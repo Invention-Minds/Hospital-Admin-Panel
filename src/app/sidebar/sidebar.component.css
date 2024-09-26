@@ -18,7 +18,7 @@
   }
   
  .sidebar .icon{
-margin-bottom: 40px;
+/* margin-bottom: 40px; */
  }
  .sidebar .icon-container{
   display: flex;
@@ -27,4 +27,47 @@ margin-bottom: 40px;
   justify-content: space-around;
   margin-top: 70px;
  }
-  
+
+.icon-container {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.icon-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.icon-wrapper:hover {
+  background-color: white;
+  color: black;
+  width: 56px;
+  height: 56px;
+  border-radius: 20px;
+}
+
+.icon {
+  fill: white;
+  transition: all 0.3s ease;
+}
+
+.icon-wrapper.active {
+  background-color: white;
+  color: black;
+  box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64); 
+  border-radius: 20px;
+}
+
+.icon-wrapper.active .icon {
+  fill: black;
+}
+a{
+  text-decoration: none;
+  color: #fff;
+}

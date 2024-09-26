@@ -1,0 +1,92 @@
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #F0F3FF;
+  padding: 10px 20px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  margin-left: 100px;
+}
+
+.hospital-name {
+  color: #7B7B7B;
+font-size: 18px;
+font-family: Kanit;
+font-weight: 400;
+  background-color: white;
+  padding: 13px 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64); 
+}
+.hospital-name-location{
+  display: flex;
+  align-items: center;
+  margin: 0;
+}
+
+.user-section {
+  display: flex;
+  align-items: center;
+}
+
+.notification-icon svg {
+  width: 24px;
+  height: 24px;
+  /* margin-right: 20px; */
+  cursor: pointer;
+}
+.notification-icon{
+  background-color: white;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64); 
+  border-radius: 10px;
+  margin-right: 20px;
+  /* border-radius: 50%; */
+}
+
+.profile-info {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.profile-pic{
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  margin-right: 10px;
+  box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64); 
+}
+.profile-text {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.username {
+  color: black;
+  font-size: 20px;
+  font-family: Kanit;
+  font-weight: 400;
+}
+
+.role {
+  color: black;
+  font-size: 14px;
+  font-family: Kanit;
+  font-weight: 400;
+}
+
+.dropdown-icon {
+  width: 16px;
+  height: 16px;
+  margin-left: 10px;
+  position: relative;
+  bottom: 12px;
+}

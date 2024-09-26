@@ -1,0 +1,28 @@
+<div class="card doctors-list">
+    <div class="header">
+      <h3>Doctors List</h3>
+      <a href="#">See all</a>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Doctor's Name</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let doctor of doctors; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>
+            <img src="{{ doctor.image }}" alt="{{ doctor.name }}" class="doctor-img">
+            <span>{{ doctor.name }}</span>
+          </td>
+          <td>
+            <span class="status {{ doctor.status }}">{{ doctor.status }}</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  

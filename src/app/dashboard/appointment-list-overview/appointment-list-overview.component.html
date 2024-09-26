@@ -1,0 +1,36 @@
+<div class="card appointment-request">
+    <div class="header">
+      <h3>Appointment Request</h3>
+      <a href="#">See all</a>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Patient Name</th>
+          <th>Doctor</th>
+          <th>Appt Date</th>
+          <th>Appt Time</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let appointment of appointments; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td>{{ appointment.patientName }}</td>
+          <td><span class="doctor-name">{{ appointment.doctorName }}</span></td>
+          <td>{{ appointment.apptDate | date }}</td>
+          <td>
+            <span class="time-badge">{{ appointment.apptTime }}</span>
+          </td>
+          <td>
+            <div class="action-buttons">
+                <div class="edit-btn"><img src='icons/book.png'></div>
+            <div class="delete-btn"><img src='icons/delete.png'></div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  

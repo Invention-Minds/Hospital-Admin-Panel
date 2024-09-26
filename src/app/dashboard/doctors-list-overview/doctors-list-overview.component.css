@@ -1,0 +1,97 @@
+.doctors-list {
+    background-color: white;
+    /* border-radius: 12px; */
+    padding: 20px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    /* opacity: 0.60; */
+      border-radius: 47px
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .header h3 {
+    color: #271E4A;
+    font-size: 24px;
+    font-family: Kanit;
+    font-weight: 500;
+  }
+  
+  .header a {
+    color: #3F779B;
+font-size: 14px;
+font-family: Kanit;
+font-weight: 500;
+    text-decoration: none;
+
+  }
+  
+  table {
+    width: 100%;
+    margin-top: 10px;
+    border-collapse: collapse;
+  }
+  
+  th, td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  th{
+    background-color: #EDF4FC;
+    color: #271E4A;
+font-size: 14px;
+font-family: Kanit;
+font-weight: 300;
+  }
+  td{
+    color: #3F779B;
+font-size: 14px;
+font-family: Kanit;
+font-weight: 500;
+  }
+  span{
+    position:relative;
+    bottom: 15px;
+  }
+  
+  .doctor-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 10px;
+  }
+  
+  .status {
+    padding: 5px 10px;
+    color: white;
+    color: white;
+    font-size: 14px;
+    font-family: Kanit;
+    font-weight: 300;
+    position: relative;
+    bottom: 0;
+  }
+  td .status{
+    width: 76px;
+    display: block;
+    text-align: center;
+  }
+
+  
+  .status.Available {
+    background: #79CFA6; 
+    box-shadow: 0px 4px 15px rgba(185.09, 178.22, 226.31, 0.64);
+  }
+  
+  .status.Unavailable {
+    background: #FF706F; box-shadow: 0px 4px 15px #FF706F
+  }
+  
+  tr:last-child td {
+    border-bottom: none;
+  }
+  

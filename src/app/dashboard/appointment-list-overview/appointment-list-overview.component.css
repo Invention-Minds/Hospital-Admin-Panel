@@ -1,0 +1,92 @@
+.appointment-request {
+    background-color: white;
+    padding: 20px 40px;
+    box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64); 
+    border-radius: 47px;
+    width: 814px;
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .header h3 {
+    color: #271E4A;
+font-size: 24px;
+font-family: Kanit;
+font-weight: 500;
+  }
+  
+  .header a {
+    text-decoration: none;
+    cursor: pointer;
+    color: #3F779B;
+font-size: 14px;
+font-family: Kanit;
+font-weight: 500;
+  }
+  
+  table {
+    width: 100%;
+    margin-top: 10px;
+    border-collapse: collapse;
+  }
+  
+  th, td {
+    padding: 0px 15px;
+    text-align: left;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 14px;
+    color: #4a4a4a;
+  }
+  
+  th {
+    color: #271E4A;
+font-size: 14px;
+font-family: Kanit;
+font-weight: 300;
+background-color: #EDF4FC;
+padding: 12px 15px;
+  }
+  td{
+    color: black;
+font-size: 16px;
+font-family: Kanit;
+font-weight: 400;
+  }
+
+  
+  tr:last-child td {
+    border-bottom: none;
+  }
+  .doctor-name{
+    color: #3F779B;
+font-size: 16px;
+font-family: Kanit;
+font-weight: 500;
+  }
+  
+  .time-badge {
+    background: #FCE35F;
+    color: black;
+    padding: 5px 15px;
+    border-radius: 8px;
+    font-weight: 400;
+  }
+  
+  .action-buttons {
+    display: flex;
+    gap: 10px;
+    cursor: pointer;
+  }
+  .edit-btn,.delete-btn{
+    width: 30px;
+  }
+  
+
+  
+
+  

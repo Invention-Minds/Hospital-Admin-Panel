@@ -1,0 +1,30 @@
+
+  .sidebar {
+    width: 100px;
+    height: 100vh;
+    background-color: #001345;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding-top: 20px;
+    color: white;
+  }
+  .sidebar .logo-container{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 40px;
+  }
+  
+ .sidebar .icon{
+margin-bottom: 40px;
+ }
+ .sidebar .icon-container{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  margin-top: 70px;
+ }
+  

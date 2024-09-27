@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-appointment-overview',
@@ -6,6 +7,7 @@ import { Component } from '@angular/core';
   styleUrl: './appointment-overview.component.css'
 })
 export class AppointmentOverviewComponent {
+  constructor(private router: Router) {}
  // Options for the dropdown to select search type (Patient ID or Phone Number)
  searchOptions = [
   { label: 'Patient ID', value: 'id' },
@@ -37,4 +39,20 @@ onClear() {
   this.selectedSearchOption = undefined;
   this.selectedDate = undefined;
 }
+activeComponent: string = 'request'; // Default to showing the request component
+
+  // Show the Appointment Request component when the "No. of Req Arrived" card is clicked
+  showAppointmentRequests() {
+    this.activeComponent = 'request';
+  }
+
+  // Show the Confirmed Appointments component when the "No. of Confirmed" card is clicked
+  showConfirmedAppointments() {
+    this.activeComponent = 'confirmed';
+  }
+
+  // Show the Cancelled Appointments component when the "No. of Cancelled" card is clicked
+  showCancelledAppointments() {
+    this.activeComponent = 'cancelled';
+  }
 }

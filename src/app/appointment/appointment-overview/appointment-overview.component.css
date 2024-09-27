@@ -22,14 +22,14 @@ font-weight: 500;
   
   .card {
     width: 287px;
-    height: 80px;
+    height: 70px;
     display: flex;
     align-items: center;
     justify-content: center;
     /* padding: 15px; */
     padding-bottom: 15px;
     background-color: white;
-    border-radius: 12px;
+    border-radius: 14px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease-in-out;
     cursor: pointer;
@@ -61,16 +61,18 @@ font-weight: 500;
     font-family: Kanit;
     font-weight: 600;
     margin: 0;
-  }.form-row {
+  }
+  .form-row {
     display: flex;
     align-items: center;
-    justify-content:flex-start;
+    justify-content:space-between;
     padding: 10px;
     background-color: #F0F3FF;
     border-radius: 12px;
     /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); */
-    margin-bottom: 15px; /* Optional: To create space below the row */
+    /* margin-bottom: 15px; Optional: To create space below the row */
     padding-left: 130px;
+    padding-top: 30px;
   }
   ::ng-deep .custom-dropdown .p-dropdown {
     width: 212px;
@@ -93,16 +95,19 @@ font-weight: 500;
     background-color: transparent; /* No background */
     padding-right: 15px;
     padding-top: 2px;
+    width: 30px;
   }
   
   ::ng-deep .custom-dropdown .p-dropdown-panel {
-    border-radius: 10px; /* Rounded panel edges */
+    border-radius: 5px; /* Rounded panel edges */
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Panel shadow */
+    background:#fff;
   }
   
   ::ng-deep .custom-dropdown .p-dropdown-item {
     font-size: 14px;
     color: #4a4a4a;
+    padding: 10px 20px;
   }
   ::ng-deep .custom-input-text {
     width: 300px; /* Adjust as necessary */
@@ -123,6 +128,8 @@ font-weight: 500;
   
   ::ng-deep .p-inputtext {
     border-radius: 10px;
+    font-weight: 600;
+    font-family: Kanit;
   }
   .p-field {
     margin: 0 10px;
@@ -137,6 +144,8 @@ font-weight: 500;
     padding-left: 10px;
     font-size: 16px;
     color: #808080; /* Light gray text */
+    font-weight: 600;
+    font-family: Kanit;
   }
   
   ::ng-deep .custom-calendar .p-calendar-trigger {
@@ -148,6 +157,7 @@ font-weight: 500;
   ::ng-deep .custom-calendar .p-datepicker {
     border-radius: 10px; /* Rounded calendar popup */
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Shadow for calendar popup */
+    background-color: white;
   }
   
   ::ng-deep .custom-calendar .p-calendar {
@@ -168,4 +178,17 @@ font-weight: 500;
   .p-calendar {
     width: 150px;
   }
-  
+  .column-1{
+    display: flex;
+    width: 50%;
+    gap: 20px;
+  }
+  .buttons-container{
+    display: flex;
+
+  }
+  .calendar-icon{
+position: relative;
+right: 38px;
+  }
+ 

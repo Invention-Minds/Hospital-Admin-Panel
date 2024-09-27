@@ -1,8 +1,10 @@
 
 <div class="dashboard-section">
-    <h1>Appointments</h1>
+    <!-- <h1>Appointments</h1> -->
     <div class="stats-cards">
-      <div class="card">
+      <div class="card" 
+      [ngClass]="{'active-card': activeComponent === 'request'}"
+      (click)="showAppointmentRequests()">
         <div class="card-icon">
           <img src="/request.png" alt="OPD Icon" />
         </div>
@@ -11,7 +13,9 @@
           <p>No. of Req Arrived</p>
         </div>
       </div>
-      <div class="card">
+      <div class="card" 
+      [ngClass]="{'active-card': activeComponent === 'confirmed'}"
+      (click)="showConfirmedAppointments()">
         <div class="card-icon">
           <img src="/completed.png" alt="Appointment Icon" />
         </div>
@@ -20,7 +24,9 @@
           <p>No. of Confirmed</p>
         </div>
       </div>
-      <div class="card">
+      <div class="card" 
+      [ngClass]="{'active-card': activeComponent === 'cancelled'}"
+      (click)="showCancelledAppointments()">
         <div class="card-icon">
           <img src="/cancel.png" alt="Doctor Available Icon" />
         </div>
@@ -33,25 +39,36 @@
   </div>
   <div class="form-row">
     <!-- Dropdown for Search By -->
-    <div class="p-field p-col-2">
-      <p-dropdown [options]="searchOptions" [(ngModel)]="selectedSearchOption" placeholder="Search By" class="custom-dropdown"></p-dropdown>
-    </div>
-  
-    <!-- Text Input for entering Patient ID or Phone Number -->
-    <div class="p-field p-col-3">
-      <input pInputText [(ngModel)]="searchValue" placeholder="0001 /123456"  class="custom-input-text" />
-    </div>
-  
-    <!-- Search and Clear Buttons -->
-    <div class="p-field p-col-2 buttons-container">
-  <img src="/icons/search.png">
-  <img class="delete" src="/icons/delete-1.png">
-    </div>
+     <div class="column-1">
+        <div class="p-field p-col-2">
+            <p-dropdown [options]="searchOptions" [(ngModel)]="selectedSearchOption" placeholder="Search By" class="custom-dropdown"></p-dropdown>
+          </div>
+        
+          <!-- Text Input for entering Patient ID or Phone Number -->
+          <div class="p-field p-col-3">
+            <input pInputText [(ngModel)]="searchValue" placeholder="0001 /123456" class="custom-input-text" />
+          </div>
+        
+          <!-- Search and Clear Buttons -->
+          <div class="p-field p-col-2 buttons-container">
+            <img src="/icons/search.png">
+            <img class="delete" src="/icons/delete-1.png">
+              </div>
+     </div>
+    
   
     <!-- Calendar Input for date selection -->
-    <div class="p-field p-col-2">
+    <div class="p-field p-col-3">
       <p-calendar [(ngModel)]="selectedDate" placeholder="Calendar" class="custom-calendar"></p-calendar>
+      <img src="/icons/dropdown-arrow.png" class="calendar-icon">
+      
     </div>
   </div>
+  <div class="component-section">
+    <app-appointment-request *ngIf="activeComponent === 'request'"></app-appointment-request>
+    <app-appointment-confirm *ngIf="activeComponent === 'confirmed'"></app-appointment-confirm>
+    <app-appointment-cancel *ngIf="activeComponent === 'cancelled'"></app-appointment-cancel>
+  </div>
+  
   
   

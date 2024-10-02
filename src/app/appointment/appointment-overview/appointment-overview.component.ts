@@ -10,23 +10,23 @@ export class AppointmentOverviewComponent {
   constructor(private router: Router) {}
  // Options for the dropdown to select search type (Patient ID or Phone Number)
  searchOptions = [
-  { label: 'Patient ID', value: 'id' },
-  { label: 'Phone Number', value: 'phone' }
+  { label: 'Patient Name', value: 'patientName' },
+  { label: 'Phone Number', value: 'phoneNumber' }
 ];
 
 // Selected option for search type
-selectedSearchOption: { label: string, value: string } | undefined;
+selectedSearchOption: { label: string, value: string } = this.searchOptions[0];
 
 // Value entered by the user (could be Patient ID or Phone Number based on selection)
 searchValue: string = '';
 
 // Selected date from calendar
-selectedDate: Date | undefined;
+selectedDate: Date | null = null;
 
 // Method to handle search action
 onSearch() {
   if (this.selectedSearchOption && this.searchValue) {
-    console.log('Searching for', this.selectedSearchOption.label, 'with value:', this.searchValue);
+    console.log('Searching for', this.selectedSearchOption, 'with value:', this.searchValue);
     // Add logic here to search by Patient ID or Phone Number
   } else {
     console.error('Please select a search option and enter a value');
@@ -36,8 +36,8 @@ onSearch() {
 // Method to clear input fields
 onClear() {
   this.searchValue = '';
-  this.selectedSearchOption = undefined;
-  this.selectedDate = undefined;
+  this.selectedSearchOption = this.searchOptions[0];
+  this.selectedDate = null;
 }
 activeComponent: string = 'request'; // Default to showing the request component
 
@@ -55,4 +55,9 @@ activeComponent: string = 'request'; // Default to showing the request component
   showCancelledAppointments() {
     this.activeComponent = 'cancelled';
   }
+  onDateChange() {
+    // Logic can be added here if needed, for example logging
+    console.log('Selected date:', this.selectedDate);
+  }
+
 }

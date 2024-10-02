@@ -18,7 +18,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let appointment of getPaginatedAppointments()">
+        <tr *ngFor="let appointment of getPaginatedAppointments(); let i = index">
           <td>{{ appointment.id }}</td>
           <td>{{ appointment.patientName }}</td>
           <td>{{ appointment.phoneNumber }}</td>
@@ -31,7 +31,7 @@
           </td>
           <td>
             <button class="btn-action">
-              <img src="icons/book.png" alt="check" class="action-icon">
+              <img src="icons/book.png" alt="check" class="action-icon" (click)="openAppointmentForm(appointment)">
               <img src="icons/delete.png" alt="delete" class="action-icon">
             </button>
           </td>
@@ -56,3 +56,9 @@
       </div>
       
   </div>
+  <app-appointment-form 
+  *ngIf="showAppointmentForm" 
+  [appointment]="selectedAppointment" 
+  (close)="closeAppointmentForm()" 
+  (submit)="submitAppointment(selectedAppointment, $event.status)">
+</app-appointment-form>

@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component , Input} from '@angular/core';
+import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 interface Appointment {
   id: string;
   patientName: string;
@@ -7,8 +8,8 @@ interface Appointment {
   therapy: string;
   date: string;
   time: string;
-  smsSent: boolean;
-  status: string;
+  smsSent?: boolean;
+  status: string; // Optional property
 }
 @Component({
   selector: 'app-appointment-confirm',
@@ -16,18 +17,31 @@ interface Appointment {
   styleUrl: './appointment-confirm.component.css'
 })
 export class AppointmentConfirmComponent {
+  confirmedAppointments: Appointment[] = [];
+
+  constructor(private appointmentService: AppointmentConfirmService) {}
   appointments: Appointment[] = [
-    { id: '0001', patientName: 'Nitish MK', phoneNumber: '7708699010', doctorName: 'Dr. Nithish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', smsSent: true, status: 'Booked' },
-    { id: '0002', patientName: 'Lokesh P', phoneNumber: '9876543211', doctorName: 'Dr. Nithish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', smsSent: false, status: 'Booked' },
-    // Add more appointments here...
+    { id: '0001', patientName: 'Anitha Sundar', phoneNumber: '+91 7708590100', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Booked', smsSent: true },
   ];
 
   currentPage = 1;
   itemsPerPage = 10;
   sortColumn: keyof Appointment | undefined = undefined;  // No sorting initially
   sortDirection: string = 'asc';  // Default sorting direction
+  @Input() selectedDate: Date | null = null;
+  @Input() selectedValue: string = '';
 
+  searchOptions = [
+    { label: 'Patient Name', value: 'patientName' },
+    { label: 'Phone Number', value: 'phoneNumber' }
+  ];
   // Method to handle sorting by a specific column
+  ngOnInit() {
+    this.appointmentService.confirmedAppointments$.subscribe(appointments => {
+      this.confirmedAppointments = appointments;
+      console.log('Confirmed appointments from component:', this.confirmedAppointments);
+    });
+  }
   sortBy(column: keyof Appointment) {
     if (this.sortColumn === column) {
       this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc'; // Toggle direction
@@ -42,10 +56,11 @@ export class AppointmentConfirmComponent {
   sortedAppointments() {
     if (!this.sortColumn) {
       // If no sorting column is selected, return the appointments as is (unsorted)
-      return [...this.appointments];
+      return [...this.filteredAppointments];
     }
-
-    return [...this.appointments].sort((a, b) => {
+    console.log("this.filteredAppointments",this.filteredAppointments);
+    console.log("this.filteredAppointments",this.filteredAppointments);
+    return [...this.filteredAppointments].sort((a, b) => {
       const valueA = a[this.sortColumn!]; // Use the non-null assertion operator (!) to tell TypeScript sortColumn is defined
       const valueB = b[this.sortColumn!]; 
 
@@ -67,7 +82,7 @@ export class AppointmentConfirmComponent {
 
   // Method to calculate total pages
   get totalPages() {
-    return Math.ceil(this.appointments.length / this.itemsPerPage);
+    return Math.ceil(this.confirmedAppointments.length / this.itemsPerPage);
   }
 
   // Method to go to the previous page
@@ -92,4 +107,47 @@ export class AppointmentConfirmComponent {
       this.currentPage = this.totalPages;
     }
   }
+  filteredAppointments: Appointment[] = [...this.confirmedAppointments];
+
+  ngOnChanges() {
+    // Whenever the selected date changes, this will be triggered
+    this.filterAppointment();
+  }
+  
+  // Method to filter appointments by the selected date
+  filterAppointment() {
+    let filteredList = [...this.confirmedAppointments];
+  
+    if (this.selectedDate) {
+      const formattedDate = this.formatDate(this.selectedDate);
+      filteredList = filteredList.filter(confirmedAppointments => confirmedAppointments.date === formattedDate);
+    }
+    if (this.selectedValue.trim() !== '') {
+      const searchLower = this.selectedValue.toLowerCase();
+      filteredList = this.filteredAppointments.filter(confirmedAppointments =>
+        confirmedAppointments.patientName.toLowerCase().includes(searchLower) ||
+        confirmedAppointments.phoneNumber.toLowerCase().includes(searchLower)
+      );
+      console.log('Filtered appointments:', filteredList);
+    }
+    else {
+      // If no date is selected, show all appointments
+      this.filteredAppointments = [...this.confirmedAppointments];
+    }
+    this.filteredAppointments = filteredList;
+    this.currentPage = 1;
+  }
+
+  // Utility method to format the date in 'dd/mm/yy' format
+  formatDate(date: Date): string {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+    const year = date.getFullYear().toString().slice(-2); // Get last two digits of year
+    return `${day}/${month}/${year}`;
+  }
+
+  // Method to return the filtered appointments for display
+  // getFilteredAppointments() {
+  //   return this.filteredAppointments;
+  // }
 }

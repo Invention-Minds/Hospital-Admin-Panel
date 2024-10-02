@@ -12,10 +12,12 @@ import { ButtonModule } from 'primeng/button';
 import { CalendarModule } from 'primeng/calendar';
 import { TableModule } from 'primeng/table';
 import { PaginatorModule } from 'primeng/paginator';
+import { MatDialogModule } from '@angular/material/dialog';
 
 //Module for the application
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import {FormsModule} from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 
 
 import { DashboardModuleComponent } from './dashboard/dashboard-module/dashboard-module.component';
@@ -29,6 +31,7 @@ import { AppointmentOverviewComponent } from './appointment/appointment-overview
 import { AppointmentRequestComponent } from './appointment/appointment-request/appointment-request.component';
 import { AppointmentConfirmComponent } from './appointment/appointment-confirm/appointment-confirm.component';
 import { AppointmentCancelComponent } from './appointment/appointment-cancel/appointment-cancel.component';
+import { AppointmentFormComponent } from './appointment/appointment-form/appointment-form.component';
 
 
 
@@ -47,6 +50,7 @@ import { AppointmentCancelComponent } from './appointment/appointment-cancel/app
     AppointmentRequestComponent,
     AppointmentConfirmComponent,
     AppointmentCancelComponent,
+    AppointmentFormComponent,
   
     
   ],
@@ -61,6 +65,8 @@ import { AppointmentCancelComponent } from './appointment/appointment-cancel/app
     CalendarModule,
     TableModule,
     PaginatorModule,
+    ReactiveFormsModule,
+    MatDialogModule
   ],
   providers: [
     provideClientHydration(),

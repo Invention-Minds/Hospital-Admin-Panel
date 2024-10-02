@@ -40,35 +40,34 @@
   <div class="form-row">
     <!-- Dropdown for Search By -->
      <div class="column-1">
-        <div class="p-field p-col-2">
-            <p-dropdown [options]="searchOptions" [(ngModel)]="selectedSearchOption" placeholder="Search By" class="custom-dropdown"></p-dropdown>
-          </div>
-        
-          <!-- Text Input for entering Patient ID or Phone Number -->
-          <div class="p-field p-col-3">
-            <input pInputText [(ngModel)]="searchValue" placeholder="0001 /123456" class="custom-input-text" />
-          </div>
+      <div class="p-field p-col-2">
+        <p-dropdown [options]="searchOptions" [(ngModel)]="selectedSearchOption" placeholder="Search By" class="custom-dropdown"></p-dropdown>
+      </div>
+      
+      <div class="p-field p-col-3">
+        <input pInputText [(ngModel)]="searchValue" placeholder="0001 /123456" class="custom-input-text" />
+      </div>
         
           <!-- Search and Clear Buttons -->
           <div class="p-field p-col-2 buttons-container">
-            <img src="/icons/search.png">
-            <img class="delete" src="/icons/delete-1.png">
+            <!-- <img (click)="onSearch()" src="/icons/search.png"> -->
+            <img (click)="onClear()" class="delete" src="/icons/delete-1.png">
               </div>
      </div>
     
   
-    <!-- Calendar Input for date selection -->
-    <div class="p-field p-col-3">
-      <p-calendar [(ngModel)]="selectedDate" placeholder="Calendar" class="custom-calendar"></p-calendar>
-      <img src="/icons/dropdown-arrow.png" class="calendar-icon">
+     <div class="p-field p-col-3">
+        <p-calendar [(ngModel)]="selectedDate" placeholder="Calendar" (ngModelChange)="onDateChange()" class="custom-calendar"></p-calendar>
+        <img src="/icons/dropdown-arrow.png" class="calendar-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 512 512"><path fill="black" d="M256 48C141.31 48 48 141.31 48 256s93.31 208 208 208s208-93.31 208-208S370.69 48 256 48m120 190.77h-89l36.88-36.88l-5.6-6.51a87.38 87.38 0 1 0-62.94 148a87.55 87.55 0 0 0 82.42-58.25l5.37-15.13l30.17 10.67l-5.3 15.13a119.4 119.4 0 1 1-112.62-159.18a118.34 118.34 0 0 1 86.36 36.95l.56.62l4.31 5L376 149.81Z"/></svg>
+      </div>
+      </div>
       
-    </div>
-  </div>
-  <div class="component-section">
-    <app-appointment-request *ngIf="activeComponent === 'request'"></app-appointment-request>
-    <app-appointment-confirm *ngIf="activeComponent === 'confirmed'"></app-appointment-confirm>
-    <app-appointment-cancel *ngIf="activeComponent === 'cancelled'"></app-appointment-cancel>
-  </div>
-  
+      <div class="component-section">
+        <app-appointment-request *ngIf="activeComponent === 'request'" [selectedDate]="selectedDate"  [selectedValue]="searchValue"></app-appointment-request>
+        <app-appointment-confirm *ngIf="activeComponent === 'confirmed'" [selectedDate]="selectedDate" [selectedValue]="searchValue"></app-appointment-confirm>
+        <app-appointment-cancel *ngIf="activeComponent === 'cancelled'" [selectedDate]="selectedDate" [selectedValue]="searchValue"></app-appointment-cancel>
+      </div>
+
   
   

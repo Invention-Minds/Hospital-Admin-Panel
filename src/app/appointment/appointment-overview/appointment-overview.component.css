@@ -19,7 +19,16 @@ font-weight: 500;
     gap: 20px;
     width: 100%;;
   }
-  
+  /* Active card styling */
+.card.active-card {
+  background-color: #79CFA6; /* Green background */
+  color: white; /* White text */
+}
+
+.card.active-card h2, 
+.card.active-card p {
+  color: white; /* Ensures text inside is also white */
+}
   .card {
     width: 287px;
     height: 70px;

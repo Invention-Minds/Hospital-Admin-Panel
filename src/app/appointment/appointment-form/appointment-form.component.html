@@ -1,0 +1,71 @@
+<div class="overlay">
+    <div class="appointment-modal">
+      <!-- Header Section -->
+       <form [formGroup]="appointmentForm">
+      <div class="appointment-header">
+        <h3>Appointment Form</h3>
+        <button class="close-button" (click)="closeForm()">&#10006;</button>
+      </div>
+  
+      <!-- Form Fields -->
+      <div class="form-content">
+        <div class="form-group">
+          <label>Patient Name:</label>
+          <input type="text" placeholder="First Name" formControlName="firstName" />
+          <input type="text" placeholder="Last Name" formControlName="lastName"  />
+        </div>
+  
+        <div class="form-group">
+          <label>Phone Number:</label>
+          <input type="text" placeholder="+91 000 000 0000" formControlName="phoneNumber"/>
+        </div>
+  
+        <div class="form-group">
+          <label>Email Id:</label>
+          <input type="email" placeholder="abcd@gmail.com" formControlName="email" />
+        </div>
+  
+        <div class="form-group">
+          <label>Doctor Name:</label>
+          <input type="text" placeholder="M.K.Nithish" formControlName="doctorName" />
+        </div>
+  <div class="appointment-timing">
+    <div class="form-group time">
+        <label>Appointment Date:</label>
+        <input type="date" formControlName="appointmentDate" />
+      </div>
+
+      <div class="form-group time">
+        <label>Appointment Time:</label>
+        <input type="text" placeholder="09:15 to 09:30" formControlName="appointmentTime"/>
+      </div>
+  </div>
+        
+  <div class="appointment-timing">
+    <div class="form-group form-group-2">
+        <label class="radio">Request Via:</label>
+        <div class="radio-group">
+          <label><input type="radio" formControlName="requestVia" value="Website" /> Website</label>
+          <label><input type="radio" formControlName="requestVia" value="Call" /> Call</label>
+        </div>
+      </div>
+
+      <div class="form-group form-group-2">
+        <label  class="radio">Appointment:</label>
+        <div class="radio-group">
+          <label><input type="radio" formControlName="appointmentStatus" value="Confirm" /> Confirm</label>
+          <label><input type="radio" formControlName="appointmentStatus" value="Cancel" /> Cancel</label>
+        </div>
+      </div>
+  </div>
+  
+        <!-- Buttons -->
+        <div class="button-group">
+          <button class="btn-primary" (click)="confirm()">Book Appointment</button>
+          <button class="btn-secondary" (click)="close.emit()">Close</button>
+        </div>
+      </div>
+    </form>
+    </div>
+  </div>
+  

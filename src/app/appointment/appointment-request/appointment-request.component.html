@@ -2,7 +2,7 @@
     <table>
       <thead>
         <tr>
-          <th>ID</th>
+          <th>NO</th>
           <th (click)="sortBy('patientName')" style="cursor: pointer;">
             Patient Name
             <span *ngIf="sortColumn === 'patientName' && sortDirection === 'asc'">&#9650;</span>
@@ -19,7 +19,7 @@
       </thead>
       <tbody>
         <tr *ngFor="let appointment of getPaginatedAppointments(); let i = index">
-          <td>{{ appointment.id }}</td>
+          <td>{{ i + 1 }}</td>
           <td>{{ appointment.patientName }}</td>
           <td>{{ appointment.phoneNumber }}</td>
           <td>{{ appointment.doctorName }}</td>

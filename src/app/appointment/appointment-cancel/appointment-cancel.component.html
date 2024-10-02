@@ -13,6 +13,7 @@
           <th>Therapy</th>
           <th>Date</th>
           <th>Time</th>
+          <th>SMS</th>
           <th>Status</th>
           <th>Action</th>
         </tr>
@@ -27,10 +28,16 @@
           <td>{{ appointment.date }}</td>
           <td>{{ appointment.time }}</td>
           <td>
+            <span class="sms-status" [ngClass]="{'sms-sent': appointment.smsSent, 'sms-not-sent': !appointment.smsSent}">
+              <img *ngIf="appointment.smsSent" src="icons/sent.svg" alt="Sent">
+              <img *ngIf="!appointment.smsSent" src="icons/not-sent.png" alt="Not Sent">
+            </span>
+          </td>
+          <td>
             <span class="status-badge cancelled">{{ appointment.status }}</span>
           </td>
           <td>
-            <button class="btn-action" (click)="confirmAppointment(appointment)">
+            <button class="btn-action">
               <img src="icons/book.png" alt="Confirm">
             </button>
           </td>

@@ -178,11 +178,19 @@ submitAppointment(appointment: Appointment | null, status: string) {
       status: 'Booked', // Update the status
       smsSent: true         // Optionally add or modify properties as needed
     };
-      const confirmed = this.confirmedAppointments;
+      // const confirmed = this.confirmedAppointments;
       console.log('Appointment status:', this.confirmedAppointments);
       this.appointmentService.addConfirmedAppointment(confirmedAppointment);
-  } else if (status === 'Cancelled') {
-      this.canceledAppointments.push({ ...appointment, status: 'Cancelled' });
+  } else if (status === 'Cancel') {
+      // this.canceledAppointments.push({ ...appointment, status: 'Cancelled' });
+      const cancelledAppointment: Appointment = { 
+        ...appointment,  // Copy all properties from the original appointment
+        status: 'Cancelled', // Update the status
+        smsSent: true         // Optionally add or modify properties as needed
+      };
+        // const confirmed = this.confirmedAppointments;
+        console.log('Appointment status from cancel:', cancelledAppointment);
+        this.appointmentService.addCancelledAppointment(cancelledAppointment);
   }
 
   // Remove the appointment from the request list based on phone number

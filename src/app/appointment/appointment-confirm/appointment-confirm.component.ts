@@ -21,7 +21,7 @@ export class AppointmentConfirmComponent {
 
   constructor(private appointmentService: AppointmentConfirmService) {}
   appointments: Appointment[] = [
-    { id: '0001', patientName: 'Anitha Sundar', phoneNumber: '+91 7708590100', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Booked', smsSent: true },
+    // { id: '0001', patientName: 'Anitha Sundar', phoneNumber: '+91 7708590100', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Booked', smsSent: true },
   ];
 
   currentPage = 1;
@@ -39,6 +39,7 @@ export class AppointmentConfirmComponent {
   ngOnInit() {
     this.appointmentService.confirmedAppointments$.subscribe(appointments => {
       this.confirmedAppointments = appointments;
+      this.filteredAppointments = [...this.confirmedAppointments];
       console.log('Confirmed appointments from component:', this.confirmedAppointments);
     });
   }

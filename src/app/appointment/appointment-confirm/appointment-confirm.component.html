@@ -18,7 +18,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let appointment of confirmedAppointments; let i = index">
+        <tr *ngFor="let appointment of getPaginatedAppointments(); let i = index">
           <td>{{ i + 1 }}</td>
           <td>{{ appointment.patientName }}</td>
           <td>{{ appointment.phoneNumber }}</td>

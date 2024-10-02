@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 interface Appointment {
   id: string;
   patientName: string;
@@ -8,6 +9,7 @@ interface Appointment {
   date: string;
   time: string;
   status: string;
+  smsSent?: boolean; // Optional property
 }
 @Component({
   selector: 'app-appointment-cancel',
@@ -15,15 +17,24 @@ interface Appointment {
   styleUrl: './appointment-cancel.component.css'
 })
 export class AppointmentCancelComponent {
-  appointments: Appointment[] = [
-    { id: '0001', patientName: 'Nitish MK', phoneNumber: '7708699010', doctorName: 'Dr. Nithish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Cancelled' },
-    { id: '0002', patientName: 'Lokesh P', phoneNumber: '9876543211', doctorName: 'Dr. Nithish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Cancelled' },
-    // Add more appointments here...
-  ];
+  cancelledAppointments: Appointment[] = [];
+  constructor(private appointmentService: AppointmentConfirmService) {}
+  // appointments: Appointment[] = [
+  //   { id: '0001', patientName: 'Nitish MK', phoneNumber: '7708699010', doctorName: 'Dr. Nithish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Cancelled' },
+  //   { id: '0002', patientName: 'Lokesh P', phoneNumber: '9876543211', doctorName: 'Dr. Nithish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Cancelled' },
+  //   // Add more appointments here...
+  // ];
   searchOptions = [
     { label: 'Patient Name', value: 'patientName' },
     { label: 'Phone Number', value: 'phoneNumber' }
   ];
+  ngOnInit() {
+    this.appointmentService.canceledAppointments$.subscribe(appointments => {
+      this.cancelledAppointments = appointments;
+      this.filteredAppointments = [...this.cancelledAppointments];
+      console.log('Confirmed appointments from component:', this.cancelledAppointments);
+    });
+  }
   currentPage = 1;
   itemsPerPage = 10;
   sortColumn: keyof Appointment | undefined = undefined;  // No sorting initially
@@ -47,7 +58,7 @@ export class AppointmentCancelComponent {
     if (!this.sortColumn) {
       return [...this.filteredAppointments];  // No sorting if the column is undefined
     }
-
+console.log("sort", this.filteredAppointments)
     return [...this.filteredAppointments].sort((a, b) => {
       const valueA = a[this.sortColumn!]; // Using non-null assertion (!) to handle the sort column
       const valueB = b[this.sortColumn!];
@@ -64,13 +75,14 @@ export class AppointmentCancelComponent {
   // Method to return paginated appointments after sorting
   getPaginatedAppointments() {
     const sorted = this.sortedAppointments();
+    console.log("sorted",sorted);
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
     return sorted.slice(startIndex, startIndex + this.itemsPerPage); // Return paginated data
   }
 
   // Method to calculate total pages
   get totalPages() {
-    return Math.ceil(this.appointments.length / this.itemsPerPage);
+    return Math.ceil(this.cancelledAppointments.length / this.itemsPerPage);
   }
 
   // Method to go to the previous page
@@ -97,13 +109,13 @@ export class AppointmentCancelComponent {
   }
 
   // Method to confirm appointment (changes status)
-  confirmAppointment(appointment: Appointment) {
-    const index = this.appointments.findIndex(a => a.id === appointment.id);
-    if (index !== -1) {
-      this.appointments[index].status = 'Confirmed'; // Change status to confirmed
-    }
-  }
-  filteredAppointments: Appointment[] = [...this.appointments];
+  // confirmAppointment(appointment: Appointment) {
+  //   const index = this.cancelledAppointments.findIndex(a => a.id === appointment.id);
+  //   if (index !== -1) {
+  //     this.cancelledAppointments[index].status = 'Confirmed'; // Change status to confirmed
+  //   }
+  // }
+  filteredAppointments: Appointment[] = [...this.cancelledAppointments];
 
   ngOnChanges() {
     // Whenever the selected date changes, this will be triggered
@@ -112,7 +124,7 @@ export class AppointmentCancelComponent {
   
   // Method to filter appointments by the selected date
   filterAppointment() {
-    let filteredList = [...this.appointments];
+    let filteredList = [...this.cancelledAppointments];
   
     if (this.selectedDate) {
       const formattedDate = this.formatDate(this.selectedDate);
@@ -128,7 +140,7 @@ export class AppointmentCancelComponent {
     }
     else {
       // If no date is selected, show all appointments
-      this.filteredAppointments = [...this.appointments];
+      this.filteredAppointments = [...this.cancelledAppointments];
     }
     this.filteredAppointments = filteredList;
     this.currentPage = 1;

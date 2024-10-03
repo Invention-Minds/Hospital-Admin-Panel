@@ -10,6 +10,7 @@ export interface Appointment {
   time: string;
   status: string;
   email: string;
+  requestVia?: string; // Optional property
   smsSent?: boolean; // Optional property
 }
 @Injectable({
@@ -18,7 +19,7 @@ export interface Appointment {
 export class AppointmentConfirmService {
   private confirmedAppointmentsSource = new BehaviorSubject<Appointment[]>([]);
   confirmedAppointments$ = this.confirmedAppointmentsSource.asObservable();
-  
+
   private canceledAppointmentsSource = new BehaviorSubject<Appointment[]>([]);
   canceledAppointments$ = this.canceledAppointmentsSource.asObservable();
 

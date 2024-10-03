@@ -60,5 +60,5 @@
   *ngIf="showAppointmentForm" 
   [appointment]="selectedAppointment" 
   (close)="closeAppointmentForm()" 
-  (submit)="submitAppointment(selectedAppointment, $event.status)">
+  (submit)="submitAppointment(selectedAppointment, $event.status, $event.requestVia)">
 </app-appointment-form>

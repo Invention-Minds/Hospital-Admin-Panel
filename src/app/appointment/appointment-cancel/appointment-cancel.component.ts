@@ -9,6 +9,7 @@ interface Appointment {
   date: string;
   time: string;
   status: string;
+  requestVia?: string; // Optional property
   smsSent?: boolean; // Optional property
 }
 @Component({

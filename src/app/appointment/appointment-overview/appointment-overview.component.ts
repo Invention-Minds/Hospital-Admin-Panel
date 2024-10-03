@@ -55,9 +55,15 @@ activeComponent: string = 'request'; // Default to showing the request component
   showCancelledAppointments() {
     this.activeComponent = 'cancelled';
   }
+  showNewAppointmentForm() {
+    this.activeComponent = 'appointment';
+  }
   onDateChange() {
     // Logic can be added here if needed, for example logging
     console.log('Selected date:', this.selectedDate);
+  }
+  refresh(){
+    this.selectedDate = null;
   }
 
 }

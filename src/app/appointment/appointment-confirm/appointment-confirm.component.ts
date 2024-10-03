@@ -8,6 +8,7 @@ interface Appointment {
   therapy: string;
   date: string;
   time: string;
+  requestVia?: string;
   smsSent?: boolean;
   status: string; // Optional property
 }

@@ -12,6 +12,7 @@ interface Appointment {
   time: string;
   status: string;
   email: string;
+  requestVia?: string; // Optional property
   [key: string]: any;  // Add this line to allow indexing by string
 }
 @Component({
@@ -48,6 +49,7 @@ export class AppointmentRequestComponent {
   selectedAppointment: Appointment | null = null; 
 
   openAppointmentForm(appointment: Appointment) {
+
     this.selectedAppointment = { ...appointment };  // Create a copy to avoid direct modification
     this.showAppointmentForm = true;
     console.log('Selected appointment:', this.selectedAppointment);
@@ -165,7 +167,7 @@ filterAppointment() {
   this.filteredAppointments = filteredList;
   this.currentPage = 1;
 }
-submitAppointment(appointment: Appointment | null, status: string) {
+submitAppointment(appointment: Appointment | null, status: string, requestVia: any) {
   console.log('Submitting appointment:', appointment, 'with status:', status);
   if (!appointment) {
       console.error('No appointment selected for submission.');
@@ -173,20 +175,34 @@ submitAppointment(appointment: Appointment | null, status: string) {
   }
 
   if (status === 'Confirm') {
+    if (requestVia === 'Website'){
+      requestVia = 'Website';
+    }
+    else{
+      requestVia = 'Call';
+    }
     const confirmedAppointment: Appointment = { 
       ...appointment,  // Copy all properties from the original appointment
       status: 'Booked', // Update the status
-      smsSent: true         // Optionally add or modify properties as needed
+      smsSent: true,
+      requestVia: requestVia         // Optionally add or modify properties as needed
     };
       // const confirmed = this.confirmedAppointments;
       console.log('Appointment status:', this.confirmedAppointments);
       this.appointmentService.addConfirmedAppointment(confirmedAppointment);
   } else if (status === 'Cancel') {
+    if (requestVia === 'Website'){
+      requestVia = 'Website';
+    }
+    else{
+      requestVia = 'Call';
+    }
       // this.canceledAppointments.push({ ...appointment, status: 'Cancelled' });
       const cancelledAppointment: Appointment = { 
         ...appointment,  // Copy all properties from the original appointment
         status: 'Cancelled', // Update the status
-        smsSent: true         // Optionally add or modify properties as needed
+        smsSent: true,
+        requestVia: requestVia        // Optionally add or modify properties as needed
       };
         // const confirmed = this.confirmedAppointments;
         console.log('Appointment status from cancel:', cancelledAppointment);

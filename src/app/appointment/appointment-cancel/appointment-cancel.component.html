@@ -13,6 +13,7 @@
           <th>Therapy</th>
           <th>Date</th>
           <th>Time</th>
+          <th>Source</th>
           <th>SMS</th>
           <th>Status</th>
           <th>Action</th>
@@ -27,6 +28,7 @@
           <td>{{ appointment.therapy }}</td>
           <td>{{ appointment.date }}</td>
           <td>{{ appointment.time }}</td>
+          <td>{{appointment.requestVia}}</td>
           <td>
             <span class="sms-status" [ngClass]="{'sms-sent': appointment.smsSent, 'sms-not-sent': !appointment.smsSent}">
               <img *ngIf="appointment.smsSent" src="icons/sent.svg" alt="Sent">

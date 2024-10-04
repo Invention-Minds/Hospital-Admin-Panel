@@ -1,5 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
+import { app } from '../../../../server';
 interface Appointment {
   id: string;
   patientName: string;
@@ -35,10 +36,15 @@ export class AppointmentCancelComponent {
   selectedAppointment: Appointment | null = null; 
   confirmedAppointments: Appointment[] = []; 
   ngOnInit() {
+    
     this.appointmentService.canceledAppointments$.subscribe(appointments => {
+      if(appointments.some(appointment => appointment.status === 'Confirmed')) {
+        this.confirmedAppointments = appointments.filter(appointment => appointment.status !== 'Confirmed');
+      }
       this.cancelledAppointments = appointments;
       this.filteredAppointments = [...this.cancelledAppointments];
-      console.log('Confirmed appointments from component:', this.cancelledAppointments);
+      console.log('Cancelled appointments from component in filtered:', this.filteredAppointments);
+      console.log('Cancelled appointments from component:', this.cancelledAppointments);
     });
   }
   currentPage = 1;
@@ -131,6 +137,7 @@ console.log("sort", this.filteredAppointments)
   // Method to filter appointments by the selected date
   filterAppointment() {
     let filteredList = [...this.cancelledAppointments];
+    console.log('Filtered appointments in filter:', filteredList);
   
     if (this.selectedDate) {
       const formattedDate = this.formatDate(this.selectedDate);
@@ -175,50 +182,33 @@ closeAppointmentForm() {
 }
 submitAppointment(appointment: Appointment | null, status: string, requestVia: any) {
   console.log('Submitting appointment:', appointment, 'with status:', status);
+  
   if (!appointment) {
       console.error('No appointment selected for submission.');
       return; // Early return if appointment is null or undefined
   }
 
-  if (status === 'Confirm') {
-    if (requestVia === 'Website'){
-      requestVia = 'Website';
-    }
-    else{
-      requestVia = 'Call';
-    }
-    const confirmedAppointment: Appointment = { 
+  const confirmedAppointment: Appointment = { 
       ...appointment,  // Copy all properties from the original appointment
-      status: 'Booked', // Update the status
       smsSent: true,
-      requestVia: requestVia         // Optionally add or modify properties as needed
-    };
-      // const confirmed = this.confirmedAppointments;
-      console.log('Appointment status:', this.confirmedAppointments);
+      requestVia: requestVia === 'Website' ? 'Website' : 'Call', // Determine requestVia
+  };
+
+  if (status === 'Confirm') {
+      confirmedAppointment.status = 'Booked'; // Set the status to confirmed
       this.appointmentService.addConfirmedAppointment(confirmedAppointment);
+
+      // Remove the confirmed appointment from the canceled appointments
+      this.cancelledAppointments = this.cancelledAppointments.filter(a => a.phoneNumber !== appointment.phoneNumber);
+      
   } else if (status === 'Cancel') {
-    if (requestVia === 'Website'){
-      requestVia = 'Website';
-    }
-    else{
-      requestVia = 'Call';
-    }
-      // this.canceledAppointments.push({ ...appointment, status: 'Cancelled' });
-      const cancelledAppointment: Appointment = { 
-        ...appointment,  // Copy all properties from the original appointment
-        status: 'Cancelled', // Update the status
-        smsSent: true,
-        requestVia: requestVia        // Optionally add or modify properties as needed
-      };
-        // const confirmed = this.confirmedAppointments;
-        console.log('Appointment status from cancel:', cancelledAppointment);
-        this.appointmentService.addCancelledAppointment(cancelledAppointment);
+      confirmedAppointment.status = 'Cancelled'; // Update the status
+      this.appointmentService.addCancelledAppointment(confirmedAppointment);
   }
 
-  // Remove the appointment from the request list based on phone number
-  this.cancelledAppointments = this.cancelledAppointments.filter(a => a.phoneNumber !== appointment.phoneNumber);
-  
+  // Additional filtering and updates
   this.closeAppointmentForm();
   this.filterAppointment(); // Refresh the filtered appointments
 }
+
 }

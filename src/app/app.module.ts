@@ -15,6 +15,7 @@ import { PaginatorModule } from 'primeng/paginator';
 import { MatDialogModule } from '@angular/material/dialog';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatDatepickerModule} from '@angular/material/datepicker';
+import { TooltipModule } from 'primeng/tooltip';
 
 //Module for the application
 import { HttpClient, HttpClientModule } from '@angular/common/http';
@@ -70,7 +71,8 @@ import { AppointmentFormComponent } from './appointment/appointment-form/appoint
     ReactiveFormsModule,
     MatDialogModule,
     MatTooltipModule,
-    MatDatepickerModule
+    MatDatepickerModule,
+    TooltipModule
   ],
   providers: [
     provideClientHydration(),

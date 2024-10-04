@@ -20,7 +20,7 @@ export class AppointmentConfirmService {
   private confirmedAppointmentsSource = new BehaviorSubject<Appointment[]>([]);
   confirmedAppointments$ = this.confirmedAppointmentsSource.asObservable();
 
-  private canceledAppointmentsSource = new BehaviorSubject<Appointment[]>([]);
+  public canceledAppointmentsSource = new BehaviorSubject<Appointment[]>([]);
   canceledAppointments$ = this.canceledAppointmentsSource.asObservable();
 
   // Method to add a confirmed appointment
@@ -28,10 +28,23 @@ export class AppointmentConfirmService {
     const currentAppointments = this.confirmedAppointmentsSource.getValue();
     this.confirmedAppointmentsSource.next([...currentAppointments, appointment]); // Add the new appointment
   }
+  // addCancelledAppointment(appointment: Appointment) {
+  //   const currentCanceledAppointments = this.canceledAppointmentsSource.getValue();
+  //   this.canceledAppointmentsSource.next([...currentCanceledAppointments, appointment]);
+  //   console.log('Cancelled appointments in service:', this.canceledAppointmentsSource);
+  // }
   addCancelledAppointment(appointment: Appointment) {
     const currentCanceledAppointments = this.canceledAppointmentsSource.getValue();
+    console.log('Before adding:', currentCanceledAppointments);
     this.canceledAppointmentsSource.next([...currentCanceledAppointments, appointment]);
-    console.log('Cancelled appointments:', this.canceledAppointmentsSource);
-  }
+    console.log('After adding:', this.canceledAppointmentsSource.getValue());
+}
+removeCancelledAppointment(phoneNumber: string) {
+  const currentCanceledAppointments = this.canceledAppointmentsSource.getValue();
+  const updatedAppointments = currentCanceledAppointments.filter(appointment => appointment.phoneNumber !== phoneNumber);
+  this.canceledAppointmentsSource.next(updatedAppointments);
+  console.log('Cancelled appointments after removal:', this.canceledAppointmentsSource.getValue());
+}
+
   constructor() { }
 }

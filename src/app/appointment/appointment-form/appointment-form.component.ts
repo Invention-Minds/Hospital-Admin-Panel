@@ -41,7 +41,7 @@ export class AppointmentFormComponent implements OnInit{
       requestVia: ['Website', Validators.required], // Set default to 'Website'
       appointmentStatus: ['Confirm', Validators.required] // Set default to 'Confirm'
     });
-    console.log('Appointment form:', this.appointment);
+    // console.log('Appointment form:', this.appointment);
     if (this.appointment) {
       const appointmentDate = this.convertDateToISO(this.appointment.date); 
       // this.appointmentForm.patchValue({
@@ -111,22 +111,26 @@ export class AppointmentFormComponent implements OnInit{
   //   } else {
   //     console.log(this.appointmentForm.status);}
   // }
-  closeForm() {
-    this.close.emit(); // Emit close event when clicking close 
-    this.showForm=false;
-    this.appointmentForm.reset();
-  }
+  closeForm(event: Event) {
+    event.preventDefault(); // Prevents any default action, if needed
+    this.close.emit();
+    this.showForm = false;
+}
   confirm() {
     // this.appointment = this.appointmentForm.value;
-    console.log('Appointment:', this.appointment);
-    console.log("submitted")
     if (this.appointment) {
-      console.log('Appointment in confirm:', this.appointment);
       const status = this.appointmentForm.get('appointmentStatus')?.value;
       const requestVia = this.appointmentForm.get('requestVia')?.value;
       console.log('Status:', status);
+       // If the current status is 'Confirmed' and the previous status was 'Cancelled'
+       if (status === 'Confirm' && this.appointment.status === 'Cancelled') {
+        // Remove this appointment from the cancelled appointments
+        this.appointmentService.removeCancelledAppointment(this.appointment.phoneNumber);
+    }
+      this.appointment.status = status
       this.submit.emit({ appointment: this.appointment, status , requestVia }); // Emit the data to the parent component
-      this.closeForm(); // Close the form after submission
+      this.showForm=false; // Close the form after submission
+      console.log('Appointment from confirm on confirming:', this.appointment);
     }
     else{
       // const appointmentDate = this.convertDateToISO(this.appointmentForm.value.appointmentDate); 
@@ -144,6 +148,7 @@ export class AppointmentFormComponent implements OnInit{
             };
 
       this.appointment = appointmentDetails;
+      // this.appointmentService.addConfirmedAppointment(appointmentDetails);
     }
     if(this.appointment?.requestVia === "Call"){
       this.appointment.status = "Booked";
@@ -151,3 +156,4 @@ this.appointmentService.addConfirmedAppointment(this.appointment);
     }
   }
 }
+

@@ -27,15 +27,15 @@ export class AppointmentRequestComponent {
   // @Input() selectedOption: string = '';
   constructor(public dialog: MatDialog, private appointmentService: AppointmentConfirmService ) { }
   appointments : Appointment[] =[
-    { id: '0001', patientName: 'Anitha Sundar', phoneNumber: '+91 7708590100', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'anitha@gmail.com' },
-    { id: '0571', patientName: 'Zona', phoneNumber: '987654321', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com'},
-    { id: '0001', patientName: 'Nitish MK', phoneNumber: '770859010', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com' },
-    { id: '0571', patientName: 'Lokesh P', phoneNumber: '987654321', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com' },
-    { id: '0001', patientName: 'Nitish MK', phoneNumber: '770859010', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com' },
-    { id: '0571', patientName: 'Lokesh P', phoneNumber: '987654321', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '27/09/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com' },
-    { id: '0001', patientName: 'Nitish MK', phoneNumber: '770859010', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com' },
-    { id: '0571', patientName: 'Lokesh P', phoneNumber: '987654321', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com' },
-    { id: '0001', patientName: 'Nitish MK', phoneNumber: '770859010', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com' },
+    { id: '0001', patientName: 'Anitha Sundar', phoneNumber: '+91 7708590100', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/04/24', time: '9.00 - 9.15', status: 'Requested', email:'anitha@gmail.com' },
+    { id: '0571', patientName: 'Zona', phoneNumber: '1234567890', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/04/24', time: '9.00 - 9.15', status: 'Requested', email:'nithish@gmail.com'},
+    { id: '0001', patientName: 'Nithish', phoneNumber: '0123456789', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com' },
+    { id: '0571', patientName: 'Rithish', phoneNumber: '2345678901', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com' },
+    { id: '0001', patientName: 'Aaron', phoneNumber: '3456789012', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com' },
+    { id: '0571', patientName: 'Teju', phoneNumber: '4567890123', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '27/09/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com' },
+    { id: '0001', patientName: 'Sandeep', phoneNumber: '5678901234', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com' },
+    { id: '0571', patientName: 'Vihan', phoneNumber: '6789012345', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com' },
+    { id: '0001', patientName: 'Ruhanshee', phoneNumber: '7890123456', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com' },
     // ...add more data
   ];
   // Dropdown options for filtering

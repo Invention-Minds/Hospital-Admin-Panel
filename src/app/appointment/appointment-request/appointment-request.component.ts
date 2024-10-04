@@ -228,5 +228,17 @@ formatDate(date: Date): string {
 // getFilteredAppointments() {
 //   return this.filteredAppointments;
 // }
+cancelAppointment(appointment: Appointment) {
+  const cancel : Appointment = {
+    ...appointment,
+    status: 'Cancelled',
+    smsSent: true,
+    requestVia: 'Website'
+  };
+  this.appointmentService.addCancelledAppointment(cancel);
+  this.appointments = this.appointments.filter(a => a.phoneNumber !== appointment.phoneNumber);
+  console.log('Appointment status from cancel:', this.appointments);
+  this.filterAppointment();
+}
   
 }

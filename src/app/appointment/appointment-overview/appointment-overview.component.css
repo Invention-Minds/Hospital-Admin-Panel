@@ -31,7 +31,7 @@ font-weight: 500;
 }
   .card {
     width: 287px;
-    height: 85px;
+    height: 68px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -144,7 +144,7 @@ font-weight: 500;
     margin: 0 10px;
   }
   ::ng-deep .custom-calendar .p-inputtext {
-    width: 250px;
+    width: 300px;
     height: 52px;
     border-radius: 10px; /* Rounded edges */
     background-color: white;
@@ -156,9 +156,10 @@ font-weight: 500;
     font-weight: 600;
     font-family: Kanit;
   }
+
   
   ::ng-deep .custom-calendar .p-calendar-trigger {
-    color: #808080; /* Light gray arrow */
+    /* color: #808080; Light gray arrow */
     border-radius: 0 10px 10px 0; /* Right side rounded for trigger button */
     background-color: transparent; /* No background */
   }
@@ -166,18 +167,26 @@ font-weight: 500;
   ::ng-deep .custom-calendar .p-datepicker {
     border-radius: 10px; /* Rounded calendar popup */
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Shadow for calendar popup */
-    background-color: white;
-  }
-  
-  ::ng-deep .custom-calendar .p-calendar {
-    border-radius: 10px;
-  }
-  
-  ::ng-deep .custom-calendar .p-inputtext:focus {
-    outline: none;
-    border: 1px solid #8cc152; /* Green border on focus */
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Stronger shadow on focus */
-  }
+    background-color: white;    font-size: 12px; /* Smaller font for calendar */
+    width: 300px; /* Adjusted width for calendar popup */
+}
+
+::ng-deep .custom-calendar .p-datepicker table {
+    font-size: 14px; /* Smaller font for dates */
+}
+
+::ng-deep .custom-calendar .p-datepicker-header {
+    padding: 5px; /* Adjust header padding */
+}
+
+::ng-deep .custom-calendar .p-datepicker .p-datepicker-prev,
+::ng-deep .custom-calendar .p-datepicker .p-datepicker-next {
+    height: 25px;  /* Adjust button size */
+    width: 25px;   /* Adjust button size */
+}
+  ::ng-deep .p-datepicker table td {
+    padding: 0;
+}
   
 
 /* .delete{

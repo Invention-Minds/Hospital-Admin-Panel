@@ -39,7 +39,7 @@
             <span class="status-badge cancelled">{{ appointment.status }}</span>
           </td>
           <td>
-            <button class="btn-action">
+            <button class="btn-action" (click)="openAppointmentForm(appointment)">
               <img src="icons/book.png" alt="Confirm">
             </button>
           </td>
@@ -58,4 +58,9 @@
       </div>
     </div>
   </div>
-  
+  <app-appointment-form 
+  *ngIf="showAppointmentForm" 
+  [appointment]="selectedAppointment" 
+  (close)="closeAppointmentForm()" 
+  (submit)="submitAppointment(selectedAppointment, $event.status, $event.requestVia)">
+</app-appointment-form>

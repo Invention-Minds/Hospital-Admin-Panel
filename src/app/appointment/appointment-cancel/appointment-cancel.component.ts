@@ -8,6 +8,7 @@ interface Appointment {
   therapy: string;
   date: string;
   time: string;
+  email: string;
   status: string;
   requestVia?: string; // Optional property
   smsSent?: boolean; // Optional property
@@ -29,6 +30,10 @@ export class AppointmentCancelComponent {
     { label: 'Patient Name', value: 'patientName' },
     { label: 'Phone Number', value: 'phoneNumber' }
   ];
+
+  showAppointmentForm = false;  // Controls the visibility of the modal
+  selectedAppointment: Appointment | null = null; 
+  confirmedAppointments: Appointment[] = []; 
   ngOnInit() {
     this.appointmentService.canceledAppointments$.subscribe(appointments => {
       this.cancelledAppointments = appointments;
@@ -159,4 +164,61 @@ console.log("sort", this.filteredAppointments)
   getFilteredAppointments() {
     return this.filteredAppointments;
   }
+  openAppointmentForm(appointment: Appointment) {
+
+    this.selectedAppointment = { ...appointment };  // Create a copy to avoid direct modification
+    this.showAppointmentForm = true;
+    console.log('Selected appointment:', this.selectedAppointment);
+}  
+closeAppointmentForm() {
+  this.showAppointmentForm = false;
+}
+submitAppointment(appointment: Appointment | null, status: string, requestVia: any) {
+  console.log('Submitting appointment:', appointment, 'with status:', status);
+  if (!appointment) {
+      console.error('No appointment selected for submission.');
+      return; // Early return if appointment is null or undefined
+  }
+
+  if (status === 'Confirm') {
+    if (requestVia === 'Website'){
+      requestVia = 'Website';
+    }
+    else{
+      requestVia = 'Call';
+    }
+    const confirmedAppointment: Appointment = { 
+      ...appointment,  // Copy all properties from the original appointment
+      status: 'Booked', // Update the status
+      smsSent: true,
+      requestVia: requestVia         // Optionally add or modify properties as needed
+    };
+      // const confirmed = this.confirmedAppointments;
+      console.log('Appointment status:', this.confirmedAppointments);
+      this.appointmentService.addConfirmedAppointment(confirmedAppointment);
+  } else if (status === 'Cancel') {
+    if (requestVia === 'Website'){
+      requestVia = 'Website';
+    }
+    else{
+      requestVia = 'Call';
+    }
+      // this.canceledAppointments.push({ ...appointment, status: 'Cancelled' });
+      const cancelledAppointment: Appointment = { 
+        ...appointment,  // Copy all properties from the original appointment
+        status: 'Cancelled', // Update the status
+        smsSent: true,
+        requestVia: requestVia        // Optionally add or modify properties as needed
+      };
+        // const confirmed = this.confirmedAppointments;
+        console.log('Appointment status from cancel:', cancelledAppointment);
+        this.appointmentService.addCancelledAppointment(cancelledAppointment);
+  }
+
+  // Remove the appointment from the request list based on phone number
+  this.cancelledAppointments = this.cancelledAppointments.filter(a => a.phoneNumber !== appointment.phoneNumber);
+  
+  this.closeAppointmentForm();
+  this.filterAppointment(); // Refresh the filtered appointments
+}
 }

@@ -1,10 +1,12 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import {provideNativeDateAdapter} from '@angular/material/core';
 
 @Component({
   selector: 'app-appointment-overview',
   templateUrl: './appointment-overview.component.html',
-  styleUrl: './appointment-overview.component.css'
+  styleUrl: './appointment-overview.component.css',
+  providers: [provideNativeDateAdapter()],
 })
 export class AppointmentOverviewComponent {
   constructor(private router: Router) {}

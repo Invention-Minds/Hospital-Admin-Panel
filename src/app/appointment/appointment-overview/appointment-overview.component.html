@@ -14,6 +14,17 @@
         </div>
       </div>
       <div class="card" 
+      [ngClass]="{'active-card': activeComponent === 'appointment'}"
+      (click)="showNewAppointmentForm()">
+        <div class="card-icon">
+          <img src="/new.png" alt="Doctor Available Icon" />
+        </div>
+        <div class="card-content">
+          <!-- <h2>42</h2> -->
+          <p>New Appointment</p>
+        </div>
+      </div>
+      <div class="card" 
       [ngClass]="{'active-card': activeComponent === 'confirmed'}"
       (click)="showConfirmedAppointments()">
         <div class="card-icon">
@@ -33,17 +44,6 @@
         <div class="card-content">
           <!-- <h2>42</h2> -->
           <p>Cancelled Appt.</p>
-        </div>
-      </div>
-      <div class="card" 
-      [ngClass]="{'active-card': activeComponent === 'appointment'}"
-      (click)="showNewAppointmentForm()">
-        <div class="card-icon">
-          <img src="/cancel.png" alt="Doctor Available Icon" />
-        </div>
-        <div class="card-content">
-          <!-- <h2>42</h2> -->
-          <p>New Appointment</p>
         </div>
       </div>
     </div>
@@ -68,9 +68,19 @@
     
   
      <div class="p-field p-col-3">
-        <p-calendar [(ngModel)]="selectedDate" placeholder="Calendar" (ngModelChange)="onDateChange()" class="custom-calendar"></p-calendar>
+        <!-- <p-calendar [(ngModel)]="selectedDate" placeholder="Calendar" class="custom-calendar"></p-calendar> -->
+        <p-calendar 
+        styleClass="custom-calendar" 
+        [(ngModel)]="selectedDate" 
+        placeholder="Calendar">
+          <ng-template pTemplate="date" let-date>
+              <span>
+                  {{ date.day }}
+              </span>
+          </ng-template>
+      </p-calendar>
         <img src="/icons/dropdown-arrow.png" class="calendar-icon">
-        <svg (click)="refresh()" class="reverse" xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="-1.5 -2.5 24 24"><path fill="currentColor" d="m4.859 5.308l1.594-.488a1 1 0 0 1 .585 1.913l-3.825 1.17a1 1 0 0 1-1.249-.665L.794 3.413a1 1 0 1 1 1.913-.585l.44 1.441C5.555.56 10.332-1.035 14.573.703a9.38 9.38 0 0 1 5.38 5.831a1 1 0 1 1-1.905.608A7.381 7.381 0 0 0 4.86 5.308zm12.327 8.195l-1.775.443a1 1 0 1 1-.484-1.94l3.643-.909a1 1 0 0 1 .61-.08a1 1 0 0 1 .84.75l.968 3.88a1 1 0 0 1-1.94.484l-.33-1.322a9.381 9.381 0 0 1-16.384-1.796l-.26-.634a1 1 0 1 1 1.851-.758l.26.633a7.381 7.381 0 0 0 13.001 1.25z"/></svg>
+        <svg (click)="refresh()" class="reverse" xmlns="http://www.w3.org/2000/svg" width="3em" height="3em" viewBox="-1.5 -2.5 24 24"><path fill="currentColor" d="m4.859 5.308l1.594-.488a1 1 0 0 1 .585 1.913l-3.825 1.17a1 1 0 0 1-1.249-.665L.794 3.413a1 1 0 1 1 1.913-.585l.44 1.441C5.555.56 10.332-1.035 14.573.703a9.38 9.38 0 0 1 5.38 5.831a1 1 0 1 1-1.905.608A7.381 7.381 0 0 0 4.86 5.308zm12.327 8.195l-1.775.443a1 1 0 1 1-.484-1.94l3.643-.909a1 1 0 0 1 .61-.08a1 1 0 0 1 .84.75l.968 3.88a1 1 0 0 1-1.94.484l-.33-1.322a9.381 9.381 0 0 1-16.384-1.796l-.26-.634a1 1 0 1 1 1.851-.758l.26.633a7.381 7.381 0 0 0 13.001 1.25z"/></svg>
       </div>
       </div>
       

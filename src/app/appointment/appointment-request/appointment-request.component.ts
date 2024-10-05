@@ -27,8 +27,8 @@ export class AppointmentRequestComponent {
   // @Input() selectedOption: string = '';
   constructor(public dialog: MatDialog, private appointmentService: AppointmentConfirmService ) { }
   appointments : Appointment[] =[
-    { id: '0001', patientName: 'Anitha Sundar', phoneNumber: '+91 7708590100', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/04/24', time: '9.00 - 9.15', status: 'Requested', email:'anitha@gmail.com' },
-    { id: '0571', patientName: 'Zona', phoneNumber: '1234567890', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/04/24', time: '9.00 - 9.15', status: 'Requested', email:'nithish@gmail.com'},
+    { id: '0001', patientName: 'Anitha Sundar', phoneNumber: '+91 7708590100', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/04/24', time: '9:00 - 9:15', status: 'Requested', email:'anitha@gmail.com' },
+    { id: '0571', patientName: 'Zona', phoneNumber: '1234567890', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/04/24', time: '9:00 - 9:15', status: 'Requested', email:'nithish@gmail.com'},
     { id: '0001', patientName: 'Nithish', phoneNumber: '0123456789', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com' },
     { id: '0571', patientName: 'Rithish', phoneNumber: '2345678901', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com' },
     { id: '0001', patientName: 'Aaron', phoneNumber: '3456789012', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com' },

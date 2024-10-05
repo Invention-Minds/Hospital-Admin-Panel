@@ -45,6 +45,13 @@ removeCancelledAppointment(phoneNumber: string) {
   this.canceledAppointmentsSource.next(updatedAppointments);
   console.log('Cancelled appointments after removal:', this.canceledAppointmentsSource.getValue());
 }
+ // Method to check if a time is available
+ isTimeAvailable(date: string, time: string): boolean {
+  const currentAppointments = this.confirmedAppointmentsSource.getValue();
+  return !currentAppointments.some(appointment => 
+    appointment.date === date && appointment.time === time
+  );
+}
 
   constructor() { }
 }

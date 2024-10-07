@@ -1,0 +1,31 @@
+<div class="dashboard-section">
+    <!-- <h1>Appointments</h1> -->
+    <div class="stats-cards">
+      <div class="card" 
+      [ngClass]="{'active-card': activeComponent === 'availability'}"
+      (click)="showDoctorAvailability()">
+        <div class="card-icon">
+          <img src="/available.png" alt="OPD Icon" />
+        </div>
+        <div class="card-content">
+          <!-- <h2>40</h2> -->
+          <p>Doctor Availability</p>
+        </div>
+      </div>
+      <div class="card" 
+      [ngClass]="{'active-card': activeComponent === 'details'}"
+      (click)="showDoctorDetails()">
+        <div class="card-icon">
+          <img src="/details.png" alt="Doctor Available Icon" />
+        </div>
+        <div class="card-content">
+          <!-- <h2>42</h2> -->
+          <p>Doctor Details</p>
+        </div>
+      </div>
+      </div>
+</div>
+<div>
+  <app-doctor-availability  *ngIf="activeComponent === 'availability'"></app-doctor-availability>
+  <app-doctor-details  *ngIf="activeComponent === 'details'"></app-doctor-details>
+</div>

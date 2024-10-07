@@ -16,6 +16,8 @@ import { MatDialogModule } from '@angular/material/dialog';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import { TooltipModule } from 'primeng/tooltip';
+import { MatFormField, MatFormFieldModule, MatLabel } from '@angular/material/form-field';
+import {MatSelectModule} from '@angular/material/select';
 
 //Module for the application
 import { HttpClient, HttpClientModule } from '@angular/common/http';
@@ -35,6 +37,12 @@ import { AppointmentRequestComponent } from './appointment/appointment-request/a
 import { AppointmentConfirmComponent } from './appointment/appointment-confirm/appointment-confirm.component';
 import { AppointmentCancelComponent } from './appointment/appointment-cancel/appointment-cancel.component';
 import { AppointmentFormComponent } from './appointment/appointment-form/appointment-form.component';
+import { DoctorDetailsComponent } from './doctor/doctor-details/doctor-details.component';
+import { DoctorOverviewComponent } from './doctor/doctor-overview/doctor-overview.component';
+import { DoctorAvailabilityComponent } from './doctor/doctor-availability/doctor-availability.component';
+import { MatOption, MatOptionModule } from '@angular/material/core';
+import { DoctorFormComponent } from './doctor/doctor-form/doctor-form.component';
+
 
 
 
@@ -54,6 +62,10 @@ import { AppointmentFormComponent } from './appointment/appointment-form/appoint
     AppointmentConfirmComponent,
     AppointmentCancelComponent,
     AppointmentFormComponent,
+    DoctorDetailsComponent,
+    DoctorOverviewComponent,
+    DoctorAvailabilityComponent,
+    DoctorFormComponent,
   
     
   ],
@@ -72,7 +84,11 @@ import { AppointmentFormComponent } from './appointment/appointment-form/appoint
     MatDialogModule,
     MatTooltipModule,
     MatDatepickerModule,
-    TooltipModule
+    TooltipModule,
+    MatFormField,
+    MatLabel,
+    MatOptionModule,
+    MatSelectModule
   ],
   providers: [
     provideClientHydration(),

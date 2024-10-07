@@ -1,0 +1,49 @@
+<div class="dropdown-container">
+    <div class="dropdown">
+      <select id="department" class="custom-select" [(ngModel)]="selectedDepartment">
+        <option value="" disabled selected>Department</option>
+        <option *ngFor="let department of department" [value]="department.name">
+          {{ department.name }}
+        </option>
+      </select>
+      <img src="/icons/dropdown-arrow.png" class="calendar-icon">
+    </div>
+  
+    <div class="dropdown">
+      <select id="doctor" class="custom-select" [(ngModel)]="selectedDoctor">
+        <option value="" disabled selected>Doctor Name</option>
+        <option *ngFor="let doctor of getDoctorsForSelectedDepartment()" [value]="doctor.name">
+          {{ doctor.name }}
+        </option>
+      </select>
+      <img src="/icons/dropdown-arrow.png" class="calendar-icon">
+    </div>
+    <div>
+      <img (click)="reset()" class="delete" src="/icons/delete-1.png">
+    </div>
+  
+  </div>
+
+  <div  *ngFor="let department of getFilteredDoctors()" class="department-container">
+    <h2 class="department">{{ department.name }}</h2>
+    <div class="doctor-cards-container">
+      <div class="doctor-card" *ngFor="let doctor of department.doctors">
+        <img src="/male-doctor.png" class="doctor-avatar" alt="Doctor Avatar">
+        <div class="doctor-info">
+          <h3 class="doctor-name">{{ doctor.name }}</h3>
+          <p class="doctor-specialty">{{ department.name }}</p>
+          <p class="doctor-availability">Availability</p>
+          <p class="availability-time">{{ doctor.availableTime }}</p>
+          <button class="view-more-button" (click)="editProfile(doctor)">
+            <img src="/icons/edit.svg" alt="Edit Icon" class="button-icon"> Edit Profile
+          </button>
+          <button class="unavailable-button">Unavailable</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+  <div *ngIf="isEditMode" class="edit-form-container">
+    <app-doctor-form  *ngIf="selectedEditDoctor" [doctor]="selectedEditDoctor" (save)="onSaveDoctor($event)" (cancel)="cancelEdit()"></app-doctor-form>
+  </div>

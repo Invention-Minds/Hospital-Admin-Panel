@@ -1,0 +1,174 @@
+.dropdown-container {
+  display: flex;
+  gap: 30px;
+  padding: 16px;
+  background-color: #f0f3ff;
+
+  justify-content: flex-end;
+  width: 100%;
+}
+
+.dropdown {
+  width: 200px;
+}
+
+.custom-select {
+  padding: 12px;
+  border: none;
+  width: 212px;
+  background: white;
+  box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64);
+  border-radius: 8px;
+  font-size: 16px;
+  outline: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  text-align: left;
+  color: #7b7b7b;
+  font-size: 18px;
+  font-family: Kanit;
+  font-weight: 500;
+}
+
+.custom-select option[disabled] {
+  color: #aaa;
+}
+
+.custom-select:focus {
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.15);
+}
+.calendar-icon {
+  position: relative;
+  right: -174px;
+  top: -37%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.department-container {
+    padding-bottom: 32px;
+    background-color: #f0f3ff;
+  }
+.doctor-cards-container {
+    display: flex;
+    gap: 24px;
+    padding: 24px;
+    background-color: #f0f3ff;
+    border-radius: 12px;
+    padding-left: 130px;
+  }
+  
+  .doctor-card {
+    background-color: white;
+    border-radius: 16px;
+    box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.1);
+    padding: 16px;
+    text-align: center;
+    width: 233px;
+    position: relative;
+    height: 322px;
+  }
+  
+  .doctor-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-bottom: 1px;
+  }
+  
+  .doctor-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .doctor-name {
+    color: #271E4A;
+    font-size: 18px;
+    font-family: Kanit;
+    font-weight: 600;
+    margin: 0;
+    line-height: 24px;
+  }
+  
+  .doctor-specialty {
+    color: #271E4A;
+font-size: 12px;
+font-family: Kanit;
+font-weight: 600;
+    margin: 0px 0;
+  }
+  
+  .doctor-availability {
+    margin: 0px;
+    color: #169458;
+    font-size: 12px;
+    font-family: Kanit;
+    font-weight: 600;
+  }
+  
+  .availability-time {
+    color: #169458;
+    font-size: 12px;
+    font-family: Kanit;
+    font-weight: 600;
+  }
+  
+  .view-more-button {
+    background-color: #002D72;  /* Dark blue background color */ /* White text color */
+    border: none;  /* Remove default border */
+    color: #FFF;
+    font-family: Kanit;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 600;  /* Font size for the text */
+    border-radius: 5px;  /* Slightly rounded corners */
+    cursor: pointer;  /* Change cursor to pointer on hover */
+    display: flex;  /* Use flexbox for alignment */
+    align-items: center;  /* Center icon and text vertically */
+    gap: 10px;  /* Space between icon and text */
+    width: 135px;
+    height: 32px;
+  }
+  
+  .view-more-button:hover {
+    background-color: #001B4D;  /* Slightly darker blue for hover effect */
+  }
+  
+  .button-icon {
+    padding-left: 12px;
+  }
+  
+  .unavailable-button {
+    display: flex;
+    width: 140px;
+    height: 32px;
+    padding: 8px 20px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    border-radius: 6px;
+border: 1px solid #D20006;
+background: #FFF;
+color: #D20006;
+
+font-family: Kanit;
+font-size: 14px;
+font-style: normal;
+font-weight: 600;
+line-height: normal;
+margin-top: 10px;
+  }
+  .department{
+    color: #271E4A;
+font-family: Kanit;
+font-size: 24px;
+font-style: normal;
+font-weight: 500;
+padding-left: 130px;
+  }
+  .delete{
+    margin-bottom: 10px;
+    cursor: pointer;
+  }

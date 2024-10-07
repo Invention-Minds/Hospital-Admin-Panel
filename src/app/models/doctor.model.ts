@@ -15,5 +15,6 @@ export interface Doctor {
     };
     availableTime: string;
     slotTiming: string;
+    unavailableDates?: string[];
   }
   

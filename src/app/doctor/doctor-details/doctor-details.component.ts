@@ -24,6 +24,9 @@ export class DoctorDetailsComponent {
   selectedDoctor: string = '';
   isEditMode: boolean = false; 
   selectedEditDoctor: Doctor | null = null;
+  showUnavailableModal: boolean = false;
+  selectedUnavailableDates: string[] = [];
+  unavailableDates: string = '';
   department:  Department[] = [
     {
       name: 'General Surgery',
@@ -36,7 +39,7 @@ export class DoctorDetailsComponent {
           email: 'atamaram@gmail.com',
           availabilityDays: { sun: false, mon: false, tue: false, wed: false, thu: false, fri: false, sat: false },
           availableTime: '16:00-17:00',
-          slotTiming: '4'
+          slotTiming: '20'
         },
         {
           name: 'Dr. Nishanth Lakshmikantha',
@@ -44,9 +47,9 @@ export class DoctorDetailsComponent {
           department: 'General Surgery',
           mobileNumber: '',
           email: '',
-          availabilityDays: { sun: false, mon: false, tue: false, wed: false, thu: false, fri: false, sat: false },
+          availabilityDays: { sun: false, mon: true, tue: true, wed: false, thu: true, fri: false, sat: false },
           availableTime: '9:30-11:00',
-          slotTiming: ''
+          slotTiming: '20'
         }
       ]
     },
@@ -542,5 +545,29 @@ export class DoctorDetailsComponent {
   cancelEdit(): void {
     this.isEditMode = false;
     this.selectedEditDoctor = null;
+  }
+  openUnavailableModal(doctor: Doctor) {
+    this.selectedEditDoctor = doctor;
+    this.showUnavailableModal = true;
+  }
+
+  closeUnavailableModal() {
+    this.showUnavailableModal = false;
+    this.selectedEditDoctor = null;
+  }
+
+  addUnavailableDate(event: any) {
+    const selectedDate = event.target.value;
+    if (selectedDate && !this.selectedUnavailableDates.includes(selectedDate)) {
+      this.selectedUnavailableDates.push(selectedDate);
+    }
+  }
+
+  saveUnavailableDates() {
+    if (this.selectedEditDoctor) {
+      this.selectedEditDoctor.unavailableDates = this.selectedUnavailableDates; // Assuming Doctor model has `unavailableDates`
+      // Save changes or call a service method to persist changes
+    }
+    this.closeUnavailableModal();
   }
 }

@@ -23,9 +23,22 @@
           <p>Doctor Details</p>
         </div>
       </div>
+      <div class="card" 
+      [ngClass]="{'active-card': activeComponent === 'form'}"
+      (click)="showDoctorForm()">
+        <div class="card-icon">
+          <img src="/add-doctor.png" alt="Doctor Available Icon" />
+        </div>
+        <div class="card-content">
+          <!-- <h2>42</h2> -->
+          <p>Add New Doctor</p>
+        </div>
+      </div>
       </div>
 </div>
 <div>
   <app-doctor-availability  *ngIf="activeComponent === 'availability'"></app-doctor-availability>
   <app-doctor-details  *ngIf="activeComponent === 'details'"></app-doctor-details>
+  <app-doctor-form  *ngIf="activeComponent === 'form'" [isEditMode]="isEditMode" [doctor]="newDoctor" (save)="onSaveDoctor($event)"
+  (cancel)="onCancelForm()"></app-doctor-form>
 </div>

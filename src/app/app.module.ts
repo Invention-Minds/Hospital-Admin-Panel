@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule, provideClientHydration } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -16,8 +17,10 @@ import { MatDialogModule } from '@angular/material/dialog';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import { TooltipModule } from 'primeng/tooltip';
-import { MatFormField, MatFormFieldModule, MatLabel } from '@angular/material/form-field';
+import {  MatFormFieldModule, MatLabel } from '@angular/material/form-field';
+
 import {MatSelectModule} from '@angular/material/select';
+import { FloatLabelModule } from 'primeng/floatlabel';
 
 //Module for the application
 import { HttpClient, HttpClientModule } from '@angular/common/http';
@@ -85,10 +88,12 @@ import { DoctorFormComponent } from './doctor/doctor-form/doctor-form.component'
     MatTooltipModule,
     MatDatepickerModule,
     TooltipModule,
-    MatFormField,
     MatLabel,
     MatOptionModule,
-    MatSelectModule
+    MatSelectModule,
+    FloatLabelModule,
+    MatFormFieldModule,
+    BrowserAnimationsModule
   ],
   providers: [
     provideClientHydration(),

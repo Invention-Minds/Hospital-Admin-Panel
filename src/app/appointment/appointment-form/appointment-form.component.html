@@ -37,7 +37,7 @@
 
       <div class="form-group time">
         <label>Appointment Time:</label>
-        <input type="text" placeholder="09:15 to 09:30" formControlName="appointmentTime"/>
+        <input type="text" placeholder="9:00 - 9:15" formControlName="appointmentTime"/>
       </div>
   </div>
   <div *ngIf="showAvailabilityMessage" class="availability-message" [ngClass]="{'available': !showAvailabilityMessage, 'not-available': showAvailabilityMessage}">
@@ -63,7 +63,7 @@
   
         <!-- Buttons -->
         <div class="button-group">
-          <button class="btn-primary" [disabled]="!appointmentForm.valid || showAvailabilityMessage" (click)="confirm()">Book Appointment</button>
+          <button class="btn-primary" [disabled]="!appointmentForm.valid" (click)="confirm()">Book Appointment</button>
           <button class="btn-secondary" (click)="closeForm($event)">Close</button>
         </div>
       </div>

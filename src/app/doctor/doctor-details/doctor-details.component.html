@@ -2,7 +2,7 @@
     <div class="dropdown">
       <select id="department" class="custom-select" [(ngModel)]="selectedDepartment">
         <option value="" disabled selected>Department</option>
-        <option *ngFor="let department of department" [value]="department.name">
+        <option *ngFor="let department of departments" [value]="department.name">
           {{ department.name }}
         </option>
       </select>
@@ -33,7 +33,7 @@
           <h3 class="doctor-name">{{ doctor.name }}</h3>
           <p class="doctor-specialty">{{ department.name }}</p>
           <p class="doctor-availability">Availability</p>
-          <p class="availability-time">{{ doctor.availableTime }}</p>
+          <p class="availability-time">{{ doctor.availableFrom }}</p>
           <button class="view-more-button" (click)="editProfile(doctor)">
             <img src="/icons/edit.svg" alt="Edit Icon" class="button-icon"> Edit Profile
           </button>
@@ -55,7 +55,7 @@
       </div>
       <div class="modal-content">
         <label for="unavailableDates">Choose Unavailable Dates:</label>
-        <input type="date" id="unavailableDates" [(ngModel)]="unavailableDates" (change)="addUnavailableDate($event)" multiple />
+        <input type="date" id="unavailableDates" (change)="addUnavailableDate($event)" />
         <div *ngIf="selectedUnavailableDates.length > 0" class="selected-dates">
           <h4>Unavailable Dates:</h4>
           <ul>
@@ -69,3 +69,4 @@
       </div>
     </div>
   </div>
+  

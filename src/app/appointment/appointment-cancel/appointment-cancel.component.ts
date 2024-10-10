@@ -2,17 +2,19 @@ import { Component, Input } from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { app } from '../../../../server';
 interface Appointment {
-  id: string;
+  id?: number;
   patientName: string;
   phoneNumber: string;
   doctorName: string;
-  therapy: string;
+  doctorId:number;
+  department: string;
   date: string;
   time: string;
-  email: string;
   status: string;
+  email: string;
+  smsSent?:boolean;
   requestVia?: string; // Optional property
-  smsSent?: boolean; // Optional property
+  [key: string]: any;  // Add this line to allow indexing by string
 }
 @Component({
   selector: 'app-appointment-cancel',
@@ -23,8 +25,8 @@ export class AppointmentCancelComponent {
   cancelledAppointments: Appointment[] = [];
   constructor(private appointmentService: AppointmentConfirmService) {}
   // appointments: Appointment[] = [
-  //   { id: '0001', patientName: 'Nitish MK', phoneNumber: '7708699010', doctorName: 'Dr. Nithish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Cancelled' },
-  //   { id: '0002', patientName: 'Lokesh P', phoneNumber: '9876543211', doctorName: 'Dr. Nithish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Cancelled' },
+  //   { id: '0001', patientName: 'Nitish MK', phoneNumber: '7708699010', doctorName: 'Dr. Nithish', department: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Cancelled' },
+  //   { id: '0002', patientName: 'Lokesh P', phoneNumber: '9876543211', doctorName: 'Dr. Nithish', department: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Cancelled' },
   //   // Add more appointments here...
   // ];
   searchOptions = [
@@ -38,8 +40,8 @@ export class AppointmentCancelComponent {
   ngOnInit() {
     
     this.appointmentService.canceledAppointments$.subscribe(appointments => {
-      if(appointments.some(appointment => appointment.status === 'Confirmed')) {
-        this.confirmedAppointments = appointments.filter(appointment => appointment.status !== 'Confirmed');
+      if(appointments.some(appointment => appointment.status === 'confirmed')) {
+        this.confirmedAppointments = appointments.filter(appointment => appointment.status !== 'confirmed');
       }
       this.cancelledAppointments = appointments;
       this.filteredAppointments = [...this.cancelledAppointments];
@@ -195,7 +197,7 @@ submitAppointment(appointment: Appointment | null, status: string, requestVia: a
   };
 
   if (status === 'Confirm') {
-      confirmedAppointment.status = 'Booked'; // Set the status to confirmed
+      confirmedAppointment.status = 'confirmed'; // Set the status to confirmed
       this.appointmentService.addConfirmedAppointment(confirmedAppointment);
 
       // Remove the confirmed appointment from the canceled appointments

@@ -1,1 +1,64 @@
-<p>doctor-availability works!</p>
+<div class="doctor-availability-wrapper">
+
+    <!-- Navigation Header -->
+    <div class="navigation-header">
+      <div class="navigation-left">
+        <button (click)="prevDay()" class="prev-button">&lt; Prev</button>
+        <div class="date-display">{{ selectedDate | date: 'EEEE, dd MMM, yyyy' }}</div>
+        <button (click)="nextDay()" class="next-button">Next &gt;</button>
+      </div>
+      <div class="navigation-right">
+        <input type="text" [(ngModel)]="searchQuery" (input)="onSearchChange()" placeholder="Search Doctor" class="search-box" />
+        <div class="calendar-dropdown">
+          <!-- <input type="date" [(ngModel)]="selectedDate" (change)="onDateChange($event)" class="calendar-input" /> -->
+          <p-calendar 
+          styleClass="custom-calendar" 
+          [(ngModel)]="selectedDate"
+          (change)="onDateChange($event)" 
+          placeholder="Calendar">
+            <!-- <ng-template pTemplate="date" let-date>
+                <span>
+                    {{ selectedDate | date: 'dd' }}
+                </span>
+            </ng-template> -->
+        </p-calendar>
+          <img src="white-arrow.png" class="calendar-icon">
+        </div>
+        <div (click)="reloadData()"><img class="reload-button" src="refresh.png"></div>
+      </div>
+    </div>
+  
+    <!-- OPD Available Time Header -->
+    <div class="opd-available-header">
+      <span class="opd-doctor-name">Doctor</span>
+      <div class="line"><img src="line.png"></div>
+      <span class="opd-available-time">OPD Available Time: 8AM to 8PM</span>
+      <div class="line-1"><img src="line.png"></div>
+    </div>
+  
+    <!-- Doctor Details & Slots -->
+    <div class="doctor-slot-container" *ngFor="let doctor of filteredDoctors">
+      <div class="doctor-profile">
+        <img src="/male-doctor.png" alt="Doctor Image" class="doctor-avatar" />
+        <div class="doctor-info">
+          <h3 class="doctor-name">{{ doctor.name }}</h3>
+          <p class="doctor-department">{{ doctor.departmentName }}</p>
+          <p class="doctor-availability-time">Availability:</p>
+          <p class="doctor-availability-time">{{ doctor.availableFrom }}</p>
+        </div>
+      </div>
+      <div class="slots-wrapper">
+        <div *ngFor="let slot of doctor.slots"
+             class="slot-box"
+             [ngClass]="{
+               'slot-available': slot.status === 'available',
+               'slot-booked': slot.status === 'booked',
+               'slot-unavailable': slot.status === 'unavailable'
+             }">
+          {{ slot.time }}
+        </div>
+      </div>
+    </div>
+  
+  </div>
+  

@@ -34,8 +34,8 @@
 
         <div class="col">
           <div class="custom-form-field">
-            <input type="tel" id="mobileNumber" [(ngModel)]="doctor!.mobileNumber" name="mobileNumber" placeholder=" " required />
-            <label for="mobileNumber" class="input-label">Mobile Number*</label>
+            <input type="tel" id="phone_number" [(ngModel)]="doctor!.phone_number" name="phone_number" placeholder=" " required />
+            <label for="phone_number" class="input-label">Mobile Number*</label>
           </div>
         </div>
       </div>
@@ -45,12 +45,12 @@
         <div class="col">
           <div class="custom-form-field">
             <input type="text" id="departmentInput" (input)="filterDepartments($event)" (focus)="toggleDropdown(true)" 
-              (blur)="toggleDropdown(false)"  class="form-control"  [(ngModel)]="doctor!.department" name="department"/>
+              (blur)="toggleDropdown(false)"  class="form-control"  [(ngModel)]="doctor!.departmentName" name="department"/>
             <label for="departmentInput" class="input-label">Department*</label>
           
             <div *ngIf="showDropdown" class="dropdown">
-              <div *ngFor="let department of filteredDepartments" class="dropdown-item" (mousedown)="selectDepartment(department)">
-                {{ department }}
+              <div *ngFor="let department of departments" class="dropdown-item" (mousedown)="selectDepartment(department)">
+                {{ department.name }}
               </div>
             </div>
           </div>
@@ -67,8 +67,9 @@
     <label class="availability-label-inline">Availability Days *</label>
     <div class="availability-days-inline">
       <div class="day-option-inline" *ngFor="let day of availabilityDaysList">
-        <input type="checkbox" id="{{ day }}" [(ngModel)]="doctor!.availabilityDays[day]" [name]="day" class="availability-checkbox-inline" />
-        <label for="{{ day }}" class="availability-day-label-inline">{{ day | titlecase }}</label>
+        <input type="checkbox" id="{{ day }}" [checked]="doctor!.availabilityDays[day.toString()]"
+        (change)="updateAvailability(day.toString(), $event)" [attr.name]="day" name="availability" class="availability-checkbox-inline" />
+        <label for="{{ day }}" class="availability-day-label-inline">{{ day.toString() | titlecase }}</label>
       </div>
     </div>
   </div>
@@ -80,14 +81,14 @@
       <div class="row">
         <div class="col">
           <div class="custom-form-field">
-            <input type="text" id="availableTime" [(ngModel)]="doctor!.availableTime" name="availableTime" placeholder=" " required />
+            <input type="text" id="availableTime" [(ngModel)]="doctor!.availableFrom" name="availableTime" placeholder=" " required />
             <label for="availableTime" class="input-label">Available Time*</label>
           </div>
         </div>
 
         <div class="col">
           <div class="custom-form-field">
-            <input type="text" id="slotTiming" [(ngModel)]="doctor!.slotTiming" name="slotTiming" placeholder=" " required />
+            <input type="text" id="slotTiming" [(ngModel)]="doctor!.slotDuration" name="slotTiming" placeholder=" " required />
             <label for="slotTiming" class="input-label">Slot Timing*</label>
           </div>
         </div>

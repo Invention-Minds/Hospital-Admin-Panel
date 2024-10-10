@@ -1,17 +1,20 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { AppointmentFormComponent } from '../appointment-form/appointment-form.component';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
+import { app } from '../../../../server';
 interface Appointment {
-  id: string;
+  id?: number;
   patientName: string;
   phoneNumber: string;
   doctorName: string;
-  therapy: string;
+  doctorId:number;
+  department: string;
   date: string;
   time: string;
   status: string;
   email: string;
+  smsSent?:boolean;
   requestVia?: string; // Optional property
   [key: string]: any;  // Add this line to allow indexing by string
 }
@@ -20,24 +23,37 @@ interface Appointment {
   templateUrl: './appointment-request.component.html',
   styleUrl: './appointment-request.component.css'
 })
-export class AppointmentRequestComponent {
+export class AppointmentRequestComponent implements OnInit {
   @Input() selectedDate: Date | null = null;
   @Input() selectedValue: string = '';
+  pendingAppointments: Appointment[] = [];
+
   // showModal: boolean = false;
   // @Input() selectedOption: string = '';
   constructor(public dialog: MatDialog, private appointmentService: AppointmentConfirmService ) { }
-  appointments : Appointment[] =[
-    { id: '0001', patientName: 'Anitha Sundar', phoneNumber: '+91 7708590100', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/04/24', time: '9:00 - 9:15', status: 'Requested', email:'anitha@gmail.com' },
-    { id: '0571', patientName: 'Zona', phoneNumber: '1234567890', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/04/24', time: '9:00 - 9:15', status: 'Requested', email:'nithish@gmail.com'},
-    { id: '0001', patientName: 'Nithish', phoneNumber: '0123456789', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com' },
-    { id: '0571', patientName: 'Rithish', phoneNumber: '2345678901', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com' },
-    { id: '0001', patientName: 'Aaron', phoneNumber: '3456789012', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com' },
-    { id: '0571', patientName: 'Teju', phoneNumber: '4567890123', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '27/09/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com' },
-    { id: '0001', patientName: 'Sandeep', phoneNumber: '5678901234', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com' },
-    { id: '0571', patientName: 'Vihan', phoneNumber: '6789012345', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com' },
-    { id: '0001', patientName: 'Ruhanshee', phoneNumber: '7890123456', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com' },
-    // ...add more data
-  ];
+
+  ngOnInit(): void {
+    this.fetchPendingAppointments();  // Fetch pending appointments on initialization
+  }
+  // appointments : Appointment[] =[
+  //   { id: 1, patientName: 'Anitha Sundar', phoneNumber: '+91 7708590100', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '11/04/24', time: '9:00 - 9:15', status: 'Requested', email:'anitha@gmail.com',doctorId:1,smsSent:false},
+  //   { id: 2, patientName: 'Zona', phoneNumber: '1234567890', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '11/04/24', time: '9:00 - 9:15', status: 'Requested', email:'nithish@gmail.com',doctorId:1,smsSent:false },
+  //   { id: 3, patientName: 'Nithish', phoneNumber: '0123456789', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com',doctorId:1,smsSent:false  },
+  //   { id: 4, patientName: 'Rithish', phoneNumber: '2345678901', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com',doctorId:1,smsSent:false  },
+  //   { id: 5, patientName: 'Aaron', phoneNumber: '3456789012', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com',doctorId:1,smsSent:false  },
+  //   { id: 6, patientName: 'Teju', phoneNumber: '4567890123', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '27/09/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com' ,doctorId:1,smsSent:false },
+  //   { id: 7, patientName: 'Sandeep', phoneNumber: '5678901234', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com',doctorId:1,smsSent:false  },
+  //   { id: 8, patientName: 'Vihan', phoneNumber: '6789012345', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com',doctorId:1,smsSent:false  },
+  //   { id: 9, patientName: 'Ruhanshee', phoneNumber: '7890123456', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com',doctorId:1,smsSent:false  },
+  //   // ...add more data
+  // ];
+  fetchPendingAppointments(): void {
+    this.appointmentService.fetchPendingAppointments().subscribe((appointments) => {
+      this.pendingAppointments = appointments;
+      console.log('Pending appointments:', this.pendingAppointments);
+      this.filteredAppointments = [...this.pendingAppointments];
+    });
+  }
   // Dropdown options for filtering
   searchOptions = [
     { label: 'Patient Name', value: 'patientName' },
@@ -55,9 +71,13 @@ export class AppointmentRequestComponent {
     console.log('Selected appointment:', this.selectedAppointment);
 }
   confirmAppointment(appointment: Appointment) {
-    appointment.status = 'Confirmed';  // Mark as confirmed
-    this.confirmedAppointments.push(appointment);  // Add to confirmed list
-    this.closeAppointmentForm();  // Close the form
+    appointment.status = 'confirmed';  // Mark as confirmed
+    // this.confirmedAppointments.push(appointment);  // Add to confirmed list
+    // this.closeAppointmentForm();  // Close the form
+    this.pendingAppointments = this.pendingAppointments.filter(a => a.id !== appointment.id);  // Remove from pending list
+    this.appointmentService.addConfirmedAppointment(appointment);  // Add to the confirmed appointments
+    this.closeAppointmentForm();
+    this.filterAppointment();  // Refresh the filtered appointments
 }
   closeAppointmentForm() {
     this.showAppointmentForm = false;
@@ -120,7 +140,7 @@ onPageChange() {
 
 // Calculate the total number of pages
 get totalPages() {
-  return Math.ceil(this.appointments.length / this.itemsPerPage);
+  return Math.ceil(this.pendingAppointments.length / this.itemsPerPage);
 }
 
 // Navigate to the previous page
@@ -137,7 +157,7 @@ nextPage() {
   }
 }
 
-filteredAppointments: Appointment[] = [...this.appointments];
+filteredAppointments: Appointment[] = [...this.pendingAppointments];
 
 ngOnChanges() {
   // Whenever the selected date changes, this will be triggered
@@ -146,7 +166,7 @@ ngOnChanges() {
 
 // Method to filter appointments by the selected date
 filterAppointment() {
-  let filteredList = [...this.appointments];
+  let filteredList = [...this.pendingAppointments];
 
   if (this.selectedDate) {
     const formattedDate = this.formatDate(this.selectedDate);
@@ -162,7 +182,7 @@ filterAppointment() {
   }
   else {
     // If no date is selected, show all appointments
-    this.filteredAppointments = [...this.appointments];
+    this.filteredAppointments = [...this.pendingAppointments];
   }
   this.filteredAppointments = filteredList;
   this.currentPage = 1;
@@ -183,7 +203,7 @@ submitAppointment(appointment: Appointment | null, status: string, requestVia: a
     }
     const confirmedAppointment: Appointment = { 
       ...appointment,  // Copy all properties from the original appointment
-      status: 'Booked', // Update the status
+      status: 'confirmed', // Update the status
       smsSent: true,
       requestVia: requestVia         // Optionally add or modify properties as needed
     };
@@ -200,7 +220,7 @@ submitAppointment(appointment: Appointment | null, status: string, requestVia: a
       // this.canceledAppointments.push({ ...appointment, status: 'Cancelled' });
       const cancelledAppointment: Appointment = { 
         ...appointment,  // Copy all properties from the original appointment
-        status: 'Cancelled', // Update the status
+        status: 'cancelled', // Update the status
         smsSent: true,
         requestVia: requestVia        // Optionally add or modify properties as needed
       };
@@ -210,7 +230,7 @@ submitAppointment(appointment: Appointment | null, status: string, requestVia: a
   }
 
   // Remove the appointment from the request list based on phone number
-  this.appointments = this.appointments.filter(a => a.phoneNumber !== appointment.phoneNumber);
+  this.pendingAppointments = this.pendingAppointments.filter(a => a.phoneNumber !== appointment.phoneNumber);
   
   this.closeAppointmentForm();
   this.filterAppointment(); // Refresh the filtered appointments
@@ -228,16 +248,22 @@ formatDate(date: Date): string {
 // getFilteredAppointments() {
 //   return this.filteredAppointments;
 // }
+// convertDateToISO(dateString: string): string {
+//   const [month, day, year] = dateString.split('/');
+//   return `20${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`; // Adjusting for 20XX century dates
+// }
 cancelAppointment(appointment: Appointment) {
+  // appointment.date = this.convertDateToISO(appointment.date);
   const cancel : Appointment = {
     ...appointment,
-    status: 'Cancelled',
+    status: 'cancelled',
     smsSent: true,
     requestVia: 'Website'
   };
+  console.log('Appointment status from cancel:', cancel);
   this.appointmentService.addCancelledAppointment(cancel);
-  this.appointments = this.appointments.filter(a => a.phoneNumber !== appointment.phoneNumber);
-  console.log('Appointment status from cancel:', this.appointments);
+  this.pendingAppointments = this.pendingAppointments.filter(a => a.phoneNumber !== appointment.phoneNumber);
+  console.log('Appointment status from cancel:', this.pendingAppointments);
   this.filterAppointment();
 }
   

@@ -1,16 +1,18 @@
 import { Component , Input} from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 interface Appointment {
-  id: string;
+  id?: number;
   patientName: string;
   phoneNumber: string;
   doctorName: string;
-  therapy: string;
+  doctorId:number;
+  department: string;
   date: string;
   time: string;
-  requestVia?: string;
-  smsSent?: boolean;
-  status: string; // Optional property
+  status: string;
+  email: string;
+  smsSent?:boolean;
+  requestVia?: string; // Optional property
 }
 @Component({
   selector: 'app-appointment-confirm',
@@ -22,7 +24,7 @@ export class AppointmentConfirmComponent {
 
   constructor(private appointmentService: AppointmentConfirmService) {}
   appointments: Appointment[] = [
-    // { id: '0001', patientName: 'Anitha Sundar', phoneNumber: '+91 7708590100', doctorName: 'Dr. Nitish', therapy: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Booked', smsSent: true },
+    // { id: '0001', patientName: 'Anitha Sundar', phoneNumber: '+91 7708590100', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Booked', smsSent: true },
   ];
 
   currentPage = 1;
@@ -38,11 +40,19 @@ export class AppointmentConfirmComponent {
   ];
   // Method to handle sorting by a specific column
   ngOnInit() {
+    // this.appointmentService.confirmedAppointments$.subscribe(appointments => {
+    //   this.confirmedAppointments = appointments;
+    //   this.filteredAppointments = [...this.confirmedAppointments];
+    //   console.log('Confirmed appointments from component:', this.confirmedAppointments);
     this.appointmentService.confirmedAppointments$.subscribe(appointments => {
       this.confirmedAppointments = appointments;
       this.filteredAppointments = [...this.confirmedAppointments];
       console.log('Confirmed appointments from component:', this.confirmedAppointments);
     });
+  
+    // Fetch appointments from backend to initialize the data
+    this.appointmentService.fetchAppointments();
+    // });
   }
   sortBy(column: keyof Appointment) {
     if (this.sortColumn === column) {

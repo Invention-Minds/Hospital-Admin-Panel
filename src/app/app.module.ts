@@ -17,6 +17,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import { TooltipModule } from 'primeng/tooltip';
+import { ToastModule } from 'primeng/toast';
 import {  MatFormFieldModule, MatLabel } from '@angular/material/form-field';
 
 import {MatSelectModule} from '@angular/material/select';
@@ -93,7 +94,8 @@ import { DoctorFormComponent } from './doctor/doctor-form/doctor-form.component'
     MatSelectModule,
     FloatLabelModule,
     MatFormFieldModule,
-    BrowserAnimationsModule
+    BrowserAnimationsModule,
+    ToastModule
   ],
   providers: [
     provideClientHydration(),

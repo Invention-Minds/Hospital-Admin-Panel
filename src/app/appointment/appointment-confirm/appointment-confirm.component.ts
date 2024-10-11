@@ -13,6 +13,7 @@ interface Appointment {
   email: string;
   smsSent?:boolean;
   requestVia?: string; // Optional property
+  created_at?: string;
 }
 @Component({
   selector: 'app-appointment-confirm',
@@ -46,6 +47,11 @@ export class AppointmentConfirmComponent {
     //   console.log('Confirmed appointments from component:', this.confirmedAppointments);
     this.appointmentService.confirmedAppointments$.subscribe(appointments => {
       this.confirmedAppointments = appointments;
+      this.confirmedAppointments.sort((a, b) => {
+        const dateA = new Date(a.created_at!);
+        const dateB = new Date(b.created_at!);
+        return dateB.getTime() - dateA.getTime();
+      });
       this.filteredAppointments = [...this.confirmedAppointments];
       console.log('Confirmed appointments from component:', this.confirmedAppointments);
     });
@@ -60,6 +66,13 @@ export class AppointmentConfirmComponent {
     } else {
       this.sortColumn = column;
       this.sortDirection = 'asc'; // Default to ascending when a new column is clicked
+    }
+    if (column === 'date') {
+      this.filteredAppointments.sort((a, b) => {
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        return this.sortDirection === 'asc' ? dateA.getTime() - dateB.getTime() : dateB.getTime() - dateA.getTime();
+      });
     }
     this.currentPage = 1; // Reset to the first page when sorting changes
   }
@@ -154,8 +167,8 @@ export class AppointmentConfirmComponent {
   formatDate(date: Date): string {
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
-    const year = date.getFullYear().toString().slice(-2); // Get last two digits of year
-    return `${day}/${month}/${year}`;
+    const year = date.getFullYear().toString().slice(-4); // Get last two digits of year
+    return `${year}-${month}-${day}`;
   }
 
   // Method to return the filtered appointments for display

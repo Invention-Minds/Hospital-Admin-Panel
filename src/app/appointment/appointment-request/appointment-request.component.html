@@ -10,8 +10,11 @@
           </th>
           <th>Phone Number</th>
           <th>Doctor Name</th>
-          <th>Therapy</th>
-          <th>Date</th>
+          <th>Department</th>
+          <th (click)="sortBy('date')">
+            Date
+            <span *ngIf="sortColumn === 'date' && sortDirection === 'asc'">&#9650;</span>
+            <span *ngIf="sortColumn === 'date' && sortDirection === 'desc'">&#9660;</span></th>
           <th>Time</th>
           <th>Status</th>
           <th>Action</th>

@@ -1,7 +1,7 @@
 import { Department } from './department.model';
 
 export interface Doctor {
-  id?: number;  // Optional for new doctors until they are saved
+  id: number;  // Optional for new doctors until they are saved
   name: string;
   qualification: string;
   departmentId?: number; // New property to link to a department

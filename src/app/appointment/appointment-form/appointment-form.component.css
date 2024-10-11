@@ -75,7 +75,8 @@
   input[type="text"],
 input[type="email"],
 input[type="tel"],
-input[type="date"]  {
+input[type="date"] ,
+select {
     flex: 2;
     /* padding: 10px; */
     font-size: 14px;
@@ -88,7 +89,7 @@ input[type="date"]  {
     margin-bottom: 20px;
   }
 input[type="date"]{
-    width: 131px;
+    width: 170px;
     margin-left: 20px;
 }
 input[type="text"],
@@ -108,12 +109,15 @@ input[type="tel"]{
   .time label{
     width: 182px;
   }
+  .slot label{
+    margin-right: 30px;
+  }
   .radio{
 
   }
   .button-group {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     margin-top: 20px;
   }
   
@@ -129,6 +133,49 @@ input[type="tel"]{
     color: white;
     font-weight: bold;
   }
+  .btn-primary:disabled {
+    background-color: #cccccc; /* Gray background for disabled button */
+    color: #666666; /* Light gray text for better readability */
+    cursor: not-allowed; /* Change cursor to indicate the button is disabled */
+    opacity: 0.6; /* Make the button less prominent */
+}
+.form-group {
+  position: relative; /* This ensures the dropdown appears relative to the input field */
+}
+.form-group {
+  position: relative; /* To ensure dropdown aligns relative to this container */
+}
+
+.doctor-suggestions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #ccc; /* Border to define dropdown */
+  background-color: #ffffff; /* White background to resemble a dropdown */
+  max-height: 200px; /* Restrict height for better display */
+  overflow-y: auto; /* Allow scrolling if suggestions overflow */
+  position: absolute; /* Position it absolutely relative to the form group */
+  width: 75%;
+    z-index: 10;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    top: calc(100% + -20px);
+    border-radius: 4px;
+    left: 200px;
+}
+
+.doctor-suggestions li {
+  padding: 10px;
+  cursor: pointer;
+  font-size: 16px; /* Adjust font size for readability */
+  color: #333; /* Text color */
+}
+
+.doctor-suggestions li:hover {
+  background-color: #f0f0f0; /* Light grey background on hover for better visibility */
+  color: #005D8C; /* Optional: Highlight text color on hover */
+}
+
+
   
   .btn-secondary {
     background-color: #C4C4C4;

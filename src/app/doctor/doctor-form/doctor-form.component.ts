@@ -68,6 +68,7 @@ export class DoctorFormComponent implements OnInit {
   }
   private initializeDoctor(): void {
     this.doctor = {
+      id:0,
       name: '',
       qualification: '',
       departmentId: 0,

@@ -60,12 +60,18 @@ activeComponent: string = 'request'; // Default to showing the request component
   showNewAppointmentForm() {
     this.activeComponent = 'appointment';
   }
-  onDateChange() {
-    // Logic can be added here if needed, for example logging
-    console.log('Selected date:', this.selectedDate);
-  }
+
+
+
+    
+  
   refresh(){
     this.selectedDate = null;
+  }
+  
+  convertDateToISO(dateString: string): string {
+    const [month, day, year] = dateString.split('/');
+    return `20${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`; // Adjusting for 20XX century dates
   }
 
 }

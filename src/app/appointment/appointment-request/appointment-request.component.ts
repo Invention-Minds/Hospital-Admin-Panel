@@ -17,6 +17,7 @@ interface Appointment {
   smsSent?:boolean;
   requestVia?: string; // Optional property
   [key: string]: any;  // Add this line to allow indexing by string
+  created_at?: string;
 }
 @Component({
   selector: 'app-appointment-request',
@@ -35,21 +36,16 @@ export class AppointmentRequestComponent implements OnInit {
   ngOnInit(): void {
     this.fetchPendingAppointments();  // Fetch pending appointments on initialization
   }
-  // appointments : Appointment[] =[
-  //   { id: 1, patientName: 'Anitha Sundar', phoneNumber: '+91 7708590100', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '11/04/24', time: '9:00 - 9:15', status: 'Requested', email:'anitha@gmail.com',doctorId:1,smsSent:false},
-  //   { id: 2, patientName: 'Zona', phoneNumber: '1234567890', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '11/04/24', time: '9:00 - 9:15', status: 'Requested', email:'nithish@gmail.com',doctorId:1,smsSent:false },
-  //   { id: 3, patientName: 'Nithish', phoneNumber: '0123456789', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com',doctorId:1,smsSent:false  },
-  //   { id: 4, patientName: 'Rithish', phoneNumber: '2345678901', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com',doctorId:1,smsSent:false  },
-  //   { id: 5, patientName: 'Aaron', phoneNumber: '3456789012', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com',doctorId:1,smsSent:false  },
-  //   { id: 6, patientName: 'Teju', phoneNumber: '4567890123', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '27/09/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com' ,doctorId:1,smsSent:false },
-  //   { id: 7, patientName: 'Sandeep', phoneNumber: '5678901234', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com',doctorId:1,smsSent:false  },
-  //   { id: 8, patientName: 'Vihan', phoneNumber: '6789012345', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com',doctorId:1,smsSent:false  },
-  //   { id: 9, patientName: 'Ruhanshee', phoneNumber: '7890123456', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Requested', email:'nithish@gmail.com',doctorId:1,smsSent:false  },
-  //   // ...add more data
-  // ];
+
+  
   fetchPendingAppointments(): void {
     this.appointmentService.fetchPendingAppointments().subscribe((appointments) => {
       this.pendingAppointments = appointments;
+      this.pendingAppointments.sort((a, b) => {
+        const dateA = new Date(a.created_at!);
+        const dateB = new Date(b.created_at!);
+        return dateB.getTime() - dateA.getTime();
+      });
       console.log('Pending appointments:', this.pendingAppointments);
       this.filteredAppointments = [...this.pendingAppointments];
     });
@@ -96,6 +92,13 @@ export class AppointmentRequestComponent implements OnInit {
   } else {
     this.sortColumn = column;
     this.sortDirection = 'asc'; // Default to ascending when a new column is clicked
+  }
+  if (column === 'date') {
+    this.filteredAppointments.sort((a, b) => {
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      return this.sortDirection === 'asc' ? dateA.getTime() - dateB.getTime() : dateB.getTime() - dateA.getTime();
+    });
   }
   this.currentPage = 1; // Reset to the first page when sorting changes
 }
@@ -170,6 +173,7 @@ filterAppointment() {
 
   if (this.selectedDate) {
     const formattedDate = this.formatDate(this.selectedDate);
+    console.log('Formatted date:', formattedDate);
     filteredList = filteredList.filter(appointment => appointment.date === formattedDate);
   }
   if (this.selectedValue.trim() !== '') {
@@ -240,8 +244,8 @@ submitAppointment(appointment: Appointment | null, status: string, requestVia: a
 formatDate(date: Date): string {
   const day = String(date.getDate()).padStart(2, '0');
   const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
-  const year = date.getFullYear().toString().slice(-2); // Get last two digits of year
-  return `${day}/${month}/${year}`;
+  const year = date.getFullYear().toString().slice(-4); // Get last two digits of year
+  return `${year}-${month}-${day}`;
 }
 
 // Method to return the filtered appointments for display

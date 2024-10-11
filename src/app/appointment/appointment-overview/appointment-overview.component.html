@@ -72,7 +72,8 @@
         <p-calendar 
         styleClass="custom-calendar" 
         [(ngModel)]="selectedDate" 
-        placeholder="Calendar">
+        placeholder="Calendar"
+        dateFormat="yy-mm-dd">
           <ng-template pTemplate="date" let-date>
               <span>
                   {{ date.day }}

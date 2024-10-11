@@ -17,7 +17,7 @@
   
         <div class="form-group">
           <label>Phone Number:</label>
-          <input type="text" placeholder="+91 000 000 0000" formControlName="phoneNumber"/>
+          <input type="text" placeholder="910000000000" formControlName="phoneNumber"/>
         </div>
   
         <div class="form-group">
@@ -25,19 +25,34 @@
           <input type="email" placeholder="abcd@gmail.com" formControlName="email" />
         </div>
   
-        <div class="form-group">
+        <!-- <div class="form-group">
           <label>Doctor Name:</label>
           <input type="text" placeholder="M.K.Nithish" formControlName="doctorName" />
+        </div> -->
+        <div class="form-group">
+          <label>Doctor Name:</label>
+          <input type="text" placeholder="Dr. Atmaram" formControlName="doctorName" (input)="onDoctorNameInput()" (focus)="showDoctorSuggestions = true"/>
+          <ul class="doctor-suggestions" *ngIf="showDoctorSuggestions && filteredDoctors.length > 0">
+            <li *ngFor="let doctor of filteredDoctors" (click)="onDoctorSelect(doctor)">
+              {{ doctor.name }}
+            </li>
+          </ul>
         </div>
+        
   <div class="appointment-timing">
     <div class="form-group time">
         <label>Appointment Date:</label>
         <input type="date" formControlName="appointmentDate" />
       </div>
 
-      <div class="form-group time">
+      <div class="form-group time slot">
         <label>Appointment Time:</label>
-        <input type="text" placeholder="9:00 - 9:15" formControlName="appointmentTime"/>
+        <select  formControlName="appointmentTime" >
+          <option value=""  selected *ngIf="availableSlots.length === 0">No available slots</option>
+          <option *ngFor="let slot of availableSlots" [value]="slot">
+            {{ slot }}
+          </option>
+        </select>
       </div>
   </div>
   <div *ngIf="showAvailabilityMessage" class="availability-message" [ngClass]="{'available': !showAvailabilityMessage, 'not-available': showAvailabilityMessage}">
@@ -63,8 +78,9 @@
   
         <!-- Buttons -->
         <div class="button-group">
+          <p-toast />
           <button class="btn-primary" [disabled]="!appointmentForm.valid" (click)="confirm()">Book Appointment</button>
-          <button class="btn-secondary" (click)="closeForm($event)">Close</button>
+          <!-- <button class="btn-secondary" (click)="closeForm($event)">Close</button> -->
         </div>
       </div>
     </form>

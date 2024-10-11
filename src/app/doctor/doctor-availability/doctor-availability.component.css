@@ -282,10 +282,14 @@ line-height: normal;
   /* Slots Styling */
   .slots-wrapper {
     display: grid;
-    grid-template-columns: repeat(11, minmax(80px, 1fr));
+    /* grid-template-columns: repeat(11, minmax(80px, 1fr)); */
+    grid-template-rows: repeat(4, auto); /* Create 4 rows */
+    grid-auto-flow: column; /* Fill each column with 4 rows first */
+    grid-template-columns: repeat(11, minmax(80px, 1fr)); /* Set 11 columns */
     gap: 6px;
     align-items: center;
     width: 100%;
+    justify-items: start;
   }
   
   .slot-box {

@@ -15,6 +15,7 @@ export class DoctorOverviewComponent {
   isEditMode: boolean = false;
 
   newDoctor: Doctor = {
+    id:0,
     name: '',
     qualification: '',
     departmentId: 0,

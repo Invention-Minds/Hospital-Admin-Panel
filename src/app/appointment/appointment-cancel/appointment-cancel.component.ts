@@ -15,6 +15,7 @@ interface Appointment {
   smsSent?:boolean;
   requestVia?: string; // Optional property
   [key: string]: any;  // Add this line to allow indexing by string
+  created_at?: string;
 }
 @Component({
   selector: 'app-appointment-cancel',
@@ -44,6 +45,11 @@ export class AppointmentCancelComponent {
         this.confirmedAppointments = appointments.filter(appointment => appointment.status !== 'confirmed');
       }
       this.cancelledAppointments = appointments;
+      this.cancelledAppointments.sort((a, b) => {
+        const dateA = new Date(a.created_at!);
+        const dateB = new Date(b.created_at!);
+        return dateB.getTime() - dateA.getTime();
+      });
       this.filteredAppointments = [...this.cancelledAppointments];
       console.log('Cancelled appointments from component in filtered:', this.filteredAppointments);
       console.log('Cancelled appointments from component:', this.cancelledAppointments);
@@ -63,6 +69,13 @@ export class AppointmentCancelComponent {
     } else {
       this.sortColumn = column;
       this.sortDirection = 'asc'; // Default to ascending when a new column is clicked
+    }
+    if (column === 'date') {
+      this.filteredAppointments.sort((a, b) => {
+        const dateA = new Date(a.date);
+        const dateB = new Date(b.date);
+        return this.sortDirection === 'asc' ? dateA.getTime() - dateB.getTime() : dateB.getTime() - dateA.getTime();
+      });
     }
     this.currentPage = 1; // Reset to the first page when sorting changes
   }
@@ -165,8 +178,8 @@ console.log("sort", this.filteredAppointments)
   formatDate(date: Date): string {
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
-    const year = date.getFullYear().toString().slice(-2); // Get last two digits of year
-    return `${day}/${month}/${year}`;
+    const year = date.getFullYear().toString().slice(-4); // Get last two digits of year
+    return `${year}-${month}-${day}`;
   }
 
   // Method to return the filtered appointments for display

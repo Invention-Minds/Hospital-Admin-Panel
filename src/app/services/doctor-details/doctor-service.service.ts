@@ -22,32 +22,7 @@ export class DoctorServiceService {
     this.doctorSubject.next(doctor);
   }
 
-  // Updates the selected doctor locally
-  // updateDoctorLocally(updatedDoctor: Doctor): void {
-  //   const index = this.doctors.findIndex((doctor) => doctor.name === updatedDoctor.name);
-  //   if (index !== -1) {
-  //     this.doctors[index] = updatedDoctor;
-  //   }
-  // }
 
-  // // Fetch all doctors from the backend
-  // getDoctors(): Observable<Doctor[]> {
-  //   return this.http.get<Doctor[]>(`${this.apiUrl}/doctors`);
-  // }
-  // getDepartments(): Observable<Department[]> {
-  //   return this.http.get<Department[]>(`${this.apiUrl}/departments`);
-  // }
-
-
-  // // Create a new doctor
-  // createDoctor(doctor: Doctor): Observable<Doctor> {
-  //   return this.http.post<Doctor>(this.apiUrl, doctor);
-  // }
-
-  // // Update an existing doctor
-  // updateDoctor(updatedDoctor: Doctor): Observable<Doctor> {
-  //   return this.http.put<Doctor>(`${this.apiUrl}/${updatedDoctor.id}`, updatedDoctor);
-  // }
 
   // Delete a doctor
   deleteDoctor(id: number): Observable<void> {
@@ -71,5 +46,9 @@ export class DoctorServiceService {
   // Get all departments
   getDepartments(): Observable<Department[]> {
     return this.http.get<Department[]>(`${this.apiUrl}/departments`);
+  }
+  getBookedSlots(doctorId: number, date: string): Observable<string[]> {
+    const bookedSlotsUrl = `http://localhost:3000/api/doctors/booked-slots?doctorId=${doctorId}&date=${date}`;
+    return this.http.get<string[]>(bookedSlotsUrl);
   }
 }

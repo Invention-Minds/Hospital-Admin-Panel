@@ -14,7 +14,7 @@
           <p-calendar 
           styleClass="custom-calendar" 
           [(ngModel)]="selectedDate"
-          (change)="onDateChange($event)" 
+          (ngModelChange)="onDateChange($event)" 
           placeholder="Calendar">
             <!-- <ng-template pTemplate="date" let-date>
                 <span>
@@ -38,7 +38,7 @@
   
     <!-- Doctor Details & Slots -->
     <div class="doctor-slot-container" *ngFor="let doctor of filteredDoctors">
-      <div class="doctor-profile">
+      <div class="doctor-profile" [ngClass]="{ 'unavailable-doctor': doctor.isUnavailable }">
         <img src="/male-doctor.png" alt="Doctor Image" class="doctor-avatar" />
         <div class="doctor-info">
           <h3 class="doctor-name">{{ doctor.name }}</h3>

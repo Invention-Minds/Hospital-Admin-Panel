@@ -9,9 +9,9 @@
           <th>#</th>
           <th>Patient Name</th>
           <th>Doctor</th>
+          <th>Department</th>
           <th>Appt Date</th>
           <th>Appt Time</th>
-          <th>Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -19,15 +19,16 @@
           <td>{{ i + 1 }}</td>
           <td>{{ appointment.patientName }}</td>
           <td><span class="doctor-name">{{ appointment.doctorName }}</span></td>
-          <td>{{ appointment.apptDate | date }}</td>
+          <td>{{ appointment.department}}</td>
           <td>
-            <span class="time-badge">{{ appointment.apptTime }}</span>
+            {{ appointment.apptDate }}
           </td>
           <td>
-            <div class="action-buttons">
+            <!-- <div class="action-buttons">
                 <div class="edit-btn"><img src='icons/book.png'></div>
             <div class="delete-btn"><img src='icons/delete.png'></div>
-            </div>
+            </div> -->
+            <span class="time-badge">{{ appointment.apptTime }}</span>
           </td>
         </tr>
       </tbody>

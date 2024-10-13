@@ -39,6 +39,8 @@
           </button>
           <button class="unavailable-button" (click)="openUnavailableModal(doctor)">Unavailable</button>
         </div>
+           <!-- Delete Icon with click event to delete the doctor -->
+      <img src="doc-delete.svg" class="doc-delete" (click)="deleteDoctor(doctor)" alt="Delete Icon">
       </div>
     </div>
   </div>
@@ -47,26 +49,31 @@
   <div *ngIf="isEditMode" class="edit-form-container">
     <app-doctor-form  *ngIf="selectedEditDoctor" [doctor]="selectedEditDoctor" [isEditMode]="isEditMode" (save)="onSaveDoctor($event)" (cancel)="cancelEdit()"></app-doctor-form>
   </div>
-  <div *ngIf="showUnavailableModal" class="modal-overlay">
-    <div class="modal-container">
+  <div *ngIf="showUnavailableModal" class="modal-backdrop">
+    <div class="modal-content">
       <div class="modal-header">
         <h2>Select Unavailable Dates for {{ selectedEditDoctor?.name }}</h2>
-        <span class="close-button" (click)="closeUnavailableModal()">&times;</span>
+        <button (click)="closeUnavailableModal()" class="close-button">&times;</button>
       </div>
-      <div class="modal-content">
-        <label for="unavailableDates">Choose Unavailable Dates:</label>
-        <input type="date" id="unavailableDates" (change)="addUnavailableDate($event)" />
-        <div *ngIf="selectedUnavailableDates.length > 0" class="selected-dates">
-          <h4>Unavailable Dates:</h4>
-          <ul>
-            <li *ngFor="let date of selectedUnavailableDates">{{ date }}</li>
-          </ul>
-        </div>
-        <div class="modal-footer">
-          <button (click)="saveUnavailableDates()" class="btn btn-primary">Save</button>
-          <button (click)="closeUnavailableModal()" class="btn btn-secondary">Cancel</button>
-        </div>
+      <div class="modal-body">
+        <form [formGroup]="unavailabilityForm">
+          <div class="form-group-inline">
+            <div class="form-group">
+              <label for="startDate">Starting Date:</label>
+              <input type="date" id="startDate" formControlName="startDate" />
+            </div>
+            <div class="form-group">
+              <label for="endDate">Ending Date:</label>
+              <input type="date" id="endDate" formControlName="endDate" />
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button (click)="onUpdate()" class="update-button">Update</button>
+        <!-- <button (click)="closeUnavailableModal()" class="close-button">Close</button> -->
       </div>
     </div>
   </div>
+  
   

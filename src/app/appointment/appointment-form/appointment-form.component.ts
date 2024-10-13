@@ -5,6 +5,7 @@ import { AppointmentConfirmService } from '../../services/appointment-confirm.se
 import { Doctor } from '../../models/doctor.model';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { MessageService } from 'primeng/api';
+import { ChangeDetectorRef } from '@angular/core';
 
 interface Appointment {
   id?: number;
@@ -41,10 +42,13 @@ export class AppointmentFormComponent implements OnInit {
   showDoctorSuggestions: boolean = false;
   doctor: Doctor[] = []; // Array to store doctor details
   filteredDoctors: Doctor[] = []; // Array to store filtered doctors based on user input
+  showDoctorUnavailableMessage: boolean = false;
+  doctorUnavailableMessage: string = '';
+  unavailableDates: string[] = [];
 
 
 
-  constructor(private fb: FormBuilder, private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private messageService: MessageService) {
+  constructor(private fb: FormBuilder, private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private messageService: MessageService, private cdr: ChangeDetectorRef) {
     console.log('Appointment:', this.appointment);
   }
 
@@ -97,6 +101,8 @@ export class AppointmentFormComponent implements OnInit {
     }
 
   }
+
+
   private loadDoctors(): void {
     this.doctorService.getDoctors().subscribe(
       (doctors) => {
@@ -107,6 +113,13 @@ export class AppointmentFormComponent implements OnInit {
       }
     );
   }
+  private formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
   onDoctorNameInput(): void {
     const doctorNameInput = this.appointmentForm.get('doctorName')?.value.toLowerCase();
     this.filteredDoctors = this.doctors.filter(doctor =>
@@ -130,10 +143,11 @@ export class AppointmentFormComponent implements OnInit {
     //   }
     // });
     this.appointmentForm.get('doctorName')?.valueChanges.subscribe(doctorName => {
+
       const date = this.appointmentForm.get('appointmentDate')?.value;
       const doctorId = this.getDoctorIdByName(doctorName);
       if (doctorId && date) {
-        this.loadAvailableSlots(doctorId, date);
+        this.checkDoctorAvailabilityAndLoadSlots(doctorId, date)
       }
     });
 
@@ -143,18 +157,47 @@ export class AppointmentFormComponent implements OnInit {
       const doctorId = this.getDoctorIdByName(doctorName);
 
       if (doctorId && date) {
-        this.loadAvailableSlots(doctorId, date);
+        this.checkDoctorAvailabilityAndLoadSlots(doctorId, date)
       }
     });
-    this.appointmentForm.get('appointmentTime')?.valueChanges.subscribe(time => {
-      const date = this.appointmentForm.get('appointmentDate')?.value;
-      const doctorName = this.appointmentForm.get('doctorName')?.value;
-      const doctorId = this.getDoctorIdByName(doctorName);
-      if (doctorId && date) {
-        this.loadAvailableSlots(doctorId, date);
-      }
-    })
+    
+    // this.appointmentForm.get('appointmentTime')?.valueChanges.subscribe(time => {
+    //   const date = this.appointmentForm.get('appointmentDate')?.value;
+    //   const doctorName = this.appointmentForm.get('doctorName')?.value;
+    //   const doctorId = this.getDoctorIdByName(doctorName);
+    //   if (doctorId && date) {
+    //     this.loadAvailableSlots(doctorId, date);
+    //   }
+    // })
 
+  }
+  private checkDoctorAvailabilityAndLoadSlots(doctorId: number, appointmentDate: string): void {
+    // Fetch unavailable dates
+    this.doctorService.getUnavailableDates(doctorId).subscribe(
+      (unavailableDates) => {
+        this.unavailableDates = unavailableDates.map((unavailable) =>
+          this.formatDate(new Date(unavailable.date))
+        );
+  
+        if (this.unavailableDates.includes(appointmentDate)) {
+          // Doctor is unavailable on this date
+          this.showDoctorUnavailableMessage = true;
+          this.doctorUnavailableMessage = '*The selected doctor is unavailable on this date.';
+          this.availableSlots = []; // Clear available slots
+          this.appointmentForm.get('appointmentTime')?.setValue(''); // Clear selected appointment time
+        } else {
+          // Doctor is available, load slots
+          this.showDoctorUnavailableMessage = false;
+          this.doctorUnavailableMessage = '';
+          this.loadAvailableSlots(doctorId, appointmentDate);
+        }
+  
+        this.cdr.detectChanges(); // Trigger change detection
+      },
+      (error) => {
+        console.error('Error fetching unavailable dates:', error);
+      }
+    );
   }
   // loadAvailableSlots(doctorId: number, date: string): void {
   //   console.log('Loading available slots for doctor:', doctorId, 'on date:', date);
@@ -182,6 +225,10 @@ export class AppointmentFormComponent implements OnInit {
     const doctor = this.doctors.find(d => d.name === doctorName);
     return doctor ? doctor.id : undefined;
   }
+  private getDoctorByName(doctorName: string): Doctor | undefined {
+    return this.doctors.find(d => d.name === doctorName);
+  }
+  
   loadAvailableSlots(doctorId: number, date: string): void {
     console.log('Loading available slots for doctor:', doctorId, 'on date:', date);
     this.appointmentService.getAvailableSlots(doctorId, date).subscribe(
@@ -394,12 +441,18 @@ export class AppointmentFormComponent implements OnInit {
         console.error('Doctor ID not found for the given doctor name.');
         return; // Optionally, stop execution if doctor ID is required
       }
+      const selectedDoctor = this.getDoctorByName(this.appointmentForm.value.doctorName);
+
+if (selectedDoctor) {
+  const doctorId = selectedDoctor.id;
+  const department = selectedDoctor.departmentName ?? 'Default Department'; // Assuming departmentName is a property in the doctor model
+
       const appointmentDetails = {
         patientName: this.appointmentForm.value.firstName + ' ' + this.appointmentForm.value.lastName,
         phoneNumber: this.appointmentForm.value.phoneNumber,
         doctorId: doctorId,
         doctorName: this.appointmentForm.value.doctorName,
-        department: 'Default Therapy', // Adjust as needed
+        department: department, // Adjust as needed
         date: this.appointmentForm.value.appointmentDate,
         time: this.appointmentForm.value.appointmentTime,
         requestVia: this.appointmentForm.value.requestVia,
@@ -407,7 +460,6 @@ export class AppointmentFormComponent implements OnInit {
         email: this.appointmentForm.value.email,
         smsSent: false
       };
-
       this.appointment = appointmentDetails;
       // Mark the slot as booked
       this.addBookedSlot(this.appointment.doctorId, this.appointment.date, this.appointment.time);
@@ -427,11 +479,11 @@ export class AppointmentFormComponent implements OnInit {
       this.showForm = false; // Close the form after submission
     }
 
-    if (this.appointment?.requestVia === "Call") {
+    if (this.appointment?.requestVia === "Call" || this.appointment?.requestVia === "Walk-In") {
       this.appointment.status = "confirmed";
       this.appointmentService.addConfirmedAppointment(this.appointment);
     }
-
+  }
   }
 
   private addBookedSlot(doctorId: number, date: string, time: string) {

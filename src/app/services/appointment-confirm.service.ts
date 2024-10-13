@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { map } from 'rxjs/operators';
 
 export interface Appointment {
@@ -116,5 +116,27 @@ addBookedSlot(doctorId: number, date: string, time: string): Observable<any> {
 getBookedSlots(doctorId: number, date: string): Observable<string[]> {
   const bookedSlotsUrl = `http://localhost:3000/api/doctors/booked-slots?doctorId=${doctorId}&date=${date}`;
   return this.http.get<string[]>(bookedSlotsUrl);
+}
+ // Method to get today's total appointments count
+ getTotalAppointmentsCountForToday(date: string): Observable<{ count: number }> {
+  return this.http.get<{ count: number }>(`${this.apiUrl}/total`, {
+    params: { date: date }
+  });
+}
+
+// Method to get today's pending appointment requests count
+getPendingAppointmentsCountForToday(date: string): Observable<{ count: number }> {
+  return this.http.get<{ count: number }>(`${this.apiUrl}/pending`, {
+    params: { date: date }
+  });
+}
+ // Method to get the count of available doctors for a specific date
+ getAvailableDoctorsCount(date: string): Observable<number> {
+  const params = new HttpParams().set('date', date);
+  return this.http.get<number>(`http://localhost:3000/api/doctors/available/count`, { params });
+}
+getAvailableDoctors(date: string): Observable<number> {
+  const params = new HttpParams().set('date', date);
+  return this.http.get<number>(`http://localhost:3000/api/doctors/available/`, { params });
 }
 }

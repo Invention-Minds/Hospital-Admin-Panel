@@ -1,10 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
 import { Doctor } from '../../models/doctor.model';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { ChangeDetectorRef } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import Swal from 'sweetalert2'; // Import SweetAlert2 for confirmation dialog
 
 interface Department {
-  id:number;
+  id: number;
   name: string;
   doctors?: Doctor[];
 }
@@ -18,19 +20,55 @@ export class DoctorDetailsComponent implements OnInit {
   departments: Department[] = [];
   selectedDepartment: string = '';
   selectedDoctor: string = '';
-  isEditMode: boolean = false; 
+  isEditMode: boolean = false;
   selectedEditDoctor: Doctor | null = null;
   showUnavailableModal: boolean = false;
   selectedUnavailableDates: string[] = [];
+  unavailabilityForm: FormGroup;
 
-  constructor(private doctorService: DoctorServiceService, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private doctorService: DoctorServiceService,
+    private cdr: ChangeDetectorRef,
+    private fb: FormBuilder
+  ) {
+    this.unavailabilityForm = this.fb.group({
+      startDate: ['', Validators.required],
+      endDate: ['', Validators.required]
+    });
+  }
 
   ngOnInit(): void {
-    // this.fetchDoctors(); // Fetch all doctors when the component initializes
-    // console.log('Doctor details component initialized');
-    // this.fetchDepartments();
     this.fetchDepartmentsAndDoctors(); // Fetch all departments and doctors
   }
+ // Method to handle deleting a doctor with a confirmation dialog
+ deleteDoctor(doctor: Doctor): void {
+  Swal.fire({
+    title: 'Are you sure?',
+    text: `Do you want to delete Dr. ${doctor.name}? This action cannot be undone.`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Yes, delete it!',
+    cancelButtonText: 'Cancel'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // Proceed with deleting the doctor
+      this.doctorService.deleteDoctor(doctor.id).subscribe(
+        () => {
+          Swal.fire('Deleted!', `Dr. ${doctor.name} has been deleted.`, 'success');
+          this.fetchDepartmentsAndDoctors(); // Refresh the list after deletion
+        },
+        (error) => {
+          console.error('Error deleting doctor:', error);
+          Swal.fire('Error!', 'An error occurred while deleting the doctor.', 'error');
+        }
+      );
+    } 
+    // else if (result.dismiss === Swal.DismissReason.cancel) {
+    //   Swal.fire('Cancelled', 'The doctor is safe :)', 'info');
+    // }
+  });
+}
+
   // Fetch all departments and doctors from the backend
   fetchDepartmentsAndDoctors(): void {
     // Fetch departments
@@ -40,7 +78,7 @@ export class DoctorDetailsComponent implements OnInit {
           ...dep,
           doctors: [] // Initialize empty doctors array
         }));
-        
+
         // Fetch doctors and link them to departments
         this.fetchDoctors();
       },
@@ -70,7 +108,7 @@ export class DoctorDetailsComponent implements OnInit {
           });
           console.log('Doctors available days', doctor.availabilityDays);
         });
-  
+
         this.departments = this.groupDoctorsByDepartment(doctors);
         console.log('Doctors fetched and grouped successfully', this.departments);
       },
@@ -79,15 +117,9 @@ export class DoctorDetailsComponent implements OnInit {
       }
     );
   }
-  
-  // fetchDepartments(): void {
-  //   this.doctorService.getDepartments().subscribe((departments: Department[]) => {
-  //     this.departments = departments;
-  //     console.log('Departments fetched successfully', this.departments);
-  //   });
-  // }
+
   // Group doctors by department
-    private groupDoctorsByDepartment(doctors: Doctor[]): Department[] {
+  private groupDoctorsByDepartment(doctors: Doctor[]): Department[] {
     // Create a map of department IDs to departments
     const departmentMap = new Map<number, Department>();
     this.departments.forEach((department) => {
@@ -107,13 +139,14 @@ export class DoctorDetailsComponent implements OnInit {
     // Convert the map back to an array of departments
     return Array.from(departmentMap.values());
   }
+
   getFilteredDoctors(): Department[] {
     let filteredDepartments = this.departments;
-  
+
     if (this.selectedDepartment) {
       filteredDepartments = filteredDepartments.filter((dep: Department) => dep.name === this.selectedDepartment);
     }
-  
+
     if (this.selectedDoctor) {
       filteredDepartments = filteredDepartments
         .map((dep: Department) => ({
@@ -121,26 +154,22 @@ export class DoctorDetailsComponent implements OnInit {
           doctors: (dep.doctors ?? []).filter((doc: Doctor) => doc.name === this.selectedDoctor) // Use `??` to provide a fallback if `doctors` is `undefined`
         }))
         .filter((dep: Department) => (dep.doctors?.length ?? 0) > 0);
-        
     }
-  
+
     return filteredDepartments;
   }
-  
-  
 
-// Get doctors for selected department for doctor dropdown
-getDoctorsForSelectedDepartment(): Doctor[] {
-  if (this.selectedDepartment) {
-    const department = this.departments.find((dep: Department) => dep.name === this.selectedDepartment);
-    // Add a fallback to an empty array if 'doctors' is undefined
-    return department ? department.doctors ?? [] : [];
-  } else {
-    // Use the fallback for 'doctors' in case any department has undefined doctors
-    return this.departments.flatMap((department: Department) => department.doctors ?? []);
+  // Get doctors for selected department for doctor dropdown
+  getDoctorsForSelectedDepartment(): Doctor[] {
+    if (this.selectedDepartment) {
+      const department = this.departments.find((dep: Department) => dep.name === this.selectedDepartment);
+      // Add a fallback to an empty array if 'doctors' is undefined
+      return department ? department.doctors ?? [] : [];
+    } else {
+      // Use the fallback for 'doctors' in case any department has undefined doctors
+      return this.departments.flatMap((department: Department) => department.doctors ?? []);
+    }
   }
-}
-
 
   // Reset filters
   reset(): void {
@@ -151,7 +180,7 @@ getDoctorsForSelectedDepartment(): Doctor[] {
   // Initiate editing a doctor profile
   editProfile(doctor: Doctor): void {
     this.selectedEditDoctor = { ...doctor }; // Create a copy to avoid direct changes
-    
+
     // Initialize availabilityDays if it does not exist
     if (!this.selectedEditDoctor.availabilityDays) {
       this.selectedEditDoctor.availabilityDays = {
@@ -164,7 +193,7 @@ getDoctorsForSelectedDepartment(): Doctor[] {
         sat: false,
       };
     }
-  
+
     // Set availabilityDays based on the available availability data
     if (doctor.availability) {
       doctor.availability.forEach((avail) => {
@@ -172,11 +201,10 @@ getDoctorsForSelectedDepartment(): Doctor[] {
       });
       console.log('Selected doctor availability days:', this.selectedEditDoctor.availabilityDays);
     }
-  
+
     this.isEditMode = true;
     this.cdr.detectChanges();
   }
-  
 
   // Handle saving the edited doctor
   onSaveDoctor(updatedDoctor: Doctor): void {
@@ -193,26 +221,26 @@ getDoctorsForSelectedDepartment(): Doctor[] {
         }
       );
     } else {
-       // Find the department ID based on the name provided
-    const department = this.departments.find(dep => dep.name === updatedDoctor.departmentName);
-    if (department) {
-      updatedDoctor.departmentId = department.id;
+      // Find the department ID based on the name provided
+      const department = this.departments.find(dep => dep.name === updatedDoctor.departmentName);
+      if (department) {
+        updatedDoctor.departmentId = department.id;
 
-      this.doctorService.createDoctor(updatedDoctor).subscribe(
-        () => {
-          updatedDoctor.slotDuration = Number(updatedDoctor.slotDuration);
+        this.doctorService.createDoctor(updatedDoctor).subscribe(
+          () => {
+            updatedDoctor.slotDuration = Number(updatedDoctor.slotDuration);
 
-          this.fetchDepartmentsAndDoctors(); // Refresh the list of doctors
-          this.selectedEditDoctor = null;
-          console.log('Doctor created successfully');
-        },
-        (error) => {
-          console.error('Error creating doctor:', error);
-        }
-      );
-    } else {
-      console.error('Department not found for the provided name');
-    }
+            this.fetchDepartmentsAndDoctors(); // Refresh the list of doctors
+            this.selectedEditDoctor = null;
+            console.log('Doctor created successfully');
+          },
+          (error) => {
+            console.error('Error creating doctor:', error);
+          }
+        );
+      } else {
+        console.error('Department not found for the provided name');
+      }
     }
   }
 
@@ -235,19 +263,22 @@ getDoctorsForSelectedDepartment(): Doctor[] {
     this.selectedEditDoctor = null;
   }
 
-  // Add unavailable date
-  addUnavailableDate(event: any): void {
-    const selectedDate = event.target.value;
-    if (selectedDate && !this.selectedUnavailableDates.includes(selectedDate)) {
-      this.selectedUnavailableDates.push(selectedDate);
-    }
-  }
+  // Handle updating the unavailable dates
+// Handle updating the unavailable dates
+onUpdate(): void {
+  if (this.unavailabilityForm.valid) {
+    const startDate = new Date(this.unavailabilityForm.value.startDate);
+    const endDate = new Date(this.unavailabilityForm.value.endDate);
 
-  // Save unavailable dates
-  saveUnavailableDates(): void {
+    if (endDate < startDate) {
+      console.error('End date must be after start date');
+      return;
+    }
+
+    const unavailableDates = this.generateDatesBetween(startDate, endDate);
+
     if (this.selectedEditDoctor) {
-      this.selectedEditDoctor.unavailableDates = [...this.selectedUnavailableDates];
-      this.doctorService.updateDoctor(this.selectedEditDoctor).subscribe(
+      this.doctorService.addUnavailableDates(this.selectedEditDoctor.id, startDate.toISOString().split('T')[0], endDate.toISOString().split('T')[0], unavailableDates).subscribe(
         () => {
           this.fetchDoctors(); // Refresh the list of doctors
           this.closeUnavailableModal();
@@ -257,5 +288,17 @@ getDoctorsForSelectedDepartment(): Doctor[] {
         }
       );
     }
+  }
+}
+
+  // Generate all dates between two given dates (inclusive)
+  private generateDatesBetween(start: Date, end: Date): string[] {
+    const dates = [];
+    let current = new Date(start);
+    while (current <= end) {
+      dates.push(current.toISOString().split('T')[0]); // Format as 'YYYY-MM-DD'
+      current.setDate(current.getDate() + 1);
+    }
+    return dates;
   }
 }

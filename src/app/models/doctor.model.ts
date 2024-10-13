@@ -18,4 +18,5 @@ export interface Doctor {
     slotDuration: number;
   }[];
   unavailableDates?: string[];
+  isUnavailable?: boolean; // Optional property to mark the doctor as unavailable
 }

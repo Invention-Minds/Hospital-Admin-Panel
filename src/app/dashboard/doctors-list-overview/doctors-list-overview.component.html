@@ -1,7 +1,7 @@
 <div class="card doctors-list">
     <div class="header">
       <h3>Doctors List</h3>
-      <a href="#">See all</a>
+      <a href="/doctor">See all</a>
     </div>
     <table>
       <thead>
@@ -15,7 +15,7 @@
         <tr *ngFor="let doctor of doctors; let i = index">
           <td>{{ i + 1 }}</td>
           <td>
-            <img src="{{ doctor.image }}" alt="{{ doctor.name }}" class="doctor-img">
+            <img src="/icons/male-doctor.png" alt="{{ doctor.name }}" class="doctor-img">
             <span>{{ doctor.name }}</span>
           </td>
           <td>

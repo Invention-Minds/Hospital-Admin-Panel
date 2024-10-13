@@ -4,19 +4,17 @@ import { Doctor } from '../../models/doctor.model';
 import { DoctorWithSlots } from '../../models/doctos_with_slots.model';
 import { ChangeDetectorRef } from '@angular/core';
 import { forkJoin } from 'rxjs';
+
 interface Slot {
   time: string;
   status: 'available' | 'booked' | 'unavailable';
 }
-
-
 
 @Component({
   selector: 'app-doctor-availability',
   templateUrl: './doctor-availability.component.html',
   styleUrl: './doctor-availability.component.css'
 })
-
 export class DoctorAvailabilityComponent {
   selectedDate: Date = new Date();
   opdStartTime: string = '08:00';
@@ -32,41 +30,112 @@ export class DoctorAvailabilityComponent {
     this.fetchDoctors();
   }
 
-  // fetchDoctors(): void {
-  //   this.doctorService.getDoctors().subscribe((doctors: Doctor[]) => {
-  //     this.doctors = doctors.map((doctor) => ({
-  //       ...doctor,
-  //       slots: this.generateDoctorSlots(doctor.availableFrom, doctor.slotDuration)
-  //     }));
-  //     this.applySearchFilter();
-  //   });
-  // }
-  fetchDoctors(): void {
-    this.doctorService.getDoctors().subscribe((doctors: Doctor[]) => {
-      const doctorRequests = doctors
-        .filter(doctor => doctor.id !== undefined)
-        .map(doctor => this.doctorService.getBookedSlots(doctor.id!, this.formatDate(this.selectedDate)));
-  
-      forkJoin(doctorRequests).subscribe((bookedSlotsArray: string[][]) => {
-        this.doctors = doctors.map((doctor, index) => {
-          const bookedSlots = bookedSlotsArray[index];
-          return {
-            ...doctor,
-            slots: this.generateDoctorSlots(doctor.availableFrom, doctor.slotDuration, bookedSlots)
-          };
+//   fetchDoctors(): void {
+//     const formattedDate = this.formatDate(this.selectedDate);
+//     console.log('formattedDate',formattedDate)
+//     this.doctorService.getDoctors().subscribe((doctors: Doctor[]) => {
+//       const doctorRequests = doctors
+//         .filter(doctor => doctor.id !== undefined)
+//         .map(doctor =>
+//           forkJoin({
+//             bookedSlots: this.doctorService.getBookedSlots(doctor.id!, this.formatDate(this.selectedDate)),
+//             unavailableDates: this.doctorService.getUnavailableDates(doctor.id!)
+//           })
+//         );
+
+//       forkJoin(doctorRequests).subscribe((doctorDataArray) => {
+//         this.doctors = doctors.map((doctor, index) => {
+//           const { bookedSlots, unavailableDates } = doctorDataArray[index];
+
+//           // Determine if the selected day is unavailable for the doctor
+//           const isUnavailableDay = unavailableDates.some(unavailable => {
+//             const unavailableDate = new Date(unavailable.date);
+//             const formattedUnavailableDate = unavailableDate.toISOString().split('T')[0];
+//             return formattedUnavailableDate === formattedDate;
+//           });
+// // Set an `isUnavailable` flag for the doctor
+// const isUnavailable = isUnavailableDay;
+//           return {
+//             ...doctor,
+//             isUnavailable,
+//             slots: this.generateDoctorSlots(doctor.availableFrom, doctor.slotDuration, bookedSlots, isUnavailableDay)
+//           };
+//         });
+//         this.applySearchFilter();
+//       });
+//     });
+//   }
+fetchDoctors(): void {
+  const formattedDate = this.formatDate(this.selectedDate);
+  console.log('formattedDate', formattedDate);
+
+  this.doctorService.getDoctors().subscribe((doctors: Doctor[]) => {
+    const doctorRequests = doctors
+      .filter(doctor => doctor.id !== undefined)
+      .map(doctor =>
+        forkJoin({
+          bookedSlots: this.doctorService.getBookedSlots(doctor.id!, this.formatDate(this.selectedDate)),
+          unavailableDates: this.doctorService.getUnavailableDates(doctor.id!)
+        })
+      );
+
+    forkJoin(doctorRequests).subscribe((doctorDataArray) => {
+      this.doctors = doctors.map((doctor, index) => {
+        const { bookedSlots, unavailableDates } = doctorDataArray[index];
+
+        // Determine if the selected day is unavailable for the doctor
+        const isUnavailableDay = unavailableDates.some(unavailable => {
+          const unavailableDate = new Date(unavailable.date);
+          const formattedUnavailableDate = unavailableDate.toISOString().split('T')[0];
+          return formattedUnavailableDate === formattedDate;
         });
-        this.applySearchFilter();
+
+        // Check if the doctor is available on the given day of the week
+        const dayOfWeek = this.selectedDate.toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
+        const availableDay = doctor.availability?.find((avail: any) =>
+          avail.day.toLowerCase() === dayOfWeek
+        );
+
+        // If the doctor is not available on this day, mark as unavailable
+        const isUnavailableDueToSchedule = !availableDay;
+
+        // Set an `isUnavailable` flag for the doctor based on unavailable date or default availability
+        const isUnavailable = isUnavailableDay || isUnavailableDueToSchedule;
+
+        // Provide default values for `availableFrom` and `slotDuration` if `availableDay` is not available
+        const availableFrom = availableDay?.availableFrom ?? '08:00-20:00'; // Use a default value for unavailable days
+        const slotDuration = availableDay?.slotDuration ?? 20; // Default to 30-minute slots if unavailable
+
+        return {
+          ...doctor,
+          isUnavailable,
+          slots: this.generateDoctorSlots(availableFrom, slotDuration, bookedSlots, isUnavailable)
+        };
       });
+      this.applySearchFilter();
     });
-  }
-  
-  reloadData(): void { // Add this method
+  });
+}
+
+
+
+  reloadData(): void {
     this.fetchDoctors();
     this.selectedDate = new Date();
   }
+
   onDateChange(event: any): void {
-    this.selectedDate = new Date(event.target.value);
+    console.log("event in",event)
+    if (event instanceof Date) {
+      this.selectedDate = event;
+      console.log('event',this.selectedDate)
+    } else {
+      this.selectedDate = new Date(event); // Ensure correct date parsing
+    }
+
+    console.log('selectedDate',this.selectedDate)
     this.fetchDoctors();
+    this.cdr.detectChanges(); // Ensure the changes are applied immediately
   }
 
   prevDay(): void {
@@ -80,10 +149,12 @@ export class DoctorAvailabilityComponent {
     this.selectedDate = new Date(this.selectedDate);
     this.fetchDoctors();
   }
+
   today(): void {
     this.selectedDate = new Date();
     this.fetchDoctors();
   }
+
   applySearchFilter(): void {
     if (this.searchQuery.trim() === '') {
       this.filteredDoctors = this.doctors;
@@ -99,58 +170,35 @@ export class DoctorAvailabilityComponent {
     this.applySearchFilter(); // Apply filter when search value changes
   }
 
-  // // Function to generate slots based on doctor availability and slot duration
-  // generateDoctorSlots(availableFrom: string, slotDuration: number): Slot[] {
-  //   const [availableStart, availableEnd] = availableFrom.split('-').map(this.stringToMinutes);
-  //   const startTime = this.stringToMinutes(this.opdStartTime);
-  //   const endTime = this.stringToMinutes(this.opdEndTime);
-  //   const slots: Slot[] = [];
+  // Function to generate slots based on doctor availability and slot duration
+// Function to generate slots based on doctor availability and slot duration
+// Function to generate slots based on doctor availability and slot duration
+generateDoctorSlots(availableFrom: string, slotDuration: number, bookedSlots: string[], isUnavailableDay: boolean): Slot[] {
+  const [availableStart, availableEnd] = availableFrom.split('-').map(this.stringToMinutes);
+  const slots: Slot[] = [];
 
-  //   for (let current = startTime; current < endTime; current += slotDuration) {
-  //     const slotTime = this.minutesToString(current);
-  //     const nextSlotTime = this.minutesToString(current + slotDuration);
+  for (let current = availableStart; current < availableEnd; current += slotDuration) {
+    const slotTime = this.minutesToString(current);
+    const nextSlotTime = this.minutesToString(current + slotDuration);
+    const slotString = `${slotTime}-${nextSlotTime}`;
 
-  //     let status: Slot['status'] = 'unavailable';
+    let status: Slot['status'] = 'unavailable'; // Default to unavailable
 
-  //     if (current >= availableStart && current < availableEnd) {
-  //       status = 'available';
-  //       // Assuming you have an array of booked slots from the backend, you can update this logic to mark specific slots as "booked"
-  //     }
-
-  //     slots.push({
-  //       time: `${slotTime}-${nextSlotTime}`,
-  //       status
-  //     });
-  //   }
-
-  //   return slots;
-  // }
-  generateDoctorSlots(availableFrom: string, slotDuration: number, bookedSlots: string[]): Slot[] {
-    const [availableStart, availableEnd] = availableFrom.split('-').map(this.stringToMinutes);
-    // const startTime = this.stringToMinutes(this.opdStartTime);
-    // const endTime = this.stringToMinutes(this.opdEndTime);
-    const slots: Slot[] = [];
-  
-    for (let current = availableStart; current < availableEnd; current += slotDuration) {
-      const slotTime = this.minutesToString(current);
-      const nextSlotTime = this.minutesToString(current + slotDuration);
-      const slotString = `${slotTime}-${nextSlotTime}`;
-  
-      let status: Slot['status'] = 'unavailable';
-  
-      if (current >= availableStart && current < availableEnd) {
-        status = bookedSlots.includes(slotString) ? 'booked' : 'available';
-      }
-  
-      slots.push({
-        time: slotString,
-        status
-      });
+    // If the day is available, mark slots as either booked or available
+    if (!isUnavailableDay) {
+      status = bookedSlots.includes(slotString) ? 'booked' : 'available';
     }
-  
-    return slots;
+
+    slots.push({
+      time: slotString,
+      status
+    });
   }
-  
+
+  return slots;
+}
+
+
 
   // Utility function to convert time in "HH:mm" format to minutes
   stringToMinutes(time: string): number {
@@ -164,11 +212,12 @@ export class DoctorAvailabilityComponent {
     const mins = minutes % 60;
     return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}`;
   }
+
   // Utility function to format date to string "yyyy-MM-dd"
-formatDate(date: Date): string {
-  const year = date.getFullYear();
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const day = date.getDate().toString().padStart(2, '0');
-  return `${year}-${month}-${day}`;
-}
+  formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
 }

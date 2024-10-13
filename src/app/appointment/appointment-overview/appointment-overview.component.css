@@ -4,6 +4,10 @@
     background-color: #F0F3FF;
     padding-top: 20px;
   }
+  .container{
+    height: 100vh;
+    background-color: #F0F3FF;
+  }
   
   h1 {
     color: #271E4A;

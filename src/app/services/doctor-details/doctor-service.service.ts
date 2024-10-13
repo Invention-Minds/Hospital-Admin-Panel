@@ -26,7 +26,7 @@ export class DoctorServiceService {
 
   // Delete a doctor
   deleteDoctor(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/doctors/${id}`);
   }
   // Get all doctors
   getDoctors(): Observable<Doctor[]> {
@@ -51,4 +51,16 @@ export class DoctorServiceService {
     const bookedSlotsUrl = `http://localhost:3000/api/doctors/booked-slots?doctorId=${doctorId}&date=${date}`;
     return this.http.get<string[]>(bookedSlotsUrl);
   }
+  addUnavailableDates(doctorId: number, startDate: string, endDate: string, unavailableDates: string[]): Observable<any> {
+    return this.http.post(`${this.apiUrl}/doctors/unavailable-dates`, {
+      doctorId,
+      startDate,
+      endDate,
+      unavailableDates,
+    });
+  }
+  getUnavailableDates(doctorId: number): Observable<{ date: string }[]> {
+    return this.http.get<{ date: string }[]>(`http://localhost:3000/api/doctors/unavailable-dates?doctorId=${doctorId}`);
+  }  
+
 }

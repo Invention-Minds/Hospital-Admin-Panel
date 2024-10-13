@@ -39,11 +39,11 @@
           </ul>
         </div>
         
-  <div class="appointment-timing">
-    <div class="form-group time">
-        <label>Appointment Date:</label>
-        <input type="date" formControlName="appointmentDate" />
-      </div>
+        <div class="appointment-timing">
+          <div class="form-group time">
+            <label>Appointment Date:</label>
+            <input type="date" formControlName="appointmentDate"  />
+          </div>
 
       <div class="form-group time slot">
         <label>Appointment Time:</label>
@@ -58,12 +58,16 @@
   <div *ngIf="showAvailabilityMessage" class="availability-message" [ngClass]="{'available': !showAvailabilityMessage, 'not-available': showAvailabilityMessage}">
     {{ availabilityMessage }}
   </div>
+  <div *ngIf="showDoctorUnavailableMessage" class="unavailable-message">
+    {{ doctorUnavailableMessage }}
+  </div>
   <div class="appointment-timing">
     <div class="form-group form-group-2">
         <label class="radio">Request Via:</label>
         <div class="radio-group">
           <label><input type="radio" formControlName="requestVia" value="Website" /> Website</label>
           <label><input type="radio" formControlName="requestVia" value="Call" /> Call</label>
+          <label><input type="radio" formControlName="requestVia" value="Walk-In" /> Walk-In</label>
         </div>
       </div>
 

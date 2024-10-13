@@ -322,6 +322,15 @@ font-weight: 600;
     background-color: #C5C5C5; /* Grey for Unavailable */
     color: #dcdcdc;
   }
+  .unavailable-doctor {
+    opacity: 0.6; /* Make the unavailable doctor's card look faded */
+    cursor:not-allowed
+  }
+  
+  .doctor-unavailable-label {
+    color: red;
+    font-weight: bold;
+  }
   
   /* Responsive Styling */
   @media (max-width: 768px) {

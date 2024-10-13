@@ -1,4 +1,5 @@
-<div class="dashboard-section">
+<div class="container">
+  <div class="dashboard-section">
     <!-- <h1>Appointments</h1> -->
     <div class="stats-cards">
       <div class="card" 
@@ -41,4 +42,5 @@
   <app-doctor-details  *ngIf="activeComponent === 'details'"></app-doctor-details>
   <app-doctor-form  *ngIf="activeComponent === 'form'" [isEditMode]="isEditMode" [doctor]="newDoctor" (save)="onSaveDoctor($event)"
   (cancel)="onCancelForm()"></app-doctor-form>
+</div>
 </div>

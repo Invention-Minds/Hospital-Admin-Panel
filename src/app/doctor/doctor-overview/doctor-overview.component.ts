@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Doctor } from '../../models/doctor.model';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
@@ -8,12 +8,17 @@ import { DoctorServiceService } from '../../services/doctor-details/doctor-servi
   templateUrl: './doctor-overview.component.html',
   styleUrls: ['./doctor-overview.component.css']
 })
-export class DoctorOverviewComponent {
+export class DoctorOverviewComponent implements OnInit {
   constructor(private router: Router, private doctorService: DoctorServiceService) {}
 
   activeComponent: string = 'availability';
   isEditMode: boolean = false;
-
+  role: string = '';  // User role
+  ngOnInit(): void {
+    // Fetch role from localStorage or the authentication service
+    this.role = localStorage.getItem('role') || '';  // You can also fetch this from a service
+    console.log('User role:', this.role);
+  }
   newDoctor: Doctor = {
     id:0,
     name: '',
@@ -35,17 +40,28 @@ export class DoctorOverviewComponent {
     slotDuration: 20,
     availability: [],
   };
-
   showDoctorAvailability() {
-    this.activeComponent = 'availability';
+    if (this.role === 'admin' || this.role === 'sub_admin') {
+      this.activeComponent = 'availability';
+    } else {
+      console.error('Access denied: Only admin can view doctor availability.');
+    }
   }
 
   showDoctorDetails() {
-    this.activeComponent = 'details';
+    if (this.role === 'sub_admin') {
+      this.activeComponent = 'details';
+    } else {
+      console.error('Access denied: Only sub_admin or admin can view doctor details.');
+    }
   }
 
   showDoctorForm() {
-    this.activeComponent = 'form';
+    if (this.role === 'sub_admin') {
+      this.activeComponent = 'form';
+    } else {
+      console.error('Access denied: Only sub_admin or admin can add a new doctor.');
+    }
   }
 
   // Save doctor (either add new or update existing)

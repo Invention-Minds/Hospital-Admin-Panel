@@ -1,6 +1,20 @@
 <!-- app.component.html -->
-<div class="container">
+<!-- <div class="container">
     <app-sidebar></app-sidebar>
 <app-dashboard-module></app-dashboard-module>
+<router-outlet></router-outlet>
+<app-login></app-login>
+  </div> -->
+  <!-- app.component.html -->
+<div class="container" *ngIf="!isLoginRoute(); else loginTemplate">
+  <app-sidebar></app-sidebar>
+  <div class="content">
+    <app-dashboard-module></app-dashboard-module>
   </div>
+</div>
+
+<ng-template #loginTemplate>
+  <app-login></app-login>
+</ng-template>
+
   

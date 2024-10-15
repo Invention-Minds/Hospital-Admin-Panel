@@ -1,0 +1,115 @@
+<div class="container">
+    <div class="profile-wrapper">
+        <!-- Tab Menu -->
+        <div class="tab-container">
+            <div class="tab" [ngClass]="{ 'active-tab': selectedTab === 'profile' }" (click)="switchTab('profile')" *ngIf="canAccessTab('profile')" >
+              Profile Edit
+            </div>
+            <div class="tab" [ngClass]="{ 'active-tab': selectedTab === 'reset' }" (click)="switchTab('reset')" *ngIf="canAccessTab('reset')" >
+              Reset Password
+            </div>
+            <div class="tab" [ngClass]="{ 'active-tab': selectedTab === 'login' }" (click)="switchTab('login')"  *ngIf="canAccessTab('login')" >
+              Login Creation
+            </div>
+          </div>
+          
+        <div class="content-container" *ngIf="selectedTab === 'profile'">
+          <!-- Profile Picture -->
+          <div class="profile-picture">
+            <img src="/login-profile-pic.png" alt="Profile Picture">
+          </div>
+      
+          <!-- Email Input -->
+           <div class="input">
+            <input type="text" class="input-field" [(ngModel)]="username" placeholder="Username_admin@rash.com">
+      
+            <!-- Password Input -->
+            <div class="password-container">
+              <input [type]="isPasswordVisible ? 'text' : 'password'"  class="input-field" [(ngModel)]="password" placeholder="********">
+              <img src="/show-password.png" alt="Show Password" class="eye-icon" (click)="togglePasswordVisibility()" >
+            </div>
+           </div>
+      
+          <!-- Save Button -->
+          <button class="save-button" (click)="changePassword()">Save Changes</button>
+      
+          <!-- Delete Account -->
+          <div class="delete-account">
+            <button class="delete-button" (click)="openDeleteDialog()">
+              <img src="doc-delete.svg" alt="Delete Icon"> Delete Account
+            </button>
+          </div>
+        </div>
+        <div class="content-container" *ngIf="selectedTab === 'reset'">
+            <!-- Profile Picture -->
+            <div class="profile-picture">
+              <img src="/login-profile-pic.png" alt="Profile Picture">
+            </div>
+        
+            <!-- Email Input -->
+             <div class="input">
+                <input type="text" class="input-field" [(ngModel)]="username" placeholder="Username_admin@rash.com">
+                <div class="password-container">
+                    <input [type]="isPasswordVisible ? 'text' : 'password'"  class="input-field" [(ngModel)]="newPassword" placeholder="New Password">
+                    <img src="/show-password.png" alt="Show Password" class="eye-icon" (click)="togglePasswordVisibility()" >
+                  </div>
+        
+              <!-- Password Input -->
+              <div class="password-container">
+                <input [type]="isPasswordVisible ? 'text' : 'password'"  class="input-field" [(ngModel)]="confirmPassword" placeholder="Confirm New Password">
+                <img src="/show-password.png" alt="Show Password" class="eye-icon" (click)="togglePasswordVisibility()" >
+              </div>
+             </div>
+        
+            <!-- Save Button -->
+            <button class="save-button" (click)="resetPassword()">Save Changes</button>
+        
+            <!-- Delete Account
+            <div class="delete-account">
+              <button class="delete-button" (click)="openDeleteDialog()">
+                <img src="doc-delete.svg" alt="Delete Icon"> Delete Account
+              </button>
+            </div> -->
+          </div>
+          <div class="content-container" *ngIf="selectedTab === 'login'">
+            <!-- Profile Picture -->
+            <div class="profile-picture">
+              <img src="/login-profile-pic.png" alt="Profile Picture">
+            </div>
+        
+            <!-- Email Input -->
+             <div class="input">
+              <input type="text" class="input-field" [(ngModel)]="username" placeholder="Username_admin@rash.com">
+        
+              <!-- Password Input -->
+              <div class="password-container">
+                <input [type]="isPasswordVisible ? 'text' : 'password'"  class="input-field"  [(ngModel)]="password" placeholder="********">
+                <img src="/show-password.png" alt="Show Password" class="eye-icon" (click)="togglePasswordVisibility()">
+              </div>
+             </div>
+        
+            <!-- Save Button -->
+            <button class="save-button" (click)="createAccount()">Create Account</button>
+        
+            <!-- Delete Account
+            <div class="delete-account">
+              <button class="delete-button" (click)="openDeleteDialog()">
+                <img src="doc-delete.svg" alt="Delete Icon"> Delete Account
+              </button>
+            </div> -->
+          </div>
+        <!-- Delete Confirmation Modal -->
+        <div class="delete-confirm-modal" *ngIf="showDeleteConfirmDialog">
+          <div class="modal-content">
+            <h2>Are you sure?</h2>
+            <p>Do you really want to delete this account?</p>
+            <div class="modal-actions">
+              <button class="confirm-button" (click)="confirmDelete()">Confirm</button>
+              <button class="cancel-button" (click)="closeDeleteDialog()">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+</div>
+
+  

@@ -4,8 +4,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { AccountCreationComponent } from './account-creation/account-creation.component';
-import { AccountLoginComponent } from './account-login/account-login.component';
+
 
 import { DropdownModule } from 'primeng/dropdown';
 import { InputTextModule } from 'primeng/inputtext';
@@ -46,6 +45,8 @@ import { DoctorOverviewComponent } from './doctor/doctor-overview/doctor-overvie
 import { DoctorAvailabilityComponent } from './doctor/doctor-availability/doctor-availability.component';
 import { MatOption, MatOptionModule } from '@angular/material/core';
 import { DoctorFormComponent } from './doctor/doctor-form/doctor-form.component';
+import { LoginComponent } from './login/login/login.component';
+import { SettingsComponent } from './settings/settings/settings.component';
 
 
 
@@ -53,8 +54,6 @@ import { DoctorFormComponent } from './doctor/doctor-form/doctor-form.component'
 @NgModule({
   declarations: [
     AppComponent,
-    AccountCreationComponent,
-    AccountLoginComponent,
     DashboardModuleComponent,
     SidebarComponent,
     DashboardOverviewComponent,
@@ -70,6 +69,8 @@ import { DoctorFormComponent } from './doctor/doctor-form/doctor-form.component'
     DoctorOverviewComponent,
     DoctorAvailabilityComponent,
     DoctorFormComponent,
+    LoginComponent,
+    SettingsComponent,
   
     
   ],

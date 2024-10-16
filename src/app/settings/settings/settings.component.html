@@ -11,6 +11,9 @@
             <div class="tab" [ngClass]="{ 'active-tab': selectedTab === 'login' }" (click)="switchTab('login')"  *ngIf="canAccessTab('login')" >
               Login Creation
             </div>
+            <div class="tab" [ngClass]="{'active-tab': selectedTab === 'delete'}" (click)="switchTab('delete')" *ngIf="canAccessTab('delete')">
+              Delete Account
+            </div>
           </div>
           
         <div class="content-container" *ngIf="selectedTab === 'profile'">
@@ -35,8 +38,8 @@
       
           <!-- Delete Account -->
           <div class="delete-account">
-            <button class="delete-button" (click)="openDeleteDialog()">
-              <img src="doc-delete.svg" alt="Delete Icon"> Delete Account
+            <button class="delete-button" (click)="logout()">
+              <img src="doc-delete.svg" alt="Delete Icon"> Logout
             </button>
           </div>
         </div>
@@ -90,6 +93,33 @@
         
             <!-- Save Button -->
             <button class="save-button" (click)="createAccount()">Create Account</button>
+        
+            <!-- Delete Account
+            <div class="delete-account">
+              <button class="delete-button" (click)="openDeleteDialog()">
+                <img src="doc-delete.svg" alt="Delete Icon"> Delete Account
+              </button>
+            </div> -->
+          </div>
+          <div class="content-container" *ngIf="selectedTab === 'delete'">
+            <!-- Profile Picture -->
+            <div class="profile-picture">
+              <img src="/login-profile-pic.png" alt="Profile Picture">
+            </div>
+        
+            <!-- Email Input -->
+             <div class="input">
+              <input type="text" class="input-field" [(ngModel)]="username" placeholder="Username_admin@rash.com">
+        
+              <!-- Password Input -->
+              <!-- <div class="password-container">
+                <input [type]="isPasswordVisible ? 'text' : 'password'"  class="input-field"  [(ngModel)]="password" placeholder="********">
+                <img src="/show-password.png" alt="Show Password" class="eye-icon" (click)="togglePasswordVisibility()">
+              </div> -->
+             </div>
+        
+            <!-- Save Button -->
+            <button class="save-button" (click)="deleteUser()">Delete Account</button>
         
             <!-- Delete Account
             <div class="delete-account">

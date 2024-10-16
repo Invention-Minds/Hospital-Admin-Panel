@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators'; 
 
@@ -18,7 +18,7 @@ export enum UserRole {
 export class AuthServiceService {
   private apiUrl = 'http://localhost:3000/api/login'; // Replace with your backend URL
   public role: string | null = null;
-  public user: { username: string; role: string } | null = null;
+  public user: { username: string; role: string, id:number } | null = null;
 
   constructor(private http: HttpClient) { 
     
@@ -28,9 +28,11 @@ export class AuthServiceService {
       tap((response: any) => {
         const user = response.user;  // Use 'user' from the response
         if (user) {
-          this.user = { username: user.username, role: user.role }; 
+          this.user = { username: user.username, role: user.role, id: user.id }; // Save the user in the service
           localStorage.setItem('username', user.username);
-          localStorage.setItem('role', user.role); // Save the user in the service
+          localStorage.setItem('role', user.role);
+          localStorage.setItem('userid',user.id) // Save the user in the service
+          localStorage.setItem('token', response.token);  // Save the token in localStorage
         }
       })
     );
@@ -57,6 +59,11 @@ export class AuthServiceService {
   changePassword(currentPassword: string, newPassword: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/change-password`, { currentPassword, newPassword });
   }
+    // Method to delete user by ID
+    deleteUser(username: string, headers: HttpHeaders): Observable<any> {
+      return this.http.delete(`http://localhost:3000/api/login/delete-user/${username}`,  { headers });
+  }
+  
   // Utility function to extract role from username
   private extractRoleFromUsername(username: string): string {
     const parts = username.split('_');

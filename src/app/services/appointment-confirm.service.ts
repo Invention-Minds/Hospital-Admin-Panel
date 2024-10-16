@@ -16,6 +16,7 @@ export interface Appointment {
   email: string;
   requestVia?: string; // Optional property
   smsSent?: boolean; // Optional property
+  emailSent?: boolean; // Optional property
 }
 
 @Injectable({
@@ -28,6 +29,9 @@ export class AppointmentConfirmService {
   private canceledAppointmentsSource = new BehaviorSubject<Appointment[]>([]);
   canceledAppointments$ = this.canceledAppointmentsSource.asObservable();
 
+  private completedAppointmentsSource = new BehaviorSubject<Appointment[]>([]);
+  completedAppointments$ = this.completedAppointmentsSource.asObservable();
+
   private apiUrl = 'http://localhost:3000/api/appointments'; // Update this with your actual backend endpoint
 
   constructor(private http: HttpClient) {}
@@ -35,11 +39,13 @@ export class AppointmentConfirmService {
   // Fetch appointments from backend
   fetchAppointments(): void {
     this.http.get<Appointment[]>(`${this.apiUrl}`).subscribe((appointments) => {
-      const confirmed = appointments.filter(a => a.status === 'confirmed');
-      const canceled = appointments.filter(a => a.status === 'cancelled');
+      const confirmed = appointments.filter(a => a.status.toLowerCase() === 'confirmed');
+      const canceled = appointments.filter(a => a.status.toLowerCase() === 'cancelled');
+      const completed = appointments.filter(a => a.status.toLowerCase() === 'completed');
 
       this.confirmedAppointmentsSource.next(confirmed);
       this.canceledAppointmentsSource.next(canceled);
+      this.completedAppointmentsSource.next(completed);
     });
   }
   // Method to add a confirmed appointment
@@ -76,6 +82,15 @@ addNewAppointment(appointment: Appointment): void {
       this.updateAppointmentStatus(appointment.id, 'cancelled');
     } else {
       console.error('Cannot cancelled appointment: Appointment ID is missing.');
+    }
+  }
+  addCompletedAppointment(appointment: Appointment): void {
+    if (appointment.id != null) { // Ensure that the id is defined and not null
+      console.log('Confirming appointment:', appointment);
+      // Update appointment status to 'confirmed' in backend
+      this.updateAppointmentStatus(appointment.id, 'completed');
+    } else {  
+      console.error('Cannot completed appointment: Appointment ID is missing.');
     }
   }
    // Method to update appointment status

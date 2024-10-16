@@ -41,7 +41,7 @@ export class DoctorOverviewComponent implements OnInit {
     availability: [],
   };
   showDoctorAvailability() {
-    if (this.role === 'admin' || this.role === 'sub_admin') {
+    if (this.role === 'admin' || this.role === 'sub_admin' || this.role === 'super_admin') {
       this.activeComponent = 'availability';
     } else {
       console.error('Access denied: Only admin can view doctor availability.');
@@ -49,7 +49,7 @@ export class DoctorOverviewComponent implements OnInit {
   }
 
   showDoctorDetails() {
-    if (this.role === 'sub_admin') {
+    if (this.role === 'sub_admin' || this.role === 'super_admin') {
       this.activeComponent = 'details';
     } else {
       console.error('Access denied: Only sub_admin or admin can view doctor details.');
@@ -57,7 +57,7 @@ export class DoctorOverviewComponent implements OnInit {
   }
 
   showDoctorForm() {
-    if (this.role === 'sub_admin') {
+    if (this.role === 'sub_admin'|| this.role === 'super_admin') {
       this.activeComponent = 'form';
     } else {
       console.error('Access denied: Only sub_admin or admin can add a new doctor.');

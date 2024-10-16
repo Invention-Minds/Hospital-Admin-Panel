@@ -19,6 +19,7 @@ interface Appointment {
   requestVia?: string;
   status: string;
   smsSent?: boolean;
+  emailSent?: boolean;
   doctorId: number;
 }
 
@@ -75,6 +76,7 @@ export class AppointmentFormComponent implements OnInit {
       // Edit existing pending appointment - check availability for the given doctor, date, and time.
       const appointmentDate = this.appointment.date;
       this.patchFormWithAppointment(this.appointment, appointmentDate);
+      this.cdr.detectChanges();
       this.checkSlotAvailability(this.appointment.doctorId, appointmentDate, this.appointment.time);
       console.log('Appointment from appointment form:', this.appointment);
       this.loadAvailableSlots(this.appointment.doctorId, appointmentDate);

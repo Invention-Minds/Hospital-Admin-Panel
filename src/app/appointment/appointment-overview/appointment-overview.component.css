@@ -193,10 +193,11 @@ font-weight: 500;
 }
   
 
-/* .delete{
-    width: 40px;
-    height: 40px;
-} */
+.delete{
+    /* width: 40px;
+    height: 40px; */
+    cursor: pointer;
+}
   .p-calendar {
     width: 150px;
   }
@@ -220,6 +221,7 @@ right: 38px;
     border: 1px solid #e0e0e0; /* Light border */
     margin-bottom: -20px;
     padding: 10px;
+    cursor: pointer;
     /* padding-top: 20px; */
   }
  

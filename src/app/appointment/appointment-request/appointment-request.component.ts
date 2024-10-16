@@ -15,6 +15,7 @@ interface Appointment {
   status: string;
   email: string;
   smsSent?:boolean;
+  emailSent?:boolean;
   requestVia?: string; // Optional property
   [key: string]: any;  // Add this line to allow indexing by string
   created_at?: string;
@@ -209,6 +210,7 @@ submitAppointment(appointment: Appointment | null, status: string, requestVia: a
       ...appointment,  // Copy all properties from the original appointment
       status: 'confirmed', // Update the status
       smsSent: true,
+      emailSent: true,
       requestVia: requestVia         // Optionally add or modify properties as needed
     };
       // const confirmed = this.confirmedAppointments;
@@ -226,6 +228,7 @@ submitAppointment(appointment: Appointment | null, status: string, requestVia: a
         ...appointment,  // Copy all properties from the original appointment
         status: 'cancelled', // Update the status
         smsSent: true,
+        emailSent: true,
         requestVia: requestVia        // Optionally add or modify properties as needed
       };
         // const confirmed = this.confirmedAppointments;
@@ -262,6 +265,7 @@ cancelAppointment(appointment: Appointment) {
     ...appointment,
     status: 'cancelled',
     smsSent: true,
+    emailSent: true,
     requestVia: 'Website'
   };
   console.log('Appointment status from cancel:', cancel);

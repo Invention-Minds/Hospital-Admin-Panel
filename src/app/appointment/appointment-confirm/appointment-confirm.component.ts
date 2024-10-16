@@ -12,6 +12,7 @@ interface Appointment {
   status: string;
   email: string;
   smsSent?:boolean;
+  emailSent?:boolean;
   requestVia?: string; // Optional property
   created_at?: string;
 }
@@ -170,7 +171,18 @@ export class AppointmentConfirmComponent {
     const year = date.getFullYear().toString().slice(-4); // Get last two digits of year
     return `${year}-${month}-${day}`;
   }
-
+  completeAppointment(appointment: Appointment) {
+    const completed : Appointment = {
+      ...appointment,
+      status: 'completed',
+      smsSent: true,
+      emailSent: true,
+      requestVia: appointment.requestVia
+    };
+    console.log('Completed appointment:', completed);
+    this.appointmentService.addCompletedAppointment(completed);
+    this.filterAppointment();
+  }
   // Method to return the filtered appointments for display
   // getFilteredAppointments() {
   //   return this.filteredAppointments;

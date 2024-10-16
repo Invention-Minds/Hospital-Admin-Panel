@@ -186,6 +186,8 @@ generateDoctorSlots(availableFrom: string, slotDuration: number, bookedSlots: st
 
     // If the day is available, mark slots as either booked or available
     if (!isUnavailableDay) {
+      console.log('slotString',slotString);
+      console.log('bookedSlots',bookedSlots);
       status = bookedSlots.includes(slotString) ? 'booked' : 'available';
     }
 

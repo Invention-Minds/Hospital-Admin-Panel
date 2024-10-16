@@ -132,6 +132,7 @@ input[type="tel"]{
     background-color: #169458;
     color: white;
     font-weight: bold;
+    cursor: pointer;
   }
   .btn-primary:disabled {
     background-color: #cccccc; /* Gray background for disabled button */
@@ -178,6 +179,7 @@ input[type="tel"]{
 
   
   .btn-secondary {
+    cursor: not-allowed;
     background-color: #C4C4C4;
     color: black;
   }

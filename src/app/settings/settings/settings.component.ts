@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { AuthServiceService } from '../../services/auth/auth-service.service';
+import { Router } from '@angular/router';
+import { HttpHeaders } from '@angular/common/http';
 
 // export enum UserRole {
 //   admin = 'admin',
@@ -24,14 +26,15 @@ export class SettingsComponent implements OnInit {
   password: string = '';
   newPassword: string = '';
   confirmPassword: string = '';
+  userid:number = 0;
   role: string | null = null;  // Store user role
-  constructor(private authService: AuthServiceService) {}
+  constructor(private authService: AuthServiceService, private router: Router) {}
  // Define the role-based access
  rolePermissions: Record<UserRole, string[]> = {
   admin: ['profile', 'reset'],
   doctor: ['profile', 'reset'],
-  sub_admin: ['profile', 'reset', 'login'],
-  super_admin: ['profile', 'reset', 'login'],
+  sub_admin: ['profile', 'reset', 'login','delete'],
+  super_admin: ['profile', 'reset', 'login','delete'],
 };
 
   ngOnInit(): void {
@@ -40,10 +43,14 @@ export class SettingsComponent implements OnInit {
     const validRoles: UserRole[] = ['admin', 'doctor', 'sub_admin', 'super_admin'];
     this.role = storedRole;
     this.username = storedUsername || '';
+    console.log(localStorage.getItem('userid'))
+    this.userid = Number(localStorage.getItem('userid'));
+
+    console.log('userid',this.userid)
     console.log('role',this.role)
     if (validRoles.includes(this.role as UserRole)) {
       this.currentUserRole = this.role as UserRole;
-      console.log("current user role in settigns",this.currentUserRole)
+      console.log("current user role in settings",this.currentUserRole)
     } else {
       this.currentUserRole = 'admin'; // Default role in case of an invalid role
     }
@@ -102,6 +109,12 @@ resetPassword() {
     console.log('Account deleted');
     this.closeDeleteDialog();
   }
+  logout() {
+    localStorage.removeItem('username');
+    localStorage.removeItem('role');
+    localStorage.removeItem('token');  // Assuming the token is also stored in localStorage
+    this.router.navigate(['/login']);
+  }
   // Role-Based Access: Show/Hide Tabs Based on Role
 // Role-Based Access: Show/Hide Tabs Based on Role
 // canAccessTab(tabName: string): boolean {
@@ -123,5 +136,36 @@ canAccessTab(tab: string): boolean {
 togglePasswordVisibility() {
   this.isPasswordVisible = !this.isPasswordVisible;
 }
+extractFirstName(username: string): string {
+  const parts = username.split('_'); // Split the string by underscore
+  if (parts.length > 0) {
+      return parts[0]; // Return the first part, which is the first name
+  }
+  return ''; // Return empty string if no underscore found
+};
 
+
+
+deleteUser() {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    console.error('No authentication token found');
+    return;
+  }
+
+  const headers = new HttpHeaders({
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`
+  });
+  // let username = this.extractFirstName(this.username); // Extract the first name
+  this.authService.deleteUser(this.username,headers).subscribe(
+    response => {
+        console.log('User deleted successfully', response);
+    },
+    error => {
+        console.error('Failed to delete user', error);
+    }
+);}
 }
+
+

@@ -13,6 +13,7 @@ interface Appointment {
   status: string;
   email: string;
   smsSent?:boolean;
+  emailSent?:boolean;
   requestVia?: string; // Optional property
   [key: string]: any;  // Add this line to allow indexing by string
   created_at?: string;
@@ -41,10 +42,9 @@ export class AppointmentCancelComponent {
   ngOnInit() {
     
     this.appointmentService.canceledAppointments$.subscribe(appointments => {
-      if(appointments.some(appointment => appointment.status === 'confirmed')) {
-        this.confirmedAppointments = appointments.filter(appointment => appointment.status !== 'confirmed');
-      }
       this.cancelledAppointments = appointments;
+      // this.cancelledAppointments = appointments;
+      console.log('Cancelled appointments from component:', this.cancelledAppointments);
       this.cancelledAppointments.sort((a, b) => {
         const dateA = new Date(a.created_at!);
         const dateB = new Date(b.created_at!);
@@ -206,7 +206,8 @@ submitAppointment(appointment: Appointment | null, status: string, requestVia: a
   const confirmedAppointment: Appointment = { 
       ...appointment,  // Copy all properties from the original appointment
       smsSent: true,
-      requestVia: requestVia === 'Website' ? 'Website' : 'Call', // Determine requestVia
+      emailSent: true,
+      requestVia: appointment.requestVia, // Determine requestVia
   };
 
   if (status === 'Confirm') {

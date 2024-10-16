@@ -18,6 +18,7 @@
           <th>Time</th>
           <th>Source</th>
           <th>SMS</th>
+          <th>Email</th>
           <th>Status</th>
           <th>Action</th>
         </tr>
@@ -36,6 +37,12 @@
             <span class="sms-status" [ngClass]="{'sms-sent': appointment.smsSent, 'sms-not-sent': !appointment.smsSent}">
               <img *ngIf="appointment.smsSent" src="icons/sent.svg" alt="Sent">
               <img *ngIf="!appointment.smsSent" src="icons/not-sent.png" alt="Not Sent">
+            </span>
+          </td>
+          <td>
+            <span class="sms-status" [ngClass]="{'sms-sent': appointment.emailSent, 'sms-not-sent': !appointment.emailSent}">
+              <img *ngIf="appointment.emailSent" src="icons/sent.svg" alt="Sent">
+              <img *ngIf="!appointment.emailSent" src="icons/not-sent.png" alt="Not Sent">
             </span>
           </td>
           <td>

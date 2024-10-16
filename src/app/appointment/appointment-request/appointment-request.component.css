@@ -54,7 +54,7 @@ height: 65px;
     padding: 12px;
     text-align: center;
     color: black;
-font-size: 16px;
+font-size: 15px;
 font-family: Kanit;
 font-weight: 400;
   }
@@ -115,12 +115,14 @@ font-weight: 400;
   background-color: #8CC152; /* Green background for next */
   color: white;
   border: none;
+  cursor: pointer;
 }
 
 .pagination-btn.prev {
   background-color: white; /* White background for previous */
   color: #333;
   border: none;
+  cursor: pointer;
 }
 
 .pagination-btn:hover:not(:disabled) {

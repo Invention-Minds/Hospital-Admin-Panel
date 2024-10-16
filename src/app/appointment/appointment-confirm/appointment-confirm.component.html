@@ -10,7 +10,7 @@
           </th>
           <th>Phone Number</th>
           <th>Doctor Name</th>
-          <th>Therapy</th>
+          <!-- <th>Therapy</th> -->
           <th (click)="sortBy('date')">
             Date
             <span *ngIf="sortColumn === 'date' && sortDirection === 'asc'">&#9650;</span>
@@ -18,7 +18,9 @@
           <th>Time</th>
           <th>Source</th>
           <th>SMS</th>
+          <th>Email</th>
           <th>Status</th>
+          <th>Action</th>
         </tr>
       </thead>
       <tbody>
@@ -27,7 +29,7 @@
           <td>{{ appointment.patientName }}</td>
           <td>{{ appointment.phoneNumber }}</td>
           <td>{{ appointment.doctorName }}</td>
-          <td>{{ appointment.department }}</td>
+          <!-- <td>{{ appointment.department }}</td> -->
           <td>{{ appointment.date }}</td>
           <td>{{ appointment.time }}</td>
           <td>{{ appointment.requestVia }}</td>
@@ -38,7 +40,18 @@
             </span>
           </td>
           <td>
+            <span class="sms-status" [ngClass]="{'sms-sent': appointment.emailSent, 'sms-not-sent': !appointment.emailSent}">
+              <img *ngIf="appointment.emailSent" src="icons/sent.svg" alt="Sent">
+              <img *ngIf="!appointment.emailSent" src="icons/not-sent.png" alt="Not Sent">
+            </span>
+          </td>
+          <td>
             <span class="status-badge">{{ appointment.status }}</span>
+          </td>
+          <td>
+            <button class="btn-action" (click)="completeAppointment(appointment)" pTooltip="Completed"  tooltipPosition="top">
+              <img src="icons/book.png" alt="Confirm">
+            </button>
           </td>
         </tr>
       </tbody>

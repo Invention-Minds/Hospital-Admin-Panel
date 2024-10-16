@@ -47,6 +47,8 @@ import { MatOption, MatOptionModule } from '@angular/material/core';
 import { DoctorFormComponent } from './doctor/doctor-form/doctor-form.component';
 import { LoginComponent } from './login/login/login.component';
 import { SettingsComponent } from './settings/settings/settings.component';
+import { ReportOverviewComponent } from './report/report-overview/report-overview.component';
+import { AdminReportComponent } from './report/admin-report/admin-report.component';
 
 
 
@@ -71,6 +73,8 @@ import { SettingsComponent } from './settings/settings/settings.component';
     DoctorFormComponent,
     LoginComponent,
     SettingsComponent,
+    ReportOverviewComponent,
+    AdminReportComponent,
   
     
   ],

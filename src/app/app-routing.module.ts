@@ -8,6 +8,7 @@ import { DoctorOverviewComponent } from './doctor/doctor-overview/doctor-overvie
 import { DoctorFormComponent } from './doctor/doctor-form/doctor-form.component';
 import { LoginComponent } from './login/login/login.component';
 import { SettingsComponent } from './settings/settings/settings.component';
+import { ReportOverviewComponent } from './report/report-overview/report-overview.component';
 
 const routes: Routes = [
   { path: 'dashboard', component: DashboardOverviewComponent },
@@ -19,8 +20,11 @@ const routes: Routes = [
   {path:'doctor-profile',component: DoctorFormComponent},
   {path:'login', component:LoginComponent},
   {path:'settings', component: SettingsComponent},
-  { path: '**', redirectTo: '/login' },
+  {path:'report',component: ReportOverviewComponent},
   { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: '**', redirectTo: '/login' },
+
+
 ];
 
 @NgModule({

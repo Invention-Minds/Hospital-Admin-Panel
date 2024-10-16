@@ -67,6 +67,7 @@ font-weight: 400;
   display: flex;
   flex-direction: column;
   text-align: left;
+  width: 150px;
 }
 
 .username {
@@ -74,6 +75,7 @@ font-weight: 400;
   font-size: 20px;
   font-family: Kanit;
   font-weight: 400;
+  text-transform: capitalize;
 }
 
 .role {

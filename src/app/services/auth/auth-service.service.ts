@@ -21,23 +21,44 @@ export class AuthServiceService {
   public user: { username: string; role: string, id:number } | null = null;
 
   constructor(private http: HttpClient) { 
-    
+    this.initializeUserFromStorage(); 
   }
   login(username: string, password: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/login`, { username, password }).pipe(
       tap((response: any) => {
         const user = response.user;  // Use 'user' from the response
+        console.log('User in the login:', user);
         if (user) {
-          this.user = { username: user.username, role: user.role, id: user.id }; // Save the user in the service
+          this.user = { username: user.username, role: user.role, id: user.userId }; // Save the user in the service
           localStorage.setItem('username', user.username);
           localStorage.setItem('role', user.role);
-          localStorage.setItem('userid',user.id) // Save the user in the service
+          localStorage.setItem('userid',user.userId)
           localStorage.setItem('token', response.token);  // Save the token in localStorage
         }
       })
     );
   }
+  getUserId(): number | null {
+    const userId = localStorage.getItem('userid');
+    console.log(userId,"from auth service");
+    return userId ? parseInt(userId, 10) : null;
 
+  }
+// Method to initialize the user from localStorage
+initializeUserFromStorage(): void {
+  const username = localStorage.getItem('username');
+  const role = localStorage.getItem('role');
+  const userId = localStorage.getItem('userid');
+
+  if (username && role && userId) {
+    this.user = {
+      username,
+      role,
+      id: parseInt(userId, 10),
+    };
+    console.log('Initialized user from storage:', this.user);
+  }
+}
   getUser() {
     return this.user;
     console.log(this.user);

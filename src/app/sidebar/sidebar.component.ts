@@ -9,9 +9,14 @@ export class SidebarComponent implements OnInit {
   role: string = ''; 
   constructor() {}
   ngOnInit(): void {
-    // Fetch role from localStorage or the authentication service
-    this.role = localStorage.getItem('role') || '';  // You can also fetch this from a service
-    console.log('User role:', this.role);
+    if (typeof window !== 'undefined' && window.localStorage) {
+      // Fetch role from localStorage or the authentication service
+      this.role = localStorage.getItem('role') || '';
+      console.log('User role:', this.role);
+    } else {
+      console.log('localStorage is not available');
+    }
   }
+  
 
 }

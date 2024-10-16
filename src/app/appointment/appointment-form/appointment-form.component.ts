@@ -464,12 +464,13 @@ if (selectedDoctor) {
       };
       this.appointment = appointmentDetails;
       // Mark the slot as booked
-      this.addBookedSlot(this.appointment.doctorId, this.appointment.date, this.appointment.time);
+      
       if (this.appointmentForm.value.appointmentStatus === "Confirm") {
         this.appointment.status = "confirmed"
       }
       if (this.appointment.status === "confirmed") {
         this.appointmentService.addConfirmedAppointment(this.appointment);
+        this.addBookedSlot(this.appointment.doctorId, this.appointment.date, this.appointment.time);
       }
       // if (this.appointment?.requestVia === "Call") {
       //   this.appointment.status = "confirmed";
@@ -481,11 +482,13 @@ if (selectedDoctor) {
       this.showForm = false; // Close the form after submission
     }
 
-    if (this.appointment?.requestVia === "Call" || this.appointment?.requestVia === "Walk-In") {
-      this.appointment.status = "confirmed";
-      this.appointmentService.addConfirmedAppointment(this.appointment);
-    }
+    // if (this.appointment?.requestVia === "Call" || this.appointment?.requestVia === "Walk-In") {
+    //   this.appointment.status = "confirmed";
+    //   this.appointmentService.addConfirmedAppointment(this.appointment);
+    //   this.addBookedSlot(this.appointment.doctorId, this.appointment.date, this.appointment.time);
+    // }
   }
+  
   }
 
   private addBookedSlot(doctorId: number, date: string, time: string) {

@@ -38,22 +38,28 @@ export class SettingsComponent implements OnInit {
 };
 
   ngOnInit(): void {
-    const storedRole = localStorage.getItem('role');
-    const storedUsername = localStorage.getItem('username');
-    const validRoles: UserRole[] = ['admin', 'doctor', 'sub_admin', 'super_admin'];
-    this.role = storedRole;
-    this.username = storedUsername || '';
-    console.log(localStorage.getItem('userid'))
-    this.userid = Number(localStorage.getItem('userid'));
-
-    console.log('userid',this.userid)
-    console.log('role',this.role)
-    if (validRoles.includes(this.role as UserRole)) {
-      this.currentUserRole = this.role as UserRole;
-      console.log("current user role in settings",this.currentUserRole)
+    if (typeof window !== 'undefined' && window.localStorage) {
+      // Fetch role from localStorage or the authentication service
+      const storedRole = localStorage.getItem('role');
+      const storedUsername = localStorage.getItem('username');
+      const validRoles: UserRole[] = ['admin', 'doctor', 'sub_admin', 'super_admin'];
+      this.role = storedRole;
+      this.username = storedUsername || '';
+      console.log(localStorage.getItem('userid'))
+      this.userid = Number(localStorage.getItem('userid'));
+      console.log('userid',this.userid)
+      console.log('role',this.role)
+      if (validRoles.includes(this.role as UserRole)) {
+        this.currentUserRole = this.role as UserRole;
+        console.log("current user role in settings",this.currentUserRole)
+      } else {
+        this.currentUserRole = 'admin'; // Default role in case of an invalid role
+      }
+  
     } else {
-      this.currentUserRole = 'admin'; // Default role in case of an invalid role
+      console.log('localStorage is not available');
     }
+    
   }
 
   switchTab(tabName: string) {

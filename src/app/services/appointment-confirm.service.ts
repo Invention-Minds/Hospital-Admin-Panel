@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { map } from 'rxjs/operators';
+import { AuthServiceService } from './auth/auth-service.service';
 
 export interface Appointment {
   id?: number;
@@ -17,6 +18,8 @@ export interface Appointment {
   requestVia?: string; // Optional property
   smsSent?: boolean; // Optional property
   emailSent?: boolean; // Optional property
+  userId?: number; // Add userId to identify which user handled the appointment
+  username?:string;
 }
 
 @Injectable({
@@ -34,7 +37,7 @@ export class AppointmentConfirmService {
 
   private apiUrl = 'http://localhost:3000/api/appointments'; // Update this with your actual backend endpoint
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private authService: AuthServiceService) {}
 
   // Fetch appointments from backend
   fetchAppointments(): void {
@@ -67,9 +70,13 @@ export class AppointmentConfirmService {
   }
 // Method to add a new appointment
 addNewAppointment(appointment: Appointment): void {
-  console.log('Adding new appointment:', appointment);
+  const userId = this.authService.getUserId();
+  console.log(userId, "in service");
+    const appointmentData = userId ? { ...appointment, userId } : appointment;
+    console.log('Adding new appointment:', appointmentData);
+  // console.log('Adding new appointment:', appointmentData);
   // Send the appointment details to the backend without an ID
-  this.http.post<Appointment>(`${this.apiUrl}`, appointment).subscribe((newAppointment) => {
+  this.http.post<Appointment>(`${this.apiUrl}`, appointmentData).subscribe((newAppointment) => {
     this.fetchAppointments(); // Fetch appointments to update the list
   });
 }
@@ -95,7 +102,9 @@ addNewAppointment(appointment: Appointment): void {
   }
    // Method to update appointment status
    private updateAppointmentStatus(appointmentId: number, status: string): void {
-    this.http.put<Appointment>(`${this.apiUrl}/${appointmentId}`, { status }).subscribe(() => {
+    const userId = this.authService.getUserId();
+    const updateData = userId ? { status, userId } : { status };
+    this.http.put<Appointment>(`${this.apiUrl}/${appointmentId}`,updateData).subscribe(() => {
       this.fetchAppointments(); // Fetch appointments to update the list
     });
   }
@@ -154,4 +163,17 @@ getAvailableDoctors(date: string): Observable<number> {
   const params = new HttpParams().set('date', date);
   return this.http.get<number>(`http://localhost:3000/api/doctors/available/`, { params });
 }
+getAppointmentsByUser(userId: number, status?: string): Observable<Appointment[]> {
+  let params = new HttpParams().set('userId', userId.toString());
+  if (status) {
+    params = params.set('status', status);
+  }
+  return this.http.get<Appointment[]>(`${this.apiUrl}/by-user`, { params });
+}
+// Service method to get all admins' appointments for sub_admins or super_admins
+getAppointmentsByRole(): Observable<Appointment[]> {
+  return this.http.get<Appointment[]>(`${this.apiUrl}/by-role`);
+}
+
+
 }

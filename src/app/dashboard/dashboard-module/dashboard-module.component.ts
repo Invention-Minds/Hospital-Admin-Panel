@@ -14,15 +14,21 @@ export class DashboardModuleComponent {
   constructor(private authService: AuthServiceService, private router: Router) {}
 
   ngOnInit(): void {
-    const storedUsername = localStorage.getItem('username');
-    const storedRole = localStorage.getItem('role');
-
-    const user = this.authService.getUser();
-    if (storedUsername && storedRole) {
-      this.username = storedUsername;
-      this.role = storedRole;
+    if (typeof window !== 'undefined' && window.localStorage) {
+      // Fetch role from localStorage or the authentication service
+      const storedUsername = localStorage.getItem('username');
+      const storedRole = localStorage.getItem('role');
+      const user = this.authService.getUser();
+      if (storedUsername && storedRole) {
+        this.username = storedUsername;
+        this.role = storedRole;
+      }
+      console.log(this.username, this.role);
+    } else {
+      console.log('localStorage is not available');
     }
-    console.log(this.username, this.role);
+
+
   }
   toggleDropdown() {
     this.dropdownOpen = !this.dropdownOpen;

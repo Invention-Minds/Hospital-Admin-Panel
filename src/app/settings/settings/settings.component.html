@@ -8,7 +8,7 @@
             <div class="tab" [ngClass]="{ 'active-tab': selectedTab === 'reset' }" (click)="switchTab('reset')" *ngIf="canAccessTab('reset')" >
               Reset Password
             </div>
-            <div class="tab" [ngClass]="{ 'active-tab': selectedTab === 'login' }" (click)="switchTab('login')" >
+            <div class="tab" [ngClass]="{ 'active-tab': selectedTab === 'login' }" (click)="switchTab('login')" *ngIf="canAccessTab('login')">
               Login Creation
             </div>
             <div class="tab" [ngClass]="{'active-tab': selectedTab === 'delete'}" (click)="switchTab('delete')" *ngIf="canAccessTab('delete')">

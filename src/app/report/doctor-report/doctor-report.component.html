@@ -1,21 +1,21 @@
 <div class="filter-container">
     <input
       type="text"
-      [(ngModel)]="usernameFilter"
+      [(ngModel)]="doctorName"
       (input)="filterAppointments()"
-      placeholder="Filter by username"
+      placeholder="Filter by Doctor name"
       class="filter-input"
     />
  
 
-   <!-- Role Filter -->
+   <!-- Role Filter
    <select [(ngModel)]="roleFilter" (change)="filterAppointments()" class="filter-input filter-select">
     <option value="">All Roles</option>
     <option value="admin">Admin</option>
     <option value="sub_admin">Sub Admin</option>
     <option value="super_admin">Super Admin</option>
     <option value="doctor">Doctor</option>
-  </select>
+  </select> -->
 </div>
   
 <div class="table-container">
@@ -24,39 +24,44 @@
         <tr>
           <th>No</th>
           <th (click)="sortBy('username')" style="cursor: pointer;">
-            Admin Name
+            Doctor Name
             <span *ngIf="sortColumn === 'username' && sortDirection === 'asc'">&#9650;</span>
             <span *ngIf="sortColumn === 'username' && sortDirection === 'desc'">&#9660;</span>
           </th>
           <th>
-            Role
+            Department
           </th>
           <th>Patient Name</th>
-          <th>Doctor Name</th>
+          <!-- <th>Doctor Name</th> -->
           <!-- <th>Therapy</th> -->
           <th (click)="sortBy('created_at')">
             Requested Date
             <span *ngIf="sortColumn === 'created_at' && sortDirection === 'asc'">&#9650;</span>
             <span *ngIf="sortColumn === 'created_at' && sortDirection === 'desc'">&#9660;</span></th>
-            <th (click)="sortBy('updated_at')">
-                Updated Date
+            <th (click)="sortBy('date')">
+                Appointment Date
                 <span *ngIf="sortColumn === 'updated_at' && sortDirection === 'asc'">&#9650;</span>
                 <span *ngIf="sortColumn === 'updated_at' && sortDirection === 'desc'">&#9660;</span></th>
+                <!-- <th (click)="sortBy('updated_at')">
+                    Updated Date
+                    <span *ngIf="sortColumn === 'updated_at' && sortDirection === 'asc'">&#9650;</span>
+                    <span *ngIf="sortColumn === 'updated_at' && sortDirection === 'desc'">&#9660;</span></th> -->
           <th>Status</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let appointment of getPaginatedAppointments(); let i = index">
           <td>{{ i + 1 }}</td>
-          <td>{{appointment.user?.username}}</td>
-          <td>{{appointment.user?.role}}</td>
+          <td>{{appointment.doctorName}}</td>
+          <td>{{appointment.department}}</td>
           <td>{{ appointment.patientName }}</td>
-          <td>{{ appointment.doctorName }}</td>
+          <!-- <td>{{ appointment.doctorName }}</td> -->
           <!-- <td>{{ appointment.department }}</td> -->
           <td>{{ appointment.created_at }}</td>
-          <td>{{ appointment.updated_at }}</td>
+          <td>{{appointment.date}}</td>
+          <!-- <td>{{ appointment.updated_at }}</td> -->
           <td>
-            <span class="status-badge" [ngClass]="getStatusClass(appointment.status)">
+            <span class="status-badge" [ngClass]="getStatusClass(appointment.status)" >
                 {{ appointment.status }}
               </span>
               

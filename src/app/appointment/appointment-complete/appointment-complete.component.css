@@ -84,26 +84,9 @@ font-weight: 400;
 font-size: 18px;
 font-family: Kanit;
 font-weight: 400;
-text-transform: capitalize;
-    /* background: #79CFA6; border-radius: 4px; */
-  }
-  /* Define different colors based on status */
-.status-cancelled {
-    background: #ff4d4f; /* Red color for cancelled */
+    background: #79CFA6; border-radius: 4px;
   }
   
-  .status-confirmed {
-    background: #ffc107; /* Yellow color for confirmed */
-  }
-  
-  .status-completed {
-    background: #79cfa6; /* Green color for completed */
-  }
-  
-  /* Optional: Default status style */
-  .status-default {
-    background: #b0b0b0; /* Gray color for any other status */
-  }
 /* Pagination styling */
 .pagination {
     display: flex;
@@ -173,61 +156,4 @@ text-transform: capitalize;
     font-size: 16px;
     padding: 5px;
   }
-  .filter-container{
-    display: flex;
-    justify-content: right;
-    gap: 20px;
-    background: #F0F3FF;
-    padding: 10px 30px 10px 0;
-  }
-
-  .filter-input{
-    width: 250px;
-    height: 52px;
-    padding: 12px 20px;
-    align-items: center;
-    gap: 70px;
-    flex-shrink: 0;
-    border-radius: 8px;
-    border: 2px solid rgba(183, 183, 183, 0.40);
-    background: #FFF;
-    box-shadow: 0px 4px 15px 0px rgba(216, 210, 252, 0.64);
-    font-size: 18px;
-    font-weight: 400;
-    font-family: Kanit;
-  }
-  .filter-input:focus{
-    outline: none;
-    border: 2px solid #79CFA6;
-  }
-  .filter-select:focus{
-    outline: none;
-    border: 2px solid #79CFA6;
-  }
-
-  .filter-input::placeholder{
-    color: #B6B6B6;
-    font-family: Kanit;
-    font-size: 18px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: normal;
-  }
-
-  .filter-select {
-    color: #B6B6B6;
-    font-family: Kanit;
-    font-size: 18px;
-    font-style: normal;
-    font-weight: 600;
-    line-height: normal;
-    appearance: none; /* For modern browsers */
-    -webkit-appearance: none; /* For Safari */
-    -moz-appearance: none; /* For Firefox */
-    background-image: url('/select-down-arrow.svg');
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    padding-right : 14px;
-    background-color: #FFF;
-    background-size: 22px;
-  }
+  

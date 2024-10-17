@@ -20,7 +20,7 @@
           <th>SMS</th>
           <th>Email</th>
           <th>Status</th>
-          <th>Action</th>
+          <!-- <th>Action</th> -->
         </tr>
       </thead>
       <tbody>
@@ -48,9 +48,11 @@
           <td>
             <span class="status-badge">{{ appointment.status }}</span>
           </td>
-          <td>
-            <span class="checkin-badge">Check-In</span>
-          </td>
+          <!-- <td>
+            <button class="btn-action" (click)="completeAppointment(appointment)" pTooltip="Completed"  tooltipPosition="top">
+              <img src="icons/book.png" alt="Confirm">
+            </button>
+          </td> -->
         </tr>
       </tbody>
     </table>

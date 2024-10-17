@@ -46,6 +46,17 @@
           <p>Cancelled Appt.</p>
         </div>
       </div>
+      <div class="card" 
+      [ngClass]="{'active-card': activeComponent === 'completed'}"
+      (click)="showCompletedAppointments()">
+        <div class="card-icon">
+          <img src="/completed-appt.png" alt="OPD Icon" />
+        </div>
+        <div class="card-content">
+          <!-- <h2>40</h2> -->
+          <p>Completed Appt.</p>
+        </div>
+      </div>
     </div>
   </div>
   <div class="form-row">
@@ -89,6 +100,7 @@
         <app-appointment-request *ngIf="activeComponent === 'request'" [selectedDate]="selectedDate"  [selectedValue]="searchValue"></app-appointment-request>
         <app-appointment-confirm *ngIf="activeComponent === 'confirmed'" [selectedDate]="selectedDate" [selectedValue]="searchValue"></app-appointment-confirm>
         <app-appointment-cancel *ngIf="activeComponent === 'cancelled'" [selectedDate]="selectedDate" [selectedValue]="searchValue"></app-appointment-cancel>
+        <app-appointment-complete *ngIf="activeComponent === 'completed'" [selectedDate]="selectedDate" [selectedValue]="searchValue"></app-appointment-complete>
         <app-appointment-form *ngIf="activeComponent === 'appointment'" ></app-appointment-form>
       </div>
 </div>

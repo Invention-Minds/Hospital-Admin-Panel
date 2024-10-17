@@ -60,7 +60,9 @@ activeComponent: string = 'request'; // Default to showing the request component
   showNewAppointmentForm() {
     this.activeComponent = 'appointment';
   }
-
+  showCompletedAppointments(){
+    this.activeComponent = 'completed';
+  }
 
 
     

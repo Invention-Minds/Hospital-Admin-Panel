@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { map } from 'rxjs/operators';
 import { AuthServiceService } from './auth/auth-service.service';
 
@@ -20,6 +20,18 @@ export interface Appointment {
   emailSent?: boolean; // Optional property
   userId?: number; // Add userId to identify which user handled the appointment
   username?:string;
+  user?: {
+    id: number;
+    username: string;
+    password: string;
+    role: string;
+    createdAt: string;
+  };
+  created_at?:string;
+  updated_at?:string;
+  lockedBy?: string;
+  lockExpiresAt?: Date | null;
+
 }
 
 @Injectable({
@@ -174,6 +186,29 @@ getAppointmentsByUser(userId: number, status?: string): Observable<Appointment[]
 getAppointmentsByRole(): Observable<Appointment[]> {
   return this.http.get<Appointment[]>(`${this.apiUrl}/by-role`);
 }
+ // Method to fetch all appointments
+ getAllAppointments(): Observable<Appointment[]> {
+  return this.http.get<Appointment[]>(`${this.apiUrl}`);
+}
+// getDoctorReport(userId: number): Observable<{ confirmedAppointments: Appointment[]; completedAppointments: Appointment[] }> {
+//   return this.http.get<{ confirmedAppointments: Appointment[]; completedAppointments: Appointment[] }>(
+//     `${this.apiUrl}/by-doctor`, 
+//     { params: { userId: userId.toString() } }
+//   );
+// }
 
-
+lockAppointment(appointmentId: number): Observable<any> {
+  return this.http.put(`${this.apiUrl}/lock/${appointmentId}`, {});
+}
+  // Unlock appointment method
+  unlockAppointment(appointmentId: number): Observable<Appointment> {
+    return this.http.put<Appointment>(`${this.apiUrl}/unlock/${appointmentId}`, {});
+  }
+  getHeaders(): HttpHeaders {
+    const token = localStorage.getItem('token');
+    return new HttpHeaders({
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    });
+  }
 }

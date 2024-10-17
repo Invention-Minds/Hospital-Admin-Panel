@@ -3,6 +3,10 @@ import { MatDialog } from '@angular/material/dialog';
 import { AppointmentFormComponent } from '../appointment-form/appointment-form.component';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { app } from '../../../../server';
+import { ActivatedRoute } from '@angular/router';
+import { AuthServiceService } from '../../services/auth/auth-service.service';
+import { Subscription } from 'rxjs';
+
 interface Appointment {
   id?: number;
   patientName: string;
@@ -29,10 +33,14 @@ export class AppointmentRequestComponent implements OnInit {
   @Input() selectedDate: Date | null = null;
   @Input() selectedValue: string = '';
   pendingAppointments: Appointment[] = [];
+  activeAppointmentId: number | null | undefined = null;
+
+  private userSubscription: Subscription | undefined;
+  private lockSubscription: Subscription | undefined;
 
   // showModal: boolean = false;
   // @Input() selectedOption: string = '';
-  constructor(public dialog: MatDialog, private appointmentService: AppointmentConfirmService ) { }
+  constructor(public dialog: MatDialog, private appointmentService: AppointmentConfirmService,private route: ActivatedRoute ) { }
 
   ngOnInit(): void {
     this.fetchPendingAppointments();  // Fetch pending appointments on initialization
@@ -66,6 +74,7 @@ export class AppointmentRequestComponent implements OnInit {
     this.selectedAppointment = { ...appointment };  // Create a copy to avoid direct modification
     this.showAppointmentForm = true;
     console.log('Selected appointment:', this.selectedAppointment);
+    this.lockAndAccessAppointment(appointment.id!);
 }
   confirmAppointment(appointment: Appointment) {
     appointment.status = 'confirmed';  // Mark as confirmed
@@ -78,6 +87,10 @@ export class AppointmentRequestComponent implements OnInit {
 }
   closeAppointmentForm() {
     this.showAppointmentForm = false;
+    if (this.activeAppointmentId) {
+      this.unlockAppointment(this.activeAppointmentId);
+      this.activeAppointmentId = null;
+    }
   }
   confirmedAppointments: Appointment[] = [];  // To hold confirmed appointments
   canceledAppointments: Appointment[] = []; 
@@ -274,5 +287,36 @@ cancelAppointment(appointment: Appointment) {
   console.log('Appointment status from cancel:', this.pendingAppointments);
   this.filterAppointment();
 }
-  
+lockAndAccessAppointment(appointmentId: number): void {
+  this.appointmentService.lockAppointment(appointmentId).subscribe(
+    (response) => {
+      // Successfully locked, proceed to access the appointment
+      this.activeAppointmentId = appointmentId;
+      console.log('Appointment locked and accessed:', appointmentId);
+    },
+    (error) => {
+      if (error.status === 401) {
+        console.error('Unauthorized access - you may need to login again.');
+        alert('You are not authorized to access this appointment. Please login again.');
+        // Optionally, redirect to login
+      } else if (error.status === 403) {
+        console.error('This appointment is currently being accessed by another user.');
+        alert('This appointment is currently being accessed by another user.');
+      } else {
+        console.error('Error locking the appointment:', error);
+      }
+    }
+  );
+}
+
+  unlockAppointment(appointmentId: number): void {
+    this.appointmentService.unlockAppointment(appointmentId).subscribe(
+      () => {
+        console.log('Unlocked appointment:', appointmentId);
+      },
+      (error) => {
+        console.error('Error unlocking the appointment:', error);
+      }
+    );
+  }
 }

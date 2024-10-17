@@ -49,6 +49,8 @@ import { LoginComponent } from './login/login/login.component';
 import { SettingsComponent } from './settings/settings/settings.component';
 import { ReportOverviewComponent } from './report/report-overview/report-overview.component';
 import { AdminReportComponent } from './report/admin-report/admin-report.component';
+import { AppointmentCompleteComponent } from './appointment/appointment-complete/appointment-complete.component';
+import { DoctorReportComponent } from './report/doctor-report/doctor-report.component';
 
 
 
@@ -75,6 +77,8 @@ import { AdminReportComponent } from './report/admin-report/admin-report.compone
     SettingsComponent,
     ReportOverviewComponent,
     AdminReportComponent,
+    AppointmentCompleteComponent,
+    DoctorReportComponent,
   
     
   ],

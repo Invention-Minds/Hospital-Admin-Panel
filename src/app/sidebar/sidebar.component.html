@@ -1,9 +1,11 @@
 <div class="sidebar">
-  <div class="logo-container">
-    <img src="sidebar/IM-logo.png" alt="logo" class="logo">
+  <div class="logo-container"><a href="https://inventionminds.com">
+    <img  src="sidebar/IM-logo.png" alt="logo" class="logo">
+  </a>
+    
   </div>
 <div class="icon-container">
-  <a [routerLink]="role !== 'doctor' ? '/dashboard' : null" routerLinkActive="active" class="icon-wrapper" pTooltip="Dashboard"  tooltipPosition="right" >
+  <a routerLink="/dashboard" routerLinkActive="active" class="icon-wrapper" pTooltip="Dashboard"  tooltipPosition="right" >
     <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
       <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6.625 2.75a3.875 3.875 0 1 0 0 7.75a3.875 3.875 0 0 0 0-7.75m10.75 0a3.875 3.875 0 1 0 0 7.75a3.875 3.875 0 0 0 0-7.75M6.625 13.5a3.875 3.875 0 1 0 0 7.75a3.875 3.875 0 0 0 0-7.75m10.75 0a3.875 3.875 0 1 0 0 7.75a3.875 3.875 0 0 0 0-7.75"/>
     </svg>

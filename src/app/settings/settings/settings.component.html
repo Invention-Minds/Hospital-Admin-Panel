@@ -24,12 +24,12 @@
       
           <!-- Email Input -->
            <div class="input">
-            <input type="text" class="input-field" [(ngModel)]="username" placeholder="Username_admin@rash.com">
+            <input type="text" class="input-field" [(ngModel)]="username" placeholder="Username_admin@rashtrotthana">
       
             <!-- Password Input -->
             <div class="password-container">
               <input [type]="isPasswordVisible ? 'text' : 'password'"  class="input-field" [(ngModel)]="password" placeholder="********">
-              <img src="/show-password.png" alt="Show Password" class="eye-icon" (click)="togglePasswordVisibility()" >
+              <img [src]="isPasswordVisible? '/not-show.png': '/show-password.png'" alt="Show Password" class="eye-icon" (click)="togglePasswordVisibility()" >
             </div>
            </div>
       
@@ -39,7 +39,7 @@
           <!-- Delete Account -->
           <div class="delete-account">
             <button class="delete-button" (click)="logout()">
-              <img src="doc-delete.svg" alt="Delete Icon"> Logout
+              <img src="logout.png" alt="Delete Icon"> Logout
             </button>
           </div>
         </div>
@@ -50,19 +50,50 @@
             </div>
         
             <!-- Email Input -->
-             <div class="input">
-                <input type="text" class="input-field" [(ngModel)]="username" placeholder="Username_admin@rash.com">
+  <div class="input">
+                <input type="text" class="input-field" [(ngModel)]="username" placeholder="Username_admin@rashtrotthana">
+                <!-- <div class="password-container">
+                  <input [type]="isPasswordVisible ? 'text' : 'password'"  class="input-field" [(ngModel)]="oldPassword" placeholder="Old Password">
+                  <img [src]="isPasswordVisible? '/not-show.png': '/show-password.png'" alt="Show Password" class="eye-icon" (click)="togglePasswordVisibility()" >
+                </div> -->
                 <div class="password-container">
-                    <input [type]="isPasswordVisible ? 'text' : 'password'"  class="input-field" [(ngModel)]="newPassword" placeholder="New Password">
-                    <img src="/show-password.png" alt="Show Password" class="eye-icon" (click)="togglePasswordVisibility()" >
+                    <input [type]="isNewPasswordVisible ? 'text' : 'password'"  class="input-field" [(ngModel)]="newPassword" placeholder="New Password">
+                    <img [src]="isNewPasswordVisible? '/not-show.png': '/show-password.png'" alt="Show Password" class="eye-icon" (click)="toggleNewPasswordVisibility()" >
                   </div>
         
               <!-- Password Input -->
-              <div class="password-container">
-                <input [type]="isPasswordVisible ? 'text' : 'password'"  class="input-field" [(ngModel)]="confirmPassword" placeholder="Confirm New Password">
-                <img src="/show-password.png" alt="Show Password" class="eye-icon" (click)="togglePasswordVisibility()" >
+<div class="password-container">
+                <input [type]="isConfirmPasswordVisible ? 'text' : 'password'"  class="input-field" [(ngModel)]="confirmPassword" placeholder="Confirm New Password">
+                <img [src]="isConfirmPasswordVisible? '/not-show.png': '/show-password.png'" alt="Show Password" class="eye-icon" (click)="toggleConfirmPasswordVisibility()" >
               </div>
-             </div>
+             </div> 
+
+
+
+<!-- 
+             <div class="input">
+              <input type="text" class="input-field" [(ngModel)]="username" placeholder="Username_admin@rashtrotthana">
+            
+              <div class="password-container">
+                <input [type]="isPasswordVisible ? 'text' : 'password'" class="input-field" [(ngModel)]="oldPassword" placeholder="Old Password">
+                <img [src]="isPasswordVisible? '/not-show.png': '/show-password.png'" alt="Show Password" class="eye-icon" (click)="togglePasswordVisibility()">
+              </div>
+            
+              <div class="password-container">
+                <input [type]="isPasswordVisible ? 'text' : 'password'" class="input-field" [(ngModel)]="newPassword" placeholder="New Password">
+                <img [src]="isPasswordVisible? '/not-show.png': '/show-password.png'" alt="Show Password" class="eye-icon" (click)="togglePasswordVisibility()">
+              </div>
+            
+              <div class="password-container">
+                <input [type]="isPasswordVisible ? 'text' : 'password'" class="input-field" [(ngModel)]="confirmPassword" placeholder="Confirm New Password">
+                <img [src]="isPasswordVisible? '/not-show.png': '/show-password.png'" alt="Show Password" class="eye-icon" (click)="togglePasswordVisibility()">
+              </div>
+            
+              <div *ngIf="passwordMatchError" class="error-message">{{ passwordMatchError }}</div>
+            
+              <button (click)="resetPassword()">Reset Password</button>
+            </div> -->
+            
         
             <!-- Save Button -->
             <button class="save-button" (click)="resetPassword()">Save Changes</button>
@@ -82,12 +113,12 @@
         
             <!-- Email Input -->
              <div class="input">
-              <input type="text" class="input-field" [(ngModel)]="username" placeholder="Username_admin@rash.com">
+              <input type="text" class="input-field" [(ngModel)]="username" placeholder="Username_admin@rashtrotthana">
         
               <!-- Password Input -->
               <div class="password-container">
-                <input [type]="isPasswordVisible ? 'text' : 'password'"  class="input-field"  [(ngModel)]="password" placeholder="********">
-                <img src="/show-password.png" alt="Show Password" class="eye-icon" (click)="togglePasswordVisibility()">
+                <input [type]="isCreatePasswordVisible ? 'text' : 'password'"  class="input-field"  [(ngModel)]="password" placeholder="********">
+                <img [src]="isCreatePasswordVisible? '/not-show.png': '/show-password.png'" alt="Show Password" class="eye-icon" (click)="toggleCreatePasswordVisibility()">
               </div>
              </div>
         
@@ -114,7 +145,7 @@
               <!-- Password Input -->
               <!-- <div class="password-container">
                 <input [type]="isPasswordVisible ? 'text' : 'password'"  class="input-field"  [(ngModel)]="password" placeholder="********">
-                <img src="/show-password.png" alt="Show Password" class="eye-icon" (click)="togglePasswordVisibility()">
+                <img [src]="isPasswordVisible? '/not-show.png': '/show-password.png'" alt="Show Password" class="eye-icon" (click)="togglePasswordVisibility()">
               </div> -->
              </div>
         

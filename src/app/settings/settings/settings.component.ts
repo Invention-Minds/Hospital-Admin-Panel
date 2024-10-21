@@ -20,8 +20,12 @@ type Tab = 'profile' | 'reset' | 'login';
 export class SettingsComponent implements OnInit {
   selectedTab: string = 'profile';
   showDeleteConfirmDialog: boolean = false;
-  currentUserRole: UserRole = 'admin';
+  currentUserRole: UserRole = 'sub_admin'; // Default role
   isPasswordVisible: boolean = false; // Track visibility of password
+  isCreatePasswordVisible:boolean = false;
+  isConfirmPasswordVisible:boolean = false;
+  isNewPasswordVisible: boolean = false;
+
   username: string = '';
   password: string = '';
   newPassword: string = '';
@@ -31,9 +35,9 @@ export class SettingsComponent implements OnInit {
   constructor(private authService: AuthServiceService, private router: Router) {}
  // Define the role-based access
  rolePermissions: Record<UserRole, string[]> = {
-  admin: ['profile', 'reset'],
+  sub_admin: ['profile', 'reset'],
   doctor: ['profile', 'reset'],
-  sub_admin: ['profile', 'reset', 'login','delete'],
+  admin: ['profile', 'reset', 'login','delete'],
   super_admin: ['profile', 'reset', 'login','delete'],
 };
 
@@ -53,7 +57,7 @@ export class SettingsComponent implements OnInit {
         this.currentUserRole = this.role as UserRole;
         console.log("current user role in settings",this.currentUserRole)
       } else {
-        this.currentUserRole = 'admin'; // Default role in case of an invalid role
+        this.currentUserRole = 'sub_admin'; // Default role in case of an invalid role
       }
   
     } else {
@@ -141,6 +145,15 @@ canAccessTab(tab: string): boolean {
 // Method to toggle password visibility
 togglePasswordVisibility() {
   this.isPasswordVisible = !this.isPasswordVisible;
+}
+toggleNewPasswordVisibility() {
+  this.isNewPasswordVisible = !this.isNewPasswordVisible;
+}
+toggleConfirmPasswordVisibility() {
+  this.isConfirmPasswordVisible = !this.isConfirmPasswordVisible;
+}
+toggleCreatePasswordVisibility() {
+  this.isCreatePasswordVisible = !this.isCreatePasswordVisible;
 }
 extractFirstName(username: string): string {
   const parts = username.split('_'); // Split the string by underscore

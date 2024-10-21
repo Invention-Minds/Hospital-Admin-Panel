@@ -9,18 +9,19 @@ import { DoctorFormComponent } from './doctor/doctor-form/doctor-form.component'
 import { LoginComponent } from './login/login/login.component';
 import { SettingsComponent } from './settings/settings/settings.component';
 import { ReportOverviewComponent } from './report/report-overview/report-overview.component';
+import { authGuard } from './auth.guard';
 
 const routes: Routes = [
-  { path: 'dashboard', component: DashboardOverviewComponent },
+  { path: 'dashboard', component: DashboardOverviewComponent, canActivate:[authGuard] },
   // { path:'',component:DashboardOverviewComponent},
-  {path:'appointments', component:AppointmentOverviewComponent},
-  { path: 'appointment-request', component: AppointmentRequestComponent },
-  { path: 'new-appointment', component: AppointmentFormComponent },
-  {path:'doctor',component:DoctorOverviewComponent},
-  {path:'doctor-profile',component: DoctorFormComponent},
+  {path:'appointments', component:AppointmentOverviewComponent,canActivate:[authGuard]},
+  { path: 'appointment-request', component: AppointmentRequestComponent,canActivate:[authGuard] },
+  { path: 'new-appointment', component: AppointmentFormComponent,canActivate:[authGuard] },
+  {path:'doctor',component:DoctorOverviewComponent,canActivate:[authGuard]},
+  {path:'doctor-profile',component: DoctorFormComponent,canActivate:[authGuard]},
   {path:'login', component:LoginComponent},
-  {path:'settings', component: SettingsComponent},
-  {path:'report',component: ReportOverviewComponent},
+  {path:'settings', component: SettingsComponent,canActivate:[authGuard]},
+  {path:'report',component: ReportOverviewComponent,canActivate:[authGuard]},
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: '**', redirectTo: '/login' },
 

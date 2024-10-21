@@ -31,7 +31,9 @@ export class TotalOverviewComponent implements OnInit {
 
     // Fetch total appointments and pending requests count for today, and available doctors count for today.
     const totalAppointments$ = this.appointmentService.getTotalAppointmentsCountForToday(currentDate);
-    const pendingAppointments$ = this.appointmentService.getPendingAppointmentsCountForToday(currentDate);
+    // const pendingAppointments$ = this.appointmentService.getPendingAppointmentsCountForToday(currentDate);
+    const pendingAppointments$ = this.appointmentService.fetchPendingAppointmentsCount();
+
 
 
     forkJoin([totalAppointments$, pendingAppointments$]).subscribe(
@@ -40,7 +42,7 @@ export class TotalOverviewComponent implements OnInit {
         this.totalAppointmentsToday = totalAppointments.count;
 
         // Number of pending requests today
-        this.pendingRequestsToday = pendingRequests.count;
+        this.pendingRequestsToday = pendingRequests;
 
         // Total number of doctors available today
       },

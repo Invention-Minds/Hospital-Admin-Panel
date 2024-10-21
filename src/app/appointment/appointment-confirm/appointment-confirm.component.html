@@ -1,69 +1,78 @@
 <div class="table-container">
-    <table class="appointment-table">
-      <thead>
-        <tr>
-          <th>No</th>
-          <th (click)="sortBy('patientName')" style="cursor: pointer;">
-            Patient Name
-            <span *ngIf="sortColumn === 'patientName' && sortDirection === 'asc'">&#9650;</span>
-            <span *ngIf="sortColumn === 'patientName' && sortDirection === 'desc'">&#9660;</span>
-          </th>
-          <th>Phone Number</th>
-          <th>Doctor Name</th>
-          <!-- <th>Therapy</th> -->
-          <th (click)="sortBy('date')">
-            Date
-            <span *ngIf="sortColumn === 'date' && sortDirection === 'asc'">&#9650;</span>
-            <span *ngIf="sortColumn === 'date' && sortDirection === 'desc'">&#9660;</span></th>
-          <th>Time</th>
-          <th>Source</th>
-          <th>SMS</th>
-          <th>Email</th>
-          <th>Status</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let appointment of getPaginatedAppointments(); let i = index">
-          <td>{{ i + 1 }}</td>
-          <td>{{ appointment.patientName }}</td>
-          <td>{{ appointment.phoneNumber }}</td>
-          <td>{{ appointment.doctorName }}</td>
-          <!-- <td>{{ appointment.department }}</td> -->
-          <td>{{ appointment.date }}</td>
-          <td>{{ appointment.time }}</td>
-          <td>{{ appointment.requestVia }}</td>
-          <td>
-            <span class="sms-status" [ngClass]="{'sms-sent': appointment.smsSent, 'sms-not-sent': !appointment.smsSent}">
-              <img *ngIf="appointment.smsSent" src="icons/sent.svg" alt="Sent">
-              <img *ngIf="!appointment.smsSent" src="icons/not-sent.png" alt="Not Sent">
-            </span>
-          </td>
-          <td>
-            <span class="sms-status" [ngClass]="{'sms-sent': appointment.emailSent, 'sms-not-sent': !appointment.emailSent}">
-              <img *ngIf="appointment.emailSent" src="icons/sent.svg" alt="Sent">
-              <img *ngIf="!appointment.emailSent" src="icons/not-sent.png" alt="Not Sent">
-            </span>
-          </td>
-          <td>
-            <span class="status-badge">{{ appointment.status }}</span>
-          </td>
-          <td>
-            <span class="checkin-badge">Check-In</span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  
-    <!-- Pagination Controls -->
-    <div class="pagination">
-      <button class="pagination-btn prev" (click)="prevPage()" [disabled]="currentPage === 1">←</button>
-      <button class="pagination-btn next" (click)="nextPage()" [disabled]="currentPage === totalPages">→</button>
-      <div class="page-info">
-        Page 
-        <input type="number" [(ngModel)]="currentPage" min="1" [max]="totalPages" class="page-input" (change)="onPageChange()">
-        of {{ totalPages }}
-      </div>
+  <table class="appointment-table">
+    <thead>
+      <tr>
+        <th>No</th>
+        <th (click)="sortBy('patientName')" style="cursor: pointer;">
+          Patient Name
+          <span *ngIf="sortColumn === 'patientName' && sortDirection === 'asc'">&#9650;</span>
+          <span *ngIf="sortColumn === 'patientName' && sortDirection === 'desc'">&#9660;</span>
+        </th>
+        <th>Phone Number</th>
+        <th>Doctor Name</th>
+        <!-- <th>Therapy</th> -->
+        <th (click)="sortBy('date')">
+          Date
+          <span *ngIf="sortColumn === 'date' && sortDirection === 'asc'">&#9650;</span>
+          <span *ngIf="sortColumn === 'date' && sortDirection === 'desc'">&#9660;</span>
+        </th>
+        <th>Time</th>
+        <th>Source</th>
+        <th>SMS</th>
+        <th>Email</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let appointment of getPaginatedAppointments(); let i = index">
+        <td>{{ i + 1 }}</td>
+        <td>{{ appointment.patientName }}</td>
+        <td>{{ appointment.phoneNumber }}</td>
+        <td>{{ appointment.doctorName }}</td>
+        <!-- <td>{{ appointment.department }}</td> -->
+        <td>{{ appointment.date }}</td>
+        <td>{{ appointment.time }}</td>
+        <td>{{ appointment.requestVia }}</td>
+        <td>
+          <span class="sms-status" [ngClass]="{'sms-sent': appointment.smsSent, 'sms-not-sent': !appointment.smsSent}">
+            <img *ngIf="appointment.smsSent" src="icons/sent.svg" alt="Sent">
+            <img *ngIf="!appointment.smsSent" src="icons/not-sent.png" alt="Not Sent">
+          </span>
+        </td>
+        <td>
+          <span class="sms-status"
+            [ngClass]="{'sms-sent': appointment.emailSent, 'sms-not-sent': !appointment.emailSent}">
+            <img *ngIf="appointment.emailSent" src="icons/sent.svg" alt="Sent">
+            <img *ngIf="!appointment.emailSent" src="icons/not-sent.png" alt="Not Sent">
+          </span>
+        </td>
+        <td>
+          <span class="status-badge">{{ appointment.status }}</span>
+        </td>
+        <td>
+          <button class="btn-action">
+            <img src="icons/book.png" alt="check" class="action-icon" (click)="completeAppointment(appointment)"
+              pTooltip="Check-in" tooltipPosition="top">
+            <button class="btn-action" [disabled] ="appointment.completed">
+              <img src="icons/delete.png" alt="delete" class="action-icon" (click)="cancelAppointment(appointment)" 
+              pTooltip="Cancel" tooltipPosition="top">
+            </button>
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Pagination Controls -->
+  <div class="pagination">
+    <button class="pagination-btn prev" (click)="prevPage()" [disabled]="currentPage === 1">←</button>
+    <button class="pagination-btn next" (click)="nextPage()" [disabled]="currentPage === totalPages">→</button>
+    <div class="page-info">
+      Page
+      <input type="number" [(ngModel)]="currentPage" min="1" [max]="totalPages" class="page-input"
+        (change)="onPageChange()">
+      of {{ totalPages }}
     </div>
   </div>
-  
+</div>

@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { app } from '../../../../server';
+import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 interface Appointment {
   id?: number;
   patientName: string;
@@ -25,7 +26,9 @@ interface Appointment {
 })
 export class AppointmentCancelComponent {
   cancelledAppointments: Appointment[] = [];
-  constructor(private appointmentService: AppointmentConfirmService) {}
+  constructor(private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService) {
+    this.userId = localStorage.getItem('userid')
+  }
   // appointments: Appointment[] = [
   //   { id: '0001', patientName: 'Nitish MK', phoneNumber: '7708699010', doctorName: 'Dr. Nithish', department: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Cancelled' },
   //   { id: '0002', patientName: 'Lokesh P', phoneNumber: '9876543211', doctorName: 'Dr. Nithish', department: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Cancelled' },
@@ -39,20 +42,21 @@ export class AppointmentCancelComponent {
   showAppointmentForm = false;  // Controls the visibility of the modal
   selectedAppointment: Appointment | null = null; 
   confirmedAppointments: Appointment[] = []; 
+  activeAppointmentId: number | null | undefined = null;
+  userId: any = 0;
+  isLockedDialogVisible: boolean = false; // To control the visibility of the lock dialog
   ngOnInit() {
     
     this.appointmentService.canceledAppointments$.subscribe(appointments => {
       this.cancelledAppointments = appointments;
       // this.cancelledAppointments = appointments;
-      console.log('Cancelled appointments from component:', this.cancelledAppointments);
       this.cancelledAppointments.sort((a, b) => {
         const dateA = new Date(a.created_at!);
         const dateB = new Date(b.created_at!);
         return dateB.getTime() - dateA.getTime();
       });
       this.filteredAppointments = [...this.cancelledAppointments];
-      console.log('Cancelled appointments from component in filtered:', this.filteredAppointments);
-      console.log('Cancelled appointments from component:', this.cancelledAppointments);
+
     });
   }
   currentPage = 1;
@@ -85,7 +89,7 @@ export class AppointmentCancelComponent {
     if (!this.sortColumn) {
       return [...this.filteredAppointments];  // No sorting if the column is undefined
     }
-console.log("sort", this.filteredAppointments)
+
     return [...this.filteredAppointments].sort((a, b) => {
       const valueA = a[this.sortColumn!]; // Using non-null assertion (!) to handle the sort column
       const valueB = b[this.sortColumn!];
@@ -102,7 +106,6 @@ console.log("sort", this.filteredAppointments)
   // Method to return paginated appointments after sorting
   getPaginatedAppointments() {
     const sorted = this.sortedAppointments();
-    console.log("sorted",sorted);
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
     return sorted.slice(startIndex, startIndex + this.itemsPerPage); // Return paginated data
   }
@@ -152,7 +155,7 @@ console.log("sort", this.filteredAppointments)
   // Method to filter appointments by the selected date
   filterAppointment() {
     let filteredList = [...this.cancelledAppointments];
-    console.log('Filtered appointments in filter:', filteredList);
+
   
     if (this.selectedDate) {
       const formattedDate = this.formatDate(this.selectedDate);
@@ -186,17 +189,77 @@ console.log("sort", this.filteredAppointments)
   getFilteredAppointments() {
     return this.filteredAppointments;
   }
-  openAppointmentForm(appointment: Appointment) {
+//   openAppointmentForm(appointment: Appointment) {
 
+//     this.selectedAppointment = { ...appointment };  // Create a copy to avoid direct modification
+//     this.showAppointmentForm = true;
+//     console.log('Selected appointment:', this.selectedAppointment);
+// }  
+openAppointmentForm(appointment: Appointment): void {
+
+  // this.selectedAppointment = { ...appointment };  // Create a copy to avoid direct modification
+  // this.showAppointmentForm = true;
+  // console.log('Selected appointment:', this.selectedAppointment);
+  this.lockAndAccessAppointment(appointment);
+}
+lockAndAccessAppointment(appointment:Appointment): void {
+  const appointmentId = appointment.id!;
+  this.appointmentService.lockAppointment(appointmentId, this.userId).subscribe({
+    next: (response) => {
+      // Successfully locked, proceed to open the form
+      this.activeAppointmentId = appointmentId;
+
+      // Proceed to open the appointment form since the lock was successful
     this.selectedAppointment = { ...appointment };  // Create a copy to avoid direct modification
     this.showAppointmentForm = true;
-    console.log('Selected appointment:', this.selectedAppointment);
-}  
+
+    },
+    error: (error) => {
+      if (error.status === 409) {
+        // Show lock modal if the appointment is locked by another user
+        this.isLockedDialogVisible = true;
+        console.warn('The appointment is currently locked by another user.');
+      } else if (error.status === 401) {
+        // If unauthorized, do NOT redirect automatically, show a custom message instead
+        console.error('Unauthorized access - maybe the session expired.');
+        alert('You are not authorized to access this resource. Please re-authenticate.');
+      } else {
+        console.error('Error locking the appointment:', error);
+      }
+    }
+
+  });
+}
+handleLockedDialogClose(): void {
+  // Hide the locked dialog
+  this.isLockedDialogVisible = false;
+}
+
+// Cleanup: unlock appointment if component is destroyed
+ngOnDestroy(): void {
+  if (this.activeAppointmentId !== null) {
+    this.closeAppointmentForm();
+  }
+}
 closeAppointmentForm() {
   this.showAppointmentForm = false;
+  if (this.activeAppointmentId !== null) {
+    // Call backend to unlock the appointment
+    this.appointmentService.unlockAppointment(this.activeAppointmentId!).subscribe({
+      next: () => {
+
+        this.activeAppointmentId = null;
+        this.selectedAppointment = null; // Close the form
+      },
+      error: (error) => {
+        console.error('Error unlocking appointment:', error);
+      }
+    });
+  }
+
 }
 submitAppointment(appointment: Appointment | null, status: string, requestVia: any) {
-  console.log('Submitting appointment:', appointment, 'with status:', status);
+
   
   if (!appointment) {
       console.error('No appointment selected for submission.');
@@ -213,13 +276,78 @@ submitAppointment(appointment: Appointment | null, status: string, requestVia: a
   if (status === 'Confirm') {
       confirmedAppointment.status = 'confirmed'; // Set the status to confirmed
       this.appointmentService.addConfirmedAppointment(confirmedAppointment);
+    // Fetch doctor's details to get the doctor's email
+    // this.doctorService.getDoctorDetails(appointment.doctorId).subscribe({
+    //   next: (response) => {
+    //     const doctorEmail = response?.email;
+    //     const patientEmail = appointment?.email;
+
+    //     // Ensure both emails are valid
+    //     if (!doctorEmail || !patientEmail) {
+    //       console.error('Doctor or patient email is missing.');
+    //       return;
+    //     }
+
+    //     // Prepare appointment details for email
+    //     const appointmentDetails = {
+    //       patientName: appointment?.patientName,
+    //       doctorName: appointment?.doctorName,
+    //       date: appointment?.date,
+    //       time: appointment?.time,
+    //     };
+
+    //     const emailStatus = 'rescheduled';
+
+    //     // Send email to the doctor
+    //     this.appointmentService.sendEmail(doctorEmail, emailStatus, appointmentDetails, 'doctor').subscribe({
+    //       next: (response) => {
+    //         console.log('Email sent to doctor successfully:', response);
+    //       },
+    //       error: (error) => {
+    //         console.error('Error sending email to doctor:', error);
+    //       },
+    //     });
+
+    //     // Send email to the patient
+    //     this.appointmentService.sendEmail(patientEmail, emailStatus, appointmentDetails, 'patient').subscribe({
+    //       next: (response) => {
+    //         console.log('Email sent to patient successfully:', response);
+    //       },
+    //       error: (error) => {
+    //         console.error('Error sending email to patient:', error);
+    //       },
+    //     });
+    //   },
+    //   error: (error) => {
+    //     console.error('Error in getting doctor details:', error);
+    //   },
+    // });
+      
+  
 
       // Remove the confirmed appointment from the canceled appointments
-      this.cancelledAppointments = this.cancelledAppointments.filter(a => a.phoneNumber !== appointment.phoneNumber);
+      this.cancelledAppointments = this.cancelledAppointments.filter(a => a.id !== appointment.id);
       
   } else if (status === 'Cancel') {
       confirmedAppointment.status = 'Cancelled'; // Update the status
       this.appointmentService.addCancelledAppointment(confirmedAppointment);
+      const appointmentDetails = {
+        patientName: appointment?.patientName,
+        doctorName: appointment?.doctorName,
+        date: appointment?.date,
+        time: appointment?.time,
+      };
+      const patientEmail = appointment.email;
+
+      const emailStatus = 'cancelled';
+      this.appointmentService.sendEmail(patientEmail, emailStatus, appointmentDetails, 'patient').subscribe({
+        next: (response) => {
+          console.log('Email sent to patient successfully:', response);
+        },
+        error: (error) => {
+          console.error('Error sending email to patient:', error);
+        },
+      });
   }
 
   // Additional filtering and updates

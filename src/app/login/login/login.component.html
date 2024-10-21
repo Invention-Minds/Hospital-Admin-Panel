@@ -13,10 +13,11 @@
         <div class="input-group">
             <img src="/password.png" alt="Username Icon" class="icon" />
             <input [type]="isPasswordVisible ? 'text' : 'password'"  class="input-field"  [(ngModel)]="password" placeholder="********" name="password" required/>  
-            <img src="/show-password.png" alt="Show Password" class="eye-icon" (click)="togglePasswordVisibility()">
+            <img [src]="isPasswordVisible? '/not-show.png': '/show-password.png'" alt="Show Password" class="eye-icon" (click)="togglePasswordVisibility()">
           </div>
         <div class="login">
             <button type="submit" [disabled]="!loginForm.valid">Login Now</button>
+            <p-toast />
         </div>
       </form>
     </div>

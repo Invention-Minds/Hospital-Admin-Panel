@@ -7,7 +7,7 @@ import { Component } from '@angular/core';
 })
 export class ReportOverviewComponent {
   role: string = '';
-  activeComponent: string = 'admin'; 
+  activeComponent: string = 'sub_admin'; 
     // Show the Appointment Request component when the "No. of Req Arrived" card is clicked
     showAdminReport() {
       if(this.role != 'doctor') {
@@ -27,7 +27,7 @@ export class ReportOverviewComponent {
     if (this.role === 'doctor') {
       this.activeComponent = 'doctor';
     } else {
-      this.activeComponent = 'admin';
+      this.activeComponent = 'sub_admin';
     }
 
       } else {

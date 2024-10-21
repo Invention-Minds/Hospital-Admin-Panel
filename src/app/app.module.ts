@@ -51,7 +51,9 @@ import { ReportOverviewComponent } from './report/report-overview/report-overvie
 import { AdminReportComponent } from './report/admin-report/admin-report.component';
 import { AppointmentCompleteComponent } from './appointment/appointment-complete/appointment-complete.component';
 import { DoctorReportComponent } from './report/doctor-report/doctor-report.component';
-
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { AuthInterceptor } from './auth.interceptor';
+import { DeleteConfirmationDialogComponent } from './delete-confirmation-dialog/delete-confirmation-dialog.component';
 
 
 
@@ -79,6 +81,7 @@ import { DoctorReportComponent } from './report/doctor-report/doctor-report.comp
     AdminReportComponent,
     AppointmentCompleteComponent,
     DoctorReportComponent,
+    DeleteConfirmationDialogComponent,
   
     
   ],
@@ -108,7 +111,12 @@ import { DoctorReportComponent } from './report/doctor-report/doctor-report.comp
   ],
   providers: [
     provideClientHydration(),
-    provideAnimationsAsync()
+    // provideAnimationsAsync(),
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true
+    }
   ],
   bootstrap: [AppComponent]
 })

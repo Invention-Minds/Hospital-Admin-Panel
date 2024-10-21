@@ -82,7 +82,7 @@ tbody tr:hover {
   display: inline-block;
   color: white;
   padding: 5px 10px;
-
+  text-transform: capitalize;
   font-size: 18px;
   font-family: Kanit;
   font-weight: 400;
@@ -169,4 +169,10 @@ tbody tr:hover {
   margin: 0 10px;
   font-size: 16px;
   padding: 5px;
+}
+
+
+.btn-action[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

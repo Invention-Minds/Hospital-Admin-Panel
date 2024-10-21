@@ -46,16 +46,19 @@ line-height: normal;
   margin-bottom: 1.5rem;
   color: #1C1C1C;
 font-family: Kanit;
-font-size: 12px;
+font-size: 16px;
 font-style: normal;
 font-weight: 400;
 line-height: normal;
 display: flex;
 align-items: center;
 border-radius: 16px;
-background: rgba(240, 237, 255, 0.8);
+background: #E8F0FE;
 width: 364px;
   height: 52px;
+}
+.eye-icon{
+  padding-right: 17px;
 }
 
 .input-group input {
@@ -66,12 +69,13 @@ width: 364px;
   border-radius: 16px;
   background: rgba(240, 237, 255, 0.8);
   flex-shrink: 0;
+  font-size: 16px;
 }
 
 button {
   color: #ffffff;
   border: none;
-  padding: 1rem 2rem;
+  /* padding: 1rem 2rem; */
 
   cursor: pointer;
   border-radius: 16px;
@@ -82,7 +86,7 @@ button {
   flex-shrink: 0;
   color: #fff;
   font-family: Kanit;
-  font-size: 12px;
+  font-size: 14px;
   font-style: normal;
   font-weight: 700;
   line-height: normal;
@@ -127,6 +131,7 @@ align-items: center;
 }
 input:focus{
     outline: none;
+    background: rgba(240, 237, 255, 0.8);
 }
 .input-group .icon {
     width: 24px; /* Set an appropriate size for the icons */

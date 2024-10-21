@@ -66,9 +66,11 @@ export class AppointmentConfirmService {
   // Method to add a confirmed appointment
   addConfirmedAppointment(appointment: Appointment): void {
     if (appointment.id != null) { // Ensure that the id is defined and not null
-      console.log('Confirming appointment:', appointment);
       // Update appointment status to 'confirmed' in backend
-      this.updateAppointmentStatus(appointment.id, 'confirmed');
+      appointment.status = 'confirmed'; // Update status
+      appointment.emailSent = true; // Update email sent status
+      appointment.smsSent = true; // Update SMS sent status
+      this.updateAppointmentStatus(appointment);
     } else {
       console.error('Cannot confirm appointment: Appointment ID is missing.');
     }
@@ -83,9 +85,9 @@ export class AppointmentConfirmService {
 // Method to add a new appointment
 addNewAppointment(appointment: Appointment): void {
   const userId = this.authService.getUserId();
-  console.log(userId, "in service");
+
     const appointmentData = userId ? { ...appointment, userId } : appointment;
-    console.log('Adding new appointment:', appointmentData);
+
   // console.log('Adding new appointment:', appointmentData);
   // Send the appointment details to the backend without an ID
   this.http.post<Appointment>(`${this.apiUrl}`, appointmentData).subscribe((newAppointment) => {
@@ -96,38 +98,46 @@ addNewAppointment(appointment: Appointment): void {
    // Method to add a canceled appointment
    addCancelledAppointment(appointment: Appointment): void {
     if (appointment.id != null) { // Ensure that the id is defined and not null
-      console.log('Confirming appointment:', appointment);
       // Update appointment status to 'confirmed' in backend
-      this.updateAppointmentStatus(appointment.id, 'cancelled');
+    appointment.status = 'cancelled'; // Update status
+    appointment.emailSent = true; // Update email sent status
+    appointment.smsSent = true; // Update SMS sent status
+    this.updateAppointmentStatus(appointment);
     } else {
       console.error('Cannot cancelled appointment: Appointment ID is missing.');
     }
   }
   addCompletedAppointment(appointment: Appointment): void {
     if (appointment.id != null) { // Ensure that the id is defined and not null
-      console.log('Confirming appointment:', appointment);
       // Update appointment status to 'confirmed' in backend
-      this.updateAppointmentStatus(appointment.id, 'completed');
+    appointment.status = 'completed'; // Update status
+    appointment.emailSent = true; // Update email sent status
+    appointment.smsSent = true; // Update SMS sent status
+    this.updateAppointmentStatus(appointment);
     } else {  
       console.error('Cannot completed appointment: Appointment ID is missing.');
     }
   }
    // Method to update appointment status
-   private updateAppointmentStatus(appointmentId: number, status: string): void {
+   private updateAppointmentStatus(appointment: Appointment): void {
     const userId = this.authService.getUserId();
-    const updateData = userId ? { status, userId } : { status };
-    this.http.put<Appointment>(`${this.apiUrl}/${appointmentId}`,updateData).subscribe(() => {
+    // const updateData = userId ? { status, userId, ...appointment } : { status };
+    const updateData = {
+      ...appointment,
+      userId: userId ? userId : appointment.userId // Include userId if available
+    };
+    this.http.put<Appointment>(`${this.apiUrl}/${appointment.id}`,updateData).subscribe(() => {
       this.fetchAppointments(); // Fetch appointments to update the list
     });
   }
 
   // Remove canceled appointment from backend
-  removeCancelledAppointment(phoneNumber: string): void {
+  removeCancelledAppointment(id: number): void {
     const currentCanceledAppointments = this.canceledAppointmentsSource.getValue();
-    const appointmentToDelete = currentCanceledAppointments.find(a => a.phoneNumber === phoneNumber);
+    const appointmentToDelete = currentCanceledAppointments.find(a => a.id === id);
     if (appointmentToDelete) {
       this.http.delete(`${this.apiUrl}/${appointmentToDelete.id}`).subscribe(() => {
-        const updatedAppointments = currentCanceledAppointments.filter(a => a.phoneNumber !== phoneNumber);
+        const updatedAppointments = currentCanceledAppointments.filter(a => a.id !== id);
         this.canceledAppointmentsSource.next(updatedAppointments);
       });
     }
@@ -158,6 +168,11 @@ getBookedSlots(doctorId: number, date: string): Observable<string[]> {
   return this.http.get<{ count: number }>(`${this.apiUrl}/total`, {
     params: { date: date }
   });
+}
+fetchPendingAppointmentsCount(): Observable<number> {
+  return this.http.get<Appointment[]>(`${this.apiUrl}`).pipe(
+    map(appointments => appointments.filter(a => a.status === 'pending').length)
+  );
 }
 
 // Method to get today's pending appointment requests count
@@ -197,12 +212,16 @@ getAppointmentsByRole(): Observable<Appointment[]> {
 //   );
 // }
 
-lockAppointment(appointmentId: number): Observable<any> {
-  return this.http.put(`${this.apiUrl}/lock/${appointmentId}`, {});
-}
-  // Unlock appointment method
-  unlockAppointment(appointmentId: number): Observable<Appointment> {
-    return this.http.put<Appointment>(`${this.apiUrl}/unlock/${appointmentId}`, {});
+  // Method to lock an appointment
+  lockAppointment(appointmentId: number, userId: string): Observable<any> {
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    return this.http.put(`${this.apiUrl}/${appointmentId}/lock`, { userId }, { headers });
+  }
+
+  // Method to unlock an appointment
+  unlockAppointment(appointmentId: number): Observable<any> {
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    return this.http.put(`${this.apiUrl}/${appointmentId}/unlock`, {}, { headers });
   }
   getHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
@@ -211,4 +230,28 @@ lockAppointment(appointmentId: number): Observable<any> {
       Authorization: `Bearer ${token}`
     });
   }
+  sendEmail(to: string| string[], status: string, appointmentDetails: any, recipientType:any): Observable<any> {
+    const recipients = Array.isArray(to) ? to.join(', ') : to;
+    const emailRequest = {
+      to: recipients,
+      status,
+      appointmentDetails,
+      recipientType
+    };
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+    });
+
+    return this.http.post<any>('http://localhost:3000/api/email/send-email', emailRequest, { headers });
+  }
+  // Method to get appointment by ID (if needed)
+  getAppointmentById(appointmentId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/${appointmentId}`);
+  }
+    // Method to schedule an appointment completion
+    scheduleCompletion(appointmentId: number, delayMinutes: number): Observable<any> {
+      const url = `${this.apiUrl}/${appointmentId}/schedule-completion`;
+      return this.http.put(url, { delayMinutes });
+    }
 }

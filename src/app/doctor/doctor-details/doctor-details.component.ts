@@ -41,33 +41,64 @@ export class DoctorDetailsComponent implements OnInit {
     this.fetchDepartmentsAndDoctors(); // Fetch all departments and doctors
   }
  // Method to handle deleting a doctor with a confirmation dialog
- deleteDoctor(doctor: Doctor): void {
-  Swal.fire({
-    title: 'Are you sure?',
-    text: `Do you want to delete Dr. ${doctor.name}? This action cannot be undone.`,
-    icon: 'warning',
-    showCancelButton: true,
-    confirmButtonText: 'Yes, delete it!',
-    cancelButtonText: 'Cancel'
-  }).then((result) => {
-    if (result.isConfirmed) {
-      // Proceed with deleting the doctor
-      this.doctorService.deleteDoctor(doctor.id).subscribe(
-        () => {
-          Swal.fire('Deleted!', `Dr. ${doctor.name} has been deleted.`, 'success');
-          this.fetchDepartmentsAndDoctors(); // Refresh the list after deletion
-        },
-        (error) => {
-          console.error('Error deleting doctor:', error);
-          Swal.fire('Error!', 'An error occurred while deleting the doctor.', 'error');
-        }
-      );
-    } 
-    // else if (result.dismiss === Swal.DismissReason.cancel) {
-    //   Swal.fire('Cancelled', 'The doctor is safe :)', 'info');
-    // }
-  });
+//  deleteDoctor(doctor: Doctor): void {
+//   Swal.fire({
+//     title: 'Are you sure?',
+//     text: `Do you want to delete Dr. ${doctor.name}? This action cannot be undone.`,
+//     icon: 'warning',
+//     showCancelButton: true,
+//     confirmButtonText: 'Yes, delete it!',
+//     cancelButtonText: 'Cancel'
+//   }).then((result) => {
+//     if (result.isConfirmed) {
+//       // Proceed with deleting the doctor
+//       this.doctorService.deleteDoctor(doctor.id).subscribe(
+//         () => {
+//           Swal.fire('Deleted!', `Dr. ${doctor.name} has been deleted.`, 'success');
+//           this.fetchDepartmentsAndDoctors(); // Refresh the list after deletion
+//         },
+//         (error) => {
+//           console.error('Error deleting doctor:', error);
+//           Swal.fire('Error!', 'An error occurred while deleting the doctor.', 'error');
+//         }
+//       );
+//     } 
+//     // else if (result.dismiss === Swal.DismissReason.cancel) {
+//     //   Swal.fire('Cancelled', 'The doctor is safe :)', 'info');
+//     // }
+//   });
+// }
+doctorToDelete: Doctor | null = null; // Hold the doctor to delete
+showDeleteConfirmDialog: boolean = false; // Control the visibility of the dialog
+
+// Method to open the delete confirmation dialog
+deleteDoctor(doctor: Doctor): void {
+  this.doctorToDelete = doctor;
+  this.showDeleteConfirmDialog = true; // Show the dialog
 }
+
+// Method to handle delete confirmation
+confirmDelete(): void {
+  if (this.doctorToDelete) {
+    this.doctorService.deleteDoctor(this.doctorToDelete.id).subscribe(
+      () => {
+        console.log(`Dr. ${this.doctorToDelete!.name} has been deleted.`);
+        this.showDeleteConfirmDialog = false; // Close the dialog
+        this.fetchDepartmentsAndDoctors(); // Refresh the list after deletion
+      },
+      (error) => {
+        console.error('Error deleting doctor:', error);
+        alert('An error occurred while deleting the doctor.');
+      }
+    );
+  }
+}
+
+// Method to close the dialog
+closeDeleteDialog(): void {
+  this.showDeleteConfirmDialog = false;
+}
+
 
   // Fetch all departments and doctors from the backend
   fetchDepartmentsAndDoctors(): void {

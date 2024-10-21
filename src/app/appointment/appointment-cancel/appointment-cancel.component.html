@@ -74,3 +74,7 @@
   (close)="closeAppointmentForm()" 
   (submit)="submitAppointment(selectedAppointment, $event.status, $event.requestVia)">
 </app-appointment-form>
+<app-delete-confirmation-dialog
+  [showDialog]="isLockedDialogVisible"
+  (close)="handleLockedDialogClose()"
+></app-delete-confirmation-dialog>

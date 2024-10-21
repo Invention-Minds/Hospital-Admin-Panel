@@ -146,7 +146,12 @@ height: 52px;
 .delete-button {
   background: transparent;
   border: none;
-  color: red;
+  color: #D20006;
+  font-family: Kanit;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
   cursor: pointer;
   display: flex;
   align-items: center;

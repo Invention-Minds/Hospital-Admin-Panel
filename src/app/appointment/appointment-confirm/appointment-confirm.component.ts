@@ -1,20 +1,22 @@
-import { Component , Input} from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
+import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 interface Appointment {
   id?: number;
   patientName: string;
   phoneNumber: string;
   doctorName: string;
-  doctorId:number;
+  doctorId: number;
   department: string;
   date: string;
   time: string;
   status: string;
   email: string;
-  smsSent?:boolean;
-  emailSent?:boolean;
+  smsSent?: boolean;
+  emailSent?: boolean;
   requestVia?: string; // Optional property
   created_at?: string;
+  completed?:boolean;
 }
 @Component({
   selector: 'app-appointment-confirm',
@@ -24,7 +26,7 @@ interface Appointment {
 export class AppointmentConfirmComponent {
   confirmedAppointments: Appointment[] = [];
 
-  constructor(private appointmentService: AppointmentConfirmService) {}
+  constructor(private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService) { }
   appointments: Appointment[] = [
     // { id: '0001', patientName: 'Anitha Sundar', phoneNumber: '+91 7708590100', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Booked', smsSent: true },
   ];
@@ -35,6 +37,7 @@ export class AppointmentConfirmComponent {
   sortDirection: string = 'asc';  // Default sorting direction
   @Input() selectedDate: Date | null = null;
   @Input() selectedValue: string = '';
+  completed: boolean = false;
 
   searchOptions = [
     { label: 'Patient Name', value: 'patientName' },
@@ -54,9 +57,9 @@ export class AppointmentConfirmComponent {
         return dateB.getTime() - dateA.getTime();
       });
       this.filteredAppointments = [...this.confirmedAppointments];
-      console.log('Confirmed appointments from component:', this.confirmedAppointments);
+
     });
-  
+
     // Fetch appointments from backend to initialize the data
     this.appointmentService.fetchAppointments();
     // });
@@ -84,11 +87,11 @@ export class AppointmentConfirmComponent {
       // If no sorting column is selected, return the appointments as is (unsorted)
       return [...this.filteredAppointments];
     }
-    console.log("this.filteredAppointments",this.filteredAppointments);
-    console.log("this.filteredAppointments",this.filteredAppointments);
+
+
     return [...this.filteredAppointments].sort((a, b) => {
       const valueA = a[this.sortColumn!]; // Use the non-null assertion operator (!) to tell TypeScript sortColumn is defined
-      const valueB = b[this.sortColumn!]; 
+      const valueB = b[this.sortColumn!];
 
       if (typeof valueA === 'string' && typeof valueB === 'string') {
         const comparison = valueA.localeCompare(valueB);
@@ -139,11 +142,11 @@ export class AppointmentConfirmComponent {
     // Whenever the selected date changes, this will be triggered
     this.filterAppointment();
   }
-  
+
   // Method to filter appointments by the selected date
   filterAppointment() {
     let filteredList = [...this.confirmedAppointments];
-  
+
     if (this.selectedDate) {
       const formattedDate = this.formatDate(this.selectedDate);
       filteredList = filteredList.filter(confirmedAppointments => confirmedAppointments.date === formattedDate);
@@ -154,7 +157,7 @@ export class AppointmentConfirmComponent {
         confirmedAppointments.patientName.toLowerCase().includes(searchLower) ||
         confirmedAppointments.phoneNumber.toLowerCase().includes(searchLower)
       );
-      console.log('Filtered appointments:', filteredList);
+
     }
     else {
       // If no date is selected, show all appointments
@@ -172,19 +175,64 @@ export class AppointmentConfirmComponent {
     return `${year}-${month}-${day}`;
   }
   completeAppointment(appointment: Appointment) {
-    const completed : Appointment = {
-      ...appointment,
-      status: 'completed',
-      smsSent: true,
-      emailSent: true,
-      requestVia: appointment.requestVia
-    };
-    console.log('Completed appointment:', completed);
-    this.appointmentService.addCompletedAppointment(completed);
-    this.filterAppointment();
+    appointment.completed = true;
+    // Fetch doctor details to get the slot duration
+    this.doctorService.getDoctorDetails(appointment.doctorId).subscribe(
+      (doctor) => {
+
+        if (doctor && doctor.slotDuration) {
+
+          const delayTime = (doctor.slotDuration + 5) * 60 * 1000; // Add 5 minutes to the slot duration and convert to milliseconds
+          this.appointmentService.scheduleCompletion(appointment.id!, delayTime).subscribe({
+            next: () => {
+              console.log('Appointment completion scheduled successfully');
+            },
+            error: (error) => {
+              console.error('Error scheduling appointment completion:', error);
+            }
+          });
+          
+        } else {
+          console.error('Slot duration not found for doctor:', doctor);
+        }
+      },
+      (error) => {
+        console.error('Error fetching doctor details:', error);
+      }
+    );
   }
+
   // Method to return the filtered appointments for display
   // getFilteredAppointments() {
   //   return this.filteredAppointments;
   // }
+  cancelAppointment(appointment: Appointment) {
+    const cancelled: Appointment = {
+      ...appointment,
+      status: 'cancelled',
+      smsSent: true,
+      emailSent: true,
+      requestVia: appointment.requestVia
+    };
+
+    this.appointmentService.addCancelledAppointment(cancelled);
+    const appointmentDetails = {
+      patientName: appointment?.patientName,
+      doctorName: appointment?.doctorName,
+      date: appointment?.date,
+      time: appointment?.time,
+    };
+    const patientEmail = appointment.email;
+
+    const emailStatus = 'cancelled';
+    this.appointmentService.sendEmail(patientEmail, emailStatus, appointmentDetails, 'patient').subscribe({
+      next: (response) => {
+        console.log('Email sent to patient successfully:', response);
+      },
+      error: (error) => {
+        console.error('Error sending email to patient:', error);
+      },
+    });
+    this.filterAppointment();
+  }
 }

@@ -50,6 +50,7 @@
       <div class="slots-wrapper">
         <div *ngFor="let slot of doctor.slots"
              class="slot-box"
+             [pTooltip]="slot.status"
              [ngClass]="{
                'slot-available': slot.status === 'available',
                'slot-booked': slot.status === 'booked',

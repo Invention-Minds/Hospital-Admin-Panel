@@ -9,7 +9,7 @@
         <!-- Doctor Name -->
         <div class="col">
           <div class="custom-form-field">
-            <input type="text" id="name" [(ngModel)]="doctor!.name" name="name" placeholder=" " required />
+            <input type="text" id="name" [(ngModel)]="doctor!.name" name="name" placeholder="Dr. Doctor Name" required />
             <label for="name" class="input-label">Doctor Name*</label>
           </div>
         </div>
@@ -17,7 +17,7 @@
         <!-- Qualification -->
         <div class="col">
           <div class="custom-form-field">
-            <input type="text" id="qualification" [(ngModel)]="doctor!.qualification" name="qualification" placeholder=" " required />
+            <input type="text" id="qualification" [(ngModel)]="doctor!.qualification" name="qualification" placeholder="MBBS" required />
             <label for="qualification" class="input-label">Qualification*</label>
           </div>
         </div>
@@ -27,14 +27,14 @@
       <div class="row">
         <div class="col">
           <div class="custom-form-field">
-            <input type="email" id="email" [(ngModel)]="doctor!.email" name="email" placeholder=" " required />
+            <input type="email" id="email" [(ngModel)]="doctor!.email" name="email" placeholder="" required />
             <label for="email" class="input-label">Email*</label>
           </div>
         </div>
 
         <div class="col">
           <div class="custom-form-field">
-            <input type="tel" id="phone_number" [(ngModel)]="doctor!.phone_number" name="phone_number" placeholder=" " required />
+            <input type="tel" id="phone_number" [(ngModel)]="doctor!.phone_number" name="phone_number" placeholder="9876543210" required />
             <label for="phone_number" class="input-label">Mobile Number*</label>
           </div>
         </div>
@@ -49,7 +49,7 @@
             <label for="departmentInput" class="input-label">Department*</label>
           
             <div *ngIf="showDropdown" class="dropdown">
-              <div *ngFor="let department of departments" class="dropdown-item" (mousedown)="selectDepartment(department)">
+              <div *ngFor="let department of filteredDepartments" class="dropdown-item" (mousedown)="selectDepartment(department)">
                 {{ department.name }}
               </div>
             </div>
@@ -81,14 +81,14 @@
       <div class="row">
         <div class="col">
           <div class="custom-form-field">
-            <input type="text" id="availableTime" [(ngModel)]="doctor!.availableFrom" name="availableTime" placeholder=" " required />
+            <input type="text" id="availableTime" [(ngModel)]="doctor!.availableFrom" name="availableTime" placeholder="09:00-11:00" required />
             <label for="availableTime" class="input-label">Available Time*</label>
           </div>
         </div>
 
         <div class="col">
           <div class="custom-form-field">
-            <input type="text" id="slotTiming" [(ngModel)]="doctor!.slotDuration" name="slotTiming" placeholder=" " required />
+            <input type="text" id="slotTiming" [(ngModel)]="doctor!.slotDuration" name="slotTiming" placeholder="20" required />
             <label for="slotTiming" class="input-label">Slot Timing*</label>
           </div>
         </div>

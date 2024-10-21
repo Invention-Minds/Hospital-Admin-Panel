@@ -25,10 +25,11 @@ searchValue: string = '';
 // Selected date from calendar
 selectedDate: Date | null = null;
 
+showForm: boolean = false;
+
 // Method to handle search action
 onSearch() {
   if (this.selectedSearchOption && this.searchValue) {
-    console.log('Searching for', this.selectedSearchOption, 'with value:', this.searchValue);
     // Add logic here to search by Patient ID or Phone Number
   } else {
     console.error('Please select a search option and enter a value');
@@ -59,6 +60,8 @@ activeComponent: string = 'request'; // Default to showing the request component
   }
   showNewAppointmentForm() {
     this.activeComponent = 'appointment';
+    // this.router.navigate(['/new-appointment']);
+    this.showForm = true;
   }
   showCompletedAppointments(){
     this.activeComponent = 'completed';

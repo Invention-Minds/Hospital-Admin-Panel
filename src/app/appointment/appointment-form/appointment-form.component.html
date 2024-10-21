@@ -1,85 +1,87 @@
 <div *ngIf="showForm" class="overlay">
-    <div class="appointment-modal">
-      <!-- Header Section -->
-       <form [formGroup]="appointmentForm">
+  <div class="appointment-modal">
+    <!-- Header Section -->
+    <form [formGroup]="appointmentForm">
       <div class="appointment-header">
         <h3>Appointment Form</h3>
         <button class="close-button" (click)="closeForm($event)">&#10006;</button>
       </div>
-  
+
       <!-- Form Fields -->
       <div class="form-content">
         <div class="form-group">
           <label>Patient Name:</label>
           <input type="text" placeholder="First Name" formControlName="firstName" />
-          <input type="text" placeholder="Last Name" formControlName="lastName"  />
+          <input type="text" placeholder="Last Name" formControlName="lastName" />
         </div>
-  
+
         <div class="form-group">
           <label>Phone Number:</label>
-          <input type="text" placeholder="0000000000" formControlName="phoneNumber"/>
+          <input type="text" placeholder="0000000000" formControlName="phoneNumber" />
         </div>
-  
+
         <div class="form-group">
           <label>Email Id:</label>
           <input type="email" placeholder="abcd@gmail.com" formControlName="email" />
         </div>
-  
+
         <!-- <div class="form-group">
           <label>Doctor Name:</label>
           <input type="text" placeholder="M.K.Nithish" formControlName="doctorName" />
         </div> -->
         <div class="form-group">
           <label>Doctor Name:</label>
-          <input type="text" placeholder="Dr. Atmaram" formControlName="doctorName" (input)="onDoctorNameInput()" (focus)="showDoctorSuggestions = true"/>
+          <input type="text" placeholder="Dr. Atmaram" formControlName="doctorName" (input)="onDoctorNameInput()"
+            (focus)="showDoctorSuggestions = true" />
           <ul class="doctor-suggestions" *ngIf="showDoctorSuggestions && filteredDoctors.length > 0">
             <li *ngFor="let doctor of filteredDoctors" (click)="onDoctorSelect(doctor)">
               {{ doctor.name }}
             </li>
           </ul>
         </div>
-        
+
         <div class="appointment-timing">
           <div class="form-group time">
             <label>Appointment Date:</label>
-            <input type="date" formControlName="appointmentDate"  />
+            <input type="date" formControlName="appointmentDate" />
           </div>
 
-      <div class="form-group time slot">
-        <label>Appointment Time:</label>
-        <select  formControlName="appointmentTime" >
-          <option value=""  selected *ngIf="availableSlots.length === 0">No available slots</option>
-          <option *ngFor="let slot of availableSlots" [value]="slot">
-            {{ slot }}
-          </option>
-        </select>
-      </div>
-  </div>
-  <div *ngIf="showAvailabilityMessage" class="availability-message" [ngClass]="{'available': !showAvailabilityMessage, 'not-available': showAvailabilityMessage}">
-    {{ availabilityMessage }}
-  </div>
-  <div *ngIf="showDoctorUnavailableMessage" class="unavailable-message">
-    {{ doctorUnavailableMessage }}
-  </div>
-  <div class="appointment-timing">
-    <div class="form-group form-group-2">
-        <label class="radio">Request Via:</label>
-        <div class="radio-group">
-          <label><input type="radio" formControlName="requestVia" value="Website" /> Website</label>
-          <label><input type="radio" formControlName="requestVia" value="Call" /> Call</label>
-          <label><input type="radio" formControlName="requestVia" value="Walk-In" /> Walk-In</label>
+          <div class="form-group time slot">
+            <label>Appointment Time:</label>
+            <select formControlName="appointmentTime">
+              <option value="" selected *ngIf="availableSlots.length === 0">No available slots</option>
+              <option *ngFor="let slot of availableSlots" [value]="slot">
+                {{ slot }}
+              </option>
+            </select>
+          </div>
         </div>
-      </div>
+        <div *ngIf="showAvailabilityMessage" class="availability-message"
+          [ngClass]="{'available': !showAvailabilityMessage, 'not-available': showAvailabilityMessage}">
+          {{ availabilityMessage }}
+        </div>
+        <div *ngIf="showDoctorUnavailableMessage" class="unavailable-message">
+          {{ doctorUnavailableMessage }}
+        </div>
+        <div class="appointment-timing">
+          <div class="form-group form-group-2">
+            <label class="radio">Request Via:</label>
+            <div class="radio-group">
+              <label><input type="radio" formControlName="requestVia" value="Website" /> Website</label>
+              <label><input type="radio" formControlName="requestVia" value="Call" /> Call</label>
+              <label><input type="radio" formControlName="requestVia" value="Walk-In" /> Walk-In</label>
+            </div>
+          </div>
 
-      <div class="form-group form-group-2">
-        <label  class="radio">Appointment:</label>
-        <div class="radio-group">
-          <label><input type="radio" formControlName="appointmentStatus" value="Confirm" /> Confirm</label>
-          <label><input type="radio" formControlName="appointmentStatus" value="Cancel" /> Cancel</label>
+          <div class="form-group form-group-2">
+            <label class="radio">Appointment:</label>
+            <div class="radio-group">
+              <label><input type="radio" formControlName="appointmentStatus" value="Confirm" /> Confirm</label>
+              <label><input type="radio" formControlName="appointmentStatus" value="Cancel" /> Cancel</label>
+            </div>
+          </div>
         </div>
-      </div>
-  </div>
-  
+
         <!-- Buttons -->
         <div class="button-group">
           <p-toast />
@@ -88,6 +90,5 @@
         </div>
       </div>
     </form>
-    </div>
   </div>
-  
+</div>

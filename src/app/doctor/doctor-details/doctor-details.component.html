@@ -75,5 +75,24 @@
       </div>
     </div>
   </div>
+  <!-- Delete Confirmation Dialog -->
+<div class="overlay" *ngIf="showDeleteConfirmDialog">
+  <div class="dialog-container">
+      <div class="dialog-header">
+          <img src="/danger.png" alt="Warning Icon" class="warning-icon">
+      </div>
+      <div class="dialog-body">
+          <div class="dialog-title">Are You Sure!</div>
+          <div class="dialog-message">
+              Do you want to delete Dr. {{ doctorToDelete?.name }}? This action cannot be undone.
+          </div>
+          <div class="dialog-actions">
+              <button class="delete-button" (click)="confirmDelete()">Yes, Delete it!</button>
+              <button class="cancel-button" (click)="closeDeleteDialog()">Cancel</button>
+          </div>
+      </div>
+  </div>
+</div>
+
   
   

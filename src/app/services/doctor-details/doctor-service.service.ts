@@ -62,5 +62,8 @@ export class DoctorServiceService {
   getUnavailableDates(doctorId: number): Observable<{ date: string }[]> {
     return this.http.get<{ date: string }[]>(`http://localhost:3000/api/doctors/unavailable-dates?doctorId=${doctorId}`);
   }  
+  getDoctorDetails(doctorId: number): Observable<Doctor> {
+    return this.http.get<Doctor>(`${this.apiUrl}/doctors/${doctorId}`);
+  }
 
 }

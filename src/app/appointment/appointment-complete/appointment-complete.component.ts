@@ -54,7 +54,6 @@ export class AppointmentCompleteComponent {
         return dateB.getTime() - dateA.getTime();
       });
       this.filteredAppointments = [...this.completedAppointments];
-      console.log('Confirmed appointments from component:', this.completedAppointments);
     });
   
     // Fetch appointments from backend to initialize the data
@@ -84,8 +83,7 @@ export class AppointmentCompleteComponent {
       // If no sorting column is selected, return the appointments as is (unsorted)
       return [...this.filteredAppointments];
     }
-    console.log("this.filteredAppointments",this.filteredAppointments);
-    console.log("this.filteredAppointments",this.filteredAppointments);
+
     return [...this.filteredAppointments].sort((a, b) => {
       const valueA = a[this.sortColumn!]; // Use the non-null assertion operator (!) to tell TypeScript sortColumn is defined
       const valueB = b[this.sortColumn!]; 
@@ -154,7 +152,7 @@ export class AppointmentCompleteComponent {
         completedAppointments.patientName.toLowerCase().includes(searchLower) ||
         completedAppointments.phoneNumber.toLowerCase().includes(searchLower)
       );
-      console.log('Filtered appointments:', filteredList);
+
     }
     else {
       // If no date is selected, show all appointments
@@ -179,7 +177,6 @@ export class AppointmentCompleteComponent {
       emailSent: true,
       requestVia: appointment.requestVia
     };
-    console.log('Completed appointment:', completed);
     this.appointmentService.addCompletedAppointment(completed);
     this.filterAppointment();
   }

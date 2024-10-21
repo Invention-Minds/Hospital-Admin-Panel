@@ -1,0 +1,109 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+.dialog-container {
+    width: 650px;
+    height: 520px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    text-align: center;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+  }
+  
+  .dialog-header {
+    background: url('/dialog.png') no-repeat center center;
+    background-size: cover;
+    height: 293px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    color: #ffffff;
+
+  }
+  
+
+  
+  .dialog-body {
+    padding: 20px;
+  }
+  
+  .dialog-title {
+
+color: black;
+ font-size: 48px;
+ font-family: Kanit;
+ font-weight: 400;
+ word-wrap: break-word;
+    margin: 10px 0;
+    margin-bottom: 32px;
+  }
+  
+  .dialog-message {
+    color: #000;
+    text-align: center;
+    font-family: Kanit;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin-bottom: 20px;
+  }
+  
+  .dialog-actions {
+    padding: 20px;
+    display: flex;
+    justify-content: space-around;
+  }
+  
+  .delete-button {
+    background-color: #ff1e1e;
+    color: #ffffff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .delete-button:hover {
+    background-color: #e60000;
+  }
+  
+  .cancel-button {
+    background-color: #d3d3d3;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-flex;
+padding: 10px 20px;
+justify-content: center;
+align-items: center;
+gap: 10px;
+color: #FFF;
+text-align: center;
+font-family: Kanit;
+font-size: 16px;
+font-style: normal;
+font-weight: 600;
+line-height: normal;
+  }
+  
+  .cancel-button:hover {
+    background-color: #bcbcbc;
+  }
+  

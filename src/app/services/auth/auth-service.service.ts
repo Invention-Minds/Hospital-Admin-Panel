@@ -46,9 +46,11 @@ export class AuthServiceService {
   }
 // Method to initialize the user from localStorage
 initializeUserFromStorage(): void {
+  if (typeof window !== 'undefined' && window.localStorage) {
   const username = localStorage.getItem('username');
   const role = localStorage.getItem('role');
   const userId = localStorage.getItem('userid');
+  const user = localStorage.getItem('user');
 
   if (username && role && userId) {
     this.user = {
@@ -57,6 +59,9 @@ initializeUserFromStorage(): void {
       id: parseInt(userId, 10),
     };
     console.log('Initialized user from storage:', this.user);
+  }}
+  else{
+    console.error('localStorage is not available');
   }
 }
   getUser() {
@@ -84,7 +89,11 @@ initializeUserFromStorage(): void {
     deleteUser(username: string, headers: HttpHeaders): Observable<any> {
       return this.http.delete(`http://localhost:3000/api/login/delete-user/${username}`,  { headers });
   }
+  isLoggedIn(): boolean {
+    console.log("token",localStorage.getItem('token'))
+    return typeof window !== 'undefined' && localStorage.getItem('token') !== null;; // Return false if localStorage is not available
   
+  }
   // Utility function to extract role from username
   private extractRoleFromUsername(username: string): string {
     const parts = username.split('_');

@@ -2,7 +2,7 @@
     <!-- <h1>Appointments</h1> -->
     <div class="stats-cards">
       <div class="card" 
-      [ngClass]="{'active-card': activeComponent === 'admin'}"
+      [ngClass]="{'active-card': activeComponent === 'sub_admin'}"
       (click)="showAdminReport()"
       *ngIf="role!='doctor'">
         <div class="card-icon">
@@ -16,7 +16,7 @@
       <div class="card" 
       [ngClass]="{'active-card': activeComponent === 'doctor'}"
       (click)="showDoctorReport()"
-      *ngIf="role === 'doctor' || role === 'sub_admin' || role === 'super_admin'">
+      *ngIf="role === 'doctor' || role === 'admin' || role === 'super_admin'">
         <div class="card-icon">
           <img src="/details.png" alt="Appointment Icon" />
         </div>
@@ -29,6 +29,6 @@
     </div>
   </div>
   <div class="component-section">
-    <app-admin-report *ngIf="activeComponent === 'admin'"></app-admin-report>
+    <app-admin-report *ngIf="activeComponent === 'sub_admin'"></app-admin-report>
     <app-doctor-report *ngIf="activeComponent === 'doctor'"></app-doctor-report>
   </div>

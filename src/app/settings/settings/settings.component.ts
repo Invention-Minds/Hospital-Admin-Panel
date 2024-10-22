@@ -25,7 +25,8 @@ export class SettingsComponent implements OnInit {
   isCreatePasswordVisible:boolean = false;
   isConfirmPasswordVisible:boolean = false;
   isNewPasswordVisible: boolean = false;
-
+  oldPassword: string='';
+  isOldPasswordVisible:boolean = false;
   username: string = '';
   password: string = '';
   newPassword: string = '';
@@ -98,16 +99,20 @@ resetPassword() {
     console.log('Password reset successfully', response);
     this.username = '';  // Clear the username
     this.newPassword = '';  // Clear the new password
+
+    this.confirmPassword= '';
+
   }, error => {
     console.error('Error resetting password', error);
   });
 }
  // Change Password method
  changePassword() {
-  this.authService.changePassword(this.password, this.newPassword).subscribe(response => {
+  this.authService.changePassword(this.password,this.oldPassword, this.newPassword).subscribe(response => {
     console.log('Password changed successfully', response);
     this.password = '';  // Clear the current password
     this.newPassword = '';  // Clear the new password
+    this.oldPassword = '';
 
   }, error => {
     console.error('Error changing password', error);
@@ -154,6 +159,9 @@ toggleConfirmPasswordVisibility() {
 }
 toggleCreatePasswordVisibility() {
   this.isCreatePasswordVisible = !this.isCreatePasswordVisible;
+}
+toggleOldPasswordVisibility(){
+this.isOldPasswordVisible = !this.isConfirmPasswordVisible
 }
 extractFirstName(username: string): string {
   const parts = username.split('_'); // Split the string by underscore

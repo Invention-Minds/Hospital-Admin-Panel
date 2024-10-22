@@ -82,8 +82,8 @@ initializeUserFromStorage(): void {
     return this.http.post(`${this.apiUrl}/reset-password`, { username,newPassword });
   }
 
-  changePassword(currentPassword: string, newPassword: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/change-password`, { currentPassword, newPassword });
+  changePassword(currentPassword: string, newPassword: string, oldPassword: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/change-password`, { currentPassword, newPassword,oldPassword });
   }
     // Method to delete user by ID
     deleteUser(username: string, headers: HttpHeaders): Observable<any> {

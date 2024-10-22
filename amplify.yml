@@ -12,7 +12,7 @@ frontend:
       commands:
         - npm run build
   artifacts:
-    baseDirectory: dist/hospital_appointment_admin_panel
+    baseDirectory: dist/hospital_appointment_admin_panel/browser
     files:
       - '**/*'
   cache:

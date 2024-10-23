@@ -7,6 +7,7 @@ import { DoctorServiceService } from '../../services/doctor-details/doctor-servi
 import { MessageService } from 'primeng/api';
 import { ChangeDetectorRef } from '@angular/core';
 import { AuthServiceService } from '../../services/auth/auth-service.service';
+import { response } from 'express';
 
 interface Appointment {
   id?: number;
@@ -62,7 +63,7 @@ export class AppointmentFormComponent implements OnInit {
     this.appointmentForm = this.fb.group({
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
-      phoneNumber: ['', [Validators.required, Validators.pattern(/^(\+91\s)?[0-9]{10}$/)]],
+      phoneNumber: ['', [Validators.required, Validators.pattern(/^(\+91\s)?[0-9]{12}$/)]],
       email: ['', [Validators.required, Validators.email]],
       doctorName: ['', Validators.required],
       appointmentDate: ['', Validators.required],
@@ -492,6 +493,31 @@ export class AppointmentFormComponent implements OnInit {
         console.log('in form component', this.appointment);
         this.appointmentService.addConfirmedAppointment(this.appointment);
         this.doctorService.getDoctorDetails(this.appointment.doctorId).subscribe({
+          next: (response) =>{
+            const doctorPhoneNumber = response?.phone_number;
+            const appointmentDetails ={
+              patientName: this.appointment?.patientName,
+              doctorName: this.appointment?.doctorName,
+              date: this.appointment?.date,
+              time: this.appointment?.time,
+              doctorPhoneNumber: doctorPhoneNumber,
+              patientPhoneNumber: this.appointment?.phoneNumber,
+              status: this.appointment?.status
+            }
+            this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
+              next: (response) => {
+                console.log('WhatsApp message sent successfully:', response);
+              },
+              error: (error) => {
+                console.error('Error sending WhatsApp message:', error);
+              }
+            });
+          }
+          
+        });
+
+        
+        this.doctorService.getDoctorDetails(this.appointment.doctorId).subscribe({
           next: (response) => {
             const doctorEmail = response?.email;
             const patientEmail = this.appointment?.email;
@@ -574,7 +600,29 @@ export class AppointmentFormComponent implements OnInit {
         }
         if (this.appointment.status === "confirmed") {
           this.appointmentService.addConfirmedAppointment(this.appointment);
-
+          this.doctorService.getDoctorDetails(this.appointment.doctorId).subscribe({
+            next: (response) =>{
+              const doctorPhoneNumber = response?.phone_number;
+              const appointmentDetails ={
+                patientName: this.appointment?.patientName,
+                doctorName: this.appointment?.doctorName,
+                date: this.appointment?.date,
+                time: this.appointment?.time,
+                doctorPhoneNumber: doctorPhoneNumber,
+                patientPhoneNumber: this.appointment?.phoneNumber,
+                status: this.appointment?.status
+              }
+              this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
+                next: (response) => {
+                  console.log('WhatsApp message sent successfully:', response);
+                },
+                error: (error) => {
+                  console.error('Error sending WhatsApp message:', error);
+                }
+              });
+            }
+            
+          });
           this.doctorService.getDoctorDetails(this.appointment.doctorId).subscribe({
             next: (response) => {
               const doctorEmail = response?.email;

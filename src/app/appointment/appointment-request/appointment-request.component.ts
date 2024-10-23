@@ -2,6 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { AppointmentFormComponent } from '../appointment-form/appointment-form.component';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
+import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { app } from '../../../../server';
 import { ActivatedRoute } from '@angular/router';
 import { AuthServiceService } from '../../services/auth/auth-service.service';
@@ -47,7 +48,7 @@ export class AppointmentRequestComponent implements OnInit {
 
   // showModal: boolean = false;
   // @Input() selectedOption: string = '';
-  constructor(public dialog: MatDialog, private appointmentService: AppointmentConfirmService, private route: ActivatedRoute) {
+  constructor(public dialog: MatDialog, private appointmentService: AppointmentConfirmService, private route: ActivatedRoute, private doctorService: DoctorServiceService) {
     this.userId = localStorage.getItem('userid')
   }
 
@@ -266,6 +267,37 @@ export class AppointmentRequestComponent implements OnInit {
       // const confirmed = this.confirmedAppointments;
 
       this.appointmentService.addCancelledAppointment(cancelledAppointment);
+      // this.appointmentService.sendWhatsAppMessage(cancelledAppointment).subscribe({
+      //   next: (response) => {
+      //     console.log('WhatsApp message sent successfully:', response);
+      //   },
+      //   error: (error) => {
+      //     console.error('Error sending WhatsApp message:', error);
+      //   }
+      // });
+      this.doctorService.getDoctorDetails(appointment.doctorId).subscribe({
+        next: (response) =>{
+          const doctorPhoneNumber = response?.phone_number;
+          const appointmentDetails ={
+            patientName: appointment?.patientName,
+            doctorName: appointment?.doctorName,
+            date: appointment?.date,
+            time: appointment?.time,
+            doctorPhoneNumber: doctorPhoneNumber,
+            patientPhoneNumber: appointment?.phoneNumber,
+            status: 'cancelled'
+          }
+          this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
+            next: (response) => {
+              console.log('WhatsApp message sent successfully:', response);
+            },
+            error: (error) => {
+              console.error('Error sending WhatsApp message:', error);
+            }
+          });
+        }
+        
+      });
       const appointmentDetails = {
         patientName: appointment?.patientName,
         doctorName: appointment?.doctorName,
@@ -319,6 +351,37 @@ export class AppointmentRequestComponent implements OnInit {
     };
 
     this.appointmentService.addCancelledAppointment(cancel);
+    // this.appointmentService.sendWhatsAppMessage(cancel).subscribe({
+    //   next: (response) => {
+    //     console.log('WhatsApp message sent successfully:', response);
+    //   },
+    //   error: (error) => {
+    //     console.error('Error sending WhatsApp message:', error);
+    //   }
+    // });
+    this.doctorService.getDoctorDetails(appointment.doctorId).subscribe({
+      next: (response) =>{
+        const doctorPhoneNumber = response?.phone_number;
+        const appointmentDetails ={
+          patientName: appointment?.patientName,
+          doctorName: appointment?.doctorName,
+          date: appointment?.date,
+          time: appointment?.time,
+          doctorPhoneNumber: doctorPhoneNumber,
+          patientPhoneNumber: appointment?.phoneNumber,
+          status: 'cancelled'
+        }
+        this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
+          next: (response) => {
+            console.log('WhatsApp message sent successfully:', response);
+          },
+          error: (error) => {
+            console.error('Error sending WhatsApp message:', error);
+          }
+        });
+      }
+      
+    });
     const appointmentDetails = {
       patientName: appointment?.patientName,
       doctorName: appointment?.doctorName,

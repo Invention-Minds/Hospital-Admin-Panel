@@ -331,6 +331,29 @@ submitAppointment(appointment: Appointment | null, status: string, requestVia: a
   } else if (status === 'Cancel') {
       confirmedAppointment.status = 'Cancelled'; // Update the status
       this.appointmentService.addCancelledAppointment(confirmedAppointment);
+      this.doctorService.getDoctorDetails(appointment.doctorId).subscribe({
+        next: (response) =>{
+          const doctorPhoneNumber = response?.phone_number;
+          const appointmentDetails ={
+            patientName: appointment?.patientName,
+            doctorName: appointment?.doctorName,
+            date: appointment?.date,
+            time: appointment?.time,
+            doctorPhoneNumber: doctorPhoneNumber,
+            patientPhoneNumber: appointment?.phoneNumber,
+            status: 'cancelled'
+          }
+          this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
+            next: (response) => {
+              console.log('WhatsApp message sent successfully:', response);
+            },
+            error: (error) => {
+              console.error('Error sending WhatsApp message:', error);
+            }
+          });
+        }
+        
+      });
       const appointmentDetails = {
         patientName: appointment?.patientName,
         doctorName: appointment?.doctorName,

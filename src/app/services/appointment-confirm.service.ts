@@ -245,10 +245,15 @@ getAppointmentsByRole(): Observable<Appointment[]> {
 
     return this.http.post<any>('http://localhost:3000/api/email/send-email', emailRequest, { headers });
   }
+    // Method to send WhatsApp message
+    sendWhatsAppMessage(data: any): Observable<any> {
+      return this.http.post<any>('http://localhost:3000/api/whatsapp/send', data);
+    }
   // Method to get appointment by ID (if needed)
   getAppointmentById(appointmentId: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/${appointmentId}`);
   }
+
     // Method to schedule an appointment completion
     scheduleCompletion(appointmentId: number, delayMinutes: number): Observable<any> {
       const url = `${this.apiUrl}/${appointmentId}/schedule-completion`;

@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
+import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { AuthServiceService } from '../../services/auth/auth-service.service';
 import { Router } from '@angular/router';
 import { HttpHeaders } from '@angular/common/http';
+import { MessageService } from 'primeng/api';
 
 // export enum UserRole {
 //   admin = 'admin',
@@ -15,11 +17,13 @@ type Tab = 'profile' | 'reset' | 'login';
 @Component({
   selector: 'app-settings',
   templateUrl: './settings.component.html',
-  styleUrl: './settings.component.css'
+  styleUrl: './settings.component.css',
+  providers: [MessageService]
 })
 export class SettingsComponent implements OnInit {
   selectedTab: string = 'profile';
   showDeleteConfirmDialog: boolean = false;
+  showLogoutConfirmDialog: boolean = false;
   currentUserRole: UserRole = 'sub_admin'; // Default role
   isPasswordVisible: boolean = false; // Track visibility of password
   isCreatePasswordVisible:boolean = false;
@@ -31,9 +35,10 @@ export class SettingsComponent implements OnInit {
   password: string = '';
   newPassword: string = '';
   confirmPassword: string = '';
+  appointmentsCount: number = 0;
   userid:number = 0;
   role: string | null = null;  // Store user role
-  constructor(private authService: AuthServiceService, private router: Router) {}
+  constructor(private authService: AuthServiceService, private router: Router, private messageService: MessageService, private appointmentService: AppointmentConfirmService) {}
  // Define the role-based access
  rolePermissions: Record<UserRole, string[]> = {
   sub_admin: ['profile', 'reset'],
@@ -60,6 +65,10 @@ export class SettingsComponent implements OnInit {
       } else {
         this.currentUserRole = 'sub_admin'; // Default role in case of an invalid role
       }
+      this.appointmentService.getAppointmentsByUser(this.userid).subscribe(appointments => {
+        console.log('Appointments for user:', appointments);
+        this.appointmentsCount = appointments.length;
+      });
   
     } else {
       console.log('localStorage is not available');
@@ -84,8 +93,10 @@ createAccount() {
     console.log('Account created successfully', response);
     this.username = '';  // Clear the username
     this.password = '';  // Clear the password
+    this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Account Created Successfully' });
   }, error => {
     console.error('Error creating account', error);
+    this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to Create Account' });
   });
 }
 
@@ -101,9 +112,11 @@ resetPassword() {
     this.newPassword = '';  // Clear the new password
 
     this.confirmPassword= '';
+    this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Password reset successfully' });
 
   }, error => {
     console.error('Error resetting password', error);
+    this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to reset the password' });
   });
 }
  // Change Password method
@@ -124,11 +137,28 @@ resetPassword() {
     console.log('Account deleted');
     this.closeDeleteDialog();
   }
+  // logout() {
+  //   localStorage.removeItem('username');
+  //   localStorage.removeItem('role');
+  //   localStorage.removeItem('token');  // Assuming the token is also stored in localStorage
+  //   this.router.navigate(['/login']);
+  // }
+
   logout() {
+    this.showLogoutConfirmDialog = true;
+  }
+
+  confirmLogout() {
+    // Clear user session and redirect to login
     localStorage.removeItem('username');
     localStorage.removeItem('role');
-    localStorage.removeItem('token');  // Assuming the token is also stored in localStorage
+    localStorage.removeItem('token');
     this.router.navigate(['/login']);
+    this.showLogoutConfirmDialog = false;
+  }
+
+  closeLogoutDialog() {
+    this.showLogoutConfirmDialog = false;
   }
   // Role-Based Access: Show/Hide Tabs Based on Role
 // Role-Based Access: Show/Hide Tabs Based on Role

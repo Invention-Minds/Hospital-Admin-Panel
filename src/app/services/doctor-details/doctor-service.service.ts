@@ -47,10 +47,10 @@ export class DoctorServiceService {
   getDepartments(): Observable<Department[]> {
     return this.http.get<Department[]>(`${this.apiUrl}/departments`);
   }
-  getBookedSlots(doctorId: number, date: string): Observable<string[]> {
-    const bookedSlotsUrl = `http://localhost:3000/api/doctors/booked-slots?doctorId=${doctorId}&date=${date}`;
-    return this.http.get<string[]>(bookedSlotsUrl);
-  }
+    getBookedSlots(doctorId: number, date: string): Observable<string[]> {
+      const bookedSlotsUrl = `http://localhost:3000/api/doctors/booked-slots?doctorId=${doctorId}&date=${date}`;
+      return this.http.get<string[]>(bookedSlotsUrl);
+    }
   addUnavailableDates(doctorId: number, startDate: string, endDate: string, unavailableDates: string[]): Observable<any> {
     return this.http.post(`${this.apiUrl}/doctors/unavailable-dates`, {
       doctorId,

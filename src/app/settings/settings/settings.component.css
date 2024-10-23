@@ -54,6 +54,10 @@
   background-color: #f0f3ff;
   padding: 20px;
   border-radius: 10px;
+  display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 .profile-picture {
@@ -283,3 +287,24 @@ line-height: normal;
 .cancel-account-button:hover {
   background-color: #bcbcbc;
 }
+.profile-info {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start; /* Aligning content to the left */
+  gap: 15px; /* Adding space between items */
+}
+
+.profile-item {
+  display: flex;
+  gap: 5px;
+  color: #000;
+  font-family: Kanit;
+  font-size: 20px;
+  font-weight: 500;
+}
+/* 
+.label {
+  font-weight: bold;
+} */

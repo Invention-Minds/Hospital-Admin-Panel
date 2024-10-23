@@ -4,7 +4,7 @@
     <div class="tab-container">
       <div class="tab" [ngClass]="{ 'active-tab': selectedTab === 'profile' }" (click)="switchTab('profile')"
         *ngIf="canAccessTab('profile')">
-        Profile Edit
+        Profile Details
       </div>
       <div class="tab" [ngClass]="{ 'active-tab': selectedTab === 'reset' }" (click)="switchTab('reset')"
         *ngIf="canAccessTab('reset')">
@@ -12,7 +12,7 @@
       </div>
       <div class="tab" [ngClass]="{ 'active-tab': selectedTab === 'login' }" (click)="switchTab('login')"
         *ngIf="canAccessTab('login')">
-        Login Creation
+        Account Creation
       </div>
       <div class="tab" [ngClass]="{'active-tab': selectedTab === 'delete'}" (click)="switchTab('delete')"
         *ngIf="canAccessTab('delete')">
@@ -27,20 +27,37 @@
       </div>
 
       <!-- Email Input -->
-      <div class="input">
-        <input type="text" class="input-field" [(ngModel)]="username" placeholder="Username_admin@rashtrotthana" disabled>
+      <!-- <div class="input">
+        <input type="text" class="input-field" [(ngModel)]="username" placeholder="Username_admin@rashtrotthana" disabled> -->
 
         <!-- Password Input -->
-        <div class="password-container">
+        <!-- <div class="password-container">
           <input [type]="isPasswordVisible ? 'text' : 'password'" class="input-field" [(ngModel)]="password"
             placeholder="********">
           <img [src]="isPasswordVisible? '/not-show.png': '/show-password.png'" alt="Show Password" class="eye-icon"
             (click)="togglePasswordVisibility()">
         </div>
-      </div>
+      </div> -->
 
       <!-- Save Button -->
-      <button class="save-button" (click)="changePassword()">Save Changes</button>
+      <!-- <button class="save-button" (click)="changePassword()">Save Changes</button> -->
+       <!-- User Info -->
+  <!-- User Info -->
+<div class="profile-info">
+  <div class="profile-item">
+    <span class="label">User Id :</span>
+    <span class="value">{{username}}</span>
+  </div>
+  <div class="profile-item">
+    <span class="label">Role :</span>
+    <span class="value">{{role}}</span>
+  </div>
+  <div class="profile-item">
+    <span class="label">No. of Appointments handled :</span>
+    <span class="value">{{appointmentsCount}}</span>
+  </div>
+</div>
+
 
       <!-- Delete Account -->
       <div class="delete-account">
@@ -136,6 +153,7 @@
 
       <!-- Save Button -->
       <button class="save-button" (click)="createAccount()">Create Account</button>
+<p-toast />
 
       <!-- Delete Account
             <div class="delete-account">
@@ -190,6 +208,25 @@
         </div>
       </div>
     </div>
+    <div class="overlay" *ngIf="showLogoutConfirmDialog">
+      <div class="dialog-container">
+          <div class="dialog-header">
+              <img src="/danger.png" alt="Warning Icon" class="warning-icon">
+          </div>
+          <div class="dialog-body">
+              <div class="dialog-title">Are You Sure!</div>
+              <div class="dialog-message">
+                  Do you really want to log out? This action will end your session.
+              </div>
+              <div class="dialog-actions">
+                  <button class="delete-account-button" (click)="confirmLogout()">Yes, Log Out</button>
+                  <button class="cancel-account-button" (click)="closeLogoutDialog()">Cancel</button>
+              </div>
+          </div>
+      </div>
+  </div>
+
+
 
   </div>
 </div>

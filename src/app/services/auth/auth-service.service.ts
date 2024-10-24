@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators'; 
+import { environment } from '../../../environment/environment';
 
 export enum UserRole {
   admin = 'admin',
@@ -16,7 +17,7 @@ export enum UserRole {
 })
 
 export class AuthServiceService {
-  private apiUrl = 'http://localhost:3000/api/login'; // Replace with your backend URL
+  private apiUrl = `${environment.apiUrl}/login`; // Replace with your backend URL
   public role: string | null = null;
   public user: { username: string; role: string, id:number } | null = null;
 
@@ -87,7 +88,7 @@ initializeUserFromStorage(): void {
   }
     // Method to delete user by ID
     deleteUser(username: string, headers: HttpHeaders): Observable<any> {
-      return this.http.delete(`http://localhost:3000/api/login/delete-user/${username}`,  { headers });
+      return this.http.delete(`${this.apiUrl}/delete-user/${username}`,  { headers });
   }
   isLoggedIn(): boolean {
     console.log("token",localStorage.getItem('token'))

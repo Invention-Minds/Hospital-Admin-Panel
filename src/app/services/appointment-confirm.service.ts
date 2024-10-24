@@ -3,6 +3,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { map } from 'rxjs/operators';
 import { AuthServiceService } from './auth/auth-service.service';
+import { environment } from '../../environment/environment';
 
 export interface Appointment {
   id?: number;
@@ -47,7 +48,8 @@ export class AppointmentConfirmService {
   private completedAppointmentsSource = new BehaviorSubject<Appointment[]>([]);
   completedAppointments$ = this.completedAppointmentsSource.asObservable();
 
-  private apiUrl = 'http://localhost:3000/api/appointments'; // Update this with your actual backend endpoint
+  private apiUrl = `${environment.apiUrl}/appointments`; // Update this with your actual backend endpoint
+  private url = `${environment.apiUrl}/doctors`; // Update this with your actual backend endpoint
 
   constructor(private http: HttpClient, private authService: AuthServiceService) {}
 
@@ -152,15 +154,15 @@ addNewAppointment(appointment: Appointment): void {
     );
   }
   getAvailableSlots(doctorId: number, date: string): Observable<any> {
-    const availabilityUrl = `http://localhost:3000/api/doctors/availability?doctorId=${doctorId}&date=${date}`;
+    const availabilityUrl = `${environment.apiUrl}/doctors/availability?doctorId=${doctorId}&date=${date}`;
     return this.http.get<any>(availabilityUrl);
 }
 addBookedSlot(doctorId: number, date: string, time: string): Observable<any> {
   const bookingData = { doctorId, date, time };
-  return this.http.post(`http://localhost:3000/api/doctors/booked-slots`, bookingData);
+  return this.http.post(`${environment.apiUrl}/doctors/booked-slots`, bookingData);
 }
 getBookedSlots(doctorId: number, date: string): Observable<string[]> {
-  const bookedSlotsUrl = `http://localhost:3000/api/doctors/booked-slots?doctorId=${doctorId}&date=${date}`;
+  const bookedSlotsUrl = `${environment.apiUrl}/doctors/booked-slots?doctorId=${doctorId}&date=${date}`;
   return this.http.get<string[]>(bookedSlotsUrl);
 }
  // Method to get today's total appointments count
@@ -184,11 +186,11 @@ getPendingAppointmentsCountForToday(date: string): Observable<{ count: number }>
  // Method to get the count of available doctors for a specific date
  getAvailableDoctorsCount(date: string): Observable<number> {
   const params = new HttpParams().set('date', date);
-  return this.http.get<number>(`http://localhost:3000/api/doctors/available/count`, { params });
+  return this.http.get<number>(`${environment.apiUrl}/doctors/available/count`, { params });
 }
 getAvailableDoctors(date: string): Observable<number> {
   const params = new HttpParams().set('date', date);
-  return this.http.get<number>(`http://localhost:3000/api/doctors/available/`, { params });
+  return this.http.get<number>(`${environment.apiUrl}/doctors/available/`, { params });
 }
 getAppointmentsByUser(userId: number, status?: string): Observable<Appointment[]> {
   let params = new HttpParams().set('userId', userId.toString());
@@ -243,11 +245,11 @@ getAppointmentsByRole(): Observable<Appointment[]> {
       'Content-Type': 'application/json',
     });
 
-    return this.http.post<any>('http://localhost:3000/api/email/send-email', emailRequest, { headers });
+    return this.http.post<any>(`${environment.apiUrl}/email/send-email`, emailRequest, { headers });
   }
     // Method to send WhatsApp message
     sendWhatsAppMessage(data: any): Observable<any> {
-      return this.http.post<any>('http://localhost:3000/api/whatsapp/send', data);
+      return this.http.post<any>(`${environment.apiUrl}/whatsapp/send`, data);
     }
   // Method to get appointment by ID (if needed)
   getAppointmentById(appointmentId: number): Observable<any> {

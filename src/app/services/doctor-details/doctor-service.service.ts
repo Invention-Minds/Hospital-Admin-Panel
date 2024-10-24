@@ -3,13 +3,14 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { Doctor } from '../../models/doctor.model';
 import { Department } from '../../models/department.model';
+import { environment } from '../../../environment/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class DoctorServiceService {
   private doctors: Doctor[] = []; // Cache to store doctors locally
-  private apiUrl = 'http://localhost:3000/api'; // Replace with your actual backend URL
+  private apiUrl = `${environment.apiUrl}`; // Replace with your actual backend URL
 
   // BehaviorSubject for managing doctor state across components
   private doctorSubject = new BehaviorSubject<Doctor | null>(null);
@@ -48,7 +49,7 @@ export class DoctorServiceService {
     return this.http.get<Department[]>(`${this.apiUrl}/departments`);
   }
     getBookedSlots(doctorId: number, date: string): Observable<string[]> {
-      const bookedSlotsUrl = `http://localhost:3000/api/doctors/booked-slots?doctorId=${doctorId}&date=${date}`;
+      const bookedSlotsUrl = `${this.apiUrl}/doctors/booked-slots?doctorId=${doctorId}&date=${date}`;
       return this.http.get<string[]>(bookedSlotsUrl);
     }
   addUnavailableDates(doctorId: number, startDate: string, endDate: string, unavailableDates: string[]): Observable<any> {
@@ -60,7 +61,7 @@ export class DoctorServiceService {
     });
   }
   getUnavailableDates(doctorId: number): Observable<{ date: string }[]> {
-    return this.http.get<{ date: string }[]>(`http://localhost:3000/api/doctors/unavailable-dates?doctorId=${doctorId}`);
+    return this.http.get<{ date: string }[]>(`${this.apiUrl}/doctors/unavailable-dates?doctorId=${doctorId}`);
   }  
   getDoctorDetails(doctorId: number): Observable<Doctor> {
     return this.http.get<Doctor>(`${this.apiUrl}/doctors/${doctorId}`);

@@ -193,6 +193,9 @@ font-weight: 400;
     pointer-events: none;
     transition: all 0.3s ease;
   }
+  small{
+    color: red;
+  }
   
   .custom-form-field input:focus + .input-label,
   .custom-form-field input:not(:placeholder-shown) + .input-label {

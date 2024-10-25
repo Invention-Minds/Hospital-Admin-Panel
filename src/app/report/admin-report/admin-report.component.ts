@@ -354,35 +354,89 @@ export class AdminReportComponent {
     }
   }
 
+  // private loadAllAppointments(): void {
+  //   this.appointmentService.getAllAppointments().subscribe(
+  //     (appointments) => {
+  //       this.appointments = appointments.map(appointment => ({
+  //          const username = appointment.user?.username ? this.extractName(appointment.user.username) : 'Unknown';
+  //         ...appointment,
+  //         // username: appointment.user?.username ?? 'Unknown',
+          
+  //         created_at: this.formatDateYear(appointment.created_at ?? '1970-01-01'),
+  //         updated_at: this.formatDateYear(appointment.updated_at ?? '1970-01-01'),
+  //       }));
+  //       this.filteredAppointments = this.appointments; // Initialize filteredAppointments
+  //     },
+  //     (error) => {
+  //       console.error('Error fetching all appointments:', error);
+  //     }
+  //   );
+  // }
+
+  // loadAppointmentsByUser(userId: number): void {
+  //   this.appointmentService.getAppointmentsByUser(userId).subscribe((appointments: any[]) => {
+  //     this.appointments = appointments.map(appointment => ({
+  //        const username = appointment.user?.username ? this.extractName(appointment.user.username) : 'Unknown';
+  //       ...appointment,
+  //       // username: appointment.user?.username ?? 'Unknown',
+        
+  //       created_at: this.formatDateYear(appointment.created_at ?? '1970-01-01'),
+  //       updated_at: this.formatDateYear(appointment.updated_at ?? '1970-01-01'),
+  //     }));
+  //     this.filteredAppointments = this.appointments; // Initialize filteredAppointments
+  //   });
+  // }
+  
+  // private extractName(username: string): string {
+  //   // Extract the part before the first underscore or '@'
+  //   return username.split(/[_@]/)[0];
+  // }
   private loadAllAppointments(): void {
     this.appointmentService.getAllAppointments().subscribe(
       (appointments) => {
-        this.appointments = appointments.map(appointment => ({
-          ...appointment,
-          username: appointment.user?.username ?? 'Unknown',
-          created_at: this.formatDateYear(appointment.created_at ?? '1970-01-01'),
-          updated_at: this.formatDateYear(appointment.updated_at ?? '1970-01-01'),
-        }));
+        this.appointments = appointments.map(appointment => {
+          // Extract the name from the username
+          const username = appointment.user?.username ? this.extractName(appointment.user.username) : 'Unknown';
+  
+          return {
+            ...appointment,
+            username,
+            created_at: this.formatDateYear(appointment.created_at ?? '1970-01-01'),
+            updated_at: this.formatDateYear(appointment.updated_at ?? '1970-01-01'),
+          };
+        });
         this.filteredAppointments = this.appointments; // Initialize filteredAppointments
+        console.log('Fetched all appointments for sub_admin or super_admin:', this.appointments);
       },
       (error) => {
         console.error('Error fetching all appointments:', error);
       }
     );
   }
-
+  
+  private extractName(username: string): string {
+    // Extract the part before the first underscore or '@'
+    return username.split(/[_@]/)[0];
+  }
+  
   loadAppointmentsByUser(userId: number): void {
     this.appointmentService.getAppointmentsByUser(userId).subscribe((appointments: any[]) => {
-      this.appointments = appointments.map(appointment => ({
-        ...appointment,
-        username: appointment.user?.username ?? 'Unknown',
-        created_at: this.formatDateYear(appointment.created_at ?? '1970-01-01'),
-        updated_at: this.formatDateYear(appointment.updated_at ?? '1970-01-01'),
-      }));
+      this.appointments = appointments.map(appointment => {
+        // Extract the name from the username
+        const username = appointment.user?.username ? this.extractName(appointment.user.username) : 'Unknown';
+  
+        return {
+          ...appointment,
+          username,
+          created_at: this.formatDateYear(appointment.created_at ?? '1970-01-01'),
+          updated_at: this.formatDateYear(appointment.updated_at ?? '1970-01-01'),
+        };
+      });
       this.filteredAppointments = this.appointments; // Initialize filteredAppointments
     });
   }
-
+  
+  
   // Filter appointments by username and role
   filterAppointments() {
     this.filteredAppointments = this.appointments.filter(appointment => {

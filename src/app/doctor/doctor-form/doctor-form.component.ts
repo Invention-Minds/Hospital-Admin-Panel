@@ -119,6 +119,7 @@ export class DoctorFormComponent implements OnInit {
   
   // Method to save the doctor form data
   saveDoctor(): void {
+    console.log('Doctor:', this.doctor);
     if (this.doctor) {
       this.save.emit(this.doctor); // Emit the updated doctor details
     }

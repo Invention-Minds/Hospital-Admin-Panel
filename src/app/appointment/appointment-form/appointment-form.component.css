@@ -19,6 +19,15 @@
     position: relative;
     height: 700px;
   }
+  .phone-number-input {
+    display: flex;
+    align-items: center;
+  }
+  
+  .phone-number-input span {
+    margin-right: 5px;
+    font-weight: bold;
+  }
   
   .appointment-header {
     background-color: #0E2970;

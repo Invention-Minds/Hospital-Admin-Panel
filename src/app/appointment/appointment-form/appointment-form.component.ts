@@ -63,8 +63,8 @@ export class AppointmentFormComponent implements OnInit {
     this.appointmentForm = this.fb.group({
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
-      phoneNumber: ['', [Validators.required, Validators.pattern(/^(\+91\s)?[0-9]{12}$/)]],
-      email: ['', [Validators.required, Validators.email]],
+      phoneNumber: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
+      email: ['', [Validators.email]],
       doctorName: ['', Validators.required],
       appointmentDate: ['', Validators.required],
       appointmentTime: ['', Validators.required],
@@ -412,10 +412,11 @@ export class AppointmentFormComponent implements OnInit {
   // }
 
   private patchFormWithAppointment(appointment: Appointment, appointmentDate: string) {
+    const phoneNumber = '91' + appointment.phoneNumber; 
     this.appointmentForm.patchValue({
       firstName: appointment.patientName.split(' ')[0],
       lastName: appointment.patientName.split(' ')[1],
-      phoneNumber: appointment.phoneNumber,
+      phoneNumber: phoneNumber,
       email: appointment.email,
       doctorName: appointment.doctorName,
       appointmentDate: appointmentDate,
@@ -495,13 +496,14 @@ export class AppointmentFormComponent implements OnInit {
         this.doctorService.getDoctorDetails(this.appointment.doctorId).subscribe({
           next: (response) =>{
             const doctorPhoneNumber = response?.phone_number;
+            const phoneNumber = '91' + this.appointment?.phoneNumber; 
             const appointmentDetails ={
               patientName: this.appointment?.patientName,
               doctorName: this.appointment?.doctorName,
               date: this.appointment?.date,
               time: this.appointment?.time,
               doctorPhoneNumber: doctorPhoneNumber,
-              patientPhoneNumber: this.appointment?.phoneNumber,
+              patientPhoneNumber: phoneNumber,
               status: this.appointment?.status
             }
             this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
@@ -577,10 +579,11 @@ export class AppointmentFormComponent implements OnInit {
       if (selectedDoctor) {
         const doctorId = selectedDoctor.id;
         const department = selectedDoctor.departmentName ?? 'Default Department'; // Assuming departmentName is a property in the doctor model
-
+        const phoneNumber = '91' + this.appointmentForm.value.phoneNumber; 
         const appointmentDetails = {
+          
           patientName: this.appointmentForm.value.firstName + ' ' + this.appointmentForm.value.lastName,
-          phoneNumber: this.appointmentForm.value.phoneNumber,
+          phoneNumber: phoneNumber,
           doctorId: doctorId,
           doctorName: this.appointmentForm.value.doctorName,
           department: department, // Adjust as needed

@@ -119,19 +119,55 @@ export class DoctorFormComponent implements OnInit {
   
   // Method to save the doctor form data
   saveDoctor(): void {
-    console.log('Doctor:', this.doctor);
-    if (this.doctor) {
-      this.save.emit(this.doctor); // Emit the updated doctor details
+    if (this.isFormValid() && this.isAnyDaySelected()) {
+      console.log('Doctor:', this.doctor);
+      if (this.doctor) {
+        this.save.emit(this.doctor); // Emit the updated doctor details
+      }
+      this.isEditMode = false; // Exit the edit mode
+    } else {
+      console.error("Form is invalid or no availability day is selected");
     }
+    console.log('Doctor:', this.doctor);
+    // if (this.doctor) {
+    //   this.save.emit(this.doctor); // Emit the updated doctor details
+    // }
     this.isEditMode = false; // Exit the edit mode
   }
+  isFormValid(): boolean {
+    return !!(
+      this.doctor &&
+      this.doctor.name &&
+      this.doctor.qualification &&
+      this.doctor.email &&
+      this.doctor.phone_number &&
+      this.doctor.departmentName &&
+      this.doctor.availableFrom &&
+      this.doctor.slotDuration !== undefined &&
+      this.doctor.slotDuration !== null &&
+      this.doctor.slotDuration > 0 &&
+      /^[a-zA-Z. ]+$/.test(this.doctor.name) && // Ensure name has letters, spaces, and dots only
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.doctor.email) && // Ensure email is valid
+      /^[0-9]{10}$/.test(this.doctor.phone_number) && // Ensure phone number is 10 digits
+      /^\d{2}:\d{2}-\d{2}:\d{2}$/.test(this.doctor.availableFrom)
+    );
+  }
+  
 
   // Method to cancel editing
   cancelEdit(): void {
     this.cancel.emit();
     this.isEditMode = false; // Exit the edit mode
   }
-
+  isAnyDaySelected(): boolean {
+    if (this.doctor && this.doctor.availabilityDays) {
+      console.log('Availability days:', this.doctor.availabilityDays);
+      return Object.values(this.doctor.availabilityDays).some(day => day);
+      
+    }
+    return false;
+  }
+  
   filterDepartments(event: any): void {
     const query = event.target.value.toLowerCase();
     this.filteredDepartments = this.departments.filter(department =>

@@ -38,6 +38,8 @@ export class SettingsComponent implements OnInit {
   appointmentsCount: number = 0;
   userid:number = 0;
   role: string | null = null;  // Store user role
+  users: any[] = []; // List of all users
+  selectedUser: string = ''; // User selected by super admin to reset password
   constructor(private authService: AuthServiceService, private router: Router, private messageService: MessageService, private appointmentService: AppointmentConfirmService) {}
  // Define the role-based access
  rolePermissions: Record<UserRole, string[]> = {
@@ -62,6 +64,9 @@ export class SettingsComponent implements OnInit {
       if (validRoles.includes(this.role as UserRole)) {
         this.currentUserRole = this.role as UserRole;
         console.log("current user role in settings",this.currentUserRole)
+        if (this.currentUserRole === 'super_admin') {
+          this.loadUsers(); // Load users if the role is super admin
+        }
       } else {
         this.currentUserRole = 'sub_admin'; // Default role in case of an invalid role
       }
@@ -87,6 +92,38 @@ export class SettingsComponent implements OnInit {
   closeDeleteDialog(): void {
     this.showDeleteConfirmDialog = false;
   }
+  loadUsers(): void {
+    this.authService.getAllUsers().subscribe(
+      (data) => {
+        this.users = data;
+        console.log('Users loaded successfully:', this.users);
+      },
+      (error) => {
+        console.error('Error loading users:', error);
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load users' });
+      }
+    );
+  }
+  resetUserPassword(): void {
+    if (this.newPassword !== this.confirmPassword) {
+      this.messageService.add({ severity: 'warn', summary: 'Warning', detail: 'Passwords do not match' });
+      return;
+    }
+
+    if (this.selectedUser) {
+      this.authService.resetPassword(this.selectedUser, this.newPassword).subscribe(
+        () => {
+          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Password reset successfully' });
+          this.newPassword = '';
+          this.confirmPassword = '';
+        },
+        (error) => {
+          console.error('Error resetting user password:', error);
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to reset password' });
+        }
+      );
+    }
+  }
 // Register method
 createAccount() {
   this.authService.register(this.username, this.password).subscribe(response => {
@@ -103,6 +140,7 @@ createAccount() {
 // Reset Password method
 resetPassword() {
   if (this.newPassword !== this.confirmPassword) {
+    this.messageService.add({ severity: 'warn', summary: 'Warning', detail: 'Passwords do not match' });
     console.error('Passwords do not match!');
     return;
   }

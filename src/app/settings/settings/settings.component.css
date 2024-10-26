@@ -116,7 +116,7 @@ line-height: normal;
 }
 
 .save-button {
-  width: 25%;
+  width: 110%;
 
   border: none;
 
@@ -308,3 +308,55 @@ line-height: normal;
 .label {
   font-weight: bold;
 } */
+.styled-select {
+  width: 401px;
+    height: 52px;
+    padding: 12px 20px;
+    align-items: center;
+    gap: 70px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    border: 2px solid rgba(183, 183, 183, 0.40);
+    background: #FFF;
+    box-shadow: 0px 4px 15px 0px rgba(216, 210, 252, 0.64);
+    font-size: 18px;
+    font-weight: 400;
+    font-family: Kanit;
+    color: #7B7B7B;
+    font-family: Kanit;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+    appearance: none; /* For modern browsers */
+    -webkit-appearance: none; /* For Safari */
+    -moz-appearance: none; /* For Firefox */
+    background-image: url('/select-down-arrow.svg');
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right : 14px;
+    background-color: #FFF;
+    background-size: 22px;
+    border: none;
+}
+
+.styled-select option {
+  color: #000; /* Regular color for options */
+}
+
+.styled-select:focus {
+  outline: none; /* Remove focus ring from styled-select */
+  border-color: none; /* Highlight color when dropdown is focused */
+}
+
+.styled-select::-ms-expand {
+  display: none; /* Hide the default dropdown arrow in Internet Explorer */
+}
+
+.styled-select::after {
+  content: '▼'; /* Add custom dropdown arrow */
+  position: absolute;
+  right: 10px;
+  pointer-events: none;
+  color: #7B7B7B;
+}

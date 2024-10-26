@@ -95,6 +95,9 @@ initializeUserFromStorage(): void {
     return typeof window !== 'undefined' && localStorage.getItem('token') !== null;; // Return false if localStorage is not available
   
   }
+  getAllUsers(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/get-all-users`);
+  }
   // Utility function to extract role from username
   private extractRoleFromUsername(username: string): string {
     const parts = username.split('_');

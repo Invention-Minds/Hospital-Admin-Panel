@@ -28,7 +28,11 @@
     margin-right: 5px;
     font-weight: bold;
   }
-  
+  small{
+    color: #D20006;
+    font-size: 16px;
+    font-weight: 500;
+  }
   .appointment-header {
     background-color: #0E2970;
     /* padding: 15px; */

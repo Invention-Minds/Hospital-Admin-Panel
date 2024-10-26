@@ -237,4 +237,11 @@ font-weight: 400;
     padding: 0 4px;
     color: #2196f3;
   }
+  .update-button.disabled,
+  .update-button:disabled {
+    background: #cccccc;
+    color: #666666;
+    cursor: not-allowed;
+  }
+  
   

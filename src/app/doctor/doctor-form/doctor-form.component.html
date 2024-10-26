@@ -4,21 +4,28 @@
       <h2>{{ isEditMode ? 'Edit Doctor Information' : 'Add Doctor Information' }}</h2>
       <span class="close-button-1" (click)="cancelEdit()">&times;</span>
     </div>
-    <form  (ngSubmit)="saveDoctor()">
+    <form #doctorForm="ngForm" (ngSubmit)="saveDoctor()">
       <div class="row">
         <!-- Doctor Name -->
         <div class="col">
           <div class="custom-form-field">
-            <input type="text" id="name" [(ngModel)]="doctor!.name" name="name" placeholder="Dr. Doctor Name" required />
+            <input type="text" id="name" [(ngModel)]="doctor!.name" name="name" pattern="^[a-zA-Z. ]+$" placeholder="Dr. Doctor Name" required #name="ngModel" />
             <label for="name" class="input-label">Doctor Name*</label>
+            <div *ngIf="name.invalid && (name.dirty || name.touched)" class="error-message">
+              <small *ngIf="name.errors && name.errors['required']">Name is required</small>
+              <small *ngIf="name.errors && name.errors['pattern']">Name cannot contain numbers</small>
+            </div>
           </div>
         </div>
 
         <!-- Qualification -->
         <div class="col">
           <div class="custom-form-field">
-            <input type="text" id="qualification" [(ngModel)]="doctor!.qualification" name="qualification" placeholder="MBBS" required />
+            <input type="text" id="qualification" [(ngModel)]="doctor!.qualification" name="qualification" placeholder="MBBS" required #qualification="ngModel" />
             <label for="qualification" class="input-label">Qualification*</label>
+            <div *ngIf="qualification.invalid && (qualification.dirty || qualification.touched)" class="error-message">
+              <small *ngIf="qualification.errors && qualification.errors['required']">Qualification is required</small>
+            </div>
           </div>
         </div>
       </div>
@@ -27,15 +34,24 @@
       <div class="row">
         <div class="col">
           <div class="custom-form-field">
-            <input type="email" id="email" [(ngModel)]="doctor!.email" name="email" placeholder="" required />
+            <input type="email" id="email" [(ngModel)]="doctor!.email" name="email" placeholder="" pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+            required #email="ngModel" />
             <label for="email" class="input-label">Email*</label>
+            <div *ngIf="email.invalid && (email.dirty || email.touched)" class="error-message">
+              <small *ngIf="email.errors && email.errors['required']">Email is required</small>
+              <small *ngIf="email.errors && email.errors['pattern']">Valid email is required</small>
+            </div>
           </div>
         </div>
 
         <div class="col">
           <div class="custom-form-field">
-            <input type="tel" id="phone_number" [(ngModel)]="doctor!.phone_number" name="phone_number" placeholder="919876543210" required />
+            <input type="tel" id="phone_number" [(ngModel)]="doctor!.phone_number" name="phone_number" pattern="^[0-9]{10}$" maxlength="10" placeholder="9876543210" required #phone_number="ngModel" />
             <label for="phone_number" class="input-label">Mobile Number*</label>
+            <div *ngIf="phone_number.invalid && (phone_number.dirty || phone_number.touched)" class="error-message">
+              <small *ngIf="phone_number.errors && phone_number.errors['required']">Valid mobile number is required</small>
+              <small *ngIf="phone_number.errors && phone_number.errors['pattern']">Phone number must be 10 digits</small>
+            </div>
           </div>
         </div>
       </div>
@@ -44,59 +60,72 @@
       <div class="row">
         <div class="col">
           <div class="custom-form-field">
-            <input type="text" id="departmentInput" (input)="filterDepartments($event)" (focus)="toggleDropdown(true)" 
-              (blur)="toggleDropdown(false)"  class="form-control"  [(ngModel)]="doctor!.departmentName" name="department"/>
+            <input type="text" id="departmentInput" (input)="filterDepartments($event)" (focus)="toggleDropdown(true)"
+              (blur)="toggleDropdown(false)" class="form-control" [(ngModel)]="doctor!.departmentName" name="department" required #department="ngModel" />
             <label for="departmentInput" class="input-label">Department*</label>
-          
+            <div *ngIf="department.invalid && (department.dirty || department.touched)" class="error-message">
+              <small *ngIf="department.errors && department.errors['required']">Department is required</small>
+            </div>
+
             <div *ngIf="showDropdown" class="dropdown">
               <div *ngFor="let department of filteredDepartments" class="dropdown-item" (mousedown)="selectDepartment(department)">
                 {{ department.name }}
               </div>
             </div>
           </div>
-          
+        </div>
+      </div>
+
+      <!-- Availability Days -->
+      <div class="row">
+        <div class="col form-group availability-group-inline">
+          <label class="availability-label-inline">Availability Days *</label>
+          <div class="availability-days-inline">
+            <div class="day-option-inline" *ngFor="let day of availabilityDaysList">
+              <input type="checkbox" id="{{ day }}" [checked]="doctor!.availabilityDays[day.toString()]"
+                (change)="updateAvailability(day.toString(), $event)" [attr.name]="day" name="availability" class="availability-checkbox-inline" />
+              <label for="{{ day }}" class="availability-day-label-inline">{{ day.toString() | titlecase }}</label>
+            </div>
+          </div>
+          <div *ngIf="!isAnyDaySelected() && doctorForm.submitted" class="error-message">
+            <small>At least one availability day must be selected</small>
           </div>
         </div>
-      
-
-      <!-- Availability Days -->
-      <!-- Availability Days -->
-<!-- Availability Days -->
-<div class="row">
-  <div class="col form-group availability-group-inline">
-    <label class="availability-label-inline">Availability Days *</label>
-    <div class="availability-days-inline">
-      <div class="day-option-inline" *ngFor="let day of availabilityDaysList">
-        <input type="checkbox" id="{{ day }}" [checked]="doctor!.availabilityDays[day.toString()]"
-        (change)="updateAvailability(day.toString(), $event)" [attr.name]="day" name="availability" class="availability-checkbox-inline" />
-        <label for="{{ day }}" class="availability-day-label-inline">{{ day.toString() | titlecase }}</label>
       </div>
-    </div>
-  </div>
-</div>
-
-
 
       <!-- Available Time and Slot Timing -->
       <div class="row">
         <div class="col">
           <div class="custom-form-field">
-            <input type="text" id="availableTime" [(ngModel)]="doctor!.availableFrom" name="availableTime" placeholder="09:00-11:00" required />
+            <input type="text" id="availableTime" [(ngModel)]="doctor!.availableFrom" name="availableTime" pattern="^\d{2}:\d{2}-\d{2}:\d{2}$" placeholder="09:00-11:00" required #availableTime="ngModel" />
             <label for="availableTime" class="input-label">Available Time*</label>
+            <div *ngIf="availableTime.invalid && (availableTime.dirty || availableTime.touched)" class="error-message">
+              <small *ngIf="availableTime.errors && availableTime.errors['required']">Available time is required</small>
+              <small *ngIf="availableTime.errors && availableTime.errors['pattern']">Time must be in format 00:00-00:00</small>
+            </div>
           </div>
         </div>
 
         <div class="col">
           <div class="custom-form-field">
-            <input type="text" id="slotTiming" [(ngModel)]="doctor!.slotDuration" name="slotTiming" placeholder="20" required />
+            <input type="number" id="slotTiming" [(ngModel)]="doctor!.slotDuration" name="slotTiming" min="1" placeholder="20" required #slotTiming="ngModel" />
             <label for="slotTiming" class="input-label">Slot Timing*</label>
+            <div *ngIf="slotTiming.invalid && (slotTiming.dirty || slotTiming.touched)" class="error-message">
+              <small *ngIf="slotTiming.errors && slotTiming.errors['required']">Slot timing is required</small>
+              <small *ngIf="slotTiming.errors && slotTiming.errors['min']">Slot timing must be a positive number</small>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- Action Buttons -->
       <div class="doctor-form-actions">
-        <button class="update-button" type="submit"> {{ isEditMode ? 'Update' : 'Add' }}</button>
+        <button class="update-button" type="submit"
+        [disabled]="!isFormValid() || !isAnyDaySelected()"
+        [ngClass]="{'disabled': !isFormValid() || !isAnyDaySelected()}">
+        {{ isEditMode ? 'Update' : 'Add' }}
+      </button>
+      
         <button class="close-button" type="button" (click)="cancelEdit()">Close</button>
       </div>
     </form>

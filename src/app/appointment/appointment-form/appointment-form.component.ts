@@ -48,6 +48,7 @@ export class AppointmentFormComponent implements OnInit {
   showDoctorUnavailableMessage: boolean = false;
   doctorUnavailableMessage: string = '';
   unavailableDates: string[] = [];
+  minDate: string = '';
 
 
 
@@ -58,19 +59,27 @@ export class AppointmentFormComponent implements OnInit {
   @Output() submit = new EventEmitter<{ appointment: Appointment; status: string; requestVia: string }>();
 
   ngOnInit(): void {
+     // Set the minimum date to today
+     const today = new Date();
+     const year = today.getFullYear();
+     const month = (today.getMonth() + 1).toString().padStart(2, '0');
+     const day = today.getDate().toString().padStart(2, '0');
+     this.minDate = `${year}-${month}-${day}`;
     this.loadDoctors();
+    
     // this.loadBookedSlots(); // Load booked slots from localStorage
     this.appointmentForm = this.fb.group({
-      firstName: ['', Validators.required],
-      lastName: ['', Validators.required],
+      firstName: ['', [Validators.required, Validators.pattern(/^[a-zA-Z\s]*$/)]],
+      lastName: ['', [Validators.required, Validators.pattern(/^[a-zA-Z.\s]*$/)]],
       phoneNumber: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
-      email: ['', [Validators.email]],
-      doctorName: ['', Validators.required],
+      email: ['', [Validators.required, Validators.email, Validators.pattern(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)]],
+      doctorName: ['', [Validators.required, Validators.pattern(/^[a-zA-Z.\s]*$/)]],
       appointmentDate: ['', Validators.required],
       appointmentTime: ['', Validators.required],
-      requestVia: ['Call', Validators.required], // Set default to 'Website'
+      requestVia: ['Call', Validators.required], // Set default to 'Call'
       appointmentStatus: ['Confirm', Validators.required] // Set default to 'Confirm'
     });
+    
 
 
     if (this.appointment) {
@@ -283,7 +292,20 @@ export class AppointmentFormComponent implements OnInit {
         if (availability && availability.availableFrom) {
           const [start, end] = availability.availableFrom.split('-');
           const slotDuration = availability.slotDuration;
-          this.availableSlots = this.generateTimeSlots(start, end, slotDuration);
+          let generatedSlots = this.generateTimeSlots(start, end, slotDuration);
+          const today = new Date();
+        const selectedDate = new Date(date);
+        if (selectedDate.toDateString() === today.toDateString()) {
+          const currentTimeInMinutes = today.getHours() * 60 + today.getMinutes();
+          generatedSlots = generatedSlots.filter(slot => {
+            const [startTime] = slot.split('-');
+            const [startHour, startMinute] = startTime.split(':').map(Number);
+            const slotTimeInMinutes = startHour * 60 + startMinute;
+            return slotTimeInMinutes > currentTimeInMinutes;
+          });
+        }
+
+        this.availableSlots = generatedSlots;
 
           // Remove the slots that are already booked for that date
           this.appointmentService.getBookedSlots(doctorId, date).subscribe(

@@ -73,12 +73,12 @@
       </div>
 
       <!-- Email Input -->
-      <div class="input">
+      <div *ngIf="currentUserRole !== 'super_admin'" class="input">
         <input type="text" class="input-field" [(ngModel)]="username" placeholder="Username_admin@rashtrotthana" disabled>
-        <!-- <div class="password-container">
+         <!-- <div class="password-container">
                   <input [type]="isOldPasswordVisible ? 'text' : 'password'"  class="input-field" [(ngModel)]="oldPassword" placeholder="Old Password">
                   <img [src]="isOldPasswordVisible? '/not-show.png': '/show-password.png'" alt="Show Password" class="eye-icon" (click)="toggleOldPasswordVisibility()" >
-                </div> -->
+                </div>  -->
         <div class="password-container">
           <input [type]="isNewPasswordVisible ? 'text' : 'password'" class="input-field" [(ngModel)]="newPassword"
             placeholder="New Password">
@@ -87,13 +87,55 @@
         </div>
 
         <!-- Password Input -->
-        <div class="password-container">
+         <div class="password-container">
           <input [type]="isConfirmPasswordVisible ? 'text' : 'password'" class="input-field"
             [(ngModel)]="confirmPassword" placeholder="Confirm New Password">
           <img [src]="isConfirmPasswordVisible? '/not-show.png': '/show-password.png'" alt="Show Password"
             class="eye-icon" (click)="toggleConfirmPasswordVisibility()">
         </div>
+      </div> 
+      <div *ngIf="currentUserRole !== 'super_admin'">
+        <button class="save-button" (click)="resetPassword()">Reset Password</button>
       </div>
+
+      
+<!-- Select User for Super Admin -->
+  <!-- <div *ngIf="currentUserRole === 'super_admin'" class="form-group">
+    <label for="userSelect">Select User to Reset Password:</label>
+    <select id="userSelect" [(ngModel)]="selectedUser">
+      <option *ngFor="let user of users" [value]="user.username">
+        {{ user.username }}
+      </option>
+    </select>
+  </div> -->
+  <div *ngIf="currentUserRole === 'super_admin'" class="form-group">
+    <select id="userSelect" [(ngModel)]="selectedUser" class="styled-select password-container">
+      <option value="" disabled selected hidden>Select User to Reset Password</option>
+      <option *ngFor="let user of users" [value]="user.username">
+        {{ user.username }}
+      </option>
+    </select>
+  </div>
+
+<!-- New Password Input Fields -->
+<div *ngIf="currentUserRole === 'super_admin'" class="password-container">
+  <input [type]="isNewPasswordVisible ? 'text' : 'password'" class="input-field" [(ngModel)]="newPassword"
+    placeholder="New Password">
+  <img [src]="isNewPasswordVisible ? '/not-show.png' : '/show-password.png'" alt="Show Password" class="eye-icon"
+    (click)="toggleNewPasswordVisibility()">
+</div>
+
+<div *ngIf="currentUserRole === 'super_admin'" class="password-container">
+  <input [type]="isConfirmPasswordVisible ? 'text' : 'password'" class="input-field" [(ngModel)]="confirmPassword"
+    placeholder="Confirm New Password">
+  <img [src]="isConfirmPasswordVisible ? '/not-show.png' : '/show-password.png'" alt="Show Password"
+    class="eye-icon" (click)="toggleConfirmPasswordVisibility()">
+</div>
+
+<!-- Button to Reset Password for Super Admin -->
+<div *ngIf="currentUserRole === 'super_admin'">
+  <button class="save-button" (click)="resetUserPassword()">Reset User Password</button>
+</div>
 
 
 
@@ -123,7 +165,7 @@
 
 
       <!-- Save Button -->
-      <button class="save-button" (click)="resetPassword()">Save Changes</button>
+      <!-- <button class="save-button" (click)="resetPassword()">Save Changes</button> -->
 
       <!-- Delete Account
             <div class="delete-account">

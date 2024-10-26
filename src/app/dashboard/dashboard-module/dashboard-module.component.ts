@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { Observable, interval } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
+import { environment } from '../../../environment/environment';
 
 
 interface Appointment {
@@ -35,6 +36,7 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
   pendingAppointmentsCount: number = 0;
   newNotification: boolean = false; // Flag to show if new appointments came
   hasNewNotification: boolean = false;
+  private apiUrl = environment.apiUrl;
   private audio = new Audio('/notification.mp3'); // Add a notification sound
   private eventSource: EventSource | null = null;
   public hasNewAppointment: boolean = true;
@@ -54,7 +56,7 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
     } else {
       console.log('localStorage is not available');
     }
-    this.eventSource = new EventSource('http://localhost:3000/api/appointments/updates');
+    this.eventSource = new EventSource(`${this.apiUrl}/appointments/updates`);
 
     this.eventSource.onmessage = (event) => {
       const newAppointment = JSON.parse(event.data);

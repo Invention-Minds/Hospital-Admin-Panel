@@ -2,7 +2,3 @@
   command = "node replace-env.js && ng build --configuration production"
   publish = "dist/hospital_appointment_admin_panel/browser"
 
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200

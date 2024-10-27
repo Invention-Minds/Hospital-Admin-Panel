@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
+import { MessageService } from 'primeng/api';
 interface Appointment {
   id?: number;
   patientName: string;
@@ -21,12 +22,13 @@ interface Appointment {
 @Component({
   selector: 'app-appointment-confirm',
   templateUrl: './appointment-confirm.component.html',
-  styleUrl: './appointment-confirm.component.css'
+  styleUrl: './appointment-confirm.component.css',
+  providers: [MessageService]
 })
 export class AppointmentConfirmComponent {
   confirmedAppointments: Appointment[] = [];
 
-  constructor(private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService) { }
+  constructor(private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService,private messageService: MessageService) { }
   appointments: Appointment[] = [
     // { id: '0001', patientName: 'Anitha Sundar', phoneNumber: '+91 7708590100', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Booked', smsSent: true },
   ];
@@ -49,6 +51,14 @@ export class AppointmentConfirmComponent {
     //   this.confirmedAppointments = appointments;
     //   this.filteredAppointments = [...this.confirmedAppointments];
     //   console.log('Confirmed appointments from component:', this.confirmedAppointments);
+    const savedAppointments = localStorage.getItem('appointments');
+  if (savedAppointments) {
+    this.appointments = JSON.parse(savedAppointments);
+  } else {
+    // Fetch appointments from the backend for the first time
+        // Fetch appointments from backend to initialize the data
+        this.appointmentService.fetchAppointments();
+  }
     this.appointmentService.confirmedAppointments$.subscribe(appointments => {
       this.confirmedAppointments = appointments;
       this.confirmedAppointments.sort((a, b) => {
@@ -60,8 +70,7 @@ export class AppointmentConfirmComponent {
 
     });
 
-    // Fetch appointments from backend to initialize the data
-    this.appointmentService.fetchAppointments();
+
     // });
   }
   sortBy(column: keyof Appointment) {
@@ -174,8 +183,12 @@ export class AppointmentConfirmComponent {
     const year = date.getFullYear().toString().slice(-4); // Get last two digits of year
     return `${year}-${month}-${day}`;
   }
+  saveToLocalStorage(): void {
+    localStorage.setItem('appointments', JSON.stringify(this.appointments));
+  }
   completeAppointment(appointment: Appointment) {
     appointment.completed = true;
+    this.saveToLocalStorage();
     // Fetch doctor details to get the slot duration
     this.doctorService.getDoctorDetails(appointment.doctorId).subscribe(
       (doctor) => {
@@ -186,6 +199,7 @@ export class AppointmentConfirmComponent {
           this.appointmentService.scheduleCompletion(appointment.id!, delayTime).subscribe({
             next: () => {
               console.log('Appointment completion scheduled successfully');
+              this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Appointment completed completion scheduled successfully' });
             },
             error: (error) => {
               console.error('Error scheduling appointment completion:', error);
@@ -230,7 +244,7 @@ export class AppointmentConfirmComponent {
         }
         this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
           next: (response) => {
-            console.log('WhatsApp message sent successfully:', response);
+            // console.log('WhatsApp message sent successfully:', response);
           },
           error: (error) => {
             console.error('Error sending WhatsApp message:', error);
@@ -250,7 +264,7 @@ export class AppointmentConfirmComponent {
     const emailStatus = 'cancelled';
     this.appointmentService.sendEmail(patientEmail, emailStatus, appointmentDetails, 'patient').subscribe({
       next: (response) => {
-        console.log('Email sent to patient successfully:', response);
+        // console.log('Email sent to patient successfully:', response);
       },
       error: (error) => {
         console.error('Error sending email to patient:', error);

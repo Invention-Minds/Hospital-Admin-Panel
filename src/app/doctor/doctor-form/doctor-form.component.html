@@ -9,7 +9,7 @@
         <!-- Doctor Name -->
         <div class="col">
           <div class="custom-form-field">
-            <input type="text" id="name" [(ngModel)]="doctor!.name" name="name" pattern="^[a-zA-Z. ]+$" placeholder="Dr. Doctor Name" required #name="ngModel" />
+            <input type="text" id="name" [(ngModel)]="doctor!.name" name="name" pattern="^[a-zA-Z.() ]+$" placeholder="Dr. Doctor Name" required #name="ngModel" />
             <label for="name" class="input-label">Doctor Name*</label>
             <div *ngIf="name.invalid && (name.dirty || name.touched)" class="error-message">
               <small *ngIf="name.errors && name.errors['required']">Name is required</small>
@@ -57,7 +57,7 @@
       </div>
 
       <!-- Department -->
-      <div class="row">
+      <!-- <div class="row">
         <div class="col">
           <div class="custom-form-field">
             <input type="text" id="departmentInput" (input)="filterDepartments($event)" (focus)="toggleDropdown(true)"
@@ -74,7 +74,25 @@
             </div>
           </div>
         </div>
+      </div> -->
+<div class="row">
+  <div class="col">
+    <div class="custom-form-field">
+      <select id="departmentSelect" [(ngModel)]="doctor!.departmentId" name="department" class="form-control" required #department="ngModel" (change)="selectDepartment($event)">
+        <option value="" disabled selected>Select Department</option>
+        <option *ngFor="let department of departments" [value]="department.id">
+          {{ department.name }}
+        </option>
+      </select>
+      <label for="departmentSelect" class="input-label">Department*</label>
+      <div *ngIf="department.invalid && (department.dirty || department.touched)" class="error-message">
+        <small *ngIf="department.errors && department.errors['required']">Department is required</small>
       </div>
+    </div>
+  </div>
+</div>
+
+      
 
       <!-- Availability Days -->
       <div class="row">

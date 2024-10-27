@@ -39,7 +39,7 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
   private apiUrl = environment.apiUrl;
   private audio = new Audio('/notification.mp3'); // Add a notification sound
   private eventSource: EventSource | null = null;
-  public hasNewAppointment: boolean = true;
+  public hasNewAppointment: boolean = false;
   constructor(private authService: AuthServiceService, private router: Router,private appointmentService: AppointmentConfirmService,private changeDetector: ChangeDetectorRef) {}
 
   ngOnInit(): void {

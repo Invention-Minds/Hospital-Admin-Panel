@@ -23,7 +23,9 @@
     display: flex;
     align-items: center;
   }
-  
+  .select{
+    margin-left: 32px;
+  }
   .phone-number-input span {
     margin-right: 5px;
     font-weight: bold;
@@ -50,7 +52,15 @@
   h3{
     margin: 0;
   }
-  
+  .errors{
+    margin-top: 42px;
+    margin-bottom: 28px;
+    margin-left: -168px;
+
+  }
+  .last-name{
+    margin-left: 98px !important;
+  }
   .close-button {
     position: absolute;
     right: 20px;
@@ -70,6 +80,7 @@
     display: flex;
     justify-content: space-between;
     margin-bottom: 15px;
+    height: 65px;
   }
   .form-group-2{
     display: flex;
@@ -99,7 +110,7 @@ select {
     /* width: 158px; */
     height: 36px;
     /* margin-left: 20px; */
-    margin-bottom: 20px;
+    /* margin-bottom: 20px; */
   }
 input[type="date"]{
     width: 170px;
@@ -127,6 +138,15 @@ input[type="tel"]{
   }
   .radio{
 
+  }
+  .email{
+    margin-right:38px;
+  }
+  .phone{
+    margin-right: -26px;
+  }
+  .doctor{
+    margin-right: -13px;
   }
   .button-group {
     display: flex;

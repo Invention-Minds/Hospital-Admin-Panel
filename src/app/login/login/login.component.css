@@ -59,6 +59,7 @@ width: 364px;
 }
 .eye-icon{
   padding-right: 17px;
+  cursor: pointer;
 }
 
 .input-group input {

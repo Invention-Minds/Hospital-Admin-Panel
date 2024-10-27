@@ -120,6 +120,7 @@ export class DoctorFormComponent implements OnInit {
   // Method to save the doctor form data
   saveDoctor(): void {
     if (this.isFormValid() && this.isAnyDaySelected()) {
+      this.doctor?.phone_number.startsWith('91') ? this.doctor?.phone_number : this.doctor!.phone_number = '91' + this.doctor?.phone_number;
       console.log('Doctor:', this.doctor);
       if (this.doctor) {
         this.save.emit(this.doctor); // Emit the updated doctor details
@@ -176,16 +177,30 @@ export class DoctorFormComponent implements OnInit {
     this.showDropdown = this.filteredDepartments.length > 0;
   }
   
-  selectDepartment(department: Department): void {
-    if (this.doctor) {
-      this.doctor.departmentName = department.name;
-      this.doctor.departmentId = department.id; 
-      this.selectedDepartmentName= this.doctor.departmentName; // Make sure you update the department correctly
-      console.log('Selected department:', this.selectedDepartmentName);
+  // selectDepartment(department: Department): void {
+  //   if (this.doctor) {
+  //     this.doctor.departmentName = department.name;
+  //     this.doctor.departmentId = department.id; 
+  //     this.selectedDepartmentName= this.doctor.departmentName; // Make sure you update the department correctly
+  //     console.log('Selected department:', this.selectedDepartmentName);
+  //   }
+  //   this.departmentSearch = department.name; // Update the input field value
+  //   this.showDropdown = false; // Hide the dropdown after selection
+  // }
+  selectDepartment(event: Event): void {
+    const selectElement = event.target as HTMLSelectElement;
+
+    if (selectElement && selectElement.value) {
+      const departmentId = Number(selectElement.value); // Convert the value to a number
+    const selectedDepartment = this.departments.find(department => department.id === departmentId);
+    if (selectedDepartment && this.doctor) {
+      this.doctor.departmentName = selectedDepartment.name;
+      this.doctor.departmentId = selectedDepartment.id;
+      console.log('Selected department:', this.doctor.departmentName);
     }
-    this.departmentSearch = department.name; // Update the input field value
-    this.showDropdown = false; // Hide the dropdown after selection
   }
+  }
+  
   
   // Toggle the dropdown for department selection
   toggleDropdown(show: boolean): void {

@@ -11,7 +11,7 @@ export class ReportOverviewComponent {
     // Show the Appointment Request component when the "No. of Req Arrived" card is clicked
     showAdminReport() {
       if(this.role != 'doctor') {
-      this.activeComponent = 'admin';
+      this.activeComponent = 'sub_admin';
     }
   }
     // Show the Confirmed Appointments component when the "No. of Confirmed" card is clicked
@@ -22,7 +22,7 @@ export class ReportOverviewComponent {
       if (typeof window !== 'undefined' && window.localStorage) {
         // Fetch role from localStorage or the authentication service
         this.role = localStorage.getItem('role') || '';
-        console.log('User role:', this.role);
+        // console.log('User role:', this.role);
             // Automatically set the active component to the doctor's report if the role is 'doctor'
     if (this.role === 'doctor') {
       this.activeComponent = 'doctor';

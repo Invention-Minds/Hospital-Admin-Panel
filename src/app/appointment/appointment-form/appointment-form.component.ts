@@ -71,7 +71,7 @@ export class AppointmentFormComponent implements OnInit {
     this.appointmentForm = this.fb.group({
       firstName: ['', [Validators.required, Validators.pattern(/^[a-zA-Z\s]*$/)]],
       lastName: ['', [Validators.required, Validators.pattern(/^[a-zA-Z.\s]*$/)]],
-      phoneNumber: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
+      phoneNumber: ['', [Validators.required, Validators.pattern(/^\d{12}$/)]],
       email: ['', [Validators.required, Validators.email, Validators.pattern(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)]],
       doctorName: ['', [Validators.required, Validators.pattern(/^[a-zA-Z.\s]*$/)]],
       appointmentDate: ['', Validators.required],
@@ -160,10 +160,11 @@ export class AppointmentFormComponent implements OnInit {
   }
 
 
-  private loadDoctors(): void {
+  public loadDoctors(): void {
     this.doctorService.getDoctors().subscribe(
       (doctors) => {
         this.doctors = doctors;
+        this.filteredDoctors = doctors
       },
       (error) => {
         console.error('Error loading doctors:', error);
@@ -187,9 +188,21 @@ export class AppointmentFormComponent implements OnInit {
     this.showDoctorSuggestions = this.filteredDoctors.length > 0 && doctorNameInput.length > 0;
   }
 
-  onDoctorSelect(doctor: Doctor): void {
-    this.appointmentForm.get('doctorName')?.setValue(doctor.name);
-    this.showDoctorSuggestions = false;  // Hide dropdown after selecting
+  onDoctorSelect(event: Event): void {
+
+    // this.appointmentForm.get('doctorName')?.setValue(doctor.name);
+    // this.showDoctorSuggestions = false;  // Hide dropdown after selecting
+    const selectElement = event.target as HTMLSelectElement | null;
+
+    if (selectElement && selectElement.value) {
+      const doctorId = parseInt(selectElement.value, 10); // Convert the value to an integer
+  
+      const selectedDoctor = this.doctors.find(doctor => doctor.id === doctorId);
+      if (selectedDoctor) {
+        this.appointmentForm.get('doctorName')?.setValue(selectedDoctor.name);
+      }
+    }
+  
   }
   private setupNewAppointmentFormListeners() {
     // Load available slots when doctor or date changes for new appointments only
@@ -434,7 +447,11 @@ export class AppointmentFormComponent implements OnInit {
   // }
 
   private patchFormWithAppointment(appointment: Appointment, appointmentDate: string) {
-    const phoneNumber = '91' + appointment.phoneNumber; 
+    let phoneNumber = appointment.phoneNumber;
+
+if (!phoneNumber.startsWith('91')) {
+  phoneNumber = '91' + phoneNumber;
+}
     this.appointmentForm.patchValue({
       firstName: appointment.patientName.split(' ')[0],
       lastName: appointment.patientName.split(' ')[1],
@@ -518,7 +535,11 @@ export class AppointmentFormComponent implements OnInit {
         this.doctorService.getDoctorDetails(this.appointment.doctorId).subscribe({
           next: (response) =>{
             const doctorPhoneNumber = response?.phone_number;
-            const phoneNumber = '91' + this.appointment?.phoneNumber; 
+            let phoneNumber = this.appointment!.phoneNumber;
+
+if (!phoneNumber.startsWith('91')) {
+  phoneNumber = '91' + phoneNumber;
+}
             const appointmentDetails ={
               patientName: this.appointment?.patientName,
               doctorName: this.appointment?.doctorName,
@@ -601,7 +622,11 @@ export class AppointmentFormComponent implements OnInit {
       if (selectedDoctor) {
         const doctorId = selectedDoctor.id;
         const department = selectedDoctor.departmentName ?? 'Default Department'; // Assuming departmentName is a property in the doctor model
-        const phoneNumber = '91' + this.appointmentForm.value.phoneNumber; 
+        let phoneNumber = this.appointmentForm.value.phoneNumber;
+
+        if (!phoneNumber.startsWith('91')) {
+          phoneNumber = '91' + phoneNumber;
+        }
         const appointmentDetails = {
           
           patientName: this.appointmentForm.value.firstName + ' ' + this.appointmentForm.value.lastName,

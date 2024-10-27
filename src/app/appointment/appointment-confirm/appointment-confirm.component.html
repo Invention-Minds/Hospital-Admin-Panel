@@ -51,8 +51,8 @@
           <span class="status-badge">{{ appointment.status }}</span>
         </td>
         <td>
-          <button class="btn-action">
-            <img src="icons/book.png" alt="check" class="action-icon" (click)="completeAppointment(appointment)"
+          <button class="btn-action" [disabled]="appointment.completed">
+            <img src="check-in.svg" alt="check" class="action-icon"  (click)="completeAppointment(appointment)"
               pTooltip="Check-in" tooltipPosition="top">
             <button class="btn-action" [disabled] ="appointment.completed">
               <img src="icons/delete.png" alt="delete" class="action-icon" (click)="cancelAppointment(appointment)" 

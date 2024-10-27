@@ -177,8 +177,20 @@ font-weight: 400;
     font-size: 16px;
     transition: all 0.3s ease;
   }
+  .custom-form-field select {
+    width: 100%;
+    padding: 12px 10px 12px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    outline: none;
+    font-size: 16px;
+    transition: all 0.3s ease;
+  }
   
   .custom-form-field input:focus {
+    border: 2px solid #007bff; /* Blue color on focus */
+  }
+  .custom-form-field select:focus {
     border: 2px solid #007bff; /* Blue color on focus */
   }
   
@@ -197,8 +209,13 @@ font-weight: 400;
     color: red;
   }
   
-  .custom-form-field input:focus + .input-label,
+  .custom-form-field input:focus + .input-label, select:focus + .input-label,
   .custom-form-field input:not(:placeholder-shown) + .input-label {
+    top: -10px;
+    font-size: 12px;
+    color: #007bff; /* Label color changes on focus or when filled */
+  }
+  .custom-form-field select:not(:placeholder-shown) + .input-label {
     top: -10px;
     font-size: 12px;
     color: #007bff; /* Label color changes on focus or when filled */

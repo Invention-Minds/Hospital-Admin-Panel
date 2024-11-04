@@ -66,5 +66,13 @@ export class DoctorServiceService {
   getDoctorDetails(doctorId: number): Observable<Doctor> {
     return this.http.get<Doctor>(`${this.apiUrl}/doctors/${doctorId}`);
   }
-
+  getUnavailableSlots(doctorId: number): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/doctors/${doctorId}/unavailable-slots`);
+  }
+  markDatesAsAvailable(doctorId: number, startDate: string, endDate: string): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/doctors/${doctorId}/mark-available`, {
+      startDate,
+      endDate
+    });
+  }
 }

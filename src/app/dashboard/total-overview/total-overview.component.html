@@ -19,7 +19,7 @@
           <p>Appoint Req</p>
         </div>
       </div>
-      <div class="card">
+      <div class="card"  (click)="toggleAvailableDoctors()">
         <div class="card-icon">
           <img src="/stethoscope.png" alt="Doctor Available Icon" />
         </div>
@@ -27,6 +27,58 @@
           <h2>{{availableDoctorsToday}}</h2>
           <p>Doc Available</p>
         </div>
+        
+      </div>
+      <div class="card" (click)="toggleUnavailableDoctors()">
+        <div class="card-icon">
+          <img src="/unavailable-doctor.svg" alt="Doctor Available Icon" />
+        </div>
+        <div class="card-content">
+          <h2>{{unavailableDoctorsToday}}</h2>
+          <p>Doc UnAvailable</p>
+        </div>
+        
       </div>
     </div>
   </div>
+<div *ngIf="showAvailableDoctors" class="overlay">
+  <div  class="container">
+    <div class="header">
+      Doctors Available
+      <button class="close-button" (click)="closeDoctorList()">&times;</button>
+    </div>
+    <div class="doctor-list">
+      <div *ngFor="let doctor of availableDoctors let i=index" class="doctor-card" >
+        <div class="doctor-details">
+          <div class="doctor-id">{{i + 1}}</div>
+          <div class="doctor-name">{{doctor.name}}</div>
+        </div>
+        <div class="availability-status available">
+          {{'Available'}}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Unavailable Doctors List -->
+<div *ngIf="showUnavailableDoctors" class="overlay">
+  <div class="container">
+    <div class="header unavailable">
+      Doctors Unavailable
+      <button class="close-button" (click)="closeUnavailableDoctorList()">&times;</button>
+    </div>
+    <div class="doctor-list">
+      <div *ngFor="let doctor of unavailableDoctors; let i=index" class="doctor-card" >
+        <div class="doctor-details">
+          <div class="doctor-id">{{i+1}}</div>
+          <div class="doctor-name">{{doctor.name}}</div>
+        </div>
+        <div class="availability-status unavailable">
+          Unavailable
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  

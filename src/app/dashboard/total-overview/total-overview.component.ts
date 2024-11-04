@@ -13,8 +13,13 @@ export class TotalOverviewComponent implements OnInit {
   totalAppointmentsToday: number = 0;
   pendingRequestsToday: number = 0;
   availableDoctorsToday: number = 0;
+  unavailableDoctorsToday: number = 0;
   doctors: any[] = [];
   date: string ='';
+  showAvailableDoctors: boolean = false;
+  showUnavailableDoctors: boolean = false;
+  availableDoctors: any[] = [];
+  unavailableDoctors: any[] = [];
 
 
   constructor(
@@ -23,7 +28,10 @@ export class TotalOverviewComponent implements OnInit {
   ) {}
   ngOnInit(): void {
     this.fetchStatistics();
+
     this.fetchDoctorsWithAvailability();
+    this.fetchDoctorsAvailability();
+    this.fetchDoctorsUnavailability();
   }
   private fetchStatistics(): void {
     const currentDate = this.formatDate(new Date());
@@ -98,7 +106,12 @@ export class TotalOverviewComponent implements OnInit {
                 status: availableSlots.length === 0 ? 'Unavailable' : 'Available',
               };
             });
+                      // After fetching and processing the data, call the functions to filter the doctors
+          this.fetchDoctorsAvailability();
+          this.fetchDoctorsUnavailability();
             this.availableDoctorsToday = this.doctors.filter(doctor => doctor.status === 'Available').length;
+            this.unavailableDoctorsToday= this.doctors.filter(doctor => doctor.status === 'Unavailable').length;
+
 
           },
           error => console.error('Error fetching booked slots or unavailable dates:', error)
@@ -107,7 +120,15 @@ export class TotalOverviewComponent implements OnInit {
       error => console.error('Error fetching doctors:', error)
     );
   }
+  fetchDoctorsAvailability(){
+    console.log(this.doctors);
+  this.availableDoctors=this.doctors.filter(doctor => doctor.status === 'Available');
+  console.log(this.availableDoctors);
 
+  }
+  fetchDoctorsUnavailability(){
+    this.unavailableDoctors=this.doctors.filter(doctor => doctor.status === 'Unavailable');
+  }
   private generateTimeSlots(startTime: string, slotDuration: number): string[] {
     const slots = [];
     let [hours, minutes] = startTime.split(':').map(Number);
@@ -139,6 +160,21 @@ export class TotalOverviewComponent implements OnInit {
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const day = date.getDate().toString().padStart(2, '0');
     return `${year}-${month}-${day}`;
+  }
+  toggleAvailableDoctors(): void {
+    this.showAvailableDoctors = true;
+    this.showUnavailableDoctors = false;
+  }
+
+  toggleUnavailableDoctors(): void {
+    this.showAvailableDoctors = false;
+    this.showUnavailableDoctors = true;
+  }
+  closeDoctorList(): void {
+    this.showAvailableDoctors = false;
+  }
+  closeUnavailableDoctorList(): void {
+    this.showUnavailableDoctors = false;
   }
 
 }

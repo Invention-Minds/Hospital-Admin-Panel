@@ -32,7 +32,7 @@ export class DoctorFormComponent implements OnInit {
   showDropdown = false;
   selectedDepartmentName: string = '';
   generatedSlots: string[] = [];
-  unavailableSlots: string[] = [];
+  unavailableSlots: { label: string, value: string }[] = []; // Correctly type unavailableSlots
   generatedSlotOptions: { label: string, value: string }[] = [];
 
   constructor(private doctorService: DoctorServiceService) {}
@@ -40,6 +40,10 @@ export class DoctorFormComponent implements OnInit {
   ngOnInit(): void {
     if (this.isEditMode && this.doctor && this.doctor.availableFrom && this.doctor.slotDuration) {
       this.generateSlots();
+    }
+    if (this.isEditMode && this.doctor && this.doctor.id) {
+      // Fetch unavailable slots for this specific doctor
+      this.fetchUnavailableSlotsForDoctor(this.doctor.id);
     }
     // If doctor is null, initialize it for the add new doctor form
     if (!this.doctor) {
@@ -52,15 +56,12 @@ export class DoctorFormComponent implements OnInit {
     // Fetch departments and set the filteredDepartments list
     this.doctorService.getDepartments().subscribe((departments: Department[]) => {
       this.departments = departments;
-      console.log('Departments fetched successfully', this.departments);
       this.filteredDepartments = [...this.departments];  // Copy all departments to filtered list
     });
     if (this.doctor!.phone_number.startsWith('91')) {
       this.doctor!.phone_number = this.doctor!.phone_number.substring(2);
     }
 
-    console.log('doctor', this.doctor);
-    console.log('isEditMode', this.isEditMode);
   }
   private ensureAvailabilityDays(): void {
     if (this.doctor && !this.doctor.availabilityDays) {
@@ -95,7 +96,8 @@ export class DoctorFormComponent implements OnInit {
       },
       availableFrom: '', // Default available time
       slotDuration: 20, // Default slot timing
-      availability: [] // Initialize with empty availability
+      availability: [], // Initialize with empty availability
+      unavailableSlots: [], // Initialize with empty unavailable slots
     };
   }
 
@@ -132,7 +134,9 @@ export class DoctorFormComponent implements OnInit {
       if (!this.doctor?.phone_number.startsWith('91')) {
         this.doctor!.phone_number = '91' + this.doctor?.phone_number;
       }
-      console.log('Doctor:', this.doctor);
+      const unavailableSlotValues = this.unavailableSlots.map(slot => slot.value);
+      console.log('Unavailable slots:', unavailableSlotValues);
+      this.doctor!.unavailableSlots = unavailableSlotValues; // Assign the values array to doctor
       if (this.doctor) {
         this.save.emit(this.doctor); // Emit the updated doctor details
       }
@@ -147,11 +151,7 @@ export class DoctorFormComponent implements OnInit {
     this.isEditMode = false; // Exit the edit mode
   }
   isFormValid(): boolean {
-    console.log('Doctor:', this.doctor);
-    console.log('' , /^[a-zA-Z.() ]+$/.test(this.doctor!.name) , // Ensure name has letters, spaces, and dots only
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.doctor!.email) , // Ensure email is valid
-    /^[0-9]{10}$/.test(this.doctor!.phone_number) , // Ensure phone number is 10 digits
-    /^\d{2}:\d{2}-\d{2}:\d{2}$/.test(this.doctor!.availableFrom))
+
     return !!(
       this.doctor &&
       this.doctor.name &&
@@ -186,6 +186,20 @@ export class DoctorFormComponent implements OnInit {
     return slots;
   }
   
+  // This method will fetch the unavailable slots for a specific doctor based on their ID
+fetchUnavailableSlotsForDoctor(doctorId: number): void {
+  this.doctorService.getUnavailableSlots(doctorId).subscribe(
+    (unavailableSlots: string[]) => {
+      // Set the unavailable slots to the ones fetched from the backend
+      this.unavailableSlots = unavailableSlots.map(slot => ({ label: slot, value: slot }));
+      console.log('Unavailable slots fetched for doctor:', this.unavailableSlots);
+    },
+    (error) => {
+      console.error('Error fetching unavailable slots for doctor:', error);
+    }
+  );
+}
+
   generateSlots(): void {
     if (this.doctor) {
       const [start, end] = this.doctor.availableFrom.split('-');
@@ -204,7 +218,6 @@ export class DoctorFormComponent implements OnInit {
   }
   isAnyDaySelected(): boolean {
     if (this.doctor && this.doctor.availabilityDays) {
-      console.log('Availability days:', this.doctor.availabilityDays);
       return Object.values(this.doctor.availabilityDays).some(day => day);
       
     }
@@ -238,7 +251,7 @@ export class DoctorFormComponent implements OnInit {
     if (selectedDepartment && this.doctor) {
       this.doctor.departmentName = selectedDepartment.name;
       this.doctor.departmentId = selectedDepartment.id;
-      console.log('Selected department:', this.doctor.departmentName);
+
     }
   }
   }
@@ -249,4 +262,5 @@ export class DoctorFormComponent implements OnInit {
       this.showDropdown = show && this.filteredDepartments.length > 0;
     }, 100); // Delay to avoid immediate blur hiding dropdown before clicking
   }
+
 }

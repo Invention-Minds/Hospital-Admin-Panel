@@ -321,6 +321,23 @@ onUpdate(): void {
     }
   }
 }
+  // New Method to mark dates as available
+  markAsAvailable(): void {
+    const { startDate, endDate } = this.unavailabilityForm.value;
+    const unavailableDates = this.generateDatesBetween(startDate, endDate);
+    if (startDate && endDate) {
+      this.doctorService.markDatesAsAvailable(this.selectedEditDoctor!.id, startDate, endDate).subscribe(
+        () => {
+          // Update UI or notify success
+          console.log('Dates marked as available successfully');
+          this.closeUnavailableModal();
+        },
+        error => {
+          console.error('Error marking dates as available:', error);
+        }
+      );
+    }
+  }
 
   // Generate all dates between two given dates (inclusive)
   private generateDatesBetween(start: Date, end: Date): string[] {

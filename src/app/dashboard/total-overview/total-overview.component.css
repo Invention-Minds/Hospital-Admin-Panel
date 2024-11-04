@@ -21,7 +21,7 @@ font-weight: 500;
   }
   
   .card {
-    width: 240px;
+    width: 273px;
     height: 80px;
     display: flex;
     align-items: center;
@@ -62,3 +62,111 @@ font-weight: 500;
     font-weight: 600;
     margin: 0;
   }
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .container {
+    width: 500px;
+    min-height: 90vh;
+    margin: 20px auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    overflow-y: scroll;
+
+  }
+  
+  .header {
+    background: #169458; /* Green header */
+
+    padding: 15px 0;
+    color: #FFF;
+font-family: Kanit;
+font-size: 20px;
+font-style: normal;
+font-weight: 600;
+line-height: normal;
+text-align: center;
+  }
+ .header.unavailable{
+    background-color: #e74c3c; /* Red header for unavailable doctors */
+  }
+  .close-button {
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    cursor: pointer;
+    float: right;
+  }
+  
+  .close-button:hover {
+    color: #fff; /* Red color for hover effect */
+  }
+  
+  .doctor-list {
+    padding: 10px;
+  }
+  
+  .doctor-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.10);
+    box-shadow: 0px 4px 15px 0px rgba(216, 210, 252, 0.64);
+    transition: box-shadow 0.3s ease;
+  }
+  
+  .doctor-card:hover {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  }
+  
+  .doctor-details {
+    display: flex;
+    align-items: center;
+  }
+  
+  .doctor-id {
+    margin-right: 20px;
+    font-weight: bold;
+    color: #000;
+  }
+  
+  .doctor-name {
+    font-weight: bold;
+    color: #000;
+  }
+  
+  .availability-status.available {
+    color: #28a745; /* Green for available doctors */
+    font-weight: bold;
+  }
+  
+  .availability-status.unavailable {
+    color: #e74c3c; /* Red for unavailable doctors */
+    font-weight: bold;
+  }
+  
+  .available {
+    color: #169458;
+font-family: Kanit;
+font-size: 16px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
+  }
+  

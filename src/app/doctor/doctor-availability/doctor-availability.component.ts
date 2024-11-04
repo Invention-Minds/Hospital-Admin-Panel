@@ -75,13 +75,14 @@ fetchDoctors(): void {
       .map(doctor =>
         forkJoin({
           bookedSlots: this.doctorService.getBookedSlots(doctor.id!, this.formatDate(this.selectedDate)),
-          unavailableDates: this.doctorService.getUnavailableDates(doctor.id!)
+          unavailableDates: this.doctorService.getUnavailableDates(doctor.id!),
+          unavailableSlots: this.doctorService.getUnavailableSlots(doctor.id!)
         })
       );
 
     forkJoin(doctorRequests).subscribe((doctorDataArray) => {
       this.doctors = doctors.map((doctor, index) => {
-        const { bookedSlots, unavailableDates } = doctorDataArray[index];
+        const { bookedSlots, unavailableDates,unavailableSlots } = doctorDataArray[index];
 
         // Determine if the selected day is unavailable for the doctor
         const isUnavailableDay = unavailableDates.some(unavailable => {
@@ -109,7 +110,7 @@ fetchDoctors(): void {
         return {
           ...doctor,
           isUnavailable,
-          slots: this.generateDoctorSlots(availableFrom, slotDuration, bookedSlots, isUnavailable)
+          slots: this.generateDoctorSlots(availableFrom, slotDuration, bookedSlots, isUnavailable,unavailableSlots)
         };
       });
       this.applySearchFilter();
@@ -173,10 +174,11 @@ fetchDoctors(): void {
   // Function to generate slots based on doctor availability and slot duration
 // Function to generate slots based on doctor availability and slot duration
 // Function to generate slots based on doctor availability and slot duration
-generateDoctorSlots(availableFrom: string, slotDuration: number, bookedSlots: string[], isUnavailableDay: boolean): Slot[] {
+generateDoctorSlots(availableFrom: string, slotDuration: number, bookedSlots: string[], isUnavailableDay: boolean,unavailableSlots: string[],): Slot[] {
   const [availableStart, availableEnd] = availableFrom.split('-').map(this.stringToMinutes);
   const slots: Slot[] = [];
 
+  console.log('unavailableSlots',unavailableSlots)
   for (let current = availableStart; current < availableEnd; current += slotDuration) {
     const slotTime = this.minutesToString(current);
     const nextSlotTime = this.minutesToString(current + slotDuration);
@@ -186,10 +188,15 @@ generateDoctorSlots(availableFrom: string, slotDuration: number, bookedSlots: st
 
     // If the day is available, mark slots as either booked or available
     if (!isUnavailableDay) {
-      console.log('slotString',slotString);
-      console.log('bookedSlots',bookedSlots);
-      status = bookedSlots.includes(slotString) ? 'booked' : 'available';
+      if (unavailableSlots.includes(slotString)) {
+        status = 'unavailable'; // Mark as unavailable if it is in unavailableSlots
+      } else if (bookedSlots.includes(slotString)) {
+        status = 'booked'; // Mark as booked if it is in bookedSlots
+      } else {
+        status = 'available'; // Otherwise, mark as available
+      }
     }
+
 
     slots.push({
       time: slotString,

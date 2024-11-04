@@ -28,10 +28,10 @@
         <!-- Phone Number -->
         <div class="form-group">
           <label>Phone Number:</label>
-          <input class="phone" type="text" placeholder="Enter the 10 digit phone number with 91" maxlength="12" formControlName="phoneNumber" />
+          <input class="phone" type="text" placeholder="Enter the 10 digit phone number" maxlength="10" formControlName="phoneNumber" />
           <div class="errors" *ngIf="appointmentForm.get('phoneNumber')?.invalid && (appointmentForm.get('phoneNumber')?.touched || appointmentForm.get('phoneNumber')?.dirty)">
             <small *ngIf="appointmentForm.get('phoneNumber')?.errors?.['required']">Phone Number is required</small>
-            <small *ngIf="appointmentForm.get('phoneNumber')?.errors?.['pattern']">Phone Number must be 12 digits including 91</small>
+            <small *ngIf="appointmentForm.get('phoneNumber')?.errors?.['pattern']">Phone Number must be 10 digits </small>
           </div>
         </div>
 
@@ -90,6 +90,13 @@
               <small>Appointment Time is required</small>
             </div>
           </div>
+        </div>
+        <div *ngIf="showAvailabilityMessage" class="availability-message"
+          [ngClass]="{'available': !showAvailabilityMessage, 'not-available': showAvailabilityMessage}">
+          {{ availabilityMessage }}
+        </div>
+        <div *ngIf="showDoctorUnavailableMessage" class="unavailable-message">
+          {{ doctorUnavailableMessage }}
         </div>
 
         <!-- Request Via -->

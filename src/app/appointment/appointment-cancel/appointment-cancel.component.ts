@@ -271,7 +271,88 @@ submitAppointment(appointment: Appointment | null, status: string, requestVia: a
       smsSent: true,
       emailSent: true,
       requestVia: appointment.requestVia, // Determine requestVia
+      status: 'confirmed'
   };
+  console.log('status:', status);
+  if(status === 'rescheduled'){
+    this.appointmentService.addConfirmedAppointment(confirmedAppointment);
+    this.doctorService.getDoctorDetails(appointment.doctorId).subscribe({
+      next: (response) => {
+        const doctorPhoneNumber = response?.phone_number;
+        let phoneNumber = appointment!.phoneNumber;
+
+        if (!phoneNumber.startsWith('91')) {
+          phoneNumber = '91' + phoneNumber;
+        }
+        const appointmentDetails = {
+          patientName:appointment?.patientName,
+          doctorName:appointment?.doctorName,
+          date:appointment?.date,
+          time:appointment?.time,
+          doctorPhoneNumber: doctorPhoneNumber,
+          patientPhoneNumber: phoneNumber,
+          status: 'rescheduled'
+        }
+        console.log('appointment details', appointmentDetails)
+        this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
+          next: (response) => {
+            console.log('WhatsApp message sent successfully:', response);
+          },
+          error: (error) => {
+            console.error('Error sending WhatsApp message:', error);
+          }
+        });
+      }
+
+    });
+
+
+    this.doctorService.getDoctorDetails(appointment.doctorId).subscribe({
+      next: (response) => {
+        const doctorEmail = response?.email;
+        const patientEmail = appointment?.email;
+
+        // Ensure both emails are valid
+        if (!doctorEmail || !patientEmail) {
+          console.error('Doctor or patient email is missing.');
+          return;
+        }
+
+        // Prepare appointment details for email
+        const appointmentDetails = {
+          patientName: appointment?.patientName,
+          doctorName: appointment?.doctorName,
+          date: appointment?.date,
+          time: appointment?.time,
+        };
+
+        const status = 'rescheduled';
+
+        // Send email to the doctor
+        this.appointmentService.sendEmail(doctorEmail, status, appointmentDetails, 'doctor').subscribe({
+          next: (response) => {
+            console.log('Email sent to doctor successfully:', response);
+          },
+          error: (error) => {
+            console.error('Error sending email to doctor:', error);
+          },
+        });
+
+        // Send email to the patient
+        this.appointmentService.sendEmail(patientEmail, status, appointmentDetails, 'patient').subscribe({
+          next: (response) => {
+            console.log('Email sent to patient successfully:', response);
+          },
+          error: (error) => {
+            console.error('Error sending email to patient:', error);
+          },
+        });
+      },
+      error: (error) => {
+        console.error('Error in getting doctor details:', error);
+      },
+    });
+  }
 
   if (status === 'Confirm') {
       confirmedAppointment.status = 'confirmed'; // Set the status to confirmed

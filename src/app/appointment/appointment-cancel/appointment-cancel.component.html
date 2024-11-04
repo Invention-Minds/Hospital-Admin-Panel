@@ -72,7 +72,7 @@
   *ngIf="showAppointmentForm" 
   [appointment]="selectedAppointment" 
   (close)="closeAppointmentForm()" 
-  (submit)="submitAppointment(selectedAppointment, $event.status, $event.requestVia)">
+  (submit)="submitAppointment(selectedAppointment,'rescheduled', $event.requestVia)">
 </app-appointment-form>
 <app-delete-confirmation-dialog
   [showDialog]="isLockedDialogVisible"

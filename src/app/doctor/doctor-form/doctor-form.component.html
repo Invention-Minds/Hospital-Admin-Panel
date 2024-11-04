@@ -35,8 +35,8 @@
         <div class="col">
           <div class="custom-form-field">
             <input type="email" id="email" [(ngModel)]="doctor!.email" name="email" placeholder="" pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-            required #email="ngModel" />
-            <label for="email" class="input-label">Email*</label>
+             #email="ngModel" />
+            <label for="email" class="input-label">Email</label>
             <div *ngIf="email.invalid && (email.dirty || email.touched)" class="error-message">
               <small *ngIf="email.errors && email.errors['required']">Email is required</small>
               <small *ngIf="email.errors && email.errors['pattern']">Valid email is required</small>
@@ -115,7 +115,7 @@
       <div class="row">
         <div class="col">
           <div class="custom-form-field">
-            <input type="text" id="availableTime" [(ngModel)]="doctor!.availableFrom" name="availableTime" pattern="^\d{2}:\d{2}-\d{2}:\d{2}$" placeholder="09:00-11:00" required #availableTime="ngModel" />
+            <input type="text" id="availableTime" [(ngModel)]="doctor!.availableFrom" name="availableTime" pattern="^\d{2}:\d{2}-\d{2}:\d{2}$" placeholder="09:00-11:00" required #availableTime="ngModel" (ngModelChange)="generateSlots()" />
             <label for="availableTime" class="input-label">Available Time*</label>
             <div *ngIf="availableTime.invalid && (availableTime.dirty || availableTime.touched)" class="error-message">
               <small *ngIf="availableTime.errors && availableTime.errors['required']">Available time is required</small>
@@ -126,7 +126,7 @@
 
         <div class="col">
           <div class="custom-form-field">
-            <input type="number" id="slotTiming" [(ngModel)]="doctor!.slotDuration" name="slotTiming" min="1" placeholder="20" required #slotTiming="ngModel" />
+            <input type="number" id="slotTiming" [(ngModel)]="doctor!.slotDuration" name="slotTiming" min="1" placeholder="20" required #slotTiming="ngModel" (ngModelChange)="generateSlots()"/>
             <label for="slotTiming" class="input-label">Slot Timing*</label>
             <div *ngIf="slotTiming.invalid && (slotTiming.dirty || slotTiming.touched)" class="error-message">
               <small *ngIf="slotTiming.errors && slotTiming.errors['required']">Slot timing is required</small>
@@ -135,6 +135,20 @@
           </div>
         </div>
       </div>
+      <div class="row">
+        <div class="col">
+          <div class="custom-form-field">
+            <label for="unavailableSlots" class="input-label">Unavailable Slots*</label>
+            <p-multiSelect 
+            [options]="generatedSlotOptions"
+            [(ngModel)]="unavailableSlots" 
+            optionLabel="label" 
+            placeholder="Select Unavailable Slots">
+          </p-multiSelect>
+          </div>
+        </div>
+      </div>
+      
 
       <!-- Action Buttons -->
       <div class="doctor-form-actions">

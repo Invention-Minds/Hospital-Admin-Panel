@@ -58,6 +58,9 @@
               <img src="icons/delete.png" alt="delete" class="action-icon" (click)="cancelAppointment(appointment)" 
               pTooltip="Cancel" tooltipPosition="top">
             </button>
+            <button class="btn-action" (click)="openAppointmentForm(appointment)"  pTooltip="Reschedule"  tooltipPosition="top">
+              <img src="icons/book.png" alt="Confirm">
+          </button>
           </button>
         </td>
       </tr>
@@ -76,3 +79,9 @@
     </div>
   </div>
 </div>
+<app-appointment-form 
+  *ngIf="showAppointmentForm" 
+  [appointment]="selectedAppointment" 
+  (close)="closeAppointmentForm()" 
+  (submit)="submitAppointment(selectedAppointment, $event.status, $event.requestVia)">
+</app-appointment-form>

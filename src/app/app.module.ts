@@ -54,7 +54,7 @@ import { DoctorReportComponent } from './report/doctor-report/doctor-report.comp
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AuthInterceptor } from './auth.interceptor';
 import { DeleteConfirmationDialogComponent } from './delete-confirmation-dialog/delete-confirmation-dialog.component';
-
+import { MultiSelectModule } from 'primeng/multiselect';
 
 
 @NgModule({
@@ -107,7 +107,8 @@ import { DeleteConfirmationDialogComponent } from './delete-confirmation-dialog/
     FloatLabelModule,
     MatFormFieldModule,
     BrowserAnimationsModule,
-    ToastModule
+    ToastModule,
+    MultiSelectModule
   ],
   providers: [
     provideClientHydration(),

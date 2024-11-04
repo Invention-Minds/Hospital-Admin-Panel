@@ -31,10 +31,16 @@ export class DoctorFormComponent implements OnInit {
   departmentSearch: string = '';
   showDropdown = false;
   selectedDepartmentName: string = '';
+  generatedSlots: string[] = [];
+  unavailableSlots: string[] = [];
+  generatedSlotOptions: { label: string, value: string }[] = [];
 
   constructor(private doctorService: DoctorServiceService) {}
 
   ngOnInit(): void {
+    if (this.isEditMode && this.doctor && this.doctor.availableFrom && this.doctor.slotDuration) {
+      this.generateSlots();
+    }
     // If doctor is null, initialize it for the add new doctor form
     if (!this.doctor) {
       this.initializeDoctor();
@@ -49,6 +55,9 @@ export class DoctorFormComponent implements OnInit {
       console.log('Departments fetched successfully', this.departments);
       this.filteredDepartments = [...this.departments];  // Copy all departments to filtered list
     });
+    if (this.doctor!.phone_number.startsWith('91')) {
+      this.doctor!.phone_number = this.doctor!.phone_number.substring(2);
+    }
 
     console.log('doctor', this.doctor);
     console.log('isEditMode', this.isEditMode);
@@ -120,7 +129,9 @@ export class DoctorFormComponent implements OnInit {
   // Method to save the doctor form data
   saveDoctor(): void {
     if (this.isFormValid() && this.isAnyDaySelected()) {
-      this.doctor?.phone_number.startsWith('91') ? this.doctor?.phone_number : this.doctor!.phone_number = '91' + this.doctor?.phone_number;
+      if (!this.doctor?.phone_number.startsWith('91')) {
+        this.doctor!.phone_number = '91' + this.doctor?.phone_number;
+      }
       console.log('Doctor:', this.doctor);
       if (this.doctor) {
         this.save.emit(this.doctor); // Emit the updated doctor details
@@ -136,22 +147,53 @@ export class DoctorFormComponent implements OnInit {
     this.isEditMode = false; // Exit the edit mode
   }
   isFormValid(): boolean {
+    console.log('Doctor:', this.doctor);
+    console.log('' , /^[a-zA-Z.() ]+$/.test(this.doctor!.name) , // Ensure name has letters, spaces, and dots only
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.doctor!.email) , // Ensure email is valid
+    /^[0-9]{10}$/.test(this.doctor!.phone_number) , // Ensure phone number is 10 digits
+    /^\d{2}:\d{2}-\d{2}:\d{2}$/.test(this.doctor!.availableFrom))
     return !!(
       this.doctor &&
       this.doctor.name &&
       this.doctor.qualification &&
-      this.doctor.email &&
       this.doctor.phone_number &&
       this.doctor.departmentName &&
       this.doctor.availableFrom &&
       this.doctor.slotDuration !== undefined &&
       this.doctor.slotDuration !== null &&
       this.doctor.slotDuration > 0 &&
-      /^[a-zA-Z. ]+$/.test(this.doctor.name) && // Ensure name has letters, spaces, and dots only
+      /^[a-zA-Z.() ]+$/.test(this.doctor.name) && // Ensure name has letters, spaces, and dots only
       /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.doctor.email) && // Ensure email is valid
       /^[0-9]{10}$/.test(this.doctor.phone_number) && // Ensure phone number is 10 digits
       /^\d{2}:\d{2}-\d{2}:\d{2}$/.test(this.doctor.availableFrom)
     );
+  }
+  generateTimeSlots(startTime: string, endTime: string, slotDuration: number): string[] {
+    const slots = [];
+    let current = new Date(`1970-01-01T${startTime}:00`);
+    const end = new Date(`1970-01-01T${endTime}:00`);
+  
+    while (current < end) {
+      const slotStart = current.toTimeString().substring(0, 5);
+      current = new Date(current.getTime() + slotDuration * 60000);
+  
+      if (current <= end) {
+        const slotEnd = current.toTimeString().substring(0, 5);
+        slots.push(`${slotStart}-${slotEnd}`);
+      }
+    }
+  
+    return slots;
+  }
+  
+  generateSlots(): void {
+    if (this.doctor) {
+      const [start, end] = this.doctor.availableFrom.split('-');
+      const slotDuration = this.doctor.slotDuration;
+       this.generatedSlots = this.generateTimeSlots(start, end, slotDuration);
+      console.log('Generated slots:', this.generatedSlots);
+      this.generatedSlotOptions = this.generatedSlots.map(slot => ({ label: slot, value: slot }));
+    }
   }
   
 
@@ -200,8 +242,7 @@ export class DoctorFormComponent implements OnInit {
     }
   }
   }
-  
-  
+ 
   // Toggle the dropdown for department selection
   toggleDropdown(show: boolean): void {
     setTimeout(() => {

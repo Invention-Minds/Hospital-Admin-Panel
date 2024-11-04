@@ -59,27 +59,30 @@ export class AppointmentFormComponent implements OnInit {
   @Output() submit = new EventEmitter<{ appointment: Appointment; status: string; requestVia: string }>();
 
   ngOnInit(): void {
-     // Set the minimum date to today
-     const today = new Date();
-     const year = today.getFullYear();
-     const month = (today.getMonth() + 1).toString().padStart(2, '0');
-     const day = today.getDate().toString().padStart(2, '0');
-     this.minDate = `${year}-${month}-${day}`;
+    // Set the minimum date to today
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = (today.getMonth() + 1).toString().padStart(2, '0');
+    const day = today.getDate().toString().padStart(2, '0');
+    this.minDate = `${year}-${month}-${day}`;
     this.loadDoctors();
-    
+
+
     // this.loadBookedSlots(); // Load booked slots from localStorage
     this.appointmentForm = this.fb.group({
       firstName: ['', [Validators.required, Validators.pattern(/^[a-zA-Z\s]*$/)]],
-      lastName: ['', [Validators.required, Validators.pattern(/^[a-zA-Z.\s]*$/)]],
-      phoneNumber: ['', [Validators.required, Validators.pattern(/^\d{12}$/)]],
-      email: ['', [Validators.required, Validators.email, Validators.pattern(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)]],
-      doctorName: ['', [Validators.required, Validators.pattern(/^[a-zA-Z.\s]*$/)]],
+      lastName: ['', [Validators.pattern(/^[a-zA-Z.\s]*$/)]],
+      phoneNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
+      email: ['', [Validators.email, Validators.pattern(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)]],
+      doctorName: ['', [Validators.required, Validators.pattern(/^[a-zA-Z().\s]*$/)]],
       appointmentDate: ['', Validators.required],
       appointmentTime: ['', Validators.required],
       requestVia: ['Call', Validators.required], // Set default to 'Call'
       appointmentStatus: ['Confirm', Validators.required] // Set default to 'Confirm'
     });
-    
+    if (this.appointment?.phoneNumber.startsWith('91')) {
+      this.appointment.phoneNumber = this.appointment.phoneNumber.substring(2);
+    }
 
 
     if (this.appointment) {
@@ -196,13 +199,13 @@ export class AppointmentFormComponent implements OnInit {
 
     if (selectElement && selectElement.value) {
       const doctorId = parseInt(selectElement.value, 10); // Convert the value to an integer
-  
+
       const selectedDoctor = this.doctors.find(doctor => doctor.id === doctorId);
       if (selectedDoctor) {
         this.appointmentForm.get('doctorName')?.setValue(selectedDoctor.name);
       }
     }
-  
+
   }
   private setupNewAppointmentFormListeners() {
     // Load available slots when doctor or date changes for new appointments only
@@ -251,6 +254,7 @@ export class AppointmentFormComponent implements OnInit {
 
         if (this.unavailableDates.includes(appointmentDate)) {
           // Doctor is unavailable on this date
+          console.log("unavailable")
           this.showDoctorUnavailableMessage = true;
           this.doctorUnavailableMessage = '*The selected doctor is unavailable on this date.';
           this.availableSlots = []; // Clear available slots
@@ -307,18 +311,18 @@ export class AppointmentFormComponent implements OnInit {
           const slotDuration = availability.slotDuration;
           let generatedSlots = this.generateTimeSlots(start, end, slotDuration);
           const today = new Date();
-        const selectedDate = new Date(date);
-        if (selectedDate.toDateString() === today.toDateString()) {
-          const currentTimeInMinutes = today.getHours() * 60 + today.getMinutes();
-          generatedSlots = generatedSlots.filter(slot => {
-            const [startTime] = slot.split('-');
-            const [startHour, startMinute] = startTime.split(':').map(Number);
-            const slotTimeInMinutes = startHour * 60 + startMinute;
-            return slotTimeInMinutes > currentTimeInMinutes;
-          });
-        }
+          const selectedDate = new Date(date);
+          if (selectedDate.toDateString() === today.toDateString()) {
+            const currentTimeInMinutes = today.getHours() * 60 + today.getMinutes();
+            generatedSlots = generatedSlots.filter(slot => {
+              const [startTime] = slot.split('-');
+              const [startHour, startMinute] = startTime.split(':').map(Number);
+              const slotTimeInMinutes = startHour * 60 + startMinute;
+              return slotTimeInMinutes > currentTimeInMinutes;
+            });
+          }
 
-        this.availableSlots = generatedSlots;
+          this.availableSlots = generatedSlots;
 
           // Remove the slots that are already booked for that date
           this.appointmentService.getBookedSlots(doctorId, date).subscribe(
@@ -449,9 +453,13 @@ export class AppointmentFormComponent implements OnInit {
   private patchFormWithAppointment(appointment: Appointment, appointmentDate: string) {
     let phoneNumber = appointment.phoneNumber;
 
-if (!phoneNumber.startsWith('91')) {
-  phoneNumber = '91' + phoneNumber;
-}
+    // if (!phoneNumber.startsWith('91')) {
+    //   phoneNumber = '91' + phoneNumber;
+    // }
+    if (phoneNumber.startsWith('91')) {
+      phoneNumber = phoneNumber.substring(2);
+
+    }
     this.appointmentForm.patchValue({
       firstName: appointment.patientName.split(' ')[0],
       lastName: appointment.patientName.split(' ')[1],
@@ -510,45 +518,63 @@ if (!phoneNumber.startsWith('91')) {
     if (!this.appointmentForm.valid) {
       this.messageService.add({ severity: 'warn', summary: 'Warn', detail: 'Some fields are not filled' });
     }
+    const currentStatus = this.appointment?.status || '';
+    const newStatus = this.appointmentForm.get('appointmentStatus')?.value;
 
     if (this.appointment) {
-      this.appointment.date = this.appointmentForm.get('appointmentDate')?.value;
-      this.appointment.time = this.appointmentForm.get('appointmentTime')?.value;
+      const newDate = this.appointmentForm.get('appointmentDate')?.value;
+      const newTime = this.appointmentForm.get('appointmentTime')?.value;
       this.appointment.emailSent = true;
       this.appointment.smsSent = true;
+      if (
+        this.appointment.date !== newDate ||
+        this.appointment.time !== newTime
+      ) {
+        this.appointment.status = 'rescheduled';
+        console.log("role",this.appointment)
+      } else {
+        this.appointment.status = 'confirmed';
+      }
+      this.appointment.date = this.appointmentForm.get('appointmentDate')?.value;
+      this.appointment.time = this.appointmentForm.get('appointmentTime')?.value;
+      console.log('appointment', this.appointment);
+      if (newStatus === 'Confirm' && (currentStatus === 'Cancelled' || currentStatus === 'confirmed')) {
+        // This is a reschedule
+        this.appointment.status = 'rescheduled';
+        console.log("status", this.appointment.status)
+        this.appointmentService.removeCancelledAppointment(this.appointment.id!);
+      } else {
+        this.appointment.status = newStatus;
+      }
 
-      const status = this.appointmentForm.get('appointmentStatus')?.value;
+      // const status = this.appointmentForm.get('appointmentStatus')?.value;
       const requestVia = this.appointmentForm.get('requestVia')?.value;
 
-      if (status === 'Confirm' && this.appointment.status === 'Cancelled') {
-        this.appointmentService.removeCancelledAppointment(this.appointment.id!);
-      }
-      this.appointment.status = status;
-      this.submit.emit({ appointment: this.appointment, status, requestVia }); // Emit the data to the parent component
+      // if (status === 'Confirm' && this.appointment.status === 'Cancelled') {
+      //   this.appointmentService.removeCancelledAppointment(this.appointment.id!);
+      // }
+      // this.appointment.status = status;
+      this.submit.emit({ appointment: this.appointment, status: this.appointment.status, requestVia }); // Emit the data to the parent component
       this.showForm = false; // Close the form after submission
-      if (this.appointmentForm.value.appointmentStatus === "Confirm") {
-        this.appointment.status = "confirmed"
-      }
-      if (this.appointment.status === "confirmed") {
-        console.log('in form component', this.appointment);
-        this.appointmentService.addConfirmedAppointment(this.appointment);
+      if (this.appointment.status === "rescheduled") {
         this.doctorService.getDoctorDetails(this.appointment.doctorId).subscribe({
-          next: (response) =>{
+          next: (response) => {
             const doctorPhoneNumber = response?.phone_number;
             let phoneNumber = this.appointment!.phoneNumber;
 
-if (!phoneNumber.startsWith('91')) {
-  phoneNumber = '91' + phoneNumber;
-}
-            const appointmentDetails ={
+            if (!phoneNumber.startsWith('91')) {
+              phoneNumber = '91' + phoneNumber;
+            }
+            const appointmentDetails = {
               patientName: this.appointment?.patientName,
               doctorName: this.appointment?.doctorName,
               date: this.appointment?.date,
               time: this.appointment?.time,
               doctorPhoneNumber: doctorPhoneNumber,
               patientPhoneNumber: phoneNumber,
-              status: this.appointment?.status
+              status: 'rescheduled'
             }
+            console.log('appointment details', appointmentDetails)
             this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
               next: (response) => {
                 console.log('WhatsApp message sent successfully:', response);
@@ -558,10 +584,10 @@ if (!phoneNumber.startsWith('91')) {
               }
             });
           }
-          
+
         });
 
-        
+
         this.doctorService.getDoctorDetails(this.appointment.doctorId).subscribe({
           next: (response) => {
             const doctorEmail = response?.email;
@@ -581,7 +607,97 @@ if (!phoneNumber.startsWith('91')) {
               time: this.appointment?.time,
             };
 
-            const status = 'confirmed';
+            const status = 'rescheduled';
+
+            // Send email to the doctor
+            this.appointmentService.sendEmail(doctorEmail, status, appointmentDetails, 'doctor').subscribe({
+              next: (response) => {
+                console.log('Email sent to doctor successfully:', response);
+              },
+              error: (error) => {
+                console.error('Error sending email to doctor:', error);
+              },
+            });
+
+            // Send email to the patient
+            this.appointmentService.sendEmail(patientEmail, status, appointmentDetails, 'patient').subscribe({
+              next: (response) => {
+                console.log('Email sent to patient successfully:', response);
+              },
+              error: (error) => {
+                console.error('Error sending email to patient:', error);
+              },
+            });
+          },
+          error: (error) => {
+            console.error('Error in getting doctor details:', error);
+          },
+        });
+      }
+
+      if (this.appointmentForm.value.appointmentStatus === "Confirm") {
+        this.appointment.status = "confirmed"
+      }
+      console.log(this.appointment.status)
+      if (this.appointment.status === "confirmed") {
+        console.log('in form component', this.appointment);
+        this.appointmentService.addConfirmedAppointment(this.appointment);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'The appointment is confirmed.',
+        });
+        this.doctorService.getDoctorDetails(this.appointment.doctorId).subscribe({
+          next: (response) => {
+            const doctorPhoneNumber = response?.phone_number;
+            let phoneNumber = this.appointment!.phoneNumber;
+
+            if (!phoneNumber.startsWith('91')) {
+              phoneNumber = '91' + phoneNumber;
+            }
+            const appointmentDetails = {
+              patientName: this.appointment?.patientName,
+              doctorName: this.appointment?.doctorName,
+              date: this.appointment?.date,
+              time: this.appointment?.time,
+              doctorPhoneNumber: doctorPhoneNumber,
+              patientPhoneNumber: phoneNumber,
+              status: 'confirmed'
+            }
+            console.log('appointment details', appointmentDetails)
+            this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
+              next: (response) => {
+                console.log('WhatsApp message sent successfully:', response);
+              },
+              error: (error) => {
+                console.error('Error sending WhatsApp message:', error);
+              }
+            });
+          }
+
+        });
+
+
+        this.doctorService.getDoctorDetails(this.appointment.doctorId).subscribe({
+          next: (response) => {
+            const doctorEmail = response?.email;
+            const patientEmail = this.appointment?.email;
+
+            // Ensure both emails are valid
+            if (!doctorEmail || !patientEmail) {
+              console.error('Doctor or patient email is missing.');
+              return;
+            }
+
+            // Prepare appointment details for email
+            const appointmentDetails = {
+              patientName: this.appointment?.patientName,
+              doctorName: this.appointment?.doctorName,
+              date: this.appointment?.date,
+              time: this.appointment?.time,
+            };
+
+            const status = this.appointment!.status;
 
             // Send email to the doctor
             this.appointmentService.sendEmail(doctorEmail, status, appointmentDetails, 'doctor').subscribe({
@@ -628,7 +744,7 @@ if (!phoneNumber.startsWith('91')) {
           phoneNumber = '91' + phoneNumber;
         }
         const appointmentDetails = {
-          
+
           patientName: this.appointmentForm.value.firstName + ' ' + this.appointmentForm.value.lastName,
           phoneNumber: phoneNumber,
           doctorId: doctorId,
@@ -640,7 +756,7 @@ if (!phoneNumber.startsWith('91')) {
           status: this.appointmentForm.value.appointmentStatus,
           email: this.appointmentForm.value.email,
           smsSent: true,
-          emailSent:true
+          emailSent: true
         };
         this.appointment = appointmentDetails;
         // Mark the slot as booked
@@ -650,10 +766,15 @@ if (!phoneNumber.startsWith('91')) {
         }
         if (this.appointment.status === "confirmed") {
           this.appointmentService.addConfirmedAppointment(this.appointment);
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Thank you, we have received your request and will get back to you shortly.',
+          });
           this.doctorService.getDoctorDetails(this.appointment.doctorId).subscribe({
-            next: (response) =>{
+            next: (response) => {
               const doctorPhoneNumber = response?.phone_number;
-              const appointmentDetails ={
+              const appointmentDetails = {
                 patientName: this.appointment?.patientName,
                 doctorName: this.appointment?.doctorName,
                 date: this.appointment?.date,
@@ -671,7 +792,7 @@ if (!phoneNumber.startsWith('91')) {
                 }
               });
             }
-            
+
           });
           this.doctorService.getDoctorDetails(this.appointment.doctorId).subscribe({
             next: (response) => {
@@ -729,6 +850,7 @@ if (!phoneNumber.startsWith('91')) {
 
         // If creating a new appointment, add it (no id needed)
         this.appointmentService.addNewAppointment(appointmentDetails);
+
         this.showForm = false; // Close the form after submission
       }
 

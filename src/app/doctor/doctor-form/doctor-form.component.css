@@ -220,6 +220,10 @@ font-weight: 400;
     font-size: 12px;
     color: #007bff; /* Label color changes on focus or when filled */
   }
+  ::ng-deep .p-multiselect{
+    width: 100%;
+  }
+
   .custom-form-field {
     position: relative;
     margin: 1em 0;

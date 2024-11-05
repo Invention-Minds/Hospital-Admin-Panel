@@ -67,6 +67,8 @@ font-weight: 400;
 font-size: 16px;
 font-family: Kanit;
 font-weight: 500;
+text-wrap: nowrap;
+padding-right: 15px;
   }
   
   .time-badge {

@@ -9,6 +9,15 @@
 
       <!-- Form Fields -->
       <div class="form-content">
+        <!-- PRN Number -->
+<div class="form-group">
+  <label>PRN:</label>
+  <input type="text" placeholder="Enter PRN Number" formControlName="prnNumber" class="prn" />
+  <div class="errors" *ngIf="appointmentForm.get('prnNumber')?.invalid && (appointmentForm.get('prnNumber')?.touched || appointmentForm.get('prnNumber')?.dirty)">
+    <small *ngIf="appointmentForm.get('prnNumber')?.errors?.['required']">PRN Number is required</small>
+  </div>
+</div>
+
         <!-- Patient Name -->
         <div class="form-group">
           <label>Patient Name:</label>

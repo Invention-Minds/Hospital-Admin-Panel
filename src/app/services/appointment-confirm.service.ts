@@ -4,6 +4,7 @@ import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { map } from 'rxjs/operators';
 import { AuthServiceService } from './auth/auth-service.service';
 import { environment } from '../../environment/environment';
+import { tap } from 'rxjs/operators';
 
 export interface Appointment {
   id?: number;
@@ -261,4 +262,25 @@ getAppointmentsByRole(): Observable<Appointment[]> {
       const url = `${this.apiUrl}/${appointmentId}/schedule-completion`;
       return this.http.put(url, { delayMinutes });
     }
+    sendRescheduledMessage(appointmentDetails: any): Observable<any> {
+      return this.sendWhatsAppMessage(appointmentDetails).pipe(
+        tap(() => {
+          this.sendEmail(appointmentDetails.doctorEmail, 'rescheduled', appointmentDetails, 'doctor').subscribe();
+          this.sendEmail(appointmentDetails.patientEmail, 'rescheduled', appointmentDetails, 'patient').subscribe();
+        })
+      );
+    }
+    
+    sendConfirmedMessage(appointmentDetails: any): Observable<any> {
+      return this.sendWhatsAppMessage(appointmentDetails).pipe(
+        tap(() => {
+          this.sendEmail(appointmentDetails.doctorEmail, 'confirmed', appointmentDetails, 'doctor').subscribe();
+          this.sendEmail(appointmentDetails.patientEmail, 'confirmed', appointmentDetails, 'patient').subscribe();
+        })
+      );
+    }
+    addPatient(patientDetails: any): Observable<any> {
+      return this.http.post(`${environment.apiUrl}/patients`, patientDetails);
+    }
+    
 }

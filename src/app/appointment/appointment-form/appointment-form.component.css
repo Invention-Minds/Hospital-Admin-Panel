@@ -79,7 +79,7 @@
   .form-group {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 15px;
+    margin-bottom: 5px;
     height: 65px;
   }
   .form-group-2{
@@ -97,6 +97,7 @@
   }
   
   input[type="text"],
+  input[type="number"],
 input[type="email"],
 input[type="tel"],
 input[type="date"] ,
@@ -118,6 +119,7 @@ input[type="date"]{
 }
 input[type="text"],
 input[type="email"],
+input[type="number"],
 input[type="tel"]{
     margin-left: 32px;
 }
@@ -147,6 +149,9 @@ input[type="tel"]{
   }
   .doctor{
     margin-right: -13px;
+  }
+  .prn{
+    margin-right:167px
   }
   .button-group {
     display: flex;

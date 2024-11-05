@@ -19,10 +19,12 @@ interface Appointment {
   time: string;
   email: string;
   requestVia?: string;
+  prnNumber?: number;
   status: string;
   smsSent?: boolean;
   emailSent?: boolean;
   doctorId: number;
+  isrescheduled?: boolean;
 }
 
 
@@ -72,6 +74,7 @@ export class AppointmentFormComponent implements OnInit {
     this.appointmentForm = this.fb.group({
       firstName: ['', [Validators.required, Validators.pattern(/^[a-zA-Z\s]*$/)]],
       lastName: ['', [Validators.pattern(/^[a-zA-Z.\s]*$/)]],
+      prnNumber: ['', [Validators.required, Validators.pattern(/^[0-9]+$/)]],
       phoneNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
       email: ['', [Validators.email, Validators.pattern(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)]],
       doctorName: ['', [Validators.required, Validators.pattern(/^[a-zA-Z().\s]*$/)]],
@@ -522,6 +525,27 @@ export class AppointmentFormComponent implements OnInit {
     if (!this.appointmentForm.valid) {
       this.messageService.add({ severity: 'warn', summary: 'Warn', detail: 'Some fields are not filled' });
     }
+    const patientName = this.appointmentForm.value.firstName + ' ' + this.appointmentForm.value.lastName;
+    const prnNumber = parseInt(this.appointmentForm.value.prnNumber);
+    const phoneNumber = this.appointmentForm.value.phoneNumber;
+    const email = this.appointmentForm.value.email;
+  
+    // Save patient information to the Patient table
+    const patientDetails = {
+      prn: prnNumber,
+      name: patientName,
+      phoneNumber: phoneNumber,
+      email: email
+    };
+  console.log('patient details', patientDetails);
+    this.appointmentService.addPatient(patientDetails).subscribe(
+      () => {
+        console.log('Patient information saved successfully');
+      },
+      (error) => {
+        console.error('Error saving patient information:', error);
+      }
+    );
     const currentStatus = this.appointment?.status || '';
     const newStatus = this.appointmentForm.get('appointmentStatus')?.value;
 
@@ -643,7 +667,7 @@ export class AppointmentFormComponent implements OnInit {
         this.appointment.status = "confirmed"
       }
       console.log(this.appointment.status)
-      if (this.appointment.status === "confirmed") {
+      if (this.appointment.status === "confirmed" && this.appointment.isrescheduled === false) {
         console.log('in form component', this.appointment);
         this.appointmentService.addConfirmedAppointment(this.appointment);
         this.messageService.add({

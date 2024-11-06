@@ -12,6 +12,7 @@ import { response } from 'express';
 interface Appointment {
   id?: number;
   patientName: string;
+  patientId?: number; // Added patientId to track the patient
   phoneNumber: string;
   doctorName: string;
   department: string;
@@ -90,6 +91,7 @@ export class AppointmentFormComponent implements OnInit {
 
     if (this.appointment) {
       console.log("existing")
+
       // Edit existing pending appointment - check availability for the given doctor, date, and time.
       // const appointmentDate = this.appointment.date;
 
@@ -117,6 +119,7 @@ export class AppointmentFormComponent implements OnInit {
       // this.availableSlots = this.appointmentForm.get('appointmentTime')?.value;
       // this.patchFormWithAppointment(this.appointment, appointmentDate);
       const appointmentDate = this.appointment.date;
+
       this.patchFormWithAppointment(this.appointment!, appointmentDate);
       this.checkSlotAvailability(this.appointment.doctorId, appointmentDate, this.appointment.time)
         .then(isAvailable => {
@@ -165,6 +168,21 @@ export class AppointmentFormComponent implements OnInit {
 
   }
 
+  private loadPatientDetails(patientId: number): void {
+    this.appointmentService.getPatientById(patientId).subscribe({
+      next: (response) => {
+        const prnNumber = response.prn;
+        
+
+        // Update the form with the fetched PRN number
+        this.appointmentForm.patchValue({ prnNumber: prnNumber });
+        console.log('Fetched PRN:', prnNumber);
+      },
+      error: (error) => {
+        console.error('Error fetching patient details:', error);
+      }
+    });
+  }
 
   public loadDoctors(): void {
     this.doctorService.getDoctors().subscribe(
@@ -336,10 +354,10 @@ export class AppointmentFormComponent implements OnInit {
               //   (slot) => !bookedSlots.includes(slot)
               // );
               this.doctorService.getUnavailableSlots(doctorId).subscribe(
-                (unavailableSlots)=>{
+                (unavailableSlots) => {
                   if (this.appointment && this.appointment.date === date && this.appointment.doctorId === doctorId) {
                     const currentSelectedTime = this.appointment.time;
-    
+
                     this.availableSlots = this.availableSlots.filter((slot) => {
                       return slot === currentSelectedTime || (!bookedSlots.includes(slot) && !unavailableSlots.includes(slot));
                     });
@@ -349,7 +367,7 @@ export class AppointmentFormComponent implements OnInit {
                   }
                 });
               // If editing an appointment, retain the currently selected time slot if it exists
-              
+
 
               if (this.availableSlots.length === 0) {
                 this.showAvailabilityMessage = true;
@@ -477,6 +495,7 @@ export class AppointmentFormComponent implements OnInit {
       appointmentTime: appointment.time,
       requestVia: appointment.requestVia,  // Default selection
       appointmentStatus: 'Confirm', // Default selection
+      prnNumber: appointment.prnNumber
     });
 
   }
@@ -525,29 +544,10 @@ export class AppointmentFormComponent implements OnInit {
     if (!this.appointmentForm.valid) {
       this.messageService.add({ severity: 'warn', summary: 'Warn', detail: 'Some fields are not filled' });
     }
-    const patientName = this.appointmentForm.value.firstName + ' ' + this.appointmentForm.value.lastName;
-    const prnNumber = parseInt(this.appointmentForm.value.prnNumber);
-    const phoneNumber = this.appointmentForm.value.phoneNumber;
-    const email = this.appointmentForm.value.email;
-  
-    // Save patient information to the Patient table
-    const patientDetails = {
-      prn: prnNumber,
-      name: patientName,
-      phoneNumber: phoneNumber,
-      email: email
-    };
-  console.log('patient details', patientDetails);
-    this.appointmentService.addPatient(patientDetails).subscribe(
-      () => {
-        console.log('Patient information saved successfully');
-      },
-      (error) => {
-        console.error('Error saving patient information:', error);
-      }
-    );
+    
     const currentStatus = this.appointment?.status || '';
     const newStatus = this.appointmentForm.get('appointmentStatus')?.value;
+    // this.appointment.prnNumber=parseInt(this.appointmentForm.get('prnNumber')?.value);
 
     if (this.appointment) {
       const newDate = this.appointmentForm.get('appointmentDate')?.value;
@@ -559,10 +559,35 @@ export class AppointmentFormComponent implements OnInit {
         this.appointment.time !== newTime
       ) {
         this.appointment.status = 'rescheduled';
-        console.log("role",this.appointment)
+        console.log("role", this.appointment)
       } else {
         this.appointment.status = 'confirmed';
       }
+      const selectedDoctor = this.getDoctorByName(this.appointmentForm.value.doctorName);
+      const doctorId = selectedDoctor!.id;
+        const department = selectedDoctor!.departmentName ?? 'Default Department';
+      let phoneNumber = this.appointmentForm.value.phoneNumber;
+
+        if (!phoneNumber.startsWith('91')) {
+          phoneNumber = '91' + phoneNumber;
+        }
+        const appointmentDetails = {
+
+          patientName: this.appointmentForm.value.firstName + ' ' + this.appointmentForm.value.lastName,
+          phoneNumber: phoneNumber,
+          doctorId: doctorId,
+          doctorName: this.appointmentForm.value.doctorName,
+          department: department, // Adjust as needed
+          date: this.appointmentForm.value.appointmentDate,
+          time: this.appointmentForm.value.appointmentTime,
+          requestVia: this.appointmentForm.value.requestVia,
+          status: this.appointmentForm.value.appointmentStatus,
+          email: this.appointmentForm.value.email,
+          smsSent: true,
+          emailSent: true,
+          prnNumber: parseInt(this.appointmentForm.value.prnNumber),
+        };
+        this.appointment = appointmentDetails;
       this.appointment.date = this.appointmentForm.get('appointmentDate')?.value;
       this.appointment.time = this.appointmentForm.get('appointmentTime')?.value;
       console.log('appointment', this.appointment);
@@ -582,9 +607,10 @@ export class AppointmentFormComponent implements OnInit {
       //   this.appointmentService.removeCancelledAppointment(this.appointment.id!);
       // }
       // this.appointment.status = status;
-      this.submit.emit({ appointment: this.appointment, status: this.appointment.status, requestVia }); // Emit the data to the parent component
+      this.submit.emit({ appointment: appointmentDetails, status: this.appointment.status, requestVia }); // Emit the data to the parent component
       this.showForm = false; // Close the form after submission
       if (this.appointment.status === "rescheduled") {
+        // this.appointmentService.addConfirmedAppointment(this.appointment)
         this.doctorService.getDoctorDetails(this.appointment.doctorId).subscribe({
           next: (response) => {
             const doctorPhoneNumber = response?.phone_number;
@@ -669,6 +695,7 @@ export class AppointmentFormComponent implements OnInit {
       console.log(this.appointment.status)
       if (this.appointment.status === "confirmed" && this.appointment.isrescheduled === false) {
         console.log('in form component', this.appointment);
+        this.appointment.prnNumber = parseInt( this.appointmentForm.get('prnNumber')?.value);
         this.appointmentService.addConfirmedAppointment(this.appointment);
         this.messageService.add({
           severity: 'success',
@@ -690,7 +717,7 @@ export class AppointmentFormComponent implements OnInit {
               time: this.appointment?.time,
               doctorPhoneNumber: doctorPhoneNumber,
               patientPhoneNumber: phoneNumber,
-              status: 'confirmed'
+              status: 'confirmed',
             }
             console.log('appointment details', appointmentDetails)
             this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
@@ -755,7 +782,49 @@ export class AppointmentFormComponent implements OnInit {
       // Mark the slot as booked
       this.addBookedSlot(this.appointment.doctorId, this.appointment.date, this.appointment.time);
     } else {
+      const patientName = this.appointmentForm.value.firstName + ' ' + this.appointmentForm.value.lastName;
+    const prnNumber = parseInt(this.appointmentForm.value.prnNumber);
+    const phoneNumber = this.appointmentForm.value.phoneNumber;
+    const email = this.appointmentForm.value.email;
+
+    // Save patient information to the Patient table
+    const patientDetails = {
+      prn: prnNumber,
+      name: patientName,
+      phoneNumber: phoneNumber,
+      email: email
+    };
+    console.log('patient details', patientDetails);
+    this.appointmentService.addPatient(patientDetails).subscribe(
+      (patientResponse) => {
+        console.log('Patient information saved successfully', patientResponse);
+        const patientId = patientResponse.id;
+        this.appointmentForm.patchValue({ patientId: patientId });
+        this.appointment!.patientId = patientId;
+
+        if (this.appointment && this.appointment.patientId !== undefined) {
+          this.appointmentService.getPatientById(this.appointment.patientId).subscribe({
+            next: (response) => {
+              const prnNumber = response.prn;
+              this.appointmentForm.patchValue({ prnNumber: prnNumber });
+              console.log('Fetched PRN:', prnNumber);
+            },
+            error: (error) => {
+              console.error('Error fetching patient details:', error);
+            }
+          });
+        } else {
+          console.error('Patient ID is undefined. Cannot fetch patient details.');
+        }
+      },
+      (error) => {
+        console.error('Error saving patient information:', error);
+      }
+    );
+
+
       const doctorId = this.getDoctorIdByName(this.appointmentForm.value.doctorName);
+      
 
       if (doctorId === undefined) {
         console.error('Doctor ID not found for the given doctor name.');
@@ -784,7 +853,8 @@ export class AppointmentFormComponent implements OnInit {
           status: this.appointmentForm.value.appointmentStatus,
           email: this.appointmentForm.value.email,
           smsSent: true,
-          emailSent: true
+          emailSent: true,
+          prnNumber: parseInt(this.appointmentForm.value.prnNumber),
         };
         this.appointment = appointmentDetails;
         // Mark the slot as booked

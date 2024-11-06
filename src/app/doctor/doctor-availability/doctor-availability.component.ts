@@ -93,6 +93,7 @@ fetchDoctors(): void {
 
         // Check if the doctor is available on the given day of the week
         const dayOfWeek = this.selectedDate.toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
+        console.log('dayOfWeek',doctor.availability)
         const availableDay = doctor.availability?.find((avail: any) =>
           avail.day.toLowerCase() === dayOfWeek
         );

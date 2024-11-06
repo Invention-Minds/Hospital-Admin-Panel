@@ -40,6 +40,9 @@ export class SettingsComponent implements OnInit {
   role: string | null = null;  // Store user role
   users: any[] = []; // List of all users
   selectedUser: string = ''; // User selected by super admin to reset password
+  loading: boolean = false;
+  name: string = '';
+
   constructor(private authService: AuthServiceService, private router: Router, private messageService: MessageService, private appointmentService: AppointmentConfirmService) {}
  // Define the role-based access
  rolePermissions: Record<UserRole, string[]> = {
@@ -56,7 +59,8 @@ export class SettingsComponent implements OnInit {
       const storedUsername = localStorage.getItem('username');
       const validRoles: UserRole[] = ['admin', 'doctor', 'sub_admin', 'super_admin'];
       this.role = storedRole;
-      this.username = storedUsername || '';
+      this.name = storedUsername || '';
+      // this.username = storedUsername || '';
       console.log(localStorage.getItem('userid'))
       this.userid = Number(localStorage.getItem('userid'));
       console.log('userid',this.userid)
@@ -252,15 +256,22 @@ deleteUser() {
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${token}`
   });
+  this.loading = true; // Show loader
   // let username = this.extractFirstName(this.username); // Extract the first name
   this.authService.deleteUser(this.username,headers).subscribe(
     response => {
         console.log('User deleted successfully', response);
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'User Deleted Successfully' });
+        this.showDeleteConfirmDialog = false;
+        this.username='';
+        this.loading = false; // Hide loader
     },
     error => {
         console.error('Failed to delete user', error);
+        this.loading = false; // Hide loader
     }
-);}
+);
+}
 }
 
 

@@ -101,7 +101,7 @@
         <app-appointment-confirm *ngIf="activeComponent === 'confirmed'" [selectedDate]="selectedDate" [selectedValue]="searchValue"></app-appointment-confirm>
         <app-appointment-cancel *ngIf="activeComponent === 'cancelled'" [selectedDate]="selectedDate" [selectedValue]="searchValue"></app-appointment-cancel>
         <app-appointment-complete *ngIf="activeComponent === 'completed'" [selectedDate]="selectedDate" [selectedValue]="searchValue"></app-appointment-complete>
-        <app-appointment-form *ngIf="activeComponent === 'appointment'" ></app-appointment-form>
+        <app-appointment-form *ngIf="activeComponent === 'appointment' && showForm" (close)="closeForm()"></app-appointment-form>
       </div>
 </div>
 

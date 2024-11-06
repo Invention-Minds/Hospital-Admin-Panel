@@ -282,5 +282,8 @@ getAppointmentsByRole(): Observable<Appointment[]> {
     addPatient(patientDetails: any): Observable<any> {
       return this.http.post(`${environment.apiUrl}/patients`, patientDetails);
     }
+    getPatientById(patientId: number): Observable<any> {
+      return this.http.get(`${environment.apiUrl}/patients/${patientId}`);
+    }
     
 }

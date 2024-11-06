@@ -57,14 +57,15 @@ export class AppointmentConfirmComponent {
     //   this.confirmedAppointments = appointments;
     //   this.filteredAppointments = [...this.confirmedAppointments];
     //   console.log('Confirmed appointments from component:', this.confirmedAppointments);
-    const savedAppointments = localStorage.getItem('appointments');
-  if (savedAppointments) {
-    this.appointments = JSON.parse(savedAppointments);
-  } else {
-    // Fetch appointments from the backend for the first time
-        // Fetch appointments from backend to initialize the data
-        this.appointmentService.fetchAppointments();
-  }
+  //   const savedAppointments = localStorage.getItem('appointments');
+  // if (savedAppointments) {
+  //   this.appointments = JSON.parse(savedAppointments);
+  // } else {
+  //   // Fetch appointments from the backend for the first time
+  //       // Fetch appointments from backend to initialize the data
+  //       this.appointmentService.fetchAppointments();
+  // }
+  this.appointmentService.fetchAppointments();
     this.appointmentService.confirmedAppointments$.subscribe(appointments => {
       this.confirmedAppointments = appointments;
       this.confirmedAppointments.sort((a, b) => {

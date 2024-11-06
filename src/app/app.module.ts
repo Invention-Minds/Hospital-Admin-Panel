@@ -26,6 +26,7 @@ import { FloatLabelModule } from 'primeng/floatlabel';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import {FormsModule} from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 
 import { DashboardModuleComponent } from './dashboard/dashboard-module/dashboard-module.component';
@@ -108,7 +109,8 @@ import { MultiSelectModule } from 'primeng/multiselect';
     MatFormFieldModule,
     BrowserAnimationsModule,
     ToastModule,
-    MultiSelectModule
+    MultiSelectModule,
+    ProgressSpinnerModule
   ],
   providers: [
     provideClientHydration(),

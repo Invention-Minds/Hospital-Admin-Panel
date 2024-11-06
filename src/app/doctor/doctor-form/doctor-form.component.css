@@ -264,5 +264,43 @@ font-weight: 400;
     color: #666666;
     cursor: not-allowed;
   }
-  
+  /* Flex container for label and input */
+/* Container for left and right columns */
+.availability-container {
+  display: flex;
+  justify-content: space-between; /* Create space between left and right columns */
+  gap: 20px; /* Add space between columns */
+}
+
+/* Each column in the two-column layout */
+.column {
+  flex: 1; /* Allow each column to take equal space */
+}
+
+/* Flex container for label and input */
+.availability-field-container {
+  display: flex;
+  align-items: center; /* Vertically center the items */
+  gap: 10px; /* Add some space between the label and the input */
+  margin-bottom: 10px; /* Add some spacing between each row */
+}
+
+/* Styling for input to adjust the width */
+.available-time-input {
+  flex: 1; /* This will take up the remaining space */
+
+}
+.next{
+  margin-top: 86px;
+}
+.next-col{
+  display: flex;
+  justify-content: flex-end;
+  gap: 20px;
+}
+
+
+
+
+
   

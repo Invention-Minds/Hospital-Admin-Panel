@@ -46,7 +46,7 @@
 <div class="profile-info">
   <div class="profile-item">
     <span class="label">User Id :</span>
-    <span class="value">{{username}}</span>
+    <span class="value">{{name}}</span>
   </div>
   <div class="profile-item">
     <span class="label">Role :</span>
@@ -244,7 +244,8 @@
             Do you really want to delete this account? This action cannot be undone.
           </div>
           <div class="dialog-actions">
-            <button class="delete-account-button" (click)="deleteUser()">Yes, Delete it!</button>
+            <button class="delete-account-button" [disabled]="loading"  (click)="deleteUser()">Yes, Delete it!</button>
+            <!-- <div *ngIf="loading" class="loader">Loading...</div> -->
             <button class="cancel-account-button" (click)="closeDeleteDialog()">Cancel</button>
           </div>
         </div>

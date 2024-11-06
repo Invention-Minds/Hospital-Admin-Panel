@@ -66,7 +66,10 @@ activeComponent: string = 'request'; // Default to showing the request component
   showCompletedAppointments(){
     this.activeComponent = 'completed';
   }
-
+  closeForm() {
+    this.showForm = false;
+    this.activeComponent = 'appointment'; // Reset to allow reopening
+  }
 
     
   

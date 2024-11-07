@@ -77,12 +77,12 @@ font-weight: 500;
   
   .container {
     width: 500px;
-    min-height: 90vh;
+    max-height: 90vh;
     margin: 20px auto;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     background-color: #fff;
-    overflow-y: scroll;
+    overflow-y: auto;
 
   }
   

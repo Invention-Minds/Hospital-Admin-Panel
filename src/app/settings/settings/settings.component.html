@@ -95,7 +95,7 @@
         </div>
       </div> 
       <div *ngIf="currentUserRole !== 'super_admin'">
-        <button class="save-button" (click)="resetPassword()">Reset Password</button>
+        <button class="save-button" (click)="resetPassword()"  [disabled]="buttonClicked">Reset Password</button>
       </div>
 
       
@@ -134,8 +134,9 @@
 
 <!-- Button to Reset Password for Super Admin -->
 <div *ngIf="currentUserRole === 'super_admin'">
-  <button class="save-button" (click)="resetUserPassword()">Reset User Password</button>
+  <button class="save-button" (click)="resetUserPassword()"  [disabled]="buttonClicked">Reset User Password</button>
 </div>
+<p-toast />
 
 
 
@@ -182,19 +183,22 @@
 
       <!-- Email Input -->
       <div class="input">
-        <input type="text" class="input-field" [(ngModel)]="username" placeholder="Username_admin@rashtrotthana">
+        <input type="text" class="input-field" [(ngModel)]="username" placeholder="Username_admin@rashtrotthana"    (ngModelChange)="validateInputs()"
+        required>
 
         <!-- Password Input -->
         <div class="password-container">
           <input [type]="isCreatePasswordVisible ? 'text' : 'password'" class="input-field" [(ngModel)]="password"
-            placeholder="********">
+            placeholder="********" (ngModelChange)="validateInputs()"
+            required
+            minlength="6">
           <img [src]="isCreatePasswordVisible? '/not-show.png': '/show-password.png'" alt="Show Password"
             class="eye-icon" (click)="toggleCreatePasswordVisibility()">
         </div>
       </div>
 
       <!-- Save Button -->
-      <button class="create-button" (click)="createAccount()">Create Account</button>
+      <button class="create-button" (click)="createAccount()"  [disabled]="buttonClicked || !isFormValid">Create Account</button>
 <p-toast />
 
       <!-- Delete Account
@@ -222,8 +226,9 @@
       </div>
 
       <!-- Save Button -->
-      <button class="delete-accounts-button" (click)="openDeleteDialog()">Delete Account</button>
+      <button class="delete-accounts-button" (click)="openDeleteDialog()"  [disabled]="buttonClicked">Delete Account</button>
 
+      <p-toast />
       <!-- Delete Account
             <div class="delete-account">
               <button class="delete-button" (click)="openDeleteDialog()">

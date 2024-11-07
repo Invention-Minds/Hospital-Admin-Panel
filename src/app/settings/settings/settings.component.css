@@ -396,3 +396,11 @@ line-height: normal;
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+/* Button disabled styles */
+button[disabled] {
+  background-color: #ccc; /* Grey color to indicate the button is disabled */
+  color: #777; /* Light grey text color */
+  cursor: not-allowed; /* Change the cursor to not-allowed */
+  transform: none; /* Remove any hover/active transformations */
+  box-shadow: none; /* Remove box shadow for a flat look */
+}

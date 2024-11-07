@@ -42,6 +42,8 @@ export class SettingsComponent implements OnInit {
   selectedUser: string = ''; // User selected by super admin to reset password
   loading: boolean = false;
   name: string = '';
+  buttonClicked: boolean = false;
+  isFormValid: boolean = false;
 
   constructor(private authService: AuthServiceService, private router: Router, private messageService: MessageService, private appointmentService: AppointmentConfirmService) {}
  // Define the role-based access
@@ -114,33 +116,41 @@ export class SettingsComponent implements OnInit {
       return;
     }
 
+    this.buttonClicked = true;
     if (this.selectedUser) {
       this.authService.resetPassword(this.selectedUser, this.newPassword).subscribe(
         () => {
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Password reset successfully' });
           this.newPassword = '';
           this.confirmPassword = '';
+          this.buttonClicked = false;
         },
         (error) => {
           console.error('Error resetting user password:', error);
           this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to reset password' });
+          this.buttonClicked = false;
         }
       );
     }
   }
 // Register method
 createAccount() {
+  this.buttonClicked = true;
   this.authService.register(this.username, this.password).subscribe(response => {
     console.log('Account created successfully', response);
     this.username = '';  // Clear the username
     this.password = '';  // Clear the password
     this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Account Created Successfully' });
+    this.buttonClicked = false;
   }, error => {
     console.error('Error creating account', error);
     this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to Create Account' });
+    this.buttonClicked = false;
   });
 }
-
+validateInputs(): void {
+  this.isFormValid = this.username.trim() !== '' && this.password.length >= 6;
+}
 // Reset Password method
 resetPassword() {
   if (this.newPassword !== this.confirmPassword) {
@@ -148,6 +158,7 @@ resetPassword() {
     console.error('Passwords do not match!');
     return;
   }
+  this.buttonClicked = true;
   this.authService.resetPassword(this.username, this.newPassword).subscribe(response => {
     console.log('Password reset successfully', response);
     this.username = '';  // Clear the username
@@ -155,10 +166,12 @@ resetPassword() {
 
     this.confirmPassword= '';
     this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Password reset successfully' });
+    this.buttonClicked = false;
 
   }, error => {
     console.error('Error resetting password', error);
     this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to reset the password' });
+    this.buttonClicked = false;
   });
 }
  // Change Password method
@@ -251,7 +264,7 @@ deleteUser() {
     console.error('No authentication token found');
     return;
   }
-
+  this.buttonClicked=true;
   const headers = new HttpHeaders({
     'Content-Type': 'application/json',
     'Authorization': `Bearer ${token}`
@@ -261,14 +274,16 @@ deleteUser() {
   this.authService.deleteUser(this.username,headers).subscribe(
     response => {
         console.log('User deleted successfully', response);
-        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'User Deleted Successfully' });
         this.showDeleteConfirmDialog = false;
         this.username='';
         this.loading = false; // Hide loader
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'User deleted successfully'});
+        this.buttonClicked = false;
     },
     error => {
         console.error('Failed to delete user', error);
         this.loading = false; // Hide loader
+        this.buttonClicked = false;
     }
 );
 }

@@ -354,16 +354,17 @@ export class AppointmentFormComponent implements OnInit {
               //   (slot) => !bookedSlots.includes(slot)
               // );
               this.doctorService.getUnavailableSlots(doctorId).subscribe(
-                (unavailableSlots) => {
+                (unavailableSlots: { [date: string]: string[] }) => {
+                  const unavailableSlotsForDate = unavailableSlots[date] || [];
                   if (this.appointment && this.appointment.date === date && this.appointment.doctorId === doctorId) {
                     const currentSelectedTime = this.appointment.time;
 
                     this.availableSlots = this.availableSlots.filter((slot) => {
-                      return slot === currentSelectedTime || (!bookedSlots.includes(slot) && !unavailableSlots.includes(slot));
+                      return slot === currentSelectedTime || (!bookedSlots.includes(slot) && !unavailableSlotsForDate.includes(slot));
                     });
                   } else {
                     // For new appointments, remove all booked slots
-                    this.availableSlots = this.availableSlots.filter((slot) => (!bookedSlots.includes(slot) && !unavailableSlots.includes(slot)));
+                    this.availableSlots = this.availableSlots.filter((slot) => (!bookedSlots.includes(slot) && !unavailableSlotsForDate.includes(slot)));
                   }
                 });
               // If editing an appointment, retain the currently selected time slot if it exists

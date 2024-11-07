@@ -108,10 +108,13 @@ fetchDoctors(): void {
         const availableFrom = availableDay?.availableFrom ?? '08:00-20:00'; // Use a default value for unavailable days
         const slotDuration = availableDay?.slotDuration ?? 20; // Default to 30-minute slots if unavailable
 
+        const date = this.formatDate(this.selectedDate); // Format the selected date to match the keys in the object
+        const unavailableSlotsForDate = unavailableSlots[formattedDate] || [];
+
         return {
           ...doctor,
           isUnavailable,
-          slots: this.generateDoctorSlots(availableFrom, slotDuration, bookedSlots, isUnavailable,unavailableSlots)
+          slots: this.generateDoctorSlots(availableFrom, slotDuration, bookedSlots, isUnavailable,unavailableSlotsForDate)
         };
       });
       this.applySearchFilter();
@@ -175,7 +178,7 @@ fetchDoctors(): void {
   // Function to generate slots based on doctor availability and slot duration
 // Function to generate slots based on doctor availability and slot duration
 // Function to generate slots based on doctor availability and slot duration
-generateDoctorSlots(availableFrom: string, slotDuration: number, bookedSlots: string[], isUnavailableDay: boolean,unavailableSlots: string[],): Slot[] {
+generateDoctorSlots(availableFrom: string, slotDuration: number, bookedSlots: string[], isUnavailableDay: boolean,unavailableSlots: string[]): Slot[] {
   const [availableStart, availableEnd] = availableFrom.split('-').map(this.stringToMinutes);
   const slots: Slot[] = [];
 

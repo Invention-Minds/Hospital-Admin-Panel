@@ -56,6 +56,7 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AuthInterceptor } from './auth.interceptor';
 import { DeleteConfirmationDialogComponent } from './delete-confirmation-dialog/delete-confirmation-dialog.component';
 import { MultiSelectModule } from 'primeng/multiselect';
+import { DatePipe } from '@angular/common';
 
 
 @NgModule({
@@ -113,6 +114,7 @@ import { MultiSelectModule } from 'primeng/multiselect';
     ProgressSpinnerModule
   ],
   providers: [
+    DatePipe,
     provideClientHydration(),
     // provideAnimationsAsync(),
     {

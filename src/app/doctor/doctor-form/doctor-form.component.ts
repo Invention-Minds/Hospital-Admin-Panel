@@ -65,7 +65,7 @@ export class DoctorFormComponent implements OnInit,AfterViewInit {
     }
     this.fetchDepartments();
     // Ensure individual availability is initialized
-    // this.initializeIndividualAvailability();
+    this.initializeIndividualAvailability();
     // Fetch departments and set the filteredDepartments list
     this.doctorService.getDepartments().subscribe((departments: Department[]) => {
       this.departments = departments;

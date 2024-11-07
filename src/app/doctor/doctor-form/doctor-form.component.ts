@@ -65,7 +65,7 @@ export class DoctorFormComponent implements OnInit,AfterViewInit {
     }
     this.fetchDepartments();
     // Ensure individual availability is initialized
-    this.initializeIndividualAvailability();
+    // this.initializeIndividualAvailability();
     // Fetch departments and set the filteredDepartments list
     this.doctorService.getDepartments().subscribe((departments: Department[]) => {
       this.departments = departments;
@@ -176,14 +176,12 @@ export class DoctorFormComponent implements OnInit,AfterViewInit {
       this.availabilityDaysList.forEach(day => {
         const dayAvailability = this.doctor?.availability.find(avail => avail.day === day);
         if (dayAvailability) {
-          console.log('Day availabitlity',this.individualAvailability)
-          console.log('Day availability:', dayAvailability);
           this.doctor!.availabilityDays[day] = true; // Mark day as available
           this.individualAvailability[day] = {
             availableFrom: dayAvailability.availableFrom,
             slotDuration: dayAvailability.slotDuration
           };
-          console.log('Day availabitlity',this.individualAvailability)
+          console.log('Day availabitlity',this.individualAvailability[day])
         } else {
           this.doctor!.availabilityDays[day] = false;
           this.individualAvailability[day] = {
@@ -295,7 +293,13 @@ export class DoctorFormComponent implements OnInit,AfterViewInit {
         }
       });
     }
-
+    if (!this.doctor?.phone_number.startsWith('91')) {
+            this.doctor!.phone_number = '91' + this.doctor?.phone_number;
+          }
+          const unavailableSlotValues = this.unavailableSlots.map(slot => slot.value);
+          console.log('Unavailable slots:', unavailableSlotValues);
+          this.doctor!.unavailableSlots = unavailableSlotValues; // Assign the values array to doctor
+    
     // Emit the save event with the doctor details
     this.save.emit(this.doctor);
     this.doctor = null; // Reset the doctor object after saving

@@ -1,61 +1,63 @@
 <div class="table-container">
-    <table class="appointment-table">
-      <thead>
-        <tr>
-          <th>No</th>
-          <th (click)="sortBy('patientName')" style="cursor: pointer;">
-            Patient Name
-            <span *ngIf="sortColumn === 'patientName' && sortDirection === 'asc'">&#9650;</span>
-            <span *ngIf="sortColumn === 'patientName' && sortDirection === 'desc'">&#9660;</span>
-          </th>
-          <th>Phone Number</th>
-          <th>Doctor Name</th>
-          <th>Therapy</th>
-          <th (click)="sortBy('date')">
-            Date
-            <span *ngIf="sortColumn === 'date' && sortDirection === 'asc'">&#9650;</span>
-            <span *ngIf="sortColumn === 'date' && sortDirection === 'desc'">&#9660;</span></th>
-          <th>Time</th>
-          <th>Source</th>
-          <th>SMS</th>
-          <th>Email</th>
-          <th>Status</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let appointment of getPaginatedAppointments(); let i = index">
-          <td>{{ i + 1 }}</td>
-          <td>{{ appointment.patientName }}</td>
-          <td>{{ appointment.phoneNumber }}</td>
-          <td>{{ appointment.doctorName }}</td>
-          <td>{{ appointment.department }}</td>
-          <td>{{ appointment.date }}</td>
-          <td>{{ appointment.time }}</td>
-          <td>{{appointment.requestVia}}</td>
-          <td>
-            <span class="sms-status" [ngClass]="{'sms-sent': appointment.smsSent, 'sms-not-sent': !appointment.smsSent}">
-              <img *ngIf="appointment.smsSent" src="icons/sent.svg" alt="Sent">
-              <img *ngIf="!appointment.smsSent" src="icons/not-sent.png" alt="Not Sent">
-            </span>
-          </td>
-          <td>
-            <span class="sms-status" [ngClass]="{'sms-sent': appointment.emailSent, 'sms-not-sent': !appointment.emailSent}">
-              <img *ngIf="appointment.emailSent" src="icons/sent.svg" alt="Sent">
-              <img *ngIf="!appointment.emailSent" src="icons/not-sent.png" alt="Not Sent">
-            </span>
-          </td>
-          <td>
-            <span class="status-badge cancelled">{{ appointment.status }}</span>
-          </td>
-          <td>
-            <button class="btn-action" (click)="openAppointmentForm(appointment)"  pTooltip="Confirm"  tooltipPosition="top">
-              <img src="icons/book.png" alt="Confirm">
-            </button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+<div class="table-wrapper">
+  <table class="appointment-table">
+    <thead>
+      <tr>
+        <th>No</th>
+        <th (click)="sortBy('patientName')" style="cursor: pointer;">
+          Patient Name
+          <span *ngIf="sortColumn === 'patientName' && sortDirection === 'asc'">&#9650;</span>
+          <span *ngIf="sortColumn === 'patientName' && sortDirection === 'desc'">&#9660;</span>
+        </th>
+        <th>Phone Number</th>
+        <th>Doctor Name</th>
+        <th>Therapy</th>
+        <th (click)="sortBy('date')">
+          Date
+          <span *ngIf="sortColumn === 'date' && sortDirection === 'asc'">&#9650;</span>
+          <span *ngIf="sortColumn === 'date' && sortDirection === 'desc'">&#9660;</span></th>
+        <th>Time</th>
+        <th>Source</th>
+        <th>SMS</th>
+        <th>Email</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let appointment of getPaginatedAppointments(); let i = index">
+        <td>{{ i + 1 }}</td>
+        <td>{{ appointment.patientName }}</td>
+        <td>{{ appointment.phoneNumber }}</td>
+        <td>{{ appointment.doctorName }}</td>
+        <td>{{ appointment.department }}</td>
+        <td>{{ appointment.date }}</td>
+        <td>{{ appointment.time }}</td>
+        <td>{{appointment.requestVia}}</td>
+        <td>
+          <span class="sms-status" [ngClass]="{'sms-sent': appointment.smsSent, 'sms-not-sent': !appointment.smsSent}">
+            <img *ngIf="appointment.smsSent" src="icons/sent.svg" alt="Sent">
+            <img *ngIf="!appointment.smsSent" src="icons/not-sent.png" alt="Not Sent">
+          </span>
+        </td>
+        <td>
+          <span class="sms-status" [ngClass]="{'sms-sent': appointment.emailSent, 'sms-not-sent': !appointment.emailSent}">
+            <img *ngIf="appointment.emailSent" src="icons/sent.svg" alt="Sent">
+            <img *ngIf="!appointment.emailSent" src="icons/not-sent.png" alt="Not Sent">
+          </span>
+        </td>
+        <td>
+          <span class="status-badge cancelled">{{ appointment.status }}</span>
+        </td>
+        <td>
+          <button class="btn-action" (click)="openAppointmentForm(appointment)"  pTooltip="Confirm"  tooltipPosition="top">
+            <img src="icons/book.png" alt="Confirm">
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
   
     <!-- Pagination Controls -->
     <div class="pagination">

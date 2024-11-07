@@ -1,18 +1,18 @@
-/* Table container styling */
 .table-container {
-    /* width: 100%; */
-    /* margin: 20px auto; */
-    border-radius: 10px;
-    background-color: #F0F3FF;
-    padding: 10px;
-    padding-left: 130px;
-  }
-  
-  /* Table header styling */
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
+  border-radius: 10px;
+  background-color: #f0f3ff;
+  padding: 10px;
+  padding-left: 130px;
+}
+.table-wrapper {
+  overflow-x: auto; /* Adds horizontal scrolling */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+}
+table {
+  width: 100%;
+  min-width: 1000px;
+  border-collapse: collapse;
+}
   
   thead {
     background: #0E2970;

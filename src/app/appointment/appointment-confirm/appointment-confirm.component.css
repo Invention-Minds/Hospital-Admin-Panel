@@ -4,9 +4,13 @@
   padding: 10px;
   padding-left: 130px;
 }
-
+.table-wrapper {
+  overflow-x: auto; /* Adds horizontal scrolling */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+}
 .appointment-table {
   width: 100%;
+  min-width: 1000px;
   border-collapse: collapse;
 }
 thead {
@@ -43,7 +47,7 @@ tbody tr:nth-child(even) {
 }
 
 tbody td {
-  padding: 10px;
+  padding: 8px;
   text-align: center;
   color: black;
   font-size: 15px;

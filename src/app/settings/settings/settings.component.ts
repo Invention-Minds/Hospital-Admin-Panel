@@ -44,6 +44,8 @@ export class SettingsComponent implements OnInit {
   name: string = '';
   buttonClicked: boolean = false;
   isFormValid: boolean = false;
+  usernameErrorMessage: string = '';
+  passwordErrorMessage: string = '';
 
   constructor(private authService: AuthServiceService, private router: Router, private messageService: MessageService, private appointmentService: AppointmentConfirmService) {}
  // Define the role-based access
@@ -149,8 +151,29 @@ createAccount() {
   });
 }
 validateInputs(): void {
-  this.isFormValid = this.username.trim() !== '' && this.password.length >= 6;
+  const usernameRegex = /^[a-zA-Z]+_(admin|subadmin|superadmin|doctor)@rashtrotthana$/;
+  
+  // Validate username using regex and validate password length
+  const isUsernameValid = usernameRegex.test(this.username);
+  const isPasswordValid = this.password.length >= 6;
+
+  // Update the form validity state
+  this.isFormValid = isUsernameValid && isPasswordValid;
+
+  // If the form is not valid, show an appropriate error message
+  if (!isUsernameValid) {
+    this.usernameErrorMessage = "Username must be in the format: name_role@rashtrotthana (e.g., john_admin@rashtrotthana). The role must be 'admin', 'subadmin', 'superadmin', or 'doctor'.";
+  } else {
+    this.usernameErrorMessage = ''; // Clear the error message if valid
+  }
+
+  if (!isPasswordValid) {
+    this.passwordErrorMessage = 'Password must be at least 6 characters long.';
+  } else {
+    this.passwordErrorMessage = ''; // Clear the error message if valid
+  }
 }
+
 // Reset Password method
 resetPassword() {
   if (this.newPassword !== this.confirmPassword) {

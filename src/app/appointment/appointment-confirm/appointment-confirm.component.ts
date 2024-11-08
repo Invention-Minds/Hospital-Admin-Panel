@@ -17,7 +17,7 @@ interface Appointment {
   emailSent?: boolean;
   requestVia?: string; // Optional property
   created_at?: string;
-  completed?:boolean;
+  checkedIn?:boolean;
 }
 @Component({
   selector: 'app-appointment-confirm',
@@ -73,7 +73,9 @@ export class AppointmentConfirmComponent {
         const dateB = new Date(b.created_at!);
         return dateB.getTime() - dateA.getTime();
       });
+      console.log("confirmedAppointments",this.confirmedAppointments);
       this.filteredAppointments = [...this.confirmedAppointments];
+      // this.filteredAppointments = this.confirmedAppointments.filter(appointment => !appointment!.completed);
 
     });
 
@@ -154,6 +156,7 @@ export class AppointmentConfirmComponent {
     }
   }
   filteredAppointments: Appointment[] = [...this.confirmedAppointments];
+  // filteredAppointments: Appointment[] = this.confirmedAppointments.filter(appointment => !appointment!.completed);
 
   ngOnChanges() {
     // Whenever the selected date changes, this will be triggered
@@ -172,13 +175,16 @@ export class AppointmentConfirmComponent {
       const searchLower = this.selectedValue.toLowerCase();
       filteredList = this.filteredAppointments.filter(confirmedAppointments =>
         confirmedAppointments.patientName.toLowerCase().includes(searchLower) ||
-        confirmedAppointments.phoneNumber.toLowerCase().includes(searchLower)
+        confirmedAppointments.phoneNumber.toLowerCase().includes(searchLower) 
       );
 
     }
     else {
       // If no date is selected, show all appointments
       this.filteredAppointments = [...this.confirmedAppointments];
+      console.log('Confirmed appointments:', this.confirmedAppointments);
+      // this.filteredAppointments = this.confirmedAppointments.filter(appointment => !appointment!.completed);
+  
     }
     this.filteredAppointments = filteredList;
     this.currentPage = 1;
@@ -195,7 +201,21 @@ export class AppointmentConfirmComponent {
     localStorage.setItem('appointments', JSON.stringify(this.appointments));
   }
   completeAppointment(appointment: Appointment) {
-    appointment.completed = true;
+    const appointmentId = appointment.id;
+    if(appointmentId !== undefined){
+      this.appointmentService.checkedinAppointment(appointmentId).subscribe({
+        next: (response) => {
+          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Checked in successfully!' });
+          appointment.checkedIn = true; // Update the UI to reflect the checked-in status
+        },
+        error: (error) => {
+          console.error('Error during check-in:', error);
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to check-in' });
+        },
+      });
+    }
+  
+
     this.saveToLocalStorage();
     // Fetch doctor details to get the slot duration
     this.doctorService.getDoctorDetails(appointment.doctorId).subscribe(
@@ -207,7 +227,7 @@ export class AppointmentConfirmComponent {
           this.appointmentService.scheduleCompletion(appointment.id!, delayTime).subscribe({
             next: () => {
               console.log('Appointment completion scheduled successfully');
-              this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Appointment completed completion scheduled successfully' });
+              this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Appointment completion scheduled successfully' });
             },
             error: (error) => {
               console.error('Error scheduling appointment completion:', error);
@@ -253,6 +273,7 @@ export class AppointmentConfirmComponent {
         this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
           next: (response) => {
             // console.log('WhatsApp message sent successfully:', response);
+            this.messageService.add({ severity: 'success', summary: 'Success', detail: 'WhatsApp message sent successfully!' });
           },
           error: (error) => {
             console.error('Error sending WhatsApp message:', error);
@@ -273,6 +294,7 @@ export class AppointmentConfirmComponent {
     this.appointmentService.sendEmail(patientEmail, emailStatus, appointmentDetails, 'patient').subscribe({
       next: (response) => {
         // console.log('Email sent to patient successfully:', response);
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to patient successfully!' });
       },
       error: (error) => {
         console.error('Error sending email to patient:', error);
@@ -299,6 +321,7 @@ export class AppointmentConfirmComponent {
     if (status === 'Confirm') {
         confirmedAppointment.status = 'confirmed'; // Set the status to confirmed
         this.appointmentService.addConfirmedAppointment(confirmedAppointment);
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Appointment confirmed successfully!' });
       // Fetch doctor's details to get the doctor's email
       // this.doctorService.getDoctorDetails(appointment.doctorId).subscribe({
       //   next: (response) => {
@@ -354,6 +377,7 @@ export class AppointmentConfirmComponent {
     } else if (status === 'Cancel') {
         confirmedAppointment.status = 'Cancelled'; // Update the status
         this.appointmentService.addCancelledAppointment(confirmedAppointment);
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Appointment cancelled successfully!' });
         this.doctorService.getDoctorDetails(appointment.doctorId).subscribe({
           next: (response) =>{
             const doctorPhoneNumber = response?.phone_number;
@@ -369,6 +393,7 @@ export class AppointmentConfirmComponent {
             this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
               next: (response) => {
                 console.log('WhatsApp message sent successfully:', response);
+                this.messageService.add({ severity: 'success', summary: 'Success', detail: 'WhatsApp message sent successfully!' });
               },
               error: (error) => {
                 console.error('Error sending WhatsApp message:', error);
@@ -389,6 +414,7 @@ export class AppointmentConfirmComponent {
         this.appointmentService.sendEmail(patientEmail, emailStatus, appointmentDetails, 'patient').subscribe({
           next: (response) => {
             console.log('Email sent to patient successfully:', response);
+            this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to patient successfully!' });
           },
           error: (error) => {
             console.error('Error sending email to patient:', error);

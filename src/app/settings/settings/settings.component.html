@@ -185,6 +185,7 @@
       <div class="input">
         <input type="text" class="input-field" [(ngModel)]="username" placeholder="Username_admin@rashtrotthana"    (ngModelChange)="validateInputs()"
         required>
+        <div *ngIf="usernameErrorMessage" class="error-message">{{ usernameErrorMessage }}</div>
 
         <!-- Password Input -->
         <div class="password-container">
@@ -195,6 +196,8 @@
           <img [src]="isCreatePasswordVisible? '/not-show.png': '/show-password.png'" alt="Show Password"
             class="eye-icon" (click)="toggleCreatePasswordVisibility()">
         </div>
+        <div *ngIf="passwordErrorMessage" class="error-message">{{ passwordErrorMessage }}</div>
+
       </div>
 
       <!-- Save Button -->

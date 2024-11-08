@@ -125,7 +125,7 @@
       </div>
     </div>
     <div *ngIf="!isAnyDaySelected() && doctorForm.submitted" class="error-message">
-      <small>At least one availability day must be selected</small>
+      <small *ngIf="doctorForm.submitted">At least one availability day must be selected</small>
     </div>
   </div>
 </div>

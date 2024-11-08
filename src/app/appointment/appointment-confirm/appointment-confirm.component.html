@@ -52,14 +52,14 @@
             <span class="status-badge">{{ appointment.status }}</span>
           </td>
           <td>
-            <button class="btn-action" [disabled]="appointment.completed">
+            <button class="btn-action" [disabled]="appointment.checkedIn">
               <img src="check-in.svg" alt="check" class="action-icon"  (click)="completeAppointment(appointment)"
                 pTooltip="Check-in" tooltipPosition="top">
-              <button class="btn-action" [disabled] ="appointment.completed">
+              <button class="btn-action" [disabled]="appointment.checkedIn">
                 <img src="icons/delete.png" alt="delete" class="action-icon" (click)="cancelAppointment(appointment)" 
                 pTooltip="Cancel" tooltipPosition="top">
               </button>
-              <button class="btn-action" (click)="openAppointmentForm(appointment)"  pTooltip="Reschedule"  tooltipPosition="top">
+              <button class="btn-action-reschedule" (click)="openAppointmentForm(appointment)"  pTooltip="Reschedule"  tooltipPosition="top">
                 <img src="icons/book.png" alt="Confirm">
             </button>
             </button>
@@ -82,6 +82,7 @@
     </div>
   </div>
 </div>
+<p-toast></p-toast>
 <app-appointment-form 
   *ngIf="showAppointmentForm" 
   [appointment]="selectedAppointment" 

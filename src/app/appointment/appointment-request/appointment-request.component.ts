@@ -8,6 +8,7 @@ import { ActivatedRoute } from '@angular/router';
 import { AuthServiceService } from '../../services/auth/auth-service.service';
 import { Subscription } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';  // Using uuid library for generating unique IDs
+import { MessageService } from 'primeng/api';
 
 
 
@@ -33,7 +34,8 @@ const lockedAppointments = new Map<number, { userId: string; lockTime: number }>
 @Component({
   selector: 'app-appointment-request',
   templateUrl: './appointment-request.component.html',
-  styleUrl: './appointment-request.component.css'
+  styleUrl: './appointment-request.component.css',
+  providers: [MessageService]
 })
 export class AppointmentRequestComponent implements OnInit {
   @Input() selectedDate: Date | null = null;
@@ -48,7 +50,9 @@ export class AppointmentRequestComponent implements OnInit {
 
   // showModal: boolean = false;
   // @Input() selectedOption: string = '';
-  constructor(public dialog: MatDialog, private appointmentService: AppointmentConfirmService, private route: ActivatedRoute, private doctorService: DoctorServiceService) {
+  constructor(public dialog: MatDialog, private appointmentService: AppointmentConfirmService, private route: ActivatedRoute, private doctorService: DoctorServiceService,
+    private authService: AuthServiceService, private messageService: MessageService
+  ) {
     this.userId = localStorage.getItem('userid')
   }
 
@@ -226,7 +230,7 @@ export class AppointmentRequestComponent implements OnInit {
     this.currentPage = 1;
   }
   submitAppointment(appointment: Appointment | null, status: string, requestVia: any) {
-
+    console.log('Appointment in Request:', appointment);
     if (!appointment) {
       console.error('No appointment selected for submission.');
       return; // Early return if appointment is null or undefined
@@ -249,6 +253,7 @@ export class AppointmentRequestComponent implements OnInit {
       // const confirmed = this.confirmedAppointments;
       console.log("confirmed in submitted", confirmedAppointment)
       this.appointmentService.addConfirmedAppointment(confirmedAppointment);
+      this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Appointment confirmed successfully!' });
     } else if (status === 'Cancel') {
       if (requestVia === 'Website') {
         requestVia = 'Website';
@@ -267,6 +272,7 @@ export class AppointmentRequestComponent implements OnInit {
       // const confirmed = this.confirmedAppointments;
 
       this.appointmentService.addCancelledAppointment(cancelledAppointment);
+      +
       // this.appointmentService.sendWhatsAppMessage(cancelledAppointment).subscribe({
       //   next: (response) => {
       //     console.log('WhatsApp message sent successfully:', response);
@@ -290,9 +296,11 @@ export class AppointmentRequestComponent implements OnInit {
           this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
             next: (response) => {
               console.log('WhatsApp message sent successfully:', response);
+              this.messageService.add({ severity: 'success', summary: 'Success', detail: 'WhatsApp message sent successfully!' });
             },
             error: (error) => {
               console.error('Error sending WhatsApp message:', error);
+              this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending WhatsApp message!' });
             }
           });
         }
@@ -310,9 +318,11 @@ export class AppointmentRequestComponent implements OnInit {
       this.appointmentService.sendEmail(patientEmail, emailStatus, appointmentDetails, 'patient').subscribe({
         next: (response) => {
           console.log('Email sent to patient successfully:', response);
+          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to patient successfully!' });
         },
         error: (error) => {
           console.error('Error sending email to patient:', error);
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending email to patient!' });
         },
       });
     }
@@ -374,9 +384,11 @@ export class AppointmentRequestComponent implements OnInit {
         this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
           next: (response) => {
             console.log('WhatsApp message sent successfully:', response);
+            this.messageService.add({ severity: 'success', summary: 'Success', detail: 'WhatsApp message sent successfully!' });
           },
           error: (error) => {
             console.error('Error sending WhatsApp message:', error);
+            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending WhatsApp message!' });
           }
         });
       }
@@ -394,9 +406,11 @@ export class AppointmentRequestComponent implements OnInit {
     this.appointmentService.sendEmail(patientEmail, emailStatus, appointmentDetails, 'patient').subscribe({
       next: (response) => {
         console.log('Email sent to patient successfully:', response);
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to patient successfully!' });
       },
       error: (error) => {
         console.error('Error sending email to patient:', error);
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending email to patient!' });
       },
     });
     this.pendingAppointments = this.pendingAppointments.filter(a => a.id !== appointment.id);

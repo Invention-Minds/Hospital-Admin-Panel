@@ -1,15 +1,16 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import {provideNativeDateAdapter} from '@angular/material/core';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-appointment-overview',
   templateUrl: './appointment-overview.component.html',
   styleUrl: './appointment-overview.component.css',
-  providers: [provideNativeDateAdapter()],
+  providers: [provideNativeDateAdapter(), MessageService],
 })
 export class AppointmentOverviewComponent {
-  constructor(private router: Router) {}
+  constructor(private router: Router,private messageService: MessageService) {}
  // Options for the dropdown to select search type (Patient ID or Phone Number)
  searchOptions = [
   { label: 'Patient Name', value: 'patientName' },

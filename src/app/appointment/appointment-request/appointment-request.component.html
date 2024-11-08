@@ -63,7 +63,7 @@
       of {{ totalPages }}
     </div>
   </div>
-
+<p-toast></p-toast>
 </div>
 <app-appointment-form *ngIf="showAppointmentForm" [appointment]="selectedAppointment" (close)="closeAppointmentForm()"
   (submit)="submitAppointment(selectedAppointment, $event.status, $event.requestVia)">

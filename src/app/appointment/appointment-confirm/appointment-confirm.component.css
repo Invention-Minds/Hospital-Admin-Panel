@@ -82,6 +82,13 @@ tbody tr:hover {
   border: none;
   cursor: pointer;
 }
+.btn-action-reschedule {
+  background-color: transparent;
+  cursor: pointer;
+  outline: none;
+  border: none;
+  cursor: pointer;
+}
 .status-badge {
   display: inline-block;
   color: white;

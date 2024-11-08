@@ -4,6 +4,7 @@ import { Doctor } from '../../models/doctor.model';
 import { FormsModule } from '@angular/forms';
 import { ChangeDetectorRef } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { MessageService } from 'primeng/api';
 
 interface Department {
   id: number;
@@ -16,7 +17,8 @@ interface Availability {
 @Component({
   selector: 'app-doctor-form',
   templateUrl: './doctor-form.component.html',
-  styleUrls: ['./doctor-form.component.css']
+  styleUrls: ['./doctor-form.component.css'],
+  providers:[MessageService]
 })
 export class DoctorFormComponent implements OnInit, AfterViewInit {
   @Input() isEditMode: boolean = false; // Determines if it's for edit or add
@@ -49,7 +51,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
   unavailableSlotsPerDate: { [date: string]: { label: string; value: string }[] } = {};
 
 
-  constructor(private doctorService: DoctorServiceService, private changeDetector: ChangeDetectorRef,private datePipe: DatePipe) { }
+  constructor(private doctorService: DoctorServiceService, private changeDetector: ChangeDetectorRef,private datePipe: DatePipe,private messageService: MessageService) { }
 
   // ngOnInit(): void {
   //   if(!this.isEditMode){
@@ -270,7 +272,11 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
     const dayKey = this.availabilityDaysList[day];
 
     if (this.doctor.availabilityDays[dayKey]) {
+      if(!this.useSameTimeForAllDays){
+        console.log('Use different time for each day',dayKey,this.individualAvailability);
+
       const availability = this.individualAvailability[dayKey];
+      console.log('Availability:', availability);
 
       if (availability.availableFrom) {
         const [start, end] = availability.availableFrom.split('-');
@@ -283,6 +289,22 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
           console.error('Error: Invalid available time or slot duration for generating slots.');
         }
       }
+    }
+    else{
+      // console.log('Use same time for all days',dayKey,this.doctor.availability);
+      // const availability = this.doctor.availability.find(avail => avail.day === dayKey);
+      // console.log('Availability:', availability);
+      
+        const [start, end] = this.doctor.availability[0].availableFrom.split('-');
+        const slotDuration = this.doctor.availability[0].slotDuration;
+        if (start && end && slotDuration) {
+          this.generatedSlots = this.generateTimeSlots(start, end, slotDuration);
+          this.generatedSlotOptions = this.generatedSlots.map(slot => ({ label: slot, value: slot }));
+        } else {
+          console.error('Error: Invalid available time or slot duration for generating slots.');
+        }
+      
+    }
     } else {
       console.log('No availability for selected date');
     }
@@ -381,6 +403,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
   saveDoctor(): void {
     console.log('Doctor:', this.doctor);
     if (!this.doctor) {
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Doctor details are missing' });
       return;
     }
 
@@ -444,6 +467,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
     console.log('Doctor:', this.doctor);
 
     // Emit the save event with the doctor details
+    this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Doctor details saved successfully' });
     this.save.emit(this.doctor);
     this.doctor = null; // Reset the doctor object after saving
     this.isEditMode = false; // Exit edit mode after saving
@@ -593,7 +617,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
   }
   isAnyDaySelected(): boolean {
     if (this.doctor && this.doctor.availabilityDays) {
-      return Object.values(this.doctor.availabilityDays).some(day => day);
+      return Object.values(this.doctor.availabilityDays).some(day => day === true);
 
     }
     return false;

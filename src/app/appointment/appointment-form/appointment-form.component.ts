@@ -9,6 +9,7 @@ import { ChangeDetectorRef } from '@angular/core';
 import { AuthServiceService } from '../../services/auth/auth-service.service';
 import { response } from 'express';
 
+
 interface Appointment {
   id?: number;
   patientName: string;
@@ -119,6 +120,7 @@ export class AppointmentFormComponent implements OnInit {
       // this.availableSlots = this.appointmentForm.get('appointmentTime')?.value;
       // this.patchFormWithAppointment(this.appointment, appointmentDate);
       const appointmentDate = this.appointment.date;
+      console.log("appointmentpatch"  ,this.appointment)
 
       this.patchFormWithAppointment(this.appointment!, appointmentDate);
       this.checkSlotAvailability(this.appointment.doctorId, appointmentDate, this.appointment.time)
@@ -540,6 +542,27 @@ export class AppointmentFormComponent implements OnInit {
     this.close.emit();
     this.showForm = false;
   }
+  private syncFormToModel(): void {
+    if (!this.appointment || !this.appointmentForm) {
+        console.error("Appointment or Form is not defined");
+        return;
+    }
+
+    const formValues = this.appointmentForm.value;
+    this.appointment.patientName = formValues.firstName + ' ' + formValues.lastName;
+    this.appointment.phoneNumber = formValues.phoneNumber.startsWith('91') ? formValues.phoneNumber : '91' + formValues.phoneNumber;
+    this.appointment.email = formValues.email;
+    this.appointment.doctorName = formValues.doctorName;
+    this.appointment.date = formValues.appointmentDate;
+    this.appointment.time = formValues.appointmentTime;
+    this.appointment.requestVia = formValues.requestVia;
+    this.appointment.status = formValues.appointmentStatus === 'Confirm' ? 'confirmed' : formValues.appointmentStatus.toLowerCase();
+    this.appointment.prnNumber = parseInt(formValues.prnNumber, 10);
+    this.appointment.emailSent = true;
+    this.appointment.smsSent = true;
+
+    console.log("Updated Appointment:", this.appointment);
+}
 
   confirm() {
     if (!this.appointmentForm.valid) {
@@ -573,7 +596,7 @@ export class AppointmentFormComponent implements OnInit {
           phoneNumber = '91' + phoneNumber;
         }
         const appointmentDetails = {
-
+          id: this.appointment.id,
           patientName: this.appointmentForm.value.firstName + ' ' + this.appointmentForm.value.lastName,
           phoneNumber: phoneNumber,
           doctorId: doctorId,
@@ -595,10 +618,222 @@ export class AppointmentFormComponent implements OnInit {
       if (newStatus === 'Confirm' && (currentStatus === 'Cancelled' || currentStatus === 'confirmed')) {
         // This is a reschedule
         this.appointment.status = 'rescheduled';
+        const appointmentDetails = {
+          id: this.appointment.id,
+          patientName: this.appointmentForm.value.firstName + ' ' + this.appointmentForm.value.lastName,
+          phoneNumber: phoneNumber,
+          doctorId: doctorId,
+          doctorName: this.appointmentForm.value.doctorName,
+          department: department, // Adjust as needed
+          date: this.appointmentForm.value.appointmentDate,
+          time: this.appointmentForm.get('appointmentTime')?.value,
+          requestVia: this.appointmentForm.value.requestVia,
+          status: 'rescheduled',
+          email: this.appointmentForm.value.email,
+          smsSent: true,
+          emailSent: true,
+          prnNumber: parseInt(this.appointmentForm.value.prnNumber),
+        };
+        this.appointment = appointmentDetails;
         console.log("status", this.appointment.status)
+        if (this.appointment.status === "rescheduled") {
+          // this.appointmentService.addConfirmedAppointment(this.appointment)
+          this.doctorService.getDoctorDetails(this.appointment.doctorId).subscribe({
+            next: (response) => {
+              const doctorPhoneNumber = response?.phone_number;
+              let phoneNumber = this.appointment!.phoneNumber;
+  
+              if (!phoneNumber.startsWith('91')) {
+                phoneNumber = '91' + phoneNumber;
+              }
+              const appointmentDetails = {
+                patientName: this.appointment?.patientName,
+                doctorName: this.appointment?.doctorName,
+                date: this.appointment?.date,
+                time: this.appointment?.time,
+                doctorPhoneNumber: doctorPhoneNumber,
+                patientPhoneNumber: phoneNumber,
+                status: 'rescheduled'
+              }
+              console.log('appointment details', appointmentDetails)
+              this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
+                next: (response) => {
+                  console.log('WhatsApp message sent successfully:', response);
+                  this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Whatsapp Message Sent Successfully' });
+                },
+                error: (error) => {
+                  console.error('Error sending WhatsApp message:', error);
+                  this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending WhatsApp message' });
+                }
+              });
+            }
+  
+          });
+  
+  
+          this.doctorService.getDoctorDetails(this.appointment.doctorId).subscribe({
+            next: (response) => {
+              const doctorEmail = response?.email;
+              const patientEmail = this.appointment?.email;
+  
+              // Ensure both emails are valid
+              if (!doctorEmail || !patientEmail) {
+                console.error('Doctor or patient email is missing.');
+                return;
+              }
+  
+              // Prepare appointment details for email
+              const appointmentDetails = {
+                patientName: this.appointment?.patientName,
+                doctorName: this.appointment?.doctorName,
+                date: this.appointment?.date,
+                time: this.appointment?.time,
+              };
+  
+              const status = 'rescheduled';
+  
+              // Send email to the doctor
+              this.appointmentService.sendEmail(doctorEmail, status, appointmentDetails, 'doctor').subscribe({
+                next: (response) => {
+                  console.log('Email sent to doctor successfully:', response);
+                  this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to doctor successfully' });
+                },
+                error: (error) => {
+                  console.error('Error sending email to doctor:', error);
+                  this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending email to doctor' });
+                },
+              });
+  
+              // Send email to the patient
+              this.appointmentService.sendEmail(patientEmail, status, appointmentDetails, 'patient').subscribe({
+                next: (response) => {
+                  console.log('Email sent to patient successfully:', response);
+                  this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to patient successfully' });
+                },
+                error: (error) => {
+                  console.error('Error sending email to patient:', error);
+                  this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending email to patient' });
+                },
+              });
+            },
+            error: (error) => {
+              console.error('Error in getting doctor details:', error);
+            },
+          });
+        }
+        // this.syncFormToModel(); 
+        this.appointmentService.addConfirmedAppointment(this.appointment);
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'The appointment is rescheduled.' });
         this.appointmentService.removeCancelledAppointment(this.appointment.id!);
       } else {
-        this.appointment.status = newStatus;
+        console.log("new status,", newStatus,"current status", currentStatus)
+        const appointmentDetails = {
+          id: this.appointment.id,
+          patientName: this.appointmentForm.value.firstName + ' ' + this.appointmentForm.value.lastName,
+          phoneNumber: phoneNumber,
+          doctorId: doctorId,
+          doctorName: this.appointmentForm.value.doctorName,
+          department: department, // Adjust as needed
+          date: this.appointmentForm.value.appointmentDate,
+          time: this.appointmentForm.get('appointmentTime')?.value,
+          requestVia: this.appointmentForm.value.requestVia,
+          status: newStatus,
+          email: this.appointmentForm.value.email,
+          smsSent: true,
+          emailSent: true,
+          prnNumber: parseInt(this.appointmentForm.value.prnNumber),
+        };
+        this.appointment = appointmentDetails;
+        console.log("cancel to confirm")
+        this.syncFormToModel(); 
+        this.appointment.status = 'rescheduled';
+        if (this.appointment.status === "rescheduled") {
+          // this.appointmentService.addConfirmedAppointment(this.appointment)
+          this.doctorService.getDoctorDetails(this.appointment.doctorId).subscribe({
+            next: (response) => {
+              const doctorPhoneNumber = response?.phone_number;
+              let phoneNumber = this.appointment!.phoneNumber;
+  
+              if (!phoneNumber.startsWith('91')) {
+                phoneNumber = '91' + phoneNumber;
+              }
+              const appointmentDetails = {
+                patientName: this.appointment?.patientName,
+                doctorName: this.appointment?.doctorName,
+                date: this.appointment?.date,
+                time: this.appointment?.time,
+                doctorPhoneNumber: doctorPhoneNumber,
+                patientPhoneNumber: phoneNumber,
+                status: 'rescheduled'
+              }
+              console.log('appointment details', appointmentDetails)
+              this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
+                next: (response) => {
+                  console.log('WhatsApp message sent successfully:', response);
+                  this.messageService.add({ severity: 'success', summary: 'Success', detail: 'WhatsApp Message Sent Successfully' });
+                },
+                error: (error) => {
+                  console.error('Error sending WhatsApp message:', error);
+                  this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending WhatsApp message' });
+                }
+              });
+            }
+  
+          });
+  
+  
+          this.doctorService.getDoctorDetails(this.appointment.doctorId).subscribe({
+            next: (response) => {
+              const doctorEmail = response?.email;
+              const patientEmail = this.appointment?.email;
+  
+              // Ensure both emails are valid
+              if (!doctorEmail || !patientEmail) {
+                console.error('Doctor or patient email is missing.');
+                return;
+              }
+  
+              // Prepare appointment details for email
+              const appointmentDetails = {
+                patientName: this.appointment?.patientName,
+                doctorName: this.appointment?.doctorName,
+                date: this.appointment?.date,
+                time: this.appointment?.time,
+              };
+  
+              const status = 'rescheduled';
+  
+              // Send email to the doctor
+              this.appointmentService.sendEmail(doctorEmail, status, appointmentDetails, 'doctor').subscribe({
+                next: (response) => {
+                  console.log('Email sent to doctor successfully:', response);
+                  this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to doctor successfully' });
+                },
+                error: (error) => {
+                  console.error('Error sending email to doctor:', error);
+                  this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending email to doctor' });
+                },
+              });
+  
+              // Send email to the patient
+              this.appointmentService.sendEmail(patientEmail, status, appointmentDetails, 'patient').subscribe({
+                next: (response) => {
+                  console.log('Email sent to patient successfully:', response);
+                  this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to patient successfully' });
+                },
+                error: (error) => {
+                  console.error('Error sending email to patient:', error);
+                  this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending email to patient' });
+                },
+              });
+            },
+            error: (error) => {
+              console.error('Error in getting doctor details:', error);
+            },
+          });
+        }
+        this.appointmentService.addConfirmedAppointment(this.appointment);
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'The appointment is rescheduled.' });
       }
 
       // const status = this.appointmentForm.get('appointmentStatus')?.value;
@@ -608,87 +843,13 @@ export class AppointmentFormComponent implements OnInit {
       //   this.appointmentService.removeCancelledAppointment(this.appointment.id!);
       // }
       // this.appointment.status = status;
-      this.submit.emit({ appointment: appointmentDetails, status: this.appointment.status, requestVia }); // Emit the data to the parent component
+      console.log('appointment', this.appointment);
+      console.log('time',this.appointmentForm.get('appointmentTime')?.value)
+      this.syncFormToModel(); 
+      this.submit.emit({ appointment: this.appointment, status: this.appointment.status, requestVia }); // Emit the data to the parent component
       this.showForm = false; // Close the form after submission
-      if (this.appointment.status === "rescheduled") {
-        // this.appointmentService.addConfirmedAppointment(this.appointment)
-        this.doctorService.getDoctorDetails(this.appointment.doctorId).subscribe({
-          next: (response) => {
-            const doctorPhoneNumber = response?.phone_number;
-            let phoneNumber = this.appointment!.phoneNumber;
+      console.log("status of appointment", this.appointment.status)
 
-            if (!phoneNumber.startsWith('91')) {
-              phoneNumber = '91' + phoneNumber;
-            }
-            const appointmentDetails = {
-              patientName: this.appointment?.patientName,
-              doctorName: this.appointment?.doctorName,
-              date: this.appointment?.date,
-              time: this.appointment?.time,
-              doctorPhoneNumber: doctorPhoneNumber,
-              patientPhoneNumber: phoneNumber,
-              status: 'rescheduled'
-            }
-            console.log('appointment details', appointmentDetails)
-            this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
-              next: (response) => {
-                console.log('WhatsApp message sent successfully:', response);
-              },
-              error: (error) => {
-                console.error('Error sending WhatsApp message:', error);
-              }
-            });
-          }
-
-        });
-
-
-        this.doctorService.getDoctorDetails(this.appointment.doctorId).subscribe({
-          next: (response) => {
-            const doctorEmail = response?.email;
-            const patientEmail = this.appointment?.email;
-
-            // Ensure both emails are valid
-            if (!doctorEmail || !patientEmail) {
-              console.error('Doctor or patient email is missing.');
-              return;
-            }
-
-            // Prepare appointment details for email
-            const appointmentDetails = {
-              patientName: this.appointment?.patientName,
-              doctorName: this.appointment?.doctorName,
-              date: this.appointment?.date,
-              time: this.appointment?.time,
-            };
-
-            const status = 'rescheduled';
-
-            // Send email to the doctor
-            this.appointmentService.sendEmail(doctorEmail, status, appointmentDetails, 'doctor').subscribe({
-              next: (response) => {
-                console.log('Email sent to doctor successfully:', response);
-              },
-              error: (error) => {
-                console.error('Error sending email to doctor:', error);
-              },
-            });
-
-            // Send email to the patient
-            this.appointmentService.sendEmail(patientEmail, status, appointmentDetails, 'patient').subscribe({
-              next: (response) => {
-                console.log('Email sent to patient successfully:', response);
-              },
-              error: (error) => {
-                console.error('Error sending email to patient:', error);
-              },
-            });
-          },
-          error: (error) => {
-            console.error('Error in getting doctor details:', error);
-          },
-        });
-      }
 
       if (this.appointmentForm.value.appointmentStatus === "Confirm") {
         this.appointment.status = "confirmed"
@@ -724,9 +885,11 @@ export class AppointmentFormComponent implements OnInit {
             this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
               next: (response) => {
                 console.log('WhatsApp message sent successfully:', response);
+                this.messageService.add({ severity: 'success', summary: 'Success', detail: 'WhatsApp Message Sent Successfully' });
               },
               error: (error) => {
                 console.error('Error sending WhatsApp message:', error);
+                this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending WhatsApp message' });
               }
             });
           }
@@ -759,9 +922,11 @@ export class AppointmentFormComponent implements OnInit {
             this.appointmentService.sendEmail(doctorEmail, status, appointmentDetails, 'doctor').subscribe({
               next: (response) => {
                 console.log('Email sent to doctor successfully:', response);
+                this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to doctor successfully' });
               },
               error: (error) => {
                 console.error('Error sending email to doctor:', error);
+                this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending email to doctor' });
               },
             });
 
@@ -769,9 +934,11 @@ export class AppointmentFormComponent implements OnInit {
             this.appointmentService.sendEmail(patientEmail, status, appointmentDetails, 'patient').subscribe({
               next: (response) => {
                 console.log('Email sent to patient successfully:', response);
+                this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to patient successfully' });
               },
               error: (error) => {
                 console.error('Error sending email to patient:', error);
+                this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending email to patient' });
               },
             });
           },
@@ -799,6 +966,7 @@ export class AppointmentFormComponent implements OnInit {
     this.appointmentService.addPatient(patientDetails).subscribe(
       (patientResponse) => {
         console.log('Patient information saved successfully', patientResponse);
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Patient information saved successfully' });
         const patientId = patientResponse.id;
         this.appointmentForm.patchValue({ patientId: patientId });
         this.appointment!.patientId = patientId;
@@ -842,7 +1010,6 @@ export class AppointmentFormComponent implements OnInit {
           phoneNumber = '91' + phoneNumber;
         }
         const appointmentDetails = {
-
           patientName: this.appointmentForm.value.firstName + ' ' + this.appointmentForm.value.lastName,
           phoneNumber: phoneNumber,
           doctorId: doctorId,
@@ -868,7 +1035,7 @@ export class AppointmentFormComponent implements OnInit {
           this.messageService.add({
             severity: 'success',
             summary: 'Success',
-            detail: 'Thank you, we have received your request and will get back to you shortly.',
+            detail: 'The appointment is confirmed.',
           });
           this.doctorService.getDoctorDetails(this.appointment.doctorId).subscribe({
             next: (response) => {
@@ -885,9 +1052,11 @@ export class AppointmentFormComponent implements OnInit {
               this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
                 next: (response) => {
                   console.log('WhatsApp message sent successfully:', response);
+                  this.messageService.add({ severity: 'success', summary: 'Success', detail: 'WhatsApp Message Sent Successfully' });
                 },
                 error: (error) => {
                   console.error('Error sending WhatsApp message:', error);
+                  this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending WhatsApp message' });
                 }
               });
             }
@@ -918,9 +1087,11 @@ export class AppointmentFormComponent implements OnInit {
               this.appointmentService.sendEmail(doctorEmail, status, appointmentDetails, 'doctor').subscribe({
                 next: (response) => {
                   console.log('Email sent to doctor successfully:', response);
+                  this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to doctor successfully' });
                 },
                 error: (error) => {
                   console.error('Error sending email to doctor:', error);
+                  this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending email to doctor' });
                 },
               });
 
@@ -928,9 +1099,11 @@ export class AppointmentFormComponent implements OnInit {
               this.appointmentService.sendEmail(patientEmail, status, appointmentDetails, 'patient').subscribe({
                 next: (response) => {
                   console.log('Email sent to patient successfully:', response);
+                  this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to patient successfully' });
                 },
                 error: (error) => {
                   console.error('Error sending email to patient:', error);
+                  this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending email to patient' });
                 },
               });
             },
@@ -949,6 +1122,7 @@ export class AppointmentFormComponent implements OnInit {
 
         // If creating a new appointment, add it (no id needed)
         this.appointmentService.addNewAppointment(appointmentDetails);
+        
 
         this.showForm = false; // Close the form after submission
       }

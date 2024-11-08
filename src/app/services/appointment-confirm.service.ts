@@ -68,6 +68,7 @@ export class AppointmentConfirmService {
   }
   // Method to add a confirmed appointment
   addConfirmedAppointment(appointment: Appointment): void {
+    console.log('appointment',appointment)
     if (appointment.id != null) { // Ensure that the id is defined and not null
       // Update appointment status to 'confirmed' in backend
       appointment.status = 'confirmed'; // Update status
@@ -284,6 +285,9 @@ getAppointmentsByRole(): Observable<Appointment[]> {
     }
     getPatientById(patientId: number): Observable<any> {
       return this.http.get(`${environment.apiUrl}/patients/${patientId}`);
+    }
+    checkedinAppointment(appointmentId: number): Observable<any> {
+      return this.http.put(`${this.apiUrl}/${appointmentId}/checkin`, {});
     }
     
 }

@@ -404,3 +404,9 @@ button[disabled] {
   transform: none; /* Remove any hover/active transformations */
   box-shadow: none; /* Remove box shadow for a flat look */
 }
+.error-message {
+  color: #d9534f; /* Red color for errors */
+  font-size: 14px;
+  margin: 10px 0;
+  width:670px
+}

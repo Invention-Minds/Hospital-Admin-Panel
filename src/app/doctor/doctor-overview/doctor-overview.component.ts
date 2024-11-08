@@ -2,14 +2,16 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { Doctor } from '../../models/doctor.model';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-doctor-overview',
   templateUrl: './doctor-overview.component.html',
-  styleUrls: ['./doctor-overview.component.css']
+  styleUrls: ['./doctor-overview.component.css'],
+  providers:[MessageService]
 })
 export class DoctorOverviewComponent implements OnInit {
-  constructor(private router: Router, private doctorService: DoctorServiceService) {}
+  constructor(private router: Router, private doctorService: DoctorServiceService, private messageService: MessageService) {}
 
   activeComponent: string = 'availability';
   isEditMode: boolean = false;
@@ -82,6 +84,7 @@ export class DoctorOverviewComponent implements OnInit {
         () => {
           doctor.slotDuration = Number(doctor.slotDuration); // Convert slot duration to number
           console.log('New doctor saved successfully:', doctor);
+          this.messageService.add({severity:'success', summary:'Success', detail:'Doctor added successfully'});
           // Redirect or update UI after successful save
           this.activeComponent = ''; // Close the form after save
 

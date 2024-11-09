@@ -38,10 +38,10 @@
       <div class="row">
         <div class="col">
           <div class="custom-form-field">
-            <input type="email" id="email" [(ngModel)]="doctor!.email" name="email" placeholder="" required #email="ngModel" />
+            <input type="email" id="email" [(ngModel)]="doctor!.email" name="email" placeholder=""  #email="ngModel" />
             <label for="email" class="input-label">Email*</label>
             <div *ngIf="email.invalid && (email.dirty || email.touched)" class="error-message">
-              <small *ngIf="email.errors && email.errors['required']">Email is required</small>
+              <!-- <small *ngIf="email.errors && email.errors['required']">Email is required</small> -->
               <small *ngIf="email.errors && email.errors['pattern']">Valid email is required</small>
             </div>
           </div>
@@ -135,11 +135,12 @@
   <div class="row">
     <div class="col">
       <div class="custom-form-field">
-        <input type="text" id="availableTimeAll" [(ngModel)]="generalAvailableFrom" name="availableTime"
+        <input type="text" id="availableTimeAll" [(ngModel)]="generalAvailableFrom" name="availableTime" #availableTime="ngModel"
           pattern="^\d{2}:\d{2}-\d{2}:\d{2}$" placeholder="09:00-17:00" required />
         <label for="availableTimeAll" class="input-label">Available Time*</label>
-        <div *ngIf="doctorForm.submitted && !generalAvailableFrom" class="error-message">
-          <small>Available time is required</small>
+        <div *ngIf="availableTime.invalid && (availableTime.dirty || availableTime.touched)" class="error-message">
+          <small *ngIf="availableTime.errors && availableTime.errors['required']">Available time is required</small>
+          <small *ngIf="availableTime.errors && availableTime.errors['pattern']">Time must be in format 00:00-00:00</small>
         </div>
       </div>
     </div>
@@ -149,8 +150,9 @@
         <input type="number" id="slotTiming" [(ngModel)]="generalSlotDuration" name="slotTiming" min="1" placeholder="20"
           required #slotTiming="ngModel" (ngModelChange)="generateSlots()" />
         <label for="slotTiming" class="input-label">Slot Timing*</label>
-        <div *ngIf="doctorForm.submitted && !generalSlotDuration" class="error-message">
-          <small>Slot timing is required</small>
+        <div *ngIf="slotTiming.invalid && (slotTiming.dirty || slotTiming.touched)" class="error-message">
+          <small *ngIf="slotTiming.errors && slotTiming.errors['required']">Slot timing is required</small>
+          <small *ngIf="slotTiming.errors && slotTiming.errors['min']">Slot timing must be a positive number</small>
         </div>
       </div>
     </div>
@@ -202,11 +204,12 @@
     </div> -->
     <div class="custom-form-field" *ngFor="let day of availabilityDaysList.slice(0, 4)">
       <div *ngIf="doctor!.availabilityDays[day]">
-        <input type="text" id="availableTimeAll" [(ngModel)]="individualAvailability[day].availableFrom"  name="availableFrom{{day}}" 
+        <input type="text" id="availableTimeAll" [(ngModel)]="individualAvailability[day].availableFrom"  name="availableFrom{{day}}" #availableTime="ngModel"
         pattern="^\d{2}:\d{2}-\d{2}:\d{2}$" placeholder="09:00-17:00" required />
       <label  class="input-label">{{ day.toString() | titlecase }} Available Time* </label>
-      <div *ngIf="doctorForm.submitted && !individualAvailability[day].availableFrom" class="error-message">
-        <small>Available time is required</small>
+      <div *ngIf="availableTime.invalid && (availableTime.dirty || availableTime.touched)" class="error-message">
+        <small *ngIf="availableTime.errors && availableTime.errors['required']">Available time is required</small>
+        <small *ngIf="availableTime.errors && availableTime.errors['pattern']">Time must be in format 00:00-00:00</small>
       </div>
       </div>
      
@@ -217,11 +220,12 @@
   <div class="column">
     <div class="custom-form-field" *ngFor="let day of availabilityDaysList.slice(4)">
       <div *ngIf="doctor!.availabilityDays[day]">
-        <input type="text" id="availableTimeAll" [(ngModel)]="individualAvailability[day].availableFrom" name="availableFrom{{day}}" 
+        <input type="text" id="availableTimeAll" [(ngModel)]="individualAvailability[day].availableFrom" name="availableFrom{{day}}"  #availableTime="ngModel"
         pattern="^\d{2}:\d{2}-\d{2}:\d{2}$" placeholder="09:00-17:00" required />
       <label  class="input-label">{{ day.toString() | titlecase }} Available Time* </label>
-      <div *ngIf="doctorForm.submitted && !individualAvailability[day].availableFrom" class="error-message">
-        <small>Available time is required</small>
+      <div *ngIf="availableTime.invalid && (availableTime.dirty || availableTime.touched)" class="error-message">
+        <small *ngIf="availableTime.errors && availableTime.errors['required']">Available time is required</small>
+        <small *ngIf="availableTime.errors && availableTime.errors['pattern']">Time must be in format 00:00-00:00</small>
       </div>
       </div>
      
@@ -236,8 +240,9 @@
         <input type="number" id="slotTiming" [(ngModel)]="generalSlotDuration" name="slotTiming" min="1" placeholder="20"
           required #slotTiming="ngModel" (ngModelChange)="generateSlots()" />
         <label for="slotTiming" class="input-label">Slot Timing*</label>
-        <div *ngIf="doctorForm.submitted && !generalSlotDuration" class="error-message">
-          <small>Slot timing is required</small>
+        <div *ngIf="slotTiming.invalid && (slotTiming.dirty || slotTiming.touched)" class="error-message">
+          <small *ngIf="slotTiming.errors && slotTiming.errors['required']">Slot timing is required</small>
+          <small *ngIf="slotTiming.errors && slotTiming.errors['min']">Slot timing must be a positive number</small>
         </div>
       </div>
     </div>

@@ -70,6 +70,38 @@ fetchDoctors(): void {
   console.log('formattedDate', formattedDate);
 
   this.doctorService.getDoctors().subscribe((doctors: Doctor[]) => {
+    doctors.forEach(doctor => {
+        // Initialize `availabilityDays` if it does not exist
+    if (!doctor.availabilityDays) {
+      doctor.availabilityDays = {
+        sun: false,
+        mon: false,
+        tue: false,
+        wed: false,
+        thu: false,
+        fri: false,
+        sat: false,
+      };
+    }
+    doctor.availableFrom = 'N/A';
+    // doctor.slotDuration = 0;
+  
+    const date = new Date(formattedDate);
+    const todayDay = this.getDayString(date);
+  
+    doctor.availability?.forEach((avail) => {
+      doctor.availabilityDays[avail.day] = true;
+      console.log('avail.day', avail.day);
+      console.log(avail.day === todayDay, 'in if');
+      
+      if (avail.day === todayDay) {
+        doctor.availableFrom = avail.availableFrom;
+        doctor.slotDuration = avail.slotDuration;
+        console.log('avail.availableFrom', avail.availableFrom);
+      }
+    });
+    }
+    );
     const doctorRequests = doctors
       .filter(doctor => doctor.id !== undefined)
       .map(doctor =>
@@ -122,7 +154,10 @@ fetchDoctors(): void {
   });
 }
 
-
+private getDayString(date: Date): keyof Doctor['availabilityDays'] {
+  const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+  return days[date.getDay()];
+}
 
   reloadData(): void {
     this.fetchDoctors();

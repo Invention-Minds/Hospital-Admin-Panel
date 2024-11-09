@@ -526,7 +526,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
       this.doctor.slotDuration !== null &&
       this.doctor.slotDuration > 0 &&
       /^[a-zA-Z.() ]+$/.test(this.doctor.name) && // Ensure name has letters, spaces, and dots only
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.doctor.email) && // Ensure email is valid
+      // /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.doctor.email) && // Ensure email is valid
       /^[0-9]{10}$/.test(this.doctor.phone_number) && // Ensure phone number is 10 digits
       (this.useSameTimeForAllDays ? availableTimePattern.test(this.generalAvailableFrom) : allIndividualTimesValid) // Check generalAvailableFrom if useSameTimeForAllDays is true, otherwise validate individual times
     );

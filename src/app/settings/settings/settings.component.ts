@@ -197,11 +197,12 @@ validPasswords(): void {
       this.usernameErrorMessageinReset = ''; // Clear the error message if valid
     }
   
-    if (!isPasswordValid) {
-      this.passwordErrorMessageinReset = 'Password must be at least 6 characters long.';
-    } else {
-      this.passwordErrorMessageinReset = ''; // Clear the error message if valid
-    }
+    // if(this.confirmPassword.length>=6 || this.newPassword.length>=6){
+    //   this.passwordErrorMessage = 'Password must be at least 6 characters long.';
+    // }
+    // else{
+    //   this.passwordErrorMessage = '';
+    // }
   }
   else{
     this.isUserNameValid = usernameRegex.test(this.username);
@@ -217,11 +218,17 @@ validPasswords(): void {
       this.usernameErrorMessage = ''; // Clear the error message if valid
     }
   
-    if (!isPasswordValid) {
-      this.passwordErrorMessage = 'Password must be at least 6 characters long.';
-    } else {
-      this.passwordErrorMessage = ''; // Clear the error message if valid
-    }
+    // if (!isPasswordValid) {
+    //   this.passwordErrorMessage = 'Password must be at least 6 characters long.';
+    // } else {
+    //   this.passwordErrorMessage = ''; // Clear the error message if valid
+    // }
+    // if(this.confirmPassword.length>=6 || this.newPassword.length>=6){
+    //   this.passwordErrorMessage = '';
+    // }
+    // else{
+    //   this.passwordErrorMessage = 'Password must be at least 6 characters long.';
+    // }
   }
  
 
@@ -362,6 +369,13 @@ deleteUser() {
     },
     error => {
         console.error('Failed to delete user', error);
+        if (error.status === 401) {
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'You are not authorized to delete users'});
+        }
+        if (error.status === 404) {
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'User not found'});
+        }
+        // this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to delete user'});
         this.loading = false; // Hide loader
         this.buttonClicked = false;
     }

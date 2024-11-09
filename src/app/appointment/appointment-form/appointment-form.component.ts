@@ -693,16 +693,16 @@ export class AppointmentFormComponent implements OnInit {
               const status = 'rescheduled';
   
               // Send email to the doctor
-              this.appointmentService.sendEmail(doctorEmail, status, appointmentDetails, 'doctor').subscribe({
-                next: (response) => {
-                  console.log('Email sent to doctor successfully:', response);
-                  this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to doctor successfully' });
-                },
-                error: (error) => {
-                  console.error('Error sending email to doctor:', error);
-                  this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending email to doctor' });
-                },
-              });
+              // this.appointmentService.sendEmail(doctorEmail, status, appointmentDetails, 'doctor').subscribe({
+              //   next: (response) => {
+              //     console.log('Email sent to doctor successfully:', response);
+              //     this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to doctor successfully' });
+              //   },
+              //   error: (error) => {
+              //     console.error('Error sending email to doctor:', error);
+              //     this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending email to doctor' });
+              //   },
+              // });
   
               // Send email to the patient
               this.appointmentService.sendEmail(patientEmail, status, appointmentDetails, 'patient').subscribe({
@@ -804,16 +804,16 @@ export class AppointmentFormComponent implements OnInit {
               const status = 'rescheduled';
   
               // Send email to the doctor
-              this.appointmentService.sendEmail(doctorEmail, status, appointmentDetails, 'doctor').subscribe({
-                next: (response) => {
-                  console.log('Email sent to doctor successfully:', response);
-                  this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to doctor successfully' });
-                },
-                error: (error) => {
-                  console.error('Error sending email to doctor:', error);
-                  this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending email to doctor' });
-                },
-              });
+              // this.appointmentService.sendEmail(doctorEmail, status, appointmentDetails, 'doctor').subscribe({
+              //   next: (response) => {
+              //     console.log('Email sent to doctor successfully:', response);
+              //     this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to doctor successfully' });
+              //   },
+              //   error: (error) => {
+              //     console.error('Error sending email to doctor:', error);
+              //     this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending email to doctor' });
+              //   },
+              // });
   
               // Send email to the patient
               this.appointmentService.sendEmail(patientEmail, status, appointmentDetails, 'patient').subscribe({
@@ -918,17 +918,17 @@ export class AppointmentFormComponent implements OnInit {
 
             const status = this.appointment!.status;
 
-            // Send email to the doctor
-            this.appointmentService.sendEmail(doctorEmail, status, appointmentDetails, 'doctor').subscribe({
-              next: (response) => {
-                console.log('Email sent to doctor successfully:', response);
-                this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to doctor successfully' });
-              },
-              error: (error) => {
-                console.error('Error sending email to doctor:', error);
-                this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending email to doctor' });
-              },
-            });
+            // // Send email to the doctor
+            // this.appointmentService.sendEmail(doctorEmail, status, appointmentDetails, 'doctor').subscribe({
+            //   next: (response) => {
+            //     console.log('Email sent to doctor successfully:', response);
+            //     this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to doctor successfully' });
+            //   },
+            //   error: (error) => {
+            //     console.error('Error sending email to doctor:', error);
+            //     this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending email to doctor' });
+            //   },
+            // });
 
             // Send email to the patient
             this.appointmentService.sendEmail(patientEmail, status, appointmentDetails, 'patient').subscribe({
@@ -1084,16 +1084,16 @@ export class AppointmentFormComponent implements OnInit {
               const status = 'confirmed';
 
               // Send email to the doctor
-              this.appointmentService.sendEmail(doctorEmail, status, appointmentDetails, 'doctor').subscribe({
-                next: (response) => {
-                  console.log('Email sent to doctor successfully:', response);
-                  this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to doctor successfully' });
-                },
-                error: (error) => {
-                  console.error('Error sending email to doctor:', error);
-                  this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending email to doctor' });
-                },
-              });
+              // this.appointmentService.sendEmail(doctorEmail, status, appointmentDetails, 'doctor').subscribe({
+              //   next: (response) => {
+              //     console.log('Email sent to doctor successfully:', response);
+              //     this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to doctor successfully' });
+              //   },
+              //   error: (error) => {
+              //     console.error('Error sending email to doctor:', error);
+              //     this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending email to doctor' });
+              //   },
+              // });
 
               // Send email to the patient
               this.appointmentService.sendEmail(patientEmail, status, appointmentDetails, 'patient').subscribe({

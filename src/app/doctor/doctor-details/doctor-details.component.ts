@@ -122,7 +122,10 @@ closeDeleteDialog(): void {
   fetchDoctors(): void {
     this.doctorService.getDoctors().subscribe(
       (doctors: Doctor[]) => {
+        const today = new Date();
+      const todayDay = this.getDayString(today);
         doctors.forEach((doctor) => {
+          
           // Initialize availabilityDays object if it does not exist
           doctor.availabilityDays = {
             sun: false,
@@ -136,6 +139,13 @@ closeDeleteDialog(): void {
           // Map availability to availabilityDays
           doctor.availability?.forEach((avail) => {
             doctor.availabilityDays[avail.day] = true;
+            if (avail.day === todayDay) {
+              doctor.availableFrom = avail.availableFrom;
+              doctor.slotDuration = avail.slotDuration;
+            }
+            else{
+              doctor.availableFrom = 'N/A';
+            }
           });
           console.log('Doctors available days', doctor.availabilityDays);
         });
@@ -148,7 +158,10 @@ closeDeleteDialog(): void {
       }
     );
   }
-
+  private getDayString(date: Date): keyof Doctor['availabilityDays'] {
+    const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+    return days[date.getDay()];
+  }
   // Group doctors by department
   private groupDoctorsByDepartment(doctors: Doctor[]): Department[] {
     // Create a map of department IDs to departments

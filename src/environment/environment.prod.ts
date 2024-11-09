@@ -1,5 +1,5 @@
 export const environment = {
     production: true,
-    apiUrl: 'BACKEND_API_URL'  // Production API URL
+    apiUrl: 'https://rashtrotthana-backend-812956739285.us-east4.run.app'  // Production API URL
   };
   

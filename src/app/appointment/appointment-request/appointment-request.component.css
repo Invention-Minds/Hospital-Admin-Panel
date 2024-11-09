@@ -26,12 +26,13 @@ height: 65px;
   }
   
   thead th {
-    padding: 12px;
+    padding: 9px;
     text-align: center;
     color: white;
     font-size: 18px;
     font-family: Kanit;
     font-weight: 600;
+    text-wrap: nowrap;
   }
   
   /* Table body styling */
@@ -51,12 +52,13 @@ height: 65px;
   }
   
   tbody td {
-    padding: 12px;
+    padding: 9px;
     text-align: center;
     color: black;
 font-size: 15px;
 font-family: Kanit;
 font-weight: 400;
+text-wrap: nowrap;
   }
   
   /* Status badge styling */

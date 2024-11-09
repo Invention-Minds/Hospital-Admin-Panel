@@ -46,6 +46,10 @@ export class SettingsComponent implements OnInit {
   isFormValid: boolean = false;
   usernameErrorMessage: string = '';
   passwordErrorMessage: string = '';
+  usernameErrorMessageinReset: string = '';
+  passwordErrorMessageinReset: string = '';
+  isUserNameValid: boolean = false;
+  loggedinUser: any;
 
   constructor(private authService: AuthServiceService, private router: Router, private messageService: MessageService, private appointmentService: AppointmentConfirmService) {}
  // Define the role-based access
@@ -64,6 +68,8 @@ export class SettingsComponent implements OnInit {
       const validRoles: UserRole[] = ['admin', 'doctor', 'sub_admin', 'super_admin'];
       this.role = storedRole;
       this.name = storedUsername || '';
+      // this.loggedinUser = `${this.name}_${this.role}@rashtrotthana`;
+      console.log('Logged in user:', this.loggedinUser);
       // this.username = storedUsername || '';
       console.log(localStorage.getItem('userid'))
       this.userid = Number(localStorage.getItem('userid'));
@@ -173,9 +179,60 @@ validateInputs(): void {
     this.passwordErrorMessage = ''; // Clear the error message if valid
   }
 }
+validPasswords(): void {
+  const usernameRegex = /^[a-zA-Z]+_(admin|subadmin|superadmin|doctor)@rashtrotthana$/;
+  
+  // Validate username using regex and validate password length
+  if(this.role === 'super_admin'){
+    this.isUserNameValid = usernameRegex.test(this.selectedUser);
+    const isPasswordValid = this.newPassword.length >= 6 && this.confirmPassword.length >= 6;
+
+    // Update the form validity state
+    this.isFormValid = this.isUserNameValid && isPasswordValid;
+  
+    // If the form is not valid, show an appropriate error message
+    if (!this.isUserNameValid) {
+      this.usernameErrorMessageinReset = "Username must be in the format: name_role@rashtrotthana. The role must be 'admin', 'subadmin', 'superadmin', or 'doctor'.";
+    } else {
+      this.usernameErrorMessageinReset = ''; // Clear the error message if valid
+    }
+  
+    if (!isPasswordValid) {
+      this.passwordErrorMessageinReset = 'Password must be at least 6 characters long.';
+    } else {
+      this.passwordErrorMessageinReset = ''; // Clear the error message if valid
+    }
+  }
+  else{
+    this.isUserNameValid = usernameRegex.test(this.username);
+    const isPasswordValid = this.newPassword.length >= 6 && this.confirmPassword.length >= 6;
+
+    // Update the form validity state
+    this.isFormValid = this.isUserNameValid && isPasswordValid;
+  
+    // If the form is not valid, show an appropriate error message
+    if (!this.isUserNameValid) {
+      this.usernameErrorMessage = "Username must be in the format: name_role@rashtrotthana. The role must be 'admin', 'subadmin', 'superadmin', or 'doctor'.";
+    } else {
+      this.usernameErrorMessage = ''; // Clear the error message if valid
+    }
+  
+    if (!isPasswordValid) {
+      this.passwordErrorMessage = 'Password must be at least 6 characters long.';
+    } else {
+      this.passwordErrorMessage = ''; // Clear the error message if valid
+    }
+  }
+ 
+
+}
 
 // Reset Password method
 resetPassword() {
+  if(this.username !== this.name){
+    this.messageService.add({ severity: 'error', summary: 'Error', detail: 'You are not authorized to reset password for other users' });
+    return;
+   }
   if (this.newPassword !== this.confirmPassword) {
     this.messageService.add({ severity: 'warn', summary: 'Warning', detail: 'Passwords do not match' });
     console.error('Passwords do not match!');

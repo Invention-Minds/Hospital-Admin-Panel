@@ -80,6 +80,7 @@ this.audio.load()
       this.hasNewAppointment = false; // Reset the notification state
       // Redirect to the appointments page when the notification icon is clicked
       this.router.navigate(['/appointments']);
+      console.log('Redirecting to appointments page');
     }
   }
 

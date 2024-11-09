@@ -74,28 +74,33 @@
 
       <!-- Email Input -->
       <div *ngIf="currentUserRole !== 'super_admin'" class="input">
-        <input type="text" class="input-field" [(ngModel)]="username" placeholder="Username_admin@rashtrotthana" disabled>
+        <input type="text" class="input-field" [(ngModel)]="username" placeholder="Username_admin@rashtrotthana" (ngModelChange)="validPasswords()">
+        <div *ngIf="usernameErrorMessage" class="error-message">{{ usernameErrorMessage }}</div>
          <!-- <div class="password-container">
                   <input [type]="isOldPasswordVisible ? 'text' : 'password'"  class="input-field" [(ngModel)]="oldPassword" placeholder="Old Password">
                   <img [src]="isOldPasswordVisible? '/not-show.png': '/show-password.png'" alt="Show Password" class="eye-icon" (click)="toggleOldPasswordVisibility()" >
                 </div>  -->
         <div class="password-container">
           <input [type]="isNewPasswordVisible ? 'text' : 'password'" class="input-field" [(ngModel)]="newPassword"
-            placeholder="New Password">
+            placeholder="New Password" (ngModelChange)="validPasswords()" required
+            minlength="6">
           <img [src]="isNewPasswordVisible? '/not-show.png': '/show-password.png'" alt="Show Password" class="eye-icon"
             (click)="toggleNewPasswordVisibility()">
         </div>
+        <div *ngIf="passwordErrorMessage" class="error-message">{{ passwordErrorMessage }}</div>
 
         <!-- Password Input -->
          <div class="password-container">
           <input [type]="isConfirmPasswordVisible ? 'text' : 'password'" class="input-field"
-            [(ngModel)]="confirmPassword" placeholder="Confirm New Password">
+            [(ngModel)]="confirmPassword" placeholder="Confirm New Password" (ngModelChange)="validPasswords()" required
+            minlength="6">
           <img [src]="isConfirmPasswordVisible? '/not-show.png': '/show-password.png'" alt="Show Password"
-            class="eye-icon" (click)="toggleConfirmPasswordVisibility()">
+            class="eye-icon" (click)="toggleConfirmPasswordVisibility()" >
         </div>
+        <div *ngIf="passwordErrorMessage" class="error-message">{{ passwordErrorMessage }}</div>
       </div> 
       <div *ngIf="currentUserRole !== 'super_admin'">
-        <button class="save-button" (click)="resetPassword()"  [disabled]="buttonClicked">Reset Password</button>
+        <button class="save-button" (click)="resetPassword()"  [disabled]="buttonClicked || !isFormValid">Reset Password</button>
       </div>
 
       
@@ -109,32 +114,37 @@
     </select>
   </div> -->
   <div *ngIf="currentUserRole === 'super_admin'" class="form-group">
-    <select id="userSelect" [(ngModel)]="selectedUser" class="styled-select password-container">
+    <select id="userSelect" [(ngModel)]="selectedUser" class="styled-select password-container" (ngModelChange)="validPasswords()" >
       <option value="" disabled selected hidden>Select User to Reset Password</option>
       <option *ngFor="let user of users" [value]="user.username">
         {{ user.username }}
       </option>
     </select>
   </div>
+  <div *ngIf="usernameErrorMessageinReset" class="error-message">{{ usernameErrorMessageinReset }}</div>
 
 <!-- New Password Input Fields -->
 <div *ngIf="currentUserRole === 'super_admin'" class="password-container">
   <input [type]="isNewPasswordVisible ? 'text' : 'password'" class="input-field" [(ngModel)]="newPassword"
-    placeholder="New Password">
+    placeholder="New Password" (ngModelChange)="validPasswords()" required
+    minlength="6">
   <img [src]="isNewPasswordVisible ? '/not-show.png' : '/show-password.png'" alt="Show Password" class="eye-icon"
     (click)="toggleNewPasswordVisibility()">
 </div>
+<div *ngIf="passwordErrorMessageinReset" class="error-message">{{ passwordErrorMessageinReset }}</div>
 
 <div *ngIf="currentUserRole === 'super_admin'" class="password-container">
   <input [type]="isConfirmPasswordVisible ? 'text' : 'password'" class="input-field" [(ngModel)]="confirmPassword"
-    placeholder="Confirm New Password">
+    placeholder="Confirm New Password" (ngModelChange)="validPasswords()" required
+    minlength="6">
   <img [src]="isConfirmPasswordVisible ? '/not-show.png' : '/show-password.png'" alt="Show Password"
     class="eye-icon" (click)="toggleConfirmPasswordVisibility()">
 </div>
+<div *ngIf="passwordErrorMessageinReset" class="error-message">{{ passwordErrorMessageinReset }}</div>
 
 <!-- Button to Reset Password for Super Admin -->
 <div *ngIf="currentUserRole === 'super_admin'">
-  <button class="save-button" (click)="resetUserPassword()"  [disabled]="buttonClicked">Reset User Password</button>
+  <button class="save-button" (click)="resetUserPassword()"  [disabled]="buttonClicked || !isFormValid">Reset User Password</button>
 </div>
 <p-toast />
 

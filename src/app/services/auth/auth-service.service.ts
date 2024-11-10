@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators'; 
-import { environment } from '../../../environment/environment';
+import { environment } from '../../../environment/environment.prod';
 
 export enum UserRole {
   admin = 'admin',
@@ -28,7 +28,7 @@ export class AuthServiceService {
     return this.http.post(`${this.apiUrl}/login`, { username, password }).pipe(
       tap((response: any) => {
         const user = response.user;  // Use 'user' from the response
-        console.log('User in the login:', user);
+        // console.log('User in the login:', user);
         if (user) {
           this.user = { username: user.username, role: user.role, id: user.userId }; // Save the user in the service
           localStorage.setItem('username', user.username);
@@ -41,7 +41,7 @@ export class AuthServiceService {
   }
   getUserId(): number | null {
     const userId = localStorage.getItem('userid');
-    console.log(userId,"from auth service");
+    // console.log(userId,"from auth service");
     return userId ? parseInt(userId, 10) : null;
 
   }
@@ -59,7 +59,7 @@ initializeUserFromStorage(): void {
       role,
       id: parseInt(userId, 10),
     };
-    console.log('Initialized user from storage:', this.user);
+    // console.log('Initialized user from storage:', this.user);
   }}
   else{
     console.error('localStorage is not available');
@@ -67,7 +67,7 @@ initializeUserFromStorage(): void {
 }
   getUser() {
     return this.user;
-    console.log(this.user);
+    // console.log(this.user);
   }
 
   register(username: string, password: string): Observable<any> {
@@ -91,7 +91,7 @@ initializeUserFromStorage(): void {
       return this.http.delete(`${this.apiUrl}/delete-user/${username}`,  { headers });
   }
   isLoggedIn(): boolean {
-    console.log("token",localStorage.getItem('token'))
+    // console.log("token",localStorage.getItem('token'))
     return typeof window !== 'undefined' && localStorage.getItem('token') !== null;; // Return false if localStorage is not available
   
   }
@@ -104,7 +104,7 @@ initializeUserFromStorage(): void {
     if (parts.length > 1) {
       const roleString = parts[1].split('@')[0];   // Extract the role portion
       const normalizedRolePart = roleString.replace(/_/g, '').toLowerCase(); // This removes underscores
-      console.log(roleString);
+      // console.log(roleString);
       switch (normalizedRolePart) {
         case 'admin':
           return UserRole.admin;

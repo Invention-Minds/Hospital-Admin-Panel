@@ -73,7 +73,7 @@ export class AppointmentConfirmComponent {
         const dateB = new Date(b.created_at!);
         return dateB.getTime() - dateA.getTime();
       });
-      console.log("confirmedAppointments",this.confirmedAppointments);
+      // console.log("confirmedAppointments",this.confirmedAppointments);
       this.filteredAppointments = [...this.confirmedAppointments];
       // this.filteredAppointments = this.confirmedAppointments.filter(appointment => !appointment!.completed);
 
@@ -182,7 +182,7 @@ export class AppointmentConfirmComponent {
     else {
       // If no date is selected, show all appointments
       this.filteredAppointments = [...this.confirmedAppointments];
-      console.log('Confirmed appointments:', this.confirmedAppointments);
+      // console.log('Confirmed appointments:', this.confirmedAppointments);
       // this.filteredAppointments = this.confirmedAppointments.filter(appointment => !appointment!.completed);
   
     }
@@ -226,7 +226,7 @@ export class AppointmentConfirmComponent {
           const delayTime = (doctor.slotDuration + 5) * 60 * 1000; // Add 5 minutes to the slot duration and convert to milliseconds
           this.appointmentService.scheduleCompletion(appointment.id!, delayTime).subscribe({
             next: () => {
-              console.log('Appointment completion scheduled successfully');
+              // console.log('Appointment completion scheduled successfully');
               this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Appointment completion scheduled successfully' });
             },
             error: (error) => {
@@ -303,7 +303,7 @@ export class AppointmentConfirmComponent {
     this.filterAppointment();
   }
   submitAppointment(appointment: Appointment | null, status: string, requestVia: any) {
-    console.log('Appointment to submit:', appointment);
+    // console.log('Appointment to submit:', appointment);
 
   
     if (!appointment) {

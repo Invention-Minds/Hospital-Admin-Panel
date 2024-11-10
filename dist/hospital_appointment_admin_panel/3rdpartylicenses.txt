@@ -300,12 +300,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 --------------------------------------------------------------------------------
-Package: @angular/forms
+Package: primeng
 License: "MIT"
 
 
 --------------------------------------------------------------------------------
-Package: primeng
+Package: @angular/forms
 License: "MIT"
 
 

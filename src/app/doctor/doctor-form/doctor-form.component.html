@@ -71,7 +71,7 @@
       required
       #department="ngModel"
       (ngModelChange)="onDepartmentChange($event)">
-      <option *ngIf="!isEditMode" value="" disabled>Select Department</option>
+      <option *ngIf="!isEditMode" value="">Select Department</option>
       <option *ngFor="let department of departments" [ngValue]="department.id">
         {{ department.name }}
       </option>

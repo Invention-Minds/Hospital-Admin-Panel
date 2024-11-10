@@ -12,7 +12,7 @@ export class SidebarComponent implements OnInit {
     if (typeof window !== 'undefined' && window.localStorage) {
       // Fetch role from localStorage or the authentication service
       this.role = localStorage.getItem('role') || '';
-      console.log('User role:', this.role);
+      // console.log('User role:', this.role);
     } else {
       console.log('localStorage is not available');
     }

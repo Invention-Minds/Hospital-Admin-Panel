@@ -332,7 +332,11 @@ font-weight: 600;
     color: red;
     font-weight: bold;
   }
-  
+  @media (max-width:1380px){
+    .slots-wrapper{
+      grid-template-columns: repeat(9, minmax(105px, 1fr));
+    }
+  }
   /* Responsive Styling */
   @media (max-width: 768px) {
     .doctor-slot-container {

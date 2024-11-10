@@ -19,7 +19,7 @@ export class DoctorOverviewComponent implements OnInit {
   ngOnInit(): void {
     // Fetch role from localStorage or the authentication service
     this.role = localStorage.getItem('role') || '';  // You can also fetch this from a service
-    console.log('User role:', this.role);
+    // console.log('User role:', this.role);
   }
   newDoctor: Doctor = {
     id:0,
@@ -68,7 +68,7 @@ export class DoctorOverviewComponent implements OnInit {
 
   // Save doctor (either add new or update existing)
   onSaveDoctor(doctor: Doctor): void {
-    console.log('Doctor to save:', doctor);
+    // console.log('Doctor to save:', doctor);
     doctor.slotDuration = Number(doctor.slotDuration);
     if (!doctor.departmentName || !doctor.departmentId) {
       console.error('Department must be selected.');
@@ -83,7 +83,7 @@ export class DoctorOverviewComponent implements OnInit {
       this.doctorService.createDoctor(doctor).subscribe(
         () => {
           doctor.slotDuration = Number(doctor.slotDuration); // Convert slot duration to number
-          console.log('New doctor saved successfully:', doctor);
+          // console.log('New doctor saved successfully:', doctor);
           this.messageService.add({severity:'success', summary:'Success', detail:'Doctor added successfully'});
           // Redirect or update UI after successful save
           this.activeComponent = ''; // Close the form after save
@@ -98,7 +98,8 @@ export class DoctorOverviewComponent implements OnInit {
       // Logic to update the existing doctor
       this.doctorService.updateDoctor(doctor).subscribe(
         () => {
-          console.log('Doctor updated successfully:', doctor);
+          // console.log('Doctor updated successfully:', doctor);
+          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Doctor details updated successfully' });
           // Redirect or update UI after successful update
           this.activeComponent = ''; // Close the form after update
         },

@@ -94,7 +94,7 @@ export class AppointmentRequestComponent implements OnInit {
     // this.confirmedAppointments.push(appointment);  // Add to confirmed list
     // this.closeAppointmentForm();  // Close the form
     this.pendingAppointments = this.pendingAppointments.filter(a => a.id !== appointment.id);  // Remove from pending list
-    console.log(appointment, "in req component");
+    // console.log(appointment, "in req component");
     this.appointmentService.addConfirmedAppointment(appointment);  // Add to the confirmed appointments
     this.closeAppointmentForm();
     this.filterAppointment();  // Refresh the filtered appointments
@@ -211,7 +211,7 @@ export class AppointmentRequestComponent implements OnInit {
 
     if (this.selectedDate) {
       const formattedDate = this.formatDate(this.selectedDate);
-      console.log('Formatted date:', formattedDate);
+      // console.log('Formatted date:', formattedDate);
       filteredList = filteredList.filter(appointment => appointment.date === formattedDate);
     }
     if (this.selectedValue.trim() !== '') {
@@ -230,7 +230,7 @@ export class AppointmentRequestComponent implements OnInit {
     this.currentPage = 1;
   }
   submitAppointment(appointment: Appointment | null, status: string, requestVia: any) {
-    console.log('Appointment in Request:', appointment);
+    // console.log('Appointment in Request:', appointment);
     if (!appointment) {
       console.error('No appointment selected for submission.');
       return; // Early return if appointment is null or undefined

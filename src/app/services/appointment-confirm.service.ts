@@ -3,7 +3,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { map } from 'rxjs/operators';
 import { AuthServiceService } from './auth/auth-service.service';
-import { environment } from '../../environment/environment';
+import { environment } from '../../environment/environment.prod';
 import { tap } from 'rxjs/operators';
 
 export interface Appointment {
@@ -68,7 +68,7 @@ export class AppointmentConfirmService {
   }
   // Method to add a confirmed appointment
   addConfirmedAppointment(appointment: Appointment): void {
-    console.log('appointment',appointment)
+    // console.log('appointment',appointment)
     if (appointment.id != null) { // Ensure that the id is defined and not null
       // Update appointment status to 'confirmed' in backend
       appointment.status = 'confirmed'; // Update status

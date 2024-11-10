@@ -94,7 +94,7 @@ padding-right: 15px;
 
 @media only screen and (max-width: 1370px) {
     .appointment-request {
-      width: 692px;
+      width: 800px;
       padding: 20px;
     }
     th, td{

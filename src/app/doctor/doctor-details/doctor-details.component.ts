@@ -3,6 +3,7 @@ import { Doctor } from '../../models/doctor.model';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MessageService } from 'primeng/api';
 import Swal from 'sweetalert2'; // Import SweetAlert2 for confirmation dialog
 
 interface Department {
@@ -14,7 +15,8 @@ interface Department {
 @Component({
   selector: 'app-doctor-details',
   templateUrl: './doctor-details.component.html',
-  styleUrls: ['./doctor-details.component.css']
+  styleUrls: ['./doctor-details.component.css'],
+  providers: [MessageService]
 })
 export class DoctorDetailsComponent implements OnInit {
   departments: Department[] = [];
@@ -29,7 +31,8 @@ export class DoctorDetailsComponent implements OnInit {
   constructor(
     private doctorService: DoctorServiceService,
     private cdr: ChangeDetectorRef,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private messageService: MessageService
   ) {
     this.unavailabilityForm = this.fb.group({
       startDate: ['', Validators.required],
@@ -147,11 +150,11 @@ closeDeleteDialog(): void {
               doctor.availableFrom = 'N/A';
             }
           });
-          console.log('Doctors available days', doctor.availabilityDays);
+          // console.log('Doctors available days', doctor.availabilityDays);
         });
 
         this.departments = this.groupDoctorsByDepartment(doctors);
-        console.log('Doctors fetched and grouped successfully', this.departments);
+        // console.log('Doctors fetched and grouped successfully', this.departments);
       },
       (error) => {
         console.error('Error fetching doctors:', error);
@@ -243,7 +246,7 @@ closeDeleteDialog(): void {
       doctor.availability.forEach((avail) => {
         this.selectedEditDoctor!.availabilityDays[avail.day] = true;
       });
-      console.log('Selected doctor availability days:', this.selectedEditDoctor.availabilityDays);
+      // console.log('Selected doctor availability days:', this.selectedEditDoctor.availabilityDays);
     }
 
     this.isEditMode = true;
@@ -342,6 +345,7 @@ onUpdate(): void {
       this.doctorService.markDatesAsAvailable(this.selectedEditDoctor!.id, startDate, endDate).subscribe(
         () => {
           // Update UI or notify success
+          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Dates marked as available Successfully' });
           console.log('Dates marked as available successfully');
           this.closeUnavailableModal();
         },

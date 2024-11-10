@@ -273,7 +273,7 @@ submitAppointment(appointment: Appointment | null, status: string, requestVia: a
     return;
   }
   this.isSubmitting = true; // Set the flag
-  console.log(appointment,'canel')
+  // console.log(appointment,'canel')
 
   const confirmedAppointment: Appointment = { 
       ...appointment,  // Copy all properties from the original appointment
@@ -282,8 +282,8 @@ submitAppointment(appointment: Appointment | null, status: string, requestVia: a
       requestVia: appointment.requestVia, // Determine requestVia
       status: 'confirmed'
   };
-  console.log('appointment',confirmedAppointment)
-  console.log('status:', status);
+  // console.log('appointment',confirmedAppointment)
+  // console.log('status:', status);
 
   // if(status === 'rescheduled'){
   //   this.appointmentService.addConfirmedAppointment(confirmedAppointment);

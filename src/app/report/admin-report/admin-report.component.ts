@@ -406,7 +406,7 @@ export class AdminReportComponent {
           };
         });
         this.filteredAppointments = this.appointments; // Initialize filteredAppointments
-        console.log('Fetched all appointments for sub_admin or super_admin:', this.appointments);
+        // console.log('Fetched all appointments for sub_admin or super_admin:', this.appointments);
       },
       (error) => {
         console.error('Error fetching all appointments:', error);

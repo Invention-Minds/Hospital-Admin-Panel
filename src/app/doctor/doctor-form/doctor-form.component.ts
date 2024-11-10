@@ -86,7 +86,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
 
   // }
   get selectedDateKey(): any {
-    console.log("selectedDate",this.datePipe.transform(this.selectedDate, 'yyyy-MM-dd'))
+    // console.log("selectedDate",this.datePipe.transform(this.selectedDate, 'yyyy-MM-dd'))
     return this.selectedDate ? this.datePipe.transform(this.selectedDate, 'yyyy-MM-dd') : '';
   }
   ngOnInit(): void {
@@ -115,7 +115,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
     if (this.doctor && this.doctor.phone_number.startsWith('91')) {
       this.doctor.phone_number = this.doctor.phone_number.substring(2);
     }
-    console.log('Doctor:', this.doctor);
+    // console.log('Doctor:', this.doctor);
   }
 
   ngAfterViewInit(): void {
@@ -267,16 +267,16 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
   // }
   onDateSelect(): void {
     if (!this.selectedDate || !this.doctor) return;
-    console.log('Selected date:', this.selectedDate);
+    // console.log('Selected date:', this.selectedDate);
     const day = this.selectedDate.getDay(); // Get day of the week (0 for Sunday, 1 for Monday, etc.)
     const dayKey = this.availabilityDaysList[day];
 
     if (this.doctor.availabilityDays[dayKey]) {
       if(!this.useSameTimeForAllDays){
-        console.log('Use different time for each day',dayKey,this.individualAvailability);
+        // console.log('Use different time for each day',dayKey,this.individualAvailability);
 
       const availability = this.individualAvailability[dayKey];
-      console.log('Availability:', availability);
+      // console.log('Availability:', availability);
 
       if (availability.availableFrom) {
         const [start, end] = availability.availableFrom.split('-');
@@ -314,7 +314,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
   private setDoctorAvailability(): void {
     if (this.doctor?.availability && this.doctor.availability.length > 0) {
       // Loop through availability and initialize individualAvailability
-      console.log('Doctor availability:', this.doctor.availability);
+      // console.log('Doctor availability:', this.doctor.availability);
       this.availabilityDaysList.forEach(day => {
         const dayAvailability = this.doctor?.availability.find(avail => avail.day === day);
         if (dayAvailability) {
@@ -323,7 +323,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
             availableFrom: dayAvailability.availableFrom,
             slotDuration: dayAvailability.slotDuration
           };
-          console.log('Day availability', this.individualAvailability[day]);
+          // console.log('Day availability', this.individualAvailability[day]);
         } else {
           if (!this.individualAvailability[day]) {
             this.individualAvailability[day] = {
@@ -401,7 +401,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
   // }
   // Method to save the doctor form data
   saveDoctor(): void {
-    console.log('Doctor:', this.doctor);
+    // console.log('Doctor:', this.doctor);
     if (!this.doctor) {
       this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Doctor details are missing' });
       return;
@@ -425,10 +425,10 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
     } else {
       // Set individual availability for each selected day
       this.availabilityDaysList.forEach(day => {
-        console.log('Day:', day);
+        // console.log('Day:', day);
         if (this.doctor?.availabilityDays?.[day]) {
           const availability = this.individualAvailability[day];
-          console.log('Availability:', availability);
+          // console.log('Availability:', availability);
           if (availability.availableFrom && availability.slotDuration !== undefined) {
             this.doctor.availability.push({
               id: 0,
@@ -447,10 +447,10 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
     // console.log('Unavailable slots:', unavailableSlotValues);
     // this.doctor!.unavailableSlots = unavailableSlotValues; // Assign the values array to doctor
     // Add unavailable slots for each date
-    console.log('Unavailable slots per date:', this.unavailableSlotsPerDate);
+    // console.log('Unavailable slots per date:', this.unavailableSlotsPerDate);
     Object.keys(this.unavailableSlotsPerDate).forEach(date => {
       const times = this.unavailableSlotsPerDate[date].map(slot => slot.value);
-      console.log('Adding unavailable slots for date:', date, times);
+      // console.log('Adding unavailable slots for date:', date, times);
 
       // Call the addUnavailableSlots API for each date
       if (this.doctor?.id) {
@@ -464,7 +464,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
         );
       }
     });
-    console.log('Doctor:', this.doctor);
+    // console.log('Doctor:', this.doctor);
 
     // Emit the save event with the doctor details
     this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Doctor details saved successfully' });
@@ -500,7 +500,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
 
 
   isFormValid(): boolean {
-    console.log('Doctor:', this.doctor);
+    // console.log('Doctor:', this.doctor);
 
     // Regular expression to validate the availableFrom format (HH:MM-HH:MM)
     const availableTimePattern = /^\d{2}:\d{2}-\d{2}:\d{2}$/;
@@ -514,7 +514,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
       }
       return true; // If the day is not available, it is valid by default
     });
-    console.log(availableTimePattern.test(this.generalAvailableFrom));
+    // console.log(availableTimePattern.test(this.generalAvailableFrom));
     return !!(
       this.doctor &&
       this.doctor.name &&
@@ -568,7 +568,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
     this.doctorService.getUnavailableSlots(doctorId).subscribe(
       (unavailableSlots: { [date: string]: string[] }) => {
         // Transform the data to match the required format
-        console.log('Fetched unavailable slots:', unavailableSlots);
+        // console.log('Fetched unavailable slots:', unavailableSlots);
         // this.unavailableSlotsPerDate = unavailableSlots.reduce((acc, slot) => {
         //   if (!acc[slot.date]) {
         //     acc[slot.date] = [];
@@ -588,7 +588,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
         }
       }
   
-        console.log('Transformed unavailable slots:', this.unavailableSlotsPerDate);
+        // console.log('Transformed unavailable slots:', this.unavailableSlotsPerDate);
       },
       (error) => {
         console.error('Error fetching unavailable slots for doctor:', error);

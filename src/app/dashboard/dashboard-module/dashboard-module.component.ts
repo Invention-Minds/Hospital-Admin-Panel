@@ -52,7 +52,7 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
         this.username = storedUsername;
         this.role = storedRole;
       }
-      console.log(this.username, this.role);
+      // console.log(this.username, this.role);
     } else {
       console.log('localStorage is not available');
     }
@@ -60,7 +60,7 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
 
     this.eventSource.onmessage = (event) => {
       const newAppointment = JSON.parse(event.data);
-      console.log('New pending appointment received:', newAppointment);
+      // console.log('New pending appointment received:', newAppointment);
       this.hasNewAppointment = true;
       this.changeDetector.detectChanges()
 

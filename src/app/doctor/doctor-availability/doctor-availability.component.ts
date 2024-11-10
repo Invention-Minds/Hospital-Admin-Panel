@@ -67,7 +67,7 @@ export class DoctorAvailabilityComponent {
 //   }
 fetchDoctors(): void {
   const formattedDate = this.formatDate(this.selectedDate);
-  console.log('formattedDate', formattedDate);
+  // console.log('formattedDate', formattedDate);
 
   this.doctorService.getDoctors().subscribe((doctors: Doctor[]) => {
     doctors.forEach(doctor => {
@@ -91,13 +91,13 @@ fetchDoctors(): void {
   
     doctor.availability?.forEach((avail) => {
       doctor.availabilityDays[avail.day] = true;
-      console.log('avail.day', avail.day);
-      console.log(avail.day === todayDay, 'in if');
+      // console.log('avail.day', avail.day);
+      // console.log(avail.day === todayDay, 'in if');
       
       if (avail.day === todayDay) {
         doctor.availableFrom = avail.availableFrom;
         doctor.slotDuration = avail.slotDuration;
-        console.log('avail.availableFrom', avail.availableFrom);
+        // console.log('avail.availableFrom', avail.availableFrom);
       }
     });
     }
@@ -125,7 +125,7 @@ fetchDoctors(): void {
 
         // Check if the doctor is available on the given day of the week
         const dayOfWeek = this.selectedDate.toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
-        console.log('dayOfWeek',doctor.availability)
+        // console.log('dayOfWeek',doctor.availability)
         const availableDay = doctor.availability?.find((avail: any) =>
           avail.day.toLowerCase() === dayOfWeek
         );
@@ -165,15 +165,15 @@ private getDayString(date: Date): keyof Doctor['availabilityDays'] {
   }
 
   onDateChange(event: any): void {
-    console.log("event in",event)
+    // console.log("event in",event)
     if (event instanceof Date) {
       this.selectedDate = event;
-      console.log('event',this.selectedDate)
+      // console.log('event',this.selectedDate)
     } else {
       this.selectedDate = new Date(event); // Ensure correct date parsing
     }
 
-    console.log('selectedDate',this.selectedDate)
+    // console.log('selectedDate',this.selectedDate)
     this.fetchDoctors();
     this.cdr.detectChanges(); // Ensure the changes are applied immediately
   }
@@ -202,7 +202,7 @@ private getDayString(date: Date): keyof Doctor['availabilityDays'] {
       this.filteredDoctors = this.doctors.filter(doctor =>
         doctor.name.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
-      console.log(this.filteredDoctors);
+      // console.log(this.filteredDoctors);
     }
   }
 
@@ -217,7 +217,7 @@ generateDoctorSlots(availableFrom: string, slotDuration: number, bookedSlots: st
   const [availableStart, availableEnd] = availableFrom.split('-').map(this.stringToMinutes);
   const slots: Slot[] = [];
 
-  console.log('unavailableSlots',unavailableSlots)
+  // console.log('unavailableSlots',unavailableSlots)
   for (let current = availableStart; current < availableEnd; current += slotDuration) {
     const slotTime = this.minutesToString(current);
     const nextSlotTime = this.minutesToString(current + slotDuration);

@@ -30,6 +30,7 @@ thead th {
   font-size: 18px;
   font-family: Kanit;
   font-weight: 600;
+  text-wrap: nowrap;
 }
 /* Table body styling */
 tbody tr {

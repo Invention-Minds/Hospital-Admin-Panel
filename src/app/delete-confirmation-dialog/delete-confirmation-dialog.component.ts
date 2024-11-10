@@ -13,6 +13,6 @@ export class DeleteConfirmationDialogComponent {
   closeDialog(): void {
     this.close.emit();
     this.showDialog = false;
-    console.log('false',this.showDialog)
+    // console.log('false',this.showDialog)
   }
 }

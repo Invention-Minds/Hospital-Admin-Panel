@@ -69,15 +69,15 @@ export class SettingsComponent implements OnInit {
       this.role = storedRole;
       this.name = storedUsername || '';
       // this.loggedinUser = `${this.name}_${this.role}@rashtrotthana`;
-      console.log('Logged in user:', this.loggedinUser);
+      // console.log('Logged in user:', this.loggedinUser);
       // this.username = storedUsername || '';
       console.log(localStorage.getItem('userid'))
       this.userid = Number(localStorage.getItem('userid'));
-      console.log('userid',this.userid)
-      console.log('role',this.role)
+      // console.log('userid',this.userid)
+      // console.log('role',this.role)
       if (validRoles.includes(this.role as UserRole)) {
         this.currentUserRole = this.role as UserRole;
-        console.log("current user role in settings",this.currentUserRole)
+        // console.log("current user role in settings",this.currentUserRole)
         if (this.currentUserRole === 'super_admin') {
           this.loadUsers(); // Load users if the role is super admin
         }
@@ -85,7 +85,7 @@ export class SettingsComponent implements OnInit {
         this.currentUserRole = 'sub_admin'; // Default role in case of an invalid role
       }
       this.appointmentService.getAppointmentsByUser(this.userid).subscribe(appointments => {
-        console.log('Appointments for user:', appointments);
+        // console.log('Appointments for user:', appointments);
         this.appointmentsCount = appointments.length;
       });
   
@@ -110,7 +110,7 @@ export class SettingsComponent implements OnInit {
     this.authService.getAllUsers().subscribe(
       (data) => {
         this.users = data;
-        console.log('Users loaded successfully:', this.users);
+        // console.log('Users loaded successfully:', this.users);
       },
       (error) => {
         console.error('Error loading users:', error);
@@ -145,7 +145,7 @@ export class SettingsComponent implements OnInit {
 createAccount() {
   this.buttonClicked = true;
   this.authService.register(this.username, this.password).subscribe(response => {
-    console.log('Account created successfully', response);
+    // console.log('Account created successfully', response);
     this.username = '';  // Clear the username
     this.password = '';  // Clear the password
     this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Account Created Successfully' });
@@ -247,7 +247,7 @@ resetPassword() {
   }
   this.buttonClicked = true;
   this.authService.resetPassword(this.username, this.newPassword).subscribe(response => {
-    console.log('Password reset successfully', response);
+    // console.log('Password reset successfully', response);
     this.username = '';  // Clear the username
     this.newPassword = '';  // Clear the new password
 
@@ -264,7 +264,7 @@ resetPassword() {
  // Change Password method
  changePassword() {
   this.authService.changePassword(this.password,this.oldPassword, this.newPassword).subscribe(response => {
-    console.log('Password changed successfully', response);
+    // console.log('Password changed successfully', response);
     this.password = '';  // Clear the current password
     this.newPassword = '';  // Clear the new password
     this.oldPassword = '';
@@ -276,7 +276,7 @@ resetPassword() {
   confirmDelete(): void {
     // Add logic to delete account
     // Example: this.doctorService.deleteDoctor(doctorId).subscribe(...)
-    console.log('Account deleted');
+    // console.log('Account deleted');
     this.closeDeleteDialog();
   }
   // logout() {
@@ -360,7 +360,7 @@ deleteUser() {
   // let username = this.extractFirstName(this.username); // Extract the first name
   this.authService.deleteUser(this.username,headers).subscribe(
     response => {
-        console.log('User deleted successfully', response);
+        // console.log('User deleted successfully', response);
         this.showDeleteConfirmDialog = false;
         this.username='';
         this.loading = false; // Hide loader

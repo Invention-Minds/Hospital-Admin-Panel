@@ -121,9 +121,9 @@ export class TotalOverviewComponent implements OnInit {
     );
   }
   fetchDoctorsAvailability(){
-    console.log(this.doctors);
+    // console.log(this.doctors);
   this.availableDoctors=this.doctors.filter(doctor => doctor.status === 'Available');
-  console.log(this.availableDoctors);
+  // console.log(this.availableDoctors);
 
   }
   fetchDoctorsUnavailability(){

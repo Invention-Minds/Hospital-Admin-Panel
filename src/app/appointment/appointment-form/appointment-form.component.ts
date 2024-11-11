@@ -76,7 +76,7 @@ export class AppointmentFormComponent implements OnInit {
     this.appointmentForm = this.fb.group({
       firstName: ['', [Validators.required, Validators.pattern(/^[a-zA-Z\s]*$/)]],
       lastName: ['', [Validators.pattern(/^[a-zA-Z.\s]*$/)]],
-      prnNumber: ['', [Validators.required, Validators.pattern(/^[0-9]+$/)]],
+      prnNumber: ['', [ Validators.pattern(/^[0-9]+$/)]],
       phoneNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
       email: ['', [Validators.email, Validators.pattern(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)]],
       doctorName: ['', [Validators.required, Validators.pattern(/^[a-zA-Z().\s]*$/)]],

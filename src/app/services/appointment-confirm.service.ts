@@ -289,5 +289,8 @@ getAppointmentsByRole(): Observable<Appointment[]> {
     checkedinAppointment(appointmentId: number): Observable<any> {
       return this.http.put(`${this.apiUrl}/${appointmentId}/checkin`, {});
     }
+    deleteAppointment(id: number): Observable<void> {
+      return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() });
+    }
     
 }

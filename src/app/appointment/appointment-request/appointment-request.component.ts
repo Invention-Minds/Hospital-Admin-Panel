@@ -44,6 +44,9 @@ export class AppointmentRequestComponent implements OnInit {
   activeAppointmentId: number | null | undefined = null;
   userId: any = 0;
   isLockedDialogVisible: boolean = false; // To control the visibility of the lock dialog
+  showDeleteConfirmDialog: boolean = false;
+  appointmentToDelete: Appointment | null = null;
+  
 
   private userSubscription: Subscription | undefined;
   private lockSubscription: Subscription | undefined;
@@ -350,6 +353,32 @@ export class AppointmentRequestComponent implements OnInit {
   //   const [month, day, year] = dateString.split('/');
   //   return `20${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`; // Adjusting for 20XX century dates
   // }
+  confirmDeleteAppointment() {
+    if(this.appointmentToDelete && this.appointmentToDelete.id) {
+    this.appointmentService.deleteAppointment(this.appointmentToDelete!.id).subscribe(
+      () => {
+        console.log('Appointment deleted successfully');
+        this.pendingAppointments = this.pendingAppointments.filter(a => a.id !== this.appointmentToDelete!.id);
+        this.filterAppointment();
+        this.showDeleteConfirmDialog= false;
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Appointment deleted successfully!' });
+        // this.fetchAppointments(); // Refresh appointments after deletion
+      },
+      (error) => {
+        console.error('Error deleting appointment:', error);
+      }
+    );
+  }
+  }
+  showDeleteDialog(appointment: Appointment): void {
+    this.appointmentToDelete = appointment;
+    this.showDeleteConfirmDialog = true;
+  }
+  closeDeleteDialog(): void {
+    this.showDeleteConfirmDialog = false;
+    this.appointmentToDelete = null;
+  }
+
   cancelAppointment(appointment: Appointment) {
     // appointment.date = this.convertDateToISO(appointment.date);
     const cancel: Appointment = {
@@ -418,6 +447,7 @@ export class AppointmentRequestComponent implements OnInit {
     this.filterAppointment();
   }
 
+
   // Private method to lock an appointment
   private lockAppointment(appointmentId: number, userId: string): boolean {
     if (lockedAppointments.has(appointmentId)) {
@@ -469,6 +499,6 @@ export class AppointmentRequestComponent implements OnInit {
       this.closeAppointmentForm();
     }
   }
-
+ 
 
 }

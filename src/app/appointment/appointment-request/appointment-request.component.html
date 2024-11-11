@@ -38,8 +38,10 @@
           <button class="btn-action">
             <img src="icons/book.png" alt="check" class="action-icon" (click)="openAppointmentForm(appointment)"
               pTooltip="Confirm" tooltipPosition="top">
-            <img src="icons/delete.png" alt="delete" class="action-icon" (click)="cancelAppointment(appointment)"
+            <img src="appt-cancel.png" alt="delete" class="action-icon" (click)="cancelAppointment(appointment)"
               pTooltip="Cancel" tooltipPosition="top">
+              <img src="icons/delete.png" alt="delete" class="action-icon" (click)="showDeleteDialog(appointment)"
+              pTooltip="Delete" tooltipPosition="top">
           </button>
         </td>
       </tr>
@@ -70,3 +72,21 @@
 </app-appointment-form>
 <app-delete-confirmation-dialog [showDialog]="isLockedDialogVisible"
   (close)="handleLockedDialogClose()"></app-delete-confirmation-dialog>
+
+  <div class="overlay" *ngIf="showDeleteConfirmDialog">
+    <div class="dialog-container">
+      <div class="dialog-header">
+        <img src="/danger.png" alt="Warning Icon" class="warning-icon">
+      </div>
+      <div class="dialog-body">
+        <div class="dialog-title">Are You Sure!</div>
+        <div class="dialog-message">
+          Do you really want to delete this appointment? This action cannot be undone.
+        </div>
+        <div class="dialog-actions">
+          <button class="delete-account-button" (click)="confirmDeleteAppointment()">Yes, Delete it!</button>
+          <button class="cancel-account-button" (click)="closeDeleteDialog()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>

@@ -604,7 +604,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
       const [start, end] = this.doctor.availableFrom.split('-');
       const slotDuration = this.doctor.slotDuration;
       this.generatedSlots = this.generateTimeSlots(start, end, slotDuration);
-      console.log('Generated slots:', this.generatedSlots);
+      // console.log('Generated slots:', this.generatedSlots);
       this.generatedSlotOptions = this.generatedSlots.map(slot => ({ label: slot, value: slot }));
     }
   }

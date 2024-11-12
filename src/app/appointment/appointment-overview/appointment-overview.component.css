@@ -205,10 +205,11 @@ font-weight: 500;
     display: flex;
     width: 50%;
     gap: 20px;
+    padding-top: 20px;
   }
   .buttons-container{
     display: flex;
-
+    margin-top: -2px;
   }
   .calendar-icon{
 position: relative;
@@ -224,4 +225,7 @@ right: 38px;
     cursor: pointer;
     /* padding-top: 20px; */
   }
- 
+ .download{
+  margin-left: 213px;
+  margin-top: 14px;
+ }

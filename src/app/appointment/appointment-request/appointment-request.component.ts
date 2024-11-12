@@ -40,6 +40,7 @@ const lockedAppointments = new Map<number, { userId: string; lockTime: number }>
 export class AppointmentRequestComponent implements OnInit {
   @Input() selectedDate: Date | null = null;
   @Input() selectedValue: string = '';
+  @Input() selectedSearchOption: string = ''; 
   pendingAppointments: Appointment[] = [];
   activeAppointmentId: number | null | undefined = null;
   userId: any = 0;
@@ -218,11 +219,41 @@ export class AppointmentRequestComponent implements OnInit {
       filteredList = filteredList.filter(appointment => appointment.date === formattedDate);
     }
     if (this.selectedValue.trim() !== '') {
+      // const searchLower = this.selectedValue.toLowerCase();
+      // filteredList = this.filteredAppointments.filter(appointment =>
+      //   appointment.patientName.toLowerCase().includes(searchLower) ||
+      //   appointment.phoneNumber.toLowerCase().includes(searchLower)
+      // );
       const searchLower = this.selectedValue.toLowerCase();
-      filteredList = this.filteredAppointments.filter(appointment =>
-        appointment.patientName.toLowerCase().includes(searchLower) ||
-        appointment.phoneNumber.toLowerCase().includes(searchLower)
-      );
+      filteredList = this.filteredAppointments.filter((appointment) => {
+        console.log('Selected search option:', this.selectedSearchOption);
+        console.log('Selected value:', this.selectedValue);
+       
+        console.log('Search lower:', searchLower);
+        console.log('Appointment:', appointment);
+        console.log('Filtered list:', filteredList);
+      
+        let match = false;
+
+        switch (this.selectedSearchOption) {
+          case 'patientName':
+            console.log('Patient Name:', appointment.patientName.toLowerCase());
+            match = appointment.patientName ? appointment.patientName.toLowerCase().includes(searchLower) : false;
+            console.log('Match:', match);
+            break;
+          case 'phoneNumber':
+            match = appointment.phoneNumber ? appointment.phoneNumber.toLowerCase().includes(searchLower) : false;
+            break;
+          case 'doctorName':
+            match = appointment.doctorName ? appointment.doctorName.toLowerCase().includes(searchLower) : false;
+            break;
+          default:
+            match = true;
+        }
+  
+
+      return match;
+    });
 
     }
     else {

@@ -1,7 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import {provideNativeDateAdapter} from '@angular/material/core';
 import { MessageService } from 'primeng/api';
+import { AppointmentConfirmComponent } from '../appointment-confirm/appointment-confirm.component';
+import { AppointmentCompleteComponent } from '../appointment-complete/appointment-complete.component';
+import { AppointmentCancelComponent } from '../appointment-cancel/appointment-cancel.component';
 
 @Component({
   selector: 'app-appointment-overview',
@@ -9,16 +12,21 @@ import { MessageService } from 'primeng/api';
   styleUrl: './appointment-overview.component.css',
   providers: [provideNativeDateAdapter(), MessageService],
 })
-export class AppointmentOverviewComponent {
+export class AppointmentOverviewComponent implements AfterViewInit {
   constructor(private router: Router,private messageService: MessageService) {}
  // Options for the dropdown to select search type (Patient ID or Phone Number)
  searchOptions = [
   { label: 'Patient Name', value: 'patientName' },
-  { label: 'Phone Number', value: 'phoneNumber' }
+  { label: 'Phone Number', value: 'phoneNumber' },
+  { label: 'Doctor Name', value: 'doctorName' },
 ];
+@ViewChild('appointmentConfirmComponent') appointmentConfirmComponent?: AppointmentConfirmComponent;
+@ViewChild('appointmentCompleteComponent') appointmentCompleteComponent?: AppointmentCompleteComponent;
+@ViewChild('appointmentCancelComponent') appointmentCancelComponent?: AppointmentCancelComponent;
 
 // Selected option for search type
-selectedSearchOption: { label: string, value: string } = this.searchOptions[0];
+selectedSearchOption:any = this.searchOptions[0];
+selectedDateRange: Date[] = [];
 
 // Value entered by the user (could be Patient ID or Phone Number based on selection)
 searchValue: string = '';
@@ -28,6 +36,10 @@ selectedDate: Date | null = null;
 
 showForm: boolean = false;
 
+ngAfterViewInit() {
+  console.log( this.appointmentConfirmComponent)
+
+}
 // Method to handle search action
 onSearch() {
   if (this.selectedSearchOption && this.searchValue) {
@@ -36,12 +48,36 @@ onSearch() {
     console.error('Please select a search option and enter a value');
   }
 }
+downloadData(): void {
+  if (this.selectedDateRange && this.selectedDateRange.length > 0 && this.activeComponent === 'confirmed') {
+    // Call the download method in the appointment confirm component
+    this.appointmentConfirmComponent?.downloadFilteredData();
+  } 
+  else if(this.activeComponent === 'completed' && this.selectedDateRange && this.selectedDateRange.length > 0) {
+    console.log('Downloading completed appointments data...');
+    console.log(this.appointmentCompleteComponent)
+    this.appointmentCompleteComponent?.downloadFilteredData();
+  }
+  else if(this.activeComponent === 'cancelled' && this.selectedDateRange && this.selectedDateRange.length > 0) {
+    console.log('Downloading cancelled appointments data...');
+    this.appointmentCancelComponent?.downloadFilteredData();
+  }
+  else if(this.selectedDateRange && this.selectedDateRange.length === 0) {
+    // Download last week's data if no component is active
+    this.messageService.add({ severity: 'info', summary: 'Info', detail: 'Select a date to download the report' });
+  }
+  
+}
+// downloadLastWeekData(): void {
+//   // Implement logic to download last week's data
+//   console.log('Downloading last week\'s data...');
+// }
 
 // Method to clear input fields
 onClear() {
   this.searchValue = '';
   this.selectedSearchOption = this.searchOptions[0];
-  this.selectedDate = null;
+  this.selectedDateRange = [];
 }
 activeComponent: string = 'request'; // Default to showing the request component
 
@@ -75,7 +111,7 @@ activeComponent: string = 'request'; // Default to showing the request component
     
   
   refresh(){
-    this.selectedDate = null;
+    this.selectedDateRange = [];
   }
   
   convertDateToISO(dateString: string): string {

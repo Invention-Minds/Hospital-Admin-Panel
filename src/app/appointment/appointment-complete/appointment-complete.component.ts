@@ -1,5 +1,6 @@
 import { Component,Input } from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
+import * as XLSX from 'xlsx';
 interface Appointment {
   id?: number;
   patientName: string;
@@ -15,6 +16,7 @@ interface Appointment {
   emailSent?:boolean;
   requestVia?: string; // Optional property
   created_at?: string;
+  user?: any;
 }
 @Component({
   selector: 'app-appointment-complete',
@@ -33,8 +35,10 @@ export class AppointmentCompleteComponent {
   itemsPerPage = 10;
   sortColumn: keyof Appointment | undefined = undefined;  // No sorting initially
   sortDirection: string = 'asc';  // Default sorting direction
-  @Input() selectedDate: Date | null = null;
+  @Input() selectedDateRange: Date[] | null = null;
   @Input() selectedValue: string = '';
+  @Input() selectedSearchOption: string = ''; 
+  filteredList: any;
 
   searchOptions = [
     { label: 'Patient Name', value: 'patientName' },
@@ -140,26 +144,128 @@ export class AppointmentCompleteComponent {
   
   // Method to filter appointments by the selected date
   filterAppointment() {
-    let filteredList = [...this.completedAppointments];
+    this.filteredList = [...this.completedAppointments];
   
-    if (this.selectedDate) {
-      const formattedDate = this.formatDate(this.selectedDate);
-      filteredList = filteredList.filter(completedAppointments => completedAppointments.date === formattedDate);
+    if (this.selectedDateRange && this.selectedDateRange.length === 2) {
+      const startDate = this.selectedDateRange[0];
+      const endDate = this.selectedDateRange[1] ? this.selectedDateRange[1] : startDate; // If endDate is null, use startDate
+      console.log(this.selectedDateRange)
+      if (startDate && endDate) {
+        if (startDate.getTime() === endDate.getTime()) {
+          // Handle the case where a single day is selected (start and end dates are the same)
+          this.filteredList = this.filteredList.filter((completedAppointments: Appointment) => {
+            const appointmentDate = new Date(completedAppointments.date);
+            return appointmentDate.toDateString() === startDate.toDateString();
+          });
+        } else {
+          // Handle the case where a date range is selected
+          this.filteredList = this.filteredList.filter((completedAppointments: Appointment) => {
+            const appointmentDate = new Date(completedAppointments.date);
+            return appointmentDate >= startDate && appointmentDate <= endDate;
+          });
+        }
+      } else {
+        // If either startDate or endDate is null, set filteredAppointments to an empty array
+        this.filteredAppointments = [];
+      }
+    } else {
+      // If no valid range is selected, show all appointments
+      this.filteredAppointments = [...this.completedAppointments];
     }
     if (this.selectedValue.trim() !== '') {
       const searchLower = this.selectedValue.toLowerCase();
-      filteredList = this.filteredAppointments.filter(completedAppointments =>
-        completedAppointments.patientName.toLowerCase().includes(searchLower) ||
-        completedAppointments.phoneNumber.toLowerCase().includes(searchLower)
-      );
+      // filteredList = this.filteredAppointments.filter(completedAppointments =>
+      //   completedAppointments.patientName.toLowerCase().includes(searchLower) ||
+      //   completedAppointments.phoneNumber.toLowerCase().includes(searchLower)
+
+      // );
+      this.filteredList = this.filteredAppointments.filter((appointment) => {
+        console.log('Selected search option:', this.selectedSearchOption);
+        console.log('Selected value:', this.selectedValue);
+       
+        console.log('Search lower:', searchLower);
+        console.log('Appointment:', appointment);
+        console.log('Filtered list:', this.filteredList);
+      
+        let match = false;
+
+        switch (this.selectedSearchOption) {
+          case 'patientName':
+            console.log('Patient Name:', appointment.patientName.toLowerCase());
+            match = appointment.patientName ? appointment.patientName.toLowerCase().includes(searchLower) : false;
+            console.log('Match:', match);
+            break;
+          case 'phoneNumber':
+            match = appointment.phoneNumber ? appointment.phoneNumber.toLowerCase().includes(searchLower) : false;
+            break;
+          case 'doctorName':
+            match = appointment.doctorName ? appointment.doctorName.toLowerCase().includes(searchLower) : false;
+            break;
+          default:
+            match = true;
+        }
+  
+
+      return match;
+    });
+  
 
     }
     else {
       // If no date is selected, show all appointments
       this.filteredAppointments = [...this.completedAppointments];
     }
-    this.filteredAppointments = filteredList;
+    this.filteredAppointments = this.filteredList;
     this.currentPage = 1;
+  }
+  downloadFilteredData(): void {
+    console.log('Downloading completed appointments data...');
+    if (this.filteredList && this.filteredList.length > 0) {
+      console.log('Downloading filtered data...');
+
+      const selectedFields = this.filteredList.map((appointment: Appointment) => ({
+        'Patient Name': appointment.patientName,
+        'Patient Phone Number': appointment.phoneNumber,
+        'Patient Email': appointment.email,
+        'Doctor Name': appointment.doctorName,
+        'Department': appointment.department,
+        'Appointment Date': appointment.date,
+        'Appointment Time': appointment.time,
+        'Appointment Created Time': appointment.created_at,
+        'Request Via': appointment.requestVia,
+        'SMS Sent': appointment.smsSent ? 'Yes' : 'No',
+        'Email Sent': appointment.emailSent ? 'Yes' : 'No',
+        'Status': appointment.status,
+        'Appointment Handled By': appointment.user!.username
+      }));
+      // Step 1: Convert the filtered data to a worksheet
+      const worksheet = XLSX.utils.json_to_sheet(selectedFields);
+      
+      // Step 2: Create a new workbook and add the worksheet
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, `Completed Appointments`);
+
+      // Step 3: Write the workbook to a binary string
+      const excelBuffer = XLSX.write(workbook, {
+        bookType: 'xlsx',
+        type: 'array',
+      });
+
+      // Step 4: Create a Blob from the binary string
+      const blob = new Blob([excelBuffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+
+      // Step 5: Trigger the download
+      const link = document.createElement('a');
+      const url = window.URL.createObjectURL(blob);
+      link.href = url;
+      link.download = 'Completed Appointments.xlsx';
+      link.click();
+      window.URL.revokeObjectURL(url);
+    } else {
+      console.warn('No data available to download');
+    }
   }
 
   // Utility method to format the date in 'dd/mm/yy' format

@@ -78,12 +78,17 @@
               </div>
      </div>
     
+     <div class="p-field p-col-3 download" *ngIf="activeComponent==='confirmed' || activeComponent === 'completed' || activeComponent === 'cancelled'" >
+      <img src="download.png" (click)="downloadData()" >
+     </div>
   
      <div class="p-field p-col-3">
         <!-- <p-calendar [(ngModel)]="selectedDate" placeholder="Calendar" class="custom-calendar"></p-calendar> -->
         <p-calendar 
         styleClass="custom-calendar" 
-        [(ngModel)]="selectedDate" 
+        [(ngModel)]="selectedDateRange"
+        selectionMode="range"
+         
         placeholder="Calendar"
         dateFormat="yy-mm-dd">
           <ng-template pTemplate="date" let-date>
@@ -98,10 +103,10 @@
       </div>
       
       <div class="component-section">
-        <app-appointment-request *ngIf="activeComponent === 'request'" [selectedDate]="selectedDate"  [selectedValue]="searchValue"></app-appointment-request>
-        <app-appointment-confirm *ngIf="activeComponent === 'confirmed'" [selectedDate]="selectedDate" [selectedValue]="searchValue"></app-appointment-confirm>
-        <app-appointment-cancel *ngIf="activeComponent === 'cancelled'" [selectedDate]="selectedDate" [selectedValue]="searchValue"></app-appointment-cancel>
-        <app-appointment-complete *ngIf="activeComponent === 'completed'" [selectedDate]="selectedDate" [selectedValue]="searchValue"></app-appointment-complete>
+        <app-appointment-request *ngIf="activeComponent === 'request'" [selectedDate]="selectedDate" [selectedSearchOption]="selectedSearchOption"  [selectedValue]="searchValue"></app-appointment-request>
+        <app-appointment-confirm *ngIf="activeComponent === 'confirmed'" [selectedSearchOption]="selectedSearchOption" [selectedDateRange]="selectedDateRange" [selectedValue]="searchValue" #appointmentConfirmComponent></app-appointment-confirm>
+        <app-appointment-cancel *ngIf="activeComponent === 'cancelled'" [selectedDate]="selectedDate" [selectedSearchOption]="selectedSearchOption" [selectedDateRange]="selectedDateRange" [selectedValue]="searchValue" #appointmentCancelComponent></app-appointment-cancel>
+        <app-appointment-complete *ngIf="activeComponent === 'completed'"  [selectedSearchOption]="selectedSearchOption" [selectedDateRange]="selectedDateRange" [selectedValue]="searchValue" #appointmentCompleteComponent></app-appointment-complete>
         <app-appointment-form *ngIf="activeComponent === 'appointment' && showForm" (close)="closeForm()"></app-appointment-form>
         
       </div>

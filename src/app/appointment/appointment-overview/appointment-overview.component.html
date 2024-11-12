@@ -79,7 +79,7 @@
      </div>
     
      <div class="p-field p-col-3 download" *ngIf="activeComponent==='confirmed' || activeComponent === 'completed' || activeComponent === 'cancelled'" >
-      <img src="download.png" (click)="downloadData()" >
+      <img src="download.png" (click)="downloadData()" pTooltip="Download" >
      </div>
   
      <div class="p-field p-col-3">
@@ -88,7 +88,7 @@
         styleClass="custom-calendar" 
         [(ngModel)]="selectedDateRange"
         selectionMode="range"
-         
+        
         placeholder="Calendar"
         dateFormat="yy-mm-dd">
           <ng-template pTemplate="date" let-date>

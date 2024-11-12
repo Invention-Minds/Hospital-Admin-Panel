@@ -148,27 +148,37 @@ export class AppointmentCompleteComponent {
   
     if (this.selectedDateRange && this.selectedDateRange.length === 2) {
       const startDate = this.selectedDateRange[0];
-      const endDate = this.selectedDateRange[1] ? this.selectedDateRange[1] : startDate; // If endDate is null, use startDate
-      console.log(this.selectedDateRange)
+      const endDate = this.selectedDateRange[1] ? this.selectedDateRange[1] : startDate; // Use endDate if provided, otherwise use startDate
+  
       if (startDate && endDate) {
-        if (startDate.getTime() === endDate.getTime()) {
-          // Handle the case where a single day is selected (start and end dates are the same)
-          this.filteredList = this.filteredList.filter((completedAppointments: Appointment) => {
-            const appointmentDate = new Date(completedAppointments.date);
-            return appointmentDate.toDateString() === startDate.toDateString();
-          });
-        } else {
-          // Handle the case where a date range is selected
-          this.filteredList = this.filteredList.filter((completedAppointments: Appointment) => {
-            const appointmentDate = new Date(completedAppointments.date);
-            return appointmentDate >= startDate && appointmentDate <= endDate;
-          });
-        }
-      } else {
-        // If either startDate or endDate is null, set filteredAppointments to an empty array
-        this.filteredAppointments = [];
+        if(startDate.getTime() !== endDate.getTime()) {
+        // Filtering appointments by the selected date range
+        console.log('Start date:', startDate, 'End date:', endDate);
+        const normalizedEndDate = new Date(endDate);
+    normalizedEndDate.setHours(23, 59, 59, 999);  // Set to the last millisecond of the day
+
+        this.filteredList = this.filteredList.filter((appointment: Appointment) => {
+          const appointmentDate = new Date(appointment.date);  // Assuming 'date' is in string format like 'YYYY-MM-DD'
+          return appointmentDate >= startDate && appointmentDate <= normalizedEndDate;
+        });
+        console.log('Filtered list:', this.filteredList);
       }
-    } else {
+      else if (startDate.getTime() === endDate.getTime()) {
+        console.log('Single date selected:');
+        const startDate = this.selectedDateRange[0];
+    
+        this.filteredList = this.filteredList.filter((appointment: Appointment) => {
+          const appointmentDate = new Date(appointment.date);
+          return appointmentDate.toDateString() === startDate.toDateString();  // Compare the date portion only
+        });
+        console.log('Filtered list:', this.filteredList);
+      }
+    }
+    else{
+      this.filteredAppointments = []
+    }
+    }
+    else {
       // If no valid range is selected, show all appointments
       this.filteredAppointments = [...this.completedAppointments];
     }

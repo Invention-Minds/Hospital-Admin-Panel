@@ -77,7 +77,7 @@ downloadData(): void {
 onClear() {
   this.searchValue = '';
   this.selectedSearchOption = this.searchOptions[0];
-  this.selectedDateRange = [];
+  // this.selectedDateRange = [];
 }
 activeComponent: string = 'request'; // Default to showing the request component
 

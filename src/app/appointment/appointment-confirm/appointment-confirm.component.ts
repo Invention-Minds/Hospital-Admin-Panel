@@ -168,12 +168,12 @@ export class AppointmentConfirmComponent {
 
   ngOnChanges(changes: SimpleChanges) {
     // Whenever the selected date changes, this will be triggered
-    // this.filterAppointment();
-    if (changes['selectedDateRange']) {
-      console.log('Selected date range:', this.selectedDateRange);
-      this.filterAppointment();
-      this.cdRef.detectChanges();  // Manually trigger change detection
-    }
+    this.filterAppointment();
+    // if (changes['selectedDateRange']) {
+    //   console.log('Selected date range:', this.selectedDateRange);
+    //   this.filterAppointment();
+    //   this.cdRef.detectChanges();  // Manually trigger change detection
+    // }
   }
 
   // Method to filter appointments by the selected date
@@ -283,9 +283,12 @@ export class AppointmentConfirmComponent {
         if(startDate.getTime() !== endDate.getTime()) {
         // Filtering appointments by the selected date range
         console.log('Start date:', startDate, 'End date:', endDate);
+        const normalizedEndDate = new Date(endDate);
+    normalizedEndDate.setHours(23, 59, 59, 999);  // Set to the last millisecond of the day
+
         this.filteredList = this.filteredList.filter((appointment: Appointment) => {
           const appointmentDate = new Date(appointment.date);  // Assuming 'date' is in string format like 'YYYY-MM-DD'
-          return appointmentDate >= startDate && appointmentDate <= endDate;
+          return appointmentDate >= startDate && appointmentDate <= normalizedEndDate;
         });
         console.log('Filtered list:', this.filteredList);
       }
@@ -315,6 +318,7 @@ export class AppointmentConfirmComponent {
   
     // Handle filtering by the search value (patient name, phone number, or doctor name)
     if (this.selectedValue.trim() !== '') {
+      console.log('Selected search option:', this.selectedSearchOption);
       const searchLower = this.selectedValue.toLowerCase();
       this.filteredList = this.filteredList.filter((appointment: Appointment) => {
         let match = false;
@@ -333,6 +337,9 @@ export class AppointmentConfirmComponent {
         }
         return match;
       });
+    }
+    else{
+      this.filteredAppointments = [...this.confirmedAppointments];
     }
   
     // Update the filtered appointments with the final result

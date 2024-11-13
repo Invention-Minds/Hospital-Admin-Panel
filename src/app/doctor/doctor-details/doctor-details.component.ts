@@ -85,7 +85,7 @@ confirmDelete(): void {
   if (this.doctorToDelete) {
     this.doctorService.deleteDoctor(this.doctorToDelete.id).subscribe(
       () => {
-        console.log(`Dr. ${this.doctorToDelete!.name} has been deleted.`);
+        // console.log(`Dr. ${this.doctorToDelete!.name} has been deleted.`);
         this.showDeleteConfirmDialog = false; // Close the dialog
         this.fetchDepartmentsAndDoctors(); // Refresh the list after deletion
       },
@@ -279,7 +279,7 @@ closeDeleteDialog(): void {
 
             this.fetchDepartmentsAndDoctors(); // Refresh the list of doctors
             this.selectedEditDoctor = null;
-            console.log('Doctor created successfully');
+            // console.log('Doctor created successfully');
           },
           (error) => {
             console.error('Error creating doctor:', error);
@@ -346,7 +346,7 @@ onUpdate(): void {
         () => {
           // Update UI or notify success
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Dates marked as available Successfully' });
-          console.log('Dates marked as available successfully');
+          // console.log('Dates marked as available successfully');
           this.closeUnavailableModal();
         },
         error => {

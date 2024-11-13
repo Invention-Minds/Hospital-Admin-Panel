@@ -214,7 +214,7 @@ private getDayString(date: Date): keyof Doctor['availabilityDays'] {
 // Function to generate slots based on doctor availability and slot duration
 // Function to generate slots based on doctor availability and slot duration
 generateDoctorSlots(availableFrom: string, slotDuration: number, bookedSlots: string[], isUnavailableDay: boolean,unavailableSlots: string[], doctorAvailableUntil: string): Slot[] {
-  console.log('availableFrom',availableFrom)
+  // console.log('availableFrom',availableFrom)
   const [availableStart, availableEnd] = availableFrom.split('-').map(this.stringToMinutes);
   const slots: Slot[] = [];
   const currentTimeInMinutes = new Date().getHours() * 60 + new Date().getMinutes();
@@ -228,7 +228,7 @@ generateDoctorSlots(availableFrom: string, slotDuration: number, bookedSlots: st
 
     // If the day is unavailable or the time has passed, mark all slots as unavailable
     if (isUnavailableDay || isPastDoctorAvailableTime || isPastDate) {
-      console.log(isUnavailableDay,isPastDoctorAvailableTime,isPastDate)
+      // console.log(isUnavailableDay,isPastDoctorAvailableTime,isPastDate)
       // console.log(availableStart,availableEnd)
       return this.generateUnavailableSlots(availableStart, availableEnd, slotDuration,bookedSlots,unavailableSlots,currentTimeInMinutes);
     }

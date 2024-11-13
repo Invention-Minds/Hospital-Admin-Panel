@@ -226,20 +226,20 @@ export class AppointmentRequestComponent implements OnInit {
       // );
       const searchLower = this.selectedValue.toLowerCase();
       filteredList = this.filteredAppointments.filter((appointment) => {
-        console.log('Selected search option:', this.selectedSearchOption);
-        console.log('Selected value:', this.selectedValue);
+        // console.log('Selected search option:', this.selectedSearchOption);
+        // console.log('Selected value:', this.selectedValue);
        
-        console.log('Search lower:', searchLower);
-        console.log('Appointment:', appointment);
-        console.log('Filtered list:', filteredList);
+        // console.log('Search lower:', searchLower);
+        // console.log('Appointment:', appointment);
+        // console.log('Filtered list:', filteredList);
       
         let match = false;
 
         switch (this.selectedSearchOption) {
           case 'patientName':
-            console.log('Patient Name:', appointment.patientName.toLowerCase());
+            // console.log('Patient Name:', appointment.patientName.toLowerCase());
             match = appointment.patientName ? appointment.patientName.toLowerCase().includes(searchLower) : false;
-            console.log('Match:', match);
+            // console.log('Match:', match);
             break;
           case 'phoneNumber':
             match = appointment.phoneNumber ? appointment.phoneNumber.toLowerCase().includes(searchLower) : false;
@@ -285,7 +285,7 @@ export class AppointmentRequestComponent implements OnInit {
         requestVia: requestVia         // Optionally add or modify properties as needed
       };
       // const confirmed = this.confirmedAppointments;
-      console.log("confirmed in submitted", confirmedAppointment)
+      // console.log("confirmed in submitted", confirmedAppointment)
       this.appointmentService.addConfirmedAppointment(confirmedAppointment);
       this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Appointment confirmed successfully!' });
     } else if (status === 'Cancel') {
@@ -388,7 +388,7 @@ export class AppointmentRequestComponent implements OnInit {
     if(this.appointmentToDelete && this.appointmentToDelete.id) {
     this.appointmentService.deleteAppointment(this.appointmentToDelete!.id).subscribe(
       () => {
-        console.log('Appointment deleted successfully');
+        // console.log('Appointment deleted successfully');
         this.pendingAppointments = this.pendingAppointments.filter(a => a.id !== this.appointmentToDelete!.id);
         this.filterAppointment();
         this.showDeleteConfirmDialog= false;

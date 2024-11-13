@@ -282,7 +282,7 @@ export class AppointmentConfirmComponent {
       if (startDate && endDate) {
         if(startDate.getTime() !== endDate.getTime()) {
         // Filtering appointments by the selected date range
-        console.log('Start date:', startDate, 'End date:', endDate);
+        // console.log('Start date:', startDate, 'End date:', endDate);
         const normalizedEndDate = new Date(endDate);
     normalizedEndDate.setHours(23, 59, 59, 999);  // Set to the last millisecond of the day
 
@@ -290,17 +290,17 @@ export class AppointmentConfirmComponent {
           const appointmentDate = new Date(appointment.date);  // Assuming 'date' is in string format like 'YYYY-MM-DD'
           return appointmentDate >= startDate && appointmentDate <= normalizedEndDate;
         });
-        console.log('Filtered list:', this.filteredList);
+        // console.log('Filtered list:', this.filteredList);
       }
       else if (startDate.getTime() === endDate.getTime()) {
-        console.log('Single date selected:');
+        // console.log('Single date selected:');
         const startDate = this.selectedDateRange[0];
     
         this.filteredList = this.filteredList.filter((appointment: Appointment) => {
           const appointmentDate = new Date(appointment.date);
           return appointmentDate.toDateString() === startDate.toDateString();  // Compare the date portion only
         });
-        console.log('Filtered list:', this.filteredList);
+        // console.log('Filtered list:', this.filteredList);
       }
     }
     else{
@@ -318,7 +318,7 @@ export class AppointmentConfirmComponent {
   
     // Handle filtering by the search value (patient name, phone number, or doctor name)
     if (this.selectedValue.trim() !== '') {
-      console.log('Selected search option:', this.selectedSearchOption);
+      // console.log('Selected search option:', this.selectedSearchOption);
       const searchLower = this.selectedValue.toLowerCase();
       this.filteredList = this.filteredList.filter((appointment: Appointment) => {
         let match = false;
@@ -349,7 +349,7 @@ export class AppointmentConfirmComponent {
   
   downloadLastWeekData(): void {
     this.loadLastWeekAppointments();
-    console.log('Downloading last week\'s data...',this.lastWeekAppointments);
+    // console.log('Downloading last week\'s data...',this.lastWeekAppointments);
     if (this.lastWeekAppointments && this.lastWeekAppointments.length > 0) {
 
       const selectedFields = this.lastWeekAppointments.map((appointment: Appointment) => ({
@@ -549,11 +549,11 @@ export class AppointmentConfirmComponent {
       emailSent: true,
       requestVia: appointment.requestVia
     };
-    console.log('Cancelled appointment:', cancelled);
+    // console.log('Cancelled appointment:', cancelled);
     this.appointmentService.addCancelledAppointment(cancelled);
     this.doctorService.getCancelledSlots(appointment.doctorId, appointment.date, appointment.time).subscribe({
       next: (response) => {
-        console.log('Cancelled slots:', response);
+        // console.log('Cancelled slots:', response);
         // const cancelledSlots = response;
         // if (cancelledSlots.includes(appointment.time)) {
         //   console.log('Slot already cancelled:', appointment.time);

@@ -80,7 +80,7 @@ export class AppointmentConfirmService {
         appointment.emailSent = true; // Update email sent status
         } // Update email sent status
       appointment.smsSent = true; // Update SMS sent status
-      console.log("confirm",appointment)
+      // console.log("confirm",appointment)
       this.updateAppointmentStatus(appointment);
     } else {
       console.error('Cannot confirm appointment: Appointment ID is missing.');
@@ -141,7 +141,7 @@ addNewAppointment(appointment: Appointment): void {
   }
    // Method to update appointment status
    private updateAppointmentStatus(appointment: Appointment): void {
-    console.log('Updating appointment status:', appointment);
+    // console.log('Updating appointment status:', appointment);
     const userId = this.authService.getUserId();
     // const updateData = userId ? { status, userId, ...appointment } : { status };
     const updateData = {

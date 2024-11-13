@@ -37,7 +37,7 @@ selectedDate: Date | null = null;
 showForm: boolean = false;
 
 ngAfterViewInit() {
-  console.log( this.appointmentConfirmComponent)
+  // console.log( this.appointmentConfirmComponent)
 
 }
 // Method to handle search action
@@ -54,12 +54,12 @@ downloadData(): void {
     this.appointmentConfirmComponent?.downloadFilteredData();
   } 
   else if(this.activeComponent === 'completed' && this.selectedDateRange && this.selectedDateRange.length > 0) {
-    console.log('Downloading completed appointments data...');
-    console.log(this.appointmentCompleteComponent)
+    // console.log('Downloading completed appointments data...');
+    // console.log(this.appointmentCompleteComponent)
     this.appointmentCompleteComponent?.downloadFilteredData();
   }
   else if(this.activeComponent === 'cancelled' && this.selectedDateRange && this.selectedDateRange.length > 0) {
-    console.log('Downloading cancelled appointments data...');
+    // console.log('Downloading cancelled appointments data...');
     this.appointmentCancelComponent?.downloadFilteredData();
   }
   else if(this.selectedDateRange && this.selectedDateRange.length === 0) {

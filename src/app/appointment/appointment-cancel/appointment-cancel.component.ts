@@ -225,7 +225,7 @@ export class AppointmentCancelComponent {
       if (startDate && endDate) {
         if(startDate.getTime() !== endDate.getTime()) {
         // Filtering appointments by the selected date range
-        console.log('Start date:', startDate, 'End date:', endDate);
+        // console.log('Start date:', startDate, 'End date:', endDate);
         const normalizedEndDate = new Date(endDate);
     normalizedEndDate.setHours(23, 59, 59, 999);  // Set to the last millisecond of the day
 
@@ -233,17 +233,17 @@ export class AppointmentCancelComponent {
           const appointmentDate = new Date(appointment.date);  // Assuming 'date' is in string format like 'YYYY-MM-DD'
           return appointmentDate >= startDate && appointmentDate <= normalizedEndDate;
         });
-        console.log('Filtered list:', this.filteredList);
+        // console.log('Filtered list:', this.filteredList);
       }
       else if (startDate.getTime() === endDate.getTime()) {
-        console.log('Single date selected:');
+        // console.log('Single date selected:');
         const startDate = this.selectedDateRange[0];
     
         this.filteredList = this.filteredList.filter((appointment: Appointment) => {
           const appointmentDate = new Date(appointment.date);
           return appointmentDate.toDateString() === startDate.toDateString();  // Compare the date portion only
         });
-        console.log('Filtered list:', this.filteredList);
+        // console.log('Filtered list:', this.filteredList);
       }
     }
     else{
@@ -262,20 +262,20 @@ export class AppointmentCancelComponent {
 
       // );
       this.filteredList = this.filteredAppointments.filter((appointment) => {
-        console.log('Selected search option:', this.selectedSearchOption);
-        console.log('Selected value:', this.selectedValue);
+        // console.log('Selected search option:', this.selectedSearchOption);
+        // console.log('Selected value:', this.selectedValue);
        
-        console.log('Search lower:', searchLower);
-        console.log('Appointment:', appointment);
-        console.log('Filtered list:', this.filteredList);
+        // console.log('Search lower:', searchLower);
+        // console.log('Appointment:', appointment);
+        // console.log('Filtered list:', this.filteredList);
       
         let match = false;
 
         switch (this.selectedSearchOption) {
           case 'patientName':
-            console.log('Patient Name:', appointment.patientName.toLowerCase());
+            // console.log('Patient Name:', appointment.patientName.toLowerCase());
             match = appointment.patientName ? appointment.patientName.toLowerCase().includes(searchLower) : false;
-            console.log('Match:', match);
+            // console.log('Match:', match);
             break;
           case 'phoneNumber':
             match = appointment.phoneNumber ? appointment.phoneNumber.toLowerCase().includes(searchLower) : false;
@@ -301,9 +301,9 @@ export class AppointmentCancelComponent {
     this.currentPage = 1;
   }
   downloadFilteredData(): void {
-    console.log('Downloading completed appointments data...');
+    // console.log('Downloading completed appointments data...');
     if (this.filteredList && this.filteredList.length > 0) {
-      console.log('Downloading filtered data...');
+      // console.log('Downloading filtered data...');
 
       // const selectedFields = this.filteredList.map((appointment: Appointment) => ({
       //   'Patient Name': appointment.patientName,
@@ -349,10 +349,10 @@ export class AppointmentCancelComponent {
       const worksheet = XLSX.utils.json_to_sheet(selectedFields);
       // Step 3: Generate the sheet name with truncation if necessary
       const startDate = this.formatDate(this.selectedDateRange[0]);
-     console.log(this.formatDate(this.selectedDateRange[0])); 
+    //  console.log(this.formatDate(this.selectedDateRange[0])); 
       const endDate = this.selectedDateRange[1] ? this.formatDate(this.selectedDateRange[1]) : startDate;
     let sheetName = `Cancelled Appointments`;
-    console.log('Sheet name:', sheetName);
+    // console.log('Sheet name:', sheetName);
     
     // Truncate sheet name to 31 characters
     if (sheetName.length > 31) {

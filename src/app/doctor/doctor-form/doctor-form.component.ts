@@ -306,7 +306,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
       
     }
     } else {
-      console.log('No availability for selected date');
+      // console.log('No availability for selected date');
     }
   }
 
@@ -456,7 +456,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
       if (this.doctor?.id) {
         this.doctorService.addUnavailableSlots(this.doctor.id, date, times).subscribe(
           response => {
-            console.log('Unavailable slots added successfully:', response);
+            // console.log('Unavailable slots added successfully:', response);
           },
           error => {
             console.error('Error adding unavailable slots:', error);

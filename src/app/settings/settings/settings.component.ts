@@ -72,7 +72,7 @@ export class SettingsComponent implements OnInit {
       // this.loggedinUser = `${this.name}_${this.role}@rashtrotthana`;
       // console.log('Logged in user:', this.loggedinUser);
       // this.username = storedUsername || '';
-      console.log(localStorage.getItem('userid'))
+      // console.log(localStorage.getItem('userid'))
       this.userid = Number(localStorage.getItem('userid'));
       // console.log('userid',this.userid)
       // console.log('role',this.role)

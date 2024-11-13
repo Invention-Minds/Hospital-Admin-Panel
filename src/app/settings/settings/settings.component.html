@@ -18,6 +18,10 @@
         *ngIf="canAccessTab('delete')">
         Delete Account
       </div>
+      <div class="tab" [ngClass]="{'active-tab': selectedTab === 'login_details'}" (click)="switchTab('login_details')"
+      *ngIf="canAccessTab('login_details')" >
+        Logged In Details
+    </div>
     </div>
 
     <div class="content-container" *ngIf="selectedTab === 'profile'">
@@ -200,7 +204,7 @@
         <!-- Password Input -->
         <div class="password-container">
           <input [type]="isCreatePasswordVisible ? 'text' : 'password'" class="input-field" [(ngModel)]="password"
-            placeholder="********" (ngModelChange)="validateInputs()"
+            placeholder="Password" (ngModelChange)="validateInputs()"
             required
             minlength="6">
           <img [src]="isCreatePasswordVisible? '/not-show.png': '/show-password.png'" alt="Show Password"
@@ -248,6 +252,31 @@
                 <img src="doc-delete.svg" alt="Delete Icon"> Delete Account
               </button>
             </div> -->
+    </div>
+    <div class="content-container" *ngIf="selectedTab === 'login_details'">
+      <div class="table-container">
+        <table class="styled-table">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Staff Name</th>
+              <th>Role</th>
+              <th>Log In Date</th>
+              <th>Log In Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let staff of users; let i = index">
+              <td>{{ i + 1 }}</td>
+              <td>{{ firstNames[i] }}</td>
+              <td>{{ staff.role }}</td>
+              <td>{{ staff.loggedInDate }}</td>
+              <td>{{ staff.loggedInTime}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
     </div>
     <!-- Delete Confirmation Modal -->
     <!-- Delete Account Confirmation Dialog -->

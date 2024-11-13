@@ -65,7 +65,7 @@
           </ul> -->
           <select  class="select doctor" formControlName="doctorName" (focus)="loadDoctors()" (change)="onDoctorSelect($event)">
             <option *ngIf="filteredDoctors.length === 0" value="">No doctors available</option>
-            <option value="" disabled selected>Select a doctor</option>
+            <option value="" selected>Select a doctor</option>
             <option *ngFor="let doctor of filteredDoctors" [value]="doctor.name">
               {{ doctor.name }}
             </option>

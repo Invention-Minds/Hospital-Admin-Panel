@@ -50,6 +50,7 @@ export class SettingsComponent implements OnInit {
   passwordErrorMessageinReset: string = '';
   isUserNameValid: boolean = false;
   loggedinUser: any;
+  firstNames: string[] = [];
 
   constructor(private authService: AuthServiceService, private router: Router, private messageService: MessageService, private appointmentService: AppointmentConfirmService) {}
  // Define the role-based access
@@ -57,14 +58,14 @@ export class SettingsComponent implements OnInit {
   sub_admin: ['profile', 'reset'],
   doctor: ['profile', 'reset'],
   admin: ['profile', 'reset', 'login','delete'],
-  super_admin: ['profile', 'reset', 'login','delete'],
+  super_admin: ['profile', 'reset', 'login','delete','login_details'],
 };
 
   ngOnInit(): void {
     if (typeof window !== 'undefined' && window.localStorage) {
       // Fetch role from localStorage or the authentication service
       const storedRole = localStorage.getItem('role');
-      const storedUsername = localStorage.getItem('username');
+      const storedUsername = localStorage.getItem('username'); 
       const validRoles: UserRole[] = ['admin', 'doctor', 'sub_admin', 'super_admin'];
       this.role = storedRole;
       this.name = storedUsername || '';
@@ -110,6 +111,8 @@ export class SettingsComponent implements OnInit {
     this.authService.getAllUsers().subscribe(
       (data) => {
         this.users = data;
+        this.firstNames = this.users.map(user => this.extractFirstName(user.username));
+        
         // console.log('Users loaded successfully:', this.users);
       },
       (error) => {

@@ -32,7 +32,7 @@
   }
   small{
     color: #D20006;
-    font-size: 16px;
+    font-size: 10px;
     font-weight: 500;
   }
   .appointment-header {
@@ -55,7 +55,7 @@
   .errors{
     margin-top: 42px;
     margin-bottom: 28px;
-    margin-left: -168px;
+    margin-left: -179px;
 
   }
   .last-name{
@@ -138,21 +138,25 @@ input[type="tel"]{
   .slot label{
     margin-right: 30px;
   }
+  .time{
+    margin-right: 38px;
+  }
   .radio{
 
   }
   .email{
-    margin-right:38px;
+    margin-right:0px;
   }
   .phone{
-    margin-right: -26px;
+    margin-right: 52px;
   }
   .doctor{
-    margin-right: -13px;
+    margin-right: 52px;
   }
   .prn{
     margin-right:167px
   }
+
   .button-group {
     display: flex;
     justify-content: flex-end;

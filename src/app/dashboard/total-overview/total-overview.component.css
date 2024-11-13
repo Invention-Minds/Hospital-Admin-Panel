@@ -21,7 +21,7 @@ font-weight: 500;
   }
   
   .card {
-    width: 273px;
+    width: 250px;
     height: 80px;
     display: flex;
     align-items: center;
@@ -57,7 +57,7 @@ font-weight: 500;
   
   .card-content p {
     color: #271E4A;
-    font-size: 22px;
+    font-size: 20px;
     font-family: Kanit;
     font-weight: 600;
     margin: 0;

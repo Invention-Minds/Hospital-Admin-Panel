@@ -1,8 +1,12 @@
 <!-- login.component.html -->
 <div class="login-container">
     <div class="login-form">
+      <div class="logo">
+        <img src="/login-logo.png" alt="Login Logo" />
+      </div>
       <h2>LOGIN</h2>
       <p>Welcome to seamless healthcare management</p>
+      
       <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
         <div class="input-group">
             <img src="/username.png" alt="Username Icon" class="icon" />
@@ -12,7 +16,7 @@
         </div>
         <div class="input-group">
             <img src="/password.png" alt="Username Icon" class="icon" />
-            <input [type]="isPasswordVisible ? 'text' : 'password'"  class="input-field"  [(ngModel)]="password" placeholder="********" name="password" required/>  
+            <input [type]="isPasswordVisible ? 'text' : 'password'"  class="input-field"  [(ngModel)]="password" placeholder="Password" name="password" required/>  
             <img [src]="isPasswordVisible? '/not-show.png': '/show-password.png'" alt="Show Password" class="eye-icon" (click)="togglePasswordVisibility()">
           </div>
         <div class="login">

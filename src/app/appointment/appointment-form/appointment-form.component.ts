@@ -8,6 +8,7 @@ import { MessageService } from 'primeng/api';
 import { ChangeDetectorRef } from '@angular/core';
 import { AuthServiceService } from '../../services/auth/auth-service.service';
 import { response } from 'express';
+import { Router } from '@angular/router';
 
 
 interface Appointment {
@@ -56,7 +57,7 @@ export class AppointmentFormComponent implements OnInit {
 
 
 
-  constructor(private fb: FormBuilder, private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private messageService: MessageService, private cdr: ChangeDetectorRef, private authService: AuthServiceService) {
+  constructor(private fb: FormBuilder, private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private messageService: MessageService, private cdr: ChangeDetectorRef, private authService: AuthServiceService, private router: Router) {
   }
 
   @Output() close = new EventEmitter<void>();
@@ -541,6 +542,7 @@ export class AppointmentFormComponent implements OnInit {
     event.preventDefault(); // Prevents any default action, if needed
     this.close.emit();
     this.showForm = false;
+
   }
   private syncFormToModel(): void {
     if (!this.appointment || !this.appointmentForm) {
@@ -848,6 +850,7 @@ export class AppointmentFormComponent implements OnInit {
       this.syncFormToModel(); 
       this.submit.emit({ appointment: this.appointment, status: this.appointment.status, requestVia }); // Emit the data to the parent component
       this.showForm = false; // Close the form after submission
+      // this.router.navigate(['/appointments']);
       // console.log("status of appointment", this.appointment.status)
 
 

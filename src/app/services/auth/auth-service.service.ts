@@ -27,10 +27,13 @@ export class AuthServiceService {
   login(username: string, password: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/login`, { username, password }).pipe(
       tap((response: any) => {
+        console.log(response)
         const user = response.user;  // Use 'user' from the response
         // console.log('User in the login:', user);
         if (user) {
-          this.user = { username: user.username, role: user.role, id: user.userId }; // Save the user in the service
+          this.user = { username: user.username, role: user.role, id: user.userId}; // Save the user in the service
+          localStorage.setItem('loggedinTime', response.generatedTime);
+          localStorage.setItem('loggedinDate', response.generatedDate);  // Save the user in localStorage
           localStorage.setItem('username', user.username);
           localStorage.setItem('role', user.role);
           localStorage.setItem('userid',user.userId)

@@ -169,7 +169,8 @@ font-weight: 500;
 padding-left: 130px;
   }
   .delete{
-    margin-bottom: 10px;
+    margin-bottom: 0px;
+    margin-top: 7px;
     cursor: pointer;
   }
   /* General modal overlay styles */

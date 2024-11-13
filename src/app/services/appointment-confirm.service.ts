@@ -69,11 +69,18 @@ export class AppointmentConfirmService {
   // Method to add a confirmed appointment
   addConfirmedAppointment(appointment: Appointment): void {
     // console.log('appointment',appointment)
-    if (appointment.id != null) { // Ensure that the id is defined and not null
+    if (appointment.id !== null) { // Ensure that the id is defined and not null
       // Update appointment status to 'confirmed' in backend
+      
       appointment.status = 'confirmed'; // Update status
-      appointment.emailSent = true; // Update email sent status
+      if(appointment.email == null || appointment.email == ''){
+        appointment.emailSent = false; // Update email sent status
+        }
+        else{
+        appointment.emailSent = true; // Update email sent status
+        } // Update email sent status
       appointment.smsSent = true; // Update SMS sent status
+      console.log("confirm",appointment)
       this.updateAppointmentStatus(appointment);
     } else {
       console.error('Cannot confirm appointment: Appointment ID is missing.');
@@ -101,10 +108,15 @@ addNewAppointment(appointment: Appointment): void {
 
    // Method to add a canceled appointment
    addCancelledAppointment(appointment: Appointment): void {
-    if (appointment.id != null) { // Ensure that the id is defined and not null
+    if (appointment.id !== null) { // Ensure that the id is defined and not null
       // Update appointment status to 'confirmed' in backend
     appointment.status = 'cancelled'; // Update status
-    appointment.emailSent = true; // Update email sent status
+    if(appointment.email == null || appointment.email == ''){
+      appointment.emailSent = false; // Update email sent status
+      }
+      else{
+      appointment.emailSent = true; // Update email sent status
+      } // Update email sent status
     appointment.smsSent = true; // Update SMS sent status
     this.updateAppointmentStatus(appointment);
     } else {
@@ -112,10 +124,15 @@ addNewAppointment(appointment: Appointment): void {
     }
   }
   addCompletedAppointment(appointment: Appointment): void {
-    if (appointment.id != null) { // Ensure that the id is defined and not null
+    if (appointment.id !== null) { // Ensure that the id is defined and not null
       // Update appointment status to 'confirmed' in backend
     appointment.status = 'completed'; // Update status
+    if(appointment.email == null || appointment.email == ''){
+    appointment.emailSent = false; // Update email sent status
+    }
+    else{
     appointment.emailSent = true; // Update email sent status
+    }
     appointment.smsSent = true; // Update SMS sent status
     this.updateAppointmentStatus(appointment);
     } else {  
@@ -124,13 +141,14 @@ addNewAppointment(appointment: Appointment): void {
   }
    // Method to update appointment status
    private updateAppointmentStatus(appointment: Appointment): void {
+    console.log('Updating appointment status:', appointment);
     const userId = this.authService.getUserId();
     // const updateData = userId ? { status, userId, ...appointment } : { status };
     const updateData = {
       ...appointment,
       userId: userId ? userId : appointment.userId // Include userId if available
     };
-    this.http.put<Appointment>(`${this.apiUrl}/${appointment.id}`,updateData).subscribe(() => {
+    this.http.put<Appointment>(`${this.apiUrl}/${appointment!.id}`,updateData).subscribe(() => {
       this.fetchAppointments(); // Fetch appointments to update the list
     });
   }

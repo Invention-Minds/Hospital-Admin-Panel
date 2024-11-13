@@ -105,7 +105,7 @@ activeComponent: string = 'request'; // Default to showing the request component
   }
   closeForm() {
     this.showForm = false;
-    this.activeComponent = 'appointment'; // Reset to allow reopening
+    this.activeComponent = 'request'; // Reset to allow reopening
   }
 
     

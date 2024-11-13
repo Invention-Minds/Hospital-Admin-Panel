@@ -399,22 +399,50 @@ export class AppointmentConfirmComponent {
     // Method to download the filtered data as Excel
     downloadFilteredData(): void {
       if (this.filteredList && this.filteredList.length > 0) {
+        
+        // const selectedFields = this.filteredList.map((appointment: Appointment) => ({
 
-        const selectedFields = this.filteredList.map((appointment: Appointment) => ({
-          'Patient Name': appointment.patientName,
-          'Patient Phone Number': appointment.phoneNumber,
-          'Patient Email': appointment.email,
-          'Doctor Name': appointment.doctorName,
-          'Department': appointment.department,
-          'Appointment Date': appointment.date,
-          'Appointment Time': appointment.time,
-          'Appointment Created Time': appointment.created_at,
-          'Request Via': appointment.requestVia,
-          'SMS Sent': appointment.smsSent ? 'Yes' : 'No',
-          'Email Sent': appointment.emailSent ? 'Yes' : 'No',
-          'Status': appointment.status,
-          'Appointment Handled By': appointment.user!.username
-        }));
+
+        //   'Patient Name': appointment.patientName,
+        //   'Patient Phone Number': appointment.phoneNumber,
+        //   'Patient Email': appointment.email,
+        //   'Doctor Name': appointment.doctorName,
+        //   'Department': appointment.department,
+        //   'Appointment Date': appointment.date,
+        //   'Appointment Time': appointment.time,
+        //   'Appointment Created Time': appointment.created_at,
+        //   'Request Via': appointment.requestVia,
+        //   'SMS Sent': appointment.smsSent ? 'Yes' : 'No',
+        //   'Email Sent': appointment.emailSent ? 'Yes' : 'No',
+        //   'Status': appointment.status,
+        //   'Appointment Handled By': appointment.user!.username
+        // }));
+        const selectedFields = this.filteredList.map((appointment: Appointment) => {
+          if(appointment.created_at){
+          const createdAt = new Date(appointment?.created_at);
+          const createdDate = createdAt.toISOString().split('T')[0]; // Extract the date part in YYYY-MM-DD format
+          const createdTime = createdAt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); // Extract time in HH:mm (24-hour format)
+          
+          appointment.created_at = createdDate + ' ' + createdTime;
+          }
+          return {
+            'Patient Name': appointment.patientName,
+            'Patient Phone Number': appointment.phoneNumber,
+            'Patient Email': appointment.email,
+            'Doctor Name': appointment.doctorName,
+            'Department': appointment.department,
+            'Appointment Date': appointment.date,
+            'Appointment Time': appointment.time,
+            'Appointment Created Time': appointment.created_at,
+            'Request Via': appointment.requestVia,
+            'SMS Sent': appointment.smsSent ? 'Yes' : 'No',
+            'Email Sent': appointment.emailSent ? 'Yes' : 'No',
+            'Status': appointment.status,
+            'Appointment Handled By': appointment.user!.username,
+          };
+        
+        });
+        
         // Step 1: Convert the filtered data to a worksheet
         const worksheet = XLSX.utils.json_to_sheet(selectedFields);
         

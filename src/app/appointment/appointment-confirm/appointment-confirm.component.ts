@@ -521,8 +521,21 @@ export class AppointmentConfirmComponent {
       emailSent: true,
       requestVia: appointment.requestVia
     };
-
+    console.log('Cancelled appointment:', cancelled);
     this.appointmentService.addCancelledAppointment(cancelled);
+    this.doctorService.getCancelledSlots(appointment.doctorId, appointment.date, appointment.time).subscribe({
+      next: (response) => {
+        console.log('Cancelled slots:', response);
+        // const cancelledSlots = response;
+        // if (cancelledSlots.includes(appointment.time)) {
+        //   console.log('Slot already cancelled:', appointment.time);
+        //   return;
+        // }
+      },
+      error: (error) => {
+        console.error('Error fetching cancelled slots:', error);
+      }
+    });
     this.doctorService.getDoctorDetails(appointment.doctorId).subscribe({
       next: (response) =>{
         const doctorPhoneNumber = response?.phone_number;

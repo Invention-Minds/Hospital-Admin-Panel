@@ -4,6 +4,7 @@ import { app } from '../../../../server';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { stat } from 'node:fs';
 import * as XLSX from 'xlsx';
+import moment from 'moment-timezone';
 interface Appointment {
   id?: number;
   patientName: string;
@@ -323,10 +324,17 @@ export class AppointmentCancelComponent {
       const selectedFields = this.filteredList.map((appointment: Appointment) => {
         if(appointment.created_at){
         const createdAt = new Date(appointment?.created_at);
-        const createdDate = createdAt.toISOString().split('T')[0]; // Extract the date part in YYYY-MM-DD format
-        const createdTime = createdAt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); // Extract time in HH:mm (24-hour format)
+        const indianTime = moment.tz(createdAt, "America/New_York").tz("Asia/Kolkata");
+
+        // Store the date and time in two separate variables
+        const indianDate = indianTime.format('YYYY-MM-DD');
+        const indianTimeOnly = indianTime.format('HH:mm:ss');
+
+        // const createdDate = createdAt.toISOString().split('T')[0]; // Extract the date part in YYYY-MM-DD format
+        // const createdTime = createdAt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); // Extract time in HH:mm (24-hour format)
         
-        appointment.created_at = createdDate + ' ' + createdTime;
+        
+        appointment.created_at = indianDate + ' ' + indianTimeOnly;
         }
         return {
           'Patient Name': appointment.patientName,

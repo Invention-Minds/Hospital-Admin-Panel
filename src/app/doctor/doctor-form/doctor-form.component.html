@@ -276,7 +276,7 @@
     <div class="custom-form-field">
       <!-- Calendar Picker for Selecting a Date -->
       <label for="calendar" class="input-label">Select a Date*</label>
-      <p-calendar [(ngModel)]="selectedDate" (onSelect)="onDateSelect()" showIcon="true" name="calendar" appendTo="body"  placeholder="Select a date for unavailable slots"></p-calendar>
+      <p-calendar [(ngModel)]="selectedDate" (onSelect)="onDateSelect()" showIcon="true" name="calendar" appendTo="body" [minDate]="minDate" placeholder="Select a date for unavailable slots"></p-calendar>
     </div>
   </div>
 

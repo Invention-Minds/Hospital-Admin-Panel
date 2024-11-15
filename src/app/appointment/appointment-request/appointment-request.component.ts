@@ -26,6 +26,7 @@ interface Appointment {
   email: string;
   smsSent?: boolean;
   emailSent?: boolean;
+  messageSent?: boolean;
   requestVia?: string; // Optional property
   [key: string]: any;  // Add this line to allow indexing by string
   created_at?: string;
@@ -282,6 +283,7 @@ export class AppointmentRequestComponent implements OnInit {
         status: 'confirmed', // Update the status
         smsSent: true,
         emailSent: true,
+        messageSent: true,
         requestVia: requestVia         // Optionally add or modify properties as needed
       };
       // const confirmed = this.confirmedAppointments;
@@ -301,6 +303,7 @@ export class AppointmentRequestComponent implements OnInit {
         status: 'cancelled', // Update the status
         smsSent: true,
         emailSent: true,
+        messageSent: true,
         requestVia: requestVia        // Optionally add or modify properties as needed
       };
       // const confirmed = this.confirmedAppointments;
@@ -327,6 +330,15 @@ export class AppointmentRequestComponent implements OnInit {
             patientPhoneNumber: appointment?.phoneNumber,
             status: 'cancelled'
           }
+          this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
+            next: (response) => {
+              // console.log('SMS message sent successfully:', response);
+              this.messageService.add({ severity: 'success', summary: 'Success', detail: 'SMS message sent successfully!' });
+            },
+            error: (error) => {
+              console.error('Error sending SMS message:', error);
+            }
+          });
           this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
             next: (response) => {
               console.log('WhatsApp message sent successfully:', response);
@@ -417,6 +429,7 @@ export class AppointmentRequestComponent implements OnInit {
       status: 'cancelled',
       smsSent: true,
       emailSent: true,
+      messageSent: true,
       requestVia: 'Website'
     };
 
@@ -441,6 +454,15 @@ export class AppointmentRequestComponent implements OnInit {
           patientPhoneNumber: appointment?.phoneNumber,
           status: 'cancelled'
         }
+        this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
+          next: (response) => {
+            // console.log('SMS message sent successfully:', response);
+            this.messageService.add({ severity: 'success', summary: 'Success', detail: 'SMS message sent successfully!' });
+          },
+          error: (error) => {
+            console.error('Error sending SMS message:', error);
+          }
+        });
         this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
           next: (response) => {
             console.log('WhatsApp message sent successfully:', response);

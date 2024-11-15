@@ -20,6 +20,7 @@ interface Appointment {
   email: string;
   smsSent?: boolean;
   emailSent?: boolean;
+  messageSent?:boolean;
   requestVia?: string; // Optional property
   created_at?: string;
   checkedIn?:boolean;
@@ -363,8 +364,9 @@ export class AppointmentConfirmComponent {
         'Appointment Time': appointment.time,
         'Appointment Created Time': appointment.created_at,
         'Request Via': appointment.requestVia,
-        'SMS Sent': appointment.smsSent ? 'Yes' : 'No',
+        'Whatsapp Sent': appointment.smsSent ? 'Yes' : 'No',
         'Email Sent': appointment.emailSent ? 'Yes' : 'No',
+        'SMS Sent': appointment.messageSent ? 'Yes' : 'No',
         'Status': appointment.status,
         'Appointment Handled By': appointment.user!.username
       }));
@@ -444,8 +446,9 @@ export class AppointmentConfirmComponent {
             'Appointment Time': appointment.time,
             'Appointment Created Time': appointment.created_at,
             'Request Via': appointment.requestVia,
-            'SMS Sent': appointment.smsSent ? 'Yes' : 'No',
+            'Whatsapp Sent': appointment.smsSent ? 'Yes' : 'No',
             'Email Sent': appointment.emailSent ? 'Yes' : 'No',
+            'SMS Sent': appointment.messageSent ? 'Yes' : 'No',
             'Status': appointment.status,
             'Appointment Handled By': appointment.user!.username,
           };
@@ -556,6 +559,7 @@ export class AppointmentConfirmComponent {
       status: 'cancelled',
       smsSent: true,
       emailSent: true,
+      messageSent: true,
       requestVia: appointment.requestVia
     };
     // console.log('Cancelled appointment:', cancelled);
@@ -585,6 +589,15 @@ export class AppointmentConfirmComponent {
           patientPhoneNumber: appointment?.phoneNumber,
           status: 'cancelled'
         }
+        this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
+          next: (response) => {
+            // console.log('SMS message sent successfully:', response);
+            this.messageService.add({ severity: 'success', summary: 'Success', detail: 'SMS message sent successfully!' });
+          },
+          error: (error) => {
+            console.error('Error sending SMS message:', error);
+          }
+        });
         this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
           next: (response) => {
             // console.log('WhatsApp message sent successfully:', response);
@@ -630,6 +643,7 @@ export class AppointmentConfirmComponent {
         ...appointment,  // Copy all properties from the original appointment
         smsSent: true,
         emailSent: true,
+        messageSent: true,
         requestVia: appointment.requestVia, // Determine requestVia
     };
   
@@ -705,6 +719,15 @@ export class AppointmentConfirmComponent {
               patientPhoneNumber: appointment?.phoneNumber,
               status: 'cancelled'
             }
+            this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
+              next: (response) => {
+                // console.log('SMS message sent successfully:', response);
+                this.messageService.add({ severity: 'success', summary: 'Success', detail: 'SMS message sent successfully!' });
+              },
+              error: (error) => {
+                console.error('Error sending SMS message:', error);
+              }
+            });
             this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
               next: (response) => {
                 console.log('WhatsApp message sent successfully:', response);

@@ -26,6 +26,7 @@ interface Appointment {
   status: string;
   smsSent?: boolean;
   emailSent?: boolean;
+  messageSent?: boolean;
   doctorId: number;
   isrescheduled?: boolean;
 }
@@ -562,6 +563,7 @@ export class AppointmentFormComponent implements OnInit {
     this.appointment.prnNumber = parseInt(formValues.prnNumber, 10);
     this.appointment.emailSent = true;
     this.appointment.smsSent = true;
+    this.appointment.messageSent = true;
 
     // console.log("Updated Appointment:", this.appointment);
 }
@@ -580,6 +582,7 @@ export class AppointmentFormComponent implements OnInit {
       const newTime = this.appointmentForm.get('appointmentTime')?.value;
       this.appointment.emailSent = true;
       this.appointment.smsSent = true;
+      this.appointment.messageSent = true;
       if (
         this.appointment.date !== newDate ||
         this.appointment.time !== newTime
@@ -611,6 +614,7 @@ export class AppointmentFormComponent implements OnInit {
           email: this.appointmentForm.value.email,
           smsSent: true,
           emailSent: true,
+          messageSent: true,
           prnNumber: parseInt(this.appointmentForm.value.prnNumber),
         };
         this.appointment = appointmentDetails;
@@ -634,6 +638,7 @@ export class AppointmentFormComponent implements OnInit {
           email: this.appointmentForm.value.email,
           smsSent: true,
           emailSent: true,
+          messageSent: true,
           prnNumber: parseInt(this.appointmentForm.value.prnNumber),
         };
         this.appointment = appointmentDetails;
@@ -657,6 +662,15 @@ export class AppointmentFormComponent implements OnInit {
                 patientPhoneNumber: phoneNumber,
                 status: 'rescheduled'
               }
+              this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
+                next: (response) => {
+                  // console.log('SMS message sent successfully:', response);
+                  this.messageService.add({ severity: 'success', summary: 'Success', detail: 'SMS message sent successfully!' });
+                },
+                error: (error) => {
+                  console.error('Error sending SMS message:', error);
+                }
+              });
               // console.log('appointment details', appointmentDetails)
               this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
                 next: (response) => {
@@ -743,6 +757,7 @@ export class AppointmentFormComponent implements OnInit {
           email: this.appointmentForm.value.email,
           smsSent: true,
           emailSent: true,
+          messageSent: true,
           prnNumber: parseInt(this.appointmentForm.value.prnNumber),
         };
         this.appointment = appointmentDetails;
@@ -768,6 +783,15 @@ export class AppointmentFormComponent implements OnInit {
                 patientPhoneNumber: phoneNumber,
                 status: 'rescheduled'
               }
+              this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
+                next: (response) => {
+                  // console.log('SMS message sent successfully:', response);
+                  this.messageService.add({ severity: 'success', summary: 'Success', detail: 'SMS message sent successfully!' });
+                },
+                error: (error) => {
+                  console.error('Error sending SMS message:', error);
+                }
+              });
               // console.log('appointment details', appointmentDetails)
               this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
                 next: (response) => {
@@ -884,6 +908,15 @@ export class AppointmentFormComponent implements OnInit {
               patientPhoneNumber: phoneNumber,
               status: 'confirmed',
             }
+            this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
+              next: (response) => {
+                // console.log('SMS message sent successfully:', response);
+                this.messageService.add({ severity: 'success', summary: 'Success', detail: 'SMS message sent successfully!' });
+              },
+              error: (error) => {
+                console.error('Error sending SMS message:', error);
+              }
+            });
             // console.log('appointment details', appointmentDetails)
             this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
               next: (response) => {
@@ -1025,6 +1058,7 @@ export class AppointmentFormComponent implements OnInit {
           email: this.appointmentForm.value.email,
           smsSent: true,
           emailSent: true,
+          messageSent: true,
           prnNumber: parseInt(this.appointmentForm.value.prnNumber),
         };
         this.appointment = appointmentDetails;
@@ -1052,6 +1086,15 @@ export class AppointmentFormComponent implements OnInit {
                 patientPhoneNumber: this.appointment?.phoneNumber,
                 status: this.appointment?.status
               }
+              this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
+                next: (response) => {
+                  // console.log('SMS message sent successfully:', response);
+                  this.messageService.add({ severity: 'success', summary: 'Success', detail: 'SMS message sent successfully!' });
+                },
+                error: (error) => {
+                  console.error('Error sending SMS message:', error);
+                }
+              });
               this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
                 next: (response) => {
                   console.log('WhatsApp message sent successfully:', response);

@@ -15,6 +15,7 @@ interface Appointment {
   email: string;
   smsSent?:boolean;
   emailSent?:boolean;
+  messageSent?:boolean;
   requestVia?: string; // Optional property
   created_at?: string;
   user?: any;
@@ -273,8 +274,9 @@ export class AppointmentCompleteComponent {
           'Appointment Time': appointment.time,
           'Appointment Created Time': appointment.created_at,
           'Request Via': appointment.requestVia,
-          'SMS Sent': appointment.smsSent ? 'Yes' : 'No',
+          'Whatsapp Sent': appointment.smsSent ? 'Yes' : 'No',
           'Email Sent': appointment.emailSent ? 'Yes' : 'No',
+          'SMS Sent':appointment.messageSent ? 'Yes': 'No',
           'Status': appointment.status,
           'Appointment Handled By': appointment.user!.username,
         };
@@ -322,6 +324,7 @@ export class AppointmentCompleteComponent {
       status: 'completed',
       smsSent: true,
       emailSent: true,
+      messageSent:true,
       requestVia: appointment.requestVia
     };
     this.appointmentService.addCompletedAppointment(completed);

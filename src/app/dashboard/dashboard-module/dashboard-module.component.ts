@@ -20,6 +20,7 @@ interface Appointment {
   email: string;
   smsSent?: boolean;
   emailSent?: boolean;
+  messageSent?: boolean;
   requestVia?: string; // Optional property
   [key: string]: any;  // Add this line to allow indexing by string
   created_at?: string;

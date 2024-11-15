@@ -20,6 +20,7 @@ export interface Appointment {
   requestVia?: string; // Optional property
   smsSent?: boolean; // Optional property
   emailSent?: boolean; // Optional property
+  messageSent?:boolean;
   userId?: number; // Add userId to identify which user handled the appointment
   username?:string;
   user?: {
@@ -80,6 +81,7 @@ export class AppointmentConfirmService {
         appointment.emailSent = true; // Update email sent status
         } // Update email sent status
       appointment.smsSent = true; // Update SMS sent status
+      appointment.messageSent = true;
       // console.log("confirm",appointment)
       this.updateAppointmentStatus(appointment);
     } else {
@@ -118,6 +120,7 @@ addNewAppointment(appointment: Appointment): void {
       appointment.emailSent = true; // Update email sent status
       } // Update email sent status
     appointment.smsSent = true; // Update SMS sent status
+    appointment.messageSent = true;
     this.updateAppointmentStatus(appointment);
     } else {
       console.error('Cannot cancelled appointment: Appointment ID is missing.');
@@ -134,6 +137,7 @@ addNewAppointment(appointment: Appointment): void {
     appointment.emailSent = true; // Update email sent status
     }
     appointment.smsSent = true; // Update SMS sent status
+    appointment.messageSent = true;
     this.updateAppointmentStatus(appointment);
     } else {  
       console.error('Cannot completed appointment: Appointment ID is missing.');
@@ -270,6 +274,9 @@ getAppointmentsByRole(): Observable<Appointment[]> {
     // Method to send WhatsApp message
     sendWhatsAppMessage(data: any): Observable<any> {
       return this.http.post<any>(`${environment.apiUrl}/whatsapp/send`, data);
+    }
+    sendSmsMessage(data: any): Observable<any> {
+      return this.http.post<any>(`${environment.apiUrl}/sms/send-sms`, data);
     }
   // Method to get appointment by ID (if needed)
   getAppointmentById(appointmentId: number): Observable<any> {

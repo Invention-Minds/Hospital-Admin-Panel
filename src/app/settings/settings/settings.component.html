@@ -233,7 +233,7 @@
 
       <!-- Email Input -->
       <div class="input">
-        <input type="text" class="input-field" [(ngModel)]="username" placeholder="Username_admin@rash.com">
+        <input type="text" class="input-field" [(ngModel)]="username" placeholder="Username_admin@rashtrotthana" (ngModelChange)="validDelete()">
 
         <!-- Password Input -->
         <!-- <div class="password-container">
@@ -243,7 +243,7 @@
       </div>
 
       <!-- Save Button -->
-      <button class="delete-accounts-button" (click)="openDeleteDialog()"  [disabled]="buttonClicked">Delete Account</button>
+      <button class="delete-accounts-button" (click)="openDeleteDialog()"  [disabled]="buttonClicked || !isFormValid">Delete Account</button>
 
       <p-toast />
       <!-- Delete Account

@@ -346,7 +346,17 @@ extractFirstName(username: string): string {
   return ''; // Return empty string if no underscore found
 };
 
-
+validDelete(): void{
+  const usernameRegex = /^[a-zA-Z]+_(admin|subadmin|superadmin|doctor)@rashtrotthana$/;
+  this.isUserNameValid = usernameRegex.test(this.username);
+   // Update the form validity state
+   this.isFormValid = this.isUserNameValid;
+  
+   // If the form is not valid, show an appropriate error message
+   if (!this.isUserNameValid) {
+     this.usernameErrorMessageinReset = "Username must be in the format: name_role@rashtrotthana. The role must be 'admin', 'subadmin', 'superadmin', or 'doctor'.";
+   } 
+}
 
 deleteUser() {
   const token = localStorage.getItem('token');

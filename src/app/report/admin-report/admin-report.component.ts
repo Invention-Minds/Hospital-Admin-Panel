@@ -235,6 +235,7 @@ interface Appointment {
   email: string;
   smsSent?: boolean;
   emailSent?: boolean;
+  messageSent?:boolean;
   requestVia?: string; // Optional property
   created_at?: string;
   updated_at?: string;

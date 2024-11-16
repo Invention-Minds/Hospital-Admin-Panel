@@ -42,6 +42,7 @@ export class AppointmentRequestComponent implements OnInit {
   @Input() selectedDate: Date | null = null;
   @Input() selectedValue: string = '';
   @Input() selectedSearchOption: string = ''; 
+  @Input() selectedDateRange: Date[] | null = null;
   pendingAppointments: Appointment[] = [];
   activeAppointmentId: number | null | undefined = null;
   userId: any = 0;
@@ -63,6 +64,7 @@ export class AppointmentRequestComponent implements OnInit {
 
   ngOnInit(): void {
     this.fetchPendingAppointments();  // Fetch pending appointments on initialization
+    
   }
 
 
@@ -75,6 +77,7 @@ export class AppointmentRequestComponent implements OnInit {
         return dateB.getTime() - dateA.getTime();
       });
       this.filteredAppointments = [...this.pendingAppointments];
+      // this.filterAppointmentsByDate(new Date());
     });
   }
   // Dropdown options for filtering
@@ -208,16 +211,72 @@ export class AppointmentRequestComponent implements OnInit {
   ngOnChanges() {
     // Whenever the selected date changes, this will be triggered
     this.filterAppointment();
+    // if(this.selectedDateRange && this.selectedDateRange.length === 0){
+    //   this.filterAppointmentsByDate(new Date());
+    // }
   }
+   // Method to filter appointments by a specific date
+  //  filterAppointmentsByDate(selectedDate: Date) {
+  //   const formattedSelectedDate = this.formatDate(selectedDate);
+  //   console.log("pending",this.pendingAppointments)
+  //   this.filteredAppointments = this.pendingAppointments.filter((appointment) => {
+  //     const appointmentDate = appointment.date;
+  //     return appointmentDate === formattedSelectedDate;
+  //   });
+
+  //   this.currentPage = 1; // Reset to the first page when the filter changes
+  // }
+
+  // Method to handle date change (e.g., when the user selects a date from a date picker)
+  // onDateChange(newDate: Date) {
+  //   this.filterAppointmentsByDate(newDate);
+  // }
+
 
   // Method to filter appointments by the selected date
   filterAppointment() {
     let filteredList = [...this.pendingAppointments];
 
-    if (this.selectedDate) {
-      const formattedDate = this.formatDate(this.selectedDate);
-      // console.log('Formatted date:', formattedDate);
-      filteredList = filteredList.filter(appointment => appointment.date === formattedDate);
+    // if (this.selectedDate) {
+    //   const formattedDate = this.formatDate(this.selectedDate);
+    //   // console.log('Formatted date:', formattedDate);
+    //   filteredList = filteredList.filter(appointment => appointment.date === formattedDate);
+    // }
+    if (this.selectedDateRange && this.selectedDateRange.length === 2) {
+      const startDate = this.selectedDateRange[0];
+      const endDate = this.selectedDateRange[1] ? this.selectedDateRange[1] : startDate; // Use endDate if provided, otherwise use startDate
+  
+      if (startDate && endDate) {
+        if(startDate.getTime() !== endDate.getTime()) {
+        // Filtering appointments by the selected date range
+        // console.log('Start date:', startDate, 'End date:', endDate);
+        const normalizedEndDate = new Date(endDate);
+    normalizedEndDate.setHours(23, 59, 59, 999);  // Set to the last millisecond of the day
+
+        filteredList = filteredList.filter((appointment: Appointment) => {
+          const appointmentDate = new Date(appointment.date);  // Assuming 'date' is in string format like 'YYYY-MM-DD'
+          return appointmentDate >= startDate && appointmentDate <= normalizedEndDate;
+        });
+        // console.log('Filtered list:', this.filteredList);
+      }
+      else if (startDate.getTime() === endDate.getTime()) {
+        // console.log('Single date selected:');
+        const startDate = this.selectedDateRange[0];
+    
+        filteredList = filteredList.filter((appointment: Appointment) => {
+          const appointmentDate = new Date(appointment.date);
+          return appointmentDate.toDateString() === startDate.toDateString();  // Compare the date portion only
+        });
+        // console.log('Filtered list:', this.filteredList);
+      }
+    }
+    // else{
+    //   this.filteredAppointments = []
+    // }
+    }
+     else {
+      // If no valid range is selected, show all appointments
+      this.filteredAppointments = [...this.pendingAppointments];
     }
     if (this.selectedValue.trim() !== '') {
       // const searchLower = this.selectedValue.toLowerCase();
@@ -247,6 +306,9 @@ export class AppointmentRequestComponent implements OnInit {
             break;
           case 'doctorName':
             match = appointment.doctorName ? appointment.doctorName.toLowerCase().includes(searchLower) : false;
+            break;
+          case 'department':
+            match = appointment.department ? appointment.department.toLowerCase().includes(searchLower) : false;
             break;
           default:
             match = true;

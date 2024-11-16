@@ -4,6 +4,7 @@ import { Doctor } from '../../models/doctor.model';
 import { DoctorWithSlots } from '../../models/doctos_with_slots.model';
 import { ChangeDetectorRef } from '@angular/core';
 import { forkJoin } from 'rxjs';
+import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 
 interface Slot {
   time: string;
@@ -23,8 +24,11 @@ export class DoctorAvailabilityComponent {
   selectedCalendarView: string = 'calendar'; // Add this property
   filteredDoctors: DoctorWithSlots[] = [];
   searchQuery: string = '';
+  selectedDoctor: Doctor | null = null;
+  selectedSlot: any | null = null;
+  showForm: boolean = false;
 
-  constructor(private doctorService: DoctorServiceService, private cdr: ChangeDetectorRef) {}
+  constructor(private doctorService: DoctorServiceService, private cdr: ChangeDetectorRef, private appointmentService: AppointmentConfirmService) {}
 
   ngOnInit(): void {
     this.fetchDoctors();
@@ -132,6 +136,7 @@ fetchDoctors(): void {
 
         // If the doctor is not available on this day, mark as unavailable
         const isUnavailableDueToSchedule = !availableDay;
+        console.log(isUnavailableDueToSchedule)
 
         // Set an `isUnavailable` flag for the doctor based on unavailable date or default availability
         const isUnavailable = isUnavailableDay || isUnavailableDueToSchedule;
@@ -195,23 +200,44 @@ private getDayString(date: Date): keyof Doctor['availabilityDays'] {
     this.fetchDoctors();
   }
 
-  applySearchFilter(): void {
-    if (this.searchQuery.trim() === '') {
-      this.filteredDoctors = this.doctors;
-    } else {
-      this.filteredDoctors = this.doctors.filter(doctor =>
-        doctor.name.toLowerCase().includes(this.searchQuery.toLowerCase())
-      );
-      // console.log(this.filteredDoctors);
-    }
-  }
+// Define variables for the search queries
+departmentSearchQuery: string = '';
+doctorSearchQuery: string = '';
 
-  onSearchChange(): void {
-    this.applySearchFilter(); // Apply filter when search value changes
+applySearchFilter(): void {
+  if (this.departmentSearchQuery.trim() === '' && this.doctorSearchQuery.trim() === '') {
+    // If both search fields are empty, show all doctors
+    this.filteredDoctors = this.doctors;
+    console.log(this.doctors);
+  } else {
+    this.filteredDoctors = this.doctors.filter(doctor => {
+      const matchesDepartment = this.departmentSearchQuery.trim() === '' || doctor.departmentName?.toLowerCase().includes(this.departmentSearchQuery.toLowerCase());
+      const matchesDoctor = this.doctorSearchQuery.trim() === '' || doctor.name.toLowerCase().includes(this.doctorSearchQuery.toLowerCase());
+      return matchesDepartment && matchesDoctor; // Match both department and doctor name
+    });
+    // console.log(this.filteredDoctors);
   }
+}
 
-  // Function to generate slots based on doctor availability and slot duration
-// Function to generate slots based on doctor availability and slot duration
+onSearchChange(): void {
+  this.applySearchFilter(); // Apply filter when either search value changes
+}
+// onSlotClick(doctor: Doctor, slot: any): void {
+//   if (slot.status !== 'available') {
+//     return; // If slot is not available, do nothing
+//   }
+//   this.selectedDoctor = doctor;
+//   this.selectedSlot = slot;
+//   this.selectedDate;
+//   this.showForm = true;
+// }
+// closeForm(): void {
+//   // Close the appointment form
+//   this.showForm = false;
+//   this.selectedDoctor = null;
+//   this.selectedSlot = null;
+// }
+
 // Function to generate slots based on doctor availability and slot duration
 generateDoctorSlots(availableFrom: string, slotDuration: number, bookedSlots: string[], isUnavailableDay: boolean,unavailableSlots: string[], doctorAvailableUntil: string): Slot[] {
   // console.log('availableFrom',availableFrom)
@@ -219,18 +245,21 @@ generateDoctorSlots(availableFrom: string, slotDuration: number, bookedSlots: st
   const slots: Slot[] = [];
   const currentTimeInMinutes = new Date().getHours() * 60 + new Date().getMinutes();
     const doctorAvailableUntilInMinutes = this.stringToMinutes(doctorAvailableUntil);
+    
 
     // Check if the current time is past the doctor's available time
-    const isPastDoctorAvailableTime = currentTimeInMinutes >= doctorAvailableUntilInMinutes;
     const today = new Date();
-    const isPastDate = this.formatDate(this.selectedDate) < today.toLocaleDateString('en-Ca');
+    const isToday = today.toLocaleDateString() === this.selectedDate.toLocaleDateString(); 
+    const isPastDoctorAvailableTime = isToday && currentTimeInMinutes >= doctorAvailableUntilInMinutes;
+   const isPastDate = this.formatDate(this.selectedDate) < today.toLocaleDateString('en-Ca');
     // console.log('isPastDate',isPastDate,new Date(),isPastDoctorAvailableTime)
 
     // If the day is unavailable or the time has passed, mark all slots as unavailable
     if (isUnavailableDay || isPastDoctorAvailableTime || isPastDate) {
       // console.log(isUnavailableDay,isPastDoctorAvailableTime,isPastDate)
       // console.log(availableStart,availableEnd)
-      return this.generateUnavailableSlots(availableStart, availableEnd, slotDuration,bookedSlots,unavailableSlots,currentTimeInMinutes);
+      console.log(isUnavailableDay,isPastDoctorAvailableTime,isPastDate);
+      return this.generateUnavailableSlots(availableStart, availableEnd, slotDuration,bookedSlots,unavailableSlots,currentTimeInMinutes,isUnavailableDay);
     }
 
   // console.log('unavailableSlots',unavailableSlots)
@@ -240,18 +269,24 @@ generateDoctorSlots(availableFrom: string, slotDuration: number, bookedSlots: st
     const slotString = `${slotTime}-${nextSlotTime}`;
 
     let status: Slot['status'] = 'unavailable'; // Default to unavailable
+    
 
     // If the day is available, mark slots as either booked or available
     if (!isUnavailableDay) {
       if (unavailableSlots.includes(slotString)) {
         status = 'unavailable'; // Mark as unavailable if it is in unavailableSlots
+        console.log(status)
       } else if (bookedSlots.includes(slotString)) {
         status = 'booked'; // Mark as booked if it is in bookedSlots
-      } else {
+      }
+      else if (isToday && (current + slotDuration) <= currentTimeInMinutes) {
+        status = 'unavailable';
+      }
+      else {
         status = 'available'; // Otherwise, mark as available
       }
     }
-
+    
 
     slots.push({
       time: slotString,
@@ -286,7 +321,8 @@ generateDoctorSlots(availableFrom: string, slotDuration: number, bookedSlots: st
   }
    // Utility function to generate all slots as unavailable
    generateUnavailableSlots(availableStart: number, availableEnd: number, slotDuration: number, bookedSlots: string[],
-    unavailableSlots: string[], currentTimeInMinutes: number ): Slot[] {
+    unavailableSlots: string[], currentTimeInMinutes: number, isUnavailableDay: boolean ): Slot[] {
+      console.log("unavailableSlots")
     const slots: Slot[] = [];
     const today = new Date();
     const isToday = today.toLocaleDateString() === this.selectedDate.toLocaleDateString(); 
@@ -296,20 +332,33 @@ generateDoctorSlots(availableFrom: string, slotDuration: number, bookedSlots: st
       const slotTime = this.minutesToString(current);
       const nextSlotTime = this.minutesToString(current + slotDuration);
       const slotString = `${slotTime}-${nextSlotTime}`;
+      console.log("current",current,'currentTimeInMinutes',currentTimeInMinutes)
       // console.log('slotString',slotString,slotTime,nextSlotTime)
       let status: Slot['status'] = 'unavailable'; // Default to available
       
-      if (isToday) {
+      // if (isToday) {
+      //   // For today, check if the slot has passed based on the current time
+      //   if (current <= currentTimeInMinutes) {
+      //     status = 'unavailable'; // Mark as unavailable if past available time
+      //   }
+      // } else {
+      //   // For future days, slots are available
+      //   status = 'available';
+      // }
+      // if(isPastDate){
+      //   status = 'unavailable';
+      // }
+      if (isUnavailableDay || isPastDate) {
+        // If the day is marked as unavailable or the date is in the past
+        status = 'unavailable';
+      } else if (isToday) {
         // For today, check if the slot has passed based on the current time
         if (current <= currentTimeInMinutes) {
           status = 'unavailable'; // Mark as unavailable if past available time
-        }
+        } 
       } else {
-        // For future days, slots are available
+        // For future days that are available
         status = 'available';
-      }
-      if(isPastDate){
-        status = 'unavailable';
       }
     // Check if the slot should be unavailable (only available slots)
      if (bookedSlots.includes(slotString)) {

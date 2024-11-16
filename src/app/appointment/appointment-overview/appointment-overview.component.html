@@ -103,7 +103,7 @@
       </div>
       
       <div class="component-section">
-        <app-appointment-request *ngIf="activeComponent === 'request'" [selectedDate]="selectedDate" [selectedSearchOption]="selectedSearchOption"  [selectedValue]="searchValue"></app-appointment-request>
+        <app-appointment-request *ngIf="activeComponent === 'request'" [selectedDateRange]="selectedDateRange" [selectedSearchOption]="selectedSearchOption"  [selectedValue]="searchValue"></app-appointment-request>
         <app-appointment-confirm *ngIf="activeComponent === 'confirmed'" [selectedSearchOption]="selectedSearchOption" [selectedDateRange]="selectedDateRange" [selectedValue]="searchValue" #appointmentConfirmComponent></app-appointment-confirm>
         <app-appointment-cancel *ngIf="activeComponent === 'cancelled'" [selectedDate]="selectedDate" [selectedSearchOption]="selectedSearchOption" [selectedDateRange]="selectedDateRange" [selectedValue]="searchValue" #appointmentCancelComponent></app-appointment-cancel>
         <app-appointment-complete *ngIf="activeComponent === 'completed'"  [selectedSearchOption]="selectedSearchOption" [selectedDateRange]="selectedDateRange" [selectedValue]="searchValue" #appointmentCompleteComponent></app-appointment-complete>

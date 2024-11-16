@@ -5,6 +5,7 @@ import { map } from 'rxjs/operators';
 import { AuthServiceService } from './auth/auth-service.service';
 import { environment } from '../../environment/environment.prod';
 import { tap } from 'rxjs/operators';
+import { Doctor } from '../models/doctor.model';
 
 export interface Appointment {
   id?: number;
@@ -142,6 +143,13 @@ addNewAppointment(appointment: Appointment): void {
     } else {  
       console.error('Cannot completed appointment: Appointment ID is missing.');
     }
+  }
+  public selectedAppointmentSource = new BehaviorSubject<{ doctor: Doctor, slot: any } | null>(null);
+  selectedAppointment$ = this.selectedAppointmentSource.asObservable();
+
+  selectSlot(doctor: Doctor, slot: any): void {
+    console.log('Selected slot:', doctor, slot);
+    this.selectedAppointmentSource.next({ doctor, slot });
   }
    // Method to update appointment status
    private updateAppointmentStatus(appointment: Appointment): void {

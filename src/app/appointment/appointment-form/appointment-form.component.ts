@@ -9,6 +9,9 @@ import { ChangeDetectorRef } from '@angular/core';
 import { AuthServiceService } from '../../services/auth/auth-service.service';
 import { response } from 'express';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 
 interface Appointment {
@@ -41,6 +44,7 @@ interface Appointment {
 export class AppointmentFormComponent implements OnInit {
   showForm: boolean = true;
   appointmentForm!: FormGroup;
+  private unsubscribe$ = new Subject<void>();
   showAvailabilityMessage: boolean = false;
   availabilityMessage: string = '';
   availableSlots: string[] = [];
@@ -55,6 +59,10 @@ export class AppointmentFormComponent implements OnInit {
   doctorUnavailableMessage: string = '';
   unavailableDates: string[] = [];
   minDate: string = '';
+  @Input() doctorAvailability: Doctor | null = null;
+  @Input() slot!: any;
+  @Input() date!:any;
+  private subscription!: Subscription;
 
 
 
@@ -74,6 +82,9 @@ export class AppointmentFormComponent implements OnInit {
     this.loadDoctors();
 
 
+ 
+
+
     // this.loadBookedSlots(); // Load booked slots from localStorage
     this.appointmentForm = this.fb.group({
       firstName: ['', [Validators.required, Validators.pattern(/^[a-zA-Z\s]*$/)]],
@@ -90,7 +101,7 @@ export class AppointmentFormComponent implements OnInit {
     if (this.appointment?.phoneNumber.startsWith('91')) {
       this.appointment.phoneNumber = this.appointment.phoneNumber.substring(2);
     }
-
+   
 
     if (this.appointment) {
       // console.log("existing")
@@ -165,12 +176,36 @@ export class AppointmentFormComponent implements OnInit {
       })
       // this.availableSlots = this.appointmentForm.get('appointmentTime')?.value;
       // console.log('available',this.availableSlots)
-    } else {
+    } 
+    else if(this.doctorAvailability && this.slot){
+      console.log(this.doctorAvailability,this.date)
+      this.date = this.formatDate(this.date)
+      console.log(this.slot.time)
+      this.checkDoctorAvailabilityAndLoadSlots(this.doctorAvailability.id, this.date)
+      console.log(typeof(String(this.slot.time)))
+        this.appointmentForm.patchValue({
+          doctorName: this.doctorAvailability!.name,
+          appointmentDate: this.date,
+          appointmentTime: this.slot.time,
+        });
+        console.log(this.availableSlots)
+        // const .match = this.availableSlots.includes(this.slot.time);
+        // console.log(match)
+        // this.appointmentForm.get('appointmentTime')?.setValue(this.slot.time);
+      
+    }
+    else {
       // New appointment - load available slots when the doctor or date changes.
       this.setupNewAppointmentFormListeners();
     }
 
   }
+  ngOnDestroy(): void {
+    this.unsubscribe$.next();
+    this.unsubscribe$.complete();
+  }
+
+
 
   private loadPatientDetails(patientId: number): void {
     this.appointmentService.getPatientById(patientId).subscribe({
@@ -192,7 +227,11 @@ export class AppointmentFormComponent implements OnInit {
     this.doctorService.getDoctors().subscribe(
       (doctors) => {
         this.doctors = doctors;
-        this.filteredDoctors = doctors
+        this.filteredDoctors = this.doctors.slice().sort((a, b) => {
+          const nameA = a.name.toLowerCase().replace(/^dr\.\s*/, ''); // Remove "Dr." prefix and normalize case
+          const nameB = b.name.toLowerCase().replace(/^dr\.\s*/, ''); // Remove "Dr." prefix and normalize case
+          return nameA.localeCompare(nameB); // Perform the comparison
+        });
       },
       (error) => {
         console.error('Error loading doctors:', error);
@@ -208,28 +247,36 @@ export class AppointmentFormComponent implements OnInit {
 
   onDoctorNameInput(): void {
     const doctorNameInput = this.appointmentForm.get('doctorName')?.value.toLowerCase();
-    this.filteredDoctors = this.doctors.filter(doctor =>
-      doctor.name.toLowerCase().startsWith(doctorNameInput)
-    );
+    this.filteredDoctors = this.doctors.slice().sort((a, b) => {
+      const nameA = a.name.toLowerCase().replace(/^dr\.\s*/, ''); // Remove "Dr." prefix and normalize case
+      const nameB = b.name.toLowerCase().replace(/^dr\.\s*/, ''); // Remove "Dr." prefix and normalize case
+      return nameA.localeCompare(nameB); // Perform the comparison
+    });
+    this.filteredDoctors = this.doctors.filter(doctor =>{
+      // doctor.name.toLowerCase().startsWith(doctorNameInput)
+      const normalizedDoctorName = doctor.name.toLowerCase().replace(/^dr\.\s*/, ''); // Remove "Dr." prefix
+      return normalizedDoctorName.startsWith(doctorNameInput);
+    
+  });
 
     // If the input is empty or there are no matches, hide the suggestions
     this.showDoctorSuggestions = this.filteredDoctors.length > 0 && doctorNameInput.length > 0;
   }
 
-  onDoctorSelect(event: Event): void {
+  onDoctorSelect(doctor: Doctor): void {
 
-    // this.appointmentForm.get('doctorName')?.setValue(doctor.name);
-    // this.showDoctorSuggestions = false;  // Hide dropdown after selecting
-    const selectElement = event.target as HTMLSelectElement | null;
+    this.appointmentForm.get('doctorName')?.setValue(doctor.name);
+    this.showDoctorSuggestions = false;  // Hide dropdown after selecting
+    // const selectElement = event.target as HTMLSelectElement | null;
 
-    if (selectElement && selectElement.value) {
-      const doctorId = parseInt(selectElement.value, 10); // Convert the value to an integer
+    // if (selectElement && selectElement.value) {
+    //   const doctorId = parseInt(selectElement.value, 10); // Convert the value to an integer
 
-      const selectedDoctor = this.doctors.find(doctor => doctor.id === doctorId);
-      if (selectedDoctor) {
-        this.appointmentForm.get('doctorName')?.setValue(selectedDoctor.name);
-      }
-    }
+    //   const selectedDoctor = this.doctors.find(doctor => doctor.id === doctorId);
+    //   if (selectedDoctor) {
+    //     this.appointmentForm.get('doctorName')?.setValue(selectedDoctor.name);
+    //   }
+    // }
 
   }
   private setupNewAppointmentFormListeners() {
@@ -490,6 +537,7 @@ export class AppointmentFormComponent implements OnInit {
       phoneNumber = phoneNumber.substring(2);
 
     }
+    console.log(typeof(appointment.time))
     this.appointmentForm.patchValue({
       firstName: appointment.patientName.split(' ')[0],
       lastName: appointment.patientName.split(' ')[1],

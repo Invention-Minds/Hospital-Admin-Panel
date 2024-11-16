@@ -19,6 +19,7 @@ export class AppointmentOverviewComponent implements AfterViewInit {
   { label: 'Patient Name', value: 'patientName' },
   { label: 'Phone Number', value: 'phoneNumber' },
   { label: 'Doctor Name', value: 'doctorName' },
+  { label: 'Department', value: 'department' },
 ];
 @ViewChild('appointmentConfirmComponent') appointmentConfirmComponent?: AppointmentConfirmComponent;
 @ViewChild('appointmentCompleteComponent') appointmentCompleteComponent?: AppointmentCompleteComponent;
@@ -112,6 +113,7 @@ activeComponent: string = 'request'; // Default to showing the request component
   
   refresh(){
     this.selectedDateRange = [];
+
   }
   
   convertDateToISO(dateString: string): string {

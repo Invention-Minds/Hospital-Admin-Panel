@@ -8,7 +8,8 @@
         <button (click)="nextDay()" class="next-button">Next &gt;</button>
       </div>
       <div class="navigation-right">
-        <input type="text" [(ngModel)]="searchQuery" (input)="onSearchChange()" placeholder="Search Doctor" class="search-box" />
+        <input type="text" [(ngModel)]="departmentSearchQuery" (input)="onSearchChange()" placeholder="Search Department" class="search-box" />
+        <input type="text" [(ngModel)]="doctorSearchQuery" (input)="onSearchChange()" placeholder="Search Doctor" class="search-box" />
         <div class="calendar-dropdown">
           <!-- <input type="date" [(ngModel)]="selectedDate" (change)="onDateChange($event)" class="calendar-input" /> -->
           <p-calendar 
@@ -56,10 +57,18 @@
                'slot-booked': slot.status === 'booked',
                'slot-unavailable': slot.status === 'unavailable'
              }">
+             <!-- (click)="onSlotClick(doctor, slot)"> -->
           {{ slot.time }}
         </div>
       </div>
     </div>
-  
+    <!-- Appointment Form Component -->
+    <!-- <app-appointment-form
+    *ngIf="showForm"
+    [doctorAvailability]="selectedDoctor"
+    [slot]="selectedSlot"
+    [date]="selectedDate"
+    (close)="closeForm()">
+  </app-appointment-form> -->
   </div>
   

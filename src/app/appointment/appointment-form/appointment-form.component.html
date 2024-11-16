@@ -57,19 +57,19 @@
         <!-- Doctor Name -->
         <div class="form-group">
           <label>Doctor Name:</label>
-          <!-- <input type="text" placeholder="Dr. Atmaram" formControlName="doctorName" (input)="onDoctorNameInput()" (focus)="showDoctorSuggestions = true" />
+          <input type="text" placeholder="Dr. Atmaram" formControlName="doctorName" (input)="onDoctorNameInput()" (focus)="showDoctorSuggestions = true" />
           <ul class="doctor-suggestions" *ngIf="showDoctorSuggestions && filteredDoctors.length > 0">
             <li *ngFor="let doctor of filteredDoctors" (click)="onDoctorSelect(doctor)">
               {{ doctor.name }}
             </li>
-          </ul> -->
-          <select  class="select doctor" formControlName="doctorName" (focus)="loadDoctors()" (change)="onDoctorSelect($event)">
+          </ul>
+          <!-- <select  class="select doctor" formControlName="doctorName" (focus)="loadDoctors()" (change)="onDoctorSelect($event)">
             <option *ngIf="filteredDoctors.length === 0" value="">No doctors available</option>
             <option value="" selected>Select a doctor</option>
             <option *ngFor="let doctor of filteredDoctors" [value]="doctor.name">
               {{ doctor.name }}
             </option>
-          </select>
+          </select> -->
           <div class="errors" *ngIf="appointmentForm.get('doctorName')?.invalid && (appointmentForm.get('doctorName')?.touched || appointmentForm.get('doctorName')?.dirty)">
             <small *ngIf="appointmentForm.get('doctorName')?.errors?.['required']">Doctor Name is required</small>
             <small *ngIf="appointmentForm.get('doctorName')?.errors?.['pattern']">Doctor Name can only contain letters, spaces, and dots</small>
@@ -114,8 +114,8 @@
             <label class="radio">Request Via:</label>
             <div class="radio-group">
               <label><input type="radio" formControlName="requestVia" value="Website" /> Website</label>
-              <label><input type="radio" formControlName="requestVia" value="Call" /> Call</label>
               <label><input type="radio" formControlName="requestVia" value="Walk-In" /> Walk-In</label>
+              <label><input type="radio" formControlName="requestVia" value="Call" /> Call</label>
             </div>
           </div>
 

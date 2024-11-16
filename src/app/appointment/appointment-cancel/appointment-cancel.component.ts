@@ -68,9 +68,28 @@ export class AppointmentCancelComponent {
         return dateB.getTime() - dateA.getTime();
       });
       this.filteredAppointments = [...this.cancelledAppointments];
-
+      this.filterAppointmentsByDate(new Date());
     });
   }
+   // Method to filter appointments by a specific date
+   filterAppointmentsByDate(selectedDate: Date) {
+    const formattedSelectedDate = this.formatDate(selectedDate);
+
+    this.filteredAppointments = this.cancelledAppointments.filter((appointment) => {
+      const appointmentDate = appointment.date;
+      return appointmentDate >= formattedSelectedDate;
+    });
+    if (this.selectedValue.trim() !== '') {
+      this.filterAppointment();
+    }
+    this.currentPage = 1; // Reset to the first page when the filter changes
+  }
+
+  // Method to handle date change (e.g., when the user selects a date from a date picker)
+  onDateChange(newDate: Date) {
+    this.filterAppointmentsByDate(newDate);
+  }
+
   currentPage = 1;
   itemsPerPage = 10;
   sortColumn: keyof Appointment | undefined = undefined;  // No sorting initially
@@ -162,6 +181,9 @@ export class AppointmentCancelComponent {
   ngOnChanges() {
     // Whenever the selected date changes, this will be triggered
     this.filterAppointment();
+    if(this.selectedDateRange && this.selectedDateRange.length === 0){
+      this.filterAppointmentsByDate(new Date());
+    }
   }
   
   // Method to filter appointments by the selected date
@@ -258,18 +280,11 @@ export class AppointmentCancelComponent {
     }
     if (this.selectedValue.trim() !== '') {
       const searchLower = this.selectedValue.toLowerCase();
-      // filteredList = this.filteredAppointments.filter(cancelledAppointments =>
-      //   completedAppointments.patientName.toLowerCase().includes(searchLower) ||
-      //   completedAppointments.phoneNumber.toLowerCase().includes(searchLower)
+
 
       // );
       this.filteredList = this.filteredAppointments.filter((appointment) => {
-        // console.log('Selected search option:', this.selectedSearchOption);
-        // console.log('Selected value:', this.selectedValue);
-       
-        // console.log('Search lower:', searchLower);
-        // console.log('Appointment:', appointment);
-        // console.log('Filtered list:', this.filteredList);
+
       
         let match = false;
 
@@ -285,6 +300,9 @@ export class AppointmentCancelComponent {
           case 'doctorName':
             match = appointment.doctorName ? appointment.doctorName.toLowerCase().includes(searchLower) : false;
             break;
+          case 'department':
+            match = appointment.department ? appointment.department.toLowerCase().includes(searchLower) : false;
+            break;
           default:
             match = true;
         }
@@ -292,6 +310,7 @@ export class AppointmentCancelComponent {
 
       return match;
     });
+    console.log('Filtered list:', this.filteredList);
   
 
     }
@@ -300,6 +319,7 @@ export class AppointmentCancelComponent {
       this.filteredAppointments = [...this.cancelledAppointments];
     }
     this.filteredAppointments = this.filteredList;
+    console.log('Filtered appointments:', this.filteredAppointments);
     this.currentPage = 1;
   }
   downloadFilteredData(): void {

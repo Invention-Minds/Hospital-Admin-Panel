@@ -85,6 +85,7 @@ export class AppointmentConfirmComponent {
       });
       // console.log("confirmedAppointments",this.confirmedAppointments);
       this.filteredAppointments = [...this.confirmedAppointments];
+      this.filterAppointmentsByDate(new Date());
       // this.filteredAppointments = this.confirmedAppointments.filter(appointment => !appointment!.completed);
 
     });
@@ -171,107 +172,32 @@ export class AppointmentConfirmComponent {
   ngOnChanges(changes: SimpleChanges) {
     // Whenever the selected date changes, this will be triggered
     this.filterAppointment();
-    // if (changes['selectedDateRange']) {
-    //   console.log('Selected date range:', this.selectedDateRange);
-    //   this.filterAppointment();
-    //   this.cdRef.detectChanges();  // Manually trigger change detection
-    // }
+    if(this.selectedDateRange && this.selectedDateRange.length === 0){
+      this.filterAppointmentsByDate(new Date());
+    }
+    
+  }
+ 
+   // Method to filter appointments by a specific date
+   filterAppointmentsByDate(selectedDate: Date) {
+    const formattedSelectedDate = this.formatDate(selectedDate);
+
+    this.filteredAppointments = this.confirmedAppointments.filter((appointment) => {
+      const appointmentDate = appointment.date;
+      return appointmentDate >= formattedSelectedDate;
+    });
+    if (this.selectedValue.trim() !== '') {
+      this.filterAppointment();
+    }
+    this.currentPage = 1; // Reset to the first page when the filter changes
+  }
+  
+  // Method to handle date change (e.g., when the user selects a date from a date picker)
+  onDateChange(newDate: Date) {
+    this.filterAppointmentsByDate(newDate);
   }
 
-  // Method to filter appointments by the selected date
-  // filterAppointment() {
-  //   this.filteredList = [...this.confirmedAppointments];
 
-  //   // if (this.selectedDateRange) {
-  //   //   // const formattedDate = this.formatDate(this.selectedDateRange);
-  //   //   // this.filteredList = this.filteredList.filter(confirmedAppointments => confirmedAppointments.date === formattedDate);
-  //   //   this.filteredList = this.confirmedAppointments.filter(
-  //   //     (appointment) => appointment.date === formattedDate
-  //   //   );
-  //   // }
-  //   console.log('Selected date range:', this.selectedDateRange);
-  //   if (this.selectedDateRange && this.selectedDateRange.length === 2) {
-  //     const startDate = this.selectedDateRange[0];
-  //     const endDate = this.selectedDateRange[1] ? this.selectedDateRange[1] : startDate; // If endDate is null, use startDate
-  //     console.log('Start date:', startDate, 'End date:', endDate);
-  //     console.log(this.selectedDateRange)
-  //     if (startDate && endDate) {
-  //       console.log('Start date:', startDate, 'End date:', endDate);
-  //       if (startDate.getTime() === endDate.getTime()) {
-  //         console.log('Single date selected:', startDate);
-  //         // Handle the case where a single day is selected (start and end dates are the same)
-  //         this.filteredList = this.filteredList.filter((confirmedAppointments: Appointment) => {
-  //           const appointmentDate = new Date(confirmedAppointments.date);
-  //           return appointmentDate >= startDate && appointmentDate <= endDate;
-           
-  //         });
-  //       } else {
-  //         // Handle the case where a date range is selected
-  //         this.filteredList = this.filteredList.filter((confirmedAppointments: Appointment) => {
-  //           const appointmentDate = new Date(confirmedAppointments.date);
-  //           return appointmentDate.toDateString() === startDate.toDateString();
-  //         });
-  //       }
-  //       console.log('Appointment Date:', this.filteredList);
-  //     } else {
-  //       // If either startDate or endDate is null, set filteredAppointments to an empty array
-  //       this.filteredAppointments = [];
-  //     }
-  //   } else {
-  //     // If no valid range is selected, show all appointments
-  //     this.filteredAppointments = [...this.confirmedAppointments];
-  //   }
-  //   if (this.selectedValue.trim() !== '') {
-  //     const searchLower = this.selectedValue.toLowerCase();
-  //     this.filteredList = this.filteredAppointments.filter((appointment) => {
-  //       console.log('Selected search option:', this.selectedSearchOption);
-  //       console.log('Selected value:', this.selectedValue);
-       
-  //       console.log('Search lower:', searchLower);
-  //       console.log('Appointment:', appointment);
-  //       console.log('Filtered list:', this.filteredList);
-      
-  //       let match = false;
-
-  //       switch (this.selectedSearchOption) {
-  //         case 'patientName':
-  //           console.log('Patient Name:', appointment.patientName.toLowerCase());
-  //           match = appointment.patientName ? appointment.patientName.toLowerCase().includes(searchLower) : false;
-  //           console.log('Match:', match);
-  //           break;
-  //         case 'phoneNumber':
-  //           match = appointment.phoneNumber ? appointment.phoneNumber.toLowerCase().includes(searchLower) : false;
-  //           break;
-  //         case 'doctorName':
-  //           match = appointment.doctorName ? appointment.doctorName.toLowerCase().includes(searchLower) : false;
-  //           break;
-  //         default:
-  //           match = true;
-  //       }
-  
-
-  //     return match;
-  //   });
-  
-      
-
-  //   }
-  //   // else {
-  //   //   // If no date is selected, show all appointments
-  //   //   this.filteredAppointments = [...this.confirmedAppointments];
-  //   //   // console.log('Confirmed appointments:', this.confirmedAppointments);
-  //   //   // this.filteredAppointments = this.confirmedAppointments.filter(appointment => !appointment!.completed);
-  
-  //   // }
-  //   this.filteredAppointments = this.filteredList;
-  //   this.currentPage = 1;
-  // }
-  // ngOnChanges(changes: SimpleChanges) {
-  //   if (changes.selectedDateRange) {
-  //     this.filterAppointment();
-  //     this.cdRef.detectChanges();  // Manually trigger change detection
-  //   }
-  // }
   filterAppointment() {
     // If there's no date range or value to filter, return the unfiltered appointments
     this.filteredList = [...this.confirmedAppointments];
@@ -333,6 +259,9 @@ export class AppointmentConfirmComponent {
             break;
           case 'doctorName':
             match = appointment.doctorName ? appointment.doctorName.toLowerCase().includes(searchLower) : false;
+            break;
+          case 'department':
+            match = appointment.department ? appointment.department.toLowerCase().includes(searchLower) : false;
             break;
           default:
             match = true; // No filtering

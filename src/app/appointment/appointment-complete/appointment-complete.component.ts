@@ -1,4 +1,4 @@
-import { Component,Input } from '@angular/core';
+import { Component,Input, OnChanges } from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import * as XLSX from 'xlsx';
 import moment from 'moment-timezone';
@@ -60,12 +60,34 @@ export class AppointmentCompleteComponent {
         return dateB.getTime() - dateA.getTime();
       });
       this.filteredAppointments = [...this.completedAppointments];
+      this.filterAppointmentsByDate(new Date());
     });
   
     // Fetch appointments from backend to initialize the data
     this.appointmentService.fetchAppointments();
     // });
   }
+   // Method to filter appointments by a specific date
+   filterAppointmentsByDate(selectedDate: Date) {
+    const formattedSelectedDate = this.formatDate(selectedDate);
+
+    this.filteredAppointments = this.completedAppointments.filter((appointment) => {
+      const appointmentDate = appointment.date;
+      return appointmentDate === formattedSelectedDate;
+    });
+    if (this.selectedValue.trim() !== '') {
+      this.filterAppointment();
+    }
+
+    this.currentPage = 1; // Reset to the first page when the filter changes
+  }
+
+  // Method to handle date change (e.g., when the user selects a date from a date picker)
+  onDateChange(newDate: Date) {
+    this.filterAppointmentsByDate(newDate);
+    console.log('Selected date:', this.selectedDateRange);
+  }
+
   sortBy(column: keyof Appointment) {
     if (this.sortColumn === column) {
       this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc'; // Toggle direction
@@ -139,10 +161,7 @@ export class AppointmentCompleteComponent {
   }
   filteredAppointments: Appointment[] = [...this.completedAppointments];
 
-  ngOnChanges() {
-    // Whenever the selected date changes, this will be triggered
-    this.filterAppointment();
-  }
+
   
   // Method to filter appointments by the selected date
   filterAppointment() {
@@ -192,15 +211,16 @@ export class AppointmentCompleteComponent {
 
       // );
       this.filteredList = this.filteredAppointments.filter((appointment) => {
-        // console.log('Selected search option:', this.selectedSearchOption);
-        // console.log('Selected value:', this.selectedValue);
+        console.log('Selected search option:', this.selectedSearchOption);
+        console.log('Selected value:', this.selectedValue);
        
         // console.log('Search lower:', searchLower);
         // console.log('Appointment:', appointment);
         // console.log('Filtered list:', this.filteredList);
+
       
         let match = false;
-
+        console.log(appointment)
         switch (this.selectedSearchOption) {
           case 'patientName':
             // console.log('Patient Name:', appointment.patientName.toLowerCase());
@@ -213,6 +233,9 @@ export class AppointmentCompleteComponent {
           case 'doctorName':
             match = appointment.doctorName ? appointment.doctorName.toLowerCase().includes(searchLower) : false;
             break;
+          case 'department':
+            match = appointment.department ? appointment.department.toLowerCase().includes(searchLower) : false;
+            break;
           default:
             match = true;
         }
@@ -220,6 +243,7 @@ export class AppointmentCompleteComponent {
 
       return match;
     });
+    console.log(this.filteredList)
   
 
     }
@@ -229,6 +253,12 @@ export class AppointmentCompleteComponent {
     }
     this.filteredAppointments = this.filteredList;
     this.currentPage = 1;
+  }
+  ngOnChanges(){
+    this.filterAppointment();
+    if(this.selectedDateRange && this.selectedDateRange.length === 0){
+      this.filterAppointmentsByDate(new Date());
+    }
   }
   downloadFilteredData(): void {
     // console.log('Downloading completed appointments data...');

@@ -15,7 +15,7 @@
   display: flex;
   justify-content: center;
   background: #002d72; /* Navy blue background */
-  border-radius: 25px;
+  border-radius: 8px;
   padding: 10px;
   margin: 20px 0;
 }
@@ -32,7 +32,7 @@
   text-align: center;
   cursor: pointer;
   transition: background 0.3s, color 0.3s;
-  border-radius: 25px;
+  border-radius: 8px;
 }
 
 .tab:not(.active-tab):hover {
@@ -95,10 +95,9 @@
 }
 .input-field::placeholder{
     color: #7B7B7B;
+font-size: 18px;
+font-weight: 400;
 font-family: Kanit;
-font-size: 20px;
-font-style: normal;
-font-weight: 500;
 line-height: normal;
 }
 
@@ -346,10 +345,6 @@ line-height: normal;
     font-weight: 400;
     font-family: Kanit;
     color: #7B7B7B;
-    font-family: Kanit;
-    font-size: 20px;
-    font-style: normal;
-    font-weight: 500;
     line-height: normal;
     appearance: none; /* For modern browsers */
     -webkit-appearance: none; /* For Safari */
@@ -365,6 +360,7 @@ line-height: normal;
 
 .styled-select option {
   color: #000; /* Regular color for options */
+  font-size: 16px;
 }
 
 .styled-select:focus {

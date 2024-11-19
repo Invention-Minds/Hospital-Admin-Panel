@@ -71,6 +71,9 @@ this.audio.load()
 
 
   }
+  gotoProfile(){
+    this.router.navigate(['/settings']);
+  }
   ngOnDestroy(): void {
     if (this.eventSource) {
       this.eventSource.close();

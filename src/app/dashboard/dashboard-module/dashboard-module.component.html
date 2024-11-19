@@ -34,7 +34,7 @@
       </svg>
       <span *ngIf="hasNewAppointment" class="badge">!</span> 
     </div>
-    <div class="profile-info">
+    <div class="profile-info" (click)="gotoProfile()">
       <img src="admin-icons/admin-icon.jpg" alt="Profile Picture" class="profile-pic" />
       <div class="profile-text">
         <span class="username">{{ username.split('_')[0] }}</span>

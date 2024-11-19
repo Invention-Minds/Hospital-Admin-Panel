@@ -303,6 +303,7 @@ closeForm(): void {
   this.showForm = false;
   this.selectedDoctor = null;
   this.selectedSlot = null;
+  this.fetchDoctors()
 }
 onStatusChange(event: { slotTime: string; status: 'complete' | 'available' | 'booked' | 'unavailable' }): void {
   const doctor = this.doctors.find((d: any) => d.id === this.selectedDoctor!.id); // Find the doctor

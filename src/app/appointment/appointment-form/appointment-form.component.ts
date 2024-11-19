@@ -198,7 +198,10 @@ export class AppointmentFormComponent implements OnInit {
           appointmentTime: this.slot.time,
         });
         
-        console.log(this.availableSlots)
+        // console.log(this.availableSlots)
+        // if(this.currentAppointment!.status === "completed"){
+
+        // }
         // const .match = this.availableSlots.includes(this.slot.time);
         // console.log(match)
         // this.appointmentForm.get('appointmentTime')?.setValue(this.slot.time);
@@ -748,6 +751,7 @@ saveToLocalStorage(): void {
     }
     console.log(this.appointmentForm.value)
     if(this.appointmentForm.value.appointmentStatus === 'Cancel'){
+      
       this.close.emit();
       const selectedDoctor = this.getDoctorByName(this.appointmentForm.value.doctorName);
       const doctorId = selectedDoctor!.id;
@@ -845,14 +849,20 @@ saveToLocalStorage(): void {
     else if(this.appointmentForm.value.appointmentStatus === 'Complete'){ 
       this.completeAppointment(this.currentAppointment!);
        // Emit the status change
-       this.statusChange.emit({
-        slotTime: this.currentAppointment!.time, // Assuming the slot time is available here
-        status: 'complete'
-      });
+      //  this.statusChange.emit({
+      //   slotTime: this.currentAppointment!.time, // Assuming the slot time is available here
+      //   status: 'complete'
+      // });
       this.close.emit();
       
     }
     else{
+      if(this.currentAppointment){
+         this.statusChange.emit({
+        slotTime: this.currentAppointment!.time, // Assuming the slot time is available here
+        status: 'booked'
+      });
+      }
       const currentStatus = this.appointment?.status || '';
       const newStatus = this.appointmentForm.get('appointmentStatus')?.value;
       // this.appointment.prnNumber=parseInt(this.appointmentForm.get('prnNumber')?.value);

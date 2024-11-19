@@ -334,8 +334,8 @@ export class AppointmentRequestComponent implements OnInit {
     }
 
     if (status === 'Confirm') {
-      if (requestVia === 'Website') {
-        requestVia = 'Website';
+      if (requestVia === 'Online') {
+        requestVia = 'Online';
       }
       else {
         requestVia = 'Call';
@@ -353,8 +353,8 @@ export class AppointmentRequestComponent implements OnInit {
       this.appointmentService.addConfirmedAppointment(confirmedAppointment);
       this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Appointment confirmed successfully!' });
     } else if (status === 'Cancel') {
-      if (requestVia === 'Website') {
-        requestVia = 'Website';
+      if (requestVia === 'Online') {
+        requestVia = 'Online';
       }
       else {
         requestVia = 'Call';
@@ -492,7 +492,7 @@ export class AppointmentRequestComponent implements OnInit {
       smsSent: true,
       emailSent: true,
       messageSent: true,
-      requestVia: 'Website'
+      requestVia: 'Online'
     };
 
     this.appointmentService.addCancelledAppointment(cancel);

@@ -112,6 +112,6 @@ export class DoctorOverviewComponent implements OnInit {
 
   // Cancel the form action
   onCancelForm(): void {
-    this.activeComponent = ''; // Hide the form component on cancel
+    this.activeComponent = 'details'; // Hide the form component on cancel
   }
 }

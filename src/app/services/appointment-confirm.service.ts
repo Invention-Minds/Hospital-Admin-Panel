@@ -257,6 +257,15 @@ getAppointmentsByRole(): Observable<Appointment[]> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
     return this.http.put(`${this.apiUrl}/${appointmentId}/unlock`, {}, { headers });
   }
+ // Method to get appointments by slot
+ getAppointmentsBySlot(doctorId: number, date: string, time: string): Observable<any> {
+  const params = new HttpParams()
+    .set('doctorId', doctorId.toString())
+    .set('date', date)
+    .set('time', time);
+
+  return this.http.get<any>(`${this.apiUrl}/slotsbyappointments`, { params });
+}
   getHeaders(): HttpHeaders {
     const token = localStorage.getItem('token');
     return new HttpHeaders({

@@ -2,7 +2,7 @@
   <div class="appointment-modal">
     <!-- Header Section -->
     <form [formGroup]="appointmentForm">
-      <div class="appointment-header">
+      <div class="appointment-header" [ngStyle]="{ 'background-color': isBookedSlot ? '#00914C' : '#0E2970' }">
         <h3>Appointment Form</h3>
         <button class="close-button" (click)="closeForm($event)">&#10006;</button>
       </div>
@@ -10,37 +10,45 @@
       <!-- Form Fields -->
       <div class="form-content">
         <!-- PRN Number -->
-<div class="form-group">
-  <label>PRN:</label>
-  <input type="text" placeholder="Enter PRN Number" formControlName="prnNumber" class="prn" />
-  <div class="errors" *ngIf="appointmentForm.get('prnNumber')?.invalid && (appointmentForm.get('prnNumber')?.touched || appointmentForm.get('prnNumber')?.dirty)">
-    <!-- <small *ngIf="appointmentForm.get('prnNumber')?.errors?.['required']">PRN Number is required</small> -->
-  </div>
-</div>
+        <div class="form-group">
+          <label>PRN:</label>
+          <input type="text" placeholder="Enter PRN Number" formControlName="prnNumber" class="prn" />
+          <div class="errors"
+            *ngIf="appointmentForm.get('prnNumber')?.invalid && (appointmentForm.get('prnNumber')?.touched || appointmentForm.get('prnNumber')?.dirty)">
+            <!-- <small *ngIf="appointmentForm.get('prnNumber')?.errors?.['required']">PRN Number is required</small> -->
+          </div>
+        </div>
 
         <!-- Patient Name -->
         <div class="form-group">
           <label>Patient Name:</label>
           <input type="text" placeholder="First Name" formControlName="firstName" />
-          <div class="errors" *ngIf="appointmentForm.get('firstName')?.invalid && (appointmentForm.get('firstName')?.touched || appointmentForm.get('firstName')?.dirty)">
+          <div class="errors"
+            *ngIf="appointmentForm.get('firstName')?.invalid && (appointmentForm.get('firstName')?.touched || appointmentForm.get('firstName')?.dirty)">
             <small *ngIf="appointmentForm.get('firstName')?.errors?.['required']">First Name is required</small>
-            <small *ngIf="appointmentForm.get('firstName')?.errors?.['pattern']">First Name can only contain letters and spaces</small>
+            <small *ngIf="appointmentForm.get('firstName')?.errors?.['pattern']">First Name can only contain letters and
+              spaces</small>
           </div>
-          
-          <input type="text" placeholder="Last Name" formControlName="lastName"  class="last-name"/>
-          <div class="errors" *ngIf="appointmentForm.get('lastName')?.invalid && (appointmentForm.get('lastName')?.touched || appointmentForm.get('lastName')?.dirty)">
+
+          <input type="text" placeholder="Last Name" formControlName="lastName" class="last-name" />
+          <div class="errors"
+            *ngIf="appointmentForm.get('lastName')?.invalid && (appointmentForm.get('lastName')?.touched || appointmentForm.get('lastName')?.dirty)">
             <small *ngIf="appointmentForm.get('lastName')?.errors?.['required']">Last Name is required</small>
-            <small *ngIf="appointmentForm.get('lastName')?.errors?.['pattern']">Last Name can only contain letters, spaces, and dots</small>
+            <small *ngIf="appointmentForm.get('lastName')?.errors?.['pattern']">Last Name can only contain letters,
+              spaces, and dots</small>
           </div>
         </div>
 
         <!-- Phone Number -->
         <div class="form-group">
           <label>Phone Number:</label>
-          <input class="phone" type="text" placeholder="Enter the 10 digit phone number" maxlength="10" formControlName="phoneNumber" />
-          <div class="errors" *ngIf="appointmentForm.get('phoneNumber')?.invalid && (appointmentForm.get('phoneNumber')?.touched || appointmentForm.get('phoneNumber')?.dirty)">
+          <input class="phone" type="text" placeholder="Enter the 10 digit phone number" maxlength="10"
+            formControlName="phoneNumber" />
+          <div class="errors"
+            *ngIf="appointmentForm.get('phoneNumber')?.invalid && (appointmentForm.get('phoneNumber')?.touched || appointmentForm.get('phoneNumber')?.dirty)">
             <small *ngIf="appointmentForm.get('phoneNumber')?.errors?.['required']">Phone Number is required</small>
-            <small *ngIf="appointmentForm.get('phoneNumber')?.errors?.['pattern']">Phone Number must be 10 digits </small>
+            <small *ngIf="appointmentForm.get('phoneNumber')?.errors?.['pattern']">Phone Number must be 10 digits
+            </small>
           </div>
         </div>
 
@@ -48,7 +56,8 @@
         <div class="form-group">
           <label>Email Id:</label>
           <input class="email" type="email" placeholder="abcd@gmail.com" formControlName="email" />
-          <div class="errors" *ngIf="appointmentForm.get('email')?.invalid && (appointmentForm.get('email')?.touched || appointmentForm.get('email')?.dirty)">
+          <div class="errors"
+            *ngIf="appointmentForm.get('email')?.invalid && (appointmentForm.get('email')?.touched || appointmentForm.get('email')?.dirty)">
             <small *ngIf="appointmentForm.get('email')?.errors?.['required']">Email is required</small>
             <small *ngIf="appointmentForm.get('email')?.errors?.['email']">Invalid email address</small>
           </div>
@@ -57,7 +66,8 @@
         <!-- Doctor Name -->
         <div class="form-group">
           <label>Doctor Name:</label>
-          <input type="text" placeholder="Dr. Atmaram" formControlName="doctorName" (input)="onDoctorNameInput()" (focus)="showDoctorSuggestions = true" />
+          <input type="text" placeholder="Dr. Atmaram" formControlName="doctorName" (input)="onDoctorNameInput()"
+            (focus)="showDoctorSuggestions = true" />
           <ul class="doctor-suggestions" *ngIf="showDoctorSuggestions && filteredDoctors.length > 0">
             <li *ngFor="let doctor of filteredDoctors" (click)="onDoctorSelect(doctor)">
               {{ doctor.name }}
@@ -70,9 +80,11 @@
               {{ doctor.name }}
             </option>
           </select> -->
-          <div class="errors" *ngIf="appointmentForm.get('doctorName')?.invalid && (appointmentForm.get('doctorName')?.touched || appointmentForm.get('doctorName')?.dirty)">
+          <div class="errors"
+            *ngIf="appointmentForm.get('doctorName')?.invalid && (appointmentForm.get('doctorName')?.touched || appointmentForm.get('doctorName')?.dirty)">
             <small *ngIf="appointmentForm.get('doctorName')?.errors?.['required']">Doctor Name is required</small>
-            <small *ngIf="appointmentForm.get('doctorName')?.errors?.['pattern']">Doctor Name can only contain letters, spaces, and dots</small>
+            <small *ngIf="appointmentForm.get('doctorName')?.errors?.['pattern']">Doctor Name can only contain letters,
+              spaces, and dots</small>
           </div>
         </div>
 
@@ -81,7 +93,8 @@
           <div class="form-group time">
             <label>Appointment Date:</label>
             <input class="email" type="date" formControlName="appointmentDate" [min]="minDate" />
-            <div class="errors" *ngIf="appointmentForm.get('appointmentDate')?.invalid && appointmentForm.get('appointmentDate')?.touched">
+            <div class="errors"
+              *ngIf="appointmentForm.get('appointmentDate')?.invalid && appointmentForm.get('appointmentDate')?.touched">
               <small>Appointment Date is required</small>
             </div>
           </div>
@@ -95,7 +108,8 @@
                 {{ slot }}
               </option>
             </select>
-            <div class="errors" *ngIf="appointmentForm.get('appointmentTime')?.invalid && appointmentForm.get('appointmentTime')?.touched">
+            <div class="errors"
+              *ngIf="appointmentForm.get('appointmentTime')?.invalid && appointmentForm.get('appointmentTime')?.touched">
               <small>Appointment Time is required</small>
             </div>
           </div>
@@ -113,25 +127,52 @@
           <div class="form-group form-group-2">
             <label class="radio">Request Via:</label>
             <div class="radio-group">
-              <label><input type="radio" formControlName="requestVia" value="Website" /> Website</label>
+              <label><input type="radio" formControlName="requestVia" value="Online" /> Online</label>
               <label><input type="radio" formControlName="requestVia" value="Walk-In" /> Walk-In</label>
               <label><input type="radio" formControlName="requestVia" value="Call" /> Call</label>
             </div>
           </div>
 
           <!-- Appointment Status -->
-          <div class="form-group form-group-2">
+          <!-- <div class="form-group form-group-2">
+            <label class="radio">Appointment:</label>
+            <div class="radio-group">
+              <label><input type="radio" formControlName="appointmentStatus" value="Confirm" /> Confirm</label>
+              <label><input type="radio" formControlName="appointmentStatus" value="Cancel" /> Cancel</label>
+            </div>
+          </div> -->
+          <!-- Appointment Status -->
+          <div class="form-group form-group-2" *ngIf="!isBookedSlot">
             <label class="radio">Appointment:</label>
             <div class="radio-group">
               <label><input type="radio" formControlName="appointmentStatus" value="Confirm" /> Confirm</label>
               <label><input type="radio" formControlName="appointmentStatus" value="Cancel" /> Cancel</label>
             </div>
           </div>
+
+          <!-- For Booked Slot - Complete or Cancel -->
+          <div class="form-group form-group-2" *ngIf="isBookedSlot">
+            <label class="radio">Appointment:</label>
+            <div class="radio-group">
+              <label><input type="radio" formControlName="appointmentStatus" value="Complete" /> Complete</label>
+              <label><input type="radio" formControlName="appointmentStatus" value="Cancel" /> Cancel</label>
+            </div>
+          </div>
+
+          <!-- Buttons -->
+          <!-- <div class="button-group">
+  <button *ngIf="!isBookedSlot" class="btn-primary" [disabled]="!appointmentForm.valid" (click)="confirm()">Book Appointment</button>
+  <button *ngIf="isBookedSlot" class="btn-primary" [disabled]="!appointmentForm.valid" (click)="confirm()">Update Appointment</button>
+</div> -->
+
         </div>
 
         <!-- Buttons -->
         <div class="button-group">
-          <button class="btn-primary" [disabled]="!appointmentForm.valid" (click)="confirm()">Book Appointment</button>
+          <button *ngIf="!isBookedSlot" class="btn-primary" [disabled]="!appointmentForm.valid" (click)="confirm()">Book
+            Appointment</button>
+          <button *ngIf="isBookedSlot" class="btn-primary" [disabled]="!appointmentForm.valid"
+            (click)="confirm()">Update Appointment</button>
         </div>
       </div>
     </form>

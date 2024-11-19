@@ -139,17 +139,28 @@ closeDeleteDialog(): void {
             fri: false,
             sat: false,
           };
+          let isAvailableToday = false;
           // Map availability to availabilityDays
           doctor.availability?.forEach((avail) => {
             doctor.availabilityDays[avail.day] = true;
+            // console.log('avail.day', avail.day);
+            // console.log(avail.day === todayDay, 'in if');
+            
             if (avail.day === todayDay) {
               doctor.availableFrom = avail.availableFrom;
               doctor.slotDuration = avail.slotDuration;
+              isAvailableToday = true; // Mark doctor as available today
             }
-            else{
-              doctor.availableFrom = 'N/A';
-            }
+            // else{
+            //   doctor.availableFrom = 'N/A';
+             
+            // }
           });
+          if (!isAvailableToday) {
+            doctor.availableFrom = 'N/A';
+           // Clear slotDuration if not available
+          }
+           
           // console.log('Doctors available days', doctor.availabilityDays);
         });
 

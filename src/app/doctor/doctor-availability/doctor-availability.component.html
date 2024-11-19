@@ -3,13 +3,14 @@
     <!-- Navigation Header -->
     <div class="navigation-header">
       <div class="navigation-left">
+      
+        <input type="text" [(ngModel)]="departmentSearchQuery" (input)="onSearchChange()" placeholder="Search Department" class="search-box" />
+        <input type="text" [(ngModel)]="doctorSearchQuery" (input)="onSearchChange()" placeholder="Search Doctor" class="search-box" />
+      </div>
+      <div class="navigation-right">
         <button (click)="prevDay()" class="prev-button">&lt; Prev</button>
         <div class="date-display">{{ selectedDate | date: 'EEEE, dd MMM, yyyy' }}</div>
         <button (click)="nextDay()" class="next-button">Next &gt;</button>
-      </div>
-      <div class="navigation-right">
-        <input type="text" [(ngModel)]="departmentSearchQuery" (input)="onSearchChange()" placeholder="Search Department" class="search-box" />
-        <input type="text" [(ngModel)]="doctorSearchQuery" (input)="onSearchChange()" placeholder="Search Doctor" class="search-box" />
         <div class="calendar-dropdown">
           <!-- <input type="date" [(ngModel)]="selectedDate" (change)="onDateChange($event)" class="calendar-input" /> -->
           <p-calendar 
@@ -46,29 +47,76 @@
           <p class="doctor-department">{{ doctor.departmentName }}</p>
           <p class="doctor-availability-time">Availability:</p>
           <p class="doctor-availability-time">{{ doctor.availableFrom }}</p>
+          <button class="unavailable-button" (click)="openUnavailableModal(doctor)" [disabled]="!isTodayOrTomorrow(selectedDate)">Unavailable Slots</button>
         </div>
       </div>
       <div class="slots-wrapper">
         <div *ngFor="let slot of doctor.slots"
              class="slot-box"
-             [pTooltip]="slot.status"
+           
              [ngClass]="{
                'slot-available': slot.status === 'available',
                'slot-booked': slot.status === 'booked',
-               'slot-unavailable': slot.status === 'unavailable'
-             }">
-             <!-- (click)="onSlotClick(doctor, slot)"> -->
+               'slot-unavailable': slot.status === 'unavailable',
+               'complete': currentAppointment?.status === 'completed' && currentAppointment?.slot === slot.time,
+               'unavailale-slot-by-user': doctor.unavailableSlots!.includes(slot.time)
+             }"
+           (click)="onSlotClick(doctor,slot)" >
           {{ slot.time }}
         </div>
       </div>
+
+
+      
     </div>
+    <div class="modal-overlay" *ngIf="isSlotDialogOpen">
+      <div class="modal">
+        <div class="modal-content">
+        
+         <div class="heading-calendar"> 
+          <h2>Select Unavailable Slots for Dr. {{ selectedDoctor?.name }}</h2>
+          <p-calendar 
+          [(ngModel)]="selectedDate"
+          [minDate]="todayforUnavialable"
+          [maxDate]="tomorrow"
+          [showIcon]="false"
+          (ngModelChange)="onDateSelectionChange()"
+          [showButtonBar]="true"
+          placeholder="Select Date"
+        ></p-calendar></div>
+          
+          <div *ngIf="generatedSlots.length === 0" class="no-slots-message">
+            No available slots for this day.
+          </div>
+    
+          <!-- Otherwise show the list of slots -->
+          <div *ngIf="generatedSlots.length > 0" class="slots-grid">
+            <label *ngFor="let slot of generatedSlots" class="slot-label">
+              <input type="checkbox" [checked]="unavailableSlots.includes(slot.time)" 
+                     (change)="onSlotSelectionChange($event, slot.time)" />
+              {{ slot.time }}
+            </label>
+          </div>
+          <div class="update-button-unavailable">
+            <button class="update" (click)="updateUnavailableSlots()">Update</button>
+            <button (click)="closeSlotDialog()" class="mark-available-button">Close</button>
+          </div>
+         
+        </div>
+      </div>
+    </div>
+
     <!-- Appointment Form Component -->
-    <!-- <app-appointment-form
+    <app-appointment-form
     *ngIf="showForm"
     [doctorAvailability]="selectedDoctor"
     [slot]="selectedSlot"
     [date]="selectedDate"
-    (close)="closeForm()">
-  </app-appointment-form> -->
+    (close)="closeForm()"
+    [isBookedSlot]="isBookedSlot"
+    [currentAppointment]="currentAppointment" 
+    (statusChange)="onStatusChange($event)">
+  </app-appointment-form>
+
   </div>
   

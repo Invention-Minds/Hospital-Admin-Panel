@@ -11,7 +11,7 @@
         </th>
         <th>Phone Number</th>
         <th>Doctor Name</th>
-        <th>Therapy</th>
+        <th>Department</th>
         <th (click)="sortBy('date')">
           Date
           <span *ngIf="sortColumn === 'date' && sortDirection === 'asc'">&#9650;</span>
@@ -57,7 +57,7 @@
           <span class="status-badge cancelled">{{ appointment.status }}</span>
         </td>
         <td>
-          <button class="btn-action" (click)="openAppointmentForm(appointment)"  pTooltip="Confirm"  tooltipPosition="top">
+          <button class="btn-action" (click)="openAppointmentForm(appointment)"  pTooltip="Reschedule" tooltipPosition="top">
             <img src="icons/book.png" alt="Confirm">
           </button>
         </td>

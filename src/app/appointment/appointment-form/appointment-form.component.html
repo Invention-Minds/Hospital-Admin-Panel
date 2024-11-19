@@ -171,7 +171,7 @@
         <div class="button-group">
           <button *ngIf="!isBookedSlot" class="btn-primary" [disabled]="!appointmentForm.valid" (click)="confirm()">Book
             Appointment</button>
-          <button *ngIf="isBookedSlot" class="btn-primary" [disabled]="!appointmentForm.valid"
+          <button *ngIf="isBookedSlot" class="btn-primary" [disabled]="!appointmentForm.valid || currentAppointment?.status === 'Complete'"
             (click)="confirm()">Update Appointment</button>
         </div>
       </div>

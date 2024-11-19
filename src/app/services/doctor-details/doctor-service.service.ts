@@ -48,10 +48,19 @@ export class DoctorServiceService {
   getDepartments(): Observable<Department[]> {
     return this.http.get<Department[]>(`${this.apiUrl}/departments`);
   }
-    getBookedSlots(doctorId: number, date: string): Observable<string[]> {
+    getBookedSlots(doctorId: number, date: string): Observable<{ time: string; complete: boolean }[]> {
       const bookedSlotsUrl = `${this.apiUrl}/doctors/booked-slots?doctorId=${doctorId}&date=${date}`;
-      return this.http.get<string[]>(bookedSlotsUrl);
+      return this.http.get<{ time: string; complete: boolean }[]>(bookedSlotsUrl);
     }
+     // Method to mark a booked slot as complete
+  markSlotAsComplete(doctorId: number, date: string, time: string): Observable<any> {
+    const markCompleteUrl = `${this.apiUrl}/doctors/mark-complete`;
+    
+
+    const body = { doctorId, date, time };
+
+    return this.http.post<any>(markCompleteUrl, body);
+  }
     getCancelledSlots(doctorId: number, date: string, time: string): Observable<any> {
       const bookingData = { doctorId, date, time };
       return this.http.post(`${environment.apiUrl}/doctors/cancel-booked-slot`, bookingData);

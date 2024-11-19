@@ -98,7 +98,8 @@ export class TotalOverviewComponent implements OnInit {
               const bookedSlots = bookedSlotsList[index];
 
               // Determine if there are any available slots left
-              const availableSlots = generatedSlots.filter(slot => !bookedSlots.includes(slot));
+              const nonCompleteBookedSlots = bookedSlots.filter(slot => !slot.complete).map(slot => slot.time);
+              const availableSlots = generatedSlots.filter(slot => !nonCompleteBookedSlots.includes(slot));
 
               // Step 5: Final check for availability based on generated slots
               return {

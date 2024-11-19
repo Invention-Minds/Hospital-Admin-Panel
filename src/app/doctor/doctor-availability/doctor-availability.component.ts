@@ -8,7 +8,7 @@ import { AppointmentConfirmService } from '../../services/appointment-confirm.se
 
 interface Slot {
   time: string;
-  status: 'available' | 'booked' | 'unavailable' | 'complete';
+  status: 'available' | 'booked' | 'unavailable' | 'complete' | 'blocked';
 }
 
 @Component({
@@ -34,6 +34,8 @@ export class DoctorAvailabilityComponent {
   generatedSlots: Slot[] = [];
   isSlotDialogOpen: boolean = false;
   unavailableSlots: string[] = [];
+  slotComplete:boolean = false;
+  isUpdateButtonDisabled: boolean = false;
 
 
 
@@ -172,7 +174,7 @@ fetchDoctors(): void {
         return {
           ...doctor,
           isUnavailable,
-          slots: this.generateDoctorSlots(availableFrom, slotDuration, bookedSlots, isUnavailable, availableFrom.split('-')[1]),
+          slots: this.generateDoctorSlots(availableFrom, slotDuration, bookedSlots, isUnavailable,formattedUnavailableSlots, availableFrom.split('-')[1]),
           unavailableSlots: formattedUnavailableSlots
         };
       });
@@ -255,7 +257,15 @@ onSearchChange(): void {
   this.applySearchFilter(); // Apply filter when either search value changes
 }
 onSlotClick(doctor: Doctor, slot: any): void {
-  if (slot.status === 'booked') {
+  console.log(doctor.unavailableSlots,"unavailableSlots while click")
+  if (doctor.unavailableSlots!.includes(slot.time)) {
+    console.log('unavailableSlots', doctor.unavailableSlots);
+    slot.status = 'blocked'
+    this.showForm = false; // Ensure form is not shown
+    return; // Stop further execution
+  }
+  if (slot.status === 'booked' || slot.status === "complete") {
+    console.log('booked slot',slot)
     this.isBookedSlot = true;
     
     
@@ -266,6 +276,9 @@ onSlotClick(doctor: Doctor, slot: any): void {
         this.selectedSlot = slot;
         this.showForm = true;
         this.currentAppointment = appointment; // Store the current appointment to pass to the form
+        if(this.currentAppointment.status === 'complete' && this.currentAppointment.time === slot.time){
+          this.slotComplete = true;
+        }
         console.log('appointment',this.currentAppointment)
       });
   } else if (slot.status === 'available') {
@@ -275,6 +288,15 @@ onSlotClick(doctor: Doctor, slot: any): void {
     this.currentAppointment = null;
     this.showForm = true;
   }
+
+  // else if(doctor.unavailableSlots!.includes(slot.time) &&){
+  //   console.log('unavailableSlots',doctor.unavailableSlots)
+  //   this.isBookedSlot = false;
+  //   this.selectedDoctor = doctor;
+  //   this.selectedSlot = slot;
+  //   this.currentAppointment = null;
+  //   this.showForm = false;
+  // }
 }
 closeForm(): void {
   // Close the appointment form
@@ -313,6 +335,57 @@ onStatusChange(event: { slotTime: string; status: 'complete' | 'available' | 'bo
 //   }
 
 // }
+onDateChangeInModal(newDate: Date): void {
+  this.selectedDate = newDate;
+
+  if (this.selectedDoctor) {
+    this.fetchUnavailableSlots(); // Re-fetch the unavailable slots based on the new date
+  }
+}
+private fetchUnavailableSlots(): void {
+  if (this.selectedDoctor && this.selectedDoctor.id && this.selectedDate) {
+    const formattedDate = this.formatDate(this.selectedDate);
+
+    this.doctorService.getUnavailableSlots(this.selectedDoctor.id).subscribe(
+      (slots: { [date: string]: string[] }) => {
+        this.unavailableSlots = slots[formattedDate] || []; // Get unavailable slots for the specific date
+        console.log('unavailableSlots', this.unavailableSlots);
+        const doctorWithSlots: DoctorWithSlots = {
+          id: this.selectedDoctor!.id,
+          name: this.selectedDoctor!.name || '',
+          qualification: this.selectedDoctor!.qualification || '',
+          departmentId: this.selectedDoctor!.departmentId || 0,
+          departmentName: this.selectedDoctor!.departmentName || '',
+          email:this.selectedDoctor?.email || '',
+          phone_number: this.selectedDoctor!.phone_number || '',
+          availability: this.selectedDoctor!.availability || [],
+          availabilityDays: this.selectedDoctor!.availabilityDays || {
+            sun: false,
+            mon: false,
+            tue: false,
+            wed: false,
+            thu: false,
+            fri: false,
+            sat: false,
+          },
+          availableFrom: this.selectedDoctor!.availableFrom || '',
+          slotDuration: this.selectedDoctor!.slotDuration || 0,
+          unavailableSlots: this.selectedDoctor!.unavailableSlots || [],
+          slots: [] // Set the initial slots as an empty array
+        };
+      
+        // Generate slots based on current availability and update checkboxes accordingly
+        const allSlots = this.generateSlotsForDoctor(doctorWithSlots);
+        this.generatedSlots = allSlots.filter(slot => {
+          return this.unavailableSlots.includes(slot.time) || slot.status === 'available';
+        });
+      },
+      error => {
+        console.error('Error fetching unavailable slots:', error);
+      }
+    );
+  }
+}
 openUnavailableModal(doctor: DoctorWithSlots): void {
   const today = new Date();
   const tomorrow = new Date();
@@ -381,6 +454,7 @@ onSlotSelectionChange(event: Event, slotTime: string): void {
 }
 
 updateUnavailableSlots(): void {
+  this.isUpdateButtonDisabled = true;
   if (this.selectedDoctor?.id) {
       const date = this.formatDate(this.selectedDate);
 
@@ -392,9 +466,11 @@ updateUnavailableSlots(): void {
                   // Close the dialog after saving
                   this.fetchDoctors();
                   this.closeSlotDialog();
+                  this.isUpdateButtonDisabled = false;
               },
               error => {
                   console.error('Error adding unavailable slots:', error);
+                  this.isUpdateButtonDisabled = false;
               }
           );
   }
@@ -420,7 +496,7 @@ generateSlotsForDoctor(doctor: DoctorWithSlots): Slot[] {
     slotDuration,
     bookedSlots,
     doctor.isUnavailable ?? false,
-    
+    doctor.unavailableSlots ?? [],
     endTime
   );
 
@@ -428,10 +504,10 @@ generateSlotsForDoctor(doctor: DoctorWithSlots): Slot[] {
 }
 
 
-getBookedSlotsForDoctor(doctorId: number, date: string): string[] {
-  let bookedSlots: string[] = [];
+getBookedSlotsForDoctor(doctorId: number, date: string): { time: string, complete: boolean }[] {
+  let bookedSlots: { time: string, complete: boolean }[] = [];
   this.doctorService.getBookedSlots(doctorId, date).subscribe(
-    (slots: string[]) => {
+    (slots: { time: string, complete: boolean }[]) => {
       bookedSlots = slots; // Store the booked slots
     },
     (error) => {
@@ -470,7 +546,7 @@ closeSlotDialog(): void {
 }
 
 // Function to generate slots based on doctor availability and slot duration
-generateDoctorSlots(availableFrom: string, slotDuration: number, bookedSlots: string[], isUnavailableDay: boolean, doctorAvailableUntil: string): Slot[] {
+generateDoctorSlots(availableFrom: string, slotDuration: number, bookedSlots: { time: string, complete: boolean }[] ,isUnavailableDay: boolean,unavailableSlots: string[], doctorAvailableUntil: string): Slot[] {
   // console.log('availableFrom',availableFrom)
   console.log(availableFrom,slotDuration,bookedSlots,isUnavailableDay,doctorAvailableUntil)
   const [availableStart, availableEnd] = availableFrom.split('-').map(this.stringToMinutes);
@@ -501,17 +577,34 @@ generateDoctorSlots(availableFrom: string, slotDuration: number, bookedSlots: st
     const slotString = `${slotTime}-${nextSlotTime}`;
 
     let status: Slot['status'] = 'unavailable'; // Default to unavailable
-    
+    const bookedSlot = bookedSlots.find(slot => slot.time === slotString);
+  
 
     // If the day is available, mark slots as either booked or available
-    if (!isUnavailableDay) {
-    if (bookedSlots.includes(slotString)) {
-        status = 'booked'; // Mark as booked if it is in bookedSlots
-      }
-      else if (isToday && (current + slotDuration) <= currentTimeInMinutes) {
+    // if (!isUnavailableDay) {
+    //   if(unavailableSlots.includes(slotString)){
+    //     status = 'blocked';
+    //   }
+    //   else if (bookedSlot) {
+    //     // Mark as complete if the slot is marked as complete, otherwise as booked
+    //     status = bookedSlot.complete ? 'complete' : 'booked';
+    //   } 
+    //   else if (isToday && (current + slotDuration) <= currentTimeInMinutes) {
+    //     status = 'unavailable';
+    //   }
+    //   else {
+    //     status = 'available'; // Otherwise, mark as available
+    //   }
+    // }
+    if (unavailableSlots.includes(slotString)) {
+      status = 'blocked'; // Mark as blocked if the slot is in unavailableSlots
+    } else if (bookedSlot) {
+      // Mark as complete if the slot is marked as complete, otherwise as booked
+      status = bookedSlot.complete ? 'complete' : 'booked';
+    } else if (!isUnavailableDay) {
+      if (isToday && (current + slotDuration) <= currentTimeInMinutes) {
         status = 'unavailable';
-      }
-      else {
+      } else {
         status = 'available'; // Otherwise, mark as available
       }
     }
@@ -549,7 +642,7 @@ console.log('status',slots)
     return `${year}-${month}-${day}`;
   }
    // Utility function to generate all slots as unavailable
-   generateUnavailableSlots(availableStart: number, availableEnd: number, slotDuration: number, bookedSlots: string[],
+   generateUnavailableSlots(availableStart: number, availableEnd: number, slotDuration: number, bookedSlots: { time: string, complete: boolean }[],
     currentTimeInMinutes: number, isUnavailableDay: boolean ): Slot[] {
       console.log("unavailableSlots")
     const slots: Slot[] = [];
@@ -564,6 +657,7 @@ console.log('status',slots)
       console.log("current",current,'currentTimeInMinutes',currentTimeInMinutes)
       // console.log('slotString',slotString,slotTime,nextSlotTime)
       let status: Slot['status'] = 'unavailable'; // Default to available
+      const bookedSlot = bookedSlots.find(slot => slot.time === slotString);
       
       // if (isToday) {
       //   // For today, check if the slot has passed based on the current time
@@ -590,9 +684,10 @@ console.log('status',slots)
         status = 'available';
       }
     // Check if the slot should be unavailable (only available slots)
-     if (bookedSlots.includes(slotString)) {
-      status = 'booked'; // Keep booked slots as booked
-    }
+    if (bookedSlot) {
+      // Mark as complete if the slot is marked as complete, otherwise as booked
+      status = bookedSlot.complete ? 'complete' : 'booked';
+    } 
       slots.push({
         time: slotString,
         status

@@ -422,7 +422,8 @@ export class AppointmentFormComponent implements OnInit {
           else{
             // Remove the slots that are already booked for that date
           this.appointmentService.getBookedSlots(doctorId, date).subscribe(
-            (bookedSlots: string[]) => {
+            (bookedSlots: { time: string; complete: boolean }[]) => {
+              const nonCompleteBookedSlots = bookedSlots.filter(slot => !slot.complete).map(slot => slot.time);
               // console.log(bookedSlots, "booked")
 
               // this.availableSlots = this.availableSlots.filter(
@@ -441,21 +442,21 @@ export class AppointmentFormComponent implements OnInit {
                     
                       console.log("else")
                       this.availableSlots = this.availableSlots.filter((slot) => {
-                        return slot === currentSelectedTime || (!bookedSlots.includes(slot) && !unavailableSlotsForDate.includes(slot));
+                        return slot === currentSelectedTime || (!nonCompleteBookedSlots.includes(slot) && !unavailableSlotsForDate.includes(slot));
                       });
                     
 
                    
                   } else {
                     // For new appointments, remove all booked slots
-                    this.availableSlots = this.availableSlots.filter((slot) => (!bookedSlots.includes(slot) && !unavailableSlotsForDate.includes(slot)));
+                    this.availableSlots = this.availableSlots.filter((slot) => (!nonCompleteBookedSlots.includes(slot) && !unavailableSlotsForDate.includes(slot)));
                   }
                 });
               // If editing an appointment, retain the currently selected time slot if it exists
               if (
                 this.isBookedSlot &&
                 this.slot?.time &&
-                bookedSlots.includes(this.slot.time) &&
+                nonCompleteBookedSlots.includes(this.slot.time) &&
                 !this.availableSlots.includes(this.slot.time)
               ) {
                 
@@ -497,16 +498,16 @@ export class AppointmentFormComponent implements OnInit {
     );
   }
 
-  private removeBookedSlotsFromAvailable(doctorId: number, date: string): void {
-    this.appointmentService.getBookedSlots(doctorId, date).subscribe(
-      (bookedSlots) => {
-        this.availableSlots = this.availableSlots.filter(slot => !bookedSlots.includes(slot));
-      },
-      (error) => {
-        console.error('Error loading booked slots:', error);
-      }
-    );
-  }
+  // private removeBookedSlotsFromAvailable(doctorId: number, date: string): void {
+  //   this.appointmentService.getBookedSlots(doctorId, date).subscribe(
+  //     (bookedSlots) => {
+  //       this.availableSlots = this.availableSlots.filter(slot => !bookedSlots.includes(slot));
+  //     },
+  //     (error) => {
+  //       console.error('Error loading booked slots:', error);
+  //     }
+  //   );
+  // }
 
   // private checkSlotAvailability(doctorId: number, date: string, time: string): void {
 
@@ -533,12 +534,28 @@ export class AppointmentFormComponent implements OnInit {
   //     }
   //   );
   // }
+  // private checkSlotAvailability(doctorId: number, date: string, time: string): Promise<boolean> {
+  //   return new Promise((resolve, reject) => {
+  //     this.appointmentService.getBookedSlots(doctorId, date).subscribe({
+  //       next: (bookedSlots: string[]) => {
+  //         // console.log(bookedSlots, 'in check slot availability')
+  //         resolve(!bookedSlots.includes(time));
+  //       },
+  //       error: (error) => {
+  //         reject(error);
+  //       }
+  //     });
+  //   });
+  // }
   private checkSlotAvailability(doctorId: number, date: string, time: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
       this.appointmentService.getBookedSlots(doctorId, date).subscribe({
-        next: (bookedSlots: string[]) => {
-          // console.log(bookedSlots, 'in check slot availability')
-          resolve(!bookedSlots.includes(time));
+        next: (bookedSlots: { time: string; complete: boolean }[]) => {
+          // Filter out booked slots that are complete
+          const nonCompleteBookedSlots = bookedSlots.filter(slot => !slot.complete).map(slot => slot.time);
+          
+          // Resolve with true if the given time is not included in non-complete booked slots (i.e., it's available)
+          resolve(!nonCompleteBookedSlots.includes(time));
         },
         error: (error) => {
           reject(error);
@@ -670,6 +687,18 @@ export class AppointmentFormComponent implements OnInit {
 completeAppointment(appointment: Appointment) {
   const appointmentId = appointment.id;
   if(appointmentId !== undefined){
+    this.doctorService.markSlotAsComplete(appointment!.doctorId, appointment.date, appointment.time)
+      .subscribe(
+        response => {
+          console.log('Slot marked as complete:', response);
+          alert('Slot successfully marked as complete!');
+          // Update your view or refresh the slots list here as needed
+        },
+        error => {
+          console.error('Error marking slot as complete:', error);
+          alert('Failed to mark the slot as complete.');
+        }
+      );
     this.appointmentService.checkedinAppointment(appointmentId).subscribe({
       next: (response) => {
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Checked in successfully!' });
@@ -821,6 +850,7 @@ saveToLocalStorage(): void {
         status: 'complete'
       });
       this.close.emit();
+      
     }
     else{
       const currentStatus = this.appointment?.status || '';

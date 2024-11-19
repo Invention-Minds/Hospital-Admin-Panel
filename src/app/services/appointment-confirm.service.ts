@@ -193,9 +193,9 @@ addBookedSlot(doctorId: number, date: string, time: string): Observable<any> {
   const bookingData = { doctorId, date, time };
   return this.http.post(`${environment.apiUrl}/doctors/booked-slots`, bookingData);
 }
-getBookedSlots(doctorId: number, date: string): Observable<string[]> {
+getBookedSlots(doctorId: number, date: string): Observable<{ time: string; complete: boolean }[]> {
   const bookedSlotsUrl = `${environment.apiUrl}/doctors/booked-slots?doctorId=${doctorId}&date=${date}`;
-  return this.http.get<string[]>(bookedSlotsUrl);
+  return this.http.get<{ time: string; complete: boolean }[]>(bookedSlotsUrl);
 }
  // Method to get today's total appointments count
  getTotalAppointmentsCountForToday(date: string): Observable<{ count: number }> {

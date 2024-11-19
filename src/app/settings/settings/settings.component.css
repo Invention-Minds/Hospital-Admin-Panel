@@ -89,6 +89,7 @@
   box-shadow: 0px 4px 15px 0px rgba(216, 210, 252, 0.64);
   border: none;
   height: 52px;
+  font-size: 18px;
 }
 .input-field:focus{
     outline: none;

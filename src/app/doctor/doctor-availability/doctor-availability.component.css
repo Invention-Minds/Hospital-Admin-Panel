@@ -50,15 +50,12 @@
 
 .navigation-right button {
   padding: 10px 20px;
-  margin: 0 5px;
+  margin: 0 21px;
   background-color: #003b6d;
   color: #fff;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-}
-.next-button{
-  margin-right: 10px;
 }
 
 .navigation-right {
@@ -154,7 +151,7 @@
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
-  color: rgba(123, 123, 123);
+  color: black;
   font-family: Kanit;
   font-size: 18px;
   font-style: normal;
@@ -294,9 +291,9 @@
   line-height: normal;
 }
 .complete {
-  background-color: green; /* Example color for completed status */
+  background-color: #0e2970; /* Example color for completed status */
   color: white;
-  border: 1px solid darkgreen;
+  border: 1px solid #0e2970;
 }
 .doctor-availability-time {
   color: #169458;
@@ -343,12 +340,13 @@
 .slot-booked {
   background-color: #ff4747; /* Red for Booked */
   color: white;
-  cursor: not-allowed;
+  cursor: pointer;
 }
 
 .slot-unavailable {
   background-color: #c5c5c5; /* Grey for Unavailable */
   color: #dcdcdc;
+  cursor:not-allowed;
 }
 .unavailale-slot-by-user{
   background-color: #E5C000; /* Red for Booked */

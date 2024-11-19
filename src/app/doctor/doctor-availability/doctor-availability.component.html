@@ -53,12 +53,18 @@
       <div class="slots-wrapper">
         <div *ngFor="let slot of doctor.slots"
              class="slot-box"
-           
+             [pTooltip]="
+             slot.status === 'booked' ? 'Booked' : 
+             slot.status === 'blocked' ? 'Blocked':
+             slot.status === 'unavailable' ? 'Unavailable' :
+             slot.status === 'available' ? 'Available' :
+             slot.status === 'complete' ? 'Complete' : 
+             ''"
              [ngClass]="{
                'slot-available': slot.status === 'available',
                'slot-booked': slot.status === 'booked',
                'slot-unavailable': slot.status === 'unavailable',
-               'complete': currentAppointment?.status === 'completed' && currentAppointment?.slot === slot.time,
+               'complete': slot.status === 'complete',
                'unavailale-slot-by-user': doctor.unavailableSlots!.includes(slot.time)
              }"
            (click)="onSlotClick(doctor,slot)" >
@@ -80,7 +86,7 @@
           [minDate]="todayforUnavialable"
           [maxDate]="tomorrow"
           [showIcon]="false"
-          (ngModelChange)="onDateSelectionChange()"
+          (ngModelChange)="onDateChangeInModal($event)"
           [showButtonBar]="true"
           placeholder="Select Date"
         ></p-calendar></div>
@@ -98,7 +104,7 @@
             </label>
           </div>
           <div class="update-button-unavailable">
-            <button class="update" (click)="updateUnavailableSlots()">Update</button>
+            <button class="update" [disabled]="isUpdateButtonDisabled" (click)="updateUnavailableSlots()">Update</button>
             <button (click)="closeSlotDialog()" class="mark-available-button">Close</button>
           </div>
          

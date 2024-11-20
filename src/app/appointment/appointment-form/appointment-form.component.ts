@@ -857,12 +857,11 @@ saveToLocalStorage(): void {
       
     }
     else{
-      if(this.currentAppointment){
          this.statusChange.emit({
-        slotTime: this.currentAppointment!.time, // Assuming the slot time is available here
+        slotTime: this.appointmentForm.value.time, // Assuming the slot time is available here
         status: 'booked'
       });
-      }
+      
       const currentStatus = this.appointment?.status || '';
       const newStatus = this.appointmentForm.get('appointmentStatus')?.value;
       // this.appointment.prnNumber=parseInt(this.appointmentForm.get('prnNumber')?.value);

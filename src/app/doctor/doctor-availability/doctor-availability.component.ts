@@ -307,6 +307,13 @@ closeForm(): void {
 }
 onStatusChange(event: { slotTime: string; status: 'complete' | 'available' | 'booked' | 'unavailable' }): void {
   const doctor = this.doctors.find((d: any) => d.id === this.selectedDoctor!.id); // Find the doctor
+  console.log("changing")
+  setTimeout(() => {
+    this.fetchDoctors();
+  }, 3000);  
+ 
+  // this.doctorsChanged.next();
+  // this.refreshDoctors.emit();
   if (doctor) {
     const slot = doctor.slots.find((s: Slot) => s.time === event.slotTime); // Find the slot
     if (slot) {

@@ -1273,7 +1273,7 @@ saveToLocalStorage(): void {
           });
         }
         // Mark the slot as booked
-        this.addBookedSlot(this.appointment.doctorId, this.appointment.date, this.appointment.time);
+        // this.addBookedSlot(this.appointment.doctorId, this.appointment.date, this.appointment.time);
       } else {
         const patientName = this.appointmentForm.value.firstName + ' ' + this.appointmentForm.value.lastName;
       const prnNumber = parseInt(this.appointmentForm.value.prnNumber);
@@ -1448,7 +1448,7 @@ saveToLocalStorage(): void {
             });
   
   
-            this.addBookedSlot(this.appointment.doctorId, this.appointment.date, this.appointment.time);
+            // this.addBookedSlot(this.appointment.doctorId, this.appointment.date, this.appointment.time);
           }
           // if (this.appointment?.requestVia === "Call") {
           //   this.appointment.status = "confirmed";

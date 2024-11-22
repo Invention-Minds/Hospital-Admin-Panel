@@ -570,24 +570,39 @@ export class AppointmentFormComponent implements OnInit {
       });
     });
   }
-  generateTimeSlots(startTime: string, endTime: string, slotDuration: number): string[] {
+  // generateTimeSlots(startTime: string, endTime: string, slotDuration: number): string[] {
 
+  //   const slots = [];
+  //   let current = new Date(`1970-01-01T${startTime}`);
+  //   const end = new Date(`1970-01-01T${endTime}`);
+
+
+  //   while (current < end) {
+  //     const slotStart = current.toTimeString().substring(0, 5);
+  //     current = new Date(current.getTime() + slotDuration * 60000);
+
+  //     if (current <= end) {
+  //       const slotEnd = current.toTimeString().substring(0, 5);
+  //       slots.push(`${slotStart}-${slotEnd}`);
+
+  //     }
+  //   }
+
+  //   return slots;
+  // }
+  generateTimeSlots(startTime: string, endTime: string, slotDuration: number): string[] {
     const slots = [];
     let current = new Date(`1970-01-01T${startTime}`);
     const end = new Date(`1970-01-01T${endTime}`);
-
-
-    while (current < end) {
+  
+    while (current < end || current.toTimeString().substring(0, 5) === endTime) {
       const slotStart = current.toTimeString().substring(0, 5);
       current = new Date(current.getTime() + slotDuration * 60000);
-
-      if (current <= end) {
-        const slotEnd = current.toTimeString().substring(0, 5);
-        slots.push(`${slotStart}-${slotEnd}`);
-
-      }
+  
+      const slotEnd = current.toTimeString().substring(0, 5);
+      slots.push(`${slotStart}-${slotEnd}`);
     }
-
+  
     return slots;
   }
 

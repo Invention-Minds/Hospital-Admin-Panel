@@ -323,6 +323,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
             availableFrom: dayAvailability.availableFrom,
             slotDuration: dayAvailability.slotDuration
           };
+          this.generalSlotDuration = dayAvailability.slotDuration;
           // console.log('Day availability', this.individualAvailability[day]);
         } else {
           if (!this.individualAvailability[day]) {
@@ -406,10 +407,10 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
       this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Doctor details are missing' });
       return;
     }
-
+  
     // Initialize availability
     this.doctor.availability = [];
-
+  
     if (this.useSameTimeForAllDays) {
       // Set availability for all selected days
       this.availabilityDaysList.forEach(day => {
@@ -434,7 +435,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
               id: 0,
               day: day as string,
               availableFrom: availability.availableFrom,
-              slotDuration: availability.slotDuration,
+              slotDuration: this.generalSlotDuration,
             });
           }
         }
@@ -451,7 +452,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
     Object.keys(this.unavailableSlotsPerDate).forEach(date => {
       const times = this.unavailableSlotsPerDate[date].map(slot => slot.value);
       // console.log('Adding unavailable slots for date:', date, times);
-
+  
       // Call the addUnavailableSlots API for each date
       if (this.doctor?.id) {
         this.doctorService.addUnavailableSlots(this.doctor.id, date, times).subscribe(
@@ -465,7 +466,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
       }
     });
     // console.log('Doctor:', this.doctor);
-
+  
     // Emit the save event with the doctor details
     this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Doctor details saved successfully' });
     this.save.emit(this.doctor);

@@ -66,6 +66,8 @@ export class AppointmentFormComponent implements OnInit {
   @Input() isBookedSlot: boolean = false; // Add input to accept the value from parent component
   @Input() currentAppointment: Appointment | null = null;
   @Output() statusChange = new EventEmitter<{ slotTime: string; status: 'available' | 'booked' | 'unavailable' | 'complete' }>();
+  oldDate: string = '';
+  oldTime: string = '';
 
   private subscription!: Subscription;
 
@@ -142,6 +144,8 @@ export class AppointmentFormComponent implements OnInit {
       // this.availableSlots = this.appointmentForm.get('appointmentTime')?.value;
       // this.patchFormWithAppointment(this.appointment, appointmentDate);
       const appointmentDate = this.appointment.date;
+      this.oldDate = this.appointment.date;
+      this.oldTime = this.appointment.time;
       // console.log("appointmentpatch"  ,this.appointment)
 
       this.patchFormWithAppointment(this.appointment!, appointmentDate);
@@ -972,7 +976,7 @@ saveToLocalStorage(): void {
                   }
                 });
               }
-    
+              
             });
     
     
@@ -1031,6 +1035,10 @@ saveToLocalStorage(): void {
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'The appointment is rescheduled.' });
           this.appointmentService.removeCancelledAppointment(this.appointment.id!);
         } else {
+            // Store old date and time before making changes
+  const oldDate = this.oldDate
+  const oldTime = this.oldTime;
+  console.log("old date", oldDate, "old time", oldTime)
           // console.log("new status,", newStatus,"current status", currentStatus)
           const appointmentDetails = {
             id: this.appointment.id,
@@ -1148,6 +1156,17 @@ saveToLocalStorage(): void {
             });
           }
           this.appointmentService.addConfirmedAppointment(this.appointment);
+          this.doctorService.getCancelledSlots(doctorId, oldDate, oldTime).subscribe({
+            next: (response) => {
+              // console.log('Cancelled slots:', response);
+              const cancelledSlots = response;
+             console.log(cancelledSlots)
+            },
+            error: (error) => {
+              console.error('Error fetching cancelled slots:', error);
+            }
+          });
+          this.addBookedSlot(this.appointment.doctorId, this.appointment.date, this.appointment.time);
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'The appointment is rescheduled.' });
         }
   

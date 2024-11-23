@@ -1063,7 +1063,7 @@ saveToLocalStorage(): void {
             doctorName: this.appointmentForm.value.doctorName,
             department: department, // Adjust as needed
             date: this.appointmentForm.value.appointmentDate,
-            time: this.appointmentForm.get('appointmentTime')?.value,
+            time: this.appointmentForm.value.appointmentTime,
             requestVia: this.appointmentForm.value.requestVia,
             status: newStatus,
             email: this.appointmentForm.value.email,
@@ -1072,6 +1072,7 @@ saveToLocalStorage(): void {
             messageSent: true,
             prnNumber: parseInt(this.appointmentForm.value.prnNumber),
           };
+          // console.log(appointmentDetails)
           this.appointment = appointmentDetails;
           // console.log("cancel to confirm")
           this.syncFormToModel(); 
@@ -1181,6 +1182,7 @@ saveToLocalStorage(): void {
               console.error('Error fetching cancelled slots:', error);
             }
           });
+          // console.log("appointment", this.appointment)
           this.addBookedSlot(this.appointment.doctorId, this.appointment.date, this.appointment.time);
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'The appointment is rescheduled.' });
         }

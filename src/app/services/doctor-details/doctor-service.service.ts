@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Doctor } from '../../models/doctor.model';
 import { Department } from '../../models/department.model';
 import { environment } from '../../../environment/environment.prod';
@@ -30,9 +30,23 @@ export class DoctorServiceService {
     return this.http.delete<void>(`${this.apiUrl}/doctors/${id}`);
   }
   // Get all doctors
-  getDoctors(): Observable<Doctor[]> {
-    return this.http.get<Doctor[]>(`${this.apiUrl}/doctors`);
+  // getDoctors(): Observable<Doctor[]> {
+  //   return this.http.get<Doctor[]>(`${this.apiUrl}/doctors`);
+  // }
+  getDoctors(date?: string): Observable<Doctor[]> {
+    let url = `${this.apiUrl}/doctors`;
+    if (date) {
+      url += `?date=${date}`;
+    }
+    return this.http.get<Doctor[]>(url);
   }
+
+    getFutureBookedSlots( doctorId: string,date: string): Observable<any> {
+      const params = new HttpParams() .set('doctorId', doctorId)
+      .set('date', date);
+      return this.http.get(`${this.apiUrl}/doctors/futureBookedSlots`, { params });
+    }
+
 
   // Create new doctor
   createDoctor(doctor: Doctor): Observable<Doctor> {

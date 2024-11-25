@@ -16,8 +16,11 @@ export interface Doctor {
     day: string;
     availableFrom: string; // Change here to use a single field
     slotDuration: number;
+    updatedAt?: Date;
+    doctorId?: number;
   }[];
   unavailableDates?: string[];
   isUnavailable?: boolean; // Optional property to mark the doctor as unavailable
   unavailableSlots?: string[]; // Optional property to mark the slots as unavailable
+  updatedAt?: Date;
 }

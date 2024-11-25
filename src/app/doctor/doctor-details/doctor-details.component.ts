@@ -160,7 +160,11 @@ closeDeleteDialog(): void {
             doctor.availableFrom = 'N/A';
            // Clear slotDuration if not available
           }
-           
+          const dayOfWeek = today.toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
+          const availableDay = doctor.availability?.find((avail: any) =>
+            avail.day.toLowerCase() === dayOfWeek
+          );
+          doctor.availableFrom = availableDay?.availableFrom ?? 'N/A';
           // console.log('Doctors available days', doctor.availabilityDays);
         });
 
@@ -172,6 +176,7 @@ closeDeleteDialog(): void {
       }
     );
   }
+  
   private getDayString(date: Date): keyof Doctor['availabilityDays'] {
     const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
     return days[date.getDay()];

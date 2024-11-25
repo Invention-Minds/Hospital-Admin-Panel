@@ -402,17 +402,57 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
   // }
   // Method to save the doctor form data
   saveDoctor(): void {
-    // console.log('Doctor:', this.doctor);
     if (!this.doctor) {
       this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Doctor details are missing' });
       return;
     }
   
+    // Initialize the selected date to today in case we need to check future slots
+    const today = new Date();
+    const formattedDate = today.toISOString().split('T')[0];
+  
+    if (this.doctor.id) {
+      const doctorid = (this.doctor.id);
+
+      // Step 1: Check if there are future booked slots for this doctor
+      this.doctorService.getFutureBookedSlots(doctorid.toString(), formattedDate).subscribe(
+        (slots) => {
+          
+          if (slots.length > 0) {
+            // Step 2: If future booked slots exist, show an error message
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Doctor Update Error',
+              detail: 'This doctor has future booked slots. Please cancel them before making changes.'
+            });
+          } else {
+            // Step 3: Proceed with saving doctor details if no future booked slots exist
+            this.saveDoctorDetails();
+          }
+        },
+        (error) => {
+          console.error('Error fetching future booked slots:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Unable to check booked slots. Please try again later.'
+          });
+        }
+      );
+    } else {
+      // If it's a new doctor, just proceed to save
+      this.saveDoctorDetails();
+    }
+    
+  }
+  
+  // Refactored method to handle the actual save operation
+  private saveDoctorDetails(): void {
     // Initialize availability
-    this.doctor.availability = [];
+    this.doctor!.availability = [];
+    this.doctor!.slotDuration = this.generalSlotDuration; // Set the general slot duration
   
     if (this.useSameTimeForAllDays) {
-      // Set availability for all selected days
       this.availabilityDaysList.forEach(day => {
         if (this.doctor?.availabilityDays?.[day]) {
           this.doctor.availability.push({
@@ -424,12 +464,9 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
         }
       });
     } else {
-      // Set individual availability for each selected day
       this.availabilityDaysList.forEach(day => {
-        // console.log('Day:', day);
         if (this.doctor?.availabilityDays?.[day]) {
           const availability = this.individualAvailability[day];
-          // console.log('Availability:', availability);
           if (availability.availableFrom && availability.slotDuration !== undefined) {
             this.doctor.availability.push({
               id: 0,
@@ -441,23 +478,20 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
         }
       });
     }
+  
     if (!this.doctor?.phone_number.startsWith('91')) {
       this.doctor!.phone_number = '91' + this.doctor?.phone_number;
     }
-    // const unavailableSlotValues = this.unavailableSlots.map(slot => slot.value);
-    // console.log('Unavailable slots:', unavailableSlotValues);
-    // this.doctor!.unavailableSlots = unavailableSlotValues; // Assign the values array to doctor
+  
     // Add unavailable slots for each date
-    // console.log('Unavailable slots per date:', this.unavailableSlotsPerDate);
     Object.keys(this.unavailableSlotsPerDate).forEach(date => {
       const times = this.unavailableSlotsPerDate[date].map(slot => slot.value);
-      // console.log('Adding unavailable slots for date:', date, times);
   
-      // Call the addUnavailableSlots API for each date
       if (this.doctor?.id) {
+        console.log('Adding unavailable slots for doctor:', this.doctor.id, date, times);
         this.doctorService.addUnavailableSlots(this.doctor.id, date, times).subscribe(
           response => {
-            // console.log('Unavailable slots added successfully:', response);
+            // Successfully added unavailable slots
           },
           error => {
             console.error('Error adding unavailable slots:', error);
@@ -465,14 +499,85 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
         );
       }
     });
-    // console.log('Doctor:', this.doctor);
   
     // Emit the save event with the doctor details
     this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Doctor details saved successfully' });
-    this.save.emit(this.doctor);
+    this.save.emit(this.doctor!);
     this.doctor = null; // Reset the doctor object after saving
     this.isEditMode = false; // Exit edit mode after saving
   }
+  // saveDoctor(): void {
+  //   // console.log('Doctor:', this.doctor);
+  //   if (!this.doctor) {
+  //     this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Doctor details are missing' });
+  //     return;
+  //   }
+  
+  //   // Initialize availability
+  //   this.doctor.availability = [];
+  
+  //   if (this.useSameTimeForAllDays) {
+  //     // Set availability for all selected days
+  //     this.availabilityDaysList.forEach(day => {
+  //       if (this.doctor?.availabilityDays?.[day]) {
+  //         this.doctor.availability.push({
+  //           id: 0, // Placeholder ID, will be replaced by backend
+  //           day: day as string,
+  //           availableFrom: this.generalAvailableFrom,
+  //           slotDuration: this.generalSlotDuration,
+  //         });
+  //       }
+  //     });
+  //   } else {
+  //     // Set individual availability for each selected day
+  //     this.availabilityDaysList.forEach(day => {
+  //       // console.log('Day:', day);
+  //       if (this.doctor?.availabilityDays?.[day]) {
+  //         const availability = this.individualAvailability[day];
+  //         // console.log('Availability:', availability);
+  //         if (availability.availableFrom && availability.slotDuration !== undefined) {
+  //           this.doctor.availability.push({
+  //             id: 0,
+  //             day: day as string,
+  //             availableFrom: availability.availableFrom,
+  //             slotDuration: this.generalSlotDuration,
+  //           });
+  //         }
+  //       }
+  //     });
+  //   }
+  //   if (!this.doctor?.phone_number.startsWith('91')) {
+  //     this.doctor!.phone_number = '91' + this.doctor?.phone_number;
+  //   }
+  //   // const unavailableSlotValues = this.unavailableSlots.map(slot => slot.value);
+  //   // console.log('Unavailable slots:', unavailableSlotValues);
+  //   // this.doctor!.unavailableSlots = unavailableSlotValues; // Assign the values array to doctor
+  //   // Add unavailable slots for each date
+  //   // console.log('Unavailable slots per date:', this.unavailableSlotsPerDate);
+  //   Object.keys(this.unavailableSlotsPerDate).forEach(date => {
+  //     const times = this.unavailableSlotsPerDate[date].map(slot => slot.value);
+  //     // console.log('Adding unavailable slots for date:', date, times);
+  
+  //     // Call the addUnavailableSlots API for each date
+  //     if (this.doctor?.id) {
+  //       this.doctorService.addUnavailableSlots(this.doctor.id, date, times).subscribe(
+  //         response => {
+  //           // console.log('Unavailable slots added successfully:', response);
+  //         },
+  //         error => {
+  //           console.error('Error adding unavailable slots:', error);
+  //         }
+  //       );
+  //     }
+  //   });
+  //   // console.log('Doctor:', this.doctor);
+  
+  //   // Emit the save event with the doctor details
+  //   this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Doctor details saved successfully' });
+  //   this.save.emit(this.doctor);
+  //   this.doctor = null; // Reset the doctor object after saving
+  //   this.isEditMode = false; // Exit edit mode after saving
+  // }
 
 
   goToStep(step: number): void {

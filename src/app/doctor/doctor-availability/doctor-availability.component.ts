@@ -96,7 +96,8 @@ fetchDoctors(): void {
   const formattedDate = this.formatDate(this.selectedDate);
   // console.log('formattedDate', formattedDate);
 
-  this.doctorService.getDoctors().subscribe((doctors: Doctor[]) => {
+  this.doctorService.getDoctors(formattedDate).subscribe((doctors: Doctor[]) => {
+    
     doctors.forEach(doctor => {
         // Initialize `availabilityDays` if it does not exist
     if (!doctor.availabilityDays) {
@@ -115,18 +116,41 @@ fetchDoctors(): void {
   
     const date = new Date(formattedDate);
     const todayDay = this.getDayString(date);
-  
+    const isToday = date.toDateString() === new Date().toDateString();
+    const isFuture = date > new Date();
+
+    // console.log(filteredDoctors,"filteredDoctors")
     doctor.availability?.forEach((avail) => {
+      // console.log('avail',avail)
       doctor.availabilityDays[avail.day] = true;
       // console.log('avail.day', avail.day);
       // console.log(avail.day === todayDay, 'in if');
       
       if (avail.day === todayDay) {
+        console.log(avail.availableFrom,avail.doctorId)
         doctor.availableFrom = avail.availableFrom;
         doctor.slotDuration = avail.slotDuration;
         // console.log('avail.availableFrom', avail.availableFrom);
       }
     });
+    // doctor.availability?.forEach((avail) => {
+    //   // Set availability day to true
+    //   doctor.availabilityDays[avail.day] = true;
+    
+    //   // Check if this availability is for today
+    //   if (avail.day === todayDay) {
+    //     // If we haven't set `availableFrom` yet, or we find an availability with a more recent `updatedAt`
+    //     if (
+    //       !doctor.availableFrom || // No availableFrom has been set yet
+    //       (avail.updatedAt && doctor.updatedAt && new Date(avail.updatedAt) > new Date(doctor.updatedAt))
+    //     ) {
+    //       doctor.availableFrom = avail.availableFrom;
+    //       doctor.slotDuration = avail.slotDuration;
+    //       doctor.updatedAt = avail.updatedAt; // Keep track of the `updatedAt` for comparison
+    //     }
+    //   }
+
+    // });
     }
     );
     const doctorRequests = doctors
@@ -165,7 +189,9 @@ fetchDoctors(): void {
         const isUnavailable = isUnavailableDay || isUnavailableDueToSchedule;
 
         // Provide default values for `availableFrom` and `slotDuration` if `availableDay` is not available
+       
         const availableFrom = availableDay?.availableFrom ?? '08:00-20:00'; // Use a default value for unavailable days
+        doctor.availableFrom = availableFrom;
         const slotDuration = availableDay?.slotDuration ?? 20; // Default to 30-minute slots if unavailable
 
         const date = this.formatDate(this.selectedDate); // Format the selected date to match the keys in the object
@@ -555,8 +581,8 @@ closeSlotDialog(): void {
 
 // Function to generate slots based on doctor availability and slot duration
 generateDoctorSlots(availableFrom: string, slotDuration: number, bookedSlots: { time: string, complete: boolean }[] ,isUnavailableDay: boolean,unavailableSlots: string[], doctorAvailableUntil: string): Slot[] {
-  // console.log('availableFrom',availableFrom)
-  console.log(availableFrom,slotDuration,bookedSlots,isUnavailableDay,doctorAvailableUntil)
+  console.log('availableFrom',availableFrom)
+  // console.log(availableFrom,slotDuration,bookedSlots,isUnavailableDay,doctorAvailableUntil)
   const [availableStart, availableEnd] = availableFrom.split('-').map(this.stringToMinutes);
   const slots: Slot[] = [];
   const currentTimeInMinutes = new Date().getHours() * 60 + new Date().getMinutes();

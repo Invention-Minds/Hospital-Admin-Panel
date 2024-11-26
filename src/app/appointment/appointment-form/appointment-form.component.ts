@@ -667,21 +667,38 @@ export class AppointmentFormComponent implements OnInit {
 
   //   return slots;
   // }
+  // generateTimeSlots(startTime: string, endTime: string, slotDuration: number): string[] {
+  //   const slots = [];
+  //   let current = new Date(`1970-01-01T${startTime}`);
+  //   const end = new Date(`1970-01-01T${endTime}`);
+
+  //   while (current < end || current.toTimeString().substring(0, 5) === endTime) {
+  //     const slotStart = this.convertTo12HourFormat(current.toTimeString());
+  //     current = new Date(current.getTime() + slotDuration * 60000);
+   
+
+  //     slots.push(slotStart); // Only add the start time
+  //   }
+
+  //   return slots;
+  // }
   generateTimeSlots(startTime: string, endTime: string, slotDuration: number): string[] {
     const slots = [];
     let current = new Date(`1970-01-01T${startTime}`);
     const end = new Date(`1970-01-01T${endTime}`);
-
-    while (current < end || current.toTimeString().substring(0, 5) === endTime) {
-      const slotStart = this.convertTo12HourFormat(current.toTimeString());
+  
+    while (current < end) {
+      const slotStart = this.convertTo12HourFormat(current.toTimeString().substring(0, 5));
       current = new Date(current.getTime() + slotDuration * 60000);
-   
-
-      slots.push(slotStart); // Only add the start time
+  
+      if (current <= end) {
+        slots.push(slotStart); // Only add the start time if the end of the slot doesn't exceed the available time
+      }
     }
-
+  
     return slots;
   }
+  
 
   // Utility function to convert Date object to 12-hour format with AM/PM
   convertTo12HourFormat(time: string): string {

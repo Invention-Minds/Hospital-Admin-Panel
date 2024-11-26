@@ -8,7 +8,7 @@ import { AppointmentConfirmService } from '../../services/appointment-confirm.se
 
 interface Slot {
   time: string;
-  status: 'available' | 'booked' | 'unavailable' | 'complete' | 'blocked';
+  status: 'available' | 'booked' | 'unavailable' | 'complete' | 'blocked' | 'extra';
 }
 
 @Component({
@@ -127,7 +127,7 @@ fetchDoctors(): void {
       // console.log(avail.day === todayDay, 'in if');
       
       if (avail.day === todayDay) {
-        console.log(avail.availableFrom,avail.doctorId)
+        // console.log(avail.availableFrom,avail.doctorId)
         doctor.availableFrom = avail.availableFrom;
         doctor.slotDuration = avail.slotDuration;
         // console.log('avail.availableFrom', avail.availableFrom);
@@ -159,14 +159,19 @@ fetchDoctors(): void {
         forkJoin({
           bookedSlots: this.doctorService.getBookedSlots(doctor.id!, this.formatDate(this.selectedDate)),
           unavailableDates: this.doctorService.getUnavailableDates(doctor.id!),
-          unavailableSlots: this.doctorService.getUnavailableSlots(doctor.id!)
+          unavailableSlots: this.doctorService.getUnavailableSlots(doctor.id!),
+          extraSlots: this.doctorService.getExtraSlots(doctor.id!, this.formatDate(this.selectedDate))
         })
+       
       );
 
     forkJoin(doctorRequests).subscribe((doctorDataArray) => {
       this.doctors = doctors.map((doctor, index) => {
-        const { bookedSlots, unavailableDates,unavailableSlots } = doctorDataArray[index];
+        const { bookedSlots, unavailableDates,unavailableSlots, extraSlots } = doctorDataArray[index];
         const formattedUnavailableSlots = unavailableSlots[formattedDate] || [];
+        console.log('extraSlots',extraSlots)
+        const formattedExtraSlots: string[] = extraSlots.map((slot: { time: string }) => slot.time);
+        console.log('formattedExtraSlots',formattedExtraSlots)
         // Determine if the selected day is unavailable for the doctor
         const isUnavailableDay = unavailableDates.some(unavailable => {
           const unavailableDate = new Date(unavailable.date);
@@ -192,16 +197,47 @@ fetchDoctors(): void {
        
         const availableFrom = availableDay?.availableFrom ?? '08:00-20:00'; // Use a default value for unavailable days
         doctor.availableFrom = availableFrom;
+        if(doctor.availableFrom === '08:00-20:00'){
+          doctor.availableFrom = 'N/A';
+        }
         const slotDuration = availableDay?.slotDuration ?? 20; // Default to 30-minute slots if unavailable
 
         const date = this.formatDate(this.selectedDate); // Format the selected date to match the keys in the object
         // const unavailableSlotsForDate = unavailableSlots[formattedDate] || [];
+        let generatedSlots = this.generateDoctorSlots(availableFrom, slotDuration, bookedSlots, isUnavailable, formattedUnavailableSlots, availableFrom.split('-')[1]);
+        console.log('fomated',formattedExtraSlots)
+        formattedExtraSlots.forEach(extraSlot => {
+          const isAlreadyBooked = bookedSlots.some(bookedSlot => bookedSlot.time === extraSlot);
+          const isAlreadyUnavailable = formattedUnavailableSlots.includes(extraSlot);
+          const isAlreadyAdded = generatedSlots.some(slot => slot.time === extraSlot);
+          const existingSlot = generatedSlots.find(slot => slot.time === extraSlot);
 
+          if (!isAlreadyBooked && !isAlreadyUnavailable && existingSlot) {
+            // If the slot already exists, mark it as available
+            existingSlot.status = 'available';
+          }
+          console.log('isAlreadyBooked',isAlreadyBooked,'isAlreadyUnavailable',isAlreadyUnavailable,'isAlreadyAdded',isAlreadyAdded)
+    
+          // if (!isAlreadyBooked && !isAlreadyUnavailable && isAlreadyAdded) {
+          //   generatedSlots.push({
+          //     time: extraSlot,
+          //     status: 'available'
+          //   });
+          // }
+        });
+          // Sort the slots by time to maintain the order
+    generatedSlots = generatedSlots.sort((a, b) => {
+      const [aStart] = a.time.split('-');
+      const [bStart] = b.time.split('-');
+      return this.stringToMinutes(aStart) - this.stringToMinutes(bStart);
+    });
+    console.log('generatedSlots',generatedSlots)
         return {
           ...doctor,
           isUnavailable,
-          slots: this.generateDoctorSlots(availableFrom, slotDuration, bookedSlots, isUnavailable,formattedUnavailableSlots, availableFrom.split('-')[1]),
-          unavailableSlots: formattedUnavailableSlots
+          slots: generatedSlots,
+          unavailableSlots: formattedUnavailableSlots,
+          extraSlots: formattedExtraSlots
         };
       });
       this.applySearchFilter();
@@ -313,6 +349,23 @@ onSlotClick(doctor: Doctor, slot: any): void {
     this.selectedSlot = slot;
     this.currentAppointment = null;
     this.showForm = true;
+  }
+  else if (slot.status === 'extra'){
+  //  slot.status = 'available';
+   this.doctorService.addExtraSlots(doctor.id,this.formatDate(this.selectedDate),slot.time).subscribe(
+      (response) => {
+        console.log('Extra slot added successfully:', response);
+        this.fetchDoctors();
+        this.isBookedSlot = false;
+    this.selectedDoctor = doctor;
+    this.selectedSlot = slot;
+    this.currentAppointment = null;
+    this.showForm = true;
+      },
+      (error) => {
+        console.error('Error adding extra slot:', error);
+      }
+    );
   }
 
   // else if(doctor.unavailableSlots!.includes(slot.time) &&){
@@ -584,6 +637,8 @@ generateDoctorSlots(availableFrom: string, slotDuration: number, bookedSlots: { 
   console.log('availableFrom',availableFrom)
   // console.log(availableFrom,slotDuration,bookedSlots,isUnavailableDay,doctorAvailableUntil)
   const [availableStart, availableEnd] = availableFrom.split('-').map(this.stringToMinutes);
+  const extendedStart = availableStart - 60;
+  const extendedEnd = availableEnd + 60;
   const slots: Slot[] = [];
   const currentTimeInMinutes = new Date().getHours() * 60 + new Date().getMinutes();
     const doctorAvailableUntilInMinutes = this.stringToMinutes(doctorAvailableUntil);
@@ -601,17 +656,55 @@ generateDoctorSlots(availableFrom: string, slotDuration: number, bookedSlots: { 
       // console.log(isUnavailableDay,isPastDoctorAvailableTime,isPastDate)
       // console.log(availableStart,availableEnd)
       // console.log(isUnavailableDay,isPastDoctorAvailableTime,isPastDate);
-      return this.generateUnavailableSlots(availableStart, availableEnd, slotDuration,bookedSlots,currentTimeInMinutes,isUnavailableDay);
+      return this.generateUnavailableSlots(extendedStart, extendedEnd, slotDuration,bookedSlots,currentTimeInMinutes,isUnavailableDay);
     }
 
   // console.log('unavailableSlots',unavailableSlots)
-  for (let current = availableStart; current < availableEnd; current += slotDuration) {
+  for (let current = extendedStart; current < extendedEnd; current += slotDuration) {
     const slotTime = this.minutesToString(current);
-    const nextSlotTime = this.minutesToString(current + slotDuration);
-    const slotString = `${slotTime}-${nextSlotTime}`;
+    // const nextSlotTime = this.minutesToString(current + slotDuration);
+    // const slotString = `${slotTime}-${nextSlotTime}`;
 
-    let status: Slot['status'] = 'unavailable'; // Default to unavailable
-    const bookedSlot = bookedSlots.find(slot => slot.time === slotString);
+    const formattedSlotTime = this.convertTo12HourFormat(slotTime); 
+    console.log('slotString',formattedSlotTime)
+
+    let status: Slot['status'] = 'extra'; // Default to unavailable
+    // const bookedSlot = bookedSlots.find(slot => slot.time === formattedSlotTime);
+    // const bookedSlot = bookedSlots.find(slot => {
+    //   const [bookedStartTime] = slot.time.split('-'); // Extract start time from "10:00-10:20"
+    //   const formattedBookedStartTime = this.convertTo12HourFormat(bookedStartTime); // Convert to 12-hour format
+    //   return formattedBookedStartTime === formattedSlotTime; // Compare with the generated slot time
+    // });
+      // **Key Change**: Mark slots as unavailable if they fall outside the regular availability and time has passed
+      if (isToday && current < currentTimeInMinutes && (current < availableStart || current >= availableEnd)) {
+        status = 'unavailable';  // Extra slots before or after availability are marked unavailable if past current time
+      }
+    const bookedSlot = bookedSlots.find(slot => {
+      const [bookedStartTime] = slot.time.split('-'); // Extract start time from "10:00-10:20"
+      
+      // Function to determine if the time is already in 12-hour format
+      const is12HourFormat = (time: string): boolean => {
+        return time.includes('AM') || time.includes('PM');
+      };
+    
+      let formattedBookedStartTime: string;
+    
+      if (is12HourFormat(bookedStartTime)) {
+        // If the booked start time is already in 12-hour format, use it directly
+        formattedBookedStartTime = bookedStartTime;
+      } else {
+        // If it is in 24-hour format, convert it to 12-hour format
+        formattedBookedStartTime = this.convertTo12HourFormat(bookedStartTime);
+      }
+    
+      return formattedBookedStartTime === formattedSlotTime; // Compare with the generated slot time
+    });
+    
+
+    console.log(bookedSlot)
+    if(bookedSlot){
+      status = bookedSlot.complete ? 'complete' : 'booked';
+    }
   
 
     // If the day is available, mark slots as either booked or available
@@ -630,22 +723,28 @@ generateDoctorSlots(availableFrom: string, slotDuration: number, bookedSlots: { 
     //     status = 'available'; // Otherwise, mark as available
     //   }
     // }
-    if (unavailableSlots.includes(slotString)) {
-      status = 'blocked'; // Mark as blocked if the slot is in unavailableSlots
-    } else if (bookedSlot) {
-      // Mark as complete if the slot is marked as complete, otherwise as booked
-      status = bookedSlot.complete ? 'complete' : 'booked';
-    } else if (!isUnavailableDay) {
-      if (isToday && (current + slotDuration) <= currentTimeInMinutes) {
-        status = 'unavailable';
-      } else {
-        status = 'available'; // Otherwise, mark as available
+    if(current >= availableStart && current < availableEnd){
+      console.log('current',current,availableStart,availableEnd)
+      if (unavailableSlots.includes(formattedSlotTime)) {
+        status = 'blocked'; // Mark as blocked if the slot is in unavailableSlots
+      } else if (bookedSlot) {
+        // Mark as complete if the slot is marked as complete, otherwise as booked
+        status = bookedSlot.complete ? 'complete' : 'booked';
+        console.log('bookedSlot',bookedSlot,status)
+      } else if (!isUnavailableDay) {
+        if (isToday && (current + slotDuration) <= currentTimeInMinutes ) {
+          console.log("unavailable")
+          status = 'unavailable';
+        } else {
+          status = 'available'; // Otherwise, mark as available
+        }
       }
     }
+
     
 // console.log('status',slots)
     slots.push({
-      time: slotString,
+      time: formattedSlotTime,
       status
     });
   }
@@ -653,7 +752,16 @@ generateDoctorSlots(availableFrom: string, slotDuration: number, bookedSlots: { 
   return slots;
 }
 
-
+convertTo12HourFormat(time: string): string {
+  let [hours, minutes] = time.split(':').map(Number);
+  const period = hours >= 12 ? 'PM' : 'AM';
+  
+  // Convert hours to 12-hour format
+  hours = hours % 12;
+  hours = hours ? hours : 12; // If hour is 0, set to 12 (for 12 AM/PM)
+  
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${period}`;
+}
 
   // Utility function to convert time in "HH:mm" format to minutes
   stringToMinutes(time: string): number {
@@ -685,13 +793,41 @@ generateDoctorSlots(availableFrom: string, slotDuration: number, bookedSlots: { 
     const isPastDate = this.formatDate(this.selectedDate) < today.toLocaleDateString('en-Ca');
 
     for (let current = availableStart; current < availableEnd; current += slotDuration) {
-      const slotTime = this.minutesToString(current);
+      // const slotTime = this.minutesToString(current);
       const nextSlotTime = this.minutesToString(current + slotDuration);
-      const slotString = `${slotTime}-${nextSlotTime}`;
+      const slotTime = this.minutesToString(current);
+      const formattedSlotTime = this.convertTo12HourFormat(slotTime);
+      // const slotString = `${slotTime}-${nextSlotTime}`;
+
       // console.log("current",current,'currentTimeInMinutes',currentTimeInMinutes)
       // console.log('slotString',slotString,slotTime,nextSlotTime)
       let status: Slot['status'] = 'unavailable'; // Default to available
-      const bookedSlot = bookedSlots.find(slot => slot.time === slotString);
+      // const bookedSlot = bookedSlots.find(slot => {
+      //   const [bookedStartTime] = slot.time.split('-'); // Extract start time from "10:00-10:20"
+      //   const formattedBookedStartTime = this.convertTo12HourFormat(bookedStartTime); // Convert to 12-hour format
+      //   return formattedBookedStartTime === formattedSlotTime; // Compare with the generated slot time
+      // });
+      const bookedSlot = bookedSlots.find(slot => {
+        const [bookedStartTime] = slot.time.split('-'); // Extract start time from "10:00-10:20"
+        
+        // Function to determine if the time is already in 12-hour format
+        const is12HourFormat = (time: string): boolean => {
+          return time.includes('AM') || time.includes('PM');
+        };
+      
+        let formattedBookedStartTime: string;
+      
+        if (is12HourFormat(bookedStartTime)) {
+          // If the booked start time is already in 12-hour format, use it directly
+          formattedBookedStartTime = bookedStartTime;
+        } else {
+          // If it is in 24-hour format, convert it to 12-hour format
+          formattedBookedStartTime = this.convertTo12HourFormat(bookedStartTime);
+        }
+      
+        return formattedBookedStartTime === formattedSlotTime; // Compare with the generated slot time
+      });
+      
       
       // if (isToday) {
       //   // For today, check if the slot has passed based on the current time
@@ -723,7 +859,7 @@ generateDoctorSlots(availableFrom: string, slotDuration: number, bookedSlots: { 
       status = bookedSlot.complete ? 'complete' : 'booked';
     } 
       slots.push({
-        time: slotString,
+        time: formattedSlotTime,
         status
       });
     }

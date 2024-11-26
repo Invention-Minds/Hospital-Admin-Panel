@@ -321,7 +321,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4px;
+  padding: 6px 10px;
 
   border-radius: 4px;
   text-align: center;
@@ -342,7 +342,11 @@
   color: white;
   cursor: pointer;
 }
-
+.blocked{
+  background-color: #6F46C1; /* Red for Booked */
+  color: white;
+  cursor: not-allowed;
+}
 .slot-unavailable {
   background-color: #c5c5c5; /* Grey for Unavailable */
   color: #dcdcdc;

@@ -49,6 +49,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
   minDate: Date = new Date();  // Set default values
   maxDate: Date = new Date();  // Set default values
   unavailableSlotsPerDate: { [date: string]: { label: string; value: string }[] } = {};
+  modifiedDay: keyof Doctor['availabilityDays'] | null = null;
 
 
   constructor(private doctorService: DoctorServiceService, private changeDetector: ChangeDetectorRef,private datePipe: DatePipe,private messageService: MessageService) { }
@@ -182,6 +183,31 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
   //     });
   //   }
   // }
+  onAvailabilityChange(day: keyof Doctor['availabilityDays']): void {
+    this.modifiedDay = day;
+    console.log('Modified day set to:', this.modifiedDay);
+    this.changeDetector.detectChanges();
+  }
+  
+  getModifiedDay(): number | undefined {
+    console.log('Modified day before conversion:', this.modifiedDay);
+    if (this.modifiedDay) {
+      const dayIndexMap: { [key: string]: number } = {
+        sun: 0,
+        mon: 1,
+        tue: 2,
+        wed: 3,
+        thu: 4,
+        fri: 5,
+        sat: 6,
+      };
+  
+      console.log('Returning day index:', dayIndexMap[this.modifiedDay]);
+      return dayIndexMap[this.modifiedDay];
+    }
+    return undefined;
+  }
+  
   private initializeIndividualAvailability(): void {
     this.availabilityDaysList.forEach(day => {
       this.individualAvailability[day] = {
@@ -346,6 +372,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
         this.generalSlotDuration = this.doctor.availability[0].slotDuration;
       }
     }
+    console.log(this.useSameTimeForAllDays)
   }
 
 
@@ -413,9 +440,10 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
   
     if (this.doctor.id) {
       const doctorid = (this.doctor.id);
-
+      
+      if(this.useSameTimeForAllDays){
       // Step 1: Check if there are future booked slots for this doctor
-      this.doctorService.getFutureBookedSlots(doctorid.toString(), formattedDate).subscribe(
+      this.doctorService.getFutureBookedSlots(doctorid.toString(), formattedDate,false).subscribe(
         (slots) => {
           
           if (slots.length > 0) {
@@ -439,12 +467,79 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
           });
         }
       );
-    } else {
-      // If it's a new doctor, just proceed to save
-      this.saveDoctorDetails();
     }
+    else{
+      // const dayOfWeek = this.selectedDate?.getDay() ?? today.getDay();
+      // this.doctorService.getFutureBookedSlots(doctorid.toString(), formattedDate, true, ).subscribe(
+      //   (slots) => {
+      //     console.log(slots)
+      //     if (slots.length > 0) {
+      //       // Step 2: If future booked slots exist, show an error message
+      //       this.messageService.add({
+      //         severity: 'error',
+      //         summary: 'Doctor Update Error',
+      //         detail: 'This doctor has future booked slots for the specific day. Please cancel them before making changes.'
+      //       });
+      //     } else {
+      //       // Step 3: Proceed with saving doctor details if no future booked slots exist
+      //       this.saveDoctorDetails();
+      //     }
+      //   },
+      //   (error) => {
+      //     console.error('Error fetching future booked slots:', error);
+      //     this.messageService.add({
+      //       severity: 'error',
+      //       summary: 'Error',
+      //       detail: 'Unable to check booked slots. Please try again later.'
+      //     });
+      //   }
+      // );
+
+        // Assuming each input box corresponds to a day, you can detect which day is being modified.
+        const dayOfWeek = this.getModifiedDay();
+        console.log(dayOfWeek)
+      
+        if (dayOfWeek !== undefined) {
+          // Send the modified day to the backend for checking
+          this.doctorService.getFutureBookedSlots(doctorid.toString(), formattedDate, true, dayOfWeek).subscribe(
+            (slots) => {
+              console.log(slots);
+              if (slots.length > 0) {
+                // Step 2: If future booked slots exist, show an error message
+                this.messageService.add({
+                  severity: 'error',
+                  summary: 'Doctor Update Error',
+                  detail: 'This doctor has future booked slots for the specific day. Please cancel them before making changes.'
+                });
+              } else {
+                // Step 3: Proceed with saving doctor details if no future booked slots exist
+                this.saveDoctorDetails();
+              }
+            },
+            (error) => {
+              console.error('Error fetching future booked slots:', error);
+              this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: 'Unable to check booked slots. Please try again later.'
+              });
+            }
+          );
+        } else {
+          // Handle the case where no specific day is modified
+          console.error('No specific day was detected for modification.');
+        }
+      
+      
+    } 
+  
     
   }
+  else {
+    // If it's a new doctor, just proceed to save
+    this.saveDoctorDetails();
+  }
+}
   
   // Refactored method to handle the actual save operation
   private saveDoctorDetails(): void {

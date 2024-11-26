@@ -62,7 +62,7 @@ export class AppointmentFormComponent implements OnInit {
   minDate: string = '';
   @Input() doctorAvailability: Doctor | null = null;
   @Input() slot!: any;
-  @Input() date!:any;
+  @Input() date!: any;
   @Input() isBookedSlot: boolean = false; // Add input to accept the value from parent component
   @Input() currentAppointment: Appointment | null = null;
   @Output() statusChange = new EventEmitter<{ slotTime: string; status: 'available' | 'booked' | 'unavailable' | 'complete' }>();
@@ -89,14 +89,14 @@ export class AppointmentFormComponent implements OnInit {
     this.loadDoctors();
 
 
- 
+
 
 
     // this.loadBookedSlots(); // Load booked slots from localStorage
     this.appointmentForm = this.fb.group({
       firstName: ['', [Validators.required, Validators.pattern(/^[a-zA-Z\s]*$/)]],
       lastName: ['', [Validators.pattern(/^[a-zA-Z.\s]*$/)]],
-      prnNumber: ['', [ Validators.pattern(/^[0-9]+$/)]],
+      prnNumber: ['', [Validators.pattern(/^[0-9]+$/)]],
       phoneNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
       email: ['', [Validators.email, Validators.pattern(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)]],
       doctorName: ['', [Validators.required, Validators.pattern(/^[a-zA-Z().\s]*$/)]],
@@ -189,27 +189,27 @@ export class AppointmentFormComponent implements OnInit {
       })
       // this.availableSlots = this.appointmentForm.get('appointmentTime')?.value;
       // console.log('available',this.availableSlots)
-    } 
-    else if(this.doctorAvailability && this.slot){
-      console.log(this.doctorAvailability,this.date)
+    }
+    else if (this.doctorAvailability && this.slot) {
+      console.log(this.doctorAvailability, this.date)
       this.date = this.formatDate(this.date)
       console.log(this.slot.time)
       this.checkDoctorAvailabilityAndLoadSlots(this.doctorAvailability.id, this.date)
-      console.log(typeof(String(this.slot.time)))
-        this.appointmentForm.patchValue({
-          doctorName: this.doctorAvailability!.name,
-          appointmentDate: this.date,
-          appointmentTime: this.slot.time,
-        });
-        
-        // console.log(this.availableSlots)
-        // if(this.currentAppointment!.status === "completed"){
+      console.log(typeof (String(this.slot.time)))
+      this.appointmentForm.patchValue({
+        doctorName: this.doctorAvailability!.name,
+        appointmentDate: this.date,
+        appointmentTime: this.slot.time,
+      });
 
-        // }
-        // const .match = this.availableSlots.includes(this.slot.time);
-        // console.log(match)
-        // this.appointmentForm.get('appointmentTime')?.setValue(this.slot.time);
-      
+      // console.log(this.availableSlots)
+      // if(this.currentAppointment!.status === "completed"){
+
+      // }
+      // const .match = this.availableSlots.includes(this.slot.time);
+      // console.log(match)
+      // this.appointmentForm.get('appointmentTime')?.setValue(this.slot.time);
+
     }
     else {
       // New appointment - load available slots when the doctor or date changes.
@@ -237,7 +237,7 @@ export class AppointmentFormComponent implements OnInit {
     this.appointmentService.getPatientById(patientId).subscribe({
       next: (response) => {
         const prnNumber = response.prn;
-        
+
 
         // Update the form with the fetched PRN number
         this.appointmentForm.patchValue({ prnNumber: prnNumber });
@@ -278,12 +278,12 @@ export class AppointmentFormComponent implements OnInit {
       const nameB = b.name.toLowerCase().replace(/^dr\.\s*/, ''); // Remove "Dr." prefix and normalize case
       return nameA.localeCompare(nameB); // Perform the comparison
     });
-    this.filteredDoctors = this.doctors.filter(doctor =>{
+    this.filteredDoctors = this.doctors.filter(doctor => {
       // doctor.name.toLowerCase().startsWith(doctorNameInput)
       const normalizedDoctorName = doctor.name.toLowerCase().replace(/^dr\.\s*/, ''); // Remove "Dr." prefix
       return normalizedDoctorName.startsWith(doctorNameInput);
-    
-  });
+
+    });
 
     // If the input is empty or there are no matches, hide the suggestions
     this.showDoctorSuggestions = this.filteredDoctors.length > 0 && doctorNameInput.length > 0;
@@ -407,94 +407,156 @@ export class AppointmentFormComponent implements OnInit {
         if (availability && availability.availableFrom) {
           const [start, end] = availability.availableFrom.split('-');
           const slotDuration = availability.slotDuration;
+          console.log(start,end,slotDuration)
           let generatedSlots = this.generateTimeSlots(start, end, slotDuration);
+          console.log(generatedSlots)
           const today = new Date();
           const selectedDate = new Date(date);
-         
+
+          // if (selectedDate.toDateString() === today.toDateString() && !this.isBookedSlot) {
+          //   console.log("today")
+          //   const currentTimeInMinutes = today.getHours() * 60 + today.getMinutes();
+          //   generatedSlots = generatedSlots.filter(slot => {
+          //     const [startTime] = slot.split('-');
+          //     const [startHour, startMinute] = startTime.split(':').map(Number);
+          //     const slotTimeInMinutes = startHour * 60 + startMinute;
+          //     return slotTimeInMinutes > currentTimeInMinutes;
+          //   });
+          // }
           if (selectedDate.toDateString() === today.toDateString() && !this.isBookedSlot) {
-            console.log("today")
+            console.log("today");
+            
+            // Get current time in minutes
             const currentTimeInMinutes = today.getHours() * 60 + today.getMinutes();
+          
+            // Filter generatedSlots to only include future slots
             generatedSlots = generatedSlots.filter(slot => {
-              const [startTime] = slot.split('-');
-              const [startHour, startMinute] = startTime.split(':').map(Number);
-              const slotTimeInMinutes = startHour * 60 + startMinute;
+              // Extract the time and period (AM/PM) from the slot
+              const [time, period] = slot.split(' '); // Example: "09:00 AM" -> ["09:00", "AM"]
+              let [hours, minutes] = time.split(':').map(Number); // Example: "09:00" -> [9, 0]
+          
+              // Convert hours based on AM/PM
+              if (period === 'PM' && hours !== 12) {
+                hours += 12; // Convert PM hour to 24-hour format (e.g., 1 PM -> 13)
+              } else if (period === 'AM' && hours === 12) {
+                hours = 0; // Convert 12 AM to 0 hours (midnight)
+              }
+          
+              // Calculate slot time in minutes
+              const slotTimeInMinutes = hours * 60 + minutes;
+          
+              // Return true if the slot time is greater than the current time in minutes
               return slotTimeInMinutes > currentTimeInMinutes;
             });
           }
+          
 
           this.availableSlots = generatedSlots;
-          if(this.isBookedSlot){
+          console.log(this.availableSlots, "in current")
+          this.doctorService.getExtraSlots(doctorId, date).subscribe(
+            (extraSlots: { date: string; time: string }[]) => {
+              // Extract times from extra slots
+              const extraSlotTimes = extraSlots.map(slot => slot.time);
+              console.log(extraSlotTimes);
+
+              // Add extra slots to generatedSlots if they are not already added
+              extraSlotTimes.forEach(extraSlot => {
+                // extraSlot = this.convertTo12HourFormat(extraSlot)
+                console.log(extraSlot)
+                const isAlreadyAdded = this.availableSlots.includes(extraSlot);
+                if (!isAlreadyAdded) {
+                  this.availableSlots.push(extraSlot);
+                }
+              });
+            });
+          if (this.isBookedSlot) {
             this.availableSlots = [...this.availableSlots, this.slot.time];
           }
-          else{
+          else {
             // Remove the slots that are already booked for that date
-          this.appointmentService.getBookedSlots(doctorId, date).subscribe(
-            (bookedSlots: { time: string; complete: boolean }[]) => {
-              const nonCompleteBookedSlots = bookedSlots.filter(slot => !slot.complete).map(slot => slot.time);
-              // console.log(bookedSlots, "booked")
+            this.appointmentService.getBookedSlots(doctorId, date).subscribe(
+              (bookedSlots: { time: string; complete: boolean }[]) => {
+                const nonCompleteBookedSlots = bookedSlots.filter(slot => !slot.complete).map(slot => slot.time);
+                console.log(nonCompleteBookedSlots,"booked")
+                // console.log(bookedSlots, "booked")
 
-              // this.availableSlots = this.availableSlots.filter(
-              //   (slot) => !bookedSlots.includes(slot)
-              // );
-              this.doctorService.getUnavailableSlots(doctorId).subscribe(
-                (unavailableSlots: { [date: string]: string[] }) => {
-                  const unavailableSlotsForDate = unavailableSlots[date] || [];
-                  if (this.appointment && this.appointment.date === date && this.appointment.doctorId === doctorId) {
-                    const currentSelectedTime = this.appointment.time;
-                    // if(this.isBookedSlot){
-                    //   console.log("if")
-                    //   this.availableSlots = [...this.availableSlots], this.slot.time;
-                    //   console.log(this.availableSlots)
-                    // }
-                    
+                // this.availableSlots = this.availableSlots.filter(
+                //   (slot) => !bookedSlots.includes(slot)
+                // );
+                this.doctorService.getUnavailableSlots(doctorId).subscribe(
+                  (unavailableSlots: { [date: string]: string[] }) => {
+                    const unavailableSlotsForDate = unavailableSlots[date] || [];
+                    if (this.appointment && this.appointment.date === date && this.appointment.doctorId === doctorId) {
+                      const formatSlotIfNeeded = (slot: string): string => {
+                        // Determine if the slot is in 12-hour format
+                        return slot.includes('AM') || slot.includes('PM') ? slot : this.convertTo12HourFormat(slot);
+                      };
+                      const currentSelectedTime = this.appointment.time;
+                      // if(this.isBookedSlot){
+                      //   console.log("if")
+                      //   this.availableSlots = [...this.availableSlots], this.slot.time;
+                      //   console.log(this.availableSlots)
+                      // }
+                      const formattedBookedSlots = nonCompleteBookedSlots.map((bookedSlot) => formatSlotIfNeeded(bookedSlot.split('-')[0]));
+                      const formattedUnavailableSlots = unavailableSlotsForDate.map((unavailableSlot) => formatSlotIfNeeded(unavailableSlot.split('-')[0]));
+                      console.log(formattedBookedSlots, "booked", formattedUnavailableSlots)
+
                       console.log("else")
                       this.availableSlots = this.availableSlots.filter((slot) => {
-                        return slot === currentSelectedTime || (!nonCompleteBookedSlots.includes(slot) && !unavailableSlotsForDate.includes(slot));
+                        return slot === currentSelectedTime || (!formattedBookedSlots.includes(slot) && !formattedUnavailableSlots.includes(slot));
                       });
-                    
 
-                   
-                  } else {
-                    // For new appointments, remove all booked slots
-                    this.availableSlots = this.availableSlots.filter((slot) => (!nonCompleteBookedSlots.includes(slot) && !unavailableSlotsForDate.includes(slot)));
-                  }
-                });
-              // If editing an appointment, retain the currently selected time slot if it exists
-              if (
-                this.isBookedSlot &&
-                this.slot?.time &&
-                nonCompleteBookedSlots.includes(this.slot.time) &&
-                !this.availableSlots.includes(this.slot.time)
-              ) {
-                
-                this.availableSlots = [...this.availableSlots, this.slot.time];
-                console.log(this.availableSlots)
+
+
+                    } else {
+                      const formatSlotIfNeeded = (slot: string): string => {
+                        // Determine if the slot is in 12-hour format
+                        return slot.includes('AM') || slot.includes('PM') ? slot : this.convertTo12HourFormat(slot);
+                      };
+                      console.log(nonCompleteBookedSlots,unavailableSlotsForDate)
+                      const formattedBookedSlots = nonCompleteBookedSlots.map((bookedSlot) => formatSlotIfNeeded(bookedSlot.split('-')[0]));
+                      const formattedUnavailableSlots = unavailableSlotsForDate.map((unavailableSlot) => formatSlotIfNeeded(unavailableSlot.split('-')[0]));
+                      console.log(formattedBookedSlots, "booked", formattedUnavailableSlots)
+                      // For new appointments, remove all booked slots
+                      this.availableSlots = this.availableSlots.filter((slot) => (!formattedBookedSlots.includes(slot) && !formattedUnavailableSlots.includes(slot)));
+                    }
+                  });
+                // If editing an appointment, retain the currently selected time slot if it exists
+                if (
+                  this.isBookedSlot &&
+                  this.slot?.time &&
+                  nonCompleteBookedSlots.includes(this.slot.time) &&
+                  !this.availableSlots.includes(this.slot.time)
+                ) {
+
+                  this.availableSlots = [...this.availableSlots, this.slot.time];
+                  console.log(this.availableSlots)
+                }
+
+                if (this.availableSlots.length === 0) {
+                  this.showAvailabilityMessage = true;
+                  this.availabilityMessage = '*No slots available for the selected date';
+                } else {
+                  this.showAvailabilityMessage = false;
+                  this.availabilityMessage = '';
+                }
+
+                // Check if the currently selected time in the form is still available
+                const selectedTime = this.appointmentForm.get('appointmentTime')?.value;
+
+                if (selectedTime && !this.availableSlots.includes(selectedTime)) {
+                  this.showAvailabilityMessage = true;
+                  this.availabilityMessage = '*The selected time slot is no longer available. Please choose a different time.';
+                }
+              },
+              (error) => {
+                console.error('Error loading booked slots:', error);
               }
 
-              if (this.availableSlots.length === 0) {
-                this.showAvailabilityMessage = true;
-                this.availabilityMessage = '*No slots available for the selected date';
-              } else {
-                this.showAvailabilityMessage = false;
-                this.availabilityMessage = '';
-              }
-
-              // Check if the currently selected time in the form is still available
-              const selectedTime = this.appointmentForm.get('appointmentTime')?.value;
-
-              if (selectedTime && !this.availableSlots.includes(selectedTime)) {
-                this.showAvailabilityMessage = true;
-                this.availabilityMessage = '*The selected time slot is no longer available. Please choose a different time.';
-              }
-            },
-            (error) => {
-              console.error('Error loading booked slots:', error);
-            }
-
-          );
+            );
           }
 
-          
+
         } else {
           this.availableSlots = [];
         }
@@ -560,7 +622,7 @@ export class AppointmentFormComponent implements OnInit {
         next: (bookedSlots: { time: string; complete: boolean }[]) => {
           // Filter out booked slots that are complete
           const nonCompleteBookedSlots = bookedSlots.filter(slot => !slot.complete).map(slot => slot.time);
-          
+
           // Resolve with true if the given time is not included in non-complete booked slots (i.e., it's available)
           resolve(!nonCompleteBookedSlots.includes(time));
         },
@@ -590,21 +652,46 @@ export class AppointmentFormComponent implements OnInit {
 
   //   return slots;
   // }
+  // generateTimeSlots(startTime: string, endTime: string, slotDuration: number): string[] {
+  //   const slots = [];
+  //   let current = new Date(`1970-01-01T${startTime}`);
+  //   const end = new Date(`1970-01-01T${endTime}`);
+
+  //   while (current < end || current.toTimeString().substring(0, 5) === endTime) {
+  //     const slotStart = current.toTimeString().substring(0, 5);
+  //     current = new Date(current.getTime() + slotDuration * 60000);
+
+  //     const slotEnd = current.toTimeString().substring(0, 5);
+  //     slots.push(`${slotStart}-${slotEnd}`);
+  //   }
+
+  //   return slots;
+  // }
   generateTimeSlots(startTime: string, endTime: string, slotDuration: number): string[] {
     const slots = [];
     let current = new Date(`1970-01-01T${startTime}`);
     const end = new Date(`1970-01-01T${endTime}`);
-  
+
     while (current < end || current.toTimeString().substring(0, 5) === endTime) {
-      const slotStart = current.toTimeString().substring(0, 5);
+      const slotStart = this.convertTo12HourFormat(current.toTimeString());
       current = new Date(current.getTime() + slotDuration * 60000);
-  
-      const slotEnd = current.toTimeString().substring(0, 5);
-      slots.push(`${slotStart}-${slotEnd}`);
+   
+
+      slots.push(slotStart); // Only add the start time
     }
-  
+
     return slots;
   }
+
+  // Utility function to convert Date object to 12-hour format with AM/PM
+  convertTo12HourFormat(time: string): string {
+    const [hours, minutes] = time.split(':').map(Number);
+    const period = hours >= 12 ? 'PM' : 'AM';
+    const hours12 = hours % 12 || 12;
+    return `${hours12.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${period}`;
+  }
+
+
 
   // private loadBookedSlots() {
   //   this.bookedSlots = JSON.parse(localStorage.getItem('bookedSlots') || '{}');
@@ -622,11 +709,11 @@ export class AppointmentFormComponent implements OnInit {
       phoneNumber = phoneNumber.substring(2);
 
     }
-    console.log(typeof(appointment.time))
-    if(!this.isBookedSlot){
+    console.log(typeof (appointment.time))
+    if (!this.isBookedSlot) {
       appointment.status = 'Confirm';
-    } 
-    else{
+    }
+    else {
       appointment.status = 'Complete';
     }
     this.appointmentForm.patchValue({
@@ -686,8 +773,8 @@ export class AppointmentFormComponent implements OnInit {
   }
   private syncFormToModel(): void {
     if (!this.appointment || !this.appointmentForm) {
-        console.error("Appointment or Form is not defined");
-        return;
+      console.error("Appointment or Form is not defined");
+      return;
     }
 
     const formValues = this.appointmentForm.value;
@@ -705,82 +792,82 @@ export class AppointmentFormComponent implements OnInit {
     this.appointment.messageSent = true;
 
     // console.log("Updated Appointment:", this.appointment);
-}
-completeAppointment(appointment: Appointment) {
-  const appointmentId = appointment.id;
-  if(appointmentId !== undefined){
-    this.doctorService.markSlotAsComplete(appointment!.doctorId, appointment.date, appointment.time)
-      .subscribe(
-        response => {
-          console.log('Slot marked as complete:', response);
-          alert('Slot successfully marked as complete!');
-          // Update your view or refresh the slots list here as needed
-        },
-        error => {
-          console.error('Error marking slot as complete:', error);
-          alert('Failed to mark the slot as complete.');
-        }
-      );
-    this.appointmentService.checkedinAppointment(appointmentId).subscribe({
-      next: (response) => {
-        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Checked in successfully!' });
-        appointment.checkedIn = true; // Update the UI to reflect the checked-in status
-      },
-      error: (error) => {
-        console.error('Error during check-in:', error);
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to check-in' });
-      },
-    });
   }
-
-
-  this.saveToLocalStorage();
-  // Fetch doctor details to get the slot duration
-  this.doctorService.getDoctorDetails(appointment.doctorId).subscribe(
-    (doctor) => {
-
-      if (doctor && doctor.slotDuration) {
-
-        const delayTime = (doctor.slotDuration + 5) * 60 * 1000; // Add 5 minutes to the slot duration and convert to milliseconds
-        this.appointmentService.scheduleCompletion(appointment.id!, delayTime).subscribe({
-          next: () => {
-            // console.log('Appointment completion scheduled successfully');
-            this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Appointment completion scheduled successfully' });
+  completeAppointment(appointment: Appointment) {
+    const appointmentId = appointment.id;
+    if (appointmentId !== undefined) {
+      this.doctorService.markSlotAsComplete(appointment!.doctorId, appointment.date, appointment.time)
+        .subscribe(
+          response => {
+            console.log('Slot marked as complete:', response);
+            alert('Slot successfully marked as complete!');
+            // Update your view or refresh the slots list here as needed
           },
-          error: (error) => {
-            console.error('Error scheduling appointment completion:', error);
+          error => {
+            console.error('Error marking slot as complete:', error);
+            alert('Failed to mark the slot as complete.');
           }
-        });
-        
-      } else {
-        console.error('Slot duration not found for doctor:', doctor);
-      }
-    },
-    (error) => {
-      console.error('Error fetching doctor details:', error);
+        );
+      this.appointmentService.checkedinAppointment(appointmentId).subscribe({
+        next: (response) => {
+          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Checked in successfully!' });
+          appointment.checkedIn = true; // Update the UI to reflect the checked-in status
+        },
+        error: (error) => {
+          console.error('Error during check-in:', error);
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to check-in' });
+        },
+      });
     }
-  );
-}
-saveToLocalStorage(): void {
-  localStorage.setItem('appointments', JSON.stringify(this.completeAppointment));
-}
+
+
+    this.saveToLocalStorage();
+    // Fetch doctor details to get the slot duration
+    this.doctorService.getDoctorDetails(appointment.doctorId).subscribe(
+      (doctor) => {
+
+        if (doctor && doctor.slotDuration) {
+
+          const delayTime = (doctor.slotDuration + 5) * 60 * 1000; // Add 5 minutes to the slot duration and convert to milliseconds
+          this.appointmentService.scheduleCompletion(appointment.id!, delayTime).subscribe({
+            next: () => {
+              // console.log('Appointment completion scheduled successfully');
+              this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Appointment completion scheduled successfully' });
+            },
+            error: (error) => {
+              console.error('Error scheduling appointment completion:', error);
+            }
+          });
+
+        } else {
+          console.error('Slot duration not found for doctor:', doctor);
+        }
+      },
+      (error) => {
+        console.error('Error fetching doctor details:', error);
+      }
+    );
+  }
+  saveToLocalStorage(): void {
+    localStorage.setItem('appointments', JSON.stringify(this.completeAppointment));
+  }
   confirm() {
     if (!this.appointmentForm.valid) {
       this.messageService.add({ severity: 'warn', summary: 'Warn', detail: 'Some fields are not filled' });
     }
     console.log(this.appointmentForm.value)
-    if(this.appointmentForm.value.appointmentStatus === 'Cancel'){
-      
+    if (this.appointmentForm.value.appointmentStatus === 'Cancel') {
+
       this.close.emit();
       const selectedDoctor = this.getDoctorByName(this.appointmentForm.value.doctorName);
       const doctorId = selectedDoctor!.id;
-        const department = selectedDoctor!.departmentName ?? 'Default Department';
+      const department = selectedDoctor!.departmentName ?? 'Default Department';
       let phoneNumber = this.appointmentForm.value.phoneNumber;
 
-        if (!phoneNumber.startsWith('91')) {
-          phoneNumber = '91' + phoneNumber;
-        }
-        console.log(this.appointment)
+      if (!phoneNumber.startsWith('91')) {
+        phoneNumber = '91' + phoneNumber;
+      }
+      console.log(this.appointment)
       const appointmentDetails = {
         id: this.currentAppointment!.id,
         patientName: this.appointmentForm.value.firstName + ' ' + this.appointmentForm.value.lastName,
@@ -814,9 +901,9 @@ saveToLocalStorage(): void {
         }
       });
       this.doctorService.getDoctorDetails(appointmentDetails.doctorId).subscribe({
-        next: (response) =>{
+        next: (response) => {
           const doctorPhoneNumber = response?.phone_number;
-          const appointmentDetailsforMessage ={
+          const appointmentDetailsforMessage = {
             patientName: appointmentDetails?.patientName,
             doctorName: appointmentDetails?.doctorName,
             date: appointmentDetails?.date,
@@ -844,7 +931,7 @@ saveToLocalStorage(): void {
             }
           });
         }
-        
+
       });
       const appointmentDetailsforEmail = {
         patientName: appointmentDetails?.patientName,
@@ -853,7 +940,7 @@ saveToLocalStorage(): void {
         time: appointmentDetails?.time,
       };
       const patientEmail = appointmentDetails.email;
-  
+
       const emailStatus = 'cancelled';
       this.appointmentService.sendEmail(patientEmail, emailStatus, appointmentDetailsforEmail, 'patient').subscribe({
         next: (response) => {
@@ -865,26 +952,26 @@ saveToLocalStorage(): void {
         },
       });
     }
-    else if(this.appointmentForm.value.appointmentStatus === 'Complete'){ 
+    else if (this.appointmentForm.value.appointmentStatus === 'Complete') {
       this.completeAppointment(this.currentAppointment!);
-       // Emit the status change
+      // Emit the status change
       //  this.statusChange.emit({
       //   slotTime: this.currentAppointment!.time, // Assuming the slot time is available here
       //   status: 'complete'
       // });
       this.close.emit();
-      
+
     }
-    else{
-         this.statusChange.emit({
+    else {
+      this.statusChange.emit({
         slotTime: this.appointmentForm.value.time, // Assuming the slot time is available here
         status: 'booked'
       });
-      
+
       const currentStatus = this.appointment?.status || '';
       const newStatus = this.appointmentForm.get('appointmentStatus')?.value;
       // this.appointment.prnNumber=parseInt(this.appointmentForm.get('prnNumber')?.value);
-  
+
       if (this.appointment) {
         const newDate = this.appointmentForm.get('appointmentDate')?.value;
         const newTime = this.appointmentForm.get('appointmentTime')?.value;
@@ -902,30 +989,30 @@ saveToLocalStorage(): void {
         }
         const selectedDoctor = this.getDoctorByName(this.appointmentForm.value.doctorName);
         const doctorId = selectedDoctor!.id;
-          const department = selectedDoctor!.departmentName ?? 'Default Department';
+        const department = selectedDoctor!.departmentName ?? 'Default Department';
         let phoneNumber = this.appointmentForm.value.phoneNumber;
-  
-          if (!phoneNumber.startsWith('91')) {
-            phoneNumber = '91' + phoneNumber;
-          }
-          const appointmentDetails = {
-            id: this.appointment.id,
-            patientName: this.appointmentForm.value.firstName + ' ' + this.appointmentForm.value.lastName,
-            phoneNumber: phoneNumber,
-            doctorId: doctorId,
-            doctorName: this.appointmentForm.value.doctorName,
-            department: department, // Adjust as needed
-            date: this.appointmentForm.value.appointmentDate,
-            time: this.appointmentForm.value.appointmentTime,
-            requestVia: this.appointmentForm.value.requestVia,
-            status: this.appointmentForm.value.appointmentStatus,
-            email: this.appointmentForm.value.email,
-            smsSent: true,
-            emailSent: true,
-            messageSent: true,
-            prnNumber: parseInt(this.appointmentForm.value.prnNumber),
-          };
-          this.appointment = appointmentDetails;
+
+        if (!phoneNumber.startsWith('91')) {
+          phoneNumber = '91' + phoneNumber;
+        }
+        const appointmentDetails = {
+          id: this.appointment.id,
+          patientName: this.appointmentForm.value.firstName + ' ' + this.appointmentForm.value.lastName,
+          phoneNumber: phoneNumber,
+          doctorId: doctorId,
+          doctorName: this.appointmentForm.value.doctorName,
+          department: department, // Adjust as needed
+          date: this.appointmentForm.value.appointmentDate,
+          time: this.appointmentForm.value.appointmentTime,
+          requestVia: this.appointmentForm.value.requestVia,
+          status: this.appointmentForm.value.appointmentStatus,
+          email: this.appointmentForm.value.email,
+          smsSent: true,
+          emailSent: true,
+          messageSent: true,
+          prnNumber: parseInt(this.appointmentForm.value.prnNumber),
+        };
+        this.appointment = appointmentDetails;
         this.appointment.date = this.appointmentForm.get('appointmentDate')?.value;
         this.appointment.time = this.appointmentForm.get('appointmentTime')?.value;
         // console.log('appointment', this.appointment);
@@ -957,7 +1044,7 @@ saveToLocalStorage(): void {
               next: (response) => {
                 const doctorPhoneNumber = response?.phone_number;
                 let phoneNumber = this.appointment!.phoneNumber;
-    
+
                 if (!phoneNumber.startsWith('91')) {
                   phoneNumber = '91' + phoneNumber;
                 }
@@ -991,21 +1078,21 @@ saveToLocalStorage(): void {
                   }
                 });
               }
-              
+
             });
-    
-    
+
+
             this.doctorService.getDoctorDetails(this.appointment.doctorId).subscribe({
               next: (response) => {
                 const doctorEmail = response?.email;
                 const patientEmail = this.appointment?.email;
-    
+
                 // Ensure both emails are valid
                 if (!doctorEmail || !patientEmail) {
                   console.error('Doctor or patient email is missing.');
                   return;
                 }
-    
+
                 // Prepare appointment details for email
                 const appointmentDetails = {
                   patientName: this.appointment?.patientName,
@@ -1013,9 +1100,9 @@ saveToLocalStorage(): void {
                   date: this.appointment?.date,
                   time: this.appointment?.time,
                 };
-    
+
                 const status = 'rescheduled';
-    
+
                 // Send email to the doctor
                 // this.appointmentService.sendEmail(doctorEmail, status, appointmentDetails, 'doctor').subscribe({
                 //   next: (response) => {
@@ -1027,7 +1114,7 @@ saveToLocalStorage(): void {
                 //     this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending email to doctor' });
                 //   },
                 // });
-    
+
                 // Send email to the patient
                 this.appointmentService.sendEmail(patientEmail, status, appointmentDetails, 'patient').subscribe({
                   next: (response) => {
@@ -1050,10 +1137,10 @@ saveToLocalStorage(): void {
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'The appointment is rescheduled.' });
           this.appointmentService.removeCancelledAppointment(this.appointment.id!);
         } else {
-            // Store old date and time before making changes
-  const oldDate = this.oldDate
-  const oldTime = this.oldTime;
-  console.log("old date", oldDate, "old time", oldTime)
+          // Store old date and time before making changes
+          const oldDate = this.oldDate
+          const oldTime = this.oldTime;
+          console.log("old date", oldDate, "old time", oldTime)
           // console.log("new status,", newStatus,"current status", currentStatus)
           const appointmentDetails = {
             id: this.appointment.id,
@@ -1075,7 +1162,7 @@ saveToLocalStorage(): void {
           // console.log(appointmentDetails)
           this.appointment = appointmentDetails;
           // console.log("cancel to confirm")
-          this.syncFormToModel(); 
+          this.syncFormToModel();
           this.appointment.status = 'rescheduled';
           if (this.appointment.status === "rescheduled") {
             // this.appointmentService.addConfirmedAppointment(this.appointment)
@@ -1083,7 +1170,7 @@ saveToLocalStorage(): void {
               next: (response) => {
                 const doctorPhoneNumber = response?.phone_number;
                 let phoneNumber = this.appointment!.phoneNumber;
-    
+
                 if (!phoneNumber.startsWith('91')) {
                   phoneNumber = '91' + phoneNumber;
                 }
@@ -1117,21 +1204,21 @@ saveToLocalStorage(): void {
                   }
                 });
               }
-    
+
             });
-    
-    
+
+
             this.doctorService.getDoctorDetails(this.appointment.doctorId).subscribe({
               next: (response) => {
                 const doctorEmail = response?.email;
                 const patientEmail = this.appointment?.email;
-    
+
                 // Ensure both emails are valid
                 if (!doctorEmail || !patientEmail) {
                   console.error('Doctor or patient email is missing.');
                   return;
                 }
-    
+
                 // Prepare appointment details for email
                 const appointmentDetails = {
                   patientName: this.appointment?.patientName,
@@ -1139,9 +1226,9 @@ saveToLocalStorage(): void {
                   date: this.appointment?.date,
                   time: this.appointment?.time,
                 };
-    
+
                 const status = 'rescheduled';
-    
+
                 // Send email to the doctor
                 // this.appointmentService.sendEmail(doctorEmail, status, appointmentDetails, 'doctor').subscribe({
                 //   next: (response) => {
@@ -1153,7 +1240,7 @@ saveToLocalStorage(): void {
                 //     this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending email to doctor' });
                 //   },
                 // });
-    
+
                 // Send email to the patient
                 this.appointmentService.sendEmail(patientEmail, status, appointmentDetails, 'patient').subscribe({
                   next: (response) => {
@@ -1176,7 +1263,7 @@ saveToLocalStorage(): void {
             next: (response) => {
               // console.log('Cancelled slots:', response);
               const cancelledSlots = response;
-             console.log(cancelledSlots)
+              console.log(cancelledSlots)
             },
             error: (error) => {
               console.error('Error fetching cancelled slots:', error);
@@ -1186,30 +1273,30 @@ saveToLocalStorage(): void {
           this.addBookedSlot(this.appointment.doctorId, this.appointment.date, this.appointment.time);
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'The appointment is rescheduled.' });
         }
-  
+
         // const status = this.appointmentForm.get('appointmentStatus')?.value;
         const requestVia = this.appointmentForm.get('requestVia')?.value;
-  
+
         // if (status === 'Confirm' && this.appointment.status === 'Cancelled') {
         //   this.appointmentService.removeCancelledAppointment(this.appointment.id!);
         // }
         // this.appointment.status = status;
         // console.log('appointment', this.appointment);
         // console.log('time',this.appointmentForm.get('appointmentTime')?.value)
-        this.syncFormToModel(); 
+        this.syncFormToModel();
         this.submit.emit({ appointment: this.appointment, status: this.appointment.status, requestVia }); // Emit the data to the parent component
         this.showForm = false; // Close the form after submission
         // this.router.navigate(['/appointments']);
         // console.log("status of appointment", this.appointment.status)
-  
-  
+
+
         if (this.appointmentForm.value.appointmentStatus === "Confirm") {
           this.appointment.status = "confirmed"
         }
         // console.log(this.appointment.status)
         if (this.appointment.status === "confirmed" && this.appointment.isrescheduled === false) {
           // console.log('in form component', this.appointment);
-          this.appointment.prnNumber = parseInt( this.appointmentForm.get('prnNumber')?.value);
+          this.appointment.prnNumber = parseInt(this.appointmentForm.get('prnNumber')?.value);
           this.appointmentService.addConfirmedAppointment(this.appointment);
           this.messageService.add({
             severity: 'success',
@@ -1220,7 +1307,7 @@ saveToLocalStorage(): void {
             next: (response) => {
               const doctorPhoneNumber = response?.phone_number;
               let phoneNumber = this.appointment!.phoneNumber;
-  
+
               if (!phoneNumber.startsWith('91')) {
                 phoneNumber = '91' + phoneNumber;
               }
@@ -1254,21 +1341,21 @@ saveToLocalStorage(): void {
                 }
               });
             }
-  
+
           });
-  
-  
+
+
           this.doctorService.getDoctorDetails(this.appointment.doctorId).subscribe({
             next: (response) => {
               const doctorEmail = response?.email;
               const patientEmail = this.appointment?.email;
-  
+
               // Ensure both emails are valid
               if (!doctorEmail || !patientEmail) {
                 console.error('Doctor or patient email is missing.');
                 return;
               }
-  
+
               // Prepare appointment details for email
               const appointmentDetails = {
                 patientName: this.appointment?.patientName,
@@ -1276,9 +1363,9 @@ saveToLocalStorage(): void {
                 date: this.appointment?.date,
                 time: this.appointment?.time,
               };
-  
+
               const status = this.appointment!.status;
-  
+
               // // Send email to the doctor
               // this.appointmentService.sendEmail(doctorEmail, status, appointmentDetails, 'doctor').subscribe({
               //   next: (response) => {
@@ -1290,7 +1377,7 @@ saveToLocalStorage(): void {
               //     this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending email to doctor' });
               //   },
               // });
-  
+
               // Send email to the patient
               this.appointmentService.sendEmail(patientEmail, status, appointmentDetails, 'patient').subscribe({
                 next: (response) => {
@@ -1312,61 +1399,61 @@ saveToLocalStorage(): void {
         // this.addBookedSlot(this.appointment.doctorId, this.appointment.date, this.appointment.time);
       } else {
         const patientName = this.appointmentForm.value.firstName + ' ' + this.appointmentForm.value.lastName;
-      const prnNumber = parseInt(this.appointmentForm.value.prnNumber);
-      const phoneNumber = this.appointmentForm.value.phoneNumber;
-      const email = this.appointmentForm.value.email;
-  
-      // Save patient information to the Patient table
-      const patientDetails = {
-        prn: prnNumber,
-        name: patientName,
-        phoneNumber: phoneNumber,
-        email: email
-      };
-      // console.log('patient details', patientDetails);
-      this.appointmentService.addPatient(patientDetails).subscribe(
-        (patientResponse) => {
-          // console.log('Patient information saved successfully', patientResponse);
-          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Patient information saved successfully' });
-          const patientId = patientResponse.id;
-          this.appointmentForm.patchValue({ patientId: patientId });
-          this.appointment!.patientId = patientId;
-  
-          if (this.appointment && this.appointment.patientId !== undefined) {
-            this.appointmentService.getPatientById(this.appointment.patientId).subscribe({
-              next: (response) => {
-                const prnNumber = response.prn;
-                this.appointmentForm.patchValue({ prnNumber: prnNumber });
-                // console.log('Fetched PRN:', prnNumber);
-              },
-              error: (error) => {
-                console.error('Error fetching patient details:', error);
-              }
-            });
-          } else {
-            console.error('Patient ID is undefined. Cannot fetch patient details.');
+        const prnNumber = parseInt(this.appointmentForm.value.prnNumber);
+        const phoneNumber = this.appointmentForm.value.phoneNumber;
+        const email = this.appointmentForm.value.email;
+
+        // Save patient information to the Patient table
+        const patientDetails = {
+          prn: prnNumber,
+          name: patientName,
+          phoneNumber: phoneNumber,
+          email: email
+        };
+        // console.log('patient details', patientDetails);
+        this.appointmentService.addPatient(patientDetails).subscribe(
+          (patientResponse) => {
+            // console.log('Patient information saved successfully', patientResponse);
+            this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Patient information saved successfully' });
+            const patientId = patientResponse.id;
+            this.appointmentForm.patchValue({ patientId: patientId });
+            this.appointment!.patientId = patientId;
+
+            if (this.appointment && this.appointment.patientId !== undefined) {
+              this.appointmentService.getPatientById(this.appointment.patientId).subscribe({
+                next: (response) => {
+                  const prnNumber = response.prn;
+                  this.appointmentForm.patchValue({ prnNumber: prnNumber });
+                  // console.log('Fetched PRN:', prnNumber);
+                },
+                error: (error) => {
+                  console.error('Error fetching patient details:', error);
+                }
+              });
+            } else {
+              console.error('Patient ID is undefined. Cannot fetch patient details.');
+            }
+          },
+          (error) => {
+            console.error('Error saving patient information:', error);
           }
-        },
-        (error) => {
-          console.error('Error saving patient information:', error);
-        }
-      );
-  
-  
+        );
+
+
         const doctorId = this.getDoctorIdByName(this.appointmentForm.value.doctorName);
-        
-  
+
+
         if (doctorId === undefined) {
           console.error('Doctor ID not found for the given doctor name.');
           return; // Optionally, stop execution if doctor ID is required
         }
         const selectedDoctor = this.getDoctorByName(this.appointmentForm.value.doctorName);
-  
+
         if (selectedDoctor) {
           const doctorId = selectedDoctor.id;
           const department = selectedDoctor.departmentName ?? 'Default Department'; // Assuming departmentName is a property in the doctor model
           let phoneNumber = this.appointmentForm.value.phoneNumber;
-  
+
           if (!phoneNumber.startsWith('91')) {
             phoneNumber = '91' + phoneNumber;
           }
@@ -1388,7 +1475,7 @@ saveToLocalStorage(): void {
           };
           this.appointment = appointmentDetails;
           // Mark the slot as booked
-  
+
           if (this.appointmentForm.value.appointmentStatus === "Confirm") {
             this.appointment.status = "confirmed"
           }
@@ -1431,19 +1518,19 @@ saveToLocalStorage(): void {
                   }
                 });
               }
-  
+
             });
             this.doctorService.getDoctorDetails(this.appointment.doctorId).subscribe({
               next: (response) => {
                 const doctorEmail = response?.email;
                 const patientEmail = this.appointment?.email;
-  
+
                 // Ensure both emails are valid
                 if (!doctorEmail || !patientEmail) {
                   console.error('Doctor or patient email is missing.');
                   return;
                 }
-  
+
                 // Prepare appointment details for email
                 const appointmentDetails = {
                   patientName: this.appointment?.patientName,
@@ -1451,9 +1538,9 @@ saveToLocalStorage(): void {
                   date: this.appointment?.date,
                   time: this.appointment?.time,
                 };
-  
+
                 const status = 'confirmed';
-  
+
                 // Send email to the doctor
                 // this.appointmentService.sendEmail(doctorEmail, status, appointmentDetails, 'doctor').subscribe({
                 //   next: (response) => {
@@ -1465,7 +1552,7 @@ saveToLocalStorage(): void {
                 //     this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending email to doctor' });
                 //   },
                 // });
-  
+
                 // Send email to the patient
                 this.appointmentService.sendEmail(patientEmail, status, appointmentDetails, 'patient').subscribe({
                   next: (response) => {
@@ -1482,22 +1569,22 @@ saveToLocalStorage(): void {
                 console.error('Error in getting doctor details:', error);
               },
             });
-  
-  
+
+
             // this.addBookedSlot(this.appointment.doctorId, this.appointment.date, this.appointment.time);
           }
           // if (this.appointment?.requestVia === "Call") {
           //   this.appointment.status = "confirmed";
           //   this.appointmentService.addConfirmedAppointment(this.appointment);
           // }
-  
+
           // If creating a new appointment, add it (no id needed)
           this.appointmentService.addNewAppointment(appointmentDetails);
-          
-  
+
+
           this.showForm = false; // Close the form after submission
         }
-  
+
         // if (this.appointment?.requestVia === "Call" || this.appointment?.requestVia === "Walk-In") {
         //   this.appointment.status = "confirmed";
         //   this.appointmentService.addConfirmedAppointment(this.appointment);
@@ -1505,8 +1592,8 @@ saveToLocalStorage(): void {
         // }
       }
     }
-    
-   
+
+
 
   }
 

@@ -41,12 +41,26 @@ export class DoctorServiceService {
     return this.http.get<Doctor[]>(url);
   }
 
-    getFutureBookedSlots( doctorId: string,date: string): Observable<any> {
-      const params = new HttpParams() .set('doctorId', doctorId)
-      .set('date', date);
+    // getFutureBookedSlots( doctorId: string,date: string): Observable<any> {
+    //   const params = new HttpParams() .set('doctorId', doctorId)
+    //   .set('date', date);
+    //   return this.http.get(`${this.apiUrl}/doctors/futureBookedSlots`, { params });
+    // }
+
+    getFutureBookedSlots(doctorId: string, date: string, individualAvailability: boolean = false, dayOfWeek?: number): Observable<any> {
+      let params = new HttpParams()
+        .set('doctorId', doctorId)
+        .set('date', date)
+        .set('individualAvailability', individualAvailability.toString()); // Add individual availability flag
+    
+      // If individual availability is true, also add the day of the week
+      if (individualAvailability && dayOfWeek !== undefined) {
+        params = params.set('dayOfWeek', dayOfWeek);
+      }
+    
       return this.http.get(`${this.apiUrl}/doctors/futureBookedSlots`, { params });
     }
-
+    
 
   // Create new doctor
   createDoctor(doctor: Doctor): Observable<Doctor> {
@@ -113,4 +127,16 @@ export class DoctorServiceService {
       endDate
     });
   }
+  addExtraSlots(doctorId: number, date: string, time: string[]): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/doctors/add-extra-slots`, { doctorId, date, time });
+  }
+  getExtraSlots(doctorId: number, date?: string): Observable<{ date: string; time: string }[]> {
+    let url = `${this.apiUrl}/doctors/${doctorId}/extraSlots`;
+    if (date) {
+      url += `?date=${date}`;
+    }
+    return this.http.get<{ date: string; time: string }[]>(url);
+  }
+  
+  
 }

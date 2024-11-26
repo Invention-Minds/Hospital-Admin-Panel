@@ -55,6 +55,7 @@
              class="slot-box"
              [pTooltip]="
              slot.status === 'booked' ? 'Booked' : 
+             slot.status === 'extra' ? 'Extra':
              slot.status === 'blocked' ? 'Blocked':
              slot.status === 'unavailable' ? 'Unavailable' :
              slot.status === 'available' ? 'Available' :
@@ -65,6 +66,7 @@
                'slot-booked': slot.status === 'booked',
                'slot-unavailable': slot.status === 'unavailable',
                'complete': slot.status === 'complete',
+                'blocked': slot.status === 'extra',
                'unavailale-slot-by-user': doctor.unavailableSlots!.includes(slot.time)
              }"
            (click)="onSlotClick(doctor,slot)" >

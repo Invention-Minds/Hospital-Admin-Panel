@@ -5,6 +5,7 @@ import { AuthServiceService } from '../../services/auth/auth-service.service';
 import { Router } from '@angular/router';
 import { HttpHeaders } from '@angular/common/http';
 import { MessageService } from 'primeng/api';
+import moment from 'moment-timezone';
 
 // export enum UserRole {
 //   admin = 'admin',
@@ -111,6 +112,18 @@ export class SettingsComponent implements OnInit {
     this.authService.getAllUsers().subscribe(
       (data) => {
         this.users = data;
+        this.users = this.users.map(user => {
+          const createdAt = new Date(user.createdAt);
+          const indianTime = moment.tz(createdAt, "America/New_York").tz("Asia/Kolkata");
+    
+          // Store the date and time in two separate variables
+          const indianDate = indianTime.format('YYYY-MM-DD');
+          const indianTimeOnly = indianTime.format('HH:mm:ss');
+          user.createdAt = indianDate + ' ' + indianTimeOnly;
+    
+          return user;
+        });
+        console.log('Users loaded successfully:', this.users);
         this.firstNames = this.users.map(user => this.extractFirstName(user.username));
         
         // console.log('Users loaded successfully:', this.users);

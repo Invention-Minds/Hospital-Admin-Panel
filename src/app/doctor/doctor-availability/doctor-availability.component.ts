@@ -36,6 +36,9 @@ export class DoctorAvailabilityComponent {
   unavailableSlots: string[] = [];
   slotComplete:boolean = false;
   isUpdateButtonDisabled: boolean = false;
+  currentPage: number = 1;
+  itemsPerPage: number = 10;
+  totalPages: number = 1;
 
 
 
@@ -295,22 +298,73 @@ private getDayString(date: Date): keyof Doctor['availabilityDays'] {
 departmentSearchQuery: string = '';
 doctorSearchQuery: string = '';
 
+// applySearchFilter(): void {
+//   let filteredDoctors = [];
+//   if (this.departmentSearchQuery.trim() === '' && this.doctorSearchQuery.trim() === '') {
+//     // If both search fields are empty, show all doctors
+//     this.filteredDoctors = this.doctors.sort((a, b) =>
+//       this.stripPrefix(a.name).localeCompare(this.stripPrefix(b.name))
+//     );
+//     // console.log(this.doctors);
+//   } else {
+//     this.filteredDoctors = this.doctors.filter(doctor => {
+//       const matchesDepartment = this.departmentSearchQuery.trim() === '' || doctor.departmentName?.toLowerCase().includes(this.departmentSearchQuery.toLowerCase());
+//       const matchesDoctor = this.doctorSearchQuery.trim() === '' || doctor.name.toLowerCase().includes(this.doctorSearchQuery.toLowerCase());
+//       return matchesDepartment && matchesDoctor; // Match both department and doctor name
+//     });
+//     // console.log(this.filteredDoctors);
+//   }
+//   applySearchFilter
+// }
 applySearchFilter(): void {
+  let filteredDoctors = [];
+
   if (this.departmentSearchQuery.trim() === '' && this.doctorSearchQuery.trim() === '') {
     // If both search fields are empty, show all doctors
-    this.filteredDoctors = this.doctors.sort((a, b) =>
+    filteredDoctors = this.doctors.sort((a, b) =>
       this.stripPrefix(a.name).localeCompare(this.stripPrefix(b.name))
     );
-    // console.log(this.doctors);
   } else {
-    this.filteredDoctors = this.doctors.filter(doctor => {
+    filteredDoctors = this.doctors.filter(doctor => {
       const matchesDepartment = this.departmentSearchQuery.trim() === '' || doctor.departmentName?.toLowerCase().includes(this.departmentSearchQuery.toLowerCase());
       const matchesDoctor = this.doctorSearchQuery.trim() === '' || doctor.name.toLowerCase().includes(this.doctorSearchQuery.toLowerCase());
-      return matchesDepartment && matchesDoctor; // Match both department and doctor name
+      return matchesDepartment && matchesDoctor;
     });
-    // console.log(this.filteredDoctors);
+  }
+
+  this.totalPages = Math.ceil(filteredDoctors.length / this.itemsPerPage);
+  this.filteredDoctors = filteredDoctors.slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage);
+}
+nextPage(): void {
+  if (this.currentPage < this.totalPages) {
+    this.currentPage++;
+    this.applySearchFilter();
   }
 }
+
+prevPage(): void {
+  if (this.currentPage > 1) {
+    this.currentPage--;
+    this.applySearchFilter();
+  }
+}
+
+goToPage(pageNumber: number): void {
+  if (pageNumber >= 1 && pageNumber <= this.totalPages) {
+    this.currentPage = pageNumber;
+    this.applySearchFilter();
+  }
+}
+onPageInputChange(): void {
+  if (this.currentPage < 1) {
+    this.currentPage = 1;
+  } else if (this.currentPage > this.totalPages) {
+    this.currentPage = this.totalPages;
+  }
+  this.applySearchFilter();
+}
+
+
 // Utility function to strip prefixes
 stripPrefix(name: string): string {
   return name.replace(/^(Dr\.|Ms\.|Mr\.|Mrs\.)\s*/i, '').trim();

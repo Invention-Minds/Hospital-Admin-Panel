@@ -261,6 +261,7 @@
               <th>No</th>
               <th>Staff Name</th>
               <th>Role</th>
+              <th>Account Created Date</th>
               <th>Log In Date</th>
               <th>Log In Time</th>
             </tr>
@@ -270,6 +271,7 @@
               <td>{{ i + 1 }}</td>
               <td>{{ firstNames[i] }}</td>
               <td>{{ staff.role }}</td>
+              <td>{{staff.createdAt}}</td>
               <td>{{ staff.loggedInDate }}</td>
               <td>{{ staff.loggedInTime}}</td>
             </tr>

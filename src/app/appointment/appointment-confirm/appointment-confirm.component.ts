@@ -437,6 +437,18 @@ export class AppointmentConfirmComponent {
   completeAppointment(appointment: Appointment) {
     const appointmentId = appointment.id;
     if(appointmentId !== undefined){
+      this.doctorService.markSlotAsComplete(appointment!.doctorId, appointment.date, appointment.time)
+      .subscribe(
+        response => {
+          console.log('Slot marked as complete:', response);
+          // alert('Slot successfully marked as complete!');
+          // Update your view or refresh the slots list here as needed
+        },
+        error => {
+          console.error('Error marking slot as complete:', error);
+          alert('Failed to mark the slot as complete.');
+        }
+      );
       this.appointmentService.checkedinAppointment(appointmentId).subscribe({
         next: (response) => {
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Checked in successfully!' });

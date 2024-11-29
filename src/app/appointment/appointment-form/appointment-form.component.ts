@@ -171,6 +171,13 @@ export class AppointmentFormComponent implements OnInit {
         .catch(error => {
           console.error('Error checking slot availability:', error);
         });
+        this.appointmentForm.get('doctorName')?.valueChanges.subscribe(doctorName => {
+          const date = this.appointmentForm.get('appointmentDate')?.value;
+          const doctorId = this.getDoctorIdByName(doctorName);
+          if (doctorId && date) {
+            this.checkDoctorAvailabilityAndLoadSlots(doctorId, date)
+          }
+        });
       this.appointmentForm.get('appointmentDate')?.valueChanges.subscribe(date => {
         const doctorName = this.appointmentForm.get('doctorName')?.value;
         const doctorId = this.getDoctorIdByName(doctorName);

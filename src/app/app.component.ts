@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
+import { InactivityService } from './services/inactivity.service';
 
 @Component({
   selector: 'app-root',
@@ -7,7 +8,7 @@ import { Router } from '@angular/router';
   styleUrl: './app.component.css'
 })
 export class AppComponent {
-  constructor(private router: Router) {}
+  constructor(private router: Router, private inactivityService: InactivityService) {}
   title = 'hospital_appointment_admin_panel';
   isLoginRoute(): boolean {
     return this.router.url === '/login'; // Adjust this if your login route is different

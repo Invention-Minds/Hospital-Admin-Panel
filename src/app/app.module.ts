@@ -57,6 +57,7 @@ import { AuthInterceptor } from './auth.interceptor';
 import { DeleteConfirmationDialogComponent } from './delete-confirmation-dialog/delete-confirmation-dialog.component';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { DatePipe } from '@angular/common';
+import { InactivityService } from './services/inactivity.service';
 
 
 @NgModule({
@@ -115,6 +116,7 @@ import { DatePipe } from '@angular/common';
   ],
   providers: [
     DatePipe,
+    InactivityService,
     provideClientHydration(),
     // provideAnimationsAsync(),
     {

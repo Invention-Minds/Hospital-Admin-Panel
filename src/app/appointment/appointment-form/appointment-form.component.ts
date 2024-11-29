@@ -740,9 +740,10 @@ export class AppointmentFormComponent implements OnInit {
     else {
       appointment.status = 'Complete';
     }
+    const nameParts = appointment.patientName.split(' ');
     this.appointmentForm.patchValue({
-      firstName: appointment.patientName.split(' ')[0],
-      lastName: appointment.patientName.split(' ')[1],
+      firstName: nameParts[0],
+      lastName: nameParts.slice(1).join(' '),
       phoneNumber: phoneNumber,
       email: appointment.email,
       doctorName: appointment.doctorName,

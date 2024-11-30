@@ -6,7 +6,7 @@ import { Router } from '@angular/router';
 })
 export class InactivityService {
   private logoutTimer: any;
-  private readonly INACTIVITY_TIME_LIMIT = 1 * 60 * 1000; // 15 minutes
+  private readonly INACTIVITY_TIME_LIMIT = 15 * 60 * 1000; // 15 minutes
 
   constructor(private router: Router, private ngZone: NgZone) {
     this.startInactivityWatch();

@@ -50,6 +50,9 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
   maxDate: Date = new Date();  // Set default values
   unavailableSlotsPerDate: { [date: string]: { label: string; value: string }[] } = {};
   modifiedDay: keyof Doctor['availabilityDays'] | null = null;
+  availableFrom: string = '';
+availableTo: string = '';
+
 
 
   constructor(private doctorService: DoctorServiceService, private changeDetector: ChangeDetectorRef,private datePipe: DatePipe,private messageService: MessageService) { }
@@ -117,6 +120,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
       this.doctor.phone_number = this.doctor.phone_number.substring(2);
     }
     // console.log('Doctor:', this.doctor);
+
   }
 
   ngAfterViewInit(): void {
@@ -168,6 +172,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
       slotDuration: 20, // Default slot timing
       availability: [], // Initialize with empty availability
       unavailableSlots: [], // Initialize with empty unavailable slots
+      doctorType: 'Regular',
     };
   }
 
@@ -543,61 +548,69 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
   
   // Refactored method to handle the actual save operation
   private saveDoctorDetails(): void {
-    // Initialize availability
-    this.doctor!.availability = [];
-    this.doctor!.slotDuration = this.generalSlotDuration; // Set the general slot duration
-  
-    if (this.useSameTimeForAllDays) {
-      this.availabilityDaysList.forEach(day => {
-        if (this.doctor?.availabilityDays?.[day]) {
-          this.doctor.availability.push({
-            id: 0, // Placeholder ID, will be replaced by backend
-            day: day as string,
-            availableFrom: this.generalAvailableFrom,
-            slotDuration: this.generalSlotDuration,
+    if(this.doctor?.doctorType === 'Visiting Consultant'){
+      console.log('Visiting Consultant',this.doctor)
+      this.save.emit(this.doctor!);
+    }
+    else{
+      this.doctor!.availability = [];
+      //   this.doctor!.slotDuration = this.generalSlotDuration; // Set the general slot duration
+      //  this.generalAvailableFrom = this.availableFrom + '-' + this.availableTo;
+      //  console.log(this.generalAvailableFrom)
+        if (this.useSameTimeForAllDays) {
+          this.availabilityDaysList.forEach(day => {
+            if (this.doctor?.availabilityDays?.[day]) {
+              this.doctor.availability.push({
+                id: 0, // Placeholder ID, will be replaced by backend
+                day: day as string,
+                availableFrom: this.generalAvailableFrom,
+                slotDuration: this.generalSlotDuration,
+              });
+            }
+          });
+        } else {
+          this.availabilityDaysList.forEach(day => {
+            if (this.doctor?.availabilityDays?.[day]) {
+              const availability = this.individualAvailability[day];
+              if (availability.availableFrom && availability.slotDuration !== undefined) {
+                this.doctor.availability.push({
+                  id: 0,
+                  day: day as string,
+                  availableFrom: availability.availableFrom,
+                  slotDuration: this.generalSlotDuration,
+                });
+              }
+            }
           });
         }
-      });
-    } else {
-      this.availabilityDaysList.forEach(day => {
-        if (this.doctor?.availabilityDays?.[day]) {
-          const availability = this.individualAvailability[day];
-          if (availability.availableFrom && availability.slotDuration !== undefined) {
-            this.doctor.availability.push({
-              id: 0,
-              day: day as string,
-              availableFrom: availability.availableFrom,
-              slotDuration: this.generalSlotDuration,
-            });
-          }
+      
+        if (!this.doctor?.phone_number.startsWith('91')) {
+          this.doctor!.phone_number = '91' + this.doctor?.phone_number;
         }
-      });
-    }
-  
-    if (!this.doctor?.phone_number.startsWith('91')) {
-      this.doctor!.phone_number = '91' + this.doctor?.phone_number;
-    }
-  
-    // Add unavailable slots for each date
-    Object.keys(this.unavailableSlotsPerDate).forEach(date => {
-      const times = this.unavailableSlotsPerDate[date].map(slot => slot.value);
-  
-      if (this.doctor?.id) {
-        console.log('Adding unavailable slots for doctor:', this.doctor.id, date, times);
-        this.doctorService.addUnavailableSlots(this.doctor.id, date, times).subscribe(
-          response => {
-            // Successfully added unavailable slots
-          },
-          error => {
-            console.error('Error adding unavailable slots:', error);
+      
+        // Add unavailable slots for each date
+        Object.keys(this.unavailableSlotsPerDate).forEach(date => {
+          const times = this.unavailableSlotsPerDate[date].map(slot => slot.value);
+      
+          if (this.doctor?.id) {
+            console.log('Adding unavailable slots for doctor:', this.doctor.id, date, times);
+            this.doctorService.addUnavailableSlots(this.doctor.id, date, times).subscribe(
+              response => {
+                // Successfully added unavailable slots
+              },
+              error => {
+                console.error('Error adding unavailable slots:', error);
+              }
+            );
           }
-        );
-      }
-    });
-  
-    // Emit the save event with the doctor details
-    this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Doctor details saved successfully' });
-    this.save.emit(this.doctor!);
+        });
+      
+        // Emit the save event with the doctor details
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Doctor details saved successfully' });
+        this.save.emit(this.doctor!)
+    }
+    // Initialize availability
+   ;
     this.doctor = null; // Reset the doctor object after saving
     this.isEditMode = false; // Exit edit mode after saving
   }
@@ -674,7 +687,28 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
   //   this.isEditMode = false; // Exit edit mode after saving
   // }
 
-
+  onDoctorTypeChange(): void {
+    if (this.doctor?.doctorType === 'Visiting Consultant') {
+      // Clear availability-related fields for visiting consultants
+      this.doctor.availabilityDays = {
+        sun: false,
+        mon: false,
+        tue: false,
+        wed: false,
+        thu: false,
+        fri: false,
+        sat: false,
+      };
+      this.generalAvailableFrom = '';
+      this.generalSlotDuration = 0;
+      this.useSameTimeForAllDays = false;
+      this.individualAvailability = {};
+    } else {
+      // Reset fields for regular doctors (if needed)
+      this.initializeIndividualAvailability();
+    }
+  }
+  
   goToStep(step: number): void {
     if (step === 2) {
       this.currentStep = step; // Proceed to step 2 only if form is valid
@@ -701,6 +735,15 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
 
 
   isFormValid(): boolean {
+    if (this.doctor?.doctorType === 'Visiting Consultant') {
+      return !!(
+        this.doctor &&
+        this.doctor.name &&
+        this.doctor.qualification &&
+        this.doctor.phone_number &&
+        this.doctor.departmentName
+      );
+    }
     // console.log('Doctor:', this.doctor);
 
     // Regular expression to validate the availableFrom format (HH:MM-HH:MM)

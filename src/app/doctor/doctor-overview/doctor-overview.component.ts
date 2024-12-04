@@ -41,6 +41,7 @@ export class DoctorOverviewComponent implements OnInit {
     availableFrom: '',
     slotDuration: 20,
     availability: [],
+    doctorType: 'Regular'
   };
   showDoctorAvailability() {
     if (this.role === 'admin' || this.role === 'sub_admin' || this.role === 'super_admin') {

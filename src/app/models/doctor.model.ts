@@ -11,6 +11,7 @@ export interface Doctor {
   availabilityDays: { [key: string]: boolean };
   availableFrom: string; // Consolidated available time like "9:00-11:00"
   slotDuration: number;
+  doctorType: string;
   availability: {
     id: number;
     day: string;

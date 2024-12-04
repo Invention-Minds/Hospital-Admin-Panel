@@ -35,6 +35,7 @@ export class InactivityService {
   private logoutUser(): void {
     this.ngZone.run(() => {
       console.log('Logging out due to inactivity...');
+      localStorage.setItem('logoutReason', 'inactivity');
       // Perform your logout logic here
       this.router.navigate(['/login']); // Adjust this to match your logout route
       localStorage.removeItem('token');

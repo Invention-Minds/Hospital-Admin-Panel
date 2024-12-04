@@ -641,6 +641,24 @@ h2 {
   padding: 5px;
 }
 
+.add-slot-button {
+ 
+  border: none;
+
+  display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 10px;
+      border-radius: 4px;
+      text-align: center;
+      font-size: 16px;
+      font-style: normal;
+      font-weight: 600;
+      font-family: Kanit;
+      background-color: #79cfa6; /* Green for Available */
+      color: white;
+      cursor: pointer;
+}
 
 @media (max-width: 1380px) {
   .slots-wrapper {

@@ -99,7 +99,7 @@
             </div>
           </div>
 
-          <div class="form-group time slot">
+          <!-- <div class="form-group time slot">
             <label>Appointment Time:</label>
             <select class="email" formControlName="appointmentTime">
               <option value="" disabled selected>Select a time</option>
@@ -112,7 +112,45 @@
               *ngIf="appointmentForm.get('appointmentTime')?.invalid && appointmentForm.get('appointmentTime')?.touched">
               <small>Appointment Time is required</small>
             </div>
+          </div> -->
+          <div class="form-group time slot">
+            <label>Appointment Time:</label>
+            <ng-container *ngIf="isVisitingConsultant; else regularTime">
+              <!-- PrimeNG Time Picker for Visiting Consultant -->
+              <p-calendar
+                formControlName="appointmentTime"
+                [timeOnly]="true"
+                hourFormat="12"
+                [showButtonBar]="true"
+                [showSeconds]="false"
+                placeholder="Select Time"
+                (onSelect)="onTimeSelect($event)"
+                [minDate]="minTime"
+
+
+              ></p-calendar>
+              <div *ngIf="timeError" class="error-message">
+                {{ timeError }}
+              </div>
+              <div class="errors" *ngIf="appointmentForm.get('appointmentTime')?.invalid && appointmentForm.get('appointmentTime')?.touched">
+                <small>Time is required</small>
+              </div>
+            </ng-container>
+            <ng-template #regularTime>
+              <!-- Dropdown for Regular Doctors -->
+              <select class="email" formControlName="appointmentTime">
+                <option value="" disabled selected>Select a time</option>
+                <option value="" selected *ngIf="availableSlots.length === 0">No available slots</option>
+                <option *ngFor="let slot of availableSlots" [value]="slot">
+                  {{ slot }}
+                </option>
+              </select>
+              <div class="errors" *ngIf="appointmentForm.get('appointmentTime')?.invalid && appointmentForm.get('appointmentTime')?.touched">
+                <small>Appointment Time is required</small>
+              </div>
+            </ng-template>
           </div>
+          
         </div>
         <div *ngIf="showAvailabilityMessage" class="availability-message"
           [ngClass]="{'available': !showAvailabilityMessage, 'not-available': showAvailabilityMessage}">

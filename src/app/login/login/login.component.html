@@ -20,7 +20,7 @@
             <img [src]="isPasswordVisible? '/not-show.png': '/show-password.png'" alt="Show Password" class="eye-icon" (click)="togglePasswordVisibility()">
           </div>
         <div class="login">
-            <button type="submit" [disabled]="!loginForm.valid">Login Now</button>
+            <button pButton type="submit" [disabled]="!loginForm.valid" [loading]="isLoading">Login Now</button>
             <p-toast />
         </div>
       </form>
@@ -30,8 +30,8 @@
             <h3>Welcome Back</h3>
             <img src="/login-doctor.png" alt="Doctors Illustration" />
     </div>
-   
+
     </div>
-    <p-toast></p-toast>
+   <p-toast></p-toast>
   </div>
   

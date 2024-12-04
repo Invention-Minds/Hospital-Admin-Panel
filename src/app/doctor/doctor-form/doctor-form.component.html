@@ -83,21 +83,73 @@
   </div>
 </div>
 </div>
+<div class="row">
+  <div class="col">
+    <label class="doctor-type-label">Doctor Type</label>
+    <div>
+      <label>
+        <input
+          type="radio"
+          name="doctorType"
+          [(ngModel)]="doctor!.doctorType"
+          [value]="'Regular'"
+          (change)="onDoctorTypeChange()"
+        /> Regular
+      </label>
+      <label>
+        <input
+          type="radio"
+          name="doctorType"
+          [(ngModel)]="doctor!.doctorType"
+          [value]="'Visiting Consultant'"
+          (change)="onDoctorTypeChange()"
+        /> Visiting Consultant
+      </label>
+    </div>
+  </div>
+</div>
+
 
 
       
 
       <!-- Next Button -->
-      <div class="row next">
+      <!-- <div class="row next">
         <div class="col next-col">
           <button type="button" class="update-button" (click)="goToStep(2)" [disabled]="!isDoctorValid()" >Next</button>
         </div>
+      </div> -->
+      <div class="row next">
+        <div class="col next-col">
+          <!-- Show "Next" button for Regular -->
+          <button
+            *ngIf="doctor?.doctorType === 'Regular'"
+            type="button"
+            class="update-button"
+            (click)="goToStep(2)"
+            [disabled]="!isDoctorValid()"
+          >
+            Next
+          </button>
+      
+          <!-- Show "Add/Submit" button for Visiting Consultant -->
+          <button
+            *ngIf="doctor?.doctorType === 'Visiting Consultant'"
+            type="submit"
+            class="update-button"
+            (click)="saveDoctor()"
+            [disabled]="!isDoctorValid()"
+          >
+          {{ isEditMode ? 'Update' : 'Add' }}
+          </button>
+        </div>
       </div>
+      
     </div>
 
     <!-- Step 2: Availability Information -->
 <!-- Step 2: Availability Information -->
-<div *ngIf="currentStep === 2">
+<div *ngIf="currentStep === 2 && doctor?.doctorType === 'Regular'">
 <!-- Ask if the available time is the same for all days -->
 <div class="row">
   <div class="col">
@@ -130,7 +182,7 @@
   </div>
 </div>
 <div class="row">
-<small>*Enter the available time in 24 hour format</small>
+<small>Note: Enter the available time in 24 hour format</small>
 </div>
 
 <!-- If the same available time for all selected days -->
@@ -147,6 +199,26 @@
         </div>
       </div>
     </div>
+    <!-- <div class="col">
+      <div class="custom-form-field">
+        <div class="time-input-container">
+          <label for="availableFrom" class="input-label">Available From*</label>
+          <input type="time" id="availableFrom" [(ngModel)]="availableFrom" name="availableFrom" #availableFromInput="ngModel" required />
+          <div *ngIf="availableFromInput.invalid && (availableFromInput.dirty || availableFromInput.touched)" class="error-message">
+            <small *ngIf="availableFromInput.errors && availableFromInput.errors['required']">Available from time is required</small>
+          </div>
+        </div>
+    
+        <div class="time-input-container">
+          <label for="availableTo" class="input-label">Available To*</label>
+          <input type="time" id="availableTo" [(ngModel)]="availableTo" name="availableTo" #availableToInput="ngModel" required />
+          <div *ngIf="availableToInput.invalid && (availableToInput.dirty || availableToInput.touched)" class="error-message">
+            <small *ngIf="availableToInput.errors && availableToInput.errors['required']">Available to time is required</small>
+          </div>
+        </div>
+      </div>
+    </div> -->
+    
 
     <div class="col">
       <div class="custom-form-field">

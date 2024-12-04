@@ -45,9 +45,9 @@
         <div class="doctor-info">
           <h3 class="doctor-name">{{ doctor.name }}</h3>
           <p class="doctor-department">{{ doctor.departmentName }}</p>
-          <p class="doctor-availability-time">Availability:</p>
-          <p class="doctor-availability-time">{{ doctor.availableFrom }}</p>
-          <button class="unavailable-button" (click)="openUnavailableModal(doctor)" [disabled]="!isTodayOrTomorrow(selectedDate)">Unavailable Slots</button>
+          <p class="doctor-availability-time">{{ doctor.doctorType === 'Visiting Consultant' ? '': 'Availability:'}}</p>
+          <p class="doctor-availability-time"> {{ doctor.doctorType === 'Visiting Consultant' ? doctor.doctorType: doctor.availableFrom }}</p>
+          <button class="unavailable-button" *ngIf="doctor.doctorType !=='Visiting Consultant'" (click)="openUnavailableModal(doctor)" [disabled]="!isTodayOrTomorrow(selectedDate)">Unavailable Slots</button>
         </div>
       </div>
       <div class="slots-wrapper">
@@ -71,6 +71,9 @@
              }"
            (click)="onSlotClick(doctor,slot)" >
           {{ slot.time }}
+        </div>
+        <div *ngIf="doctor.doctorType === 'Visiting Consultant'" class="add-appointment-wrapper">
+          <button class="add-slot-button" (click)="onAddSlotClick(doctor)" >Add Slot</button>
         </div>
       </div>
 

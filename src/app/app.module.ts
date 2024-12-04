@@ -18,6 +18,9 @@ import {MatDatepickerModule} from '@angular/material/datepicker';
 import { TooltipModule } from 'primeng/tooltip';
 import { ToastModule } from 'primeng/toast';
 import {  MatFormFieldModule, MatLabel } from '@angular/material/form-field';
+import { MessageService } from 'primeng/api';
+
+
 
 import {MatSelectModule} from '@angular/material/select';
 import { FloatLabelModule } from 'primeng/floatlabel';
@@ -117,6 +120,7 @@ import { InactivityService } from './services/inactivity.service';
   providers: [
     DatePipe,
     InactivityService,
+    MessageService,
     provideClientHydration(),
     // provideAnimationsAsync(),
     {

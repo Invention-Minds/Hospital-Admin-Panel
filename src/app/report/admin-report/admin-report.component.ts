@@ -1,226 +1,21 @@
-// import { Component } from '@angular/core';
-// import { ActivatedRoute } from '@angular/router';
-// import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
-// import { AuthServiceService } from '../../services/auth/auth-service.service';
-// import { Subscription } from 'rxjs';
-// import { format } from 'path';
-// import { app } from '../../../../server';
-
-// interface Appointment {
-//   id?: number;
-//   patientName: string;
-//   phoneNumber: string;
-//   doctorName: string;
-//   doctorId:number;
-//   department: string;
-//   date: string;
-//   time: string;
-//   status: string;
-//   email: string;
-//   smsSent?:boolean;
-//   emailSent?:boolean;
-//   requestVia?: string; // Optional property
-//   created_at?: string;
-//   updated_at?: string;
-//   user?: {
-//     id: number;
-//     username: string;
-//     password: string;
-//     role: string;
-//     createdAt: string;
-//   };
-// }
-// @Component({
-//   selector: 'app-admin-report',
-//   templateUrl: './admin-report.component.html',
-//   styleUrl: './admin-report.component.css'
-// })
-// export class AdminReportComponent {
-//   currentPage = 1;
-//   itemsPerPage = 10;
-//   filteredAppointments: Appointment[] = [];
-//   sortColumn: keyof Appointment | undefined = undefined;  // No sorting initially
-//   sortDirection: string = 'asc';  // Default sorting direction
-//   private userSubscription: Subscription | undefined;
-//   usernameFilter: string = '';
-
-//   constructor( private route: ActivatedRoute, private appointmentService: AppointmentConfirmService, private authService: AuthServiceService){}
-//   appointments: Appointment[] = [];
-
-//   sortBy(column: keyof Appointment) {
-//     if (this.sortColumn === column) {
-//       this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc'; // Toggle direction
-//     } else {
-//       this.sortColumn = column;
-//       this.sortDirection = 'asc'; // Default to ascending when a new column is clicked
-//     }
-//     if (column === 'date') {
-//       this.appointments.sort((a, b) => {
-//         const dateA = new Date(a.date);
-//         const dateB = new Date(b.date);
-//         return this.sortDirection === 'asc' ? dateA.getTime() - dateB.getTime() : dateB.getTime() - dateA.getTime();
-//       });
-//     }
-//     this.currentPage = 1; // Reset to the first page when sorting changes
-//   }
-//   sortedAppointments() {
-//     if (!this.sortColumn) {
-//       // If no sorting column is selected, return the appointments as is (unsorted)
-//       return [...this.filteredAppointments];
-//     }
-//     console.log("this.appointments",this.appointments);
-//     console.log("this.appointments",this.appointments);
-//     return [...this.filteredAppointments].sort((a, b) => {
-//       const valueA = a[this.sortColumn!]; // Use the non-null assertion operator (!) to tell TypeScript sortColumn is defined
-//       const valueB = b[this.sortColumn!]; 
-
-//       if (typeof valueA === 'string' && typeof valueB === 'string') {
-//         const comparison = valueA.localeCompare(valueB);
-//         return this.sortDirection === 'asc' ? comparison : -comparison;
-//       }
-
-//       return 0; // Default to no sorting if types are not strings
-//     });
-//   }
-//     // Method to return paginated appointments after sorting
-//     getPaginatedAppointments() {
-//       const sorted = this.sortedAppointments();  // First, sort the data (or not)
-//       const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-//       return sorted.slice(startIndex, startIndex + this.itemsPerPage); // Return paginated data
-//     }
-  
-//     // Method to calculate total pages
-//     get totalPages() {
-//       return Math.ceil(this.appointments.length / this.itemsPerPage);
-//     }
-  
-//     // Method to go to the previous page
-//     prevPage() {
-//       if (this.currentPage > 1) {
-//         this.currentPage--;
-//       }
-//     }
-  
-//     // Method to go to the next page
-//     nextPage() {
-//       if (this.currentPage < this.totalPages) {
-//         this.currentPage++;
-//       }
-//     }
-  
-//     // Handle page number change
-//     onPageChange() {
-//       if (this.currentPage < 1) {
-//         this.currentPage = 1;
-//       } else if (this.currentPage > this.totalPages) {
-//         this.currentPage = this.totalPages;
-//       }
-//     }
-//       // Utility method to format the date in 'dd/mm/yy' format
-//   formatDate(date: Date): string {
-//     const day = String(date.getDate()).padStart(2, '0');
-//     const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
-//     const year = date.getFullYear().toString().slice(-4); // Get last two digits of year
-//     return `${year}-${month}-${day}`;
-//   }
-
-//   ngOnDestroy(): void {
-//     if (this.userSubscription) {
-//       this.userSubscription.unsubscribe();
-//     }
-//   }
-//   formatDateYear(dateString: string): string {
-//     const date = new Date(dateString);
-//     return date.toISOString().split('T')[0]; // Returns date in 'YYYY-MM-DD' format
-//   }
-//   ngOnInit(): void {
-//     // const userId = Number(this.route.snapshot.paramMap.get('userId'));
-//     // this.loadAppointmentsByUser(userId);
-//      // Subscribe to getUser and load appointments based on the user
-//     //  const user = this.authService.getUser();
-//     //  console.log(user,"from admin report");
-//     //   if (user) {
-//     //     this.loadAppointmentsByUser(user.id);
-//     //   } else {
-//     //     console.error('User not found');
-//     //     this.authService.initializeUserFromStorage();
-//     // const newUser = this.authService.getUser();
-//     // if (newUser) {
-//     //   this.loadAppointmentsByUser(newUser.id);
-//     // }
-//     const role = localStorage.getItem('role');
-//     const userId = localStorage.getItem('userid');
-//     console.log('role',role);
-
-//     if (role) {
-//       if (role === 'sub_admin' || role === 'super_admin') {
-//         this.loadAllAppointments();
-//       } else if (role === 'admin' && userId) {
-//         this.loadAppointmentsByUser(parseInt(userId, 10));
-//       }
-//     }
-//         // this.authService.initializeUserFromStorage();
-//       }
-//       private loadAllAppointments(): void {
-//         this.appointmentService.getAllAppointments().subscribe(
-//           (appointments) => {
-//             console.log('Fetched all appointments for sub_admin or super_admin:', appointments);
-//             this.appointments = appointments.map(appointment => {
-//               return {
-//                 ...appointment,
-//                 username: appointment.user?.username ?? 'Unknown',
-//                 created_at: this.formatDateYear(appointment.created_at ?? '1970-01-01'),
-//           updated_at: this.formatDateYear(appointment.updated_at ?? '1970-01-01'),
-//               };
-//             });
-//           },
-//           (error) => {
-//             console.error('Error fetching all appointments:', error);
-//           }
-//         );
-//       }
-  
-//   loadAppointmentsByUser(userId: number): void {
-//     this.appointmentService.getAppointmentsByUser(userId).subscribe((appointments: any[]) => {
-//       console.log('Appointments by user:', appointments);
-      
-//       // Ensure each appointment has the `username` assigned
-//       this.appointments = appointments.map(appointment => {
-
-//         if (appointment.user) {
-//           return {
-//             ...appointment,
-//             username: appointment.user.username,
-//             created_at: this.formatDateYear(appointment.created_at),
-//             updated_at: this.formatDateYear(appointment.updated_at),
-//           };
-//         } else {
-//           return {
-//             ...appointment,
-//             username: 'Unknown',
-//           };
-//         }
-//       });
-//     });
-//   }
-//     // Filter appointments by username
-//     filterAppointments() {
-//       if (this.usernameFilter.trim()) {
-//         this.filteredAppointments = this.appointments.filter(appointment =>
-//           appointment.user?.username?.toLowerCase().includes(this.usernameFilter.trim().toLowerCase())
-//         );
-//         console.log(this.filteredAppointments)
-//       } else {
-//         this.filteredAppointments = this.appointments; // Reset to all appointments when the filter is cleared
-//       }
-//     }
-  
-// }
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { AuthServiceService } from '../../services/auth/auth-service.service';
 import { Subscription } from 'rxjs';
+import * as XLSX from 'xlsx';
+import { Workbook } from 'exceljs';
+import * as FileSaver from 'file-saver';
+
+interface AppointmentSummary {
+  username: string;
+  role: string;
+  totalHandled: number;
+  confirmed: number;
+  cancelled: number;
+  completed: number;
+  userId:number;
+}
 
 interface Appointment {
   id?: number;
@@ -235,7 +30,7 @@ interface Appointment {
   email: string;
   smsSent?: boolean;
   emailSent?: boolean;
-  messageSent?:boolean;
+  messageSent?: boolean;
   requestVia?: string; // Optional property
   created_at?: string;
   updated_at?: string;
@@ -247,6 +42,7 @@ interface Appointment {
     role: string;
     createdAt: string;
   };
+  userId?: number;
 }
 
 @Component({
@@ -262,16 +58,17 @@ export class AdminReportComponent {
   sortDirection: string = 'asc';  // Default sorting direction
   usernameFilter: string = ''; // New filter property for username
   roleFilter: string = ''; // New filter property for role
+  selectedDateRange: Date[] = [];
   private userSubscription: Subscription | undefined;
 
   constructor(
     private route: ActivatedRoute,
     private appointmentService: AppointmentConfirmService,
     private authService: AuthServiceService
-  ) {}
+  ) { }
 
   appointments: Appointment[] = [];
-  filteredAppointments: Appointment[] = []; // List to hold filtered appointments
+  filteredAppointments: any[] = []; // List to hold filtered appointments
 
   sortBy(column: keyof Appointment) {
     if (this.sortColumn === column) {
@@ -290,6 +87,43 @@ export class AdminReportComponent {
     this.currentPage = 1; // Reset to the first page when sorting changes
   }
 
+  // Function to filter appointments based on user ID
+  // filterAppointmentsByUser(userId: number | string): Appointment[] {
+  //   console.log('Filtering appointments for user ID:', userId, this.appointments);
+  //   return this.appointments.filter(appointment => appointment.userId === userId);
+  // }
+   // Function to filter appointments based on user ID and date range
+   filterAppointmentsByUser(userId: number | string): Appointment[] {
+    let filteredList = this.appointments.filter(appointment => appointment.userId === userId);
+
+    if (this.selectedDateRange && this.selectedDateRange.length === 2) {
+      const startDate = this.selectedDateRange[0];
+      const endDate = this.selectedDateRange[1] ? this.selectedDateRange[1] : startDate;
+
+      if (startDate && endDate) {
+        if (startDate.getTime() !== endDate.getTime()) {
+          // Filtering by range
+          const normalizedEndDate = new Date(endDate);
+          normalizedEndDate.setHours(23, 59, 59, 999); // Set to the last millisecond of the day
+
+          filteredList = filteredList.filter((appointment: Appointment) => {
+            const appointmentDate = new Date(appointment.created_at || appointment.date);
+            return appointmentDate >= startDate && appointmentDate <= normalizedEndDate;
+          });
+        } else {
+          // Filtering by single date
+          filteredList = filteredList.filter((appointment: Appointment) => {
+            const appointmentDate = new Date(appointment.created_at || appointment.date);
+            return appointmentDate.toDateString() === startDate.toDateString();
+          });
+        }
+      }
+    }
+
+    return filteredList;
+  }
+
+
   sortedAppointments() {
     if (!this.sortColumn) {
       return [...this.filteredAppointments];
@@ -306,7 +140,11 @@ export class AdminReportComponent {
       return 0; // Default to no sorting if types are not strings
     });
   }
-
+  
+  refresh(){
+    this.selectedDateRange = [];
+    this.loadAllAppointments();
+  }
   getPaginatedAppointments() {
     const sorted = this.sortedAppointments();  // First, sort the data (or not)
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
@@ -348,121 +186,257 @@ export class AdminReportComponent {
 
     if (role) {
       if (role === 'sub_admin' || role === 'super_admin') {
+        console.log('Loading all appointments...');
         this.loadAllAppointments();
-      } else if (role === 'admin' && userId) {
-        this.loadAppointmentsByUser(parseInt(userId, 10));
       }
     }
   }
-
-  // private loadAllAppointments(): void {
-  //   this.appointmentService.getAllAppointments().subscribe(
-  //     (appointments) => {
-  //       this.appointments = appointments.map(appointment => ({
-  //          const username = appointment.user?.username ? this.extractName(appointment.user.username) : 'Unknown';
-  //         ...appointment,
-  //         // username: appointment.user?.username ?? 'Unknown',
-          
-  //         created_at: this.formatDateYear(appointment.created_at ?? '1970-01-01'),
-  //         updated_at: this.formatDateYear(appointment.updated_at ?? '1970-01-01'),
-  //       }));
-  //       this.filteredAppointments = this.appointments; // Initialize filteredAppointments
-  //     },
-  //     (error) => {
-  //       console.error('Error fetching all appointments:', error);
-  //     }
-  //   );
-  // }
-
-  // loadAppointmentsByUser(userId: number): void {
-  //   this.appointmentService.getAppointmentsByUser(userId).subscribe((appointments: any[]) => {
-  //     this.appointments = appointments.map(appointment => ({
-  //        const username = appointment.user?.username ? this.extractName(appointment.user.username) : 'Unknown';
-  //       ...appointment,
-  //       // username: appointment.user?.username ?? 'Unknown',
-        
-  //       created_at: this.formatDateYear(appointment.created_at ?? '1970-01-01'),
-  //       updated_at: this.formatDateYear(appointment.updated_at ?? '1970-01-01'),
-  //     }));
-  //     this.filteredAppointments = this.appointments; // Initialize filteredAppointments
-  //   });
-  // }
-  
-  // private extractName(username: string): string {
-  //   // Extract the part before the first underscore or '@'
-  //   return username.split(/[_@]/)[0];
-  // }
-  private loadAllAppointments(): void {
-    this.appointmentService.getAllAppointments().subscribe(
-      (appointments) => {
-        this.appointments = appointments.map(appointment => {
-          // Extract the name from the username
-          const username = appointment.user?.username ? this.extractName(appointment.user.username) : 'Unknown';
-  
-          return {
-            ...appointment,
-            username,
-            created_at: this.formatDateYear(appointment.created_at ?? '1970-01-01'),
-            updated_at: this.formatDateYear(appointment.updated_at ?? '1970-01-01'),
-          };
-        });
-        this.filteredAppointments = this.appointments; // Initialize filteredAppointments
-        // console.log('Fetched all appointments for sub_admin or super_admin:', this.appointments);
-      },
-      (error) => {
-        console.error('Error fetching all appointments:', error);
-      }
-    );
-  }
-  
-  private extractName(username: string): string {
-    // Extract the part before the first underscore or '@'
-    return username.split(/[_@]/)[0];
-  }
-  
-  loadAppointmentsByUser(userId: number): void {
-    this.appointmentService.getAppointmentsByUser(userId).subscribe((appointments: any[]) => {
-      this.appointments = appointments.map(appointment => {
-        // Extract the name from the username
-        const username = appointment.user?.username ? this.extractName(appointment.user.username) : 'Unknown';
-  
-        return {
-          ...appointment,
-          username,
-          created_at: this.formatDateYear(appointment.created_at ?? '1970-01-01'),
-          updated_at: this.formatDateYear(appointment.updated_at ?? '1970-01-01'),
-        };
-      });
-      this.filteredAppointments = this.appointments; // Initialize filteredAppointments
-    });
-  }
-  
-  
-  // Filter appointments by username and role
-  filterAppointments() {
+  filterAppointments(): void {
     this.filteredAppointments = this.appointments.filter(appointment => {
       const matchesUsername = this.usernameFilter.trim()
         ? appointment.username?.toLowerCase().includes(this.usernameFilter.trim().toLowerCase())
         : true;
-
+  
       const matchesRole = this.roleFilter
         ? appointment.user?.role === this.roleFilter
         : true;
-
+  
       return matchesUsername && matchesRole;
     });
   }
-  getStatusClass(status: string): string {
-    switch (status.toLowerCase()) {
-      case 'cancelled':
-        return 'status-cancelled';
-      case 'confirmed':
-        return 'status-confirmed';
-      case 'completed':
-        return 'status-completed';
-      default:
-        return 'status-default'; // You can add a default class if needed
-    }
+  
+   loadAllAppointments(): void {
+    this.authService.getAllUsers().subscribe(
+      (users) => {
+        this.appointmentService.getAllAppointments().subscribe(
+          (appointments) => {
+            this.appointments = appointments;
+  
+            let filteredAppointments = this.appointments;
+  
+            // Check if the date range is selected
+
+          if (this.selectedDateRange && this.selectedDateRange.length === 2) {
+            const startDate = this.selectedDateRange[0];
+            const endDate = this.selectedDateRange[1] ? this.selectedDateRange[1] : startDate; // Use endDate if provided, otherwise use startDate
+        
+            if (startDate && endDate) {
+              if(startDate.getTime() !== endDate.getTime()) {
+              // Filtering appointments by the selected date range
+              // console.log('Start date:', startDate, 'End date:', endDate);
+              const normalizedEndDate = new Date(endDate);
+          normalizedEndDate.setHours(23, 59, 59, 999);  // Set to the last millisecond of the day
+      
+              filteredAppointments = filteredAppointments.filter((appointment: Appointment) => {
+                const appointmentDate = new Date(appointment.date);  // Assuming 'date' is in string format like 'YYYY-MM-DD'
+                return appointmentDate >= startDate && appointmentDate <= normalizedEndDate;
+              });
+              // console.log('Filtered list:', filteredAppointments);
+            }
+            else if (startDate.getTime() === endDate.getTime()) {
+              console.log('Single date selected:');
+              const startDate = this.selectedDateRange[0];
+          
+              filteredAppointments = filteredAppointments.filter((appointment: Appointment) => {
+                const appointmentDate = new Date(appointment.date);
+                return appointmentDate.toDateString() === startDate.toDateString();  // Compare the date portion only
+              });
+              // console.log('Filtered list:', this.filteredList);
+            }
+          }
+          else{
+            filteredAppointments = []
+          }
+          }
+      
+          else {
+            console.log('No valid date range selected');
+                // If no valid range is selected, show all appointments
+                filteredAppointments = this.appointments
+              }
+        
+            
+              const uniqueUserIds = Array.from(new Set(appointments.map(appointment => appointment.user?.id)));
+  
+              // Iterate over unique users to extract usernames
+              uniqueUserIds.forEach((userId) => {
+                const user = appointments.find(appointment => appointment.user?.id === userId)?.user;
+                if (user) {
+                  user.username = this.extractName(user.username);
+                }
+              });
+  
+            // Create an object to store summary data
+            const appointmentSummary: { [key: string]: AppointmentSummary } = {}; // Define the type for the summary
+            console.log('Filtered appointments:', filteredAppointments);
+            // Aggregate filtered appointment data user-wise
+            filteredAppointments.forEach((appointment) => {
+              const userId = appointment.user?.id?.toString() || 'unknown';
+  
+              // Skip appointments handled by doctors
+              if (appointment.user?.role === 'doctor') {
+                return;
+              }
+             
+              if (!appointmentSummary[userId]) {
+                appointmentSummary[userId] = {
+                  username: appointment.user?.username || 'Unknown',
+                  role: appointment.user?.role || 'Unknown',
+                  totalHandled: 0,
+                  confirmed: 0,
+                  cancelled: 0,
+                  completed: 0,
+                  userId: appointment.user?.id || 0,
+                };
+              }
+  
+              // Increment the counts based on appointment status
+              appointmentSummary[userId].totalHandled++;
+              if (appointment.status === 'confirmed') {
+                appointmentSummary[userId].confirmed++;
+              } else if (appointment.status === 'cancelled') {
+                appointmentSummary[userId].cancelled++;
+              } else if (appointment.status === 'completed') {
+                appointmentSummary[userId].completed++;
+              }
+            });
+  
+            // Include only relevant users (admins, sub_admins, super_admins) without appointments
+            users.forEach((user: any) => {
+              // const username = this.extractName(user.username);
+              // console.log('User:', user.username, this.extractName(user.username));
+              if (['admin', 'sub_admin', 'super_admin'].includes(user.role)) {
+                const userId = user.id?.toString() || 'unknown';
+                if (!appointmentSummary[userId]) {
+                  appointmentSummary[userId] = {
+                    username: this.extractName(user.username),
+                    role: user.role,
+                    totalHandled: 0,
+                    confirmed: 0,
+                    cancelled: 0,
+                    completed: 0,
+                    userId: user.id,
+                  };
+                }
+              }
+            });
+  
+            // Convert the summary object to an array for display
+            this.filteredAppointments = Object.values(appointmentSummary);
+            console.log('Fetched all appointments for sub_admin or super_admin:', this.filteredAppointments);
+          },
+          (error) => {
+            console.error('Error fetching all appointments:', error);
+          }
+        );
+      },
+      (error) => {
+        console.error('Error fetching all users:', error);
+      }
+    );
   }
   
+
+  
+  // Function to download the filtered appointments as an Excel file
+  downloadAppointments(userId: number | string): void {
+    const userAppointments = this.filterAppointmentsByUser(userId);
+    console.log('Downloading appointments for user ID:', userId);
+  
+    const workbook = new Workbook();
+    const worksheet = workbook.addWorksheet('Appointments');
+  
+    worksheet.columns = [
+      { header: 'No', key: 'no', width: 5 },
+      { header: 'Patient Name', key: 'patientName', width: 20 },
+      { header: 'Phone Number', key: 'phoneNumber', width: 15 },
+      { header: 'Doctor Name', key: 'doctorName', width: 20 },
+      { header: 'Department', key: 'department', width: 20 },
+      { header: 'Date', key: 'date', width: 15 },
+      { header: 'Time', key: 'time', width: 10 },
+      { header: 'Status', key: 'status', width: 15 },
+    ];
+  
+    // Add rows to the worksheet
+    userAppointments.forEach((appointment, index) => {
+      worksheet.addRow({
+        no: index + 1,
+        patientName: appointment.patientName,
+        phoneNumber: appointment.phoneNumber,
+        doctorName: appointment.doctorName,
+        department: appointment.department,
+        date: appointment.date,
+        time: appointment.time,
+        status: appointment.status,
+      });
+    });
+  
+    // Generate the Excel file and download it
+    workbook.xlsx.writeBuffer().then((buffer) => {
+      FileSaver.saveAs(new Blob([buffer]), `Appointments_${userId}.xlsx`);
+    });
+  }
+
+  // Function to print the filtered appointments
+  printAppointments(userId: number | string): void {
+    const userAppointments = this.filterAppointmentsByUser(userId);
+    console.log('Printing appointments for user ID:', userId);
+  
+    let printContents = `
+      <h1>Appointments Report for User ID: ${userId}</h1>
+      <table border="1">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Patient Name</th>
+            <th>Phone Number</th>
+            <th>Doctor Name</th>
+            <th>Department</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
+  
+    userAppointments.forEach((appointment, index) => {
+      printContents += `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${appointment.patientName}</td>
+          <td>${appointment.phoneNumber}</td>
+          <td>${appointment.doctorName}</td>
+          <td>${appointment.department}</td>
+          <td>${appointment.date}</td>
+          <td>${appointment.time}</td>
+          <td>${appointment.status}</td>
+        </tr>
+      `;
+    });
+  
+    printContents += `
+        </tbody>
+      </table>
+    `;
+  
+    const popupWin = window.open('', '_blank', 'width=800,height=600');
+    popupWin?.document.open();
+    popupWin?.document.write(`
+      <html>
+        <head>
+          <title>Print Appointments</title>
+        </head>
+        <body onload="window.print()">
+          ${printContents}
+        </body>
+      </html>
+    `);
+    popupWin?.document.close();
+  }
+
+  private extractName(username: string): string {
+    // Extract the part before the first underscore or '@'
+    return username.split(/[_@]/)[0];
+  }
 }

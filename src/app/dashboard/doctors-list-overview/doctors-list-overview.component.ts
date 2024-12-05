@@ -72,7 +72,16 @@ export class DoctorsListOverviewComponent implements OnInit {
               };
             });
 
-            // Limit the doctors list to the first 4
+            const prefixesToIgnore = /^(dr\.|ms\.|mr\.|brig\.)\s*/i;
+
+            // Sort doctors in alphabetical order based on the name without prefixes
+            this.doctors = this.doctors.sort((a, b) => {
+              const nameA = a.name.toLowerCase().replace(prefixesToIgnore, '');
+              const nameB = b.name.toLowerCase().replace(prefixesToIgnore, '');
+              return nameA.localeCompare(nameB);
+            });
+            
+            // Slice the first 4 elements
             this.doctors = this.doctors.slice(0, 4);
           },
           error => console.error('Error fetching booked slots or unavailable dates:', error)

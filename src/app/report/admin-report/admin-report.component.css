@@ -196,6 +196,14 @@ text-transform: capitalize;
     font-weight: 400;
     font-family: Kanit;
   }
+  .btn-action {
+    background-color: transparent;
+    cursor: pointer;
+    outline: none;
+    border: none;
+    gap: 10px;
+    display: flex;
+  }
   .filter-input:focus{
     outline: none;
     border: 2px solid #79CFA6;
@@ -231,3 +239,65 @@ text-transform: capitalize;
     background-color: #FFF;
     background-size: 22px;
   }
+  .p-field {
+    margin: 0 10px;
+  }
+  ::ng-deep .custom-calendar .p-inputtext {
+    width: 300px;
+    height: 52px;
+    border-radius: 10px; /* Rounded edges */
+    background-color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    border: 1px solid #e0e0e0; /* Light gray border */
+    padding-left: 15px;
+    font-size: 16px;
+    color: #808080; /* Light gray text */
+    font-weight: 600;
+    font-family: Kanit;
+  }
+
+  
+  ::ng-deep .custom-calendar .p-calendar-trigger {
+    /* color: #808080; Light gray arrow */
+    border-radius: 0 10px 10px 0; /* Right side rounded for trigger button */
+    background-color: transparent; /* No background */
+  }
+  
+  ::ng-deep .custom-calendar .p-datepicker {
+    border-radius: 10px; /* Rounded calendar popup */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Shadow for calendar popup */
+    background-color: white;    font-size: 12px; /* Smaller font for calendar */
+    width: 300px; /* Adjusted width for calendar popup */
+}
+
+::ng-deep .custom-calendar .p-datepicker table {
+    font-size: 14px; /* Smaller font for dates */
+}
+
+::ng-deep .custom-calendar .p-datepicker-header {
+    padding: 5px; /* Adjust header padding */
+}
+
+::ng-deep .custom-calendar .p-datepicker .p-datepicker-prev,
+::ng-deep .custom-calendar .p-datepicker .p-datepicker-next {
+    height: 25px;  /* Adjust button size */
+    width: 25px;   /* Adjust button size */
+}
+  ::ng-deep .p-datepicker table td {
+    padding: 0;
+}
+.calendar-icon{
+  position: relative;
+  right: 38px;
+    }
+    .reverse{
+      border-radius: 10px; /* Rounded edges */
+      background-color: white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Shadow effect */
+      border: 1px solid #e0e0e0; /* Light border */
+      margin-bottom: -14px;
+      
+      padding: 10px;
+      cursor: pointer;
+      /* padding-top: 20px; */
+    }

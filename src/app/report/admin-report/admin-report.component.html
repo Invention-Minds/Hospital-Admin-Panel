@@ -1,67 +1,65 @@
 <div class="filter-container">
-    <input
-      type="text"
-      [(ngModel)]="usernameFilter"
-      (input)="filterAppointments()"
-      placeholder="Filter by username"
-      class="filter-input"
-    />
- 
-
-   <!-- Role Filter -->
-   <select [(ngModel)]="roleFilter" (change)="filterAppointments()" class="filter-input filter-select">
-    <option value="">All Roles</option>
-    <option value="admin">Admin</option>
-    <option value="sub_admin">Sub Admin</option>
-    <option value="super_admin">Super Admin</option>
-    <option value="doctor">Doctor</option>
-  </select>
+  <div class="p-field p-col-3 calendar">
+    <!-- <p-calendar [(ngModel)]="selectedDate" placeholder="Calendar" class="custom-calendar"></p-calendar> -->
+    <p-calendar 
+    styleClass="custom-calendar" 
+    [(ngModel)]="selectedDateRange"
+    (ngModelChange)="loadAllAppointments()"
+    selectionMode="range"
+    
+    placeholder="Calendar"
+    dateFormat="yy-mm-dd">
+      <ng-template pTemplate="date" let-date>
+          <span>
+              {{ date.day }}
+          </span>
+      </ng-template>
+  </p-calendar>
+    <img src="/icons/dropdown-arrow.png" class="calendar-icon">
+    <svg pTooltip="Refresh" (click)="refresh()" class="reverse" xmlns="http://www.w3.org/2000/svg" width="2.5em" height="2.5em" viewBox="-1.5 -2.5 24 24"><path fill="currentColor" d="m4.859 5.308l1.594-.488a1 1 0 0 1 .585 1.913l-3.825 1.17a1 1 0 0 1-1.249-.665L.794 3.413a1 1 0 1 1 1.913-.585l.44 1.441C5.555.56 10.332-1.035 14.573.703a9.38 9.38 0 0 1 5.38 5.831a1 1 0 1 1-1.905.608A7.381 7.381 0 0 0 4.86 5.308zm12.327 8.195l-1.775.443a1 1 0 1 1-.484-1.94l3.643-.909a1 1 0 0 1 .61-.08a1 1 0 0 1 .84.75l.968 3.88a1 1 0 0 1-1.94.484l-.33-1.322a9.381 9.381 0 0 1-16.384-1.796l-.26-.634a1 1 0 1 1 1.851-.758l.26.633a7.381 7.381 0 0 0 13.001 1.25z"/></svg>
+  </div>
 </div>
   
 <div class="table-container">
-    <table class="appointment-table">
+    <table class="appointment-table " id="appointmentsTable">
       <thead>
         <tr>
           <th>No</th>
           <th (click)="sortBy('username')" style="cursor: pointer;">
-            Admin Name
+            Staff Name
             <span *ngIf="sortColumn === 'username' && sortDirection === 'asc'">&#9650;</span>
             <span *ngIf="sortColumn === 'username' && sortDirection === 'desc'">&#9660;</span>
           </th>
           <th>
             Role
           </th>
-          <th>Patient Name</th>
-          <th>Doctor Name</th>
+          <th>Appt. Handled</th>
+          <th>Appt. Confirmed</th>
           <!-- <th>Therapy</th> -->
-          <th (click)="sortBy('created_at')">
-            Requested Date
-            <span *ngIf="sortColumn === 'created_at' && sortDirection === 'asc'">&#9650;</span>
-            <span *ngIf="sortColumn === 'created_at' && sortDirection === 'desc'">&#9660;</span></th>
-            <th (click)="sortBy('updated_at')">
-                Updated Date
-                <span *ngIf="sortColumn === 'updated_at' && sortDirection === 'asc'">&#9650;</span>
-                <span *ngIf="sortColumn === 'updated_at' && sortDirection === 'desc'">&#9660;</span></th>
-          <th>Status</th>
+          <th>Appt. Cancelled</th>
+          <th>Appt. Completed</th>
+          <th>Action</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let appointment of getPaginatedAppointments(); let i = index">
           <td>{{ i + 1 }}</td>
-          <td>{{appointment.username}}</td>
-          <td>{{appointment.user?.role}}</td>
-          <td>{{ appointment.patientName }}</td>
-          <td>{{ appointment.doctorName }}</td>
-          <!-- <td>{{ appointment.department }}</td> -->
-          <td>{{ appointment.created_at }}</td>
-          <td>{{ appointment.updated_at }}</td>
+          <td>{{ appointment.username }}</td>
+          <td>{{ appointment.role }}</td>
+          <td>{{ appointment.totalHandled }}</td>
+          <td>{{ appointment.confirmed }}</td>
+          <td>{{ appointment.cancelled }}</td>
+          <td>{{ appointment.completed }}</td>
           <td>
-            <span class="status-badge" [ngClass]="getStatusClass(appointment.status)">
-                {{ appointment.status }}
-              </span>
-              
+            <button class="btn-action">
+              <img src="report-download.svg" alt="check" class="action-icon" (click)="downloadAppointments(appointment.userId)"
+                pTooltip="Download" tooltipPosition="top">
+              <img src="print.png" alt="delete" class="action-icon" (click)="printAppointments(appointment.userId)"
+                pTooltip="Print" tooltipPosition="top">
+            </button>
           </td>
         </tr>
+        
       </tbody>
     </table>
   

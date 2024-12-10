@@ -417,6 +417,33 @@ button[disabled] {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Light shadow for a card-like effect */
   font-family: Kanit;
 }
+.radio-container {
+  margin: 10px 0;
+  text-align: left;
+  width: 39%;
+}
+
+.radio-container label {
+  color: #000;
+  font-family: Kanit;
+  font-size: 17px;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.radio-option {
+  margin-left: 0;
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+
+}
+
+.radio-option input[type='radio'] {
+  margin-right: 8px;
+}
+
 
 .styled-table {
   width: 100%;

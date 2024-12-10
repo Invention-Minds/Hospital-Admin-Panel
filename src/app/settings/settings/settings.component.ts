@@ -40,7 +40,7 @@ export class SettingsComponent implements OnInit {
   userid:number = 0;
   role: string | null = null;  // Store user role
   users: any[] = []; // List of all users
-  selectedUser: string = ''; // User selected by super admin to reset password
+  selectedUser: any = ''; // User selected by super admin to reset password
   loading: boolean = false;
   name: string = '';
   buttonClicked: boolean = false;
@@ -52,6 +52,8 @@ export class SettingsComponent implements OnInit {
   isUserNameValid: boolean = false;
   loggedinUser: any;
   firstNames: string[] = [];
+  isReceptionist: boolean = true; // Default value for checkbox
+  showReceptionistOptions: boolean = false;
 
   constructor(private authService: AuthServiceService, private router: Router, private messageService: MessageService, private appointmentService: AppointmentConfirmService) {}
  // Define the role-based access
@@ -134,6 +136,23 @@ export class SettingsComponent implements OnInit {
       }
     );
   }
+  onUsernameChange(): void {
+    const role = this.extractRoleFromUsername(this.username);
+    if (role === 'subadmin') {
+      this.showReceptionistOptions = true;
+    } else {
+      this.showReceptionistOptions = false;
+      this.isReceptionist = true; // Reset checkbox value when role is not subadmin
+    }
+    this.validateInputs(); // Optionally validate inputs
+  }
+  extractRoleFromUsername(username: string): string {
+    const parts = username.split('_');
+    return parts.length > 1 ? parts[1].split('@')[0] : '';
+  }
+  onReceptionistChange(): void {
+    console.log('Is Receptionist:', this.isReceptionist ? 'Front Desk' : 'Tele Caller');
+  }
   resetUserPassword(): void {
     if (this.newPassword !== this.confirmPassword) {
       this.messageService.add({ severity: 'warn', summary: 'Warning', detail: 'Passwords do not match' });
@@ -157,19 +176,28 @@ export class SettingsComponent implements OnInit {
       );
     }
   }
+
 // Register method
 createAccount() {
   this.buttonClicked = true;
-  this.authService.register(this.username, this.password).subscribe(response => {
+  this.authService.register(this.username, this.password,this.isReceptionist).subscribe(response => {
     // console.log('Account created successfully', response);
     this.username = '';  // Clear the username
     this.password = '';  // Clear the password
+    this.showReceptionistOptions = false;  // Reset the checkbox
     this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Account Created Successfully' });
     this.buttonClicked = false;
   }, error => {
-    console.error('Error creating account', error);
+    if (error.status === 400) {
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'This username has already been used.' });
+      this.buttonClicked = false;
+    }
+    else{
+      console.error('Error creating account', error);
     this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to Create Account' });
     this.buttonClicked = false;
+    }
+    
   });
 }
 validateInputs(): void {

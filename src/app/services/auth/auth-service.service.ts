@@ -73,9 +73,9 @@ initializeUserFromStorage(): void {
     // console.log(this.user);
   }
 
-  register(username: string, password: string): Observable<any> {
+  register(username: string, password: string, isReceptionist: boolean): Observable<any> {
     const role = this.extractRoleFromUsername(username);  // Extract role
-    return this.http.post(`${this.apiUrl}/register`, { username, password }).pipe(
+    return this.http.post(`${this.apiUrl}/register`, { username, password, isReceptionist }).pipe(
       tap(response => {
         this.role = role;  // Save the role
       })

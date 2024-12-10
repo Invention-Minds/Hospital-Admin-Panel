@@ -1,6 +1,9 @@
 <div class="filter-container">
+
   <div class="p-field p-col-3 calendar">
     <!-- <p-calendar [(ngModel)]="selectedDate" placeholder="Calendar" class="custom-calendar"></p-calendar> -->
+    <img src="report-download.svg" alt="check" (click)="download()"
+    pTooltip="Download" class="download" tooltipPosition="top">
     <p-calendar 
     styleClass="custom-calendar" 
     [(ngModel)]="selectedDateRange"
@@ -42,7 +45,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let appointment of getPaginatedAppointments(); let i = index">
+        <!-- <tr *ngFor="let appointment of getPaginatedAppointments(); let i = index">
           <td>{{ i + 1 }}</td>
           <td>{{ appointment.username }}</td>
           <td>{{ appointment.role }}</td>
@@ -58,7 +61,72 @@
                 pTooltip="Print" tooltipPosition="top">
             </button>
           </td>
-        </tr>
+        </tr> -->
+
+          <tr *ngFor="let appointment of getPaginatedAppointments(); let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ appointment.username }}</td>
+            <td>{{ appointment.role }}</td>
+            <td>
+              {{ appointment.totalHandled }}
+              <span *ngIf="appointment.trends.totalHandled > 0" class="arrow up">↑</span>
+              <span *ngIf="appointment.trends.totalHandled < 0" class="arrow down">↓</span>
+            </td>
+            <td>
+              {{ appointment.confirmed }}
+              <span *ngIf="appointment.trends.confirmed > 0" class="arrow up">↑</span>
+              <span *ngIf="appointment.trends.confirmed < 0" class="arrow down">↓</span>
+            </td>
+            <td>
+              {{ appointment.cancelled }}
+              <span *ngIf="appointment.trends.cancelled > 0" class="arrow up">↑</span>
+              <span *ngIf="appointment.trends.cancelled < 0" class="arrow down">↓</span>
+            </td>
+            <td>
+              {{ appointment.completed }}
+              <span *ngIf="appointment.trends.completed > 0" class="arrow up">↑</span>
+              <span *ngIf="appointment.trends.completed < 0" class="arrow down">↓</span>
+            </td>
+            <td>
+              <button class="btn-action">
+                <!-- Pass `userId` for admin roles -->
+                <img 
+                  src="report-download.svg" 
+                  alt="Download" 
+                  class="action-icon" 
+                  *ngIf="appointment.role !== 'Doctor'" 
+                  (click)="downloadAppointments(appointment.userId, appointment.role)" 
+                />
+                <!-- Pass `doctorId` for doctor roles -->
+                <img 
+                  src="report-download.svg" 
+                  alt="Download" 
+                  class="action-icon" 
+                  *ngIf="appointment.role === 'Doctor'" 
+                  (click)="downloadAppointments(appointment.doctorId, appointment.role)" 
+                />
+              
+                <!-- Print button for admin roles -->
+                <img 
+                  src="print.png" 
+                  alt="Print" 
+                  class="action-icon" 
+                  *ngIf="appointment.role !== 'Doctor'" 
+                  (click)="printAppointments(appointment.userId, appointment.role)" 
+                />
+                <!-- Print button for doctor roles -->
+                <img 
+                  src="print.png" 
+                  alt="Print" 
+                  class="action-icon" 
+                  *ngIf="appointment.role === 'Doctor'" 
+                  (click)="printAppointments(appointment.doctorId, appointment.role)" 
+                />
+              </button>
+              
+            </td>
+          </tr>
+
         
       </tbody>
     </table>
@@ -73,5 +141,6 @@
         of {{ totalPages }}
       </div>
     </div>
+    <p-toast></p-toast>
   </div>
   

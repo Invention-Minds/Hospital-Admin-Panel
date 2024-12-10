@@ -197,7 +197,7 @@
 
       <!-- Email Input -->
       <div class="input">
-        <input type="text" class="input-field" [(ngModel)]="username" placeholder="Username_admin@rashtrotthana"    (ngModelChange)="validateInputs()"
+        <input type="text" class="input-field" [(ngModel)]="username" placeholder="Username_admin@rashtrotthana"     (ngModelChange)="onUsernameChange()"
         required>
         <div *ngIf="usernameErrorMessage" class="error-message">{{ usernameErrorMessage }}</div>
 
@@ -211,9 +211,36 @@
             class="eye-icon" (click)="toggleCreatePasswordVisibility()">
         </div>
         <div *ngIf="passwordErrorMessage" class="error-message">{{ passwordErrorMessage }}</div>
-
+        <div *ngIf="showReceptionistOptions" class="radio-container">
+          <label>Sub Admin Type:</label>
+          <div class="radio-option">
+            <label>
+              <input
+                type="radio"
+                name="subAdminType"
+                [(ngModel)]="isReceptionist"
+                [value]="true"
+              />
+              Front Desk
+            </label>
+          </div>
+          <div class="radio-option">
+            <label>
+              <input
+                type="radio"
+                name="subAdminType"
+                [(ngModel)]="isReceptionist"
+                [value]="false"
+              />
+              Tele Caller
+            </label>
+          </div>
+        </div>
       </div>
-
+  <!-- Checkbox for Tele Caller / Front Desk -->
+ 
+  
+  
       <!-- Save Button -->
       <button class="create-button" (click)="createAccount()"  [disabled]="buttonClicked || !isFormValid">Create Account</button>
 <p-toast />

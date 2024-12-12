@@ -18,8 +18,10 @@ export class TotalOverviewComponent implements OnInit {
   date: string ='';
   showAvailableDoctors: boolean = false;
   showUnavailableDoctors: boolean = false;
+  showAbsentDoctors: boolean = false;
   availableDoctors: any[] = [];
   unavailableDoctors: any[] = [];
+  absentDoctors: any[] = [];
 
 
   constructor(
@@ -59,68 +61,126 @@ export class TotalOverviewComponent implements OnInit {
       }
     );
   }
-  private fetchDoctorsWithAvailability(): void {
-    // Step 1: Fetch all doctors from backend
-    this.doctorService.getDoctors().subscribe(
-      (doctors) => {
-        // Step 2: Get unavailable dates and booked slots for each doctor
-        const bookedSlotsObservables = doctors.map(doctor => 
-          this.appointmentService.getBookedSlots(doctor.id, this.date)
-        );
-        const unavailableDatesObservables = doctors.map(doctor => 
-          this.doctorService.getUnavailableDates(doctor.id)
-        );
+  // private fetchDoctorsWithAvailability(): void {
+  //   // Step 1: Fetch all doctors from backend
+  //   this.doctorService.getDoctors().subscribe(
+  //     (doctors) => {
+  //       // Step 2: Get unavailable dates and booked slots for each doctor
+  //       const bookedSlotsObservables = doctors.map(doctor => 
+  //         this.appointmentService.getBookedSlots(doctor.id, this.date)
+  //       );
+  //       const unavailableDatesObservables = doctors.map(doctor => 
+  //         this.doctorService.getUnavailableDates(doctor.id)
+  //       );
 
-        forkJoin([forkJoin(bookedSlotsObservables), forkJoin(unavailableDatesObservables)]).subscribe(
-          ([bookedSlotsList, unavailableDatesList]) => {
-            this.doctors = doctors.map((doctor, index) => {
-              // Step 3: Check for unavailable dates
-              const unavailableDates = unavailableDatesList[index].map((d: any) => new Date(d.date).toISOString().split('T')[0]);
-              const isUnavailableByDate = unavailableDates.includes(this.date);
+  //       forkJoin([forkJoin(bookedSlotsObservables), forkJoin(unavailableDatesObservables)]).subscribe(
+  //         ([bookedSlotsList, unavailableDatesList]) => {
+  //           this.doctors = doctors.map((doctor, index) => {
+  //             // Step 3: Check for unavailable dates
+  //             const unavailableDates = unavailableDatesList[index].map((d: any) => new Date(d.date).toISOString().split('T')[0]);
+  //             const isUnavailableByDate = unavailableDates.includes(this.date);
 
-              if (isUnavailableByDate) {
-                return { ...doctor, status: 'Unavailable' };
-              }
+  //             if (isUnavailableByDate) {
+  //               return { ...doctor, status: 'Unavailable' };
+  //             }
 
-              // Step 4: Check for availability based on slots
-              const availableDay = doctor.availability?.find((avail: any) =>
-                avail.day.toLowerCase() === new Date(this.date).toLocaleString('en-us', { weekday: 'short' }).toLowerCase()
-              );
+  //             // Step 4: Check for availability based on slots
+  //             const availableDay = doctor.availability?.find((avail: any) =>
+  //               avail.day.toLowerCase() === new Date(this.date).toLocaleString('en-us', { weekday: 'short' }).toLowerCase()
+  //             );
               
 
-              if (!availableDay) {
-                // If the doctor is not available on this day, mark as unavailable
-                return { ...doctor, status: 'Unavailable' };
-              }
+  //             if (!availableDay) {
+  //               // If the doctor is not available on this day, mark as unavailable
+  //               return { ...doctor, status: 'Unavailable' };
+  //             }
 
-              // Generate all time slots for the day
-              const generatedSlots = this.generateTimeSlots(availableDay.availableFrom, availableDay.slotDuration);
-              const bookedSlots = bookedSlotsList[index];
+  //             // Generate all time slots for the day
+  //             const generatedSlots = this.generateTimeSlots(availableDay.availableFrom, availableDay.slotDuration);
+  //             const bookedSlots = bookedSlotsList[index];
 
-              // Determine if there are any available slots left
-              const nonCompleteBookedSlots = bookedSlots.filter(slot => !slot.complete).map(slot => slot.time);
-              const availableSlots = generatedSlots.filter(slot => !nonCompleteBookedSlots.includes(slot));
+  //             // Determine if there are any available slots left
+  //             const nonCompleteBookedSlots = bookedSlots.filter(slot => !slot.complete).map(slot => slot.time);
+  //             const availableSlots = generatedSlots.filter(slot => !nonCompleteBookedSlots.includes(slot));
 
-              // Step 5: Final check for availability based on generated slots
-              return {
-                ...doctor,
-                status: availableSlots.length === 0 ? 'Unavailable' : 'Available',
-              };
-            });
-                      // After fetching and processing the data, call the functions to filter the doctors
-          this.fetchDoctorsAvailability();
-          this.fetchDoctorsUnavailability();
-            this.availableDoctorsToday = this.doctors.filter(doctor => doctor.status === 'Available').length;
-            this.unavailableDoctorsToday= this.doctors.filter(doctor => doctor.status === 'Unavailable').length;
+  //             // Step 5: Final check for availability based on generated slots
+  //             return {
+  //               ...doctor,
+  //               status: availableSlots.length === 0 ? 'Unavailable' : 'Available',
+  //             };
+  //           });
+  //                     // After fetching and processing the data, call the functions to filter the doctors
+  //         this.fetchDoctorsAvailability();
+  //         this.fetchDoctorsUnavailability();
+  //           this.availableDoctorsToday = this.doctors.filter(doctor => doctor.status === 'Available').length;
+  //           this.unavailableDoctorsToday= this.doctors.filter(doctor => doctor.status === 'Unavailable').length;
 
 
-          },
-          error => console.error('Error fetching booked slots or unavailable dates:', error)
-        );
+  //         },
+  //         error => console.error('Error fetching booked slots or unavailable dates:', error)
+  //       );
+  //     },
+  //     error => console.error('Error fetching doctors:', error)
+  //   );
+  // }
+  private fetchDoctorsWithAvailability(): void {
+    // Step 1: Fetch all doctors with booked slots and unavailable dates from the backend
+    this.doctorService.getDoctors().subscribe(
+      (doctors) => {
+        this.doctors = doctors.map((doctor) => {
+          // Step 2: Check for unavailable dates
+          const unavailableDates = doctor.unavailableDates?.map((d: any) =>
+            new Date(d).toISOString().split('T')[0]
+          ) || []; // Default to empty array if undefined
+          const isUnavailableByDate = unavailableDates.includes(this.date);
+  
+          if (isUnavailableByDate) {
+            return { ...doctor, status: 'Unavailable' };
+          }
+  
+          // Step 3: Check availability based on slots
+          const availableDay = doctor.availability?.find((avail: any) =>
+            avail.day.toLowerCase() ===
+            new Date(this.date).toLocaleString('en-us', { weekday: 'short' }).toLowerCase()
+          );
+  
+          if (!availableDay) {
+            // If the doctor is not available on this day, mark as unavailable
+            return { ...doctor, status: 'Unavailable' };
+          }
+  
+          // Generate all time slots for the day
+          const generatedSlots = this.generateTimeSlots(
+            availableDay.availableFrom,
+            availableDay.slotDuration
+          );
+          const bookedSlots = doctor.bookedSlots || []; // Default to empty array if undefined
+  
+          // Determine if there are any available slots left
+          const nonCompleteBookedSlots = bookedSlots
+            .filter((slot: any) => !slot.complete)
+            .map((slot: any) => slot.time);
+          const availableSlots = generatedSlots.filter(slot => !nonCompleteBookedSlots.includes(slot));
+  
+          // Step 4: Final check for availability based on generated slots
+          return {
+            ...doctor,
+            status: availableSlots.length === 0 ? 'Unavailable' : 'Available',
+          };
+        });
+  
+        // Step 5: Update counts for available and unavailable doctors
+        this.availableDoctorsToday = this.doctors.filter(doctor => doctor.status === 'Available').length;
+        this.unavailableDoctorsToday = this.doctors.filter(doctor => doctor.status === 'Unavailable').length;
+  
+        // Optional: Call additional filtering functions if needed
+        this.fetchDoctorsAvailability();
+        this.fetchDoctorsUnavailability();
       },
-      error => console.error('Error fetching doctors:', error)
+      (error) => console.error('Error fetching doctors:', error)
     );
   }
+  
   fetchDoctorsAvailability(){
     // console.log(this.doctors);
   this.availableDoctors=this.doctors.filter(doctor => doctor.status === 'Available');
@@ -165,11 +225,18 @@ export class TotalOverviewComponent implements OnInit {
   toggleAvailableDoctors(): void {
     this.showAvailableDoctors = true;
     this.showUnavailableDoctors = false;
+    this.showAbsentDoctors = false;
   }
 
   toggleUnavailableDoctors(): void {
     this.showAvailableDoctors = false;
     this.showUnavailableDoctors = true;
+    this.showAbsentDoctors = false;
+  }
+  toggleAbsentDoctors(): void {
+    this.showAbsentDoctors = true;
+    this.showUnavailableDoctors = false;
+    this.showAvailableDoctors = false;
   }
   closeDoctorList(): void {
     this.showAvailableDoctors = false;

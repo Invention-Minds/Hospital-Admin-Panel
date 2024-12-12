@@ -1,7 +1,13 @@
 /* You can add global styles to this file, and also import other style files */
-
+@use '@angular/material' as mat;
 html, body { height: 100%; }
 body { margin: 0; font-family: Kanit; background-color: #F0F3FF; }
+:root {
+    @include mat.badge-overrides((
+      background-color: orange,
+      text-color: red,
+    ));
+  }
 @media (min-width:641px) {
 
     *::-webkit-scrollbar {

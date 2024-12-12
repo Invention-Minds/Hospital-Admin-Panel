@@ -288,6 +288,19 @@ getAppointmentsByRole(): Observable<Appointment[]> {
 
     return this.http.post<any>(`${environment.apiUrl}/email/send-email`, emailRequest, { headers });
   }
+  getNotifications(): Observable<any> {
+    return this.http.get<any>(`${environment.apiUrl}/appointments/notifications`);
+  }
+  deleteNotification(notificationId: number): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/notifications/${notificationId}`);
+  }
+  getNotificationsByRole(params: { userId: string; isReceptionist: boolean }): Observable<any[]> {
+    const { userId, isReceptionist } = params;
+    return this.http.get<any[]>(`${this.apiUrl}/notifications`, {
+      params: { userId, isReceptionist: String(isReceptionist) },
+    });
+  }
+  
     // Method to send WhatsApp message
     sendWhatsAppMessage(data: any): Observable<any> {
       return this.http.post<any>(`${environment.apiUrl}/whatsapp/send`, data);

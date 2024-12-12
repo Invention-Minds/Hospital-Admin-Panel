@@ -40,6 +40,13 @@ export class DoctorServiceService {
     }
     return this.http.get<Doctor[]>(url);
   }
+  getAllDoctors(date?: string): Observable<Doctor[]> {
+    let url = `${this.apiUrl}/doctors`;
+    if (date) {
+      url += `?date=${date}`;
+    }
+    return this.http.get<Doctor[]>(url);
+  }
 
     // getFutureBookedSlots( doctorId: string,date: string): Observable<any> {
     //   const params = new HttpParams() .set('doctorId', doctorId)
@@ -107,6 +114,7 @@ export class DoctorServiceService {
   getDoctorDetails(doctorId: number): Observable<Doctor> {
     return this.http.get<Doctor>(`${this.apiUrl}/doctors/${doctorId}`);
   }
+ 
   // getUnavailableSlots(doctorId: number): Observable<{ date: string, time: string }[]> {
   //   return this.http.get<{ date: string, time: string }[]>(`${this.apiUrl}/doctors/${doctorId}/unavailableSlots`);
   // }

@@ -1,11 +1,28 @@
-import { Component, OnDestroy,OnInit,ChangeDetectorRef } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectorRef } from '@angular/core';
 import { AuthServiceService } from '../../services/auth/auth-service.service';
 import { Router } from '@angular/router';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { Observable, interval } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { environment } from '../../../environment/environment';
+import { MessageService } from 'primeng/api';
 
+interface Notification {
+  id: number;
+  type: string;
+  title: string;
+  message: string;
+  status: string;
+  entityId: number | null;
+  entityType: string;
+  createdAt: string;
+  sentAt: string | null;
+  viewedAt: string | null;
+  isCritical: boolean;
+  expiresAt: string | null;
+  targetRole: string;
+  userId: number;
+}
 
 interface Appointment {
   id?: number;
@@ -28,50 +45,190 @@ interface Appointment {
 @Component({
   selector: 'app-dashboard-module',
   templateUrl: './dashboard-module.component.html',
-  styleUrl: './dashboard-module.component.css'
+  styleUrl: './dashboard-module.component.css',
+  providers: [MessageService]
 })
 export class DashboardModuleComponent implements OnInit, OnDestroy {
   username: string = '';
   role: string = '';
   dropdownOpen: boolean = false;
+  notifications: Notification[] = [];
+  showNotifications: boolean = false; // Toggle for showing notification dropdown
   pendingAppointmentsCount: number = 0;
   newNotification: boolean = false; // Flag to show if new appointments came
   hasNewNotification: boolean = false;
+  isReceptionist: boolean = false;
   private apiUrl = environment.apiUrl;
   private audio = new Audio('/notification.mp3'); // Add a notification sound
   private eventSource: EventSource | null = null;
   public hasNewAppointment: boolean = false;
-  constructor(private authService: AuthServiceService, private router: Router,private appointmentService: AppointmentConfirmService,private changeDetector: ChangeDetectorRef) {}
+  constructor(private authService: AuthServiceService, private router: Router, private appointmentService: AppointmentConfirmService, private changeDetector: ChangeDetectorRef, private messageService: MessageService) { }
 
+  // ngOnInit(): void {
+  //   if (typeof window !== 'undefined' && window.localStorage) {
+  //     // Fetch role from localStorage or the authentication service
+  //     const storedUsername = localStorage.getItem('username');
+  //     const storedRole = localStorage.getItem('role');
+  //     const user = this.authService.getUser();
+  //     if (storedUsername && storedRole) {
+  //       this.username = storedUsername;
+  //       this.role = storedRole;
+  //     }
+  //     // console.log(this.username, this.role);
+  //   } else {
+  //     console.log('localStorage is not available');
+  //   }
+  //   console.log('Connecting to server to receive new appointments...',this.apiUrl,environment.apiUrl);
+  //   this.eventSource = new EventSource(`${environment.apiUrl}/appointments/updates`);
+  //   this.eventSource.onopen = () => {
+  //     console.log('Connection to server opened.');
+  //   };
+
+  //   this.eventSource.onerror = (error) => {
+  //     console.error('Error connecting to server:', error);
+  //   };
+  //   this.eventSource.onmessage = (event) => {
+  //     console.log('New pending appointment received:', event.data);
+
+  //     this.appointmentService.getNotifications().subscribe((notifications: Notification[]) => {
+  //       const userId = Number(localStorage.getItem('userid')); // Assuming a method to get the current logged-in user's ID
+  //       console.log('User ID:', userId);
+  //   const userNotifications = notifications.filter(
+  //     (notification) => notification.userId === userId 
+  //   );
+
+  //   console.log('User Notifications:', userNotifications);
+  //       const sortedNotifications = userNotifications.sort((a, b) => {
+  //         const dateA = new Date(a.createdAt || 0).getTime(); // Default to epoch if undefined
+  //         const dateB = new Date(b.createdAt || 0).getTime(); // Default to epoch if undefined
+  //         return dateB - dateA; // Sort in descending order by creation date
+  //       });
+  //       this.notifications = sortedNotifications;
+
+  //       console.log('Notifications:', notifications);
+  //       this.changeDetector.detectChanges()
+
+  //       this.audio.load()
+  //       this.audio.play();
+  //     });
+  //   };
+
+  //   this.appointmentService.getNotifications().subscribe((notifications: Notification[]) => {
+  //     const sortedNotifications = notifications.sort((a, b) => {
+  //       const dateA = new Date(a.createdAt || 0).getTime(); // Default to epoch if undefined
+  //       const dateB = new Date(b.createdAt || 0).getTime(); // Default to epoch if undefined
+  //       return dateB - dateA; // Sort in descending order by creation date
+  //     });
+  //     this.notifications = sortedNotifications;
+  //     console.log('Notifications:', notifications);
+
+  //   });
+  // }
   ngOnInit(): void {
     if (typeof window !== 'undefined' && window.localStorage) {
-      // Fetch role from localStorage or the authentication service
       const storedUsername = localStorage.getItem('username');
       const storedRole = localStorage.getItem('role');
-      const user = this.authService.getUser();
+      const isReceptionist = localStorage.getItem('isReceptionist') === 'true'; // Check if receptionist
+      this.isReceptionist = localStorage.getItem('isReceptionist') === 'true';
+
       if (storedUsername && storedRole) {
         this.username = storedUsername;
         this.role = storedRole;
       }
-      // console.log(this.username, this.role);
-    } else {
-      console.log('localStorage is not available');
+
+      console.log('Connecting to server to receive new appointments...', this.apiUrl, environment.apiUrl);
+      this.eventSource = new EventSource(`${environment.apiUrl}/appointments/updates`);
+
+      this.eventSource.onmessage = (event) => {
+        console.log('New notification received:', event.data);
+        const userId = localStorage.getItem('userid');
+
+        if (!userId) {
+          console.error('User ID is not available.');
+          return; // Exit early or handle accordingly
+        }
+        const newNotification: Notification = JSON.parse(event.data);
+
+        // Determine if the notification should trigger a toast
+        if (
+          this.role !== 'super_admin' && // Exclude super admin
+          this.role !== 'admin' && // Exclude admin
+          (
+            (newNotification.type === 'appointment_request') || // For both tele callers and receptionists
+            (this.isReceptionist && newNotification.type === 'appointment_remainder') // For receptionists only
+          )
+        ) {
+          console.log('New Notification Processed:', newNotification);
+
+          // Play audio notification
+          this.audio.load();
+          this.audio.play();
+
+          // Display a toast for the notification
+          const toastSummary = newNotification.type === 'appointment_request'
+            ? 'New Appointment Request'
+            : 'Appointment Reminder';
+
+          this.messageService.add({
+            severity: 'info', // Severity type: success, info, warn, error
+            summary: toastSummary,
+            detail: newNotification.message,
+            life: 5000, // Duration in milliseconds
+          });
+        }
+
+
+        // Fetch notifications based on role
+        this.appointmentService.getNotifications().subscribe((notifications: Notification[]) => {
+          const filteredNotifications = notifications.filter(notification =>
+            notification.type === 'appointment_request' ||
+            (this.isReceptionist && notification.type === 'appointment_remainder')
+          );
+          console.log('Filtered Notifications:', filteredNotifications);
+          const sortedNotifications = filteredNotifications.sort((a, b) => {
+            const dateA = new Date(a.createdAt || 0).getTime();
+            const dateB = new Date(b.createdAt || 0).getTime();
+            return dateB - dateA;
+          });
+
+
+
+          this.notifications = sortedNotifications;
+
+          console.log('Filtered Notifications:', sortedNotifications);
+
+
+        });
+      };
+      this.appointmentService.getNotifications().subscribe((notifications: Notification[]) => {
+        // const userId = Number(localStorage.getItem('userid'));
+        // console.log('User ID:', userId);
+        // const userNotifications = notifications.filter(
+        //   (notification) => notification.userId === userId
+        // );
+        const filteredNotifications = notifications.filter(notification =>
+          notification.type === 'appointment_request' ||
+          (this.isReceptionist && notification.type === 'appointment_remainder')
+        );
+        console.log('Filtered Notifications:', filteredNotifications);
+        const sortedNotifications = filteredNotifications.sort((a, b) => {
+          const dateA = new Date(a.createdAt || 0).getTime();
+          const dateB = new Date(b.createdAt || 0).getTime();
+          return dateB - dateA;
+        });
+
+
+
+        this.notifications = sortedNotifications;
+
+        // this.audio.load();
+        // this.audio.play();
+      }
+      );
     }
-    this.eventSource = new EventSource(`${this.apiUrl}/appointments/updates`);
-
-    this.eventSource.onmessage = (event) => {
-      const newAppointment = JSON.parse(event.data);
-      // console.log('New pending appointment received:', newAppointment);
-      this.hasNewAppointment = true;
-      this.changeDetector.detectChanges()
-
-this.audio.load()
-      this.audio.play();
-    };
-
-
   }
-  gotoProfile(){
+
+  gotoProfile() {
     this.router.navigate(['/settings']);
   }
   ngOnDestroy(): void {
@@ -79,14 +236,52 @@ this.audio.load()
       this.eventSource.close();
     }
   }
-  handleNotificationClick(): void {
-    if (this.hasNewAppointment) {
-      this.hasNewAppointment = false; // Reset the notification state
-      // Redirect to the appointments page when the notification icon is clicked
-      this.router.navigate(['/appointments']);
-      console.log('Redirecting to appointments page');
+  // handleNotificationClick(index: number): void {
+  //   // Remove the clicked notification from the list
+  //   this.notifications.splice(index, 1);
+
+  //   // Navigate to the appointments page
+  //   this.router.navigate(['/appointments']);
+
+  //   // Close the notification dropdown if there are no notifications left
+  //   if (this.notifications.length === 0) {
+  //     this.dropdownOpen = false;
+  //   }
+  // }
+  handleNotificationClick(index: number): void {
+    const notificationToDelete = this.notifications[index];
+    if (notificationToDelete.id) {
+
+      // Make the HTTP request to delete the notification from the backend
+      this.appointmentService.deleteNotification(notificationToDelete.id).subscribe(
+        () => {
+          // Remove the clicked notification from the list on successful deletion
+          this.notifications.splice(index, 1);
+          this.showNotifications = false;
+
+          // Navigate to the appointments page
+          this.router.navigate(['/appointments']);
+
+          // Close the notification dropdown if there are no notifications left
+          if (this.notifications.length === 0) {
+            this.dropdownOpen = false;
+          }
+        },
+        (error) => {
+          console.error('Failed to delete the notification:', error);
+        }
+      );
     }
   }
+
+
+  toggleNotificationDropdown(): void {
+    this.showNotifications = !this.showNotifications;
+    if (this.hasNewAppointment) {
+      this.hasNewAppointment = false; // Reset the notification badge state when viewing notifications
+    }
+  }
+
 
   playNotificationSound(): void {
     this.audio.load();

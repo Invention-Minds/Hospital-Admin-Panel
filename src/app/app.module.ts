@@ -61,6 +61,7 @@ import { DeleteConfirmationDialogComponent } from './delete-confirmation-dialog/
 import { MultiSelectModule } from 'primeng/multiselect';
 import { DatePipe } from '@angular/common';
 import { InactivityService } from './services/inactivity.service';
+import {MatBadgeModule} from '@angular/material/badge';
 
 
 @NgModule({
@@ -115,7 +116,8 @@ import { InactivityService } from './services/inactivity.service';
     BrowserAnimationsModule,
     ToastModule,
     MultiSelectModule,
-    ProgressSpinnerModule
+    ProgressSpinnerModule,
+    MatBadgeModule
   ],
   providers: [
     DatePipe,

@@ -41,6 +41,9 @@
           <!-- <th>Therapy</th> -->
           <th>Appt. Cancelled</th>
           <th>Appt. Completed</th>
+          <th>Online Requests</th>
+      <th>Call Requests</th>
+      <th>Walk-in Requests</th>
           <th>Action</th>
         </tr>
       </thead>
@@ -69,24 +72,31 @@
             <td>{{ appointment.role }}</td>
             <td>
               {{ appointment.totalHandled }}
-              <span *ngIf="appointment.trends.totalHandled > 0" class="arrow up">↑</span>
-              <span *ngIf="appointment.trends.totalHandled < 0" class="arrow down">↓</span>
+              <span *ngIf="appointment.trends?.totalHandled > 0">↑</span>
+              <span *ngIf="appointment.trends?.totalHandled < 0">↓</span>
+              <!-- <span *ngIf="appointment.trends?.totalHandled === 0">→</span> -->
             </td>
             <td>
               {{ appointment.confirmed }}
-              <span *ngIf="appointment.trends.confirmed > 0" class="arrow up">↑</span>
-              <span *ngIf="appointment.trends.confirmed < 0" class="arrow down">↓</span>
+              <span *ngIf="appointment.trends?.confirmed > 0">↑</span>
+              <span *ngIf="appointment.trends?.confirmed < 0">↓</span>
+              <!-- <span *ngIf="appointment.trends?.confirmed === 0">→</span> -->
             </td>
             <td>
               {{ appointment.cancelled }}
-              <span *ngIf="appointment.trends.cancelled > 0" class="arrow up">↑</span>
-              <span *ngIf="appointment.trends.cancelled < 0" class="arrow down">↓</span>
+              <span *ngIf="appointment.trends?.cancelled > 0">↑</span>
+              <span *ngIf="appointment.trends?.cancelled < 0">↓</span>
+              <!-- <span *ngIf="appointment.trends?.cancelled === 0">→</span> -->
             </td>
             <td>
               {{ appointment.completed }}
-              <span *ngIf="appointment.trends.completed > 0" class="arrow up">↑</span>
-              <span *ngIf="appointment.trends.completed < 0" class="arrow down">↓</span>
+              <span *ngIf="appointment.trends?.completed > 0">↑</span>
+              <span *ngIf="appointment.trends?.completed < 0">↓</span>
+              <!-- <span *ngIf="appointment.trends?.completed === 0">→</span> -->
             </td>
+            <td>{{ appointment.requestTypes?.online || 0 }}</td>
+            <td>{{ appointment.requestTypes?.call || 0 }}</td>
+            <td>{{ appointment.requestTypes?.walkin || 0 }}</td>
             <td>
               <button class="btn-action">
                 <!-- Pass `userId` for admin roles -->

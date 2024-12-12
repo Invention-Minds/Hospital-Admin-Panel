@@ -257,6 +257,7 @@ export class DoctorReportComponent {
     );
   }
   
+  
   // Function to create a summary of doctor-wise appointment data
   private createDoctorSummary(): void {
     let filteredAppointments: Appointment[] = this.appointments;

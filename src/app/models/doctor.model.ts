@@ -24,4 +24,7 @@ export interface Doctor {
   isUnavailable?: boolean; // Optional property to mark the doctor as unavailable
   unavailableSlots?: string[]; // Optional property to mark the slots as unavailable
   updatedAt?: Date;
+  bookedSlots?: { time: string; complete: boolean }[]; // Optional property to store booked slots
+  extraSlots?: string[]; // Optional property to store extra slots
+  
 }

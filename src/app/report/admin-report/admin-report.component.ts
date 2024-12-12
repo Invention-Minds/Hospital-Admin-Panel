@@ -520,6 +520,7 @@ export class AdminReportComponent {
       (appointments) => {
         this.appointments = appointments;
         let filteredAppointments = this.appointments;
+        this.allAppointments = appointments;
 
         // Check if the date range is selected
         if (this.selectedDateRange && this.selectedDateRange.length === 2) {

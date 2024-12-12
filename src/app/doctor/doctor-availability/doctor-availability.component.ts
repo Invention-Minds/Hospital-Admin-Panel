@@ -99,7 +99,7 @@ export class DoctorAvailabilityComponent {
     const formattedDate = this.formatDate(this.selectedDate);
     // console.log('formattedDate', formattedDate);
 
-    this.doctorService.getAllDoctors(formattedDate).subscribe((doctors: Doctor[]) => {
+    this.doctorService.getDoctors(formattedDate).subscribe((doctors: Doctor[]) => {
 
       doctors.forEach(doctor => {
         // Initialize `availabilityDays` if it does not exist

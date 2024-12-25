@@ -20,7 +20,7 @@
             <img [src]="isPasswordVisible? '/not-show.png': '/show-password.png'" alt="Show Password" class="eye-icon" (click)="togglePasswordVisibility()">
           </div>
         <div class="login">
-            <button pButton type="submit" [disabled]="!loginForm.valid" [loading]="isLoading">Login Now</button>
+            <button  type="submit" [disabled]="!loginForm.valid " mat-raised-button [class.spinner]="isLoading"><span *ngIf="!isLoading">Login Now</span></button>
             <p-toast />
         </div>
       </form>

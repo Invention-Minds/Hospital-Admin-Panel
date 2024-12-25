@@ -1,10 +1,13 @@
 <div class="filter-container">
+
   <div class="p-field p-col-3 calendar">
     <!-- <p-calendar [(ngModel)]="selectedDate" placeholder="Calendar" class="custom-calendar"></p-calendar> -->
+    <img src="report-download.svg" alt="check" (click)="download()"
+    pTooltip="Download" class="download" tooltipPosition="top">
     <p-calendar 
     styleClass="custom-calendar" 
     [(ngModel)]="selectedDateRange"
-    (ngModelChange)="loadAllAppointments()"
+    (ngModelChange)="loadServices()"
     selectionMode="range"
     
     placeholder="Calendar"
@@ -25,39 +28,115 @@
       <thead>
         <tr>
           <th>No</th>
-          <th (click)="sortBy('doctorName')" style="cursor: pointer;">
-            Doctor Name
-            <span *ngIf="sortColumn === 'doctorName' && sortDirection === 'asc'">&#9650;</span>
-            <span *ngIf="sortColumn === 'doctorName' && sortDirection === 'desc'">&#9660;</span>
+          <th (click)="sortBy('username')" style="cursor: pointer;">
+            Name
+            <span *ngIf="sortColumn === 'username' && sortDirection === 'asc'">&#9650;</span>
+            <span *ngIf="sortColumn === 'username' && sortDirection === 'desc'">&#9660;</span>
           </th>
           <th>
-            Department
+            Role
           </th>
-          <th>Availability Type</th>
-      <th>No. of Appt. Confirm</th>
-      <th>No. of Appt. Cancel</th>
-      <th>No. of Attend</th>
-      <th>Action</th>
+          <th>Pack. Handled</th>
+          <th>Pack. Confirmed</th>
+          <!-- <th>Therapy</th> -->
+          <th>Pack. Cancelled</th>
+          <th>Pack. Completed</th>
+          <th>Online Requests</th>
+      <th>Call Requests</th>
+      <th>Walk-in Requests</th>
+          <th>Action</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let doctor of getPaginatedAppointments(); let i = index">
+        <!-- <tr *ngFor="let appointment of getPaginatedAppointments(); let i = index">
           <td>{{ i + 1 }}</td>
-          <td>{{ doctor.doctorName }}</td>
-          <td class="capitalize">{{ doctor.department }}</td>
-          <td>{{ doctor.availabilityType }}</td>
-          <td>{{ doctor.confirmed }}</td>
-          <td>{{doctor.cancelled}}</td>
-          <td>{{ doctor.attended }}</td>
+          <td>{{ appointment.username }}</td>
+          <td>{{ appointment.role }}</td>
+          <td>{{ appointment.totalHandled }}</td>
+          <td>{{ appointment.confirmed }}</td>
+          <td>{{ appointment.cancelled }}</td>
+          <td>{{ appointment.completed }}</td>
           <td>
             <button class="btn-action">
-              <img src="report-download.svg" alt="check" class="action-icon" (click)="downloadAppointments(doctor.doctorId)"
+              <img src="report-download.svg" alt="check" class="action-icon" (click)="downloadAppointments(appointment.userId)"
                 pTooltip="Download" tooltipPosition="top">
-              <img src="print.png" alt="delete" class="action-icon" (click)="printAppointments(doctor.doctorId)"
+              <img src="print.png" alt="delete" class="action-icon" (click)="printAppointments(appointment.userId)"
                 pTooltip="Print" tooltipPosition="top">
             </button>
           </td>
-        </tr>
+        </tr> -->
+
+          <tr *ngFor="let appointment of getPaginatedData(); let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ appointment.username }}</td>
+            <td>{{ appointment.role }}</td>
+            <td>
+              {{ appointment.totalHandled }}
+              <span *ngIf="appointment.trends?.totalHandled > 0">↑</span>
+              <span *ngIf="appointment.trends?.totalHandled < 0">↓</span>
+              <!-- <span *ngIf="appointment.trends?.totalHandled === 0">→</span> -->
+            </td>
+            <td>
+              {{ appointment.Confirm }}
+              <span *ngIf="appointment.trends?.confirmed > 0">↑</span>
+              <span *ngIf="appointment.trends?.confirmed < 0">↓</span>
+              <!-- <span *ngIf="appointment.trends?.confirmed === 0">→</span> -->
+            </td>
+            <td>
+              {{ appointment.Cancel }}
+              <span *ngIf="appointment.trends?.cancelled > 0">↑</span>
+              <span *ngIf="appointment.trends?.cancelled < 0">↓</span>
+              <!-- <span *ngIf="appointment.trends?.cancelled === 0">→</span> -->
+            </td>
+            <td>
+              {{ appointment.complete }}
+              <span *ngIf="appointment.trends?.completed > 0">↑</span>
+              <span *ngIf="appointment.trends?.completed < 0">↓</span>
+              <!-- <span *ngIf="appointment.trends?.completed === 0">→</span> -->
+            </td>
+            <td>{{ appointment.online || 0 }}</td>
+            <td>{{ appointment.call || 0 }}</td>
+            <td>{{ appointment.walkin || 0 }}</td>
+            <td>
+              <button class="btn-action">
+                <!-- Pass `userId` for admin roles -->
+                <img 
+                  src="report-download.svg" 
+                  alt="Download" 
+                  class="action-icon" 
+                  *ngIf="appointment.role !== 'Package'" 
+                  (click)="downloadAppointments(appointment.userId, appointment.role)" 
+                />
+                <!-- Pass `doctorId` for doctor roles -->
+                <img 
+                  src="report-download.svg" 
+                  alt="Download" 
+                  class="action-icon" 
+                  *ngIf="appointment.role === 'Package'" 
+                  (click)="downloadAppointments(appointment.packageId, appointment.role)" 
+                />
+              
+                <!-- Print button for admin roles -->
+                <img 
+                  src="print.png" 
+                  alt="Print" 
+                  class="action-icon" 
+                  *ngIf="appointment.role !== 'Package'" 
+                  (click)="printAppointments(appointment.userId, appointment.role)" 
+                />
+                <!-- Print button for doctor roles -->
+                <img 
+                  src="print.png" 
+                  alt="Print" 
+                  class="action-icon" 
+                  *ngIf="appointment.role === 'Package'" 
+                  (click)="printAppointments(appointment.packageId, appointment.role)" 
+                />
+              </button>
+              
+            </td>
+          </tr>
+
         
       </tbody>
     </table>
@@ -72,5 +151,6 @@
         of {{ totalPages }}
       </div>
     </div>
+    <p-toast></p-toast>
   </div>
   

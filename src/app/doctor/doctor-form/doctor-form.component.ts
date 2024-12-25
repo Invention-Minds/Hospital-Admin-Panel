@@ -25,6 +25,9 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
   @Input() doctor: Doctor | null = null;
   @Output() save = new EventEmitter<Doctor>(); // Emits when the form is saved
   @Output() cancel = new EventEmitter<void>(); // Emits when the edit is canceled
+  availableTimes: string = ''; // Single string storing all ranges
+  availableTimesArray: string[] = ['']; // Dynamic array for input fields
+  formError: string | null = null;
 
   // Define the days with a type assertion to ensure that only valid days are used
   availabilityDaysList: (keyof Doctor['availabilityDays'])[] = [
@@ -40,7 +43,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
   generatedSlots: string[] = [];
   unavailableSlots: { label: string, value: string }[] = []; // Correctly type unavailableSlots
   generatedSlotOptions: { label: string, value: string }[] = [];
-  individualAvailability: { [key: string]: { availableFrom: string; slotDuration: number } } = {};
+  individualAvailability: { [key: string]: { availableFrom: string; slotDuration: number ; availableFromArray: string[]} } = {};
   useSameTimeForAllDays: boolean = true;
   generalAvailableFrom: string = '';
   generalSlotDuration: number = 20;
@@ -50,9 +53,6 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
   maxDate: Date = new Date();  // Set default values
   unavailableSlotsPerDate: { [date: string]: { label: string; value: string }[] } = {};
   modifiedDay: keyof Doctor['availabilityDays'] | null = null;
-  availableFrom: string = '';
-availableTo: string = '';
-
 
 
   constructor(private doctorService: DoctorServiceService, private changeDetector: ChangeDetectorRef,private datePipe: DatePipe,private messageService: MessageService) { }
@@ -217,6 +217,7 @@ availableTo: string = '';
     this.availabilityDaysList.forEach(day => {
       this.individualAvailability[day] = {
         availableFrom: '',
+        availableFromArray: [''],
         slotDuration: 20
       };
     });
@@ -352,7 +353,12 @@ availableTo: string = '';
           this.doctor!.availabilityDays[day] = true; // Mark day as available
           this.individualAvailability[day] = {
             availableFrom: dayAvailability.availableFrom,
-            slotDuration: dayAvailability.slotDuration
+            slotDuration: dayAvailability.slotDuration,
+            availableFromArray: dayAvailability.availableFrom
+            ? dayAvailability.availableFrom.includes(',')
+              ? dayAvailability.availableFrom.split(',').map(time => time.trim()) // Split by commas
+              : [dayAvailability.availableFrom.trim()] // Single item array
+            : [''] // Default to one empty string if no value
           };
           this.generalSlotDuration = dayAvailability.slotDuration;
           // console.log('Day availability', this.individualAvailability[day]);
@@ -360,7 +366,8 @@ availableTo: string = '';
           if (!this.individualAvailability[day]) {
             this.individualAvailability[day] = {
               availableFrom: '', // Reset if no availability
-              slotDuration: 20 // Default value
+              slotDuration: 20,
+              availableFromArray: [''] // Default value
             };
           }
           this.doctor!.availabilityDays[day] = false;
@@ -374,6 +381,7 @@ availableTo: string = '';
       if (this.useSameTimeForAllDays) {
         // Set general values if all times are the same
         this.generalAvailableFrom = this.doctor.availability[0].availableFrom;
+        this.availableTimesArray = this.generalAvailableFrom.split(',');
         this.generalSlotDuration = this.doctor.availability[0].slotDuration;
       }
     }
@@ -557,9 +565,11 @@ availableTo: string = '';
       //   this.doctor!.slotDuration = this.generalSlotDuration; // Set the general slot duration
       //  this.generalAvailableFrom = this.availableFrom + '-' + this.availableTo;
       //  console.log(this.generalAvailableFrom)
+
         if (this.useSameTimeForAllDays) {
           this.availabilityDaysList.forEach(day => {
             if (this.doctor?.availabilityDays?.[day]) {
+              console.log(this.generalAvailableFrom)
               this.doctor.availability.push({
                 id: 0, // Placeholder ID, will be replaced by backend
                 day: day as string,
@@ -572,6 +582,7 @@ availableTo: string = '';
           this.availabilityDaysList.forEach(day => {
             if (this.doctor?.availabilityDays?.[day]) {
               const availability = this.individualAvailability[day];
+              console.log('Availability:', availability);
               if (availability.availableFrom && availability.slotDuration !== undefined) {
                 this.doctor.availability.push({
                   id: 0,
@@ -606,13 +617,14 @@ availableTo: string = '';
         });
       
         // Emit the save event with the doctor details
-        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Doctor details saved successfully' });
-        this.save.emit(this.doctor!)
+        // this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Doctor details saved successfully' });
+        this.save.emit(this.doctor!);
+        // this.doctor = null; // Reset the doctor object after saving
+        // this.isEditMode = false;
     }
     // Initialize availability
    ;
-    this.doctor = null; // Reset the doctor object after saving
-    this.isEditMode = false; // Exit edit mode after saving
+ // Exit edit mode after saving
   }
   // saveDoctor(): void {
   //   // console.log('Doctor:', this.doctor);
@@ -746,18 +758,35 @@ availableTo: string = '';
     }
     // console.log('Doctor:', this.doctor);
 
-    // Regular expression to validate the availableFrom format (HH:MM-HH:MM)
     const availableTimePattern = /^\d{2}:\d{2}-\d{2}:\d{2}$/;
 
-    // Loop through individualAvailability to check if each availableFrom matches the pattern
-    // only if the day is marked as available
+    // Function to validate a comma-separated list of times
+    const validateMultipleTimes = (timeString: string): boolean => {
+      const times = timeString.split(',').map(time => time.trim()); // Split and trim each timing
+      return times.every(time => availableTimePattern.test(time)); // Validate each timing
+    };
+    
+    // Check if all individual times are valid
     const allIndividualTimesValid = this.availabilityDaysList.every((day) => {
       if (this.doctor?.availabilityDays[day]) {
-        // Check availableFrom for the days that are marked as available (true)
-        return availableTimePattern.test(this.individualAvailability[day].availableFrom);
+        // Split the availableFrom times by comma and validate each time
+        const times = this.individualAvailability[day].availableFrom.split(',').map(time => time.trim());
+        return times.every((time) => availableTimePattern.test(time));
       }
       return true; // If the day is not available, it is valid by default
     });
+    // console.log(allIndividualTimesValid, "individual");
+    
+    // Validate generalAvailableFrom if using the same time for all days
+    const isGeneralTimeValid = this.useSameTimeForAllDays
+      ? validateMultipleTimes(this.generalAvailableFrom)
+      : true;
+    
+    // Final validation result
+    const isValid = allIndividualTimesValid || isGeneralTimeValid;
+    
+    // console.log('Validation Result:', isValid);
+    
     // console.log(availableTimePattern.test(this.generalAvailableFrom));
     return !!(
       this.doctor &&
@@ -771,8 +800,9 @@ availableTo: string = '';
       this.doctor.slotDuration > 0 &&
       /^[a-zA-Z.() ]+$/.test(this.doctor.name) && // Ensure name has letters, spaces, and dots only
       // /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.doctor.email) && // Ensure email is valid
-      /^[0-9]{10}$/.test(this.doctor.phone_number) && // Ensure phone number is 10 digits
-      (this.useSameTimeForAllDays ? availableTimePattern.test(this.generalAvailableFrom) : allIndividualTimesValid) // Check generalAvailableFrom if useSameTimeForAllDays is true, otherwise validate individual times
+      /^[0-9]{10}$/.test(this.doctor.phone_number) &&
+      // && // Ensure phone number is 10 digits
+      (this.useSameTimeForAllDays ? isGeneralTimeValid : allIndividualTimesValid) // Check generalAvailableFrom if useSameTimeForAllDays is true, otherwise validate individual times
     );
   }
 
@@ -840,8 +870,74 @@ availableTo: string = '';
     );
   }
   
+   // Split the string into an array of time ranges
+   splitAvailableTimes(): string[] {
+    return this.availableTimesArray; // Use the dynamic array directly
+  }
+
+  // Add a new time range
+  addTime() {
+    if (this.validateTimes()) {
+      this.availableTimesArray.push(''); // Add a new empty time slot
+      this.saveTimes()
+    }
+  }
+
+  // Remove a specific time range
+  removeTime(index: number) {
+    
+    this.availableTimesArray.splice(index, 1); // Remove time slot
+    this.saveTimes()
+  }
+
+  // Validate all time ranges
+  validateTimes(): boolean {
+    const timePattern = /^\d{2}:\d{2}-\d{2}:\d{2}$/;
+
+    for (const time of this.availableTimesArray) {
+      if (time.trim() !== '' && !timePattern.test(time)) {
+        this.formError = 'All times must be in the format 00:00-00:00.';
+        return false;
+      }
+    }
+
+    this.formError = null; // Clear error if validation passes
+    return true;
+  }
+// Track elements by their index
+trackByFn(index: number, item: string) {
+  return index; // Use index as the unique identifier
+}
+  // Save all time ranges
+  saveTimes() {
+    if (this.validateTimes()) {
+      // Combine the array into a single string for saving
+      this.availableTimes = this.availableTimesArray.filter(time => time.trim() !== '').join(', ');
+      console.log('Combined Available Times:', this.availableTimes);
+      this.generalAvailableFrom = this.availableTimes;
+      // Perform save logic here (e.g., send to API or store in the database)
+    }
+  }
   
+  addTimeRange(day: string): void {
+    this.modifiedDay = day as keyof Doctor['availabilityDays'];
+    this.individualAvailability[day].availableFromArray.push(''); // Add a new empty time range
+    this.updateAvailableFromString(day); // Update the combined string
+  }
   
+  removeTimeRange(day: string, index: number): void {
+    this.modifiedDay = day as keyof Doctor['availabilityDays'];
+    this.individualAvailability[day].availableFromArray.splice(index, 1); // Remove the specific time range
+    this.updateAvailableFromString(day); // Update the combined string
+  }
+  updateAvailableFromString(day: string): void {
+    this.modifiedDay = day as keyof Doctor['availabilityDays'];
+    const timeArray = this.individualAvailability[day].availableFromArray || [];
+    this.individualAvailability[day].availableFrom = timeArray.filter(time => time.trim() !== '').join(', '); // Join non-empty values
+    console.log('Updated available from:', this.individualAvailability[day].availableFrom);
+  }
+    
+
 
   generateSlots(): void {
     if (this.doctor) {

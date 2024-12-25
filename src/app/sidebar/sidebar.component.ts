@@ -17,6 +17,10 @@ export class SidebarComponent implements OnInit {
       console.log('localStorage is not available');
     }
   }
-  
+  isExpanded: boolean = false;
+
+  toggleSidebar() {
+    this.isExpanded = !this.isExpanded;
+  }
 
 }

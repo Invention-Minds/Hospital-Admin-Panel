@@ -165,8 +165,10 @@ export class AppointmentCompleteComponent {
   
   // Method to filter appointments by the selected date
   filterAppointment() {
+    // If there's no date range or value to filter, return the unfiltered appointments
     this.filteredList = [...this.completedAppointments];
   
+    // Handle filtering by date range if selected
     if (this.selectedDateRange && this.selectedDateRange.length === 2) {
       const startDate = this.selectedDateRange[0];
       const endDate = this.selectedDateRange[1] ? this.selectedDateRange[1] : startDate; // Use endDate if provided, otherwise use startDate
@@ -199,33 +201,24 @@ export class AppointmentCompleteComponent {
       this.filteredAppointments = []
     }
     }
+
     else {
-      // If no valid range is selected, show all appointments
-      this.filteredAppointments = [...this.completedAppointments];
-    }
+          // If no valid range is selected, show all appointments
+          this.filteredAppointments = [...this.completedAppointments];
+        }
+  
+    // Handle filtering by a single date if the start and end dates are the same
+   
+  
+    // Handle filtering by the search value (patient name, phone number, or doctor name)
     if (this.selectedValue.trim() !== '') {
+      // console.log('Selected search option:', this.selectedSearchOption);
       const searchLower = this.selectedValue.toLowerCase();
-      // filteredList = this.filteredAppointments.filter(completedAppointments =>
-      //   completedAppointments.patientName.toLowerCase().includes(searchLower) ||
-      //   completedAppointments.phoneNumber.toLowerCase().includes(searchLower)
-
-      // );
-      this.filteredList = this.filteredAppointments.filter((appointment) => {
-        console.log('Selected search option:', this.selectedSearchOption);
-        console.log('Selected value:', this.selectedValue);
-       
-        // console.log('Search lower:', searchLower);
-        // console.log('Appointment:', appointment);
-        // console.log('Filtered list:', this.filteredList);
-
-      
+      this.filteredList = this.filteredList.filter((appointment: Appointment) => {
         let match = false;
-        console.log(appointment)
         switch (this.selectedSearchOption) {
           case 'patientName':
-            // console.log('Patient Name:', appointment.patientName.toLowerCase());
             match = appointment.patientName ? appointment.patientName.toLowerCase().includes(searchLower) : false;
-            // console.log('Match:', match);
             break;
           case 'phoneNumber':
             match = appointment.phoneNumber ? appointment.phoneNumber.toLowerCase().includes(searchLower) : false;
@@ -237,22 +230,18 @@ export class AppointmentCompleteComponent {
             match = appointment.department ? appointment.department.toLowerCase().includes(searchLower) : false;
             break;
           default:
-            match = true;
+            match = true; // No filtering
         }
-  
-
-      return match;
-    });
-    console.log(this.filteredList)
-  
-
+        return match;
+      });
     }
-    else {
-      // If no date is selected, show all appointments
+    else{
       this.filteredAppointments = [...this.completedAppointments];
     }
+  
+    // Update the filtered appointments with the final result
     this.filteredAppointments = this.filteredList;
-    this.currentPage = 1;
+    this.currentPage = 1; // Reset to first page whenever new filters are applied
   }
   ngOnChanges(){
     this.filterAppointment();

@@ -13,6 +13,8 @@ import { Subscription } from 'rxjs';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { app } from '../../../../server';
+import { start } from 'node:repl';
+import { stat } from 'node:fs';
 
 
 interface Appointment {
@@ -497,8 +499,9 @@ export class AppointmentFormComponent implements OnInit {
         if (availability && availability.availableFrom) {
           const [start, end] = availability.availableFrom.split('-');
           const slotDuration = availability.slotDuration;
+          const availableFrom = availability.availableFrom;
           console.log(start,end,slotDuration)
-          let generatedSlots = this.generateTimeSlots(start, end, slotDuration);
+          let generatedSlots = this.generateTimeSlots(availableFrom, slotDuration);
           console.log(generatedSlots)
           const today = new Date();
           const selectedDate = new Date(date);
@@ -620,7 +623,7 @@ export class AppointmentFormComponent implements OnInit {
                 ) {
 
                   this.availableSlots = [...this.availableSlots, this.slot.time];
-                  console.log(this.availableSlots)
+                  console.log(this.availableSlots,"availableSlots")
                 }
 
                 if (this.availableSlots.length === 0) {
@@ -633,6 +636,7 @@ export class AppointmentFormComponent implements OnInit {
 
                 // Check if the currently selected time in the form is still available
                 const selectedTime = this.appointmentForm.get('appointmentTime')?.value;
+                console.log(selectedTime, "selectedTime",)
 
                 if (selectedTime && !this.availableSlots.includes(selectedTime)) {
                   this.showAvailabilityMessage = true;
@@ -772,22 +776,62 @@ export class AppointmentFormComponent implements OnInit {
 
   //   return slots;
   // }
-  generateTimeSlots(startTime: string, endTime: string, slotDuration: number): string[] {
-    const slots = [];
-    let current = new Date(`1970-01-01T${startTime}`);
-    const end = new Date(`1970-01-01T${endTime}`);
+  // generateTimeSlots(startTime: string, endTime: string, slotDuration: number): string[] {
+  //   const slots = [];
+  //   let current = new Date(`1970-01-01T${startTime}`);
+  //   const end = new Date(`1970-01-01T${endTime}`);
   
-    while (current < end) {
-      const slotStart = this.convertTo12HourFormat(current.toTimeString().substring(0, 5));
-      current = new Date(current.getTime() + slotDuration * 60000);
+  //   while (current <= end) {
+  //     const slotStart = this.convertTo12HourFormat(current.toTimeString().substring(0, 5));
+  //     current = new Date(current.getTime() + slotDuration * 60000);
   
-      if (current <= end) {
-        slots.push(slotStart); // Only add the start time if the end of the slot doesn't exceed the available time
+  //     if (current <= end) {
+  //       slots.push(slotStart); // Only add the start time if the end of the slot doesn't exceed the available time
+  //     }
+  //   }
+  // console.log(slots,startTime,endTime)
+  //   return slots;
+  // }
+  // generateTimeSlots(startTime: string, endTime: string, slotDuration: number): string[] {
+  //   const slots = [];
+  //   let current = new Date(`1970-01-01T${startTime}`);
+  //   const end = new Date(`1970-01-01T${endTime}`);
+  
+  //   while (current <= end) {
+  //     const slotStart = this.convertTo12HourFormat(current.toTimeString().substring(0, 5));
+  //     current = new Date(current.getTime() + slotDuration * 60000);
+  
+  //     if (current <= end) {
+  //       slots.push(slotStart); // Add the slot if it fits within the schedule
+  //     }
+  //   }
+  //   console.log(slots, startTime, endTime);
+  //   return slots;
+  // }
+  generateTimeSlots(availableFrom: string, slotDuration: number): string[] {
+    const slots: string[] = [];
+    const timeRanges = availableFrom.split(',').map(range => range.trim()); // Split by commas and trim spaces
+  
+    for (const range of timeRanges) {
+      const [startTime, endTime] = range.split('-').map(time => time.trim()); // Split start and end times
+      let current = new Date(`1970-01-01T${startTime}`);
+      const end = new Date(`1970-01-01T${endTime}`);
+  
+      while (current < end) {
+        const slotStart = this.convertTo12HourFormat(current.toTimeString().substring(0, 5));
+        current = new Date(current.getTime() + slotDuration * 60000);
+  
+        if (current <= end) {
+          slots.push(slotStart); // Add the slot if it fits within the range
+        }
       }
     }
   
+    console.log(slots, availableFrom);
     return slots;
   }
+  
+  
   
 
   // Utility function to convert Date object to 12-hour format with AM/PM
@@ -1582,6 +1626,7 @@ export class AppointmentFormComponent implements OnInit {
         // Mark the slot as booked
         // this.addBookedSlot(this.appointment.doctorId, this.appointment.date, this.appointment.time);
       } else {
+        console.log('Appointment or form is not defined');
         const patientName = this.appointmentForm.value.firstName + ' ' + this.appointmentForm.value.lastName;
         const prnNumber = parseInt(this.appointmentForm.value.prnNumber);
         const phoneNumber = this.appointmentForm.value.phoneNumber;
@@ -1674,6 +1719,10 @@ export class AppointmentFormComponent implements OnInit {
           }
           if (this.appointment.status === "confirmed") {
             this.appointmentService.addConfirmedAppointment(this.appointment);
+            this.statusChange.emit({
+              slotTime: this.time, // Assuming the slot time is available here
+              status: 'booked'
+            });
             this.messageService.add({
               severity: 'success',
               summary: 'Success',

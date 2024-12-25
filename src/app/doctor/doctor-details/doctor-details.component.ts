@@ -43,6 +43,18 @@ export class DoctorDetailsComponent implements OnInit {
   ngOnInit(): void {
     this.fetchDepartmentsAndDoctors(); // Fetch all departments and doctors
   }
+  ngAfterViewInit() {
+    const buttons = document.querySelectorAll('button[id^="doctor-btn-"]');
+    buttons.forEach((button) => {
+      button.addEventListener('click', (event) => {
+        console.log('Manually attached event triggered:', event);
+      });
+    });
+  }
+  click(){
+    console.log('clicked');
+    this.isEditMode = true;
+  }
  // Method to handle deleting a doctor with a confirmation dialog
 //  deleteDoctor(doctor: Doctor): void {
 //   Swal.fire({
@@ -209,7 +221,7 @@ closeDeleteDialog(): void {
     if (this.selectedDepartment) {
       filteredDepartments = filteredDepartments.filter((dep: Department) => dep.name === this.selectedDepartment);
     }
-
+    // console.log('selectedDoctor', this.selectedDoctor);
     if (this.selectedDoctor) {
       filteredDepartments = filteredDepartments
         .map((dep: Department) => ({
@@ -218,16 +230,20 @@ closeDeleteDialog(): void {
         }))
         .filter((dep: Department) => (dep.doctors?.length ?? 0) > 0);
     }
-
+// console.log('filteredDepartments', filteredDepartments);
     return filteredDepartments;
   }
+
+
 
   // Get doctors for selected department for doctor dropdown
   getDoctorsForSelectedDepartment(): Doctor[] {
     if (this.selectedDepartment) {
       const department = this.departments.find((dep: Department) => dep.name === this.selectedDepartment);
       // Add a fallback to an empty array if 'doctors' is undefined
+      // console.log('department', department);
       return department ? department.doctors ?? [] : [];
+      
     } else {
       // Use the fallback for 'doctors' in case any department has undefined doctors
       return this.departments.flatMap((department: Department) => department.doctors ?? []);
@@ -242,6 +258,13 @@ closeDeleteDialog(): void {
 
   // Initiate editing a doctor profile
   editProfile(doctor: Doctor): void {
+    console.log("true")
+    if (!doctor) {
+      console.error("No doctor selected for editing.");
+      return;
+    }
+  
+    console.log("Editing doctor:", doctor);
     this.selectedEditDoctor = { ...doctor }; // Create a copy to avoid direct changes
 
     // Initialize availabilityDays if it does not exist

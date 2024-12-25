@@ -58,7 +58,7 @@
           <td>
             <span class="status-badge">{{ appointment.status }}</span>
           </td>
-          <td>
+          <td class="button">
             <button class="btn-action" [disabled]="appointment.checkedIn">
               <img src="check-in.png" alt="check" class="action-icon" (click)="completeAppointment(appointment)"
                 pTooltip="Check-in" tooltipPosition="top">

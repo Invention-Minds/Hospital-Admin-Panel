@@ -1,0 +1,299 @@
+<div class="custom-dialog-overlay" *ngIf="displayDialog">
+  <div class="custom-dialog">
+    <div class="dialog-content">
+      <div class="icon-container">
+        <img src="warning.png" alt="Warning Icon" class="dialog-icon" />
+      </div>
+      <div class="dialog-text">
+        <h3>Conflict Detected</h3>
+        <p>The Following date conflict with holidays: {{ conflictDates.join(', ') }}. Do you want to proceed?</p>
+      </div>
+    </div>
+    <div class="dialog-buttons">
+      <button type="button" class="cancel" (click)="onReject(form)">No</button>
+      <button type="button" class="btn-primary" (click)="onAccept()">Yes</button>
+    </div>
+  </div>
+</div>
+
+  
+
+<div class="form-container" >
+    <h2 class="form-title">Health Check Up Form</h2>
+    <form #form="ngForm" class="health-form" (ngSubmit)="onSubmit(form)" novalidate>
+      <!-- Row 1 -->
+      <div class="form-row">
+        <div class="form-group full-width">
+          <input
+            type="text"
+            class="form-input"
+            id="pnr"
+            name="pnr"
+            pattern="^[0-9]*$"
+            ngModel
+            [(ngModel)]="formData.pnrNumber"
+            placeholder=" "
+          />
+          <label for="pnr" class="form-label">PNR Number*</label>
+          <div *ngIf="form.submitted && form.controls['pnr']?.invalid" class="error-message">
+            <span *ngIf="form.controls['pnr']?.errors?.['pattern']">Enter a valid number.</span>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Row 2 -->
+      <div class="form-row">
+        <div class="form-group half-width">
+          <input
+            type="text"
+            class="form-input"
+            id="firstName"
+            name="firstName"
+            ngModel
+            [(ngModel)]="formData.firstName"
+            required
+            placeholder=" "
+          />
+          <label for="firstName" class="form-label">First Name*</label>
+          <div *ngIf="form.submitted && form.controls['firstName']?.invalid" class="error-message">
+            First Name is required.
+          </div>
+        </div>
+        <div class="form-group half-width">
+          <input
+            type="text"
+            class="form-input"
+            id="lastName"
+            name="lastName"
+            ngModel
+            [(ngModel)]="formData.lastName"
+            placeholder=" "
+          />
+          <label for="lastName" class="form-label">Last Name</label>
+        </div>
+      </div>
+  
+      <!-- Row 3 -->
+      <div class="form-row">
+        <div class="form-group half-width">
+          <input
+            type="tel"
+            class="form-input"
+            id="phone"
+            name="phone"
+            ngModel
+            [(ngModel)]="formData.phoneNumber"
+            required
+            pattern="^[0-9]{10}$"
+            placeholder=" "
+          />
+          <label for="phone" class="form-label">Phone Number*</label>
+          <div *ngIf="form.submitted && form.controls['phone']?.invalid" class="error-message">
+            <span *ngIf="form.controls['phone']?.errors?.['required']">Phone Number is required.</span>
+            <span *ngIf="form.controls['phone']?.errors?.['pattern']">Enter a valid 10-digit phone number.</span>
+          </div>
+        </div>
+        <div class="form-group half-width">
+          <input
+            type="email"
+            class="form-input"
+            id="email"
+            name="email"
+            ngModel
+            [(ngModel)]="formData.email"
+            placeholder=" "
+          />
+          <label for="email" class="form-label">Email Id</label>
+        </div>
+      </div>
+  
+      <!-- Row 4 -->
+      <div class="form-row">
+        <div class="form-group full-width">
+          <select
+            class="form-input"
+            name="package"
+            [(ngModel)]="selectedPackageId"
+            required
+          >
+            <option value="" disabled>Select a Package</option>
+            <option *ngFor="let pkg of packages" [value]="pkg.id">
+              {{ pkg.name }}
+            </option>
+          </select>
+          <div
+            *ngIf="form.submitted && !selectedPackageId"
+            class="error-message"
+          >
+            Package selection is required.
+          </div>
+        </div>
+      </div>
+      
+  
+      <!-- Row for Date and Time -->
+      <div class="form-row">
+        <div class="form-group half-width">
+          <input
+            type="date"
+            class="form-input"
+            id="date"
+            name="date"
+            ngModel
+            required
+            placeholder=" "
+            [(ngModel)]="selectedDate"
+            (change)="fetchAvailableSlots()"
+            (ngModelChange)="onFieldChange(form)"
+            [min]="minDateString"
+
+          />
+          <label for="date" class="form-label">Select Date*</label>
+          <div *ngIf="form.submitted && form.controls['date']?.invalid" class="error-message">
+            Date selection is required.
+          </div>
+        </div>
+        <div class="form-group half-width">
+            <select class="form-input" name="time" ngModel [(ngModel)]="formData.appointmentTime" required>
+              <option value="" disabled >Select Time*</option>
+              <option *ngFor="let slot of timeSlots" [value]="slot">{{ slot }}</option>
+            </select>
+            <div *ngIf="form.submitted && form.controls['time']?.invalid" class="error-message">
+              Time selection is required.
+            </div>
+          </div>
+          
+      </div>
+  
+      <!-- Checkbox Row -->
+      <div class="form-row checkbox-container">
+        <input type="checkbox" id="repeat" name="repeat"  [ngModel]="isRepeatChecked"
+        (ngModelChange)="onRepeatChange($event)" ngModel />
+        <label for="repeat">Repeat</label>
+      </div>
+      <p-confirmPopup #cp></p-confirmPopup>
+      <!-- Row for Days and Times -->
+      <div class="form-row" *ngIf="isRepeatChecked">
+
+        <div class="form-group half-width">
+          <input
+            type="number"
+            class="form-input"
+            id="days"
+            name="days"
+            #days="ngModel"
+            ngModel
+            [(ngModel)]="formData.daysInterval"
+            placeholder=" "
+            (ngModelChange)="onFieldChange(form)"
+            min="1"
+            max="365"
+            required
+          />
+          <label for="days" class="form-label">No. of days once*</label>
+          <div *ngIf="(days.invalid && days.touched) || form.submitted" class="error-message">
+            <span *ngIf="days.errors?.['required']">Days selection is required.</span>
+            <span *ngIf="days.errors?.['min']">Days must be greater than 1.</span>
+            <span *ngIf="days.errors?.['max']">Days cannot exceed 365.</span>
+          </div>
+        </div>
+        <div class="form-group half-width">
+          <input
+            type="number"
+            class="form-input"
+            id="times"
+            name="times"
+            ngModel
+            #times="ngModel"
+            placeholder=" "
+            min="2"
+            max="10"
+            [(ngModel)]="formData.numberOfTimes"
+            (ngModelChange)="onFieldChange(form)"
+            required
+          />
+          <label for="times" class="form-label">No. of Times*</label>
+          <div *ngIf="(times.invalid && times.touched) || form.submitted" class="error-message">
+            <span *ngIf="times.errors?.['required']">Times selection is required.</span>
+            <span *ngIf="times.errors?.['min']">Times must be greater than 1.</span>
+            <span *ngIf="times.errors?.['max']">Times cannot exceed 365.</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Radio Buttons for Request Via -->
+<div class="form-row">
+    <div class="form-group half-width">
+      <div class="label">Request Via:</div>
+      <div class="radio-group">
+        <label>
+          <input
+            type="radio"
+            name="requestVia"
+            [(ngModel)]="requestVia"
+            value="Online"
+          />
+          Online
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="requestVia"
+            [(ngModel)]="requestVia"
+            value="Walk-In"
+          />
+          Walk-In
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="requestVia"
+            [(ngModel)]="requestVia"
+            value="Call"
+          />
+          Call
+        </label>
+      </div>
+    </div>
+  
+    <!-- Radio Buttons for Appointment -->
+    <div class="form-group half-width">
+      <div class="label">Appointment:</div>
+      <div class="radio-group">
+        <label>
+          <input
+            type="radio"
+            name="appointmentStatus"
+            [(ngModel)]="appointmentStatus"
+            value="Confirm"
+          />
+          Confirm
+        </label>
+        <label>
+          <input
+            type="radio"
+            name="appointmentStatus"
+            [(ngModel)]="appointmentStatus"
+            value="Cancel"
+          />
+          Cancel
+        </label>
+      </div>
+    </div>
+  </div>
+  
+  
+      <!-- Buttons -->
+      <div class="form-buttons">
+        
+        <button  mat-raised-button type="submit" class="btn btn-submit" [disabled]="form.invalid || hasConflict || isLoading"  [class.spinner]="isLoading" > <span *ngIf="!isLoading">Book Appointment</span></button>
+        <button type="button" class="btn btn-cancel" (click)="cancelForm(form)">Cancel</button>
+      </div>
+    </form>
+
+<p-toast></p-toast>
+  </div>
+  <!-- <div class="loading-div" *ngIf="isLoading">
+    <div class="loader" *ngIf="isLoading"></div>
+  </div> -->
+ 

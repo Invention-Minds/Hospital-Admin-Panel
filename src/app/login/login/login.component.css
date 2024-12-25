@@ -99,7 +99,10 @@ button {
       align-items: center;
 }
 
-
+.login button:disabled{
+    pointer-events: none;
+    background: #ccc;
+}
 .image{
     display: flex;
     justify-content: center;
@@ -166,4 +169,27 @@ flex-shrink: 0;
 display: flex;
 justify-self: center;
 align-items: center;
+}
+
+@keyframes spinner {
+  to {transform: rotate(360deg);}
+}
+.spinner {
+  position: relative;
+}
+
+.spinner:before {
+  content: '';
+  box-sizing: border-box;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin-top: -10px;
+  margin-left: -10px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  border-top-color: #000000;
+  animation: spinner .8s linear infinite;
 }

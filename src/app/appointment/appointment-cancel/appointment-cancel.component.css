@@ -2,7 +2,7 @@
   border-radius: 10px;
   background-color: #f0f3ff;
   padding: 20px;
-  padding-left: 130px;
+  padding-left: 90px;
 }
 .table-wrapper {
   overflow-x: auto; /* Adds horizontal scrolling */
@@ -18,16 +18,16 @@
      box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64); 
      border-radius: 16px;
     color: white;
-font-size: 18px;
+font-size: 14px;
 font-family: Kanit;
 font-weight: 600;
-height: 65px;
+height: 54px;
   }
   thead th {
     padding: 12px;
     text-align: center;
     color: white;
-    font-size: 18px;
+    font-size: 14px;
     font-family: Kanit;
     font-weight: 600;
     text-wrap: nowrap;
@@ -45,15 +45,19 @@ height: 65px;
       }
   
   tbody td {
-    padding: 20px 8px;
+    padding: 0px 8px;
     text-align: center;
     color: black;
-font-size: 15px;
+font-size: 14px;
 font-family: Kanit;
 font-weight: 400;
 text-wrap: nowrap;
+padding-bottom: 0px;
   }
-  
+  .sms-status img {
+    width: 20px;
+    height: 20px;
+  }
   tbody tr:hover {
     background-color: #f0f8ff;
   }
@@ -61,17 +65,18 @@ text-wrap: nowrap;
   .status-badge {
     display: inline-block;
     padding: 5px 10px;
-    border-radius: 12px;
+    border-radius: 8px;
     color: white;
-font-size: 16px;
+font-size: 14px;
 font-family: Kanit;
 font-weight: 400;
-width: 110px;
+width: 85px;
 /* height: 31px; */
   }
   
   .status-badge.cancelled {
     background-color: red;
+    text-transform: capitalize;
   }
   .btn-action {
     background-color: transparent;
@@ -80,12 +85,17 @@ width: 110px;
     border: none;
     cursor: pointer;
   }
+  .button{display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 10px !important;
+}
   .pagination {
     display: flex;
     justify-content: flex-end;
     align-items: center;
     margin-top: 20px;
-    font-size: 16px;
+    font-size: 14px;
   }
   
   /* Pagination button styling */
@@ -97,7 +107,7 @@ width: 110px;
     margin: 0 5px;
     border-radius: 10px;
     cursor: pointer;
-    font-size: 18px;
+    font-size: 14px;
     display: flex;
     align-items: center;
     justify-content: center;

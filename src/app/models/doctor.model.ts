@@ -1,5 +1,12 @@
 import { Department } from './department.model';
 
+interface UnavailableSlot {
+  id: number;
+  doctorId: number;
+  date: string;
+  time: string;
+}
+
 export interface Doctor {
   id: number;  // Optional for new doctors until they are saved
   name: string;
@@ -19,12 +26,13 @@ export interface Doctor {
     slotDuration: number;
     updatedAt?: Date;
     doctorId?: number;
+    availableFromArray?: [''],
   }[];
   unavailableDates?: string[];
   isUnavailable?: boolean; // Optional property to mark the doctor as unavailable
-  unavailableSlots?: string[]; // Optional property to mark the slots as unavailable
+  unavailableSlots?: any[]; // Optional property to mark the slots as unavailable
   updatedAt?: Date;
   bookedSlots?: { time: string; complete: boolean }[]; // Optional property to store booked slots
-  extraSlots?: string[]; // Optional property to store extra slots
+  extraSlots?: any[]; // Optional property to store extra slots
   
 }

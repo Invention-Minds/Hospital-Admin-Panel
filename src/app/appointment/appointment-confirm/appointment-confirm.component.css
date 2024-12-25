@@ -2,7 +2,7 @@
   border-radius: 10px;
   background-color: #f0f3ff;
   padding: 20px;
-  padding-left: 130px;
+  padding-left: 90px;
 }
 .table-wrapper {
   overflow-x: auto; /* Adds horizontal scrolling */
@@ -18,19 +18,20 @@ thead {
   box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64);
   border-radius: 16px;
   color: white;
-  font-size: 18px;
+  font-size: 14px;
   font-family: Kanit;
   font-weight: 600;
-  height: 65px;
+  /* height: 65px; */
 }
 thead th {
   padding: 12px;
   text-align: center;
   color: white;
-  font-size: 18px;
+  font-size: 14px;
   font-family: Kanit;
   font-weight: 600;
   text-wrap: nowrap;
+  height: 54px;
 }
 /* Table body styling */
 tbody tr {
@@ -48,12 +49,13 @@ tbody tr:nth-child(even) {
 }
 
 tbody td {
-  padding: 20px 8px;
+  padding: 0px 8px;
   text-align: center;
   color: black;
-  font-size: 15px;
+  font-size: 14px;
   font-family: Kanit;
   font-weight: 400;
+  padding-bottom: 0px;
 }
 
 tbody tr:hover {
@@ -90,13 +92,20 @@ tbody tr:hover {
   outline: none;
   border: none;
 
+
+}
+.button{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 10px !important;
 }
 .status-badge {
   display: inline-block;
   color: white;
   padding: 5px 10px;
   text-transform: capitalize;
-  font-size: 18px;
+  font-size: 14px;
   font-family: Kanit;
   font-weight: 400;
   background: #79cfa6;
@@ -107,7 +116,7 @@ tbody tr:hover {
   color: white;
   padding: 5px 10px;
 
-  font-size: 18px;
+  font-size: 16px;
   font-family: Kanit;
   font-weight: 400;
   background: #79cfa6;

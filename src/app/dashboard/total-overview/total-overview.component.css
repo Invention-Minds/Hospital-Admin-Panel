@@ -1,13 +1,13 @@
 .dashboard-section {
     /* margin: 20px; */
-    padding-left: 130px;
+    padding-left: 90px;
     background-color: #F0F3FF;
     padding-top: 20px;
   }
   
   h1 {
     color: #271E4A;
-font-size: 36px;
+font-size: 24px;
 font-family: Kanit;
 font-weight: 500;
     margin-bottom: 20px;
@@ -21,13 +21,13 @@ font-weight: 500;
   }
   
   .card {
-    width: 250px;
-    height: 80px;
+    width: 220px;
+    height: 72px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: left;
     /* padding: 15px; */
-    padding-bottom: 15px;
+    padding-bottom: 0px;
     background-color: white;
     border-radius: 12px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
@@ -44,20 +44,29 @@ font-weight: 500;
     /* width: 50px;
     height: 50px; */
     margin-right: 15px;
-    padding-top: 19px;
+    padding-top: 8px;
+    width: 40px;
+    margin-left: 20px;
   }
   
-  .card-content h2 {
+  .card-content .number {
     color: #7B7B7B;
-    font-size: 24px;
+    font-size: 20px;
     font-family: Kanit;
     font-weight: 400;
     margin: 0;
   }
+  .close{
+    color: white;
+    font-size: 20px;
+    font-family: Kanit;
+    font-weight: 600;
+   
+  }
   
   .card-content p {
     color: #271E4A;
-    font-size: 20px;
+    font-size: 16px;
     font-family: Kanit;
     font-weight: 600;
     margin: 0;
@@ -88,27 +97,40 @@ font-weight: 500;
   
   .header {
     background: #169458; /* Green header */
-
-    padding: 15px 0;
+    padding: 15px 20px;
     color: #FFF;
-font-family: Kanit;
-font-size: 20px;
-font-style: normal;
-font-weight: 600;
-line-height: normal;
-text-align: center;
+    font-family: Kanit;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    border-radius: 9px 9px 0 0;
+    display: flex;
+    justify-content: space-between;
+    position: fixed;
+    width: 500px;
+
   }
- .header.unavailable{
+ .header.absent{
     background-color: #e74c3c; /* Red header for unavailable doctors */
   }
+.header.unavailable{
+    background-color: #f5d94b; /* Red header for unavailable doctors */
+  }
+  
+  .content {
+    padding: 20px;
+}
+
   .close-button {
     background: transparent;
     border: none;
     font-size: 24px;
     font-weight: bold;
-    color: #333;
+    color: #fff;
     cursor: pointer;
     float: right;
+    /* margin-right: 10px; */
   }
   
   .close-button:hover {
@@ -117,6 +139,7 @@ text-align: center;
   
   .doctor-list {
     padding: 10px;
+    margin-top: 3rem;
   }
   
   .doctor-card {
@@ -127,8 +150,10 @@ text-align: center;
     margin: 10px 0;
     border-radius: 16px;
     background: rgba(255, 255, 255, 0.10);
-    box-shadow: 0px 4px 15px 0px rgba(216, 210, 252, 0.64);
     transition: box-shadow 0.3s ease;
+  }
+  .doctor-card:hover{
+    box-shadow: 0px 4px 15px 0px rgba(216, 210, 252, 0.64);
   }
   
   .doctor-card:hover {
@@ -142,23 +167,38 @@ text-align: center;
   
   .doctor-id {
     margin-right: 20px;
-    font-weight: bold;
     color: #000;
+    font-family: Kanit;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
   }
   
   .doctor-name {
-    font-weight: bold;
     color: #000;
+    font-family: Kanit;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
   }
   
   .availability-status.available {
     color: #28a745; /* Green for available doctors */
-    font-weight: bold;
   }
   
   .availability-status.unavailable {
-    color: #e74c3c; /* Red for unavailable doctors */
-    font-weight: bold;
+    color: #f5d94b; /* Red for unavailable doctors */
+  }
+  .availability-status.absent{
+    color: #e74c3c;
+  }
+  .no-record{
+    text-align: center !important;
+    justify-content: center !important;
+    align-items: center !important;
+    font-family: Kanit;
   }
   
   .available {

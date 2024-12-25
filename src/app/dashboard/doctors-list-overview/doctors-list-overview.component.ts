@@ -95,7 +95,7 @@ export class DoctorsListOverviewComponent implements OnInit {
           const isUnavailableByDate = unavailableDates.includes(this.date);
     
           if (isUnavailableByDate) {
-            return { ...doctor, status: 'Unavailable' };
+            return { ...doctor, status: 'Absent' };
           }
     
           // Step 2: Check availability based on slots
@@ -106,7 +106,7 @@ export class DoctorsListOverviewComponent implements OnInit {
     
           if (!availableDay) {
             // If the doctor is not available on this day, mark as unavailable
-            return { ...doctor, status: 'Unavailable' };
+            return { ...doctor, status: 'Absent' };
           }
     
           // Generate all time slots for the day

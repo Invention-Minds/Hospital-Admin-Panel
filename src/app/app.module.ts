@@ -5,12 +5,13 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 
-
+import { CommonModule } from '@angular/common';
 import { DropdownModule } from 'primeng/dropdown';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { CalendarModule } from 'primeng/calendar';
 import { TableModule } from 'primeng/table';
+import { DialogModule } from '@angular/cdk/dialog';
 import { PaginatorModule } from 'primeng/paginator';
 import { MatDialogModule } from '@angular/material/dialog';
 import {MatTooltipModule} from '@angular/material/tooltip';
@@ -18,7 +19,8 @@ import {MatDatepickerModule} from '@angular/material/datepicker';
 import { TooltipModule } from 'primeng/tooltip';
 import { ToastModule } from 'primeng/toast';
 import {  MatFormFieldModule, MatLabel } from '@angular/material/form-field';
-import { MessageService } from 'primeng/api';
+import { ConfirmationService, MessageService } from 'primeng/api';
+import { NgxLoadingButtonsModule } from 'ngx-loading-buttons';
 
 
 
@@ -62,6 +64,17 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { DatePipe } from '@angular/common';
 import { InactivityService } from './services/inactivity.service';
 import {MatBadgeModule} from '@angular/material/badge';
+import { HealthCheckupFormComponent } from './health-checkup-service/health-checkup-form/health-checkup-form.component';
+import { HealthCheckupOverviewComponent } from './health-checkup-service/health-checkup-overview/health-checkup-overview.component';
+import { ConfirmPopupModule } from 'primeng/confirmpopup';
+import { HealthCheckupConfirmedComponent } from './health-checkup-service/health-checkup-confirmed/health-checkup-confirmed/health-checkup-confirmed.component';
+import { HealthCheckupCancelComponent } from './health-checkup-service/health-checkup-cancel/health-checkup-cancel/health-checkup-cancel.component';
+import { HealthCheckupCompleteComponent } from './health-checkup-service/health-checkup-complete/health-checkup-complete/health-checkup-complete.component';
+import { HealthCheckupRequestComponent } from './health-checkup-service/health-checkup-request/health-checkup-request/health-checkup-request.component';
+import { ColdObservable } from 'rxjs/internal/testing/ColdObservable';
+import { LoaderComponent } from './loader/loader.component';
+import { LoadingInterceptor } from './loading.interceptor';
+
 
 
 @NgModule({
@@ -89,6 +102,14 @@ import {MatBadgeModule} from '@angular/material/badge';
     AppointmentCompleteComponent,
     DoctorReportComponent,
     DeleteConfirmationDialogComponent,
+    HealthCheckupFormComponent,
+    HealthCheckupOverviewComponent,
+    HealthCheckupConfirmedComponent,
+    HealthCheckupCancelComponent,
+    HealthCheckupCompleteComponent,
+    HealthCheckupRequestComponent,
+    LoaderComponent,
+
   
     
   ],
@@ -117,19 +138,28 @@ import {MatBadgeModule} from '@angular/material/badge';
     ToastModule,
     MultiSelectModule,
     ProgressSpinnerModule,
-    MatBadgeModule
+    MatBadgeModule,
+    ConfirmPopupModule,
+    DialogModule,
+    NgxLoadingButtonsModule,
+    CommonModule
   ],
   providers: [
     DatePipe,
     InactivityService,
     MessageService,
+    ConfirmationService,
     provideClientHydration(),
     // provideAnimationsAsync(),
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
       multi: true
+    },
+    {
+      provide: HTTP_INTERCEPTORS, useClass: LoadingInterceptor, multi: true
     }
+    
   ],
   bootstrap: [AppComponent]
 })

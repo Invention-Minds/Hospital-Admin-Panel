@@ -1,77 +1,134 @@
+.sidebar {
+  width: 70px;
+  height: 100vh;
+  background-color: #001345;
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding-top: 20px;
+  color: white;
+  z-index: 1;
+  transition: all 0.3s ease-in-out; /* Smooth transition for expanding */
+  overflow: hidden;
+}
 
-  .sidebar {
-    width: 100px;
-    height: 100vh;
-    background-color: #001345;
-    position: fixed;
-    top: 0;
-    left: 0;
-    padding-top: 20px;
-    color: white;
-    z-index: 1;
-  }
-  .sidebar .logo-container{
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: -17px;
-  }
-  .logo{
-    width: 100px;
-  }
-  
- .sidebar .icon{
-/* margin-bottom: 40px; */
- }
- .sidebar .icon-container{
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-around;
+.sidebar:hover {
+  width: 250px; /* Expanded width */
+}
+
+.icon-container_2{
   margin-top: 40px;
- }
+}
+.logo-container {
+  /* width: 100%; */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  margin-bottom: 10px;
+  margin-left: 40px;
+}
+.logo-text {
+  font-size: 18px;
+  font-weight: bold;
+  color: white;
+  opacity: 0; /* Hide the text initially */
+  white-space: nowrap; /* Prevent the text from wrapping */
+  margin-left: -20px; /* Hide the text visually when sidebar is collapsed */
+}
+
+.logo {
+  width: 55px;
+}
 
 .icon-container {
   display: flex;
   flex-direction: column;
+  align-items: flex-start; /* Align items to the left when expanded */
+  justify-content: space-around;
+  /* margin-top: 40px; */
   gap: 30px;
+  padding-left: 10px; /* Add padding for text alignment */
+  flex-grow: 1;
 }
 
 .icon-wrapper {
   display: flex;
-  justify-content: center;
   align-items: center;
-  width: 56px;
-  height: 56px;
+  width: 45px;
+  height: 45px;
   border-radius: 12px;
   cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  overflow: hidden; /* Prevent text overflow */
+}
+.icon-content {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+.sidebar:hover .icon-wrapper {
+  width: auto; /* Allow the wrapper to adjust to content */
+  padding-right: 15px; /* Add spacing for text */
 }
 
 .icon-wrapper:hover {
   background-color: white;
   color: black;
-  width: 56px;
-  height: 56px;
-  border-radius: 20px;
 }
 
 .icon {
   fill: white;
   transition: all 0.3s ease;
+  margin-right: 10px; /* Add spacing between icon and text */
 }
 
 .icon-wrapper.active {
   background-color: white;
   color: black;
-  box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64); 
-  border-radius: 20px;
+  box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64);
 }
 
 .icon-wrapper.active .icon {
   fill: black;
 }
+
+.icon-wrapper span {
+  opacity: 0; /* Hide text when collapsed */
+  white-space: nowrap;
+  transition: opacity 0.3s ease; /* Smooth fade-in for text */
+  font-family: Kanit;
+}
+.icon-wrapper svg{
+  opacity: 1;
+  position: relative;
+  left: 6px;
+
+}
 a{
   text-decoration: none;
-  color: #fff;
+  color: white;
+}
+
+.sidebar:hover .icon-wrapper span {
+  opacity: 1; /* Show text when expanded */
+  width: 120px;
+  
+}
+
+.sidebar:hover .logo-text {
+  opacity: 1; /* Show text on hover */
+  margin-left: 0; /* Adjust margin to align properly */
+}
+.sidebar:hover .logo-container{
+  margin-left: 10px;
+  font-family: Kanit;
+  justify-content: flex-start;
+}
+.icon-container .icon-wrapper:nth-last-child(1) {
+  position: absolute;/* Push to the bottom */
+  bottom: 15px;
+}
+.sidebar:hover .settings{
+transform:rotate(90deg);
+transition-duration: 1.5s;
 }

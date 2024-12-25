@@ -9,7 +9,10 @@ import { DoctorFormComponent } from './doctor/doctor-form/doctor-form.component'
 import { LoginComponent } from './login/login/login.component';
 import { SettingsComponent } from './settings/settings/settings.component';
 import { ReportOverviewComponent } from './report/report-overview/report-overview.component';
+import { HealthCheckupOverviewComponent } from './health-checkup-service/health-checkup-overview/health-checkup-overview.component';
 import { authGuard } from './auth.guard';
+import { HealthCheckupFormComponent } from './health-checkup-service/health-checkup-form/health-checkup-form.component';
+import { UnsavedChangesGuard } from './guards/unsaved-changes.guard';
 
 const routes: Routes = [
   { path: 'dashboard', component: DashboardOverviewComponent, canActivate:[authGuard] },
@@ -22,8 +25,16 @@ const routes: Routes = [
   {path:'login', component:LoginComponent},
   {path:'settings', component: SettingsComponent,canActivate:[authGuard]},
   {path:'report',component: ReportOverviewComponent,canActivate:[authGuard]},
+  {path: 'health-checkup', component: HealthCheckupOverviewComponent,canActivate:[authGuard]},
+  { path: 'reschedule/:id', component: HealthCheckupFormComponent,canActivate:[authGuard] },
+  {
+    path: 'form',
+    component: HealthCheckupFormComponent,
+    canDeactivate: [UnsavedChangesGuard], // Apply the guard
+  },
   { path: '', redirectTo: '/login', pathMatch: 'full' },
   { path: '**', redirectTo: '/login' },
+
 
 
 ];

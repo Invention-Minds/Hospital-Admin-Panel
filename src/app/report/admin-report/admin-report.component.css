@@ -2,7 +2,7 @@
     border-radius: 10px;
     background-color: #F0F3FF;
     padding: 10px;
-    padding-left: 130px;
+    padding-left: 90px;
   }
   
   .appointment-table {
@@ -47,6 +47,7 @@ height: 65px;
 font-size: 15px;
 font-family: Kanit;
 font-weight: 400;
+padding-bottom: 0px;
   }
   
   tbody tr:hover {

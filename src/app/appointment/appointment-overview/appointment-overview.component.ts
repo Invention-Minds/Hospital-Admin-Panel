@@ -80,6 +80,9 @@ onClear() {
   this.selectedSearchOption = this.searchOptions[0];
   // this.selectedDateRange = [];
 }
+setActiveComponent(componentName: string): void {
+  this.activeComponent = componentName;
+}
 activeComponent: string = 'request'; // Default to showing the request component
 
   // Show the Appointment Request component when the "No. of Req Arrived" card is clicked

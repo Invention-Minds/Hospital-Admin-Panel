@@ -66,6 +66,9 @@ export class DoctorOverviewComponent implements OnInit {
       console.error('Access denied: Only sub_admin or admin can add a new doctor.');
     }
   }
+  setActiveComponent(componentName: string): void {
+    this.activeComponent = componentName;
+  }
 
   // Save doctor (either add new or update existing)
   onSaveDoctor(doctor: Doctor): void {

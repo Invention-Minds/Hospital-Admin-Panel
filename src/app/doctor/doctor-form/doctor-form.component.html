@@ -190,14 +190,33 @@
   <div class="row">
     <div class="col">
       <div class="custom-form-field">
-        <input type="text" id="availableTimeAll" [(ngModel)]="generalAvailableFrom" name="availableTime" #availableTime="ngModel"
-          pattern="^\d{2}:\d{2}-\d{2}:\d{2}$" placeholder="09:00-17:00" required />
-        <label for="availableTimeAll" class="input-label">Available Time*</label>
-        <div *ngIf="availableTime.invalid && (availableTime.dirty || availableTime.touched)" class="error-message">
-          <small *ngIf="availableTime.errors && availableTime.errors['required']">Available time is required</small>
-          <small *ngIf="availableTime.errors && availableTime.errors['pattern']">Time must be in format 00:00-00:00</small>
+        <div *ngFor="let time of availableTimesArray; let i = index; trackBy: trackByFn" class="availability-field-container">
+          <input 
+            type="text" 
+            id="availableTime{{i}}" 
+            [(ngModel)]="availableTimesArray[i]" 
+            name="availableTime{{i}}" 
+            #availableTime="ngModel"
+            pattern="^\d{2}:\d{2}-\d{2}:\d{2}$" 
+            placeholder="09:00-17:00" 
+            required 
+            (ngModelChange)="saveTimes()"
+          />
+          <label for="availableTime{{i}}" class="input-label">Available Time {{i + 1}}*</label>
+          <div class="remove" *ngIf="i > 0" type="button" (click)="removeTime(i)"><img src="remove.png"></div>
+          <div class="remove" type="button" (click)="addTime()"><img src="add.png"></div>
         </div>
+      
+        <div *ngIf="formError" class="error-message">
+          <small>{{ formError }}</small>
+        </div>
+      
+        <!-- <button type="button" (click)="saveTimes()">Save</button> -->
       </div>
+      
+      
+      
+      
     </div>
     <!-- <div class="col">
       <div class="custom-form-field">
@@ -267,62 +286,75 @@
 <!-- If different available times for each selected day -->
 <!-- If different available times for each selected day -->
 <div *ngIf="!useSameTimeForAllDays">
-<div class="availability-container">
-  <!-- Left Column: Sun, Mon, Tue, Wed -->
-  <div class="column">
-    <!-- <div class=" custom-form-field" *ngFor="let day of availabilityDaysList.slice(0, 4)">
-      <div *ngIf="doctor!.availabilityDays[day]">
-        <label class="input-label">{{ day.toString() | titlecase }} </label>
-        <input type="text"  [(ngModel)]="individualAvailability[day].availableFrom" pattern="^\d{2}:\d{2}-\d{2}:\d{2}$"
-          placeholder="09:00-17:00" required name="availableFrom{{day}}"  />
-      </div>
-    </div> -->
-    <div class="custom-form-field" *ngFor="let day of availabilityDaysList.slice(0, 4)">
-      <div *ngIf="doctor!.availabilityDays[day]">
-        <input type="text" id="availableTimeAll" [(ngModel)]="individualAvailability[day].availableFrom"  name="availableFrom{{day}}" #availableTime="ngModel"
-        pattern="^\d{2}:\d{2}-\d{2}:\d{2}$" placeholder="09:00-17:00" required (change)="onAvailabilityChange(day)"/>
-      <label  class="input-label">{{ day.toString() | titlecase }} Available Time* </label>
-      <div *ngIf="availableTime.invalid && (availableTime.dirty || availableTime.touched)" class="error-message">
-        <small *ngIf="availableTime.errors && availableTime.errors['required']">Available time is required</small>
-        <small *ngIf="availableTime.errors && availableTime.errors['pattern']">Time must be in format 00:00-00:00</small>
-      </div>
-      </div>
-     
-    </div>
-  </div>
+  <div class="availability-container">
+    <!-- Left Column: Sun, Mon, Tue, Wed -->
+    <div class="column">
+      <div class="custom-form-field input" *ngFor="let day of availabilityDaysList.slice(0, 4)">
+        <div class="" *ngIf="doctor!.availabilityDays[day]">
+          
+          
+          <!-- Loop through individual time ranges -->
+          <div *ngFor="let time of individualAvailability[day].availableFromArray; let i = index; trackBy: trackByFn" class="availability-field-container">
+            <input 
+              type="text" 
+              [(ngModel)]="individualAvailability[day].availableFromArray[i]" 
+              placeholder="09:00-10:00" 
+              name="availableTime{{day}}{{i}}" 
+              pattern="^\d{2}:\d{2}-\d{2}:\d{2}$" 
+              required
+              (change)="updateAvailableFromString(day.toString())"
+            />
+            <label class="input-label">{{ day.toString() | titlecase }} Available Times*</label>
+            <div class="remove" *ngIf="i > 0" type="button" (click)="removeTimeRange(day.toString(), i)"><img src="remove.png"></div>
+            <div class="remove" type="button" (click)="addTimeRange(day.toString())"><img src="add.png"></div>
+          </div>
 
-  <!-- Right Column: Thu, Fri, Sat -->
-  <div class="column">
-    <div class="custom-form-field" *ngFor="let day of availabilityDaysList.slice(4)">
-      <div *ngIf="doctor!.availabilityDays[day]">
-        <input type="text" id="availableTimeAll" [(ngModel)]="individualAvailability[day].availableFrom" name="availableFrom{{day}}"  #availableTime="ngModel"
-        pattern="^\d{2}:\d{2}-\d{2}:\d{2}$" placeholder="09:00-17:00" required (change)="onAvailabilityChange(day)" />
-      <label  class="input-label">{{ day.toString() | titlecase }} Available Time* </label>
-      <div *ngIf="availableTime.invalid && (availableTime.dirty || availableTime.touched)" class="error-message">
-        <small *ngIf="availableTime.errors && availableTime.errors['required']">Available time is required</small>
-        <small *ngIf="availableTime.errors && availableTime.errors['pattern']">Time must be in format 00:00-00:00</small>
-      </div>
-      </div>
-     
-    </div>
-  </div>
-</div>
-
-<!-- Single Slot Duration for All Days -->
-<div class="row">
-    <div class="col">
-      <div class="custom-form-field">
-        <input type="number" id="slotTiming" [(ngModel)]="generalSlotDuration" name="slotTiming" min="1" placeholder="20"
-          required #slotTiming="ngModel" (ngModelChange)="generateSlots()" />
-        <label for="slotTiming" class="input-label">Slot Timing*</label>
-        <div *ngIf="slotTiming.invalid && (slotTiming.dirty || slotTiming.touched)" class="error-message">
-          <small *ngIf="slotTiming.errors && slotTiming.errors['required']">Slot timing is required</small>
-          <small *ngIf="slotTiming.errors && slotTiming.errors['min']">Slot timing must be a positive number</small>
+          <!-- Add new time range button -->
+          
         </div>
       </div>
     </div>
+
+    <!-- Right Column: Thu, Fri, Sat -->
+    <div class="column">
+      <div class="custom-form-field input" *ngFor="let day of availabilityDaysList.slice(4)">
+        <div *ngIf="doctor!.availabilityDays[day]">
+        
+
+          <!-- Loop through individual time ranges -->
+          <div *ngFor="let time of individualAvailability[day].availableFromArray; let i = index;trackBy: trackByFn" class="availability-field-container">
+            <input 
+              type="text" 
+              [(ngModel)]="individualAvailability[day].availableFromArray[i]" 
+              name="availableTime{{day}}{{i}}" 
+              placeholder="09:00-10:00" 
+              pattern="^\d{2}:\d{2}-\d{2}:\d{2}$" 
+              required
+              (change)="updateAvailableFromString(day.toString())"
+            />
+            <label class="input-label">{{ day.toString() | titlecase }} Available Times*</label>
+            <div *ngIf="i > 0" type="button" (click)="removeTimeRange(day.toString(), i)"><img src="remove.png"></div>
+            <div type="button" (click)="addTimeRange(day.toString())"><img src="add.png"></div>
+          </div>
+
+          <!-- Add new time range button -->
+          
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slot Timing for All Days -->
+  <div class="row">
+    <div class="col">
+      <div class="custom-form-field">
+        <input type="number" id="slotTiming" [(ngModel)]="generalSlotDuration" name="slotTiming" min="1" placeholder="20" required />
+        <label for="slotTiming" class="input-label">Slot Timing*</label>
+      </div>
+    </div>
+  </div>
 </div>
-</div>
+
 
 <!-- <div class="row">
 <div class="col">

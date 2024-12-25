@@ -41,7 +41,7 @@ export class DoctorServiceService {
     return this.http.get<Doctor[]>(url);
   }
   getAllDoctors(date?: string): Observable<Doctor[]> {
-    let url = `${this.apiUrl}/doctors`;
+    let url = `${this.apiUrl}/doctors/get-doctor-details`;
     if (date) {
       url += `?date=${date}`;
     }

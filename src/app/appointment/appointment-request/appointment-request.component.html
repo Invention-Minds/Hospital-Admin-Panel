@@ -1,7 +1,7 @@
 <div class="table-container">
 <div class="table-wrapper">
   <table>
-    <thead>
+    <thead class="table-header">
       <tr>
         <th>No.</th>
         <th (click)="sortBy('patientName')" style="cursor: pointer;">
@@ -34,7 +34,7 @@
         <td>
           <span class="status-badge">Pending</span>
         </td>
-        <td>
+        <td class="button">
           <button class="btn-action">
             <img src="icons/book.png" alt="check" class="action-icon" (click)="openAppointmentForm(appointment)"
               pTooltip="Confirm" tooltipPosition="top">

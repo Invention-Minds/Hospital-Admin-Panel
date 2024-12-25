@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectorRef, HostListener, ElementRef } from '@angular/core';
 import { AuthServiceService } from '../../services/auth/auth-service.service';
 import { Router } from '@angular/router';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
@@ -62,7 +62,7 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
   private audio = new Audio('/notification.mp3'); // Add a notification sound
   private eventSource: EventSource | null = null;
   public hasNewAppointment: boolean = false;
-  constructor(private authService: AuthServiceService, private router: Router, private appointmentService: AppointmentConfirmService, private changeDetector: ChangeDetectorRef, private messageService: MessageService) { }
+  constructor(private authService: AuthServiceService, private router: Router, private appointmentService: AppointmentConfirmService, private changeDetector: ChangeDetectorRef, private messageService: MessageService, private elementRef: ElementRef) { }
 
   // ngOnInit(): void {
   //   if (typeof window !== 'undefined' && window.localStorage) {
@@ -297,5 +297,16 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
     localStorage.removeItem('token');  // Assuming the token is also stored in localStorage
     this.router.navigate(['/login']);
   }
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event): void {
+    const targetElement = event.target as HTMLElement;
 
+    // Close the dropdown if the click is outside the dropdown or notification icon
+    if (
+      this.showNotifications &&
+      !this.elementRef.nativeElement.contains(targetElement)
+    ) {
+      this.showNotifications = false;
+    }
+  }
 }

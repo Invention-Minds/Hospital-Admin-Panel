@@ -77,6 +77,7 @@ export class AdminReportComponent {
   private userSubscription: Subscription | undefined;
   allAppointments: Appointment[] = [];
   previousDaySummary: AppointmentSummary[] = [];
+  isLoading: boolean = false;
 
 
   constructor(
@@ -516,6 +517,7 @@ export class AdminReportComponent {
 
   // Function to download the filtered appointments as an Excel file
   loadAllAppointments(): void {
+    this.isLoading = true;
     this.appointmentService.getAllAppointments().subscribe(
       (appointments) => {
         this.appointments = appointments;
@@ -756,6 +758,9 @@ export class AdminReportComponent {
       },
       (error) => {
         console.error('Error fetching all appointments:', error);
+      },
+      () =>{
+        this.isLoading = false;
       }
     );
   }

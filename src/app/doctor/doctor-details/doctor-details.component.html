@@ -6,7 +6,7 @@
           {{ department.name }}
         </option>
       </select>
-      <img src="/icons/dropdown-arrow.png" class="calendar-icon">
+      <i class="fa-solid fa-angle-down calendar-icon"></i>
     </div>
   
     <div class="dropdown">
@@ -16,10 +16,12 @@
           {{ doctor.name }}
         </option>
       </select>
-      <img src="/icons/dropdown-arrow.png" class="calendar-icon">
+      <i class="fa-solid fa-angle-down calendar-icon"></i>
     </div>
     <div>
-      <img (click)="reset()" class="delete" src="/icons/delete-1.png">
+      <svg (click)="reset()" class="delete" xmlns="http://www.w3.org/2000/svg" width="3.5em" height="3.5em" viewBox="0 0 24 24">
+        <path fill="#fff" d="M7 21q-.825 0-1.412-.587T5 19V6q-.425 0-.712-.288T4 5t.288-.712T5 4h4q0-.425.288-.712T10 3h4q.425 0 .713.288T15 4h4q.425 0 .713.288T20 5t-.288.713T19 6v13q0 .825-.587 1.413T17 21zM17 6H7v13h10zm-7 11q.425 0 .713-.288T11 16V9q0-.425-.288-.712T10 8t-.712.288T9 9v7q0 .425.288.713T10 17m4 0q.425 0 .713-.288T15 16V9q0-.425-.288-.712T14 8t-.712.288T13 9v7q0 .425.288.713T14 17M7 6v13z" />
+      </svg>
     </div>
   
   </div>
@@ -31,7 +33,7 @@
         <img src="/male-doctor.png" class="doctor-avatar" alt="Doctor Avatar">
         <div class="doctor-info">
           <h3 class="doctor-name">{{ doctor.name }}</h3>
-          <p class="doctor-specialty">{{ department.name }}</p>
+          <!-- <p class="doctor-specialty">{{ department.name }}</p> -->
           <p class="doctor-availability">Availability</p>
           <p class="availability-time">{{ doctor.availableFrom }}</p>
           <button class="view-more-button" (click)="editProfile(doctor)">

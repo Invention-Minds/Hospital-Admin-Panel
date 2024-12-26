@@ -90,7 +90,7 @@
 /* Error Message Styling */
 .error-message {
   color: #ff4d4d;
-  font-size: 0.9rem;
+  font-size: 14px;
   margin-top: 5px;
 }
 
@@ -124,6 +124,7 @@
     font-size: 14px;
     color: #271e4a;
     font-weight: 500;
+    margin-top: 10px;
   }
   
   .radio-group label {

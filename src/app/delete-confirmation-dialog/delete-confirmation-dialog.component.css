@@ -14,7 +14,7 @@
     width: 650px;
     height: 520px;
     background-color: #ffffff;
-    border-radius: 8px;
+    border-radius: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     overflow: hidden;
     text-align: center;
@@ -47,7 +47,7 @@
 color: black;
  font-size: 48px;
  font-family: Kanit;
- font-weight: 400;
+ font-weight: 500;
  word-wrap: break-word;
     margin: 10px 0;
     margin-bottom: 32px;
@@ -67,7 +67,9 @@ color: black;
   .dialog-actions {
     padding: 20px;
     display: flex;
-    justify-content: space-around;
+    justify-content: center;
+  align-items: center;
+  gap: 40px;
   }
   
   .delete-button {
@@ -97,9 +99,9 @@ gap: 10px;
 color: #FFF;
 text-align: center;
 font-family: Kanit;
-font-size: 16px;
+font-size: 14px;
 font-style: normal;
-font-weight: 600;
+font-weight: 400;
 line-height: normal;
   }
   

@@ -20,6 +20,7 @@ export class DoctorReportComponent implements OnInit {
   sortColumn: keyof any | undefined = undefined;
   sortDirection: 'asc' | 'desc' = 'asc';
   today = new Date();
+  isLoading: boolean = false;
 
   constructor(private serviceApi: HealthCheckupServiceService, private messageService: MessageService ) {}
 
@@ -28,6 +29,7 @@ export class DoctorReportComponent implements OnInit {
   }
 
   loadServices(): void {
+    this.isLoading=true
     this.serviceApi.getAllServices().subscribe(
       (data) => {
         this.services = data;
@@ -36,6 +38,9 @@ export class DoctorReportComponent implements OnInit {
       },
       (error) => {
         console.error('Error fetching services:', error);
+      },
+      () => {
+        this.isLoading = false;
       }
     );
   }

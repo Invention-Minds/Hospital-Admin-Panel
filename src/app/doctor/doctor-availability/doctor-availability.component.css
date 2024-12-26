@@ -17,8 +17,8 @@
   background-color: #005d8c;
   padding: 15px;
   color: #fff;
-  font-size: 16px;
-  height: 65px;
+  font-size: 14px;
+  height: 56px;
   width: 100%;
   padding-left: 70px;
 }
@@ -30,7 +30,9 @@
 
 .navigation-right .date-display {
   margin: 0 15px;
-  width: 200px;
+  width: 156px;
+  font-size: 13px;
+  text-align: center;
 }
 
 .navigation-right button {
@@ -41,7 +43,9 @@
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-weight: bold;
+  font-weight: 500;
+  font-family: Kanit;
+  font-size: 13px;
 }
 
 .today-button {
@@ -50,7 +54,7 @@
 }
 
 .navigation-right button {
-  padding: 10px 20px;
+  padding: 8px 14px;
   margin: 0 21px;
   background-color: #003b6d;
   color: #fff;
@@ -69,7 +73,18 @@
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  margin-top: 10px;
+  /* margin-top: 10px; */
+  height: 33px;
+  font-size: 10px;
+  padding-left: 6px;
+
+ 
+}
+.reload{
+  border: 2px solid #fff;
+  height: 36px;
+  width: 36px;
+  border-radius: 10px;
 }
 .calendar-input {
   padding: 12px;
@@ -78,29 +93,27 @@
   background: transparent;
   /* box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64); */
   border-radius: 8px;
-  font-size: 16px;
   outline: none;
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
   text-align: left;
   color: #7b7b7b;
-  font-size: 18px;
+  font-size: 13px;
   font-family: Kanit;
   font-weight: 500;
   margin-left: 30px;
 }
 ::ng-deep .custom-calendar .p-inputtext {
-  width: 200px;
-  height: 44px;
+  width: 180px;
+  height: 36px;
   border-radius: 10px; /* Rounded edges */
   border-radius: 8px;
   border: 2px solid #fff;
   /* box-shadow: 0px 4px 15px 0px rgba(216, 210, 252, 0.64); */
   padding-left: 15px;
-  font-size: 16px;
+  font-size: 13px;
   color: #fff;
-  font-weight: 600;
   font-family: Kanit;
   background: transparent;
 }
@@ -138,23 +151,24 @@
 .calendar-icon {
   position: relative;
   right: 38px;
+  font-size: 16px;
+  margin-left: 10px;
 }
 .search-box {
   padding: 12px;
   border: none;
   width: 275px;
-  height: 44px;
+  height: 34px;
   background: white;
   /* box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64); */
-  border-radius: 8px;
-  font-size: 16px;
+  border-radius: 4px;
   outline: none;
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
   color: black;
   font-family: Kanit;
-  font-size: 18px;
+  font-size: 13px;
   font-style: normal;
   font-weight: 300;
   line-height: normal;
@@ -171,7 +185,7 @@
   border-radius: 16px;
   background: #0e2970;
   box-shadow: 0px 4px 15px 0px rgba(216, 210, 252, 0.64);
-  height: 65px;
+  height: 56px;
   margin-left: 80px;
   margin-right: 20px;
 }
@@ -200,9 +214,9 @@
 .opd-available-time {
   color: #fff;
   font-family: Kanit;
-  font-size: 18px;
+  font-size: 14px;
   font-style: normal;
-  font-weight: 600;
+  font-weight: 500;
   line-height: normal;
   display: flex;
   justify-content: center;
@@ -215,7 +229,7 @@
 .doctor-slot-container {
   background-color: #f0f3ff;
   border-radius: 6px;
-  margin-top: 15px;
+  margin-top: 0px;
   padding: 12px;
   color: #333;
   display: flex;
@@ -246,27 +260,32 @@
   margin-top: 8px;
   text-align: center;
 }
-
-.unavailable-button {
-  display: flex;
-  width: 140px;
-  height: 32px;
-  padding: 8px 20px;
-  justify-content: center;
+.unavailable{
+ display: flex;
+ justify-content: center;
   align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-  border-radius: 6px;
-  border: 1px solid #d20006;
-  background: transparent;
-  color: #d20006;
-  cursor: pointer;
-  font-family: Kanit;
-  font-size: 12px;
-  font-style: normal;
-  font-weight: 600;
-  line-height: normal;
-  margin-top: 10px;
+}
+.unavailable-button {
+  display: flex
+;
+    /* width: 150px; */
+    height: 32px;
+    padding: 8px 10px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+    border-radius: 6px;
+    border: 1px solid #d20006;
+    background: transparent;
+    color: #d20006;
+    cursor: pointer;
+    font-family: Kanit;
+    font-size: 13px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    margin-top: 10px;
 }
 .unavailable-button:disabled {
   background-color: #d3d3d3; /* Grey background for disabled state */
@@ -277,7 +296,7 @@
   margin: 0;
   color: #271e4a;
   font-family: Kanit;
-  font-size: 16px;
+  font-size: 14px;
   font-style: normal;
   font-weight: 600;
   line-height: normal;
@@ -286,9 +305,9 @@
 .doctor-department {
   color: #271e4a;
   font-family: Kanit;
-  font-size: 14px;
+  font-size: 13px;
   font-style: normal;
-  font-weight: 600;
+  font-weight: 500;
   line-height: normal;
 }
 .complete {
@@ -299,23 +318,26 @@
 .doctor-availability-time {
   color: #169458;
   font-family: Kanit;
-  font-size: 14px;
+  font-size: 13px;
   font-style: normal;
-  font-weight: 600;
+  font-weight: 500;
   line-height: normal;
+  margin: 0;
 }
 
 /* Slots Styling */
 .slots-wrapper {
   display: grid;
   /* grid-template-columns: repeat(11, minmax(80px, 1fr)); */
-  grid-template-rows: repeat(4, auto); /* Create 4 rows */
+  grid-template-rows: repeat(4, 40px); 
+  /* grid-template-rows: 100px 200px 150px auto; */
   grid-auto-flow: column; /* Fill each column with 4 rows first */
-  grid-template-columns: repeat(11, minmax(80px, 1fr)); /* Set 11 columns */
+  grid-template-columns: repeat(13, minmax(80px, 1fr)); /* Set 11 columns */
   gap: 6px;
   align-items: center;
   width: 100%;
   justify-items: start;
+  margin-top:20px;
 }
 
 .slot-box {
@@ -326,9 +348,10 @@
 
   border-radius: 4px;
   text-align: center;
-  font-size: 14px;
+  font-size: 13px;
   font-style: normal;
   font-weight: 600;
+  width: 84px;
 }
 
 /* Color Coding Slots */
@@ -502,14 +525,14 @@ h2 {
   left: 0;
   right: 0;
   background-color: #ffffff;
-  padding: 26px 20px;
+  padding: 25px 30px;
   box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
  z-index: -0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 16px;
-  height: 55px;
+  font-size: 13px;
+  height: 28px;
   padding-left: 130px;
   width: 100%;
 }
@@ -528,8 +551,8 @@ h2 {
 }
 
 .color-box {
-  width: 25px;
-  height: 25px;
+  width: 22px;
+  height: 22px;
   border-radius: 4px;
 }
 
@@ -561,7 +584,7 @@ h2 {
 .label {
   color: #000;
   font-family: Kanit;
-  font-size: 12px;
+  font-size: 13px;
   font-style: normal;
   font-weight: 400;
   line-height: normal;
@@ -625,7 +648,7 @@ h2 {
   display: flex;
   align-items: center;
   color: #7B7B7B;
-  font-size: 16px;
+  font-size: 14px;
   font-family: Kanit, sans-serif;
   font-weight: 400;
 }
@@ -637,7 +660,7 @@ h2 {
   border-radius: 5px;
   text-align: center;
   margin: 0 10px;
-  font-size: 16px;
+  font-size: 14px;
   padding: 5px;
 }
 

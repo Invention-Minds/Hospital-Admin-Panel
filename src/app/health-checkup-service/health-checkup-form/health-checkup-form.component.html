@@ -216,7 +216,7 @@
           <div *ngIf="(times.invalid && times.touched) || form.submitted" class="error-message">
             <span *ngIf="times.errors?.['required']">Times selection is required.</span>
             <span *ngIf="times.errors?.['min']">Times must be greater than 1.</span>
-            <span *ngIf="times.errors?.['max']">Times cannot exceed 365.</span>
+            <span *ngIf="times.errors?.['max']">Times cannot exceed 10.</span>
           </div>
         </div>
       </div>

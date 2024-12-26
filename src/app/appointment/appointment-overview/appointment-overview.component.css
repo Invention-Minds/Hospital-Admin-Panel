@@ -32,6 +32,7 @@ font-weight: 500;
 .card.active-card h2, 
 .card.active-card p {
   color: white; /* Ensures text inside is also white */
+  font-weight: 600;
 }
   .card {
     width: 205px;
@@ -74,7 +75,7 @@ font-weight: 500;
     color: #271E4A;
     font-size: 14px;
     font-family: Kanit;
-    font-weight: 600;
+    font-weight: 400;
     margin: 0;
   }
   .form-row {
@@ -290,3 +291,4 @@ font-family: 900;
  .download img{
   width:39px
  }
+ 

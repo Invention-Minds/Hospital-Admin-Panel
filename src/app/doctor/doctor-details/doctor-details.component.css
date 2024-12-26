@@ -1,6 +1,6 @@
 .dropdown-container {
   display: flex;
-  gap: 100px;
+  gap: 80px;
   padding: 16px;
   background-color: #f0f3ff;
 
@@ -10,12 +10,14 @@
 
 .dropdown {
   width: 200px;
+  height: 44px;
 }
 
 .custom-select {
   padding: 12px;
   border: none;
-  width: 275px;
+  width: 260px;
+  height: 44px;
   background: white;
   box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64);
   border-radius: 8px;
@@ -26,7 +28,7 @@
   appearance: none;
   text-align: left;
   color: #7b7b7b;
-  font-size: 18px;
+  font-size: 14px;
   font-family: Kanit;
   font-weight: 500;
 }
@@ -41,18 +43,18 @@
 .calendar-icon {
   position: relative;
   right: -234px;
-  top: -37%;
+  top: -55%;
   transform: translateY(-50%);
   pointer-events: none;
 }
 .department-container {
-    padding-bottom: 32px;
+    padding-bottom: 0px;
     background-color: #f0f3ff;
   }
 .doctor-cards-container {
     display: flex;
     gap: 24px;
-    padding: 24px;
+    padding: 14px;
     background-color: #f0f3ff;
     border-radius: 12px;
     padding-left: 90px;
@@ -60,18 +62,18 @@
   
   .doctor-card {
     background-color: white;
-    border-radius: 16px;
+    border-radius: 8px;
     box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.1);
-    padding: 16px;
+    padding: 12px;
     text-align: center;
-    width: 233px;
+    width: 220px;
     position: relative;
-    height: 322px;
+    height: 260px;
   }
   
   .doctor-avatar {
-    width: 80px;
-    height: 80px;
+    width: 70px;
+    height: 70px;
     border-radius: 50%;
     margin-bottom: 1px;
   }
@@ -84,34 +86,37 @@
   
   .doctor-name {
     color: #271E4A;
-    font-size: 18px;
+    font-size: 14px;
     font-family: Kanit;
-    font-weight: 600;
+    font-weight: 500;
     margin: 0;
     line-height: 24px;
   }
   
   .doctor-specialty {
     color: #271E4A;
-font-size: 12px;
+font-size: 13px;
 font-family: Kanit;
-font-weight: 600;
+font-weight: 500;
     margin: 0px 0;
   }
   
   .doctor-availability {
     margin: 0px;
     color: #169458;
-    font-size: 12px;
+    font-size: 13px;
     font-family: Kanit;
-    font-weight: 600;
+    font-weight: 500;
+    height: 20px;
   }
+
+
   
   .availability-time {
     color: #169458;
-    font-size: 12px;
+    font-size: 13px;
     font-family: Kanit;
-    font-weight: 600;
+    font-weight: 500;
   }
   
   .view-more-button {
@@ -119,15 +124,15 @@ font-weight: 600;
     border: none;  /* Remove default border */
     color: #FFF;
     font-family: Kanit;
-    font-size: 14px;
+    font-size: 13px;
     font-style: normal;
-    font-weight: 600;  /* Font size for the text */
+    font-weight: 500;  /* Font size for the text */
     border-radius: 5px;  /* Slightly rounded corners */
     cursor: pointer;  /* Change cursor to pointer on hover */
     display: flex;  /* Use flexbox for alignment */
     align-items: center;  /* Center icon and text vertically */
     gap: 10px;  /* Space between icon and text */
-    width: 135px;
+    width: 120px;
     height: 32px;
   }
   
@@ -136,12 +141,12 @@ font-weight: 600;
   }
   
   .button-icon {
-    padding-left: 12px;
+    padding-left: 8px;
   }
   
   .unavailable-button {
     display: flex;
-    width: 140px;
+    width: 120px;
     height: 32px;
     padding: 8px 20px;
     justify-content: center;
@@ -154,24 +159,37 @@ background: #FFF;
 color: #D20006;
 cursor: pointer;
 font-family: Kanit;
-font-size: 14px;
+font-size: 13px;
 font-style: normal;
-font-weight: 600;
+font-weight: 500;
 line-height: normal;
 margin-top: 10px;
   }
   .department{
     color: #271E4A;
 font-family: Kanit;
-font-size: 24px;
+font-size: 18px;
 font-style: normal;
 font-weight: 500;
-padding-left: 130px;
+padding-left: 90px;
+margin: 0;
   }
   .delete{
     margin-bottom: 0px;
-    margin-top: 7px;
+    margin-top: 2px;
     cursor: pointer;
+  }
+  .delete{
+    border-radius: 10px; /* Rounded edges */
+    background-color: #FF4747;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Shadow effect */
+    border: 1px solid #e0e0e0; /* Light border */
+    margin-bottom: 0px;
+    color: white;
+    padding: 6px;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
   }
   /* General modal overlay styles */
 .modal-overlay {
@@ -339,7 +357,7 @@ line-height: normal;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   position: absolute;
   top: 14px;
-  right: 10px;
+  right: 14px;
 }
 
 .doc-delete:hover {
@@ -368,7 +386,7 @@ line-height: normal;
   width: 650px;
   height: 520px;
   background-color: #ffffff;
-  border-radius: 8px;
+  border-radius: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   overflow: hidden;
   text-align: center;
@@ -405,7 +423,7 @@ line-height: normal;
   color: black;
   font-size: 48px;
   font-family: Kanit;
-  font-weight: 400;
+  font-weight: 500;
   word-wrap: break-word;
   margin: 10px 0;
   margin-bottom: 32px;
@@ -425,7 +443,9 @@ line-height: normal;
 .dialog-actions {
   padding: 20px;
   display: flex;
-  justify-content: space-around;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
 }
 
 .delete-button {
@@ -434,9 +454,9 @@ background: #D20006;
   color: #FFF;
 text-align: center;
 font-family: Kanit;
-font-size: 16px;
+font-size: 14px;
 font-style: normal;
-font-weight: 600;
+font-weight: 500;
 line-height: normal;
   padding: 10px 20px;
   border: none;
@@ -460,9 +480,9 @@ line-height: normal;
   color: #FFF;
 text-align: center;
 font-family: Kanit;
-font-size: 16px;
+font-size: 14px;
 font-style: normal;
-font-weight: 600;
+font-weight: 500;
 line-height: normal;
 }
 

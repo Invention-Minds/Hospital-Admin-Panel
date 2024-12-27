@@ -288,6 +288,20 @@ getAppointmentsByRole(): Observable<Appointment[]> {
 
     return this.http.post<any>(`${environment.apiUrl}/email/send-email`, emailRequest, { headers });
   }
+  sendEmailHealthCheckup(to: string| string[], status: string, appointmentDetails: any): Observable<any> {
+    const recipients = Array.isArray(to) ? to.join(', ') : to;
+    const emailRequest = {
+      to: recipients,
+      status,
+      appointmentDetails,
+    };
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+    });
+
+    return this.http.post<any>(`${environment.apiUrl}/email/send-email-service`, emailRequest, { headers });
+  }
   getNotifications(): Observable<any> {
     return this.http.get<any>(`${environment.apiUrl}/appointments/notifications`);
   }

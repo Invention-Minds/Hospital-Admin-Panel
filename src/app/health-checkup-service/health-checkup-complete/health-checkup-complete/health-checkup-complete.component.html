@@ -77,6 +77,11 @@
                 </tr>
             </thead>
             <tbody>
+              <tr *ngIf="filteredAppointments.length === 0">
+                <td colspan="11" class="no-records-message">
+                  No records to display
+                </td>
+              </tr>
                 <tr *ngFor="let service of getPaginatedAppointments(); let i = index">
                     <td>{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
                     <td>{{ service.firstName }} {{ service.lastName || '' }}</td>

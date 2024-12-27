@@ -69,6 +69,11 @@
             </button>
           </td>
         </tr> -->
+        <tr *ngIf="combinedReport.length === 0">
+          <td colspan="11" class="no-records-message">
+            No records to display
+          </td>
+        </tr>
 
           <tr *ngFor="let appointment of getPaginatedData(); let i = index">
             <td>{{ i + 1 }}</td>

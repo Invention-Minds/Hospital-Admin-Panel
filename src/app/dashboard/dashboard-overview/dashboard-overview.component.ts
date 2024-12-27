@@ -6,6 +6,7 @@ import { Component } from '@angular/core';
   styleUrl: './dashboard-overview.component.css'
 })
 export class DashboardOverviewComponent {
+  isLoading: boolean = false;
   overview = [
     {
       iconPath: 'opd.png',
@@ -27,4 +28,11 @@ export class DashboardOverviewComponent {
     },
 
   ];
+  ngOnInit(): void {
+    // Simulate data fetching
+    this.isLoading = true; // Start loading
+    setTimeout(() => {
+      this.isLoading = false; // Stop loading after data is fetched
+    }, 2000); // Adjust the timeout as needed for your API calls
+  }
 }

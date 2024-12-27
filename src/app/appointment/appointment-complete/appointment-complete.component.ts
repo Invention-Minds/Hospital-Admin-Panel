@@ -41,6 +41,7 @@ export class AppointmentCompleteComponent {
   @Input() selectedValue: string = '';
   @Input() selectedSearchOption: string = ''; 
   filteredList: any;
+  isLoading: boolean = false;
 
   searchOptions = [
     { label: 'Patient Name', value: 'patientName' },
@@ -52,6 +53,7 @@ export class AppointmentCompleteComponent {
     //   this.completedAppointments = appointments;
     //   this.filteredAppointments = [...this.completedAppointments];
     //   console.log('Confirmed appointments from component:', this.completedAppointments);
+    this.isLoading = true; // Start loading indicator
     this.appointmentService.completedAppointments$.subscribe(appointments => {
       this.completedAppointments = appointments;
       this.completedAppointments.sort((a, b) => {
@@ -61,7 +63,16 @@ export class AppointmentCompleteComponent {
       });
       this.filteredAppointments = [...this.completedAppointments];
       this.filterAppointmentsByDate(new Date());
-    });
+      setTimeout(() => {
+        console.log('Setting isLoading to false after delay');
+        this.isLoading = false; // Stop loading indicator
+      }, 2000); // 2-second delay
+    },
+    (error) => {
+      console.error('Error fetching completed appointments:', error);
+      this.isLoading = false; // Stop loading indicator
+    }
+    );
   
     // Fetch appointments from backend to initialize the data
     this.appointmentService.fetchAppointments();

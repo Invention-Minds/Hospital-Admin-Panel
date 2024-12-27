@@ -1,4 +1,5 @@
-<div class="table-container">
+<div class="table-container" [ngClass]="{'loading': isLoading}" *ngIf="!isLoading">
+
 <div class="table-wrapper">
   <table class="appointment-table">
     <thead>
@@ -26,6 +27,11 @@
       </tr>
     </thead>
     <tbody>
+      <tr *ngIf="filteredAppointments.length === 0">
+        <td colspan="11" class="no-records-message">
+          No records to display
+        </td>
+      </tr>
       <tr *ngFor="let appointment of getPaginatedAppointments(); let i = index">
         <td>{{ i + 1 }}</td>
         <td>{{ appointment.patientName }}</td>
@@ -77,6 +83,7 @@
       </div>
     </div>
   </div>
+  <div class="loader" *ngIf="isLoading"></div>
   <app-appointment-form 
   *ngIf="showAppointmentForm" 
   [appointment]="selectedAppointment" 
@@ -87,3 +94,4 @@
   [showDialog]="isLockedDialogVisible"
   (close)="handleLockedDialogClose()"
 ></app-delete-confirmation-dialog>
+

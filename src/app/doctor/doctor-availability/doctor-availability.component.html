@@ -1,4 +1,4 @@
-<div class="doctor-availability-wrapper">
+<div  class="doctor-availability-wrapper">
 
     <!-- Navigation Header -->
     <div class="navigation-header">
@@ -39,8 +39,8 @@
     </div>
   
     <!-- Doctor Details & Slots -->
-    <div class="doctor-slot-container" *ngFor="let doctor of filteredDoctors">
-      <div class="doctor-profile" [ngClass]="{ 'unavailable-doctor': doctor.isUnavailable }">
+    <div  class="doctor-slot-container" *ngFor="let doctor of filteredDoctors">
+      <div class="doctor-profile" [ngClass]="{ 'unavailable-doctor': doctor.isUnavailable }" *ngIf="!isLoading">
         <img src="/male-doctor.png" alt="Doctor Image" class="doctor-avatar" />
         <div class="doctor-info">
           <h3 class="doctor-name">{{ doctor.name }}</h3>
@@ -52,7 +52,7 @@
           </div>
         </div>
       </div>
-      <div class="slots-wrapper">
+      <div class="slots-wrapper" *ngIf="!isLoading">
         <div *ngFor="let slot of doctor.slots"
              class="slot-box"
              [pTooltip]="
@@ -190,4 +190,4 @@
   
   
   </div>
-  
+  <div class="loader" *ngIf="isLoading"></div>

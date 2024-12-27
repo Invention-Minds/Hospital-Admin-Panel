@@ -8,6 +8,7 @@ import { ActivatedRoute } from '@angular/router';
 import { CanComponentDeactivate } from '../../guards/unsaved-changes.guard';
 import { HealthCheckupConfirmedComponent } from '../health-checkup-confirmed/health-checkup-confirmed/health-checkup-confirmed.component';
 import { request } from 'http';
+import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 
 @Component({
   selector: 'app-health-checkup-form',
@@ -44,7 +45,7 @@ export class HealthCheckupFormComponent implements OnInit {
   emailSent?: boolean = false;
 
 
-  constructor(private confirmationService: ConfirmationService, private healthCheckupService: HealthCheckupServiceService, private messageService: MessageService, private route: ActivatedRoute) { }
+  constructor(private confirmationService: ConfirmationService, private healthCheckupService: HealthCheckupServiceService, private messageService: MessageService, private route: ActivatedRoute, private appointmentService: AppointmentConfirmService) { }
   @Input() serviceData: any = null; // Input data from the overview component
   @Output() closeForm = new EventEmitter<void>(); // Event to notify form close
   @Output() formStatus = new EventEmitter<boolean>(); // Emit dirty state
@@ -398,7 +399,11 @@ export class HealthCheckupFormComponent implements OnInit {
               this.serviceData.numberOfTimes !== payload.numberOfTimes ||
               JSON.stringify(this.serviceData.repeatedDates) !== JSON.stringify(payload.repeatedDates);
 
-            const status = isRescheduled ? 'rescheduled' : 'confirmed';
+            let status = isRescheduled ? 'rescheduled' : 'confirmed';
+
+            if(form.value.appointmentStatus === 'Cancel') {
+              status = 'cancelled';
+            }
 
             payload.appointmentStatus = status; // Update the payload status
             const messagePayload = {
@@ -434,6 +439,36 @@ export class HealthCheckupFormComponent implements OnInit {
                 console.error('Error sending whatsapp message:', error);
               },
             });
+            const appointmentDetails = {
+              patientName: form.value.firstName + ' ' + form.value.lastName,
+              packageName: selectedPackage ? selectedPackage.name : null,
+              appointmentDate: form.value.date,
+              appointmentTime: form.value?.time,
+            };
+            const patientEmail = form.value.email;
+            this.appointmentService.sendEmailHealthCheckup(patientEmail,status,appointmentDetails).subscribe({
+              next: (response) => {
+                console.log('Email sent successfully:', response);
+                const emailPayload ={
+                  ...payload,
+                  emailSent: true
+                }
+                this.healthCheckupService.updateService(serviceId, emailPayload).subscribe({
+                  next: (updateResponse) => {
+                    console.log('Service updated with emailSent status:', updateResponse);
+                  },
+                  error: (updateError) => {
+                    console.error('Error updating emailSent status in service:', updateError);
+                  },
+                  complete: () => {
+                    this.isLoading = false;
+                  },
+                });
+              },
+              error: (error) => {
+                console.error('Error sending email:', error);
+              },
+            });
             this.isLoading = false;
             this.resetForm(form);
             this.closeForm.emit()
@@ -466,6 +501,20 @@ export class HealthCheckupFormComponent implements OnInit {
               appointmentStatus: 'confirmed',
               requestVia: form.value.requestVia
             }
+            const patientDetails = {
+              prn: form.value.pnr,
+              name: form.value.firstName + ' ' + form.value.lastName,
+              phoneNumber: formattedPhoneNumber,
+              email: form.value.email,
+            };
+            this.appointmentService.addPatient(patientDetails).subscribe({
+              next: (response) => {
+                console.log('Patient added successfully:', response);
+              },
+              error: (error) => {
+                console.error('Error adding patient:', error);
+              },
+            });
             this.healthCheckupService.sendWhatsappMessageForService(messagePayload).subscribe({
               next: (response) => {
                 console.log('Whatsapp message sent successfully:', response);
@@ -488,6 +537,37 @@ export class HealthCheckupFormComponent implements OnInit {
               },
               error: (error) => {
                 console.error('Error sending whatsapp message:', error);
+              },
+            });
+            const appointmentDetails = {
+              patientName: form.value.firstName + ' ' + form.value.lastName,
+              packageName: selectedPackage ? selectedPackage.name : null,
+              appointmentDate: form.value.date,
+              appointmentTime: form.value?.time,
+            };
+            const patientEmail = form.value.email;
+            const status = 'confirmed';
+            this.appointmentService.sendEmailHealthCheckup(patientEmail,status,appointmentDetails).subscribe({
+              next: (response) => {
+                console.log('Email sent successfully:', response);
+                const emailPayload ={
+                  ...payload,
+                  emailSent: true
+                }
+                this.healthCheckupService.updateService(serviceId, emailPayload).subscribe({
+                  next: (updateResponse) => {
+                    console.log('Service updated with emailSent status:', updateResponse);
+                  },
+                  error: (updateError) => {
+                    console.error('Error updating emailSent status in service:', updateError);
+                  },
+                  complete: () => {
+                    this.isLoading = false;
+                  },
+                });
+              },
+              error: (error) => {
+                console.error('Error sending email:', error);
               },
             });
             this.resetForm(form);

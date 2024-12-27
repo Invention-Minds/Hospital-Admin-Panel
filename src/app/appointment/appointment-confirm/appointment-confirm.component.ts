@@ -56,6 +56,7 @@ export class AppointmentConfirmComponent {
   cancelledAppointments: Appointment[] = [];
   filteredList: any;
   lastWeekAppointments: any[] = [];  
+  isLoading: boolean = false;
 
   searchOptions = [
     { label: 'Patient Name', value: 'patientName' },
@@ -63,36 +64,44 @@ export class AppointmentConfirmComponent {
   ];
   // Method to handle sorting by a specific column
   ngOnInit() {
-    // this.appointmentService.confirmedAppointments$.subscribe(appointments => {
-    //   this.confirmedAppointments = appointments;
-    //   this.filteredAppointments = [...this.confirmedAppointments];
-    //   console.log('Confirmed appointments from component:', this.confirmedAppointments);
-  //   const savedAppointments = localStorage.getItem('appointments');
-  // if (savedAppointments) {
-  //   this.appointments = JSON.parse(savedAppointments);
-  // } else {
-  //   // Fetch appointments from the backend for the first time
-  //       // Fetch appointments from backend to initialize the data
-  //       this.appointmentService.fetchAppointments();
-  // }
-  this.appointmentService.fetchAppointments();
-    this.appointmentService.confirmedAppointments$.subscribe(appointments => {
-      this.confirmedAppointments = appointments;
-      this.confirmedAppointments.sort((a, b) => {
-        const dateA = new Date(a.created_at!);
-        const dateB = new Date(b.created_at!);
-        return dateB.getTime() - dateA.getTime();
-      });
-      // console.log("confirmedAppointments",this.confirmedAppointments);
-      this.filteredAppointments = [...this.confirmedAppointments];
-      this.filterAppointmentsByDate(new Date());
-      // this.filteredAppointments = this.confirmedAppointments.filter(appointment => !appointment!.completed);
-
+    console.log('Setting isLoading to true');
+    this.isLoading = true; // Start loading indicator
+  
+    // Fetch appointments
+    this.appointmentService.fetchAppointments();
+  
+    // Subscribe to confirmed appointments
+    this.appointmentService.confirmedAppointments$.subscribe({
+      next: (appointments) => {
+        console.log('Appointments received:', appointments);
+        this.confirmedAppointments = appointments;
+  
+        // Sort appointments
+        this.confirmedAppointments.sort((a, b) => {
+          const dateA = new Date(a.created_at!);
+          const dateB = new Date(b.created_at!);
+          return dateB.getTime() - dateA.getTime();
+        });
+  
+        this.filteredAppointments = [...this.confirmedAppointments];
+        this.filterAppointmentsByDate(new Date());
+  
+        console.log('Setting isLoading to false');
+        setTimeout(() => {
+          console.log('Setting isLoading to false after delay');
+          this.isLoading = false; // Stop loading indicator
+        }, 1000); // 2-second delay
+        
+      },
+      error: (error) => {
+        console.error('Error fetching appointments:', error);
+        // this.errorMessage = 'Failed to fetch appointments.';
+        console.log('Setting isLoading to false due to error');
+        this.isLoading = false; // Stop loading indicator even on error
+      }
     });
-
-
-    // });
   }
+  
   
   sortBy(column: keyof Appointment) {
     if (this.sortColumn === column) {

@@ -27,8 +27,8 @@
   </div>
 
   <div  *ngFor="let department of getFilteredDoctors()" class="department-container">
-    <h2 class="department">{{ department.name }}</h2>
-    <div class="doctor-cards-container">
+    <h2 class="department" *ngIf="!isLoading">{{ department.name }}</h2>
+    <div class="doctor-cards-container" *ngIf="!isLoading">
       <div class="doctor-card" *ngFor="let doctor of department.doctors">
         <img src="/male-doctor.png" class="doctor-avatar" alt="Doctor Avatar">
         <div class="doctor-info">
@@ -98,5 +98,5 @@
   </div>
 </div>
 
-  
+  <div class="loader" *ngIf="isLoading"></div>
   

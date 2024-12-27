@@ -69,7 +69,11 @@
             </button>
           </td>
         </tr> -->
-
+        <tr *ngIf="filteredAppointments.length === 0">
+          <td colspan="11" class="no-records-message">
+            No records to display
+          </td>
+        </tr>
           <tr *ngFor="let appointment of getPaginatedAppointments(); let i = index">
             <td>{{ i + 1 }}</td>
             <td>{{ appointment.username }}</td>

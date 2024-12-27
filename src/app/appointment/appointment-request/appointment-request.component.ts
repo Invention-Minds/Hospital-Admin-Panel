@@ -49,6 +49,7 @@ export class AppointmentRequestComponent implements OnInit {
   isLockedDialogVisible: boolean = false; // To control the visibility of the lock dialog
   showDeleteConfirmDialog: boolean = false;
   appointmentToDelete: Appointment | null = null;
+  isLoading: boolean = false;
   
 
   private userSubscription: Subscription | undefined;
@@ -69,7 +70,9 @@ export class AppointmentRequestComponent implements OnInit {
 
 
   fetchPendingAppointments(): void {
+    this.isLoading = true;
     this.appointmentService.fetchPendingAppointments().subscribe((appointments) => {
+      this.isLoading = false;
       this.pendingAppointments = appointments;
       this.pendingAppointments.sort((a, b) => {
         const dateA = new Date(a.created_at!);

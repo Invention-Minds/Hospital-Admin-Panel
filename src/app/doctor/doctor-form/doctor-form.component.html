@@ -137,7 +137,6 @@
             *ngIf="doctor?.doctorType === 'Visiting Consultant'"
             type="submit"
             class="update-button"
-            (click)="saveDoctor()"
             [disabled]="!isDoctorValid()"
           >
           {{ isEditMode ? 'Update' : 'Add' }}
@@ -410,7 +409,7 @@
 <!-- Back and Submit Buttons -->
 <div class="doctor-form-actions">
   <button class="close-button" type="button" (click)="goToStep(1)">Back</button>
-  <button class="update-button" type="submit"
+  <button class="update-button"
   [disabled]="!isFormValid() || !isAnyDaySelected()"
   [ngClass]="{'disabled': !isFormValid() || !isAnyDaySelected()}">
   {{ isEditMode ? 'Update' : 'Add' }}

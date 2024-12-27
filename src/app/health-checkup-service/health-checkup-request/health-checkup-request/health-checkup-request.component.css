@@ -422,11 +422,11 @@ font-family: 900;
   font-family: monospace;
   line-height: 1.4;
   font-weight: bold;
-  color: #2C63BA;
-  --c: no-repeat linear-gradient(#2C63BA 0 0); 
+  color: #0e2970;
+  --c: no-repeat linear-gradient(#0e2970 0 0); 
   background: var(--c),var(--c),var(--c),var(--c),var(--c),var(--c),var(--c);
   background-size: calc(1ch + 1px) 100%;
-  border-bottom: 10px solid #2C63BA; 
+  border-bottom: 10px solid #0e2970; 
   animation: l8-0 1s infinite linear;
   clip-path: inset(-20px 0);
   z-index: 999; /* Ensure it appears above other elements */
@@ -458,4 +458,11 @@ font-family: 900;
 }
 @keyframes l8-1{
   100% {left:115%}
+}
+.no-records-message {
+  text-align: center;
+  font-size: 18px;
+  color: #666;
+  padding: 20px;
+  font-family: Kanit;
 }

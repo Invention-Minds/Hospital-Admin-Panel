@@ -1,6 +1,6 @@
-<div class="table-container">
+<div class="table-container" *ngIf="!isLoading">
   <div class="table-wrapper">
-    <table class="appointment-table">
+    <table class="appointment-table" *ngIf="!isLoading">
       <thead>
         <tr>
           <th>No</th>
@@ -27,6 +27,11 @@
         </tr>
       </thead>
       <tbody>
+        <tr *ngIf="filteredAppointments.length === 0">
+          <td colspan="11" class="no-records-message">
+            No records to display
+          </td>
+        </tr>
         <tr *ngFor="let appointment of getPaginatedAppointments(); let i = index">
           <td>{{ i + 1 }}</td>
           <td>{{ appointment.patientName }}</td>
@@ -96,3 +101,5 @@
   (close)="closeAppointmentForm()" 
   (submit)="submitAppointment(selectedAppointment, $event.status, $event.requestVia)">
 </app-appointment-form>
+
+<div class="loader" *ngIf="isLoading"></div>

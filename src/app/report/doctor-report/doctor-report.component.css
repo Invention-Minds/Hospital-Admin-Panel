@@ -382,3 +382,10 @@ tbody tr:hover {
 @keyframes l8-1{
   100% {left:115%}
 }
+.no-records-message {
+  text-align: center;
+  font-size: 18px;
+  color: #666;
+  padding: 20px;
+  font-family: Kanit;
+}

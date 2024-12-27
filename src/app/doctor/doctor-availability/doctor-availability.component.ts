@@ -39,6 +39,7 @@ export class DoctorAvailabilityComponent {
   currentPage: number = 1;
   itemsPerPage: number = 10;
   totalPages: number = 1;
+  isLoading: boolean = false;
 
 
 
@@ -268,7 +269,10 @@ export class DoctorAvailabilityComponent {
 
 
     // });
-    this.doctorService.getAllDoctors(formattedDate).subscribe((doctors: Doctor[]) => {
+    this.isLoading = true;
+    this.doctorService.getAllDoctors(formattedDate).subscribe({
+      next: (doctors: Doctor[]) => {
+      this.isLoading = false;
       doctors.forEach(doctor => {
         // Initialize `availabilityDays` if it does not exist
         if (!doctor.availabilityDays) {
@@ -396,7 +400,15 @@ export class DoctorAvailabilityComponent {
       });
     
       this.applySearchFilter();
-    });
+    },
+    error: (error) => {
+      this.isLoading = false;
+      console.error('Error fetching doctors:', error);
+    },
+    complete: () => {
+      this.isLoading = false;
+    }
+  });
     
 
     

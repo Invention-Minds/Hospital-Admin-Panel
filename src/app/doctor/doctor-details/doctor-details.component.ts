@@ -27,6 +27,7 @@ export class DoctorDetailsComponent implements OnInit {
   showUnavailableModal: boolean = false;
   selectedUnavailableDates: string[] = [];
   unavailabilityForm: FormGroup;
+  isLoading: boolean = false;
 
   constructor(
     private doctorService: DoctorServiceService,
@@ -118,29 +119,38 @@ closeDeleteDialog(): void {
   // Fetch all departments and doctors from the backend
   fetchDepartmentsAndDoctors(): void {
     // Fetch departments
-    this.doctorService.getDepartments().subscribe(
-      (departments: Department[]) => {
+    this.isLoading = true;
+    this.doctorService.getDepartments().subscribe({
+   
+      next: (departments: Department[]) => {
+        this.isLoading = false;
         this.departments = departments.map(dep => ({
           ...dep,
           doctors: [] // Initialize empty doctors array
         }));
-
+  
         // Fetch doctors and link them to departments
         this.fetchDoctors();
       },
-      (error) => {
+      error: (error) => {
+        this.isLoading = false;
         console.error('Error fetching departments:', error);
+      },
+      complete: () => {
+        this.isLoading = false;
+        console.log('Departments retrieval completed.');
       }
-    );
+    });
   }
 
   fetchDoctors(): void {
-    this.doctorService.getDoctors().subscribe(
-      (doctors: Doctor[]) => {
+    this.isLoading = true;
+    this.doctorService.getDoctors().subscribe({
+      next: (doctors: Doctor[]) => {
         const today = new Date();
       const todayDay = this.getDayString(today);
         doctors.forEach((doctor) => {
-          
+          // this.isLoading = false;
           // Initialize availabilityDays object if it does not exist
           doctor.availabilityDays = {
             sun: false,
@@ -183,10 +193,17 @@ closeDeleteDialog(): void {
         this.departments = this.groupDoctorsByDepartment(doctors);
         // console.log('Doctors fetched and grouped successfully', this.departments);
       },
+      error:
       (error) => {
+        this.isLoading = false;
         console.error('Error fetching doctors:', error);
+      },
+      complete: () => {
+        this.isLoading = false;
+        console.log('Doctors retrieval completed.');
       }
-    );
+
+  });
   }
   
   private getDayString(date: Date): keyof Doctor['availabilityDays'] {

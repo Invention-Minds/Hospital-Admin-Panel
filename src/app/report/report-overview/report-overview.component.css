@@ -36,7 +36,7 @@ color: white; /* Ensures text inside is also white */
 font-weight: 600;
 }
 .card {
-  width: 230px;
+  width: 240px;
   height: 56px;
   display: flex;
   align-items: center;

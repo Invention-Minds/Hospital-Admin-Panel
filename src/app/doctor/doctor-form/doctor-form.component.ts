@@ -446,7 +446,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
       this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Doctor details are missing' });
       return;
     }
-  
+    console.log('Doctor:', this.doctor);
     // Initialize the selected date to today in case we need to check future slots
     const today = new Date();
     const formattedDate = today.toISOString().split('T')[0];
@@ -468,6 +468,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
             });
           } else {
             // Step 3: Proceed with saving doctor details if no future booked slots exist
+            console.log("No future booked slots")
             this.saveDoctorDetails();
           }
         },
@@ -526,6 +527,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
                 });
               } else {
                 // Step 3: Proceed with saving doctor details if no future booked slots exist
+                console.log("No future booked slots in specific day")
                 this.saveDoctorDetails();
               }
             },
@@ -550,6 +552,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
   }
   else {
     // If it's a new doctor, just proceed to save
+    console.log('New doctor, proceed to save');
     this.saveDoctorDetails();
   }
 }

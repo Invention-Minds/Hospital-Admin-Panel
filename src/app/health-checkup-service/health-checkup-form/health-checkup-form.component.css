@@ -217,13 +217,13 @@ background-color: transparent;
   .custom-dialog {
     border-radius: 8px;
 background: linear-gradient(108deg, #DC3A35 0%, #A10500 100%);
-padding: 30px;
-padding-left: 6px;
-padding-top: 10px;
+padding: 20px;
+padding-left: 5px;
+padding-top: 5px;
 
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
     text-align: right;
-    max-width: 500px;
+    max-width: 600px;
     width: 90%;
     color: white;
 
@@ -252,9 +252,9 @@ padding-top: 10px;
   h3 {
     color: #FFF;
     font-family: Kanit;
-    font-size: 30px;
+    font-size: 24px;
     font-style: normal;
-    font-weight: 600;
+    font-weight: 400;
     line-height: normal;
     margin-top: 10px;
   }
@@ -264,9 +264,9 @@ padding-top: 10px;
     color: #FFF;
     text-align: right;
     font-family: Kanit;
-    font-size: 18px;
+    font-size: 13px;
     font-style: normal;
-    font-weight: 400;
+    font-weight: 300;
     line-height: normal;
   }
   
@@ -284,9 +284,9 @@ padding-top: 10px;
 background: #0E2970;
     color: #FFF;
     font-family: Kanit;
-    font-size: 20px;
+    /* font-size: 20px; */
     font-style: normal;
-    font-weight: 600;
+    font-weight: 400;
     line-height: normal;
     border: none;
     padding: 10px 30px;
@@ -308,9 +308,9 @@ background: #FFF;
     color: #000;
     text-align: center;
     font-family: Kanit;
-    font-size: 20px;
+    /* font-size: 20px; */
     font-style: normal;
-    font-weight: 600;
+    font-weight: 400;
     line-height: normal;
     border: 2px solid #ccc;
     padding: 10px 30px;

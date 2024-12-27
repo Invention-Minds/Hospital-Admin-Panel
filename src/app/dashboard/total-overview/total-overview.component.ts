@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { forkJoin } from 'rxjs';
+import { LoadingService } from '../../services/loader.service';
 
 @Component({
   selector: 'app-total-overview',
@@ -26,7 +27,8 @@ export class TotalOverviewComponent implements OnInit {
 
   constructor(
     private appointmentService: AppointmentConfirmService,
-    private doctorService: DoctorServiceService
+    private doctorService: DoctorServiceService,
+    private loadingService: LoadingService
   ) {}
 
   ngOnInit(): void {
@@ -59,8 +61,10 @@ export class TotalOverviewComponent implements OnInit {
     this.showAbsentDoctors = false;
   }
   private fetchDoctorsWithAvailability(): void {
+    this.loadingService.startLoading();
     this.doctorService.getAllDoctors().subscribe(
       (doctors) => {
+        this.loadingService.stopLoading();
         console.log('Doctors:', doctors);
         this.doctors = doctors.map((doctor) => {
           const unavailableSlots = doctor.unavailableSlots || [];
@@ -87,7 +91,10 @@ export class TotalOverviewComponent implements OnInit {
 
         this.updateDoctorCounts();
       },
-      (error) => console.error('Error fetching doctors:', error)
+      (error) => {console.error('Error fetching doctors:', error)
+        this.loadingService.stopLoading();
+      }
+     
     );
   }
 

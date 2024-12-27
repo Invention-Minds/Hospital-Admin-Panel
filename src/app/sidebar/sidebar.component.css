@@ -13,7 +13,7 @@
 }
 
 .sidebar:hover {
-  width: 250px; /* Expanded width */
+  width: 220px; /* Expanded width */
 }
 
 .icon-container_2{
@@ -29,11 +29,12 @@
 }
 .logo-text {
   font-size: 18px;
-  font-weight: bold;
+  font-weight: 500;
   color: white;
   opacity: 0; /* Hide the text initially */
   white-space: nowrap; /* Prevent the text from wrapping */
   margin-left: -20px; /* Hide the text visually when sidebar is collapsed */
+  font-family: Kanit;
 }
 
 .logo {

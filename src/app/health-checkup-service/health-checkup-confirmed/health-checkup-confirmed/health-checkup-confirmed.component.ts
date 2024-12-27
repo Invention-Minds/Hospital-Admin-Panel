@@ -1,5 +1,6 @@
 import { Component, Output, EventEmitter } from '@angular/core';
 import { HealthCheckupServiceService } from '../../../services/health-checkup/health-checkup-service.service';
+import { AppointmentConfirmService } from '../../../services/appointment-confirm.service';
 import * as FileSaver from 'file-saver';
 import { MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
@@ -36,7 +37,7 @@ export interface Service {
 })
 export class HealthCheckupConfirmedComponent {
 
-  constructor(private healthCheckupService: HealthCheckupServiceService, private messageService: MessageService, private router: Router){
+  constructor(private healthCheckupService: HealthCheckupServiceService, private messageService: MessageService, private router: Router, private appointmentService: AppointmentConfirmService) {
   
   }
   confirmedAppointments: Service[] = [];
@@ -405,6 +406,70 @@ onClear() {
           severity: 'success',
           summary: 'Appointment Cancelled',
           detail: `Appointment for ${service.firstName} has been cancelled.`,
+        });
+        const messagePayload = {
+          packageName: service.packageName,
+          appointmentDate: service.appointmentDate,
+          appointmentTime: service.appointmentTime,
+          firstName: service.firstName,
+          lastName: service.lastName,
+          phoneNumber: service.phoneNumber,
+          appointmentStatus: 'Cancelled',
+          requestVia: service.requestVia
+        }
+        this.healthCheckupService.sendWhatsappMessageForService(messagePayload).subscribe({
+          next: (response) => {
+            console.log('Whatsapp message sent successfully:', response);
+            const whatsappPayload ={
+              ...service,
+              messageSent: true
+            }
+            this.healthCheckupService.updateService(service.id!, whatsappPayload).subscribe({
+              next: (updateResponse) => {
+                console.log('Service updated with messageSent status:', updateResponse);
+              },
+              error: (updateError) => {
+                console.error('Error updating messageSent status in service:', updateError);
+              },
+              complete: () => {
+                this.isLoading = false;
+              },
+            });
+          },
+          error: (error) => {
+            console.error('Error sending whatsapp message:', error);
+          },
+        });
+        const appointmentDetails = {
+          patientName: service.firstName + ' ' + service.lastName,
+          packageName: service.packageName ? service.packageName : null,
+          appointmentDate: service.appointmentDate,
+          appointmentTime: service?.appointmentTime,
+        };
+        const status = 'Cancelled';
+        const patientEmail = service.email;
+        this.appointmentService.sendEmailHealthCheckup(patientEmail!,status,appointmentDetails).subscribe({
+          next: (response) => {
+            console.log('Email sent successfully:', response);
+            const emailPayload ={
+              ...service,
+              emailSent: true
+            }
+            this.healthCheckupService.updateService(service.id!, emailPayload).subscribe({
+              next: (updateResponse) => {
+                console.log('Service updated with emailSent status:', updateResponse);
+              },
+              error: (updateError) => {
+                console.error('Error updating emailSent status in service:', updateError);
+              },
+              complete: () => {
+                this.isLoading = false;
+              },
+            });
+          },
+          error: (error) => {
+            console.error('Error sending email:', error);
+          },
         });
         this.fetchConfirmedAppointments(); // Refresh the list of appointments
       },

@@ -62,6 +62,7 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
   private audio = new Audio('/notification.mp3'); // Add a notification sound
   private eventSource: EventSource | null = null;
   public hasNewAppointment: boolean = false;
+  isDropdownOpen: boolean = false;
   constructor(private authService: AuthServiceService, private router: Router, private appointmentService: AppointmentConfirmService, private changeDetector: ChangeDetectorRef, private messageService: MessageService, private elementRef: ElementRef) { }
 
   // ngOnInit(): void {
@@ -309,4 +310,32 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
       this.showNotifications = false;
     }
   }
+  toggleDropdownOpen(): void {
+    this.isDropdownOpen = !this.isDropdownOpen;
+  }
+
+  // gotoProfile(): void {
+  //   console.log('Navigating to Profile Settings...');
+  //   // Add navigation logic here
+  // }
+
+  gotoReports(): void {
+    console.log('Navigating to Reports & Data...');
+    // Add navigation logic here
+  }
+
+  gotoAnalytics(): void {
+    console.log('Navigating to Analytics & Data...');
+    // Add navigation logic here
+  }
+
+  gotoHelp(): void {
+    console.log('Navigating to Help Center...');
+    // Add navigation logic here
+  }
+
+  // logout(): void {
+  //   console.log('Logging out...');
+  //   // Add logout logic here
+  // }
 }

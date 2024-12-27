@@ -57,20 +57,44 @@ export class AppointmentCancelComponent {
   userId: any = 0;
   isLockedDialogVisible: boolean = false; // To control the visibility of the lock dialog
   isSubmitting: boolean = false;
+  isLoading: boolean = false;
   ngOnInit() {
-    
-    this.appointmentService.canceledAppointments$.subscribe(appointments => {
-      this.cancelledAppointments = appointments;
-      // this.cancelledAppointments = appointments;
-      this.cancelledAppointments.sort((a, b) => {
-        const dateA = new Date(a.created_at!);
-        const dateB = new Date(b.created_at!);
-        return dateB.getTime() - dateA.getTime();
-      });
-      this.filteredAppointments = [...this.cancelledAppointments];
-      this.filterAppointmentsByDate(new Date());
-    });
+    this.fetchCancelledAppointments();
   }
+  
+  fetchCancelledAppointments() {
+    this.isLoading = true; // Start loading
+    console.log('Fetching cancelled appointments...');
+    this.appointmentService.fetchAppointments();
+    this.appointmentService.canceledAppointments$.subscribe(
+      (appointments) => {
+        this.cancelledAppointments = appointments;
+  
+        // Sort the appointments
+        this.cancelledAppointments.sort((a, b) => {
+          const dateA = new Date(a.created_at!);
+          const dateB = new Date(b.created_at!);
+          return dateB.getTime() - dateA.getTime();
+        });
+  
+        // Filter appointments
+        this.filteredAppointments = [...this.cancelledAppointments];
+        this.filterAppointmentsByDate(new Date());
+        setTimeout(() => {
+          console.log('Setting isLoading to false after delay');
+          this.isLoading = false; // Stop loading indicator
+        }, 2000); // 2-second delay
+      },
+      (error) => {
+        console.error('Error fetching cancelled appointments:', error);
+      },
+      () => {
+        this.isLoading = false; // Stop loading
+        console.log('Cancelled appointments fetched successfully.');
+      }
+    );
+  }
+  
    // Method to filter appointments by a specific date
    filterAppointmentsByDate(selectedDate: Date) {
     const formattedSelectedDate = this.formatDate(selectedDate);

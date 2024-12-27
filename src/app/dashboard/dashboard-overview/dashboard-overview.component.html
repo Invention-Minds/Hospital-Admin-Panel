@@ -1,5 +1,11 @@
-<app-total-overview></app-total-overview>
- <div class="container">
+<div class="loading-overlay" *ngIf="isLoading">
+  <div class="loader"></div>
+</div>
+
+<div *ngIf="!isLoading">
+  <app-total-overview></app-total-overview>
+  <div class="container">
     <app-doctors-list-overview></app-doctors-list-overview>
-<app-appointment-list-overview></app-appointment-list-overview>
- </div> 
+    <app-appointment-list-overview></app-appointment-list-overview>
+  </div>
+</div>

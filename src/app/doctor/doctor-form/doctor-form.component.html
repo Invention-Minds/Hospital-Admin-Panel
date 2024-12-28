@@ -347,7 +347,7 @@
   <div class="row">
     <div class="col">
       <div class="custom-form-field">
-        <input type="number" id="slotTiming" [(ngModel)]="generalSlotDuration" name="slotTiming" min="1" placeholder="20" required />
+        <input type="number" id="slotTiming" [(ngModel)]="generalSlotDuration" (ngModelChange)="generateSlots()" name="slotTiming" min="1" placeholder="20" required />
         <label for="slotTiming" class="input-label">Slot Timing*</label>
       </div>
     </div>

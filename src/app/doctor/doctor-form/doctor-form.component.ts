@@ -343,50 +343,137 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
   }
 
 
+  // private setDoctorAvailability(): void {
+  //   if (this.doctor?.availability && this.doctor.availability.length > 0) {
+  //     // Loop through availability and initialize individualAvailability
+  //     // console.log('Doctor availability:', this.doctor.availability);
+  //     this.availabilityDaysList.forEach(day => {
+  //       const dayAvailability = this.doctor?.availability.find(avail => avail.day === day);
+  //       if (dayAvailability) {
+  //         this.doctor!.availabilityDays[day] = true; // Mark day as available
+  //         this.individualAvailability[day] = {
+  //           availableFrom: dayAvailability.availableFrom,
+  //           slotDuration: dayAvailability.slotDuration,
+  //           availableFromArray: dayAvailability.availableFrom
+  //           ? dayAvailability.availableFrom.includes(',')
+  //             ? dayAvailability.availableFrom.split(',').map(time => time.trim()) // Split by commas
+  //             : [dayAvailability.availableFrom.trim()] // Single item array
+  //           : [''] // Default to one empty string if no value
+  //         };
+  //         this.generalSlotDuration = dayAvailability.slotDuration;
+  //         // console.log('Day availability', this.individualAvailability[day]);
+  //       } else {
+  //         if (!this.individualAvailability[day]) {
+  //           this.individualAvailability[day] = {
+  //             availableFrom: '', // Reset if no availability
+  //             slotDuration: 20,
+  //             availableFromArray: [''] // Default value
+  //           };
+  //         }
+  //         this.doctor!.availabilityDays[day] = false;
+  //       }
+  //     });
+
+  //     // Determine if we should use the same time for all days
+  //     const uniqueTimes = new Set(this.doctor.availability.map(avail => avail.availableFrom));
+  //     this.useSameTimeForAllDays = uniqueTimes.size === 1;
+
+  //     if (this.useSameTimeForAllDays) {
+  //       // Set general values if all times are the same
+  //       this.generalAvailableFrom = this.doctor.availability[0].availableFrom;
+  //       this.availableTimesArray = this.generalAvailableFrom.split(',');
+  //       this.generalSlotDuration = this.doctor.availability[0].slotDuration;
+  //     }
+  //   }
+  //   console.log(this.useSameTimeForAllDays)
+  // }
   private setDoctorAvailability(): void {
     if (this.doctor?.availability && this.doctor.availability.length > 0) {
-      // Loop through availability and initialize individualAvailability
-      // console.log('Doctor availability:', this.doctor.availability);
       this.availabilityDaysList.forEach(day => {
-        const dayAvailability = this.doctor?.availability.find(avail => avail.day === day);
-        if (dayAvailability) {
-          this.doctor!.availabilityDays[day] = true; // Mark day as available
-          this.individualAvailability[day] = {
-            availableFrom: dayAvailability.availableFrom,
-            slotDuration: dayAvailability.slotDuration,
-            availableFromArray: dayAvailability.availableFrom
-            ? dayAvailability.availableFrom.includes(',')
-              ? dayAvailability.availableFrom.split(',').map(time => time.trim()) // Split by commas
-              : [dayAvailability.availableFrom.trim()] // Single item array
-            : [''] // Default to one empty string if no value
-          };
-          this.generalSlotDuration = dayAvailability.slotDuration;
-          // console.log('Day availability', this.individualAvailability[day]);
-        } else {
-          if (!this.individualAvailability[day]) {
-            this.individualAvailability[day] = {
-              availableFrom: '', // Reset if no availability
-              slotDuration: 20,
-              availableFromArray: [''] // Default value
-            };
-          }
-          this.doctor!.availabilityDays[day] = false;
-        }
-      });
-
-      // Determine if we should use the same time for all days
-      const uniqueTimes = new Set(this.doctor.availability.map(avail => avail.availableFrom));
-      this.useSameTimeForAllDays = uniqueTimes.size === 1;
-
+              const dayAvailability = this.doctor?.availability.find(avail => avail.day === day);
+              if (dayAvailability) {
+                this.doctor!.availabilityDays[day] = true; // Mark day as available
+                this.individualAvailability[day] = {
+                  availableFrom: dayAvailability.availableFrom,
+                  slotDuration: dayAvailability.slotDuration,
+                  availableFromArray: dayAvailability.availableFrom
+                  ? dayAvailability.availableFrom.includes(',')
+                    ? dayAvailability.availableFrom.split(',').map(time => time.trim()) // Split by commas
+                    : [dayAvailability.availableFrom.trim()] // Single item array
+                  : [''] // Default to one empty string if no value
+                };
+                this.generalSlotDuration = dayAvailability.slotDuration;
+                // console.log('Day availability', this.individualAvailability[day]);
+              } else {
+                if (!this.individualAvailability[day]) {
+                  this.individualAvailability[day] = {
+                    availableFrom: '', // Reset if no availability
+                    slotDuration: 20,
+                    availableFromArray: [''] // Default value
+                  };
+                }
+                this.doctor!.availabilityDays[day] = false;
+              }
+            });
+      // Step 1: Find the latest `updatedAt` timestamp
+      const latestTimestamp = this.doctor.availability.reduce((latest, curr) => {
+        return curr.updatedAt && new Date(curr.updatedAt).getTime() > new Date(latest).getTime()
+          ? curr.updatedAt
+          : latest;
+      }, this.doctor.availability[0].updatedAt || '');
+  
+      // Step 2: Filter entries with the latest `updatedAt` timestamp
+      const latestAvailability = this.doctor.availability.filter(
+        avail => avail.updatedAt === latestTimestamp
+      );
+  
+      // Step 3: Reset availabilityDays and individualAvailability for all days
+     
+  
+      // Step 5: Check if all days in the latest update have the same time and duration
+      const uniqueTimes = new Set(latestAvailability.map(avail => avail.availableFrom));
+      const uniqueDurations = new Set(latestAvailability.map(avail => avail.slotDuration));
+  
+      this.useSameTimeForAllDays = uniqueTimes.size === 1 && uniqueDurations.size === 1;
+  
       if (this.useSameTimeForAllDays) {
-        // Set general values if all times are the same
-        this.generalAvailableFrom = this.doctor.availability[0].availableFrom;
-        this.availableTimesArray = this.generalAvailableFrom.split(',');
-        this.generalSlotDuration = this.doctor.availability[0].slotDuration;
+        // Set general values if all times and durations are the same
+        this.generalAvailableFrom = latestAvailability[0].availableFrom;
+        this.availableTimesArray = this.generalAvailableFrom.includes(',')
+          ? this.generalAvailableFrom.split(',').map(time => time.trim())
+          : [this.generalAvailableFrom.trim()];
+        this.generalSlotDuration = latestAvailability[0].slotDuration;
+      } else {
+        // Reset general values if times or durations differ
+        this.generalAvailableFrom = '';
+        this.availableTimesArray = [];
+        this.generalSlotDuration = 0;
       }
+    } else {
+      // Reset all values if no availability
+      this.availabilityDaysList.forEach(day => {
+        this.doctor!.availabilityDays[day] = false;
+        this.individualAvailability[day] = {
+          availableFrom: '',
+          slotDuration: 20,
+          availableFromArray: ['']
+        };
+      });
+      this.useSameTimeForAllDays = false;
+      this.generalAvailableFrom = '';
+      this.availableTimesArray = [];
+      this.generalSlotDuration = 20;
     }
-    console.log(this.useSameTimeForAllDays)
+  
+    console.log(this.useSameTimeForAllDays);
   }
+  
+  
+  
+  
+  
+  
+  
 
 
 

@@ -63,6 +63,7 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
   private eventSource: EventSource | null = null;
   public hasNewAppointment: boolean = false;
   isDropdownOpen: boolean = false;
+  showLogoutConfirmDialog: boolean = false;
   constructor(private authService: AuthServiceService, private router: Router, private appointmentService: AppointmentConfirmService, private changeDetector: ChangeDetectorRef, private messageService: MessageService, private elementRef: ElementRef) { }
 
   // ngOnInit(): void {
@@ -293,10 +294,7 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
   }
   // Logout function
   logout() {
-    localStorage.removeItem('username');
-    localStorage.removeItem('role');
-    localStorage.removeItem('token');  // Assuming the token is also stored in localStorage
-    this.router.navigate(['/login']);
+ this.showLogoutConfirmDialog = true;
   }
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event): void {
@@ -321,6 +319,7 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
 
   gotoReports(): void {
     console.log('Navigating to Reports & Data...');
+    this.router.navigate(['/reports']);
     // Add navigation logic here
   }
 
@@ -332,6 +331,18 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
   gotoHelp(): void {
     console.log('Navigating to Help Center...');
     // Add navigation logic here
+  }
+  confirmLogout() {
+    // Clear user session and redirect to login
+    localStorage.removeItem('username');
+    localStorage.removeItem('role');
+    localStorage.removeItem('token');
+    this.router.navigate(['/login']);
+    this.showLogoutConfirmDialog = false;
+  }
+
+  closeLogoutDialog() {
+    this.showLogoutConfirmDialog = false;
   }
 
   // logout(): void {

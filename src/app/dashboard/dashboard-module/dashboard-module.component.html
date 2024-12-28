@@ -45,16 +45,76 @@
 
       </div>
     </div>
-    <div class="profile-info" (click)="gotoProfile()">
+    <!-- <div class="profile-info" (click)="gotoProfile()">
       <img src="admin-icons/admin-icon.jpg" alt="Profile Picture" class="profile-pic" />
       <div class="profile-text">
         <span class="username">{{ username.split('_')[0] }}</span>
         <span class="role">{{ role }}</span>
       </div>
+    </div> -->
+    <div class="profile-container" (click)="toggleDropdownOpen()">
+      <div class="profile-info" [ngClass]="{ 'profile-background': isDropdownOpen }">
+        <img src="admin-icons/admin-icon.jpg" alt="Profile Picture" class="profile-pic" />
+        <div class="profile-text">
+          <span class="username">{{ username.split('_')[0] }}</span>
+          <span class="role">{{ role }}</span>
+        </div>
+        <img
+          src="/arrow-dropdown.svg"
+          alt="Dropdown Icon"
+          [class.rotate-arrow]="isDropdownOpen"
+          class="dropdown-icon"
+        />
+      </div>
+    
+      <div *ngIf="isDropdownOpen" class="dropdowns-menu">
+        <ul>
+          <hr />
+          <li (click)="gotoProfile()">
+            <img src="/profile-dropdown.svg" class="icon" alt="Profile Settings" />
+            Profile Settings
+          </li>
+          <li (click)="gotoReports()">
+            <img src="/report-dropdown.svg"  class="icon" alt="Report & Data" />
+            Report & Data
+          </li>
+          <li (click)="gotoAnalytics()">
+            <img src="/analytics-dropdown.svg"  class="icon" alt="Analytics & Data" />
+            Analytics & Data
+          </li>
+          <li (click)="gotoHelp()">
+            <img src="/help-dropdown.svg"  class="icon" alt="Help Center" />
+            Help Center
+          </li>
+          <hr />
+          <li (click)="logout()">
+            <img src="/logout-dropdown.svg"  class="icon" alt="Log Out" />
+            Log Out
+          </li>
+        </ul>
+      </div>
     </div>
+    
     
   </div>
 
+</div>
+<div class="overlay" *ngIf="showLogoutConfirmDialog">
+  <div class="dialog-container">
+      <div class="dialog-header">
+          <img src="/danger.png" alt="Warning Icon" class="warning-icon">
+      </div>
+      <div class="dialog-body">
+          <div class="dialog-title">Are You Sure!</div>
+          <div class="dialog-message">
+              Do you really want to log out? This action will end your session.
+          </div>
+          <div class="dialog-actions">
+              <button class="delete-account-button" (click)="confirmLogout()">Yes, Log Out</button>
+              <button class="cancel-account-button" (click)="closeLogoutDialog()">Cancel</button>
+          </div>
+      </div>
+  </div>
 </div>
 <p-toast></p-toast>
 <router-outlet></router-outlet>

@@ -24,7 +24,7 @@ export interface Doctor {
     day: string;
     availableFrom: string; // Change here to use a single field
     slotDuration: number;
-    updatedAt?: Date;
+    updatedAt?: string;
     doctorId?: number;
     availableFromArray?: [''],
   }[];

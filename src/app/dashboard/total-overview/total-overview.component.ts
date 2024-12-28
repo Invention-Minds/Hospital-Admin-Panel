@@ -181,7 +181,7 @@ export class TotalOverviewComponent implements OnInit {
   private setupDynamicAvailabilityCheck(): void {
     setInterval(() => {
       this.fetchDoctorsWithAvailability();
-    }, 60000); // Check every 60 seconds
+    }, 300000); // Check every 60 seconds
   }
 
   private updateDoctorCounts(): void {

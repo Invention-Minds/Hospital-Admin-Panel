@@ -380,9 +380,10 @@ export class HealthCheckupFormComponent implements OnInit {
           payload.repeatedDates = this.repeatedDates;
         }
         this.isLoading = true;
+        const updatedService = { ...this.serviceData, ...payload };
         this.healthCheckupService.updateService(this.serviceData.id, payload).subscribe({
           next: (response) => {
-            const serviceId = response.id; // Get the updated service ID
+            const serviceId = this.serviceData.id; // Get the updated service ID
             console.log('Service Rescheduled Successfully:', response);
             this.messageService.add({
               severity: 'success',
@@ -420,10 +421,10 @@ export class HealthCheckupFormComponent implements OnInit {
               next: (response) => {
                 console.log('Whatsapp message sent successfully:', response);
                 const whatsappPayload ={
-                  ...payload,
                   messageSent: true
                 }
-                this.healthCheckupService.updateService(serviceId, whatsappPayload).subscribe({
+                updatedService.messageSent = true;
+                this.healthCheckupService.updateServiceMessageStatus(serviceId, whatsappPayload).subscribe({
                   next: (updateResponse) => {
                     console.log('Service updated with messageSent status:', updateResponse);
                   },
@@ -439,6 +440,37 @@ export class HealthCheckupFormComponent implements OnInit {
                 console.error('Error sending whatsapp message:', error);
               },
             });
+            const smsPayload = {
+              patientName: form.value.firstName + ' ' + form.value.lastName,
+              date: form.value.date,
+              time: form.value.time,
+              patientPhoneNumber: formattedPhoneNumber,
+              status: status,
+              packageName: selectedPackage ? selectedPackage.name : null,
+            }
+            this.healthCheckupService.sendSmsMessage(smsPayload).subscribe({
+              next: (response) => {
+                console.log('SMS sent successfully:', response);
+                const smsPayload ={
+                  smsSent: true
+                }
+                updatedService.smsSent = true;
+                this.healthCheckupService.updateServiceMessageStatus(serviceId, smsPayload).subscribe({
+                  next: (updateResponse) => {
+                    console.log('Service updated with smsSent status:', updateResponse);
+                  },
+                  error: (updateError) => {
+                    console.error('Error updating smsSent status in service:', updateError);
+                  },
+                  complete: () => {
+                    this.isLoading = false;
+                  },
+                });
+              },
+              error: (error) => {
+                console.error('Error sending SMS:', error);
+              },
+            });
             const appointmentDetails = {
               patientName: form.value.firstName + ' ' + form.value.lastName,
               packageName: selectedPackage ? selectedPackage.name : null,
@@ -450,10 +482,10 @@ export class HealthCheckupFormComponent implements OnInit {
               next: (response) => {
                 console.log('Email sent successfully:', response);
                 const emailPayload ={
-                  ...payload,
                   emailSent: true
                 }
-                this.healthCheckupService.updateService(serviceId, emailPayload).subscribe({
+                updatedService.emailSent = true;
+                this.healthCheckupService.updateServiceMessageStatus(serviceId, emailPayload).subscribe({
                   next: (updateResponse) => {
                     console.log('Service updated with emailSent status:', updateResponse);
                   },
@@ -515,14 +547,15 @@ export class HealthCheckupFormComponent implements OnInit {
                 console.error('Error adding patient:', error);
               },
             });
+            const updatedSerive = {...payload, response}
             this.healthCheckupService.sendWhatsappMessageForService(messagePayload).subscribe({
               next: (response) => {
                 console.log('Whatsapp message sent successfully:', response);
                 const whatsappPayload ={
-                  ...payload,
                   messageSent: true
                 }
-                this.healthCheckupService.updateService(serviceId, whatsappPayload).subscribe({
+                // updatedSerive.messageSent = true;
+                this.healthCheckupService.updateServiceMessageStatus(serviceId, whatsappPayload).subscribe({
                   next: (updateResponse) => {
                     console.log('Service updated with messageSent status:', updateResponse);
                   },
@@ -539,6 +572,36 @@ export class HealthCheckupFormComponent implements OnInit {
                 console.error('Error sending whatsapp message:', error);
               },
             });
+            const smsPayload = {
+              patientName: form.value.firstName + ' ' + form.value.lastName,
+              date: form.value.date,
+              time: form.value.time,
+              patientPhoneNumber: formattedPhoneNumber,
+              status: 'confirmed',
+              packageName: selectedPackage ? selectedPackage.name : null,
+            }
+            this.healthCheckupService.sendSmsMessage(smsPayload).subscribe({
+              next: (response) => {
+                console.log('SMS sent successfully:', response);
+                const smsPayload ={
+                  smsSent: true
+                }
+                this.healthCheckupService.updateServiceMessageStatus(serviceId, smsPayload).subscribe({
+                  next: (updateResponse) => {
+                    console.log('Service updated with smsSent status:', updateResponse);
+                  },
+                  error: (updateError) => {
+                    console.error('Error updating smsSent status in service:', updateError);
+                  },
+                  complete: () => {
+                    this.isLoading = false;
+                  },
+                });
+              },
+              error: (error) => {
+                console.error('Error sending SMS:', error);
+              },
+            });
             const appointmentDetails = {
               patientName: form.value.firstName + ' ' + form.value.lastName,
               packageName: selectedPackage ? selectedPackage.name : null,
@@ -551,10 +614,9 @@ export class HealthCheckupFormComponent implements OnInit {
               next: (response) => {
                 console.log('Email sent successfully:', response);
                 const emailPayload ={
-                  ...payload,
                   emailSent: true
                 }
-                this.healthCheckupService.updateService(serviceId, emailPayload).subscribe({
+                this.healthCheckupService.updateServiceMessageStatus(serviceId, emailPayload).subscribe({
                   next: (updateResponse) => {
                     console.log('Service updated with emailSent status:', updateResponse);
                   },

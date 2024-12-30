@@ -53,6 +53,9 @@ export class HealthCheckupServiceService {
   updateServiceStatus(id: number, status: string): Observable<any> {
     return this.http.put(`${this.baseUrl}/${id}`, { appointmentStatus: status });
   }
+  updateServiceMessageStatus(id: number, status: any): Observable<any> {
+    return this.http.put(`${this.baseUrl}/${id}/update-message`, { status });
+  }
   // Delete a service by ID
   deleteService(id: number): Observable<any> {
     return this.http.delete(`${this.baseUrl}/${id}`);
@@ -87,6 +90,9 @@ unlockService(serviceId: number): Observable<any> {
 }
 sendWhatsappMessageForService(data: any): Observable<any> {
   return this.http.post<any>(`${environment.apiUrl}/whatsapp/send-service-message`, data);
+}
+sendSmsMessage(data: any): Observable<any> {
+  return this.http.post<any>(`${environment.apiUrl}/sms/send-sms-package`, data);
 }
 
 }

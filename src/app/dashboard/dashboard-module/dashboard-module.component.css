@@ -207,9 +207,9 @@ font-weight: 400;
   background-color: red !important;  /* Makes the badge color red */
   color: white !important;           /* Ensures the text color is readable */
   font-size: 10px !important;        /* Increases the size of the badge text */
-  width: 22px !important;            /* Increases the size of the badge circle */
-  height: 22px !important;           /* Increases the size of the badge circle */
-  line-height: 24px !important;      /* Centers the text within the badge */
+  width: 27px !important;            /* Increases the size of the badge circle */
+  height: 25px !important;           /* Increases the size of the badge circle */
+  line-height: 26px !important;      /* Centers the text within the badge */
   top: -10px !important;             /* Adjusts the badge's vertical positioning */
   left: 10px !important;           /* Adjusts the badge's horizontal positioning */
 }

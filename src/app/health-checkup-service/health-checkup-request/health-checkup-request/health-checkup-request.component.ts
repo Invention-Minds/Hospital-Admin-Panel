@@ -56,6 +56,7 @@ export class HealthCheckupRequestComponent {
   isLockedDialogVisible: boolean = false;
   userId: any = 0;
   activeComponent: string = 'cancelled'; // Default to the cancelled appointments view
+  messageSent: boolean = false;
 
   @Output() reschedule = new EventEmitter<any>();
   // Value entered by the user (could be Patient ID or Phone Number based on selection)
@@ -383,6 +384,7 @@ this.fetchPendingAppointments();
           summary: 'Appointment Cancelled',
           detail: `Appointment for ${service.firstName} has been cancelled.`,
         });
+        const updatedService = {...service}
         const messagePayload = {
           packageName: service.packageName,
           appointmentDate: service.appointmentDate,
@@ -396,13 +398,17 @@ this.fetchPendingAppointments();
         this.healthCheckupService.sendWhatsappMessageForService(messagePayload).subscribe({
           next: (response) => {
             console.log('Whatsapp message sent successfully:', response);
-            const whatsappPayload ={
-              ...service,
-              messageSent: true
-            }
-            this.healthCheckupService.updateService(service.id!, whatsappPayload).subscribe({
+            // const whatsappPayload ={
+            //   ...service,
+            //   messageSent: true
+            // }
+            updatedService.messageSent = true;
+            this.healthCheckupService.updateServiceMessageStatus(service.id!, {messageSent: true}).subscribe({
               next: (updateResponse) => {
                 console.log('Service updated with messageSent status:', updateResponse);
+                if(updateResponse.messageSent){
+                  this.messageSent = true;
+                }
               },
               error: (updateError) => {
                 console.error('Error updating messageSent status in service:', updateError);
@@ -416,6 +422,39 @@ this.fetchPendingAppointments();
             console.error('Error sending whatsapp message:', error);
           },
         });
+        const smsPayload = {
+          patientName: service.firstName + ' ' + service.lastName,
+          date: service.appointmentDate,
+          time: service.appointmentTime,
+          patientPhoneNumber: service.phoneNumber,
+          status: 'Cancelled',
+          packageName: service.packageName,
+        }
+        this.healthCheckupService.sendSmsMessage(smsPayload).subscribe({
+          next: (response) => {
+            console.log('SMS sent successfully:', response);
+            // const smsPayload ={
+            //   ...service,
+            //   messageSent: this.messageSent,
+            //   smsSent: true
+            // }
+            updatedService.smsSent = true;
+            this.healthCheckupService.updateServiceMessageStatus(service.id!, {smsSent: true}).subscribe({
+              next: (updateResponse) => {
+                console.log('Service updated with smsSent status:', updateResponse);
+              },
+              error: (updateError) => {
+                console.error('Error updating smsSent status in service:', updateError);
+              },
+              complete: () => {
+                this.isLoading = false;
+              },
+            });
+          },
+          error: (error) => {
+            console.error('Error sending SMS:', error);
+          },
+        });
         const appointmentDetails = {
           patientName: service.firstName + ' ' + service.lastName,
           packageName: service.packageName ? service.packageName : null,
@@ -427,11 +466,12 @@ this.fetchPendingAppointments();
         this.appointmentService.sendEmailHealthCheckup(patientEmail!,status,appointmentDetails).subscribe({
           next: (response) => {
             console.log('Email sent successfully:', response);
-            const emailPayload ={
-              ...service,
-              emailSent: true
-            }
-            this.healthCheckupService.updateService(service.id!, emailPayload).subscribe({
+            // const emailPayload ={
+            //   ...service,
+            //   emailSent: true
+            // }
+            updatedService.emailSent = true;
+            this.healthCheckupService.updateServiceMessageStatus(service.id!, {emailSent: true}).subscribe({
               next: (updateResponse) => {
                 console.log('Service updated with emailSent status:', updateResponse);
               },

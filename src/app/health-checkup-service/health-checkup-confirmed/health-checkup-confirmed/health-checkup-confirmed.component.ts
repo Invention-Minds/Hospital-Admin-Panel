@@ -397,6 +397,7 @@ onClear() {
     if (!service.id) return;
 
     this.isLoading = true;
+    
 
     this.healthCheckupService.updateServiceStatus(service.id, 'Cancel').subscribe({
       next: (response) => {
@@ -417,14 +418,16 @@ onClear() {
           appointmentStatus: 'Cancelled',
           requestVia: service.requestVia
         }
+        const updateService = {...service}
         this.healthCheckupService.sendWhatsappMessageForService(messagePayload).subscribe({
           next: (response) => {
             console.log('Whatsapp message sent successfully:', response);
-            const whatsappPayload ={
-              ...service,
-              messageSent: true
-            }
-            this.healthCheckupService.updateService(service.id!, whatsappPayload).subscribe({
+            // const whatsappPayload ={
+            //   ...service,
+            //   messageSent: true
+            // }
+            updateService.messageSent = true;
+            this.healthCheckupService.updateServiceMessageStatus(service.id!, {messageSent: true}).subscribe({
               next: (updateResponse) => {
                 console.log('Service updated with messageSent status:', updateResponse);
               },
@@ -440,6 +443,38 @@ onClear() {
             console.error('Error sending whatsapp message:', error);
           },
         });
+        const smsPayload = {
+          patientName: service.firstName + ' ' + service.lastName,
+          date: service.appointmentDate,
+          time: service.appointmentTime,
+          patientPhoneNumber: service.phoneNumber,
+          status: 'Cancelled',
+          packageName: service.packageName,
+        }
+        this.healthCheckupService.sendSmsMessage(smsPayload).subscribe({
+          next: (response) => {
+            console.log('SMS sent successfully:', response);
+            // const smsPayload ={
+            //   ...service,
+            //   smsSent: true
+            // }
+            updateService.smsSent = true;
+            this.healthCheckupService.updateServiceMessageStatus(service.id!, {smsSent: true}).subscribe({
+              next: (updateResponse) => {
+                console.log('Service updated with smsSent status:', updateResponse);
+              },
+              error: (updateError) => {
+                console.error('Error updating smsSent status in service:', updateError);
+              },
+              complete: () => {
+                this.isLoading = false;
+              },
+            });
+          },
+          error: (error) => {
+            console.error('Error sending SMS:', error);
+          },
+        });
         const appointmentDetails = {
           patientName: service.firstName + ' ' + service.lastName,
           packageName: service.packageName ? service.packageName : null,
@@ -451,11 +486,12 @@ onClear() {
         this.appointmentService.sendEmailHealthCheckup(patientEmail!,status,appointmentDetails).subscribe({
           next: (response) => {
             console.log('Email sent successfully:', response);
-            const emailPayload ={
-              ...service,
-              emailSent: true
-            }
-            this.healthCheckupService.updateService(service.id!, emailPayload).subscribe({
+            // const emailPayload ={
+            //   ...service,
+            //   emailSent: true
+            // }
+            updateService.emailSent = true;
+            this.healthCheckupService.updateServiceMessageStatus(service.id!, {emailSent: true}).subscribe({
               next: (updateResponse) => {
                 console.log('Service updated with emailSent status:', updateResponse);
               },

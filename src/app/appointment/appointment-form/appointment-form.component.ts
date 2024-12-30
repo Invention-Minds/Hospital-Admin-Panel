@@ -38,6 +38,20 @@ interface Appointment {
   checkedIn?: boolean;
   doctor?: Doctor;
 }
+type DayName = 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat';
+
+// Update the availability type
+interface Availability {
+  
+    id: number;
+    day: DayName;
+    availableFrom: string; // Change here to use a single field
+    slotDuration: number;
+    updatedAt?: string;
+    doctorId?: number;
+    availableFromArray?: [''],
+  
+}
 
 
 @Component({
@@ -63,7 +77,7 @@ export class AppointmentFormComponent implements OnInit {
   showDoctorUnavailableMessage: boolean = false;
   doctorUnavailableMessage: string = '';
   unavailableDates: string[] = [];
-  minDate: string = '';
+  minDate: Date = new Date();
   @Input() doctorAvailability: Doctor | null = null;
   @Input() slot!: any;
   @Input() date!: any;
@@ -76,6 +90,8 @@ export class AppointmentFormComponent implements OnInit {
   time: string = '';
   minTime: Date | undefined;
   timeError: string = '';
+  availableDates: string[] = [];
+  disabledDates: Date[] = [];
 
   private subscription!: Subscription;
 
@@ -94,7 +110,7 @@ export class AppointmentFormComponent implements OnInit {
     const year = today.getFullYear();
     const month = (today.getMonth() + 1).toString().padStart(2, '0');
     const day = today.getDate().toString().padStart(2, '0');
-    this.minDate = `${year}-${month}-${day}`;
+    this.minDate = today;
     this.loadDoctors();
 
   
@@ -120,11 +136,12 @@ export class AppointmentFormComponent implements OnInit {
     console.log(this.currentAppointment)
     if (this.currentAppointment) {
       console.log(this.currentAppointment)
-      this.patchFormWithAppointment(this.currentAppointment, this.currentAppointment.date);
+
+      this.patchFormWithAppointment(this.currentAppointment, new Date(this.currentAppointment.date));
     }
 
     if (this.appointment) {
-      // console.log("existing")
+      console.log("existing")
 
       // Edit existing pending appointment - check availability for the given doctor, date, and time.
       // const appointmentDate = this.appointment.date;
@@ -152,7 +169,8 @@ export class AppointmentFormComponent implements OnInit {
       // })
       // this.availableSlots = this.appointmentForm.get('appointmentTime')?.value;
       // this.patchFormWithAppointment(this.appointment, appointmentDate);
-      const appointmentDate = this.appointment.date;
+      const appointmentDate = new Date(this.appointment.date);
+      console.log(new Date(this.appointment.date));
       this.oldDate = this.appointment.date;
       this.oldTime = this.appointment.time;
       // console.log("appointmentpatch"  ,this.appointment)
@@ -231,7 +249,8 @@ export class AppointmentFormComponent implements OnInit {
       console.log(this.doctorAvailability, this.date);
       
       // Format the date correctly
-      this.date = this.formatDate(this.date);
+      // this.date = new Date(this.date);
+      console.log(this.date, 'date');
       
       // Check if doctor type is Visiting Consultant
       if (this.doctorAvailability.doctorType === 'Visiting Consultant') {
@@ -378,14 +397,21 @@ export class AppointmentFormComponent implements OnInit {
     //   }
     // });
     this.appointmentForm.get('doctorName')?.valueChanges.subscribe(doctorName => {
-
-      const date = this.appointmentForm.get('appointmentDate')?.value;
+      // this.loadAvailableDates(doctorId!);
+      
+    
       const doctorId = this.getDoctorIdByName(doctorName);
+      if(doctorId){
+        this.onDoctorChange(doctorId)
+        let date = this.appointmentForm.get('appointmentDate')?.value;
+        if (doctorId && date) {
+          this.checkDoctorAvailabilityAndLoadSlots(doctorId, date)
+        }
+      }
+      // const date = this.appointmentForm.get('appointmentDate')?.value;
  
       
-      if (doctorId && date) {
-        this.checkDoctorAvailabilityAndLoadSlots(doctorId, date)
-      }
+      
     });
 
 
@@ -415,7 +441,7 @@ export class AppointmentFormComponent implements OnInit {
     // })
 
   }
-  private checkDoctorAvailabilityAndLoadSlots(doctorId: number, appointmentDate: string): void {
+  private checkDoctorAvailabilityAndLoadSlots(doctorId: number, appointmentDate: any): void {
     // Fetch unavailable dates
     this.doctorService.getUnavailableDates(doctorId).subscribe(
       (unavailableDates) => {
@@ -710,7 +736,7 @@ export class AppointmentFormComponent implements OnInit {
   //     });
   //   });
   // }
-  private checkSlotAvailability(doctorId: number, date: string, time: string): Promise<boolean> {
+  private checkSlotAvailability(doctorId: number, date: any, time: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
       this.appointmentService.getBookedSlots(doctorId, date).subscribe({
         next: (bookedSlots: { time: string; complete: boolean }[]) => {
@@ -849,7 +875,7 @@ export class AppointmentFormComponent implements OnInit {
   //   console.log('Loaded booked slots:', JSON.stringify(this.bookedSlots, null, 2));
   // }
 
-  private patchFormWithAppointment(appointment: Appointment, appointmentDate: string) {
+  private patchFormWithAppointment(appointment: Appointment, appointmentDate: any) {
    this.appointment?.doctor?.doctorType === 'Visiting Consultant' ? this.isVisitingConsultant = true : this.isVisitingConsultant = false;
    console.log(this.appointment?.doctor?.doctorType,this.isVisitingConsultant)
     console.log(appointment)
@@ -938,11 +964,12 @@ export class AppointmentFormComponent implements OnInit {
     if (selectedDoctor && selectedDoctor.doctorType === 'Visiting Consultant') {
         time = this.formatTimeTo12Hour(time);
     }
+    const date = this.formatDate(new Date(formValues.appointmentDate));
     this.appointment.patientName = formValues.firstName + ' ' + formValues.lastName;
     this.appointment.phoneNumber = formValues.phoneNumber.startsWith('91') ? formValues.phoneNumber : '91' + formValues.phoneNumber;
     this.appointment.email = formValues.email;
     this.appointment.doctorName = formValues.doctorName;
-    this.appointment.date = formValues.appointmentDate;
+    this.appointment.date = date;
     this.appointment.time = time;
     this.appointment.requestVia = formValues.requestVia;
     this.appointment.status = formValues.appointmentStatus === 'Confirm' ? 'confirmed' : formValues.appointmentStatus.toLowerCase();
@@ -1717,6 +1744,7 @@ export class AppointmentFormComponent implements OnInit {
           if (this.appointmentForm.value.appointmentStatus === "Confirm") {
             this.appointment.status = "confirmed"
           }
+          this.syncFormToModel();
           if (this.appointment.status === "confirmed") {
             this.appointmentService.addConfirmedAppointment(this.appointment);
             this.statusChange.emit({
@@ -1868,6 +1896,63 @@ export class AppointmentFormComponent implements OnInit {
       }
     );
   }
+  disabledDays: number[] = []; // Indices of disabled days
 
+private updateDisabledDays(availability: Availability[]): void {
+  // Map short day names to their respective indices
+  const dayNameToIndex: Record<DayName, number> = {
+    sun: 0,
+    mon: 1,
+    tue: 2,
+    wed: 3,
+    thu: 4,
+    fri: 5,
+    sat: 6,
+  };
+
+  // Convert available days to indices
+  const availableDays = availability.map((avail) => dayNameToIndex[avail.day]);
+
+  // Determine disabled days by excluding available days
+  this.disabledDays = Object.values(dayNameToIndex).filter(
+    (index) => !availableDays.includes(index)
+  );
+
+  console.log('Disabled Days (by index):', this.disabledDays);
+}
+
+onDoctorChange(doctorId: number): void {
+  this.doctorService.getDoctorById(doctorId).subscribe(
+    (response: { availability: { day: string; id: number; availableFrom: string; slotDuration: number; updatedAt?: string }[] }) => {
+      console.log('Doctor Availability:', response.availability);
+      const latestTimestamp = response.availability.reduce((latest, curr) => {
+        if (curr.updatedAt) {
+          return new Date(curr.updatedAt).getTime() > new Date(latest).getTime()
+            ? curr.updatedAt
+            : latest;
+        }
+        return latest;
+      }, response.availability[0].updatedAt || '');
+  
+      // Step 2: Filter entries with the latest `updatedAt` timestamp
+      const latestAvailability = response.availability.filter(
+        avail => avail.updatedAt === latestTimestamp
+      );
+
+      // Map `response.availability` to the correct `Availability` type
+      const validatedAvailability: Availability[] = latestAvailability.map((avail) => ({
+        ...avail,
+        day: avail.day.toLowerCase() as DayName, // Ensure `day` is a valid `DayName`
+      }));
+
+      this.updateDisabledDays(validatedAvailability); // Update disabled days
+    },
+    (error) => {
+      console.error('Error fetching doctor availability:', error);
+    }
+  );
+}
+
+  
 
 }

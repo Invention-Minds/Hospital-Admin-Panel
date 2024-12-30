@@ -41,7 +41,7 @@ import { DashboardOverviewComponent } from './dashboard/dashboard-overview/dashb
 import { DoctorsListOverviewComponent } from './dashboard/doctors-list-overview/doctors-list-overview.component';
 import { AppointmentListOverviewComponent } from './dashboard/appointment-list-overview/appointment-list-overview.component';
 import { TotalOverviewComponent } from './dashboard/total-overview/total-overview.component';
-import { AppointmentOverviewComponent } from './appointment/appointment-overview/appointment-overview.component';
+import { AppointmentOverviewComponent } from './appointment/appointment-form/appointment-overview/appointment-overview.component';
 import { AppointmentRequestComponent } from './appointment/appointment-request/appointment-request.component';
 import { AppointmentConfirmComponent } from './appointment/appointment-confirm/appointment-confirm.component';
 import { AppointmentCancelComponent } from './appointment/appointment-cancel/appointment-cancel.component';

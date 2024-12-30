@@ -157,7 +157,7 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
           this.role !== 'admin' && // Exclude admin
           (
             (newNotification.type === 'appointment_request') || // For both tele callers and receptionists
-            (this.isReceptionist && newNotification.type === 'appointment_remainder') // For receptionists only
+            (this.isReceptionist && (newNotification.type === 'appointment_remainder' || newNotification.type === 'service_reminder')) // For receptionists only
           )
         ) {
           console.log('New Notification Processed:', newNotification);
@@ -184,7 +184,7 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
         this.appointmentService.getNotifications().subscribe((notifications: Notification[]) => {
           const filteredNotifications = notifications.filter(notification =>
             notification.type === 'appointment_request' ||
-            (this.isReceptionist && notification.type === 'appointment_remainder')
+            (this.isReceptionist && (notification.type === 'appointment_remainder' || notification.type === 'service_reminder'))
           );
           console.log('Filtered Notifications:', filteredNotifications);
           const sortedNotifications = filteredNotifications.sort((a, b) => {
@@ -210,7 +210,7 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
         // );
         const filteredNotifications = notifications.filter(notification =>
           notification.type === 'appointment_request' ||
-          (this.isReceptionist && notification.type === 'appointment_remainder')
+          (this.isReceptionist && (notification.type === 'appointment_remainder' || notification.type === 'service_reminder'))
         );
         console.log('Filtered Notifications:', filteredNotifications);
         const sortedNotifications = filteredNotifications.sort((a, b) => {

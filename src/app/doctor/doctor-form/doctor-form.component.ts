@@ -485,6 +485,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
       const latestAvailability = this.doctor.availability.filter(
         avail => avail.updatedAt === latestTimestamp
       );
+      console.log('Latest availability:', latestAvailability);
   
       // Step 3: Reset availabilityDays and individualAvailability for all days
       this.availabilityDaysList.forEach(day => {

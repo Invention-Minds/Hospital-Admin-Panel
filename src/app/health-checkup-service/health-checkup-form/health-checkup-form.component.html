@@ -53,10 +53,12 @@
             [(ngModel)]="formData.firstName"
             required
             placeholder=" "
+            pattern="^[a-zA-Z]*$"
           />
           <label for="firstName" class="form-label">First Name*</label>
           <div *ngIf="form.submitted && form.controls['firstName']?.invalid" class="error-message">
             First Name is required.
+            <span class="error-message" *ngIf="form.submitted && form.controls['firstName']?.errors?.['pattern']">Enter a valid name.</span>
           </div>
         </div>
         <div class="form-group half-width">
@@ -68,8 +70,10 @@
             ngModel
             [(ngModel)]="formData.lastName"
             placeholder=" "
+            pattern="^[a-zA-Z]*$"
           />
           <label for="lastName" class="form-label">Last Name</label>
+          <span class="error-message" *ngIf=" form.submitted && form.controls['lastName']?.errors?.['pattern']">Enter a valid name.</span>
         </div>
       </div>
   
@@ -102,8 +106,10 @@
             ngModel
             [(ngModel)]="formData.email"
             placeholder=" "
+            pattern="^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
           />
           <label for="email" class="form-label">Email Id</label>
+          <span class="error-message" *ngIf=" form.submitted && form.controls['email']?.errors?.['pattern']">Enter a valid email.</span>
         </div>
       </div>
   

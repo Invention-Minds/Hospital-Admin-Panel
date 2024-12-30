@@ -145,6 +145,9 @@ export class DoctorServiceService {
     }
     return this.http.get<{ date: string; time: string }[]>(url);
   }
+  getDoctorById(doctorId: number): Observable<Doctor> {
+    return this.http.get<Doctor>(`${this.apiUrl}/doctors/${doctorId}`);
+  }
   
   
 }

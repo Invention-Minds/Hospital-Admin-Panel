@@ -2,9 +2,9 @@ import { Component, ViewChild, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import {provideNativeDateAdapter} from '@angular/material/core';
 import { MessageService } from 'primeng/api';
-import { AppointmentConfirmComponent } from '../appointment-confirm/appointment-confirm.component';
-import { AppointmentCompleteComponent } from '../appointment-complete/appointment-complete.component';
-import { AppointmentCancelComponent } from '../appointment-cancel/appointment-cancel.component';
+import { AppointmentConfirmComponent } from '../../appointment-confirm/appointment-confirm.component';
+import { AppointmentCompleteComponent } from '../../appointment-complete/appointment-complete.component';
+import { AppointmentCancelComponent } from '../../appointment-cancel/appointment-cancel.component';
 
 @Component({
   selector: 'app-appointment-overview',

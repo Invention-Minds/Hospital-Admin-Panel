@@ -100,7 +100,8 @@
               {
                 "glob": "**/*",
                 "input": "public"
-              }
+              },
+              "src/_redirects" 
             ],
             "styles": [
               "./node_modules/ngx-loading-buttons/src/styles.css",

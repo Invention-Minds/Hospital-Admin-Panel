@@ -51,7 +51,7 @@ export class HealthCheckupConfirmedComponent {
     { label: 'Phone Number', value: 'phoneNumber' },
     { label: 'Package Name', value: 'packageName' },
   ];
-  selectedSearchOption: keyof Service = 'firstName';
+  selectedSearchOption: any = this.searchOptions[0];
   selectedDateRange: Date[] = [];
   isLoading = false;
   activeServiceId: number | null = null;

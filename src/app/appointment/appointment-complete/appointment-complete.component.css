@@ -16,7 +16,7 @@
     color: white;
 font-size: 14px;
 font-family: Kanit;
-font-weight: 600;
+font-weight: 400;
 height: 54px;
   }
   thead th {
@@ -25,7 +25,7 @@ height: 54px;
     color: white;
     font-size: 14px;
     font-family: Kanit;
-    font-weight: 600;
+    font-weight: 400;
   }
     /* Table body styling */
     tbody tr {

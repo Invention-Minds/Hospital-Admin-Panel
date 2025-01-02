@@ -2,11 +2,13 @@ import { Component, ViewChild } from '@angular/core';
 import { HealthCheckupConfirmedComponent } from "../health-checkup-confirmed/health-checkup-confirmed/health-checkup-confirmed.component";
 import { HealthCheckupCancelComponent } from "../health-checkup-cancel/health-checkup-cancel/health-checkup-cancel.component";
 import { HealthCheckupRequestComponent } from "../health-checkup-request/health-checkup-request/health-checkup-request.component";
+import { HealthCheckupRepeatComponent } from "../health-checkup-repeat/health-checkup-repeat.component";
 
 @Component({
   selector: 'app-health-checkup-overview',
   templateUrl: './health-checkup-overview.component.html',
   styleUrl: './health-checkup-overview.component.css',
+  
  
 })
 export class HealthCheckupOverviewComponent {
@@ -61,5 +63,8 @@ service: any;
   }
   showCompletedAppointments(){
     this.activeComponent = 'completed';
+  }
+  showRepeatAppointments(){
+    this.activeComponent = 'repeated';
   }
 }

@@ -43,7 +43,7 @@ export class HealthCheckupCompleteComponent {
   sortColumn: keyof Service | undefined = undefined;  // No sorting initially
   sortDirection: string = 'asc';  // Default sorting direction
   searchOptions = [
-    { label: 'Patient Name', value: 'patientName' },
+    { label: 'Patient Name', value: 'firstName' },
     { label: 'Phone Number', value: 'phoneNumber' },
     { label: 'Package Name', value: 'packageName' },
   ];

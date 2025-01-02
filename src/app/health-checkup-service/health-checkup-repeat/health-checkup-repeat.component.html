@@ -42,12 +42,13 @@
       <i class="fa-solid fa-angle-down calendar-icon"></i>
       <svg pTooltip="Refresh" (click)="refresh()" class="reverse" xmlns="http://www.w3.org/2000/svg" width="2.5em" height="2.5em" viewBox="-1.5 -2.5 24 24"><path fill="currentColor" d="m4.859 5.308l1.594-.488a1 1 0 0 1 .585 1.913l-3.825 1.17a1 1 0 0 1-1.249-.665L.794 3.413a1 1 0 1 1 1.913-.585l.44 1.441C5.555.56 10.332-1.035 14.573.703a9.38 9.38 0 0 1 5.38 5.831a1 1 0 1 1-1.905.608A7.381 7.381 0 0 0 4.86 5.308zm12.327 8.195l-1.775.443a1 1 0 1 1-.484-1.94l3.643-.909a1 1 0 0 1 .61-.08a1 1 0 0 1 .84.75l.968 3.88a1 1 0 0 1-1.94.484l-.33-1.322a9.381 9.381 0 0 1-16.384-1.796l-.26-.634a1 1 0 1 1 1.851-.758l.26.633a7.381 7.381 0 0 0 13.001 1.25z"/></svg>
 
-      <svg class="p-field p-col-3 download" src="download.png"   *ngIf="activeComponent==='confirmed' || activeComponent === 'completed' || activeComponent === 'cancelled'" (click)="downloadData()" pTooltip="Download" xmlns="http://www.w3.org/2000/svg" width="3em" height="3em" viewBox="0 0 20 20">
+      <!-- <svg class="p-field p-col-3 download" src="download.png"   *ngIf="activeComponent==='confirmed' || activeComponent === 'completed' || activeComponent === 'cancelled'" (click)="downloadData()" pTooltip="Download" xmlns="http://www.w3.org/2000/svg" width="3em" height="3em" viewBox="0 0 20 20">
         <path fill="#fff" fill-rule="evenodd" d="M3 17a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H4a1 1 0 0 1-1-1m3.293-7.707a1 1 0 0 1 1.414 0L9 10.586V3a1 1 0 1 1 2 0v7.586l1.293-1.293a1 1 0 1 1 1.414 1.414l-3 3a1 1 0 0 1-1.414 0l-3-3a1 1 0 0 1 0-1.414" clip-rule="evenodd" />
-      </svg> 
+      </svg>  -->
 
       </div>
       </div>
+
 
 <div class="table-container" [ngClass]="{'loading': isLoading}" *ngIf="!isLoading">
     <div class="table-wrapper">
@@ -62,22 +63,23 @@
                     </th>
                     <th>Phone Number</th>
                     <th>Package Name</th>
-                    <th (click)="sortBy('appointmentDate')" style="cursor: pointer;">
-                         Date
+                    <!-- <th (click)="sortBy('appointmentDate')" style="cursor: pointer;">
+                         From Date
                         <span *ngIf="sortColumn === 'appointmentDate' && sortDirection === 'asc'">&#9650;</span>
                         <span *ngIf="sortColumn === 'appointmentDate' && sortDirection === 'desc'">&#9660;</span>
                     </th>
-                    <th>Time</th>
-                    <th>Source</th>
-                    <th>WA</th>
-                    <th>Email</th>
-                    <th>SMS</th>
-                    <th>Status</th>
+                    <th>To Date</th> -->
+                    <th>
+                        Repeated Dates
+                      </th>
+                    <th>Total Repeats</th>
+                    <th>Complete Visits</th>
+                    <th>Pending Visits</th>
                     <th>Action</th>
                 </tr>
             </thead>
             <tbody>
-              <tr *ngIf="filteredAppointments.length === 0">
+              <tr *ngIf="filteredServices.length === 0">
                 <td colspan="11" class="no-records-message">
                   No records to display
                 </td>
@@ -87,35 +89,23 @@
                     <td>{{ service.firstName }} {{ service.lastName || '' }}</td>
                     <td>{{ service.phoneNumber }}</td>
                     <td>{{ service.packageName }}</td>
-                    <td>{{ service.appointmentDate }}</td>
-                    <td>{{ service.appointmentTime }}</td>
-                    <td>{{ service.requestVia }}</td>
-                    <td>
-                        <span class="sms-status" [ngClass]="{'sms-sent': service.smsSent, 'sms-not-sent': !service.smsSent}">
-                          <img *ngIf="service.smsSent" src="icons/sent.svg" alt="Sent">
-                          <img *ngIf="!service.smsSent" src="icons/not-sent.png" alt="Not Sent">
-                        </span>
-                      </td>
-                      <td>
-                        <span class="sms-status"
-                          [ngClass]="{'sms-sent': service.emailSent, 'sms-not-sent': !service.emailSent}">
-                          <img *ngIf="service.emailSent" src="icons/sent.svg" alt="Sent">
-                          <img *ngIf="!service.emailSent" src="icons/not-sent.png" alt="Not Sent">
-                        </span>
-                      </td>
-                      <td>
-                        <span class="sms-status" [ngClass]="{'sms-sent': service.messageSent, 'sms-not-sent': !service.messageSent}">
-                          <img *ngIf="service.messageSent" src="icons/sent.svg" alt="Sent">
-                          <img *ngIf="!service.messageSent" src="icons/not-sent.png" alt="Not Sent">
-                        </span>
-                      </td>
-                      <td>
-                        <span class="status-badge cancelled">{{ service.appointmentStatus }}</span>
-                      </td>
+                    <td><div class="dropdown-container-in-table">
+                        <select class="dropdown-in-table">
+                          <option  *ngFor="let date of service.repeatDates" [value]="date">
+                            {{ date }}
+                          </option>
+                        </select>
+                        </div>
+                        </td>
+
+                    <td>{{ service.totalAppointments }}</td>
+                    <td>{{ service.completedVisits }}</td>
+                    <td>{{ service.pendingVisits }}</td>
                     <td class="button">
-                        <button class="btn-action" (click)="openAppointmentForm(service)"  pTooltip="Reschedule" tooltipPosition="top">
-                            <img src="icons/book.png" alt="Confirm">
-                          </button>
+                        <button class="btn-action-reschedule" pTooltip="Stop Repeat"  tooltipPosition="top"  *ngIf="service.repeatChecked"  (click)="stopRepeatedAppointments(service)">
+                            <img src="icons/repeat.svg" alt="Confirm">
+                        </button>
+                        <!-- </button> -->
                       </td>
                 </tr>
             </tbody>
@@ -134,7 +124,6 @@
         </div>
       </div>
       <p-toast></p-toast>
-      <app-delete-confirmation-dialog [showDialog]="isLockedDialogVisible"
-      (close)="handleLockedDialogClose()"></app-delete-confirmation-dialog>
+ 
 </div>
 <div class="loader" *ngIf="isLoading"></div>

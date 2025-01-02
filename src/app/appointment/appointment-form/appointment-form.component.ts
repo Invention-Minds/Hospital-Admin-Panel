@@ -1020,23 +1020,25 @@ export class AppointmentFormComponent implements OnInit {
           response => {
             console.log('Slot marked as complete:', response);
             alert('Slot successfully marked as complete!');
+            this.appointmentService.checkedinAppointment(appointmentId).subscribe({
+              next: (response) => {
+                this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Checked in successfully!' });
+                appointment.checkedIn = true; // Update the UI to reflect the checked-in status
+              },
+              error: (error) => {
+                console.error('Error during check-in:', error);
+                this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to check-in' });
+              },
+            });
             // Update your view or refresh the slots list here as needed
           },
+          
           error => {
             console.error('Error marking slot as complete:', error);
             alert('Failed to mark the slot as complete.');
           }
         );
-      this.appointmentService.checkedinAppointment(appointmentId).subscribe({
-        next: (response) => {
-          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Checked in successfully!' });
-          appointment.checkedIn = true; // Update the UI to reflect the checked-in status
-        },
-        error: (error) => {
-          console.error('Error during check-in:', error);
-          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to check-in' });
-        },
-      });
+     
     }
 
 

@@ -45,7 +45,7 @@ export class HealthCheckupCancelComponent {
   sortColumn: keyof Service | undefined = undefined;  // No sorting initially
   sortDirection: string = 'asc';  // Default sorting direction
   searchOptions = [
-    { label: 'Patient Name', value: 'patientName' },
+    { label: 'Patient Name', value: 'firstName' },
     { label: 'Phone Number', value: 'phoneNumber' },
     { label: 'Package Name', value: 'packageName' },
   ];
@@ -89,7 +89,7 @@ getCancelledAppointments(): void {
       });
 
       // Store a copy for filtering
-      this.cancelledAppointments = [...this.cancelledAppointments];
+      this.filteredAppointments = [...this.cancelledAppointments];
       console.log('Cancelled appointments:', this.cancelledAppointments);
     },
     error: (error) => {
@@ -200,7 +200,7 @@ downloadData(): void {
   });
   const csvContent = this.convertToCSV(this.filteredAppointments);
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  FileSaver.saveAs(blob, 'confirmed_appointments.csv');
+  FileSaver.saveAs(blob, 'cancelled_appointments.csv');
 }
 
 // Utility to Convert JSON to CSV

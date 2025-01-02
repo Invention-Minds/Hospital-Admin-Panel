@@ -46,6 +46,17 @@
         </div>
       </div>
       <div class="card" 
+      [ngClass]="{'active-card': activeComponent === 'repeated'}"
+      (click)="showRepeatAppointments()">
+        <div class="card-icon">
+          <img src="/health-repeat.svg" alt="OPD Icon" />
+        </div>
+        <div class="card-content">
+          <!-- <h2>40</h2> -->
+          <p>Repeated Packages</p>
+        </div>
+      </div>
+      <div class="card" 
       [ngClass]="{'active-card': activeComponent === 'completed'}"
       (click)="showCompletedAppointments()">
         <div class="card-icon">
@@ -53,9 +64,10 @@
         </div>
         <div class="card-content">
           <!-- <h2>40</h2> -->
-          <p>Completed Package</p>
+          <p>Completed Visits</p>
         </div>
       </div>
+
     </div>
   </div>
   <div class="component-section">
@@ -69,4 +81,5 @@
     <app-health-checkup-cancel *ngIf="activeComponent === 'cancelled'" (reschedule)="openAppointmentForm($event)" ></app-health-checkup-cancel>
     <app-health-checkup-complete *ngIf="activeComponent === 'completed'" ></app-health-checkup-complete>
     <app-health-checkup-request *ngIf="activeComponent === 'request'" (reschedule)="openAppointmentForm($event)" ></app-health-checkup-request>
+    <app-health-checkup-repeat *ngIf="activeComponent === 'repeated'" ></app-health-checkup-repeat>
   </div>

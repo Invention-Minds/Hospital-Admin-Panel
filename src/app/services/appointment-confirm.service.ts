@@ -322,6 +322,7 @@ getAppointmentsByRole(): Observable<Appointment[]> {
     sendSmsMessage(data: any): Observable<any> {
       return this.http.post<any>(`${environment.apiUrl}/sms/send-sms`, data);
     }
+    
   // Method to get appointment by ID (if needed)
   getAppointmentById(appointmentId: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/${appointmentId}`);

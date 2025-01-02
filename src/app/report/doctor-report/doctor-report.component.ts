@@ -165,15 +165,15 @@ generateCombinedReport(): void {
     if (userNames) {
       userNames = this.extractName(userNames);
     }
-    console.log(startDate, endDate);
+    // console.log(startDate, endDate);
     const createdAt = service.createdAt ? new Date(service.createdAt) : null;
-    console.log(service.appointmentDate, new Date(service.appointmentDate));
+    // console.log(service.appointmentDate, new Date(service.appointmentDate));
     const appointmentDate = service.appointmentDate ? new Date(service.appointmentDate) : null;
 
     // Filter by dates
     const isAdminInRange = createdAt && createdAt >= startDate && createdAt <= endDate;
     const isPackageInRange = appointmentDate && appointmentDate >= startDate && appointmentDate <= endDate;
-    console.log(isPackageInRange, startDate, endDate, createdAt, appointmentDate);
+    // console.log(isPackageInRange, startDate, endDate, createdAt, appointmentDate);
 
     // Admin summary (filter by createdAt)
     if (role !== 'Package' && isAdminInRange) {

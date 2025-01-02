@@ -4,6 +4,17 @@
     padding: 20px;
     padding-left: 90px;
   }
+  .table-container {
+    position: relative; /* Ensures the loader is centered in this container */
+    min-height: 200px; /* Ensure there’s enough space for the loader */
+  }
+  
+  .table-container.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px; /* Ensure the loader has enough space */
+  }
   .table-wrapper {
     overflow-x: auto; /* Adds horizontal scrolling */
     -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
@@ -21,7 +32,7 @@
     font-size: 14px;
     font-family: Kanit;
     font-weight: 400;
-    height: 65px;
+    height: 54px;
   }
   thead th {
     padding: 12px;
@@ -83,7 +94,7 @@
     outline: none;
     border: none;
     display: flex;
-    gap: 10px;
+    gap: 5px;
     justify-content: center;
     align-items: center;
   }
@@ -100,23 +111,18 @@
     align-items: center;
     padding-top: 10px !important;
   }
-  
-    .status-badge {
-      display: inline-block;
-      padding: 5px 5px;
-      border-radius: 6px;
-      color: white;
+  .status-badge {
+    display: inline-block;
+  color: white;
+  padding: 5px 10px;
+  text-transform: capitalize;
   font-size: 14px;
   font-family: Kanit;
   font-weight: 400;
-  width: 70px;
-  /* height: 31px; */
-    }
-    
-    .status-badge.cancelled {
-      background-color: red;
-      text-transform: capitalize;
-    }
+  background: #79cfa6;
+  border-radius: 4px;
+}
+  
   .checkin-badge {
     display: inline-block;
     color: white;
@@ -135,7 +141,7 @@
     justify-content: flex-end;
     align-items: center;
     margin-top: 20px;
-    font-size: 16px;
+    font-size: 14px;
   }
   
   /* Pagination button styling */
@@ -147,7 +153,7 @@
     margin: 0 5px;
     border-radius: 10px;
     cursor: pointer;
-    font-size: 18px;
+    font-size: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -203,11 +209,6 @@
   .btn-action[disabled] {
     opacity: 0.5;
     cursor: not-allowed;
-  }
-  .button{
-    display: flex;
-    justify-content: center;
-    align-items: center;
   }
   .form-row {
     display: flex;
@@ -423,57 +424,102 @@ font-family: 900;
   width:39px
  }
 
-  /* HTML: <div class="loader"></div> */
-  .loader {
-    position: absolute; /* Ensure it overlays the content */
-    top: 50%; /* Center vertically */
-    left: 50%; /* Center horizontally */
-    transform: translate(-50%, -50%); /* Adjust for the loader's dimensions */
-    font-size: 24px;
-    font-family: monospace;
-    line-height: 1.4;
-    font-weight: bold;
-    color: #0e2970;
-    --c: no-repeat linear-gradient(#0e2970 0 0); 
-    background: var(--c),var(--c),var(--c),var(--c),var(--c),var(--c),var(--c);
-    background-size: calc(1ch + 1px) 100%;
-    border-bottom: 10px solid #0e2970; 
-    animation: l8-0 1s infinite linear;
-    clip-path: inset(-20px 0);
-    z-index: 999; /* Ensure it appears above other elements */
+ /* HTML: <div class="loader"></div> */
+ .loader {
+  position: absolute; /* Ensure it overlays the content */
+  top: 50%; /* Center vertically */
+  left: 50%; /* Center horizontally */
+  transform: translate(-50%, -50%); /* Adjust for the loader's dimensions */
+  font-size: 24px;
+  font-family: monospace;
+  line-height: 1.4;
+  font-weight: bold;
+  color: #0e2970;
+  --c: no-repeat linear-gradient(#0e2970 0 0); 
+  background: var(--c),var(--c),var(--c),var(--c),var(--c),var(--c),var(--c);
+  background-size: calc(1ch + 1px) 100%;
+  border-bottom: 10px solid #0e2970; 
+  animation: l8-0 1s infinite linear;
+  clip-path: inset(-20px 0);
+  z-index: 999; /* Ensure it appears above other elements */
+}
+
+.loader::before {
+  content:"Docminds";
+}
+.loader::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 14px;
+  background: #F28729;
+  left: -10px;
+  bottom: 100%;
+  animation: l8-1 1s infinite linear;
+}
+@keyframes l8-0{
+   0%,
+   12.5% {background-position: calc(0*100%/6) 0   ,calc(1*100%/6)    0,calc(2*100%/6)    0,calc(3*100%/6)    0,calc(4*100%/6)    0,calc(5*100%/6)    0,calc(6*100%/6) 0}
+   25%   {background-position: calc(0*100%/6) 40px,calc(1*100%/6)    0,calc(2*100%/6)    0,calc(3*100%/6)    0,calc(4*100%/6)    0,calc(5*100%/6)    0,calc(6*100%/6) 0}
+   37.5% {background-position: calc(0*100%/6) 40px,calc(1*100%/6) 40px,calc(2*100%/6)    0,calc(3*100%/6)    0,calc(4*100%/6)    0,calc(5*100%/6)    0,calc(6*100%/6) 0}
+   50%   {background-position: calc(0*100%/6) 40px,calc(1*100%/6) 40px,calc(2*100%/6) 40px,calc(3*100%/6)    0,calc(4*100%/6)    0,calc(5*100%/6)    0,calc(6*100%/6) 0}
+   62.5% {background-position: calc(0*100%/6) 40px,calc(1*100%/6) 40px,calc(2*100%/6) 40px,calc(3*100%/6) 40px,calc(4*100%/6)    0,calc(5*100%/6)    0,calc(6*100%/6) 0}
+   75%   {background-position: calc(0*100%/6) 40px,calc(1*100%/6) 40px,calc(2*100%/6) 40px,calc(3*100%/6) 40px,calc(4*100%/6) 40px,calc(5*100%/6)    0,calc(6*100%/6) 0}
+   87.4% {background-position: calc(0*100%/6) 40px,calc(1*100%/6) 40px,calc(2*100%/6) 40px,calc(3*100%/6) 40px,calc(4*100%/6) 40px,calc(5*100%/6) 40px,calc(6*100%/6) 0}
+   100%  {background-position: calc(0*100%/6) 40px,calc(1*100%/6) 40px,calc(2*100%/6) 40px,calc(3*100%/6) 40px,calc(4*100%/6) 40px,calc(5*100%/6) 40px,calc(6*100%/6) 40px}
+}
+@keyframes l8-1{
+  100% {left:115%}
+}
+.no-records-message {
+  text-align: center;
+  font-size: 18px;
+  color: #666;
+  padding: 20px;
+  font-family: Kanit;
+}
+/* Container for dropdown within a table cell */
+.dropdown-container-in-table {
+    display: flex;
+    justify-content: center; /* Center align within the cell */
+    align-items: center;
+    width: 100%; /* Ensure it stretches across the cell */
   }
   
-  .loader::before {
-    content:"Docminds";
-  }
-  .loader::after {
-    content: "";
-    position: absolute;
-    width: 10px;
-    height: 14px;
-    background: #F28729;
-    left: -10px;
-    bottom: 100%;
-    animation: l8-1 1s infinite linear;
-  }
-  @keyframes l8-0{
-     0%,
-     12.5% {background-position: calc(0*100%/6) 0   ,calc(1*100%/6)    0,calc(2*100%/6)    0,calc(3*100%/6)    0,calc(4*100%/6)    0,calc(5*100%/6)    0,calc(6*100%/6) 0}
-     25%   {background-position: calc(0*100%/6) 40px,calc(1*100%/6)    0,calc(2*100%/6)    0,calc(3*100%/6)    0,calc(4*100%/6)    0,calc(5*100%/6)    0,calc(6*100%/6) 0}
-     37.5% {background-position: calc(0*100%/6) 40px,calc(1*100%/6) 40px,calc(2*100%/6)    0,calc(3*100%/6)    0,calc(4*100%/6)    0,calc(5*100%/6)    0,calc(6*100%/6) 0}
-     50%   {background-position: calc(0*100%/6) 40px,calc(1*100%/6) 40px,calc(2*100%/6) 40px,calc(3*100%/6)    0,calc(4*100%/6)    0,calc(5*100%/6)    0,calc(6*100%/6) 0}
-     62.5% {background-position: calc(0*100%/6) 40px,calc(1*100%/6) 40px,calc(2*100%/6) 40px,calc(3*100%/6) 40px,calc(4*100%/6)    0,calc(5*100%/6)    0,calc(6*100%/6) 0}
-     75%   {background-position: calc(0*100%/6) 40px,calc(1*100%/6) 40px,calc(2*100%/6) 40px,calc(3*100%/6) 40px,calc(4*100%/6) 40px,calc(5*100%/6)    0,calc(6*100%/6) 0}
-     87.4% {background-position: calc(0*100%/6) 40px,calc(1*100%/6) 40px,calc(2*100%/6) 40px,calc(3*100%/6) 40px,calc(4*100%/6) 40px,calc(5*100%/6) 40px,calc(6*100%/6) 0}
-     100%  {background-position: calc(0*100%/6) 40px,calc(1*100%/6) 40px,calc(2*100%/6) 40px,calc(3*100%/6) 40px,calc(4*100%/6) 40px,calc(5*100%/6) 40px,calc(6*100%/6) 40px}
-  }
-  @keyframes l8-1{
-    100% {left:115%}
-  }
-  .no-records-message {
-    text-align: center;
-    font-size: 18px;
-    color: #666;
-    padding: 20px;
+  /* Dropdown styling */
+  .dropdown-in-table {
+    width: 90%; /* Adjust width to fit inside the table cell */
+    padding: 6px 8px;
+    font-size: 14px;
+    border-radius: 4px;
+    background-color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    border: 1px solid #e0e0e0; /* Light gray border */
+    color: #7B7B7B;
+    cursor: pointer;
+    transition: all 0.3s ease;
     font-family: Kanit;
   }
+  
+  /* Hover and focus effects */
+  .dropdown-in-table:hover,
+  .dropdown-in-table:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
+  }
+  
+  /* Option styling */
+  .dropdown-in-table option {
+    font-size: 14px;
+    padding: 4px;
+  }
+  .dropdown-in-table.no-select {
+    pointer-events: none; /* Disable all interactions */
+    background-color: #f8f9fa; /* Light gray to indicate non-selectable */
+    color: #6c757d; /* Slightly dimmed text color */
+    cursor: default; /* Regular cursor to show it's for display */
+  }
+  
+  /* Ensure dropdown does not break table layout */
+ 
+  

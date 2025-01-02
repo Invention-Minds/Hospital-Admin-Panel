@@ -62,7 +62,7 @@
                         <span *ngIf="sortColumn === 'firstName' && sortDirection === 'desc'">&#9660;</span>
                     </th>
                     <th>Phone Number</th>
-                    <th>Package</th>
+                    <th>Package Name</th>
                     <th (click)="sortBy('appointmentDate')" style="cursor: pointer;">
                          Date
                         <span *ngIf="sortColumn === 'appointmentDate' && sortDirection === 'asc'">&#9650;</span>
@@ -124,9 +124,9 @@
                           <button class="btn-action-reschedule" (click)="openAppointmentForm(service)"  pTooltip="Reschedule"  tooltipPosition="top">
                             <img src="icons/book.png" alt="Confirm">
                         </button>
-                        <button class="btn-action-reschedule" pTooltip="Stop Repeat"  tooltipPosition="top"  *ngIf="service.repeatChecked"  (click)="stopRepeatedAppointments(service)">
+                        <!-- <button class="btn-action-reschedule" pTooltip="Stop Repeat"  tooltipPosition="top"  *ngIf="service.repeatChecked"  (click)="stopRepeatedAppointments(service)">
                             <img src="icons/repeat.png" alt="Confirm">
-                        </button>
+                        </button> -->
                         </button>
                       </td>
                 </tr>

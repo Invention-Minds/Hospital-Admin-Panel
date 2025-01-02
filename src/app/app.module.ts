@@ -74,6 +74,7 @@ import { HealthCheckupRequestComponent } from './health-checkup-service/health-c
 import { ColdObservable } from 'rxjs/internal/testing/ColdObservable';
 import { LoaderComponent } from './loader/loader.component';
 import { LoadingInterceptor } from './loading.interceptor';
+import { HealthCheckupRepeatComponent } from './health-checkup-service/health-checkup-repeat/health-checkup-repeat.component';
 
 
 
@@ -109,6 +110,7 @@ import { LoadingInterceptor } from './loading.interceptor';
     HealthCheckupCompleteComponent,
     HealthCheckupRequestComponent,
     LoaderComponent,
+    HealthCheckupRepeatComponent,
 
   
     

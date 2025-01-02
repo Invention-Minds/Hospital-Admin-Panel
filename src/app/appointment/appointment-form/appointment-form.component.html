@@ -1,5 +1,5 @@
-<div *ngIf="showForm" class="overlay">
-  <div class="appointment-modal">
+<div *ngIf="showForm" class="overlay" (click)="closeForm($event)">
+  <div class="appointment-modal" (click)="preventClose($event)">
     <!-- Header Section -->
     <form [formGroup]="appointmentForm">
       <div class="appointment-header" [ngStyle]="{ 'background-color': isBookedSlot ? '#00914C' : '#0E2970' }">

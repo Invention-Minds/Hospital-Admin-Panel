@@ -420,6 +420,17 @@ this.fetchPendingAppointments();
           },
           error: (error) => {
             console.error('Error sending whatsapp message:', error);
+            this.healthCheckupService.updateServiceMessageStatus(service.id!, {messageSent: false}).subscribe({
+              next: (updateResponse) => {
+                console.log('Service updated with messageSent status:', updateResponse);
+              },
+              error: (updateError) => {
+                console.error('Error updating messageSent status in service:', updateError);
+              },
+              complete: () => {
+                this.isLoading = false;
+              },
+            });
           },
         });
         const smsPayload = {
@@ -453,6 +464,17 @@ this.fetchPendingAppointments();
           },
           error: (error) => {
             console.error('Error sending SMS:', error);
+            this.healthCheckupService.updateServiceMessageStatus(service.id!, {smsSent: false}).subscribe({
+              next: (updateResponse) => {
+                console.log('Service updated with smsSent status:', updateResponse);
+              },
+              error: (updateError) => {
+                console.error('Error updating smsSent status in service:', updateError);
+              },
+              complete: () => {
+                this.isLoading = false;
+              },
+            });
           },
         });
         const appointmentDetails = {
@@ -485,6 +507,17 @@ this.fetchPendingAppointments();
           },
           error: (error) => {
             console.error('Error sending email:', error);
+            this.healthCheckupService.updateServiceMessageStatus(service.id!, {emailSent: false}).subscribe({
+              next: (updateResponse) => {
+                console.log('Service updated with emailSent status:', updateResponse);
+              },
+              error: (updateError) => {
+                console.error('Error updating emailSent status in service:', updateError);
+              },
+              complete: () => {
+                this.isLoading = false;
+              },
+            });
           },
         });
         this.fetchPendingAppointments(); // Refresh the list of appointments

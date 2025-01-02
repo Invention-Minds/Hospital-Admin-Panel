@@ -70,7 +70,7 @@
             ngModel
             [(ngModel)]="formData.lastName"
             placeholder=" "
-            pattern="^[a-zA-Z]*$"
+            pattern="^[a-zA-Z ]*$"
           />
           <label for="lastName" class="form-label">Last Name</label>
           <span class="error-message" *ngIf=" form.submitted && form.controls['lastName']?.errors?.['pattern']">Enter a valid name.</span>

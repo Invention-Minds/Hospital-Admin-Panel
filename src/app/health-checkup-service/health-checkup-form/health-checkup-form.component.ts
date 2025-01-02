@@ -438,6 +438,17 @@ export class HealthCheckupFormComponent implements OnInit {
               },
               error: (error) => {
                 console.error('Error sending whatsapp message:', error);
+                this.healthCheckupService.updateServiceMessageStatus(serviceId, {messageSent: false}).subscribe({
+                  next: (updateResponse) => {
+                    console.log('Service updated with messageSent status:', updateResponse);
+                  },
+                  error: (updateError) => {
+                    console.error('Error updating messageSent status in service:', updateError);
+                  },
+                  complete: () => {
+                    this.isLoading = false;
+                  },
+                });
               },
             });
             const smsPayload = {
@@ -461,6 +472,7 @@ export class HealthCheckupFormComponent implements OnInit {
                   },
                   error: (updateError) => {
                     console.error('Error updating smsSent status in service:', updateError);
+
                   },
                   complete: () => {
                     this.isLoading = false;
@@ -469,7 +481,19 @@ export class HealthCheckupFormComponent implements OnInit {
               },
               error: (error) => {
                 console.error('Error sending SMS:', error);
+                this.healthCheckupService.updateServiceMessageStatus(serviceId, {smsSent: false}).subscribe({
+                  next: (updateResponse) => {
+                    console.log('Service updated with smsSent status:', updateResponse);
+                  },
+                  error: (updateError) => {
+                    console.error('Error updating smsSent status in service:', updateError);
+                  },
+                  complete: () => {
+                    this.isLoading = false;
+                  },
+                });
               },
+
             });
             const appointmentDetails = {
               patientName: form.value.firstName + ' ' + form.value.lastName,
@@ -499,6 +523,17 @@ export class HealthCheckupFormComponent implements OnInit {
               },
               error: (error) => {
                 console.error('Error sending email:', error);
+                this.healthCheckupService.updateServiceMessageStatus(serviceId, {emailSent: false}).subscribe({
+                  next: (updateResponse) => {
+                    console.log('Service updated with emailSent status:', updateResponse);
+                  },
+                  error: (updateError) => {
+                    console.error('Error updating emailSent status in service:', updateError);
+                  },
+                  complete: () => {
+                    this.isLoading = false;
+                  },
+                });
               },
             });
             this.isLoading = false;
@@ -570,6 +605,17 @@ export class HealthCheckupFormComponent implements OnInit {
               },
               error: (error) => {
                 console.error('Error sending whatsapp message:', error);
+                this.healthCheckupService.updateServiceMessageStatus(serviceId, {messageSent: false}).subscribe({
+                  next: (updateResponse) => {
+                    console.log('Service updated with messageSent status:', updateResponse);
+                  },
+                  error: (updateError) => {
+                    console.error('Error updating messageSent status in service:', updateError);
+                  },
+                  complete: () => {
+                    this.isLoading = false;
+                  },
+                });
               },
             });
             const smsPayload = {
@@ -600,6 +646,17 @@ export class HealthCheckupFormComponent implements OnInit {
               },
               error: (error) => {
                 console.error('Error sending SMS:', error);
+                this.healthCheckupService.updateServiceMessageStatus(serviceId, {smsSent: false}).subscribe({
+                  next: (updateResponse) => {
+                    console.log('Service updated with smsSent status:', updateResponse);
+                  },
+                  error: (updateError) => {
+                    console.error('Error updating smsSent status in service:', updateError);
+                  },
+                  complete: () => {
+                    this.isLoading = false;
+                  },
+                });
               },
             });
             const appointmentDetails = {
@@ -630,6 +687,17 @@ export class HealthCheckupFormComponent implements OnInit {
               },
               error: (error) => {
                 console.error('Error sending email:', error);
+                this.healthCheckupService.updateServiceMessageStatus(serviceId, {emailSent: false}).subscribe({
+                  next: (updateResponse) => {
+                    console.log('Service updated with emailSent status:', updateResponse);
+                  },
+                  error: (updateError) => {
+                    console.error('Error updating emailSent status in service:', updateError);
+                  },
+                  complete: () => {
+                    this.isLoading = false;
+                  },
+                });
               },
             });
             this.resetForm(form);

@@ -52,7 +52,7 @@
         <span class="role">{{ role }}</span>
       </div>
     </div> -->
-    <div class="profile-container" (click)="toggleDropdownOpen()">
+    <div class="profile-container" (click)="toggleDropdownOpen()" (document:click)="closeDropdowns($event)">
       <div class="profile-info" [ngClass]="{ 'profile-background': isDropdownOpen }">
         <img src="admin-icons/admin-icon.jpg" alt="Profile Picture" class="profile-pic" />
         <div class="profile-text">

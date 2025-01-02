@@ -1,10 +1,10 @@
-import { Component, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, ViewChild, AfterViewInit, HostListener, ElementRef } from '@angular/core';
 import { Router } from '@angular/router';
 import {provideNativeDateAdapter} from '@angular/material/core';
 import { MessageService } from 'primeng/api';
-import { AppointmentConfirmComponent } from '../../appointment-confirm/appointment-confirm.component';
-import { AppointmentCompleteComponent } from '../../appointment-complete/appointment-complete.component';
-import { AppointmentCancelComponent } from '../../appointment-cancel/appointment-cancel.component';
+import { AppointmentConfirmComponent } from '../appointment-confirm/appointment-confirm.component';
+import { AppointmentCompleteComponent } from '../appointment-complete/appointment-complete.component';
+import { AppointmentCancelComponent } from '../appointment-cancel/appointment-cancel.component';
 
 @Component({
   selector: 'app-appointment-overview',
@@ -13,7 +13,7 @@ import { AppointmentCancelComponent } from '../../appointment-cancel/appointment
   providers: [provideNativeDateAdapter(), MessageService],
 })
 export class AppointmentOverviewComponent implements AfterViewInit {
-  constructor(private router: Router,private messageService: MessageService) {}
+  constructor(private router: Router,private messageService: MessageService, private elementRef: ElementRef) {}
  // Options for the dropdown to select search type (Patient ID or Phone Number)
  searchOptions = [
   { label: 'Patient Name', value: 'patientName' },
@@ -110,6 +110,16 @@ activeComponent: string = 'request'; // Default to showing the request component
   closeForm() {
     this.showForm = false;
     this.activeComponent = 'request'; // Reset to allow reopening
+  }
+  @HostListener('document:click', ['$event'])
+  handleOutsideClick(event: Event): void {
+    const clickedInside = this.elementRef.nativeElement.contains(event.target);
+    console.log('Clicked inside:', clickedInside);
+    if (!clickedInside) {
+      this.closeForm()
+      
+      console.log('Dropdown closed');
+    }
   }
 
     

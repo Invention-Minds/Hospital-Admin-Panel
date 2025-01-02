@@ -296,22 +296,31 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
   logout() {
  this.showLogoutConfirmDialog = true;
   }
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: Event): void {
-    const targetElement = event.target as HTMLElement;
 
-    // Close the dropdown if the click is outside the dropdown or notification icon
-    if (
-      this.showNotifications &&
-      !this.elementRef.nativeElement.contains(targetElement)
-    ) {
-      this.showNotifications = false;
-    }
-  }
   toggleDropdownOpen(): void {
     this.isDropdownOpen = !this.isDropdownOpen;
   }
-
+  // @HostListener('document:click', ['$event'])
+  // handleOutsideClick(event: Event): void {
+  //   const clickedInside = this.elementRef.nativeElement.contains(event.target);
+  //   console.log('Clicked inside:', clickedInside);
+  //   if (!clickedInside) {
+  //     this.isDropdownOpen = false;
+  //     this.showNotifications = false;
+      
+  //     console.log('Dropdown closed');
+  //   }
+  // }
+  @HostListener('document:click', ['$event'])
+  closeDropdowns(event: Event): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.notification-icon') && !target.closest('.notification-dropdown')) {
+      this.showNotifications = false;
+    }
+    if (!target.closest('.profile-container')) {
+      this.isDropdownOpen = false;
+    }
+  }
   // gotoProfile(): void {
   //   console.log('Navigating to Profile Settings...');
   //   // Add navigation logic here

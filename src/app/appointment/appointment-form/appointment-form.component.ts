@@ -1,5 +1,5 @@
 
-import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, Input, HostListener } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { Doctor } from '../../models/doctor.model';
@@ -15,6 +15,7 @@ import { takeUntil } from 'rxjs/operators';
 import { app } from '../../../../server';
 import { start } from 'node:repl';
 import { stat } from 'node:fs';
+import { Toast } from 'primeng/toast';
 
 
 interface Appointment {
@@ -77,7 +78,7 @@ export class AppointmentFormComponent implements OnInit {
   showDoctorUnavailableMessage: boolean = false;
   doctorUnavailableMessage: string = '';
   unavailableDates: string[] = [];
-  minDate: Date = new Date();
+  minDate: any = new Date();
   @Input() doctorAvailability: Doctor | null = null;
   @Input() slot!: any;
   @Input() date!: any;
@@ -251,6 +252,14 @@ export class AppointmentFormComponent implements OnInit {
       // Format the date correctly
       // this.date = new Date(this.date);
       console.log(this.date, 'date');
+      console.log(today, this.minDate)
+      if (this.date.toDateString() === today.toDateString()) {
+        this.minDate = null;
+        console.log(this.minDate, 'minDate');
+      } else if (this.date < today) {
+        this.minDate = null; // Also handle past dates
+        console.log(this.minDate, 'minDate');
+      }
       
       // Check if doctor type is Visiting Consultant
       if (this.doctorAvailability.doctorType === 'Visiting Consultant') {
@@ -270,6 +279,7 @@ export class AppointmentFormComponent implements OnInit {
         this.checkDoctorAvailabilityAndLoadSlots(this.doctorAvailability.id, this.date);
         
         if (this.slot && this.slot.time) {
+          console.log(this.date)
           this.appointmentForm.patchValue({
             doctorName: this.doctorAvailability!.name,
             appointmentDate: this.date,
@@ -895,6 +905,18 @@ export class AppointmentFormComponent implements OnInit {
     else {
       appointment.status = 'Complete';
     }
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = (today.getMonth() + 1).toString().padStart(2, '0');
+    const day = today.getDate().toString().padStart(2, '0');
+    const date = `${year}-${month}-${day}`;
+    if (appointment.date === date) {
+      this.minDate = null;
+      console.log(this.minDate, 'minDate');
+    } else if (appointment.date < date) {
+      this.minDate = null; // Also handle past dates
+      console.log(this.minDate, 'minDate');
+    }
     const nameParts = appointment.patientName.split(' ');
     this.appointmentForm.patchValue({
       firstName: nameParts[0],
@@ -949,7 +971,17 @@ export class AppointmentFormComponent implements OnInit {
     event.preventDefault(); // Prevents any default action, if needed
     this.close.emit();
     this.showForm = false;
+    console.log(this.showForm)
+    event.stopPropagation(); 
 
+  }
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event): void {
+    const overlayElement = document.querySelector('.overlay');
+    if (overlayElement && !overlayElement.contains(event.target as Node)) {
+      console.log('Clicked outside the form');
+      this.showForm = false;
+    }
   }
   private syncFormToModel(): void {
     if (!this.appointment || !this.appointmentForm) {
@@ -1864,8 +1896,12 @@ export class AppointmentFormComponent implements OnInit {
       }
     }
 
+   
 
 
+  }
+  preventClose(event: Event): void {
+    event.stopPropagation(); // Prevent clicks inside the form from closing it
   }
   formatTimeTo12Hour(date: Date): string {
     // Extract hours and minutes directly from the given date

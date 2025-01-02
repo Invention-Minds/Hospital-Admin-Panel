@@ -124,7 +124,7 @@
                           <button class="btn-action-reschedule" (click)="openAppointmentForm(service)"  pTooltip="Reschedule"  tooltipPosition="top">
                             <img src="icons/book.png" alt="Confirm">
                         </button>
-                        <button class="btn-action-reschedule" pTooltip="Stop Repeat"  tooltipPosition="top" (click)="stopRepeatedAppointments(service)">
+                        <button class="btn-action-reschedule" pTooltip="Stop Repeat"  tooltipPosition="top"  *ngIf="service.repeatChecked"  (click)="stopRepeatedAppointments(service)">
                             <img src="icons/repeat.png" alt="Confirm">
                         </button>
                         </button>

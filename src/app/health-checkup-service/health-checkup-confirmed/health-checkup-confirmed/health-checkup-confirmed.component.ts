@@ -47,7 +47,7 @@ export class HealthCheckupConfirmedComponent {
   sortColumn: keyof Service | undefined = undefined;  // No sorting initially
   sortDirection: string = 'asc';  // Default sorting direction
   searchOptions = [
-    { label: 'Patient Name', value: 'patientName' },
+    { label: 'Patient Name', value: 'firstName' },
     { label: 'Phone Number', value: 'phoneNumber' },
     { label: 'Package Name', value: 'packageName' },
   ];
@@ -59,6 +59,7 @@ export class HealthCheckupConfirmedComponent {
   userId: any = 0;
   @Output() reschedule = new EventEmitter<any>();
   activeComponent: string = 'confirmed';
+  confirmedServices: Service[] = [];
 
 
   // Value entered by the user (could be Patient ID or Phone Number based on selection)
@@ -71,8 +72,10 @@ this.fetchConfirmedAppointments();
 this.userId = localStorage.getItem('userid')
   this.activeComponent = 'confirmed';
 }
+
 fetchConfirmedAppointments(): void {
   this.isLoading = true
+  const today = new Date();
   this.healthCheckupService.getAllServices().subscribe({
     next: (services: Service[]) => {
       
@@ -80,6 +83,15 @@ fetchConfirmedAppointments(): void {
       this.confirmedAppointments = services.filter(
         (service) => service.appointmentStatus === 'Confirm' || service.appointmentStatus === 'confirmed'
       );
+      // this.confirmedAppointments = services.filter(
+      //   (service) => {
+      //     const appointmentDate = new Date(service.appointmentDate);
+      //     return (
+      //       (service.appointmentStatus === 'Confirm' || service.appointmentStatus === 'confirmed') &&
+      //       appointmentDate >= today // Filter out past dates
+      //     );
+      //   }
+      // );
       this.confirmedAppointments.sort((a, b) => {
         const dateA = new Date(a.createdAt!);
         const dateB = new Date(b.createdAt!);
@@ -441,6 +453,17 @@ onClear() {
           },
           error: (error) => {
             console.error('Error sending whatsapp message:', error);
+            this.healthCheckupService.updateServiceMessageStatus(service.id!, {messageSent: false}).subscribe({
+              next: (updateResponse) => {
+                console.log('Service updated with messageSent status:', updateResponse);
+              },
+              error: (updateError) => {
+                console.error('Error updating messageSent status in service:', updateError);
+              },
+              complete: () => {
+                this.isLoading = false;
+              },
+            });
           },
         });
         const smsPayload = {
@@ -473,6 +496,17 @@ onClear() {
           },
           error: (error) => {
             console.error('Error sending SMS:', error);
+            this.healthCheckupService.updateServiceMessageStatus(service.id!, {smsSent: false}).subscribe({
+              next: (updateResponse) => {
+                console.log('Service updated with smsSent status:', updateResponse);
+              },
+              error: (updateError) => {
+                console.error('Error updating smsSent status in service:', updateError);
+              },
+              complete: () => {
+                this.isLoading = false;
+              },
+            });
           },
         });
         const appointmentDetails = {
@@ -505,6 +539,17 @@ onClear() {
           },
           error: (error) => {
             console.error('Error sending email:', error);
+            this.healthCheckupService.updateServiceMessageStatus(service.id!, {emailSent: false}).subscribe({
+              next: (updateResponse) => {
+                console.log('Service updated with emailSent status:', updateResponse);
+              },
+              error: (updateError) => {
+                console.error('Error updating emailSent status in service:', updateError);
+              },
+              complete: () => {
+                this.isLoading = false;
+              },
+            });
           },
         });
         this.fetchConfirmedAppointments(); // Refresh the list of appointments

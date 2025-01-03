@@ -702,7 +702,7 @@ h2 {
 }
 
 .loader::before {
-  content:"Docminds";
+  content:"DocMinds";
 }
 .loader::after {
   content: "";

@@ -328,8 +328,17 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
 
   gotoReports(): void {
     console.log('Navigating to Reports & Data...');
-    this.router.navigate(['/reports']);
+    this.router.navigate(['/report']);
     // Add navigation logic here
+  }
+  gotoAppointments(): void {
+    console.log('Navigating to Appointments...');
+    this.router.navigate(['/appointments']);
+    // Add navigation logic here
+  }
+  gotoHealthCheckup(): void{
+    console.log('Navigating to Health Checkup...');
+    this.router.navigate(['/health-checkup']);
   }
 
   gotoAnalytics(): void {

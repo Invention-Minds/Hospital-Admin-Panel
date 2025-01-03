@@ -527,7 +527,7 @@ background: #FFF;
 }
 
 .loader::before {
-  content:"Docminds";
+  content:"DocMinds";
 }
 .loader::after {
   content: "";

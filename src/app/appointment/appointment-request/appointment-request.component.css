@@ -356,7 +356,7 @@ line-height: normal;
 }
 
 .loader::before {
-  content:"Docminds";
+  content:"DocMinds";
 }
 .loader::after {
   content: "";

@@ -170,7 +170,11 @@ fetchConfirmedAppointments(): void {
           repeatDates
         };
       });
-
+      this.repeatedAppointments.sort((a, b) => {
+                const dateA = new Date(a.createdAt!);
+                const dateB = new Date(b.createdAt!);
+                return dateB.getTime() - dateA.getTime();
+              });
       this.filteredServices = [...this.repeatedAppointments];
       // console.log(this.filteredServices)
       console.log('Services processed successfully.');

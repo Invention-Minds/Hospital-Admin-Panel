@@ -356,7 +356,7 @@ tbody tr:hover {
 }
 
 .loader::before {
-  content:"Docminds";
+  content:"DocMinds";
 }
 .loader::after {
   content: "";

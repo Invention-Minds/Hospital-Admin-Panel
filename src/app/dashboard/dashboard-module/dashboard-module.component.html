@@ -74,24 +74,39 @@
             <img src="/profile-dropdown.svg" class="icon" alt="Profile Settings" />
             Profile Settings
           </li>
-          <li (click)="gotoReports()">
-            <img src="/report-dropdown.svg"  class="icon" alt="Report & Data" />
-            Report
-          </li>
-          <li (click)="gotoAnalytics()">
-            <img src="/analytics-dropdown.svg"  class="icon" alt="Analytics & Data" />
-            Analytics
-          </li>
+          <ng-container *ngIf="role === 'sub_admin'; else adminOptions">
+            <!-- Subadmin Options -->
+            <li (click)="gotoAppointments()">
+              <img src="/appt.svg" class="icon" alt="Appointments" />
+              Appointments
+            </li>
+            <li (click)="gotoHealthCheckup()">
+              <img src="/health.svg" class="icon" alt="Health Checkup" />
+              Health Checkup
+            </li>
+          </ng-container>
+          <ng-template #adminOptions>
+            <!-- Default Admin Options -->
+            <li (click)="gotoReports()">
+              <img src="/report-dropdown.svg" class="icon" alt="Report & Data" />
+              Report
+            </li>
+            <li (click)="gotoAnalytics()">
+              <img src="/analytics-dropdown.svg" class="icon" alt="Analytics & Data" />
+              Analytics
+            </li>
+          </ng-template>
           <li (click)="gotoHelp()">
-            <img src="/help-dropdown.svg"  class="icon" alt="Help Center" />
+            <img src="/help-dropdown.svg" class="icon" alt="Help Center" />
             Help Center
           </li>
           <hr />
           <li (click)="logout()">
-            <img src="/logout-dropdown.svg"  class="icon" alt="Log Out" />
+            <img src="/logout-dropdown.svg" class="icon" alt="Log Out" />
             Log Out
           </li>
         </ul>
+        
       </div>
     </div>
     

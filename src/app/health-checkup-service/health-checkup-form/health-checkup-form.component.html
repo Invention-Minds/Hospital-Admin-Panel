@@ -34,7 +34,7 @@
             [(ngModel)]="formData.pnrNumber"
             placeholder=" "
           />
-          <label for="pnr" class="form-label">PNR Number*</label>
+          <label for="pnr" class="form-label">PRN Number</label>
           <div *ngIf="form.submitted && form.controls['pnr']?.invalid" class="error-message">
             <span *ngIf="form.controls['pnr']?.errors?.['pattern']">Enter a valid number.</span>
           </div>

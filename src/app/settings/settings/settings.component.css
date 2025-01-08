@@ -1,6 +1,9 @@
 .container {
+  display: flex;
   height: 100vh;
   background-color: #f0f3ff;
+  font-family: "Kanit";
+
 }
 .profile-wrapper {
   width: 1104px;
@@ -55,9 +58,9 @@
   padding: 20px;
   border-radius: 10px;
   display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
 .profile-picture {
@@ -76,11 +79,12 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap:14px;
 }
 .input-field {
   display: flex;
   width: 400px;
-  padding: 11px 0px 11px 30px;
+  padding: 11px 0px 11px 19px;
   align-items: center;
   justify-content: center;
   gap: 10px;
@@ -88,18 +92,18 @@
   background: #fff;
   box-shadow: 0px 4px 15px 0px rgba(216, 210, 252, 0.64);
   border: none;
-  height: 52px;
-  font-size: 18px;
+  height: 42px;
+  font-size: 13px;
 }
-.input-field:focus{
-    outline: none;
+.input-field:focus {
+  outline: none;
 }
-.input-field::placeholder{
-    color: #7B7B7B;
-font-size: 18px;
-font-weight: 400;
-font-family: Kanit;
-line-height: normal;
+.input-field::placeholder {
+  color: #7b7b7b;
+  font-size: 13px;
+  font-weight: 400;
+  font-family: Kanit;
+  line-height: normal;
 }
 
 .password-container {
@@ -109,7 +113,7 @@ line-height: normal;
 
 .password-container .eye-icon {
   position: absolute;
-  right: 10px;
+  right: 21px;
   top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
@@ -121,59 +125,60 @@ line-height: normal;
   border: none;
 
   cursor: pointer;
-  margin-top: 20px;
+  margin-top: 40px;
   display: inline-flex;
-padding: 11px 20px;
-justify-content: center;
-align-items: center;
-gap: 10px;
-border-radius: 8px;
-background: #00B15C;
-box-shadow: 0px 4px 15px 0px rgba(216, 210, 252, 0.64);
-color: #FFF;
-font-family: Kanit;
-font-size: 20px;
-font-style: normal;
-font-weight: 500;
-line-height: normal;
-height: 52px;
+  padding: 11px 20px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  border-radius: 8px;
+  background: #00b15c;
+  box-shadow: 0px 4px 15px 0px rgba(216, 210, 252, 0.64);
+  color: #fff;
+  font-family: Kanit;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  height: 44px;
 }
 
 .save-button:hover {
   background: #218838;
 }
-.create-button,.delete-accounts-button{
-  width: 25%;
+.create-button,
+.delete-accounts-button {
+  width: 28%;
 
   border: none;
 
   cursor: pointer;
-  margin-top: 20px;
+  margin-top: 40px;
   display: inline-flex;
-padding: 11px 20px;
-justify-content: center;
-align-items: center;
-gap: 10px;
-border-radius: 8px;
-background: #00B15C;
-box-shadow: 0px 4px 15px 0px rgba(216, 210, 252, 0.64);
-color: #FFF;
-font-family: Kanit;
-font-size: 20px;
-font-style: normal;
-font-weight: 500;
-line-height: normal;
-height: 52px;
+  padding: 11px 20px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  border-radius: 8px;
+  background: #00b15c;
+  box-shadow: 0px 4px 15px 0px rgba(216, 210, 252, 0.64);
+  color: #fff;
+  font-family: Kanit;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  height: 44px;
 }
 
 .delete-account {
-  margin-top: 20px;
+  margin-top: 40px;
 }
 
 .delete-button {
   background: transparent;
   border: none;
-  color: #D20006;
+  color: #d20006;
   font-family: Kanit;
   font-size: 20px;
   font-style: normal;
@@ -220,16 +225,14 @@ height: 52px;
   z-index: 1000;
 }
 
-  
 .dialog-header {
-  background: url('/dialog.png') no-repeat center center;
+  background: url("/dialog.png") no-repeat center center;
   background-size: cover;
   height: 293px;
   display: flex;
   justify-content: center;
   align-items: flex-end;
   color: #ffffff;
-
 }
 
 .warning-icon {
@@ -274,15 +277,15 @@ height: 52px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  color: #FFF;
-text-align: center;
-font-family: Kanit;
-font-size: 16px;
-font-style: normal;
-font-weight: 600;
-line-height: normal;
-border-radius: 4px;
-background: #D20006;
+  color: #fff;
+  text-align: center;
+  font-family: Kanit;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  border-radius: 4px;
+  background: #d20006;
 }
 
 .delete-account-button:hover {
@@ -298,34 +301,34 @@ background: #D20006;
   display: inline-flex;
   justify-content: center;
   align-items: center;
-  color: #FFF;
-text-align: center;
-font-family: Kanit;
-font-size: 16px;
-font-style: normal;
-font-weight: 600;
-line-height: normal;
+  color: #fff;
+  text-align: center;
+  font-family: Kanit;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
 }
 
 .cancel-account-button:hover {
   background-color: #bcbcbc;
 }
 .profile-info {
-  margin-top: 20px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start; /* Aligning content to the left */
-  gap: 15px; /* Adding space between items */
+  margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 30px;
 }
 
 .profile-item {
   display: flex;
-  gap: 5px;
-  color: #000;
-  font-family: Kanit;
-  font-size: 20px;
-  font-weight: 500;
+      gap: 5px;
+      color: #000;
+      font-family: Kanit;
+      font-size: 18px;
+      font-weight: 500;
 }
 /* 
 .label {
@@ -333,30 +336,30 @@ line-height: normal;
 } */
 .styled-select {
   width: 401px;
-    height: 52px;
-    padding: 12px 20px;
-    align-items: center;
-    gap: 70px;
-    flex-shrink: 0;
-    border-radius: 8px;
-    border: 2px solid rgba(183, 183, 183, 0.40);
-    background: #FFF;
-    box-shadow: 0px 4px 15px 0px rgba(216, 210, 252, 0.64);
-    font-size: 18px;
-    font-weight: 400;
-    font-family: Kanit;
-    color: #7B7B7B;
-    line-height: normal;
-    appearance: none; /* For modern browsers */
-    -webkit-appearance: none; /* For Safari */
-    -moz-appearance: none; /* For Firefox */
-    background-image: url('/select-down-arrow.svg');
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-    padding-right : 14px;
-    background-color: #FFF;
-    background-size: 22px;
-    border: none;
+  height: 44px;
+  padding: 12px 20px;
+  align-items: center;
+  gap: 70px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  border: 2px solid rgba(183, 183, 183, 0.4);
+  background: #fff;
+  box-shadow: 0px 4px 15px 0px rgba(216, 210, 252, 0.64);
+  font-size: 13px;
+  font-weight: 400;
+  font-family: Kanit;
+  color: #7b7b7b;
+  line-height: normal;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url(/select-down-arrow.svg);
+  background-repeat: no-repeat;
+  background-position: right 20px center;
+  padding-right: 14px;
+  background-color: #fff;
+  background-size: 16px;
+  border: none;
 }
 
 .styled-select option {
@@ -374,11 +377,11 @@ line-height: normal;
 }
 
 .styled-select::after {
-  content: '▼'; /* Add custom dropdown arrow */
+  content: "▼"; /* Add custom dropdown arrow */
   position: absolute;
   right: 10px;
   pointer-events: none;
-  color: #7B7B7B;
+  color: #7b7b7b;
 }
 .loader {
   border: 4px solid #f3f3f3; /* Light grey */
@@ -390,8 +393,12 @@ line-height: normal;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 /* Button disabled styles */
 button[disabled] {
@@ -405,16 +412,17 @@ button[disabled] {
   color: #d9534f; /* Red color for errors */
   font-size: 14px;
   margin: 10px 0;
-  width:670px
+  width: 670px;
 }
 .table-container {
   width: 100%;
-  max-height: 400px; /* Max height for scrolling vertically */
+  max-height: 500px;
+  max-width: 450px;
   margin: auto;
   margin-top: 20px;
-  overflow-y: auto; /* Enable vertical scrolling */
-  border-radius: 10px; /* Smooth borders for the table container */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Light shadow for a card-like effect */
+  overflow-y: auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   font-family: Kanit;
 }
 .radio-container {
@@ -437,39 +445,40 @@ button[disabled] {
   margin-top: 5px;
   display: flex;
   align-items: center;
-
 }
 
-.radio-option input[type='radio'] {
+.radio-option input[type="radio"] {
   margin-right: 8px;
 }
-
 
 .styled-table {
   width: 100%;
   border-collapse: collapse;
-
 }
 
 .styled-table th,
 .styled-table td {
-  padding: 15px;
-  text-align: center; /* Center align content like the provided image */
+  padding: 10px 15px 10px 15px;
+  text-align: center;
+  text-wrap: nowrap; /* Center align content like the provided image */
 }
 
 .styled-table th {
-  background: #00CAC0; /* Dark blue background for headers */
+  background: #00cac0; /* Dark blue background for headers */
   color: #fff; /* White text for headers */
   font-weight: 600;
+  font-size: 13px;
+  text-wrap: nowrap;
   position: sticky;
   top: 0; /* Keep headers sticky while scrolling */
   z-index: 2; /* Keep it above other elements */
-  
-box-shadow: 0px 4px 15px 0px rgba(216, 210, 252, 0.64);
+
+  box-shadow: 0px 4px 15px 0px rgba(216, 210, 252, 0.64);
 }
 
 .styled-table td {
- /* White background for content cells */
+  font-size:13px;
+  /* White background for content cells */
   color: #000; /* Dark blue text for content */
   /* border-radius: 16px; */
   /* background: rgba(255, 255, 255, 0.10);
@@ -481,19 +490,132 @@ box-shadow: 0px 4px 15px 0px rgba(216, 210, 252, 0.64);
   box-shadow: 0px 4px 15px 0px rgba(216, 210, 252, 0.64);
   border-radius: 16px;
   transition: box-shadow 0.3s ease;/* Light border below cells */
-  tbody tr {
-    /* border-bottom: 1px solid #ddd; */
-    box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64); border-radius: 16px; 
-    height: 60px;
-  }
-  
-  tbody tr:nth-child(even) {
-    background: rgba(255, 255, 255, 0.10);
-     box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64); border-radius: 16px;
-  }
+tbody tr {
+  /* border-bottom: 1px solid #ddd; */
+  box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64);
+  border-radius: 16px;
+  height: 60px;
+}
 
-  tbody tr:hover {
-    background-color: #f0f8ff;
-  }
+tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64);
+  border-radius: 16px;
+}
+
+tbody tr:hover {
+  background-color: #f0f8ff;
+}
+:host {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.settings-container {
+  display: flex;
+    height: 600px;
+    width: 800px;
+    padding-left: 90px;
+    background-color: #f0f3ff;
+    font-family: "Kanit", sans-serif;
+    z-index: 10000000000000000000000000;
+}
+
+.settings-sidebar {
+  width: 175px;
+    background-color: #002d72;
+    padding: 50px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+.settings-tab {
+  color: #fff;
+  font-family: Kanit;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    padding: 5px 0px 4px 10px;
+    border-radius: 8px;
+    text-align: left;
+    cursor: pointer;
+  transition: background 0.3s;
+}
+
+.settings-tab:hover {
+  background-color: white;
+  color: #002d72;
+}
+
+.active-tab {
+  background-color: white;
+  color: #002d72;
+  /* font-weight: bold; */
+}
+
+.settings-content {
+  flex: 1;
+  padding: 40px 20px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  gap:14px;
+}
+
+.profile-picture img {
+  width: 100px;
+  height: 100px;
+  border-radius: 0%;
+}
+
+.profile-info p {
+  font-size: 16px;
+  color: #271e4a;
+  margin: 5px 0;
+}
 
 
+.save-button {
+  padding: 8px;
+  border: none;
+  border-radius: 8px;
+  background-color: #00b15c;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.save-button:hover {
+  background-color: #008f4e;
+}
+
+.logout-button {
+  padding: 10px 20px;
+  background-color: #d20006;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.logout-button:hover {
+  background-color: #a50004;
+}

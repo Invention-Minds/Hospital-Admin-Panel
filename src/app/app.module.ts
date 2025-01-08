@@ -75,6 +75,7 @@ import { ColdObservable } from 'rxjs/internal/testing/ColdObservable';
 import { LoaderComponent } from './loader/loader.component';
 import { LoadingInterceptor } from './loading.interceptor';
 import { HealthCheckupRepeatComponent } from './health-checkup-service/health-checkup-repeat/health-checkup-repeat.component';
+import { SignatureComponent } from './signature/signature/signature.component';
 
 
 
@@ -111,6 +112,7 @@ import { HealthCheckupRepeatComponent } from './health-checkup-service/health-ch
     HealthCheckupRequestComponent,
     LoaderComponent,
     HealthCheckupRepeatComponent,
+    SignatureComponent,
 
   
     

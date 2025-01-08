@@ -416,6 +416,8 @@ line-height: normal;
 .cancel-account-button:hover {
   background-color: #bcbcbc;
 }
-
+.logout{
+  color: #D20006 !important;
+}
 
 

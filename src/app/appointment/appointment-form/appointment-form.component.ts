@@ -111,7 +111,7 @@ export class AppointmentFormComponent implements OnInit {
     const year = today.getFullYear();
     const month = (today.getMonth() + 1).toString().padStart(2, '0');
     const day = today.getDate().toString().padStart(2, '0');
-    this.minDate = today;
+    this.minDate = `${year}-${month}-${day}`;
     this.loadDoctors();
 
   
@@ -170,7 +170,7 @@ export class AppointmentFormComponent implements OnInit {
       // })
       // this.availableSlots = this.appointmentForm.get('appointmentTime')?.value;
       // this.patchFormWithAppointment(this.appointment, appointmentDate);
-      const appointmentDate = new Date(this.appointment.date);
+      const appointmentDate = this.appointment.date;
       console.log(new Date(this.appointment.date));
       this.oldDate = this.appointment.date;
       this.oldTime = this.appointment.time;
@@ -248,18 +248,18 @@ export class AppointmentFormComponent implements OnInit {
     // }
     else if (this.doctorAvailability) {
       console.log(this.doctorAvailability, this.date);
-      
+      this.date = this.formatDate(this.date)
       // Format the date correctly
       // this.date = new Date(this.date);
-      console.log(this.date, 'date');
-      console.log(today, this.minDate)
-      if (this.date.toDateString() === today.toDateString()) {
-        this.minDate = null;
-        console.log(this.minDate, 'minDate');
-      } else if (this.date < today) {
-        this.minDate = null; // Also handle past dates
-        console.log(this.minDate, 'minDate');
-      }
+      // console.log(this.date, 'date');
+      // console.log(today, this.minDate)
+      // if (this.date.toDateString() === today.toDateString()) {
+      //   this.minDate = null;
+      //   console.log(this.minDate, 'minDate');
+      // } else if (this.date < today) {
+      //   this.minDate = null; // Also handle past dates
+      //   console.log(this.minDate, 'minDate');
+      // }
       
       // Check if doctor type is Visiting Consultant
       if (this.doctorAvailability.doctorType === 'Visiting Consultant') {
@@ -529,7 +529,9 @@ export class AppointmentFormComponent implements OnInit {
     console.log(this.bookedSlots, "booked")
 
   }
-  loadAvailableSlots(doctorId: number, date: string): void {
+  loadAvailableSlots(doctorId: number, date: any): void {
+    // date = date.toDateString();
+    console.log(date, 'date');
     this.appointmentService.getAvailableSlots(doctorId, date).subscribe(
       (availability) => {
         if (availability && availability.availableFrom) {
@@ -910,13 +912,13 @@ export class AppointmentFormComponent implements OnInit {
     const month = (today.getMonth() + 1).toString().padStart(2, '0');
     const day = today.getDate().toString().padStart(2, '0');
     const date = `${year}-${month}-${day}`;
-    if (appointment.date === date) {
-      this.minDate = null;
-      console.log(this.minDate, 'minDate');
-    } else if (appointment.date < date) {
-      this.minDate = null; // Also handle past dates
-      console.log(this.minDate, 'minDate');
-    }
+    // if (appointment.date === date) {
+    //   this.minDate = null;
+    //   console.log(this.minDate, 'minDate');
+    // } else if (appointment.date < date) {
+    //   this.minDate = null; // Also handle past dates
+    //   console.log(this.minDate, 'minDate');
+    // }
     const nameParts = appointment.patientName.split(' ');
     this.appointmentForm.patchValue({
       firstName: nameParts[0],

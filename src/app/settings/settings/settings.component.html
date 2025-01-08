@@ -1,33 +1,33 @@
-<div class="container">
-  <div class="profile-wrapper">
+<div class="settings-container">
+  <!-- <div class="profile-wrapper"> -->
     <!-- Tab Menu -->
-    <div class="tab-container">
-      <div class="tab" [ngClass]="{ 'active-tab': selectedTab === 'profile' }" (click)="switchTab('profile')"
+    <div class="settings-sidebar">
+      <div class="settings-tab" [ngClass]="{ 'active-tab': selectedTab === 'profile' }" (click)="switchTab('profile')"
         *ngIf="canAccessTab('profile')">
         Profile Details
       </div>
-      <div class="tab" [ngClass]="{ 'active-tab': selectedTab === 'reset' }" (click)="switchTab('reset')"
+      <div class="settings-tab" [ngClass]="{ 'active-tab': selectedTab === 'reset' }" (click)="switchTab('reset')"
         *ngIf="canAccessTab('reset')">
         Reset Password
       </div>
-      <div class="tab" [ngClass]="{ 'active-tab': selectedTab === 'login' }" (click)="switchTab('login')"
+      <div class="settings-tab" [ngClass]="{ 'active-tab': selectedTab === 'login' }" (click)="switchTab('login')"
         *ngIf="canAccessTab('login')">
         Account Creation
       </div>
-      <div class="tab" [ngClass]="{'active-tab': selectedTab === 'delete'}" (click)="switchTab('delete')"
+      <div class="settings-tab" [ngClass]="{'active-tab': selectedTab === 'delete'}" (click)="switchTab('delete')"
         *ngIf="canAccessTab('delete')">
         Delete Account
       </div>
-      <div class="tab" [ngClass]="{'active-tab': selectedTab === 'login_details'}" (click)="switchTab('login_details')"
+      <div class="settings-tab" [ngClass]="{'active-tab': selectedTab === 'login_details'}" (click)="switchTab('login_details')"
       *ngIf="canAccessTab('login_details')" >
         Logged In Details
     </div>
     </div>
 
-    <div class="content-container" *ngIf="selectedTab === 'profile'">
+    <div class="settings-content" *ngIf="selectedTab === 'profile'">
       <!-- Profile Picture -->
       <div class="profile-picture">
-        <img src="/login-profile-pic.png" alt="Profile Picture">
+        <img src="/login-profile-pic.svg" alt="Profile Picture">
       </div>
 
       <!-- Email Input -->
@@ -66,14 +66,14 @@
       <!-- Delete Account -->
       <div class="delete-account">
         <button class="delete-button" (click)="logout()">
-          <img src="logout.png" alt="Delete Icon"> Logout
+          Logout<img src="logout.svg" alt="Delete Icon"> 
         </button>
       </div>
     </div>
-    <div class="content-container" *ngIf="selectedTab === 'reset'">
+    <div class="settings-content" *ngIf="selectedTab === 'reset'">
       <!-- Profile Picture -->
       <div class="profile-picture">
-        <img src="/login-profile-pic.png" alt="Profile Picture">
+        <img src="/login-profile-pic.svg" alt="Profile Picture">
       </div>
 
       <!-- Email Input -->
@@ -132,7 +132,7 @@
   <input [type]="isNewPasswordVisible ? 'text' : 'password'" class="input-field" [(ngModel)]="newPassword"
     placeholder="New Password" (ngModelChange)="validPasswords()" required
     minlength="6">
-  <img [src]="isNewPasswordVisible ? '/not-show.png' : '/show-password.png'" alt="Show Password" class="eye-icon"
+  <img [src]="isNewPasswordVisible ? '/not-show.svg' : '/show-password.svg'" alt="Show Password" class="eye-icon"
     (click)="toggleNewPasswordVisibility()">
 </div>
 <div *ngIf="passwordErrorMessageinReset" class="error-message">{{ passwordErrorMessageinReset }}</div>
@@ -141,7 +141,7 @@
   <input [type]="isConfirmPasswordVisible ? 'text' : 'password'" class="input-field" [(ngModel)]="confirmPassword"
     placeholder="Confirm New Password" (ngModelChange)="validPasswords()" required
     minlength="6">
-  <img [src]="isConfirmPasswordVisible ? '/not-show.png' : '/show-password.png'" alt="Show Password"
+  <img [src]="isConfirmPasswordVisible ? '/not-show.svg' : '/show-password.svg'" alt="Show Password"
     class="eye-icon" (click)="toggleConfirmPasswordVisibility()">
 </div>
 <div *ngIf="passwordErrorMessageinReset" class="error-message">{{ passwordErrorMessageinReset }}</div>
@@ -189,10 +189,10 @@
               </button>
             </div> -->
     </div>
-    <div class="content-container" *ngIf="selectedTab === 'login'">
+    <div class="settings-content" *ngIf="selectedTab === 'login'">
       <!-- Profile Picture -->
       <div class="profile-picture">
-        <img src="/login-profile-pic.png" alt="Profile Picture">
+        <img src="/login-profile-pic.svg" alt="Profile Picture">
       </div>
 
       <!-- Email Input -->
@@ -207,7 +207,7 @@
             placeholder="Password" (ngModelChange)="validateInputs()"
             required
             minlength="6">
-          <img [src]="isCreatePasswordVisible? '/not-show.png': '/show-password.png'" alt="Show Password"
+          <img [src]="isCreatePasswordVisible? '/not-show.svg': '/show-password.svg'" alt="Show Password"
             class="eye-icon" (click)="toggleCreatePasswordVisibility()">
         </div>
         <div *ngIf="passwordErrorMessage" class="error-message">{{ passwordErrorMessage }}</div>
@@ -252,10 +252,10 @@
               </button>
             </div> -->
     </div>
-    <div class="content-container" *ngIf="selectedTab === 'delete'">
+    <div class="settings-content" *ngIf="selectedTab === 'delete'">
       <!-- Profile Picture -->
       <div class="profile-picture">
-        <img src="/login-profile-pic.png" alt="Profile Picture">
+        <img src="/login-profile-pic.svg" alt="Profile Picture">
       </div>
 
       <!-- Email Input -->
@@ -280,7 +280,7 @@
               </button>
             </div> -->
     </div>
-    <div class="content-container" *ngIf="selectedTab === 'login_details'">
+    <div class="settings-content" *ngIf="selectedTab === 'login_details'">
       <div class="table-container">
         <table class="styled-table">
           <thead>
@@ -347,5 +347,5 @@
 
 
 
-  </div>
+  <!-- </div> -->
 </div>

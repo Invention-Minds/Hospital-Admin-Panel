@@ -6,17 +6,19 @@
 <app-login></app-login>
   </div> -->
   <!-- app.component.html -->
-<div class="container" *ngIf="!isLoginRoute(); else loginTemplate">
+<!-- <div class="container" *ngIf="!isLoginRoute(); else loginTemplate">
   <app-sidebar></app-sidebar>
   <div class="content">
     <app-dashboard-module></app-dashboard-module>
+    <app-settings *ngIf="isSettingsOpen"></app-settings>
   </div>
 </div>
 
 <ng-template #loginTemplate>
   <app-login></app-login>
 </ng-template>
-<!-- <app-loader [isLoading]="isLoading"></app-loader> -->
 <router-outlet></router-outlet>
 
-  <p-toast></p-toast>
+  <p-toast></p-toast> -->
+
+  <app-signature></app-signature>

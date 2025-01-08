@@ -1,0 +1,12 @@
+<div style="display: flex;justify-content: center;align-items: center;margin-top: 40vh;">
+    <label>Patient Signature:</label>
+    <canvas #patientPad width="500" height="200" style="border: 1px solid black;"></canvas>
+    <button (click)="clearPad('patient')">Clear</button>
+  
+    <label>Employee Signature:</label>
+    <canvas #employeePad width="500" height="200" style="border: 1px solid black;"></canvas>
+    <button (click)="clearPad('employee')">Clear</button>
+  
+    <button (click)="submitForm()">Submit</button>
+  </div>
+  

@@ -475,15 +475,33 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
   private setDoctorAvailability(): void {
     if (this.doctor?.availability && this.doctor.availability.length > 0) {
       // Step 1: Find the latest `updatedAt` timestamp
-      const latestTimestamp = this.doctor.availability.reduce((latest, curr) => {
-        return curr.updatedAt && new Date(curr.updatedAt).getTime() > new Date(latest).getTime()
-          ? curr.updatedAt
-          : latest;
-      }, this.doctor.availability[0].updatedAt || '');
+      // const latestTimestamp = this.doctor.availability.reduce((latest, curr) => {
+      //   return curr.updatedAt && new Date(curr.updatedAt).getTime() > new Date(latest).getTime()
+      //     ? curr.updatedAt
+      //     : latest;
+      // }, this.doctor.availability[0].updatedAt || '');
   
-      // Step 2: Filter entries with the latest `updatedAt` timestamp
+      // // Step 2: Filter entries with the latest `updatedAt` timestamp
+      // const latestAvailability = this.doctor.availability.filter(
+      //   avail => avail.updatedAt === latestTimestamp
+      // );
+      const latestTimestamp = this.doctor.availability.reduce((latest, curr) => {
+        // Consider `null` as the earliest timestamp
+        if (curr.updatedAt === null) {
+          return latest;
+        }
+        
+        if (curr.updatedAt) {
+          return new Date(curr.updatedAt).getTime() > new Date(latest).getTime()
+            ? curr.updatedAt
+            : latest;
+        }
+        return latest;
+      }, this.doctor.availability[0].updatedAt || '');
+    
+      // Step 2: Filter entries with the latest `updatedAt` timestamp, including those with `null`
       const latestAvailability = this.doctor.availability.filter(
-        avail => avail.updatedAt === latestTimestamp
+        avail => avail.updatedAt === latestTimestamp || avail.updatedAt === null
       );
       console.log('Latest availability:', latestAvailability);
   

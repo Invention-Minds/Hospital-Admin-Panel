@@ -137,6 +137,12 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
         this.username = storedUsername;
         this.role = storedRole;
       }
+      if(this.role !== 'doctor'){
+        this.username = this.username.split(`_${this.role}`)[0]
+      }
+      else if(this.role === 'doctor'){
+        this.username = `Dr. ${this.username.split('_doctor')[0]}`
+      }
 
       console.log('Connecting to server to receive new appointments...', this.apiUrl, environment.apiUrl);
       this.eventSource = new EventSource(`${environment.apiUrl}/appointments/updates`);
@@ -344,6 +350,10 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
   gotoAnalytics(): void {
     console.log('Navigating to Analytics & Data...');
     // Add navigation logic here
+  }
+  gotoLeaveRequest(): void {
+    console.log('Navigating to Leave Request...');
+    // Add navigation logic
   }
 
   gotoHelp(): void {

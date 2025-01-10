@@ -56,7 +56,7 @@
       <div class="profile-info" [ngClass]="{ 'profile-background': isDropdownOpen }">
         <img src="admin-icons/admin-icon.jpg" alt="Profile Picture" class="profile-pic" />
         <div class="profile-text">
-          <span class="username">{{ username.split('_')[0] }}</span>
+          <span class="username">{{ username }}</span>
           <span class="role">{{ role }}</span>
         </div>
         <img
@@ -74,7 +74,7 @@
             <img src="/profile-dropdown.svg" class="icon" alt="Profile Settings" />
             Profile Settings
           </li>
-          <ng-container *ngIf="role === 'sub_admin'; else adminOptions">
+          <ng-container *ngIf="role === 'sub_admin'; else otherRoles">
             <!-- Subadmin Options -->
             <li (click)="gotoAppointments()">
               <img src="/appt.svg" class="icon" alt="Appointments" />
@@ -85,17 +85,33 @@
               Health Checkup
             </li>
           </ng-container>
-          <ng-template #adminOptions>
-            <!-- Default Admin Options -->
-            <li (click)="gotoReports()">
-              <img src="/report-dropdown.svg" class="icon" alt="Report & Data" />
-              Report
-            </li>
-            <li (click)="gotoAnalytics()">
-              <img src="/analytics-dropdown.svg" class="icon" alt="Analytics & Data" />
-              Analytics
-            </li>
+          
+          <ng-template #otherRoles>
+            <ng-container *ngIf="role === 'doctor'; else adminOptions">
+              <!-- Doctor Options -->
+              <li (click)="gotoAppointments()">
+                <img src="/appt.svg" class="icon" alt="Appointments" />
+                Appointments
+              </li>
+              <li (click)="gotoLeaveRequest()">
+                <img src="/leave.svg" class="icon" alt="Leave Request Form" />
+                Leave Request Form
+              </li>
+            </ng-container>
+          
+            <ng-template #adminOptions>
+              <!-- Default Admin Options -->
+              <li (click)="gotoReports()">
+                <img src="/report-dropdown.svg" class="icon" alt="Report & Data" />
+                Report
+              </li>
+              <li (click)="gotoAnalytics()">
+                <img src="/analytics-dropdown.svg" class="icon" alt="Analytics & Data" />
+                Analytics
+              </li>
+            </ng-template>
           </ng-template>
+          
           <li (click)="gotoHelp()">
             <img src="/help-dropdown.svg" class="icon" alt="Help Center" />
             Help Center

@@ -13,6 +13,9 @@ import { HealthCheckupOverviewComponent } from './health-checkup-service/health-
 import { authGuard } from './auth.guard';
 import { HealthCheckupFormComponent } from './health-checkup-service/health-checkup-form/health-checkup-form.component';
 import { UnsavedChangesGuard } from './guards/unsaved-changes.guard';
+import { TotalOverviewComponent } from './dashboard/total-overview/total-overview.component';
+import { TodayConsultationsComponent } from './doctor-role/today-consultations/today-consultations/today-consultations.component';
+import { OverviewComponent } from './doctor-role/overview/overview/overview.component';
 
 const routes: Routes = [
   { path: 'dashboard', component: DashboardOverviewComponent, canActivate:[authGuard] },
@@ -27,6 +30,7 @@ const routes: Routes = [
   {path:'report',component: ReportOverviewComponent,canActivate:[authGuard]},
   {path: 'health-checkup', component: HealthCheckupOverviewComponent,canActivate:[authGuard]},
   { path: 'reschedule/:id', component: HealthCheckupFormComponent,canActivate:[authGuard] },
+  {path:'doctor-appointments', component: OverviewComponent, canActivate:[authGuard]},
   {
     path: 'form',
     component: HealthCheckupFormComponent,

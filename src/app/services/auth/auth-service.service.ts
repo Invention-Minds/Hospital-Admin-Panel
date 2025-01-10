@@ -24,8 +24,8 @@ export class AuthServiceService {
   constructor(private http: HttpClient) { 
     this.initializeUserFromStorage(); 
   }
-  login(username: string, password: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/login`, { username, password }).pipe(
+  login(employeeId: string, password: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/login`, { employeeId, password }).pipe(
       tap((response: any) => {
         console.log(response)
         const user = response.user;  // Use 'user' from the response
@@ -74,9 +74,9 @@ initializeUserFromStorage(): void {
     // console.log(this.user);
   }
 
-  register(username: string, password: string, isReceptionist: boolean): Observable<any> {
-    const role = this.extractRoleFromUsername(username);  // Extract role
-    return this.http.post(`${this.apiUrl}/register`, { username, password, isReceptionist }).pipe(
+  register(username: string, password: string, isReceptionist: boolean, employeeId: string, role:string): Observable<any> {
+    // const role = this.extractRoleFromUsername(username);  // Extract role
+    return this.http.post(`${this.apiUrl}/register`, { username, password, isReceptionist, employeeId, role }).pipe(
       tap(response => {
         this.role = role;  // Save the role
       })

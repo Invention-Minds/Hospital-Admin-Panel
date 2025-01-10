@@ -76,6 +76,9 @@ import { LoaderComponent } from './loader/loader.component';
 import { LoadingInterceptor } from './loading.interceptor';
 import { HealthCheckupRepeatComponent } from './health-checkup-service/health-checkup-repeat/health-checkup-repeat.component';
 import { SignatureComponent } from './signature/signature/signature.component';
+import { TodayConsultationsComponent } from './doctor-role/today-consultations/today-consultations/today-consultations.component';
+import { OverviewComponent } from './doctor-role/overview/overview/overview.component';
+import { FutureConsultationsComponent } from './doctor-role/future-consultations/future-consultations/future-consultations.component';
 
 
 
@@ -113,6 +116,9 @@ import { SignatureComponent } from './signature/signature/signature.component';
     LoaderComponent,
     HealthCheckupRepeatComponent,
     SignatureComponent,
+    TodayConsultationsComponent,
+    OverviewComponent,
+    FutureConsultationsComponent,
 
   
     

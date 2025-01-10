@@ -77,7 +77,7 @@
       </div>
 
       <!-- Email Input -->
-      <div *ngIf="currentUserRole !== 'super_admin'" class="input">
+      <div *ngIf="currentUserRole !== 'super_admin' && currentUserRole !== 'admin'" class="input">
         <input type="text" class="input-field" [(ngModel)]="username" placeholder="Username_admin@rashtrotthana" (ngModelChange)="validPasswords()">
         <div *ngIf="usernameErrorMessage" class="error-message">{{ usernameErrorMessage }}</div>
          <!-- <div class="password-container">
@@ -103,7 +103,7 @@
         </div>
         <div *ngIf="passwordErrorMessage" class="error-message">{{ passwordErrorMessage }}</div>
       </div> 
-      <div *ngIf="currentUserRole !== 'super_admin'">
+      <div *ngIf="currentUserRole !== 'super_admin' && currentUserRole !== 'admin'" >
         <button class="save-button" (click)="resetPassword()"  [disabled]="buttonClicked || !isFormValid">Reset Password</button>
       </div>
 
@@ -117,7 +117,7 @@
       </option>
     </select>
   </div> -->
-  <div *ngIf="currentUserRole === 'super_admin'" class="form-group">
+  <div *ngIf="currentUserRole === 'super_admin' || currentUserRole === 'admin' " class="form-group">
     <select id="userSelect" [(ngModel)]="selectedUser" class="styled-select password-container" (ngModelChange)="validPasswords()" >
       <option value="" disabled selected hidden>Select User to Reset Password</option>
       <option *ngFor="let user of users" [value]="user.username">
@@ -128,7 +128,7 @@
   <div *ngIf="usernameErrorMessageinReset" class="error-message">{{ usernameErrorMessageinReset }}</div>
 
 <!-- New Password Input Fields -->
-<div *ngIf="currentUserRole === 'super_admin'" class="password-container">
+<div *ngIf="currentUserRole === 'super_admin' || currentUserRole === 'admin'" class="password-container">
   <input [type]="isNewPasswordVisible ? 'text' : 'password'" class="input-field" [(ngModel)]="newPassword"
     placeholder="New Password" (ngModelChange)="validPasswords()" required
     minlength="6">
@@ -137,7 +137,7 @@
 </div>
 <div *ngIf="passwordErrorMessageinReset" class="error-message">{{ passwordErrorMessageinReset }}</div>
 
-<div *ngIf="currentUserRole === 'super_admin'" class="password-container">
+<div *ngIf="currentUserRole === 'super_admin' || currentUserRole === 'admin'" class="password-container">
   <input [type]="isConfirmPasswordVisible ? 'text' : 'password'" class="input-field" [(ngModel)]="confirmPassword"
     placeholder="Confirm New Password" (ngModelChange)="validPasswords()" required
     minlength="6">
@@ -147,7 +147,7 @@
 <div *ngIf="passwordErrorMessageinReset" class="error-message">{{ passwordErrorMessageinReset }}</div>
 
 <!-- Button to Reset Password for Super Admin -->
-<div *ngIf="currentUserRole === 'super_admin'">
+<div *ngIf="currentUserRole === 'super_admin' || currentUserRole === 'admin'">
   <button class="save-button" (click)="resetUserPassword()"  [disabled]="buttonClicked || !isFormValid">Reset User Password</button>
 </div>
 <p-toast />
@@ -190,68 +190,149 @@
             </div> -->
     </div>
     <div class="settings-content" *ngIf="selectedTab === 'login'">
-      <!-- Profile Picture -->
-      <div class="profile-picture">
-        <img src="/login-profile-pic.svg" alt="Profile Picture">
-      </div>
-
-      <!-- Email Input -->
-      <div class="input">
-        <input type="text" class="input-field" [(ngModel)]="username" placeholder="Username_admin@rashtrotthana"     (ngModelChange)="onUsernameChange()"
-        required>
-        <div *ngIf="usernameErrorMessage" class="error-message">{{ usernameErrorMessage }}</div>
-
-        <!-- Password Input -->
-        <div class="password-container">
-          <input [type]="isCreatePasswordVisible ? 'text' : 'password'" class="input-field" [(ngModel)]="password"
-            placeholder="Password" (ngModelChange)="validateInputs()"
-            required
-            minlength="6">
-          <img [src]="isCreatePasswordVisible? '/not-show.svg': '/show-password.svg'" alt="Show Password"
-            class="eye-icon" (click)="toggleCreatePasswordVisibility()">
-        </div>
-        <div *ngIf="passwordErrorMessage" class="error-message">{{ passwordErrorMessage }}</div>
-        <div *ngIf="showReceptionistOptions" class="radio-container">
-          <label>Sub Admin Type:</label>
-          <div class="radio-option">
-            <label>
-              <input
-                type="radio"
-                name="subAdminType"
-                [(ngModel)]="isReceptionist"
-                [value]="true"
-              />
-              Front Desk
-            </label>
-          </div>
-          <div class="radio-option">
-            <label>
-              <input
-                type="radio"
-                name="subAdminType"
-                [(ngModel)]="isReceptionist"
-                [value]="false"
-              />
-              Tele Caller
-            </label>
-          </div>
+      <!-- Account Type Selection -->
+      <div class="account-type">
+        <label>Account Type:</label>
+        <div>
+          <label>
+            <input type="checkbox" [(ngModel)]="isAdmin" (change)="onAccountTypeChange('admin')" /> Admin
+          </label>
+          <label>
+            <input type="checkbox" [(ngModel)]="isSubAdmin" (change)="onAccountTypeChange('subadmin')" /> Sub Admin
+          </label>
+          <label>
+            <input type="checkbox" [(ngModel)]="isDoctor" (change)="onAccountTypeChange('doctor')" /> Doctor
+          </label>
         </div>
       </div>
-  <!-- Checkbox for Tele Caller / Front Desk -->
- 
-  
-  
+    
+      <!-- Admin Inputs -->
+      <div *ngIf="isAdmin">
+        <div class="input">
+          <div class="floating-label">
+            <input type="text" id="type" name="type" placeholder=" " [(ngModel)]="type" disabled />
+            <label for="type">Type (Admin)</label>
+          </div>
+          <div class="floating-label">
+            <input type="text" id="name" name="name" placeholder=" " [(ngModel)]="name" required />
+            <label for="name">Name*</label>
+          </div>
+          <div class="floating-label">
+            <input type="text" id="employeeId" name="employeeId" placeholder=" " [(ngModel)]="employeeId" required />
+            <label for="employeeId">Employee ID*</label>
+          </div>
+          <div class="password-container floating-label">
+            <input
+            [type]="isCreatePasswordVisible ? 'text' : 'password'"
+              id="password"
+              name="password"
+              placeholder=" "
+              [(ngModel)]="password"
+              required
+              minlength="6"
+              (ngModelChange)="validateInputs()"
+            />
+            <label for="password">Password*</label>
+            <img
+              [src]="isCreatePasswordVisible ? '/not-show.svg' : '/show-password.svg'"
+              alt="Show Password"
+              class="eye-icon"
+              (click)="toggleCreatePasswordVisibility()"
+            />
+          </div>
+        </div>
+      </div>
+    
+      <!-- Sub Admin Inputs -->
+      <div *ngIf="isSubAdmin">
+        <div class="input">
+          <div class="floating-label">
+            <select id="subAdminType" [(ngModel)]="subAdminType" (ngModelChange)="typeChange()" class="styled-select">
+              <option value="Front Desk">Front Desk</option>
+              <option value="Tele Caller">Tele Caller</option>
+              <option value="Estimator">Estimator</option>
+            </select>
+            <label for="subAdminType">Sub Admin Type*</label>
+          </div>
+          <div class="floating-label">
+            <input type="text" id="name" name="name" placeholder=" " [(ngModel)]="name" required />
+            <label for="name">Name*</label>
+          </div>
+          <div class="floating-label">
+            <input type="text" id="employeeId" name="employeeId" placeholder=" " [(ngModel)]="employeeId" required />
+            <label for="employeeId">Employee ID*</label>
+          </div>
+          <div class="password-container floating-label">
+            <input
+            [type]="isCreatePasswordVisible ? 'text' : 'password'"
+              id="password"
+              name="password"
+              placeholder=" "
+              [(ngModel)]="password"
+              required
+              minlength="6"
+              (ngModelChange)="validateInputs()"
+            />
+            <label for="password">Password*</label>
+            <img
+              [src]="isCreatePasswordVisible ? '/not-show.svg' : '/show-password.svg'"
+              alt="Show Password"
+              class="eye-icon"
+              (click)="toggleCreatePasswordVisibility()"
+            />
+          </div>
+        </div>
+      </div>
+    
+      <!-- Doctor Inputs -->
+      <div *ngIf="isDoctor">
+        <div class="input">
+          <div class="floating-label">
+            <select id="department" [(ngModel)]="selectedDepartment" (change)="onDepartmentChange()" class="styled-select">
+              <option *ngFor="let department of departments" [value]="department.name">{{ department.name }}</option>
+            </select>
+            <label for="department">Department*</label>
+          </div>
+          <div class="floating-label">
+            <select id="doctor" [(ngModel)]="selectedDoctor" class="styled-select">
+              <option *ngFor="let doctor of filteredDoctors" [ngValue]="doctor">{{ doctor.name }}</option>
+            </select>
+            <label for="doctor">Doctor*</label>
+          </div>
+          <div class="floating-label">
+            <input type="text" id="employeeId" name="employeeId" placeholder=" " [(ngModel)]="employeeId" required />
+            <label for="employeeId">Employee ID*</label>
+          </div>
+          <div class="password-container floating-label">
+            <input
+            [type]="isCreatePasswordVisible ? 'text' : 'password'"
+              id="password"
+              name="password"
+              placeholder=" "
+              [(ngModel)]="password"
+              required
+              minlength="6"
+              (ngModelChange)="validateInputs()"
+            />
+            <label for="password">Password*</label>
+            <img
+              [src]="isCreatePasswordVisible ? '/not-show.svg' : '/show-password.svg'"
+              alt="Show Password"
+              class="eye-icon"
+              (click)="toggleCreatePasswordVisibility()"
+            />
+          </div>
+          <div *ngIf="passwordErrorMessage" class="error-message">{{ passwordErrorMessage }}</div>
+        </div>
+      </div>
+    
       <!-- Save Button -->
-      <button class="create-button" (click)="createAccount()"  [disabled]="buttonClicked || !isFormValid">Create Account</button>
-<p-toast />
-
-      <!-- Delete Account
-            <div class="delete-account">
-              <button class="delete-button" (click)="openDeleteDialog()">
-                <img src="doc-delete.svg" alt="Delete Icon"> Delete Account
-              </button>
-            </div> -->
+      <button class="create-button" (click)="createAccount()" [disabled]="!isFormValid">Create Account</button>
+      <p-toast></p-toast>
     </div>
+    
+    
+    
     <div class="settings-content" *ngIf="selectedTab === 'delete'">
       <!-- Profile Picture -->
       <div class="profile-picture">

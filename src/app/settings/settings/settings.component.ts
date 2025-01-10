@@ -54,8 +54,19 @@ export class SettingsComponent implements OnInit {
   firstNames: string[] = [];
   isReceptionist: boolean = true; // Default value for checkbox
   showReceptionistOptions: boolean = false;
+  employeeId: string = '';
+  selectedDepartment: string = '';
+  selectedDoctor: any;
+  filteredDoctors: any[] = [];
+  departments: any[] = [];
+  doctors: any[] = [];
+  isAdmin = false;
+  isSubAdmin = false;
+  isDoctor = false;
+  type = '';
+  subAdminType = '';
 
-  constructor(private authService: AuthServiceService, private router: Router, private messageService: MessageService, private appointmentService: AppointmentConfirmService) {}
+  constructor(private authService: AuthServiceService, private router: Router, private messageService: MessageService, private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService) {}
  // Define the role-based access
  rolePermissions: Record<UserRole, string[]> = {
   sub_admin: ['profile', 'reset'],
@@ -71,7 +82,7 @@ export class SettingsComponent implements OnInit {
       const storedUsername = localStorage.getItem('username'); 
       const validRoles: UserRole[] = ['admin', 'doctor', 'sub_admin', 'super_admin'];
       this.role = storedRole;
-      this.name = storedUsername || '';
+      // this.name = storedUsername || '';
       // this.loggedinUser = `${this.name}_${this.role}@rashtrotthana`;
       // console.log('Logged in user:', this.loggedinUser);
       // this.username = storedUsername || '';
@@ -82,7 +93,7 @@ export class SettingsComponent implements OnInit {
       if (validRoles.includes(this.role as UserRole)) {
         this.currentUserRole = this.role as UserRole;
         // console.log("current user role in settings",this.currentUserRole)
-        if (this.currentUserRole === 'super_admin') {
+        if (this.currentUserRole === 'super_admin' || this.currentUserRole === 'admin') {
           this.loadUsers(); // Load users if the role is super admin
         }
       } else {
@@ -96,7 +107,8 @@ export class SettingsComponent implements OnInit {
     } else {
       console.log('localStorage is not available');
     }
-    
+    this.loadDepartments();
+    this.loadDoctors();
   }
 
   switchTab(tabName: string) {
@@ -176,17 +188,80 @@ export class SettingsComponent implements OnInit {
       );
     }
   }
+  formatDoctorName(name: string): string {
+    if (!name) return '';
+    
+    // Step 1: Remove "Dr." prefix if it exists
+    let formattedName = name.replace(/^Dr\.\s*/i, '');
+  
+    // Step 2: Replace all spaces with underscores
+    formattedName = formattedName.replace(/\s+/g, '_');
+  
+    // Step 3: Convert to lowercase (optional, based on requirements)
+    return formattedName.toLowerCase();
+  }
+  
+  // Usage Example
+  typeChange(){
+    console.log(this.subAdminType)
+  }
 
 // Register method
 createAccount() {
   this.buttonClicked = true;
-  this.authService.register(this.username, this.password,this.isReceptionist).subscribe(response => {
+  
+  if(this.isDoctor){
+    console.log(this.selectedDoctor);
+    const name = this.formatDoctorName(this.selectedDoctor.name);
+    console.log(name)
+  
+    // const doctorName = this.doctors.filter(
+    //   (doctor) => doctor.name === this.selectedDoctor
+    // 
+    
+
+    this.username = name + '_doctor@rashtrotthana';
+    this.role = 'doctor';
+    this.isReceptionist = false;
+  }
+  if (this.isAdmin) {
+    this.username = `${this.name}_admin@rashtrotthana`;
+    this.role = 'admin';
+    this.isReceptionist = false;
+  } else if (this.isSubAdmin) {
+    this.username = `${this.name}_subadmin@rashtrotthana`;
+    this.role = 'sub_admin';
+    console.log(this.subAdminType)
+    if(this.subAdminType !== 'Front Desk'){
+      this.isReceptionist = false;
+      
+    }
+  } 
+  this.authService.register(this.username, this.password,this.isReceptionist, this.employeeId, this.role!).subscribe(response => {
     // console.log('Account created successfully', response);
     this.username = '';  // Clear the username
     this.password = '';  // Clear the password
     this.showReceptionistOptions = false;  // Reset the checkbox
+    this.employeeId='';
+    this.selectedDepartment ='';
+    // this.selectedDoctor = [];
+    this.subAdminType='';
+    this.name='';
     this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Account Created Successfully' });
     this.buttonClicked = false;
+    if(this.isDoctor){
+      this.selectedDoctor.userId = response.id;
+      console.log(this.selectedDoctor);
+      this.doctorService.updateDoctor(this.selectedDoctor).subscribe(
+        () => {
+          console.log('Doctor updated successfully');
+          this.selectedDoctor=[]
+        },
+        (error) => {
+          console.error('Error updating doctor:', error);
+        }
+      );
+    }
   }, error => {
     if (error.status === 400) {
       this.messageService.add({ severity: 'error', summary: 'Error', detail: 'This username has already been used.' });
@@ -199,6 +274,7 @@ createAccount() {
     }
     
   });
+  console.log(this.username, this.password, this.isReceptionist, this.employeeId);
 }
 validateInputs(): void {
   const usernameRegex = /^[a-zA-Z]+_(admin|subadmin|superadmin|doctor)@rashtrotthana$/;
@@ -208,7 +284,8 @@ validateInputs(): void {
   const isPasswordValid = this.password.length >= 6;
 
   // Update the form validity state
-  this.isFormValid = isUsernameValid && isPasswordValid;
+  // this.isFormValid = isUsernameValid && isPasswordValid;
+  this.isFormValid = isPasswordValid
 
   // If the form is not valid, show an appropriate error message
   if (!isUsernameValid) {
@@ -434,6 +511,46 @@ deleteUser() {
         this.buttonClicked = false;
     }
 );
+}
+loadDepartments(): void {
+  this.doctorService.getDepartments().subscribe((departments) => {
+    this.departments = departments;
+  });
+}
+
+onDepartmentChange(): void {
+
+ console.log(this.selectedDepartment);
+ console.log(this.doctors);
+  this.filteredDoctors = this.doctors.filter(
+    (doctor) => doctor.departmentName === this.selectedDepartment
+  );
+  console.log('Filtered doctors:', this.filteredDoctors);
+}
+loadDoctors(): void {
+  this.doctorService.getDoctors().subscribe(
+    (doctors) => {
+      this.doctors = doctors; // Now this.doctors will hold the array of doctors
+    },
+    (error) => {
+      console.error('Error fetching doctors:', error);
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to fetch doctors.' });
+    }
+  );
+}
+
+onAccountTypeChange(type: string) {
+  this.isAdmin = type === 'admin';
+  this.isSubAdmin = type === 'subadmin';
+  this.isDoctor = type === 'doctor';
+
+  // Reset form when switching account types
+  this.username = '';
+  this.password = '';
+  this.employeeId = '';
+  this.selectedDepartment = '';
+  this.selectedDoctor = [];
+  this.name = '';
 }
 }
 

@@ -12,6 +12,7 @@ import { SignatureComponent } from "./signature/signature/signature.component";
   // imports: [SettingsComponent],
 })
 export class AppComponent {
+  role: string = ''; 
   constructor(private router: Router, private inactivityService: InactivityService) {}
   title = 'hospital_appointment_admin_panel';
   isLoginRoute(): boolean {
@@ -23,5 +24,14 @@ export class AppComponent {
   toggleSettings(): void {
     this.isSettingsOpen = !this.isSettingsOpen;
     console.log('Settings open:', this.isSettingsOpen);
+  }
+  ngOnInit(): void {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      // Fetch role from localStorage or the authentication service
+      this.role = localStorage.getItem('role') || '';
+      // console.log('User role:', this.role);
+    } else {
+      console.log('localStorage is not available');
+    }
   }
 }

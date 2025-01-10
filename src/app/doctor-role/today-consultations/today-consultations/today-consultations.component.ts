@@ -1,6 +1,6 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
-import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
+import { AppointmentConfirmService } from '../../../services/appointment-confirm.service';
+import { DoctorServiceService } from '../../../services/doctor-details/doctor-service.service';
 import { MessageService } from 'primeng/api';
 import { ChangeDetectorRef } from '@angular/core';
 import * as XLSX from 'xlsx';
@@ -26,13 +26,13 @@ interface Appointment {
   checkedIn?:boolean;
   user?: any;
 }
+
 @Component({
-  selector: 'app-appointment-confirm',
-  templateUrl: './appointment-confirm.component.html',
-  styleUrl: './appointment-confirm.component.css',
-  providers: [MessageService]
+  selector: 'app-today-consultations',
+  templateUrl: './today-consultations.component.html',
+  styleUrl: './today-consultations.component.css'
 })
-export class AppointmentConfirmComponent {
+export class TodayConsultationsComponent {
   confirmedAppointments: Appointment[] = [];
 
   constructor(private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService,private messageService: MessageService, private cdRef: ChangeDetectorRef) { }
@@ -57,6 +57,8 @@ export class AppointmentConfirmComponent {
   filteredList: any;
   lastWeekAppointments: any[] = [];  
   isLoading: boolean = false;
+  allAppointments: Appointment[]=[] 
+  today: string = '';
 
   searchOptions = [
     { label: 'Patient Name', value: 'patientName' },
@@ -64,26 +66,44 @@ export class AppointmentConfirmComponent {
   ];
   // Method to handle sorting by a specific column
   ngOnInit() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = (today.getMonth() + 1).toString().padStart(2, '0');
+    const day = today.getDate().toString().padStart(2, '0');
+    this.today = `${year}-${month}-${day}`;
     console.log('Setting isLoading to true');
     this.isLoading = true; // Start loading indicator
+    this.userId=localStorage.getItem('userid')
   
     // Fetch appointments
     this.appointmentService.fetchAppointments();
-  
-    // Subscribe to confirmed appointments
-    this.appointmentService.confirmedAppointments$.subscribe({
+    this.appointmentService.getAllAppointments().subscribe({
       next: (appointments) => {
-        console.log('Appointments received:', appointments);
-        this.confirmedAppointments = appointments;
-  
-        // Sort appointments
+        console.log('All Appointments received:', appointments);
+        this.allAppointments = appointments;
+        this.confirmedAppointments = appointments.filter(appointment => appointment.status === 'confirmed');
+
+        this.doctorService.getAllDoctors().subscribe({
+          next: (doctors) => {
+            this.filteredAppointments = this.confirmedAppointments.filter(appointment => {
+              const doctor = doctors.find(doc => doc.id === appointment.doctorId);
+              console.log('Doctor:', doctor?.userId,this.userId);
+              return doctor && doctor.userId === parseInt(this.userId) && appointment.date === this.today;
+            });
+            console.log(this.filteredAppointments)
+          },
+          error: (error) => {
+            console.error('Error fetching doctor details:', error);
+          }
+        });
+        
         this.confirmedAppointments.sort((a, b) => {
           const dateA = new Date(a.created_at!);
           const dateB = new Date(b.created_at!);
           return dateB.getTime() - dateA.getTime();
         });
   
-        this.filteredAppointments = [...this.confirmedAppointments];
+        // this.filteredAppointments = [...this.confirmedAppointments];
         this.filterAppointmentsByDate(new Date());
   
         console.log('Setting isLoading to false');
@@ -91,15 +111,11 @@ export class AppointmentConfirmComponent {
           console.log('Setting isLoading to false after delay');
           this.isLoading = false; // Stop loading indicator
         }, 1000); // 2-second delay
-        
-      },
-      error: (error) => {
-        console.error('Error fetching appointments:', error);
-        // this.errorMessage = 'Failed to fetch appointments.';
-        console.log('Setting isLoading to false due to error');
-        this.isLoading = false; // Stop loading indicator even on error
       }
-    });
+    })
+  
+    // Subscribe to confirmed appointments
+   
   }
   
   
@@ -745,7 +761,6 @@ export class AppointmentConfirmComponent {
   }
   lockAndAccessAppointment(appointment:Appointment): void {
     const appointmentId = appointment.id!;
-    console.log(this.userId)
     this.appointmentService.lockAppointment(appointmentId, this.userId).subscribe({
       next: (response) => {
         // Successfully locked, proceed to open the form
@@ -773,3 +788,5 @@ export class AppointmentConfirmComponent {
     });
   }
 }
+
+

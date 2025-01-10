@@ -93,6 +93,8 @@ export class AppointmentFormComponent implements OnInit {
   timeError: string = '';
   availableDates: string[] = [];
   disabledDates: Date[] = [];
+  department: string = '';
+  doctorType: string = '';
 
   private subscription!: Subscription;
 
@@ -201,14 +203,16 @@ export class AppointmentFormComponent implements OnInit {
         });
         this.appointmentForm.get('doctorName')?.valueChanges.subscribe(doctorName => {
           const date = this.appointmentForm.get('appointmentDate')?.value;
-          const doctorId = this.getDoctorIdByName(doctorName);
+          // const doctorId = this.getDoctorIdByName(doctorName);
+          const doctorId = this.doctorId;
           if (doctorId && date) {
             this.checkDoctorAvailabilityAndLoadSlots(doctorId, date)
           }
         });
       this.appointmentForm.get('appointmentDate')?.valueChanges.subscribe(date => {
         const doctorName = this.appointmentForm.get('doctorName')?.value;
-        const doctorId = this.getDoctorIdByName(doctorName);
+        // const doctorId = this.getDoctorIdByName(doctorName);
+        const doctorId = this.doctorId;
 
         if (doctorId && date) {
           this.checkDoctorAvailabilityAndLoadSlots(doctorId, date);
@@ -217,7 +221,8 @@ export class AppointmentFormComponent implements OnInit {
       this.appointmentForm.get('appointmentTime')?.valueChanges.subscribe(time => {
         const date = this.appointmentForm.get('appointmentDate')?.value;
         const doctorName = this.appointmentForm.get('doctorName')?.value;
-        const doctorId = this.getDoctorIdByName(doctorName);
+        // const doctorId = this.getDoctorIdByName(doctorName);
+        const doctorId = this.doctorId;
         if (doctorId && date) {
           this.checkDoctorAvailabilityAndLoadSlots(doctorId, date);
         }
@@ -264,6 +269,8 @@ export class AppointmentFormComponent implements OnInit {
       // Check if doctor type is Visiting Consultant
       if (this.doctorAvailability.doctorType === 'Visiting Consultant') {
         this.isVisitingConsultant = true;
+        this.doctorId = this.doctorAvailability.id;
+        console.log(this.doctorId)
         // Handle Visiting Consultant doctor slots by prompting the user to select manually
         this.appointmentForm.patchValue({
           doctorName: this.doctorAvailability!.name,
@@ -276,6 +283,8 @@ export class AppointmentFormComponent implements OnInit {
       } else {
         // For other doctor types, continue using the current slot
         console.log(this.slot.time);
+        this.doctorId = this.doctorAvailability.id;
+        console.log(this.doctorId)
         this.checkDoctorAvailabilityAndLoadSlots(this.doctorAvailability.id, this.date);
         
         if (this.slot && this.slot.time) {
@@ -384,6 +393,10 @@ export class AppointmentFormComponent implements OnInit {
   onDoctorSelect(doctor: Doctor): void {
 
     this.appointmentForm.get('doctorName')?.setValue(doctor.name);
+    this.doctorId = doctor.id;
+    this.department = doctor.departmentName!;
+    this.doctorType = doctor.doctorType;
+    console.log(this.doctorId)
     this.isVisitingConsultant = doctor.doctorType === 'Visiting Consultant';
     this.showDoctorSuggestions = false;  // Hide dropdown after selecting
     // const selectElement = event.target as HTMLSelectElement | null;
@@ -410,7 +423,8 @@ export class AppointmentFormComponent implements OnInit {
       // this.loadAvailableDates(doctorId!);
       
     
-      const doctorId = this.getDoctorIdByName(doctorName);
+      // const doctorId = this.getDoctorIdByName(doctorName);
+      const doctorId = this.doctorId;
       if(doctorId){
         this.onDoctorChange(doctorId)
         let date = this.appointmentForm.get('appointmentDate')?.value;
@@ -427,7 +441,8 @@ export class AppointmentFormComponent implements OnInit {
 
     this.appointmentForm.get('appointmentDate')?.valueChanges.subscribe(date => {
       const doctorName = this.appointmentForm.get('doctorName')?.value;
-      const doctorId = this.getDoctorIdByName(doctorName);
+      // const doctorId = this.getDoctorIdByName(doctorName);
+      const doctorId = this.doctorId;
       if(doctorId !== undefined){
         this.appointmentService.getBookedSlots(doctorId, date).subscribe(
           (bookedSlots: { time: string; complete: boolean }[]) => {
@@ -512,7 +527,8 @@ export class AppointmentFormComponent implements OnInit {
   onTimeSelect(event: any): void {
     const selectedTime = this.formatTimeTo12Hour(event); // Assuming formatTimeTo12Hour formats the date to 'hh:mm AM/PM'
     const doctorName = this.appointmentForm.get('doctorName')?.value;
-    const doctorId = this.getDoctorIdByName(doctorName);
+    // const doctorId = this.getDoctorIdByName(doctorName);
+    const doctorId = this.doctorId;
     const selectedDate = this.appointmentForm.get('appointmentDate')?.value;
   
     const bookedSlotsForDoctor = this.bookedSlots[doctorName]?.[selectedDate] || [];
@@ -1083,8 +1099,8 @@ export class AppointmentFormComponent implements OnInit {
 
       this.close.emit();
       const selectedDoctor = this.getDoctorByName(this.appointmentForm.value.doctorName);
-      const doctorId = selectedDoctor!.id;
-      const department = selectedDoctor!.departmentName ?? 'Default Department';
+      const doctorId = this.doctorId;
+      const department = this.department ?? 'Default Department';
       let phoneNumber = this.appointmentForm.value.phoneNumber;
 
       if (!phoneNumber.startsWith('91')) {
@@ -1093,7 +1109,7 @@ export class AppointmentFormComponent implements OnInit {
       console.log(this.appointment)
       console.log(this.appointmentForm.value.appointmentTime)
       // const time = this.appointmentForm.value.appointmentTime;
-      if(selectedDoctor!.doctorType === 'Visiting Consultant') {
+      if(this.doctorType === 'Visiting Consultant') {
         console.log("visiting")
         this.isVisitingConsultant = true;
         const time = this.formatTimeTo12Hour(this.appointmentForm.value.appointmentTime);
@@ -1220,14 +1236,14 @@ export class AppointmentFormComponent implements OnInit {
           this.appointment.status = 'confirmed';
         }
         const selectedDoctor = this.getDoctorByName(this.appointmentForm.value.doctorName);
-        const doctorId = selectedDoctor!.id;
-        const department = selectedDoctor!.departmentName ?? 'Default Department';
+        const doctorId = this.doctorId
+        const department = this.department ?? 'Default Department';
         let phoneNumber = this.appointmentForm.value.phoneNumber;
 
         if (!phoneNumber.startsWith('91')) {
           phoneNumber = '91' + phoneNumber;
         }
-        if(selectedDoctor!.doctorType === 'Visiting Consultant') {
+        if(this.doctorType === 'Visiting Consultant') {
           console.log("visiting")
           this.isVisitingConsultant = true;
           const time = this.formatTimeTo12Hour(this.appointmentForm.value.appointmentTime);
@@ -1418,7 +1434,7 @@ export class AppointmentFormComponent implements OnInit {
           // }
           let time: string;
 
-          if (selectedDoctor!.doctorType === 'Visiting Consultant') {
+          if (this.doctorType === 'Visiting Consultant') {
             console.log("visiting");
             this.isVisitingConsultant = true;
             time = this.formatTimeTo12Hour(this.appointmentForm.get('appointmentTime')?.value);
@@ -1732,9 +1748,9 @@ export class AppointmentFormComponent implements OnInit {
         );
 
 
-        const doctorId = this.getDoctorIdByName(this.appointmentForm.value.doctorName);
+        // const doctorId = this.getDoctorIdByName(this.appointmentForm.value.doctorName);
 
-
+        const doctorId = this.doctorId;
         if (doctorId === undefined) {
           console.error('Doctor ID not found for the given doctor name.');
           return; // Optionally, stop execution if doctor ID is required
@@ -1742,14 +1758,14 @@ export class AppointmentFormComponent implements OnInit {
         const selectedDoctor = this.getDoctorByName(this.appointmentForm.value.doctorName);
 
         if (selectedDoctor) {
-          const doctorId = selectedDoctor.id;
-          const department = selectedDoctor.departmentName ?? 'Default Department'; // Assuming departmentName is a property in the doctor model
+          const doctorId = this.doctorId;
+          const department = this.department ?? 'Default Department'; // Assuming departmentName is a property in the doctor model
           let phoneNumber = this.appointmentForm.value.phoneNumber;
 
           if (!phoneNumber.startsWith('91')) {
             phoneNumber = '91' + phoneNumber;
           }
-          if(selectedDoctor.doctorType === 'Visiting Consultant') {
+          if(this.doctorType === 'Visiting Consultant') {
             const time = this.formatTimeTo12Hour(this.appointmentForm.value.appointmentTime);
             this.time = time;
           }

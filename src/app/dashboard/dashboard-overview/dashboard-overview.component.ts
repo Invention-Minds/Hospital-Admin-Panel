@@ -34,5 +34,7 @@ export class DashboardOverviewComponent {
     setTimeout(() => {
       this.isLoading = false; // Stop loading after data is fetched
     }, 2000); // Adjust the timeout as needed for your API calls
+    
   }
+
 }

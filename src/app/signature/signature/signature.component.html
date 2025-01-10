@@ -1,12 +1,35 @@
-<div style="display: flex;justify-content: center;align-items: center;margin-top: 40vh;">
+<form>
+  <div>
+    <label>Patient Name:</label>
+    <input [(ngModel)]="formData.patientName" name="patientName" required />
+  </div>
+  <div>
+    <label>Relationship:</label>
+    <input [(ngModel)]="formData.relationship" name="relationship" />
+  </div>
+  <div>
+    <label>Contact Number:</label>
+    <input [(ngModel)]="formData.contactNumber" name="contactNumber" />
+  </div>
+  <div>
+    <label>Staff Name:</label>
+    <input [(ngModel)]="formData.staffName" name="staffName" />
+  </div>
+  <div>
+    <label>Staff ID:</label>
+    <input [(ngModel)]="formData.staffId" name="staffId" />
+  </div>
+
+  <div>
     <label>Patient Signature:</label>
     <canvas #patientPad width="500" height="200" style="border: 1px solid black;"></canvas>
-    <button (click)="clearPad('patient')">Clear</button>
-  
+    <button type="button" (click)="clearPad('patient')">Clear</button>
+  </div>
+  <div>
     <label>Employee Signature:</label>
     <canvas #employeePad width="500" height="200" style="border: 1px solid black;"></canvas>
-    <button (click)="clearPad('employee')">Clear</button>
-  
-    <button (click)="submitForm()">Submit</button>
+    <button type="button" (click)="clearPad('employee')">Clear</button>
   </div>
-  
+
+  <button type="button" (click)="generatePDF()">Download PDF</button>
+</form>

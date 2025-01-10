@@ -70,7 +70,7 @@
             (focus)="showDoctorSuggestions = true" />
           <ul class="doctor-suggestions" *ngIf="showDoctorSuggestions && filteredDoctors.length > 0">
             <li *ngFor="let doctor of filteredDoctors" (click)="onDoctorSelect(doctor)">
-              {{ doctor.name }}
+              {{ doctor.name }} - {{ doctor.departmentName }}
             </li>
           </ul>
           <!-- <select  class="select doctor" formControlName="doctorName" (focus)="loadDoctors()" (change)="onDoctorSelect($event)">

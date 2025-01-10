@@ -1,0 +1,125 @@
+<div class="container">
+    <div class="p-field p-col-3 calendar">
+        <!-- <p-calendar [(ngModel)]="selectedDate" placeholder="Calendar" class="custom-calendar"></p-calendar> -->
+        <p-calendar 
+        styleClass="custom-calendar" 
+        [(ngModel)]="selectedDateRange"
+        selectionMode="range"
+        (ngModelChange)="onSearch()"
+        
+        placeholder="Calendar"
+        dateFormat="yy-mm-dd">
+          <ng-template pTemplate="date" let-date>
+              <span>
+                  {{ date.day }}
+              </span>
+          </ng-template>
+      </p-calendar>
+      <i class="fa-solid fa-angle-down calendar-icon"></i>
+      <svg pTooltip="Refresh" (click)="refresh()" class="reverse" xmlns="http://www.w3.org/2000/svg" width="2.5em" height="2.5em" viewBox="-1.5 -2.5 24 24"><path fill="currentColor" d="m4.859 5.308l1.594-.488a1 1 0 0 1 .585 1.913l-3.825 1.17a1 1 0 0 1-1.249-.665L.794 3.413a1 1 0 1 1 1.913-.585l.44 1.441C5.555.56 10.332-1.035 14.573.703a9.38 9.38 0 0 1 5.38 5.831a1 1 0 1 1-1.905.608A7.381 7.381 0 0 0 4.86 5.308zm12.327 8.195l-1.775.443a1 1 0 1 1-.484-1.94l3.643-.909a1 1 0 0 1 .61-.08a1 1 0 0 1 .84.75l.968 3.88a1 1 0 0 1-1.94.484l-.33-1.322a9.381 9.381 0 0 1-16.384-1.796l-.26-.634a1 1 0 1 1 1.851-.758l.26.633a7.381 7.381 0 0 0 13.001 1.25z"/></svg>
+
+
+      </div>
+</div>
+<div class="table-container" *ngIf="!isLoading">
+    <div class="table-wrapper">
+      <table class="appointment-table" *ngIf="!isLoading">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th (click)="sortBy('patientName')" style="cursor: pointer;">
+              Patient Name
+              <span *ngIf="sortColumn === 'patientName' && sortDirection === 'asc'">&#9650;</span>
+              <span *ngIf="sortColumn === 'patientName' && sortDirection === 'desc'">&#9660;</span>
+            </th>
+            <!-- <th>Phone Number</th>
+            <th>Doctor Name</th> -->
+            <!-- <th>Therapy</th> -->
+            <th (click)="sortBy('date')">
+              Date
+              <span *ngIf="sortColumn === 'date' && sortDirection === 'asc'">&#9650;</span>
+              <span *ngIf="sortColumn === 'date' && sortDirection === 'desc'">&#9660;</span>
+            </th>
+            <th>Time</th>
+            <!-- <th>Source</th>
+            <th>WA</th>
+            <th>Email</th>
+            <th>SMS</th>
+            <th>Status</th> -->
+            <th><span class="action" ></span>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="filteredAppointments.length === 0">
+            <td colspan="11" class="no-records-message">
+              No records to display
+            </td>
+          </tr>
+          <tr *ngFor="let appointment of getPaginatedAppointments(); let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ appointment.patientName }}</td>
+            <!-- <td>{{ appointment.phoneNumber }}</td>
+            <td>{{ appointment.doctorName }}</td> -->
+            <!-- <td>{{ appointment.department }}</td> -->
+            <td>{{ appointment.date }}</td>
+            <td>
+               <span class="status-badge">{{ appointment.time }}</span>
+            </td>
+            <!-- <td>{{ appointment.requestVia }}</td> -->
+            <!-- <td>
+              <span class="sms-status" [ngClass]="{'sms-sent': appointment.smsSent, 'sms-not-sent': !appointment.smsSent}">
+                <img *ngIf="appointment.smsSent" src="icons/sent.svg" alt="Sent">
+                <img *ngIf="!appointment.smsSent" src="icons/not-sent.png" alt="Not Sent">
+              </span>
+            </td>
+            <td>
+              <span class="sms-status"
+                [ngClass]="{'sms-sent': appointment.emailSent, 'sms-not-sent': !appointment.emailSent}">
+                <img *ngIf="appointment.emailSent" src="icons/sent.svg" alt="Sent">
+                <img *ngIf="!appointment.emailSent" src="icons/not-sent.png" alt="Not Sent">
+              </span>
+            </td>
+            <td>
+              <span class="sms-status" [ngClass]="{'sms-sent': appointment.messageSent, 'sms-not-sent': !appointment.messageSent}">
+                <img *ngIf="appointment.messageSent" src="icons/sent.svg" alt="Sent">
+                <img *ngIf="!appointment.messageSent" src="icons/not-sent.png" alt="Not Sent">
+              </span>
+            </td>
+            <td>
+              <span class="status-badge">{{ appointment.status }}</span>
+            </td> -->
+            <td class="button">
+              <button class="start"  [disabled]="true">
+                <img src="/start.svg">Start Consultations
+              </button>
+              <button class="estimation"  [disabled]="true">
+                <img src="/est.svg">Estimation
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  
+  
+    <!-- Pagination Controls -->
+    <div class="pagination">
+      <button class="pagination-btn prev" (click)="prevPage()" [disabled]="currentPage === 1">←</button>
+      <button class="pagination-btn next" (click)="nextPage()" [disabled]="currentPage === totalPages">→</button>
+      <div class="page-info">
+        Page
+        <input type="number" [(ngModel)]="currentPage" min="1" [max]="totalPages" class="page-input"
+          (change)="onPageChange()">
+        of {{ totalPages }}
+      </div>
+    </div>
+  </div>
+  <p-toast></p-toast>
+  <!-- <app-appointment-form 
+    *ngIf="showAppointmentForm" 
+    [appointment]="selectedAppointment" 
+    (close)="closeAppointmentForm()" 
+    (submit)="submitAppointment(selectedAppointment, $event.status, $event.requestVia)">
+  </app-appointment-form> -->
+  
+  <div class="loader" *ngIf="isLoading"></div>

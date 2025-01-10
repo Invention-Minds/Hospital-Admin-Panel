@@ -14,15 +14,31 @@ export class LoginComponent implements OnInit {
   password: string = '';
   isPasswordVisible: boolean = false; // Track visibility of password
   isLoading: boolean = false; // Track loading state of the login form
+  role: string = ''; // Track the user role
   
   constructor(private authService: AuthServiceService, private router: Router,private messageService: MessageService) {}
   ngOnInit(): void {
     // Check if the user is already logged in by checking the token in localStorage or sessionStorage
     const token = localStorage.getItem('token');
+    if (typeof window !== 'undefined' && window.localStorage) {
+      // Fetch role from localStorage or the authentication service
+      this.role = localStorage.getItem('role') || '';
+      // console.log('User role:', this.role);
+    } else {
+      console.log('localStorage is not available');
+    }
     if (token) {
       // If a token exists, redirect to the dashboard
-      this.router.navigate(['/dashboard']);
+      // this.router.navigate(['/dashboard']);
+      if(this.role!== 'doctor'){
+        console.log('role', this.role)
+        this.router.navigate(['/dashboard']);
+      }else{
+        console.log('doctor',this.role)
+        this.router.navigate(['/doctor-appointments']);
+      }
     }
+    
     const logoutReason = localStorage.getItem('logoutReason');
     if (logoutReason === 'inactivity') {
       console.log('Logged out due to inactivity');
@@ -41,11 +57,17 @@ export class LoginComponent implements OnInit {
     this.isLoading = true;
     this.authService.login(this.username, this.password).subscribe(
       (response) => {
-        // console.log('Login successful:', response);
+        console.log('Login successful:', response);
         // response = response;
         
         // Navigate to the desired route upon successful login
-        this.router.navigate(['/dashboard']); // Adjust the route as necessary
+        if(response.user.role!== 'doctor'){
+          console.log('role', response.user.role)
+          this.router.navigate(['/dashboard']);
+        }else if(response.user.role === 'doctor'){
+          console.log('doctor',response.user.role)
+          this.router.navigate(['/doctor-appointments']);
+        }
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Welcome!' });
       },
       (error) => {

@@ -1,0 +1,292 @@
+/* Overall container styling */
+.tv-container {
+    font-family:Kanit;
+    color: #fff;
+    background-color: #F8F8F8;
+
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  
+  /* Header styling */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    background-color: #001345;
+    height: 100px;
+  }
+  .header h1{
+    color: #FFF;
+    font-family: Kanit;
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+    padding-top: 20px;
+    position: relative;
+  }
+  
+  .logo {
+    height: 50px;
+    padding-left: 10px;
+  }
+  .datetime-container {
+    background: #F0F3FF;
+    clip-path: polygon(30% 0, 100% 0, 100% 100%, 0% 100%);
+    padding: 10px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: right;
+    color: #001345; /* Text color */
+  }
+  
+  .datetime {
+    text-align: center;
+    color: #001345;
+    font-family: Kanit;
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    background: #F0F3FF;
+padding: 0 10px;
+padding-left: 20px;
+  }
+  .date{
+    color: #001345;
+font-family: Kanit;
+font-size: 20px;
+font-style: normal;
+font-weight: 600;
+line-height: normal;
+  }
+  
+  /* Doctor cards container */
+/* Overall Doctor Cards Layout */
+.doctor-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    background: #F0F3FF;
+    margin: 0;
+    /* margin: 20px; */
+  }
+  
+  /* Individual Doctor Card */
+  .doctor-card {
+    background: #F0F3FF;
+    /* border: 1px solid #0077b6; */
+    border-radius: 8px;
+    width: 472px; /* Fixed width for uniform alignment */
+  
+    /* padding: 15px; */
+    /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+  }
+  
+  /* Doctor Header Styling */
+  .doctor-header {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    border-radius: 16px;
+background: #169458;
+height: 155px;
+justify-content: center;
+align-items: center;
+  }
+  
+  .doctor-header img {
+    /* width: 80px;
+    height: 80px; */
+    /* border-radius: 8px;
+    border: 2px solid #0077b6; */
+   
+  }
+  .doctor-image{
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-right: 30px;
+    /* padding: 0 10px; */
+  }
+  
+  .doctor-details h3 {
+    color: #FFF;
+font-family: Kanit;
+font-size: 15px;
+font-style: normal;
+font-weight: 500;
+line-height: normal;
+  }
+  
+  .doctor-details p {
+    color: #FFF;
+    font-family: Kanit;
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+  }
+  
+  /* Queue Table Styling */
+/* General Table Styling */
+.queue-table {
+    width: 100%;
+    border-collapse: separate; /* Allows spacing between rows */
+    border-spacing: 0 5px; /* Adds vertical spacing between rows */
+    text-align: left; /* Aligns text to the left */
+  }
+  
+  /* Table Header Styling */
+  .queue-table thead tr {
+    background-color: #003566; /* Dark blue for header */
+    color: white;
+    font-size: 14px;
+  }
+  
+  .queue-table th {
+    padding: 10px;
+    color: #FFF;
+font-family: Kanit;
+font-size: 20px;
+font-style: normal;
+font-weight: 500;
+line-height: normal;
+    text-align: center;
+     /* Removes borders for a clean look */
+height: 52px;
+flex-shrink: 0;
+  }
+  
+  /* Table Body Rows Styling */
+  .queue-table tbody tr {
+    background: white; /* White background for rows */
+    box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64); /* Add shadow for card-like appearance */
+    border-radius: 8px; /* Rounds corners for each row */
+  }
+  
+  /* Table Cells Styling */
+  .queue-table td {
+    padding: 10px;
+    font-family: Kanit, sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: #222;
+    text-align: center;
+    border: none; /* Removes default borders */
+  }
+  
+  /* Status Styling */
+  .status {
+    display: inline-block;
+    width: 100px;
+    padding: 4px 10px;
+    border-radius: 4px;
+  
+  }
+  
+  .status.PatientIn {
+    border-radius: 4px;
+    background: #169458; /* Green for Patient In */
+    color: #FFF;
+font-family: Kanit;
+font-size: 14px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
+  }
+  
+  .status.Next {
+ /* Yellow for Next */
+    color: #FFF;
+font-family: Kanit;
+font-size: 14px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
+border-radius: 4px;
+background: #FB9C2A;
+  }
+  
+  .status.Default {
+    color: #000;
+    font-family: Kanit;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    border-radius: 4px;
+border: 1px solid #000;
+  }
+  
+  
+  /* Footer styling */
+  .footer {
+    margin-top: 20px;
+    display: flex; 
+    background-color: #FFF; 
+    padding: 0;
+    justify-content: center;
+    align-items: center;
+  }
+  .footer p {
+    color: #FFF;
+text-align: center;
+font-family: Kanit;
+font-size: 15px;
+font-style: normal;
+font-weight: 500;
+line-height: normal;
+
+margin: 0;
+
+
+  }
+  .footer marquee{
+    color: #001345;
+text-align: center;
+font-family: Kanit;
+font-size: 26px;
+font-style: normal;
+font-weight: 500;
+line-height: normal;
+  }
+  .copy-right-container{
+    clip-path: polygon(8% 0, 100% 0, 100% 100%, 0% 100%);
+    width: 444px;
+    height: 80px;
+    flex-shrink: 0;
+    background-color: #001345;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-left: 20px;
+  }
+  .four-doctors-layout {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 equally spaced columns */
+    margin-left: 15px;
+     /* Spacing between columns */
+  }
+  .four-doctors-layout .doctor-card{
+    width: 344px;
+  }
+
+  
+  /* Hide doctor image when there are 4 doctors */
+  .hide-image {
+    display: none;
+  }
+  
+  .hide-image .queue-table {
+    margin-top: 0;
+  }

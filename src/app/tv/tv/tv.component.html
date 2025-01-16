@@ -1,0 +1,68 @@
+<div class="tv-container">
+    <header class="header">
+      <img src="sidebar/IM-logo.png" alt="Logo" class="logo" />
+      <h1>Rashtrotthana Hospital - Bangalore</h1>
+      <div class="datetime-container">
+        <div class="datetime">
+          <span class="date">{{ currentDate }}</span><br />
+          <span>{{ currentTime }}</span>
+        </div>
+      </div>
+    </header>
+  
+    <div
+      class="doctor-cards"
+      [ngClass]="{ 'four-doctors-layout': isFourDoctors() }"
+    >
+      <div
+        class="doctor-card"
+        *ngFor="let doctor of doctors"
+      >
+        <div class="doctor-header" >
+          <div class="doctor-image" *ngIf="!isFourDoctors()">
+            <img [src]="doctor.image" alt="Doctor Image" />
+          </div>
+          <div class="doctor-details">
+            <h3>Name: {{ doctor.name }}</h3>
+            <p>Department: {{ doctor.department }}</p>
+            <p>Room No: {{ doctor.room }}</p>
+            <p>Avail. Time: {{ doctor.time }}</p>
+          </div>
+        </div>
+  
+        <table class="queue-table">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Name</th>
+              <th>Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let patient of doctor.patients; let i = index">
+              <td>{{ i + 1 }}</td>
+              <td>{{ patient.name }}</td>
+              <td>
+                <span class="status" [ngClass]="patient.status">{{ patient.details }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  
+    <footer class="footer">
+      <marquee>
+        Surgery Package: Total Knee Replacement - Unilateral (Excluding Implant
+        Charges)
+      </marquee>
+      <div class="copy-right-container">
+        <img src="/IM-logo-main.svg" />
+        <p>
+          Copyright ⓒ 2025 Doc minds. All Rights Reserved.<br />
+          Proudly Powered by Invention Minds
+        </p>
+      </div>
+    </footer>
+  </div>
+  

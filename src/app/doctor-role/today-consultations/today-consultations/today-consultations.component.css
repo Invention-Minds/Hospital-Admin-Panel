@@ -289,8 +289,8 @@ tbody tr:hover {
 }
 .start {
   display: flex;
-  width: 165px;
-  height: 30px;
+  width: 176px;
+  height: 36px;
   padding: 8px 10px;
   justify-content: center;
   align-items: center;
@@ -301,14 +301,15 @@ tbody tr:hover {
   background: #fff;
   color: #169458;
   font-family: Kanit;
-  font-size: 12px;
+  font-size: 14px;
   font-style: normal;
   font-weight: 500;
   line-height: normal;
+  cursor: pointer;
 }
 .estimation {
   display: inline-flex;
-  height: 30px;
+  height: 36px;
   padding: 8px 10px;
   justify-content: center;
   align-items: center;
@@ -319,10 +320,11 @@ tbody tr:hover {
   background: #fff;
   color: #0e2970;
   font-family: Kanit;
-  font-size: 12px;
+  font-size: 14px;
   font-style: normal;
   font-weight: 500;
   line-height: normal;
+  cursor: pointer;
 }
 .close-opd {
   display: flex;
@@ -342,33 +344,295 @@ tbody tr:hover {
   font-style: normal;
   font-weight: 500;
   line-height: normal;
+  cursor: pointer;
 }
 .end-consul {
-    display: flex;
-width: 185px;
-height: 44px;
-padding: 8px 20px;
-justify-content: center;
-align-items: center;
-gap: 10px;
-flex-shrink: 0;
-border-radius: 6px;
-border: 1px solid #D20006;
-background: #FFF;
-color: #D20006;
+  display: flex;
+  width: 185px;
+  height: 44px;
+  padding: 8px 20px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  border: 1px solid #d20006;
+  background: #fff;
+  color: #d20006;
+  font-family: Kanit;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  cursor: pointer;
+}
+.container {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 20px;
+  margin-right: 50px;
+}
+.action {
+  margin-left: 267px !important;
+}
+.image {
+  width: 20px;
+  height: 20px;
+}
+
+.end-consul[disabled] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.estimation-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  border-radius: 20px;
+  background: #fff;
+  padding: 20px;
+  width: 673px;
+  height: 420px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.modal-header h3 {
+  color: #271e4a;
+  font-family: Kanit;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  margin: 0;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.modal-body {
+  margin-bottom: 20px;
+}
+
+.modal-body p {
+    color: rgba(39, 30, 74, 0.80);
+font-family: Kanit;
+font-size: 18px;
+font-style: normal;
+font-weight: 500;
+line-height: normal;
+  margin: 10px 0;
+}
+.popup-close{
+    background-color: transparent;
+    border: none;
+}
+.estimation-textarea {
+  width: 100%;
+  height: 100px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 10px;
+
+  resize: none;
+  color: rgba(39, 30, 74, 0.8);
+  font-family: Kanit;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  margin-top: 40px;
+}
+textarea::placeholder{
+    color: rgba(39, 30, 74, 0.80);
 font-family: Kanit;
 font-size: 14px;
 font-style: normal;
 font-weight: 500;
 line-height: normal;
 }
-.container{
+
+.modal-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  
+}
+.modal-footer-close-opd{
     display: flex;
-    justify-content: flex-end;
+    justify-content: center;
     align-items: center;
-    gap: 20px;
-    margin-right: 50px;
+    gap: 30px;
+    position: relative;
+  bottom: -143px; /* Stick to the bottom */
 }
-.action{
-    margin-left: 267px !important;
+
+.save-button {
+  background-color: #169458;
+  color: #fff;
+  font-family: Kanit;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  width: 150px;
+  padding: 7px 14px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
 }
+
+.close-button {
+  display: flex;
+  width: 150px;
+  padding: 7px 65px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  border: 1px solid #7b7b7b;
+  color: #7b7b7b;
+  font-family: Kanit;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+.close-opd-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+
+  .approval-button {
+    background-color: #169458;
+    color: #fff;
+    font-family: Kanit;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    width: 195px;
+    padding: 7px 14px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+  }
+  .select-all-container {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+  }
+  
+  .select-all-button,
+  .unselect-all-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+  
+  .select-all-button:hover,
+  .unselect-all-button:hover {
+    background-color: #0056b3;
+  }
+  .space{
+    margin-left: 20px;
+    margin-right: 7px;
+  }
+  .space-1{
+    margin-left: 97px;
+    margin-right: 5px;
+  }
+  .leave-request-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  .date-selection {
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  
+  .date-selection label {
+    font-family: Kanit;
+    font-size: 16px;
+    font-weight: 500;
+    color: #271e4a;
+    margin-bottom: 10px;
+  }
+  
+  .date-selection input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+    width: 220px;
+    height: 42px;
+  }
+  .modal-body-date{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .calendar-input{
+    display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 110px;
+        margin-top: 70px;
+        margin-bottom: 40px;
+    
+  }

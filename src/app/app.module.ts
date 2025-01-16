@@ -79,6 +79,7 @@ import { SignatureComponent } from './signature/signature/signature.component';
 import { TodayConsultationsComponent } from './doctor-role/today-consultations/today-consultations/today-consultations.component';
 import { OverviewComponent } from './doctor-role/overview/overview/overview.component';
 import { FutureConsultationsComponent } from './doctor-role/future-consultations/future-consultations/future-consultations.component';
+import { TvComponent } from './tv/tv/tv.component';
 
 
 
@@ -119,6 +120,7 @@ import { FutureConsultationsComponent } from './doctor-role/future-consultations
     TodayConsultationsComponent,
     OverviewComponent,
     FutureConsultationsComponent,
+    TvComponent,
 
   
     

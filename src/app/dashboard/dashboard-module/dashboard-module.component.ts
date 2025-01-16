@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ChangeDetectorRef, HostListener, ElementRef } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectorRef, HostListener, ElementRef, Output, EventEmitter } from '@angular/core';
 import { AuthServiceService } from '../../services/auth/auth-service.service';
 import { Router } from '@angular/router';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
@@ -64,6 +64,7 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
   public hasNewAppointment: boolean = false;
   isDropdownOpen: boolean = false;
   showLogoutConfirmDialog: boolean = false;
+  @Output() leaveRequestClicked = new EventEmitter<void>();
   constructor(private authService: AuthServiceService, private router: Router, private appointmentService: AppointmentConfirmService, private changeDetector: ChangeDetectorRef, private messageService: MessageService, private elementRef: ElementRef) { }
 
   // ngOnInit(): void {
@@ -354,6 +355,7 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
   gotoLeaveRequest(): void {
     console.log('Navigating to Leave Request...');
     // Add navigation logic
+    this.leaveRequestClicked.emit();
   }
 
   gotoHelp(): void {

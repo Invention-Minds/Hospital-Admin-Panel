@@ -289,8 +289,8 @@
   }
   .start {
     display: flex;
-    width: 165px;
-    height: 30px;
+    width: 176px;
+    height: 36px;
     padding: 8px 10px;
     justify-content: center;
     align-items: center;
@@ -301,14 +301,14 @@
     background: #fff;
     color: #169458;
     font-family: Kanit;
-    font-size: 12px;
+    font-size: 14px;
     font-style: normal;
     font-weight: 500;
     line-height: normal;
   }
   .estimation {
     display: inline-flex;
-    height: 30px;
+    height: 36px;
     padding: 8px 10px;
     justify-content: center;
     align-items: center;
@@ -319,7 +319,7 @@
     background: #fff;
     color: #0e2970;
     font-family: Kanit;
-    font-size: 12px;
+    font-size: 14px;
     font-style: normal;
     font-weight: 500;
     line-height: normal;
@@ -372,6 +372,10 @@
   .action{
       margin-left: 267px !important;
   }
+  .image{
+    width: 20px;
+    height: 20px;
+}
   ::ng-deep .custom-dropdown .p-dropdown {
     width: 200px;
     height: 46px;

@@ -57,6 +57,7 @@ export class AppointmentConfirmComponent {
   filteredList: any;
   lastWeekAppointments: any[] = [];  
   isLoading: boolean = false;
+  today: string = ''
 
   searchOptions = [
     { label: 'Patient Name', value: 'patientName' },
@@ -64,6 +65,11 @@ export class AppointmentConfirmComponent {
   ];
   // Method to handle sorting by a specific column
   ngOnInit() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = (today.getMonth() + 1).toString().padStart(2, '0');
+    const day = today.getDate().toString().padStart(2, '0');
+    this.today = `${year}-${month}-${day}`;
     console.log('Setting isLoading to true');
     this.isLoading = true; // Start loading indicator
   
@@ -150,7 +156,7 @@ export class AppointmentConfirmComponent {
 
   // Method to calculate total pages
   get totalPages() {
-    return Math.ceil(this.confirmedAppointments.length / this.itemsPerPage);
+    return Math.ceil(this.filteredAppointments.length / this.itemsPerPage);
   }
 
   // Method to go to the previous page
@@ -445,19 +451,23 @@ export class AppointmentConfirmComponent {
   }
   completeAppointment(appointment: Appointment) {
     const appointmentId = appointment.id;
+    if(appointment.date > this.today){
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Cannot check-in for future appointments!' });
+      return;
+    }
     if(appointmentId !== undefined){
-      this.doctorService.markSlotAsComplete(appointment!.doctorId, appointment.date, appointment.time)
-      .subscribe(
-        response => {
-          console.log('Slot marked as complete:', response);
-          // alert('Slot successfully marked as complete!');
-          // Update your view or refresh the slots list here as needed
-        },
-        error => {
-          console.error('Error marking slot as complete:', error);
-          alert('Failed to mark the slot as complete.');
-        }
-      );
+      // this.doctorService.markSlotAsComplete(appointment!.doctorId, appointment.date, appointment.time)
+      // .subscribe(
+      //   response => {
+      //     console.log('Slot marked as complete:', response);
+      //     // alert('Slot successfully marked as complete!');
+      //     // Update your view or refresh the slots list here as needed
+      //   },
+      //   error => {
+      //     console.error('Error marking slot as complete:', error);
+      //     alert('Failed to mark the slot as complete.');
+      //   }
+      // );
       this.appointmentService.checkedinAppointment(appointmentId).subscribe({
         next: (response) => {
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Checked in successfully!' });

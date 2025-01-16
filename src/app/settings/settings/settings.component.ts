@@ -65,6 +65,7 @@ export class SettingsComponent implements OnInit {
   isDoctor = false;
   type = '';
   subAdminType = '';
+  loggedInName: string = '';
 
   constructor(private authService: AuthServiceService, private router: Router, private messageService: MessageService, private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService) {}
  // Define the role-based access
@@ -82,7 +83,7 @@ export class SettingsComponent implements OnInit {
       const storedUsername = localStorage.getItem('username'); 
       const validRoles: UserRole[] = ['admin', 'doctor', 'sub_admin', 'super_admin'];
       this.role = storedRole;
-      // this.name = storedUsername || '';
+      this.loggedInName = storedUsername || '';
       // this.loggedinUser = `${this.name}_${this.role}@rashtrotthana`;
       // console.log('Logged in user:', this.loggedinUser);
       // this.username = storedUsername || '';

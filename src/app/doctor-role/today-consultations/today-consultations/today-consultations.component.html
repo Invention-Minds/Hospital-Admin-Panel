@@ -1,10 +1,10 @@
 <div class="container">
-    <div class="close-opd">
+    <div class="close-opd" (click)="openCloseOpdPopup()">
         <img src="/close-opd.svg"> Close OPD
     </div>
-    <div class="end-consul">
-        <img src="/end.svg"> End Consultation
-    </div>
+    <button class="end-consul" [disabled]="filteredAppointments.length>1" >
+        <img src="/end.svg" > End Consultation
+    </button>
 </div>
 <div class="table-container" *ngIf="!isLoading">
     <div class="table-wrapper">
@@ -74,11 +74,11 @@
               <span class="status-badge">{{ appointment.status }}</span>
             </td> -->
             <td class="button">
-              <button class="start">
-                <img src="/start.svg">Start Consultations
+              <button class="start" (click)="startConsultation(appointment)">
+                <img class="image" src="/start.svg">Start Consultation
               </button>
-              <button class="estimation">
-                <img src="/est.svg">Estimation
+              <button class="estimation" (click)="openEstimationPopup(appointment)">
+                <img class="image" src="/est.svg">Estimation
               </button>
             </td>
           </tr>
@@ -108,3 +108,91 @@
   </app-appointment-form> -->
   
   <div class="loader" *ngIf="isLoading"></div>
+  <div *ngIf="showEstimationPopup" class="estimation-modal" >
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Estimation Form {{ currentDoctorName }}</h3>
+        <button class="popup-close" (click)="closeEstimationPopup()"><img src="/popup-close.svg"></button>
+      </div>
+      <hr>
+      <div class="modal-body">
+        <p>
+          Patient Name<span class="space">:</span>{{ selectedAppointment?.patientName }}
+        </p>
+        <p>
+          Date<span class="space-1">:</span> {{ selectedAppointment?.date }}
+        </p>
+        <textarea
+          class="estimation-textarea"
+          [(ngModel)]="estimationText"
+          placeholder="Please Enter Estimation Here*"
+        ></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="save-button" (click)="saveEstimation()">Save</button>
+        <button class="close-button" (click)="closeEstimationPopup()">Close</button>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="showCloseOpdPopup" class="close-opd-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Select Slots for Close OPD Request</h3>
+        <button class="popup-close" (click)="closeCloseOpdPopup()">
+          <img src="/popup-close.svg" alt="Close Popup" />
+        </button>
+      </div>
+      <hr />
+      <div class="modal-body">
+        <p>
+          Please select the slots you want to send for Request to Close OPD:
+        </p>
+        <div class="select-all-container">
+            <button class="select-all-button" (click)="selectAllSlots()">Select All</button>
+            <button class="unselect-all-button" (click)="unselectAllSlots()">Unselect All</button>
+          </div>
+        <div class="slots-container">
+          <div *ngFor="let slot of filteredAppointments" class="slot-item">
+            <input
+              type="checkbox"
+              [id]="slot.time"
+              [(ngModel)]="slot.selectedSlot"
+            />
+            <label [for]="slot.time">{{ slot.time }}</label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer-close-opd">
+        <button class="approval-button" (click)="sendSelectedSlots()">Send Request</button>
+        <button class="close-button" (click)="closeCloseOpdPopup()">Cancel</button>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="showLeaveRequestPopup" class="leave-request-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Select Dates for Leave</h3>
+        <button class="popup-close" (click)="closeLeaveRequestPopup()">
+          <img src="/popup-close.svg" alt="Close Popup" />
+        </button>
+      </div>
+      <hr />
+      <div class="modal-body-date">
+        <form class="calendar-input">
+          <div class="date-selection">
+            <label for="startDate">Starting Date:</label>
+            <input type="date" id="startDate" [(ngModel)]="startDate" name="startDate" />
+          </div>
+          <div class="date-selection">
+            <label for="endDate">Ending Date:</label>
+            <input type="date" id="endDate" [(ngModel)]="endDate" name="endDate" />
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="save-button" (click)="submitLeaveRequest()">Request</button>
+        <button class="close-button" (click)="closeLeaveRequestPopup()">Close</button>
+      </div>
+    </div>
+  </div>
+  

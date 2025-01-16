@@ -24,8 +24,8 @@ export class AuthServiceService {
   constructor(private http: HttpClient) { 
     this.initializeUserFromStorage(); 
   }
-  login(username: string, password: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/login`, { username, password }).pipe(
+  login(employeeId: string, password: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/login`, { employeeId, password }).pipe(
       tap((response: any) => {
         console.log(response)
         const user = response.user;  // Use 'user' from the response

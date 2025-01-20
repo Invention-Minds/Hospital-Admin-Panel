@@ -16,6 +16,8 @@ import { UnsavedChangesGuard } from './guards/unsaved-changes.guard';
 import { TotalOverviewComponent } from './dashboard/total-overview/total-overview.component';
 import { TodayConsultationsComponent } from './doctor-role/today-consultations/today-consultations/today-consultations.component';
 import { OverviewComponent } from './doctor-role/overview/overview/overview.component';
+import { TvComponent } from './tv/tv/tv.component';
+import { TvControlComponent } from './tv-control/tv-control/tv-control.component';
 
 const routes: Routes = [
   { path: 'dashboard', component: DashboardOverviewComponent, canActivate:[authGuard] },
@@ -31,6 +33,8 @@ const routes: Routes = [
   {path: 'health-checkup', component: HealthCheckupOverviewComponent,canActivate:[authGuard]},
   { path: 'reschedule/:id', component: HealthCheckupFormComponent,canActivate:[authGuard] },
   {path:'doctor-appointments', component: OverviewComponent, canActivate:[authGuard]},
+  {path: 'tv-control', component: TvControlComponent, canActivate:[authGuard]},
+  { path: 'channel/:channelId', component: TvComponent },
   {
     path: 'form',
     component: HealthCheckupFormComponent,

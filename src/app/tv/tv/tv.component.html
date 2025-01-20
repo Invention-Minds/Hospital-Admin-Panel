@@ -10,7 +10,7 @@
       </div>
     </header>
   
-    <div
+    <div *ngIf="!loading; else loaderTemplate"
       class="doctor-cards"
       [ngClass]="{ 'four-doctors-layout': isFourDoctors() }"
     >
@@ -39,18 +39,23 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let patient of doctor.patients; let i = index">
+            <tr
+            *ngFor="let patient of doctor.patients; let i = index;  trackBy: trackByFn"
+            [class.removed]="patient.checkedOut"
+          >
               <td>{{ i + 1 }}</td>
-              <td>{{ patient.name }}</td>
+              <td>{{ patient.patientName }}</td>
               <td>
-                <span class="status" [ngClass]="patient.status">{{ patient.details }}</span>
+                <span class="status" [ngClass]="patient.status">{{ patient.time }}</span>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
-  
+    <ng-template #loaderTemplate>
+        <div class="loader"></div>
+      </ng-template>
     <footer class="footer">
       <marquee>
         Surgery Package: Total Knee Replacement - Unilateral (Excluding Implant

@@ -252,6 +252,10 @@ getAppointmentsByRole(): Observable<Appointment[]> {
 //     { params: { userId: userId.toString() } }
 //   );
 // }
+getAppointmentsByDoctor(userId: number): Observable<any[]> {
+  const params = new HttpParams().set('userId', userId.toString());
+  return this.http.get<any[]>(`${this.apiUrl}/by-doctor`, { params });
+}
 
   // Method to lock an appointment
   lockAppointment(appointmentId: number, userId: string): Observable<any> {

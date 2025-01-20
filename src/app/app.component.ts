@@ -34,4 +34,7 @@ export class AppComponent {
       console.log('localStorage is not available');
     }
   }
+  isChannelRoute(): boolean {
+    return this.router.url.startsWith('/channel/');
+  }
 }

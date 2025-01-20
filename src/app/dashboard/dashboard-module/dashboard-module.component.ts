@@ -136,10 +136,13 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
 
       if (storedUsername && storedRole) {
         this.username = storedUsername;
-        this.role = storedRole;
+        // this.role = storedRole;
+        this.role = storedRole.replace(/_/g, ''); // Removes all underscores
+
       }
       if(this.role !== 'doctor'){
         this.username = this.username.split(`_${this.role}`)[0]
+        console.log(this.username)
       }
       else if(this.role === 'doctor'){
         this.username = `Dr. ${this.username.split('_doctor')[0]}`

@@ -80,6 +80,7 @@ import { TodayConsultationsComponent } from './doctor-role/today-consultations/t
 import { OverviewComponent } from './doctor-role/overview/overview/overview.component';
 import { FutureConsultationsComponent } from './doctor-role/future-consultations/future-consultations/future-consultations.component';
 import { TvComponent } from './tv/tv/tv.component';
+import { TvControlComponent } from './tv-control/tv-control/tv-control.component';
 
 
 
@@ -121,6 +122,7 @@ import { TvComponent } from './tv/tv/tv.component';
     OverviewComponent,
     FutureConsultationsComponent,
     TvComponent,
+    TvControlComponent,
 
   
     

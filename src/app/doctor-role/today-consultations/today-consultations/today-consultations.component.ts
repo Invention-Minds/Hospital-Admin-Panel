@@ -1,6 +1,7 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { AppointmentConfirmService } from '../../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../../services/doctor-details/doctor-service.service';
+import { EventService } from '../../../services/event.service';
 import { MessageService } from 'primeng/api';
 import { ChangeDetectorRef } from '@angular/core';
 import { Doctor } from '../../../models/doctor.model';
@@ -25,6 +26,7 @@ interface Appointment {
   requestVia?: string; // Optional property
   created_at?: string;
   checkedIn?:boolean;
+  checkedOut?:boolean;
   user?: any;
   selectedSlot?: boolean;
 }
@@ -36,8 +38,9 @@ interface Appointment {
 })
 export class TodayConsultationsComponent {
   confirmedAppointments: Appointment[] = [];
+  @Output() consultationStarted = new EventEmitter<{ doctorId: number, appointmentId: number }>();
 
-  constructor(private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService,private messageService: MessageService, private cdRef: ChangeDetectorRef) { }
+  constructor(private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService,private messageService: MessageService, private cdRef: ChangeDetectorRef,private eventService: EventService) { }
   appointments: Appointment[] = [
     // { id: '0001', patientName: 'Anitha Sundar', phoneNumber: '+91 7708590100', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Booked', smsSent: true },
   ];
@@ -98,7 +101,7 @@ export class TodayConsultationsComponent {
 
         this.doctorService.getAllDoctors().subscribe({
           next: (doctors) => {
-            this.confirmedAppointments = appointments.filter(appointment => appointment.status === 'confirmed');
+            this.confirmedAppointments = appointments.filter(appointment => appointment.status === 'confirmed' && (appointment as any).checkedIn === true);
             this.filteredAppointments = this.confirmedAppointments.filter(appointment => {
               const doctor = doctors.find(doc => doc.id === appointment.doctorId);
               this.doctor = doctor ? [doctor] : [];
@@ -114,11 +117,11 @@ export class TodayConsultationsComponent {
             this.isLoading = false; // Stop loading indicator
           }
         });
-        
-        this.confirmedAppointments.sort((a, b) => {
-          const dateA = new Date(a.created_at!);
-          const dateB = new Date(b.created_at!);
-          return dateB.getTime() - dateA.getTime();
+
+        this.filteredAppointments.sort((a, b) => {
+          const timeA = this.parseTimeToMinutes(a.time);
+          const timeB = this.parseTimeToMinutes(b.time);
+          return timeA - timeB; // Ascending order
         });
   
         // this.filteredAppointments = [...this.confirmedAppointments];
@@ -134,6 +137,20 @@ export class TodayConsultationsComponent {
   
     // Subscribe to confirmed appointments
    
+  }
+  parseTimeToMinutes(time: string): number {
+    const [hours, minutesPart] = time.split(':');
+    const minutes = parseInt(minutesPart.slice(0, 2), 10); // Extract the numeric minutes
+    const isPM = time.toLowerCase().includes('pm');
+  
+    let hoursInMinutes = parseInt(hours, 10) * 60;
+    if (isPM && parseInt(hours, 10) !== 12) {
+      hoursInMinutes += 12 * 60; // Add 12 hours for PM times
+    } else if (!isPM && parseInt(hours, 10) === 12) {
+      hoursInMinutes -= 12 * 60; // Subtract 12 hours for 12 AM
+    }
+  
+    return hoursInMinutes + minutes;
   }
   
   
@@ -209,7 +226,7 @@ export class TodayConsultationsComponent {
       this.currentPage = this.totalPages;
     }
   }
-  filteredAppointments: Appointment[] = [...this.confirmedAppointments];
+  filteredAppointments: Appointment[] =[];
   // filteredAppointments: Appointment[] = this.confirmedAppointments.filter(appointment => !appointment!.completed);
 
   ngOnChanges(changes: SimpleChanges) {
@@ -243,7 +260,7 @@ export class TodayConsultationsComponent {
 
   filterAppointment() {
     // If there's no date range or value to filter, return the unfiltered appointments
-    this.filteredList = [...this.confirmedAppointments];
+    this.filteredList = [...this.filteredAppointments];
   
     // Handle filtering by date range if selected
     if (this.selectedDateRange && this.selectedDateRange.length === 2) {
@@ -406,8 +423,12 @@ export class TodayConsultationsComponent {
   }
 
   startConsultation(appointment: Appointment): void {
-    appointment.status = "completed";
+    appointment.checkedOut = true;
     this.appointmentService.updateAppointment(appointment)
+    this.eventService.emitConsultationStarted({
+      doctorId: this.currentDoctorId,
+      appointmentId: appointment.id!,
+    });
   }
 
   // Confirm and perform the Close OPD action

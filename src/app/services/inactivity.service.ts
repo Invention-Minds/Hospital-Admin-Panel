@@ -20,6 +20,9 @@ export class InactivityService {
       window.addEventListener(event, () => this.resetLogoutTimer());
     });
   }
+  private isChannelRoute(): boolean {
+    return this.router.url.startsWith('/channel/');
+  }
 
   // Function to reset the inactivity timer
   private resetLogoutTimer(): void {
@@ -33,12 +36,14 @@ export class InactivityService {
 
   // Function to log out the user
   private logoutUser(): void {
-    this.ngZone.run(() => {
-      console.log('Logging out due to inactivity...');
-      localStorage.setItem('logoutReason', 'inactivity');
-      // Perform your logout logic here
-      this.router.navigate(['/login']); // Adjust this to match your logout route
-      localStorage.removeItem('token');
-    });
+    if (!this.isChannelRoute()) {
+      this.ngZone.run(() => {
+        console.log('Logging out due to inactivity...');
+        localStorage.setItem('logoutReason', 'inactivity');
+        // Perform your logout logic here
+        this.router.navigate(['/login']); // Adjust this to match your logout route
+        localStorage.removeItem('token');
+      });
+    }
   }
 }

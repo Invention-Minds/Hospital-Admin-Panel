@@ -1,12 +1,5 @@
-<!-- app.component.html -->
-<!-- <div class="container">
-    <app-sidebar></app-sidebar>
-<app-dashboard-module></app-dashboard-module>
-<router-outlet></router-outlet>
-<app-login></app-login>
-  </div> -->
-  <!-- app.component.html -->
-<!-- <div class="container" *ngIf="!isLoginRoute(); else loginTemplate">
+<!-- 
+<div class="container" *ngIf="!isLoginRoute(); else loginTemplate">
   <app-sidebar></app-sidebar>
   <div class="content">
     <app-dashboard-module  ></app-dashboard-module>
@@ -20,4 +13,21 @@
 <router-outlet></router-outlet>
 
   <p-toast></p-toast> -->
-  <app-tv></app-tv>
+  <div *ngIf="!isChannelRoute(); else channelTemplate">
+    <div *ngIf="!isLoginRoute(); else loginTemplate">
+      <app-sidebar></app-sidebar>
+      <div class="content">
+        <app-dashboard-module></app-dashboard-module>
+      </div>
+    </div>
+    <ng-template #loginTemplate>
+      <app-login></app-login>
+    </ng-template>
+  </div>
+  
+  <ng-template #channelTemplate>
+    <router-outlet></router-outlet>
+  </ng-template>
+  
+  <p-toast></p-toast>
+  

@@ -146,12 +146,7 @@ line-height: normal;
     text-align: left; /* Aligns text to the left */
 
   }
-  .queue-table tbody {
-    display: block; /* Makes the body scrollable */
-    max-height: 300px; /* Set max height for scrolling */
-    overflow-y: auto; /* Enable vertical scrolling */
-    width: 100%; /* Match the table width */
-  }
+
   
   /* Table Header Styling */
   .queue-table thead tr {
@@ -163,10 +158,8 @@ line-height: normal;
   .queue-table thead {
     background-color: #003566; /* Dark blue for header */
     color: white;
-    font-size: 14px;
-    display: table; /* Keeps the header aligned */
-    width: 100%; /* Match the table width */
-    table-layout: fixed; /* Ensures proper column widths */
+    font-size: 14px; /* Keeps the header aligned */
+    width: 100%; /* Match the table width *//* Ensures proper column widths */
   }
 
   

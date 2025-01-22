@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class ChannelService {
-  private baseUrl = 'https://backend-812956739285.us-east4.run.app/api/channel'; // Update with your backend URL
+  private baseUrl = 'http://localhost:3000/api/channel'; // Update with your backend URL
 
   constructor(private http: HttpClient) {}
 

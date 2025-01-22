@@ -27,6 +27,7 @@ export class TvControlComponent {
   selectedChannelIndex: number = 0;
   selectedDoctorIndex: number = 0;
   isPopupOpen = false;
+  roomNumber : string = ''
 
   openForm(channelIndex: number, doctorIndex: number) {
     this.selectedChannelIndex = channelIndex;
@@ -194,7 +195,18 @@ export class TvControlComponent {
         doctorId: this.selectedDoctor.id,
         departmentName: this.selectedDepartment,
       };
-  
+
+      this.selectedDoctor.roomNo = this.roomNumber;
+      console.log(this.selectedDoctor)
+
+      this.doctorService.updateDoctor(this.selectedDoctor).subscribe(
+        (response) => {
+          console.log('Doctor updated successfully:', response);
+        },
+        (error) => {
+          console.error('Error updating doctor:', error);
+        }
+      )
       console.log('Doctor Data to Save:', doctorData);
   
       // Send the data to the backend

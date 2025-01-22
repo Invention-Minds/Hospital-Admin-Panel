@@ -25,7 +25,7 @@
           <div class="doctor-details">
             <h3>Name: {{ doctor.name }}</h3>
             <p>Department: {{ doctor.department }}</p>
-            <p>Room No: {{ doctor.room }}</p>
+            <p>Room No: {{ doctor.roomNo }}</p>
             <p>Avail. Time: {{ doctor.time }}</p>
           </div>
         </div>
@@ -42,8 +42,9 @@
             <tr
             *ngFor="let patient of doctor.patients; let i = index;  trackBy: trackByFn"
             [class.removed]="patient.checkedOut"
+            @fadeInOut
           >
-              <td>{{ i + 1 }}</td>
+              <td>{{i+ 1}}</td>
               <td>{{ patient.patientName }}</td>
               <td>
                 <span class="status" [ngClass]="patient.status">{{ patient.time }}</span>

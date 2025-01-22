@@ -81,6 +81,8 @@ import { OverviewComponent } from './doctor-role/overview/overview/overview.comp
 import { FutureConsultationsComponent } from './doctor-role/future-consultations/future-consultations/future-consultations.component';
 import { TvComponent } from './tv/tv/tv.component';
 import { TvControlComponent } from './tv-control/tv-control/tv-control.component';
+import { EstimationFormComponent } from './estimation/estimation-form/estimation-form/estimation-form.component';
+import { EstimationOverviewComponent } from './estimation/estimation-overview/estimation-overview/estimation-overview.component';
 
 
 
@@ -123,6 +125,8 @@ import { TvControlComponent } from './tv-control/tv-control/tv-control.component
     FutureConsultationsComponent,
     TvComponent,
     TvControlComponent,
+    EstimationFormComponent,
+    EstimationOverviewComponent,
 
   
     

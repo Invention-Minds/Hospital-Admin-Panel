@@ -345,10 +345,10 @@ export class DoctorAvailabilityComponent {
             });
 
             // Check if the doctor is available on the given day of the week
-            const dayOfWeek = this.selectedDate.toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
-            const availableDay = doctor.availability?.find(avail =>
-              avail.day.toLowerCase() === dayOfWeek
-            );
+            // const dayOfWeek = this.selectedDate.toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
+            // const availableDay = doctor.availability?.find(avail =>
+            //   avail.day.toLowerCase() === dayOfWeek
+            // );
 
             // const isUnavailableDueToSchedule = !availableDay;
             // const latestTimestamp = doctor.availability?.reduce((latest, curr) => {
@@ -365,6 +365,27 @@ export class DoctorAvailabilityComponent {
             // Step 3: Check if the doctor is available on the given day of the week
             // const dayOfWeek = this.selectedDate.toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
             // const availableDay = latestAvailability?.find(avail => avail.day.toLowerCase() === dayOfWeek);
+            // Step 1: Determine if all `updatedAt` fields are null
+const allUpdatedAtNull = doctor.availability?.every(avail => !avail.updatedAt);
+
+// Step 2: Calculate the latest timestamp if any `updatedAt` is not null
+const latestTimestamp = allUpdatedAtNull
+  ? null // If all are null, treat it as the "latest"
+  : doctor.availability?.reduce((latest, curr) => {
+      return curr.updatedAt && new Date(curr.updatedAt).getTime() > new Date(latest).getTime()
+        ? curr.updatedAt
+        : latest;
+    }, doctor.availability.find(avail => avail.updatedAt)?.updatedAt || '');
+
+// Step 3: Filter availability data based on the latest timestamp
+const latestAvailability = allUpdatedAtNull
+  ? doctor.availability // If all are null, consider the entire availability as "latest"
+  : doctor.availability?.filter(avail => avail.updatedAt === latestTimestamp);
+
+// Step 4: Check if the doctor is available on the given day of the week
+const dayOfWeek = this.selectedDate.toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
+const availableDay = latestAvailability?.find(avail => avail.day.toLowerCase() === dayOfWeek);
+
 
             const isUnavailableDueToSchedule = !availableDay;
 

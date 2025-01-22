@@ -1,0 +1,158 @@
+<div class="form-container">
+    <h2 class="form-title">Estimation Form</h2>
+    <hr class="line">
+    <form #estimationForm="ngForm" (ngSubmit)="onSubmit(estimationForm)" novalidate>
+    <div class="section">
+        <h3>Patient Information:</h3>
+        <div class="form-row">
+            <div class="input-container">
+                <input  type="text"
+                id="uhid"
+                name="uhid"
+                pattern="[A-Za-z0-9\-]+"
+                class="custom-input"
+                ngModel
+                [(ngModel)]="formData.uhid"
+                placeholder=" "
+                required />
+                <label for="uhid" class="custom-label">UHID/MRD*</label>
+                <div *ngIf="estimationForm.submitted && estimationForm.controls['uhid']?.invalid" class="error-message">
+                    <span *ngIf="estimationForm.controls['uhid']?.errors?.['required']">UHID is required.</span>
+                    <span *ngIf="estimationForm.controls['uhid']?.errors?.['pattern']">Invalid UHID format.</span>
+                  </div>
+            </div>
+            <div class="input-container">
+                <input type="text" id="patientName" placeholder=" " class="custom-input"  />
+                <label for="patientName" class="custom-label">Patient Name*</label>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="input-container">
+                <input type="number" id="age"  placeholder=" " class="custom-input" />
+                <label for="age" class="custom-label">Age*</label>
+            </div>
+            <div class="input-container">
+                <input type="text" id="gender" placeholder=" " class="custom-input" />
+                <label for="gender" class="custom-label">Gender*</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>Consultant Information:</h3>
+        <div class="form-row">
+            <div class="input-container">
+                <input type="text" id="consultant-name" placeholder=" " class="custom-input" />
+                <label for="consultant-name" class="custom-label">Consultant Name*</label>
+            </div>
+            <div class="input-container">
+                <input type="date" id="preferredDate" placeholder=" " class="custom-input" />
+                <label for="preferredDate" class="custom-label">Preferred Date by Doctor*</label>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="input-container">
+                <input type="text" id="surgeryName" placeholder=" " class="custom-input" />
+                <label for="surgeryName" class="custom-label">Surgery Name*</label>
+            </div>
+            <div class="input-container">
+                <input type="text" id="remarks" placeholder=" " class="custom-input" />
+                <label for="remarks" class="custom-label">Remarks</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>Estimated Hospital Stay (No. of Days):</h3>
+        <div class="form-row">
+            <div class="input-container">
+                <input type="number" id="icuDays" placeholder=" " class="custom-input" />
+                <label for="icuDays" class="custom-label">No. of Days for ICU*</label>
+            </div>
+            <div class="input-container">
+                <input type="number" id="wardDays" placeholder=" " class="custom-input" />
+                <label for="wardDays" class="custom-label">No. of Days for Ward*</label>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="input-container">
+                <label for="roomType">Room Type*</label>
+                <select id="roomType" class="custom-input">
+                    <option>Select Room Type</option>
+                    <option>General</option>
+                    <option>Semi-Private</option>
+                    <option>Private</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>Inclusions and Exclusions:</h3>
+        <div class="checkbox-grid">
+            <label><input type="checkbox" /> Ward and ICU Stay</label>
+            <label><input type="checkbox" /> Primary Consultant</label>
+            <label><input type="checkbox" /> Cross Consultation</label>
+            <label><input type="checkbox" /> Implants</label>
+            <label><input type="checkbox" /> Laboratory and Imaging</label>
+            <label><input type="checkbox" /> Instrument/Equipment</label>
+            <label><input type="checkbox" /> Diet</label>
+            <label><input type="checkbox" /> Nursing</label>
+            <label><input type="checkbox" /> Surgeon, OT, Anesthesia</label>
+            <label><input type="checkbox" /> Bedside Procedure</label>
+            <label><input type="checkbox" /> OT Drugs</label>
+            <label><input type="checkbox" /> Drugs and Consumables</label>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>Estimation Details:</h3>
+        <div class="form-row">
+            <div class="input-container">
+                <input type="date" id="estimatedDate" placeholder=" " class="custom-input"  />
+                <label for="estimatedDate" class="custom-label">Estimated Date*</label>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="input-container">
+                <input type="number" id="estimationCost" placeholder=" " class="custom-input" />
+                <label for="estimationCost" class="custom-label">Estimation Cost*</label>
+            </div>
+            <div class="input-container">
+                <input type="number" id="discount" placeholder=" " class="custom-input" />
+                <label for="discount" class="custom-label">Applicable Discount*</label>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="input-container">
+                <input type="number" id="grandTotal"placeholder=" " class="custom-input"  />
+                <label for="grandTotal" class="custom-label">Grand Total*</label>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>Signature:</h3>
+        <div class="form-row">
+            <div class="input-container">
+                <label>Signature of:</label>
+                <div>
+                    <input type="radio" name="signature" /> Patient
+                    <input type="radio" name="signature" /> Attender
+                </div>
+            </div>
+            <div class="input-container">
+                <input type="text" placeholder=" " class="custom-input" />
+                <label class="custom-label">Signature of Staff:</label>
+            </div>
+            <div class="input-container">
+                <input type="text" placeholder=" " class="custom-input" />
+                <label class="custom-label">Approver Signature:</label>
+            </div>
+        </div>
+    </div>
+    <div>
+        <button class="submit-button">Save</button>
+    </div>
+</form>
+</div>

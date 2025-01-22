@@ -75,6 +75,7 @@ line-height: normal;
     justify-content: center;
     background: #F0F3FF;
     margin: 0;
+    height: 100vh;
     /* margin: 20px; */
   }
   
@@ -171,7 +172,7 @@ font-size: 20px;
 font-style: normal;
 font-weight: 500;
 line-height: normal;
-    text-align: center;
+    text-align: left;
      /* Removes borders for a clean look */
 height: 52px;
 
@@ -206,12 +207,13 @@ height: 52px;
   .queue-table td {
     padding: 10px;
     font-family: Kanit, sans-serif;
-    font-size: 16px;
+    font-size: 22px;
     font-weight: 500;
     color: #222;
-    text-align: center;
+    text-align: left;
     border: none; /* Removes default borders */
     margin-bottom: 5px;
+    text-wrap: nowrap;
   }
   /* Table Body Container */
 .scrollable-body {
@@ -224,9 +226,10 @@ height: 52px;
   /* Status Styling */
   .status {
     display: inline-block;
-    width: 100px;
+    width: 150px;
     padding: 4px 10px;
     border-radius: 4px;
+    text-align: center;
   
   }
   
@@ -235,7 +238,7 @@ height: 52px;
     background: #169458; /* Green for Patient In */
     color: #FFF;
 font-family: Kanit;
-font-size: 14px;
+font-size: 22px;
 font-style: normal;
 font-weight: 400;
 line-height: normal;
@@ -245,7 +248,7 @@ line-height: normal;
  /* Yellow for Next */
     color: #FFF;
 font-family: Kanit;
-font-size: 14px;
+font-size: 22px;
 font-style: normal;
 font-weight: 400;
 line-height: normal;
@@ -256,7 +259,7 @@ background: #FB9C2A;
   .status.Default {
     color: #000;
     font-family: Kanit;
-    font-size: 14px;
+    font-size: 22px;
     font-style: normal;
     font-weight: 400;
     line-height: normal;
@@ -311,6 +314,7 @@ line-height: normal;
     display: grid;
     grid-template-columns: repeat(4, 1fr); /* 4 equally spaced columns */
     margin-left: 15px;
+    height: 100vh;
      /* Spacing between columns */
   }
   .four-doctors-layout .doctor-card{

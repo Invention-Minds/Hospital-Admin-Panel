@@ -51,6 +51,19 @@
                   <option *ngFor="let doctor of filteredDoctors" [ngValue]="doctor">{{ doctor.name }}</option>
                 </select>
               </div>
+
+              <div class="form-group">
+                <label for="roomNumber">Room Number</label>
+                <input 
+                  type="text" 
+                  id="roomNumber" 
+                  [(ngModel)]="roomNumber" 
+                  class="form-control" 
+                  placeholder="Enter Room Number" 
+                  required
+                />
+              </div>
+              
               
               <div class="popup-actions">
                 <button class="save-button" (click)="saveDoctor()">Save</button>

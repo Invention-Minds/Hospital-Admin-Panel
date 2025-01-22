@@ -69,7 +69,7 @@
 // //         this.doctors = doctors.map((doctor) => {
 // //           const unavailableSlots = doctor.unavailableSlots || [];
 // //           const formattedUnavailableSlots = unavailableSlots.map(slot => slot.time) // Array of strings
-        
+
 // //           // const unavailableSlots = doctor.unavailableSlots || [];
 // //           const availableDay = doctor.availability?.find((avail: any) =>
 // //             avail.day.toLowerCase() ===
@@ -94,7 +94,7 @@
 // //       (error) => {console.error('Error fetching doctors:', error)
 // //         // this.loadingService.stopLoading();
 // //       }
-     
+
 // //     );
 // //   }
 
@@ -105,30 +105,30 @@
 // //   ): string {
 // //     const currentTime = this.timeToMinutes(new Date().toTimeString().substring(0, 5));
 // //     const timeRanges = availableFrom.split(',').map(range => range.trim());
-  
+
 // //     for (const range of timeRanges) {
 // //       const [startTime, endTime] = range.split('-').map(time => time.trim());
 // //       let currentSlotTime = this.timeToMinutes(startTime);
 // //       const endSlotTime = this.timeToMinutes(endTime);
-  
+
 // //       while (currentSlotTime < endSlotTime) {
 // //         const slotStart = this.minutesToString(currentSlotTime);
 // //         const slotEnd = this.minutesToString(currentSlotTime + slotDuration);
 // //         // console.log('slotStart:', slotStart, 'slotEnd:', slotEnd, unavailableSlots);
 // //         const status = this.getSlotStatus(slotStart, slotEnd, currentTime, unavailableSlots, slotDuration);
 // //         // console.log('status:', status);
-  
+
 // //         if (status === 'Unavailable') {
 // //           return 'Unavailable';
 // //         }
-  
+
 // //         currentSlotTime += slotDuration;
 // //       }
 // //     }
-  
+
 // //     return 'Available';
 // //   }
-  
+
 
 // //   private getSlotStatus(
 // //     slotStart: string,
@@ -139,45 +139,45 @@
 // //   ): string {
 // //     const slotStartMinutes = this.timeToMinutes(slotStart);
 // //     const slotEndMinutes = this.timeToMinutes(slotEnd);
-  
+
 // //     // Check if the slot is in the future
 // //     if (currentTime < slotStartMinutes) {
 // //       // console.log(`Future slot: ${slotStart} - ${slotEnd}`);
 // //       return 'Available'; // Future slots are available by default
 // //     }
-  
+
 // //     // Check if the current time is within the slot range
 // //     const isCurrent = currentTime >= slotStartMinutes && currentTime < slotEndMinutes;
-  
+
 // //     // Check if the slot overlaps with any unavailable slots
 // //     const isUnavailable = unavailableSlots.some((unavailableSlot) => {
 // //       const unavailableParsed = this.parseTime(unavailableSlot); // Parse '07:00 PM' to '19:00'
 // //       const unavailableStartMinutes = this.timeToMinutes(unavailableParsed);
 // //       const unavailableEndMinutes = unavailableStartMinutes + slotDuration;
-  
+
 // //       // console.log('unavailableSlot:', unavailableSlot, 'parsed:', unavailableParsed);
 // //       // console.log('unavailableStartMinutes:', unavailableStartMinutes, 'unavailableEndMinutes:', unavailableEndMinutes);
-  
+
 // //       return (
 // //         currentTime >= unavailableStartMinutes &&
 // //         currentTime < unavailableEndMinutes
 // //       );
 // //     });
-  
+
 // //     // console.log('isUnavailable:', isUnavailable);
-  
+
 // //     // Return appropriate status
 // //     if (isCurrent) {
 // //       return isUnavailable ? 'Unavailable' : 'Current';
 // //     }
-  
+
 // //     return isUnavailable ? 'Unavailable' : 'Available';
 // //   }
-  
-  
-  
-  
-  
+
+
+
+
+
 // //   private setupDynamicAvailabilityCheck(): void {
 // //     setInterval(() => {
 // //       this.fetchDoctorsWithAvailability();
@@ -198,23 +198,23 @@
 
 // //   private timeToMinutes(time: string): number {
 // //     if (this.timeCache[time]) return this.timeCache[time];
-  
+
 // //     const [hours, minutes] = time.split(':').map(Number);
 // //     const totalMinutes = hours * 60 + minutes;
 // //     this.timeCache[time] = totalMinutes;
 // //     return totalMinutes;
 // //   }
-  
+
 // //   private parseTime(time: string): string {
 // //     const [hourMin, period] = time.split(' ');
 // //     let [hours, minutes] = hourMin.split(':').map(Number);
-  
+
 // //     if (period.toUpperCase() === 'PM' && hours < 12) {
 // //       hours += 12;
 // //     } else if (period.toUpperCase() === 'AM' && hours === 12) {
 // //       hours = 0;
 // //     }
-  
+
 // //     return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
 // //   }
 // //   // private minutesToString(minutes: number): string {
@@ -410,18 +410,18 @@
 //       const slotStartMinutes = this.timeToMinutes(slot.time);
 //       const slotDuration = slot.duration || 20; // Default duration
 //       const slotEndMinutes = slotStartMinutes + slotDuration;
-  
+
 //       if (isNaN(slotStartMinutes) || isNaN(slotEndMinutes)) {
 //         console.error("Invalid slot timing:", slot);
 //         return false;
 //       }
-  
+
 //       console.log("Slot Timings:", { currentTime, slotStartMinutes, slotEndMinutes });
-  
+
 //       return currentTime >= slotStartMinutes && currentTime < slotEndMinutes;
 //     });
 //   }
-  
+
 
 //   private updateDoctorLists(): void {
 //     this.availableDoctors = this.doctors.filter(
@@ -439,31 +439,31 @@
 //       console.error("Invalid time format:", time);
 //       return NaN;
 //     }
-  
+
 //     if (this.timeCache[time]) return this.timeCache[time];
-  
+
 //     // Split the time into hours, minutes, and optional AM/PM
 //     const [timePart, period] = time.split(" ");
 //     const [hours, minutes] = timePart.split(":").map(Number);
-  
+
 //     if (isNaN(hours) || isNaN(minutes)) {
 //       console.error("Invalid time components:", time);
 //       return NaN;
 //     }
-  
+
 //     let totalMinutes = hours * 60 + minutes;
-  
+
 //     // Adjust for 12-hour clock if AM/PM is present
 //     if (period?.toUpperCase() === "PM" && hours < 12) {
 //       totalMinutes += 12 * 60;
 //     } else if (period?.toUpperCase() === "AM" && hours === 12) {
 //       totalMinutes -= 12 * 60;
 //     }
-  
+
 //     this.timeCache[time] = totalMinutes;
 //     return totalMinutes;
 //   }
-  
+
 
 //   private minutesToString(minutes: number): string {
 //     if (this.timeStringCache[minutes]) return this.timeStringCache[minutes];
@@ -545,7 +545,7 @@ export class TotalOverviewComponent implements OnInit {
   constructor(
     private appointmentService: AppointmentConfirmService,
     private doctorService: DoctorServiceService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.date = this.formatDate(new Date());
@@ -658,12 +658,12 @@ export class TotalOverviewComponent implements OnInit {
       (doctors) => {
         const currentTime = this.timeToMinutes(new Date().toTimeString().substring(0, 5)); // Current time in minutes
         const selectedDate = this.date;
-  
+
         // Initialize counts
         let availableCount = 0;
         let unavailableCount = 0;
         let absentCount = 0;
-  
+
         this.doctors = doctors
           .filter((doctor) => {
             if (doctor.doctorType === 'Visiting Consultant') {
@@ -684,16 +684,33 @@ export class TotalOverviewComponent implements OnInit {
               time: slot.time,
               duration: slot.duration || 20, // Default to 20 minutes if not provided
             }));
-  
+
             let status: string;
-  
+            const allUpdatedAtNull = doctor.availability?.every(avail => !avail.updatedAt);
+
+            // Step 2: Calculate the latest timestamp if any `updatedAt` is not null
+            const latestTimestamp = allUpdatedAtNull
+              ? null // If all are null, treat it as the "latest"
+              : doctor.availability?.reduce((latest, curr) => {
+                return curr.updatedAt && new Date(curr.updatedAt).getTime() > new Date(latest).getTime()
+                  ? curr.updatedAt
+                  : latest;
+              }, doctor.availability.find(avail => avail.updatedAt)?.updatedAt || '');
+
+            // Step 3: Filter availability data based on the latest timestamp
+            const latestAvailability = allUpdatedAtNull
+              ? doctor.availability // If all are null, consider the entire availability as "latest"
+              : doctor.availability?.filter(avail => avail.updatedAt === latestTimestamp);
+              // console.log(latestAvailability)
+
             if (doctor.doctorType === 'Visiting Consultant') {
               // Visiting Consultant with booked slots for today is Available
               availableCount++;
               status = 'Available';
             } else {
               const isAbsent =
-                !doctor.availability?.some(
+              latestAvailability?.length > 0 &&
+                !latestAvailability?.some(
                   (avail: any) =>
                     avail.day.toLowerCase() ===
                     new Date(selectedDate)
@@ -706,7 +723,7 @@ export class TotalOverviewComponent implements OnInit {
                   ).toISOString().split('T')[0];
                   return formattedUnavailableDate === selectedDate;
                 });
-  
+
               if (isAbsent) {
                 absentCount++;
                 status = 'Absent';
@@ -720,15 +737,15 @@ export class TotalOverviewComponent implements OnInit {
                 status = 'Available';
               }
             }
-  
+
             return { ...doctor, status };
           });
-  
+
         // Update counts
         this.availableDoctorsToday = availableCount;
         this.unavailableDoctorsToday = unavailableCount;
         this.absentDoctorsToday = absentCount;
-  
+
         this.updateDoctorLists();
       },
       (error) => {
@@ -736,7 +753,7 @@ export class TotalOverviewComponent implements OnInit {
       }
     );
   }
-  
+
 
   private isDoctorUnavailable(
     currentTime: number,

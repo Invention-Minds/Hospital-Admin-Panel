@@ -133,3 +133,6 @@ a{
 transform:rotate(90deg);
 transition-duration: 1.5s;
 }
+.appt{
+  margin-top: -143px;
+}

@@ -93,47 +93,7 @@ export class TodayConsultationsComponent {
   
     // Fetch appointments
     // this.appointmentService.fetchAppointments();
-    this.appointmentService.getAllAppointments().subscribe({
-      next: (appointments) => {
-        // console.log('All Appointments received:', appointments);
-        this.allAppointments = appointments;
-       
-
-        this.doctorService.getAllDoctors().subscribe({
-          next: (doctors) => {
-            this.confirmedAppointments = appointments.filter(appointment => appointment.status === 'confirmed' && (appointment as any).checkedIn === true);
-            this.filteredAppointments = this.confirmedAppointments.filter(appointment => {
-              const doctor = doctors.find(doc => doc.id === appointment.doctorId);
-              this.doctor = doctor ? [doctor] : [];
-              // console.log(doctor)
-              // console.log('Doctor:', doctor?.userId,this.userId);
-              return doctor && doctor.userId === parseInt(this.userId) && appointment.date === this.today;
-            });
-            console.log(this.filteredAppointments)
-            this.isLoading = false; // Stop loading indicator
-          },
-          error: (error) => {
-            console.error('Error fetching doctor details:', error);
-            this.isLoading = false; // Stop loading indicator
-          }
-        });
-
-        this.filteredAppointments.sort((a, b) => {
-          const timeA = this.parseTimeToMinutes(a.time);
-          const timeB = this.parseTimeToMinutes(b.time);
-          return timeA - timeB; // Ascending order
-        });
-  
-        // this.filteredAppointments = [...this.confirmedAppointments];
-        this.filterAppointmentsByDate(new Date());
-  
-        console.log('Setting isLoading to false');
-        // setTimeout(() => {
-        //   console.log('Setting isLoading to false after delay');
-        //   this.isLoading = false; // Stop loading indicator
-        // }, 1000); // 2-second delay
-      }
-    })
+  this.fetchAppointments();
   
     // Subscribe to confirmed appointments
    
@@ -153,6 +113,50 @@ export class TodayConsultationsComponent {
     return hoursInMinutes + minutes;
   }
   
+  fetchAppointments(){
+    this.appointmentService.getAllAppointments().subscribe({
+      next: (appointments) => {
+        // console.log('All Appointments received:', appointments);
+        this.allAppointments = appointments;
+       
+
+          this.doctorService.getAllDoctors().subscribe({
+            next: (doctors) => {
+              this.confirmedAppointments = appointments.filter(appointment => appointment.status === 'confirmed' && (appointment as any).checkedIn === true);
+              this.filteredAppointments = this.confirmedAppointments.filter(appointment => {
+                const doctor = doctors.find(doc => doc.id === appointment.doctorId);
+                this.doctor = doctor ? [doctor] : [];
+                // console.log(doctor)
+                // console.log('Doctor:', doctor?.userId,this.userId);
+                return doctor && doctor.userId === parseInt(this.userId) && appointment.date === this.today;
+              });
+              this.filteredAppointments.sort((a, b) => {
+                const timeA = this.parseTimeToMinutes(a.time);
+                const timeB = this.parseTimeToMinutes(b.time);
+                return timeA - timeB; // Ascending order
+              });
+              // console.log(this.filteredAppointments)
+              this.isLoading = false; // Stop loading indicator
+            },
+            error: (error) => {
+              console.error('Error fetching doctor details:', error);
+              this.isLoading = false; // Stop loading indicator
+            }
+          });
+          
+          console.log(this.filteredAppointments);
+  
+        // this.filteredAppointments = [...this.confirmedAppointments];
+        this.filterAppointmentsByDate(new Date());
+  
+        console.log('Setting isLoading to false');
+        // setTimeout(() => {
+        //   console.log('Setting isLoading to false after delay');
+        //   this.isLoading = false; // Stop loading indicator
+        // }, 1000); // 2-second delay
+      }
+    })
+  }
   
   sortBy(column: keyof Appointment) {
     if (this.sortColumn === column) {
@@ -424,11 +428,19 @@ export class TodayConsultationsComponent {
 
   startConsultation(appointment: Appointment): void {
     appointment.checkedOut = true;
+    
+    this.doctor.filter((doc) => {
+      this.currentDepartmentId = doc.departmentId!;
+      this.currentDoctorName = doc.name!;
+      this.currentDoctorId = doc.id!;
+    });
     this.appointmentService.updateAppointment(appointment)
     this.eventService.emitConsultationStarted({
       doctorId: this.currentDoctorId,
-      appointmentId: appointment.id!,
+      appointmentId: appointment.id!, // Add channelId to appointments in the backend
+      channelId: 2,
     });
+    console.log(this.currentDoctorId, appointment.id!)
   }
 
   // Confirm and perform the Close OPD action

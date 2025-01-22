@@ -165,6 +165,7 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
         if (
           this.role !== 'super_admin' && // Exclude super admin
           this.role !== 'admin' && // Exclude admin
+          this.role !== 'doctor' &&
           (
             (newNotification.type === 'appointment_request') || // For both tele callers and receptionists
             (this.isReceptionist && (newNotification.type === 'appointment_remainder' || newNotification.type === 'service_reminder')) // For receptionists only

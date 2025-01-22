@@ -18,6 +18,7 @@ import { TodayConsultationsComponent } from './doctor-role/today-consultations/t
 import { OverviewComponent } from './doctor-role/overview/overview/overview.component';
 import { TvComponent } from './tv/tv/tv.component';
 import { TvControlComponent } from './tv-control/tv-control/tv-control.component';
+import { EstimationOverviewComponent } from './estimation/estimation-overview/estimation-overview/estimation-overview.component';
 
 const routes: Routes = [
   { path: 'dashboard', component: DashboardOverviewComponent, canActivate:[authGuard] },
@@ -35,6 +36,7 @@ const routes: Routes = [
   {path:'doctor-appointments', component: OverviewComponent, canActivate:[authGuard]},
   {path: 'tv-control', component: TvControlComponent, canActivate:[authGuard]},
   { path: 'channel/:channelId', component: TvComponent },
+  {path: 'estimation', component: EstimationOverviewComponent, canActivate:[authGuard]},
   {
     path: 'form',
     component: HealthCheckupFormComponent,

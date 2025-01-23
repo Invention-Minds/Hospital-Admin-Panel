@@ -11,6 +11,12 @@ interface Slot {
   status: 'available' | 'booked' | 'unavailable' | 'complete' | 'blocked' | 'extra';
 }
 
+type UnavailableDate = {
+  id: number;
+  doctorId: number;
+  date: string; // ISO string
+};
+
 @Component({
   selector: 'app-doctor-availability',
   templateUrl: './doctor-availability.component.html',
@@ -306,7 +312,7 @@ export class DoctorAvailabilityComponent {
         this.doctors = doctors.map(doctor => {
           // Extract bookedSlots, unavailableDates, unavailableSlots, and extraSlots directly from the doctor object
           const bookedSlots = doctor.bookedSlots || [];
-          const unavailableDates = doctor.unavailableDates || [];
+          const unavailableDates: UnavailableDate[] = doctor.unavailableDates || [];
           const unavailableSlots = doctor.unavailableSlots || [];
           const extraSlots = doctor.extraSlots?.map(slot => slot.time) || [];
           // const formattedUnavailableSlots = unavailableSlots; // Array of strings
@@ -339,8 +345,9 @@ export class DoctorAvailabilityComponent {
           } else {
             // Determine if the selected day is unavailable for the doctor
             const isUnavailableDay = unavailableDates.some(unavailable => {
-              const unavailableDate = new Date(unavailable);
-              const formattedUnavailableDate = unavailableDate.toISOString().split('T')[0];
+              const unavailableDate = unavailable.date;
+              console.log(unavailableDate)
+              const formattedUnavailableDate = unavailableDate.toString().split('T')[0];
               return formattedUnavailableDate === formattedDate;
             });
 

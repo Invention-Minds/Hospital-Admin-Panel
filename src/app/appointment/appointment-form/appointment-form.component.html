@@ -92,8 +92,8 @@
         <div class="appointment-timing">
           <div class="form-group time">
             <label>Appointment Date:</label>
-            <!-- <input class="email" type="date" formControlName="appointmentDate" [min]="minDate" /> -->
-            <p-calendar
+            <input class="email" type="date" formControlName="appointmentDate" [min]="minDate" />
+            <!-- <p-calendar
             class="email"
             formControlName="appointmentDate"
             [minDate]="minDate"
@@ -101,7 +101,7 @@
             [showButtonBar]="true"
             [appendTo]="'body'"
             placeholder="Select appointment date"
-          ></p-calendar>
+          ></p-calendar> -->
             <div class="errors"
               *ngIf="appointmentForm.get('appointmentDate')?.invalid && appointmentForm.get('appointmentDate')?.touched">
               <small>Appointment Date is required</small>

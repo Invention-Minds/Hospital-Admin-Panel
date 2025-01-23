@@ -1,161 +1,218 @@
 body {
-    font-family: Kanit;
-  }
-  
-  .form-container {
-    max-width: 900px;
-    /* margin: auto; */
-    padding-left: 90px;
-    /* padding: 20px; */
-  }
-  
-  .form-title {
-    color: #000;
-font-family: Kanit;
-font-size: 24px;
-font-style: normal;
-font-weight: 600;
-line-height: normal;
-    margin-bottom: 20px;
-    margin-top: 30px;
-  }
-  .line{
-    color: #000;
-    width: 900px;
-  }
-  .input-container {
-    position: relative;
-    margin: 10px 0;
-    flex: 1; /* Ensures equal width for both inputs */
-    min-width: 200px; /* Optional, to prevent shrinking too small */
-}
-  .custom-input {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 16px;
-    background-color: #f6f8ff; /* Background color like the first image */
-    outline: none;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    font-family: Kanit;
-  }
-  
-  .custom-input:focus {
-    border-color: #007bff; /* Focus border color like the second image */
-    box-shadow: 0 0 3px #007bff;
-  }
-  
-  .custom-label {
-    position: absolute;
-    top: 50%;
-    left: 12px;
-    transform: translateY(-50%);
-    color: #aaa;
-    font-size: 16px;
-    transition: all 0.3s ease;
-    pointer-events: none;
-  }
-  
-  .custom-input:focus + .custom-label,
-  .custom-input:not(:placeholder-shown) + .custom-label {
-    top: -3px;
-    left: 10px;
-    font-size: 12px;
-    color: #007bff; /* Label color on focus */
-    background-color: #f6f8ff;
-  }
-  
-  .error .custom-input {
-    border-color: red;
-    background-color: #fef2f2;
+  font-family: Kanit;
 }
 
-.error .custom-label {
-    color: red;
+.form-container {
+  max-width: 900px;
+  /* margin: auto; */
+  padding-left: 90px;
+  /* padding: 20px; */
 }
 
+.form-title {
+  color: #000;
+  font-family: Kanit;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  margin-bottom: 20px;
+  margin-top: 30px;
+}
+.line {
+  color: #000;
+  width: 900px;
+}
+.input-container {
+  position: relative;
+  margin: 10px 0;
+  flex: 1; /* Ensures equal width for both inputs */
+  min-width: 200px; /* Optional, to prevent shrinking too small */
+}
+.custom-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  background-color: #f6f8ff; /* Background color like the first image */
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  font-family: Kanit;
+}
+
+.custom-input:focus {
+  border-color: #007bff; /* Focus border color like the second image */
+  box-shadow: 0 0 3px #007bff;
+}
+
+.custom-label {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: #aaa;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.custom-input:focus + .custom-label,
+.custom-input:not(:placeholder-shown) + .custom-label {
+  top: -3px;
+  left: 10px;
+  font-size: 12px;
+  color: #007bff; /* Label color on focus */
+  background-color: #f6f8ff;
+}
+
+.custom-input.ng-invalid.ng-touched {
+  border: 1px solid #ff4d4d; /* Red border for invalid inputs */
+  box-shadow: 0 0 3px rgba(255, 77, 77, 0.4);
+}
+
+.custom-input.ng-invalid.ng-touched + .custom-label {
+  color: #ff4d4d; /* Red label when invalid */
+}
 .error-message {
-    font-size: 12px;
-    color: red;
-    margin-top: 5px;
-    position: absolute;
+  font-size: 12px;
+  color: red;
+  margin-top: 5px;
+  position: absolute;
 }
-  
-  .section {
-    margin-bottom: 20px;
-  }
-  
-  h3 {
-    margin-bottom: 10px;
+
+.section {
+  margin-bottom: 20px;
+}
+
+h3 {
+  margin-bottom: 10px;
+  color: #000;
+  font-family: Kanit;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+}
+
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.form-group {
+  flex: 1 1 calc(50% - 15px);
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  margin-bottom: 5px;
+  font-weight: 500;
+  font-family: Kanit;
+  color: #495057;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="date"],
+select {
+  padding: 8px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+}
+
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.checkbox-grid label {
+  display: flex;
+  align-items: center;
+  color: #000;
+  font-family: Kanit;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+}
+
+input[type="radio"] {
+  margin-right: 5px;
+}
+.submit-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: Kanit;
+}
+
+.submit-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+.note {
+  margin-bottom: 20px;
+  padding: 15px 30px;
+  border-radius: 16px;
+  border: 1px solid #000;
+  background-color: #f6f8ff; /* Light blue */
+  color: #7b7b7b;
+  font-family: Kanit;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  font-family: Kanit;
+  max-width: 900px;
+}
+
+.signature-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 20px;
+}
+.signature-container-1 {
+  width: 50%;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.sign{
     color: #000;
-    font-family: Kanit;
-    font-size: 20px;
-    font-style: normal;
-    font-weight: 600;
-    line-height: normal;
-  }
-  
-  .form-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-  }
-  
-  .form-group {
-    flex: 1 1 calc(50% - 15px);
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .form-group label {
-    margin-bottom: 5px;
-    font-weight: 500;
-    font-family: Kanit;
-    color: #495057;
-  }
-  
-  input[type="text"],
-  input[type="number"],
-  input[type="date"],
-  select {
-    padding: 8px;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-  }
-  
-  .checkbox-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 10px;
-  }
-  
-  .checkbox-grid label {
-    display: flex;
-    align-items: center;
-    color: #000;
-font-family: Kanit;
-font-size: 16px;
-font-style: normal;
-font-weight: 500;
-line-height: normal;
-  }
-  
-  input[type="radio"] {
-    margin-right: 5px;
-  }
-  .submit-button {
-    margin-top: 20px;
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-family: Kanit;
-  }
-  
-  .submit-button:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-  }
+  font-family: Kanit;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+}
+
+.signature-section {
+  flex: 1;
+  min-width: 250px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.radio-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.signature-box {
+  height: 80px;
+  background-color: #d3d3d3;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}

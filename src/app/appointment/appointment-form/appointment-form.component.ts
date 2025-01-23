@@ -110,16 +110,16 @@ export class AppointmentFormComponent implements OnInit {
   ngOnInit(): void {
     // Set the minimum date to today
     const today = new Date();
-    // const year = today.getFullYear();
-    // const month = (today.getMonth() + 1).toString().padStart(2, '0');
-    // const day = today.getDate().toString().padStart(2, '0');
-    // this.minDate = `${year}-${month}-${day}`;
+    const year = today.getFullYear();
+    const month = (today.getMonth() + 1).toString().padStart(2, '0');
+    const day = today.getDate().toString().padStart(2, '0');
+    this.minDate = `${year}-${month}-${day}`;
     // this.minDate = today.toISOString().split('T')[0]
     // console.log(this.minDate)
-    if (!(this.minDate instanceof Date)) {
-      console.error('Invalid minDate, resetting to today.');
-      this.minDate = new Date(); // Reset to today's date
-    }
+    // if (!(this.minDate instanceof Date)) {
+    //   console.error('Invalid minDate, resetting to today.');
+    //   this.minDate = new Date(); // Reset to today's date
+    // }
     this.loadDoctors();
 
 
@@ -403,7 +403,7 @@ export class AppointmentFormComponent implements OnInit {
     this.department = doctor.departmentName!;
     this.doctorType = doctor.doctorType;
     console.log(this.doctorId)
-    this.onDoctorChange(this.doctorId)
+    // this.onDoctorChange(this.doctorId)
     this.isVisitingConsultant = doctor.doctorType === 'Visiting Consultant';
     this.showDoctorSuggestions = false;  // Hide dropdown after selecting
     // const selectElement = event.target as HTMLSelectElement | null;

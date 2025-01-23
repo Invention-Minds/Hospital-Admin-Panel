@@ -10,10 +10,10 @@
         *ngIf="canAccessTab('reset')">
         Reset Password
       </div>
-      <div class="settings-tab" [ngClass]="{ 'active-tab': selectedTab === 'login' }" (click)="switchTab('login')"
+      <!-- <div class="settings-tab" [ngClass]="{ 'active-tab': selectedTab === 'login' }" (click)="switchTab('login')"
         *ngIf="canAccessTab('login')">
         Account Creation
-      </div>
+      </div> -->
       <div class="settings-tab" [ngClass]="{'active-tab': selectedTab === 'delete'}" (click)="switchTab('delete')"
         *ngIf="canAccessTab('delete')">
         Delete Account

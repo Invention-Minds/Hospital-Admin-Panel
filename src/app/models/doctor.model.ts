@@ -28,7 +28,7 @@ export interface Doctor {
     doctorId?: number;
     availableFromArray?: [''],
   }[];
-  unavailableDates?: string[];
+  unavailableDates?: any[];
   isUnavailable?: boolean; // Optional property to mark the doctor as unavailable
   unavailableSlots?: any[]; // Optional property to mark the slots as unavailable
   updatedAt?: Date;

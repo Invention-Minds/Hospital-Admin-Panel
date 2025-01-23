@@ -89,10 +89,16 @@ export class DoctorsListOverviewComponent implements OnInit {
         // );
         this.doctors = doctors.map((doctor) => {
           // Step 1: Check for unavailable dates
-          const unavailableDates = doctor.unavailableDates?.map((d) =>
-            new Date(d).toISOString().split('T')[0]
-          ) || []; 
-          const isUnavailableByDate = unavailableDates.includes(this.date);
+          // const unavailableDates = doctor.unavailableDates?.map((d) =>
+          //   new Date(d).toISOString().split('T')[0]
+          // ) || []; 
+          // const isUnavailableByDate = unavailableDates.includes(this.date);
+          const isUnavailableByDate = doctor.unavailableDates!.some(unavailable => {
+            const unavailableDate = unavailable.date;
+            console.log(unavailableDate)
+            const formattedUnavailableDate = unavailableDate.toString().split('T')[0];
+            return formattedUnavailableDate === this.date;
+          });
     
           if (isUnavailableByDate) {
             return { ...doctor, status: 'Absent' };

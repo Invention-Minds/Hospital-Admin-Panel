@@ -13,6 +13,7 @@
     <div *ngIf="!loading; else loaderTemplate"
       class="doctor-cards"
       [ngClass]="{ 'four-doctors-layout': isFourDoctors() }"
+      [ngClass]="{'two-doctors-layout': isTwoDoctors()}"
     >
       <div
         class="doctor-card"
@@ -26,7 +27,7 @@
             <h3>Name: {{ doctor.name }}</h3>
             <p>Department: {{ doctor.department }}</p>
             <p>Room No: {{ doctor.roomNo }}</p>
-            <p>Avail. Time: {{ doctor.time }}</p>
+            <p>Avail. Time: {{ doctor.remainingTime }}</p>
           </div>
         </div>
   
@@ -41,7 +42,7 @@
           <tbody>
             <tr
             *ngFor="let patient of doctor.patients; let i = index;  trackBy: trackByFn"
-            [class.removed]="patient.checkedOut"
+            [class.removed]="patient.endConsultation"
             @fadeInOut
           >
               <td>{{i+ 1}}</td>

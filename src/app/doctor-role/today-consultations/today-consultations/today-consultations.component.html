@@ -45,6 +45,9 @@
               <button class="start" (click)="startConsultation(appointment)">
                 <img class="image" src="/start.svg">Start Consultation
               </button>
+              <button class="finish" (click)="finishConsultation(appointment)">
+                <img class="image" src="/finish.svg">Finish
+              </button>
               <button class="estimation" (click)="openEstimationPopup(appointment)">
                 <img class="image" src="/est.svg">Estimation
               </button>
@@ -76,7 +79,7 @@
   </app-appointment-form> -->
   
   <div class="loader" *ngIf="isLoading"></div>
-  <div *ngIf="showEstimationPopup" class="estimation-modal" >
+  <!-- <div *ngIf="showEstimationPopup" class="estimation-modal" >
     <div class="modal-content">
       <div class="modal-header">
         <h3>Estimation Form {{ currentDoctorName }}</h3>
@@ -90,11 +93,98 @@
         <p>
           Date<span class="space-1">:</span> {{ selectedAppointment?.date }}
         </p>
-        <textarea
+        
+        <input type="text"
           class="estimation-textarea"
           [(ngModel)]="estimationText"
           placeholder="Please Enter Estimation Here*"
-        ></textarea>
+        >
+        <div class="input-container">
+          <input type="date" 
+           id="estimationDate"
+          name="estimationDate"
+          class="custom-input"
+          ngModel
+          [(ngModel)]="estimationPreferedDate"
+          required
+          placeholder=" " class="custom-input"  />
+          <label for="estimationDate" class="custom-label">Estimated Date*</label>
+          </div>
+      </div>
+      <div class="modal-footer">
+        <button class="save-button" (click)="saveEstimation()">Save</button>
+        <button class="close-button" (click)="closeEstimationPopup()">Close</button>
+      </div>
+    </div>
+  </div> -->
+  <div *ngIf="showEstimationPopup" class="estimation-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Estimation Form {{ currentDoctorName }}</h3>
+        <button class="popup-close" (click)="closeEstimationPopup()">
+          <img src="/popup-close.svg" />
+        </button>
+      </div>
+      <hr />
+      <div class="modal-body">
+        <p>
+          Patient Name<span class="space">:</span>{{ selectedAppointment?.patientName }}
+        </p>
+        <p>
+          Date<span class="space-1">:</span> {{ selectedAppointment?.date }}
+        </p>
+
+        <div class="estimation-type-container">
+          <label class="estimation-type-label">Estimation Type:</label>
+          <div class="radio-buttons">
+            <label>
+              <input type="radio" name="estimationType" [(ngModel)]="estimationType" value="MM" />
+              MM
+            </label>
+            <label>
+              <input type="radio" name="estimationType" [(ngModel)]="estimationType" value="SM" />
+              SM
+            </label>
+          </div>
+        </div>
+
+      <div class="estimation-input-container">
+        <!-- Input field for estimation -->
+        <input 
+          type="text" 
+          placeholder="Enter or Select an Estimation" 
+          [(ngModel)]="estimationText" 
+          (input)="onEstimationInput()"
+          (focus)="showEstimationSuggestions = true"
+          class="custom-input"
+        />
+        
+        <!-- Dropdown for suggestions -->
+        <ul 
+          class="estimation-suggestions" 
+          *ngIf="showEstimationSuggestions && filteredEstimations.length > 0"
+        >
+          <li 
+            *ngFor="let estimation of filteredEstimations" 
+            (click)="onEstimationSelect(estimation)"
+          >
+            {{ estimation }}
+          </li>
+        </ul>
+      </div>
+      
+  
+        <div class="input-container">
+          <input
+            type="date"
+            id="estimationDate"
+            name="estimationDate"
+            class="custom-input"
+            [(ngModel)]="estimationPreferedDate"
+            required
+          />
+          <label for="estimationDate" class="custom-label">Estimated Date*</label>
+        </div>
       </div>
       <div class="modal-footer">
         <button class="save-button" (click)="saveEstimation()">Save</button>
@@ -102,6 +192,7 @@
       </div>
     </div>
   </div>
+  
   <div *ngIf="showCloseOpdPopup" class="close-opd-modal">
     <div class="modal-content">
       <div class="modal-header">

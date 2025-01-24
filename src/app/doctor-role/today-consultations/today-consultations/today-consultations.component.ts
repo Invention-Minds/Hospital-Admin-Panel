@@ -1,6 +1,7 @@
 import { Component, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { AppointmentConfirmService } from '../../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../../services/doctor-details/doctor-service.service';
+import { EstimationService } from '../../../services/estimation/estimation.service';
 import { EventService } from '../../../services/event.service';
 import { MessageService } from 'primeng/api';
 import { ChangeDetectorRef } from '@angular/core';
@@ -8,6 +9,7 @@ import { Doctor } from '../../../models/doctor.model';
 import * as XLSX from 'xlsx';
 import { start } from 'node:repl';
 import * as moment from 'moment-timezone';
+import { app } from '../../../../../server';
 
 interface Appointment {
   id?: number;
@@ -29,6 +31,11 @@ interface Appointment {
   checkedOut?:boolean;
   user?: any;
   selectedSlot?: boolean;
+  endConsultation?: boolean;
+  checkedOutTime?: Date;
+  checkedInTime?: Date;
+  waitingTime?: string;
+  postPond?:boolean;
 }
 
 @Component({
@@ -40,7 +47,7 @@ export class TodayConsultationsComponent {
   confirmedAppointments: Appointment[] = [];
   @Output() consultationStarted = new EventEmitter<{ doctorId: number, appointmentId: number }>();
 
-  constructor(private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService,private messageService: MessageService, private cdRef: ChangeDetectorRef,private eventService: EventService) { }
+  constructor(private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService,private messageService: MessageService, private cdRef: ChangeDetectorRef,private eventService: EventService, private estimationService: EstimationService) { }
   appointments: Appointment[] = [
     // { id: '0001', patientName: 'Anitha Sundar', phoneNumber: '+91 7708590100', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Booked', smsSent: true },
   ];
@@ -74,7 +81,11 @@ export class TodayConsultationsComponent {
   showLeaveRequestPopup: boolean = true;
   startDate: string | null = null;
   endDate: string | null = null;
-
+  estimationPreferedDate: string = ''
+  estimationSuggestions: string[] = []; // Full list of suggestions
+  filteredEstimations: string[] = []; // Filtered suggestions for dropdown
+  showEstimationSuggestions: boolean = false; 
+  estimationType: string = 'MM'
 
   searchOptions = [
     { label: 'Patient Name', value: 'patientName' },
@@ -94,6 +105,10 @@ export class TodayConsultationsComponent {
     // Fetch appointments
     // this.appointmentService.fetchAppointments();
   this.fetchAppointments();
+  // setInterval(() => {
+  //   this.fetchAppointments();
+  //   console.log('interval')
+  // }, 60000);
   
     // Subscribe to confirmed appointments
    
@@ -240,8 +255,28 @@ export class TodayConsultationsComponent {
       this.filterAppointmentsByDate(new Date());
     }
     
+    
   }
- 
+  // loadSugesstionFunction(){
+  //   this.doctor.filter((doc) => {
+  //     this.currentDepartmentId = doc.departmentId!;
+  //     this.currentDoctorName = doc.name!;
+  //   });
+  //   if (this.currentDepartmentId) {
+  //     this.loadEstimationSuggestions(this.currentDepartmentId);
+  //   }
+  // }
+  loadEstimationSuggestions(departmentId: number): void {
+    this.estimationService.getEstimationsByDepartment(departmentId, this.estimationType).subscribe(
+      (response) => {
+        this.estimationSuggestions = response; // Assign the response directly
+        console.log('Fetched suggestions:', this.estimationSuggestions);
+      },
+      (error) => {
+        console.error('Error fetching estimation suggestions:', error);
+      }
+    );
+  }
    // Method to filter appointments by a specific date
    filterAppointmentsByDate(selectedDate: Date) {
     const formattedSelectedDate = this.formatDate(selectedDate);
@@ -375,7 +410,40 @@ export class TodayConsultationsComponent {
     this.showEstimationPopup = false;
     this.selectedAppointment = null;
     this.estimationText = '';
+    this.estimationPreferedDate = '';
   }
+
+  onEstimationInput(): void {
+    // Filter suggestions based on the input text
+       this.doctor.filter((doc) => {
+      this.currentDepartmentId = doc.departmentId!;
+      this.currentDoctorName = doc.name!;
+    });
+    if (this.currentDepartmentId) {
+      this.loadEstimationSuggestions(this.currentDepartmentId);
+    }
+    if (this.estimationText.trim()) {
+      this.filteredEstimations = this.estimationSuggestions.filter((estimation) =>
+        estimation.toLowerCase().includes(this.estimationText.toLowerCase())
+      );
+    } else {
+      this.filteredEstimations = [];
+    }
+    this.showEstimationSuggestions = true;
+  }
+  onEstimationSelect(estimation: string): void {
+    this.estimationText = estimation; // Set the selected suggestion in the input field
+    this.showEstimationSuggestions = false; // Hide the suggestions dropdown
+    console.log(this.estimationText)
+  }
+
+  // // Called when a suggestion is clicked
+  // hideSuggestions(): void {
+  //   setTimeout(() => {
+  //     this.showEstimationSuggestions = false;
+  //   }, 200); // Add a delay to allow click events to register
+  // }
+
 
   saveEstimation(): void {
     if (!this.estimationText) {
@@ -383,6 +451,52 @@ export class TodayConsultationsComponent {
       this.messageService.add({severity: 'warn', summary: 'Warning', detail: 'Please enter an estimation.'})
       return;
     }
+
+    const existingEstimation = this.estimationSuggestions.find(
+      (suggestion) => suggestion.toLowerCase() === this.estimationText.toLowerCase()
+    );
+
+    if (existingEstimation) {
+      // If the estimation exists, don't save it again
+      // this.messageService.add({ severity: 'info', summary: 'Info', detail: 'Estimation already exists.' });
+      // this.closeEstimationPopup();
+      const estimationDetails = {
+        prnNumber: this.selectedAppointment?.id,
+        patientName: this.selectedAppointment?.patientName,
+        phoneNumber: this.selectedAppointment?.phoneNumber,
+        estimationName: this.estimationText,
+        preferredDate: this.estimationPreferedDate,
+        doctorId: this.currentDoctorId,
+        doctorName: this.currentDoctorName,
+        status: 'pending',
+        estimationType: this.estimationType,
+         estimationId: 'JMRH/24/25-001'
+      };
+      this.estimationService.createEstimationDetails(estimationDetails).subscribe({
+        next: (response) => {
+          console.log('Estimation Details saved:', response);
+          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Estimation Details Saved Successfully' });
+          this.closeEstimationPopup();
+        },
+        error: (error) => {
+          console.error('Error saving estimation details:', error);
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error saving estimation details. Please try again.' });
+        }
+      });
+      return;
+    }
+    const estimationDetails = {
+      prnNumber: this.selectedAppointment?.id,
+      patientName: this.selectedAppointment?.patientName,
+      phoneNumber: this.selectedAppointment?.phoneNumber,
+      estimationName: this.estimationText,
+      preferredDate: this.estimationPreferedDate,
+      doctorId: this.currentDoctorId,
+      doctorName: this.currentDoctorName,
+      status: 'pending',
+      estimationType: this.estimationType,
+      estimationId: 'JMRH/24/25-001'
+    };
 
     this.doctor.filter((doc) => {
       this.currentDepartmentId = doc.departmentId!;
@@ -392,13 +506,26 @@ export class TodayConsultationsComponent {
       doctorId: this.currentDoctorId,
       departmentId: this.currentDepartmentId,
       estimation: this.estimationText,
+      estimationType: this.estimationType
     });
-    this.appointmentService.createEstimation(  this.currentDoctorId,this.currentDepartmentId,this.estimationText).subscribe({
+
+    this.estimationService.createEstimation(  this.currentDoctorId,this.currentDepartmentId,this.estimationText, this.estimationType).subscribe({
       next: (response) => {
         console.log('Estimation saved:', response);
         // alert('Estimation saved successfully.');
         this.messageService.add({severity: 'success', summary: 'Success', detail: 'Estimated Saved Successfully'})
-        this.closeEstimationPopup();
+        // this.closeEstimationPopup();
+        this.estimationService.createEstimationDetails(estimationDetails).subscribe({
+          next: (response) => {
+            console.log('Estimation Details saved:', response);
+            this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Estimation Details Saved Successfully' });
+            this.closeEstimationPopup();
+          },
+          error: (error) => {
+            console.error('Error saving estimation details:', error);
+            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error saving estimation details. Please try again.' });
+          }
+        });
       },
       error: (error) => {
         console.error('Error saving estimation:', error);
@@ -428,6 +555,19 @@ export class TodayConsultationsComponent {
 
   startConsultation(appointment: Appointment): void {
     appointment.checkedOut = true;
+    appointment.checkedOutTime = new Date()
+    if(appointment.checkedInTime){
+      const checkedIn = new Date(appointment.checkedInTime).getTime(); // Convert to timestamp
+      const checkedOut = new Date(appointment.checkedOutTime).getTime(); // Convert to timestamp
+    
+      const differenceInMinutes = Math.floor((checkedOut - checkedIn) / 60000); // Difference in minutes
+      appointment.waitingTime = differenceInMinutes.toString();
+    }
+   
+  
+    console.log('Waiting time calculated:', appointment.waitingTime);
+
+    // appointment.waitingTime = differenceInMinutes.toString(); // Assuming waitingTime is a string field
     
     this.doctor.filter((doc) => {
       this.currentDepartmentId = doc.departmentId!;
@@ -441,6 +581,16 @@ export class TodayConsultationsComponent {
       channelId: 2,
     });
     console.log(this.currentDoctorId, appointment.id!)
+  }
+  finishConsultation(appointment: Appointment): void{
+    appointment.endConsultation = true;
+    this.appointmentService.updateAppointment(appointment)
+  }
+  postPondAppointment(appointment: Appointment):void{
+    appointment.checkedOut = false;
+    appointment.checkedOutTime = undefined;
+    appointment.postPond = true;
+    this.appointmentService.updateAppointment(appointment)
   }
 
   // Confirm and perform the Close OPD action

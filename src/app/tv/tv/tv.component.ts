@@ -56,8 +56,10 @@ export class TvComponent implements OnInit, OnDestroy {
   currentDate: string = '';
   currentTime: string = '';
   loading: boolean = false;
+  today: string = ''
   doctors: any[] = [];
   private intervalId: any;
+  private anotherIntervalId: any;
   private eventSubscription!: Subscription;
   todayFullAppointments: any[] = []
 
@@ -75,18 +77,24 @@ export class TvComponent implements OnInit, OnDestroy {
       this.updateDateTime();
     }, 60000);
 
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = (today.getMonth() + 1).toString().padStart(2, '0');
+    const day = today.getDate().toString().padStart(2, '0');
+    this.today = `${year}-${month}-${day}`;
+
     // Fetch channel ID from the URL and fetch doctors for that channel
     const channelId = this.route.snapshot.paramMap.get('channelId');
     if (channelId) {
-      // this.loadDoctorsForChannel(channelId);
-      setInterval(() =>{
-        this.loadAppointmentsForDoctors();
-      }, 60000)
-      console.log(this.loadDoctorsForChannel(channelId))
-      console.log(channelId)
+      this.loadDoctorsForChannel(channelId);
+      // this.anotherIntervalId = setInterval(() => {
+      //   this.loadAppointmentsForDoctors();
+      // }, 30000);
+      // console.log(this.loadDoctorsForChannel(channelId))
+      // console.log(channelId)
     }
     this.eventSubscription = this.eventService.consultationEvent$.subscribe((event) => {
-      console.log(event.doctorId, event.appointmentId, event.channelId, channelId)
+      // console.log(event.doctorId, event.appointmentId, event.channelId, channelId)
       if (event.channelId === Number(channelId)) {
         this.updateAppointment(event.doctorId, event.appointmentId);
       }
@@ -100,8 +108,8 @@ export class TvComponent implements OnInit, OnDestroy {
     this.channelService.getDoctorsByChannel(channelId).subscribe(
       (response: any) => {
         this.doctors = response.doctors;
-        console.log(this.doctors)
-        this.doctors.forEach(doctor =>{
+        // console.log(this.doctors)
+        this.doctors.forEach(doctor => {
           this.loadDoctorDetails(doctor)
         })
         // this.loadDoctorDetails(this.doctors)
@@ -114,11 +122,83 @@ export class TvComponent implements OnInit, OnDestroy {
   }
   loadDoctorDetails(doctor: any): void {
     const today = new Date()
+    // this.doctorService.getDoctorById(doctor.doctorId).subscribe((doctorDetails) => {
+    //   if (doctorDetails && doctorDetails.availability) {
+    //     // Step 1: Check if all `updatedAt` fields are null
+    //     const allUpdatedAtNull = doctorDetails.availability.every((avail: any) => !avail.updatedAt);
+
+    //     // Step 2: Calculate the latest timestamp if any `updatedAt` is not null
+    //     let latestTimestamp: string | null = null;
+    //     if (!allUpdatedAtNull) {
+    //       const maxTimestamp = doctorDetails.availability
+    //         .filter((avail: any) => avail.updatedAt) // Filter entries with non-null `updatedAt`
+    //         .map((avail: any) => new Date(avail.updatedAt).getTime()) // Convert to timestamp
+    //         .reduce((max, curr) => Math.max(max, curr), 0); // Find the max timestamp
+
+    //       // Convert the max timestamp back to an ISO string
+    //       latestTimestamp = new Date(maxTimestamp).toISOString();
+    //     }
+
+    //     // Step 3: Filter availability data based on the latest timestamp
+    //     const latestAvailability = allUpdatedAtNull
+    //       ? doctorDetails.availability // If all are null, consider all availability as the latest
+    //       : doctorDetails.availability.filter((avail: any) => avail.updatedAt === latestTimestamp);
+
+    //     // console.log(latestAvailability)
+
+    //     const dayOfWeek = today.toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
+    //     // console.log(dayOfWeek);
+    //     const availableDay = latestAvailability?.find(avail => avail.day.toLowerCase() === dayOfWeek);
+
+    //     if (availableDay?.availableFrom) {
+    //       // Split the availableFrom string into "start" and "end" times
+    //       const [availableFromStr, availableToStr] = availableDay.availableFrom.split('-');
+    //       console.log(availableFromStr, availableToStr)
+
+    //       // Parse the start and end times
+    //       const availableFrom = this.parseTime(availableFromStr.trim());
+    //       const availableTo = this.parseTime(availableToStr.trim());
+
+    //       const currentTime = new Date();
+
+    //       // Check if the current time is within the available slot
+    //       if (currentTime >= availableFrom && currentTime <= availableTo) {
+    //         // Calculate remaining time in minutes
+    //         const remainingTimeMinutes = Math.floor((availableTo.getTime() - currentTime.getTime()) / (1000 * 60));
+    //         doctor.remainingTime = `${remainingTimeMinutes} mins`;
+    //       } else {
+    //         // If not within the slot, set remaining time to 0
+    //         doctor.remainingTime = `Slot not active`;
+    //       }
+    //     } else {
+    //       doctor.remainingTime = 'No Availability';
+    //     }
+    //     this.doctorService.getExtraSlots(doctor.doctorId, this.today).subscribe(
+    //       (extraSlots: { date: string; time: string }[]) => {
+    //         // Parse extra slots times
+    //         const extraSlotTimes = extraSlots.map(slot => this.parseTime(slot.time));
+
+    //         // Calculate the duration of each extra slot based on the slot duration
+    //         const slotDuration = doctor.slotDuration; // Assuming each slot is 20 minutes
+    //         const extraMinutes = extraSlotTimes.length * slotDuration;
+    //         doctor.remainingTime = remainingTimeMinutes + extraMinutes
+    //       })
+
+
+    //     // Step 4: Update the doctor's time based on the latest availability
+    //     const latestAvailableFrom = availableDay?.availableFrom || 'N/A'
+
+    //     // Assign the `availableFrom` time back to the doctor object
+    //     doctor.time = latestAvailableFrom;
+
+    //     // console.log(`Updated Doctor Time for ${doctor.name}: ${doctor.time}`);
+    //   }
+    // });
     this.doctorService.getDoctorById(doctor.doctorId).subscribe((doctorDetails) => {
       if (doctorDetails && doctorDetails.availability) {
         // Step 1: Check if all `updatedAt` fields are null
         const allUpdatedAtNull = doctorDetails.availability.every((avail: any) => !avail.updatedAt);
-  
+    
         // Step 2: Calculate the latest timestamp if any `updatedAt` is not null
         let latestTimestamp: string | null = null;
         if (!allUpdatedAtNull) {
@@ -126,35 +206,89 @@ export class TvComponent implements OnInit, OnDestroy {
             .filter((avail: any) => avail.updatedAt) // Filter entries with non-null `updatedAt`
             .map((avail: any) => new Date(avail.updatedAt).getTime()) // Convert to timestamp
             .reduce((max, curr) => Math.max(max, curr), 0); // Find the max timestamp
-  
+    
           // Convert the max timestamp back to an ISO string
           latestTimestamp = new Date(maxTimestamp).toISOString();
         }
-  
+    
         // Step 3: Filter availability data based on the latest timestamp
         const latestAvailability = allUpdatedAtNull
           ? doctorDetails.availability // If all are null, consider all availability as the latest
           : doctorDetails.availability.filter((avail: any) => avail.updatedAt === latestTimestamp);
-
-          console.log(latestAvailability)
-
-          const dayOfWeek = today.toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
-          console.log(dayOfWeek);
-          const availableDay = latestAvailability?.find(avail => avail.day.toLowerCase() === dayOfWeek);
-  
-        // Step 4: Update the doctor's time based on the latest availability
-        const latestAvailableFrom = availableDay?.availableFrom || 'N/A'
-  
-        // Assign the `availableFrom` time back to the doctor object
+    
+        const dayOfWeek = new Date().toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
+        const availableDay = latestAvailability?.find(avail => avail.day.toLowerCase() === dayOfWeek);
+    
+        let remainingTimeMinutes = 0;
+    
+        if (availableDay?.availableFrom) {
+          // Split the availableFrom string into "start" and "end" times
+          const [availableFromStr, availableToStr] = availableDay.availableFrom.split('-');
+    
+          // Parse the start and end times
+          const availableFrom = this.parseTime(availableFromStr.trim());
+          const availableTo = this.parseTime(availableToStr.trim());
+    
+          const currentTime = new Date();
+    
+          // Check if the current time is within the available slot
+          if (currentTime >= availableFrom && currentTime <= availableTo) {
+            // Calculate remaining time in minutes
+            remainingTimeMinutes = Math.floor((availableTo.getTime() - currentTime.getTime()) / (1000 * 60));
+          }
+        }
+    
+        // Get extra slots
+        this.doctorService.getExtraSlots(doctor.doctorId, this.today).subscribe(
+          (extraSlots: { date: string; time: string }[]) => {
+            // Parse extra slots times
+            const extraSlotTimes = extraSlots.map(slot => this.parseTime(slot.time));
+    
+            // Calculate the duration of each extra slot based on the slot duration
+            const slotDuration = doctorDetails.slotDuration || 20; // Default to 20 minutes if not defined
+            const extraMinutes = extraSlotTimes.length * slotDuration;
+    
+            // Add extra minutes to the remaining time
+            const totalRemainingTime = remainingTimeMinutes + extraMinutes;
+    
+            // Update the doctor's remaining time
+            doctor.remainingTime = totalRemainingTime > 0 ? `${totalRemainingTime} mins` : 'No active slots';
+    
+            console.log(
+              `Doctor ${doctor.name} has ${extraSlotTimes.length} extra slots. Total remaining time: ${doctor.remainingTime}`
+            );
+          },
+          (error) => {
+            console.error(`Error fetching extra slots for doctor ${doctor.doctorId}:`, error);
+            doctor.remainingTime = 'No Availability'; // Handle errors gracefully
+          }
+        );
+    
+        // Step 4: Update the doctor's availableFrom time based on the latest availability
+        const latestAvailableFrom = availableDay?.availableFrom || 'N/A';
         doctor.time = latestAvailableFrom;
-  
+    
         console.log(`Updated Doctor Time for ${doctor.name}: ${doctor.time}`);
+      } else {
+        doctor.remainingTime = 'No Availability';
       }
     });
+    
   }
-  
+  parseTime(timeStr: string): Date {
+    const [time, modifier] = timeStr.split(' ');
+    const [hours, minutes] = time.split(':').map(Number);
 
-  
+    const date = new Date();
+    date.setHours(modifier === 'PM' && hours !== 12 ? hours + 12 : hours);
+    date.setMinutes(minutes);
+    date.setSeconds(0);
+
+    return date;
+  }
+
+
+
   loadAppointmentsForDoctors() {
     console.log('Loading appointments for doctors...');
     const todayDate = new Date().toISOString().split('T')[0]; // Format as YYYY-MM-DD
@@ -183,7 +317,7 @@ export class TvComponent implements OnInit, OnDestroy {
             const timeB = this.parseTimeToMinutes(b.time);
             return timeA - timeB; // Ascending order
           });
-          console.log(todayAppointments)
+          // console.log(todayAppointments)
           // todayAppointments.forEach((appointment: any) => {
           //   if (appointment.checkedOut) {
           //     this.updateAppointment(doctor.doctorId, appointment.id);
@@ -205,12 +339,13 @@ export class TvComponent implements OnInit, OnDestroy {
           //     appointment.status = ''; // All other appointments have no status
           //   }
           // });
-          this.updateAppointmentStatuses(todayAppointments.filter((appt: any) => !appt.checkedOut));
+          this.updateAppointmentStatuses(todayAppointments.filter((appt: any) => appt.endConsultation === null));
 
 
 
           // Assign updated appointments to doctor
           doctor.patients = todayAppointments;
+          console.log(doctor.patients)
           console.log(`Loaded ${doctor.patients.length} patients for doctor ${doctor.name}`);
         },
         (error) => {
@@ -225,24 +360,21 @@ export class TvComponent implements OnInit, OnDestroy {
     const [hours, minutesPart] = time.split(':');
     const minutes = parseInt(minutesPart.slice(0, 2), 10); // Extract the numeric minutes
     const isPM = time.toLowerCase().includes('pm');
-  
+
     let hoursInMinutes = parseInt(hours, 10) * 60;
     if (isPM && parseInt(hours, 10) !== 12) {
       hoursInMinutes += 12 * 60; // Add 12 hours for PM times
     } else if (!isPM && parseInt(hours, 10) === 12) {
       hoursInMinutes -= 12 * 60; // Subtract 12 hours for 12 AM
     }
-  
+
     return hoursInMinutes + minutes;
   }
-  
-  callIndex() {
-    this.calculateStartIndex(this.todayFullAppointments)
-    console.log(this.calculateStartIndex)
-  }
+
+
 
   updateAppointment(doctorId: number, appointmentId: number): void {
-    console.log("update")
+    // console.log("update")
     const doctor = this.doctors.find((doc) => doc.doctorId === doctorId);
     if (doctor) {
       const appointmentIndex = doctor.patients.findIndex((appt: any) => appt.id === appointmentId);
@@ -252,7 +384,7 @@ export class TvComponent implements OnInit, OnDestroy {
 
         // Filter out checked-out appointments
         doctor.patients = doctor.patients.filter((appt: any) => !appt.checkedOut);
-        console.log(doctor.patients)
+        // console.log(doctor.patients)
 
         // Update the status of remaining patients
         if (doctor.patients.length > 0) {
@@ -265,12 +397,7 @@ export class TvComponent implements OnInit, OnDestroy {
     }
     this.removeCheckedOutPatients(doctor)
   }
-  calculateStartIndex(appointments: any[]): number {
-    const todayDate = new Date().toISOString().split('T')[0]; // Format as YYYY-MM-DD
 
-    console.log(appointments.filter((appointment: any) => appointment.checkedIn === true && appointment.date === todayDate).length + 1)
-    return appointments.filter((appointment: any) => appointment.checkedIn === true && appointment.checkedOut === false).length + 1;
-  }
 
 
   updateDateTime() {
@@ -295,32 +422,59 @@ export class TvComponent implements OnInit, OnDestroy {
     if (this.intervalId) {
       clearInterval(this.intervalId);
     }
+    // if (this.anotherIntervalId) {
+    //   clearImmediate(this.anotherIntervalId)
+    // }
   }
   isFourDoctors(): boolean {
     return this.doctors.length === 4;
+  }
+  isTwoDoctors(): boolean {
+    return this.doctors.length === 2;
   }
   removeCheckedOutPatients(doctor: any) {
     doctor.patients = doctor.patients.filter((appointment: any) => !appointment.checkedOut);
     this.updateAppointmentStatuses(doctor);
   }
 
-  // Update statuses after removing a row
+
+
   updateAppointmentStatuses(appointments: any[]): void {
-    appointments.forEach((appointment: any, index: number) => {
-      if (appointment.checkedOut === true) {
-        appointment.status = 'Default'; // No status for checked-out appointments
-        
-      } else if (index === 0) {
-        appointment.status = 'PatientIn'; // First appointment is "PatientIn"
-        appointment.time = 'PatientIn'
-      } else if (index === 1) {
-        appointment.status = 'Next'; // Second appointment is "Next"
-        appointment.time = 'Next'
-      } else {
-        appointment.status = 'Default'; // All other appointments have no status
+    let patientInFound = false; // Flag to track if "PatientIn" is found
+
+    appointments.forEach((appointment: any) => {
+      // If appointment is not checked out, mark as Default
+
+      // If "PatientIn" has not been found, mark the first matching appointment as "PatientIn"
+      if (!patientInFound && appointment.checkedOut === true && appointment.endConsultation === null) {
+        appointment.status = 'PatientIn';
+        appointment.time = 'PatientIn';
+        patientInFound = true; // Mark that "PatientIn" is found
+        return;
       }
+      if (appointment.checkedOut === true && appointment.endConsultation === true) {
+        patientInFound = true;
+        return;
+      }
+      console.log(patientInFound)
+      // If "PatientIn" is already found, the next appointment becomes "Next"
+      if (patientInFound && appointment.checkedOut === false) {
+        appointment.status = 'Next';
+        appointment.time = 'Next';
+        patientInFound = false; // Reset the flag, as "Next" can only be assigned once
+        return;
+      }
+      if (appointment.checkedOut !== true) {
+        appointment.status = 'Default';
+        return;
+      }
+
+      // Mark all remaining appointments as "Default"
+      appointment.status = 'Default';
     });
   }
+
+
 
   markCheckedOut(patient: any, doctor: any) {
     patient.checkedOut = true;

@@ -36,6 +36,7 @@ interface Appointment {
   checkedInTime?: Date;
   waitingTime?: string;
   postPond?:boolean;
+  endConsultationTime?: Date;
 }
 
 @Component({
@@ -86,7 +87,7 @@ export class TodayConsultationsComponent {
   filteredEstimations: string[] = []; // Filtered suggestions for dropdown
   showEstimationSuggestions: boolean = false; 
   estimationType: string = 'MM'
-
+  showCancelPopup: boolean = false;
   searchOptions = [
     { label: 'Patient Name', value: 'patientName' },
     { label: 'Phone Number', value: 'phoneNumber' }
@@ -584,7 +585,17 @@ export class TodayConsultationsComponent {
   }
   finishConsultation(appointment: Appointment): void{
     appointment.endConsultation = true;
+    appointment.endConsultationTime = new Date()
     this.appointmentService.updateAppointment(appointment)
+  }
+  endConsultation(){
+   const postPondAppointment = this.filteredAppointments.filter(appointment =>{
+      appointment.postPond === true
+    })
+    const count = postPondAppointment.length;
+    if(count > 1){
+      this.showCancelPopup = true;
+    }
   }
   postPondAppointment(appointment: Appointment):void{
     appointment.checkedOut = false;

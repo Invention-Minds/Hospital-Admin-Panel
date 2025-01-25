@@ -483,30 +483,30 @@ export class AppointmentConfirmComponent {
 
     this.saveToLocalStorage();
     // Fetch doctor details to get the slot duration
-    this.doctorService.getDoctorDetails(appointment.doctorId).subscribe(
-      (doctor) => {
+    // this.doctorService.getDoctorDetails(appointment.doctorId).subscribe(
+    //   (doctor) => {
 
-        if (doctor && doctor.slotDuration) {
+    //     if (doctor && doctor.slotDuration) {
 
-          const delayTime = (doctor.slotDuration + 5) * 60 * 1000; // Add 5 minutes to the slot duration and convert to milliseconds
-          this.appointmentService.scheduleCompletion(appointment.id!, delayTime).subscribe({
-            next: () => {
-              // console.log('Appointment completion scheduled successfully');
-              this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Appointment completion scheduled successfully' });
-            },
-            error: (error) => {
-              console.error('Error scheduling appointment completion:', error);
-            }
-          });
+    //       const delayTime = (doctor.slotDuration + 5) * 60 * 1000; // Add 5 minutes to the slot duration and convert to milliseconds
+    //       this.appointmentService.scheduleCompletion(appointment.id!, delayTime).subscribe({
+    //         next: () => {
+    //           // console.log('Appointment completion scheduled successfully');
+    //           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Appointment completion scheduled successfully' });
+    //         },
+    //         error: (error) => {
+    //           console.error('Error scheduling appointment completion:', error);
+    //         }
+    //       });
           
-        } else {
-          console.error('Slot duration not found for doctor:', doctor);
-        }
-      },
-      (error) => {
-        console.error('Error fetching doctor details:', error);
-      }
-    );
+    //     } else {
+    //       console.error('Slot duration not found for doctor:', doctor);
+    //     }
+    //   },
+    //   (error) => {
+    //     console.error('Error fetching doctor details:', error);
+    //   }
+    // );
   }
 
   // Method to return the filtered appointments for display

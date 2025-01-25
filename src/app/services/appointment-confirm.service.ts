@@ -373,9 +373,9 @@ getAppointmentsByDoctor(userId: number): Observable<any[]> {
     deleteAppointment(id: number): Observable<void> {
       return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() });
     }
-    createEstimation(doctorId:number, departmentId:number, estimation:string): Observable<any>{
-      return this.http.post(`${environment.apiUrl}/estimation`, {doctorId, departmentId, estimation});
-    }
+    // createEstimation(doctorId:number, departmentId:number, estimation:string): Observable<any>{
+    //   return this.http.post(`${environment.apiUrl}/estimation`, {doctorId, departmentId, estimation});
+    // }
     sendAdminMessage(doctorName: string, startDate: string, endDate: string, adminPhoneNumber: string): Observable<any> {
       return this.http.post(`${environment.apiUrl}/whatsapp/send-admin-message`, { doctorName, startDate, endDate, adminPhoneNumber });
     }

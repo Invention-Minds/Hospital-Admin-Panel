@@ -23,6 +23,9 @@ export class InactivityService {
   private isChannelRoute(): boolean {
     return this.router.url.startsWith('/channel/');
   }
+  private isDoctorRoute(): boolean {
+    return this.router.url.startsWith('/doctor-appointments');
+  }
 
   // Function to reset the inactivity timer
   private resetLogoutTimer(): void {
@@ -36,7 +39,7 @@ export class InactivityService {
 
   // Function to log out the user
   private logoutUser(): void {
-    if (!this.isChannelRoute()) {
+    if (!this.isChannelRoute() || !this.isDoctorRoute()) {
       this.ngZone.run(() => {
         console.log('Logging out due to inactivity...');
         localStorage.setItem('logoutReason', 'inactivity');

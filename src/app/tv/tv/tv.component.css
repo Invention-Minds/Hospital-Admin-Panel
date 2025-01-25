@@ -266,6 +266,16 @@ background: #FB9C2A;
     border-radius: 4px;
 border: 1px solid #000;
   }
+  .status.Pending{
+    border-radius: 4px;
+background: #FCE35F;
+color: #000;
+font-family: Kanit;
+font-size: 22px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
+  }
   
   
   /* Footer styling */
@@ -321,6 +331,37 @@ line-height: normal;
     width: 344px;
   }
 
+  .two-doctors-layout{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    height: 100vh;
+    margin-left: 50px;
+  }
+  .two-doctors-layout .doctor-card{
+    width: 680px;
+  }
+  
+  .two-doctors-layout .doctor-details h3{
+    color: #FFF;
+font-family: Kanit;
+font-size: 24px;
+font-style: normal;
+font-weight: 500;
+line-height: 30px;
+margin: 0;
+  }
+
+  .two-doctors-layout .doctor-details p{
+    color: #FFF;
+font-family: Kanit;
+font-size: 24px;
+font-style: normal;
+font-weight: 500;
+line-height: 30px;
+margin:0;
+  }
+
+  
   
   /* Hide doctor image when there are 4 doctors */
   .hide-image {

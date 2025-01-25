@@ -409,7 +409,7 @@
     <div class="section">
         <div class="note">
           <p>
-            <strong>Note:</strong>
+            <strong>Note:</strong><br>
             This estimate is based on the information available at the time of the request. Actual charges may vary based on the patient’s specific circumstances and any unforeseen complications that may arise during the procedure/treatment.
           </p>
         </div>
@@ -418,18 +418,20 @@
           <div class="signature-section">
             <label class="sign">Signature of:</label>
             <div class="radio-buttons">
-              <input type="radio" id="patient" name="signatureOf" value="patient" />
+              <input type="radio" id="patient" name="signatureOf" value="patient"  [(ngModel)]="formData.signatureOf" required/>
               <label for="patient" class="sign">Patient</label>
-              <input type="radio" id="attender" name="signatureOf" value="attender" />
+              <input type="radio" id="attender" name="signatureOf" value="attender"  [(ngModel)]="formData.signatureOf" />
               <label for="attender" class="sign">Attender</label>
             </div>
-            <div class="signature-box"></div>
+            <canvas #patientSignatureCanvas width="500" height="300" style="border: 1px solid black;"></canvas>
+            <!-- <button (click)="saveSignature()">Save</button>
+            <button (click)="clearSignature()">Clear</button> -->
           </div>
       </div>
       <div class="signature-container">
         <div class="signature-section">
             <label class="sign">Staff Signature</label>
-            <div class="signature-box"></div>
+            <canvas #staffSignatureCanvas width="500" height="300" style="border: 1px solid black;"></canvas>
             <div class="input-container">
                 <input
               type="text"
@@ -452,7 +454,7 @@
       
           <div class="signature-section">
             <label class="sign" >Approver Signature:</label>
-            <div class="signature-box"></div>
+            <canvas #approverSignatureCanvas width="500" height="300" style="border: 1px solid black;"></canvas>
             <div class="input-container">
                 <input
               type="text"

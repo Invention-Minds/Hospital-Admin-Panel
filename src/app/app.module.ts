@@ -83,6 +83,7 @@ import { TvComponent } from './tv/tv/tv.component';
 import { TvControlComponent } from './tv-control/tv-control/tv-control.component';
 import { EstimationFormComponent } from './estimation/estimation-form/estimation-form/estimation-form.component';
 import { EstimationOverviewComponent } from './estimation/estimation-overview/estimation-overview/estimation-overview.component';
+import { EstimationRequestComponent } from './estimation/estimation-request/estimation-request/estimation-request.component';
 
 
 
@@ -127,6 +128,7 @@ import { EstimationOverviewComponent } from './estimation/estimation-overview/es
     TvControlComponent,
     EstimationFormComponent,
     EstimationOverviewComponent,
+    EstimationRequestComponent,
 
   
     

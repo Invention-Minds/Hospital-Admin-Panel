@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component , ViewChild, ElementRef, Input} from '@angular/core';
+import SignaturePad from 'signature_pad';
+
 
 type InclusionsType = {
   wardICUStay: boolean;
@@ -22,6 +24,42 @@ type InclusionsType = {
 })
 
 export class EstimationFormComponent {
+  @ViewChild('patientSignatureCanvas', { static: true }) patientSignatureCanvas!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('staffSignatureCanvas', { static: true }) staffSignatureCanvas!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('approverSignatureCanvas', { static: true }) approverSignatureCanvas!: ElementRef<HTMLCanvasElement>;
+  @Input() estimationData: any = null;
+
+  private patientSignaturePad!: SignaturePad;
+  private staffSignaturePad!: SignaturePad;
+  private approverSignaturePad!: SignaturePad;
+  // private signaturePad!: SignaturePad;
+
+  ngAfterViewInit(): void {
+    this.patientSignaturePad = new SignaturePad(this.patientSignatureCanvas.nativeElement);
+    this.staffSignaturePad = new SignaturePad(this.staffSignatureCanvas.nativeElement);
+    this.approverSignaturePad = new SignaturePad(this.approverSignatureCanvas.nativeElement);
+  }
+
+  saveAllSignatures(): void {
+    // Save signatures to formData
+    this.formData.patientSign = this.patientSignaturePad.toDataURL();
+    this.formData.employeeSign = this.staffSignaturePad.toDataURL();
+    this.formData.approverSign = this.approverSignaturePad.toDataURL();
+
+    console.log('Form Data with Signatures:', this.formData);
+  }
+  clearAllSignatures(): void {
+    // Clear all signature pads and reset their corresponding formData properties
+    this.patientSignaturePad.clear();
+    this.staffSignaturePad.clear();
+    this.approverSignaturePad.clear();
+
+    this.formData.patientSign = '';
+    this.formData.employeeSign = '';
+    this.formData.approverSign = '';
+  }
+
+
   formData = {
     patientUHID: '',
     patientName: '',
@@ -41,6 +79,9 @@ export class EstimationFormComponent {
     signatureOf: '',
     staffName: '',
     approverName: '',
+    patientSign: '',
+    employeeSign:'',
+    approverSign:'',
     includedItems: {
       wardICUStay: false,
       primaryConsultant: false,
@@ -64,8 +105,29 @@ export class EstimationFormComponent {
    * Handles form submission and validates required fields.
    */
 
+  signaturePadOptions: Object = {
+    minWidth: 1,
+    canvasWidth: 500,
+    canvasHeight: 300,
+  };
+
+ngOnInit(): void{
+  console.log(this.estimationData)
+  // this.formData = this.estimationData
+  if (this.estimationData) {
+    this.formData = {
+      ...this.formData, // Use the default formData structure
+      ...this.estimationData, // Override with estimationData values
+      includedItems: {
+        ...this.formData.includedItems, // Ensure default structure for includedItems
+        ...(this.estimationData.includedItems || {}), // Override with includedItems from estimationData if present
+      },
+    };
+  }
+}
   onSubmit(form: any) {
     this.updateInclusionsAndExclusions()
+    this.saveAllSignatures()
     if (!this.isAnyCheckboxChecked) {
       console.error('At least one inclusion must be selected.');
       return;

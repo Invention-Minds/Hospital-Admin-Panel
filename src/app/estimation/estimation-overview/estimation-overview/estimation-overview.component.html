@@ -77,11 +77,11 @@
     <app-appointment-complete *ngIf="activeComponent === 'completed'"  [selectedSearchOption]="selectedSearchOption" [selectedDateRange]="selectedDateRange" [selectedValue]="searchValue" #appointmentCompleteComponent></app-appointment-complete> -->
     <!-- <app-estimation-form *ngIf="activeComponent === 'form'"  [serviceData]="selectedService"
     (closeForm)="closeForm()"></app-estimation-form> -->
-    <app-estimation-form *ngIf="activeComponent === 'form'" 
+    <app-estimation-form *ngIf="activeComponent === 'form'" [estimationData]="selectedEstimation"
     (closeForm)="closeForm()"></app-estimation-form>
     <app-health-checkup-confirmed *ngIf="activeComponent === 'confirmed'" #healthCheckupConfirmed (reschedule)="openAppointmentForm($event)"  ></app-health-checkup-confirmed>
     <app-health-checkup-cancel *ngIf="activeComponent === 'cancelled'" (reschedule)="openAppointmentForm($event)" ></app-health-checkup-cancel>
     <app-health-checkup-complete *ngIf="activeComponent === 'completed'" ></app-health-checkup-complete>
-    <app-health-checkup-request *ngIf="activeComponent === 'request'" (reschedule)="openAppointmentForm($event)" ></app-health-checkup-request>
+    <app-estimation-request *ngIf="activeComponent === 'request'" (reschedule)="openAppointmentForm($event)" ></app-estimation-request>
     <app-health-checkup-repeat *ngIf="activeComponent === 'repeated'" ></app-health-checkup-repeat>
   </div>

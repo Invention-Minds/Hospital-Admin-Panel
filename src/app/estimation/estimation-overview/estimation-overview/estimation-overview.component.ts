@@ -8,14 +8,14 @@ import { HealthCheckupConfirmedComponent } from "../../../health-checkup-service
 })
 export class EstimationOverviewComponent {
   activeComponent: string = 'form';
-  selectedService: any = null; // Store the service data to pass to the form
+  selectedEstimation: any = null; // Store the service data to pass to the form
   service: any;
   
   @ViewChild('healthCheckupConfirmed') healthCheckupConfirmedComponent?: HealthCheckupConfirmedComponent;
   
     openAppointmentForm(service: any): void {
-      this.selectedService = service; // Store the selected service
-      console.log(this.selectedService);
+      this.selectedEstimation = service; // Store the selected service
+      console.log(this.selectedEstimation);
       this.service = service
       this.activeComponent = 'form'; // Switch to the form view
     }
@@ -23,7 +23,7 @@ export class EstimationOverviewComponent {
   
     closeForm(): void {
       this.activeComponent = 'confirmed'; // Switch back to the confirmed view
-      this.selectedService = null; // Clear the selected service
+      this.selectedEstimation = null; // Clear the selected service
       setTimeout(() => {
         if (this.healthCheckupConfirmedComponent) {
           this.healthCheckupConfirmedComponent.activeServiceId = this.service?.id || null; // Reset activeServiceId

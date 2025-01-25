@@ -37,4 +37,7 @@ export class AppComponent {
   isChannelRoute(): boolean {
     return this.router.url.startsWith('/channel/');
   }
+  private isDoctorRoute(): boolean {
+    return this.router.url.startsWith('/doctor-appointments');
+  }
 }

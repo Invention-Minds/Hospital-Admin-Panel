@@ -307,7 +307,7 @@ tbody tr:hover {
   line-height: normal;
   cursor: pointer;
 }
-.estimation {
+.finish {
   display: inline-flex;
   height: 36px;
   padding: 8px 10px;
@@ -319,6 +319,44 @@ tbody tr:hover {
   border: 1px solid #0e2970;
   background: #fff;
   color: #0e2970;
+  font-family: Kanit;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  cursor: pointer;
+}
+.postPond {
+  border-radius: 6px;
+  border: 1px solid #deba00;
+  background: #fff;
+  display: inline-flex;
+  height: 36px;
+  padding: 8px 10px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  color: #deba00;
+  font-family: Kanit;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+}
+.estimation {
+  display: inline-flex;
+  height: 36px;
+  padding: 8px 10px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  border: 1px solid #36b8b8;
+  background: #fff;
+  color: #36b8b8;
   font-family: Kanit;
   font-size: 14px;
   font-style: normal;
@@ -403,7 +441,7 @@ tbody tr:hover {
   background: #fff;
   padding: 20px;
   width: 673px;
-  height: 420px;
+  height: 480px;
   flex-shrink: 0;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
@@ -437,26 +475,23 @@ tbody tr:hover {
 }
 
 .modal-body p {
-    color: rgba(39, 30, 74, 0.80);
-font-family: Kanit;
-font-size: 18px;
-font-style: normal;
-font-weight: 500;
-line-height: normal;
+  color: rgba(39, 30, 74, 0.8);
+  font-family: Kanit;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
   margin: 10px 0;
 }
-.popup-close{
-    background-color: transparent;
-    border: none;
+.popup-close {
+  background-color: transparent;
+  border: none;
 }
 .estimation-textarea {
   width: 100%;
-  height: 100px;
   border: 1px solid #ccc;
   border-radius: 4px;
   padding: 10px;
-
-  resize: none;
   color: rgba(39, 30, 74, 0.8);
   font-family: Kanit;
   font-size: 18px;
@@ -464,14 +499,15 @@ line-height: normal;
   font-weight: 500;
   line-height: normal;
   margin-top: 40px;
+  margin-bottom: 20px;
 }
-textarea::placeholder{
-    color: rgba(39, 30, 74, 0.80);
-font-family: Kanit;
-font-size: 14px;
-font-style: normal;
-font-weight: 500;
-line-height: normal;
+input[type="text"]::placeholder {
+  color: rgba(39, 30, 74, 0.8);
+  font-family: Kanit;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
 }
 
 .modal-footer {
@@ -479,14 +515,13 @@ line-height: normal;
   justify-content: center;
   align-items: center;
   gap: 30px;
-  
 }
-.modal-footer-close-opd{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 30px;
-    position: relative;
+.modal-footer-close-opd {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  position: relative;
   bottom: -143px; /* Stick to the bottom */
 }
 
@@ -527,112 +562,228 @@ line-height: normal;
   line-height: normal;
 }
 .close-opd-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-  
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
 
-  .approval-button {
-    background-color: #169458;
-    color: #fff;
-    font-family: Kanit;
-    font-size: 20px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: normal;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    display: flex;
-    width: 195px;
-    padding: 7px 14px;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-  }
-  .select-all-container {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 15px;
-  }
-  
-  .select-all-button,
-  .unselect-all-button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 5px 10px;
-    cursor: pointer;
-    font-size: 12px;
-  }
-  
-  .select-all-button:hover,
-  .unselect-all-button:hover {
-    background-color: #0056b3;
-  }
-  .space{
-    margin-left: 20px;
-    margin-right: 7px;
-  }
-  .space-1{
-    margin-left: 97px;
-    margin-right: 5px;
-  }
-  .leave-request-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-  .date-selection {
-    margin-bottom: 15px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-  
-  .date-selection label {
-    font-family: Kanit;
-    font-size: 16px;
-    font-weight: 500;
-    color: #271e4a;
-    margin-bottom: 10px;
-  }
-  
-  .date-selection input {
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 16px;
-    width: 220px;
-    height: 42px;
-  }
-  .modal-body-date{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  .calendar-input{
-    display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 110px;
-        margin-top: 70px;
-        margin-bottom: 40px;
-    
-  }
+.approval-button {
+  background-color: #169458;
+  color: #fff;
+  font-family: Kanit;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  width: 195px;
+  padding: 7px 14px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+.select-all-container {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.select-all-button,
+.unselect-all-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 10px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.select-all-button:hover,
+.unselect-all-button:hover {
+  background-color: #0056b3;
+}
+.space {
+  margin-left: 20px;
+  margin-right: 7px;
+}
+.space-1 {
+  margin-left: 97px;
+  margin-right: 5px;
+}
+.leave-request-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.date-selection {
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.date-selection label {
+  font-family: Kanit;
+  font-size: 16px;
+  font-weight: 500;
+  color: #271e4a;
+  margin-bottom: 10px;
+}
+
+.date-selection input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 16px;
+  width: 220px;
+  height: 42px;
+}
+.modal-body-date {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.calendar-input {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 110px;
+  margin-top: 70px;
+  margin-bottom: 40px;
+}
+.input-container {
+  position: relative;
+  margin: 10px 0;
+  flex: 1; /* Ensures equal width for both inputs */
+  min-width: 200px; /* Optional, to prevent shrinking too small */
+  margin-top: 48px;
+}
+.custom-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  background-color: #f6f8ff; /* Background color like the first image */
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  font-family: Kanit;
+}
+
+.custom-input:focus {
+  border-color: #007bff; /* Focus border color like the second image */
+  box-shadow: 0 0 3px #007bff;
+}
+
+.custom-label {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: #aaa;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.custom-input:focus + .custom-label,
+.custom-input:not(:placeholder-shown) + .custom-label {
+  top: -3px;
+  left: 10px;
+  font-size: 12px;
+  color: #007bff; /* Label color on focus */
+  background-color: #f6f8ff;
+}
+.estimation-input-container {
+  position: relative;
+  padding-top: 16px;
+  /* width: 300px; */
+}
+
+input {
+  width: 100%;
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-bottom: 0px;
+  font-family: Kanit;
+}
+
+.estimation-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-top: none;
+  max-height: 150px;
+  overflow-y: auto;
+  z-index: 1000;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-family: Kanit;
+}
+
+.estimation-suggestions li {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.estimation-suggestions li:hover {
+  background-color: #f0f0f0;
+}
+.estimation-type-container {
+  display: flex;
+  align-items: center;
+  margin: 15px 0;
+}
+
+.estimation-type-label {
+  /* font-size: 14px;
+    font-weight: bold; */
+  margin-right: 10px;
+  color: rgba(39, 30, 74, 0.8);
+  font-family: Kanit;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+}
+
+.radio-buttons {
+  display: flex;
+  align-items: center;
+  gap: 15px; /* Space between radio buttons */
+}
+
+.radio-buttons label {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.radio-buttons input[type="radio"] {
+  margin-right: 5px;
+}

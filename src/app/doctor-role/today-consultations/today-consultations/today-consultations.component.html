@@ -2,7 +2,7 @@
     <div class="close-opd" (click)="openCloseOpdPopup()">
         <img src="/close-opd.svg"> Close OPD
     </div>
-    <button class="end-consul" [disabled]="filteredAppointments.length>1" >
+    <button class="end-consul" [disabled]="filteredAppointments.length>1" (click)="endConsultation()" >
         <img src="/end.svg" > End Consultation
     </button>
 </div>
@@ -47,6 +47,9 @@
               </button>
               <button class="finish" (click)="finishConsultation(appointment)">
                 <img class="image" src="/finish.svg">Finish
+              </button>
+              <button class="postPond" (click)="postPondAppointment(appointment)">
+                <img class="image" src="/pause.svg">PostPoned
               </button>
               <button class="estimation" (click)="openEstimationPopup(appointment)">
                 <img class="image" src="/est.svg">Estimation

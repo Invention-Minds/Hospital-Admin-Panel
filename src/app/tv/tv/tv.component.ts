@@ -13,6 +13,7 @@ import {
   style,
   animate,
 } from '@angular/animations';
+import { app } from '../../../../server';
 
 interface Appointment {
   id?: number;
@@ -441,9 +442,72 @@ export class TvComponent implements OnInit, OnDestroy {
 
   updateAppointmentStatuses(appointments: any[]): void {
     let patientInFound = false; // Flag to track if "PatientIn" is found
+    const slotDuration = 20; // Slot duration in minutes
 
+    // Sort appointments by `endConsultationTime` (latest first)
+    const validAppointments = this.todayFullAppointments.filter(appt => appt.endConsultation);
+    console.log(validAppointments)
+
+    // Sort valid appointments by descending endConsultation time
+    const sortedAppointments = [...validAppointments].sort((a, b) => {
+      const endConsultationA = new Date(a.endConsultation!).getTime();
+      const endConsultationB = new Date(b.endConsultation!).getTime();
+      return endConsultationA - endConsultationB; // Descending order
+    });
+    
+    // Find the latest endConsultation appointment
+    const latestEndConsultationAppointment = sortedAppointments[sortedAppointments.length - 1] || null;
+    let adjustedTime: Date | null = latestEndConsultationAppointment
+      ? new Date(latestEndConsultationAppointment.endConsultationTime!)
+      : null;
+
+      console.log(latestEndConsultationAppointment)
+  
+    // Helper function to format time as "hh:mm AM/PM"
+    const formatTime = (time: Date): string => {
+      const hours = time.getHours();
+      const minutes = time.getMinutes();
+      const period = hours >= 12 ? "PM" : "AM";
+      const formattedHours = (hours % 12 || 12).toString().padStart(2, "0");
+      const formattedMinutes = minutes.toString().padStart(2, "0");
+      return `${formattedHours}:${formattedMinutes} ${period}`;
+    };
+    // const formatTimeInIST = (time: Date): string => {
+    //   const options: Intl.DateTimeFormatOptions = {
+    //     hour: "2-digit",
+    //     minute: "2-digit",
+    //     hour12: true,
+    //     timeZone: "Asia/Kolkata", // Convert to IST
+    //   };
+    //   return time.toLocaleString("en-US", options);
+    // };
+    
+    // console.log(adjustedTime, formatTime(adjustedTime!))
+  
     appointments.forEach((appointment: any) => {
-      // If appointment is not checked out, mark as Default
+      if (adjustedTime && !isNaN(adjustedTime.getTime())) {
+        // Adjust the appointment time based on the latest endConsultationTime
+        appointment.time = formatTime(adjustedTime);
+        adjustedTime.setMinutes(adjustedTime.getMinutes() + slotDuration); // Add slot duration
+      } else {
+        // If no valid endConsultationTime, fallback to the original appointment time
+        const originalTimeParts = appointment.time.match(/(\d+):(\d+)\s?(AM|PM)/);
+        if (originalTimeParts) {
+          const [_, hours, minutes, period] = originalTimeParts;
+          const originalTime = new Date();
+          originalTime.setHours(
+            period === "PM" ? parseInt(hours) % 12 + 12 : parseInt(hours) % 12,
+            parseInt(minutes),
+            0,
+            0
+          );
+          appointment.time = formatTime(originalTime);
+          adjustedTime = new Date(originalTime);
+          adjustedTime.setMinutes(adjustedTime.getMinutes() + slotDuration);
+        } else {
+          console.error("Invalid appointment time format:", appointment.time);
+        }
+      }
 
       // If "PatientIn" has not been found, mark the first matching appointment as "PatientIn"
       if (!patientInFound && appointment.checkedOut === true && appointment.endConsultation === null) {
@@ -452,25 +516,37 @@ export class TvComponent implements OnInit, OnDestroy {
         patientInFound = true; // Mark that "PatientIn" is found
         return;
       }
-      if (appointment.checkedOut === true && appointment.endConsultation === true) {
-        patientInFound = true;
-        return;
-      }
+      // if (appointment.checkedOut === true && appointment.endConsultation === true) {
+      //   patientInFound = true;
+      //   return;
+      // }
       console.log(patientInFound)
+      if(appointment.postPond === true){
+        appointment.status = 'Pending'
+        appointment.time = 'Pending'
+        return
+      }
       // If "PatientIn" is already found, the next appointment becomes "Next"
-      if (patientInFound && appointment.checkedOut === false) {
+      if (
+        latestEndConsultationAppointment && // Check if the appointment exists
+        latestEndConsultationAppointment.endConsultationTime && // Check if endConsultationTime exists
+        appointment.checkedOut === false &&
+        appointment.time === formatTime(new Date(latestEndConsultationAppointment.endConsultationTime))
+      ) {
+        // If the appointment time matches the latest end consultation time and it's not checked out
         appointment.status = 'Next';
         appointment.time = 'Next';
         patientInFound = false; // Reset the flag, as "Next" can only be assigned once
         return;
       }
+      
       if (appointment.checkedOut !== true) {
         appointment.status = 'Default';
         return;
       }
 
       // Mark all remaining appointments as "Default"
-      appointment.status = 'Default';
+      // appointment.status = 'Default';
     });
   }
 

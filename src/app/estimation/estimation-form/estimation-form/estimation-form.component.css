@@ -3,7 +3,7 @@ body {
 }
 
 .form-container {
-  max-width: 900px;
+  max-width: calc(100% - 10%);
   /* margin: auto; */
   padding-left: 90px;
   /* padding: 20px; */
@@ -21,7 +21,6 @@ body {
 }
 .line {
   color: #000;
-  width: 900px;
 }
 .input-container {
   position: relative;
@@ -171,7 +170,7 @@ input[type="radio"] {
   font-weight: 600;
   line-height: normal;
   font-family: Kanit;
-  max-width: 900px;
+  /* max-width: 900px; */
 }
 
 .signature-container {

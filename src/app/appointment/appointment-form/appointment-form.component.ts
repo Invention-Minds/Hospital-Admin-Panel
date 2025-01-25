@@ -114,8 +114,8 @@ export class AppointmentFormComponent implements OnInit {
     const month = (today.getMonth() + 1).toString().padStart(2, '0');
     const day = today.getDate().toString().padStart(2, '0');
     this.minDate = `${year}-${month}-${day}`;
-    // this.minDate = today.toISOString().split('T')[0]
-    // console.log(this.minDate)
+    // // this.minDate = today.toISOString().split('T')[0]
+    // // console.log(this.minDate)
     // if (!(this.minDate instanceof Date)) {
     //   console.error('Invalid minDate, resetting to today.');
     //   this.minDate = new Date(); // Reset to today's date
@@ -151,6 +151,8 @@ export class AppointmentFormComponent implements OnInit {
 
     if (this.appointment) {
       console.log("existing")
+      console.log(this.appointment)
+      this.doctorId = this.appointment.doctorId;
 
       // Edit existing pending appointment - check availability for the given doctor, date, and time.
       // const appointmentDate = this.appointment.date;
@@ -218,6 +220,7 @@ export class AppointmentFormComponent implements OnInit {
       this.appointmentForm.get('appointmentDate')?.valueChanges.subscribe(date => {
         const doctorName = this.appointmentForm.get('doctorName')?.value;
         // const doctorId = this.getDoctorIdByName(doctorName);
+        console.log(this.doctorId)
         const doctorId = this.doctorId;
 
         if (doctorId && date) {
@@ -403,7 +406,7 @@ export class AppointmentFormComponent implements OnInit {
     this.department = doctor.departmentName!;
     this.doctorType = doctor.doctorType;
     console.log(this.doctorId)
-    // this.onDoctorChange(this.doctorId)
+    this.onDoctorChange(this.doctorId)
     this.isVisitingConsultant = doctor.doctorType === 'Visiting Consultant';
     this.showDoctorSuggestions = false;  // Hide dropdown after selecting
     // const selectElement = event.target as HTMLSelectElement | null;
@@ -449,6 +452,7 @@ export class AppointmentFormComponent implements OnInit {
     this.appointmentForm.get('appointmentDate')?.valueChanges.subscribe(date => {
       const doctorName = this.appointmentForm.get('doctorName')?.value;
       // const doctorId = this.getDoctorIdByName(doctorName);
+      console.log(this.doctorId)
       const doctorId = this.doctorId;
       if (doctorId !== undefined) {
         this.appointmentService.getBookedSlots(doctorId, date).subscribe(
@@ -1243,7 +1247,8 @@ export class AppointmentFormComponent implements OnInit {
           this.appointment.status = 'confirmed';
         }
         const selectedDoctor = this.getDoctorByName(this.appointmentForm.value.doctorName);
-        const doctorId = this.doctorId
+        console.log(this.doctor, this.appointment.doctorId)
+        const doctorId = this.appointment.doctorId
         const department = this.department ?? 'Default Department';
         let phoneNumber = this.appointmentForm.value.phoneNumber;
 

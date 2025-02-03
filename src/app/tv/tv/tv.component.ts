@@ -92,11 +92,11 @@ export class TvComponent implements OnInit, OnDestroy {
     const channelId = this.route.snapshot.paramMap.get('channelId');
     if (channelId) {
       this.loadDoctorsForChannel(channelId);
-      // this.anotherIntervalId = setInterval(() => {
-      //   this.loadAppointmentsForDoctors();
-      // }, 30000);
-      // console.log(this.loadDoctorsForChannel(channelId))
-      // console.log(channelId)
+      this.anotherIntervalId = setInterval(() => {
+        this.loadAppointmentsForDoctors();
+      }, 30000);
+      console.log(this.loadDoctorsForChannel(channelId))
+      console.log(channelId)
     }
     this.eventSubscription = this.eventService.consultationEvent$.subscribe((event) => {
       // console.log(event.doctorId, event.appointmentId, event.channelId, channelId)
@@ -128,9 +128,9 @@ export class TvComponent implements OnInit, OnDestroy {
     );
   }
   startAutoUpdate() {
-    // this.updateTimeInterval = interval(60000).subscribe(() => {
-    //   this.loadDoctorDetails(this.doctors);
-    // });
+    this.updateTimeInterval = interval(60000).subscribe(() => {
+      this.loadDoctorDetails(this.doctors);
+    });
   }
   loadDoctorDetails(doctor: any): void {
     const today = new Date()

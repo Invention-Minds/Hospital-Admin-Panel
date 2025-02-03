@@ -279,6 +279,7 @@ export class TvComponent implements OnInit, OnDestroy {
         // Step 4: Update the doctor's availableFrom time based on the latest availability
         const latestAvailableFrom = availableDay?.availableFrom || 'N/A';
         doctor.time = latestAvailableFrom;
+        doctor.image = 'sunil.svg'
 
         console.log(`Updated Doctor Time for ${doctor.name}: ${doctor.time}`);
       } else {

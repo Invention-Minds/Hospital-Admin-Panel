@@ -9,12 +9,21 @@ import { SettingsComponent } from "../settings/settings/settings.component";
 })
 export class SidebarComponent implements OnInit {
   role: string = ''; 
+  subAdminType: string = ''
+  adminType: string = ''
+  type: string[] = []
   // openSetting: boolean = false;
   constructor() {}
   ngOnInit(): void {
     if (typeof window !== 'undefined' && window.localStorage) {
       // Fetch role from localStorage or the authentication service
       this.role = localStorage.getItem('role') || '';
+      this.subAdminType = localStorage.getItem('subAdminType') || '';
+      this.adminType = localStorage.getItem('adminType') || '';
+      this.type = [this.adminType].filter(value => value !== '');
+
+    console.log("User types:", this.type);
+
       // console.log('User role:', this.role);
     } else {
       console.log('localStorage is not available');
@@ -31,5 +40,15 @@ export class SidebarComponent implements OnInit {
     this.toggleSettings.emit();
     console.log('Settings opened');
   }
-
+  hasEstimationAccess(): boolean {
+    const allowedRoles = this.adminType;
+    // console.log(this.type.some(t => allowedRoles.includes(t)))
+    return this.type.some(t => allowedRoles.includes(t));  // Fix arrow function usage
+  }
+  isNotEstimator(): boolean {
+    return !(this.role === 'sub_admin' && this.subAdminType === 'Estimator');
+  }
+  isEstimator():boolean {
+    return(this.role === 'sub_admin' && this.subAdminType === 'Estimator')
+  }
 }

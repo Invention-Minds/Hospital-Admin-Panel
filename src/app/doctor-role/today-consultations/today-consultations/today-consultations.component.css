@@ -287,9 +287,18 @@ tbody tr:hover {
   padding: 20px;
   font-family: Kanit;
 }
+.start:disabled {
+  background-color: #f0f0f0; /* Gray background for disabled button */
+  cursor: not-allowed; /* Change cursor to indicate the button is disabled */
+  opacity: 0.6; /* Make the button less prominent */
+}
+.finish:disabled{
+  background-color: #f0f0f0; /* Gray background for disabled button */
+  cursor: not-allowed; /* Change cursor to indicate the button is disabled */
+  opacity: 0.6; /* Make the button less prominent */
+}
 .start {
   display: flex;
-  width: 176px;
   height: 36px;
   padding: 8px 10px;
   justify-content: center;
@@ -357,6 +366,25 @@ tbody tr:hover {
   border: 1px solid #36b8b8;
   background: #fff;
   color: #36b8b8;
+  font-family: Kanit;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  cursor: pointer;
+}
+.transfer{
+  display: inline-flex;
+  height: 36px;
+  padding: 8px 10px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  border: 1px solid #FB9C2A;
+  background: #FFF;
+  color: #FB9C2A;
   font-family: Kanit;
   font-size: 14px;
   font-style: normal;
@@ -437,6 +465,33 @@ tbody tr:hover {
 }
 
 .modal-content {
+  border-radius: 20px;
+  background: #fff;
+  padding: 20px;
+  width: 673px;
+  height: 580px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+.modal-content-transfer {
+  border-radius: 20px;
+  background: #fff;
+  padding: 20px;
+  width: 673px;
+  height: auto;
+  flex-shrink: 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+.modal-content-leave {
+  border-radius: 20px;
+  background: #fff;
+  padding: 20px;
+  width: 673px;
+  height: 380px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+.modal-content-close-opd {
   border-radius: 20px;
   background: #fff;
   padding: 20px;
@@ -682,7 +737,7 @@ input[type="text"]::placeholder {
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 16px;
-  background-color: #f6f8ff; /* Background color like the first image */
+  background-color: #fff; /* Background color like the first image */
   outline: none;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
   font-family: Kanit;
@@ -710,11 +765,11 @@ input[type="text"]::placeholder {
   left: 10px;
   font-size: 12px;
   color: #007bff; /* Label color on focus */
-  background-color: #f6f8ff;
+  background-color: #fff;
 }
 .estimation-input-container {
   position: relative;
-  padding-top: 16px;
+  /* padding-top: 16px; */
   /* width: 300px; */
 }
 
@@ -757,6 +812,7 @@ input {
   display: flex;
   align-items: center;
   margin: 15px 0;
+  margin-bottom: 40px;
 }
 
 .estimation-type-label {
@@ -786,4 +842,32 @@ input {
 
 .radio-buttons input[type="radio"] {
   margin-right: 5px;
+}
+.slots-container {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* 8 slots per row */
+  gap: 15px; /* Space between slots */
+  padding: 20px;
+  justify-content: center; /* Center the grid */
+}
+
+.slot-item {
+  display: flex;
+  flex-direction: row; /* Stack checkbox and label vertically */
+  align-items: center; /* Center align items */
+  gap: 4px; /* Space between checkbox and label */
+  font-size: 14px;
+  text-align: center; /* Center the text below the checkbox */
+}
+
+.slot-item input {
+  cursor: pointer;
+  width: 20%;
+}
+
+.slot-item label {
+  cursor: pointer;
+}
+.content{
+  text-align: center;
 }

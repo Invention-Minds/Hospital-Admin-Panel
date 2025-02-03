@@ -70,6 +70,12 @@ export class DoctorOverviewComponent implements OnInit {
     this.activeComponent = componentName;
   }
 
+  showAppointments(){
+    if(this.role === 'admin' || this.role === 'super_admin'){
+      this.activeComponent = 'appointments'
+    }
+  }
+
   // Save doctor (either add new or update existing)
   onSaveDoctor(doctor: Doctor): void {
     // console.log('Doctor to save:', doctor);

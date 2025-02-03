@@ -1,87 +1,94 @@
 <div class="dashboard-section">
-    <!-- <h1>Appointments</h1> -->
-    <div class="stats-cards">
-      <div class="card-1" 
-      [ngClass]="{'active-card': activeComponent === 'form'}"
-      (click)="showNewAppointmentForm()">
-        <div class="card-icon">
-          <img src="/est-form.svg" alt="OPD Icon" />
-        </div>
-        <div class="card-content">
-          <!-- <h2>40</h2> -->
-          <!-- <p>Health CheckUp Form</p> -->
-        </div>
+  <!-- <h1>Appointments</h1> -->
+  <div class="stats-cards">
+    <div class="card-1" [ngClass]="{'active-card': activeComponent === 'form'}" (click)="showNewAppointmentForm()">
+      <div class="card-icon">
+        <img src="/est-form.svg" alt="OPD Icon" />
       </div>
-      <div class="card" 
-      [ngClass]="{'active-card': activeComponent === 'request'}"
-      (click)="showAppointmentRequests()">
-        <div class="card-icon">
-          <img src="/est-req.svg" alt="Doctor Available Icon" />
-        </div>
-        <div class="card-content">
-          <!-- <h2>42</h2> -->
-          <p>Estimation Request</p>
-        </div>
+      <div class="card-content">
+        <!-- <h2>40</h2> -->
+        <!-- <p>Health CheckUp Form</p> -->
       </div>
-      <div class="card" 
-      [ngClass]="{'active-card': activeComponent === 'confirmed'}"
-      (click)="showConfirmedAppointments()">
-        <div class="card-icon">
-          <img src="/est-appr.svg" alt="Appointment Icon" />
-        </div>
-        <div class="card-content">
-          <!-- <h2>25</h2> -->
-          <p>Approved Estimation</p>
-        </div>
-      </div>
-      <div class="card" 
-      [ngClass]="{'active-card': activeComponent === 'cancelled'}"
-      (click)="showCancelledAppointments()">
-        <div class="card-icon">
-          <img src="/est-confirm.svg" alt="Doctor Available Icon" />
-        </div>
-        <div class="card-content">
-          <!-- <h2>42</h2> -->
-          <p>Confirmed Estimation</p>
-        </div>
-      </div>
-      <div class="card" 
-      [ngClass]="{'active-card': activeComponent === 'repeated'}"
-      (click)="showRepeatAppointments()">
-        <div class="card-icon">
-          <img src="/est-cancel.svg" alt="OPD Icon" />
-        </div>
-        <div class="card-content">
-          <!-- <h2>40</h2> -->
-          <p>Compl/Cancel Est.</p>
-        </div>
-      </div>
-      <div class="card" 
-      [ngClass]="{'active-card': activeComponent === 'completed'}"
-      (click)="showCompletedAppointments()">
-        <div class="card-icon">
-          <img src="/est-overdue.svg" alt="OPD Icon" />
-        </div>
-        <div class="card-content">
-          <!-- <h2>40</h2> -->
-          <p>OverDue Estimation</p>
-        </div>
-      </div>
-
     </div>
+    <div class="card" *ngIf="role === 'sub_admin'" [ngClass]="{'active-card': activeComponent === 'request'}"
+      (click)="showAppointmentRequests()">
+      <div class="card-icon">
+        <img src="/est-req.svg" alt="Doctor Available Icon" />
+      </div>
+      <div class="card-content">
+        <!-- <h2>42</h2> -->
+        <p>Estimation Request</p>
+      </div>
+    </div>
+    <div class="card" *ngIf="role === 'admin' || role === 'super_admin' "
+      [ngClass]="{'active-card': activeComponent === 'submitted'}" (click)="showSubmittedRequest()">
+      <div class="card-icon">
+        <img src="/est-req.svg" alt="Doctor Available Icon" />
+      </div>
+      <div class="card-content">
+        <!-- <h2>42</h2> -->
+        <p>Estimation Request</p>
+      </div>
+    </div>
+    <div class="card" [ngClass]="{'active-card': activeComponent === 'approved'}" (click)="showApprovedAppointments()">
+      <div class="card-icon">
+        <img src="/est-appr.svg" alt="Appointment Icon" />
+      </div>
+      <div class="card-content">
+        <!-- <h2>25</h2> -->
+        <p>Approved Estimation</p>
+      </div>
+    </div>
+    <div class="card" [ngClass]="{'active-card': activeComponent === 'confirmed'}"
+      (click)="showConfirmedAppointments()">
+      <div class="card-icon">
+        <img src="/est-confirm.svg" alt="Doctor Available Icon" />
+      </div>
+      <div class="card-content">
+        <!-- <h2>42</h2> -->
+        <p>Confirmed Estimation</p>
+      </div>
+    </div>
+    <div class="card" [ngClass]="{'active-card': activeComponent === 'completed'}"
+      (click)="showCompletedAppointments()">
+      <div class="card-icon">
+        <img src="/est-cancel.svg" alt="OPD Icon" />
+      </div>
+      <div class="card-content">
+        <!-- <h2>40</h2> -->
+        <p>Compl/Cancel Est.</p>
+      </div>
+    </div>
+    <div class="card" [ngClass]="{'active-card': activeComponent === 'overdue'}" (click)="showOverDueAppointment()">
+      <div class="card-icon">
+        <img src="/est-overdue.svg" alt="OPD Icon" />
+      </div>
+      <div class="card-content">
+        <!-- <h2>40</h2> -->
+        <p>OverDue Estimation</p>
+      </div>
+    </div>
+
   </div>
-  <div class="component-section">
-    <!-- <app-appointment-request *ngIf="activeComponent === 'request'" [selectedDateRange]="selectedDateRange" [selectedSearchOption]="selectedSearchOption"  [selectedValue]="searchValue"></app-appointment-request>
+</div>
+<div class="component-section">
+  <!-- <app-appointment-request *ngIf="activeComponent === 'request'" [selectedDateRange]="selectedDateRange" [selectedSearchOption]="selectedSearchOption"  [selectedValue]="searchValue"></app-appointment-request>
     
     <app-appointment-cancel *ngIf="activeComponent === 'cancelled'" [selectedDate]="selectedDate" [selectedSearchOption]="selectedSearchOption" [selectedDateRange]="selectedDateRange" [selectedValue]="searchValue" #appointmentCancelComponent></app-appointment-cancel>
     <app-appointment-complete *ngIf="activeComponent === 'completed'"  [selectedSearchOption]="selectedSearchOption" [selectedDateRange]="selectedDateRange" [selectedValue]="searchValue" #appointmentCompleteComponent></app-appointment-complete> -->
-    <!-- <app-estimation-form *ngIf="activeComponent === 'form'"  [serviceData]="selectedService"
+  <!-- <app-estimation-form *ngIf="activeComponent === 'form'"  [serviceData]="selectedService"
     (closeForm)="closeForm()"></app-estimation-form> -->
-    <app-estimation-form *ngIf="activeComponent === 'form'" [estimationData]="selectedEstimation"
+  <app-estimation-form *ngIf="activeComponent === 'form'" [estimationData]="selectedEstimation"
     (closeForm)="closeForm()"></app-estimation-form>
-    <app-health-checkup-confirmed *ngIf="activeComponent === 'confirmed'" #healthCheckupConfirmed (reschedule)="openAppointmentForm($event)"  ></app-health-checkup-confirmed>
-    <app-health-checkup-cancel *ngIf="activeComponent === 'cancelled'" (reschedule)="openAppointmentForm($event)" ></app-health-checkup-cancel>
-    <app-health-checkup-complete *ngIf="activeComponent === 'completed'" ></app-health-checkup-complete>
-    <app-estimation-request *ngIf="activeComponent === 'request'" (reschedule)="openAppointmentForm($event)" ></app-estimation-request>
-    <app-health-checkup-repeat *ngIf="activeComponent === 'repeated'" ></app-health-checkup-repeat>
-  </div>
+  <!-- <app-health-checkup-confirmed *ngIf="activeComponent === 'confirmed'" #healthCheckupConfirmed (reschedule)="openAppointmentForm($event)"  ></app-health-checkup-confirmed> -->
+  <app-estimation-approved #estimationApproved *ngIf="activeComponent === 'approved'"
+    (reschedule)="openAppointmentForm($event)"></app-estimation-approved>
+  <app-estimation-confirmed *ngIf="activeComponent === 'confirmed'"
+    (reschedule)="openAppointmentForm($event)"></app-estimation-confirmed>
+  <app-estimation-complete *ngIf="activeComponent === 'completed'"></app-estimation-complete>
+  <app-estimation-request #estimationApproved *ngIf="activeComponent === 'request'"
+    (reschedule)="openAppointmentForm($event)" ></app-estimation-request>
+  <app-estimation-overdue *ngIf="activeComponent === 'overdue'"></app-estimation-overdue>
+  <app-estimation-submit #estimationApproved *ngIf="activeComponent === 'submitted'"
+    (reschedule)="openAppointmentForm($event)"></app-estimation-submit>
+</div>

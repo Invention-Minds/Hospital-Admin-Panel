@@ -63,10 +63,11 @@
           <td>
             <span class="status-badge">{{ appointment.status }}</span>
           </td>
-          <td class="button">
-            <button class="btn-action" [disabled]="appointment.checkedIn">
+          <!-- <td class="button" >
+            <button class="btn-action" [disabled]="appointment.checkedIn && !isCheckInEnabled(appointment)">
               <img src="check-in.png" alt="check" class="action-icon" (click)="completeAppointment(appointment)"
-                pTooltip="Check-in" tooltipPosition="top">
+                pTooltip="Check-in" tooltipPosition="top" >
+              </button>
               <button class="btn-action" [disabled]="appointment.checkedIn">
                 <img src="appt-cancel.png" alt="delete" class="action-icon" (click)="cancelAppointment(appointment)" 
                 pTooltip="Cancel" tooltipPosition="top">
@@ -74,8 +75,35 @@
               <button class="btn-action-reschedule" (click)="openAppointmentForm(appointment)"  pTooltip="Reschedule"  tooltipPosition="top">
                 <img src="icons/book.png" alt="Confirm">
             </button>
+          </td> -->
+          <td class="button">
+            <!-- Check-in Button -->
+            <button class="btn-action" 
+                    [disabled]="appointment.checkedIn || !isCheckInEnabled(appointment)">
+              <img src="check-in.png" alt="check" 
+                   class="action-icon" 
+                   (click)="completeAppointment(appointment)"
+                   pTooltip="Check-in" tooltipPosition="top">
+            </button>
+          
+            <!-- Cancel Button -->
+            <button class="btn-action" 
+                    [disabled]="appointment.checkedIn">
+              <img src="appt-cancel.png" alt="delete" 
+                   class="action-icon" 
+                   (click)="cancelAppointment(appointment)" 
+                   pTooltip="Cancel" tooltipPosition="top">
+            </button>
+          
+            <!-- Reschedule Button -->
+            <button class="btn-action-reschedule" 
+                    [disabled]="appointment.checkedIn" 
+                    (click)="openAppointmentForm(appointment)"  
+                    pTooltip="Reschedule" tooltipPosition="top">
+              <img src="icons/book.png" alt="Confirm">
             </button>
           </td>
+          
         </tr>
       </tbody>
     </table>

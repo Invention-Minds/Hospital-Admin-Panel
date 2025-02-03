@@ -39,6 +39,9 @@ export class AuthServiceService {
           localStorage.setItem('userid',user.userId)
           localStorage.setItem('token', response.token);  // Save the token in localStorage
           localStorage.setItem('isReceptionist', user.isReceptionist);
+          localStorage.setItem('employeeId', user.employeeId);
+          localStorage.setItem('subAdminType',user.subAdminType);
+          localStorage.setItem('adminType',user.adminType);
         }
       })
     );
@@ -74,9 +77,9 @@ initializeUserFromStorage(): void {
     // console.log(this.user);
   }
 
-  register(username: string, password: string, isReceptionist: boolean, employeeId: string, role:string): Observable<any> {
+  register(username: string, password: string, isReceptionist: boolean, employeeId: string, role:string, adminType: string, subAdminType: string): Observable<any> {
     // const role = this.extractRoleFromUsername(username);  // Extract role
-    return this.http.post(`${this.apiUrl}/register`, { username, password, isReceptionist, employeeId, role }).pipe(
+    return this.http.post(`${this.apiUrl}/register`, { username, password, isReceptionist, employeeId, role, adminType, subAdminType }).pipe(
       tap(response => {
         this.role = role;  // Save the role
       })

@@ -15,6 +15,7 @@ export class LoginComponent implements OnInit {
   isPasswordVisible: boolean = false; // Track visibility of password
   isLoading: boolean = false; // Track loading state of the login form
   role: string = ''; // Track the user role
+  subAdminType: string = ''
   
   constructor(private authService: AuthServiceService, private router: Router,private messageService: MessageService) {}
   ngOnInit(): void {
@@ -23,6 +24,7 @@ export class LoginComponent implements OnInit {
     if (typeof window !== 'undefined' && window.localStorage) {
       // Fetch role from localStorage or the authentication service
       this.role = localStorage.getItem('role') || '';
+      this.subAdminType = localStorage.getItem('subAdminType') || ''
       // console.log('User role:', this.role);
     } else {
       console.log('localStorage is not available');
@@ -33,7 +35,11 @@ export class LoginComponent implements OnInit {
       if(this.role!== 'doctor'){
         console.log('role', this.role)
         this.router.navigate(['/dashboard']);
-      }else{
+      }else if (this.subAdminType === 'Estimator'){
+        console.log(this.subAdminType)
+        this.router.navigate(['/estimation'])
+      }
+      else{
         console.log('doctor',this.role)
         this.router.navigate(['/doctor-appointments']);
       }
@@ -61,10 +67,14 @@ export class LoginComponent implements OnInit {
         // response = response;
         
         // Navigate to the desired route upon successful login
-        if(response.user.role!== 'doctor'){
+        if (response.user.subAdminType === 'Estimator'){
+          console.log(this.subAdminType)
+          this.router.navigate(['/estimation'])
+        }else if(response.user.role!== 'doctor'){
           console.log('role', response.user.role)
           this.router.navigate(['/dashboard']);
-        }else if(response.user.role === 'doctor'){
+        }
+        else if(response.user.role === 'doctor'){
           console.log('doctor',response.user.role)
           this.router.navigate(['/doctor-appointments']);
         }

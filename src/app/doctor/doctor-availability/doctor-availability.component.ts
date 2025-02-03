@@ -750,6 +750,7 @@ const availableDay = latestAvailability?.find(avail => avail.day.toLowerCase() =
     }
   }
   openUnavailableModal(doctor: DoctorWithSlots): void {
+    console.log(doctor)
     const today = new Date();
     const tomorrow = new Date();
     tomorrow.setDate(today.getDate() + 1);
@@ -758,7 +759,7 @@ const availableDay = latestAvailability?.find(avail => avail.day.toLowerCase() =
     const isTomorrow = this.selectedDate.toDateString() === tomorrow.toDateString();
 
     // Ensure the modal only opens for today or tomorrow
-    if (isToday || isTomorrow) {
+    if (isToday || isTomorrow || doctor.id === 14) {
       this.selectedDoctor = doctor;
 
       // Fetch unavailable slots for the selected doctor and selected date

@@ -84,6 +84,12 @@ import { TvControlComponent } from './tv-control/tv-control/tv-control.component
 import { EstimationFormComponent } from './estimation/estimation-form/estimation-form/estimation-form.component';
 import { EstimationOverviewComponent } from './estimation/estimation-overview/estimation-overview/estimation-overview.component';
 import { EstimationRequestComponent } from './estimation/estimation-request/estimation-request/estimation-request.component';
+import { EstimationApprovedComponent } from './estimation/estimation-approved/estimation-approved/estimation-approved.component';
+import { EstimationConfirmedComponent } from './estimation/estimation-confirmed/estimation-confirmed/estimation-confirmed.component';
+import { EstimationCompleteComponent } from './estimation/estimation-complete/estimation-complete/estimation-complete.component';
+import { EstimationOverdueComponent } from './estimation/estimation-overdue/estimation-overdue/estimation-overdue.component';
+import { EstimationSubmitComponent } from './estimation/estimation-submit/estimation-submit/estimation-submit.component';
+import { DoctorAppointmentsComponent } from './doctor/doctor-appointments/doctor-appointments/doctor-appointments.component';
 
 
 
@@ -129,6 +135,12 @@ import { EstimationRequestComponent } from './estimation/estimation-request/esti
     EstimationFormComponent,
     EstimationOverviewComponent,
     EstimationRequestComponent,
+    EstimationApprovedComponent,
+    EstimationConfirmedComponent,
+    EstimationCompleteComponent,
+    EstimationOverdueComponent,
+    EstimationSubmitComponent,
+    DoctorAppointmentsComponent,
 
   
     

@@ -39,7 +39,9 @@ body {
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
   font-family: Kanit;
 }
-
+.dropdown-container{
+  margin-top: 20px;
+}
 .custom-input:focus {
   border-color: #007bff; /* Focus border color like the second image */
   box-shadow: 0 0 3px #007bff;
@@ -78,6 +80,25 @@ body {
   color: red;
   margin-top: 5px;
   position: absolute;
+}
+.custom-label-surgery {
+  position: absolute;
+  top: 54%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: #007bff;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  background-color: #f6f8ff;
+  
+}
+.custom-label-type{
+  color: #007bff;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  background-color: #f6f8ff;
 }
 
 .section {
@@ -142,16 +163,7 @@ select {
 input[type="radio"] {
   margin-right: 5px;
 }
-.submit-button {
-  margin-top: 20px;
-  padding: 10px 20px;
-  background-color: #007bff;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-family: Kanit;
-}
+
 
 .submit-button:disabled {
   background-color: #ccc;
@@ -186,8 +198,8 @@ input[type="radio"] {
   gap: 20px;
 }
 
-.sign{
-    color: #000;
+.sign {
+  color: #000;
   font-family: Kanit;
   font-size: 20px;
   font-style: normal;
@@ -214,4 +226,74 @@ input[type="radio"] {
   background-color: #d3d3d3;
   border: 1px solid #ccc;
   border-radius: 8px;
+}
+.submit-button {
+  border-radius: 4px;
+  background: #169458;
+  display: flex;
+  width: 150px;
+  padding: 7px 14px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  font-family: Kanit;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+
+.clear-button {
+  border-radius: 4px;
+  border: 1px solid #7b7b7b;
+  outline: none;
+  display: flex;
+  width: 150px;
+  padding: 7px 14px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  color: #7b7b7b;
+  font-family: Kanit;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  background-color: transparent;
+}
+
+.sign-clear{
+  width: 100px !important;
+height: 32px !important;
+}
+
+.button{
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  align-items: center;
+  gap: 30px ;
+}
+
+.reject-button {
+  border-radius: 4px;
+background: #D20006;
+  display: flex;
+  width: 150px;
+  padding: 7px 14px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+  font-family: Kanit;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
 }

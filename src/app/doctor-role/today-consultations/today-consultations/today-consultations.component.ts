@@ -6,6 +6,7 @@ import { EventService } from '../../../services/event.service';
 import { MessageService } from 'primeng/api';
 import { ChangeDetectorRef } from '@angular/core';
 import { Doctor } from '../../../models/doctor.model';
+import { ChannelService } from '../../../services/channel/channel.service';
 import * as XLSX from 'xlsx';
 import { start } from 'node:repl';
 import * as moment from 'moment-timezone';
@@ -37,6 +38,7 @@ interface Appointment {
   waitingTime?: string;
   postPond?:boolean;
   endConsultationTime?: Date;
+  isTransfer?: boolean
 }
 
 @Component({
@@ -48,7 +50,7 @@ export class TodayConsultationsComponent {
   confirmedAppointments: Appointment[] = [];
   @Output() consultationStarted = new EventEmitter<{ doctorId: number, appointmentId: number }>();
 
-  constructor(private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService,private messageService: MessageService, private cdRef: ChangeDetectorRef,private eventService: EventService, private estimationService: EstimationService) { }
+  constructor(private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService,private messageService: MessageService, private cdRef: ChangeDetectorRef,private eventService: EventService, private estimationService: EstimationService, private channelService: ChannelService) { }
   appointments: Appointment[] = [
     // { id: '0001', patientName: 'Anitha Sundar', phoneNumber: '+91 7708590100', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Booked', smsSent: true },
   ];
@@ -88,6 +90,10 @@ export class TodayConsultationsComponent {
   showEstimationSuggestions: boolean = false; 
   estimationType: string = 'MM'
   showCancelPopup: boolean = false;
+  remarks: string = '';
+  completedAppointments: any[] = [];
+  showTransferAppointment: boolean = false;
+  estimation: any[] = []
   searchOptions = [
     { label: 'Patient Name', value: 'patientName' },
     { label: 'Phone Number', value: 'phoneNumber' }
@@ -146,6 +152,8 @@ export class TodayConsultationsComponent {
                 // console.log('Doctor:', doctor?.userId,this.userId);
                 return doctor && doctor.userId === parseInt(this.userId) && appointment.date === this.today;
               });
+              this.completedAppointments = this.filteredAppointments.filter(appointment => !appointment.checkedOut )
+              console.log(this.completedAppointments, 'complete')
               this.filteredAppointments.sort((a, b) => {
                 const timeA = this.parseTimeToMinutes(a.time);
                 const timeB = this.parseTimeToMinutes(b.time);
@@ -405,6 +413,13 @@ export class TodayConsultationsComponent {
     this.currentDoctorName = appointment.doctorName || 'Unknown Doctor';
     this.showEstimationPopup = true;
     this.currentDoctorId = appointment.doctorId
+    this.doctor.filter((doc) => {
+      this.currentDepartmentId = doc.departmentId!;
+      this.currentDoctorName = doc.name!;
+    });
+    if (this.currentDepartmentId) {
+      this.loadEstimationSuggestions(this.currentDepartmentId);
+    }
   }
 
   closeEstimationPopup(): void {
@@ -414,15 +429,10 @@ export class TodayConsultationsComponent {
     this.estimationPreferedDate = '';
   }
 
+
   onEstimationInput(): void {
     // Filter suggestions based on the input text
-       this.doctor.filter((doc) => {
-      this.currentDepartmentId = doc.departmentId!;
-      this.currentDoctorName = doc.name!;
-    });
-    if (this.currentDepartmentId) {
-      this.loadEstimationSuggestions(this.currentDepartmentId);
-    }
+
     if (this.estimationText.trim()) {
       this.filteredEstimations = this.estimationSuggestions.filter((estimation) =>
         estimation.toLowerCase().includes(this.estimationText.toLowerCase())
@@ -471,7 +481,8 @@ export class TodayConsultationsComponent {
         doctorName: this.currentDoctorName,
         status: 'pending',
         estimationType: this.estimationType,
-         estimationId: 'JMRH/24/25-001'
+        estimationCreatedTime: new Date(),
+        remarks: this.remarks
       };
       this.estimationService.createEstimationDetails(estimationDetails).subscribe({
         next: (response) => {
@@ -496,7 +507,8 @@ export class TodayConsultationsComponent {
       doctorName: this.currentDoctorName,
       status: 'pending',
       estimationType: this.estimationType,
-      estimationId: 'JMRH/24/25-001'
+      estimationCreatedTime: new Date(),
+      remarks: this.remarks
     };
 
     this.doctor.filter((doc) => {
@@ -564,6 +576,9 @@ export class TodayConsultationsComponent {
       const differenceInMinutes = Math.floor((checkedOut - checkedIn) / 60000); // Difference in minutes
       appointment.waitingTime = differenceInMinutes.toString();
     }
+    if(appointment.postPond === true){
+      appointment.postPond = false
+    }
    
   
     console.log('Waiting time calculated:', appointment.waitingTime);
@@ -588,13 +603,53 @@ export class TodayConsultationsComponent {
     appointment.endConsultationTime = new Date()
     this.appointmentService.updateAppointment(appointment)
   }
+  transfer(appointment:Appointment): void{
+    appointment.isTransfer = true;
+    this.appointmentService.updateAppointment(appointment)
+    this.closeCloseOpdPopup()
+  }
+  openTransferPopup(estimation:any){
+    this.selectedAppointment = estimation
+    this.showTransferAppointment = true;
+  }
+  closeTransferPopup(){
+    this.showTransferAppointment = false;
+  }
   endConsultation(){
    const postPondAppointment = this.filteredAppointments.filter(appointment =>{
       appointment.postPond === true
     })
     const count = postPondAppointment.length;
-    if(count > 1){
+    if(count >= 1){
       this.showCancelPopup = true;
+    }
+    else{
+      this.doctor.filter((doc) => {
+        this.currentDepartmentId = doc.departmentId!;
+        this.currentDoctorName = doc.name!;
+        this.currentDoctorId = doc.id!;
+      });
+      this.channelService.getChannelsByDoctor(this.currentDoctorId).subscribe({
+        next:(response) =>{
+          const channelId = response.channelId;
+          const doctorData = {
+            channelId: channelId,
+            doctorId: this.currentDoctorId
+          }
+          this.channelService.removeDoctorFromChannel(doctorData).subscribe({
+            next: (response) => {
+              console.log('Doctor Removed From the Channel')
+            },
+            error: (error) => {
+              console.error('Error deleting doctor from channel:', error);
+            }
+          })
+        },
+        error: (error) => {
+          console.error('Error submitting getting channel:', error);
+          
+        }
+      })
     }
   }
   postPondAppointment(appointment: Appointment):void{

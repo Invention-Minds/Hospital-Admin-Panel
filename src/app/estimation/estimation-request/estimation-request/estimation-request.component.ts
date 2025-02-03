@@ -2,6 +2,7 @@ import { Component, Output, EventEmitter } from '@angular/core';
 import { EstimationService } from '../../../services/estimation/estimation.service';
 import { MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
+import { HealthCheckupServiceService } from '../../../services/health-checkup/health-checkup-service.service';
 
 
 
@@ -14,7 +15,7 @@ import { Router } from '@angular/router';
 export class EstimationRequestComponent {
 
 
-    constructor(private estimationService: EstimationService, private messageService: MessageService,private router: Router) { }
+    constructor(private estimationService: EstimationService, private messageService: MessageService,private router: Router, private healthCheckupService: HealthCheckupServiceService) { }
     pendingEstimations: any[] = [];
     filteredEstimations: any[] = [];
     currentPage = 1;
@@ -22,9 +23,9 @@ export class EstimationRequestComponent {
     sortColumn: keyof any | undefined = undefined;  // No sorting initially
     sortDirection: string = 'asc';  // Default sorting direction
     searchOptions = [
-      { label: 'Patient Name', value: 'firstName' },
-      { label: 'Phone Number', value: 'phoneNumber' },
-      { label: 'Package', value: 'package' },
+      { label: 'Patient Name', value: 'patientName' },
+      { label: 'Estimation ID', value: 'estimationId' },
+      { label: 'Doctor Name', value: 'consultantName' },
     ];
     isLoading = false;
     selectedSearchOption: any = this.searchOptions[0];
@@ -55,7 +56,7 @@ export class EstimationRequestComponent {
           
           // Process the services when the API call is successful
           this.pendingEstimations = estimation.filter(
-            (estimation) => estimation.statusOfEstimation === 'pending'
+            (estimation) => estimation.statusOfEstimation === 'pending' || estimation.statusOfEstimation === 'rejected'
           );
           console.log(this.pendingEstimations)
           this.pendingEstimations.sort((a, b) => {
@@ -79,23 +80,25 @@ export class EstimationRequestComponent {
       
     }
     onSearch(): void {
-  
+
       this.filteredEstimations = this.pendingEstimations.filter((service) => {
+        console.log(service)
         let matches = true;
+        console.log(this.searchValue, this.selectedSearchOption)
   
         // Filter by search option
         if (this.selectedSearchOption && this.searchValue && service) {
           switch (this.selectedSearchOption) {
-            case 'firstName':
-              matches = service.firstName
+            case 'patientName':
+              matches = service.patientName
                 ?.toLowerCase()
                 .includes(this.searchValue.toLowerCase());
               break;
-            case 'phoneNumber':
-              matches = service.phoneNumber?.includes(this.searchValue);
+            case 'estimationId':
+              matches = service.estimationId?.toLowerCase().includes(this.searchValue.toLowerCase());
               break;
-            case 'packageName':
-              matches = !!service.packageName
+            case 'consultantName':
+              matches = !!service.consultantName
                 ?.toLowerCase()
                 .includes(this.searchValue.toLowerCase());
               break;
@@ -105,7 +108,7 @@ export class EstimationRequestComponent {
   
         // Filter by date range
         if (this.selectedDateRange && this.selectedDateRange.length) {
-          const serviceDate = new Date(service.appointmentDate);
+          const serviceDate = new Date(service.estimationPreferredDate);
           const startDate = new Date(this.selectedDateRange[0]);
           const endDate = this.selectedDateRange[1]
             ? new Date(this.selectedDateRange[1])
@@ -134,7 +137,7 @@ export class EstimationRequestComponent {
           const singleDate = new Date(this.selectedDate);
           matches =
             matches &&
-            new Date(service.appointmentDate).toDateString() === singleDate.toDateString();
+            new Date(service.estimationPreferredDate).toDateString() === singleDate.toDateString();
         }
         
         console.log(matches);
@@ -144,6 +147,7 @@ export class EstimationRequestComponent {
     }
     refresh() {
       this.selectedDateRange = []
+      this.filteredEstimations = [...this.pendingEstimations]
     }
     downloadData(): void {
       // if (this.selectedDateRange && this.selectedDateRange.length > 0 && this.activeComponent === 'confirmed') {
@@ -273,10 +277,10 @@ export class EstimationRequestComponent {
     }
     completeAppointment(appointment: any): void { }
     openAppointmentForm(service: any): void {
-      // this.router.navigate(['/reschedule', service.id], {
-      //   state: { data: service }, // Passing full service object using state
-      // });
-      // this.lockService(service);
+      this.router.navigate(['/reschedule', service.id], {
+        state: { data: service }, // Passing full service object using state
+      });
+      this.lockService(service);
       this.openAppointmentFormAfterLocked(service)
     }
     openAppointmentFormAfterLocked(service: any): void {
@@ -287,32 +291,32 @@ export class EstimationRequestComponent {
     lockService(service: any): void {
       if (!service.id) return;
   
-      // this.healthCheckupService.lockService(service.id, this.userId).subscribe({
-      //   next: (response) => {
-      //     console.log('Service locked:', response);
-      //     this.activeServiceId = service.id!;
-      //     this.messageService.add({
-      //       severity: 'success',
-      //       summary: 'Locked',
-      //       detail: `Service ID ${service.id} has been locked successfully.`,
-      //     });
-      //     this.openAppointmentFormAfterLocked(service);
-      //     this.activeComponent = 'form';
-      //   },
-      //   error: (error) => {
-      //     if (error.status === 409) {
-      //       this.isLockedDialogVisible = true; // Show dialog if locked by another user
-      //       console.warn('Service is already locked by another user.');
-      //     } else {
-      //       console.error('Error locking service:', error);
-      //       this.messageService.add({
-      //         severity: 'error',
-      //         summary: 'Error',
-      //         detail: 'Failed to lock the service.',
-      //       });
-      //     }
-      //   },
-      // });
+      this.estimationService.lockService(service.id, this.userId).subscribe({
+        next: (response) => {
+          console.log('Service locked:', response);
+          this.activeServiceId = service.id!;
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Locked',
+            detail: `Service ID ${service.id} has been locked successfully.`,
+          });
+          this.openAppointmentFormAfterLocked(service);
+          this.activeComponent = 'form';
+        },
+        error: (error) => {
+          if (error.status === 409) {
+            this.isLockedDialogVisible = true; // Show dialog if locked by another user
+            console.warn('Service is already locked by another user.');
+          } else {
+            console.error('Error locking service:', error);
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'Failed to lock the service.',
+            });
+          }
+        },
+      });
     }
     handleLockedDialogClose(){
       this.isLockedDialogVisible = false;
@@ -322,26 +326,26 @@ export class EstimationRequestComponent {
       console.log('Unlocking service:', this.activeServiceId);
       if (!this.activeServiceId) return;
   
-      // this.healthCheckupService.unlockService(this.activeServiceId).subscribe({
-      //   next: (response) => {
-      //     console.log('Service unlocked:', response);
-      //     this.activeServiceId = null;
-      //     this.messageService.add({
-      //       severity: 'success',
-      //       summary: 'Unlocked',
-      //       detail: 'Service has been unlocked successfully.',
-      //     });
-      //     this.activeComponent = 'confirmed'; // Navigate back to the confirmed appointments
-      //   },
-      //   error: (error) => {
-      //     console.error('Error unlocking service:', error);
-      //     this.messageService.add({
-      //       severity: 'error',
-      //       summary: 'Error',
-      //       detail: 'Failed to unlock the service.',
-      //     });
-      //   },
-      // });
+      this.estimationService.unlockService(this.activeServiceId).subscribe({
+        next: (response) => {
+          console.log('Service unlocked:', response);
+          this.activeServiceId = null;
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Unlocked',
+            detail: 'Service has been unlocked successfully.',
+          });
+          this.activeComponent = 'confirmed'; // Navigate back to the confirmed appointments
+        },
+        error: (error) => {
+          console.error('Error unlocking service:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to unlock the service.',
+          });
+        },
+      });
     }
     ngOnDestroy(): void {
       // Unlock the service on component destroy if locked

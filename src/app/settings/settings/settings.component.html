@@ -210,8 +210,12 @@
       <div *ngIf="isAdmin">
         <div class="input">
           <div class="floating-label">
-            <input type="text" id="type" name="type" placeholder=" " [(ngModel)]="type" disabled />
-            <label for="type">Type (Admin)</label>
+            <select id="adminType" [(ngModel)]="adminType" (ngModelChange)="typeChange()" class="styled-select">
+              <option value="Manager">Manager</option>
+              <option value="Senior Manager">Senior Manager</option>
+              <option value="Management">Management</option>
+            </select>
+            <label for="adminType"> Admin Type*</label>
           </div>
           <div class="floating-label">
             <input type="text" id="name" name="name" placeholder=" " [(ngModel)]="name" required />

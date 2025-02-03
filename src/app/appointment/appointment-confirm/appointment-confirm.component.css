@@ -198,6 +198,10 @@ tbody tr:hover {
   opacity: 0.5;
   cursor: not-allowed;
 }
+.btn-action-reschedule[disabled]{
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 .loader {
   position: absolute; /* Ensure it overlays the content */
   top: 50%; /* Center vertically */

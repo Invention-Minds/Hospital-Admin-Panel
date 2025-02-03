@@ -1049,7 +1049,8 @@ export class AppointmentFormComponent implements OnInit {
           response => {
             console.log('Slot marked as complete:', response);
             alert('Slot successfully marked as complete!');
-            this.appointmentService.checkedinAppointment(appointmentId).subscribe({
+            const username = localStorage.getItem('username')
+            this.appointmentService.checkedinAppointment(appointmentId, username).subscribe({
               next: (response) => {
                 this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Checked in successfully!' });
                 appointment.checkedIn = true; // Update the UI to reflect the checked-in status

@@ -313,6 +313,9 @@ getAppointmentsByDoctor(userId: number): Observable<any[]> {
 
     return this.http.post<any>(`${environment.apiUrl}/email/send-email-service`, emailRequest, { headers });
   }
+  sendMailtoApprover(to: string| string[], patientName: string, pdfLink: any): Observable<any>{
+    return this.http.post<any>(`${environment.apiUrl}/email/send-approver-email`, {to, patientName, pdfLink});
+  }
   getNotifications(): Observable<any> {
     return this.http.get<any>(`${environment.apiUrl}/appointments/notifications`);
   }
@@ -367,8 +370,8 @@ getAppointmentsByDoctor(userId: number): Observable<any[]> {
     getPatientById(patientId: number): Observable<any> {
       return this.http.get(`${environment.apiUrl}/patients/${patientId}`);
     }
-    checkedinAppointment(appointmentId: number): Observable<any> {
-      return this.http.put(`${this.apiUrl}/${appointmentId}/checkin`, {});
+    checkedinAppointment(appointmentId: number, username: any): Observable<any> {
+      return this.http.put(`${this.apiUrl}/${appointmentId}/checkin`, {username});
     }
     deleteAppointment(id: number): Observable<void> {
       return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() });
@@ -379,5 +382,16 @@ getAppointmentsByDoctor(userId: number): Observable<any[]> {
     sendAdminMessage(doctorName: string, startDate: string, endDate: string, adminPhoneNumber: string): Observable<any> {
       return this.http.post(`${environment.apiUrl}/whatsapp/send-admin-message`, { doctorName, startDate, endDate, adminPhoneNumber });
     }
-    
+    updateExtraWaitingTime(appointmentId: number, waitingTime: any): Observable<any> {
+      return this.http.put(`${this.apiUrl}/${appointmentId}/waitingTime`, {waitingTime});
+    }
+    sendWaitingTimeAlert(payload: {
+      adminPhoneNumbers: string[],
+      doctorPhoneNumber: string,
+      noOfPatients: number,
+      doctorName: string,
+      waitingMultiplier: number
+    }): Observable<any> {
+      return this.http.post(`${environment.apiUrl}/whatsapp/send-waiting-message`, payload);
+    }
 }

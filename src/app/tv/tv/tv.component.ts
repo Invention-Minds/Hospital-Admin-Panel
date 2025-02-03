@@ -5,7 +5,7 @@ import { ChannelService } from '../../services/channel/channel.service';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { EventService } from '../../services/event.service';
-import { Subscription } from 'rxjs';
+import { Subscription, interval } from 'rxjs';
 
 import {
   trigger,
@@ -34,6 +34,7 @@ interface Appointment {
   checkedIn?: boolean;
   user?: any;
   selectedSlot?: boolean;
+  scheduledTime?: string
 }
 @Component({
   selector: 'app-tv',
@@ -63,6 +64,8 @@ export class TvComponent implements OnInit, OnDestroy {
   private anotherIntervalId: any;
   private eventSubscription!: Subscription;
   todayFullAppointments: any[] = []
+  checkedInAppointments: any[] = [];
+  private updateTimeInterval!: Subscription;
 
   constructor(
     private route: ActivatedRoute,
@@ -77,6 +80,7 @@ export class TvComponent implements OnInit, OnDestroy {
     this.intervalId = setInterval(() => {
       this.updateDateTime();
     }, 60000);
+    this.startAutoUpdate()
 
     const today = new Date();
     const year = today.getFullYear();
@@ -111,7 +115,9 @@ export class TvComponent implements OnInit, OnDestroy {
         this.doctors = response.doctors;
         // console.log(this.doctors)
         this.doctors.forEach(doctor => {
-          this.loadDoctorDetails(doctor)
+          const updateTimeInterval = interval(60000).subscribe(() => {
+            this.loadDoctorDetails(doctor);
+          });
         })
         // this.loadDoctorDetails(this.doctors)
         this.loadAppointmentsForDoctors();
@@ -120,6 +126,11 @@ export class TvComponent implements OnInit, OnDestroy {
         console.error('Error fetching doctors for channel:', error);
       }
     );
+  }
+  startAutoUpdate() {
+    // this.updateTimeInterval = interval(60000).subscribe(() => {
+    //   this.loadDoctorDetails(this.doctors);
+    // });
   }
   loadDoctorDetails(doctor: any): void {
     const today = new Date()
@@ -199,7 +210,7 @@ export class TvComponent implements OnInit, OnDestroy {
       if (doctorDetails && doctorDetails.availability) {
         // Step 1: Check if all `updatedAt` fields are null
         const allUpdatedAtNull = doctorDetails.availability.every((avail: any) => !avail.updatedAt);
-    
+
         // Step 2: Calculate the latest timestamp if any `updatedAt` is not null
         let latestTimestamp: string | null = null;
         if (!allUpdatedAtNull) {
@@ -207,54 +218,54 @@ export class TvComponent implements OnInit, OnDestroy {
             .filter((avail: any) => avail.updatedAt) // Filter entries with non-null `updatedAt`
             .map((avail: any) => new Date(avail.updatedAt).getTime()) // Convert to timestamp
             .reduce((max, curr) => Math.max(max, curr), 0); // Find the max timestamp
-    
+
           // Convert the max timestamp back to an ISO string
           latestTimestamp = new Date(maxTimestamp).toISOString();
         }
-    
+
         // Step 3: Filter availability data based on the latest timestamp
         const latestAvailability = allUpdatedAtNull
           ? doctorDetails.availability // If all are null, consider all availability as the latest
           : doctorDetails.availability.filter((avail: any) => avail.updatedAt === latestTimestamp);
-    
+
         const dayOfWeek = new Date().toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
         const availableDay = latestAvailability?.find(avail => avail.day.toLowerCase() === dayOfWeek);
-    
+
         let remainingTimeMinutes = 0;
-    
+
         if (availableDay?.availableFrom) {
           // Split the availableFrom string into "start" and "end" times
           const [availableFromStr, availableToStr] = availableDay.availableFrom.split('-');
-    
+
           // Parse the start and end times
           const availableFrom = this.parseTime(availableFromStr.trim());
           const availableTo = this.parseTime(availableToStr.trim());
-    
+
           const currentTime = new Date();
-    
+
           // Check if the current time is within the available slot
           if (currentTime >= availableFrom && currentTime <= availableTo) {
             // Calculate remaining time in minutes
             remainingTimeMinutes = Math.floor((availableTo.getTime() - currentTime.getTime()) / (1000 * 60));
           }
         }
-    
+
         // Get extra slots
         this.doctorService.getExtraSlots(doctor.doctorId, this.today).subscribe(
           (extraSlots: { date: string; time: string }[]) => {
             // Parse extra slots times
             const extraSlotTimes = extraSlots.map(slot => this.parseTime(slot.time));
-    
+
             // Calculate the duration of each extra slot based on the slot duration
             const slotDuration = doctorDetails.slotDuration || 20; // Default to 20 minutes if not defined
             const extraMinutes = extraSlotTimes.length * slotDuration;
-    
+
             // Add extra minutes to the remaining time
             const totalRemainingTime = remainingTimeMinutes + extraMinutes;
-    
+
             // Update the doctor's remaining time
             doctor.remainingTime = totalRemainingTime > 0 ? `${totalRemainingTime} mins` : 'No active slots';
-    
+
             console.log(
               `Doctor ${doctor.name} has ${extraSlotTimes.length} extra slots. Total remaining time: ${doctor.remainingTime}`
             );
@@ -264,17 +275,17 @@ export class TvComponent implements OnInit, OnDestroy {
             doctor.remainingTime = 'No Availability'; // Handle errors gracefully
           }
         );
-    
+
         // Step 4: Update the doctor's availableFrom time based on the latest availability
         const latestAvailableFrom = availableDay?.availableFrom || 'N/A';
         doctor.time = latestAvailableFrom;
-    
+
         console.log(`Updated Doctor Time for ${doctor.name}: ${doctor.time}`);
       } else {
         doctor.remainingTime = 'No Availability';
       }
     });
-    
+
   }
   parseTime(timeStr: string): Date {
     const [time, modifier] = timeStr.split(' ');
@@ -287,6 +298,7 @@ export class TvComponent implements OnInit, OnDestroy {
 
     return date;
   }
+
 
 
 
@@ -313,6 +325,7 @@ export class TvComponent implements OnInit, OnDestroy {
               appointment.checkedIn === true && appointment.date === todayDate
 
           );
+          this.checkedInAppointments = todayAppointments
           todayAppointments.sort((a, b) => {
             const timeA = this.parseTimeToMinutes(a.time);
             const timeB = this.parseTimeToMinutes(b.time);
@@ -324,6 +337,7 @@ export class TvComponent implements OnInit, OnDestroy {
           //     this.updateAppointment(doctor.doctorId, appointment.id);
           //   }
           // });
+          console.log(this.checkedInAppointments)
           this.todayFullAppointments = appointments.filter(
             (appointment: any) =>
               appointment.checkedIn === true && appointment.date === todayDate
@@ -426,6 +440,9 @@ export class TvComponent implements OnInit, OnDestroy {
     // if (this.anotherIntervalId) {
     //   clearImmediate(this.anotherIntervalId)
     // }
+    if (this.updateTimeInterval) {
+      this.updateTimeInterval.unsubscribe(); // Stop interval when component is destroyed
+    }
   }
   isFourDoctors(): boolean {
     return this.doctors.length === 4;
@@ -454,15 +471,15 @@ export class TvComponent implements OnInit, OnDestroy {
       const endConsultationB = new Date(b.endConsultation!).getTime();
       return endConsultationA - endConsultationB; // Descending order
     });
-    
+
     // Find the latest endConsultation appointment
     const latestEndConsultationAppointment = sortedAppointments[sortedAppointments.length - 1] || null;
     let adjustedTime: Date | null = latestEndConsultationAppointment
       ? new Date(latestEndConsultationAppointment.endConsultationTime!)
       : null;
 
-      console.log(latestEndConsultationAppointment)
-  
+    console.log(latestEndConsultationAppointment)
+
     // Helper function to format time as "hh:mm AM/PM"
     const formatTime = (time: Date): string => {
       const hours = time.getHours();
@@ -481,9 +498,98 @@ export class TvComponent implements OnInit, OnDestroy {
     //   };
     //   return time.toLocaleString("en-US", options);
     // };
-    
+
     // console.log(adjustedTime, formatTime(adjustedTime!))
-  
+    const latestCheckedOutAppointment = appointments
+      .filter((appt: any) => appt.checkedOut === true)
+      .sort((a: any, b: any) => new Date(b.time).getTime() - new Date(a.time).getTime())[0];
+
+    const parseTimeToDate = (timeString: string | null): Date | null => {
+      if (!timeString) return null;
+
+      const match = timeString.match(/(\d{1,2}):(\d{2})\s?(AM|PM)/);
+      if (!match) {
+        console.error("⚠️ Invalid scheduledTime format:", timeString);
+        return null;
+      }
+
+      const [, hours, minutes, period] = match;
+      const parsedDate = new Date();
+      parsedDate.setHours(period === "PM" ? (parseInt(hours) % 12) + 12 : parseInt(hours) % 12);
+      parsedDate.setMinutes(parseInt(minutes));
+      parsedDate.setSeconds(0);
+      return parsedDate;
+    };
+    let nextAppointmentFound = false;
+    console.log(latestCheckedOutAppointment)
+    const pendingAppointments = this.checkedInAppointments.filter((appt: any) => appt.checkedOut === false && appt.checkedIn === true);
+    console.log(this.checkedInAppointments)
+    console.log(pendingAppointments)
+    if (pendingAppointments.length > 0) {
+      const averageWaitingTime = slotDuration; // Total expected wait time
+      const patientInAppointment = this.checkedInAppointments.find((appt: any) => appt.checkedOut === true && appt.endConsultationTime === null);
+      console.log(patientInAppointment)
+      if (patientInAppointment) {
+        setTimeout(() => {
+          console.log("Patient Appointment Data:", patientInAppointment);
+          console.log("Scheduled Time:", patientInAppointment?.scheduledTime);
+          const scheduledTime = parseTimeToDate(patientInAppointment.scheduledTime)
+          if (scheduledTime) {
+            const elapsedTime = new Date().getTime() - scheduledTime?.getTime()
+            const elapsedMinutes = Math.floor(elapsedTime / 60000); // Convert milliseconds to minutes
+            console.log(elapsedMinutes - averageWaitingTime)
+            if (elapsedMinutes > averageWaitingTime) {
+              console.warn(
+                `⏳ Alert: Patient ${patientInAppointment.patientName} has exceeded expected waiting time by ${elapsedMinutes - averageWaitingTime} mins!`
+              );
+              console.log(`${elapsedMinutes - averageWaitingTime - slotDuration}`)
+              const waitingMultiplier = Math.ceil(elapsedMinutes / averageWaitingTime);
+
+
+              // Store extra waiting time for the next patient
+              const nextAppointment = this.todayFullAppointments.find((appt: any) => appt.status === "Next");
+              if (nextAppointment) {
+                nextAppointment.extraWaitingTime = elapsedMinutes - averageWaitingTime;
+                const extraWaitingTime = nextAppointment.extraWaitingTime - slotDuration
+                this.appointmentService.updateExtraWaitingTime(nextAppointment.id, extraWaitingTime).subscribe(
+                  (response: any) => {
+                    console.log("updated successfully", response)
+                  },
+                  (error) => {
+                    console.error('Error updating waiting Time:', error);
+                  }
+                );
+                const adminPhoneNumbers = ["919342287945", "919698779181", "917708059010"]; // List of Admins
+                const noOfPatients = pendingAppointments.length
+                this.appointmentService.sendWaitingTimeAlert({
+                  adminPhoneNumbers,
+                  doctorPhoneNumber: nextAppointment.doctorPhoneNumber,
+                  noOfPatients: noOfPatients,
+                  doctorName: nextAppointment.doctorName,
+                  waitingMultiplier,
+                }).subscribe(
+                  (response) => {
+                    console.log("WhatsApp message sent successfully", response);
+                  },
+                  (error) => {
+                    console.error("Error sending WhatsApp message:", error);
+                  }
+                );
+
+              }
+            }
+          }
+
+
+        }, 1000);
+
+
+
+        // If waiting time exceeds the expected average waiting time
+
+      }
+    }
+
     appointments.forEach((appointment: any) => {
       if (adjustedTime && !isNaN(adjustedTime.getTime())) {
         // Adjust the appointment time based on the latest endConsultationTime
@@ -508,10 +614,10 @@ export class TvComponent implements OnInit, OnDestroy {
           console.error("Invalid appointment time format:", appointment.time);
         }
       }
-
       // If "PatientIn" has not been found, mark the first matching appointment as "PatientIn"
       if (!patientInFound && appointment.checkedOut === true && appointment.endConsultation === null) {
         appointment.status = 'PatientIn';
+        appointment.scheduledTime = appointment.time
         appointment.time = 'PatientIn';
         patientInFound = true; // Mark that "PatientIn" is found
         return;
@@ -521,10 +627,21 @@ export class TvComponent implements OnInit, OnDestroy {
       //   return;
       // }
       console.log(patientInFound)
-      if(appointment.postPond === true){
+      if (appointment.postPond === true) {
         appointment.status = 'Pending'
         appointment.time = 'Pending'
         return
+      }
+
+      if (
+        latestCheckedOutAppointment &&
+        !nextAppointmentFound &&
+        patientInFound
+      ) {
+        appointment.status = "Next";
+        appointment.time = "Next";
+        nextAppointmentFound = true; // Ensure only one gets marked as "Next"
+        return;
       }
       // If "PatientIn" is already found, the next appointment becomes "Next"
       if (
@@ -539,11 +656,12 @@ export class TvComponent implements OnInit, OnDestroy {
         patientInFound = false; // Reset the flag, as "Next" can only be assigned once
         return;
       }
-      
+
       if (appointment.checkedOut !== true) {
         appointment.status = 'Default';
         return;
       }
+
 
       // Mark all remaining appointments as "Default"
       // appointment.status = 'Default';

@@ -2,7 +2,7 @@
     <div class="close-opd" (click)="openCloseOpdPopup()">
         <img src="/close-opd.svg"> Close OPD
     </div>
-    <button class="end-consul" [disabled]="filteredAppointments.length>1" (click)="endConsultation()" >
+    <button class="end-consul" [disabled]="completedAppointments.length>1" (click)="endConsultation()" >
         <img src="/end.svg" > End Consultation
     </button>
 </div>
@@ -42,10 +42,10 @@
             </td>
 
             <td class="button">
-              <button class="start" (click)="startConsultation(appointment)">
-                <img class="image" src="/start.svg">Start Consultation
+              <button class="start" [disabled]="appointment.checkedOut === true" (click)="appointment.checkedOut === false && startConsultation(appointment)">
+                <img class="image" src="/start.svg">Start 
               </button>
-              <button class="finish" (click)="finishConsultation(appointment)">
+              <button class="finish" [disabled]="appointment.endConsultationTime !== null " (click)="appointment.endConsultationTime === null  && finishConsultation(appointment)">
                 <img class="image" src="/finish.svg">Finish
               </button>
               <button class="postPond" (click)="postPondAppointment(appointment)">
@@ -53,6 +53,9 @@
               </button>
               <button class="estimation" (click)="openEstimationPopup(appointment)">
                 <img class="image" src="/est.svg">Estimation
+              </button>
+              <button class="transfer" (click)="openTransferPopup(appointment)">
+                <img class="image" src="/transfer.svg">Transfer
               </button>
             </td>
           </tr>
@@ -74,52 +77,10 @@
     </div>
   </div>
   <p-toast></p-toast>
-  <!-- <app-appointment-form 
-    *ngIf="showAppointmentForm" 
-    [appointment]="selectedAppointment" 
-    (close)="closeAppointmentForm()" 
-    (submit)="submitAppointment(selectedAppointment, $event.status, $event.requestVia)">
-  </app-appointment-form> -->
+ 
   
   <div class="loader" *ngIf="isLoading"></div>
-  <!-- <div *ngIf="showEstimationPopup" class="estimation-modal" >
-    <div class="modal-content">
-      <div class="modal-header">
-        <h3>Estimation Form {{ currentDoctorName }}</h3>
-        <button class="popup-close" (click)="closeEstimationPopup()"><img src="/popup-close.svg"></button>
-      </div>
-      <hr>
-      <div class="modal-body">
-        <p>
-          Patient Name<span class="space">:</span>{{ selectedAppointment?.patientName }}
-        </p>
-        <p>
-          Date<span class="space-1">:</span> {{ selectedAppointment?.date }}
-        </p>
-        
-        <input type="text"
-          class="estimation-textarea"
-          [(ngModel)]="estimationText"
-          placeholder="Please Enter Estimation Here*"
-        >
-        <div class="input-container">
-          <input type="date" 
-           id="estimationDate"
-          name="estimationDate"
-          class="custom-input"
-          ngModel
-          [(ngModel)]="estimationPreferedDate"
-          required
-          placeholder=" " class="custom-input"  />
-          <label for="estimationDate" class="custom-label">Estimated Date*</label>
-          </div>
-      </div>
-      <div class="modal-footer">
-        <button class="save-button" (click)="saveEstimation()">Save</button>
-        <button class="close-button" (click)="closeEstimationPopup()">Close</button>
-      </div>
-    </div>
-  </div> -->
+
   <div *ngIf="showEstimationPopup" class="estimation-modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -155,13 +116,12 @@
         <!-- Input field for estimation -->
         <input 
           type="text" 
-          placeholder="Enter or Select an Estimation" 
           [(ngModel)]="estimationText" 
           (input)="onEstimationInput()"
           (focus)="showEstimationSuggestions = true"
           class="custom-input"
         />
-        
+        <label for="estimationText" class="custom-label">Estimation Name*</label>
         <!-- Dropdown for suggestions -->
         <ul 
           class="estimation-suggestions" 
@@ -188,6 +148,15 @@
           />
           <label for="estimationDate" class="custom-label">Estimated Date*</label>
         </div>
+        <div class="input-container">
+          <input 
+          type="text" 
+
+          [(ngModel)]="remarks" 
+          class="custom-input"
+        />
+        <label for="estimationDate" class="custom-label">Remarks</label>
+        </div>
       </div>
       <div class="modal-footer">
         <button class="save-button" (click)="saveEstimation()">Save</button>
@@ -197,7 +166,7 @@
   </div>
   
   <div *ngIf="showCloseOpdPopup" class="close-opd-modal">
-    <div class="modal-content">
+    <div class="modal-content-close-opd">
       <div class="modal-header">
         <h3>Select Slots for Close OPD Request</h3>
         <button class="popup-close" (click)="closeCloseOpdPopup()">
@@ -231,7 +200,7 @@
     </div>
   </div>
   <div *ngIf="showLeaveRequestPopup" class="leave-request-modal">
-    <div class="modal-content">
+    <div class="modal-content-leave">
       <div class="modal-header">
         <h3>Select Dates for Leave</h3>
         <button class="popup-close" (click)="closeLeaveRequestPopup()">
@@ -257,4 +226,24 @@
       </div>
     </div>
   </div>
-  
+  <div *ngIf="showTransferAppointment" class="close-opd-modal">
+    <div class="modal-content-transfer">
+      <div class="modal-header">
+        <h3>Transfer Appointment</h3>
+        <button class="popup-close" (click)="closeTransferPopup()">
+          <img src="/popup-close.svg" alt="Close Popup" />
+        </button>
+      </div>
+      <hr />
+      <div class="modal-body">
+        <p class="content">
+          Are you sure! <br>
+          Do you want to transfer the appointment for other department
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="approval-button" (click)="transfer(this.selectedAppointment!)">Transfer</button>
+        <button class="close-button" (click)="closeTransferPopup()">Cancel</button>
+      </div>
+    </div>
+  </div>

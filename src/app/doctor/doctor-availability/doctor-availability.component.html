@@ -48,7 +48,7 @@
           <p class="doctor-availability-time">{{ doctor.doctorType === 'Visiting Consultant' ? '': 'Availability:'}}</p>
           <p class="doctor-availability-time"> {{ doctor.doctorType === 'Visiting Consultant' ? doctor.doctorType: doctor.availableFrom }}</p>
           <div class="unavailable">
-            <button class="unavailable-button" *ngIf="doctor.doctorType !=='Visiting Consultant'" (click)="openUnavailableModal(doctor)" [disabled]="!isTodayOrTomorrow(selectedDate)">Unavailable Slots</button>
+            <button class="unavailable-button" *ngIf="doctor.doctorType !=='Visiting Consultant'" (click)="openUnavailableModal(doctor)" [disabled]="!isTodayOrTomorrow(selectedDate) && doctor.id !== 14">Unavailable Slots</button>
           </div>
         </div>
       </div>

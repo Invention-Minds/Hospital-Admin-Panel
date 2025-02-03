@@ -468,7 +468,8 @@ export class AppointmentConfirmComponent {
       //     alert('Failed to mark the slot as complete.');
       //   }
       // );
-      this.appointmentService.checkedinAppointment(appointmentId).subscribe({
+      const username = localStorage.getItem('username')
+      this.appointmentService.checkedinAppointment(appointmentId, username).subscribe({
         next: (response) => {
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Checked in successfully!' });
           appointment.checkedIn = true; // Update the UI to reflect the checked-in status
@@ -513,6 +514,27 @@ export class AppointmentConfirmComponent {
   // getFilteredAppointments() {
   //   return this.filteredAppointments;
   // }
+  isCheckInEnabled(appointment: any): boolean {
+    const currentTime = new Date();
+  
+    // Parse the appointment time (e.g., "12:40 PM")
+    const [time, period] = appointment.time.split(' ');
+    const [hours, minutes] = time.split(':').map(Number);
+  
+    // Convert to 24-hour format
+    const appointmentDate = new Date();
+    appointmentDate.setHours(period === 'PM' && hours !== 12 ? hours + 12 : (period === 'AM' && hours === 12 ? 0 : hours));
+    appointmentDate.setMinutes(minutes);
+    appointmentDate.setSeconds(0);
+  
+    // Define the time window (30 mins before and after)
+    const startWindow = new Date(appointmentDate.getTime() - 30 * 60000); // 30 mins before
+    const endWindow = new Date(appointmentDate.getTime() + 30 * 60000);   // 30 mins after
+  
+    // Enable if the current time is within the window
+    return currentTime >= startWindow && currentTime <= endWindow;
+  }
+  
   cancelAppointment(appointment: Appointment) {
     const cancelled: Appointment = {
       ...appointment,

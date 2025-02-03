@@ -58,6 +58,8 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
   newNotification: boolean = false; // Flag to show if new appointments came
   hasNewNotification: boolean = false;
   isReceptionist: boolean = false;
+  subAdminType: string = '';
+  adminType: string = '';
   private apiUrl = environment.apiUrl;
   private audio = new Audio('/notification.mp3'); // Add a notification sound
   private eventSource: EventSource | null = null;
@@ -131,6 +133,8 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
     if (typeof window !== 'undefined' && window.localStorage) {
       const storedUsername = localStorage.getItem('username');
       const storedRole = localStorage.getItem('role');
+      this.subAdminType = localStorage.getItem('subAdminType') || "";
+      this.adminType = localStorage.getItem('adminType') || "";
       const isReceptionist = localStorage.getItem('isReceptionist') === 'true'; // Check if receptionist
       this.isReceptionist = localStorage.getItem('isReceptionist') === 'true';
 

@@ -57,7 +57,10 @@
         <img src="admin-icons/admin-icon.jpg" alt="Profile Picture" class="profile-pic" />
         <div class="profile-text">
           <span class="username">{{ username }}</span>
-          <span class="role">{{ role }}</span>
+          <span class="role">
+            {{ role === 'subadmin' ? subAdminType : role === 'admin' ? adminType : role }}
+          </span>
+          
         </div>
         <img
           src="/arrow-dropdown.svg"

@@ -111,3 +111,36 @@
     font-weight: 400;
     margin: 0;
   }
+
+/* Tablet View (768px - 1024px) */
+@media (max-width: 1024px) {
+  .card:not(:nth-child(2)), /* Hide cards except the 2nd one (Request) */
+  .card-1:not(:nth-child(1)) { /* Hide cards except the 1st one (Form) */
+    display: none; 
+  }
+  .custom-dropdown .p-dropdown{
+    width: 134px !important;
+  }
+  .custom-input-text{
+    width: 170px !important;
+  }
+  .custom-calendar .p-inputtext{
+    width: 210px !important;
+  }
+}
+
+/* Mobile View (Optional if needed) */
+@media (max-width: 768px) {
+  .card, .card-1 {
+    justify-content: center;
+  }
+  .custom-dropdown .p-dropdown{
+    width: 134px !important;
+  }
+  .custom-input-text{
+    width: 170px !important;
+  }
+  .custom-calendar .p-inputtext{
+    width: 210px !important;
+  }
+}

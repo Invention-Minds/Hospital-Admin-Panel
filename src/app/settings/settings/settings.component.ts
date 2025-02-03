@@ -65,6 +65,7 @@ export class SettingsComponent implements OnInit {
   isDoctor = false;
   type = '';
   subAdminType = '';
+  adminType ='';
   loggedInName: string = '';
 
   constructor(private authService: AuthServiceService, private router: Router, private messageService: MessageService, private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService) {}
@@ -229,6 +230,7 @@ createAccount() {
     this.username = `${this.name}_admin@rashtrotthana`;
     this.role = 'admin';
     this.isReceptionist = false;
+    this.adminType = this.adminType
   } else if (this.isSubAdmin) {
     this.username = `${this.name}_subadmin@rashtrotthana`;
     this.role = 'sub_admin';
@@ -238,7 +240,9 @@ createAccount() {
       
     }
   } 
-  this.authService.register(this.username, this.password,this.isReceptionist, this.employeeId, this.role!).subscribe(response => {
+  console.log(this.subAdminType,"subadmin")
+  console.log(this.adminType,"adminType")
+  this.authService.register(this.username, this.password,this.isReceptionist, this.employeeId, this.role!, this.subAdminType,this.adminType).subscribe(response => {
     // console.log('Account created successfully', response);
     this.username = '';  // Clear the username
     this.password = '';  // Clear the password
@@ -275,7 +279,7 @@ createAccount() {
     }
     
   });
-  console.log(this.username, this.password, this.isReceptionist, this.employeeId);
+  console.log(this.username, this.password, this.isReceptionist, this.employeeId, this.subAdminType, this.adminType);
 }
 validateInputs(): void {
   const usernameRegex = /^[a-zA-Z]+_(admin|subadmin|superadmin|doctor)@rashtrotthana$/;
@@ -358,6 +362,7 @@ validPasswords(): void {
 
 // Reset Password method
 resetPassword() {
+  console.log(this.username, this.name)
   if(this.username !== this.name){
     this.messageService.add({ severity: 'error', summary: 'Error', detail: 'You are not authorized to reset password for other users' });
     return;
@@ -417,6 +422,10 @@ resetPassword() {
     localStorage.removeItem('username');
     localStorage.removeItem('role');
     localStorage.removeItem('token');
+    localStorage.removeItem('employeeId');
+    localStorage.removeItem('subAdminType');
+    localStorage.removeItem('adminType');
+    localStorage.removeItem('userId')
     this.router.navigate(['/login']);
     this.showLogoutConfirmDialog = false;
   }

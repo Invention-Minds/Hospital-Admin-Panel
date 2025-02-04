@@ -1,6 +1,6 @@
 /* Overall container styling */
 .tv-container {
-  font-family: Kanit;
+  font-family: Poppins;
   color: #fff;
   /* background-color: #F8F8F8; */
 
@@ -18,10 +18,14 @@
   margin-bottom: 15px;
   background-color: #001345;
   height: 70px;
+  position: fixed;
+  top: 0px;
+  width: 100%;
+  z-index: 10000000;
 }
 .header h1 {
   color: #fff;
-  font-family: Kanit;
+  font-family: Poppins;
   font-size: 28px;
   font-style: normal;
   font-weight: 500;
@@ -49,7 +53,7 @@
 .datetime {
   text-align: center;
   color: #001345;
-  font-family: Kanit;
+  font-family: Poppins;
   font-size: 26px;
   font-style: normal;
   font-weight: 600;
@@ -63,7 +67,7 @@
 }
 .date {
   color: #001345;
-  font-family: Kanit;
+  font-family: Poppins;
   font-size: 18px;
   font-style: normal;
   font-weight: 600;
@@ -80,6 +84,8 @@
   background: #f0f3ff;
   margin: 0;
   height: 100vh;
+  position: relative;
+  top: 85px;
   /* margin: 20px; */
 }
 
@@ -126,7 +132,7 @@
 
 .doctor-details h3 {
   color: #fff;
-  font-family: Kanit;
+  font-family: Poppins;
   font-size: 18px;
   font-style: normal;
   font-weight: 500;
@@ -137,7 +143,7 @@
 
 .doctor-details p {
   color: #fff;
-  font-family: Kanit;
+  font-family: Poppins;
   font-size: 18px;
   font-style: normal;
   font-weight: 500;
@@ -178,7 +184,7 @@
 .queue-table th {
   padding: 10px;
   color: #fff;
-  font-family: Kanit;
+  font-family: Poppins;
   font-size: 20px;
   font-style: normal;
   font-weight: 500;
@@ -236,7 +242,7 @@
 /* Table Cells Styling */
 .queue-table td {
   padding: 10px;
-  font-family: Kanit, sans-serif;
+  font-family: Poppins, sans-serif;
   font-size: 22px;
   font-weight: 500;
   color: #222;
@@ -265,7 +271,7 @@
   border-radius: 4px;
   background: #169458; /* Green for Patient In */
   color: #fff;
-  font-family: Kanit;
+  font-family: Poppins;
   font-size: 22px;
   font-style: normal;
   font-weight: 400;
@@ -276,7 +282,7 @@
 .status.Next {
   /* Yellow for Next */
   color: #fff;
-  font-family: Kanit;
+  font-family: Poppins;
   font-size: 22px;
   font-style: normal;
   font-weight: 400;
@@ -288,7 +294,7 @@
 
 /* .status.Default {
     color: #000;
-    font-family: Kanit;
+    font-family: Poppins;
     font-size: 22px;
     font-style: normal;
     font-weight: 400;
@@ -300,7 +306,7 @@ border: 1px solid #000;
   border-radius: 4px;
   background: #fce35f;
   color: #000;
-  font-family: Kanit;
+  font-family: Poppins;
   font-size: 22px;
   font-style: normal;
   font-weight: 400;
@@ -322,7 +328,7 @@ border: 1px solid #000;
 .footer p {
   color: #fff;
   text-align: center;
-  font-family: Kanit;
+  font-family: Poppins;
   font-size: 15px;
   font-style: normal;
   font-weight: 500;
@@ -341,7 +347,7 @@ border: 1px solid #000;
 .footer marquee {
   color: #001345;
   text-align: center;
-  font-family: Kanit;
+  font-family: Poppins;
   font-size: 24px;
   font-style: normal;
   font-weight: 500;
@@ -381,7 +387,7 @@ border: 1px solid #000;
 
 .two-doctors-layout .doctor-details h3 {
   color: #fff;
-  font-family: Kanit;
+  font-family: Poppins;
   font-size: 24px;
   font-style: normal;
   font-weight: 500;
@@ -391,7 +397,7 @@ border: 1px solid #000;
 
 .two-doctors-layout .doctor-details p {
   color: #fff;
-  font-family: Kanit;
+  font-family: Poppins;
   font-size: 24px;
   font-style: normal;
   font-weight: 500;

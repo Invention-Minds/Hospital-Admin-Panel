@@ -247,3 +247,24 @@
       </div>
     </div>
   </div>
+  <div *ngIf="showCancelPopup" class="close-opd-modal">
+    <div class="modal-content-transfer">
+      <div class="modal-header">
+        <h3>Cancel the Pending Appointment</h3>
+        <button class="popup-close" (click)="closeCancelPopup()">
+          <img src="/popup-close.svg" alt="Close Popup" />
+        </button>
+      </div>
+      <hr />
+      <div class="modal-body">
+        <p class="content">
+          Are you sure! <br>
+          Do you want to cancel the {{countOfPending}} appointment ?
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="approval-button" (click)="cancel()">Yes</button>
+        <button class="close-button" (click)="closeCancelPopup()">No</button>
+      </div>
+    </div>
+  </div>

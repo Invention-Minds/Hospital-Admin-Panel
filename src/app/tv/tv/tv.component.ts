@@ -95,8 +95,8 @@ export class TvComponent implements OnInit, OnDestroy {
       this.anotherIntervalId = setInterval(() => {
         this.loadAppointmentsForDoctors();
       }, 30000);
-      console.log(this.loadDoctorsForChannel(channelId))
-      console.log(channelId)
+      // console.log(this.loadDoctorsForChannel(channelId))
+      // console.log(channelId)
     }
     this.eventSubscription = this.eventService.consultationEvent$.subscribe((event) => {
       // console.log(event.doctorId, event.appointmentId, event.channelId, channelId)
@@ -312,7 +312,7 @@ export class TvComponent implements OnInit, OnDestroy {
         console.warn('Skipping doctor with missing or undefined ID:', doctor);
         return;
       }
-
+      doctor.patients = doctor.patients || [];
       this.appointmentService.getAppointmentsByDoctor(doctor.doctorId).subscribe(
         (appointments) => {
           if (!appointments || !Array.isArray(appointments)) {
@@ -327,6 +327,9 @@ export class TvComponent implements OnInit, OnDestroy {
 
           );
           this.checkedInAppointments = todayAppointments
+          todayAppointments.forEach(appointments =>{
+            appointments.actualTime = appointments.time
+          })
           todayAppointments.sort((a, b) => {
             const timeA = this.parseTimeToMinutes(a.time);
             const timeB = this.parseTimeToMinutes(b.time);
@@ -338,7 +341,7 @@ export class TvComponent implements OnInit, OnDestroy {
           //     this.updateAppointment(doctor.doctorId, appointment.id);
           //   }
           // });
-          console.log(this.checkedInAppointments)
+          // console.log(this.checkedInAppointments)
           this.todayFullAppointments = appointments.filter(
             (appointment: any) =>
               appointment.checkedIn === true && appointment.date === todayDate
@@ -360,9 +363,19 @@ export class TvComponent implements OnInit, OnDestroy {
 
 
           // Assign updated appointments to doctor
-          doctor.patients = todayAppointments;
+          doctor.patients = todayAppointments || [];
+
+          const allConsultationsEnded = todayAppointments.every(
+            (appointment: any) => appointment.endConsultation === true
+          );
+  
+          if (allConsultationsEnded) {
+            doctor.patients = []; // If all consultations are ended, set to empty array
+          } else {
+            doctor.patients = todayAppointments; // Otherwise, set to the filtered appointments
+          }
           console.log(doctor.patients)
-          console.log(`Loaded ${doctor.patients.length} patients for doctor ${doctor.name}`);
+          // console.log(`Loaded ${doctor.patients.length} patients for doctor ${doctor.name}`);
         },
         (error) => {
           console.error(`Error fetching appointments for doctor ${doctor.id}:`, error);
@@ -479,7 +492,7 @@ export class TvComponent implements OnInit, OnDestroy {
       ? new Date(latestEndConsultationAppointment.endConsultationTime!)
       : null;
 
-    console.log(latestEndConsultationAppointment)
+    // console.log(latestEndConsultationAppointment)
 
     // Helper function to format time as "hh:mm AM/PM"
     const formatTime = (time: Date): string => {
@@ -522,23 +535,22 @@ export class TvComponent implements OnInit, OnDestroy {
       return parsedDate;
     };
     let nextAppointmentFound = false;
-    console.log(latestCheckedOutAppointment)
+    // console.log(latestCheckedOutAppointment)
     const pendingAppointments = this.checkedInAppointments.filter((appt: any) => appt.checkedOut === false && appt.checkedIn === true);
-    console.log(this.checkedInAppointments)
-    console.log(pendingAppointments)
+    // console.log(this.checkedInAppointments)
+    // console.log(pendingAppointments)
     if (pendingAppointments.length > 0) {
       const averageWaitingTime = slotDuration; // Total expected wait time
       const patientInAppointment = this.checkedInAppointments.find((appt: any) => appt.checkedOut === true && appt.endConsultationTime === null);
-      console.log(patientInAppointment)
       if (patientInAppointment) {
         setTimeout(() => {
-          console.log("Patient Appointment Data:", patientInAppointment);
-          console.log("Scheduled Time:", patientInAppointment?.scheduledTime);
+          // console.log("Patient Appointment Data:", patientInAppointment);
+          // console.log("Scheduled Time:", patientInAppointment?.scheduledTime);
           const scheduledTime = parseTimeToDate(patientInAppointment.scheduledTime)
           if (scheduledTime) {
             const elapsedTime = new Date().getTime() - scheduledTime?.getTime()
             const elapsedMinutes = Math.floor(elapsedTime / 60000); // Convert milliseconds to minutes
-            console.log(elapsedMinutes - averageWaitingTime)
+            // console.log(elapsedMinutes - averageWaitingTime)
             if (elapsedMinutes > averageWaitingTime) {
               console.warn(
                 `⏳ Alert: Patient ${patientInAppointment.patientName} has exceeded expected waiting time by ${elapsedMinutes - averageWaitingTime} mins!`

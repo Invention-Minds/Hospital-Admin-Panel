@@ -5,14 +5,14 @@ import { DoctorServiceService } from '../../../services/doctor-details/doctor-se
 import * as FileSaver from 'file-saver';
 import { MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
-import { app } from '../../../../../server';
+
 
 @Component({
-  selector: 'app-doctor-appointments',
-  templateUrl: './doctor-appointments.component.html',
-  styleUrl: './doctor-appointments.component.css'
+  selector: 'app-appointment-transfer',
+  templateUrl: './appointment-transfer.component.html',
+  styleUrl: './appointment-transfer.component.css'
 })
-export class DoctorAppointmentsComponent {
+export class AppointmentTransferComponent {
 
   constructor(private healthCheckupService: HealthCheckupServiceService, private messageService: MessageService, private router: Router, private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService) {
 
@@ -25,7 +25,6 @@ export class DoctorAppointmentsComponent {
   sortDirection: string = 'asc';  // Default sorting direction
   searchOptions = [
     { label: 'Patient Name', value: 'patientName' },
-    { label: 'Phone Number', value: 'phoneNumber' },
     { label: 'Doctor Name', value: 'doctorName' },
     { label: 'Department', value: 'department' },
   ];
@@ -59,7 +58,7 @@ export class DoctorAppointmentsComponent {
 
         // Process the services when the API call is successful
         this.confirmedAppointments = services.filter(
-          (service) => service.isCloseOPD === true
+          (service) => service.status === 'confirmed' && service.isTransfer === true
         );
         // this.confirmedAppointments = services.filter(
         //   (service) => {
@@ -103,9 +102,6 @@ export class DoctorAppointmentsComponent {
             matches = service.patientName
               ?.toLowerCase()
               .includes(this.searchValue.toLowerCase());
-            break;
-          case 'phoneNumber':
-            matches = service.phoneNumber?.includes(this.searchValue);
             break;
           case 'doctorName':
             matches = !!service.doctorName

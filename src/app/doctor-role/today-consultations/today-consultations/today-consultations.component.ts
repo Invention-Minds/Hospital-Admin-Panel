@@ -7,6 +7,7 @@ import { MessageService } from 'primeng/api';
 import { ChangeDetectorRef } from '@angular/core';
 import { Doctor } from '../../../models/doctor.model';
 import { ChannelService } from '../../../services/channel/channel.service';
+import { firstValueFrom } from 'rxjs';
 import * as XLSX from 'xlsx';
 import { start } from 'node:repl';
 import * as moment from 'moment-timezone';
@@ -38,7 +39,9 @@ interface Appointment {
   waitingTime?: string;
   postPond?:boolean;
   endConsultationTime?: Date;
-  isTransfer?: boolean
+  isTransfer?: boolean;
+  isCloseOPD?:boolean;
+  isCloseOPDTime?: Date;
 }
 
 @Component({
@@ -86,14 +89,15 @@ export class TodayConsultationsComponent {
   endDate: string | null = null;
   estimationPreferedDate: string = ''
   estimationSuggestions: string[] = []; // Full list of suggestions
-  filteredEstimations: string[] = []; // Filtered suggestions for dropdown
+  filteredEstimations: any[] = []; // Filtered suggestions for dropdown
   showEstimationSuggestions: boolean = false; 
   estimationType: string = 'MM'
   showCancelPopup: boolean = false;
   remarks: string = '';
   completedAppointments: any[] = [];
   showTransferAppointment: boolean = false;
-  estimation: any[] = []
+  estimation: any[] = [];
+  countOfPending: number = 0;
   searchOptions = [
     { label: 'Patient Name', value: 'patientName' },
     { label: 'Phone Number', value: 'phoneNumber' }
@@ -254,7 +258,7 @@ export class TodayConsultationsComponent {
       this.currentPage = this.totalPages;
     }
   }
-  filteredAppointments: Appointment[] =[];
+  filteredAppointments: any[] =[];
   // filteredAppointments: Appointment[] = this.confirmedAppointments.filter(appointment => !appointment!.completed);
 
   ngOnChanges(changes: SimpleChanges) {
@@ -567,6 +571,20 @@ export class TodayConsultationsComponent {
   }
 
   startConsultation(appointment: Appointment): void {
+    const ongoingConsultation = this.filteredAppointments.find(
+      (appt) => appt.checkedOut === true && appt.endConsultationTime === null
+    );
+    console.log(ongoingConsultation)
+    // If there's an ongoing consultation (previous patient has not finished)
+    if (ongoingConsultation) {
+      // Update the ongoing consultation (endConsultationTime) for the first patient
+      ongoingConsultation.endConsultationTime = new Date();
+      ongoingConsultation.endConsultation = true // Set endConsultationTime to the current time // Set checkedOut to false for the previous patient
+      // Update the appointment in the backend for the previous patient
+      this.appointmentService.updateAppointment(ongoingConsultation);
+  
+      console.log(`Updated endConsultationTime for patient ID: ${ongoingConsultation.id}`);
+    }
     appointment.checkedOut = true;
     appointment.checkedOutTime = new Date()
     if(appointment.checkedInTime){
@@ -604,6 +622,7 @@ export class TodayConsultationsComponent {
     this.appointmentService.updateAppointment(appointment)
   }
   transfer(appointment:Appointment): void{
+    console.log(appointment)
     appointment.isTransfer = true;
     this.appointmentService.updateAppointment(appointment)
     this.closeCloseOpdPopup()
@@ -619,9 +638,10 @@ export class TodayConsultationsComponent {
    const postPondAppointment = this.filteredAppointments.filter(appointment =>{
       appointment.postPond === true
     })
-    const count = postPondAppointment.length;
-    if(count >= 1){
+    this.countOfPending = postPondAppointment.length;
+    if(this.countOfPending >= 1){
       this.showCancelPopup = true;
+      
     }
     else{
       this.doctor.filter((doc) => {
@@ -652,6 +672,12 @@ export class TodayConsultationsComponent {
       })
     }
   }
+  cancel(){
+
+  }
+  closeCancelPopup(){
+    this.showCancelPopup = false;
+  }
   postPondAppointment(appointment: Appointment):void{
     appointment.checkedOut = false;
     appointment.checkedOutTime = undefined;
@@ -665,25 +691,90 @@ export class TodayConsultationsComponent {
     // Add your logic to close OPD here
     this.closeCloseOpdPopup();
   }
-  sendSelectedSlots(): void {
-    const selectedSlots = this.filteredAppointments
-      .filter((slot) => slot.selectedSlot) // Filter only selected slots
-      .map((slot) => slot.time); // Extract time from selected slots
+  // sendSelectedSlots(): void {
+  //   const selectedAppointments = this.filteredAppointments
+  //   .filter((slot) => slot.selectedSlot) // Filter only selected slots
+  //   .map((slot) => ({
+  //     id: slot.id,
+  //     isCloseOPD: true,
+  //     isCloseOPDTime: null, // Set the current date and time
+  //   }));
+  //   const selectedAppointmentsObject: { [key: string]: { id: number, isCloseOPD: boolean, isCloseOPDTime: Date | null } } = selectedAppointments.reduce((acc, appointment, index) => {
+  //     acc[index.toString()] = appointment;  // Use the index as the key ('0', '1', etc.)
+  //     return acc;
+  //   }, {} as { [key: string]: { id: number, isCloseOPD: boolean, isCloseOPDTime: Date | null } });
+  
+  //   console.log('Selected Appointments Object:', selectedAppointmentsObject);
+  //   console.log(selectedAppointments)
+  //   this.appointmentService.bulkUpdateAppointments(selectedAppointmentsObject).subscribe({
+  //     next: (response) => {
+  //       console.log('Appointments updated successfully:', response);
+  //       this.messageService.add({
+  //         severity: 'success',
+  //         summary: 'Success',
+  //         detail: 'Appointments updated successfully.',
+  //       });
+  //       this.closeCloseOpdPopup(); // Close the popup after successful update
+  //     },
+  //     error: (error) => {
+  //       console.error('Error updating appointments:', error);
+  //       this.messageService.add({
+  //         severity: 'error',
+  //         summary: 'Error',
+  //         detail: 'Failed to update appointments.',
+  //       });
+  //     }
+  //   });
+  // if (selectedAppointments.length === 0) {
+  //   this.messageService.add({ severity: 'warn', summary: 'Warning', detail: 'Please select at least one slot.' });
+  //   return;
+  // }
 
-    if (selectedSlots.length === 0) {
-   this.messageService.add({severity: 'warn', summary: 'Warning', detail: 'Please select at least one slot.'})
+  // console.log('Updating appointments:', selectedAppointments);
+   
+  //   // Prepare the payload for the API call
+
+  //   this.closeCloseOpdPopup();
+  // }
+  sendSelectedSlots(): void {
+    const selectedAppointments = this.filteredAppointments
+      .filter((slot) => slot.selectedSlot) // Filter only selected slots
+      .map((slot) => ({
+        id: slot.id,
+        isCloseOPD: true,
+        isCloseOPDTime: new Date(), // Set the current date and time
+      }));
+  
+    if (selectedAppointments.length === 0) {
+      this.messageService.add({ severity: 'warn', summary: 'Warning', detail: 'Please select at least one slot.' });
       return;
     }
-
-    console.log('Sending the following slots for admin approval:', selectedSlots);
-
-    // TODO: Replace the following line with actual API logic
-    // alert(`Selected slots sent for admin approval: ${selectedSlots.join(', ')}`);
-    // alert(`Selected slots sent for admin approval: ${selectedSlots.join(', ')}`); 
-    this.messageService.add({ severity: 'info', summary: 'Info', detail: `Selected slots sent for admin approval: ${selectedSlots.join(', ')}` });
-
-    this.closeCloseOpdPopup();
+  
+    // Now we have an array, not an object with numeric keys
+    console.log('Selected Appointments:', selectedAppointments);
+  
+    // Now send the array as the payload to the backend
+    this.appointmentService.bulkUpdateAppointments(selectedAppointments).subscribe({
+      next: (response) => {
+        console.log('Appointments updated successfully:', response);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Appointments updated successfully.',
+        });
+        this.closeCloseOpdPopup(); // Close the popup after successful update
+      },
+      error: (error) => {
+        console.error('Error updating appointments:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to update appointments.',
+        });
+      }
+    });
   }
+  
   selectAllSlots(): void {
     this.filteredAppointments.forEach((slot) => {
       slot.selectedSlot = true;

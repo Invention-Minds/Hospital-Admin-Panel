@@ -107,6 +107,9 @@ activeComponent: string = 'request'; // Default to showing the request component
   showCompletedAppointments(){
     this.activeComponent = 'completed';
   }
+  showTransferAppointments(){
+    this.activeComponent = 'transfer'
+  }
   closeForm() {
     this.showForm = false;
     this.activeComponent = 'request'; // Reset to allow reopening

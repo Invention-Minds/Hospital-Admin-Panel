@@ -4,7 +4,7 @@
       <h1>Rashtrotthana Hospital - Bangalore</h1>
       <div class="datetime-container">
         <div class="datetime">
-          <span class="date">{{ currentDate }}</span><br />
+          <span class="date">{{ currentDate }}</span>
           <span>{{ currentTime }}</span>
         </div>
       </div>
@@ -21,7 +21,7 @@
       >
         <div class="doctor-header" >
           <div class="doctor-image" *ngIf="!isFourDoctors()">
-            <img src="/sunil.svg" alt="Doctor Image" />
+            <img  class="image" src="/sunil.svg" alt="Doctor Image" />
           </div>
           <div class="doctor-details">
             <h3>Name: {{ doctor.name }}</h3>
@@ -36,10 +36,14 @@
             <tr>
               <th>No</th>
               <th>Name</th>
-              <th>Details</th>
+              <th>Actual Time</th>
+              <th>Predict Time</th>
             </tr>
           </thead>
           <tbody>
+            <tr *ngIf="doctor.patients && doctor.patients.length === 0">
+              <td colspan="4" style="text-align: center;" >No Active Waitlists</td>
+            </tr>
             <tr
             *ngFor="let patient of doctor.patients; let i = index;  trackBy: trackByFn"
             [class.removed]="patient.endConsultation"
@@ -47,6 +51,9 @@
           >
               <td>{{i+ 1}}</td>
               <td>{{ patient.patientName }}</td>
+              <td>
+                <span class="status">{{ patient.actualTime }}</span>
+              </td>
               <td>
                 <span class="status" [ngClass]="patient.status">{{ patient.time }}</span>
               </td>

@@ -14,6 +14,7 @@ export interface Appointment {
   doctorName: string;
   department: string;
   doctorId:number;
+  doctor?:any;
   date: string;
   time: string;
   status: string;
@@ -35,6 +36,7 @@ export interface Appointment {
   updated_at?:string;
   lockedBy?: string;
   lockExpiresAt?: Date | null;
+  
   
 
 }
@@ -166,7 +168,8 @@ addNewAppointment(appointment: Appointment): void {
     });
   }
 
-  updateAppointment(appointment: Appointment): void {
+  updateAppointment(appointment: Appointment): void{
+
     this.http.put<Appointment>(`${this.apiUrl}/${appointment.id}`, appointment).subscribe(() => {
       this.fetchAppointments(); // Fetch appointments to update the list
     });
@@ -393,5 +396,8 @@ getAppointmentsByDoctor(userId: number): Observable<any[]> {
       waitingMultiplier: number
     }): Observable<any> {
       return this.http.post(`${environment.apiUrl}/whatsapp/send-waiting-message`, payload);
+    }
+    bulkUpdateAppointments(appointments: any): Observable<any> {
+      return this.http.put(`${this.apiUrl}/bulk-update`, appointments);
     }
 }

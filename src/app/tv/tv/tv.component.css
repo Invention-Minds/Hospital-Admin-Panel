@@ -1,262 +1,292 @@
 /* Overall container styling */
 .tv-container {
-    font-family:Kanit;
-    color: #fff;
-    /* background-color: #F8F8F8; */
+  font-family: Kanit;
+  color: #fff;
+  /* background-color: #F8F8F8; */
 
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-  
-  /* Header styling */
-  .header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    background-color: #001345;
-    height: 100px;
-  }
-  .header h1{
-    color: #FFF;
-    font-family: Kanit;
-    font-size: 32px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: normal;
-    padding-top: 20px;
-    position: relative;
-  }
-  
-  .logo {
-    height: 50px;
-    padding-left: 10px;
-  }
-  .datetime-container {
-    background: #F0F3FF;
-    clip-path: polygon(30% 0, 100% 0, 100% 100%, 0% 100%);
-    padding: 10px 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    text-align: right;
-    color: #001345; /* Text color */
-  }
-  
-  .datetime {
-    text-align: center;
-    color: #001345;
-    font-family: Kanit;
-    font-size: 32px;
-    font-style: normal;
-    font-weight: 600;
-    line-height: normal;
-    background: #F0F3FF;
-padding: 0 10px;
-padding-left: 20px;
-  }
-  .date{
-    color: #001345;
-font-family: Kanit;
-font-size: 20px;
-font-style: normal;
-font-weight: 600;
-line-height: normal;
-  }
-  
-  /* Doctor cards container */
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Header styling */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  background-color: #001345;
+  height: 70px;
+}
+.header h1 {
+  color: #fff;
+  font-family: Kanit;
+  font-size: 28px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  padding-top: 20px;
+  position: relative;
+}
+
+.logo {
+  height: 50px;
+  padding-left: 10px;
+}
+.datetime-container {
+  background: #f0f3ff;
+  clip-path: polygon(30% 0, 100% 0, 100% 100%, 0% 100%);
+  padding: 33px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: right;
+  color: #001345; /* Text color */
+  height: 58px;
+}
+
+.datetime {
+  text-align: center;
+  color: #001345;
+  font-family: Kanit;
+  font-size: 26px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  background: #f0f3ff;
+  padding: 0 10px;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.date {
+  color: #001345;
+  font-family: Kanit;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+}
+
+/* Doctor cards container */
 /* Overall Doctor Cards Layout */
 .doctor-cards {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center;
-    background: #F0F3FF;
-    margin: 0;
-    height: 100vh;
-    /* margin: 20px; */
-  }
-  
-  /* Individual Doctor Card */
-  .doctor-card {
-    background: #F0F3FF;
-    /* border: 1px solid #0077b6; */
-    border-radius: 8px;
-    width: 472px; /* Fixed width for uniform alignment */
-  
-    /* padding: 15px; */
-    /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
-    display: flex;
-    flex-direction: column;
-    text-align: left;
-  }
-  
-  /* Doctor Header Styling */
-  .doctor-header {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
-    border-radius: 16px;
-background: #003566;
-height: 155px;
-justify-content: center;
-align-items: center;
-  }
-  
-  .doctor-header img {
-    /* width: 80px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  background: #f0f3ff;
+  margin: 0;
+  height: 100vh;
+  /* margin: 20px; */
+}
+
+/* Individual Doctor Card */
+.doctor-card {
+  /* background: #F0F3FF; */
+  /* border: 1px solid #0077b6; */
+  border-radius: 8px;
+  width: 500px; /* Fixed width for uniform alignment */
+
+  /* padding: 15px; */
+  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+/* Doctor Header Styling */
+.doctor-header {
+  display: flex;
+  gap: 0px;
+  margin-bottom: 10px;
+  border-radius: 16px;
+  background: #003566;
+  height: 155px;
+  justify-content: flex-start;
+  padding-left: 30px;
+  align-items: center;
+}
+
+.doctor-header img {
+  /* width: 80px;
     height: 80px; */
-    /* border-radius: 8px;
+  /* border-radius: 8px;
     border: 2px solid #0077b6; */
-   
-  }
-  .doctor-image{
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    margin-right: 30px;
-    /* padding: 0 10px; */
-  }
-  
-  .doctor-details h3 {
-    color: #FFF;
-font-family: Kanit;
-font-size: 15px;
-font-style: normal;
-font-weight: 500;
-line-height: normal;
-  }
-  
-  .doctor-details p {
-    color: #FFF;
-    font-family: Kanit;
-    font-size: 15px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: normal;
-  }
-  
-  /* Queue Table Styling */
+}
+.doctor-image {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-right: 20px;
+  /* padding: 0 10px; */
+}
+
+.doctor-details h3 {
+  color: #fff;
+  font-family: Kanit;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 30px;
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+.doctor-details p {
+  color: #fff;
+  font-family: Kanit;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 30px;
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+/* Queue Table Styling */
 /* General Table Styling */
 .queue-table {
-    width: 100%;
-    border-collapse: separate; /* Allows spacing between rows */
-    border-spacing: 0 5px; /* Adds vertical spacing between rows */
-    text-align: left; /* Aligns text to the left */
+  width: 100%;
+  border-collapse: separate; /* Allows spacing between rows */
+  border-spacing: 0 5px; /* Adds vertical spacing between rows */
+  text-align: left; /* Aligns text to the left */
+  max-height: 300px;
+  overflow-y: scroll;
+}
+.image {
+  border-radius: 8px;
+  width: 115px;
+  height: 140px;
+}
 
-  }
+/* Table Header Styling */
+.queue-table thead tr {
+  background-color: #003566; /* Dark blue for header */
+  color: white;
+  font-size: 14px;
+  width: 100%;
+}
+.queue-table thead {
+  box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64); /* Add shadow for card-like appearance */
+  border-radius: 8px; /* Rounds corners for each row */
+  overflow: hidden;
+}
 
-  
-  /* Table Header Styling */
-  .queue-table thead tr {
-    background-color: #003566; /* Dark blue for header */
-    color: white;
-    font-size: 14px;
-    width: 100%;
-  }
-  .queue-table thead {
-    background-color: #003566; /* Dark blue for header */
-    color: white;
-    font-size: 14px; /* Keeps the header aligned */
-    width: 100%; /* Match the table width *//* Ensures proper column widths */
-  }
+.queue-table th {
+  padding: 10px;
+  color: #fff;
+  font-family: Kanit;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  text-align: left;
+  /* Removes borders for a clean look */
+  height: 52px;
+}
 
-  
-  .queue-table th {
-    padding: 10px;
-    color: #FFF;
-font-family: Kanit;
-font-size: 20px;
-font-style: normal;
-font-weight: 500;
-line-height: normal;
-    text-align: left;
-     /* Removes borders for a clean look */
-height: 52px;
+/* Table Body Rows Styling */
+.queue-table tbody tr {
+  box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64); /* Add shadow for card-like appearance */
+  border-radius: 8px; /* Rounds corners for each row */
+  overflow: hidden;
+  background-color: white;
+}
 
-  }
-  
-  /* Table Body Rows Styling */
-  .queue-table tbody tr {
-    background: white; /* White background for rows */
-    box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64); /* Add shadow for card-like appearance */
-    border-radius: 8px; /* Rounds corners for each row */
-  }
-  /* Row transition for removal */
+.queue-table tbody td:first-child {
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+}
+
+.queue-table tbody td:last-child {
+  border-top-right-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+.queue-table thead th:first-child {
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+}
+
+.queue-table thead th:last-child {
+  border-top-right-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+
+/* Row transition for removal */
 .removed {
-    opacity: 0;
-    transform: translateY(-20px);
-    transition: all 0.3s ease-out;
-  }
-  
-  /* Default row styles */
-  .queue-table tbody tr {
-    transition: all 0.3s ease-in;
-  }
-  
-  /* For a smoother fade-out, you can tweak transition timing */
-  .queue-table tbody tr.removed {
-    display: none;
-    transition: opacity 0.3s ease-out, transform 0.3s ease-in;
-  }
-  
-  
-  /* Table Cells Styling */
-  .queue-table td {
-    padding: 10px;
-    font-family: Kanit, sans-serif;
-    font-size: 22px;
-    font-weight: 500;
-    color: #222;
-    text-align: left;
-    border: none; /* Removes default borders */
-    margin-bottom: 5px;
-    text-wrap: nowrap;
-  }
-  /* Table Body Container */
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: all 0.3s ease-out;
+}
+
+/* Default row styles */
+.queue-table tbody tr {
+  transition: all 0.3s ease-in;
+}
+
+/* For a smoother fade-out, you can tweak transition timing */
+.queue-table tbody tr.removed {
+  display: none;
+  transition: opacity 0.3s ease-out, transform 0.3s ease-in;
+}
+
+/* Table Cells Styling */
+.queue-table td {
+  padding: 10px;
+  font-family: Kanit, sans-serif;
+  font-size: 22px;
+  font-weight: 500;
+  color: #222;
+  text-align: left;
+  border: none; /* Removes default borders */
+  margin-bottom: 5px;
+  text-wrap: nowrap;
+}
+/* Table Body Container */
 .scrollable-body {
-    max-height: 300px; /* Maximum height for the table body */
-    overflow-y: auto; /* Adds vertical scroll if content exceeds height */
-    width: 100%; /* Ensure it matches the table width */
-    display: block; /* Required for scrollable div */
-  }
-  
-  /* Status Styling */
-  .status {
-    display: inline-block;
-    width: 150px;
-    padding: 4px 10px;
-    border-radius: 4px;
-    text-align: center;
-  
-  }
-  
-  .status.PatientIn {
-    border-radius: 4px;
-    background: #169458; /* Green for Patient In */
-    color: #FFF;
-font-family: Kanit;
-font-size: 22px;
-font-style: normal;
-font-weight: 400;
-line-height: normal;
-  }
-  
-  .status.Next {
- /* Yellow for Next */
-    color: #FFF;
-font-family: Kanit;
-font-size: 22px;
-font-style: normal;
-font-weight: 400;
-line-height: normal;
-border-radius: 4px;
-background: #FB9C2A;
-  }
-  
-  .status.Default {
+  max-height: 300px; /* Maximum height for the table body */
+  overflow-y: auto; /* Adds vertical scroll if content exceeds height */
+  width: 100%; /* Ensure it matches the table width */
+  display: block; /* Required for scrollable div */
+}
+
+/* Status Styling */
+.status {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.status.PatientIn {
+  border-radius: 4px;
+  background: #169458; /* Green for Patient In */
+  color: #fff;
+  font-family: Kanit;
+  font-size: 22px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  /* width: 150px; */
+}
+
+.status.Next {
+  /* Yellow for Next */
+  color: #fff;
+  font-family: Kanit;
+  font-size: 22px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  border-radius: 4px;
+  background: #fb9c2a;
+  width: 113px;
+}
+
+/* .status.Default {
     color: #000;
     font-family: Kanit;
     font-size: 22px;
@@ -265,109 +295,115 @@ background: #FB9C2A;
     line-height: normal;
     border-radius: 4px;
 border: 1px solid #000;
-  }
-  .status.Pending{
-    border-radius: 4px;
-background: #FCE35F;
-color: #000;
-font-family: Kanit;
-font-size: 22px;
-font-style: normal;
-font-weight: 400;
-line-height: normal;
-  }
-  
-  
-  /* Footer styling */
-  .footer {
-    margin-top: 20px;
-    display: flex; 
-    background-color: #FFF; 
-    padding: 0;
-    justify-content: center;
-    align-items: center;
-  }
-  .footer p {
-    color: #FFF;
-text-align: center;
-font-family: Kanit;
-font-size: 15px;
-font-style: normal;
-font-weight: 500;
-line-height: normal;
+  } */
+.status.Pending {
+  border-radius: 4px;
+  background: #fce35f;
+  color: #000;
+  font-family: Kanit;
+  font-size: 22px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
 
-margin: 0;
+/* Footer styling */
+.footer {
+  margin-top: 15px;
+  display: flex;
+  background-color: #fff;
+  padding: 0;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+}
+.footer p {
+  color: #fff;
+  text-align: center;
+  font-family: Kanit;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
 
+  margin: 0;
+}
+.no-patients-message {
+  text-align: center;
+  font-size: 16px;
+  font-weight: bold;
+  color: #777;
+  padding: 10px 0;
+}
 
-  }
-  .footer marquee{
-    color: #001345;
-text-align: center;
-font-family: Kanit;
-font-size: 26px;
-font-style: normal;
-font-weight: 500;
-line-height: normal;
-  }
-  .copy-right-container{
-    clip-path: polygon(8% 0, 100% 0, 100% 100%, 0% 100%);
-    width: 444px;
-    height: 80px;
-    flex-shrink: 0;
-    background-color: #001345;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding-left: 20px;
-  }
-  .four-doctors-layout {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr); /* 4 equally spaced columns */
-    margin-left: 15px;
-    height: 100vh;
-     /* Spacing between columns */
-  }
-  .four-doctors-layout .doctor-card{
-    width: 344px;
-  }
+.footer marquee {
+  color: #001345;
+  text-align: center;
+  font-family: Kanit;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+}
+.copy-right-container {
+  clip-path: polygon(8% 0, 100% 0, 100% 100%, 0% 100%);
+  width: 444px;
+  height: 65px;
+  flex-shrink: 0;
+  background-color: #001345;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-left: 20px;
+}
+.four-doctors-layout {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr); /* 4 equally spaced columns */
+  margin-left: 15px;
+  height: 100vh;
+  /* Spacing between columns */
+}
+.four-doctors-layout .doctor-card {
+  width: 344px;
+}
 
-  .two-doctors-layout{
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    height: 100vh;
-    margin-left: 50px;
-  }
-  .two-doctors-layout .doctor-card{
-    width: 680px;
-  }
-  
-  .two-doctors-layout .doctor-details h3{
-    color: #FFF;
-font-family: Kanit;
-font-size: 24px;
-font-style: normal;
-font-weight: 500;
-line-height: 30px;
-margin: 0;
-  }
+.two-doctors-layout {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  height: 100vh;
+  margin-left: 50px;
+}
+.two-doctors-layout .doctor-card {
+  width: 680px;
+}
 
-  .two-doctors-layout .doctor-details p{
-    color: #FFF;
-font-family: Kanit;
-font-size: 24px;
-font-style: normal;
-font-weight: 500;
-line-height: 30px;
-margin:0;
-  }
+.two-doctors-layout .doctor-details h3 {
+  color: #fff;
+  font-family: Kanit;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 30px;
+  margin: 0;
+}
 
-  
-  
-  /* Hide doctor image when there are 4 doctors */
-  .hide-image {
-    display: none;
-  }
-  
-  .hide-image .queue-table {
-    margin-top: 0;
-  }
+.two-doctors-layout .doctor-details p {
+  color: #fff;
+  font-family: Kanit;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 30px;
+  margin: 0;
+}
+
+/* Hide doctor image when there are 4 doctors */
+.hide-image {
+  display: none;
+}
+
+.hide-image .queue-table {
+  margin-top: 0;
+}

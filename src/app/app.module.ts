@@ -90,6 +90,7 @@ import { EstimationCompleteComponent } from './estimation/estimation-complete/es
 import { EstimationOverdueComponent } from './estimation/estimation-overdue/estimation-overdue/estimation-overdue.component';
 import { EstimationSubmitComponent } from './estimation/estimation-submit/estimation-submit/estimation-submit.component';
 import { DoctorAppointmentsComponent } from './doctor/doctor-appointments/doctor-appointments/doctor-appointments.component';
+import { AppointmentTransferComponent } from './appointment/appointment-transfer/appointment-transfer/appointment-transfer.component';
 
 
 
@@ -141,6 +142,7 @@ import { DoctorAppointmentsComponent } from './doctor/doctor-appointments/doctor
     EstimationOverdueComponent,
     EstimationSubmitComponent,
     DoctorAppointmentsComponent,
+    AppointmentTransferComponent,
 
   
     

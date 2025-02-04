@@ -87,12 +87,12 @@
                     <td>{{ service.date }}</td>
                     <td>{{ service.time }}</td>
                       <td>
-                        <span class="status-badge">{{ service.isCloseOPD ? 'Close OPD' : 'Close OPD'  }}</span>
+                        <span class="status-badge">{{ service.isTransfer ? 'Transfer' : 'Close OPD'  }}</span>
                       </td>
                     <td class="button">
                         <button class="btn-action" >
                           <img src="check-in.png" alt="check" class="action-icon" (click)="completeAppointment(service)"
-                            pTooltip="Check-in" tooltipPosition="top">
+                            pTooltip="Complete" tooltipPosition="top">
                           <button class="btn-action">
                             <img src="appt-cancel.png" alt="delete" class="action-icon" (click)="cancelAppointment(service)" 
                             pTooltip="Cancel" tooltipPosition="top">

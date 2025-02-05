@@ -9,7 +9,7 @@
             <span *ngIf="sortColumn === 'patientName' && sortDirection === 'asc'">&#9650;</span>
             <span *ngIf="sortColumn === 'patientName' && sortDirection === 'desc'">&#9660;</span>
           </th>
-          <th>Phone Number</th>
+          <!-- <th>Phone Number</th> -->
           <th>Doctor Name</th>
           <!-- <th>Therapy</th> -->
           <th (click)="sortBy('date')">
@@ -35,7 +35,7 @@
         <tr *ngFor="let appointment of getPaginatedAppointments(); let i = index">
           <td>{{ i + 1 }}</td>
           <td>{{ appointment.patientName }}</td>
-          <td>{{ appointment.phoneNumber }}</td>
+          <!-- <td>{{ appointment.phoneNumber }}</td> -->
           <td>{{ appointment.doctorName }}</td>
           <!-- <td>{{ appointment.department }}</td> -->
           <td>{{ appointment.date }}</td>

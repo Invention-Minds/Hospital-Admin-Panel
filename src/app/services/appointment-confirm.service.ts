@@ -373,6 +373,9 @@ getAppointmentsByDoctor(userId: number): Observable<any[]> {
     getPatientById(patientId: number): Observable<any> {
       return this.http.get(`${environment.apiUrl}/patients/${patientId}`);
     }
+    getAllPatients(): Observable<any> {
+      return this.http.get(`${environment.apiUrl}/patients`);
+    }
     checkedinAppointment(appointmentId: number, username: any): Observable<any> {
       return this.http.put(`${this.apiUrl}/${appointmentId}/checkin`, {username});
     }
@@ -399,5 +402,8 @@ getAppointmentsByDoctor(userId: number): Observable<any[]> {
     }
     bulkUpdateAppointments(appointments: any): Observable<any> {
       return this.http.put(`${this.apiUrl}/bulk-update`, appointments);
+    }
+    bulkUpdateAppointmentsForAccept(appointments: any): Observable<any> {
+      return this.http.put(`${this.apiUrl}/bulk-updates-accept`, appointments);
     }
 }

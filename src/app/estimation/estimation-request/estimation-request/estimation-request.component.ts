@@ -277,9 +277,9 @@ export class EstimationRequestComponent {
     }
     completeAppointment(appointment: any): void { }
     openAppointmentForm(service: any): void {
-      this.router.navigate(['/reschedule', service.id], {
-        state: { data: service }, // Passing full service object using state
-      });
+      // this.router.navigate(['/reschedule', service.id], {
+      //   state: { data: service }, // Passing full service object using state
+      // });
       this.lockService(service);
       this.openAppointmentFormAfterLocked(service)
     }

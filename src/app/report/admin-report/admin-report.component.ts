@@ -518,8 +518,8 @@ export class AdminReportComponent {
   // Function to download the filtered appointments as an Excel file
   loadAllAppointments(): void {
     this.isLoading = true;
-    this.appointmentService.getAllAppointments().subscribe(
-      (appointments) => {
+    this.appointmentService.getAllAppointments().subscribe({
+      next: (appointments) => {
         this.appointments = appointments;
         let filteredAppointments = this.appointments;
         this.allAppointments = appointments;
@@ -756,13 +756,14 @@ export class AdminReportComponent {
           console.error('Error fetching doctor details:', error);
         });
       },
-      (error) => {
+      error: (error) => {
         console.error('Error fetching all appointments:', error);
+        this.isLoading = false;
       },
-      () =>{
+      complete: () =>{
         this.isLoading = false;
       }
-    );
+  });
   }
   private async fetchDoctorDetailsAndSummary(doctorIds: number[]): Promise<any[]> {
     const doctorDetails = await Promise.all(

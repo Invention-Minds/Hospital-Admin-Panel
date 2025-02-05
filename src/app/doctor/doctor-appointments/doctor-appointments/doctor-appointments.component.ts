@@ -38,6 +38,8 @@ export class DoctorAppointmentsComponent {
   @Output() reschedule = new EventEmitter<any>();
   activeComponent: string = 'confirmed';
   confirmedServices: any[] = [];
+  doctorCloseOpdSummary: any[] = [];
+
 
 
   // Value entered by the user (could be Patient ID or Phone Number based on selection)
@@ -61,6 +63,8 @@ export class DoctorAppointmentsComponent {
         this.confirmedAppointments = services.filter(
           (service) => service.isCloseOPD === true
         );
+        this.filteredServices = [...this.confirmedAppointments];
+      this.calculateDoctorCloseOpdSummary(); // Add this line
         // this.confirmedAppointments = services.filter(
         //   (service) => {
         //     const appointmentDate = new Date(service.appointmentDate);
@@ -75,7 +79,7 @@ export class DoctorAppointmentsComponent {
           const dateB = new Date(b.createdAt!);
           return dateB.getTime() - dateA.getTime();
         });
-        this.filteredServices = [...this.confirmedAppointments];
+
         console.log('Services processed successfully.');
       },
       error: (err) => {
@@ -90,7 +94,128 @@ export class DoctorAppointmentsComponent {
     });
 
   }
+  calculateDoctorCloseOpdSummary(): void {
+    const summaryMap = new Map<string, { doctorName: string; department: string; date: string; count: number; isAccepted: boolean;  appointments: any[]; }>();
+  
+    this.confirmedAppointments.forEach(appointment => {
+      if (appointment.isCloseOPD) {
+        const key = `${appointment.doctorName}_${appointment.date}`;
+        
+        if (summaryMap.has(key)) {
+          const existingSummary = summaryMap.get(key)!;
+        existingSummary.count += 1;
+        existingSummary.isAccepted = existingSummary.isAccepted || appointment.isAccepted; // Update if any appointment is accepted
+        existingSummary.appointments.push(appointment);
 
+        } else {
+          summaryMap.set(key, {
+            doctorName: appointment.doctorName,
+            department: appointment.department,
+            date: appointment.date,
+            count: 1,
+            isAccepted: appointment.isAccepted || false,
+            appointments: [appointment]
+
+          });
+        }
+      }
+    });
+  
+    this.doctorCloseOpdSummary = Array.from(summaryMap.values());
+    console.log(this.doctorCloseOpdSummary)
+  }
+  updateAppointment(summary: any): void {
+    summary.appointments.forEach((appointment: any) => {
+      appointment.isAccepted = true;
+    });
+    this.appointmentService.bulkUpdateAppointmentsForAccept(summary.appointments).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'All appointments have been accepted successfully!'
+        });
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to update appointments.'
+        });
+        console.error('Error updating appointments:', err);
+      }
+    });  
+  
+    // Optionally, update the backend if needed
+    // this.appointmentService.updateAppointment(summary).subscribe({
+    //   next: () => {
+    //     console.log('Appointment updated successfully.');
+    //   },
+    //   error: (err) => {
+    //     console.error('Error updating appointment:', err);
+    //   }
+    // });
+  }
+  printAppointments(summary: any): void {
+    let printContent = `
+      <h2>Appointment Summary</h2>
+      <p><strong>Doctor Name:</strong> ${summary.doctorName}</p>
+      <p><strong>Department:</strong> ${summary.department}</p>
+      <p><strong>Date:</strong> ${summary.date}</p>
+      <p><strong>Total Close OPDs:</strong> ${summary.count}</p>
+      <p><strong>Status:</strong> ${summary.isAccepted ? 'Accepted' : 'Requested'}</p>
+      <hr />
+      <h3>Appointments:</h3>
+      <table border="1" cellspacing="0" cellpadding="5" style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Patient Name</th>
+            <th>Time</th>
+            <th>Phone Number</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>`;
+  
+    summary.appointments.forEach((appointment: any, index: number) => {
+      printContent += `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${appointment.patientName}</td>
+          <td>${appointment.time}</td>
+          <td>${appointment.phoneNumber}</td>
+          <td>${appointment.isAccepted ? 'Accepted' : 'Requested'}</td>
+        </tr>`;
+    });
+  
+    printContent += `
+        </tbody>
+      </table>
+    `;
+  
+    const printWindow = window.open('', '', 'width=800,height=600');
+    if (printWindow) {
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Appointment Summary</title>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 20px; }
+              table { border: 1px solid #ccc; border-collapse: collapse; width: 100%; }
+              th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+              th { background-color: #f4f4f4; }
+            </style>
+          </head>
+          <body>${printContent}</body>
+        </html>
+      `);
+      printWindow.document.close();
+      printWindow.print();
+    }
+  }
   onSearch(): void {
 
     this.filteredServices = this.confirmedAppointments.filter((service) => {

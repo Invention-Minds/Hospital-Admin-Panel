@@ -98,6 +98,7 @@ export class TodayConsultationsComponent {
   showTransferAppointment: boolean = false;
   estimation: any[] = [];
   countOfPending: number = 0;
+  surgeryTime: string = ''
   searchOptions = [
     { label: 'Patient Name', value: 'patientName' },
     { label: 'Phone Number', value: 'phoneNumber' }

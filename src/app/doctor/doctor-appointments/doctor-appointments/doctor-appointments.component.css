@@ -478,3 +478,12 @@ font-family: 900;
   padding: 20px;
   font-family: Kanit;
 }
+.status-badge.accepted {
+  background-color: #169458; /* Green for Accepted */
+  color: #fff;
+}
+
+.status-badge.requested {
+  background-color: #FCE35F; /* Yellow for Requested */
+  color: #0E2970;
+}

@@ -95,6 +95,7 @@ export class AppointmentFormComponent implements OnInit {
   disabledDates: Date[] = [];
   department: string = '';
   doctorType: string = '';
+  patients: any[] = [];
 
   private subscription!: Subscription;
 
@@ -121,6 +122,12 @@ export class AppointmentFormComponent implements OnInit {
     //   this.minDate = new Date(); // Reset to today's date
     // }
     this.loadDoctors();
+    this.appointmentService.getAllPatients().subscribe(
+      (patients =>{
+        this.patients = patients;
+        console.log(this.patients)
+      })
+    )
 
 
 
@@ -327,6 +334,31 @@ export class AppointmentFormComponent implements OnInit {
     }
   }
 
+  onPRNChange(){
+    console.log(this.appointmentForm.value.prnNumber)
+    if (!this.appointmentForm.value.prnNumber) {
+      // Reset fields if UHID is empty
+      this.appointmentForm.value.patientName = '';
+      this.appointmentForm.value.phoneNumber = ''
+      return;
+    }
+    const matchingEstimation = this.patients.find(
+      (estimation) => String(estimation.prn) === String(this.appointmentForm.value.prnNumber)
+    );
+    console.log("🔍 Matching Estimation:", matchingEstimation);
+
+    console.log(matchingEstimation)
+    if (matchingEstimation) {
+      const nameParts = matchingEstimation.name.split(" ");
+      this.appointmentForm.get('firstName')?.setValue(nameParts[0]);
+      this.appointmentForm.get('lastName')?.setValue(nameParts.slice(1).join(' '));
+      this.appointmentForm.get('phoneNumber')?.setValue(matchingEstimation.phoneNumber);
+    } else {
+      // Reset if no match found
+      this.appointmentForm.value.patientName = '';
+       this.appointmentForm.value.patientPhoneNumber = ''
+    }
+  }
   ngOnDestroy(): void {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();

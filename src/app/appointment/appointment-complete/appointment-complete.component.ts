@@ -145,7 +145,7 @@ export class AppointmentCompleteComponent {
 
   // Method to calculate total pages
   get totalPages() {
-    return Math.ceil(this.completedAppointments.length / this.itemsPerPage);
+    return Math.ceil(this.filteredAppointments.length / this.itemsPerPage);
   }
 
   // Method to go to the previous page

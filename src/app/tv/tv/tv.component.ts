@@ -535,79 +535,117 @@ export class TvComponent implements OnInit, OnDestroy {
       return parsedDate;
     };
     let nextAppointmentFound = false;
-    // console.log(latestCheckedOutAppointment)
-    const pendingAppointments = this.checkedInAppointments.filter((appt: any) => appt.checkedOut === false && appt.checkedIn === true);
-    // console.log(this.checkedInAppointments)
-    // console.log(pendingAppointments)
-    if (pendingAppointments.length > 0) {
-      const averageWaitingTime = slotDuration; // Total expected wait time
-      const patientInAppointment = this.checkedInAppointments.find((appt: any) => appt.checkedOut === true && appt.endConsultationTime === null);
+
+    // Step 1: Filter all pending appointments
+    const pendingAppointments = this.checkedInAppointments.filter(
+      (appt: any) =>  appt.checkedIn === true
+    );
+    
+    // Step 2: Group pending appointments by doctor
+    const appointmentsByDoctor = pendingAppointments.reduce((acc: any, appointment: any) => {
+      const doctorId = appointment.doctorId;
+    
+      if (!acc[doctorId]) {
+        acc[doctorId] = {
+          doctorName: appointment.doctorName,
+          doctorPhoneNumber: appointment.doctor.phone_number,
+          appointments: [],
+          slotDuration: appointment.doctor.slotDuration
+        };
+      }
+    
+      acc[doctorId].appointments.push(appointment);
+      return acc;
+    }, {});
+    console.log(appointmentsByDoctor)
+    
+    // Step 3: Loop through each doctor's appointments
+    Object.values(appointmentsByDoctor).forEach((doctorData: any) => {
+      const { doctorName, doctorPhoneNumber, appointments, slotDuration } = doctorData;
+      console.log(appointments)
+      const averageWaitingTime = slotDuration;
+    
+      // Find the currently checked-in patient who hasn't checked out yet
+      const patientInAppointment = appointments.find(
+        (appt: any) => appt.checkedOut === true && appt.endConsultationTime === null
+      );
+      const completeAppointment = pendingAppointments.filter(
+        (appt:any) => appt.checkedOut === true
+      )
+    
+      console.log(patientInAppointment)
       if (patientInAppointment) {
         setTimeout(() => {
-          // console.log("Patient Appointment Data:", patientInAppointment);
-          // console.log("Scheduled Time:", patientInAppointment?.scheduledTime);
-          const scheduledTime = parseTimeToDate(patientInAppointment.scheduledTime)
+          const scheduledTime = parseTimeToDate(patientInAppointment.scheduledTime);
+    
           if (scheduledTime) {
-            const elapsedTime = new Date().getTime() - scheduledTime?.getTime()
-            const elapsedMinutes = Math.floor(elapsedTime / 60000); // Convert milliseconds to minutes
-            // console.log(elapsedMinutes - averageWaitingTime)
+            const elapsedTime = new Date().getTime() - scheduledTime.getTime();
+            const elapsedMinutes = Math.floor(elapsedTime / 60000);
+            console.log(scheduledTime, elapsedMinutes, elapsedTime)
+    
             if (elapsedMinutes > averageWaitingTime) {
               console.warn(
-                `⏳ Alert: Patient ${patientInAppointment.patientName} has exceeded expected waiting time by ${elapsedMinutes - averageWaitingTime} mins!`
+                `⏳ Alert: Patient ${patientInAppointment.patientName} under Dr. ${doctorName} has exceeded waiting time by ${
+                  elapsedMinutes - averageWaitingTime
+                } mins!`
               );
-              console.log(`${elapsedMinutes - averageWaitingTime - slotDuration}`)
+    
               const waitingMultiplier = Math.ceil(elapsedMinutes / averageWaitingTime);
-
-
-              // Store extra waiting time for the next patient
-              const nextAppointment = this.todayFullAppointments.find((appt: any) => appt.status === "Next");
+    
+              // Step 4: Find the next appointment for the doctor
+              const nextAppointment = this.checkedInAppointments.find(
+                (appt: any) => appt.status === "Next" && appt.doctorId === patientInAppointment.doctorId
+              );
+              console.log(nextAppointment)
+    
               if (nextAppointment) {
                 nextAppointment.extraWaitingTime = elapsedMinutes - averageWaitingTime;
-                const extraWaitingTime = nextAppointment.extraWaitingTime - slotDuration
+                const extraWaitingTime = nextAppointment.extraWaitingTime - slotDuration;
+    
+                // Step 5: Update extra waiting time in DB
                 this.appointmentService.updateExtraWaitingTime(nextAppointment.id, extraWaitingTime).subscribe(
                   (response: any) => {
-                    console.log("updated successfully", response)
+                    console.log("Waiting time updated successfully", response);
                   },
                   (error) => {
-                    console.error('Error updating waiting Time:', error);
+                    console.error("Error updating waiting time:", error);
                   }
                 );
-                const adminPhoneNumbers = ["919342287945", "919698779181", "917708059010"]; // List of Admins
-                const noOfPatients = pendingAppointments.length
-                this.appointmentService.sendWaitingTimeAlert({
-                  adminPhoneNumbers,
-                  doctorPhoneNumber: nextAppointment.doctorPhoneNumber,
-                  noOfPatients: noOfPatients,
-                  doctorName: nextAppointment.doctorName,
-                  waitingMultiplier,
-                }).subscribe(
-                  (response) => {
-                    console.log("WhatsApp message sent successfully", response);
-                  },
-                  (error) => {
-                    console.error("Error sending WhatsApp message:", error);
-                  }
-                );
-
+    
+                // Step 6: Send WhatsApp notifications to Admins & Doctor
+                const adminPhoneNumbers = ["919342287945", "919698779181", "917708059010"]; // Admin List
+                let noOfPatients = pendingAppointments.length - completeAppointment.length; // Pending appointments for this doctor
+                noOfPatients = Math.max(noOfPatients, 0);
+    
+                this.appointmentService
+                  .sendWaitingTimeAlert({
+                    adminPhoneNumbers,
+                    doctorPhoneNumber: doctorPhoneNumber,
+                    noOfPatients: noOfPatients,
+                    doctorName: doctorName,
+                    waitingMultiplier,
+                  })
+                  .subscribe(
+                    (response) => {
+                      console.log(`✅ WhatsApp message sent to Dr. ${doctorName}`, response);
+                    },
+                    (error) => {
+                      console.error(`❌ Error sending message to Dr. ${doctorName}:`, error);
+                    }
+                  );
               }
             }
           }
-
-
         }, 1000);
-
-
-
-        // If waiting time exceeds the expected average waiting time
-
       }
-    }
+    });
+    
 
     appointments.forEach((appointment: any) => {
       if (adjustedTime && !isNaN(adjustedTime.getTime())) {
         // Adjust the appointment time based on the latest endConsultationTime
         appointment.time = formatTime(adjustedTime);
-        adjustedTime.setMinutes(adjustedTime.getMinutes() + slotDuration); // Add slot duration
+        adjustedTime.setMinutes(adjustedTime.getMinutes() + appointment.doctor.slotDuration); // Add slot duration
       } else {
         // If no valid endConsultationTime, fallback to the original appointment time
         const originalTimeParts = appointment.time.match(/(\d+):(\d+)\s?(AM|PM)/);
@@ -622,7 +660,7 @@ export class TvComponent implements OnInit, OnDestroy {
           );
           appointment.time = formatTime(originalTime);
           adjustedTime = new Date(originalTime);
-          adjustedTime.setMinutes(adjustedTime.getMinutes() + slotDuration);
+          adjustedTime.setMinutes(adjustedTime.getMinutes() + appointment.doctor.slotDuration);
         } else {
           console.error("Invalid appointment time format:", appointment.time);
         }

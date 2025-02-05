@@ -157,6 +157,15 @@
         />
         <label for="estimationDate" class="custom-label">Remarks</label>
         </div>
+        <div class="input-container">
+          <input 
+          type="text" 
+
+          [(ngModel)]="surgeryTime" 
+          class="custom-input"
+        />
+        <label for="estimationDate" class="custom-label">OT UtilizationTime</label>
+        </div>
       </div>
       <div class="modal-footer">
         <button class="save-button" (click)="saveEstimation()">Save</button>

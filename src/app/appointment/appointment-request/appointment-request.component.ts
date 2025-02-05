@@ -30,6 +30,7 @@ interface Appointment {
   requestVia?: string; // Optional property
   [key: string]: any;  // Add this line to allow indexing by string
   created_at?: string;
+  isAccepted?:boolean;
 }
 const lockedAppointments = new Map<number, { userId: string; lockTime: number }>();
 @Component({
@@ -192,7 +193,7 @@ export class AppointmentRequestComponent implements OnInit {
 
   // Calculate the total number of pages
   get totalPages() {
-    return Math.ceil(this.pendingAppointments.length / this.itemsPerPage);
+    return Math.ceil(this.filteredAppointments.length / this.itemsPerPage);
   }
 
   // Navigate to the previous page

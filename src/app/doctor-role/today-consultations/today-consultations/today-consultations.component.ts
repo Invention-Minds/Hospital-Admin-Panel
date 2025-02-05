@@ -487,8 +487,10 @@ export class TodayConsultationsComponent {
         status: 'pending',
         estimationType: this.estimationType,
         estimationCreatedTime: new Date(),
-        remarks: this.remarks
+        remarks: this.remarks,
+        surgeryTime:this.surgeryTime
       };
+      console.log(estimationDetails)
       this.estimationService.createEstimationDetails(estimationDetails).subscribe({
         next: (response) => {
           console.log('Estimation Details saved:', response);
@@ -513,7 +515,8 @@ export class TodayConsultationsComponent {
       status: 'pending',
       estimationType: this.estimationType,
       estimationCreatedTime: new Date(),
-      remarks: this.remarks
+      remarks: this.remarks,
+      surgeryTime:this.surgeryTime
     };
 
     this.doctor.filter((doc) => {
@@ -526,7 +529,7 @@ export class TodayConsultationsComponent {
       estimation: this.estimationText,
       estimationType: this.estimationType
     });
-
+    console.log(estimationDetails)
     this.estimationService.createEstimation(  this.currentDoctorId,this.currentDepartmentId,this.estimationText, this.estimationType).subscribe({
       next: (response) => {
         console.log('Estimation saved:', response);

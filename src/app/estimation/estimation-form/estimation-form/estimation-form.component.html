@@ -204,6 +204,22 @@
           </div>
         </div>
       </div>
+      <div class="form-row">
+        <div class="input-container">
+
+          <select id="surgeryTime" name="surgeryTime" class="custom-input" ngModel [(ngModel)]="formData.surgeryTime" required
+            #surgeryTime="ngModel">
+            <option value="" disabled selected>Select OT Utilization Time</option>
+            <option value="0 to 15">0 to 15 mins</option>
+            <option value="15 to 30">15 to 30 mins</option>
+            <option value="30 to 60">30 to 60 mins</option>
+          </select>
+          <label for="surgeryTime" class="custom-label">OT Utilization Time*</label>
+          <div *ngIf="estimationForm.submitted && estimationForm.controls['surgeryTime']?.invalid" class="error-message">
+            <span *ngIf="estimationForm.controls['surgeryTime']?.errors?.['required']">OT Utilization Time is required.</span>
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="section">
@@ -248,6 +264,9 @@
             <option value="General">General</option>
             <option value="Semi-Private">Semi-Private</option>
             <option value="Private">Private</option>
+            <option value="Deluxe">Deluxe</option>
+            <option value="VIP Suite">VIP Suite</option>
+            <option value="Presidential Suite">Presidential Suite</option>
           </select>
           <label for="roomType" class="custom-label">Room Type*</label>
           <div *ngIf="estimationForm.submitted && estimationForm.controls['roomType']?.invalid" class="error-message">

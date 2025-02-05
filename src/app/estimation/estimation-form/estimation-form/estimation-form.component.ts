@@ -155,6 +155,7 @@ export class EstimationFormComponent {
     approverSign: '',
     employeeId: '',
     approverId: '',
+    surgeryTime:'',
     statusOfEstimation: '',
     includedItems: {
       wardICUStay: false,
@@ -450,7 +451,8 @@ export class EstimationFormComponent {
         approverId: this.formData.approverId,
         totalDaysStay: this.formData.totalDaysStay,
         attenderName: this.formData.attenderName,
-        approvedDateAndTime: new Date()
+        approvedDateAndTime: new Date(),
+        surgeryTime: this.formData.surgeryTime,
       },
       inclusions: this.formData.inclusions,
       exclusions: this.formData.exclusions,
@@ -527,6 +529,7 @@ export class EstimationFormComponent {
         approverId: this.formData.approverId,
         totalDaysStay: this.formData.totalDaysStay,
         attenderName: this.formData.attenderName,
+        surgeryTime: this.formData.surgeryTime,
       },
       inclusions: this.formData.inclusions,
       exclusions: this.formData.exclusions,
@@ -660,6 +663,7 @@ export class EstimationFormComponent {
           employeeId: this.formData.employeeId,
           totalDaysStay: this.formData.totalDaysStay,
           attenderName: this.formData.attenderName,
+          surgeryTime: this.formData.surgeryTime,
         },
         inclusions: this.formData.inclusions,
         exclusions: this.formData.exclusions,

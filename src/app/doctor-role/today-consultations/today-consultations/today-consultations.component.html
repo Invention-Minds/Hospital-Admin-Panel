@@ -158,14 +158,15 @@
         <label for="estimationDate" class="custom-label">Remarks</label>
         </div>
         <div class="input-container">
-          <input 
-          type="text" 
-
-          [(ngModel)]="surgeryTime" 
-          class="custom-input"
-        />
-        <label for="estimationDate" class="custom-label">OT UtilizationTime</label>
+          <select id="surgeryTime" name="surgeryTime" class="custom-input" [(ngModel)]="surgeryTime" required #surgeryTimeModel="ngModel">
+            <option value="" disabled selected>Select OT Utilization Time</option>
+            <option value="0 to 15">0 to 15 mins</option>
+            <option value="15 to 30">15 to 30 mins</option>
+            <option value="30 to 60">30 to 60 mins</option>
+          </select>
+          <label for="surgeryTime" class="custom-label">OT Utilization Time*</label>
         </div>
+        
       </div>
       <div class="modal-footer">
         <button class="save-button" (click)="saveEstimation()">Save</button>

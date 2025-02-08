@@ -69,6 +69,26 @@ downloadData(): void {
   }
   
 }
+printData(): void {
+  if (this.selectedDateRange && this.selectedDateRange.length > 0 && this.activeComponent === 'confirmed') {
+    // Call the download method in the appointment confirm component
+    this.appointmentConfirmComponent?.printAppointmentDetails();
+  } 
+  else if(this.activeComponent === 'completed' && this.selectedDateRange && this.selectedDateRange.length > 0) {
+    // console.log('Downloading completed appointments data...');
+    // console.log(this.appointmentCompleteComponent)
+    this.appointmentCompleteComponent?.printAppointmentDetails();
+  }
+  else if(this.activeComponent === 'cancelled' && this.selectedDateRange && this.selectedDateRange.length > 0) {
+    // console.log('Downloading cancelled appointments data...');
+    this.appointmentCancelComponent?.printAppointmentDetails();
+  }
+  else if(this.selectedDateRange && this.selectedDateRange.length === 0) {
+    // Download last week's data if no component is active
+    this.messageService.add({ severity: 'info', summary: 'Info', detail: 'Select a date to download the report' });
+  }
+  
+}
 // downloadLastWeekData(): void {
 //   // Implement logic to download last week's data
 //   console.log('Downloading last week\'s data...');
@@ -117,11 +137,11 @@ activeComponent: string = 'request'; // Default to showing the request component
   @HostListener('document:click', ['$event'])
   handleOutsideClick(event: Event): void {
     const clickedInside = this.elementRef.nativeElement.contains(event.target);
-    console.log('Clicked inside:', clickedInside);
+    // console.log('Clicked inside:', clickedInside);
     if (!clickedInside) {
       this.closeForm()
       
-      console.log('Dropdown closed');
+      // console.log('Dropdown closed');
     }
   }
 

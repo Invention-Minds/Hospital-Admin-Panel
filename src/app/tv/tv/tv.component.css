@@ -135,9 +135,8 @@
   font-family: Poppins;
   font-size: 18px;
   font-style: normal;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 30px;
-  letter-spacing: 1px;
   margin: 0;
 }
 
@@ -146,9 +145,8 @@
   font-family: Poppins;
   font-size: 18px;
   font-style: normal;
-  font-weight: 500;
+  font-weight: 600;
   line-height: 30px;
-  letter-spacing: 1px;
   margin: 0;
 }
 
@@ -182,7 +180,7 @@
 }
 
 .queue-table th {
-  padding: 10px;
+  padding: 10px 6px 10px 6px;
   color: #fff;
   font-family: Poppins;
   font-size: 20px;
@@ -191,7 +189,7 @@
   line-height: normal;
   text-align: left;
   /* Removes borders for a clean look */
-  height: 52px;
+  height: 66px;
 }
 
 /* Table Body Rows Styling */
@@ -241,10 +239,10 @@
 
 /* Table Cells Styling */
 .queue-table td {
-  padding: 10px;
+  padding: 10px 6px 10px 6px;
   font-family: Poppins, sans-serif;
   font-size: 22px;
-  font-weight: 500;
+  font-weight: 600;
   color: #222;
   text-align: left;
   border: none; /* Removes default borders */
@@ -262,9 +260,16 @@
 /* Status Styling */
 .status {
   display: inline-block;
-  padding: 4px 10px;
+  padding: 4px 6px;
   border-radius: 4px;
   text-align: center;
+  font-family: Poppins;
+  font-size: 22px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  width: 120px;
+  height: 40px;
 }
 
 .status.PatientIn {
@@ -272,10 +277,12 @@
   background: #169458; /* Green for Patient In */
   color: #fff;
   font-family: Poppins;
-  font-size: 22px;
+  font-size: 21px;
   font-style: normal;
-  font-weight: 400;
+  font-weight: 600;
   line-height: normal;
+  width: 120px;
+  height: 40px;
   /* width: 150px; */
 }
 
@@ -283,13 +290,14 @@
   /* Yellow for Next */
   color: #fff;
   font-family: Poppins;
-  font-size: 22px;
+  font-size: 21px;
   font-style: normal;
-  font-weight: 400;
+  font-weight: 600;
   line-height: normal;
   border-radius: 4px;
   background: #fb9c2a;
-  width: 113px;
+  width: 120px;
+  height: 40px;
 }
 
 /* .status.Default {
@@ -309,8 +317,10 @@ border: 1px solid #000;
   font-family: Poppins;
   font-size: 22px;
   font-style: normal;
-  font-weight: 400;
+  font-weight: 600;
   line-height: normal;
+  width: 120px;
+  height: 40px;
 }
 
 /* Footer styling */

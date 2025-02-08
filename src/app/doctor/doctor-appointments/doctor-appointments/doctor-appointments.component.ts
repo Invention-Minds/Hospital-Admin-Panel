@@ -80,7 +80,7 @@ export class DoctorAppointmentsComponent {
           return dateB.getTime() - dateA.getTime();
         });
 
-        console.log('Services processed successfully.');
+        // console.log('Services processed successfully.');
       },
       error: (err) => {
         // Handle the error if the API call fails
@@ -136,6 +136,7 @@ export class DoctorAppointmentsComponent {
           summary: 'Success',
           detail: 'All appointments have been accepted successfully!'
         });
+        this.fetchConfirmedAppointments()
       },
       error: (err) => {
         this.isLoading = false;
@@ -495,7 +496,7 @@ export class DoctorAppointmentsComponent {
         });
         this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
           next: (response) => {
-            console.log('WhatsApp message sent successfully:', response);
+            // console.log('WhatsApp message sent successfully:', response);
             this.messageService.add({ severity: 'success', summary: 'Success', detail: 'WhatsApp message sent successfully!' });
           },
           error: (error) => {
@@ -517,7 +518,7 @@ export class DoctorAppointmentsComponent {
     const emailStatus = 'cancelled';
     this.appointmentService.sendEmail(patientEmail, emailStatus, appointmentDetails, 'patient').subscribe({
       next: (response) => {
-        console.log('Email sent to patient successfully:', response);
+        // console.log('Email sent to patient successfully:', response);
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to patient successfully!' });
       },
       error: (error) => {
@@ -534,7 +535,7 @@ export class DoctorAppointmentsComponent {
     this.isLoading = true;
     this.healthCheckupService.lockService(service.id, this.userId).subscribe({
       next: (response) => {
-        console.log('Service locked:', response);
+        // console.log('Service locked:', response);
         this.activeServiceId = service.id!;
         this.messageService.add({
           severity: 'success',
@@ -567,12 +568,12 @@ export class DoctorAppointmentsComponent {
   }
   // Unlock a service
   unlockService(): void {
-    console.log('Unlocking service:', this.activeServiceId);
+    // console.log('Unlocking service:', this.activeServiceId);
     if (!this.activeServiceId) return;
     this.isLoading = true;
     this.healthCheckupService.unlockService(this.activeServiceId).subscribe({
       next: (response) => {
-        console.log('Service unlocked:', response);
+        // console.log('Service unlocked:', response);
         this.activeServiceId = null;
         this.messageService.add({
           severity: 'success',
@@ -597,7 +598,7 @@ export class DoctorAppointmentsComponent {
 
   ngOnDestroy(): void {
     // Unlock the service on component destroy if locked
-    console.log('Destroying confirmed component...', this.activeComponent);
+    // console.log('Destroying confirmed component...', this.activeComponent);
     if (this.activeServiceId && this.activeComponent !== 'form') {
       this.unlockService();
     }

@@ -73,7 +73,7 @@ export class FutureConsultationsComponent {
     const day = today.getDate().toString().padStart(2, '0');
     this.today = `${year}-${month}-${day}`;
 
-    console.log('Setting isLoading to true');
+    // console.log('Setting isLoading to true');
     this.isLoading = true; // Start loading indicator
     this.userId = localStorage.getItem('userid')
 
@@ -81,7 +81,7 @@ export class FutureConsultationsComponent {
     this.appointmentService.fetchAppointments();
     this.appointmentService.getAllAppointments().subscribe({
       next: (appointments) => {
-        console.log('All Appointments received:', appointments);
+        // console.log('All Appointments received:', appointments);
         this.allAppointments = appointments;
         this.confirmedAppointments = appointments.filter(appointment => appointment.status === 'confirmed');
 
@@ -93,14 +93,14 @@ export class FutureConsultationsComponent {
               return doctor && doctor.userId === parseInt(this.userId) && appointment.date > this.today;
 
             });
-            console.log(this.futureAppointments)
+            // console.log(this.futureAppointments)
             this.filteredAppointments = [...this.futureAppointments];
           },
           error: (error) => {
             console.error('Error fetching doctor details:', error);
           }
         });
-        console.log(this.filteredAppointments)
+        // console.log(this.filteredAppointments)
         this.filteredAppointments.sort((a, b) => {
           const dateA = new Date(a.created_at!);
           const dateB = new Date(b.created_at!);
@@ -111,9 +111,9 @@ export class FutureConsultationsComponent {
         // this.filteredAppointments = [...this.confirmedAppointments];
         // this.filterAppointmentsByDate(new Date());
 
-        console.log('Setting isLoading to false');
+        // console.log('Setting isLoading to false');
         setTimeout(() => {
-          console.log('Setting isLoading to false after delay');
+          // console.log('Setting isLoading to false after delay');
           this.isLoading = false; // Stop loading indicator
         }, 1000); // 2-second delay
       }
@@ -305,7 +305,7 @@ export class FutureConsultationsComponent {
 
   onSearch() {
     this.filteredList = [...this.filteredAppointments];
-    console.log('Search value:', this.filteredList);
+    // console.log('Search value:', this.filteredList);
 
     // Handle filtering by date range if selected
     if (this.selectedDateRange && this.selectedDateRange.length === 2) {
@@ -315,7 +315,7 @@ export class FutureConsultationsComponent {
       if (startDate && endDate) {
         if (startDate.getTime() !== endDate.getTime()) {
           // Filtering appointments by the selected date range
-          console.log('Start date:', startDate, 'End date:', endDate);
+          // console.log('Start date:', startDate, 'End date:', endDate);
           const normalizedEndDate = new Date(endDate);
           normalizedEndDate.setHours(23, 59, 59, 999);  // Set to the last millisecond of the day
 
@@ -323,7 +323,7 @@ export class FutureConsultationsComponent {
             const appointmentDate = new Date(appointment.date);  // Assuming 'date' is in string format like 'YYYY-MM-DD'
             return appointmentDate >= startDate && appointmentDate <= normalizedEndDate;
           });
-          console.log('Filtered list:', this.filteredList);
+          // console.log('Filtered list:', this.filteredList);
           this.filteredAppointments = this.filteredList
         }
         else if (startDate.getTime() === endDate.getTime()) {
@@ -332,10 +332,10 @@ export class FutureConsultationsComponent {
           // console.log(startDate);
           this.filteredList = this.futureAppointments.filter((appointment: Appointment) => {
             const appointmentDate = new Date(appointment.date);
-            console.log(appointmentDate, startDate, appointmentDate.toDateString(), startDate.toDateString());
+            // console.log(appointmentDate, startDate, appointmentDate.toDateString(), startDate.toDateString());
             return appointmentDate.toDateString() === startDate.toDateString();  // Compare the date portion only
           });
-          console.log('Filtered list:', this.filteredList);
+          // console.log('Filtered list:', this.filteredList);
           this.filteredAppointments = this.filteredList;
         }
       }

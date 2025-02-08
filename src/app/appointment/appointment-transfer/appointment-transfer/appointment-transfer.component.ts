@@ -75,7 +75,7 @@ export class AppointmentTransferComponent {
           return dateB.getTime() - dateA.getTime();
         });
         this.filteredServices = [...this.confirmedAppointments];
-        console.log('Services processed successfully.');
+        // console.log('Services processed successfully.');
       },
       error: (err) => {
         // Handle the error if the API call fails
@@ -84,7 +84,7 @@ export class AppointmentTransferComponent {
       complete: () => {
         this.isLoading = false
         // Optional: Actions to perform once the API call completes
-        console.log('Service fetching process completed.');
+        // console.log('Service fetching process completed.');
       }
     });
 
@@ -151,7 +151,7 @@ export class AppointmentTransferComponent {
           new Date(service.date).toDateString() === singleDate.toDateString();
       }
 
-      console.log(matches);
+      // console.log(matches);
       return matches;
 
     });
@@ -366,7 +366,7 @@ export class AppointmentTransferComponent {
         });
         this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
           next: (response) => {
-            console.log('WhatsApp message sent successfully:', response);
+            // console.log('WhatsApp message sent successfully:', response);
             this.messageService.add({ severity: 'success', summary: 'Success', detail: 'WhatsApp message sent successfully!' });
           },
           error: (error) => {
@@ -388,7 +388,7 @@ export class AppointmentTransferComponent {
     const emailStatus = 'cancelled';
     this.appointmentService.sendEmail(patientEmail, emailStatus, appointmentDetails, 'patient').subscribe({
       next: (response) => {
-        console.log('Email sent to patient successfully:', response);
+        // console.log('Email sent to patient successfully:', response);
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to patient successfully!' });
       },
       error: (error) => {
@@ -405,7 +405,7 @@ export class AppointmentTransferComponent {
     this.isLoading = true;
     this.healthCheckupService.lockService(service.id, this.userId).subscribe({
       next: (response) => {
-        console.log('Service locked:', response);
+        // console.log('Service locked:', response);
         this.activeServiceId = service.id!;
         this.messageService.add({
           severity: 'success',
@@ -438,12 +438,12 @@ export class AppointmentTransferComponent {
   }
   // Unlock a service
   unlockService(): void {
-    console.log('Unlocking service:', this.activeServiceId);
+    // console.log('Unlocking service:', this.activeServiceId);
     if (!this.activeServiceId) return;
     this.isLoading = true;
     this.healthCheckupService.unlockService(this.activeServiceId).subscribe({
       next: (response) => {
-        console.log('Service unlocked:', response);
+        // console.log('Service unlocked:', response);
         this.activeServiceId = null;
         this.messageService.add({
           severity: 'success',
@@ -468,7 +468,7 @@ export class AppointmentTransferComponent {
 
   ngOnDestroy(): void {
     // Unlock the service on component destroy if locked
-    console.log('Destroying confirmed component...', this.activeComponent);
+    // console.log('Destroying confirmed component...', this.activeComponent);
     if (this.activeServiceId && this.activeComponent !== 'form') {
       this.unlockService();
     }

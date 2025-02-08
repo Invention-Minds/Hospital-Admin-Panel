@@ -1,7 +1,6 @@
 .container {
   display: flex;
   height: 100vh;
-  background-color: #f0f3ff;
   font-family: "Kanit";
 
 }
@@ -523,7 +522,7 @@ tbody tr:hover {
   display: flex;
     height: 600px;
     width: 800px;
-    padding-left: 90px;
+    /* padding-left: 90px; */
     background-color: #f0f3ff;
     font-family: "Kanit", sans-serif;
     z-index: 10000000000000000000000000;

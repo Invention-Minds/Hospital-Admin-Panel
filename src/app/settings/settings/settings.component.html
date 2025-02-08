@@ -222,8 +222,9 @@
             <label for="name">Name*</label>
           </div>
           <div class="floating-label">
-            <input type="text" id="employeeId" name="employeeId" placeholder=" " [(ngModel)]="employeeId" required />
+            <input type="text" id="employeeId" name="employeeId" placeholder=" "  [(ngModel)]="employeeId" required  (ngModelChange)="validateEmployeeID()"/>
             <label for="employeeId">Employee ID*</label>
+            <div *ngIf="employeeIdErrorMessage" class="error-message">{{ employeeIdErrorMessage }}</div>
           </div>
           <div class="password-container floating-label">
             <input
@@ -263,9 +264,11 @@
             <label for="name">Name*</label>
           </div>
           <div class="floating-label">
-            <input type="text" id="employeeId" name="employeeId" placeholder=" " [(ngModel)]="employeeId" required />
+            <input type="text" id="employeeId" name="employeeId" placeholder=" " [(ngModel)]="employeeId" required (ngModelChange)="validateEmployeeID()" />
             <label for="employeeId">Employee ID*</label>
+            <div *ngIf="employeeIdErrorMessage" class="error-message">{{ employeeIdErrorMessage }}</div>
           </div>
+
           <div class="password-container floating-label">
             <input
             [type]="isCreatePasswordVisible ? 'text' : 'password'"
@@ -285,6 +288,7 @@
               (click)="toggleCreatePasswordVisibility()"
             />
           </div>
+          <div *ngIf="passwordErrorMessage" class="error-message">{{ passwordErrorMessage }}</div>
         </div>
       </div>
     
@@ -304,8 +308,9 @@
             <label for="doctor">Doctor*</label>
           </div>
           <div class="floating-label">
-            <input type="text" id="employeeId" name="employeeId" placeholder=" " [(ngModel)]="employeeId" required />
+            <input type="text" id="employeeId" name="employeeId" placeholder=" " [(ngModel)]="employeeId" required (ngModelChange)="validateEmployeeID()" />
             <label for="employeeId">Employee ID*</label>
+            <div *ngIf="employeeIdErrorMessage" class="error-message">{{ employeeIdErrorMessage }}</div>
           </div>
           <div class="password-container floating-label">
             <input

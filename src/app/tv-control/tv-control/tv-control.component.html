@@ -1,13 +1,14 @@
 <div class="queue-management-container">
     <div *ngFor="let channel of channels; let channelIndex = index" class="channel-container">
       <h3 class="channel-name">Channel No: {{ channelIndex + 1 }}</h3>
-      <div style="    position: relative;" *ngFor="let doctor of channel.doctors; let doctorIndex = index">
+      <div style="    position: relative;" *ngFor="let doctor of channel.doctors.slice(0,3); let doctorIndex = index">
         <div class="doctor-card"  [class.filled]="doctor">
             <div class="doctor-header">
                 <div  class="text" *ngIf="doctor">
                     <div>
                         <p class="doctor-name">Doctor Name: {{ doctor.doctorName }}</p>
                         <p class="department-name">Department: {{ doctor.departmentName }}</p>
+                        <p class="department-name">Room No: {{ doctor.roomNo }}</p>
                     </div>
                 </div >
                 <div *ngIf="!doctor" class="add-btn" (click)="openForm(channelIndex, doctorIndex)">
@@ -25,53 +26,57 @@
     </div>
   
     <!-- Popup Form -->
-     <div  *ngIf="isPopupOpen" class="overlay">
-        <div *ngIf="isPopupOpen" class="popup">
-            <div class="popup-content">
 
-              <div class="popup-header">
+        <div *ngIf="isPopupOpen" class="overlay" >
+            <div class="modal-content">
+
+              <div class="modal-header">
                 <div class="tv-control">TV Control</div>
                 <button class="popup-close" (click)="closeForm()">
                     <img src="/popup-close.svg" alt="Close Popup" />
                   </button>
               </div>
-              
-              <div class="custom-dropdown">
-                <label for="department">Department*</label>
-                <select [(ngModel)]="selectedDepartment" id="department" (ngModelChange)="filterDoctors()">
-                  <option value="" disabled selected>Select Department</option>
-                  <option *ngFor="let dept of departments" [value]="dept.name">{{ dept.name }}</option>
-                </select>
+              <hr />
+             <div class="modal-body">
+              <div class="input-type-container">
+                <div class="custom-dropdown">
+                  <label for="department">Department*</label>
+                  <select [(ngModel)]="selectedDepartment" id="department" (ngModelChange)="filterDoctors()">
+                    <option value="" disabled selected>Select Department</option>
+                    <option *ngFor="let dept of departments" [value]="dept.name">{{ dept.name }}</option>
+                  </select>
+                </div>
+                
+                <div class="custom-dropdown">
+                  <label for="doctor">Doctor*</label>
+                  <select [(ngModel)]="selectedDoctor" id="doctor">
+                    <option value="" disabled selected>Select Doctor</option>
+                    <option *ngFor="let doctor of filteredDoctors" [ngValue]="doctor">{{ doctor.name }}</option>
+                  </select>
+                </div>
+  
+               <div class="input-container">
+                  <input 
+                    type="text" 
+                    id="roomNumber" 
+                    [(ngModel)]="roomNumber" 
+                    class="custom-input" 
+                    placeholder="" 
+                    required
+                  />
+                  <label class="custom-label" for="roomNumber">Room Number</label>
+               </div>
               </div>
-              
-              <div class="custom-dropdown">
-                <label for="doctor">Doctor*</label>
-                <select [(ngModel)]="selectedDoctor" id="doctor">
-                  <option value="" disabled selected>Select Doctor</option>
-                  <option *ngFor="let doctor of filteredDoctors" [ngValue]="doctor">{{ doctor.name }}</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label for="roomNumber">Room Number</label>
-                <input 
-                  type="text" 
-                  id="roomNumber" 
-                  [(ngModel)]="roomNumber" 
-                  class="form-control" 
-                  placeholder="Enter Room Number" 
-                  required
-                />
-              </div>
+             </div>
               
               
-              <div class="popup-actions">
-                <button class="save-button" (click)="saveDoctor()">Save</button>
+              <div class="modal-footer">
+                <button class="save-button" [disabled]="!isButtonClicked" (click)="saveDoctor()">Save</button>
                 <button class="close-button" (click)="closeForm()">Close</button>
               </div>
             </div>
           </div>
-     </div>
+
 
   </div>
   

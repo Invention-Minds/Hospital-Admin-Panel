@@ -28,6 +28,7 @@ export class DoctorDetailsComponent implements OnInit {
   selectedUnavailableDates: string[] = [];
   unavailabilityForm: FormGroup;
   isLoading: boolean = false;
+  role: string = '';
 
   constructor(
     private doctorService: DoctorServiceService,
@@ -48,12 +49,12 @@ export class DoctorDetailsComponent implements OnInit {
     const buttons = document.querySelectorAll('button[id^="doctor-btn-"]');
     buttons.forEach((button) => {
       button.addEventListener('click', (event) => {
-        console.log('Manually attached event triggered:', event);
+        // console.log('Manually attached event triggered:', event);
       });
     });
   }
   click(){
-    console.log('clicked');
+    // console.log('clicked');
     this.isEditMode = true;
   }
  // Method to handle deleting a doctor with a confirmation dialog
@@ -138,7 +139,7 @@ closeDeleteDialog(): void {
       },
       complete: () => {
         this.isLoading = false;
-        console.log('Departments retrieval completed.');
+        // console.log('Departments retrieval completed.');
       }
     });
   }
@@ -182,13 +183,29 @@ closeDeleteDialog(): void {
             doctor.availableFrom = 'N/A';
            // Clear slotDuration if not available
           }
-          const dayOfWeek = today.toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
-          const availableDay = doctor.availability?.find((avail: any) =>
-            avail.day.toLowerCase() === dayOfWeek
-          );
-          doctor.availableFrom = availableDay?.availableFrom ?? 'N/A';
+
+          const allUpdatedAtNull = doctor.availability?.every(avail => !avail.updatedAt);
+
+          // Step 2: Calculate the latest timestamp if any `updatedAt` is not null
+          const latestTimestamp = allUpdatedAtNull
+            ? null // If all are null, treat it as the "latest"
+            : doctor.availability?.reduce((latest, curr) => {
+              return curr.updatedAt && new Date(curr.updatedAt).getTime() > new Date(latest).getTime()
+                ? curr.updatedAt
+                : latest;
+            }, doctor.availability.find(avail => avail.updatedAt)?.updatedAt || '');
+    
+          // Step 3: Filter availability data based on the latest timestamp
+          const latestAvailability = allUpdatedAtNull
+            ? doctor.availability // If all are null, consider the entire availability as "latest"
+            : doctor.availability?.filter(avail => avail.updatedAt === latestTimestamp);
           // console.log('Doctors available days', doctor.availabilityDays);
+          const dayOfWeek = today.toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
+          const availableDay = latestAvailability?.find(avail => avail.day.toLowerCase() === dayOfWeek);
+          // console.log(availableDay,'AvailableDay')
+          doctor.availableFrom = availableDay?.availableFrom ?? 'N/A';
         });
+
 
         this.departments = this.groupDoctorsByDepartment(doctors);
         // console.log('Doctors fetched and grouped successfully', this.departments);
@@ -200,7 +217,7 @@ closeDeleteDialog(): void {
       },
       complete: () => {
         this.isLoading = false;
-        console.log('Doctors retrieval completed.');
+        // console.log('Doctors retrieval completed.');
       }
 
   });
@@ -275,13 +292,13 @@ closeDeleteDialog(): void {
 
   // Initiate editing a doctor profile
   editProfile(doctor: Doctor): void {
-    console.log("true")
+    // console.log("true")
     if (!doctor) {
       console.error("No doctor selected for editing.");
       return;
     }
   
-    console.log("Editing doctor:", doctor);
+    // console.log("Editing doctor:", doctor);
     this.selectedEditDoctor = { ...doctor }; // Create a copy to avoid direct changes
 
     // Initialize availabilityDays if it does not exist

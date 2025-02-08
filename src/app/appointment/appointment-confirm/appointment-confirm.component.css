@@ -198,6 +198,36 @@ tbody tr:hover {
   opacity: 0.5;
   cursor: not-allowed;
 }
+.name-container {
+  display: flex;
+  justify-content: space-between; /* Pushes name to left, icon to right */
+  align-items: center; /* Keeps everything vertically aligned */
+  width: 100%; /* Ensures full width usage */
+  padding: 4px; /* Adjust spacing */
+}
+
+.patient-name {
+  flex-grow: 1; /* Allows the name to take available space */
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis; /* Handles overflow if name is too long */
+}
+
+.edit-icon, .save-icon, .cancel-icon {
+  width: 16px; /* Adjust icon size */
+  height: 16px;
+  cursor: pointer;
+  margin-left: 8px;
+}
+
+.edit-input {
+  width: 100%;
+  padding: 4px;
+  font-size: 14px;
+  font-family: Kanit;
+}
+
+
 .btn-action-reschedule[disabled]{
   opacity: 0.5;
   cursor: not-allowed;

@@ -34,10 +34,10 @@
         <table class="queue-table">
           <thead>
             <tr>
-              <th>No.</th>
+              <th style="text-align: center;">No.</th>
               <th>Name</th>
-              <th>Actual Time</th>
-              <th>Predict Time</th>
+              <th style="text-align: center;">Actual Time</th>
+              <th style="text-align: center;">Predict Time</th>
             </tr>
           </thead>
           <tbody>
@@ -49,12 +49,12 @@
             [class.removed]="patient.endConsultation"
             @fadeInOut
           >
-              <td>{{i+ 1}}</td>
+              <td style="text-align: center;">{{i+ 1}}</td>
               <td>{{ patient.patientName }}</td>
-              <td>
+              <td style="text-align: center;">
                 <span class="status">{{ patient.actualTime }}</span>
               </td>
-              <td>
+              <td style="text-align: center;">
                 <span class="status" [ngClass]="patient.status">{{ patient.time }}</span>
               </td>
             </tr>

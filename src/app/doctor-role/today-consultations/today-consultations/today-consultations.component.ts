@@ -7,6 +7,7 @@ import { MessageService } from 'primeng/api';
 import { ChangeDetectorRef } from '@angular/core';
 import { Doctor } from '../../../models/doctor.model';
 import { ChannelService } from '../../../services/channel/channel.service';
+import { environment } from '../../../../environment/environment';
 import { firstValueFrom } from 'rxjs';
 import * as XLSX from 'xlsx';
 import { start } from 'node:repl';
@@ -26,21 +27,21 @@ interface Appointment {
   email: string;
   smsSent?: boolean;
   emailSent?: boolean;
-  messageSent?:boolean;
+  messageSent?: boolean;
   requestVia?: string; // Optional property
   created_at?: string;
-  checkedIn?:boolean;
-  checkedOut?:boolean;
+  checkedIn?: boolean;
+  checkedOut?: boolean;
   user?: any;
   selectedSlot?: boolean;
   endConsultation?: boolean;
   checkedOutTime?: Date;
   checkedInTime?: Date;
   waitingTime?: string;
-  postPond?:boolean;
+  postPond?: boolean;
   endConsultationTime?: Date;
   isTransfer?: boolean;
-  isCloseOPD?:boolean;
+  isCloseOPD?: boolean;
   isCloseOPDTime?: Date;
 }
 
@@ -53,7 +54,7 @@ export class TodayConsultationsComponent {
   confirmedAppointments: Appointment[] = [];
   @Output() consultationStarted = new EventEmitter<{ doctorId: number, appointmentId: number }>();
 
-  constructor(private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService,private messageService: MessageService, private cdRef: ChangeDetectorRef,private eventService: EventService, private estimationService: EstimationService, private channelService: ChannelService) { }
+  constructor(private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private messageService: MessageService, private cdRef: ChangeDetectorRef, private eventService: EventService, private estimationService: EstimationService, private channelService: ChannelService) { }
   appointments: Appointment[] = [
     // { id: '0001', patientName: 'Anitha Sundar', phoneNumber: '+91 7708590100', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Booked', smsSent: true },
   ];
@@ -64,18 +65,18 @@ export class TodayConsultationsComponent {
   sortDirection: string = 'asc';  // Default sorting direction
   @Input() selectedDateRange: Date[] | null = null;
   @Input() selectedValue: string = '';
-  @Input() selectedSearchOption: string = ''; 
+  @Input() selectedSearchOption: string = '';
   completed: boolean = false;
   showAppointmentForm = false;  // Controls the visibility of the modal
-  selectedAppointment: Appointment | null = null; 
+  selectedAppointment: Appointment | null = null;
   activeAppointmentId: number | null | undefined = null;
   userId: any = 0;
   isLockedDialogVisible: boolean = false; // To control the visibility of the lock dialog
   cancelledAppointments: Appointment[] = [];
   filteredList: any;
-  lastWeekAppointments: any[] = [];  
+  lastWeekAppointments: any[] = [];
   isLoading: boolean = false;
-  allAppointments: Appointment[]=[] 
+  allAppointments: Appointment[] = []
   today: string = '';
   showEstimationPopup = false; // Control the visibility of the popup
   currentDoctorName: string = ''; // Store the current doctor's name
@@ -83,14 +84,14 @@ export class TodayConsultationsComponent {
   showCloseOpdPopup = false;
   currentDoctorId: number = 0;
   currentDepartmentId: number = 0;
-  doctor: Doctor[] =[]
-  showLeaveRequestPopup: boolean = true;
+  doctor: any = []
+  showLeaveRequestPopup: boolean = false;
   startDate: string | null = null;
   endDate: string | null = null;
   estimationPreferedDate: string = ''
   estimationSuggestions: string[] = []; // Full list of suggestions
   filteredEstimations: any[] = []; // Filtered suggestions for dropdown
-  showEstimationSuggestions: boolean = false; 
+  showEstimationSuggestions: boolean = false;
   estimationType: string = 'MM'
   showCancelPopup: boolean = false;
   remarks: string = '';
@@ -98,11 +99,14 @@ export class TodayConsultationsComponent {
   showTransferAppointment: boolean = false;
   estimation: any[] = [];
   countOfPending: number = 0;
-  surgeryTime: string = ''
+  surgeryTime: string = '';
+  doctorId: number = 0;
   searchOptions = [
     { label: 'Patient Name', value: 'patientName' },
     { label: 'Phone Number', value: 'phoneNumber' }
   ];
+
+  private eventSource: EventSource | null = null;
   // Method to handle sorting by a specific column
   ngOnInit() {
     const today = new Date();
@@ -110,83 +114,83 @@ export class TodayConsultationsComponent {
     const month = (today.getMonth() + 1).toString().padStart(2, '0');
     const day = today.getDate().toString().padStart(2, '0');
     this.today = `${year}-${month}-${day}`;
-    console.log('Setting isLoading to true');
+    // console.log('Setting isLoading to true');
     this.isLoading = true; // Start loading indicator
-    this.userId=localStorage.getItem('userid')
-  
+    this.userId = localStorage.getItem('userid')
+    this.appointmentService.leaveRequest$.subscribe(() => {
+      this.showLeaveRequestPopup = true; // Open the leave request popup
+    });
+
+    this.doctorService.getDoctorByUserId(this.userId).subscribe(
+      (response) =>{
+        this.doctor = response;
+        this.doctorId = response.id
+        this.fetchAppointments(this.doctorId);
+        console.log(this.doctor)
+      }
+    )
+
     // Fetch appointments
     // this.appointmentService.fetchAppointments();
-  this.fetchAppointments();
-  // setInterval(() => {
-  //   this.fetchAppointments();
-  //   console.log('interval')
-  // }, 60000);
-  
+    
+    // setInterval(() => {
+    //   this.fetchAppointments();
+    //   console.log('interval')
+    // }, 60000);
+
     // Subscribe to confirmed appointments
-   
+    this.eventSource = new EventSource(`${environment.apiUrl}/appointments/updates`);
+    this.eventSource.addEventListener('loadDoctor', (event: any) => {
+    const data = JSON.parse(event.data);
+    console.log('Reloading appointments for doctor ID:', data);
+
+    // Refresh only the affected doctor's appointments
+    this.fetchAppointments(data);
+  });
+
   }
   parseTimeToMinutes(time: string): number {
     const [hours, minutesPart] = time.split(':');
     const minutes = parseInt(minutesPart.slice(0, 2), 10); // Extract the numeric minutes
     const isPM = time.toLowerCase().includes('pm');
-  
+
     let hoursInMinutes = parseInt(hours, 10) * 60;
     if (isPM && parseInt(hours, 10) !== 12) {
       hoursInMinutes += 12 * 60; // Add 12 hours for PM times
     } else if (!isPM && parseInt(hours, 10) === 12) {
       hoursInMinutes -= 12 * 60; // Subtract 12 hours for 12 AM
     }
-  
+
     return hoursInMinutes + minutes;
   }
-  
-  fetchAppointments(){
-    this.appointmentService.getAllAppointments().subscribe({
-      next: (appointments) => {
-        // console.log('All Appointments received:', appointments);
-        this.allAppointments = appointments;
-       
 
-          this.doctorService.getAllDoctors().subscribe({
-            next: (doctors) => {
-              this.confirmedAppointments = appointments.filter(appointment => appointment.status === 'confirmed' && (appointment as any).checkedIn === true);
-              this.filteredAppointments = this.confirmedAppointments.filter(appointment => {
-                const doctor = doctors.find(doc => doc.id === appointment.doctorId);
-                this.doctor = doctor ? [doctor] : [];
-                // console.log(doctor)
-                // console.log('Doctor:', doctor?.userId,this.userId);
-                return doctor && doctor.userId === parseInt(this.userId) && appointment.date === this.today;
-              });
-              this.completedAppointments = this.filteredAppointments.filter(appointment => !appointment.checkedOut )
-              console.log(this.completedAppointments, 'complete')
-              this.filteredAppointments.sort((a, b) => {
-                const timeA = this.parseTimeToMinutes(a.time);
-                const timeB = this.parseTimeToMinutes(b.time);
-                return timeA - timeB; // Ascending order
-              });
-              // console.log(this.filteredAppointments)
-              this.isLoading = false; // Stop loading indicator
-            },
-            error: (error) => {
-              console.error('Error fetching doctor details:', error);
-              this.isLoading = false; // Stop loading indicator
-            }
-          });
-          
-          console.log(this.filteredAppointments);
-  
-        // this.filteredAppointments = [...this.confirmedAppointments];
+  fetchAppointments(doctorId?: number) {
+    this.appointmentService.getAppointmentsByDoctor(doctorId!).subscribe(
+      (appointments) => {
+        console.log(appointments)
+        this.confirmedAppointments = appointments.filter(appointment => appointment.status === 'confirmed' && (appointment as any).checkedIn === true && appointment.date === this.today);
+        this.filteredAppointments = this.confirmedAppointments;
+        // console.log(this.doctor)
+        this.completedAppointments = this.filteredAppointments.filter(appointment => !appointment.checkedOut && !appointment.isCloseOPD)
+        // console.log(this.completedAppointments, 'complete')
+        this.filteredAppointments.sort((a, b) => {
+          const timeA = this.parseTimeToMinutes(a.time);
+          const timeB = this.parseTimeToMinutes(b.time);
+          return timeA - timeB; // Ascending order
+        });
         this.filterAppointmentsByDate(new Date());
-  
-        console.log('Setting isLoading to false');
-        // setTimeout(() => {
-        //   console.log('Setting isLoading to false after delay');
-        //   this.isLoading = false; // Stop loading indicator
-        // }, 1000); // 2-second delay
+        this.isLoading = false;
+        // console.log(`Loaded ${doctor.patients.length} patients for doctor ${doctor.name}`);
+      },
+      (error) => {
+        console.error(`Error fetching appointments for doctor ${doctorId!}:`, error);
+        this.isLoading = false
+         // Handle error gracefully by assigning an empty array
       }
-    })
+      
+    );
   }
-  
+
   sortBy(column: keyof Appointment) {
     if (this.sortColumn === column) {
       this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc'; // Toggle direction
@@ -259,17 +263,17 @@ export class TodayConsultationsComponent {
       this.currentPage = this.totalPages;
     }
   }
-  filteredAppointments: any[] =[];
+  filteredAppointments: any[] = [];
   // filteredAppointments: Appointment[] = this.confirmedAppointments.filter(appointment => !appointment!.completed);
 
   ngOnChanges(changes: SimpleChanges) {
     // Whenever the selected date changes, this will be triggered
     this.filterAppointment();
-    if(this.selectedDateRange && this.selectedDateRange.length === 0){
+    if (this.selectedDateRange && this.selectedDateRange.length === 0) {
       this.filterAppointmentsByDate(new Date());
     }
-    
-    
+
+
   }
   // loadSugesstionFunction(){
   //   this.doctor.filter((doc) => {
@@ -284,15 +288,15 @@ export class TodayConsultationsComponent {
     this.estimationService.getEstimationsByDepartment(departmentId, this.estimationType).subscribe(
       (response) => {
         this.estimationSuggestions = response; // Assign the response directly
-        console.log('Fetched suggestions:', this.estimationSuggestions);
+        // console.log('Fetched suggestions:', this.estimationSuggestions);
       },
       (error) => {
         console.error('Error fetching estimation suggestions:', error);
       }
     );
   }
-   // Method to filter appointments by a specific date
-   filterAppointmentsByDate(selectedDate: Date) {
+  // Method to filter appointments by a specific date
+  filterAppointmentsByDate(selectedDate: Date) {
     const formattedSelectedDate = this.formatDate(selectedDate);
 
     this.filteredAppointments = this.confirmedAppointments.filter((appointment) => {
@@ -304,7 +308,7 @@ export class TodayConsultationsComponent {
     }
     this.currentPage = 1; // Reset to the first page when the filter changes
   }
-  
+
   // Method to handle date change (e.g., when the user selects a date from a date picker)
   onDateChange(newDate: Date) {
     this.filterAppointmentsByDate(newDate);
@@ -314,49 +318,49 @@ export class TodayConsultationsComponent {
   filterAppointment() {
     // If there's no date range or value to filter, return the unfiltered appointments
     this.filteredList = [...this.filteredAppointments];
-  
+
     // Handle filtering by date range if selected
     if (this.selectedDateRange && this.selectedDateRange.length === 2) {
       const startDate = this.selectedDateRange[0];
       const endDate = this.selectedDateRange[1] ? this.selectedDateRange[1] : startDate; // Use endDate if provided, otherwise use startDate
-  
-      if (startDate && endDate) {
-        if(startDate.getTime() !== endDate.getTime()) {
-        // Filtering appointments by the selected date range
-        // console.log('Start date:', startDate, 'End date:', endDate);
-        const normalizedEndDate = new Date(endDate);
-    normalizedEndDate.setHours(23, 59, 59, 999);  // Set to the last millisecond of the day
 
-        this.filteredList = this.filteredList.filter((appointment: Appointment) => {
-          const appointmentDate = new Date(appointment.date);  // Assuming 'date' is in string format like 'YYYY-MM-DD'
-          return appointmentDate >= startDate && appointmentDate <= normalizedEndDate;
-        });
-        // console.log('Filtered list:', this.filteredList);
+      if (startDate && endDate) {
+        if (startDate.getTime() !== endDate.getTime()) {
+          // Filtering appointments by the selected date range
+          // console.log('Start date:', startDate, 'End date:', endDate);
+          const normalizedEndDate = new Date(endDate);
+          normalizedEndDate.setHours(23, 59, 59, 999);  // Set to the last millisecond of the day
+
+          this.filteredList = this.filteredList.filter((appointment: Appointment) => {
+            const appointmentDate = new Date(appointment.date);  // Assuming 'date' is in string format like 'YYYY-MM-DD'
+            return appointmentDate >= startDate && appointmentDate <= normalizedEndDate;
+          });
+          // console.log('Filtered list:', this.filteredList);
+        }
+        else if (startDate.getTime() === endDate.getTime()) {
+          // console.log('Single date selected:');
+          const startDate = this.selectedDateRange[0];
+
+          this.filteredList = this.filteredList.filter((appointment: Appointment) => {
+            const appointmentDate = new Date(appointment.date);
+            return appointmentDate.toDateString() === startDate.toDateString();  // Compare the date portion only
+          });
+          // console.log('Filtered list:', this.filteredList);
+        }
       }
-      else if (startDate.getTime() === endDate.getTime()) {
-        // console.log('Single date selected:');
-        const startDate = this.selectedDateRange[0];
-    
-        this.filteredList = this.filteredList.filter((appointment: Appointment) => {
-          const appointmentDate = new Date(appointment.date);
-          return appointmentDate.toDateString() === startDate.toDateString();  // Compare the date portion only
-        });
-        // console.log('Filtered list:', this.filteredList);
+      else {
+        this.filteredAppointments = []
       }
-    }
-    else{
-      this.filteredAppointments = []
-    }
     }
 
     else {
-          // If no valid range is selected, show all appointments
-          this.filteredAppointments = [...this.confirmedAppointments];
-        }
-  
+      // If no valid range is selected, show all appointments
+      this.filteredAppointments = [...this.confirmedAppointments];
+    }
+
     // Handle filtering by a single date if the start and end dates are the same
-   
-  
+
+
     // Handle filtering by the search value (patient name, phone number, or doctor name)
     if (this.selectedValue.trim() !== '') {
       // console.log('Selected search option:', this.selectedSearchOption);
@@ -382,17 +386,17 @@ export class TodayConsultationsComponent {
         return match;
       });
     }
-    else{
+    else {
       this.filteredAppointments = [...this.confirmedAppointments];
     }
-  
+
     // Update the filtered appointments with the final result
     this.filteredAppointments = this.filteredList;
     this.currentPage = 1; // Reset to first page whenever new filters are applied
   }
-  
 
-    // Method to download the filtered data as Excel
+
+  // Method to download the filtered data as Excel
 
 
   // Utility method to format the date in 'dd/mm/yy' format
@@ -418,10 +422,12 @@ export class TodayConsultationsComponent {
     this.currentDoctorName = appointment.doctorName || 'Unknown Doctor';
     this.showEstimationPopup = true;
     this.currentDoctorId = appointment.doctorId
-    this.doctor.filter((doc) => {
-      this.currentDepartmentId = doc.departmentId!;
-      this.currentDoctorName = doc.name!;
-    });
+    // this.doctor.filter((doc:any) => {
+    //   this.currentDepartmentId = doc.departmentId!;
+    //   this.currentDoctorName = doc.name!;
+    // });
+    this.currentDepartmentId = this.doctor.departmentId;
+    this.currentDoctorName = this.doctor.name
     if (this.currentDepartmentId) {
       this.loadEstimationSuggestions(this.currentDepartmentId);
     }
@@ -432,6 +438,8 @@ export class TodayConsultationsComponent {
     this.selectedAppointment = null;
     this.estimationText = '';
     this.estimationPreferedDate = '';
+    this.remarks = '';
+    this.surgeryTime = '';
   }
 
 
@@ -450,7 +458,7 @@ export class TodayConsultationsComponent {
   onEstimationSelect(estimation: string): void {
     this.estimationText = estimation; // Set the selected suggestion in the input field
     this.showEstimationSuggestions = false; // Hide the suggestions dropdown
-    console.log(this.estimationText)
+    // console.log(this.estimationText)
   }
 
   // // Called when a suggestion is clicked
@@ -464,7 +472,7 @@ export class TodayConsultationsComponent {
   saveEstimation(): void {
     if (!this.estimationText) {
       // alert('Please enter an estimation.');
-      this.messageService.add({severity: 'warn', summary: 'Warning', detail: 'Please enter an estimation.'})
+      this.messageService.add({ severity: 'warn', summary: 'Warning', detail: 'Please enter an estimation.' })
       return;
     }
 
@@ -488,12 +496,12 @@ export class TodayConsultationsComponent {
         estimationType: this.estimationType,
         estimationCreatedTime: new Date(),
         remarks: this.remarks,
-        surgeryTime:this.surgeryTime
+        surgeryTime: this.surgeryTime
       };
-      console.log(estimationDetails)
+      // console.log(estimationDetails)
       this.estimationService.createEstimationDetails(estimationDetails).subscribe({
         next: (response) => {
-          console.log('Estimation Details saved:', response);
+          // console.log('Estimation Details saved:', response);
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Estimation Details Saved Successfully' });
           this.closeEstimationPopup();
         },
@@ -516,29 +524,31 @@ export class TodayConsultationsComponent {
       estimationType: this.estimationType,
       estimationCreatedTime: new Date(),
       remarks: this.remarks,
-      surgeryTime:this.surgeryTime
+      surgeryTime: this.surgeryTime
     };
 
-    this.doctor.filter((doc) => {
-      this.currentDepartmentId = doc.departmentId!;
-      this.currentDoctorName = doc.name!;
-    });
-    console.log('Saving Estimation:', {
-      doctorId: this.currentDoctorId,
-      departmentId: this.currentDepartmentId,
-      estimation: this.estimationText,
-      estimationType: this.estimationType
-    });
-    console.log(estimationDetails)
-    this.estimationService.createEstimation(  this.currentDoctorId,this.currentDepartmentId,this.estimationText, this.estimationType).subscribe({
+    // this.doctor.filter((doc:any) => {
+    //   this.currentDepartmentId = doc.departmentId!;
+    //   this.currentDoctorName = doc.name!;
+    // });
+    this.currentDepartmentId = this.doctor.departmentId;
+    this.currentDoctorName = this.doctor.name
+    // console.log('Saving Estimation:', {
+    //   doctorId: this.currentDoctorId,
+    //   departmentId: this.currentDepartmentId,
+    //   estimation: this.estimationText,
+    //   estimationType: this.estimationType
+    // });
+    // console.log(estimationDetails)
+    this.estimationService.createEstimation(this.currentDoctorId, this.currentDepartmentId, this.estimationText, this.estimationType).subscribe({
       next: (response) => {
-        console.log('Estimation saved:', response);
+        // console.log('Estimation saved:', response);
         // alert('Estimation saved successfully.');
-        this.messageService.add({severity: 'success', summary: 'Success', detail: 'Estimated Saved Successfully'})
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Estimated Saved Successfully' })
         // this.closeEstimationPopup();
         this.estimationService.createEstimationDetails(estimationDetails).subscribe({
           next: (response) => {
-            console.log('Estimation Details saved:', response);
+            // console.log('Estimation Details saved:', response);
             this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Estimation Details Saved Successfully' });
             this.closeEstimationPopup();
           },
@@ -551,7 +561,7 @@ export class TodayConsultationsComponent {
       error: (error) => {
         console.error('Error saving estimation:', error);
         // alert('Error saving estimation. Please try again.');
-        this.messageService.add({severity: 'error', summary: 'Error', detail: 'Error saving estimation. Please try again.'})
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error saving estimation. Please try again.' })
       }
     });
 
@@ -563,7 +573,7 @@ export class TodayConsultationsComponent {
         appointment.checkedIn = false; // Add a `selected` property for checkboxes
       });
       this.showCloseOpdPopup = true;
-      console.log('Appointments to close:', this.filteredAppointments);
+      // console.log('Appointments to close:', this.filteredAppointments);
     } else {
       this.messageService.add({ severity: 'info', summary: 'Info', detail: 'No Appointments are Scheduled' });
     }
@@ -578,7 +588,7 @@ export class TodayConsultationsComponent {
     const ongoingConsultation = this.filteredAppointments.find(
       (appt) => appt.checkedOut === true && appt.endConsultationTime === null
     );
-    console.log(ongoingConsultation)
+    // console.log(ongoingConsultation)
     // If there's an ongoing consultation (previous patient has not finished)
     if (ongoingConsultation) {
       // Update the ongoing consultation (endConsultationTime) for the first patient
@@ -586,75 +596,83 @@ export class TodayConsultationsComponent {
       ongoingConsultation.endConsultation = true // Set endConsultationTime to the current time // Set checkedOut to false for the previous patient
       // Update the appointment in the backend for the previous patient
       this.appointmentService.updateAppointment(ongoingConsultation);
-  
-      console.log(`Updated endConsultationTime for patient ID: ${ongoingConsultation.id}`);
+
+      // console.log(`Updated endConsultationTime for patient ID: ${ongoingConsultation.id}`);
     }
     appointment.checkedOut = true;
     appointment.checkedOutTime = new Date()
-    if(appointment.checkedInTime){
+    if (appointment.checkedInTime) {
       const checkedIn = new Date(appointment.checkedInTime).getTime(); // Convert to timestamp
       const checkedOut = new Date(appointment.checkedOutTime).getTime(); // Convert to timestamp
-    
+
       const differenceInMinutes = Math.floor((checkedOut - checkedIn) / 60000); // Difference in minutes
       appointment.waitingTime = differenceInMinutes.toString();
     }
-    if(appointment.postPond === true){
+    if (appointment.postPond === true) {
       appointment.postPond = false
     }
-   
-  
-    console.log('Waiting time calculated:', appointment.waitingTime);
+
+
+    // console.log('Waiting time calculated:', appointment.waitingTime);
 
     // appointment.waitingTime = differenceInMinutes.toString(); // Assuming waitingTime is a string field
-    
-    this.doctor.filter((doc) => {
-      this.currentDepartmentId = doc.departmentId!;
-      this.currentDoctorName = doc.name!;
-      this.currentDoctorId = doc.id!;
-    });
+
+    // this.doctor.filter((doc:any) => {
+    //   this.currentDepartmentId = doc.departmentId!;
+    //   this.currentDoctorName = doc.name!;
+    //   this.currentDoctorId = doc.id!;
+    // });
+    this.currentDepartmentId = this.doctor.departmentId;
+    this.currentDoctorName = this.doctor.name
     this.appointmentService.updateAppointment(appointment)
     this.eventService.emitConsultationStarted({
       doctorId: this.currentDoctorId,
       appointmentId: appointment.id!, // Add channelId to appointments in the backend
       channelId: 2,
     });
-    console.log(this.currentDoctorId, appointment.id!)
+    // console.log(this.currentDoctorId, appointment.id!)
   }
-  finishConsultation(appointment: Appointment): void{
+  finishConsultation(appointment: Appointment): void {
     appointment.endConsultation = true;
     appointment.endConsultationTime = new Date()
     this.appointmentService.updateAppointment(appointment)
   }
-  transfer(appointment:Appointment): void{
-    console.log(appointment)
+  transfer(appointment: Appointment): void {
+    // console.log(appointment)
     appointment.isTransfer = true;
     this.appointmentService.updateAppointment(appointment)
-    this.closeCloseOpdPopup()
+    this.closeTransferPopup()
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Success',
+      detail: 'Transferred  successfully.',
+    });
   }
-  openTransferPopup(estimation:any){
+  openTransferPopup(estimation: any) {
     this.selectedAppointment = estimation
     this.showTransferAppointment = true;
   }
-  closeTransferPopup(){
+  closeTransferPopup() {
     this.showTransferAppointment = false;
   }
-  endConsultation(){
-   const postPondAppointment = this.filteredAppointments.filter(appointment =>{
+  endConsultation() {
+    const postPondAppointment = this.filteredAppointments.filter(appointment => {
       appointment.postPond === true
     })
     this.countOfPending = postPondAppointment.length;
-    if(this.countOfPending >= 1){
+    if (this.countOfPending >= 1) {
       this.showCancelPopup = true;
-      
     }
-    else{
-      this.doctor.filter((doc) => {
-        this.currentDepartmentId = doc.departmentId!;
-        this.currentDoctorName = doc.name!;
-        this.currentDoctorId = doc.id!;
-      });
+    else {
+      // this.doctor.filter((doc:any) => {
+      //   this.currentDepartmentId = doc.departmentId!;
+      //   this.currentDoctorName = doc.name!;
+      //   this.currentDoctorId = doc.id!;
+      // });
+      this.currentDepartmentId = this.doctor.departmentId;
+      this.currentDoctorName = this.doctor.name
       this.channelService.getChannelsByDoctor(this.currentDoctorId).subscribe({
-        next:(response) =>{
+        next: (response) => {
           const channelId = response.channelId;
           const doctorData = {
             channelId: channelId,
@@ -662,7 +680,7 @@ export class TodayConsultationsComponent {
           }
           this.channelService.removeDoctorFromChannel(doctorData).subscribe({
             next: (response) => {
-              console.log('Doctor Removed From the Channel')
+              // console.log('Doctor Removed From the Channel')
             },
             error: (error) => {
               console.error('Error deleting doctor from channel:', error);
@@ -671,18 +689,18 @@ export class TodayConsultationsComponent {
         },
         error: (error) => {
           console.error('Error submitting getting channel:', error);
-          
+
         }
       })
     }
   }
-  cancel(){
-
+  cancel() {
+    this.showCancelPopup = false
   }
-  closeCancelPopup(){
+  closeCancelPopup() {
     this.showCancelPopup = false;
   }
-  postPondAppointment(appointment: Appointment):void{
+  postPondAppointment(appointment: Appointment): void {
     appointment.checkedOut = false;
     appointment.checkedOutTime = undefined;
     appointment.postPond = true;
@@ -691,7 +709,7 @@ export class TodayConsultationsComponent {
 
   // Confirm and perform the Close OPD action
   confirmCloseOpd(): void {
-    console.log('Closing OPD with the following appointments:', this.filteredAppointments);
+    // console.log('Closing OPD with the following appointments:', this.filteredAppointments);
     // Add your logic to close OPD here
     this.closeCloseOpdPopup();
   }
@@ -707,7 +725,7 @@ export class TodayConsultationsComponent {
   //     acc[index.toString()] = appointment;  // Use the index as the key ('0', '1', etc.)
   //     return acc;
   //   }, {} as { [key: string]: { id: number, isCloseOPD: boolean, isCloseOPDTime: Date | null } });
-  
+
   //   console.log('Selected Appointments Object:', selectedAppointmentsObject);
   //   console.log(selectedAppointments)
   //   this.appointmentService.bulkUpdateAppointments(selectedAppointmentsObject).subscribe({
@@ -735,7 +753,7 @@ export class TodayConsultationsComponent {
   // }
 
   // console.log('Updating appointments:', selectedAppointments);
-   
+
   //   // Prepare the payload for the API call
 
   //   this.closeCloseOpdPopup();
@@ -748,19 +766,19 @@ export class TodayConsultationsComponent {
         isCloseOPD: true,
         isCloseOPDTime: new Date(), // Set the current date and time
       }));
-  
+
     if (selectedAppointments.length === 0) {
       this.messageService.add({ severity: 'warn', summary: 'Warning', detail: 'Please select at least one slot.' });
       return;
     }
-  
+
     // Now we have an array, not an object with numeric keys
-    console.log('Selected Appointments:', selectedAppointments);
-  
+    // console.log('Selected Appointments:', selectedAppointments);
+
     // Now send the array as the payload to the backend
     this.appointmentService.bulkUpdateAppointments(selectedAppointments).subscribe({
       next: (response) => {
-        console.log('Appointments updated successfully:', response);
+        // console.log('Appointments updated successfully:', response);
         this.messageService.add({
           severity: 'success',
           summary: 'Success',
@@ -778,7 +796,7 @@ export class TodayConsultationsComponent {
       }
     });
   }
-  
+
   selectAllSlots(): void {
     this.filteredAppointments.forEach((slot) => {
       slot.selectedSlot = true;
@@ -806,13 +824,15 @@ export class TodayConsultationsComponent {
   submitLeaveRequest(): void {
     if (!this.startDate || !this.endDate) {
       // alert('Please select both start and end dates.');
-      this.messageService.add({severity: 'warn', summary: 'Warning', detail: 'Please select both start and end dates.'})
+      this.messageService.add({ severity: 'warn', summary: 'Warning', detail: 'Please select both start and end dates.' })
       return;
     }
-    this.doctor.filter((doc) => {
-      this.currentDepartmentId = doc.departmentId!;
-      this.currentDoctorName = doc.name!;
-    });
+    // this.doctor.filter((doc:any) => {
+    //   this.currentDepartmentId = doc.departmentId!;
+    //   this.currentDoctorName = doc.name!;
+    // });
+    this.currentDepartmentId = this.doctor.departmentId;
+    this.currentDoctorName = this.doctor.name
     const isSameDate = this.startDate === this.endDate;
 
     const leaveRequest = {
@@ -821,11 +841,11 @@ export class TodayConsultationsComponent {
       endDate: this.endDate,
     };
     const adminPhoneNumber = '919342287945'
-    this.appointmentService.sendAdminMessage(this.currentDoctorName, this.startDate, this.endDate, adminPhoneNumber ).subscribe({
+    this.appointmentService.sendAdminMessage(this.currentDoctorName, this.startDate, this.endDate, adminPhoneNumber).subscribe({
       next: (response) => {
-        console.log('Leave request submitted:', response);
+        // console.log('Leave request submitted:', response);
         // alert('Leave request submitted successfully.');
-        this.messageService.add({severity: 'success', summary: 'Success', detail: 'Leave Request Submitted Successfully'})
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Leave Request Submitted Successfully' })
         this.closeLeaveRequestPopup();
       },
       error: (error) => {
@@ -833,7 +853,7 @@ export class TodayConsultationsComponent {
         alert('Error submitting leave request. Please try again.');
       }
     });
-    console.log('Submitting leave request:', leaveRequest);
+    // console.log('Submitting leave request:', leaveRequest);
 
   }
 

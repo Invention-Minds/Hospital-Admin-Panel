@@ -407,7 +407,7 @@ export class AppointmentRequestComponent implements OnInit {
           });
           this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
             next: (response) => {
-              console.log('WhatsApp message sent successfully:', response);
+              // console.log('WhatsApp message sent successfully:', response);
               this.messageService.add({ severity: 'success', summary: 'Success', detail: 'WhatsApp message sent successfully!' });
             },
             error: (error) => {
@@ -531,7 +531,7 @@ export class AppointmentRequestComponent implements OnInit {
         });
         this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
           next: (response) => {
-            console.log('WhatsApp message sent successfully:', response);
+            // console.log('WhatsApp message sent successfully:', response);
             this.messageService.add({ severity: 'success', summary: 'Success', detail: 'WhatsApp message sent successfully!' });
           },
           error: (error) => {
@@ -553,7 +553,7 @@ export class AppointmentRequestComponent implements OnInit {
     const emailStatus = 'cancelled';
     this.appointmentService.sendEmail(patientEmail, emailStatus, appointmentDetails, 'patient').subscribe({
       next: (response) => {
-        console.log('Email sent to patient successfully:', response);
+        // console.log('Email sent to patient successfully:', response);
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to patient successfully!' });
       },
       error: (error) => {

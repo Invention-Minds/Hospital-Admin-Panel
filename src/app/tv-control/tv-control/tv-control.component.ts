@@ -1,6 +1,11 @@
 import { Component } from '@angular/core';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { ChannelService } from '../../services/channel/channel.service';
+import { MessageService } from 'primeng/api';
+import { EventService } from '../../services/event.service';
+import { Subscription, interval } from 'rxjs';
+import { environment } from '../../../environment/environment';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-tv-control',
@@ -10,12 +15,15 @@ import { ChannelService } from '../../services/channel/channel.service';
 export class TvControlComponent {
   constructor(
     private doctorService: DoctorServiceService,
-    private channelService: ChannelService
+    private channelService: ChannelService,
+    private messageService: MessageService,
+    private router: Router
   ) {
     this.loadDepartments();
     this.loadDoctors();
     this.loadChannels();
   }
+
 
   channels :any = []; // Will be fetched from the backend
   channelLength :number = 0;
@@ -27,7 +35,27 @@ export class TvControlComponent {
   selectedChannelIndex: number = 0;
   selectedDoctorIndex: number = 0;
   isPopupOpen = false;
-  roomNumber : string = ''
+  roomNumber : string = '';
+  isButtonClicked: boolean = true;
+  private eventSource: EventSource | null = null;
+
+  ngOnInit(){
+    this.eventSource = new EventSource(`${environment.apiUrl}/appointments/updates`);
+
+    this.eventSource.addEventListener('channelRemoval', (event: MessageEvent) => {
+      const removedChannel = JSON.parse(event.data);
+      console.log('Channel Removed:', removedChannel);
+  
+      const currentRoute = this.router.url;
+      console.log(currentRoute)
+
+        this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+          this.router.navigate([currentRoute]); // Refresh the current route
+          // this.loadChannels()
+        });
+      
+    });
+  }
 
   openForm(channelIndex: number, doctorIndex: number) {
     this.selectedChannelIndex = channelIndex;
@@ -69,6 +97,7 @@ export class TvControlComponent {
   }
 
   loadChannels(): void {
+    console.log('load channels')
     this.channelService.getChannels().subscribe(
       (channels) => {
         console.log('Fetched Channels:', channels);
@@ -77,12 +106,14 @@ export class TvControlComponent {
         this.channels = channels.map((channel: any) => {
           // Extract doctor assignments for the current channel
           const doctorAssignments = channel.doctorAssignments || [];
+          console.log(doctorAssignments)
   
           // Map doctor assignments to the `doctors` array
           const doctors = doctorAssignments.map((assignment: any) => ({
             doctorId: assignment.doctor?.id || null,
             doctorName: assignment.doctor?.name || null,
             departmentName: assignment.departmentName || null,
+            roomNo: assignment.doctor?.roomNo || null
           }));
   
           // Fill the remaining slots (if any) with `null` to ensure max 4 slots
@@ -167,7 +198,8 @@ export class TvControlComponent {
   
 
   saveDoctor() {
-    if (this.selectedDoctor && this.selectedDepartment) {
+    this.isButtonClicked = false;
+    if (this.selectedDoctor && this.selectedDepartment && this.roomNumber) {
       console.log('Selected Doctor:', this.selectedDoctor);
       console.log('Selected Channel Index:', this.selectedChannelIndex, 'Selected Doctor Index:', this.selectedDoctorIndex);
   
@@ -213,7 +245,11 @@ export class TvControlComponent {
       this.channelService.assignDoctorToChannel(doctorData).subscribe(
         (response) => {
           console.log('Doctor assigned successfully:', response);
-  
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Doctor is assigned successfully',
+          });
           // Close the form after saving
           this.closeForm();
         },
@@ -222,7 +258,13 @@ export class TvControlComponent {
         }
       );
     } else {
-      alert('Please select a department and a doctor!');
+      this.isButtonClicked = true;
+      // alert('Please select a department and a doctor!');
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Please fill all the details',
+      });
     }
   }
   

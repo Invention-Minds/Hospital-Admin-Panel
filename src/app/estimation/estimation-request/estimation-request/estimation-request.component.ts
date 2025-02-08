@@ -60,8 +60,8 @@ export class EstimationRequestComponent {
           );
           console.log(this.pendingEstimations)
           this.pendingEstimations.sort((a, b) => {
-            const dateA = new Date(a.createdAt!);
-            const dateB = new Date(b.createdAt!);
+            const dateA = new Date(a.estimationCreatedTime!);
+            const dateB = new Date(b.estimationCreatedTime!);
             return dateB.getTime() - dateA.getTime();
           });
           this.filteredEstimations = [...this.pendingEstimations];
@@ -293,12 +293,12 @@ export class EstimationRequestComponent {
   
       this.estimationService.lockService(service.id, this.userId).subscribe({
         next: (response) => {
-          console.log('Service locked:', response);
+          console.log('Estimation locked:', response);
           this.activeServiceId = service.id!;
           this.messageService.add({
             severity: 'success',
             summary: 'Locked',
-            detail: `Service ID ${service.id} has been locked successfully.`,
+            detail: `Estimation has been locked successfully.`,
           });
           this.openAppointmentFormAfterLocked(service);
           this.activeComponent = 'form';
@@ -306,13 +306,13 @@ export class EstimationRequestComponent {
         error: (error) => {
           if (error.status === 409) {
             this.isLockedDialogVisible = true; // Show dialog if locked by another user
-            console.warn('Service is already locked by another user.');
+            console.warn('Estimation is already locked by another user.');
           } else {
-            console.error('Error locking service:', error);
+            console.error('Error locking Estimation:', error);
             this.messageService.add({
               severity: 'error',
               summary: 'Error',
-              detail: 'Failed to lock the service.',
+              detail: 'Failed to lock the Estimation.',
             });
           }
         },
@@ -328,21 +328,21 @@ export class EstimationRequestComponent {
   
       this.estimationService.unlockService(this.activeServiceId).subscribe({
         next: (response) => {
-          console.log('Service unlocked:', response);
+          console.log('Estimation unlocked:', response);
           this.activeServiceId = null;
           this.messageService.add({
             severity: 'success',
             summary: 'Unlocked',
-            detail: 'Service has been unlocked successfully.',
+            detail: 'Estimation has been unlocked successfully.',
           });
           this.activeComponent = 'confirmed'; // Navigate back to the confirmed appointments
         },
         error: (error) => {
-          console.error('Error unlocking service:', error);
+          console.error('Error unlocking Estimation:', error);
           this.messageService.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'Failed to unlock the service.',
+            detail: 'Failed to unlock the Estimation.',
           });
         },
       });

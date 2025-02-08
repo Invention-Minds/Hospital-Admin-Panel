@@ -27,7 +27,7 @@ export class DoctorsListOverviewComponent implements OnInit {
     // Step 1: Fetch all doctors from backend
     this.doctorService.getDoctors().subscribe(
       (doctors) => {
-        console.log('Doctors:', doctors); 
+        // console.log('Doctors:', doctors); 
         // // Step 2: Get unavailable dates and booked slots for each doctor
         // const bookedSlotsObservables = doctors.map(doctor => 
         //   this.appointmentService.getBookedSlots(doctor.id, this.date)
@@ -95,7 +95,7 @@ export class DoctorsListOverviewComponent implements OnInit {
           // const isUnavailableByDate = unavailableDates.includes(this.date);
           const isUnavailableByDate = doctor.unavailableDates!.some(unavailable => {
             const unavailableDate = unavailable.date;
-            console.log(unavailableDate)
+            // console.log(unavailableDate)
             const formattedUnavailableDate = unavailableDate.toString().split('T')[0];
             return formattedUnavailableDate === this.date;
           });

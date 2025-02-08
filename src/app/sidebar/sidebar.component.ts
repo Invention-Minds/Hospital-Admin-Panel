@@ -1,5 +1,6 @@
 import { Component , OnInit, Output, EventEmitter} from '@angular/core';
 import { SettingsComponent } from "../settings/settings/settings.component";
+import { AppointmentConfirmService } from '../services/appointment-confirm.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -13,7 +14,7 @@ export class SidebarComponent implements OnInit {
   adminType: string = ''
   type: string[] = []
   // openSetting: boolean = false;
-  constructor() {}
+  constructor(private appointmentService: AppointmentConfirmService) {}
   ngOnInit(): void {
     if (typeof window !== 'undefined' && window.localStorage) {
       // Fetch role from localStorage or the authentication service
@@ -34,10 +35,10 @@ export class SidebarComponent implements OnInit {
   toggleSidebar() {
     this.isExpanded = !this.isExpanded;
   }
-  @Output() toggleSettings = new EventEmitter<void>();
+
 
   openSettings(): void {
-    this.toggleSettings.emit();
+    this.appointmentService.openSettingsModal()
     console.log('Settings opened');
   }
   hasEstimationAccess(): boolean {

@@ -64,7 +64,7 @@ export class AppointmentCompleteComponent {
       this.filteredAppointments = [...this.completedAppointments];
       this.filterAppointmentsByDate(new Date());
       setTimeout(() => {
-        console.log('Setting isLoading to false after delay');
+        // console.log('Setting isLoading to false after delay');
         this.isLoading = false; // Stop loading indicator
       }, 2000); // 2-second delay
     },
@@ -96,7 +96,7 @@ export class AppointmentCompleteComponent {
   // Method to handle date change (e.g., when the user selects a date from a date picker)
   onDateChange(newDate: Date) {
     this.filterAppointmentsByDate(newDate);
-    console.log('Selected date:', this.selectedDateRange);
+    // console.log('Selected date:', this.selectedDateRange);
   }
 
   sortBy(column: keyof Appointment) {
@@ -339,6 +339,84 @@ export class AppointmentCompleteComponent {
     } else {
       console.warn('No data available to download');
     }
+  }
+  printAppointmentDetails(): void {
+    const selectedFields = this.filteredList.map((appointment: Appointment) => {
+      // console.log('Appointment:', appointment.created_at);
+      if(appointment.created_at){
+      const createdAt = new Date(appointment?.created_at);
+      const indianTime = moment.tz(createdAt, "America/New_York").tz("Asia/Kolkata");
+
+    // Store the date and time in two separate variables
+    const indianDate = indianTime.format('YYYY-MM-DD');
+    const indianTimeOnly = indianTime.format('HH:mm:ss');
+      // const createdDate = createdAt.toISOString().split('T')[0]; // Extract the date part in YYYY-MM-DD format
+      // const createdTime = createdAt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); // Extract time in HH:mm (24-hour format)
+      
+      
+    appointment.created_at = indianDate + ' ' + indianTimeOnly;
+    // console.log('Appointment:', appointment.created_at);
+      }
+      return {
+        'Patient Name': appointment.patientName,
+        'Patient Phone Number': appointment.phoneNumber,
+        'Patient Email': appointment.email,
+        'Doctor Name': appointment.doctorName,
+        'Department': appointment.department,
+        'Appointment Date': appointment.date,
+        'Appointment Time': appointment.time,
+        'Appointment Created Time': appointment.created_at,
+        'Request Via': appointment.requestVia,
+        'Whatsapp Sent': appointment.smsSent ? 'Yes' : 'No',
+        'Email Sent': appointment.emailSent ? 'Yes' : 'No',
+        'SMS Sent': appointment.messageSent ? 'Yes' : 'No',
+        'Status': appointment.status,
+        'Appointment Handled By': appointment.user!.username,
+      };
+    
+    });
+    let printWindow = window.open('', '', 'width=800,height=600');
+  
+    let tableHTML = `
+      <html>
+      <head>
+        <title>Appointment Details</title>
+        <style>
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 16px;
+            text-align: left;
+          }
+          th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+          }
+          th {
+            background-color: #f2f2f2;
+          }
+        </style>
+      </head>
+      <body>
+        <h2>Confirmed Appointment Details</h2>
+        <table>
+          <thead>
+            <tr>
+              ${Object.keys(selectedFields[0]).map(key => `<th>${key}</th>`).join('')}
+            </tr>
+          </thead>
+          <tbody>
+            ${selectedFields.map((row:any) => `<tr>${Object.values(row).map(value => `<td>${value}</td>`).join('')}</tr>`).join('')}
+          </tbody>
+        </table>
+      </body>
+      </html>
+    `;
+  
+    printWindow!.document.write(tableHTML);
+    printWindow!.document.close();
+    printWindow!.print();
   }
 
   // Utility method to format the date in 'dd/mm/yy' format

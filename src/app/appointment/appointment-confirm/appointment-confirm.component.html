@@ -4,7 +4,7 @@
       <thead>
         <tr>
           <th>No</th>
-          <th (click)="sortBy('patientName')" style="cursor: pointer;">
+          <th (click)="sortBy('patientName')" style="cursor: pointer; width: 200px">
             Patient Name
             <span *ngIf="sortColumn === 'patientName' && sortDirection === 'asc'">&#9650;</span>
             <span *ngIf="sortColumn === 'patientName' && sortDirection === 'desc'">&#9660;</span>
@@ -34,7 +34,23 @@
         </tr>
         <tr *ngFor="let appointment of getPaginatedAppointments(); let i = index">
           <td>{{ i + 1 }}</td>
-          <td>{{ appointment.patientName }}</td>
+          <td style="width: 200px;">
+            <ng-container *ngIf="editingAppointmentId !== appointment.id; else editMode">
+              <div class="name-container">
+                <span class="patient-name">{{ appointment.patientName }}</span>
+                <img src="edit.svg" alt="Edit" class="edit-icon" (click)="enableEdit(appointment)" pTooltip="Edit" tooltipPosition="top">
+              </div>
+            </ng-container>
+          
+            <ng-template #editMode>
+              <div class="name-container">
+                <input type="text" [(ngModel)]="editedName" class="edit-input">
+                <img src="icons/save.png" alt="Save" class="save-icon" (click)="saveEditedName(appointment)" pTooltip="Save" tooltipPosition="top">
+                <img src="cancel.svg" alt="Cancel" class="cancel-icon" (click)="cancelEdit()" pTooltip="Cancel" tooltipPosition="top">
+              </div>
+            </ng-template>
+          </td>
+          
           <!-- <td>{{ appointment.phoneNumber }}</td> -->
           <td>{{ appointment.doctorName }}</td>
           <!-- <td>{{ appointment.department }}</td> -->
@@ -79,10 +95,11 @@
           <td class="button">
             <!-- Check-in Button -->
             <button class="btn-action" 
-                    [disabled]="appointment.checkedIn || !isCheckInEnabled(appointment)">
+                    [disabled]="appointment.checkedIn || !isCheckInEnabled(appointment)"
+                    (click)="!appointment.checkedIn && completeAppointment(appointment)">
               <img src="check-in.png" alt="check" 
                    class="action-icon" 
-                   (click)="completeAppointment(appointment)"
+                  
                    pTooltip="Check-in" tooltipPosition="top">
             </button>
           

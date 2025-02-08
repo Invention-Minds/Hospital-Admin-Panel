@@ -346,7 +346,7 @@ export class DoctorAvailabilityComponent {
             // Determine if the selected day is unavailable for the doctor
             const isUnavailableDay = unavailableDates.some(unavailable => {
               const unavailableDate = unavailable.date;
-              console.log(unavailableDate)
+              // console.log(unavailableDate)
               const formattedUnavailableDate = unavailableDate.toString().split('T')[0];
               return formattedUnavailableDate === formattedDate;
             });
@@ -373,25 +373,25 @@ export class DoctorAvailabilityComponent {
             // const dayOfWeek = this.selectedDate.toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
             // const availableDay = latestAvailability?.find(avail => avail.day.toLowerCase() === dayOfWeek);
             // Step 1: Determine if all `updatedAt` fields are null
-const allUpdatedAtNull = doctor.availability?.every(avail => !avail.updatedAt);
+            const allUpdatedAtNull = doctor.availability?.every(avail => !avail.updatedAt);
 
-// Step 2: Calculate the latest timestamp if any `updatedAt` is not null
-const latestTimestamp = allUpdatedAtNull
-  ? null // If all are null, treat it as the "latest"
-  : doctor.availability?.reduce((latest, curr) => {
-      return curr.updatedAt && new Date(curr.updatedAt).getTime() > new Date(latest).getTime()
-        ? curr.updatedAt
-        : latest;
-    }, doctor.availability.find(avail => avail.updatedAt)?.updatedAt || '');
+            // Step 2: Calculate the latest timestamp if any `updatedAt` is not null
+            const latestTimestamp = allUpdatedAtNull
+              ? null // If all are null, treat it as the "latest"
+              : doctor.availability?.reduce((latest, curr) => {
+                return curr.updatedAt && new Date(curr.updatedAt).getTime() > new Date(latest).getTime()
+                  ? curr.updatedAt
+                  : latest;
+              }, doctor.availability.find(avail => avail.updatedAt)?.updatedAt || '');
 
-// Step 3: Filter availability data based on the latest timestamp
-const latestAvailability = allUpdatedAtNull
-  ? doctor.availability // If all are null, consider the entire availability as "latest"
-  : doctor.availability?.filter(avail => avail.updatedAt === latestTimestamp);
+            // Step 3: Filter availability data based on the latest timestamp
+            const latestAvailability = allUpdatedAtNull
+              ? doctor.availability // If all are null, consider the entire availability as "latest"
+              : doctor.availability?.filter(avail => avail.updatedAt === latestTimestamp);
 
-// Step 4: Check if the doctor is available on the given day of the week
-const dayOfWeek = this.selectedDate.toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
-const availableDay = latestAvailability?.find(avail => avail.day.toLowerCase() === dayOfWeek);
+            // Step 4: Check if the doctor is available on the given day of the week
+            const dayOfWeek = this.selectedDate.toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
+            const availableDay = latestAvailability?.find(avail => avail.day.toLowerCase() === dayOfWeek);
 
 
             const isUnavailableDueToSchedule = !availableDay;
@@ -419,7 +419,7 @@ const availableDay = latestAvailability?.find(avail => avail.day.toLowerCase() =
               const isAlreadyBooked = bookedSlots.some(bookedSlot => bookedSlot.time === extraSlot);
               const isAlreadyUnavailable = formattedUnavailableSlots.includes(extraSlot);
               const existingSlot = generatedSlots.find(slot => slot.time === extraSlot);
-              console.log(isAlreadyBooked, isAlreadyUnavailable, existingSlot)
+              // console.log(isAlreadyBooked, isAlreadyUnavailable, existingSlot)
               if (isAlreadyBooked) {
                 existingSlot!.status = 'booked';
               }
@@ -628,7 +628,7 @@ const availableDay = latestAvailability?.find(avail => avail.day.toLowerCase() =
       //  slot.status = 'available';
       this.doctorService.addExtraSlots(doctor.id, this.formatDate(this.selectedDate), slot.time).subscribe(
         (response) => {
-          console.log('Extra slot added successfully:', response);
+          // console.log('Extra slot added successfully:', response);
           this.fetchDoctors();
           this.isBookedSlot = false;
           this.selectedDoctor = doctor;
@@ -660,7 +660,7 @@ const availableDay = latestAvailability?.find(avail => avail.day.toLowerCase() =
   }
   onStatusChange(event: { slotTime: string; status: 'complete' | 'available' | 'booked' | 'unavailable' }): void {
     const doctor = this.doctors.find((d: any) => d.id === this.selectedDoctor!.id); // Find the doctor
-    console.log("changing")
+    // console.log("changing")
     setTimeout(() => {
       this.fetchDoctors();
     }, 3000);
@@ -750,7 +750,7 @@ const availableDay = latestAvailability?.find(avail => avail.day.toLowerCase() =
     }
   }
   openUnavailableModal(doctor: DoctorWithSlots): void {
-    console.log(doctor)
+    // console.log(doctor)
     const today = new Date();
     const tomorrow = new Date();
     tomorrow.setDate(today.getDate() + 1);
@@ -826,7 +826,7 @@ const availableDay = latestAvailability?.find(avail => avail.day.toLowerCase() =
       this.doctorService.addUnavailableSlots(this.selectedDoctor.id, date, this.unavailableSlots)
         .subscribe(
           response => {
-            console.log('Unavailable slots added successfully:', response);
+            // console.log('Unavailable slots added successfully:', response);
             // Close the dialog after saving
             this.fetchDoctors();
             this.closeSlotDialog();
@@ -1138,12 +1138,12 @@ const availableDay = latestAvailability?.find(avail => avail.day.toLowerCase() =
       const [availableStart, availableEnd] = timeRange.split('-').map(this.stringToMinutes);
       earliestStart = Math.min(earliestStart, availableStart);
       latestEnd = Math.max(latestEnd, availableEnd);
-      console.log(slotDuration, availableStart, availableEnd)
+      // console.log(slotDuration, availableStart, availableEnd)
 
       // Generate regular slots for the current time range
       for (let current = availableStart; current < availableEnd; current += slotDuration) {
         if (current >= availableEnd) break;
-        if(slotDuration === 0){
+        if (slotDuration === 0) {
           break;
         }
         const slotTime = this.minutesToString(current);
@@ -1151,7 +1151,7 @@ const availableDay = latestAvailability?.find(avail => avail.day.toLowerCase() =
         const period = hours >= 12 ? 'PM' : 'AM';
         const formattedSlotTime = `${(hours % 12 || 12).toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${period}`;
         // const formattedSlotTime = this.convertTo12HourFormat(slotTime);
-        console.log(formattedSlotTime)
+        // console.log(formattedSlotTime)
 
         let status: Slot['status'] = 'extra'; // Default to extra
 
@@ -1256,7 +1256,7 @@ const availableDay = latestAvailability?.find(avail => avail.day.toLowerCase() =
   }
 
   convertTo12HourFormat(time: string): string {
-    console.log('convert')
+    // console.log('convert')
     return this.timeFormatCache[time];
   }
 

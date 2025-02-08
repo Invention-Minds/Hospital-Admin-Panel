@@ -87,7 +87,36 @@ body {
   left: 12px;
   transform: translateY(-50%);
   color: #007bff;
-  font-size: 16px;
+  font-size: 12px;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  background-color: #f6f8ff;
+  
+}
+.custom-select {
+  appearance: none; /* Hides the default dropdown arrow */
+  -webkit-appearance: none; /* For Safari */
+  -moz-appearance: none; /* For Firefox */
+  background-image: url('/select-down-arrow.svg'); /* Custom arrow */
+  background-repeat: no-repeat;
+  background-position: right 15px center; /* Adjust positioning */
+  background-size: 16px; /* Adjust size */
+  padding-right: 40px; /* Ensure space for the icon */
+  cursor: pointer;
+}
+
+/* Ensure it works on all browsers */
+.custom-select::-ms-expand {
+  display: none; /* Hide default arrow in IE/Edge */
+}
+
+.custom-label-consultantName {
+  position: absolute;
+  top: 31%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: #007bff;
+  font-size: 12px;
   transition: all 0.3s ease;
   pointer-events: none;
   background-color: #f6f8ff;
@@ -142,6 +171,11 @@ select {
   border: 1px solid #ced4da;
   border-radius: 4px;
 }
+select{
+  background-image: url(/select-down-arrow.svg);
+  background-repeat: no-repeat;
+  background-position: right 20px center;
+}
 
 .checkbox-grid {
   display: grid;
@@ -164,6 +198,14 @@ input[type="radio"] {
   margin-right: 5px;
 }
 
+.type-container{
+  display: flex;
+  position: relative;
+  margin: 10px 0;
+  flex: 1;
+  min-width: 200px;
+  align-items: center;
+}
 
 .submit-button:disabled {
   background-color: #ccc;

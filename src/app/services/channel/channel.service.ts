@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../../../environment/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ChannelService {
-  private baseUrl = 'https://backend-812956739285.us-east4.run.app/api/channel'; // Update with your backend URL
+  private baseUrl = `${environment.apiUrl}/channel`; // Update with your backend URL
 
   constructor(private http: HttpClient) {}
 

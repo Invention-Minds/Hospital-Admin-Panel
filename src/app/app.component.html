@@ -28,6 +28,13 @@
   <ng-template #channelTemplate>
     <router-outlet></router-outlet>
   </ng-template>
+  <div *ngIf="showSettingsModal" class="settings-modal-overlay"   (click)="closeSettings()">
+    <div class="settings-modal"  (click)="preventClose($event)">
+      <div class="modal-header">
+      </div>
+      <app-settings></app-settings>
+    </div>
+  </div>
   
   <p-toast></p-toast>
   

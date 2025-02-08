@@ -1,11 +1,13 @@
 // tv.component.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { ChannelService } from '../../services/channel/channel.service';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { EventService } from '../../services/event.service';
 import { Subscription, interval } from 'rxjs';
+import { environment } from '../../../environment/environment';
 
 import {
   trigger,
@@ -66,6 +68,7 @@ export class TvComponent implements OnInit, OnDestroy {
   todayFullAppointments: any[] = []
   checkedInAppointments: any[] = [];
   private updateTimeInterval!: Subscription;
+  private eventSource: EventSource | null = null;
 
   constructor(
     private route: ActivatedRoute,
@@ -73,6 +76,7 @@ export class TvComponent implements OnInit, OnDestroy {
     private appointmentService: AppointmentConfirmService,
     private eventService: EventService,
     private doctorService: DoctorServiceService,
+    private router: Router
   ) { }
 
   ngOnInit() {
@@ -104,7 +108,21 @@ export class TvComponent implements OnInit, OnDestroy {
         this.updateAppointment(event.doctorId, event.appointmentId);
       }
     });
+    this.eventSource = new EventSource(`${environment.apiUrl}/appointments/updates`);
 
+    this.eventSource.addEventListener('channelRemoval', (event: MessageEvent) => {
+      const removedChannel = JSON.parse(event.data);
+      console.log('Channel Removed:', removedChannel);
+  
+      const currentRoute = this.router.url;
+      console.log(currentRoute)
+      if (currentRoute.includes(channelId!)) {
+        this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+          this.router.navigate([currentRoute]); // Refresh the current route
+        });
+      }
+    });
+  
   }
 
 
@@ -457,6 +475,9 @@ export class TvComponent implements OnInit, OnDestroy {
     if (this.updateTimeInterval) {
       this.updateTimeInterval.unsubscribe(); // Stop interval when component is destroyed
     }
+    if (this.eventSource) {
+      this.eventSource.close(); // Clean up the connection
+    }
   }
   isFourDoctors(): boolean {
     return this.doctors.length === 4;
@@ -590,7 +611,7 @@ export class TvComponent implements OnInit, OnDestroy {
                 } mins!`
               );
     
-              const waitingMultiplier = Math.ceil(elapsedMinutes / averageWaitingTime);
+              const waitingMultiplier = Math.ceil((elapsedMinutes - averageWaitingTime) / averageWaitingTime);
     
               // Step 4: Find the next appointment for the doctor
               const nextAppointment = this.checkedInAppointments.find(
@@ -600,7 +621,7 @@ export class TvComponent implements OnInit, OnDestroy {
     
               if (nextAppointment) {
                 nextAppointment.extraWaitingTime = elapsedMinutes - averageWaitingTime;
-                const extraWaitingTime = nextAppointment.extraWaitingTime - slotDuration;
+                const extraWaitingTime = nextAppointment.extraWaitingTime;
     
                 // Step 5: Update extra waiting time in DB
                 this.appointmentService.updateExtraWaitingTime(nextAppointment.id, extraWaitingTime).subscribe(
@@ -616,7 +637,8 @@ export class TvComponent implements OnInit, OnDestroy {
                 const adminPhoneNumbers = ["919342287945", "919698779181", "917708059010"]; // Admin List
                 let noOfPatients = pendingAppointments.length - completeAppointment.length; // Pending appointments for this doctor
                 noOfPatients = Math.max(noOfPatients, 0);
-    
+                const intervalDuration = slotDuration * 60 * 1000;
+                setInterval(() => {
                 this.appointmentService
                   .sendWaitingTimeAlert({
                     adminPhoneNumbers,
@@ -633,6 +655,7 @@ export class TvComponent implements OnInit, OnDestroy {
                       console.error(`❌ Error sending message to Dr. ${doctorName}:`, error);
                     }
                   );
+                },intervalDuration);
               }
             }
           }
@@ -645,6 +668,7 @@ export class TvComponent implements OnInit, OnDestroy {
       if (adjustedTime && !isNaN(adjustedTime.getTime())) {
         // Adjust the appointment time based on the latest endConsultationTime
         appointment.time = formatTime(adjustedTime);
+        console.log(appointment.time)
         adjustedTime.setMinutes(adjustedTime.getMinutes() + appointment.doctor.slotDuration); // Add slot duration
       } else {
         // If no valid endConsultationTime, fallback to the original appointment time

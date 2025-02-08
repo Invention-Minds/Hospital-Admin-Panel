@@ -25,6 +25,9 @@ interface Appointment {
   created_at?: string;
   checkedIn?:boolean;
   user?: any;
+  isEditing?: boolean;
+  editedPatientName?: string
+  
 }
 @Component({
   selector: 'app-appointment-confirm',
@@ -57,7 +60,10 @@ export class AppointmentConfirmComponent {
   filteredList: any;
   lastWeekAppointments: any[] = [];  
   isLoading: boolean = false;
-  today: string = ''
+  today: string = '';
+  editedName: string = '';
+  isEditing: boolean = false;
+  editingAppointmentId: number | null = null;
 
   searchOptions = [
     { label: 'Patient Name', value: 'patientName' },
@@ -70,7 +76,7 @@ export class AppointmentConfirmComponent {
     const month = (today.getMonth() + 1).toString().padStart(2, '0');
     const day = today.getDate().toString().padStart(2, '0');
     this.today = `${year}-${month}-${day}`;
-    console.log('Setting isLoading to true');
+    // console.log('Setting isLoading to true');
     this.isLoading = true; // Start loading indicator
   
     // Fetch appointments
@@ -79,7 +85,7 @@ export class AppointmentConfirmComponent {
     // Subscribe to confirmed appointments
     this.appointmentService.confirmedAppointments$.subscribe({
       next: (appointments) => {
-        console.log('Appointments received:', appointments);
+        // console.log('Appointments received:', appointments);
         this.confirmedAppointments = appointments;
   
         // Sort appointments
@@ -92,9 +98,9 @@ export class AppointmentConfirmComponent {
         this.filteredAppointments = [...this.confirmedAppointments];
         this.filterAppointmentsByDate(new Date());
   
-        console.log('Setting isLoading to false');
+        // console.log('Setting isLoading to false');
         setTimeout(() => {
-          console.log('Setting isLoading to false after delay');
+          // console.log('Setting isLoading to false after delay');
           this.isLoading = false; // Stop loading indicator
         }, 1000); // 2-second delay
         
@@ -102,7 +108,7 @@ export class AppointmentConfirmComponent {
       error: (error) => {
         console.error('Error fetching appointments:', error);
         // this.errorMessage = 'Failed to fetch appointments.';
-        console.log('Setting isLoading to false due to error');
+        // console.log('Setting isLoading to false due to error');
         this.isLoading = false; // Stop loading indicator even on error
       }
     });
@@ -346,24 +352,7 @@ export class AppointmentConfirmComponent {
     // Method to download the filtered data as Excel
     downloadFilteredData(): void {
       if (this.filteredList && this.filteredList.length > 0) {
-        
-        // const selectedFields = this.filteredList.map((appointment: Appointment) => ({
 
-
-        //   'Patient Name': appointment.patientName,
-        //   'Patient Phone Number': appointment.phoneNumber,
-        //   'Patient Email': appointment.email,
-        //   'Doctor Name': appointment.doctorName,
-        //   'Department': appointment.department,
-        //   'Appointment Date': appointment.date,
-        //   'Appointment Time': appointment.time,
-        //   'Appointment Created Time': appointment.created_at,
-        //   'Request Via': appointment.requestVia,
-        //   'SMS Sent': appointment.smsSent ? 'Yes' : 'No',
-        //   'Email Sent': appointment.emailSent ? 'Yes' : 'No',
-        //   'Status': appointment.status,
-        //   'Appointment Handled By': appointment.user!.username
-        // }));
         const selectedFields = this.filteredList.map((appointment: Appointment) => {
           // console.log('Appointment:', appointment.created_at);
           if(appointment.created_at){
@@ -428,6 +417,84 @@ export class AppointmentConfirmComponent {
         console.warn('No data available to download');
       }
     }
+    printAppointmentDetails(): void {
+      const selectedFields = this.filteredList.map((appointment: Appointment) => {
+        // console.log('Appointment:', appointment.created_at);
+        if(appointment.created_at){
+        const createdAt = new Date(appointment?.created_at);
+        const indianTime = moment.tz(createdAt, "America/New_York").tz("Asia/Kolkata");
+
+      // Store the date and time in two separate variables
+      const indianDate = indianTime.format('YYYY-MM-DD');
+      const indianTimeOnly = indianTime.format('HH:mm:ss');
+        // const createdDate = createdAt.toISOString().split('T')[0]; // Extract the date part in YYYY-MM-DD format
+        // const createdTime = createdAt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); // Extract time in HH:mm (24-hour format)
+        
+        
+      appointment.created_at = indianDate + ' ' + indianTimeOnly;
+      // console.log('Appointment:', appointment.created_at);
+        }
+        return {
+          'Patient Name': appointment.patientName,
+          'Patient Phone Number': appointment.phoneNumber,
+          'Patient Email': appointment.email,
+          'Doctor Name': appointment.doctorName,
+          'Department': appointment.department,
+          'Appointment Date': appointment.date,
+          'Appointment Time': appointment.time,
+          'Appointment Created Time': appointment.created_at,
+          'Request Via': appointment.requestVia,
+          'Whatsapp Sent': appointment.smsSent ? 'Yes' : 'No',
+          'Email Sent': appointment.emailSent ? 'Yes' : 'No',
+          'SMS Sent': appointment.messageSent ? 'Yes' : 'No',
+          'Status': appointment.status,
+          'Appointment Handled By': appointment.user!.username,
+        };
+      
+      });
+      let printWindow = window.open('', '', 'width=800,height=600');
+    
+      let tableHTML = `
+        <html>
+        <head>
+          <title>Appointment Details</title>
+          <style>
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin: 20px 0;
+              font-size: 16px;
+              text-align: left;
+            }
+            th, td {
+              border: 1px solid #ddd;
+              padding: 8px;
+            }
+            th {
+              background-color: #f2f2f2;
+            }
+          </style>
+        </head>
+        <body>
+          <h2>Confirmed Appointment Details</h2>
+          <table>
+            <thead>
+              <tr>
+                ${Object.keys(selectedFields[0]).map(key => `<th>${key}</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+              ${selectedFields.map((row:any) => `<tr>${Object.values(row).map(value => `<td>${value}</td>`).join('')}</tr>`).join('')}
+            </tbody>
+          </table>
+        </body>
+        </html>
+      `;
+    
+      printWindow!.document.write(tableHTML);
+      printWindow!.document.close();
+      printWindow!.print();
+    }
     loadLastWeekAppointments(): void {
       const today = new Date();
       const lastWeek = new Date(today.setDate(today.getDate() - 7));
@@ -449,6 +516,34 @@ export class AppointmentConfirmComponent {
   saveToLocalStorage(): void {
     localStorage.setItem('appointments', JSON.stringify(this.appointments));
   }
+  enableEdit(appointment: any) {
+    this.editingAppointmentId = appointment.id;
+   this.editedName = appointment.patientName // Preserve original name
+  }
+  
+  cancelEdit() {
+    this.editingAppointmentId = null;
+  }
+  
+  async saveEditedName(appointment: any) {
+    if (!this.editedName.trim()) return;
+  
+    try {
+      console.log(appointment.editedPatientName)
+      appointment.patientName = this.editedName // Update UI
+      this.editingAppointmentId = null;
+      this.appointmentService.updateAppointment(appointment)
+      this.showToast('Patient name updated successfully', 'success'); // Show success message
+    } catch (error) {
+      console.error('Error updating patient name:', error);
+      this.showToast('Failed to update name', 'error'); // Show error message
+    }
+  }
+  
+  showToast(message: string, type: string) {
+    this.messageService.add({ severity: type, summary: message });
+  }
+  
   completeAppointment(appointment: Appointment) {
     const appointmentId = appointment.id;
     if(appointment.date > this.today){
@@ -712,7 +807,7 @@ export class AppointmentConfirmComponent {
             });
             this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
               next: (response) => {
-                console.log('WhatsApp message sent successfully:', response);
+                // console.log('WhatsApp message sent successfully:', response);
                 this.messageService.add({ severity: 'success', summary: 'Success', detail: 'WhatsApp message sent successfully!' });
               },
               error: (error) => {
@@ -733,7 +828,7 @@ export class AppointmentConfirmComponent {
         const emailStatus = 'cancelled';
         this.appointmentService.sendEmail(patientEmail, emailStatus, appointmentDetails, 'patient').subscribe({
           next: (response) => {
-            console.log('Email sent to patient successfully:', response);
+            // console.log('Email sent to patient successfully:', response);
             this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to patient successfully!' });
           },
           error: (error) => {
@@ -777,7 +872,7 @@ export class AppointmentConfirmComponent {
   }
   lockAndAccessAppointment(appointment:Appointment): void {
     const appointmentId = appointment.id!;
-    console.log(this.userId)
+    // console.log(this.userId)
     this.appointmentService.lockAppointment(appointmentId, this.userId).subscribe({
       next: (response) => {
         // Successfully locked, proceed to open the form

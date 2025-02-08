@@ -60,7 +60,7 @@ import { Router } from '@angular/router';
       this.isLoading = true
       this.estimationService.getAllEstimation().subscribe({
         next: (estimation: any[]) => {
-          console.log(estimation)
+          // console.log(estimation)
           
           // Process the services when the API call is successful
           this.pendingEstimations = estimation.filter(
@@ -70,14 +70,14 @@ import { Router } from '@angular/router';
           //   estimation.followUpDates.map((followUp: any) => followUp.date)
           // );
           // console.log(this.followUpDateArray)
-          console.log(this.pendingEstimations)
+          // console.log(this.pendingEstimations)
           this.pendingEstimations.sort((a, b) => {
-            const dateA = new Date(a.createdAt!);
-            const dateB = new Date(b.createdAt!);
+            const dateA = new Date(a.estimationCreatedTime!);
+            const dateB = new Date(b.estimationCreatedTime!);
             return dateB.getTime() - dateA.getTime();
           });
           this.filteredEstimations = [...this.pendingEstimations];
-          console.log('Services processed successfully.');
+          // console.log('Services processed successfully.');
         },
         error: (err) => {
           // Handle the error if the API call fails
@@ -86,7 +86,7 @@ import { Router } from '@angular/router';
         complete: () => {
           this.isLoading=false
           // Optional: Actions to perform once the API call completes
-          console.log('Service fetching process completed.');
+          // console.log('Service fetching process completed.');
         }
       });
       
@@ -110,13 +110,14 @@ import { Router } from '@angular/router';
      const estimationData ={
       estimationId: this.selectedEstimation.estimationId,
         advanceAmountPaid: Number(this.advanceAmount),
-        receiptNumber: this.receiptNumber
+        receiptNumber: this.receiptNumber,
+
       
       
      }
      this.estimationService.updateAdvanceDetails(estimationData.estimationId, estimationData).subscribe(
       (response) => {
-        console.log('Estimation updated successfully:', response);
+        // console.log('Estimation updated successfully:', response);
         this.closeAdvancePopup();
         this.fetchPendingEstimations()
       },
@@ -148,7 +149,7 @@ import { Router } from '@angular/router';
       }
   
       const newFollowUp = { date: this.followUpDate, remarks: this.feedback };
-      console.log(newFollowUp)
+      // console.log(newFollowUp)
       this.estimationService.updateFollowUps(this.selectedEstimation.estimationId, newFollowUp)
         .subscribe(
             (response: any) => {
@@ -212,10 +213,10 @@ import { Router } from '@angular/router';
         inclusions: this.selectedEstimation.inclusions.map((item:any) => item.description),
         exclusions: this.selectedEstimation.exclusions.map((item:any) => item.description),
       };
-      console.log(estimationData)
+      // console.log(estimationData)
       this.estimationService.generateAndSendPdf(estimationData.estimationId, estimationData).subscribe(
         (pdfResponse) => {
-          console.log("✅ PDF Generated & Sent via WhatsApp:", pdfResponse);
+          // console.log("✅ PDF Generated & Sent via WhatsApp:", pdfResponse);
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'PDF Generated & Sent PDF via WhatsApp:!' });
         },
         (pdfError) => {
@@ -240,9 +241,9 @@ import { Router } from '@angular/router';
     onSearch(): void {
 
       this.filteredEstimations = this.pendingEstimations.filter((service) => {
-        console.log(service)
+        // console.log(service)
         let matches = true;
-        console.log(this.searchValue, this.selectedSearchOption)
+        // console.log(this.searchValue, this.selectedSearchOption)
   
         // Filter by search option
         if (this.selectedSearchOption && this.searchValue && service) {
@@ -298,7 +299,7 @@ import { Router } from '@angular/router';
             new Date(service.estimationDate).toDateString() === singleDate.toDateString();
         }
         
-        console.log(matches);
+        // console.log(matches);
         return matches;
         
       });
@@ -443,7 +444,7 @@ import { Router } from '@angular/router';
     }
     openAppointmentFormAfterLocked(service: any): void {
       this.reschedule.emit(service);
-      console.log('Opening appointment form:', service);
+      // console.log('Opening appointment form:', service);
     }
   
     lockService(service: any): void {
@@ -481,33 +482,33 @@ import { Router } from '@angular/router';
     }
     // Unlock a service
     unlockService(): void {
-      console.log('Unlocking service:', this.activeServiceId);
+      // console.log('Estimation service:', this.activeServiceId);
       if (!this.activeServiceId) return;
   
       this.estimationService.unlockService(this.activeServiceId).subscribe({
         next: (response) => {
-          console.log('Service unlocked:', response);
+          // console.log('Estimation unlocked:', response);
           this.activeServiceId = null;
           this.messageService.add({
             severity: 'success',
             summary: 'Unlocked',
-            detail: 'Service has been unlocked successfully.',
+            detail: 'Estimation has been unlocked successfully.',
           });
           this.activeComponent = 'confirmed'; // Navigate back to the confirmed appointments
         },
         error: (error) => {
-          console.error('Error unlocking service:', error);
+          console.error('Error unlocking Estimation:', error);
           this.messageService.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'Failed to unlock the service.',
+            detail: 'Failed to unlock the Estimation.',
           });
         },
       });
     }
     ngOnDestroy(): void {
       // Unlock the service on component destroy if locked
-      console.log('Destroying confirmed component...', this.activeComponent);
+      // console.log('Destroying confirmed component...', this.activeComponent);
       if(this.activeServiceId && this.activeComponent !== 'form'){ 
         this.unlockService();
       }

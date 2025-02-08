@@ -2,7 +2,7 @@
     <div class="close-opd" (click)="openCloseOpdPopup()">
         <img src="/close-opd.svg"> Close OPD
     </div>
-    <button class="end-consul" [disabled]="completedAppointments.length>1" (click)="endConsultation()" >
+    <button class="end-consul" [disabled]="completedAppointments.length>=1" (click)="endConsultation()" >
         <img src="/end.svg" > End Consultation
     </button>
 </div>
@@ -54,7 +54,7 @@
               <button class="estimation" (click)="openEstimationPopup(appointment)">
                 <img class="image" src="/est.svg">Estimation
               </button>
-              <button class="transfer" (click)="openTransferPopup(appointment)">
+              <button class="transfer" [disabled]="appointment.isTransfer" (click)="!appointment.isTransfer && openTransferPopup(appointment)">
                 <img class="image" src="/transfer.svg">Transfer
               </button>
             </td>
@@ -260,7 +260,7 @@
   <div *ngIf="showCancelPopup" class="close-opd-modal">
     <div class="modal-content-transfer">
       <div class="modal-header">
-        <h3>Cancel the Pending Appointment</h3>
+        <h3>Postponed Appointments Warning</h3>
         <button class="popup-close" (click)="closeCancelPopup()">
           <img src="/popup-close.svg" alt="Close Popup" />
         </button>
@@ -268,13 +268,12 @@
       <hr />
       <div class="modal-body">
         <p class="content">
-          Are you sure! <br>
-          Do you want to cancel the {{countOfPending}} appointment ?
+          Still {{countOfPending}} postponed appointments are there!
         </p>
       </div>
-      <div class="modal-footer">
+      <!-- <div class="modal-footer">
         <button class="approval-button" (click)="cancel()">Yes</button>
         <button class="close-button" (click)="closeCancelPopup()">No</button>
-      </div>
+      </div> -->
     </div>
   </div>

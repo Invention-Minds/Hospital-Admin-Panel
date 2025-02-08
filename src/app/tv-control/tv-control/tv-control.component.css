@@ -1,275 +1,350 @@
 .queue-management-container {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    /* justify-content: space-between; */
-    padding: 20px;
-    gap: 20px;
-    padding-left: 90px;
-  }
-  
-  .channel-container {
-    /* width: 23%; */
-    /* background-color: #f5f5f5; */
-    border-radius: 8px;
-    padding: 10px;
-  }
-  .channel-name{
-    color: #000;
-font-family: Kanit;
-font-size: 20px;
-font-style: normal;
-font-weight: 600;
-line-height: normal;
-  }
-  .doctor-card {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #e8e8e8;
-    border-radius: 8px;
-    margin: 5px 0;
-    height: 75px;
-    width: 434px;
-  }
-  /* Doctor Header Styling */
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  /* justify-content: space-between; */
+  padding: 20px;
+  gap: 20px;
+  padding-left: 90px;
+}
+
+.channel-container {
+  /* width: 23%; */
+  /* background-color: #f5f5f5; */
+  border-radius: 8px;
+  padding: 10px;
+}
+.channel-name {
+  color: #000;
+  font-family: Kanit;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+}
+.doctor-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #e8e8e8;
+  border-radius: 8px;
+  margin: 5px 0;
+  height: 75px;
+  width: 434px;
+}
+/* Doctor Header Styling */
 .doctor-header {
-    /* position: relative; */
-    display: flex;
-    flex-direction: column;
-    /* padding: 10px; */
-    border-radius: 7px;
-    /* background-color: #169458; Green background for filled doctor */
-    color: white;
-    height: 100%;
-    width: 434px;
-    height: 75px;
-    /* overflow: hidden; To handle content clipping */
-  }
-  
-  /* Delete Button Container */
-  .delete-btn-container {
-    width: 434px;
-    height: 75px;
-    position: absolute;
-    /* right: 0;  */
-    top: 0;
-    display: flex;
-    justify-content: right;
-  }
-  
-  /* Delete Button Styling */
-  .remove-btn {
-    background-color: #fff; /* Red background */
-    border: none;
-    border-top-left-radius: 50%;
-    border-bottom-left-radius: 50%;
-    border-bottom-right-radius: 50%;
-    border-top-right-radius: 8px;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-  }
-  
-  .remove-btn img {
-    width: 16px;
-    height: 16px;
-  }
-  
-  .text{
-    display: flex; 
-    /* justify-content: center;  */
-    align-items: center;
-    /* flex-direction: column; */
-    /* padding: auto 10px; */
-    height: 75px;
-    margin-left: 20px;
-  }
-  
-  .doctor-card.filled {
-    background-color: #169458;
-    color: white;
-    justify-content: start;
-    align-items: flex-start;
-  }
-  
-  .add-btn {
-    font-size: 24px;
-    color: #666;
-    cursor: pointer;
-    display:flex ;
-    justify-content: center;
-    align-items: center;
-    height: 75px;
-  }
-  p{
-    color: #FFF;
-font-family: Kanit;
-font-size: 14px;
-font-style: normal;
-font-weight: 400;
-line-height: normal;
-margin: 0;
-  }
+  /* position: relative; */
+  display: flex;
+  flex-direction: column;
+  /* padding: 10px; */
+  border-radius: 7px;
+  /* background-color: #169458; Green background for filled doctor */
+  color: white;
+  height: 100%;
+  width: 434px;
+  height: 75px;
+  /* overflow: hidden; To handle content clipping */
+}
 
-  
-  .overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-  .popup {
-    width: 526px;
-    height: 420px;
-    flex-shrink: 0;
-    border-radius: 20px;
-background: #FFF;
-display: flex;
-flex-direction: column;
-align-items: center;
-justify-content: center;
-  }
-  label{
-    color: rgba(39, 30, 74, 0.80);
-font-family: Kanit;
-font-size: 14px;
-font-style: normal;
-font-weight: 500;
-line-height: normal;
-  }
-  .tv-control{
-    color: #271E4A;
-font-family: Kanit;
-font-size: 24px;
-font-style: normal;
-font-weight: 500;
-line-height: normal;
-/* border-bottom: 2px solid #271E4A; */
-  }
-  .popup-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    padding: 20px;
-    border-bottom: 2px solid #271E4A;
-    margin-bottom: 36px;
-  }
-  
-  .popup-content {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
+/* Delete Button Container */
+.delete-btn-container {
+  width: 434px;
+  height: 75px;
+  position: absolute;
+  /* right: 0;  */
+  top: 0;
+  display: flex;
+  justify-content: right;
+}
 
+/* Delete Button Styling */
+.remove-btn {
+  background-color: #fff; /* Red background */
+  border: none;
+  border-top-left-radius: 50%;
+  border-bottom-left-radius: 50%;
+  border-bottom-right-radius: 50%;
+  border-top-right-radius: 8px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
 
-  .popup-actions {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-  }
-  .save-button {
-    background-color: #169458;
-    color: #fff;
-    font-family: Kanit;
-    font-size: 20px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: normal;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    display: flex;
-    width: 150px;
-    padding: 7px 14px;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-  }
-  .close-button {
-    display: flex;
-    width: 150px;
-    padding: 7px 65px;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    border-radius: 4px;
-    border: 1px solid #7b7b7b;
-    color: #7b7b7b;
-    font-family: Kanit;
-    font-size: 20px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: normal;
-    background-color: white;
-  }
-  /* Container for dropdown and label */
+.remove-btn img {
+  width: 16px;
+  height: 16px;
+}
+
+.text {
+  display: flex;
+  /* justify-content: center;  */
+  align-items: center;
+  /* flex-direction: column; */
+  /* padding: auto 10px; */
+  height: 75px;
+  margin-left: 20px;
+}
+
+.doctor-card.filled {
+  background-color: #169458;
+  color: white;
+  justify-content: start;
+  align-items: flex-start;
+}
+
+.add-btn {
+  font-size: 24px;
+  color: #666;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 75px;
+}
+p {
+  color: #fff;
+  font-family: Kanit;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin: 0;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.modal-content {
+  border-radius: 20px;
+  background: #fff;
+  padding: 20px;
+  width: 673px;
+  height: 420px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+.input-type-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 15px 0;
+  margin-bottom: 40px;
+  gap: 20px;
+}
+.modal-body {
+  margin-bottom: 20px;
+}
+.modal-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+}
+.popup {
+  width: 526px;
+  height: 420px;
+  flex-shrink: 0;
+  border-radius: 20px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+label {
+  color: rgba(39, 30, 74, 0.8);
+  font-family: Kanit;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+}
+.tv-control {
+  color: #271e4a;
+  font-family: Kanit;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  /* border-bottom: 2px solid #271E4A; */
+}
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 20px;
+  border-bottom: 2px solid #271e4a;
+  margin-bottom: 36px;
+}
+
+.popup-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.popup-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+.save-button {
+  background-color: #169458;
+  color: #fff;
+  font-family: Kanit;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  width: 150px;
+  padding: 7px 14px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+.save-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.close-button {
+  display: flex;
+  width: 150px;
+  padding: 7px 65px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  border: 1px solid #7b7b7b;
+  color: #7b7b7b;
+  font-family: Kanit;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  background-color: white;
+}
+/* Container for dropdown and label */
 .custom-dropdown {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    position: relative;
-    font-family: Kanit;
-  }
-  
-  /* Label Styling */
-  .custom-dropdown label {
-    font-size: 14px;
-    font-weight: 400;
-    color: #1a73e8; /* Blue color */
-    position: absolute;
-    top: -2px;
-    left: 10px;
-    background-color: white;
-    padding: 0 4px;
-    transform: translateY(-50%);
-    pointer-events: none;
-    z-index: 10;
-  }
-  
-  /* Select Styling */
-  .custom-dropdown select {
-    width: 430px;
-    padding: 12px 20px;
-    border: 1px solid #1a73e8; /* Blue border */
-    border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+  font-family: Kanit;
+}
 
-    font-size: 16px;
-    font-weight: 400;
-    color: #000; /* Black text color */
-    outline: none;
-    font-family: Kanit;
-    -webkit-appearance: none; /* Remove default dropdown styling for WebKit browsers */
-    -moz-appearance: none; /* Remove default dropdown styling for Mozilla browsers */
-    appearance: none; /* Remove default dropdown styling */
-    position: relative;
-    background-image: url(/select-down-arrow.svg);
-    background-repeat: no-repeat;
-    background-position: right 20px center;
-  }
-  
-  /* Dropdown Arrow Customization */
-  .custom-dropdown select::after {
-    content: '▼'; /* Custom arrow */
-    font-size: 16px;
-    color: #1a73e8;
-    position: absolute;
-    right: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
-  }
-  .popup-close{
-    background-color: transparent;
-    border: none;
+/* Label Styling */
+.custom-dropdown label {
+  font-size: 14px;
+  font-weight: 400;
+  color: #007bff; /* Blue color */
+  position: absolute;
+  top: -2px;
+  left: 10px;
+  background-color: white;
+  padding: 0 4px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Select Styling */
+.custom-dropdown select {
+  width: 430px;
+  padding: 12px 20px;
+  border: 1px solid #007bff; /* Blue border */
+  border-radius: 8px;
+
+  font-size: 16px;
+  font-weight: 400;
+  color: #000; /* Black text color */
+  outline: none;
+  font-family: Kanit;
+  -webkit-appearance: none; /* Remove default dropdown styling for WebKit browsers */
+  -moz-appearance: none; /* Remove default dropdown styling for Mozilla browsers */
+  appearance: none; /* Remove default dropdown styling */
+  position: relative;
+  background-image: url(/select-down-arrow.svg);
+  background-repeat: no-repeat;
+  background-position: right 20px center;
+}
+
+/* Dropdown Arrow Customization */
+.custom-dropdown select::after {
+  content: "▼"; /* Custom arrow */
+  font-size: 16px;
+  color: #007bff;
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.popup-close {
+  background-color: transparent;
+  border: none;
+}
+.input-container {
+ position: relative;
+ width: 430px;
+}
+.custom-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  background-color: #fff; /* Background color like the first image */
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  font-family: Kanit;
+}
+
+.custom-input:focus {
+  border-color: #007bff; /* Focus border color like the second image */
+  box-shadow: 0 0 3px #007bff;
+}
+
+.custom-label {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: #aaa;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.custom-input:focus + .custom-label,
+.custom-input:not(:placeholder-shown) + .custom-label {
+  top: -3px;
+  left: 10px;
+  font-size: 12px;
+  color: #007bff; /* Label color on focus */
+  background-color: #fff;
 }

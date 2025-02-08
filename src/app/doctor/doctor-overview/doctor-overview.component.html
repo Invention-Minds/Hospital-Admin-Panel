@@ -27,7 +27,7 @@
       </div>
       <div class="card" 
       [ngClass]="{'active-card': activeComponent === 'details'}"
-      (click)="showDoctorDetails()">
+      (click)="showDoctorDetails()" *ngIf="role === 'admin' || role === 'super_admin'">
         <div class="card-icon">
           <img src="/details-doctor.svg" alt="Doctor Available Icon" />
         </div>

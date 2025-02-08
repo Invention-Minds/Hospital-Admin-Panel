@@ -67,6 +67,8 @@ export class SettingsComponent implements OnInit {
   subAdminType = '';
   adminType ='';
   loggedInName: string = '';
+  showSettings: boolean = false;
+  employeeIdErrorMessage: string = ''
 
   constructor(private authService: AuthServiceService, private router: Router, private messageService: MessageService, private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService) {}
  // Define the role-based access
@@ -78,6 +80,10 @@ export class SettingsComponent implements OnInit {
 };
 
   ngOnInit(): void {
+    this.appointmentService.settingsModalState$.subscribe((state: boolean) => {
+      this.showSettings = state;
+      console.log(this.showSettings)
+    });
     if (typeof window !== 'undefined' && window.localStorage) {
       // Fetch role from localStorage or the authentication service
       const storedRole = localStorage.getItem('role');
@@ -111,6 +117,11 @@ export class SettingsComponent implements OnInit {
     }
     this.loadDepartments();
     this.loadDoctors();
+
+  }
+
+  closeSettings() {
+    this.appointmentService.closeSettingsModal();
   }
 
   switchTab(tabName: string) {
@@ -305,6 +316,17 @@ validateInputs(): void {
     this.passwordErrorMessage = ''; // Clear the error message if valid
   }
 }
+validateEmployeeID():void {
+  const employeeIdRegex = /^[a-zA-Z0-9]+$/;
+  const isemployeeIdValid = employeeIdRegex.test(this.employeeId);
+  if(!isemployeeIdValid){
+    this.employeeIdErrorMessage = "Employee Id Should contain only characters and numbers"
+  }
+  else{
+    this.employeeIdErrorMessage = ''
+  }
+
+}
 validPasswords(): void {
   const usernameRegex = /^[a-zA-Z]+_(admin|subadmin|superadmin|doctor)@rashtrotthana$/;
   
@@ -428,6 +450,7 @@ resetPassword() {
     localStorage.removeItem('userId')
     this.router.navigate(['/login']);
     this.showLogoutConfirmDialog = false;
+   this.closeSettings()
   }
 
   closeLogoutDialog() {

@@ -317,7 +317,22 @@ font-family: 900;
     height: 40px;
   
  }
+ .print{
+  border-radius: 10px; /* Rounded edges */
+  background-color: #D20006;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Shadow effect */
+  border: 1px solid #e0e0e0; /* Light border */
+  margin-bottom: -14px;
+  
+  padding: 6px;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+ }
  .download img{
   width:39px
+ }
+ .print img{
+  width: 39px;
  }
  

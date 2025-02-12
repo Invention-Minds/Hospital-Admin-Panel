@@ -106,7 +106,7 @@
                           <button class="btn-action" (click)="openAppointmentForm(estimation)"  pTooltip="View" tooltipPosition="top">
                             <img src="/view.svg" alt="Confirm">
                           </button>
-                          <button class="btn-action" (click)="markPACdone(estimation)"  pTooltip="PAC" tooltipPosition="top">
+                          <button class="btn-action" *ngIf="estimation.estimationType !== 'MM' " (click)="openAdvancePopup(estimation)"  pTooltip="PAC" tooltipPosition="top">
                             <img src="/pac.svg" alt="Confirm">
                           </button>
 
@@ -137,7 +137,7 @@
 <div *ngIf="showCancelFeedback" class="estimation-modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>Advance Confirmation for {{ selectedEstimation.patientName }}</h3>
+        <h3>Cancellation for {{ selectedEstimation.patientName }}</h3>
         <button class="popup-close" (click)="closeCancelFeedback()">
           <img src="/popup-close.svg" />
         </button>
@@ -167,6 +167,55 @@
       <div class="modal-footer">
         <button class="save-button" (click)="saveFeedback()">Save</button>
         <button class="close-button" (click)="closeCancelFeedback()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="showAdvancePopup" class="estimation-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Advance Confirmation for {{ selectedEstimation.patientName }}</h3>
+        <button class="popup-close" (click)="closeAdvancePopup()">
+          <img src="/popup-close.svg" />
+        </button>
+      </div>
+      <hr />
+      <div class="modal-body">
+        <p>
+          Patient Name<span class="space">:</span>{{ selectedEstimation?.patientName }}
+        </p>
+        <p>
+          Surgery Date<span class="space-1">:</span> {{ selectedEstimation?.estimatedDate }}
+        </p>
+
+
+      <div class="estimation-input-container">
+        <!-- Input field for estimation -->
+        <input 
+          type="text" 
+          name="advance"
+          [(ngModel)]="advanceAmount" 
+        required
+          class="custom-input"
+        />
+        <label for="advance" class="custom-label">Advance Amount*</label>
+      </div>
+
+      <div class="estimation-input-container">
+        <!-- Input field for estimation -->
+        <input 
+          type="text" 
+          [(ngModel)]="receiptNumber" 
+          required
+          class="custom-input"
+        />
+        <label for="receiptNumber" class="custom-label">Receipt Number*</label>
+      </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="save-button" (click)="savePAC(selectedEstimation)">Save</button>
+        <button class="close-button" (click)="closeAdvancePopup()">Close</button>
       </div>
     </div>
   </div>

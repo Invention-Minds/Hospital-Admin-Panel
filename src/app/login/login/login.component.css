@@ -212,3 +212,17 @@ align-items: center;
   }
 
 }
+@media (max-width: 500px){
+  .login-container, .login-form{
+    width: 100%;
+  }
+  .login-container{
+    padding: 3.5rem 1rem;
+  }
+  .input-group{
+    width: 100%;
+  }
+  .login-form p{
+    text-align: center;
+  }
+}

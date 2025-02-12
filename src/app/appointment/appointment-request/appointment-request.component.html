@@ -19,7 +19,7 @@
         </th>
         <th>Time</th>
         <th>Status</th>
-        <th>Source</th>
+        <!-- <th>Source</th> -->
         <th>Action</th>
       </tr>
     </thead>
@@ -42,7 +42,7 @@
             {{ appointment.isAccepted ? 'Doctor Request' : 'Pending' }}
           </span>
         </td>
-        <td>{{appointment.requestVia}}</td>
+        <!-- <td>{{appointment.requestVia}}</td> -->
         <td class="button">
           <button class="btn-action">
             <img src="icons/book.png" alt="check" class="action-icon" (click)="openAppointmentForm(appointment)"

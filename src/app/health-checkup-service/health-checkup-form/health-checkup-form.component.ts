@@ -574,14 +574,14 @@ export class HealthCheckupFormComponent implements OnInit {
               phoneNumber: formattedPhoneNumber,
               email: form.value.email,
             };
-            this.appointmentService.addPatient(patientDetails).subscribe({
-              next: (response) => {
-                console.log('Patient added successfully:', response);
-              },
-              error: (error) => {
-                console.error('Error adding patient:', error);
-              },
-            });
+            // this.appointmentService.addPatient(patientDetails).subscribe({
+            //   next: (response) => {
+            //     console.log('Patient added successfully:', response);
+            //   },
+            //   error: (error) => {
+            //     console.error('Error adding patient:', error);
+            //   },
+            // });
             const updatedSerive = {...payload, response}
             this.healthCheckupService.sendWhatsappMessageForService(messagePayload).subscribe({
               next: (response) => {

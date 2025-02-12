@@ -339,7 +339,9 @@ export class AppointmentConfirmService {
   sendSmsMessage(data: any): Observable<any> {
     return this.http.post<any>(`${environment.apiUrl}/sms/send-sms`, data);
   }
-
+  individualComplete(data: any): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/whatsapp/mark-complete`, data);
+  }
   // Method to get appointment by ID (if needed)
   getAppointmentById(appointmentId: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/${appointmentId}`);
@@ -400,11 +402,30 @@ export class AppointmentConfirmService {
   }): Observable<any> {
     return this.http.post(`${environment.apiUrl}/whatsapp/send-waiting-message`, payload);
   }
+  lateLogin(payload: {
+    doctorPhoneNumber: string,
+    noOfPatients: number,
+    doctorName: string,
+    doctorId: number
+  }): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/whatsapp/send-doctor-remainder`, payload);
+  }
+  adminLateLoginDoctor(payload: {
+    adminPhoneNumber: string,
+    noOfPatients: number,
+    doctorName: string,
+    doctorId: number
+  }): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/whatsapp/send-admin-late`, payload);
+  }
   bulkUpdateAppointments(appointments: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/bulk-update`, appointments);
   }
   bulkUpdateAppointmentsForAccept(appointments: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/bulk-updates-accept`, appointments);
+  }
+  bulkCancel(appointments: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/bulk-cancel`, appointments);
   }
   private leaveRequestSubject = new Subject<boolean>();
 

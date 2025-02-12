@@ -72,7 +72,7 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngIf="filteredServices.length === 0">
+        <tr *ngIf="doctorCloseOpdSummary.length === 0">
           <td colspan="11" class="no-records-message">
             No records to display
           </td>
@@ -98,7 +98,7 @@
                         </button>
                       </td>
                 </tr> -->
-        <tr *ngFor="let summary of doctorCloseOpdSummary;  let i = index">
+        <tr *ngFor="let summary of filteredSummary;  let i = index">
           <td>{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
           <td>{{ summary.doctorName }}</td>
           <td>{{ summary.department }}</td>
@@ -112,9 +112,13 @@
           <td class="button">
             <!-- Update Button -->
             <button class="btn-action" (click)="updateAppointment(summary)" *ngIf="!summary.isAccepted">
-              <img src="accept.svg" alt="check" class="action-icon" pTooltip="Accept" tooltipPosition="top">
+              <img src="accept.svg" alt="Accept" class="action-icon" pTooltip="Accept" tooltipPosition="top">
             </button>
         
+            <!-- Show "Cancel" button if already accepted -->
+            <button class="btn-action cancel-btn" (click)="cancelAppointment(summary)" *ngIf="summary.isAccepted">
+              <img src="appt-cancel.png" alt="Cancel" class="action-icon" pTooltip="Cancel" tooltipPosition="top">
+            </button>
             <!-- Print Button -->
             <button class="btn-action" (click)="printAppointments(summary)">
               <img src="print.svg" alt="print" class="action-icon" pTooltip="Print Summary" tooltipPosition="top">

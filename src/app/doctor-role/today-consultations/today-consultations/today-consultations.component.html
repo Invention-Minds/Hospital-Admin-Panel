@@ -6,7 +6,7 @@
         <img src="/end.svg" > End Consultation
     </button>
 </div>
-<div class="table-container" *ngIf="!isLoading">
+<div class="table-container" *ngIf="!isLoading || !isDesktopView">
     <div class="table-wrapper">
       <table class="appointment-table" *ngIf="!isLoading">
         <thead>
@@ -76,6 +76,56 @@
       </div>
     </div>
   </div>
+  <div class="mobile-appointments" *ngIf="!isDesktopView">
+    <div *ngFor="let appointment of filteredAppointments" class="appointment-card">
+      <div class="card-header">
+        <div class="patient-info">
+          <div>
+            <img src="admin-icons/admin-icon.jpg" class="profile-pic">
+          </div>
+          <div>
+            <h3>{{ appointment.patientName }}</h3>
+            <p class="patient">Patient</p>
+          </div>
+        </div>
+       <div class="calendar-div">
+        <p class="date-time">
+          <img src="/w-calendar.svg" alt="calendar" class="icon"> {{ appointment.date }} 
+        </p>
+        <p class="date-time">
+          <img src="/w-time.svg" alt="calendar" class="icon"> {{ appointment.time }}
+        </p>
+       </div>
+      </div>
+      <div class="card-actions">
+        <button class="start" [disabled]="appointment.checkedOut === true" (click)="appointment.checkedOut === false && startConsultation(appointment)">
+          <img class="image" src="/start.svg">Start 
+        </button>
+        <button class="finish" [disabled]="appointment.endConsultationTime !== null " (click)="appointment.endConsultationTime === null  && finishConsultation(appointment)">
+          <img class="image" src="/finish.svg">Finish
+        </button>
+        <button class="postPond" (click)="postPondAppointment(appointment)">
+          <img class="image" src="/pause.svg">PostPoned
+        </button>
+        <button class="estimation" (click)="openEstimationPopup(appointment)">
+          <img class="image" src="/est.svg">Estimation
+        </button>
+        <button class="transfer" [disabled]="appointment.isTransfer" (click)="!appointment.isTransfer && openTransferPopup(appointment)">
+          <img class="image" src="/transfer.svg">Transfer
+        </button>
+      </div>
+    </div>
+    <div class="pagination">
+      <button class="pagination-btn prev" (click)="prevPage()" [disabled]="currentPage === 1">←</button>
+      <button class="pagination-btn next" (click)="nextPage()" [disabled]="currentPage === totalPages">→</button>
+      <div class="page-info">
+        Page
+        <input type="number" [(ngModel)]="currentPage" min="1" [max]="totalPages" class="page-input"
+          (change)="onPageChange()">
+        of {{ totalPages }}
+      </div>
+    </div>
+  </div>
   <p-toast></p-toast>
  
   
@@ -111,6 +161,20 @@
             </label>
           </div>
         </div>
+        <div class="estimation-type-container">
+          <label class="estimation-type-label">Estimation Status:</label>
+          <div class="radio-buttons">
+            <label>
+              <input type="radio" name="estimationStatus" [(ngModel)]="estimationStatus" value="planned" />
+              Planned
+            </label>
+            <label>
+              <input type="radio" name="estimationStatus" [(ngModel)]="estimationStatus" value="immediate" />
+              Immediate
+            </label>
+          </div>
+        </div>
+
 
       <div class="estimation-input-container">
         <!-- Input field for estimation -->
@@ -178,7 +242,7 @@
   <div *ngIf="showCloseOpdPopup" class="close-opd-modal">
     <div class="modal-content-close-opd">
       <div class="modal-header">
-        <h3>Select Slots for Close OPD Request</h3>
+        <h3>Select Slots for Close OPD </h3>
         <button class="popup-close" (click)="closeCloseOpdPopup()">
           <img src="/popup-close.svg" alt="Close Popup" />
         </button>
@@ -186,14 +250,14 @@
       <hr />
       <div class="modal-body">
         <p>
-          Please select the slots you want to send for Request to Close OPD:
+          Please select slots to close OPD
         </p>
         <div class="select-all-container">
             <button class="select-all-button" (click)="selectAllSlots()">Select All</button>
             <button class="unselect-all-button" (click)="unselectAllSlots()">Unselect All</button>
           </div>
         <div class="slots-container">
-          <div *ngFor="let slot of filteredAppointments" class="slot-item">
+          <div *ngFor="let slot of closeOpdAppointments" class="slot-item">
             <input
               type="checkbox"
               [id]="slot.time"
@@ -204,7 +268,7 @@
         </div>
       </div>
       <div class="modal-footer-close-opd">
-        <button class="approval-button" (click)="sendSelectedSlots()">Send Request</button>
+        <button class="approval-button" (click)="sendSelectedSlots()">Submit</button>
         <button class="close-button" (click)="closeCloseOpdPopup()">Cancel</button>
       </div>
     </div>
@@ -231,7 +295,7 @@
         </form>
       </div>
       <div class="modal-footer">
-        <button class="save-button" (click)="submitLeaveRequest()">Request</button>
+        <button class="save-button" (click)="submitLeaveRequest()">Submit</button>
         <button class="close-button" (click)="closeLeaveRequestPopup()">Close</button>
       </div>
     </div>

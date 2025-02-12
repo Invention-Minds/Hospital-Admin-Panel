@@ -427,3 +427,18 @@ line-height: normal;
 }
 
 
+
+@media screen and (max-width: 768px) {
+  .header-container{
+   margin-left: 0;
+   justify-content: center;
+  }
+  .hospital-name{
+    display: none;
+  }
+  .user-section{
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    width: 100%;
+  }
+}

@@ -24,10 +24,9 @@ export class DoctorAppointmentsComponent {
   sortColumn: keyof any | undefined = undefined;  // No sorting initially
   sortDirection: string = 'asc';  // Default sorting direction
   searchOptions = [
-    { label: 'Patient Name', value: 'patientName' },
-    { label: 'Phone Number', value: 'phoneNumber' },
     { label: 'Doctor Name', value: 'doctorName' },
     { label: 'Department', value: 'department' },
+    { label: 'Status', value: 'isAccepted'}
   ];
   selectedSearchOption: any = this.searchOptions[0];
   selectedDateRange: Date[] = [];
@@ -39,6 +38,7 @@ export class DoctorAppointmentsComponent {
   activeComponent: string = 'confirmed';
   confirmedServices: any[] = [];
   doctorCloseOpdSummary: any[] = [];
+  filteredSummary: any[] = [];
 
 
 
@@ -122,6 +122,7 @@ export class DoctorAppointmentsComponent {
     });
   
     this.doctorCloseOpdSummary = Array.from(summaryMap.values());
+    this.filteredSummary = this.doctorCloseOpdSummary
     console.log(this.doctorCloseOpdSummary)
   }
   updateAppointment(summary: any): void {
@@ -217,80 +218,156 @@ export class DoctorAppointmentsComponent {
       printWindow.print();
     }
   }
+  // onSearch(): void {
+
+  //   this.filteredServices = this.confirmedAppointments.filter((service) => {
+  //     let matches = true;
+
+  //     // Filter by search option
+  //     if (this.selectedSearchOption && this.searchValue && service) {
+  //       switch (this.selectedSearchOption) {
+  //         case 'patientName':
+  //           matches = service.patientName
+  //             ?.toLowerCase()
+  //             .includes(this.searchValue.toLowerCase());
+  //           break;
+  //         case 'phoneNumber':
+  //           matches = service.phoneNumber?.includes(this.searchValue);
+  //           break;
+  //         case 'doctorName':
+  //           matches = !!service.doctorName
+  //             ?.toLowerCase()
+  //             .includes(this.searchValue.toLowerCase());
+  //           break;
+  //           case 'departmentName':
+  //             matches = !!service.department
+  //               ?.toLowerCase()
+  //               .includes(this.searchValue.toLowerCase());
+  //             break;
+  //             case 'isAccepted':
+  //               if (this.searchValue.toLowerCase() === 'requested') {
+  //                 matches = service.isAccepted === false;
+  //               } else if (this.searchValue.toLowerCase() === 'accepted') {
+  //                 matches = service.isAccepted === true;
+  //               } else {
+  //                 matches = false; // Default case if searchValue is not 'Requested' or 'Accepted'
+  //               }
+  //               break;
+  //       }
+
+  //     }
+
+  //     // Filter by date range
+  //     if (this.selectedDateRange && this.selectedDateRange.length) {
+  //       const serviceDate = new Date(service.date);
+  //       const startDate = new Date(this.selectedDateRange[0]);
+  //       const endDate = this.selectedDateRange[1]
+  //         ? new Date(this.selectedDateRange[1])
+  //         : startDate; // Use the same date for both start and end if it's a single date
+
+  //       // Normalize endDate to include the full day
+  //       const normalizedEndDate = new Date(endDate);
+  //       normalizedEndDate.setHours(23, 59, 59, 999);
+
+  //       if (startDate.getTime() === normalizedEndDate.getTime()) {
+  //         // Single date selected
+  //         matches =
+  //           matches &&
+  //           serviceDate.toDateString() === startDate.toDateString(); // Match only the date part
+  //       } else {
+  //         // Date range selected
+  //         matches =
+  //           matches &&
+  //           serviceDate >= startDate &&
+  //           serviceDate <= normalizedEndDate; // Match within the range
+  //       }
+  //     }
+
+  //     // Filter by specific date
+  //     if (this.selectedDate) {
+  //       const singleDate = new Date(this.selectedDate);
+  //       matches =
+  //         matches &&
+  //         new Date(service.date).toDateString() === singleDate.toDateString();
+  //     }
+
+  //     console.log(matches);
+  //     return matches;
+
+  //   });
+  // }
   onSearch(): void {
-
-    this.filteredServices = this.confirmedAppointments.filter((service) => {
+    this.filteredServices = [...this.confirmedAppointments]; // Reset filtered services
+  
+    this.filteredSummary = this.doctorCloseOpdSummary.filter((summary) => {
       let matches = true;
-
-      // Filter by search option
-      if (this.selectedSearchOption && this.searchValue && service) {
+  
+      // **Filter by selected search option**
+      if (this.selectedSearchOption && this.searchValue) {
         switch (this.selectedSearchOption) {
-          case 'patientName':
-            matches = service.patientName
-              ?.toLowerCase()
-              .includes(this.searchValue.toLowerCase());
-            break;
-          case 'phoneNumber':
-            matches = service.phoneNumber?.includes(this.searchValue);
-            break;
           case 'doctorName':
-            matches = !!service.doctorName
+            matches = summary.doctorName
               ?.toLowerCase()
               .includes(this.searchValue.toLowerCase());
             break;
-            case 'departmentName':
-              matches = !!service.department
-                ?.toLowerCase()
-                .includes(this.searchValue.toLowerCase());
-              break;
+  
+          case 'department':
+            matches = summary.department
+              ?.toLowerCase()
+              .includes(this.searchValue.toLowerCase());
+            break;
+  
+          case 'isAccepted': // **Filter by Status: Requested or Accepted**
+            if (this.searchValue.toLowerCase() === 'requested') {
+              matches = summary.isAccepted === false;
+            } else if (this.searchValue.toLowerCase() === 'accepted') {
+              matches = summary.isAccepted === true;
+            } else {
+              matches = false; // Default case if searchValue is invalid
+            }
+            break;
+  
+          default:
+            matches = true;
         }
-
       }
-
-      // Filter by date range
+  
+      // **Filter by Calendar Date Selection**
       if (this.selectedDateRange && this.selectedDateRange.length) {
-        const serviceDate = new Date(service.date);
+        const summaryDate = new Date(summary.date);
         const startDate = new Date(this.selectedDateRange[0]);
         const endDate = this.selectedDateRange[1]
           ? new Date(this.selectedDateRange[1])
-          : startDate; // Use the same date for both start and end if it's a single date
-
+          : startDate; // If only one date is selected, use it as both start and end
+  
         // Normalize endDate to include the full day
         const normalizedEndDate = new Date(endDate);
         normalizedEndDate.setHours(23, 59, 59, 999);
-
+  
         if (startDate.getTime() === normalizedEndDate.getTime()) {
           // Single date selected
           matches =
             matches &&
-            serviceDate.toDateString() === startDate.toDateString(); // Match only the date part
+            summaryDate.toDateString() === startDate.toDateString(); // Match exact date
         } else {
           // Date range selected
           matches =
             matches &&
-            serviceDate >= startDate &&
-            serviceDate <= normalizedEndDate; // Match within the range
+            summaryDate >= startDate &&
+            summaryDate <= normalizedEndDate; // Match within range
         }
       }
-
-      // Filter by specific date
-      if (this.selectedDate) {
-        const singleDate = new Date(this.selectedDate);
-        matches =
-          matches &&
-          new Date(service.date).toDateString() === singleDate.toDateString();
-      }
-
-      console.log(matches);
+  
       return matches;
-
     });
+  
+    console.log(this.filteredSummary); // Check filtered data in console
   }
-
+  
 
   refresh() {
     this.selectedDateRange = [];
-    this.filteredServices = [...this.confirmedAppointments];
+    this.filteredSummary = this.doctorCloseOpdSummary
   }
   downloadData(): void {
     if (this.filteredServices.length === 0) {
@@ -456,77 +533,28 @@ export class DoctorAppointmentsComponent {
   openAppointmentFormAfterLocked(service: any): void {
     this.reschedule.emit(service);
   }
-  cancelAppointment(appointment: any) {
-    // appointment.date = this.convertDateToISO(appointment.date);
-    const cancel: any = {
-      ...appointment,
-      status: 'cancelled',
-      requestVia: appointment.requestVia
-    };
+  cancelAppointment(summary: any) {
 
-    this.appointmentService.addCancelledAppointment(cancel);
-    // this.appointmentService.sendWhatsAppMessage(cancel).subscribe({
-    //   next: (response) => {
-    //     console.log('WhatsApp message sent successfully:', response);
-    //   },
-    //   error: (error) => {
-    //     console.error('Error sending WhatsApp message:', error);
-    //   }
-    // });
-    this.doctorService.getDoctorDetails(appointment.doctorId).subscribe({
-      next: (response) =>{
-        const doctorPhoneNumber = response?.phone_number;
-        const appointmentDetails ={
-          patientName: appointment?.patientName,
-          doctorName: appointment?.doctorName,
-          date: appointment?.date,
-          time: appointment?.time,
-          doctorPhoneNumber: doctorPhoneNumber,
-          patientPhoneNumber: appointment?.phoneNumber,
-          status: 'cancelled'
-        }
-        this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
-          next: (response) => {
-            // console.log('SMS message sent successfully:', response);
-            this.messageService.add({ severity: 'success', summary: 'Success', detail: 'SMS message sent successfully!' });
-          },
-          error: (error) => {
-            console.error('Error sending SMS message:', error);
-          }
+    this.appointmentService.bulkCancel(summary.appointments).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'All appointments have been accepted successfully!'
         });
-        this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
-          next: (response) => {
-            // console.log('WhatsApp message sent successfully:', response);
-            this.messageService.add({ severity: 'success', summary: 'Success', detail: 'WhatsApp message sent successfully!' });
-          },
-          error: (error) => {
-            console.error('Error sending WhatsApp message:', error);
-            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending WhatsApp message!' });
-          }
+        this.fetchConfirmedAppointments()
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to update appointments.'
         });
+        console.error('Error updating appointments:', err);
       }
-      
-    });
-    const appointmentDetails = {
-      patientName: appointment?.patientName,
-      doctorName: appointment?.doctorName,
-      date: appointment?.date,
-      time: appointment?.time,
-    };
-    const patientEmail = appointment.email;
-
-    const emailStatus = 'cancelled';
-    this.appointmentService.sendEmail(patientEmail, emailStatus, appointmentDetails, 'patient').subscribe({
-      next: (response) => {
-        // console.log('Email sent to patient successfully:', response);
-        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to patient successfully!' });
-      },
-      error: (error) => {
-        console.error('Error sending email to patient:', error);
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending email to patient!' });
-      },
-    });
-    this.confirmedAppointments = this.confirmedAppointments.filter(a => a.id !== appointment.id);
+    });  
 
   }
   // Lock a service

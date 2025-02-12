@@ -54,7 +54,7 @@ export class DoctorDetailsComponent implements OnInit {
     });
   }
   click(){
-    // console.log('clicked');
+    console.log('clicked');
     this.isEditMode = true;
   }
  // Method to handle deleting a doctor with a confirmation dialog
@@ -292,7 +292,7 @@ closeDeleteDialog(): void {
 
   // Initiate editing a doctor profile
   editProfile(doctor: Doctor): void {
-    // console.log("true")
+    console.log("true")
     if (!doctor) {
       console.error("No doctor selected for editing.");
       return;

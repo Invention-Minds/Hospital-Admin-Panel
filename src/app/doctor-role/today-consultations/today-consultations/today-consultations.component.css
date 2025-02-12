@@ -292,7 +292,7 @@ tbody tr:hover {
   cursor: not-allowed; /* Change cursor to indicate the button is disabled */
   opacity: 0.6; /* Make the button less prominent */
 }
-.finish:disabled{
+.finish:disabled {
   background-color: #f0f0f0; /* Gray background for disabled button */
   cursor: not-allowed; /* Change cursor to indicate the button is disabled */
   opacity: 0.6; /* Make the button less prominent */
@@ -373,7 +373,7 @@ tbody tr:hover {
   line-height: normal;
   cursor: pointer;
 }
-.transfer{
+.transfer {
   display: inline-flex;
   height: 36px;
   padding: 8px 10px;
@@ -382,9 +382,9 @@ tbody tr:hover {
   gap: 10px;
   flex-shrink: 0;
   border-radius: 6px;
-  border: 1px solid #FB9C2A;
-  background: #FFF;
-  color: #FB9C2A;
+  border: 1px solid #fb9c2a;
+  background: #fff;
+  color: #fb9c2a;
   font-family: Kanit;
   font-size: 14px;
   font-style: normal;
@@ -469,7 +469,7 @@ tbody tr:hover {
   background: #fff;
   padding: 20px;
   width: 673px;
-  height: 680px;
+  height: 780px;
   flex-shrink: 0;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
@@ -868,6 +868,168 @@ input {
 .slot-item label {
   cursor: pointer;
 }
-.content{
+.content {
   text-align: center;
+}
+/* Default styles (Table View) */
+.table-container {
+  display: block;
+}
+
+/* Hide the mobile cards by default */
+.mobile-appointments {
+  display: none;
+}
+
+/* Show the mobile cards on smaller screens */
+@media screen and (max-width: 768px) {
+  .table-container {
+    display: none; /* Hide the table */
+  }
+
+  .mobile-appointments {
+    display: block;
+    padding: 10px;
+  }
+
+  .appointment-card {
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .card-header {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .date-time {
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    margin: 0;
+  }
+
+  .icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .card-actions {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .card-actions button {
+    flex: 1;
+    min-width: 100px;
+    padding: 8px;
+    font-size: 14px;
+    text-align: center;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  .profile-pic {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    margin-right: 10px;
+  }
+  .patient-info {
+    display: flex;
+    width: 100%;
+  }
+  h3 {
+    color: #001345;
+    font-family: Kanit;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+    margin: 0;
+  }
+
+  .patient {
+    color: #001345;
+    font-family: Kanit;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+    margin: 0;
+  }
+  .modal-content,
+  .modal-content-transfer,
+  .modal-content-leave,
+  .modal-content-close-opd {
+    width: 90%;
+    height: auto;
+    padding: 15px;
+    max-height: 462px;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch; 
+    border-radius: 10px;
+  }
+
+  .modal-footer,
+  .modal-footer-close-opd {
+    flex-direction: column;
+  }
+
+  .save-button,
+  .close-button {
+    width: 100%;
+    font-size: 16px;
+  }
+  /* Hide scrollbar but allow scrolling */
+.mobile-container {
+  overflow-y: auto; /* Allow vertical scrolling */
+  scrollbar-width: thin; /* For Firefox - makes scrollbar thin */
+  scrollbar-color: transparent transparent; /* Transparent scrollbar */
+}
+
+/* Hide scrollbar for Webkit (Chrome, Safari) */
+.mobile-container::-webkit-scrollbar {
+  width: 4px; /* Reduce scrollbar width */
+}
+
+.mobile-container::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2); /* Light scrollbar */
+  border-radius: 10px;
+}
+
+.mobile-container::-webkit-scrollbar-track {
+  background: transparent; /* Hide track */
+}
+.container{
+  margin-top: 30px;
+  margin-right: 0px;
+  justify-content: unset;
+  justify-self: unset;
+  padding-left: 10px;
+}
+.calendar-div{
+  border-radius: 10px;
+background: #001345;
+width: 100%;
+height: 44px;
+flex-shrink: 0;
+color: #FFF;
+font-family: Kanit;
+font-size: 14px;
+font-style: normal;
+font-weight: 500;
+line-height: normal;
+display: flex;
+justify-content: space-around;
+align-items: center;
+}
 }

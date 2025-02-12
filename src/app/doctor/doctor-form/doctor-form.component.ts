@@ -727,12 +727,8 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
           );
         } else {
           // Handle the case where no specific day is modified
-          if (this.isSlotDurationChanged) {
-            this.saveDoctorDetails();
-          }
-          else {
-            console.error('No specific day was detected for modification.');
-          }
+         this.saveDoctorDetails()
+
 
         }
 

@@ -38,6 +38,9 @@ export class EstimationConfirmedComponent {
   cancellerName: string = '';
   role: string = '';
   adminType: string = '';
+  receiptNumber: string = '';
+  advanceAmount: string = '';
+  showAdvancePopup: boolean = false
 
   @Output() reschedule = new EventEmitter<any>();
   // Value entered by the user (could be Patient ID or Phone Number based on selection)
@@ -287,6 +290,14 @@ export class EstimationConfirmedComponent {
     this.currentPage = 1; // Reset to the first page after sorting
   }
   completeAppointment(estimation: any): void {
+    if(!estimation.pacDone){
+      this.messageService.add({
+              severity: 'warn',
+              summary: 'Need to do PAC',
+              detail: `Kindly Do PAC`,
+            });
+      return
+    }
     this.selectedEstimation = estimation;
     const estimationData = {
       estimationId: this.selectedEstimation.estimationId,
@@ -306,19 +317,22 @@ export class EstimationConfirmedComponent {
     );
 
   }
-  markPACdone(estimation: any){
+  savePAC(estimation: any){
     this.selectedEstimation = estimation;
     const estimationData = {
       estimationId: this.selectedEstimation.estimationId,
       updateFields: {
-        pacDone: true
+        pacDone: true,
+        pacAmountPaid: this.advanceAmount,
+        pacReceiptNumber: this.receiptNumber
       }
 
     }
     this.estimationService.updateEstimationPacDone(estimationData.estimationId, estimationData).subscribe(
       (response) => {
         console.log('Estimation updated successfully:', response);
-        this.fetchPendingEstimations()
+        this.fetchPendingEstimations();
+        this.closeAdvancePopup()
       },
       (error) => {
         console.error('Error updating estimation:', error);
@@ -370,7 +384,18 @@ export class EstimationConfirmedComponent {
       }
     );
   }
+
+      openAdvancePopup(estimation: any): void {
+      this.selectedEstimation = estimation
+      this.showAdvancePopup = true;
+    }
   
+    closeAdvancePopup(): void {
+      this.showAdvancePopup = false;
+      this.advanceAmount = '',
+      this.receiptNumber = ''
+
+    }
   lockService(service: any): void {
     if (!service.id) return;
 

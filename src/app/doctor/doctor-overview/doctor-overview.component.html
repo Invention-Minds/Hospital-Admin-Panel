@@ -5,13 +5,13 @@
     <div class="stats-cards">
       <div class="card" 
       [ngClass]="{'active-card': activeComponent === 'appointments'}"
-      (click)="showAppointments()">
+      (click)="showAppointments()" *ngIf="role === 'admin' || role === 'super_admin'">
         <div class="card-icon">
-          <img src="/add-doctor.svg" alt="Doctor Available Icon" />
+          <img src="/close-opd-overview.svg" alt="Doctor Available Icon" />
         </div>
         <div class="card-content">
           <!-- <h2>42</h2> -->
-          <p>Appointment Requests</p>
+          <p>Close OPD Req</p>
         </div>
       </div>
       <div class="card" 
@@ -38,7 +38,7 @@
       </div>
       <div class="card" 
       [ngClass]="{'active-card': activeComponent === 'form'}"
-      (click)="showDoctorForm()">
+      (click)="showDoctorForm()"  *ngIf="role === 'admin' || role === 'super_admin'">
         <div class="card-icon">
           <img src="/add-doctor.svg" alt="Doctor Available Icon" />
         </div>

@@ -19,7 +19,7 @@
         </div>
         <div class="input-container">
           <input type="text" id="patientName" name="patientName" placeholder=" " class="custom-input"
-            pattern="^[a-zA-Z . ]*$" ngModel [(ngModel)]="formData.patientName" placeholder=" "
+          pattern="^[a-zA-Z() . ]*$" ngModel [(ngModel)]="formData.patientName" placeholder=" "
             [readonly]="formData.statusOfEstimation === 'approved' || formData.statusOfEstimation === 'confirmed'  "
             required />
           <label for="patientName" class="custom-label">Patient Name*</label>
@@ -180,7 +180,7 @@
         </div>
         <div class="input-container">
           <input type="date" id="estimationPreferredDate" name="estimationPreferredDate" class="custom-input" ngModel
-            [(ngModel)]="formData.estimationPreferredDate" required
+            [(ngModel)]="formData.estimationPreferredDate" 
             [readonly]="formData.statusOfEstimation === 'approved' || formData.statusOfEstimation === 'confirmed'  "
             placeholder=" " class="custom-input" />
           <label for="estimationPreferredDate" class="custom-label">Preferred Date by Doctor*</label>

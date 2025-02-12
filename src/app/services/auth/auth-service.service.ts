@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { tap } from 'rxjs/operators'; 
 import { environment } from '../../../environment/environment.prod';
 
@@ -104,6 +105,16 @@ initializeUserFromStorage(): void {
   }
   getAllUsers(): Observable<any> {
     return this.http.get(`${this.apiUrl}/get-all-users`);
+  }
+  getUserDetails(userId: number): Observable<any> {
+    const params = new HttpParams().set('userId', userId); // Pass userId as a query param
+
+    return this.http.get<any>(`${this.apiUrl}/user-details`, { params }).pipe(
+      catchError((error) => {
+        console.error('Error fetching user details:', error);
+        return throwError(() => new Error('Failed to fetch user details'));
+      })
+    );
   }
   // Utility function to extract role from username
   private extractRoleFromUsername(username: string): string {

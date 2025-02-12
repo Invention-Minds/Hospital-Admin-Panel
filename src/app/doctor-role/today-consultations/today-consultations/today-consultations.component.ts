@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, Output, EventEmitter, HostListener } from '@angular/core';
 import { AppointmentConfirmService } from '../../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../../services/doctor-details/doctor-service.service';
 import { EstimationService } from '../../../services/estimation/estimation.service';
@@ -101,14 +101,29 @@ export class TodayConsultationsComponent {
   countOfPending: number = 0;
   surgeryTime: string = '';
   doctorId: number = 0;
+  estimationStatus: string = 'planned';
   searchOptions = [
     { label: 'Patient Name', value: 'patientName' },
     { label: 'Phone Number', value: 'phoneNumber' }
   ];
+  closeOpdAppointments: Appointment[] = []
+  isDesktopView: boolean = true;
+
+
+
+  @HostListener('window:resize', ['$event'])
+  onResize() {
+    this.checkScreenSize();
+  }
+
+  checkScreenSize() {
+    this.isDesktopView = window.innerWidth > 768; // Use table if screen width > 768px
+  }
 
   private eventSource: EventSource | null = null;
   // Method to handle sorting by a specific column
   ngOnInit() {
+    this.checkScreenSize();
     const today = new Date();
     const year = today.getFullYear();
     const month = (today.getMonth() + 1).toString().padStart(2, '0');
@@ -171,7 +186,7 @@ export class TodayConsultationsComponent {
         this.confirmedAppointments = appointments.filter(appointment => appointment.status === 'confirmed' && (appointment as any).checkedIn === true && appointment.date === this.today);
         this.filteredAppointments = this.confirmedAppointments;
         // console.log(this.doctor)
-        this.completedAppointments = this.filteredAppointments.filter(appointment => !appointment.checkedOut && !appointment.isCloseOPD)
+        this.completedAppointments = this.filteredAppointments.filter(appointment => !appointment.checkedOut || (!appointment.checkedOut && !appointment.isCloseOPD))
         // console.log(this.completedAppointments, 'complete')
         this.filteredAppointments.sort((a, b) => {
           const timeA = this.parseTimeToMinutes(a.time);
@@ -496,7 +511,8 @@ export class TodayConsultationsComponent {
         estimationType: this.estimationType,
         estimationCreatedTime: new Date(),
         remarks: this.remarks,
-        surgeryTime: this.surgeryTime
+        surgeryTime: this.surgeryTime,
+        estimationStatus: this.estimationStatus
       };
       // console.log(estimationDetails)
       this.estimationService.createEstimationDetails(estimationDetails).subscribe({
@@ -524,7 +540,8 @@ export class TodayConsultationsComponent {
       estimationType: this.estimationType,
       estimationCreatedTime: new Date(),
       remarks: this.remarks,
-      surgeryTime: this.surgeryTime
+      surgeryTime: this.surgeryTime,
+      estimationStatus: this.estimationStatus
     };
 
     // this.doctor.filter((doc:any) => {
@@ -569,12 +586,29 @@ export class TodayConsultationsComponent {
   }
   openCloseOpdPopup(): void {
     if (this.filteredAppointments.length > 0) {
-      this.filteredAppointments.forEach((appointment) => {
-        appointment.checkedIn = false; // Add a `selected` property for checkboxes
-      });
-      this.showCloseOpdPopup = true;
+      const pendingAppointments = this.filteredAppointments.some(appointment => appointment.checkedOut && !appointment.endConsultation);
+
+      if (pendingAppointments) {
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Pending Appointments',
+          detail: 'Some appointments are started but not marked as finished. Please finish them before closing the OPD.',
+        });
+      } else {
+        // Proceed with closing OPD if all appointments are either finished or not checked out
+        // this.filteredAppointments.forEach((appointment) => {
+        //   appointment.checkedOut = false; // Reset checked-in status
+        // });
+        console.log(this.filteredAppointments)
+        this.closeOpdAppointments = this.filteredAppointments.filter(appointment => 
+          appointment.checkedOut === false 
+        );
+        
+        console.log(this.closeOpdAppointments)
+        this.showCloseOpdPopup = true;
+      }
       // console.log('Appointments to close:', this.filteredAppointments);
-    } else {
+    }else {
       this.messageService.add({ severity: 'info', summary: 'Info', detail: 'No Appointments are Scheduled' });
     }
   }
@@ -759,7 +793,7 @@ export class TodayConsultationsComponent {
   //   this.closeCloseOpdPopup();
   // }
   sendSelectedSlots(): void {
-    const selectedAppointments = this.filteredAppointments
+    const selectedAppointments = this.closeOpdAppointments
       .filter((slot) => slot.selectedSlot) // Filter only selected slots
       .map((slot) => ({
         id: slot.id,
@@ -798,14 +832,14 @@ export class TodayConsultationsComponent {
   }
 
   selectAllSlots(): void {
-    this.filteredAppointments.forEach((slot) => {
+    this.closeOpdAppointments.forEach((slot) => {
       slot.selectedSlot = true;
     });
   }
 
   // Unselect all slots
   unselectAllSlots(): void {
-    this.filteredAppointments.forEach((slot) => {
+    this.closeOpdAppointments.forEach((slot) => {
       slot.selectedSlot = false;
     });
   }

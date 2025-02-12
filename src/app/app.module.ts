@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule, provideClientHydration } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { PhoneMaskPipe } from './services/phone-mask.pipe';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -143,7 +144,7 @@ import { AppointmentTransferComponent } from './appointment/appointment-transfer
     EstimationSubmitComponent,
     DoctorAppointmentsComponent,
     AppointmentTransferComponent,
-
+    PhoneMaskPipe
   
     
   ],
@@ -178,6 +179,7 @@ import { AppointmentTransferComponent } from './appointment/appointment-transfer
     NgxLoadingButtonsModule,
     CommonModule
   ],
+  exports: [PhoneMaskPipe],
   providers: [
     DatePipe,
     InactivityService,

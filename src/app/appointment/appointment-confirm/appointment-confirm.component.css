@@ -214,8 +214,7 @@ tbody tr:hover {
 }
 
 .edit-icon, .save-icon, .cancel-icon {
-  width: 16px; /* Adjust icon size */
-  height: 16px;
+ 
   cursor: pointer;
   margin-left: 8px;
 }

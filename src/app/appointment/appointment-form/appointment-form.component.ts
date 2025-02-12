@@ -38,6 +38,8 @@ interface Appointment {
   isrescheduled?: boolean;
   checkedIn?: boolean;
   doctor?: Doctor;
+  age?: string;
+  gender?: string;
 }
 type DayName = 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat';
 
@@ -96,6 +98,9 @@ export class AppointmentFormComponent implements OnInit {
   department: string = '';
   doctorType: string = '';
   patients: any[] = [];
+  filteredPRNs: any[] = []; // To store filtered PRN suggestions
+  showSuggestions = false; // Control visibility of suggestion dropdown
+  appointmentStatus: string = 'pending'
 
   private subscription!: Subscription;
 
@@ -114,16 +119,16 @@ export class AppointmentFormComponent implements OnInit {
     const year = today.getFullYear();
     const month = (today.getMonth() + 1).toString().padStart(2, '0');
     const day = today.getDate().toString().padStart(2, '0');
-    this.minDate = `${year}-${month}-${day}`;
-    // // this.minDate = today.toISOString().split('T')[0]
-    // // console.log(this.minDate)
-    // if (!(this.minDate instanceof Date)) {
-    //   console.error('Invalid minDate, resetting to today.');
-    //   this.minDate = new Date(); // Reset to today's date
-    // }
+    // this.minDate = `${year}-${month}-${day}`;
+    // this.minDate = today.toISOString().split('T')[0]
+    // console.log(this.minDate)
+    if (!(this.minDate instanceof Date)) {
+      console.error('Invalid minDate, resetting to today.');
+      this.minDate = new Date(); // Reset to today's date
+    }
     this.loadDoctors();
     this.appointmentService.getAllPatients().subscribe(
-      (patients =>{
+      (patients => {
         this.patients = patients;
         // console.log(this.patients)
       })
@@ -138,13 +143,15 @@ export class AppointmentFormComponent implements OnInit {
       firstName: ['', [Validators.required, Validators.pattern(/^[a-zA-Z\s]*$/)]],
       lastName: ['', [Validators.pattern(/^[a-zA-Z.\s]*$/)]],
       prnNumber: ['', [Validators.pattern(/^[0-9]+$/)]],
-      phoneNumber: ['', [Validators.required, Validators.pattern(/^[0-9]{10}$/)]],
+      phoneNumber: ['', [Validators.required, Validators.pattern(/^\d{10}$|^\d{3}\*{4}\d{3}$/)]],
       email: ['', [Validators.email, Validators.pattern(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)]],
       doctorName: ['', [Validators.required, Validators.pattern(/^[a-zA-Z().\s]*$/)]],
       appointmentDate: ['', Validators.required],
       appointmentTime: ['', Validators.required],
       requestVia: ['Call', Validators.required], // Set default to 'Call'
-      appointmentStatus: ['Confirm', Validators.required] // Set default to 'Confirm'
+      appointmentStatus: ['Confirm', Validators.required], // Set default to 'Confirm'
+      age: ['', Validators.pattern(/^[0-9]+$/)],
+      gender: ['Male']
     });
     if (this.appointment?.phoneNumber.startsWith('91')) {
       this.appointment.phoneNumber = this.appointment.phoneNumber.substring(2);
@@ -160,6 +167,17 @@ export class AppointmentFormComponent implements OnInit {
       // console.log("existing")
       // console.log(this.appointment)
       this.doctorId = this.appointment.doctorId;
+      console.log(this.appointment.status)
+      this.appointmentStatus = this.appointment.status
+      setTimeout(() => {
+
+
+        if (this.appointmentStatus !== 'pending') {
+          this.appointmentForm.get('phoneNumber')?.setValue(this.getMaskedPhoneNumber(this.appointment!.phoneNumber));
+        } else {
+          this.appointmentForm.get('phoneNumber')?.setValue(this.appointment!.phoneNumber);
+        }
+      }, 1000);
 
       // Edit existing pending appointment - check availability for the given doctor, date, and time.
       // const appointmentDate = this.appointment.date;
@@ -271,20 +289,21 @@ export class AppointmentFormComponent implements OnInit {
       console.log(this.doctorAvailability, this.date);
       this.date = this.formatDate(this.date)
       // Format the date correctly
-      // this.date = new Date(this.date);
-      // console.log(this.date, 'date');
-      // console.log(today, this.minDate)
-      // if (this.date.toDateString() === today.toDateString()) {
-      //   this.minDate = null;
-      //   console.log(this.minDate, 'minDate');
-      // } else if (this.date < today) {
-      //   this.minDate = null; // Also handle past dates
-      //   console.log(this.minDate, 'minDate');
-      // }
+      this.date = new Date(this.date);
+      console.log(this.date, 'date');
+      console.log(today, this.minDate)
+      if (this.date.toDateString() === today.toDateString()) {
+        this.minDate = null;
+        console.log(this.minDate, 'minDate');
+      } else if (this.date < today) {
+        this.minDate = null; // Also handle past dates
+        console.log(this.minDate, 'minDate');
+      }
 
       // Check if doctor type is Visiting Consultant
       if (this.doctorAvailability.doctorType === 'Visiting Consultant') {
         this.isVisitingConsultant = true;
+        this.department = this.doctorAvailability.departmentName!
         this.doctorId = this.doctorAvailability.id;
         // console.log(this.doctorId)
         // Handle Visiting Consultant doctor slots by prompting the user to select manually
@@ -292,6 +311,8 @@ export class AppointmentFormComponent implements OnInit {
           doctorName: this.doctorAvailability!.name,
           appointmentDate: this.date,
           appointmentTime: this.currentAppointment?.time,  // Set to null initially, prompt user to select a time
+          age: this.currentAppointment?.age,
+          gender: this.currentAppointment?.gender,
         });
 
         // Show message or handle slot selection using p-calendar for manual time selection
@@ -300,6 +321,7 @@ export class AppointmentFormComponent implements OnInit {
         // For other doctor types, continue using the current slot
         // console.log(this.slot.time);
         this.doctorId = this.doctorAvailability.id;
+        this.department = this.doctorAvailability.departmentName!
         // console.log(this.doctorId)
         this.checkDoctorAvailabilityAndLoadSlots(this.doctorAvailability.id, this.date);
 
@@ -334,31 +356,119 @@ export class AppointmentFormComponent implements OnInit {
     }
   }
 
-  onPRNChange(){
-    // console.log(this.appointmentForm.value.prnNumber)
-    if (!this.appointmentForm.value.prnNumber) {
-      // Reset fields if UHID is empty
-      this.appointmentForm.value.patientName = '';
-      this.appointmentForm.value.phoneNumber = ''
+  // onPRNChange(){
+  //   // console.log(this.appointmentForm.value.prnNumber)
+  //   if (!this.appointmentForm.value.prnNumber) {
+  //     // Reset fields if UHID is empty
+  //     this.appointmentForm.value.patientName = '';
+  //     this.appointmentForm.value.phoneNumber = ''
+  //     return;
+  //   }
+  //   const matchingEstimation = this.patients.find(
+  //     (estimation) => String(estimation.prn) === String(this.appointmentForm.value.prnNumber)
+  //   );
+  //   // console.log("🔍 Matching Estimation:", matchingEstimation);
+
+  //   // console.log(matchingEstimation)
+  //   if (matchingEstimation) {
+  //     const nameParts = matchingEstimation.name.split(" ");
+  //     this.appointmentForm.get('firstName')?.setValue(nameParts[0]);
+  //     this.appointmentForm.get('lastName')?.setValue(nameParts.slice(1).join(' '));
+  //     this.appointmentForm.get('phoneNumber')?.setValue(matchingEstimation.phoneNumber);
+  //   } else {
+  //     // Reset if no match found
+  //     this.appointmentForm.value.patientName = '';
+  //      this.appointmentForm.value.patientPhoneNumber = ''
+  //   }
+  // }
+  onPRNChange() {
+    const input = this.appointmentForm.get('prnNumber')?.value || '';
+
+    if (!input) {
+      this.filteredPRNs = [];
       return;
     }
-    const matchingEstimation = this.patients.find(
-      (estimation) => String(estimation.prn) === String(this.appointmentForm.value.prnNumber)
-    );
-    // console.log("🔍 Matching Estimation:", matchingEstimation);
 
-    // console.log(matchingEstimation)
-    if (matchingEstimation) {
-      const nameParts = matchingEstimation.name.split(" ");
-      this.appointmentForm.get('firstName')?.setValue(nameParts[0]);
-      this.appointmentForm.get('lastName')?.setValue(nameParts.slice(1).join(' '));
-      this.appointmentForm.get('phoneNumber')?.setValue(matchingEstimation.phoneNumber);
+    // Filter PRN suggestions
+    this.filteredPRNs = this.patients.filter(patient =>
+      String(patient.prn).startsWith(String(input)) // Convert to string before calling startsWith()
+    );
+
+    if (this.filteredPRNs.length === 0) {
+      this.showSuggestions = false;
     } else {
-      // Reset if no match found
-      this.appointmentForm.value.patientName = '';
-       this.appointmentForm.value.patientPhoneNumber = ''
+      this.showSuggestions = true;
     }
   }
+
+  selectPRN(selectedPatient: any) {
+    if (!selectedPatient) return;
+
+    console.log(selectedPatient)
+
+    // Extract name and remove prefixes
+    const nameParts = selectedPatient.name.split(" ");
+    const titles = ["Mr.", "Ms.", "Mrs.", "Miss.", "Dr.", "Master"];
+
+    let firstName = nameParts[0];
+    let lastName = nameParts.slice(1).join(" ");
+
+    if (titles.includes(firstName)) {
+      firstName = nameParts[1] || "";
+      lastName = nameParts.slice(2).join(" ") || "";
+    }
+
+    // Ensure that form controls exist before setting values
+    this.appointmentForm.patchValue({
+      prnNumber: selectedPatient.prn || '',
+      firstName: firstName || '',
+      lastName: lastName || '',
+      phoneNumber: selectedPatient.mobileNo || '', // Extract only numbers from "81 Yrs"
+      gender: selectedPatient.gender
+    });
+    this.appointmentForm.get('age')?.clearAsyncValidators();
+    this.appointmentForm.get('age')?.updateValueAndValidity();
+    this.appointmentForm.patchValue({
+      age: selectedPatient.age ? selectedPatient.age.replace(/\D/g, '') : ''
+    });
+
+    this.appointmentForm.get('age')?.updateValueAndValidity();
+
+    console.log("PRN Selected:", selectedPatient);
+
+    // Hide suggestions
+    this.showSuggestions = false;
+  }
+
+
+  hideSuggestions() {
+    // Hide suggestions after clicking outside, but keep it visible if user is interacting
+    setTimeout(() => {
+      this.showSuggestions = false;
+    }, 200);
+  }
+  getMaskedPhoneNumber(phoneNumber: string): string {
+    if (!phoneNumber) return ''; // If no phone number is available, return blank
+
+    // Mask middle 4 digits for non-pending statuses
+    return phoneNumber.replace(/(\d{3})\d{4}(\d{3})/, '$1****$2');
+  }
+
+  onPhoneFocus() {
+    if (this.appointmentStatus !== 'pending') return; // Do nothing if not pending
+
+    const originalPhone = this.appointmentForm.get('phoneNumber')?.value;
+    this.appointmentForm.get('phoneNumber')?.setValue(originalPhone.replace(/\D/g, '')); // Remove masking
+  }
+
+  onPhoneBlur() {
+    if (this.appointmentStatus === 'pending') return; // Do nothing if pending
+
+    const originalPhone = this.appointmentForm.get('phoneNumber')?.value;
+    this.appointmentForm.get('phoneNumber')?.setValue(this.getMaskedPhoneNumber(originalPhone));
+  }
+
+
   ngOnDestroy(): void {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
@@ -436,6 +546,7 @@ export class AppointmentFormComponent implements OnInit {
     this.appointmentForm.get('doctorName')?.setValue(doctor.name);
     this.doctorId = doctor.id;
     this.department = doctor.departmentName!;
+    console.log(this.department)
     this.doctorType = doctor.doctorType;
     // console.log(this.doctorId)
     this.onDoctorChange(this.doctorId)
@@ -510,6 +621,7 @@ export class AppointmentFormComponent implements OnInit {
 
   }
   private checkDoctorAvailabilityAndLoadSlots(doctorId: number, appointmentDate: any): void {
+    console.log(this.appointmentForm.value)
     // Fetch unavailable dates
     this.doctorService.getUnavailableDates(doctorId).subscribe(
       (unavailableDates) => {
@@ -584,6 +696,7 @@ export class AppointmentFormComponent implements OnInit {
       this.showAvailabilityMessage = false;
       this.timeError = '';
     }
+    console.log(this.appointmentForm.value)
 
     // console.log(this.bookedSlots, "booked")
 
@@ -908,28 +1021,28 @@ export class AppointmentFormComponent implements OnInit {
   generateTimeSlots(availableFrom: string, slotDuration: number): string[] {
     const slots: string[] = [];
     const timeRanges = availableFrom.split(',').map(range => range.trim()); // Split by commas and trim spaces
-  
+
     for (const range of timeRanges) {
       const [startTime, endTime] = range.split('-').map(time => time.trim()); // Split start and end times
       let current = new Date(`1970-01-01T${startTime}`);
       const end = new Date(`1970-01-01T${endTime}`);
-  
+
       while (current <= end) {
         const slotStart = this.convertTo12HourFormat(current.toTimeString().substring(0, 5));
         slots.push(slotStart);
-  
+
         // Move to the next slot
         current.setMinutes(current.getMinutes() + slotDuration);
-  
+
         // Ensure it does not exceed the end time
         if (current > end) break;
       }
     }
-  
+
     console.log(slots);
     return slots;
   }
-  
+
 
 
 
@@ -974,13 +1087,13 @@ export class AppointmentFormComponent implements OnInit {
     const month = (today.getMonth() + 1).toString().padStart(2, '0');
     const day = today.getDate().toString().padStart(2, '0');
     const date = `${year}-${month}-${day}`;
-    // if (appointment.date === date) {
-    //   this.minDate = null;
-    //   console.log(this.minDate, 'minDate');
-    // } else if (appointment.date < date) {
-    //   this.minDate = null; // Also handle past dates
-    //   console.log(this.minDate, 'minDate');
-    // }
+    if (appointment.date === date) {
+      this.minDate = null;
+      console.log(this.minDate, 'minDate');
+    } else if (appointment.date < date) {
+      this.minDate = null; // Also handle past dates
+      console.log(this.minDate, 'minDate');
+    }
     const nameParts = appointment.patientName.split(' ');
     this.appointmentForm.patchValue({
       firstName: nameParts[0],
@@ -992,7 +1105,9 @@ export class AppointmentFormComponent implements OnInit {
       appointmentTime: appointment.time,
       requestVia: appointment.requestVia,  // Default selection
       appointmentStatus: appointment.status, // Default selection
-      prnNumber: appointment.prnNumber
+      prnNumber: appointment.prnNumber,
+      age: appointment.age,
+      gender: appointment.gender
     });
 
   }
@@ -1032,7 +1147,7 @@ export class AppointmentFormComponent implements OnInit {
   // }
 
   closeForm(event: Event) {
-    event.preventDefault(); // Prevents any default action, if needed
+   console.log('close')
     this.close.emit();
     this.showForm = false;
     // console.log(this.showForm)
@@ -1073,6 +1188,8 @@ export class AppointmentFormComponent implements OnInit {
     this.appointment.emailSent = true;
     this.appointment.smsSent = true;
     this.appointment.messageSent = true;
+    this.appointment.age = formValues.age;
+    this.appointment.gender = formValues.gender;
 
     // console.log("Updated Appointment:", this.appointment);
   }
@@ -1172,7 +1289,7 @@ export class AppointmentFormComponent implements OnInit {
         phoneNumber: phoneNumber,
         doctorId: doctorId,
         doctorName: this.appointmentForm.value.doctorName,
-        department: department, // Adjust as needed
+        department: this.department, // Adjust as needed
         date: this.appointmentForm.value.appointmentDate,
         time: this.time,
         requestVia: this.appointmentForm.value.requestVia,
@@ -1182,6 +1299,8 @@ export class AppointmentFormComponent implements OnInit {
         emailSent: true,
         messageSent: true,
         prnNumber: parseInt(this.appointmentForm.value.prnNumber),
+        age: this.appointmentForm.value.age,
+        gender: this.appointmentForm.value.gender,
       };
       // console.log(appointmentDetails)
       this.appointmentService.addCancelledAppointment(appointmentDetails);
@@ -1208,7 +1327,8 @@ export class AppointmentFormComponent implements OnInit {
             time: appointmentDetails?.time,
             doctorPhoneNumber: doctorPhoneNumber,
             patientPhoneNumber: appointmentDetails?.phoneNumber,
-            status: 'cancelled'
+            status: 'cancelled',
+            requestVia: appointmentDetails.requestVia
           }
           this.appointmentService.sendSmsMessage(appointmentDetailsforMessage).subscribe({
             next: (response) => {
@@ -1313,7 +1433,7 @@ export class AppointmentFormComponent implements OnInit {
           phoneNumber: phoneNumber,
           doctorId: doctorId,
           doctorName: this.appointmentForm.value.doctorName,
-          department: department, // Adjust as needed
+          department: this.department, // Adjust as needed
           date: this.appointmentForm.value.appointmentDate,
           time: this.time,
           requestVia: this.appointmentForm.value.requestVia,
@@ -1323,6 +1443,9 @@ export class AppointmentFormComponent implements OnInit {
           emailSent: true,
           messageSent: true,
           prnNumber: parseInt(this.appointmentForm.value.prnNumber),
+          age: this.appointmentForm.value.age,
+          gender: this.appointmentForm.value.gender,
+
         };
         this.appointment = appointmentDetails;
         this.appointment.date = this.appointmentForm.get('appointmentDate')?.value;
@@ -1349,7 +1472,7 @@ export class AppointmentFormComponent implements OnInit {
             phoneNumber: phoneNumber,
             doctorId: doctorId,
             doctorName: this.appointmentForm.value.doctorName,
-            department: department, // Adjust as needed
+            department: this.department, // Adjust as needed
             date: this.appointmentForm.value.appointmentDate,
             time: this.time,
             requestVia: this.appointmentForm.value.requestVia,
@@ -1359,6 +1482,8 @@ export class AppointmentFormComponent implements OnInit {
             emailSent: true,
             messageSent: true,
             prnNumber: parseInt(this.appointmentForm.value.prnNumber),
+            age: this.appointmentForm.value.age,
+            gender: this.appointmentForm.value.gender,
           };
           // console.log(this.time)
           this.appointment.time = this.time;
@@ -1382,7 +1507,8 @@ export class AppointmentFormComponent implements OnInit {
                   time: this.appointment?.time,
                   doctorPhoneNumber: doctorPhoneNumber,
                   patientPhoneNumber: phoneNumber,
-                  status: 'rescheduled'
+                  status: 'rescheduled',
+                  requestVia: this.appointment!.requestVia
                 }
                 this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
                   next: (response) => {
@@ -1508,6 +1634,10 @@ export class AppointmentFormComponent implements OnInit {
             emailSent: true,
             messageSent: true,
             prnNumber: parseInt(this.appointmentForm.value.prnNumber),
+            age: this.appointmentForm.value.age,
+            gender: this.appointmentForm.value.gender,
+
+
           };
           // console.log(time)
 
@@ -1536,7 +1666,8 @@ export class AppointmentFormComponent implements OnInit {
                   time: this.appointment?.time,
                   doctorPhoneNumber: doctorPhoneNumber,
                   patientPhoneNumber: phoneNumber,
-                  status: 'rescheduled'
+                  status: 'rescheduled',
+                  requestVia: this.appointment!.requestVia
                 }
                 this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
                   next: (response) => {
@@ -1674,6 +1805,7 @@ export class AppointmentFormComponent implements OnInit {
                 doctorPhoneNumber: doctorPhoneNumber,
                 patientPhoneNumber: phoneNumber,
                 status: 'confirmed',
+                requestVia: this.appointment!.requestVia
               }
               this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
                 next: (response) => {
@@ -1767,33 +1899,33 @@ export class AppointmentFormComponent implements OnInit {
           email: email
         };
         // console.log('patient details', patientDetails);
-        this.appointmentService.addPatient(patientDetails).subscribe(
-          (patientResponse) => {
-            // console.log('Patient information saved successfully', patientResponse);
-            this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Patient information saved successfully' });
-            const patientId = patientResponse.id;
-            this.appointmentForm.patchValue({ patientId: patientId });
-            this.appointment!.patientId = patientId;
+        // this.appointmentService.addPatient(patientDetails).subscribe(
+        //   (patientResponse) => {
+        //     // console.log('Patient information saved successfully', patientResponse);
+        //     this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Patient information saved successfully' });
+        //     const patientId = patientResponse.id;
+        //     this.appointmentForm.patchValue({ patientId: patientId });
+        //     this.appointment!.patientId = patientId;
 
-            if (this.appointment && this.appointment.patientId !== undefined) {
-              this.appointmentService.getPatientById(this.appointment.patientId).subscribe({
-                next: (response) => {
-                  const prnNumber = response.prn;
-                  this.appointmentForm.patchValue({ prnNumber: prnNumber });
-                  // console.log('Fetched PRN:', prnNumber);
-                },
-                error: (error) => {
-                  console.error('Error fetching patient details:', error);
-                }
-              });
-            } else {
-              console.error('Patient ID is undefined. Cannot fetch patient details.');
-            }
-          },
-          (error) => {
-            console.error('Error saving patient information:', error);
-          }
-        );
+        //     if (this.appointment && this.appointment.patientId !== undefined) {
+        //       this.appointmentService.getPatientById(this.appointment.patientId).subscribe({
+        //         next: (response) => {
+        //           const prnNumber = response.prn;
+        //           this.appointmentForm.patchValue({ prnNumber: prnNumber });
+        //           // console.log('Fetched PRN:', prnNumber);
+        //         },
+        //         error: (error) => {
+        //           console.error('Error fetching patient details:', error);
+        //         }
+        //       });
+        //     } else {
+        //       console.error('Patient ID is undefined. Cannot fetch patient details.');
+        //     }
+        //   },
+        //   (error) => {
+        //     console.error('Error saving patient information:', error);
+        //   }
+        // );
 
 
         // const doctorId = this.getDoctorIdByName(this.appointmentForm.value.doctorName);
@@ -1836,7 +1968,10 @@ export class AppointmentFormComponent implements OnInit {
             emailSent: true,
             messageSent: true,
             prnNumber: parseInt(this.appointmentForm.value.prnNumber),
-            doctorType: selectedDoctor.doctorType
+            doctorType: selectedDoctor.doctorType,
+            age: this.appointmentForm.value.age,
+            gender: this.appointmentForm.value.gender,
+
           };
           this.appointment = appointmentDetails;
           // Mark the slot as booked
@@ -1866,7 +2001,8 @@ export class AppointmentFormComponent implements OnInit {
                   time: this.appointment?.time,
                   doctorPhoneNumber: doctorPhoneNumber,
                   patientPhoneNumber: this.appointment?.phoneNumber,
-                  status: this.appointment?.status
+                  status: this.appointment?.status,
+                  requestVia: this.appointment!.requestVia
                 }
                 this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
                   next: (response) => {
@@ -1970,6 +2106,7 @@ export class AppointmentFormComponent implements OnInit {
   }
   preventClose(event: Event): void {
     event.stopPropagation(); // Prevent clicks inside the form from closing it
+    console.log('closes')
   }
   formatTimeTo12Hour(date: Date): string {
     // Extract hours and minutes directly from the given date

@@ -108,11 +108,11 @@ export class AppointmentTransferComponent {
               ?.toLowerCase()
               .includes(this.searchValue.toLowerCase());
             break;
-            case 'departmentName':
-              matches = !!service.department
-                ?.toLowerCase()
-                .includes(this.searchValue.toLowerCase());
-              break;
+          case 'departmentName':
+            matches = !!service.department
+              ?.toLowerCase()
+              .includes(this.searchValue.toLowerCase());
+            break;
         }
 
       }
@@ -308,9 +308,19 @@ export class AppointmentTransferComponent {
     const { id: serviceId } = appointment;
     const payload = {
       ...appointment,
-      checkedIn: true,
+      status: 'completed',
     }
     if (!serviceId) return;
+
+    this.appointmentService.individualComplete(payload).subscribe({
+      next: (response) => {
+        console.log('WhatsApp message sent successfully:', response);
+        this.fetchConfirmedAppointments()
+      },
+      error: (error) => {
+        console.error('Error sending WhatsApp message:', error);
+      }
+    });
 
 
 
@@ -344,9 +354,9 @@ export class AppointmentTransferComponent {
     //   }
     // });
     this.doctorService.getDoctorDetails(appointment.doctorId).subscribe({
-      next: (response) =>{
+      next: (response) => {
         const doctorPhoneNumber = response?.phone_number;
-        const appointmentDetails ={
+        const appointmentDetails = {
           patientName: appointment?.patientName,
           doctorName: appointment?.doctorName,
           date: appointment?.date,
@@ -355,6 +365,7 @@ export class AppointmentTransferComponent {
           patientPhoneNumber: appointment?.phoneNumber,
           status: 'cancelled'
         }
+
         this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
           next: (response) => {
             // console.log('SMS message sent successfully:', response);
@@ -375,7 +386,7 @@ export class AppointmentTransferComponent {
           }
         });
       }
-      
+
     });
     const appointmentDetails = {
       patientName: appointment?.patientName,
@@ -396,7 +407,7 @@ export class AppointmentTransferComponent {
         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending email to patient!' });
       },
     });
-    this.confirmedAppointments = this.confirmedAppointments.filter(a => a.id !== appointment.id);
+    this.fetchConfirmedAppointments()
 
   }
   // Lock a service

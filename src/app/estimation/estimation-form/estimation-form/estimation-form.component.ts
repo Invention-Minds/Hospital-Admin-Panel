@@ -311,6 +311,8 @@ export class EstimationFormComponent {
       };
       this.cdr.detectChanges();
       console.log(this.formData)
+        // Manually mark surgeryTime as touched if it has a value
+
     }
     else {
       this.clearForm()
@@ -571,11 +573,21 @@ export class EstimationFormComponent {
       };
     }
   }
-
+  getInvalidControls(form: NgForm) {
+    const invalidControls = [];
+    for (const name in form.controls) {
+      if (form.controls[name].invalid) {
+        invalidControls.push(name);
+      }
+    }
+    return invalidControls;
+  }
+  
   onSubmit(form: any) {
-    this.updateInclusionsAndExclusions(); // Prepare inclusions and exclusions
-    this.saveAllSignatures(); // Save the signatures
-
+    // this.updateInclusionsAndExclusions(); // Prepare inclusions and exclusions
+    // this.saveAllSignatures(); // Save the signatures
+    console.log(form.controls);
+    console.log(this.getInvalidControls(form))
     if (!this.isAnyCheckboxChecked) {
       console.error('At least one inclusion must be selected.');
       return;

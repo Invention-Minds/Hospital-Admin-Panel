@@ -49,6 +49,16 @@
         </div>
         
       </div>
+      <div class="card" (click)="downloadFilteredData()">
+        <div class="card-icon">
+          <img src="/close-opd-overview.svg" alt="Doctor Available Icon" />
+        </div>
+        <div class="card-content">
+          <p  class="number">{{checkinAppointmentsToday}}</p>
+          <p>Check-in Today</p>
+        </div>
+        
+      </div>
     </div>
   </div>
 <div *ngIf="showAvailableDoctors" class="overlay">

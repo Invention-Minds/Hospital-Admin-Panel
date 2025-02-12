@@ -1,4 +1,4 @@
-import { Component , OnInit, Output, EventEmitter} from '@angular/core';
+import { Component , OnInit, Output, EventEmitter, HostListener} from '@angular/core';
 import { SettingsComponent } from "../settings/settings/settings.component";
 import { AppointmentConfirmService } from '../services/appointment-confirm.service';
 
@@ -15,7 +15,20 @@ export class SidebarComponent implements OnInit {
   type: string[] = []
   // openSetting: boolean = false;
   constructor(private appointmentService: AppointmentConfirmService) {}
+  isDesktopView: boolean = true;
+
+  
+
+  @HostListener('window:resize', ['$event'])
+  onResize() {
+    this.checkScreenSize();
+  }
+
+  checkScreenSize() {
+    this.isDesktopView = window.innerWidth > 768; // Use table if screen width > 768px
+  }
   ngOnInit(): void {
+    this.checkScreenSize()
     if (typeof window !== 'undefined' && window.localStorage) {
       // Fetch role from localStorage or the authentication service
       this.role = localStorage.getItem('role') || '';

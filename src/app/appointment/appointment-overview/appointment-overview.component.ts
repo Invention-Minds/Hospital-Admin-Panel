@@ -145,6 +145,12 @@ activeComponent: string = 'request'; // Default to showing the request component
     }
   }
 
+
+  getDynamicPlaceholder(searchValue: any): string {
+    console.log(searchValue)
+    return searchValue ? `Enter the ${searchValue}...` : 'Enter your search query';
+  }
+  
     
   
   refresh(){

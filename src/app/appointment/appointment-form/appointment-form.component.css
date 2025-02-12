@@ -1,189 +1,193 @@
 .overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.5);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-  
-  .appointment-modal {
-    width: 873px;
-    background-color: white;
-    border-radius: 30px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    position: relative;
-    height: 700px;
-  }
-  .phone-number-input {
-    display: flex;
-    align-items: center;
-  }
-  .select{
-    margin-left: 32px;
-  }
-  .phone-number-input span {
-    margin-right: 5px;
-    font-weight: bold;
-  }
-  small{
-    color: #D20006;
-    font-size: 10px;
-    font-weight: 500;
-  }
-  .appointment-header {
-    background-color: #0E2970;
-    /* padding: 15px; */
-    text-align: center;
-    color: white;
-    font-family: 'Kanit', sans-serif;
-    font-size: 32px;
-    font-weight: 500;
-    height: 70px;
-    border-radius: 20px 20px 0 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  h3{
-    margin: 0;
-  }
-  .errors{
-    margin-top: 42px;
-    margin-bottom: 28px;
-    margin-left: -179px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
 
-  }
-  .last-name{
-    margin-left: 98px !important;
-  }
-  .close-button {
-    position: absolute;
-    right: 20px;
-    top: 7px;
-    border: none;
-    background: none;
-    color: white;
-    font-size: 24px;
-    cursor: pointer;
-  }
-  
-  .form-content {
-    padding: 45px;
-  }
-  
-  .form-group {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 5px;
-    height: 65px;
-  }
-  .form-group-2{
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-  }
-  
-  .form-group label {
-   width: 170px;
-    color: #271E4A;
-    font-size: 16px;
-    font-family: Kanit;
-    font-weight: 400;
-  }
-  
-  input[type="text"],
-  input[type="number"],
+.appointment-modal {
+  width: 873px;
+  background-color: white;
+  border-radius: 30px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  position: relative;
+  height: 700px;
+}
+.phone-number-input {
+  display: flex;
+  align-items: center;
+}
+.select {
+  margin-left: 32px;
+}
+.phone-number-input span {
+  margin-right: 5px;
+  font-weight: bold;
+}
+small {
+  color: #d20006;
+  font-size: 10px;
+  font-weight: 500;
+}
+.appointment-header {
+  background-color: #0e2970;
+  /* padding: 15px; */
+  text-align: center;
+  color: white;
+  font-family: "Kanit";
+  font-size: 32px;
+  font-weight: 500;
+  height: 70px;
+  border-radius: 20px 20px 0 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+h3 {
+  margin: 0;
+}
+.errors {
+  margin-top: 42px;
+  margin-bottom: 28px;
+  margin-left: -179px;
+}
+.last-name {
+  margin-left: 98px !important;
+}
+.close-button {
+  position: absolute;
+  right: 20px;
+  top: 7px;
+  border: none;
+  background: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.form-content {
+  padding: 20px;
+}
+
+.form-group {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  height: 50px;
+}
+.form-group-2 {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.form-group label {
+  width: 170px;
+  color: #271e4a;
+  font-size: 16px;
+  font-family: Kanit;
+  font-weight: 400;
+}
+
+input[type="text"],
+input[type="number"],
 input[type="email"],
 input[type="tel"],
-input[type="date"] ,
+input[type="date"],
 select {
-    flex: 2;
-    /* padding: 10px; */
-    font-size: 14px;
-    border-radius: 4px;
-    border: 1px solid #3B3B3B;
-    padding-left: 10px;
-    /* width: 158px; */
-    height: 36px;
-    /* margin-left: 20px; */
-    /* margin-bottom: 20px; */
-  }
-input[type="date"]{
-    width: 170px;
-    margin-left: 20px;
+  flex: 2;
+  /* padding: 10px; */
+  font-size: 14px;
+  border-radius: 4px;
+  border: 1px solid #3b3b3b;
+  padding-left: 10px;
+  /* width: 158px; */
+  height: 36px;
+  /* margin-left: 20px; */
+  /* margin-bottom: 20px; */
+}
+input[type="date"] {
+  width: 170px;
+  margin-left: 20px;
 }
 input[type="text"],
 input[type="email"],
 input[type="number"],
-input[type="tel"]{
-    margin-left: 32px;
+input[type="tel"] {
+  margin-left: 32px;
 }
-::ng-deep .email{
+::ng-deep .email {
   color: black;
 }
-  .radio-group {
-    display: flex;
-    gap: 0px;
-    margin-top: 20px;
-  }
-  
-  .radio-group input {
-    margin-right: 5px;
-  }
-  .time label{
-    width: 182px;
-  }
-  .slot label{
-    margin-right: 30px;
-  }
-  .time{
-    margin-right: 38px;
-  }
-  .radio{
+.radio-group {
+  display: flex;
+  gap: 0px;
+  margin-top: 20px;
+}
+.radio-group-gender {
+  display: flex;
+  gap: 0px;
+  margin-top: 0px;
+  margin-right: 124px;
+}
 
-  }
-  .email{
-    margin-right:0px;
-  }
-  .phone{
-    margin-right: 52px;
-  }
-  .doctor{
-    margin-right: 52px;
-  }
-  .prn{
-    margin-right:167px
-  }
+.radio-group input {
+  margin-right: 5px;
+}
+.time label {
+  width: 182px;
+}
+.slot label {
+  margin-right: 30px;
+}
+.time {
+  margin-right: 38px;
+}
+.radio {
+}
+.email {
+  margin-right: 0px;
+}
+.phone {
+  margin-right: 52px;
+}
+.doctor {
+  margin-right: 52px;
+}
+.prn {
+  margin-right: 167px;
+}
 
-  .button-group {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 20px;
-  }
-  
-  button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    font-size: 16px;
-  }
-  
-  .btn-primary {
-    background-color: #169458;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-  }
-  .btn-primary:disabled {
-    background-color: #cccccc; /* Gray background for disabled button */
-    color: #666666; /* Light gray text for better readability */
-    cursor: not-allowed; /* Change cursor to indicate the button is disabled */
-    opacity: 0.6; /* Make the button less prominent */
+.button-group {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+.btn-primary {
+  background-color: #169458;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+.btn-primary:disabled {
+  background-color: #cccccc; /* Gray background for disabled button */
+  color: #666666; /* Light gray text for better readability */
+  cursor: not-allowed; /* Change cursor to indicate the button is disabled */
+  opacity: 0.6; /* Make the button less prominent */
 }
 .form-group {
   position: relative; /* This ensures the dropdown appears relative to the input field */
@@ -202,11 +206,11 @@ input[type="tel"]{
   overflow-y: auto; /* Allow scrolling if suggestions overflow */
   position: absolute; /* Position it absolutely relative to the form group */
   width: 75%;
-    z-index: 10;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    top: calc(100% + -20px);
-    border-radius: 4px;
-    left: 200px;
+  z-index: 10;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  top: calc(100% + -20px);
+  border-radius: 4px;
+  left: 200px;
 }
 
 .doctor-suggestions li {
@@ -218,40 +222,66 @@ input[type="tel"]{
 
 .doctor-suggestions li:hover {
   background-color: #f0f0f0; /* Light grey background on hover for better visibility */
-  color: #005D8C; /* Optional: Highlight text color on hover */
+  color: #005d8c; /* Optional: Highlight text color on hover */
+}
+.prn-suggestions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #ccc; /* Border to define dropdown */
+  background-color: #ffffff; /* White background to resemble a dropdown */
+  max-height: 200px; /* Restrict height for better display */
+  overflow-y: auto; /* Allow scrolling if suggestions overflow */
+  position: absolute; /* Position it absolutely relative to the form group */
+  width: 53%;
+  z-index: 10;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  top: calc(100% + -20px);
+  border-radius: 4px;
+  left: 200px;
 }
 
+.prn-suggestions li {
+  padding: 10px;
+  cursor: pointer;
+  font-size: 16px; /* Adjust font size for readability */
+  color: #333; /* Text color */
+}
 
-  
-  .btn-secondary {
-    cursor: not-allowed;
-    background-color: #C4C4C4;
-    color: black;
+.prn-suggestions li:hover {
+  background-color: #f0f0f0; /* Light grey background on hover for better visibility */
+  color: #005d8c; /* Optional: Highlight text color on hover */
+}
+
+.btn-secondary {
+  cursor: not-allowed;
+  background-color: #c4c4c4;
+  color: black;
+}
+.appointment-timing {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
+.availability-message {
+  color: #d20006;
+  font-size: 16px;
+  font-weight: 500;
+  position: relative;
+  bottom: 15px;
+}
+.unavailable-message {
+  color: #d20006;
+  font-size: 16px;
+  font-weight: 500;
+  position: relative;
+  bottom: 15px;
+}
+@media screen and (max-width: 1390px) {
+  .form-content {
+    padding: 32px 45px;
   }
-  .appointment-timing{
-    display: flex;
-    width: 100%;
-    justify-content: space-between;
+  .appointment-modal {
+    height: 637px;
   }
-  .availability-message{
-    color: #D20006;
-    font-size: 16px;
-    font-weight: 500;
-    position: relative;
-    bottom: 15px;
-  }
-  .unavailable-message{
-    color: #D20006;
-    font-size: 16px;
-    font-weight: 500;
-    position: relative;
-    bottom: 15px;
-  }
-  @media screen and (max-width: 1390px) {
-    .form-content{
-        padding: 32px 45px;
-    }
-    .appointment-modal{
-        height: 637px;
-    }
-  }
+}

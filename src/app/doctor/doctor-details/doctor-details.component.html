@@ -36,8 +36,8 @@
           <!-- <p class="doctor-specialty">{{ department.name }}</p> -->
           <p class="doctor-availability">Availability</p>
           <p class="availability-time">{{ doctor.availableFrom }}</p>
-          <button class="view-more-button">
-            <img src="/icons/edit.svg" alt="Edit Icon" (click)="editProfile(doctor)" class="button-icon"> Edit Profile
+          <button class="view-more-button" (click)="editProfile(doctor)">
+            <img src="/icons/edit.svg" alt="Edit Icon"  class="button-icon"> Edit Profile
           </button>
           <!-- <button id="doctor-btn-{{ doctor.name }}" (click)="click()">Click Me</button> -->
           <button class="unavailable-button" (click)="openUnavailableModal(doctor)">Unavailable</button>

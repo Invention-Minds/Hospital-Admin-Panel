@@ -33,3 +33,31 @@
     cursor: pointer;
   }
   
+  
+  /* Webkit-based browsers (Chrome, Safari) */
+  .content::-webkit-scrollbar {
+    width: 4px; /* Make scrollbar thin */
+  }
+  
+  .content::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2); /* Light scrollbar */
+    border-radius: 10px;
+  }
+  
+  .content::-webkit-scrollbar-track {
+    background: transparent; /* Hide scrollbar track */
+  }
+
+  @media screen and (max-width: 768px) {
+    .content {
+      overflow-y: auto; /* Enable vertical scrolling */
+      max-height: 90vh; /* Restrict height to viewport */
+      padding: 10px;
+      scrollbar-width: thin; /* Firefox: Make scrollbar thin */
+      scrollbar-color: transparent transparent; /* Hide scrollbar */
+    }
+    
+  }
+  
+
+  

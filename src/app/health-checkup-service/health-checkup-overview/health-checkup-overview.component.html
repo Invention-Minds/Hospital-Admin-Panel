@@ -1,7 +1,7 @@
 <div class="dashboard-section">
     <!-- <h1>Appointments</h1> -->
-    <div class="stats-cards">
-      <div class="card" 
+    <div class="stats-cards" *ngIf="isNotMHC()">
+      <div class="card-1" 
       [ngClass]="{'active-card': activeComponent === 'form'}"
       (click)="showNewAppointmentForm()">
         <div class="card-icon">
@@ -9,7 +9,7 @@
         </div>
         <div class="card-content">
           <!-- <h2>40</h2> -->
-          <p>Health CheckUp Form</p>
+          <!-- <p>Health CheckUp Form</p> -->
         </div>
       </div>
       <div class="card" 
@@ -69,6 +69,41 @@
       </div>
 
     </div>
+    <div class="stats-cards" *ngIf="isMHC()">
+      <div class="card-1" 
+      [ngClass]="{'active-card': activeComponent === 'mhcForm'}"
+      (click)="showMhcForm()">
+        <div class="card-icon">
+          <img src="/mhc-form.svg" alt="OPD Icon" />
+        </div>
+        <div class="card-content">
+          <!-- <h2>40</h2> -->
+          <!-- <p>Health CheckUp Form</p> -->
+        </div>
+      </div>
+      <div class="card" 
+      [ngClass]="{'active-card': activeComponent === 'mhcToday'}"
+      (click)="showMhcToday()">
+        <div class="card-icon">
+          <img src="/mhc-consul.svg" alt="Doctor Available Icon" />
+        </div>
+        <div class="card-content">
+          <!-- <h2>42</h2> -->
+          <p>Today Consultations</p>
+        </div>
+      </div>
+      <div class="card" 
+      [ngClass]="{'active-card': activeComponent === 'mhcConfirm'}"
+      (click)="showMhcConfirm()">
+        <div class="card-icon">
+          <img src="/mhc-confirm.svg" alt="Doctor Available Icon" />
+        </div>
+        <div class="card-content">
+          <!-- <h2>42</h2> -->
+          <p>Confirmed Appts</p>
+        </div>
+      </div>
+    </div>
   </div>
   <div class="component-section">
     <!-- <app-appointment-request *ngIf="activeComponent === 'request'" [selectedDateRange]="selectedDateRange" [selectedSearchOption]="selectedSearchOption"  [selectedValue]="searchValue"></app-appointment-request>
@@ -82,4 +117,8 @@
     <app-health-checkup-complete *ngIf="activeComponent === 'completed'" ></app-health-checkup-complete>
     <app-health-checkup-request *ngIf="activeComponent === 'request'" (reschedule)="openAppointmentForm($event)" ></app-health-checkup-request>
     <app-health-checkup-repeat *ngIf="activeComponent === 'repeated'" ></app-health-checkup-repeat>
+    <app-mhc-form *ngIf="activeComponent === 'mhcForm' " [selectedAppointment]="selectedAppointment"
+    (closeForm)="closeConsultation()"></app-mhc-form>
+    <app-mhc-today-consul *ngIf="activeComponent === 'mhcToday'" (reschedule)="openConsultationForm($event)"></app-mhc-today-consul>
+    <app-appointment-confirm *ngIf="activeComponent === 'mhcConfirm' "></app-appointment-confirm>
   </div>

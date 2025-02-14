@@ -92,6 +92,9 @@ import { EstimationOverdueComponent } from './estimation/estimation-overdue/esti
 import { EstimationSubmitComponent } from './estimation/estimation-submit/estimation-submit/estimation-submit.component';
 import { DoctorAppointmentsComponent } from './doctor/doctor-appointments/doctor-appointments/doctor-appointments.component';
 import { AppointmentTransferComponent } from './appointment/appointment-transfer/appointment-transfer/appointment-transfer.component';
+import { NewFormComponent } from './appointment/new-form/new-form.component';
+import { MhcFormComponent } from './health-checkup-service/mhc-form/mhc-form.component';
+import { MhcTodayConsulComponent } from './health-checkup-service/mhc-today-consul/mhc-today-consul.component';
 
 
 
@@ -144,7 +147,10 @@ import { AppointmentTransferComponent } from './appointment/appointment-transfer
     EstimationSubmitComponent,
     DoctorAppointmentsComponent,
     AppointmentTransferComponent,
-    PhoneMaskPipe
+    PhoneMaskPipe,
+    NewFormComponent,
+    MhcFormComponent,
+    MhcTodayConsulComponent
   
     
   ],

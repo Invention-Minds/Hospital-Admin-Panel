@@ -310,7 +310,7 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
   // ✅ Determines if a notification should be displayed
   private shouldDisplayNotification(notification: Notification): boolean {
     const isEstimator = this.subAdminType === 'Estimator';
-    const isTelecaller = this.subAdminType === 'Telecaller';
+    const isTelecaller = this.subAdminType === 'Tele Caller';
     const isFrontDesk = this.subAdminType === 'Front Desk';
     const isAdminManager = this.adminType === 'Manager' || this.adminType === 'Senior Manager';
   

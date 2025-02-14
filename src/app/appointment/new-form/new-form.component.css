@@ -1,0 +1,188 @@
+.root-container {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.formContainer {
+  width: 963px;
+  /* height: 776px; */
+  border-radius: 15px;
+  background: #FFF;
+}
+
+.formContent{
+    padding : 0 4%;
+}
+
+.formHeading{
+    color: #FFF;
+    position: relative;
+    font-family: Kanit;
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+    display: flex;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 70px;
+    background: #0e2970;
+    border-top-right-radius: 15px;
+    border-top-left-radius: 15px;
+}
+
+.closeButton{
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    position: relative;
+    height: 70px;
+    margin-top: -70px;
+}
+
+.closeButton i{
+    margin-right: 20px;
+    color: #fff;
+    font-size: 20px;
+    font-weight: bolder;
+}
+
+.sections{
+    display: flex;
+    gap: 30px;
+    width: 100%;
+}
+
+.lable_name{
+    width: 20%;
+    color: #271E4A;
+    font-family: Kanit;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.input_field{
+    width: 80%;
+}
+
+.input_field input, select{
+    border-radius: 4px;
+    border: 1px solid #3B3B3B;
+    height: 36px;
+    width: 100%;
+    padding: 5px 3%;
+}
+
+.input_field input::placeholder{
+    color: rgba(123, 123, 123, 0.40);
+    font-family: Kanit;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+}
+
+.input_flex{
+    display: flex;
+    gap: 20px;
+}
+
+.selectFlex{
+    display: flex;
+    gap: 20px;
+    width: 50%;
+}
+
+.selectFlex .lable_name{    
+    width: 64%;
+}
+
+.selectFlex .input_flex{
+    width: 40%;
+}
+
+.container_margin{
+    margin-top: 20px;
+}
+
+.radio_name{
+    color: #0E2970;
+    font-family: Kanit;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.radio_flex{
+    width: 50%;
+    display: flex;
+    gap: 20px;
+    flex-direction: column;
+}
+
+.radio_flex .lable_name{
+    width: 100%;
+    display: flex;
+    gap: 20px;
+    flex-direction: column;
+}
+
+
+.button_section{
+    display: flex;
+    align-items: center;
+    justify-content: right;
+    height: 100px;
+    gap: 30px;
+}
+
+.book_btn{
+    color: #FFF;
+    font-family: Kanit;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    width: 200px;
+    height: 44px;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    background-color: #169458;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.close_btn{
+    display: flex;
+    width: 180px;
+    height: 44px;
+    padding: 7px 0px;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    border-radius: 4px;
+    border: 1px solid #7B7B7B;
+    color: #7B7B7B;
+    font-family: Kanit;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.radio_flex .radioInput{
+    width: 100%;
+    display: flex;
+    gap: 20px;
+}

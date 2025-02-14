@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, HostListener } from '@angular/core';
 import { AppointmentConfirmService } from '../../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../../services/doctor-details/doctor-service.service';
 import { MessageService } from 'primeng/api';
@@ -60,11 +60,21 @@ export class FutureConsultationsComponent {
   allAppointments: Appointment[] = [];
   today: string = '';
   futureAppointments: Appointment[] = [];
+  isDesktopView: boolean = true;
 
   searchOptions = [
     { label: 'Patient Name', value: 'patientName' },
     { label: 'Phone Number', value: 'phoneNumber' }
   ];
+
+  @HostListener('window:resize', ['$event'])
+  onResize() {
+    this.checkScreenSize();
+  }
+
+  checkScreenSize() {
+    this.isDesktopView = window.innerWidth > 500; // Use table if screen width > 768px
+  }
   // Method to handle sorting by a specific column
   ngOnInit() {
     const today = new Date();
@@ -72,7 +82,7 @@ export class FutureConsultationsComponent {
     const month = (today.getMonth() + 1).toString().padStart(2, '0');
     const day = today.getDate().toString().padStart(2, '0');
     this.today = `${year}-${month}-${day}`;
-
+    this.checkScreenSize()
     // console.log('Setting isLoading to true');
     this.isLoading = true; // Start loading indicator
     this.userId = localStorage.getItem('userid')

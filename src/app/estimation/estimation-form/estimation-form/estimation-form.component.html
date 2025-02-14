@@ -129,7 +129,7 @@
                 {{ surgery }}
               </option>
             </select>
-            <label for="estimationName" class="custom-label">Surgery Name*</label>
+            <label for="estimationName" class="custom-label">Estimation Name*</label>
 
           </ng-container>
 
@@ -138,7 +138,7 @@
             <input type="text" id="estimationName" name="estimationName" pattern="^[a-zA-Z ]*$" class="custom-input"
               [(ngModel)]="formData.estimationName" required
               [readonly]="formData.statusOfEstimation === 'approved' || formData.statusOfEstimation === 'confirmed'" />
-            <label for="estimationName" class="custom-label">Surgery Name*</label>
+            <label for="estimationName" class="custom-label">Estimation Name*</label>
 
           </ng-template>
           <div *ngIf="estimationForm.submitted && estimationForm.controls['estimationName']?.invalid"
@@ -150,10 +150,10 @@
         </div>
 
 
-        <div class="input-container">
+        <div class="input-container" *ngIf="selectedEstimationType === 'SM' ">
 
           <select id="surgeryTime" name="surgeryTime" class="custom-input custom-select" ngModel
-            [(ngModel)]="formData.surgeryTime" required #surgeryTime="ngModel">
+            [(ngModel)]="formData.surgeryTime" [required]="selectedEstimationType === 'SM' " #surgeryTime="ngModel">
             <option value="" disabled selected>Select OT Utilization Time</option>
             <option value="0 to 15">0 to 15 mins</option>
             <option value="15 to 30">15 to 30 mins</option>
@@ -231,7 +231,7 @@
       <div class="form-row">
         <div class="input-container">
 
-          <select id="roomType" name="roomType" class="custom-input" ngModel [(ngModel)]="formData.roomType" required
+          <select id="roomType" name="roomType" class="custom-input custom-select" ngModel [(ngModel)]="formData.roomType" required
             #roomType="ngModel">
             <option value="" disabled selected>Select Room Type</option>
             <option value="General">General</option>

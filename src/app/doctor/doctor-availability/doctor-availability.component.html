@@ -53,8 +53,9 @@
         </div>
       </div>
       <div class="slots-wrapper" *ngIf="!isLoading">
-        <div *ngFor="let slot of doctor.slots"
+        <!-- <div *ngFor="let slot of doctor.slots"
              class="slot-box"
+             *ngIf="slot.status !== 'extra' || role === 'admin'"
              [pTooltip]="
              slot.status === 'booked' ? 'Booked' : 
              slot.status === 'extra' ? 'Extra':
@@ -73,7 +74,31 @@
              }"
            (click)="onSlotClick(doctor,slot)" >
           {{ slot.time }}
-        </div>
+        </div> -->
+        <ng-container *ngFor="let slot of doctor.slots">
+          <div *ngIf="slot.status !== 'extra' || (role === 'admin' || role === 'super_admin')"
+               class="slot-box"
+               [pTooltip]="
+               slot.status === 'booked' ? 'Booked' : 
+               slot.status === 'extra' ? 'Extra':
+               slot.status === 'blocked' ? 'Blocked':
+               slot.status === 'unavailable' ? 'Unavailable' :
+               slot.status === 'available' ? 'Available' :
+               slot.status === 'complete' ? 'Complete' : 
+               ''"
+               [ngClass]="{
+                 'slot-available': slot.status === 'available',
+                 'slot-booked': slot.status === 'booked',
+                 'slot-unavailable': slot.status === 'unavailable',
+                 'complete': slot.status === 'complete',
+                 'blocked': slot.status === 'extra' && (role === 'admin' || role === 'super_admin'),
+                 'unavailale-slot-by-user': doctor.unavailableSlots!.includes(slot.time)
+               }"
+             (click)="onSlotClick(doctor, slot)">
+            {{ slot.time }}
+          </div>
+        </ng-container>
+        
         <div *ngIf="doctor.doctorType === 'Visiting Consultant'" class="add-appointment-wrapper">
           <button class="add-slot-button" (click)="onAddSlotClick(doctor)" >Add Slot</button>
         </div>

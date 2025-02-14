@@ -6,6 +6,7 @@ import { ChangeDetectorRef } from '@angular/core';
 import * as XLSX from 'xlsx';
 import { start } from 'node:repl';
 import * as moment from 'moment-timezone';
+import { app } from '../../../../server';
 
 interface Appointment {
   id?: number;
@@ -27,6 +28,7 @@ interface Appointment {
   user?: any;
   isEditing?: boolean;
   editedPatientName?: string
+  type?: string;
   
 }
 @Component({
@@ -64,6 +66,9 @@ export class AppointmentConfirmComponent {
   editedName: string = '';
   isEditing: boolean = false;
   editingAppointmentId: number | null = null;
+  showPopup: boolean = false;
+  checkinAppointment: any = null;
+  appointmentType: string = 'paid'
 
   searchOptions = [
     { label: 'Patient Name', value: 'patientName' },
@@ -78,7 +83,13 @@ export class AppointmentConfirmComponent {
     this.today = `${year}-${month}-${day}`;
     // console.log('Setting isLoading to true');
     this.isLoading = true; // Start loading indicator
-  
+    this.cancelExpiredAppointments(); 
+
+    // Run every 5 minutes (300,000 ms)
+    setInterval(() => {
+      console.log("⏳ Checking for expired appointments...");
+      this.cancelExpiredAppointments();
+    }, 300000); // 5 minutes in milliseconds
     // Fetch appointments
     this.appointmentService.fetchAppointments();
   
@@ -544,30 +555,32 @@ export class AppointmentConfirmComponent {
     this.messageService.add({ severity: type, summary: message });
   }
   
+  openCheckinPopup(appointment: any){
+    this.showPopup = true;
+    this.checkinAppointment = appointment
+  }
+  closePopup(){
+    this.showPopup = false;
+    this.checkinAppointment = null;
+  }
+
   completeAppointment(appointment: Appointment) {
+    console.log(appointment)
     const appointmentId = appointment.id;
+    appointment.type = this.appointmentType
     if(appointment.date > this.today){
       this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Cannot check-in for future appointments!' });
       return;
     }
     if(appointmentId !== undefined){
-      // this.doctorService.markSlotAsComplete(appointment!.doctorId, appointment.date, appointment.time)
-      // .subscribe(
-      //   response => {
-      //     console.log('Slot marked as complete:', response);
-      //     // alert('Slot successfully marked as complete!');
-      //     // Update your view or refresh the slots list here as needed
-      //   },
-      //   error => {
-      //     console.error('Error marking slot as complete:', error);
-      //     alert('Failed to mark the slot as complete.');
-      //   }
-      // );
       const username = localStorage.getItem('username')
       this.appointmentService.checkedinAppointment(appointmentId, username).subscribe({
         next: (response) => {
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Checked in successfully!' });
           appointment.checkedIn = true; // Update the UI to reflect the checked-in status
+          this.showPopup = false;
+          this.checkinAppointment = null;
+          this.appointmentService.updateAppointment(appointment)
         },
         error: (error) => {
           console.error('Error during check-in:', error);
@@ -628,6 +641,52 @@ export class AppointmentConfirmComponent {
   
     // Enable if the current time is within the window
     return currentTime >= startWindow && currentTime <= endWindow;
+  }
+  cancelExpiredAppointments() {
+  
+    const currentTime = new Date();
+    const expiredAppointments = this.confirmedAppointments.filter((appointment: any) => {
+      const [time, period] = appointment.time.split(' '); // e.g., "06:00 PM"
+      const [hours, minutes] = time.split(':').map(Number);
+  
+      // Convert to 24-hour format
+      const appointmentDate = new Date();
+      appointmentDate.setHours(period === 'PM' && hours !== 12 ? hours + 12 : (period === 'AM' && hours === 12 ? 0 : hours));
+      appointmentDate.setMinutes(minutes);
+      appointmentDate.setSeconds(0);
+  
+      // Check if the appointment is 30+ minutes past
+      return (currentTime.getTime() - appointmentDate.getTime()) > 30 * 60000;
+    });
+  
+    if (expiredAppointments.length === 0) {
+      console.log("✅ No expired appointments to cancel.");
+      return;
+    }
+  
+    console.log("⚠️ Expired Appointments:", expiredAppointments);
+  
+    // Call API to cancel expired appointments
+    this.appointmentService.bulkCancel(expiredAppointments).subscribe({
+      next: () => {
+        this.isLoading = false;
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Expired appointments have been canceled successfully!'
+        });
+        this.filterAppointment(); // Refresh the list
+      },
+      error: (err) => {
+        this.isLoading = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to cancel expired appointments.'
+        });
+        console.error('Error canceling appointments:', err);
+      }
+    });
   }
   
   cancelAppointment(appointment: Appointment) {

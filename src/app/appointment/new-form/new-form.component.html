@@ -1,0 +1,106 @@
+<div class="root-container">
+    <div class="formContainer">
+
+        <div class="header">
+            <div class="formHeading">Appointment Form</div>
+            <div class="closeButton"><i class="fa-solid fa-x"></i></div>
+        </div>
+
+        <div class="formContent">
+            <!-- prn number -->
+            <div class="sections container_margin">
+                <div class="lable_name"><span>PRN:</span></div>
+                <div class="input_field">
+                    <input type="text">
+                </div>
+            </div>
+
+            <!-- patient name -->
+            <div class="sections container_margin">
+                <div class="lable_name"><span>Patient Name: </span></div>
+                <div class="input_field input_flex">
+                    <input type="text">
+                    <input type="text">
+                </div>
+            </div>
+
+            <!-- phone number -->
+            <div class="sections container_margin">
+                <div class="lable_name"><span>Phone Number: </span></div>
+                <div class="input_field">
+                    <input type="text">
+                </div>
+            </div>
+
+            <!-- email id -->
+            <div class="sections container_margin">
+                <div class="lable_name"><span>Email Id:</span></div>
+                <div class="input_field">
+                    <input type="text">
+                </div>
+            </div>
+
+            <!-- age -->
+            <div class="sections container_margin">
+                <div class="lable_name"><span>Age: </span></div>
+                <div class="input_field">
+                    <input type="text">
+                </div>
+            </div>
+
+            <!-- gender -->
+            <div class="sections container_margin">
+                <div class="lable_name"><span>Gender: </span></div>
+                <div class="input_field">
+                    <select>
+                        <option option = '' disabled selected>Select Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="sections container_margin">
+                <div class="selectFlex">
+                    <div class="lable_name"><span>Appointment Date:</span></div>
+                    <div class="input_field">
+                        <p-calendar formControlName="appointmentTime" [timeOnly]="true" hourFormat="12" [showButtonBar]="true"
+                        [showSeconds]="false" placeholder="Select Time"></p-calendar>
+                    </div>
+                </div>
+                <div class="selectFlex">
+                    <div class="lable_name"><span>Appointment Time:</span></div>
+                    <div class="input_field">
+                        <select>
+                            <option option = '' disabled selected>09.15 to 09.30</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sections container_margin">
+                <div class="radio_flex">
+                    <div class="lable_name"><span>Request Via</span></div>
+                    <div class="radioInput">
+                        <div class="radios"></div><input type="radio"><div class="radio_name">Website</div>
+                        <div class="radios"></div><input type="radio"><div class="radio_name">Call</div>
+                    </div>
+                </div>
+                <div class="radio_flex">
+                    <div class="lable_name"><span>Appointment</span></div>
+                    <div class="radioInput">
+                        <div class="radios"></div><input type="radio"><div class="radio_name">Confirm</div>
+                        <div class="radios"></div><input type="radio"><div class="radio_name">Cancel</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="button_section container_margin">
+                <div class="book_btn">Book Appointment</div>
+                <!-- <div class="close_btn">Close</div> -->
+            </div>
+        </div>
+    </div>
+</div>

@@ -882,7 +882,7 @@ input {
 }
 
 /* Show the mobile cards on smaller screens */
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 500px) {
   .table-container {
     display: none; /* Hide the table */
   }
@@ -898,6 +898,8 @@ input {
     border-radius: 10px;
     margin-bottom: 10px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    cursor: pointer; /* ✅ Clickable effect */
+  transition: all 0.3s ease-in-out;
   }
 
   .card-header {
@@ -930,7 +932,7 @@ input {
 
   .card-actions button {
     flex: 1;
-    min-width: 100px;
+    min-width: 102px;
     padding: 8px;
     font-size: 14px;
     text-align: center;
@@ -982,11 +984,12 @@ input {
   .modal-footer,
   .modal-footer-close-opd {
     flex-direction: column;
+    gap: 14px;
   }
 
   .save-button,
   .close-button {
-    width: 100%;
+    width: 50%;
     font-size: 16px;
   }
   /* Hide scrollbar but allow scrolling */
@@ -1014,8 +1017,81 @@ input {
   margin-right: 0px;
   justify-content: unset;
   justify-self: unset;
-  padding-left: 10px;
+  padding-left: 40px;
 }
+.custom-input {
+  appearance: none; /* Remove default iOS styling */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  background-color: white;
+}
+
+.custom-input:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.custom-input::-ms-expand {
+  display: none; /* Hide default arrow in IE */
+}
+
+/* Ensure dropdown icon appears properly */
+.input-container {
+  position: relative;
+}
+
+.input-container::after {
+
+  font-size: 14px;
+  color: #555;
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.radio-buttons {
+  display: flex;
+  align-items: center;  /* Align radio buttons vertically */
+  gap: 10px;  /* Space between radio buttons */
+}
+
+.radio-buttons label {
+  display: flex;
+  align-items: center;
+  gap: 5px;  /* Space between radio button and text */
+  font-size: 16px;  /* Ensure consistent font size */
+  white-space: nowrap; /* Prevent text from breaking into multiple lines */
+}
+
+.radio-buttons input[type="radio"] {
+  width: 18px;  /* Adjust width */
+  height: 18px; /* Adjust height */
+  accent-color: #007bff;  /* Use custom color */
+  appearance: none; /* Reset default iOS styles */
+  border: 2px solid #007bff;  /* Custom border */
+  border-radius: 50%; /* Circular */
+  outline: none; /* Remove outline */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.radio-buttons input[type="radio"]:checked::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  background-color: #007bff;
+  border-radius: 50%;
+  position: absolute;
+}
+
 .calendar-div{
   border-radius: 10px;
 background: #001345;
@@ -1031,5 +1107,13 @@ line-height: normal;
 display: flex;
 justify-content: space-around;
 align-items: center;
+}
+.calendar-input{
+  display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 0;
+    margin:0
 }
 }

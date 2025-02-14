@@ -25,7 +25,7 @@ export class SidebarComponent implements OnInit {
   }
 
   checkScreenSize() {
-    this.isDesktopView = window.innerWidth > 768; // Use table if screen width > 768px
+    this.isDesktopView = window.innerWidth > 500; // Use table if screen width > 768px
   }
   ngOnInit(): void {
     this.checkScreenSize()

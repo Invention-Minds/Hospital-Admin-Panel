@@ -271,6 +271,32 @@
   width: 120px;
   height: 40px;
 }
+/* Set a fixed width for the patient name column */
+.patient-name {
+  width: 130px;  /* Adjust width based on your requirement */
+  overflow: hidden;  /* Hide overflow text */
+  white-space: nowrap;  /* Prevent the text from wrapping */
+  display: inline-block;
+  margin-top: 8px;
+  
+}
+
+/* Create the marquee effect */
+.scrolling-name {
+  display: inline-block;
+  animation: scroll-left 10s linear infinite;  /* Adjust the scroll speed */
+}
+
+/* Define the scroll animation */
+@keyframes scroll-left {
+  0% {
+    transform: translateX(100%);  /* Start from the right */
+  }
+  100% {
+    transform: translateX(-100%);  /* Move to the left */
+  }
+}
+
 
 .status.PatientIn {
   border-radius: 4px;

@@ -39,7 +39,7 @@ export class InactivityService {
 
   // Function to log out the user
   private logoutUser(): void {
-    if (!this.isChannelRoute() || !this.isDoctorRoute()) {
+    if (!this.isChannelRoute() && !this.isDoctorRoute()) {
       this.ngZone.run(() => {
         console.log('Logging out due to inactivity...');
         localStorage.setItem('logoutReason', 'inactivity');

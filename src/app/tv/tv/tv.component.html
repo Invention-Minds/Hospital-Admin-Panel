@@ -50,7 +50,14 @@
             @fadeInOut
           >
               <td style="text-align: center;">{{i+ 1}}</td>
-              <td>{{ patient.patientName }}</td>
+              <td class="patient-name">
+                <span *ngIf="patient.patientName.length > 10" class="scrolling-name">
+                  {{ patient.patientName }}
+                </span>
+                <span *ngIf="patient.patientName.length <= 10">
+                  {{ patient.patientName }}
+                </span>
+              </td>
               <td style="text-align: center;">
                 <span class="status">{{ patient.actualTime }}</span>
               </td>

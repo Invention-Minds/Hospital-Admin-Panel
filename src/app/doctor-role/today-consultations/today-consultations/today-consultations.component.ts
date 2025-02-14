@@ -117,7 +117,7 @@ export class TodayConsultationsComponent {
   }
 
   checkScreenSize() {
-    this.isDesktopView = window.innerWidth > 768; // Use table if screen width > 768px
+    this.isDesktopView = window.innerWidth > 500; // Use table if screen width > 768px
   }
 
   private eventSource: EventSource | null = null;
@@ -163,6 +163,9 @@ export class TodayConsultationsComponent {
     this.fetchAppointments(data);
   });
 
+  }
+  toggleCard(index: number) {
+    this.filteredAppointments[index].expanded = !this.filteredAppointments[index].expanded;
   }
   parseTimeToMinutes(time: string): number {
     const [hours, minutesPart] = time.split(':');

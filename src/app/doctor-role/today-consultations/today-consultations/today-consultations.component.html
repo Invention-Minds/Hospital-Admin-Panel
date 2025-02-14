@@ -77,7 +77,7 @@
     </div>
   </div>
   <div class="mobile-appointments" *ngIf="!isDesktopView">
-    <div *ngFor="let appointment of filteredAppointments" class="appointment-card">
+    <!-- <div *ngFor="let appointment of filteredAppointments" class="appointment-card">
       <div class="card-header">
         <div class="patient-info">
           <div>
@@ -114,10 +114,67 @@
           <img class="image" src="/transfer.svg">Transfer
         </button>
       </div>
+    </div> -->
+    <div class="mobile-appointments">
+      <div *ngFor="let appointment of filteredAppointments; let i = index" 
+           class="appointment-card"
+           (click)="toggleCard(i)"> <!-- ✅ Clicking toggles the full view -->
+    
+        <!-- Compact View -->
+        <div class="card-header" *ngIf="!appointment.expanded">
+          <div class="patient-info">
+            <img src="admin-icons/admin-icon.jpg" class="profile-pic">
+            <div>
+              <h3>{{ appointment.patientName }}</h3>
+              <p class="patient">Consultation</p>
+            </div>
+          </div>
+        </div>
+    
+        <!-- Expanded View -->
+        <div class="expanded-card" *ngIf="appointment.expanded">
+          <div class="card-header">
+            <div class="patient-info">
+              <img src="admin-icons/admin-icon.jpg" class="profile-pic">
+              <div>
+                <h3>{{ appointment.patientName }}</h3>
+                <p class="patient">Consultation</p>
+              </div>
+            </div>
+            <div class="calendar-div">
+              <p class="date-time">
+                <img src="/w-calendar.svg" alt="calendar" class="icon"> {{ appointment.date }}
+              </p>
+              <p class="date-time">
+                <img src="/w-time.svg" alt="calendar" class="icon"> {{ appointment.time }}
+              </p>
+            </div>
+          </div>
+    
+          <div class="card-actions">
+            <button class="start" [disabled]="appointment.checkedOut" (click)="appointment.checkedOut === false && startConsultation(appointment)">
+              <img class="image" src="/start.svg"> Start 
+            </button>
+            <button class="finish" [disabled]="appointment.endConsultationTime !== null" (click)="appointment.endConsultationTime === null && finishConsultation(appointment)">
+              <img class="image" src="/finish.svg"> Finish
+            </button>
+            <button class="postPond" (click)="postPondAppointment(appointment)">
+              <img class="image" src="/pause.svg"> Postponed
+            </button>
+            <button class="estimation" (click)="openEstimationPopup(appointment)">
+              <img class="image" src="/est.svg"> Estimation
+            </button>
+            <button class="transfer" [disabled]="appointment.isTransfer" (click)="!appointment.isTransfer && openTransferPopup(appointment)">
+              <img class="image" src="/transfer.svg"> Transfer
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
+    
     <div class="pagination">
-      <button class="pagination-btn prev" (click)="prevPage()" [disabled]="currentPage === 1">←</button>
-      <button class="pagination-btn next" (click)="nextPage()" [disabled]="currentPage === totalPages">→</button>
+      <button class="pagination-btn prev" (click)="prevPage()" [disabled]="currentPage === 1 || totalPages === 0">←</button>
+      <button class="pagination-btn next" (click)="nextPage()" [disabled]="currentPage >= totalPages || totalPages === 0">→</button>
       <div class="page-info">
         Page
         <input type="number" [(ngModel)]="currentPage" min="1" [max]="totalPages" class="page-input"
@@ -221,7 +278,7 @@
         />
         <label for="estimationDate" class="custom-label">Remarks</label>
         </div>
-        <div class="input-container">
+        <div class="input-container" *ngIf="estimationType === 'SM'">
           <select id="surgeryTime" name="surgeryTime" class="custom-input" [(ngModel)]="surgeryTime" required #surgeryTimeModel="ngModel">
             <option value="" disabled selected>Select OT Utilization Time</option>
             <option value="0 to 15">0 to 15 mins</option>

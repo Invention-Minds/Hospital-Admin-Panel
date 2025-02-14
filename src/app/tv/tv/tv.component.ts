@@ -212,7 +212,7 @@ export class TvComponent implements OnInit, OnDestroy {
               (appointment: any) =>
                 appointment.checkedIn === true && 
                 appointment.date === todayDate && 
-                appointment.status === 'confirmed'
+                appointment.status === 'confirmed' 
             );
     
             if (todayAppointments.length > 0) {

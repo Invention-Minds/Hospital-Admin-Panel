@@ -102,18 +102,15 @@ input[type="tel"],
 input[type="date"],
 select {
   flex: 2;
-  /* padding: 10px; */
   font-size: 14px;
   border-radius: 4px;
   border: 1px solid #3b3b3b;
   padding-left: 10px;
-  /* width: 158px; */
   height: 36px;
-  /* margin-left: 20px; */
-  /* margin-bottom: 20px; */
+  width: 100%;
 }
 input[type="date"] {
-  width: 170px;
+  /* width: 170px; */
   margin-left: 20px;
 }
 input[type="text"],

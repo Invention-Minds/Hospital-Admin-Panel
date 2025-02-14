@@ -284,3 +284,99 @@ tbody tr:hover {
   padding: 20px;
   font-family: Kanit;
 }
+.save-button {
+  background-color: #169458;
+  color: #fff;
+  font-family: Kanit;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  width: 150px;
+  padding: 7px 14px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.close-button {
+  display: flex;
+  width: 150px;
+  padding: 7px 65px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  border: 1px solid #7b7b7b;
+  color: #7b7b7b;
+  font-family: Kanit;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+.popup-close {
+  background-color: transparent;
+  border: none;
+}
+.modal-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+}
+.modal-body {
+  margin-bottom: 20px;
+}
+
+.modal-body p {
+  color: rgba(39, 30, 74, 0.8);
+  font-family: Kanit;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  margin: 10px 0;
+}
+.close-opd-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.modal-content-transfer {
+  border-radius: 20px;
+  background: #fff;
+  padding: 20px;
+  width: 673px;
+  height: auto;
+  flex-shrink: 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.modal-header h3 {
+  color: #271e4a;
+  font-family: Kanit;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  margin: 0;
+}

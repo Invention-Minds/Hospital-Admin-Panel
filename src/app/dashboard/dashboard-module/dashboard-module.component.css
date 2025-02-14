@@ -428,7 +428,7 @@ line-height: normal;
 
 
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 500px) {
   .header-container{
    margin-left: 0;
    justify-content: center;

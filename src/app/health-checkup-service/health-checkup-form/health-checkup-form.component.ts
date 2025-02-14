@@ -39,7 +39,7 @@ export class HealthCheckupFormComponent implements OnInit {
   userName: string = ''; // Username of the logged-in admin
   role: string = ''; // Role of the logged-in admin
   minDate: Date = new Date();
-  minDateString: string = this.minDate.toISOString().split('T')[0];
+  minDateString: string =  new Date().toLocaleDateString('en-CA');
   smsSent?: boolean = false;
   messageSent?: boolean = false;
   emailSent?: boolean = false;
@@ -120,7 +120,7 @@ export class HealthCheckupFormComponent implements OnInit {
       return;
     }
     const now = new Date();
-  const isToday = new Date(this.selectedDate).toDateString() === now.toDateString();
+  const isToday = new Date(this.selectedDate).toDateString() ===  new Date().toLocaleDateString('en-CA');
     this.healthCheckupService.getAvailableSlots(this.selectedDate, parseInt(this.selectedPackageId)).subscribe({
       next: (response) => {
         console.log('Available Slots:', response);
@@ -142,6 +142,7 @@ export class HealthCheckupFormComponent implements OnInit {
           }
   
           this.timeSlots = availableSlots;
+          console.log(this.timeSlots)
   
           // Include already selected appointment time if it exists
           if (this.formData.appointmentTime && !this.timeSlots.includes(this.formData.appointmentTime)) {

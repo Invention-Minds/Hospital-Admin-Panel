@@ -19,6 +19,7 @@
           </th>
           <th>Time</th>
           <th>Source</th>
+          <th>Type</th>
           <th>WA</th>
           <th>Email</th>
           <th>SMS</th>
@@ -57,6 +58,7 @@
           <td>{{ appointment.date }}</td>
           <td>{{ appointment.time }}</td>
           <td>{{ appointment.requestVia }}</td>
+          <td style="text-transform: capitalize;">{{appointment.type ? appointment.type : '-' }}</td>
           <td>
             <span class="sms-status" [ngClass]="{'sms-sent': appointment.smsSent, 'sms-not-sent': !appointment.smsSent}">
               <img *ngIf="appointment.smsSent" src="icons/sent.svg" alt="Sent">
@@ -96,7 +98,7 @@
             <!-- Check-in Button -->
             <button class="btn-action" 
                     [disabled]="appointment.checkedIn || !isCheckInEnabled(appointment)"
-                    (click)="!appointment.checkedIn && completeAppointment(appointment)">
+                    (click)="!appointment.checkedIn && openCheckinPopup(appointment)">
               <img src="check-in.png" alt="check" 
                    class="action-icon" 
                   
@@ -146,5 +148,43 @@
   (close)="closeAppointmentForm()" 
   (submit)="submitAppointment(selectedAppointment, $event.status, $event.requestVia)">
 </app-appointment-form>
+
+<div *ngIf="showPopup" class="close-opd-modal">
+  <div class="modal-content-transfer">
+    <div class="modal-header">
+      <h3>Appointment Type</h3>
+      <button class="popup-close" (click)="closePopup()">
+        <img src="/popup-close.svg" alt="Close Popup" />
+      </button>
+    </div>
+    <hr />
+    <div class="modal-body">
+      <label class="estimation-type-label">Select any one appointment type</label>
+      <div class="radio-buttons">
+        <label>
+          <input type="radio" name="estimationStatus" [(ngModel)]="appointmentType" value="paid" />
+          Paid
+        </label>
+        <label>
+          <input type="radio" name="estimationStatus" [(ngModel)]="appointmentType" value="followUp" />
+          Follow up
+        </label>
+        <label>
+          <input type="radio" name="estimationStatus" [(ngModel)]="appointmentType" value="camp" />
+          Camp
+        </label>
+        <label>
+          <input type="radio" name="estimationStatus" [(ngModel)]="appointmentType" value="mhc" />
+          MHC
+        </label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="save-button" (click)="completeAppointment(this.checkinAppointment!)">Check-in</button>
+      <button class="close-button" (click)="closePopup()">Cancel</button>
+    </div>
+  </div>
+</div>
+
 
 <div class="loader" *ngIf="isLoading"></div>

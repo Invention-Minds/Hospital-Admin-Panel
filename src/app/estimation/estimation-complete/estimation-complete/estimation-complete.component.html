@@ -82,6 +82,7 @@
                     <th>Est. Approved By</th>
                     <th>SMS</th>
                     <th>Status</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -130,25 +131,13 @@
                             {{ estimation.statusOfEstimation }}
                         </span>
                     </td>
-                    <!-- <td class="button">
-                        <button class="btn-action" (click)="openAppointmentForm(estimation)"  pTooltip="Reschedule" tooltipPosition="top">
-                            <img src="/follow-up.svg" alt="Confirm">
-                          </button>
-                          <button class="btn-action" (click)="openAppointmentForm(estimation)"  pTooltip="Reschedule" tooltipPosition="top">
-                            <img src="/view.svg" alt="Confirm">
-                          </button>
-                          <button class="btn-action" (click)="openAppointmentForm(estimation)"  pTooltip="Reschedule" tooltipPosition="top">
-                            <img src="/paid.svg" alt="Confirm">
-                          </button>
-                          <button class="btn-action" (click)="openAppointmentForm(estimation)"  pTooltip="Reschedule" tooltipPosition="top">
-                            <img src="/resend.svg" alt="Confirm">
-                          </button>
-                          <button class="btn-action" (click)="openAppointmentForm(estimation)"  pTooltip="Reschedule" tooltipPosition="top">
-                            <img src="/print.svg" alt="Confirm">
+                    <td class="button">
+                          <button class="btn-action" (click)="print(estimation)"  pTooltip="Download" tooltipPosition="top">
+                            <img src="/report-download.svg" alt="Confirm">
                           </button>
                           <!-- <img src="appt-cancel.png" alt="delete" class="action-icon" (click)="cancelAppointment(estimation)"
                           pTooltip="Cancel" tooltipPosition="top"> -->
-                    <!-- </td> -->
+                    </td>
                 </tr>
             </tbody>
         </table>

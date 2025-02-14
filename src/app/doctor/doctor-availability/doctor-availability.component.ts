@@ -46,6 +46,7 @@ export class DoctorAvailabilityComponent {
   itemsPerPage: number = 10;
   totalPages: number = 1;
   isLoading: boolean = false;
+  role: string = ''
 
 
 
@@ -56,6 +57,7 @@ export class DoctorAvailabilityComponent {
 
   ngOnInit(): void {
     this.fetchDoctors();
+    this.role = localStorage.getItem('role') || ''
   }
 
   //   fetchDoctors(): void {

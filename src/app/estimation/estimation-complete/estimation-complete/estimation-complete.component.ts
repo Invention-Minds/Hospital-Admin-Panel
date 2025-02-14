@@ -75,6 +75,18 @@ this.fetchPendingEstimations();
     });
     
   }
+  print(estimation: any): void {
+    if (estimation.pdfLink) {
+      const pdfWindow = window.open(estimation.pdfLink, '_blank'); // Open the PDF in a new tab
+      if (pdfWindow) {
+        pdfWindow.onload = () => {
+          pdfWindow.print(); // Automatically triggers the print dialog
+        };
+      }
+    } else {
+      console.error("No PDF link available for this estimation.");
+    }
+  }
   onSearch(): void {
 
     this.filteredEstimations = this.pendingEstimations.filter((service) => {

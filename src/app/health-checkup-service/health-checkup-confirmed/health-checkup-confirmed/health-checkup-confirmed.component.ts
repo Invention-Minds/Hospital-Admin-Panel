@@ -360,38 +360,14 @@ onClear() {
       checkedIn: true,
     }
     if (!serviceId) return;
-    const slotDuration = 10; // Slot duration in minutes
-    const bufferTime = 5; // Buffer time in minutes
-    const delayMinutes = slotDuration + bufferTime;
-    this.isLoading=true;
-    this.healthCheckupService.scheduleServiceCompletion(serviceId, delayMinutes).subscribe({
-      next: (response) => {
 
-        console.log('Service completion scheduled:', response);
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Scheduled',
-          detail: `Service ID ${serviceId} will be marked as completed in ${delayMinutes} minutes.`,
-        });
-        this.healthCheckupService.updateService(serviceId,payload).subscribe({
-          next: (response) => {
-            console.log('Service marked as completed:', response);
-            appointment.checkedIn = true; // Update UI
-          }
-        })
-      },
-      error: (err) => {
-        console.error('Error scheduling service completion:', err);
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to schedule service completion. Please try again.',
-        });
-      },
-      complete: () => {
-        this.isLoading = false;
-      }, 
-    });
+    this.healthCheckupService.updateService(serviceId,payload).subscribe({
+      next: (response) => {
+        console.log('Service marked as completed:', response);
+        this.fetchConfirmedAppointments()
+
+      }
+    })
 
   // Update UI
 

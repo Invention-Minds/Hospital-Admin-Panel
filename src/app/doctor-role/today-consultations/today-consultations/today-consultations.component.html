@@ -126,7 +126,7 @@
             <img src="admin-icons/admin-icon.jpg" class="profile-pic">
             <div>
               <h3>{{ appointment.patientName }}</h3>
-              <p class="patient">Consultation</p>
+              <p class="patient">Patient</p>
             </div>
           </div>
         </div>
@@ -138,7 +138,7 @@
               <img src="admin-icons/admin-icon.jpg" class="profile-pic">
               <div>
                 <h3>{{ appointment.patientName }}</h3>
-                <p class="patient">Consultation</p>
+                <p class="patient">Patient</p>
               </div>
             </div>
             <div class="calendar-div">
@@ -269,6 +269,36 @@
           />
           <label for="estimationDate" class="custom-label">Estimated Date*</label>
         </div>
+        <div class="stay-container">
+          <div class="input-container">
+            <input 
+            type="text" 
+            (input)="calculateWardStay()"
+            [(ngModel)]="totalStay" 
+            class="custom-input"
+          />
+          <label for="remarks" class="custom-label">Total Stay</label>
+          </div>
+          <div class="input-container">
+            <input 
+            type="text" 
+            (input)="calculateWardStay()"
+            [(ngModel)]="icu" 
+            [ngClass]="{'input-error': isInvalidInput()}" 
+            class="custom-input"
+          />
+          <label for="remarks" class="custom-label">Icu</label>
+          </div>
+          <div class="input-container">
+            <input 
+            type="text" 
+  
+            [(ngModel)]="ward" 
+            class="custom-input"
+          />
+          <label for="remarks" class="custom-label">Ward</label>
+          </div>
+        </div>
         <div class="input-container">
           <input 
           type="text" 
@@ -276,7 +306,7 @@
           [(ngModel)]="remarks" 
           class="custom-input"
         />
-        <label for="estimationDate" class="custom-label">Remarks</label>
+        <label for="remarks" class="custom-label">Remarks</label>
         </div>
         <div class="input-container" *ngIf="estimationType === 'SM'">
           <select id="surgeryTime" name="surgeryTime" class="custom-input" [(ngModel)]="surgeryTime" required #surgeryTimeModel="ngModel">

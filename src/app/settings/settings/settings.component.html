@@ -78,7 +78,7 @@
 
       <!-- Email Input -->
       <div *ngIf="currentUserRole !== 'super_admin' && currentUserRole !== 'admin'" class="input">
-        <input type="text" class="input-field" [(ngModel)]="username" placeholder="Username_admin@rashtrotthana" (ngModelChange)="validPasswords()">
+        <input type="text" class="input-field" [(ngModel)]="employeeId" placeholder="JMRH01" (ngModelChange)="validPasswords()">
         <div *ngIf="usernameErrorMessage" class="error-message">{{ usernameErrorMessage }}</div>
          <!-- <div class="password-container">
                   <input [type]="isOldPasswordVisible ? 'text' : 'password'"  class="input-field" [(ngModel)]="oldPassword" placeholder="Old Password">
@@ -118,10 +118,10 @@
     </select>
   </div> -->
   <div *ngIf="currentUserRole === 'super_admin' || currentUserRole === 'admin' " class="form-group">
-    <select id="userSelect" [(ngModel)]="selectedUser" class="styled-select password-container" (ngModelChange)="validPasswords()" >
+    <select id="userSelect" [(ngModel)]="employeeId" class="styled-select password-container" (ngModelChange)="validPasswords()" >
       <option value="" disabled selected hidden>Select User to Reset Password</option>
-      <option *ngFor="let user of users" [value]="user.username">
-        {{ user.username }}
+      <option *ngFor="let user of users" [value]="user.employeeId">
+        {{ user.employeeId }}
       </option>
     </select>
   </div>

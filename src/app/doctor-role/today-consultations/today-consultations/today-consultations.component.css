@@ -729,7 +729,7 @@ input[type="text"]::placeholder {
   margin: 10px 0;
   flex: 1; /* Ensures equal width for both inputs */
   min-width: 200px; /* Optional, to prevent shrinking too small */
-  margin-top: 48px;
+  margin-top: 30px;
 }
 .custom-input {
   width: 100%;
@@ -757,6 +757,10 @@ input[type="text"]::placeholder {
   font-size: 16px;
   transition: all 0.3s ease;
   pointer-events: none;
+}
+.input-error {
+  border: 1px solid #ff4d4d !important;
+
 }
 
 .custom-input:focus + .custom-label,
@@ -812,7 +816,12 @@ input {
   display: flex;
   align-items: center;
   margin: 15px 0;
-  margin-bottom: 40px;
+  margin-bottom: 30px;
+}
+.stay-container{
+  display: flex;
+  width: 100%;
+  gap: 10px;
 }
 
 .estimation-type-label {
@@ -899,9 +908,14 @@ input {
     margin-bottom: 10px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
     cursor: pointer; /* ✅ Clickable effect */
-  transition: all 0.3s ease-in-out;
+  transition: all 0.8s ease-in-out;
   }
 
+
+.expanded-card{
+  transition: max-height 0.8s ease-in-out, opacity 0.8s ease-in-out;
+}
+  
   .card-header {
     display: flex;
     flex-direction: column;

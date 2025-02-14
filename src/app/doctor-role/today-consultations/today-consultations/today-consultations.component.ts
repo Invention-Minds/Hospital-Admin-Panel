@@ -108,6 +108,9 @@ export class TodayConsultationsComponent {
   ];
   closeOpdAppointments: Appointment[] = []
   isDesktopView: boolean = true;
+  totalStay: number = 0;
+  icu: number = 0;
+  ward: number = 0;
 
 
 
@@ -458,9 +461,23 @@ export class TodayConsultationsComponent {
     this.estimationPreferedDate = '';
     this.remarks = '';
     this.surgeryTime = '';
+    this.totalStay = 0;
+    this.icu = 0;
+    this.ward = 0
   }
 
+  calculateWardStay(): void {
+  
 
+    // Ensure valid input values
+    if (this.totalStay >= 0 && this.icu >= 0) {
+      // Calculate ward stay
+      this.ward = Math.max(0, this.totalStay - this.icu);
+    }
+  }
+  isInvalidInput(): boolean {
+    return this.icu > this.totalStay;
+  }
   onEstimationInput(): void {
     // Filter suggestions based on the input text
 
@@ -515,7 +532,10 @@ export class TodayConsultationsComponent {
         estimationCreatedTime: new Date(),
         remarks: this.remarks,
         surgeryTime: this.surgeryTime,
-        estimationStatus: this.estimationStatus
+        estimationStatus: this.estimationStatus,
+        totalDaysStay: Number(this.totalStay),
+        icuStay: Number(this.icu),
+        wardStay: Number(this.ward),
       };
       // console.log(estimationDetails)
       this.estimationService.createEstimationDetails(estimationDetails).subscribe({
@@ -523,6 +543,7 @@ export class TodayConsultationsComponent {
           // console.log('Estimation Details saved:', response);
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Estimation Details Saved Successfully' });
           this.closeEstimationPopup();
+
         },
         error: (error) => {
           console.error('Error saving estimation details:', error);
@@ -544,7 +565,10 @@ export class TodayConsultationsComponent {
       estimationCreatedTime: new Date(),
       remarks: this.remarks,
       surgeryTime: this.surgeryTime,
-      estimationStatus: this.estimationStatus
+      estimationStatus: this.estimationStatus,
+      totalDaysStay: Number(this.totalStay),
+      icuStay:Number(this.icu),
+      wardStay:Number(this.ward),
     };
 
     // this.doctor.filter((doc:any) => {

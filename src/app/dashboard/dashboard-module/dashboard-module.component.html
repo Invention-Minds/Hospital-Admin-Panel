@@ -22,8 +22,12 @@
   </div>
 </div>
 <router-outlet></router-outlet> --> 
-
+<div class="mobile-header">
+  <img src="sidebar/IM-logo.png" class="mobile-logo" alt="DocMinds Logo">
+  <p class="mobile-title">DocMinds</p>
+</div>
 <div class="header-container">
+
   <div class="hospital-name">
     <p class="hospital-name-location">Rashtrotthana Hospital – Bangalore</p>
   </div>
@@ -54,7 +58,9 @@
     </div> -->
     <div class="profile-container" (click)="toggleDropdownOpen()" (document:click)="closeDropdowns($event)">
       <div class="profile-info" [ngClass]="{ 'profile-background': isDropdownOpen }">
-        <img src="admin-icons/admin-icon.jpg" alt="Profile Picture" class="profile-pic" />
+        <img [src]="role === 'doctor' ? '/doctor-dp.svg' : 'admin-icons/admin-icon.jpg'" 
+     alt="Profile Picture" class="profile-pic" />
+
         <div class="profile-text">
           <span class="username">{{ username }}</span>
           <span class="role">

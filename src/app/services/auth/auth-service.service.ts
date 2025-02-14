@@ -26,7 +26,27 @@ export class AuthServiceService {
     this.initializeUserFromStorage(); 
   }
   login(employeeId: string, password: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/login`, { employeeId, password }).pipe(
+    let loginPayload: any = { password }; // Default payload
+
+    // ✅ Check if it's a phone number (12 digits, starts with '91')
+    if (/^\d+$/.test(employeeId)) {
+      if (employeeId.length === 10) {
+        // ✅ If 10 digits, prepend '91' (convert to phone number)
+        employeeId = `91${employeeId}`;
+      }
+  
+      if (employeeId.length === 12 && employeeId.startsWith("91")) {
+        // ✅ If 12 digits & starts with '91', it's a phone number
+        loginPayload.phoneNumber = employeeId;
+      } else {
+        // ✅ Otherwise, it's an employee ID
+        loginPayload.employeeId = employeeId;
+      }
+    } else {
+      // ✅ If not numeric, treat it as an employee ID
+      loginPayload.employeeId = employeeId;
+    }
+    return this.http.post(`${this.apiUrl}/login`, loginPayload).pipe(
       tap((response: any) => {
         console.log(response)
         const user = response.user;  // Use 'user' from the response
@@ -87,8 +107,8 @@ initializeUserFromStorage(): void {
     );
   }
 
-  resetPassword(username: string,newPassword: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/reset-password`, { username,newPassword });
+  resetPassword(employeeId: string,newPassword: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/reset-password`, { employeeId,newPassword });
   }
 
   changePassword(currentPassword: string, newPassword: string, oldPassword: string): Observable<any> {

@@ -748,6 +748,9 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
   private saveDoctorDetails(): void {
     if (this.doctor?.doctorType === 'Visiting Consultant') {
       // console.log('Visiting Consultant', this.doctor)
+      if (!this.doctor?.phone_number.startsWith('91')) {
+        this.doctor!.phone_number = '91' + this.doctor?.phone_number;
+      }
       this.save.emit(this.doctor!);
     }
     else {

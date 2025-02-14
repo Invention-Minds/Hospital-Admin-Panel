@@ -427,11 +427,25 @@ line-height: normal;
 }
 
 
+/* ✅ Hide on Desktop by Default */
+.mobile-header {
+  display: none;
+  gap: 8px;
+  padding: 10px 15px;
+  background: #001345;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  height: 58px;
+}
+
+
 
 @media screen and (max-width: 500px) {
   .header-container{
    margin-left: 0;
    justify-content: center;
+   padding: 10px 0;
   }
   .hospital-name{
     display: none;
@@ -440,5 +454,27 @@ line-height: normal;
     flex-direction: row-reverse;
     justify-content: space-between;
     width: 100%;
+  }
+  .mobile-header {
+    display: flex; /* Show on mobile */
+    justify-content: flex-start;
+  }
+  
+  .mobile-logo {
+    width: 36px; /* Adjust as needed */
+    height: 36px;
+    border-radius: 50%;
+  }
+  
+  .mobile-title {
+    font-family: 'Kanit', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding-left: 4px;
   }
 }

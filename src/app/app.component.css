@@ -52,7 +52,7 @@
     .content {
       overflow-y: auto; /* Enable vertical scrolling */
       max-height: 90vh; /* Restrict height to viewport */
-      padding: 10px;
+      padding: 0px;
       scrollbar-width: thin; /* Firefox: Make scrollbar thin */
       scrollbar-color: transparent transparent; /* Hide scrollbar */
     }

@@ -185,8 +185,8 @@ export class SettingsComponent implements OnInit {
     }
 
     this.buttonClicked = true;
-    if (this.selectedUser) {
-      this.authService.resetPassword(this.selectedUser, this.newPassword).subscribe(
+    if (this.employeeId) {
+      this.authService.resetPassword(this.employeeId, this.newPassword).subscribe(
         () => {
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Password reset successfully' });
           this.newPassword = '';
@@ -332,18 +332,18 @@ validPasswords(): void {
   
   // Validate username using regex and validate password length
   if(this.role === 'super_admin'){
-    this.isUserNameValid = usernameRegex.test(this.selectedUser);
+
     const isPasswordValid = this.newPassword.length >= 6 && this.confirmPassword.length >= 6;
 
     // Update the form validity state
-    this.isFormValid = this.isUserNameValid && isPasswordValid;
+    this.isUserNameValid = !this.employeeId
+
+    // Update the form validity state
+    this.isFormValid = !this.isUserNameValid && isPasswordValid;
+    console.log(this.isFormValid, this.isUserNameValid)
   
     // If the form is not valid, show an appropriate error message
-    if (!this.isUserNameValid) {
-      this.usernameErrorMessageinReset = "Username must be in the format: name_role@rashtrotthana. The role must be 'admin', 'subadmin', 'superadmin', or 'doctor'.";
-    } else {
-      this.usernameErrorMessageinReset = ''; // Clear the error message if valid
-    }
+
   
     // if(this.confirmPassword.length>=6 || this.newPassword.length>=6){
     //   this.passwordErrorMessage = 'Password must be at least 6 characters long.';
@@ -353,18 +353,20 @@ validPasswords(): void {
     // }
   }
   else{
-    this.isUserNameValid = usernameRegex.test(this.username);
+
     const isPasswordValid = this.newPassword.length >= 6 && this.confirmPassword.length >= 6;
+    this.isUserNameValid = !this.employeeId
 
     // Update the form validity state
-    this.isFormValid = this.isUserNameValid && isPasswordValid;
+    this.isFormValid = !this.isUserNameValid && isPasswordValid;
+    console.log(this.isFormValid, this.isUserNameValid)
   
     // If the form is not valid, show an appropriate error message
-    if (!this.isUserNameValid) {
-      this.usernameErrorMessage = "Username must be in the format: name_role@rashtrotthana. The role must be 'admin', 'subadmin', 'superadmin', or 'doctor'.";
-    } else {
-      this.usernameErrorMessage = ''; // Clear the error message if valid
-    }
+    // if (!this.isUserNameValid) {
+    //   this.usernameErrorMessage = "Username must be in the format: name_role@rashtrotthana. The role must be 'admin', 'subadmin', 'superadmin', or 'doctor'.";
+    // } else {
+    //   this.usernameErrorMessage = ''; // Clear the error message if valid
+    // }
   
     // if (!isPasswordValid) {
     //   this.passwordErrorMessage = 'Password must be at least 6 characters long.';
@@ -384,7 +386,7 @@ validPasswords(): void {
 
 // Reset Password method
 resetPassword() {
-  console.log(this.username, this.name)
+  console.log(this.employeeId, this.name)
   if(this.username !== this.name){
     this.messageService.add({ severity: 'error', summary: 'Error', detail: 'You are not authorized to reset password for other users' });
     return;
@@ -395,9 +397,9 @@ resetPassword() {
     return;
   }
   this.buttonClicked = true;
-  this.authService.resetPassword(this.username, this.newPassword).subscribe(response => {
+  this.authService.resetPassword(this.employeeId, this.newPassword).subscribe(response => {
     // console.log('Password reset successfully', response);
-    this.username = '';  // Clear the username
+    this.employeeId = '';  // Clear the username
     this.newPassword = '';  // Clear the new password
 
     this.confirmPassword= '';

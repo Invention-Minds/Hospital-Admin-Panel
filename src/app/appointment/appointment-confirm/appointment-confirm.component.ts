@@ -3,6 +3,7 @@ import { AppointmentConfirmService } from '../../services/appointment-confirm.se
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { MessageService } from 'primeng/api';
 import { ChangeDetectorRef } from '@angular/core';
+import * as FileSaver from 'file-saver';
 import * as XLSX from 'xlsx';
 import { start } from 'node:repl';
 import * as moment from 'moment-timezone';
@@ -21,15 +22,16 @@ interface Appointment {
   email: string;
   smsSent?: boolean;
   emailSent?: boolean;
-  messageSent?:boolean;
+  messageSent?: boolean;
   requestVia?: string; // Optional property
   created_at?: string;
-  checkedIn?:boolean;
+  checkedIn?: boolean;
   user?: any;
   isEditing?: boolean;
   editedPatientName?: string
   type?: string;
-  
+  prnNumber?: any
+
 }
 @Component({
   selector: 'app-appointment-confirm',
@@ -40,8 +42,8 @@ interface Appointment {
 export class AppointmentConfirmComponent {
   confirmedAppointments: Appointment[] = [];
 
-  constructor(private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService,private messageService: MessageService, private cdRef: ChangeDetectorRef) { }
-  appointments: Appointment[] = [
+  constructor(private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private messageService: MessageService, private cdRef: ChangeDetectorRef) { }
+  appointments: any[] = [
     // { id: '0001', patientName: 'Anitha Sundar', phoneNumber: '+91 7708590100', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Booked', smsSent: true },
   ];
 
@@ -49,18 +51,18 @@ export class AppointmentConfirmComponent {
   itemsPerPage = 10;
   sortColumn: keyof Appointment | undefined = undefined;  // No sorting initially
   sortDirection: string = 'asc';  // Default sorting direction
-  @Input() selectedDateRange: Date[] | null = null;
-  @Input() selectedValue: string = '';
-  @Input() selectedSearchOption: string = ''; 
+
+  selectedValue: string = '';
+
   completed: boolean = false;
   showAppointmentForm = false;  // Controls the visibility of the modal
-  selectedAppointment: Appointment | null = null; 
+  selectedAppointment: Appointment | null = null;
   activeAppointmentId: number | null | undefined = null;
   userId: any = 0;
   isLockedDialogVisible: boolean = false; // To control the visibility of the lock dialog
   cancelledAppointments: Appointment[] = [];
   filteredList: any;
-  lastWeekAppointments: any[] = [];  
+  lastWeekAppointments: any[] = [];
   isLoading: boolean = false;
   today: string = '';
   editedName: string = '';
@@ -69,11 +71,20 @@ export class AppointmentConfirmComponent {
   showPopup: boolean = false;
   checkinAppointment: any = null;
   appointmentType: string = 'paid'
+  searchValue: string = '';
+  activeComponent: string = 'confirmed';
+  selectedDate: Date | null = null;
+
+  filteredServices: any[] = []
 
   searchOptions = [
     { label: 'Patient Name', value: 'patientName' },
-    { label: 'Phone Number', value: 'phoneNumber' }
+    { label: 'PRN', value: 'prnNumber' },
+    { label: 'Doctor Name', value: 'doctorName' },
+    { label: 'Department', value: 'department' },
   ];
+  selectedSearchOption: any = this.searchOptions[0];
+  selectedDateRange: Date[] = [];
   // Method to handle sorting by a specific column
   ngOnInit() {
     const today = new Date();
@@ -83,7 +94,7 @@ export class AppointmentConfirmComponent {
     this.today = `${year}-${month}-${day}`;
     // console.log('Setting isLoading to true');
     this.isLoading = true; // Start loading indicator
-    this.cancelExpiredAppointments(); 
+    this.userId = localStorage.getItem('userid')
 
     // Run every 5 minutes (300,000 ms)
     setInterval(() => {
@@ -91,41 +102,69 @@ export class AppointmentConfirmComponent {
       this.cancelExpiredAppointments();
     }, 300000); // 5 minutes in milliseconds
     // Fetch appointments
-    this.appointmentService.fetchAppointments();
-  
+    this.appointmentService.fetchAppointments()
+
     // Subscribe to confirmed appointments
     this.appointmentService.confirmedAppointments$.subscribe({
       next: (appointments) => {
         // console.log('Appointments received:', appointments);
         this.confirmedAppointments = appointments;
-  
+        this.appointments = appointments
+        console.log(appointments)
+        this.cancelExpiredAppointments();
+
         // Sort appointments
         this.confirmedAppointments.sort((a, b) => {
           const dateA = new Date(a.created_at!);
           const dateB = new Date(b.created_at!);
           return dateB.getTime() - dateA.getTime();
         });
-  
+
         this.filteredAppointments = [...this.confirmedAppointments];
-        this.filterAppointmentsByDate(new Date());
-  
+        
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Normalize to midnight (00:00:00)
+
+        // Filter out appointments that are in the past
+        this.filteredAppointments = this.filteredAppointments.filter((appointment: any) => {
+          const appointmentDate = new Date(appointment.date); // Convert appointment date to Date object
+          // If the appointment date is today or in the future
+          return appointmentDate >= today;
+        });
+
+        console.log(this.filteredAppointments)
+        // this.filterAppointmentsByDate(new Date());
+
         // console.log('Setting isLoading to false');
         setTimeout(() => {
-          // console.log('Setting isLoading to false after delay');
+
+
           this.isLoading = false; // Stop loading indicator
+
+
+
+          console.log(this.filteredAppointments);
+
+          console.log(this.filteredAppointments)
         }, 1000); // 2-second delay
-        
+
       },
       error: (error) => {
         console.error('Error fetching appointments:', error);
         // this.errorMessage = 'Failed to fetch appointments.';
         // console.log('Setting isLoading to false due to error');
         this.isLoading = false; // Stop loading indicator even on error
+      },
+      complete: () => {
+        this.filteredAppointments = this.filteredAppointments.filter((appointment: any) => {
+          appointment.date >= today
+        })
+        console.log(this.filteredAppointments)
       }
     });
   }
-  
-  
+
+
   sortBy(column: keyof Appointment) {
     if (this.sortColumn === column) {
       this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc'; // Toggle direction
@@ -173,7 +212,7 @@ export class AppointmentConfirmComponent {
 
   // Method to calculate total pages
   get totalPages() {
-    return Math.ceil(this.filteredAppointments.length / this.itemsPerPage);
+    return Math.ceil(this.filteredAppointments?.length / this.itemsPerPage);
   }
 
   // Method to go to the previous page
@@ -200,82 +239,215 @@ export class AppointmentConfirmComponent {
   }
   filteredAppointments: Appointment[] = [...this.confirmedAppointments];
   // filteredAppointments: Appointment[] = this.confirmedAppointments.filter(appointment => !appointment!.completed);
+  onSearch(): void {
+    this.filteredAppointments = [...this.confirmedAppointments]
 
+    console.log(this.searchValue, this.selectedDateRange)
+
+    this.filteredServices = this.confirmedAppointments.filter((service) => {
+      let matches = true;
+
+      // Filter by search option
+      if (this.selectedSearchOption && this.searchValue && service) {
+        switch (this.selectedSearchOption) {
+          case 'patientName':
+            matches = service.patientName
+              ?.toLowerCase()
+              .includes(this.searchValue.toLowerCase());
+            break;
+          case 'doctorName':
+            matches = !!service.doctorName
+              ?.toLowerCase()
+              .includes(this.searchValue.toLowerCase());
+            break;
+          case 'departmentName':
+            matches = !!service.department
+              ?.toLowerCase()
+              .includes(this.searchValue.toLowerCase());
+            break;
+          case 'prnNumber':
+            const prnNumber = Number(service.prnNumber); // Convert to Number
+            const searchNumber = Number(this.searchValue); // Convert to Number
+            // ✅ Check if searchValue is a valid number and matches the prnNumber
+            matches = !isNaN(searchNumber) && prnNumber === searchNumber;
+            break;
+        }
+
+      }
+      if (this.selectedDateRange && this.selectedDateRange.length) {
+        // ✅ Convert service date to a Date object and remove time component
+        const serviceDate = new Date(service.date);
+        // serviceDate.setHours(0, 0, 0, 0); // Normalize time to avoid mismatches
+
+        // ✅ Ensure selected start date is a Date object
+        let startDate = new Date(this.selectedDateRange[0]);
+        startDate.setHours(0, 0, 0, 0); // Normalize time
+
+        // ✅ Ensure endDate is assigned correctly
+        let endDate = this.selectedDateRange[1] ? new Date(this.selectedDateRange[1]) : startDate;
+        endDate.setHours(23, 59, 59, 999); // Ensure full-day range
+
+
+        if (startDate === endDate) {
+          // ✅ Single date selected - Exact match
+          matches = serviceDate.toISOString().split('T')[0] === startDate.toISOString().split('T')[0];
+          console.log(matches)
+        } else {
+          // ✅ Date range selected - Match within range
+          matches = matches && serviceDate.getTime() >= startDate.getTime() && serviceDate.getTime() <= endDate.getTime();
+        }
+      }
+
+
+
+
+
+
+
+      // ✅ Filter by single specific date
+      if (this.selectedDate) {
+        const singleDate = new Date(this.selectedDate).toISOString().split('T')[0]; // ✅ Extract YYYY-MM-DD only
+        console.log(singleDate, "Selected Date (Date Only)");
+
+        matches = matches && new Date(service.date).toDateString() === singleDate;
+      }
+
+
+      // console.log(matches);
+      return matches;
+    });
+
+    this.filteredAppointments = this.filteredServices
+    console.log(this.filteredAppointments)
+
+
+  }
+
+
+  refresh() {
+    this.selectedDateRange = [];
+    this.filteredAppointments = this.filteredAppointments.filter((appointment: any) => {
+      appointment.date >= new Date()
+    })
+  }
+  downloadData(): void {
+    if (this.filteredServices.length === 0) {
+      console.warn('No data to download');
+      return;
+    }
+    this.filteredServices.forEach((service) => {
+      // Check if repeatedDates exists and is an array
+      if (Array.isArray(service.repeatedDates)) {
+        // Map to extract only the date property and join with commas
+        const repeatedDates = service.repeatedDates
+          .map((rd: any) => rd.date)
+          .join(', ');
+        service.repeatedDate = repeatedDates;
+      } else {
+        service.repeatedDate = ''; // Handle cases where repeatedDates is not available
+      }
+    });
+    const csvContent = this.convertToCSV(this.filteredServices);
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    FileSaver.saveAs(blob, 'confirmed_appointments.csv');
+  }
+
+
+
+  // Method to clear input fields
+  onClear() {
+    this.searchValue = '';
+    this.selectedSearchOption = 'firstName';
+    this.selectedDateRange = [];
+    this.filteredServices = [...this.confirmedAppointments];
+  }
   ngOnChanges(changes: SimpleChanges) {
     // Whenever the selected date changes, this will be triggered
-    this.filterAppointment();
-    if(this.selectedDateRange && this.selectedDateRange.length === 0){
-      this.filterAppointmentsByDate(new Date());
-    }
-    
-  }
- 
-   // Method to filter appointments by a specific date
-   filterAppointmentsByDate(selectedDate: Date) {
-    const formattedSelectedDate = this.formatDate(selectedDate);
+    // this.filterAppointment();
+    // if(this.selectedDateRange && this.selectedDateRange.length === 0){
+    //   this.filterAppointmentsByDate(new Date());
+    // }
 
-    this.filteredAppointments = this.confirmedAppointments.filter((appointment) => {
-      const appointmentDate = appointment.date;
-      return appointmentDate >= formattedSelectedDate;
-    });
-    if (this.selectedValue.trim() !== '') {
-      this.filterAppointment();
-    }
-    this.currentPage = 1; // Reset to the first page when the filter changes
   }
-  
+  // Utility to Convert JSON to CSV
+  private convertToCSV(data: any[]): string {
+    const headers = Object.keys(data[0]).join(',');
+    const rows = data
+      .map((row) =>
+        Object.values(row)
+          .map((value) => `"${value}"`)
+          .join(',')
+      )
+      .join('\n');
+
+    return `${headers}\n${rows}`;
+  }
+  // Method to filter appointments by a specific date
+  //  filterAppointmentsByDate(selectedDate: Date) {
+  //   const formattedSelectedDate = this.formatDate(selectedDate);
+
+  //   this.filteredAppointments = this.confirmedAppointments.filter((appointment) => {
+  //     const appointmentDate = appointment.date;
+  //     return appointmentDate >= formattedSelectedDate;
+  //   });
+  //   if (this.selectedValue.trim() !== '') {
+  //     this.filterAppointment();
+  //   }
+  //   this.currentPage = 1; // Reset to the first page when the filter changes
+  // }
+
   // Method to handle date change (e.g., when the user selects a date from a date picker)
-  onDateChange(newDate: Date) {
-    this.filterAppointmentsByDate(newDate);
-  }
+  // onDateChange(newDate: Date) {
+  //   this.filterAppointmentsByDate(newDate);
+  // }
 
 
   filterAppointment() {
     // If there's no date range or value to filter, return the unfiltered appointments
     this.filteredList = [...this.confirmedAppointments];
-  
+
     // Handle filtering by date range if selected
     if (this.selectedDateRange && this.selectedDateRange.length === 2) {
       const startDate = this.selectedDateRange[0];
       const endDate = this.selectedDateRange[1] ? this.selectedDateRange[1] : startDate; // Use endDate if provided, otherwise use startDate
-  
-      if (startDate && endDate) {
-        if(startDate.getTime() !== endDate.getTime()) {
-        // Filtering appointments by the selected date range
-        // console.log('Start date:', startDate, 'End date:', endDate);
-        const normalizedEndDate = new Date(endDate);
-    normalizedEndDate.setHours(23, 59, 59, 999);  // Set to the last millisecond of the day
 
-        this.filteredList = this.filteredList.filter((appointment: Appointment) => {
-          const appointmentDate = new Date(appointment.date);  // Assuming 'date' is in string format like 'YYYY-MM-DD'
-          return appointmentDate >= startDate && appointmentDate <= normalizedEndDate;
-        });
-        // console.log('Filtered list:', this.filteredList);
+      if (startDate && endDate) {
+        if (startDate.getTime() !== endDate.getTime()) {
+          // Filtering appointments by the selected date range
+          // console.log('Start date:', startDate, 'End date:', endDate);
+          const normalizedEndDate = new Date(endDate);
+          normalizedEndDate.setHours(23, 59, 59, 999);  // Set to the last millisecond of the day
+
+          this.filteredList = this.filteredList.filter((appointment: Appointment) => {
+            const appointmentDate = new Date(appointment.date);  // Assuming 'date' is in string format like 'YYYY-MM-DD'
+            return appointmentDate >= startDate && appointmentDate <= normalizedEndDate;
+          });
+          // console.log('Filtered list:', this.filteredList);
+        }
+        else if (startDate.getTime() === endDate.getTime()) {
+          // console.log('Single date selected:');
+          const startDate = this.selectedDateRange[0];
+
+          this.filteredList = this.filteredList.filter((appointment: Appointment) => {
+            const appointmentDate = new Date(appointment.date);
+            return appointmentDate.toDateString() === startDate.toDateString();  // Compare the date portion only
+          });
+          // console.log('Filtered list:', this.filteredList);
+        }
       }
-      else if (startDate.getTime() === endDate.getTime()) {
-        // console.log('Single date selected:');
-        const startDate = this.selectedDateRange[0];
-    
-        this.filteredList = this.filteredList.filter((appointment: Appointment) => {
-          const appointmentDate = new Date(appointment.date);
-          return appointmentDate.toDateString() === startDate.toDateString();  // Compare the date portion only
-        });
-        // console.log('Filtered list:', this.filteredList);
+      else {
+        this.filteredAppointments = []
       }
-    }
-    else{
-      this.filteredAppointments = []
-    }
     }
 
     else {
-          // If no valid range is selected, show all appointments
-          this.filteredAppointments = [...this.confirmedAppointments];
-        }
-  
+      // If no valid range is selected, show all appointments
+      this.filteredAppointments = [...this.confirmedAppointments];
+    }
+
     // Handle filtering by a single date if the start and end dates are the same
-   
-  
+
+
     // Handle filtering by the search value (patient name, phone number, or doctor name)
     if (this.selectedValue.trim() !== '') {
       // console.log('Selected search option:', this.selectedSearchOption);
@@ -301,15 +473,15 @@ export class AppointmentConfirmComponent {
         return match;
       });
     }
-    else{
+    else {
       this.filteredAppointments = [...this.confirmedAppointments];
     }
-  
+
     // Update the filtered appointments with the final result
     this.filteredAppointments = this.filteredList;
     this.currentPage = 1; // Reset to first page whenever new filters are applied
   }
-  
+
   downloadLastWeekData(): void {
     this.loadLastWeekAppointments();
     // console.log('Downloading last week\'s data...',this.lastWeekAppointments);
@@ -333,7 +505,7 @@ export class AppointmentConfirmComponent {
       }));
       // Step 1: Convert the filtered data to a worksheet
       const worksheet = XLSX.utils.json_to_sheet(selectedFields);
-      
+
       // Step 2: Create a new workbook and add the worksheet
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Last Week Appointments');
@@ -360,90 +532,25 @@ export class AppointmentConfirmComponent {
       console.warn('No data available to download');
     }
   }
-    // Method to download the filtered data as Excel
-    downloadFilteredData(): void {
-      if (this.filteredList && this.filteredList.length > 0) {
+  // Method to download the filtered data as Excel
+  downloadFilteredData(): void {
+    if (this.filteredList && this.filteredList.length > 0) {
 
-        const selectedFields = this.filteredList.map((appointment: Appointment) => {
-          // console.log('Appointment:', appointment.created_at);
-          if(appointment.created_at){
+      const selectedFields = this.filteredList.map((appointment: Appointment) => {
+        // console.log('Appointment:', appointment.created_at);
+        if (appointment.created_at) {
           const createdAt = new Date(appointment?.created_at);
           const indianTime = moment.tz(createdAt, "America/New_York").tz("Asia/Kolkata");
 
-        // Store the date and time in two separate variables
-        const indianDate = indianTime.format('YYYY-MM-DD');
-        const indianTimeOnly = indianTime.format('HH:mm:ss');
+          // Store the date and time in two separate variables
+          const indianDate = indianTime.format('YYYY-MM-DD');
+          const indianTimeOnly = indianTime.format('HH:mm:ss');
           // const createdDate = createdAt.toISOString().split('T')[0]; // Extract the date part in YYYY-MM-DD format
           // const createdTime = createdAt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); // Extract time in HH:mm (24-hour format)
-          
-          
-        appointment.created_at = indianDate + ' ' + indianTimeOnly;
-        // console.log('Appointment:', appointment.created_at);
-          }
-          return {
-            'Patient Name': appointment.patientName,
-            'Patient Phone Number': appointment.phoneNumber,
-            'Patient Email': appointment.email,
-            'Doctor Name': appointment.doctorName,
-            'Department': appointment.department,
-            'Appointment Date': appointment.date,
-            'Appointment Time': appointment.time,
-            'Appointment Created Time': appointment.created_at,
-            'Request Via': appointment.requestVia,
-            'Whatsapp Sent': appointment.smsSent ? 'Yes' : 'No',
-            'Email Sent': appointment.emailSent ? 'Yes' : 'No',
-            'SMS Sent': appointment.messageSent ? 'Yes' : 'No',
-            'Status': appointment.status,
-            'Appointment Handled By': appointment.user!.username,
-          };
-        
-        });
-        
-        // Step 1: Convert the filtered data to a worksheet
-        const worksheet = XLSX.utils.json_to_sheet(selectedFields);
-        
-        // Step 2: Create a new workbook and add the worksheet
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, `Confirmed Appointments`);
-  
-        // Step 3: Write the workbook to a binary string
-        const excelBuffer = XLSX.write(workbook, {
-          bookType: 'xlsx',
-          type: 'array',
-        });
-  
-        // Step 4: Create a Blob from the binary string
-        const blob = new Blob([excelBuffer], {
-          type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        });
-  
-        // Step 5: Trigger the download
-        const link = document.createElement('a');
-        const url = window.URL.createObjectURL(blob);
-        link.href = url;
-        link.download = 'Confirmed Appointment.xlsx';
-        link.click();
-        window.URL.revokeObjectURL(url);
-      } else {
-        console.warn('No data available to download');
-      }
-    }
-    printAppointmentDetails(): void {
-      const selectedFields = this.filteredList.map((appointment: Appointment) => {
-        // console.log('Appointment:', appointment.created_at);
-        if(appointment.created_at){
-        const createdAt = new Date(appointment?.created_at);
-        const indianTime = moment.tz(createdAt, "America/New_York").tz("Asia/Kolkata");
 
-      // Store the date and time in two separate variables
-      const indianDate = indianTime.format('YYYY-MM-DD');
-      const indianTimeOnly = indianTime.format('HH:mm:ss');
-        // const createdDate = createdAt.toISOString().split('T')[0]; // Extract the date part in YYYY-MM-DD format
-        // const createdTime = createdAt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); // Extract time in HH:mm (24-hour format)
-        
-        
-      appointment.created_at = indianDate + ' ' + indianTimeOnly;
-      // console.log('Appointment:', appointment.created_at);
+
+          appointment.created_at = indianDate + ' ' + indianTimeOnly;
+          // console.log('Appointment:', appointment.created_at);
         }
         return {
           'Patient Name': appointment.patientName,
@@ -461,11 +568,76 @@ export class AppointmentConfirmComponent {
           'Status': appointment.status,
           'Appointment Handled By': appointment.user!.username,
         };
-      
+
       });
-      let printWindow = window.open('', '', 'width=800,height=600');
-    
-      let tableHTML = `
+
+      // Step 1: Convert the filtered data to a worksheet
+      const worksheet = XLSX.utils.json_to_sheet(selectedFields);
+
+      // Step 2: Create a new workbook and add the worksheet
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, `Confirmed Appointments`);
+
+      // Step 3: Write the workbook to a binary string
+      const excelBuffer = XLSX.write(workbook, {
+        bookType: 'xlsx',
+        type: 'array',
+      });
+
+      // Step 4: Create a Blob from the binary string
+      const blob = new Blob([excelBuffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
+
+      // Step 5: Trigger the download
+      const link = document.createElement('a');
+      const url = window.URL.createObjectURL(blob);
+      link.href = url;
+      link.download = 'Confirmed Appointment.xlsx';
+      link.click();
+      window.URL.revokeObjectURL(url);
+    } else {
+      console.warn('No data available to download');
+    }
+  }
+  printAppointmentDetails(): void {
+    console.log(this.filteredServices)
+    const selectedFields = this.filteredServices.map((appointment: Appointment) => {
+      // console.log('Appointment:', appointment.created_at);
+      if (appointment.created_at) {
+        const createdAt = new Date(appointment?.created_at);
+        const indianTime = moment.tz(createdAt, "America/New_York").tz("Asia/Kolkata");
+
+        // Store the date and time in two separate variables
+        const indianDate = indianTime.format('YYYY-MM-DD');
+        const indianTimeOnly = indianTime.format('HH:mm:ss');
+        // const createdDate = createdAt.toISOString().split('T')[0]; // Extract the date part in YYYY-MM-DD format
+        // const createdTime = createdAt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); // Extract time in HH:mm (24-hour format)
+
+
+        appointment.created_at = indianDate + ' ' + indianTimeOnly;
+        // console.log('Appointment:', appointment.created_at);
+      }
+      return {
+        'Patient Name': appointment.patientName,
+        'Patient Email': appointment.email,
+        'Doctor Name': appointment.doctorName,
+        'Department': appointment.department,
+        'Appointment Date': appointment.date,
+        'Appointment Time': appointment.time,
+        'Appointment Created Time': appointment.created_at,
+        'Request Via': appointment.requestVia,
+        'Whatsapp Sent': appointment.smsSent ? 'Yes' : 'No',
+        'Email Sent': appointment.emailSent ? 'Yes' : 'No',
+        'SMS Sent': appointment.messageSent ? 'Yes' : 'No',
+        'Status': appointment.status,
+        'Appointment Handled By': appointment.user!.username,
+      };
+
+    });
+    let printWindow = window.open('', '', 'width=800,height=600');
+
+    let tableHTML = `
         <html>
         <head>
           <title>Appointment Details</title>
@@ -495,27 +667,27 @@ export class AppointmentConfirmComponent {
               </tr>
             </thead>
             <tbody>
-              ${selectedFields.map((row:any) => `<tr>${Object.values(row).map(value => `<td>${value}</td>`).join('')}</tr>`).join('')}
+              ${selectedFields.map((row: any) => `<tr>${Object.values(row).map(value => `<td>${value}</td>`).join('')}</tr>`).join('')}
             </tbody>
           </table>
         </body>
         </html>
       `;
-    
-      printWindow!.document.write(tableHTML);
-      printWindow!.document.close();
-      printWindow!.print();
-    }
-    loadLastWeekAppointments(): void {
-      const today = new Date();
-      const lastWeek = new Date(today.setDate(today.getDate() - 7));
-  
-      // Assuming confirmedAppointments is populated from an API with all appointments
-      this.lastWeekAppointments = this.confirmedAppointments.filter((appointment) => {
-        const appointmentDate = new Date(appointment.date);
-        return appointmentDate >= lastWeek && appointmentDate <= new Date();
-      });
-    }
+
+    printWindow!.document.write(tableHTML);
+    printWindow!.document.close();
+    printWindow!.print();
+  }
+  loadLastWeekAppointments(): void {
+    const today = new Date();
+    const lastWeek = new Date(today.setDate(today.getDate() - 7));
+
+    // Assuming confirmedAppointments is populated from an API with all appointments
+    this.lastWeekAppointments = this.confirmedAppointments.filter((appointment) => {
+      const appointmentDate = new Date(appointment.date);
+      return appointmentDate >= lastWeek && appointmentDate <= new Date();
+    });
+  }
 
   // Utility method to format the date in 'dd/mm/yy' format
   formatDate(date: Date): string {
@@ -529,20 +701,21 @@ export class AppointmentConfirmComponent {
   }
   enableEdit(appointment: any) {
     this.editingAppointmentId = appointment.id;
-   this.editedName = appointment.patientName // Preserve original name
+    this.editedName = appointment.patientName // Preserve original name
   }
-  
+
   cancelEdit() {
     this.editingAppointmentId = null;
   }
-  
+
   async saveEditedName(appointment: any) {
     if (!this.editedName.trim()) return;
-  
+
     try {
       console.log(appointment.editedPatientName)
       appointment.patientName = this.editedName // Update UI
       this.editingAppointmentId = null;
+      appointment.nameChangedBy = this.userId
       this.appointmentService.updateAppointment(appointment)
       this.showToast('Patient name updated successfully', 'success'); // Show success message
     } catch (error) {
@@ -550,16 +723,16 @@ export class AppointmentConfirmComponent {
       this.showToast('Failed to update name', 'error'); // Show error message
     }
   }
-  
+
   showToast(message: string, type: string) {
     this.messageService.add({ severity: type, summary: message });
   }
-  
-  openCheckinPopup(appointment: any){
+
+  openCheckinPopup(appointment: any) {
     this.showPopup = true;
     this.checkinAppointment = appointment
   }
-  closePopup(){
+  closePopup() {
     this.showPopup = false;
     this.checkinAppointment = null;
   }
@@ -568,11 +741,11 @@ export class AppointmentConfirmComponent {
     console.log(appointment)
     const appointmentId = appointment.id;
     appointment.type = this.appointmentType
-    if(appointment.date > this.today){
+    if (appointment.date > this.today) {
       this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Cannot check-in for future appointments!' });
       return;
     }
-    if(appointmentId !== undefined){
+    if (appointmentId !== undefined) {
       const username = localStorage.getItem('username')
       this.appointmentService.checkedinAppointment(appointmentId, username).subscribe({
         next: (response) => {
@@ -588,7 +761,7 @@ export class AppointmentConfirmComponent {
         },
       });
     }
-  
+
 
     this.saveToLocalStorage();
     // Fetch doctor details to get the slot duration
@@ -607,7 +780,7 @@ export class AppointmentConfirmComponent {
     //           console.error('Error scheduling appointment completion:', error);
     //         }
     //       });
-          
+
     //     } else {
     //       console.error('Slot duration not found for doctor:', doctor);
     //     }
@@ -624,49 +797,119 @@ export class AppointmentConfirmComponent {
   // }
   isCheckInEnabled(appointment: any): boolean {
     const currentTime = new Date();
-  
+
     // Parse the appointment time (e.g., "12:40 PM")
     const [time, period] = appointment.time.split(' ');
     const [hours, minutes] = time.split(':').map(Number);
-  
+
     // Convert to 24-hour format
     const appointmentDate = new Date();
     appointmentDate.setHours(period === 'PM' && hours !== 12 ? hours + 12 : (period === 'AM' && hours === 12 ? 0 : hours));
     appointmentDate.setMinutes(minutes);
     appointmentDate.setSeconds(0);
-  
+
     // Define the time window (30 mins before and after)
     const startWindow = new Date(appointmentDate.getTime() - 30 * 60000); // 30 mins before
     const endWindow = new Date(appointmentDate.getTime() + 30 * 60000);   // 30 mins after
-  
+
     // Enable if the current time is within the window
     return currentTime >= startWindow && currentTime <= endWindow;
   }
+  // cancelExpiredAppointments() {
+
+  //   const currentTime = new Date();
+  //   const expiredAppointments = this.confirmedAppointments.filter((appointment: any) => {
+  //     const [time, period] = appointment.time.split(' '); // e.g., "06:00 PM"
+  //     const [hours, minutes] = time.split(':').map(Number);
+
+  //     // Convert to 24-hour format
+  //     const appointmentDate = new Date();
+  //     appointmentDate.setHours(period === 'PM' && hours !== 12 ? hours + 12 : (period === 'AM' && hours === 12 ? 0 : hours));
+  //     appointmentDate.setMinutes(minutes);
+  //     appointmentDate.setSeconds(0);
+
+  //     // Check if the appointment is 30+ minutes past
+  //     return (currentTime.getTime() - appointmentDate.getTime()) > 30 * 60000;
+  //   });
+
+  //   if (expiredAppointments.length === 0) {
+  //     console.log("✅ No expired appointments to cancel.");
+  //     return;
+  //   }
+
+  //   console.log("⚠️ Expired Appointments:", expiredAppointments);
+
+  //   // Call API to cancel expired appointments
+  //   this.appointmentService.bulkCancel(expiredAppointments).subscribe({
+  //     next: () => {
+  //       this.isLoading = false;
+  //       this.messageService.add({
+  //         severity: 'success',
+  //         summary: 'Success',
+  //         detail: 'Expired appointments have been canceled successfully!'
+  //       });
+  //       this.filterAppointment(); // Refresh the list
+  //     },
+  //     error: (err) => {
+  //       this.isLoading = false;
+  //       this.messageService.add({
+  //         severity: 'error',
+  //         summary: 'Error',
+  //         detail: 'Failed to cancel expired appointments.'
+  //       });
+  //       console.error('Error canceling appointments:', err);
+  //     }
+  //   });
+  // }
   cancelExpiredAppointments() {
-  
     const currentTime = new Date();
+    const today = currentTime.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+
+    // ✅ Filter expired appointments (Only today's and 30 minutes past appointment time)
     const expiredAppointments = this.confirmedAppointments.filter((appointment: any) => {
-      const [time, period] = appointment.time.split(' '); // e.g., "06:00 PM"
-      const [hours, minutes] = time.split(':').map(Number);
-  
-      // Convert to 24-hour format
-      const appointmentDate = new Date();
-      appointmentDate.setHours(period === 'PM' && hours !== 12 ? hours + 12 : (period === 'AM' && hours === 12 ? 0 : hours));
-      appointmentDate.setMinutes(minutes);
-      appointmentDate.setSeconds(0);
-  
-      // Check if the appointment is 30+ minutes past
-      return (currentTime.getTime() - appointmentDate.getTime()) > 30 * 60000;
+      // console.log(appointment.checkedIn)
+      if (appointment.checkedIn === false && appointment.date) { // Ensure checkedIn is false and date exists
+        const appointmentDateStr = appointment.date.split('T')[0]; // Extract YYYY-MM-DD
+        console.log(appointmentDateStr)
+        if (appointmentDateStr !== today) return false; // Skip if not today's appointment
+
+        if (!appointment.time) return false; // Skip if time is missing
+
+        const [time, period] = appointment.time.split(' '); // e.g., "07:50 PM"
+        if (!time || !period) return false; // Skip if time is invalid
+
+        const [hours, minutes] = time.split(':').map(Number);
+        if (isNaN(hours) || isNaN(minutes)) return false; // Skip if conversion fails
+
+        // ✅ Convert to 24-hour format
+        const appointmentDate = new Date();
+        appointmentDate.setHours(
+          period === 'PM' && hours !== 12 ? hours + 12 :
+            period === 'AM' && hours === 12 ? 0 : hours
+        );
+        appointmentDate.setMinutes(minutes);
+        appointmentDate.setSeconds(0);
+        console.log(appointmentDate)
+
+        // ✅ Add 30 minutes buffer
+        const cancelTime = new Date(appointmentDate.getTime() + 30 * 60000); // Add 30 min
+
+        // ✅ Cancel only if current time is past the cancelTime
+        return currentTime.getTime() > cancelTime.getTime();
+      }
+      return false;
     });
-  
+
+    // ✅ If no expired appointments, exit function
     if (expiredAppointments.length === 0) {
       console.log("✅ No expired appointments to cancel.");
       return;
     }
-  
-    console.log("⚠️ Expired Appointments:", expiredAppointments);
-  
-    // Call API to cancel expired appointments
+
+    console.log("⚠️ Expired Appointments (30+ min past scheduled time):", expiredAppointments);
+
+    // ✅ Call API to cancel expired appointments
+    // this.isLoading = true;
     this.appointmentService.bulkCancel(expiredAppointments).subscribe({
       next: () => {
         this.isLoading = false;
@@ -684,11 +927,14 @@ export class AppointmentConfirmComponent {
           summary: 'Error',
           detail: 'Failed to cancel expired appointments.'
         });
-        console.error('Error canceling appointments:', err);
+        console.error('❌ Error canceling appointments:', err);
       }
     });
   }
-  
+
+
+
+
   cancelAppointment(appointment: Appointment) {
     const cancelled: Appointment = {
       ...appointment,
@@ -714,9 +960,9 @@ export class AppointmentConfirmComponent {
       }
     });
     this.doctorService.getDoctorDetails(appointment.doctorId).subscribe({
-      next: (response) =>{
+      next: (response) => {
         const doctorPhoneNumber = response?.phone_number;
-        const appointmentDetails ={
+        const appointmentDetails = {
           patientName: appointment?.patientName,
           doctorName: appointment?.doctorName,
           date: appointment?.date,
@@ -744,7 +990,7 @@ export class AppointmentConfirmComponent {
           }
         });
       }
-      
+
     });
     const appointmentDetails = {
       patientName: appointment?.patientName,
@@ -769,36 +1015,36 @@ export class AppointmentConfirmComponent {
   submitAppointment(appointment: Appointment | null, status: string, requestVia: any) {
     // console.log('Appointment to submit:', appointment);
 
-  
+
     if (!appointment) {
-        console.error('No appointment selected for submission.');
-        return; // Early return if appointment is null or undefined
+      console.error('No appointment selected for submission.');
+      return; // Early return if appointment is null or undefined
     }
-  
-    const confirmedAppointment: Appointment = { 
-        ...appointment,  // Copy all properties from the original appointment
-        smsSent: true,
-        emailSent: true,
-        messageSent: true,
-        requestVia: appointment.requestVia, // Determine requestVia
+
+    const confirmedAppointment: Appointment = {
+      ...appointment,  // Copy all properties from the original appointment
+      smsSent: true,
+      emailSent: true,
+      messageSent: true,
+      requestVia: appointment.requestVia, // Determine requestVia
     };
-  
+
     if (status === 'Confirm') {
-        confirmedAppointment.status = 'confirmed'; // Set the status to confirmed
-        this.appointmentService.addConfirmedAppointment(confirmedAppointment);
-        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Appointment confirmed successfully!' });
+      confirmedAppointment.status = 'confirmed'; // Set the status to confirmed
+      this.appointmentService.addConfirmedAppointment(confirmedAppointment);
+      this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Appointment confirmed successfully!' });
       // Fetch doctor's details to get the doctor's email
       // this.doctorService.getDoctorDetails(appointment.doctorId).subscribe({
       //   next: (response) => {
       //     const doctorEmail = response?.email;
       //     const patientEmail = appointment?.email;
-  
+
       //     // Ensure both emails are valid
       //     if (!doctorEmail || !patientEmail) {
       //       console.error('Doctor or patient email is missing.');
       //       return;
       //     }
-  
+
       //     // Prepare appointment details for email
       //     const appointmentDetails = {
       //       patientName: appointment?.patientName,
@@ -806,9 +1052,9 @@ export class AppointmentConfirmComponent {
       //       date: appointment?.date,
       //       time: appointment?.time,
       //     };
-  
+
       //     const emailStatus = 'rescheduled';
-  
+
       //     // Send email to the doctor
       //     this.appointmentService.sendEmail(doctorEmail, emailStatus, appointmentDetails, 'doctor').subscribe({
       //       next: (response) => {
@@ -818,7 +1064,7 @@ export class AppointmentConfirmComponent {
       //         console.error('Error sending email to doctor:', error);
       //       },
       //     });
-  
+
       //     // Send email to the patient
       //     this.appointmentService.sendEmail(patientEmail, emailStatus, appointmentDetails, 'patient').subscribe({
       //       next: (response) => {
@@ -833,69 +1079,69 @@ export class AppointmentConfirmComponent {
       //     console.error('Error in getting doctor details:', error);
       //   },
       // });
-        
-    
-  
-        // Remove the confirmed appointment from the canceled appointments
-        this.cancelledAppointments = this.cancelledAppointments.filter(a => a.id !== appointment.id);
-        
+
+
+
+      // Remove the confirmed appointment from the canceled appointments
+      this.cancelledAppointments = this.cancelledAppointments.filter(a => a.id !== appointment.id);
+
     } else if (status === 'Cancel') {
-        confirmedAppointment.status = 'Cancelled'; // Update the status
-        this.appointmentService.addCancelledAppointment(confirmedAppointment);
-        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Appointment cancelled successfully!' });
-        this.doctorService.getDoctorDetails(appointment.doctorId).subscribe({
-          next: (response) =>{
-            const doctorPhoneNumber = response?.phone_number;
-            const appointmentDetails ={
-              patientName: appointment?.patientName,
-              doctorName: appointment?.doctorName,
-              date: appointment?.date,
-              time: appointment?.time,
-              doctorPhoneNumber: doctorPhoneNumber,
-              patientPhoneNumber: appointment?.phoneNumber,
-              status: 'cancelled'
-            }
-            this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
-              next: (response) => {
-                // console.log('SMS message sent successfully:', response);
-                this.messageService.add({ severity: 'success', summary: 'Success', detail: 'SMS message sent successfully!' });
-              },
-              error: (error) => {
-                console.error('Error sending SMS message:', error);
-              }
-            });
-            this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
-              next: (response) => {
-                // console.log('WhatsApp message sent successfully:', response);
-                this.messageService.add({ severity: 'success', summary: 'Success', detail: 'WhatsApp message sent successfully!' });
-              },
-              error: (error) => {
-                console.error('Error sending WhatsApp message:', error);
-              }
-            });
+      confirmedAppointment.status = 'Cancelled'; // Update the status
+      this.appointmentService.addCancelledAppointment(confirmedAppointment);
+      this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Appointment cancelled successfully!' });
+      this.doctorService.getDoctorDetails(appointment.doctorId).subscribe({
+        next: (response) => {
+          const doctorPhoneNumber = response?.phone_number;
+          const appointmentDetails = {
+            patientName: appointment?.patientName,
+            doctorName: appointment?.doctorName,
+            date: appointment?.date,
+            time: appointment?.time,
+            doctorPhoneNumber: doctorPhoneNumber,
+            patientPhoneNumber: appointment?.phoneNumber,
+            status: 'cancelled'
           }
-          
-        });
-        const appointmentDetails = {
-          patientName: appointment?.patientName,
-          doctorName: appointment?.doctorName,
-          date: appointment?.date,
-          time: appointment?.time,
-        };
-        const patientEmail = appointment.email;
-  
-        const emailStatus = 'cancelled';
-        this.appointmentService.sendEmail(patientEmail, emailStatus, appointmentDetails, 'patient').subscribe({
-          next: (response) => {
-            // console.log('Email sent to patient successfully:', response);
-            this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to patient successfully!' });
-          },
-          error: (error) => {
-            console.error('Error sending email to patient:', error);
-          },
-        });
+          this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
+            next: (response) => {
+              // console.log('SMS message sent successfully:', response);
+              this.messageService.add({ severity: 'success', summary: 'Success', detail: 'SMS message sent successfully!' });
+            },
+            error: (error) => {
+              console.error('Error sending SMS message:', error);
+            }
+          });
+          this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
+            next: (response) => {
+              // console.log('WhatsApp message sent successfully:', response);
+              this.messageService.add({ severity: 'success', summary: 'Success', detail: 'WhatsApp message sent successfully!' });
+            },
+            error: (error) => {
+              console.error('Error sending WhatsApp message:', error);
+            }
+          });
+        }
+
+      });
+      const appointmentDetails = {
+        patientName: appointment?.patientName,
+        doctorName: appointment?.doctorName,
+        date: appointment?.date,
+        time: appointment?.time,
+      };
+      const patientEmail = appointment.email;
+
+      const emailStatus = 'cancelled';
+      this.appointmentService.sendEmail(patientEmail, emailStatus, appointmentDetails, 'patient').subscribe({
+        next: (response) => {
+          // console.log('Email sent to patient successfully:', response);
+          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to patient successfully!' });
+        },
+        error: (error) => {
+          console.error('Error sending email to patient:', error);
+        },
+      });
     }
-  
+
     // Additional filtering and updates
     this.closeAppointmentForm();
     this.filterAppointment(); // Refresh the filtered appointments
@@ -906,7 +1152,7 @@ export class AppointmentConfirmComponent {
       // Call backend to unlock the appointment
       this.appointmentService.unlockAppointment(this.activeAppointmentId!).subscribe({
         next: () => {
-  
+
           this.activeAppointmentId = null;
           this.selectedAppointment = null; // Close the form
         },
@@ -915,7 +1161,7 @@ export class AppointmentConfirmComponent {
         }
       });
     }
-  
+
   }
   ngOnDestroy(): void {
     if (this.activeAppointmentId !== null) {
@@ -929,18 +1175,18 @@ export class AppointmentConfirmComponent {
     // console.log('Selected appointment:', this.selectedAppointment);
     this.lockAndAccessAppointment(appointment);
   }
-  lockAndAccessAppointment(appointment:Appointment): void {
+  lockAndAccessAppointment(appointment: Appointment): void {
     const appointmentId = appointment.id!;
     // console.log(this.userId)
     this.appointmentService.lockAppointment(appointmentId, this.userId).subscribe({
       next: (response) => {
         // Successfully locked, proceed to open the form
         this.activeAppointmentId = appointmentId;
-  
+
         // Proceed to open the appointment form since the lock was successful
-      this.selectedAppointment = { ...appointment };  // Create a copy to avoid direct modification
-      this.showAppointmentForm = true;
-  
+        this.selectedAppointment = { ...appointment };  // Create a copy to avoid direct modification
+        this.showAppointmentForm = true;
+
       },
       error: (error) => {
         if (error.status === 409) {
@@ -955,7 +1201,7 @@ export class AppointmentConfirmComponent {
           console.error('Error locking the appointment:', error);
         }
       }
-  
+
     });
   }
 }

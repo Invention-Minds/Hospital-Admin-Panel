@@ -15,7 +15,6 @@
           <input type="text" placeholder="Enter PRN Number" formControlName="prnNumber" class="prn"
             (input)="onPRNChange()" (focus)="showSuggestions = true" />
 
-          <!-- PRN Suggestions Dropdown -->
           <ul class="prn-suggestions" *ngIf="showSuggestions && filteredPRNs.length > 0">
             <li *ngFor="let prn of filteredPRNs" (click)="selectPRN(prn)">
               {{ prn.prn }} - {{ prn.name }}
@@ -27,6 +26,8 @@
             <small *ngIf="appointmentForm.get('prnNumber')?.errors?.['required']">PRN Number is required</small>
           </div>
         </div>
+      
+        
 
         <!-- Patient Name -->
         <div class="form-group">

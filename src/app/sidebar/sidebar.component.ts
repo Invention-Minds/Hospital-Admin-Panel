@@ -62,7 +62,13 @@ export class SidebarComponent implements OnInit {
   isNotEstimator(): boolean {
     return !(this.role === 'sub_admin' && this.subAdminType === 'Estimator');
   }
+  isNotMHC(): boolean {
+    return !(this.role === 'sub_admin' && this.subAdminType === 'MHC Coordinator');
+  }
   isEstimator():boolean {
     return(this.role === 'sub_admin' && this.subAdminType === 'Estimator')
+  }
+  isMHC():boolean{
+    return(this.role === 'sub_admin' && this.subAdminType === 'MHC Coordinator')
   }
 }

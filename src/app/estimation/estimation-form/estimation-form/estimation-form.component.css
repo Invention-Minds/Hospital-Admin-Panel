@@ -226,6 +226,88 @@ input[type="radio"] {
   font-family: Kanit;
   /* max-width: 900px; */
 }
+/* Dropdown Button */
+.dropdown-btn {
+  width: 50%;
+  padding: 10px;
+  background-color: #f6f8ff;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  text-align: left;
+  position: relative;
+}
+
+/* Dropdown Content */
+.dropdown-content {
+  position: absolute;
+  max-width: calc(100% - 10%);
+  background-color: white;
+  border: 1px solid #ccc;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  max-height: 200px;
+  overflow-y: auto;
+  padding: 10px;
+  font-family: Kanit;
+}
+
+/* Search Box */
+.dropdown-content input {
+  max-width: calc(100% - 10%);
+  padding: 5px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  font-family: Kanit;
+}
+
+/* Checkbox List */
+.checkbox-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* Table for Selected Rooms */
+.room-costs {
+  margin-top: 20px;
+}
+.selected-rooms-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.room-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f8f9fa;
+  padding: 10px;
+  border-radius: 8px;
+  min-width: 150px;
+  border: 1px solid #ccc;
+}
+
+.room-name {
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+.room-cost {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.remove-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: red;
+  font-size: 16px;
+  font-weight: bold;
+}
+
 
 .signature-container {
   display: flex;

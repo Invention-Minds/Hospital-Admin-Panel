@@ -8,99 +8,142 @@
 
         <div class="formContent">
             <!-- prn number -->
-            <div class="sections container_margin">
-                <div class="lable_name"><span>PRN:</span></div>
-                <div class="input_field">
-                    <input type="text">
+            <div class="container_margin">
+                <div class="sections">
+                    <div class="lable_name"><span>PRN:</span></div>
+                    <div class="input_field">
+                        <input type="text">
+                    </div>
+                </div>
+                <ul class="prn-suggestions" *ngIf="showSuggestions && filteredPRNs.length > 0">
+                    <li *ngFor="let prn of filteredPRNs" (click)="selectPRN(prn)">
+                        {{ prn.prn }} - {{ prn.name }}
+                    </li>
+                </ul>
+
+                <div class="errors"
+                    *ngIf="appointmentForm.get('prnNumber')?.invalid && (appointmentForm.get('prnNumber')?.touched || appointmentForm.get('prnNumber')?.dirty)">
+                    <small *ngIf="appointmentForm.get('prnNumber')?.errors?.['required']">PRN Number is required</small>
                 </div>
             </div>
 
             <!-- patient name -->
-            <div class="sections container_margin">
-                <div class="lable_name"><span>Patient Name: </span></div>
-                <div class="input_field input_flex">
-                    <input type="text">
-                    <input type="text">
+            <div class="container_margin">
+                <div class="sections">
+                    <div class="lable_name"><span>Patient Name: </span></div>
+                    <div class="input_field input_flex">
+                        <input type="text">
+                        <input type="text">
+                    </div>
+                </div>
+                <div class="errors"
+                    *ngIf="appointmentForm.get('firstName')?.invalid && (appointmentForm.get('firstName')?.touched || appointmentForm.get('firstName')?.dirty)">
+                    <small *ngIf="appointmentForm.get('firstName')?.errors?.['required']">First Name is required</small>
+                    <small *ngIf="appointmentForm.get('firstName')?.errors?.['pattern']">First Name can only contain
+                        letters and
+                        spaces</small>
                 </div>
             </div>
 
             <!-- phone number -->
-            <div class="sections container_margin">
-                <div class="lable_name"><span>Phone Number: </span></div>
-                <div class="input_field">
-                    <input type="text">
+            <div class="container_margin">
+                <div class="sections">
+                    <div class="lable_name"><span>Phone Number: </span></div>
+                    <div class="input_field">
+                        <input type="text">
+                    </div>
                 </div>
             </div>
 
             <!-- email id -->
             <div class="sections container_margin">
-                <div class="lable_name"><span>Email Id:</span></div>
-                <div class="input_field">
-                    <input type="text">
+                <div class="sections">
+                    <div class="lable_name"><span>Email Id:</span></div>
+                    <div class="input_field">
+                        <input type="text">
+                    </div>
                 </div>
             </div>
 
             <!-- age -->
             <div class="sections container_margin">
-                <div class="lable_name"><span>Age: </span></div>
-                <div class="input_field">
-                    <input type="text">
+                <div class="sections">
+                    <div class="lable_name"><span>Age: </span></div>
+                    <div class="input_field">
+                        <input type="text">
+                    </div>
                 </div>
+
             </div>
 
             <!-- gender -->
             <div class="sections container_margin">
-                <div class="lable_name"><span>Gender: </span></div>
-                <div class="input_field">
-                    <select>
-                        <option option = '' disabled selected>Select Gender</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="sections container_margin">
-                <div class="selectFlex">
-                    <div class="lable_name"><span>Appointment Date:</span></div>
-                    <div class="input_field">
-                        <p-calendar formControlName="appointmentTime" [timeOnly]="true" hourFormat="12" [showButtonBar]="true"
-                        [showSeconds]="false" placeholder="Select Time"></p-calendar>
-                    </div>
-                </div>
-                <div class="selectFlex">
-                    <div class="lable_name"><span>Appointment Time:</span></div>
+                <div class="sections">
+                    <div class="lable_name"><span>Gender: </span></div>
                     <div class="input_field">
                         <select>
-                            <option option = '' disabled selected>09.15 to 09.30</option>
+                            <option option='' disabled selected>Select Gender</option>
                             <option value="male">Male</option>
                             <option value="female">Female</option>
                         </select>
                     </div>
                 </div>
+
             </div>
 
-            <div class="sections container_margin">
-                <div class="radio_flex">
+            <div class="container_margin">
+                <div class="sections">
+                    <div class="selectFlex">
+                        <div class="lable_name"><span>Appointment Date:</span></div>
+                        <div class="input_field">
+                            <p-calendar formControlName="appointmentTime" [timeOnly]="true" hourFormat="12"
+                                [showButtonBar]="true" [showSeconds]="false" placeholder="Select Time"></p-calendar>
+                        </div>
+                    </div>
+                    <div class="selectFlex">
+                        <div class="lable_name"><span>Appointment Time:</span></div>
+                        <div class="input_field">
+                            <select>
+                                <option option='' disabled selected>09.15 to 09.30</option>
+                                <option value="male">Male</option>
+                                <option value="female">Female</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container_margin">
+                <div class="sections">
+                    <div class="radio_flex">
                     <div class="lable_name"><span>Request Via</span></div>
                     <div class="radioInput">
-                        <div class="radios"></div><input type="radio"><div class="radio_name">Website</div>
-                        <div class="radios"></div><input type="radio"><div class="radio_name">Call</div>
+                        <div class="radios"></div><input type="radio">
+                        <div class="radio_name">Website</div>
+                        <div class="radios"></div><input type="radio">
+                        <div class="radio_name">Call</div>
                     </div>
                 </div>
                 <div class="radio_flex">
                     <div class="lable_name"><span>Appointment</span></div>
                     <div class="radioInput">
-                        <div class="radios"></div><input type="radio"><div class="radio_name">Confirm</div>
-                        <div class="radios"></div><input type="radio"><div class="radio_name">Cancel</div>
+                        <div class="radios"></div><input type="radio">
+                        <div class="radio_name">Confirm</div>
+                        <div class="radios"></div><input type="radio">
+                        <div class="radio_name">Cancel</div>
                     </div>
                 </div>
             </div>
 
-            <div class="button_section container_margin">
-                <div class="book_btn">Book Appointment</div>
-                <!-- <div class="close_btn">Close</div> -->
             </div>
+
+        </div>
+
+        <div class="button_section container_margin">
+            <div class="book_btn">Book Appointment</div>
+            <!-- <div class="close_btn">Close</div> -->
         </div>
     </div>
 </div>
+
+<!-- </div> -->

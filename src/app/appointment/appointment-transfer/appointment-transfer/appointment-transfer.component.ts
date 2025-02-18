@@ -35,7 +35,7 @@ export class AppointmentTransferComponent {
   isLockedDialogVisible: boolean = false;
   userId: any = 0;
   @Output() reschedule = new EventEmitter<any>();
-  activeComponent: string = 'confirmed';
+  activeComponent: string = 'transfer';
   confirmedServices: any[] = [];
 
 
@@ -116,7 +116,7 @@ export class AppointmentTransferComponent {
         }
 
       }
-
+      console.log(this.selectedDateRange)
       // Filter by date range
       if (this.selectedDateRange && this.selectedDateRange.length) {
         const serviceDate = new Date(service.date);
@@ -127,9 +127,11 @@ export class AppointmentTransferComponent {
 
         // Normalize endDate to include the full day
         const normalizedEndDate = new Date(endDate);
+        console.log(endDate)
         normalizedEndDate.setHours(23, 59, 59, 999);
 
         if (startDate.getTime() === normalizedEndDate.getTime()) {
+          console.log('start',startDate)
           // Single date selected
           matches =
             matches &&
@@ -146,6 +148,7 @@ export class AppointmentTransferComponent {
       // Filter by specific date
       if (this.selectedDate) {
         const singleDate = new Date(this.selectedDate);
+        console.log(singleDate)
         matches =
           matches &&
           new Date(service.date).toDateString() === singleDate.toDateString();

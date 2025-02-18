@@ -23,7 +23,9 @@ export class DoctorServiceService {
     this.doctorSubject.next(doctor);
   }
 
-
+  addOrUpdateExtraSlot(extraSlotData: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/extraslot-count/add`, extraSlotData);
+  }
 
   // Delete a doctor
   deleteDoctor(id: number): Observable<void> {

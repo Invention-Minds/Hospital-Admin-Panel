@@ -35,5 +35,8 @@ export interface Doctor {
   bookedSlots?: { time: string; complete: boolean }[]; // Optional property to store booked slots
   extraSlots?: any[]; // Optional property to store extra slots
   userId?: number; // Optional property to link to a user
+  ExtraSlotCount?: any;
+  extraHoursBefore?:any;
+  extraHoursAfter?:any;
   
 }

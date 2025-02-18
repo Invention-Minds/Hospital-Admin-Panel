@@ -31,6 +31,7 @@ interface Appointment {
   [key: string]: any;  // Add this line to allow indexing by string
   created_at?: string;
   isAccepted?:boolean;
+  prnNumber?:any;
 }
 const lockedAppointments = new Map<number, { userId: string; lockTime: number }>();
 @Component({
@@ -40,10 +41,10 @@ const lockedAppointments = new Map<number, { userId: string; lockTime: number }>
   providers: [MessageService]
 })
 export class AppointmentRequestComponent implements OnInit {
-  @Input() selectedDate: Date | null = null;
-  @Input() selectedValue: string = '';
-  @Input() selectedSearchOption: string = ''; 
-  @Input() selectedDateRange: Date[] | null = null;
+ selectedDate: Date | null = null;
+ selectedValue: string = '';
+ selectedSearchOption: string = ''; 
+ selectedDateRange: Date[] | null = null;
   pendingAppointments: Appointment[] = [];
   activeAppointmentId: number | null | undefined = null;
   userId: any = 0;
@@ -51,7 +52,10 @@ export class AppointmentRequestComponent implements OnInit {
   showDeleteConfirmDialog: boolean = false;
   appointmentToDelete: Appointment | null = null;
   isLoading: boolean = false;
-  
+  searchValue: string = '';
+  activeComponent: string = 'confirmed';
+
+  filteredServices:any[] = []
 
   private userSubscription: Subscription | undefined;
   private lockSubscription: Subscription | undefined;
@@ -219,22 +223,101 @@ export class AppointmentRequestComponent implements OnInit {
     //   this.filterAppointmentsByDate(new Date());
     // }
   }
-   // Method to filter appointments by a specific date
-  //  filterAppointmentsByDate(selectedDate: Date) {
-  //   const formattedSelectedDate = this.formatDate(selectedDate);
-  //   console.log("pending",this.pendingAppointments)
-  //   this.filteredAppointments = this.pendingAppointments.filter((appointment) => {
-  //     const appointmentDate = appointment.date;
-  //     return appointmentDate === formattedSelectedDate;
-  //   });
+  onClear() {
+    this.searchValue = '';
+    this.selectedSearchOption = 'firstName';
+    this.selectedDateRange = [];
+    this.filteredServices = [...this.pendingAppointments];
+  }
+  onSearch(): void {
+    this.filteredAppointments = [...this.pendingAppointments]
 
-  //   this.currentPage = 1; // Reset to the first page when the filter changes
-  // }
+    console.log(this.searchValue, this.selectedDateRange)
 
-  // Method to handle date change (e.g., when the user selects a date from a date picker)
-  // onDateChange(newDate: Date) {
-  //   this.filterAppointmentsByDate(newDate);
-  // }
+    this.filteredServices = this.pendingAppointments.filter((service) => {
+      let matches = true;
+
+      // Filter by search option
+      if (this.selectedSearchOption && this.searchValue && service) {
+        switch (this.selectedSearchOption) {
+          case 'patientName':
+            matches = service.patientName
+              ?.toLowerCase()
+              .includes(this.searchValue.toLowerCase());
+            break;
+          case 'doctorName':
+            matches = !!service.doctorName
+              ?.toLowerCase()
+              .includes(this.searchValue.toLowerCase());
+            break;
+          case 'departmentName':
+            matches = !!service.department
+              ?.toLowerCase()
+              .includes(this.searchValue.toLowerCase());
+            break;
+        case 'prnNumber':
+                const prnNumber = Number(service.prnNumber); // Convert to Number
+                const searchNumber = Number(this.searchValue); // Convert to Number
+                // ✅ Check if searchValue is a valid number and matches the prnNumber
+                matches = !isNaN(searchNumber) && prnNumber === searchNumber;
+                break;
+        }
+
+      }
+      if (this.selectedDateRange && this.selectedDateRange.length) {
+        // ✅ Convert service date to a Date object and remove time component
+        const serviceDate = new Date(service.date);
+        // serviceDate.setHours(0, 0, 0, 0); // Normalize time to avoid mismatches
+    
+        // ✅ Ensure selected start date is a Date object
+        let startDate = new Date(this.selectedDateRange[0]);
+        startDate.setHours(0, 0, 0, 0); // Normalize time
+    
+        // ✅ Ensure endDate is assigned correctly
+        let endDate = this.selectedDateRange[1] ? new Date(this.selectedDateRange[1]) : startDate;
+        endDate.setHours(23, 59, 59, 999); // Ensure full-day range
+
+    
+        if (startDate=== endDate) {
+            // ✅ Single date selected - Exact match
+            matches = serviceDate.toISOString().split('T')[0] === startDate.toISOString().split('T')[0];
+            console.log(matches)
+        } else {
+            // ✅ Date range selected - Match within range
+            matches = matches && serviceDate.getTime() >= startDate.getTime() && serviceDate.getTime() <= endDate.getTime();
+        }
+    }
+    
+    
+    
+    
+    
+    
+    
+    // ✅ Filter by single specific date
+    if (this.selectedDate) {
+        const singleDate = new Date(this.selectedDate).toISOString().split('T')[0]; // ✅ Extract YYYY-MM-DD only
+        console.log(singleDate, "Selected Date (Date Only)");
+    
+        matches = matches && new Date(service.date).toDateString() === singleDate;
+    }
+    
+
+      // console.log(matches);
+      return matches;
+    });
+
+    this.filteredAppointments = this.filteredServices
+    console.log(this.filteredAppointments)
+
+
+  }
+
+
+  refresh() {
+    this.selectedDateRange = [];
+    this.filteredAppointments = this.pendingAppointments
+  }
 
 
   // Method to filter appointments by the selected date

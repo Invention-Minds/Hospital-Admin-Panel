@@ -50,6 +50,10 @@
           <div class="unavailable">
             <button class="unavailable-button" *ngIf="doctor.doctorType !=='Visiting Consultant'" (click)="openUnavailableModal(doctor)" [disabled]="!isTodayOrTomorrow(selectedDate) && doctor.id !== 14">Unavailable Slots</button>
           </div>
+          <div class="extra-slots-buttons" *ngIf="((role === 'admin' || role === 'super_admin') && doctor.doctorType !== 'Visiting Consultant')">
+            <button type="button" (click)="addExtraSlotsBefore(doctor)">Add Extra Slots Before</button>
+            <button type="button" (click)="addExtraSlotsAfter(doctor)">Add Extra Slots After</button>
+          </div>
         </div>
       </div>
       <div class="slots-wrapper" *ngIf="!isLoading">
@@ -74,6 +78,10 @@
              }"
            (click)="onSlotClick(doctor,slot)" >
           {{ slot.time }}
+        </div> -->
+        <!-- <div class="extra-slots-buttons" *ngIf="((role === 'admin' || role === 'super_admin') && doctor.doctorType !== 'Visiting Consultant')">
+          <button type="button" (click)="addExtraSlotsBefore(doctor)">Add Extra Slots Before</button>
+          <button type="button" (click)="addExtraSlotsAfter(doctor)">Add Extra Slots After</button>
         </div> -->
         <ng-container *ngFor="let slot of doctor.slots">
           <div *ngIf="slot.status !== 'extra' || (role === 'admin' || role === 'super_admin')"

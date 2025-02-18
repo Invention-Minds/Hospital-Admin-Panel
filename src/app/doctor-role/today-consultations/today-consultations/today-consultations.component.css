@@ -834,12 +834,14 @@ input {
   font-style: normal;
   font-weight: 500;
   line-height: normal;
+  width: 30%;
 }
 
 .radio-buttons {
   display: flex;
   align-items: center;
   gap: 15px; /* Space between radio buttons */
+  width: 70%;
 }
 
 .radio-buttons label {
@@ -847,6 +849,7 @@ input {
   align-items: center;
   font-size: 14px;
   cursor: pointer;
+  text-wrap: nowrap;
 }
 
 .radio-buttons input[type="radio"] {
@@ -888,6 +891,14 @@ input {
 /* Hide the mobile cards by default */
 .mobile-appointments {
   display: none;
+}
+.estimation-note{
+  color: #7B7B7B;
+font-family: Kanit;
+font-size: 12px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
 }
 
 /* Show the mobile cards on smaller screens */
@@ -1074,7 +1085,18 @@ input {
   align-items: center;  /* Align radio buttons vertically */
   gap: 10px;  /* Space between radio buttons */
 }
-
+.stay-container{
+  display: flex;
+  flex-direction: column;
+}
+.estimation-note{
+  color: #7B7B7B;
+font-family: Kanit;
+font-size: 12px;
+font-style: normal;
+font-weight: 400;
+line-height: normal;
+}
 .radio-buttons label {
   display: flex;
   align-items: center;

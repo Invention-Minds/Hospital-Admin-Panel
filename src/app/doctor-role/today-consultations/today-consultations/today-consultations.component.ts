@@ -84,6 +84,7 @@ export class TodayConsultationsComponent {
   showCloseOpdPopup = false;
   currentDoctorId: number = 0;
   currentDepartmentId: number = 0;
+  currentDepartmentName: string = ''
   doctor: any = []
   showLeaveRequestPopup: boolean = false;
   startDate: string | null = null;
@@ -111,6 +112,7 @@ export class TodayConsultationsComponent {
   totalStay: number = 0;
   icu: number = 0;
   ward: number = 0;
+  surgeryPackage: string = 'single surgery';
 
 
 
@@ -442,7 +444,8 @@ export class TodayConsultationsComponent {
     this.selectedAppointment = appointment;
     this.currentDoctorName = appointment.doctorName || 'Unknown Doctor';
     this.showEstimationPopup = true;
-    this.currentDoctorId = appointment.doctorId
+    this.currentDoctorId = appointment.doctorId;
+    this.currentDepartmentName = appointment.departmentName
     // this.doctor.filter((doc:any) => {
     //   this.currentDepartmentId = doc.departmentId!;
     //   this.currentDoctorName = doc.name!;
@@ -536,6 +539,7 @@ export class TodayConsultationsComponent {
         totalDaysStay: Number(this.totalStay),
         icuStay: Number(this.icu),
         wardStay: Number(this.ward),
+        surgeryPackage: this.surgeryPackage
       };
       // console.log(estimationDetails)
       this.estimationService.createEstimationDetails(estimationDetails).subscribe({
@@ -569,6 +573,7 @@ export class TodayConsultationsComponent {
       totalDaysStay: Number(this.totalStay),
       icuStay:Number(this.icu),
       wardStay:Number(this.ward),
+      surgeryPackage: this.surgeryPackage
     };
 
     // this.doctor.filter((doc:any) => {
@@ -576,6 +581,7 @@ export class TodayConsultationsComponent {
     //   this.currentDoctorName = doc.name!;
     // });
     this.currentDepartmentId = this.doctor.departmentId;
+    this.currentDepartmentName = this.doctor.departmentName
     this.currentDoctorName = this.doctor.name
     // console.log('Saving Estimation:', {
     //   doctorId: this.currentDoctorId,
@@ -684,6 +690,7 @@ export class TodayConsultationsComponent {
     //   this.currentDoctorId = doc.id!;
     // });
     this.currentDepartmentId = this.doctor.departmentId;
+    this.currentDepartmentName = this.doctor.departmentName;
     this.currentDoctorName = this.doctor.name
     this.appointmentService.updateAppointment(appointment)
     this.eventService.emitConsultationStarted({
@@ -731,6 +738,7 @@ export class TodayConsultationsComponent {
       //   this.currentDoctorId = doc.id!;
       // });
       this.currentDepartmentId = this.doctor.departmentId;
+      this.currentDepartmentName = this.doctor.departmentName
       this.currentDoctorName = this.doctor.name
       this.channelService.getChannelsByDoctor(this.currentDoctorId).subscribe({
         next: (response) => {
@@ -893,16 +901,18 @@ export class TodayConsultationsComponent {
     //   this.currentDoctorName = doc.name!;
     // });
     this.currentDepartmentId = this.doctor.departmentId;
+    this.currentDepartmentName = this.doctor.departmentName
     this.currentDoctorName = this.doctor.name
     const isSameDate = this.startDate === this.endDate;
 
     const leaveRequest = {
       doctorName: this.currentDoctorName,
+      departmentName: this.currentDepartmentName,
       startDate: this.startDate,
       endDate: this.endDate,
     };
     const adminPhoneNumber = '919342287945'
-    this.appointmentService.sendAdminMessage(this.currentDoctorName, this.startDate, this.endDate, adminPhoneNumber).subscribe({
+    this.appointmentService.sendAdminMessage(this.currentDoctorName, this.currentDepartmentName ,this.startDate, this.endDate, adminPhoneNumber).subscribe({
       next: (response) => {
         // console.log('Leave request submitted:', response);
         // alert('Leave request submitted successfully.');

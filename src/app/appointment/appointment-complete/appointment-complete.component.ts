@@ -1,5 +1,6 @@
 import { Component,Input, OnChanges } from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
+import * as FileSaver from 'file-saver';
 import * as XLSX from 'xlsx';
 import moment from 'moment-timezone';
 interface Appointment {
@@ -19,7 +20,7 @@ interface Appointment {
   requestVia?: string; // Optional property
   created_at?: string;
   user?: any;
-}
+  prnNumber?:any}
 @Component({
   selector: 'app-appointment-complete',
   templateUrl: './appointment-complete.component.html',
@@ -37,18 +38,33 @@ export class AppointmentCompleteComponent {
   itemsPerPage = 10;
   sortColumn: keyof Appointment | undefined = undefined;  // No sorting initially
   sortDirection: string = 'asc';  // Default sorting direction
-  @Input() selectedDateRange: Date[] | null = null;
-  @Input() selectedValue: string = '';
-  @Input() selectedSearchOption: string = ''; 
+
+  selectedValue: string = '';
+
+  selectedDate: Date | null = null;
+  filteredServices:any[] = []
+
+  selectedDateRange: Date[] = [];
   filteredList: any;
   isLoading: boolean = false;
+  searchValue: string = '';
+  activeComponent: string = 'completed'
+  today:string = ''
 
   searchOptions = [
     { label: 'Patient Name', value: 'patientName' },
-    { label: 'Phone Number', value: 'phoneNumber' }
+    {label: 'PRN', value: 'prnNumber'},
+    { label: 'Doctor Name', value: 'doctorName' },
+    { label: 'Department', value: 'department' },
   ];
+  selectedSearchOption: any = this.searchOptions[0];
   // Method to handle sorting by a specific column
   ngOnInit() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = (today.getMonth() + 1).toString().padStart(2, '0');
+    const day = today.getDate().toString().padStart(2, '0');
+    this.today = `${year}-${month}-${day}`;
     // this.appointmentService.completedAppointments$.subscribe(appointments => {
     //   this.completedAppointments = appointments;
     //   this.filteredAppointments = [...this.completedAppointments];
@@ -62,7 +78,16 @@ export class AppointmentCompleteComponent {
         return dateB.getTime() - dateA.getTime();
       });
       this.filteredAppointments = [...this.completedAppointments];
-      this.filterAppointmentsByDate(new Date());
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Normalize to midnight (00:00:00)
+
+      // Filter out appointments that are in the past
+      this.filteredAppointments = this.filteredAppointments.filter((appointment: any) => {
+        const appointmentDate = new Date(appointment.date); // Convert appointment date to Date object
+        // If the appointment date is today or in the future
+        return appointmentDate >= today;
+      });
+      // this.filterAppointmentsByDate(new Date());
       setTimeout(() => {
         // console.log('Setting isLoading to false after delay');
         this.isLoading = false; // Stop loading indicator
@@ -171,8 +196,145 @@ export class AppointmentCompleteComponent {
     }
   }
   filteredAppointments: Appointment[] = [...this.completedAppointments];
+  onSearch(): void {
+    this.filteredAppointments = [...this.completedAppointments]
+
+    console.log(this.searchValue, this.selectedDateRange)
+
+    this.filteredServices = this.completedAppointments.filter((service) => {
+      let matches = true;
+
+      // Filter by search option
+      if (this.selectedSearchOption && this.searchValue && service) {
+        switch (this.selectedSearchOption) {
+          case 'patientName':
+            matches = service.patientName
+              ?.toLowerCase()
+              .includes(this.searchValue.toLowerCase());
+            break;
+          case 'doctorName':
+            matches = !!service.doctorName
+              ?.toLowerCase()
+              .includes(this.searchValue.toLowerCase());
+            break;
+          case 'departmentName':
+            matches = !!service.department
+              ?.toLowerCase()
+              .includes(this.searchValue.toLowerCase());
+            break;
+          case 'prnNumber':
+            const prnNumber = Number(service.prnNumber); // Convert to Number
+           
+            const searchNumber = Number(this.searchValue); // Convert to Number
+            console.log(prnNumber, searchNumber)
+    
+            // ✅ Check if searchValue is a valid number and matches the prnNumber
+            matches = !isNaN(searchNumber) && prnNumber === searchNumber;
+            break;
+        }
+
+      }
+      if (this.selectedDateRange && this.selectedDateRange.length) {
+        // ✅ Convert service date to a Date object and remove time component
+        const serviceDate = new Date(service.date);
+        // serviceDate.setHours(0, 0, 0, 0); // Normalize time to avoid mismatches
+    
+        // ✅ Ensure selected start date is a Date object
+        let startDate = new Date(this.selectedDateRange[0]);
+        startDate.setHours(0, 0, 0, 0); // Normalize time
+    
+        // ✅ Ensure endDate is assigned correctly
+        let endDate = this.selectedDateRange[1] ? new Date(this.selectedDateRange[1]) : startDate;
+        endDate.setHours(23, 59, 59, 999); // Ensure full-day range
+
+    
+        if (startDate=== endDate) {
+            // ✅ Single date selected - Exact match
+            matches = serviceDate.toISOString().split('T')[0] === startDate.toISOString().split('T')[0];
+            console.log(matches)
+        } else {
+            // ✅ Date range selected - Match within range
+            matches = matches && serviceDate.getTime() >= startDate.getTime() && serviceDate.getTime() <= endDate.getTime();
+        }
+    }
+    
+    
+    
+    
+    
+    
+    
+    // ✅ Filter by single specific date
+    if (this.selectedDate) {
+        const singleDate = new Date(this.selectedDate).toISOString().split('T')[0]; // ✅ Extract YYYY-MM-DD only
+        console.log(singleDate, "Selected Date (Date Only)");
+    
+        matches = matches && new Date(service.date).toDateString() === singleDate;
+    }
+    
+
+      // console.log(matches);
+      return matches;
+    });
+
+    this.filteredAppointments = this.filteredServices
+    console.log(this.filteredAppointments)
 
 
+  }
+
+
+  refresh() {
+    this.selectedDateRange = [];
+    this.filteredAppointments = this.filteredAppointments.filter((appointment:any)=>{
+      appointment.date >= new Date()
+    })
+  }
+  downloadData(): void {
+    if (this.filteredServices.length === 0) {
+      console.warn('No data to download');
+      return;
+    }
+    this.filteredServices.forEach((service) => {
+      // Check if repeatedDates exists and is an array
+      if (Array.isArray(service.repeatedDates)) {
+        // Map to extract only the date property and join with commas
+        const repeatedDates = service.repeatedDates
+          .map((rd: any) => rd.date)
+          .join(', ');
+        service.repeatedDate = repeatedDates;
+      } else {
+        service.repeatedDate = ''; // Handle cases where repeatedDates is not available
+      }
+    });
+    const csvContent = this.convertToCSV(this.filteredServices);
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    FileSaver.saveAs(blob, 'confirmed_appointments.csv');
+  }
+
+  // Utility to Convert JSON to CSV
+  private convertToCSV(data: any[]): string {
+    const headers = Object.keys(data[0]).join(',');
+    const rows = data
+      .map((row) =>
+        Object.values(row)
+          .map((value) => `"${value}"`)
+          .join(',')
+      )
+      .join('\n');
+
+    return `${headers}\n${rows}`;
+  }
+
+  // Method to clear input fields
+  onClear() {
+    this.searchValue = '';
+    this.selectedSearchOption = 'firstName';
+    this.selectedDateRange = [];
+    this.filteredAppointments = this.filteredAppointments.filter((appointment:any)=>{
+      appointment.date > new Date()
+    })
+  }
   
   // Method to filter appointments by the selected date
   filterAppointment() {
@@ -341,7 +503,7 @@ export class AppointmentCompleteComponent {
     }
   }
   printAppointmentDetails(): void {
-    const selectedFields = this.filteredList.map((appointment: Appointment) => {
+    const selectedFields = this.filteredServices.map((appointment: Appointment) => {
       // console.log('Appointment:', appointment.created_at);
       if(appointment.created_at){
       const createdAt = new Date(appointment?.created_at);
@@ -359,7 +521,6 @@ export class AppointmentCompleteComponent {
       }
       return {
         'Patient Name': appointment.patientName,
-        'Patient Phone Number': appointment.phoneNumber,
         'Patient Email': appointment.email,
         'Doctor Name': appointment.doctorName,
         'Department': appointment.department,

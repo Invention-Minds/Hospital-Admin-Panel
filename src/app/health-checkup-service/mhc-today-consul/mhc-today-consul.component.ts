@@ -74,7 +74,7 @@ export class MhcTodayConsulComponent {
           (service) =>
             service.appointmentStatus === 'Confirm' &&
             service.checkedIn === true &&
-            service.appointmentDate === this.today
+            service.appointmentDate === '2025-02-18'
         )
         .map((service) => ({
           ...service,

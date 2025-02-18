@@ -71,7 +71,7 @@
       <div *ngFor="let doctor of availableDoctors let i=index" class="doctor-card" >
         <div class="doctor-details">
           <div class="doctor-id">{{i + 1}}</div>
-          <div class="doctor-name">{{doctor.name}}</div>
+          <div class="doctor-name">{{doctor.name}}<span style="margin-left: 5px;"> - ({{doctor.availableFrom}})</span></div>
         </div>
         <div class="availability-status available">
           {{'Available'}}

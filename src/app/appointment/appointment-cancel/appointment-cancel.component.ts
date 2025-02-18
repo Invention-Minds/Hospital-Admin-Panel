@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { app } from '../../../../server';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
+import * as FileSaver from 'file-saver';
 import { stat } from 'node:fs';
 import * as XLSX from 'xlsx';
 import moment from 'moment-timezone';
@@ -24,6 +25,7 @@ interface Appointment {
   created_at?: string;
   isrescheduled?: boolean;
   user?:any;
+  prnNumber?:any
 }
 @Component({
   selector: 'app-appointment-cancel',
@@ -40,14 +42,21 @@ export class AppointmentCancelComponent {
   //   { id: '0002', patientName: 'Lokesh P', phoneNumber: '9876543211', doctorName: 'Dr. Nithish', department: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Cancelled' },
   //   // Add more appointments here...
   // ];
-  searchOptions = [
-    { label: 'Patient Name', value: 'patientName' },
-    { label: 'Phone Number', value: 'phoneNumber' }
-  ];
-  @Input() selectedDate: Date | null = null;
-  @Input() selectedValue: string = '';
-  @Input() selectedSearchOption: string = ''; 
-  @Input() selectedDateRange: Date[] = [];
+
+ selectedDate: Date | null = null;
+ selectedValue: string = '';
+ searchValue: string = '';
+ selectedDateRange: Date[] = [];
+ activeComponent: string = 'cancelled'
+
+ searchOptions = [
+   { label: 'Patient Name', value: 'patientName' },
+   {label: 'PRN', value: 'prnNumber'},
+   { label: 'Doctor Name', value: 'doctorName' },
+   { label: 'Department', value: 'department' },
+
+ ];
+ selectedSearchOption: any = this.searchOptions[0];
   filteredList: any;
 
   showAppointmentForm = false;  // Controls the visibility of the modal
@@ -58,11 +67,19 @@ export class AppointmentCancelComponent {
   isLockedDialogVisible: boolean = false; // To control the visibility of the lock dialog
   isSubmitting: boolean = false;
   isLoading: boolean = false;
+  filteredServices:any[] = [];
+  today: string = ''
   ngOnInit() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = (today.getMonth() + 1).toString().padStart(2, '0');
+    const day = today.getDate().toString().padStart(2, '0');
+    this.today = `${year}-${month}-${day}`;
     this.fetchCancelledAppointments();
   }
   
   fetchCancelledAppointments() {
+
     this.isLoading = true; // Start loading
     // console.log('Fetching cancelled appointments...');
     this.appointmentService.fetchAppointments();
@@ -78,8 +95,16 @@ export class AppointmentCancelComponent {
         });
   
         // Filter appointments
-        this.filteredAppointments = [...this.cancelledAppointments];
-        this.filterAppointmentsByDate(new Date());
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Normalize to midnight (00:00:00)
+
+        // Filter out appointments that are in the past
+        this.filteredAppointments = this.filteredAppointments.filter((appointment: any) => {
+          const appointmentDate = new Date(appointment.date); // Convert appointment date to Date object
+          // If the appointment date is today or in the future
+          return appointmentDate >= today;
+        });
+        // this.filterAppointmentsByDate(new Date());
         setTimeout(() => {
           // console.log('Setting isLoading to false after delay');
           this.isLoading = false; // Stop loading indicator
@@ -93,6 +118,140 @@ export class AppointmentCancelComponent {
         // console.log('Cancelled appointments fetched successfully.');
       }
     );
+  }
+  onSearch(): void {
+    this.filteredAppointments = [...this.cancelledAppointments]
+
+    console.log(this.searchValue, this.selectedDateRange)
+
+    this.filteredServices = this.cancelledAppointments.filter((service) => {
+      let matches = true;
+
+      // Filter by search option
+      if (this.selectedSearchOption && this.searchValue && service) {
+        switch (this.selectedSearchOption) {
+          case 'patientName':
+            matches = service.patientName
+              ?.toLowerCase()
+              .includes(this.searchValue.toLowerCase());
+            break;
+          case 'doctorName':
+            matches = !!service.doctorName
+              ?.toLowerCase()
+              .includes(this.searchValue.toLowerCase());
+            break;
+          case 'departmentName':
+            matches = !!service.department
+              ?.toLowerCase()
+              .includes(this.searchValue.toLowerCase());
+            break;
+            case 'prnNumber':
+              const prnNumber = Number(service.prnNumber); // Convert to Number
+              const searchNumber = Number(this.searchValue); // Convert to Number
+              // ✅ Check if searchValue is a valid number and matches the prnNumber
+              matches = !isNaN(searchNumber) && prnNumber === searchNumber;
+              break;
+        }
+
+      }
+      if (this.selectedDateRange && this.selectedDateRange.length) {
+        // ✅ Convert service date to a Date object and remove time component
+        const serviceDate = new Date(service.date);
+        // serviceDate.setHours(0, 0, 0, 0); // Normalize time to avoid mismatches
+    
+        // ✅ Ensure selected start date is a Date object
+        let startDate = new Date(this.selectedDateRange[0]);
+        startDate.setHours(0, 0, 0, 0); // Normalize time
+    
+        // ✅ Ensure endDate is assigned correctly
+        let endDate = this.selectedDateRange[1] ? new Date(this.selectedDateRange[1]) : startDate;
+        endDate.setHours(23, 59, 59, 999); // Ensure full-day range
+
+    
+        if (startDate=== endDate) {
+            // ✅ Single date selected - Exact match
+            matches = serviceDate.toISOString().split('T')[0] === startDate.toISOString().split('T')[0];
+            console.log(matches)
+        } else {
+            // ✅ Date range selected - Match within range
+            matches = matches && serviceDate.getTime() >= startDate.getTime() && serviceDate.getTime() <= endDate.getTime();
+        }
+    }
+    
+    
+    
+    
+    
+    
+    
+    // ✅ Filter by single specific date
+    if (this.selectedDate) {
+        const singleDate = new Date(this.selectedDate).toISOString().split('T')[0]; // ✅ Extract YYYY-MM-DD only
+        console.log(singleDate, "Selected Date (Date Only)");
+    
+        matches = matches && new Date(service.date).toDateString() === singleDate;
+    }
+    
+
+      // console.log(matches);
+      return matches;
+    });
+
+    this.filteredAppointments = this.filteredServices
+    console.log(this.filteredAppointments)
+
+
+  }
+
+
+  refresh() {
+    this.selectedDateRange = [];
+    this.filteredAppointments = this.filteredAppointments.filter((appointment:any)=>{
+      appointment.date >= new Date()
+    })
+  }
+  downloadData(): void {
+    if (this.filteredServices.length === 0) {
+      console.warn('No data to download');
+      return;
+    }
+    this.filteredServices.forEach((service) => {
+      // Check if repeatedDates exists and is an array
+      if (Array.isArray(service.repeatedDates)) {
+        // Map to extract only the date property and join with commas
+        const repeatedDates = service.repeatedDates
+          .map((rd: any) => rd.date)
+          .join(', ');
+        service.repeatedDate = repeatedDates;
+      } else {
+        service.repeatedDate = ''; // Handle cases where repeatedDates is not available
+      }
+    });
+    const csvContent = this.convertToCSV(this.filteredServices);
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    FileSaver.saveAs(blob, 'confirmed_appointments.csv');
+  }
+
+  // Utility to Convert JSON to CSV
+  private convertToCSV(data: any[]): string {
+    const headers = Object.keys(data[0]).join(',');
+    const rows = data
+      .map((row) =>
+        Object.values(row)
+          .map((value) => `"${value}"`)
+          .join(',')
+      )
+      .join('\n');
+
+    return `${headers}\n${rows}`;
+  }
+
+  // Method to clear input fields
+  onClear() {
+    this.searchValue = '';
+    this.selectedSearchOption = 'firstName';
+    this.selectedDateRange = [];
+    this.filteredServices = [...this.cancelledAppointments];
   }
   
    // Method to filter appointments by a specific date
@@ -440,7 +599,7 @@ export class AppointmentCancelComponent {
     }
   }
   printAppointmentDetails(): void {
-    const selectedFields = this.filteredList.map((appointment: Appointment) => {
+    const selectedFields = this.filteredServices.map((appointment: Appointment) => {
       // console.log('Appointment:', appointment.created_at);
       if(appointment.created_at){
       const createdAt = new Date(appointment?.created_at);

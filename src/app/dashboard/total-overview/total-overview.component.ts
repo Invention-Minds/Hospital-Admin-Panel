@@ -318,7 +318,9 @@ export class TotalOverviewComponent implements OnInit {
               ? doctor.availability // If all are null, consider the entire availability as "latest"
               : doctor.availability?.filter(avail => avail.updatedAt === latestTimestamp);
               // console.log(latestAvailability)
-
+              const dayOfWeek = new Date().toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
+              const availableDay = latestAvailability?.find(avail => avail.day.toLowerCase() === dayOfWeek);
+              doctor.availableFrom = availableDay?.availableFrom!
             if (doctor.doctorType === 'Visiting Consultant') {
               // Visiting Consultant with booked slots for today is Available
               availableCount++;

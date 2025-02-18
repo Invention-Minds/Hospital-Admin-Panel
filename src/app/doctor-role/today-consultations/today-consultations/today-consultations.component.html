@@ -231,6 +231,19 @@
             </label>
           </div>
         </div>
+        <div class="estimation-type-container">
+          <label class="estimation-type-label">Surgery Procedure:</label>
+          <div class="radio-buttons">
+            <label>
+              <input type="radio" name="surgeryPackage" [(ngModel)]="surgeryPackage" value="single surgery" />
+              Single Surgery
+            </label>
+            <label>
+              <input type="radio" name="surgeryPackage" [(ngModel)]="surgeryPackage" value="multiple surgeries" />
+              Multiple Surgeries
+            </label>
+          </div>
+        </div>
 
 
       <div class="estimation-input-container">
@@ -243,6 +256,9 @@
           class="custom-input"
         />
         <label for="estimationText" class="custom-label">Estimation Name*</label>
+        <div *ngIf="surgeryPackage === 'multiple surgeries'" class="estimation-note">
+          Note: Estimated Procedures:* (Eg: Surgery 1, Surgery 2, Surgery 3)
+        </div>
         <!-- Dropdown for suggestions -->
         <ul 
           class="estimation-suggestions" 
@@ -283,11 +299,10 @@
             <input 
             type="text" 
             (input)="calculateWardStay()"
-            [(ngModel)]="icu" 
-            [ngClass]="{'input-error': isInvalidInput()}" 
+            [(ngModel)]="icu"  
             class="custom-input"
           />
-          <label for="remarks" class="custom-label">Icu</label>
+          <label for="remarks" class="custom-label">ICU</label>
           </div>
           <div class="input-container">
             <input 
@@ -310,12 +325,25 @@
         </div>
         <div class="input-container" *ngIf="estimationType === 'SM'">
           <select id="surgeryTime" name="surgeryTime" class="custom-input" [(ngModel)]="surgeryTime" required #surgeryTimeModel="ngModel">
-            <option value="" disabled selected>Select OT Utilization Time</option>
-            <option value="0 to 15">0 to 15 mins</option>
-            <option value="15 to 30">15 to 30 mins</option>
-            <option value="30 to 60">30 to 60 mins</option>
+            <option value="" disabled selected>Select Surgery Level</option>
+            <option value="Level 1">Level 1</option>
+            <option value="Level 1A">Level 1A</option>
+            <option value="Level 2">Level 2</option>
+            <option value="Level 2A">Level 2A</option>
+            <option value="Level 3">Level 3</option>
+            <option value="Level 3A">Level 3A</option>
+            <option value="Level 4">Level 4</option>
+            <option value="Level 4A">Level 4A</option>
+            <option value="Level 5">Level 5</option>
+            <option value="Level 5A">Level 5A</option>
+            <option value="Level 6">Level 6</option>
+            <option value="Level 6A">Level 6A</option>
+            <option value="Level 7">Level 7</option>
+            <option value="Level 7A">Level 7A</option>
+            <option value="Level 8">Level 8</option>
+            <option value="Level 8A">Level 8A</option>
           </select>
-          <label for="surgeryTime" class="custom-label">OT Utilization Time*</label>
+          <label for="surgeryTime" class="custom-label">Surgery Level*</label>
         </div>
         
       </div>

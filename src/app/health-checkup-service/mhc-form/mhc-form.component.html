@@ -1,51 +1,75 @@
 <div class="container">
-    <h2>MHC - Doctor Confirmation Form</h2>
-    <form [formGroup]="doctorForm" (ngSubmit)="onSubmit()">
-  
-      <!-- Patient Details -->
-      <div class="form-group">
-        <input type="text" placeholder="PNR Number*" formControlName="pnrNumber" readonly>
-        <input type="text" placeholder="Patient Name*" formControlName="patientName" readonly>
-        <input type="text" placeholder="Health Check Type*" formControlName="healthCheckType" readonly>
-      </div>
-  
-      <!-- Dynamic Department Fields -->
-      <div class="grid-container" formArrayName="appointments">
-        <div class="department-box" *ngFor="let dept of departments; let i = index" [formGroupName]="i">
-          <input type="text" [value]="dept.name" readonly class="dept-input">
-          
-          <!-- Doctor Dropdown -->
-          <select formControlName="doctor" (change)="onDoctorSelected(i, $event)">
+  <h2>MHC - Doctor Confirmation Form</h2>
+  <form [formGroup]="doctorForm" (ngSubmit)="onSubmit()">
+
+    <!-- Patient Details -->
+    <div class="form-group">
+      <input type="text" placeholder="PNR Number*" formControlName="pnrNumber">
+      <input type="text" placeholder="Patient Name*" formControlName="patientName" readonly>
+      <input type="text" placeholder="Health Check Type*" formControlName="healthCheckType" readonly>
+    </div>
+
+    <!-- Dynamic Department Fields -->
+    <div class="grid-container" formArrayName="appointments">
+      <div class="department-box" *ngFor="let dept of departments; let i = index" [formGroupName]="i">
+        <input type="text" [value]="dept.name" readonly class="dept-input">
+
+        <!-- Doctor Dropdown -->
+        <!-- Doctor Dropdown -->
+        <select formControlName="doctor" (change)="onDoctorSelected(i, $event)">
+          <ng-container *ngIf="dept.hasDoctor; else noDoctor">
             <option value="" disabled selected>Select Doctor*</option>
             <option *ngFor="let doc of dept.doctors" [value]="doc.id">{{ doc.name }}</option>
-          </select>
-          
+          </ng-container>
+          <ng-template #noDoctor>
+            <option value="no-doctor" selected disabled>No Doctor Available</option>
+          </ng-template>
+        </select>
 
-          
-  
-          <!-- Time Dropdown -->
-                    
-          <!-- <select formControlName="time">
+
+
+
+
+        <!-- Time Dropdown -->
+
+        <!-- <select formControlName="time">
             <option value="" disabled selected>Select Time*</option>
             <option *ngFor="let slot of availableTimes[i]">{{ slot }}</option>
           </select> -->
-          <select formControlName="time">
-            <option value="" disabled selected>Select Time*</option>
-            <ng-container *ngIf="dept.hasDoctor; else noSlots">
-              <option *ngFor="let t of availableTimes[i]" [value]="t">{{ t }}</option>
-            </ng-container>
-            <ng-template #noSlots>
-              <option value="no-slots" selected disabled>No Available Slots</option>
-            </ng-template>
-          </select>
-        </div>
+        <!-- Time Dropdown -->
+        <!-- Time Dropdown -->
+        <!-- Time Dropdown -->
+        <!-- Time Dropdown -->
+        <!-- Time Dropdown -->
+        <select formControlName="time">
+          <option value="" disabled selected>Select Time*</option>
+          <ng-container *ngIf="dept.hasDoctor; else noSlots">
+            <option *ngFor="let t of availableTimes[i]" [value]="t">{{ t }}</option>
+            <!-- ✅ Ensure booked time is displayed when no other slots exist -->
+            <option
+              *ngIf="(availableTimes[i]?.length === 0 || availableTimes[i]?.includes('No Available Slots')) && appointments[i]?.time"
+              [value]="appointments[i]?.time">
+              {{ appointments[i]?.time }}
+            </option>
+          </ng-container>
+          <ng-template #noSlots>
+            <option value="no-slots" selected disabled>No Available Slots</option>
+          </ng-template>
+        </select>
+
+
+
+
+
       </div>
-  
-      <!-- Buttons -->
-      <div class="button-container">
-        <button type="submit">Book Appointment</button>
-        <button type="button" class="cancel">Cancel</button>
-      </div>
-    </form>
-  </div>
-  
+    </div>
+
+    <!-- Buttons -->
+    <div class="button-container">
+      <!-- <button class="submit" type="submit" >Book Appointment</button> -->
+      <button type="submit" class="submit" mat-raised-button [class.spinner]="isLoading"><span *ngIf="!isLoading">Book
+          Appointment</span></button>
+      <button type="button" class="cancel">Cancel</button>
+    </div>
+  </form>
+</div>

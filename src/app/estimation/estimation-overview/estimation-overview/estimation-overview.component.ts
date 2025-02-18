@@ -36,7 +36,11 @@ export class EstimationOverviewComponent {
   
   
     closeForm(): void {
-      this.activeComponent = 'approved'; // Switch back to the confirmed view
+      if(this.role=== 'sub_admin'){
+        this.showAppointmentRequests()
+      } else{
+        this.showSubmittedRequest()
+      }// Switch back to the confirmed view
       this.selectedEstimation = null; // Clear the selected service
       setTimeout(() => {
         if (this.EstimationApprovedComponent) {

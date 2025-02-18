@@ -393,6 +393,7 @@ export class AppointmentFormComponent implements OnInit {
     this.filteredPRNs = this.patients.filter(patient =>
       String(patient.prn).startsWith(String(input)) // Convert to string before calling startsWith()
     );
+    console.log(this.filteredPRNs)
 
     if (this.filteredPRNs.length === 0) {
       this.showSuggestions = false;
@@ -402,6 +403,7 @@ export class AppointmentFormComponent implements OnInit {
   }
 
   selectPRN(selectedPatient: any) {
+    console.log(selectedPatient)
     if (!selectedPatient) return;
 
     console.log(selectedPatient)

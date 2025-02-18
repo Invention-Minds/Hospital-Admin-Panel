@@ -211,4 +211,234 @@ font-weight: 400;
     padding: 20px;
     font-family: Kanit;
   }
+  .form-row {
+    display: flex;
+    align-items: center;
+    justify-content:space-between;
+    padding: 10px;
+    background-color: #F0F3FF;
+    border-radius: 12px;
+    /* box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); */
+    /* margin-bottom: 15px; Optional: To create space below the row */
+    padding-left: 90px;
+    /* padding-top: 20px; */
+  }
+  ::ng-deep .custom-dropdown .p-dropdown {
+    width: 200px;
+    height: 46px;
+    border-radius: 10px; /* Rounded edges */
+    background-color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Shadow effect */
+    border: 1px solid #e0e0e0; /* Light border */
+  }
   
+  ::ng-deep .custom-dropdown .p-dropdown-label {
+    font-size: 14px;
+    color: #808080; /* Light gray font for placeholder */
+    padding-left: 10px;
+    padding: 11px;
+  }
+  ::ng-deep .custom-dropdown .p-dropdown-trigger {
+    color: #808080; /* Light gray arrow */
+    border-radius: 0 10px 10px 0; /* Right side rounded for trigger button */
+    background-color: transparent; /* No background */
+    padding-right: 15px;
+    padding-top: 2px;
+    width: 30px;
+  }
+  
+  ::ng-deep .custom-dropdown .p-dropdown-panel {
+    border-radius: 5px; /* Rounded panel edges */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Panel shadow */
+    background:#fff;
+  }
+  
+  ::ng-deep .custom-dropdown .p-dropdown-item {
+    font-size: 14px;
+    color: #4a4a4a;
+    padding: 10px 20px;
+  }
+  ::ng-deep .custom-input-text {
+    width: 300px; /* Adjust as necessary */
+    height: 46px; /* Match height */
+    border-radius: 10px; /* Rounded edges */
+    background-color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    border: 1px solid #e0e0e0; /* Light gray border */
+    padding-left: 15px; /* Padding for text */
+    color: #7B7B7B;
+    font-family: Kanit;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal; /* Light gray text */
+  }
+  ::ng-deep .custom-input-text:focus {
+    outline: none; /* Remove default outline */
+    border: 1px solid #8cc152; /* Green border on focus */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Stronger shadow on focus */
+    color: #7B7B7B;
+  font-family: Kanit;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  }
+  
+  ::ng-deep .p-inputtext {
+    border-radius: 10px;
+    color: #7B7B7B;
+  font-family: Kanit;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  }
+  ::ng-deep .p-inputtext:focus{
+    color: #7B7B7B;
+  font-family: Kanit;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  }
+  .p-field {
+    margin: 0 10px;
+  }
+  ::ng-deep .custom-calendar .p-inputtext {
+    width: 300px;
+    height: 46px;
+    border-radius: 10px; /* Rounded edges */
+    background-color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    border: 1px solid #e0e0e0; /* Light gray border */
+    padding-left: 15px;
+    color: #7B7B7B;
+    font-family: Kanit;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+  }
+  
+  
+  ::ng-deep .custom-calendar .p-calendar-trigger {
+    /* color: #808080; Light gray arrow */
+    border-radius: 0 10px 10px 0; /* Right side rounded for trigger button */
+    background-color: transparent; /* No background */
+  }
+  
+  ::ng-deep .custom-calendar .p-datepicker {
+    border-radius: 10px; /* Rounded calendar popup */
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Shadow for calendar popup */
+    background-color: white;    font-size: 12px; /* Smaller font for calendar */
+    width: 300px; /* Adjusted width for calendar popup */
+  }
+  
+  ::ng-deep .custom-calendar .p-datepicker table {
+    font-size: 14px; /* Smaller font for dates */
+  }
+  
+  ::ng-deep .custom-calendar .p-datepicker-header {
+    padding: 5px; /* Adjust header padding */
+  }
+  
+  ::ng-deep .custom-calendar .p-datepicker .p-datepicker-prev,
+  ::ng-deep .custom-calendar .p-datepicker .p-datepicker-next {
+    height: 25px;  /* Adjust button size */
+    width: 25px;   /* Adjust button size */
+  }
+  ::ng-deep .p-datepicker table td {
+    padding: 0;
+  }
+  
+  
+  .delete{
+    /* width: 40px;
+    height: 40px; */
+    cursor: pointer;
+    height: 40px;
+    margin-top: 5px;
+  }
+  .calendar{
+  padding-top: 21px;
+  }
+  .p-calendar {
+    width: 150px;
+  }
+  .column-1{
+    display: flex;
+    width: 50%;
+    /* gap: 20px; */
+    padding-top: 20px;
+    position: relative;
+    left: -10px;
+  }
+  .buttons-container{
+    display: flex;
+    margin-top: -2px;
+  }
+  .calendar-icon{
+  position: relative;
+  right: 38px;
+  font-size: 18px;
+  color: #4a4a4a;
+  font-family: 900;
+  }
+  .reverse{
+    border-radius: 10px; /* Rounded edges */
+    background-color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Shadow effect */
+    border: 1px solid #e0e0e0; /* Light border */
+    margin-bottom: -14px;
+    
+    padding: 10px;
+    cursor: pointer;
+    /* padding-top: 20px; */
+  }
+  .delete{
+    border-radius: 10px; /* Rounded edges */
+    background-color: #FF4747;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Shadow effect */
+    border: 1px solid #e0e0e0; /* Light border */
+    margin-bottom: 0px;
+    color: white;
+    padding: 6px;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+  }
+  .download{
+  border-radius: 10px; /* Rounded edges */
+    background-color: #0E2970;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Shadow effect */
+    border: 1px solid #e0e0e0; /* Light border */
+    margin-bottom: -14px;
+    
+    padding: 6px;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+  
+  }
+  .download img{
+  width:39px
+  }
+  
+  .print{
+    border-radius: 10px; /* Rounded edges */
+    background-color: #D20006;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Shadow effect */
+    border: 1px solid #e0e0e0; /* Light border */
+    margin-bottom: -14px;
+    
+    padding: 6px;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+   }
+  
+   .print img{
+    width: 39px;
+   }
+   

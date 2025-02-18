@@ -111,6 +111,15 @@ export class AppointmentConfirmService {
       this.fetchAppointments(); // Fetch appointments to update the list
     });
   }
+  createAppointment(appointment: Appointment): void {
+const appointmentData = appointment
+
+    // console.log('Adding new appointment:', appointmentData);
+    // Send the appointment details to the backend without an ID
+    this.http.post<Appointment>(`${this.apiUrl}/new`, appointmentData).subscribe((newAppointment) => {
+      this.fetchAppointments(); // Fetch appointments to update the list
+    });
+  }
 
   // Method to add a canceled appointment
   addCancelledAppointment(appointment: Appointment): void {
@@ -387,8 +396,8 @@ export class AppointmentConfirmService {
   // createEstimation(doctorId:number, departmentId:number, estimation:string): Observable<any>{
   //   return this.http.post(`${environment.apiUrl}/estimation`, {doctorId, departmentId, estimation});
   // }
-  sendAdminMessage(doctorName: string, startDate: string, endDate: string, adminPhoneNumber: string): Observable<any> {
-    return this.http.post(`${environment.apiUrl}/whatsapp/send-admin-message`, { doctorName, startDate, endDate, adminPhoneNumber });
+  sendAdminMessage(doctorName: string, departmentName:string, startDate: string, endDate: string, adminPhoneNumber: string): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/whatsapp/send-admin-message`, { doctorName,departmentName, startDate, endDate, adminPhoneNumber });
   }
   updateExtraWaitingTime(appointmentId: number, waitingTime: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/${appointmentId}/waitingTime`, { waitingTime });
@@ -446,5 +455,14 @@ export class AppointmentConfirmService {
   closeSettingsModal() {
     this.settingsModalSubject.next(false);
   }
-
+  getAppointmentsByServiceId(serviceId: any, date?: string): Observable<any> {
+    let apiUrl = `${this.apiUrl}/appts-by-serviceId?serviceId=${serviceId}`;
+    
+    if (date) {
+      apiUrl += `&date=${date}`; // Append date parameter if provided
+    }
+  
+    return this.http.get<any>(apiUrl);
+  }
+  
 }

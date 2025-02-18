@@ -64,7 +64,7 @@ import { Router } from '@angular/router';
           
           // Process the services when the API call is successful
           this.pendingEstimations = estimation.filter(
-            (estimation) => estimation.statusOfEstimation === 'approved'
+            (estimation) => estimation.statusOfEstimation === 'approved' || estimation.statusOfEstimation === 'accepted'
           );
           // this.followUpDateArray = this.pendingEstimations.map((estimation) =>
           //   estimation.followUpDates.map((followUp: any) => followUp.date)

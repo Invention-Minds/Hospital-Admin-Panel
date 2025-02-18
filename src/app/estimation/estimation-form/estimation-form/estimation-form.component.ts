@@ -21,6 +21,7 @@ type InclusionsType = {
   bedsideProcedure: boolean;
   otDrugs: boolean;
   drugsConsumables: boolean;
+  cSection: boolean;
 };
 
 @Component({
@@ -55,9 +56,23 @@ export class EstimationFormComponent {
   selectedDepartmentId: number | null = null;
   filteredSurgeryNames: string[] = [];
   selectedEstimationType: string = 'MM';
-  allEstimations: any[] = []
+  allEstimations: any[] = [];
+  selectedRooms: { name: string; cost: number }[] = [];
+  filteredRooms: { name: string; cost: number }[] = [];
+  dropdownOpen:boolean = false;
 
-  constructor(private estimationService: EstimationService, private cdr: ChangeDetectorRef, private messageService: MessageService, private doctorService: DoctorServiceService, private appointmentService: AppointmentConfirmService) { }
+  constructor(private estimationService: EstimationService, private cdr: ChangeDetectorRef, private messageService: MessageService, private doctorService: DoctorServiceService, private appointmentService: AppointmentConfirmService) {
+    this.filteredRooms = [...this.availableRooms];
+    this.availableRooms = [
+      { name: 'General', cost: 500 },
+      { name: 'Semi-Private', cost: 1000 },
+      { name: 'Private', cost: 1500 },
+      { name: 'Deluxe', cost: 2000 },
+      { name: 'VIP Suite', cost: 3000 },
+      { name: 'Presidential Suite', cost: 5000 }
+    ];
+  
+   }
 
   ngAfterViewInit(): void {
     this.patientSignaturePad = new SignaturePad(this.patientCanvasRef.nativeElement);
@@ -77,6 +92,73 @@ export class EstimationFormComponent {
       this.loadSignatureToCanvas(this.approverCanvasRef, this.formData.approverSign);
     }
   }
+  availableRooms = [
+    { name: 'General', cost: 500 },
+    { name: 'Semi-Private', cost: 1000 },
+    { name: 'Private', cost: 1500 },
+    { name: 'Deluxe', cost: 2000 },
+    { name: 'VIP Suite', cost: 3000 },
+    { name: 'Presidential Suite', cost: 5000 }
+  ];
+
+// Filtered rooms (for search functionality)
+toggleDropdown(event: Event): void {
+  event?.stopPropagation()
+  event.preventDefault()
+  this.dropdownOpen = !this.dropdownOpen;
+}
+
+filterRooms(event: any): void {
+  const searchText = event.target.value.toLowerCase();
+  this.filteredRooms = this.availableRooms.filter(room =>
+    room.name.toLowerCase().includes(searchText)
+  );
+}
+
+toggleSelection(room: { name: string; cost: number }) {
+  const index = this.selectedRooms.findIndex(r => r.name === room.name);
+
+  if (index > -1) {
+    // Remove room if already selected
+    this.selectedRooms.splice(index, 1);
+  } else {
+    // Add room if not selected
+    this.selectedRooms.push(room);
+  }
+
+  // Store room names & costs in formData.roomType
+  this.formData.roomType = this.selectedRooms.map(r => `${r.name} - ₹${r.cost}`).join(', ');
+
+  // ✅ Force validation check
+  if (this.estimationForm.controls['roomType']) {
+    this.estimationForm.controls['roomType'].updateValueAndValidity();
+  }
+}
+
+
+removeRoom(room: { name: string; cost: number }): void {
+  this.selectedRooms = this.selectedRooms.filter(selected => selected.name !== room.name);
+  this.updateRoomTypeField();
+}
+
+isSelected(roomName: string): boolean {
+  return this.selectedRooms.some(room => room.name === roomName);
+}
+
+getRoomCost(roomName: string): number {
+  const room = this.availableRooms.find(room => room.name === roomName);
+  return room ? room.cost : 0;
+}
+
+updateRoomTypeField(): void {
+  this.formData.roomType = this.selectedRooms
+    .map(room => `${room.name} - ${room.cost}`)
+    .join(', ');
+  console.log(this.formData.roomType)
+}
+
+  // Stores the selected room types
+
 
   saveAllSignatures(): void {
     // Save signatures to formData
@@ -157,6 +239,8 @@ export class EstimationFormComponent {
     approverId: '',
     surgeryTime:'',
     statusOfEstimation: '',
+    staffRemarks:'',
+    patientRemarks:'',
     includedItems: {
       wardICUStay: false,
       primaryConsultant: false,
@@ -170,6 +254,7 @@ export class EstimationFormComponent {
       bedsideProcedure: false,
       otDrugs: false,
       drugsConsumables: false,
+      cSection:false
     } as InclusionsType,
     exclusions: [] as string[],
     inclusions: [] as string[],
@@ -291,7 +376,16 @@ export class EstimationFormComponent {
   ngOnInit(): void {
     this.loadDoctors();
     this.setSelectedDoctorName(); // If consultantId exists, get doctor name
-    this.fetchPendingEstimations()
+    this.fetchPendingEstimations();
+    this.availableRooms = [
+      { name: 'General', cost: 500 },
+      { name: 'Semi-Private', cost: 1000 },
+      { name: 'Private', cost: 1500 },
+      { name: 'Deluxe', cost: 2000 },
+      { name: 'VIP Suite', cost: 3000 },
+      { name: 'Presidential Suite', cost: 5000 }
+    ];
+  
     console.log(this.estimationData)
     // this.formData = this.estimationData
     if (this.estimationData) {
@@ -309,6 +403,24 @@ export class EstimationFormComponent {
         inclusions: this.estimationData.inclusions?.map((inclusion: any) => inclusion.description) || [],
         exclusions: this.estimationData.exclusions?.map((exclusion: any) => exclusion.description) || [],
       };
+      console.log(this.estimationData.roomType, this.availableRooms)
+      if (this.estimationData.roomType) {
+        this.selectedRooms = this.estimationData.roomType.split(',')
+          .map((room: string) => {
+            const trimmedRoom = room.trim();
+            const roomNameOnly = trimmedRoom.split(' - ')[0].trim(); // Extract only the name part
+            const matchedRoom = this.availableRooms.find((r) => r.name === roomNameOnly);
+            return matchedRoom ? { name: matchedRoom.name, cost: matchedRoom.cost } : null;
+          })
+          .filter((room: any): room is { name: string; cost: number } => room !== null); // ✅ Ensures only valid objects
+      
+        console.log('Selected Rooms:', this.selectedRooms);
+      } else {
+        this.selectedRooms = [];
+      }
+      
+      
+      
       this.cdr.detectChanges();
       console.log(this.formData)
         // Manually mark surgeryTime as touched if it has a value
@@ -455,6 +567,8 @@ export class EstimationFormComponent {
         attenderName: this.formData.attenderName,
         approvedDateAndTime: new Date(),
         surgeryTime: this.formData.surgeryTime,
+        staffRemarks:this.formData.staffRemarks,
+        patientRemarks: this.formData.patientRemarks
       },
       inclusions: this.formData.inclusions,
       exclusions: this.formData.exclusions,
@@ -465,23 +579,6 @@ export class EstimationFormComponent {
         console.log('Estimation updated successfully:', response);
         this.closeForm.emit();
         this.estimationForm.resetForm();
-        this.estimationService.generateAndSendPdf(estimationData.estimationId, estimationData).subscribe(
-          (pdfResponse) => {
-            console.log("✅ PDF Generated & Sent via WhatsApp:", pdfResponse);
-            this.messageService.add({ severity: 'success', summary: 'Success', detail: 'PDF Generated & Sent PDF via WhatsApp:!' });
-            const to = "keerthanasaminathan0805@gmail.com"
-            this.appointmentService.sendMailtoApprover(to, estimationData.estimationId, pdfResponse.filePath).subscribe(
-              (response) => {
-                console.log('Email sent successfully:', response);
-              }, (error) => {
-                console.error("❌ Error sending mail:", error);
-              }
-            )
-          },
-          (pdfError) => {
-            console.error("❌ Error generating PDF:", pdfError);
-          }
-        );
       },
       (error) => {
         console.error('Error updating estimation:', error);
@@ -532,6 +629,8 @@ export class EstimationFormComponent {
         totalDaysStay: this.formData.totalDaysStay,
         attenderName: this.formData.attenderName,
         surgeryTime: this.formData.surgeryTime,
+        staffRemarks:this.formData.staffRemarks,
+        patientRemarks: this.formData.patientRemarks
       },
       inclusions: this.formData.inclusions,
       exclusions: this.formData.exclusions,
@@ -582,10 +681,53 @@ export class EstimationFormComponent {
     }
     return invalidControls;
   }
+  acceptRequest(){
+    const { inclusions, exclusions,followUpDates, ...estimationDataWithoutInclusions } = this.estimationData;
+    this.saveAllSignatures();
+    const estimationData = {
+      estimationId: this.estimationData.estimationId,
+      updateFields:{
+        ...estimationDataWithoutInclusions,
+        statusOfEstimation: 'accepted',
+        patientSign: this.formData.patientSign,
+        signatureOf: this.formData.signatureOf,
+        attenderName: this.formData.attenderName,
+      },
+      inclusions: this.formData.inclusions,
+      exclusions: this.formData.exclusions,
+    }
+    this.estimationService.updateEstimationDetails(estimationData.estimationId, estimationData).subscribe(
+      (response) => {
+        console.log('Estimation updated successfully:', response);
+        this.clearForm();
+        this.closeForm.emit()
+        this.estimationService.generateAndSendPdf(estimationData.estimationId, estimationData).subscribe(
+          (pdfResponse) => {
+            console.log("✅ PDF Generated & Sent via WhatsApp:", pdfResponse);
+            this.messageService.add({ severity: 'success', summary: 'Success', detail: 'PDF Generated & Sent PDF via WhatsApp:!' });
+            const to = "keerthanasaminathan0805@gmail.com"
+            this.appointmentService.sendMailtoApprover(to, estimationData.estimationId, pdfResponse.filePath).subscribe(
+              (response) => {
+                console.log('Email sent successfully:', response);
+              }, (error) => {
+                console.error("❌ Error sending mail:", error);
+              }
+            )
+          },
+          (pdfError) => {
+            console.error("❌ Error generating PDF:", pdfError);
+          }
+        );
+      },
+      (error) => {
+        console.error('Error updating estimation:', error);
+      }
+    );
+  }
   
   onSubmit(form: any) {
-    // this.updateInclusionsAndExclusions(); // Prepare inclusions and exclusions
-    // this.saveAllSignatures(); // Save the signatures
+    this.updateInclusionsAndExclusions(); // Prepare inclusions and exclusions
+    this.saveAllSignatures(); // Save the signatures
     console.log(form.controls);
     console.log(this.getInvalidControls(form))
     if (!this.isAnyCheckboxChecked) {
@@ -628,6 +770,8 @@ export class EstimationFormComponent {
           employeeId: this.formData.employeeId,
           totalDaysStay: this.formData.totalDaysStay,
           attenderName: this.formData.attenderName,
+          staffRemarks:this.formData.staffRemarks,
+          patientRemarks: this.formData.patientRemarks
         },
         inclusions: this.formData.inclusions,
         exclusions: this.formData.exclusions,
@@ -676,6 +820,8 @@ export class EstimationFormComponent {
           totalDaysStay: this.formData.totalDaysStay,
           attenderName: this.formData.attenderName,
           surgeryTime: this.formData.surgeryTime,
+          staffRemarks:this.formData.staffRemarks,
+          patientRemarks: this.formData.patientRemarks
         },
         inclusions: this.formData.inclusions,
         exclusions: this.formData.exclusions,
@@ -732,6 +878,48 @@ export class EstimationFormComponent {
     //     console.error('Error unlocking service:', error);
     //   },
     // });
+  }
+  selectedCategory: 'implants' | 'procedures' | 'instrumentals'  = 'implants';
+
+  
+  // Separate lists for each category
+  selectedItems = {
+    implants: [] as { name: string; cost: number }[],
+    procedures: [] as { name: string; cost: number }[],
+    instrumentals: [] as { name: string; cost: number }[],
+  };
+
+  // Function to add new entry dynamically
+  addItem(event:Event) {
+    event.preventDefault()
+    if (this.selectedCategory) {
+      this.selectedItems[this.selectedCategory].push({ name: "", cost: 0 });
+    }
+  }
+
+  // Function to remove an entry
+  removeItem(index: number, event: Event) {
+    event.preventDefault()
+    if (this.selectedCategory) {
+      this.selectedItems[this.selectedCategory].splice(index, 1);
+    }
+  }
+
+  // Function to handle dropdown selection change
+  onCategoryChange(event: Event) {
+    event.preventDefault()
+    if (!this.selectedItems[this.selectedCategory]) {
+      this.selectedItems[this.selectedCategory] = [];
+    }
+  }
+
+  // Function to format data for submission
+  getFormattedData() {
+    return {
+      implants: this.selectedItems.implants.map(item => `${item.name} - ${item.cost}`).join(", "),
+      procedures: this.selectedItems.procedures.map(item => `${item.name} - ${item.cost}`).join(", "),
+      instrumentals: this.selectedItems.instrumentals.map(item => `${item.name} - ${item.cost}`).join(", "),
+    };
   }
 }
 

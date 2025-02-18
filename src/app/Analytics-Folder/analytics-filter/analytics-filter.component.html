@@ -1,0 +1,13 @@
+<div class="root-container">
+    <div class="flex">
+        <Select (change)="departmentONchange($event)">
+            <option value="all">All</option>
+            <option  *ngFor="let dept of department" [value]="dept.id">{{dept.name}}</option>
+        </Select>
+        <Select (change)="doctorOnchange($event)">
+            <option value="all">All</option>
+            <option *ngFor="let doc of doctors" [value]="doc.id">{{doc.name}}</option>
+        </Select> 
+        <input type="date" (change)="dateOnChange($event)" >
+    </div>
+</div>

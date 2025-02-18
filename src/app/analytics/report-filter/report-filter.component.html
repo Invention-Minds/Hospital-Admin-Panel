@@ -1,0 +1,56 @@
+<div class="roo-container">
+  <div class="comtent">
+    <div class="cancelButton">
+      <div style="font-size: 20px; cursor: pointer;" (click)="closingReport()" class="tooltip"><i class="fa-solid fa-xmark"><div class="tooltiptext">Close</div></i></div>
+    </div>
+    <div class="report-filter">
+      <div (click)="downloadExcel()" style="font-size: 20px; cursor: pointer;" class="tooltip"><i class="fa-solid fa-download"><div class="tooltiptext">Download</div></i>
+      </div>
+      <select (change)="departmentOnchange($event)">
+        <option class="dummy" value="all" disabled selected hidden>Choose the Department</option>
+        <option value="all">All</option>
+        <option *ngFor="let dept of department" [value]="dept.id">{{dept.name}}</option>
+      </select>
+
+      <select (change)="onChoosingDoctor($event)" >
+        <option class="dummy" value="all" disabled selected hidden>Choose the Doctor</option>
+        <option value="all">All</option>
+        <option *ngFor="let doc of doctors" [value]="doc.id">{{doc.name}}</option>
+      </select>
+      <div class="date-picker">
+        <p-calendar styleClass="custom-calendar" [selectionMode]="type ? 'range' : 'single'"
+          [(ngModel)]="selectedDateRange" (ngModelChange)="onDateRangeSelect($event)"
+          [placeholder]="type ? 'Please Select Date Range' : 'Please Select Date'" dateFormat="yy-mm-dd">
+          <ng-template pTemplate="date" let-date>
+            <span>
+              {{ date.day }}
+            </span>
+          </ng-template>
+        </p-calendar>
+      </div>
+      <div class="refreh tooltip" style="cursor: pointer;" (click)="refresh()"><i class="fa-solid fa-arrows-rotate"></i><span class="tooltiptext">refresh</span></div>
+
+    </div>
+
+    <div class="report-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Sl. No.</th>
+            <th *ngFor="let column of columns">{{ column.header }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of importedData; let i = index">
+            <td>{{i+1}}</td>
+            <td *ngFor="let column of columns">{{ row[column.key] }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="noData" *ngIf="!importedData || importedData.length === 0">
+        <span class="nodata">No Records Found</span>
+      </div>
+    </div>
+    
+  </div>
+</div>

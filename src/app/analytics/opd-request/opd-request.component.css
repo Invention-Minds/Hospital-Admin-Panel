@@ -1,0 +1,134 @@
+.root-container {
+    padding: 3%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.heading {
+    color: #000;
+    font-family: Kanit;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+}
+
+.viewmore {
+    color: #6F46C1;
+    font-family: Kanit;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    cursor: pointer;
+}
+
+.legend_item {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+}
+
+.indicator {
+    width: 18px;
+    height: 12px;
+    border-radius: 2px;
+    color: #222;
+    font-family: Kanit;
+    font-size: 13px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+}
+
+.legend {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+.green {
+    border-radius: 2px;
+    background: #91CC75;
+}
+
+.yellow {
+    background: #FAC858;
+}
+
+.blue {
+    background: #5470C6;
+}
+
+.info svg{
+    width: 18px;
+    height: auto;
+}
+
+.tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    right: 0;
+}
+
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 300px;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 0%;
+    /* Position above the element */
+    top: 40px;
+    left: 0;
+    margin-left: -160px;
+    /* Adjust to center the tooltip */
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 12px;
+    background-color: #7B7B7B;
+    height: 120px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+}
+
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
+
+.info {
+    width: 100%;
+    display: flex;
+    justify-content: right;
+    position: relative;
+    margin-top: -25px;
+}
+
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+.hidden{
+    visibility: hidden;
+}

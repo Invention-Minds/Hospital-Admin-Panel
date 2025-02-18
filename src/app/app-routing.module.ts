@@ -19,6 +19,7 @@ import { OverviewComponent } from './doctor-role/overview/overview/overview.comp
 import { TvComponent } from './tv/tv/tv.component';
 import { TvControlComponent } from './tv-control/tv-control/tv-control.component';
 import { EstimationOverviewComponent } from './estimation/estimation-overview/estimation-overview/estimation-overview.component';
+import { AnalyticsRootComponent } from './analytics/analytics-root/analytics-root.component';
 
 const routes: Routes = [
   { path: 'dashboard', component: DashboardOverviewComponent, canActivate:[authGuard] },
@@ -37,6 +38,7 @@ const routes: Routes = [
   {path: 'tv-control', component: TvControlComponent, canActivate:[authGuard]},
   { path: 'channel/:channelId', component: TvComponent },
   {path: 'estimation', component: EstimationOverviewComponent, canActivate:[authGuard]},
+  {path: 'analytics', component: AnalyticsRootComponent, canActivate:[authGuard]},
   {
     path: 'form',
     component: HealthCheckupFormComponent,

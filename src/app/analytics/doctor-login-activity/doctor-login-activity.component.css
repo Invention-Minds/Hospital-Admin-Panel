@@ -1,0 +1,255 @@
+.root-container{
+    padding: 2%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.header{
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.heading{
+    color: #000;
+    font-family: Kanit;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+}
+
+.viewmore{
+    color: #6F46C1;
+    font-family: Kanit;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    cursor: pointer;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    background-color: #f4f4f4;
+    border-radius: 10px;
+}
+
+table {
+    color: #3B3B3B;
+    font-family: Kanit;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    border-collapse: collapse;
+    overflow: scroll;
+}
+
+th, td {
+    padding: 12px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+th {
+    background-color: #FFFFFF;
+    color: #000;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #FFFFFF;
+}
+
+tbody td:nth-child(2) {
+    text-align: left;
+}
+
+
+tbody tr:hover {
+    background-color: #FFFFFF;
+}
+/* Modal Overlay */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-overlay.show {
+    display: flex;
+}
+
+/* Modal Container */
+.modal-container {
+    background: white;
+    width: 80%;
+    max-width: 900px;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Modal Header */
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 22px;
+}
+
+.modal-close {
+    font-size: 24px;
+    cursor: pointer;
+    color: #333;
+}
+
+/* Date Picker Section */
+.modal-filters {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-top: 15px;
+    margin-bottom: 10px;
+}
+
+.modal-filters label {
+    font-size: 16px;
+    margin-right: 10px;
+}
+
+.modal-filters input {
+    padding: 5px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Table Container */
+.modal-table-container {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* Table Styling */
+.modal-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.modal-table th,
+.modal-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.modal-table th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+}
+
+.modal-table tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Delay Styling */
+.delayed {
+    color: red;
+    font-weight: bold;
+}
+
+.on-time {
+    color: green;
+    font-weight: bold;
+}
+
+.info svg{
+    width: 18px;
+    height: auto;
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  right: 0;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 300px;
+  text-align: center;
+  border-radius: 5px;
+  padding: 5px;
+  position: absolute;
+  z-index: 1;
+  bottom: 0%; /* Position above the element */
+  top: 40px;
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 12px;
+  background-color: #7B7B7B;
+  height: 120px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  right: 0;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+
+.view_info{
+    display: flex;
+    gap: 10px;
+}
+
+.info{
+    display: flex;
+    justify-content: right;
+    position: relative;
+    margin-top: -7px;
+}
+
+.loading{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .modal-container {
+        width: 95%;
+        max-width: 100%;
+    }
+
+    .modal-table-container {
+        overflow-x: auto;
+    }
+}

@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
-import * as echarts from 'echarts';
+import * as echarts from 'echarts/core';
 import { utcToIstDate, getLast14Days, getPositiveNegative, getTodayDate } from '../functions'
 import { EstimationService } from '../../services/estimation/estimation.service';
 import { HealthCheckupServiceService } from '../../services/health-checkup/health-checkup-service.service';

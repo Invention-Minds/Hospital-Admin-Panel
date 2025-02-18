@@ -32,12 +32,18 @@ export class LoginComponent implements OnInit {
     if (token) {
       // If a token exists, redirect to the dashboard
       // this.router.navigate(['/dashboard']);
-      if(this.role!== 'doctor'){
+      if(this.role === 'admin'){
         console.log('role', this.role)
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/analytics']);
       }else if (this.subAdminType === 'Estimator'){
         console.log(this.subAdminType)
         this.router.navigate(['/estimation'])
+      }
+      else if(this.subAdminType === 'MHC Coordinator'){
+        this.router.navigate(['/health-checkup'])
+      }
+      else if(this.role === 'sub_admin'){
+        this.router.navigate(['/dashboard'])
       }
       else{
         console.log('doctor',this.role)
@@ -65,12 +71,16 @@ export class LoginComponent implements OnInit {
       (response) => {
         console.log('Login successful:', response);
         // response = response;
-        
         // Navigate to the desired route upon successful login
         if (response.user.subAdminType === 'Estimator'){
           console.log(this.subAdminType)
           this.router.navigate(['/estimation'])
-        }else if(response.user.role!== 'doctor'){
+        }else if(response.user.subAdminType === 'MHC Coordinator'){
+          this.router.navigate(['/health-checkup'])
+        }else if(response.user.role === 'admin'){
+          this.router.navigate(['/analytics']);
+        }
+        else if(response.user.role!== 'doctor'){
           console.log('role', response.user.role)
           this.router.navigate(['/dashboard']);
         }

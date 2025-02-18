@@ -1,0 +1,273 @@
+.rootcontainer {
+  background-color: #F0F3FF;
+  margin-left: 70px;
+  padding: 0 1%;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+.dashboard_header {
+  display: flex;
+  justify-content: space-between;
+  padding: 1% 0;
+  align-items: center;
+}
+
+
+.dashboard {
+  color: #271E4A;
+  font-family: Kanit;
+  font-size: 30px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+}
+
+.filters {
+  display: flex;
+  gap: 10px;
+}
+
+.filters select,
+input {
+  width: 206px;
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 2px solid #B7B7B7;
+  background: #FFF;
+  box-shadow: 0px 4px 15px 0px rgba(216, 210, 252, 0.64);
+  color: #7B7B7B;
+  font-family: Kanit;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+
+.calendar i {
+  cursor: pointer;
+  color: #7B7B7B;;
+  position: relative;
+  right: 30px;
+}
+
+.datebox {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 150px;
+  height: 40px;
+  border-radius: 8px;
+  border: 2px solid #B7B7B7;
+  background: #FFF;
+  box-shadow: 0px 4px 15px 0px rgba(216, 210, 252, 0.64);
+}
+
+.prev_next {
+  display: flex;
+  gap: 10px;
+}
+
+.prev_next .button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 38px;
+  border: 2px solid #3B3B3B;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.filters select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg width='14' height='8' viewBox='0 0 14 8' fill='none' xmlns='http://www.w3.org/2000/svg'><path d='M1 1L7 7L13 1' stroke='%23B7B7B7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  cursor: pointer;
+}
+
+/* Custom styles for PrimeNG Calendar */
+.p-calendar .p-inputtext {
+  border: 2px solid #7B7B7B;
+  border-radius: 8px;
+  padding: 10px;
+  font-family: 'Kanit', sans-serif;
+  font-size: 14px;
+  color: #7B7B7B;
+  width: 300px;
+}
+
+.p-calendar .p-datepicker-trigger {
+  background-color: #7B7B7B;
+  color: white;
+  border: none;
+  border-radius: 0 8px 8px 0;
+}
+
+.p-datepicker {
+  border: 2px solid #7B7B7B;
+  border-radius: 8px;
+  font-family: 'Kanit', sans-serif;
+  width: 300px;
+}
+
+.p-datepicker-header {
+  background-color: #7B7B7B;
+  color: white;
+  border-radius: 8px 8px 0 0;
+
+}
+
+.p-datepicker-calendar td>span {
+  color: #7B7B7B;
+  border-radius: 50%;
+  transition: background-color 0.3s;
+}
+
+.p-datepicker-calendar td>span.p-highlight {
+  background-color: #7B7B7B;
+  color: white;
+}
+
+.p-datepicker-calendar td>span.p-datepicker-today {
+  color: #7B7B7B;
+  border: 2px solid #7B7B7B;
+}
+
+.p-datepicker-calendar td>span:not(.p-disabled):hover {
+  background-color: #f0f0f0;
+  color: #7B7B7B;
+}
+
+.container_margin {
+  margin-top: 30px;
+}
+
+.flex {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+}
+
+.opd_estimations {
+  width: 30%;
+  height: 400px;
+}
+
+.opd_datewise {
+  width: 70%;
+  height: 400px;
+}
+
+.bg_color {
+  background-color: #FFF;
+  border-radius: 14px;
+}
+
+.waiting_time {
+  width: 35%;
+  height: 350px;
+}
+
+.common_box {
+  width: 65%;
+  height: 742px;
+}
+
+.opd_request_via {
+  width: 45%;
+  height: 350px;
+}
+
+.doctor_login {
+  width: 55%;
+  height: 350px;
+  padding-bottom: 10px;
+  overflow: scroll;
+}
+
+.estimation {
+  width: 65%;
+  height: 363px;
+}
+
+.gender_overview {
+  width: 35%;
+  height: 363px;
+}
+
+.hide {
+  display: none;
+}
+
+.show_analytics {
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  z-index: 1000;
+  top: 0;
+  left: 0;
+  overflow: scroll;
+  display: flex;
+  justify-content: center;
+  background-color: #F0F3FF;
+}
+
+.loading {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.mhc_overview {
+  width: 70%;
+  height: 363px;
+}
+
+.opd_type {
+  width: 30%;
+  height: 363px;
+}
+
+::ng-deep .p-calendar .p-calendar-icon {
+  color: #ff5733;
+  font-size: 18px;
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  color: #000;
+  text-align: center;
+  border-radius: 5px;
+  padding: 5px;
+  position: absolute;
+  z-index: 1;
+  bottom: 0%; /* Position above the element */
+  top: 40px;
+  left: 0%;
+  margin-left: -60px; /* Adjust to center the tooltip */
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 12px;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+  color: #000;
+}

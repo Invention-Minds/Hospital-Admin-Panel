@@ -95,7 +95,21 @@ import { AppointmentTransferComponent } from './appointment/appointment-transfer
 import { NewFormComponent } from './appointment/new-form/new-form.component';
 import { MhcFormComponent } from './health-checkup-service/mhc-form/mhc-form.component';
 import { MhcTodayConsulComponent } from './health-checkup-service/mhc-today-consul/mhc-today-consul.component';
-
+import { AnalyticsRootComponent } from './analytics/analytics-root/analytics-root.component';
+import { OpdEstimationPieComponent } from './analytics/opd-estimation-pie/opd-estimation-pie.component';
+import { OpdRequestComponent } from './analytics/opd-request/opd-request.component';
+import { OpdOverviewComponent } from './analytics/opd-overview/opd-overview.component';
+import { ReportFilterComponent } from './analytics/report-filter/report-filter.component';
+import { AverageWaitingTimeComponent } from './analytics/average-waiting-time/average-waiting-time.component';
+import { DoctorLoginActivityComponent } from './analytics/doctor-login-activity/doctor-login-activity.component';
+import { OpdTimeWiseComponent } from './analytics/opd-time-wise/opd-time-wise.component';
+import { MhcOverviewComponent } from './analytics/mhc-overview/mhc-overview.component';
+import { OpdTypeComponent } from './analytics/opd-type/opd-type.component';
+import { GenderOverviewComponent } from './analytics/gender-overview/gender-overview.component';
+import { LoadingComponent } from './analytics/loading/loading.component';
+import { DelayReportComponent } from './analytics/delay-report/delay-report.component'; 
+import { TodayAnalyticsComponent } from './analytics/today-analytics/today-analytics.component';
+import { EstimationBarComponent } from './analytics/estimation-bar/estimation-bar.component';
 
 
 @NgModule({
@@ -150,9 +164,22 @@ import { MhcTodayConsulComponent } from './health-checkup-service/mhc-today-cons
     PhoneMaskPipe,
     NewFormComponent,
     MhcFormComponent,
-    MhcTodayConsulComponent
-  
-    
+    MhcTodayConsulComponent,
+    AnalyticsRootComponent,
+    OpdEstimationPieComponent,
+    OpdRequestComponent, 
+    OpdOverviewComponent,
+    ReportFilterComponent,
+    AverageWaitingTimeComponent,
+    DoctorLoginActivityComponent,
+    OpdTimeWiseComponent,
+    MhcOverviewComponent,
+    OpdTypeComponent,
+    GenderOverviewComponent,
+    LoadingComponent,
+    DelayReportComponent,
+    TodayAnalyticsComponent,
+    EstimationBarComponent
   ],
   imports: [
     BrowserModule,
@@ -183,7 +210,7 @@ import { MhcTodayConsulComponent } from './health-checkup-service/mhc-today-cons
     ConfirmPopupModule,
     DialogModule,
     NgxLoadingButtonsModule,
-    CommonModule
+    CommonModule,
   ],
   exports: [PhoneMaskPipe],
   providers: [

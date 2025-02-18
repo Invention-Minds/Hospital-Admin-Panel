@@ -1,0 +1,109 @@
+.root-container{
+    padding: 3%;
+}
+
+.header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.heading{
+    color: #000;
+    font-family: Kanit;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+}
+
+.viewmore{
+    color: #6F46C1;
+    font-family: Kanit;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    cursor: pointer;
+}
+
+.chart{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.legends, .legend_items{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+}
+
+.legend_items{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 7px;
+}
+
+.indicator{
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+}
+
+.blue{
+    background-color: #36C;
+}
+
+.green{
+    background-color: #20AA68;
+}
+
+.info svg{
+    width: 18px;
+    height: auto;
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  right: 0;
+}
+
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 300px;
+  text-align: center;
+  border-radius: 5px;
+  padding: 5px;
+  position: absolute;
+  z-index: 1;
+  bottom: 0%; /* Position above the element */
+  top: 40px;
+  left: 0 ;
+  margin-left: -160px; /* Adjust to center the tooltip */
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 12px;
+  background-color: #7B7B7B;
+  height: 120px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+}
+
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+
+.info{
+    display: flex;
+    justify-content: right;
+    position: relative;
+    margin-top: -15px;
+}

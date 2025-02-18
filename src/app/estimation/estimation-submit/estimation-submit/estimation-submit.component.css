@@ -55,6 +55,7 @@
     font-family: Kanit;
     font-weight: 400;
     padding-bottom: 0px;
+    text-wrap: nowrap;
   }
   
   tbody tr:hover {

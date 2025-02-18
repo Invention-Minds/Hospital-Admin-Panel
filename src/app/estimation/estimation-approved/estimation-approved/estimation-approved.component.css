@@ -55,6 +55,7 @@
     font-family: Kanit;
     font-weight: 400;
     padding-bottom: 0px;
+    text-wrap: nowrap;
   }
   
   tbody tr:hover {
@@ -108,6 +109,15 @@ font-size: 14px;
 font-family: Kanit;
 font-weight: 400;
 text-transform: capitalize;
+  }
+  .approved {
+    background-color: #0E2970;
+    color: white;
+  }
+  
+  .accepted {
+    background-color: #169458;
+    color: white;
   }
   .checkin-badge {
     display: inline-block;
@@ -685,4 +695,34 @@ font-family: 900;
     padding: 4px;
   }
 
+  @media (max-width: 1024px) {
+    .card:not(:nth-child(2)), /* Hide cards except the 2nd one (Request) */
+    .card-1:not(:nth-child(1)) { /* Hide cards except the 1st one (Form) */
+      display: none; 
+    }
+    .custom-dropdown .p-dropdown{
+      width: 134px !important;
+    }
+    .custom-input-text{
+      width: 170px !important;
+    }
+    .custom-calendar .p-inputtext{
+      width: 210px !important;
+    }
+  }
   
+  /* Mobile View (Optional if needed) */
+  @media (max-width: 768px) {
+    .card, .card-1 {
+      justify-content: center;
+    }
+    ::ng-deep .custom-dropdown .p-dropdown{
+      width: 134px !important;
+    }
+    ::ng-deep .custom-input-text{
+      width: 170px !important;
+    }
+    ::ng-deep .custom-calendar .p-inputtext{
+      width: 210px !important;
+    }
+  }

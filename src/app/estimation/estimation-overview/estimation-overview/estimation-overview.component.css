@@ -114,10 +114,11 @@
 
 /* Tablet View (768px - 1024px) */
 @media (max-width: 1024px) {
-  .card:not(:nth-child(2)), /* Hide cards except the 2nd one (Request) */
-  .card-1:not(:nth-child(1)) { /* Hide cards except the 1st one (Form) */
-    display: none; 
+  .card:not(:nth-child(2)):not(:nth-child(3)), /* Hide all except 2nd & 3rd cards */
+  .card-1:not(:nth-child(1)) { /* Hide all except 1st card */
+      display: none; 
   }
+  
   .custom-dropdown .p-dropdown{
     width: 134px !important;
   }

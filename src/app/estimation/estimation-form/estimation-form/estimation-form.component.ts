@@ -59,7 +59,9 @@ export class EstimationFormComponent {
   allEstimations: any[] = [];
   selectedRooms: { name: string; cost: number }[] = [];
   filteredRooms: { name: string; cost: number }[] = [];
-  dropdownOpen:boolean = false;
+  dropdownOpen: boolean = false;
+  estimationCosts: number[] = []; 
+  selectedSurgeryPackage: string = 'single surgery'
 
   constructor(private estimationService: EstimationService, private cdr: ChangeDetectorRef, private messageService: MessageService, private doctorService: DoctorServiceService, private appointmentService: AppointmentConfirmService) {
     this.filteredRooms = [...this.availableRooms];
@@ -71,8 +73,8 @@ export class EstimationFormComponent {
       { name: 'VIP Suite', cost: 3000 },
       { name: 'Presidential Suite', cost: 5000 }
     ];
-  
-   }
+
+  }
 
   ngAfterViewInit(): void {
     this.patientSignaturePad = new SignaturePad(this.patientCanvasRef.nativeElement);
@@ -101,61 +103,61 @@ export class EstimationFormComponent {
     { name: 'Presidential Suite', cost: 5000 }
   ];
 
-// Filtered rooms (for search functionality)
-toggleDropdown(event: Event): void {
-  event?.stopPropagation()
-  event.preventDefault()
-  this.dropdownOpen = !this.dropdownOpen;
-}
-
-filterRooms(event: any): void {
-  const searchText = event.target.value.toLowerCase();
-  this.filteredRooms = this.availableRooms.filter(room =>
-    room.name.toLowerCase().includes(searchText)
-  );
-}
-
-toggleSelection(room: { name: string; cost: number }) {
-  const index = this.selectedRooms.findIndex(r => r.name === room.name);
-
-  if (index > -1) {
-    // Remove room if already selected
-    this.selectedRooms.splice(index, 1);
-  } else {
-    // Add room if not selected
-    this.selectedRooms.push(room);
+  // Filtered rooms (for search functionality)
+  toggleDropdown(event: Event): void {
+    event?.stopPropagation()
+    event.preventDefault()
+    this.dropdownOpen = !this.dropdownOpen;
   }
 
-  // Store room names & costs in formData.roomType
-  this.formData.roomType = this.selectedRooms.map(r => `${r.name} - ₹${r.cost}`).join(', ');
-
-  // ✅ Force validation check
-  if (this.estimationForm.controls['roomType']) {
-    this.estimationForm.controls['roomType'].updateValueAndValidity();
+  filterRooms(event: any): void {
+    const searchText = event.target.value.toLowerCase();
+    this.filteredRooms = this.availableRooms.filter(room =>
+      room.name.toLowerCase().includes(searchText)
+    );
   }
-}
+
+  toggleSelection(room: { name: string; cost: number }) {
+    const index = this.selectedRooms.findIndex(r => r.name === room.name);
+
+    if (index > -1) {
+      // Remove room if already selected
+      this.selectedRooms.splice(index, 1);
+    } else {
+      // Add room if not selected
+      this.selectedRooms.push(room);
+    }
+
+    // Store room names & costs in formData.roomType
+    this.formData.roomType = this.selectedRooms.map(r => `${r.name} - ₹${r.cost}`).join(', ');
+
+    // ✅ Force validation check
+    if (this.estimationForm.controls['roomType']) {
+      this.estimationForm.controls['roomType'].updateValueAndValidity();
+    }
+  }
 
 
-removeRoom(room: { name: string; cost: number }): void {
-  this.selectedRooms = this.selectedRooms.filter(selected => selected.name !== room.name);
-  this.updateRoomTypeField();
-}
+  removeRoom(room: { name: string; cost: number }): void {
+    this.selectedRooms = this.selectedRooms.filter(selected => selected.name !== room.name);
+    this.updateRoomTypeField();
+  }
 
-isSelected(roomName: string): boolean {
-  return this.selectedRooms.some(room => room.name === roomName);
-}
+  isSelected(roomName: string): boolean {
+    return this.selectedRooms.some(room => room.name === roomName);
+  }
 
-getRoomCost(roomName: string): number {
-  const room = this.availableRooms.find(room => room.name === roomName);
-  return room ? room.cost : 0;
-}
+  getRoomCost(roomName: string): number {
+    const room = this.availableRooms.find(room => room.name === roomName);
+    return room ? room.cost : 0;
+  }
 
-updateRoomTypeField(): void {
-  this.formData.roomType = this.selectedRooms
-    .map(room => `${room.name} - ${room.cost}`)
-    .join(', ');
-  console.log(this.formData.roomType)
-}
+  updateRoomTypeField(): void {
+    this.formData.roomType = this.selectedRooms
+      .map(room => `${room.name} - ${room.cost}`)
+      .join(', ');
+    console.log(this.formData.roomType)
+  }
 
   // Stores the selected room types
 
@@ -237,10 +239,15 @@ updateRoomTypeField(): void {
     approverSign: '',
     employeeId: '',
     approverId: '',
-    surgeryTime:'',
+    surgeryTime: '',
     statusOfEstimation: '',
-    staffRemarks:'',
-    patientRemarks:'',
+    staffRemarks: '',
+    patientRemarks: '',
+    implants: '',
+    instrumentals: '',
+    procedures: '',
+    multipleEstimationCost:'',
+    surgeryPackage:'',
     includedItems: {
       wardICUStay: false,
       primaryConsultant: false,
@@ -254,7 +261,7 @@ updateRoomTypeField(): void {
       bedsideProcedure: false,
       otDrugs: false,
       drugsConsumables: false,
-      cSection:false
+      cSection: false
     } as InclusionsType,
     exclusions: [] as string[],
     inclusions: [] as string[],
@@ -311,7 +318,7 @@ updateRoomTypeField(): void {
       this.formData.patientName = '';
       this.formData.ageOfPatient = null;
       this.formData.genderOfPatient = '';
-       this.formData.patientPhoneNumber = ''
+      this.formData.patientPhoneNumber = ''
     }
   }
   public loadDoctors(): void {
@@ -385,7 +392,8 @@ updateRoomTypeField(): void {
       { name: 'VIP Suite', cost: 3000 },
       { name: 'Presidential Suite', cost: 5000 }
     ];
-  
+    
+
     console.log(this.estimationData)
     // this.formData = this.estimationData
     if (this.estimationData) {
@@ -413,17 +421,39 @@ updateRoomTypeField(): void {
             return matchedRoom ? { name: matchedRoom.name, cost: matchedRoom.cost } : null;
           })
           .filter((room: any): room is { name: string; cost: number } => room !== null); // ✅ Ensures only valid objects
-      
+
         console.log('Selected Rooms:', this.selectedRooms);
       } else {
         this.selectedRooms = [];
       }
-      
-      
-      
+      this.selectedItems = {
+        implants: this.parseExistingData(this.estimationData.implants),
+        procedures: this.parseExistingData(this.estimationData.procedures),
+        instrumentals: this.parseExistingData(this.estimationData.instrumentals),
+      };
+      this.selectedCategories = Object.keys(this.selectedItems)
+      .filter((category) => this.selectedItems[category as keyof typeof this.selectedItems].length > 0)
+      .map((category) => category as "implants" | "procedures" | "instrumentals");
+      console.log(this.selectedItems)
+      // if(this.formData.estimationName){
+      //   this.updateEstimationCosts();
+      // }
+      if (this.formData.multipleEstimationCost) {
+        this.estimationCosts = this.formData.multipleEstimationCost.split(',').map(cost => parseInt(cost.trim(), 10) || 0);
+        console.log(this.estimationCosts, this.formData.multipleEstimationCost)
+      } else {
+        this.estimationCosts = [];
+      }
+
+
+      this.selectedEstimationType = this.estimationData.estimationType;
+      this.selectedSurgeryPackage = this.estimationData.surgeryPackage;
+
+
+
       this.cdr.detectChanges();
       console.log(this.formData)
-        // Manually mark surgeryTime as touched if it has a value
+      // Manually mark surgeryTime as touched if it has a value
 
     }
     else {
@@ -434,6 +464,13 @@ updateRoomTypeField(): void {
     if (this.role === 'sub_admin') {
       this.formData.employeeId = this.employeeId!
     }
+  }
+  parseExistingData(data: string | null): { name: string; cost: number }[] {
+    if (!data) return [];
+    return data.split(',').map((entry) => {
+      const [name, cost] = entry.split(' - ₹');
+      return { name: name.trim(), cost: cost ? parseFloat(cost) : 0 };
+    });
   }
 
   // onSubmit(form: any) {
@@ -567,8 +604,13 @@ updateRoomTypeField(): void {
         attenderName: this.formData.attenderName,
         approvedDateAndTime: new Date(),
         surgeryTime: this.formData.surgeryTime,
-        staffRemarks:this.formData.staffRemarks,
-        patientRemarks: this.formData.patientRemarks
+        staffRemarks: this.formData.staffRemarks,
+        patientRemarks: this.formData.patientRemarks,
+        implants: this.formData.implants,
+        procedures: this.formData.procedures,
+        instrumentals: this.formData.instrumentals,
+        surgeryPackage: this.selectedSurgeryPackage,
+        multipleEstimationCost: this.formData.multipleEstimationCost
       },
       inclusions: this.formData.inclusions,
       exclusions: this.formData.exclusions,
@@ -629,8 +671,13 @@ updateRoomTypeField(): void {
         totalDaysStay: this.formData.totalDaysStay,
         attenderName: this.formData.attenderName,
         surgeryTime: this.formData.surgeryTime,
-        staffRemarks:this.formData.staffRemarks,
-        patientRemarks: this.formData.patientRemarks
+        staffRemarks: this.formData.staffRemarks,
+        patientRemarks: this.formData.patientRemarks,
+        implants: this.formData.implants,
+        procedures: this.formData.procedures,
+        instrumentals: this.formData.instrumentals,
+        surgeryPackage: this.selectedSurgeryPackage,
+        multipleEstimationCost: this.formData.multipleEstimationCost
       },
       inclusions: this.formData.inclusions,
       exclusions: this.formData.exclusions,
@@ -681,12 +728,12 @@ updateRoomTypeField(): void {
     }
     return invalidControls;
   }
-  acceptRequest(){
-    const { inclusions, exclusions,followUpDates, ...estimationDataWithoutInclusions } = this.estimationData;
+  acceptRequest() {
+    const { inclusions, exclusions, followUpDates, ...estimationDataWithoutInclusions } = this.estimationData;
     this.saveAllSignatures();
     const estimationData = {
       estimationId: this.estimationData.estimationId,
-      updateFields:{
+      updateFields: {
         ...estimationDataWithoutInclusions,
         statusOfEstimation: 'accepted',
         patientSign: this.formData.patientSign,
@@ -724,7 +771,7 @@ updateRoomTypeField(): void {
       }
     );
   }
-  
+
   onSubmit(form: any) {
     this.updateInclusionsAndExclusions(); // Prepare inclusions and exclusions
     this.saveAllSignatures(); // Save the signatures
@@ -739,105 +786,115 @@ updateRoomTypeField(): void {
     // }
 
     if (form.valid) {
-      if(this.estimationData && this.estimationData.estimationId){
-      const estimationData = {
-        estimationId: this.estimationData.estimationId, // Replace this with the actual ID from your context
-        updateFields: {
-          patientUHID: this.formData.patientUHID,
-          patientName: this.formData.patientName,
-          ageOfPatient: this.formData.ageOfPatient,
-          genderOfPatient: this.formData.genderOfPatient,
-          consultantName: this.formData.consultantName,
-          consultantId: this.formData.consultantId,
-          estimationType: this.formData.estimationType,
-          estimationPreferredDate: this.formData.estimationPreferredDate,
-          icuStay: this.formData.icuStay,
-          wardStay: this.formData.wardStay,
-          estimationCost: this.formData.estimationCost,
-          estimationName: this.formData.estimationName,
-          remarks: this.formData.remarks,
-          roomType: this.formData.roomType,
-          estimatedDate: this.formData.estimatedDate,
-          discountPercentage: this.formData.discountPercentage,
-          totalEstimationAmount: this.formData.totalEstimationAmount,
-          signatureOf: this.formData.signatureOf,
-          employeeName: this.formData.employeeName,
-          approverName: this.formData.approverName,
-          patientSign: this.formData.patientSign,
-          employeeSign: this.formData.employeeSign,
-          approverSign: this.formData.approverSign,
-          statusOfEstimation: 'submitted',
-          employeeId: this.formData.employeeId,
-          totalDaysStay: this.formData.totalDaysStay,
-          attenderName: this.formData.attenderName,
-          staffRemarks:this.formData.staffRemarks,
-          patientRemarks: this.formData.patientRemarks
-        },
-        inclusions: this.formData.inclusions,
-        exclusions: this.formData.exclusions,
-      };
-      console.log(estimationData);
-      this.estimationService.updateEstimationDetails(estimationData.estimationId, estimationData).subscribe(
-        (response) => {
-          console.log('Estimation updated successfully:', response);
-          this.clearForm();
-          this.closeForm.emit()
-        },
-        (error) => {
-          console.error('Error updating estimation:', error);
-        }
-      );
-    }else{
-      const estimationData = {
-// Replace this with the actual ID from your context
-        updateFields: {
-          patientUHID: Number(this.formData.patientUHID),
-          patientName: this.formData.patientName,
-          ageOfPatient: this.formData.ageOfPatient,
-          genderOfPatient: this.formData.genderOfPatient,
-          consultantName: this.formData.consultantName,
-          consultantId: this.formData.consultantId,
-          estimationType: this.formData.estimationType,
-          estimationPreferredDate: this.formData.estimationPreferredDate,
-          patientPhoneNumber: this.formData.patientPhoneNumber,
-          icuStay: this.formData.icuStay,
-          wardStay: this.formData.wardStay,
-          estimationCost: this.formData.estimationCost,
-          estimationName: this.formData.estimationName,
-          remarks: this.formData.remarks,
-          roomType: this.formData.roomType,
-          estimatedDate: this.formData.estimatedDate,
-          discountPercentage: this.formData.discountPercentage,
-          totalEstimationAmount: this.formData.totalEstimationAmount,
-          signatureOf: this.formData.signatureOf,
-          employeeName: this.formData.employeeName,
-          approverName: this.formData.approverName,
-          patientSign: this.formData.patientSign,
-          employeeSign: this.formData.employeeSign,
-          approverSign: this.formData.approverSign,
-          statusOfEstimation: 'submitted',
-          employeeId: this.formData.employeeId,
-          totalDaysStay: this.formData.totalDaysStay,
-          attenderName: this.formData.attenderName,
-          surgeryTime: this.formData.surgeryTime,
-          staffRemarks:this.formData.staffRemarks,
-          patientRemarks: this.formData.patientRemarks
-        },
-        inclusions: this.formData.inclusions,
-        exclusions: this.formData.exclusions,
-      };
-      console.log(estimationData);
-      this.estimationService.createNewEstimationDetails(estimationData).subscribe(
-        (response) => {
-          console.log('Estimation updated successfully:', response);
-          this.clearForm();
-          this.closeForm.emit()
-        },
-        (error) => {
-          console.error('Error updating estimation:', error);
-        }
-      ); 
-    }
+      if (this.estimationData && this.estimationData.estimationId) {
+        const estimationData = {
+          estimationId: this.estimationData.estimationId, // Replace this with the actual ID from your context
+          updateFields: {
+            patientUHID: this.formData.patientUHID,
+            patientName: this.formData.patientName,
+            ageOfPatient: this.formData.ageOfPatient,
+            genderOfPatient: this.formData.genderOfPatient,
+            consultantName: this.formData.consultantName,
+            consultantId: this.formData.consultantId,
+            estimationType: this.selectedEstimationType,
+            estimationPreferredDate: this.formData.estimationPreferredDate,
+            icuStay: this.formData.icuStay,
+            wardStay: this.formData.wardStay,
+            estimationCost: this.formData.estimationCost,
+            estimationName: this.formData.estimationName,
+            remarks: this.formData.remarks,
+            roomType: this.formData.roomType,
+            estimatedDate: this.formData.estimatedDate,
+            discountPercentage: this.formData.discountPercentage,
+            totalEstimationAmount: this.formData.totalEstimationAmount,
+            signatureOf: this.formData.signatureOf,
+            employeeName: this.formData.employeeName,
+            approverName: this.formData.approverName,
+            patientSign: this.formData.patientSign,
+            employeeSign: this.formData.employeeSign,
+            approverSign: this.formData.approverSign,
+            statusOfEstimation: 'submitted',
+            employeeId: this.formData.employeeId,
+            totalDaysStay: this.formData.totalDaysStay,
+            attenderName: this.formData.attenderName,
+            staffRemarks: this.formData.staffRemarks,
+            patientRemarks: this.formData.patientRemarks,
+            implants: this.formData.implants,
+            procedures: this.formData.procedures,
+            instrumentals: this.formData.instrumentals,
+            surgeryPackage: this.selectedSurgeryPackage,
+            multipleEstimationCost: this.formData.multipleEstimationCost
+          },
+          inclusions: this.formData.inclusions,
+          exclusions: this.formData.exclusions,
+        };
+        console.log(estimationData);
+        this.estimationService.updateEstimationDetails(estimationData.estimationId, estimationData).subscribe(
+          (response) => {
+            console.log('Estimation updated successfully:', response);
+            this.clearForm();
+            this.closeForm.emit()
+          },
+          (error) => {
+            console.error('Error updating estimation:', error);
+          }
+        );
+      } else {
+        const estimationData = {
+          // Replace this with the actual ID from your context
+          updateFields: {
+            patientUHID: Number(this.formData.patientUHID),
+            patientName: this.formData.patientName,
+            ageOfPatient: this.formData.ageOfPatient,
+            genderOfPatient: this.formData.genderOfPatient,
+            consultantName: this.formData.consultantName,
+            consultantId: this.formData.consultantId,
+            estimationType: this.selectedEstimationType,
+            estimationPreferredDate: this.formData.estimationPreferredDate,
+            patientPhoneNumber: this.formData.patientPhoneNumber,
+            icuStay: this.formData.icuStay,
+            wardStay: this.formData.wardStay,
+            estimationCost: this.formData.estimationCost,
+            estimationName: this.formData.estimationName,
+            remarks: this.formData.remarks,
+            roomType: this.formData.roomType,
+            estimatedDate: this.formData.estimatedDate,
+            discountPercentage: this.formData.discountPercentage,
+            totalEstimationAmount: this.formData.totalEstimationAmount,
+            signatureOf: this.formData.signatureOf,
+            employeeName: this.formData.employeeName,
+            approverName: this.formData.approverName,
+            patientSign: this.formData.patientSign,
+            employeeSign: this.formData.employeeSign,
+            approverSign: this.formData.approverSign,
+            statusOfEstimation: 'submitted',
+            employeeId: this.formData.employeeId,
+            totalDaysStay: this.formData.totalDaysStay,
+            attenderName: this.formData.attenderName,
+            surgeryTime: this.formData.surgeryTime,
+            staffRemarks: this.formData.staffRemarks,
+            patientRemarks: this.formData.patientRemarks,
+            implants: this.formData.implants,
+            procedures: this.formData.procedures,
+            instrumentals: this.formData.instrumentals,
+            surgeryPackage: this.selectedSurgeryPackage,
+            multipleEstimationCost: this.formData.multipleEstimationCost
+          },
+          inclusions: this.formData.inclusions,
+          exclusions: this.formData.exclusions,
+        };
+        console.log(estimationData);
+        this.estimationService.createNewEstimationDetails(estimationData).subscribe(
+          (response) => {
+            console.log('Estimation updated successfully:', response);
+            this.clearForm();
+            this.closeForm.emit()
+          },
+          (error) => {
+            console.error('Error updating estimation:', error);
+          }
+        );
+      }
     } else {
       console.log('Form is invalid:', form);
     }
@@ -879,47 +936,128 @@ updateRoomTypeField(): void {
     //   },
     // });
   }
-  selectedCategory: 'implants' | 'procedures' | 'instrumentals'  = 'implants';
+  categories: Array<"implants" | "procedures" | "instrumentals"> = ["implants", "procedures", "instrumentals"];
 
-  
-  // Separate lists for each category
-  selectedItems = {
-    implants: [] as { name: string; cost: number }[],
-    procedures: [] as { name: string; cost: number }[],
-    instrumentals: [] as { name: string; cost: number }[],
+  // ✅ Track selected categories
+  selectedCategories: Array<"implants" | "procedures" | "instrumentals"> = [];
+
+  // ✅ Track dropdown open/close state
+  isDropdownOpen = false;
+
+  // ✅ Store entries dynamically per category
+  selectedItems: Record<"implants" | "procedures" | "instrumentals", { name: string; cost: number }[]> = {
+    implants: [],
+    procedures: [],
+    instrumentals: [],
   };
 
-  // Function to add new entry dynamically
-  addItem(event:Event) {
+  // ✅ Toggle dropdown visibility
+  toggleInclusion(event: Event) {
+    event.stopPropagation();
     event.preventDefault()
-    if (this.selectedCategory) {
-      this.selectedItems[this.selectedCategory].push({ name: "", cost: 0 });
+    this.isDropdownOpen = !this.isDropdownOpen;
+  }
+
+  // ✅ Toggle category selection
+  toggleCategory(category: "implants" | "procedures" | "instrumentals", event: Event) {
+    event.stopPropagation();
+    event.preventDefault()
+    if (this.selectedCategories.includes(category)) {
+      this.selectedCategories = this.selectedCategories.filter((cat) => cat !== category);
+    } else {
+      this.selectedCategories.push(category);
+    }
+    // Ensure category exists in selectedItems
+    if (!this.selectedItems[category]) {
+      this.selectedItems[category] = [];
     }
   }
 
-  // Function to remove an entry
-  removeItem(index: number, event: Event) {
+  // ✅ Add a new entry for a selected category
+  addItem(category: "implants" | "procedures" | "instrumentals", event: Event) {
     event.preventDefault()
-    if (this.selectedCategory) {
-      this.selectedItems[this.selectedCategory].splice(index, 1);
+    if (!this.selectedItems[category]) {
+      this.selectedItems[category] = [];
     }
+    this.selectedItems[category].push({ name: '', cost: 0 });
+    this.updateFormData()
   }
 
-  // Function to handle dropdown selection change
-  onCategoryChange(event: Event) {
+  // ✅ Remove an entry from a category
+  removeItem(category: "implants" | "procedures" | "instrumentals", index: number, event: Event) {
     event.preventDefault()
-    if (!this.selectedItems[this.selectedCategory]) {
-      this.selectedItems[this.selectedCategory] = [];
-    }
+    this.selectedItems[category].splice(index, 1);
+    this.updateFormData()
   }
 
-  // Function to format data for submission
-  getFormattedData() {
-    return {
-      implants: this.selectedItems.implants.map(item => `${item.name} - ${item.cost}`).join(", "),
-      procedures: this.selectedItems.procedures.map(item => `${item.name} - ${item.cost}`).join(", "),
-      instrumentals: this.selectedItems.instrumentals.map(item => `${item.name} - ${item.cost}`).join(", "),
+  // ✅ Format data for form submission
+  formatDataForSubmission() {
+    console.log(this.selectedItems);
+
+    const formattedData = {
+      implants: this.selectedItems.implants.map((item) => `${item.name} - ₹${item.cost}`).join(", "),
+      procedures: this.selectedItems.procedures.map((item) => `${item.name} - ₹${item.cost}`).join(", "),
+      instrumentals: this.selectedItems.instrumentals.map((item) => `${item.name} - ₹${item.cost}`).join(", "),
     };
+    console.log("Formatted Submission Data:", formattedData);
+  }
+  updateFormData(): void {
+    this.formData.implants = this.selectedItems.implants
+      ?.filter(item => item.name && item.cost) // ✅ Ignore empty values
+      .map((item) => `${item.name} - ₹${item.cost}`)
+      .join(", ") || '';
+  
+    this.formData.procedures = this.selectedItems.procedures
+      ?.filter(item => item.name && item.cost) // ✅ Ignore empty values
+      .map((item) => `${item.name} - ₹${item.cost}`)
+      .join(", ") || '';
+  
+    this.formData.instrumentals = this.selectedItems.instrumentals
+      ?.filter(item => item.name && item.cost) // ✅ Ignore empty values
+      .map((item) => `${item.name} - ₹${item.cost}`)
+      .join(", ") || '';
+  
+    console.log("Updated formData:", this.formData);
+  }
+  
+  trackByIndex(index: number, item: any) {
+    return index; // Ensures Angular tracks items by their index
+  }
+  updateEstimationCosts() {
+    console.log("Updating Estimation Costs based on surgery names:", this.formData.estimationName);
+  
+    if (this.formData.estimationName) {
+      const surgeries = this.formData.estimationName.split(',').map(s => s.trim());
+  
+      // Ensure estimationCosts has the correct length
+      const newEstimationCosts = new Array(surgeries.length).fill(0);
+  
+      // Preserve existing costs
+      for (let i = 0; i < surgeries.length; i++) {
+        if (this.estimationCosts[i] !== undefined) {
+          newEstimationCosts[i] = this.estimationCosts[i];
+        }
+      }
+  
+      this.estimationCosts = newEstimationCosts; 
+      this.updateEstimationCostString();
+    } else {
+      this.estimationCosts = [];
+      this.formData.multipleEstimationCost = ''; // Reset when empty
+    }
+  }
+  
+
+  
+  
+
+  /**
+   * Converts estimationCosts array into a comma-separated string.
+   */
+  updateEstimationCostString() {
+    this.formData.multipleEstimationCost = this.estimationCosts.join(', ');
+    console.log("Updated multipleEstimationCost:", this.formData.multipleEstimationCost);
   }
 }
+
 

@@ -911,7 +911,7 @@ export class TodayConsultationsComponent {
       startDate: this.startDate,
       endDate: this.endDate,
     };
-    const adminPhoneNumber = '919342287945'
+    const adminPhoneNumber = ["919880544866", "916364833988"]
     this.appointmentService.sendAdminMessage(this.currentDoctorName, this.currentDepartmentName ,this.startDate, this.endDate, adminPhoneNumber).subscribe({
       next: (response) => {
         // console.log('Leave request submitted:', response);

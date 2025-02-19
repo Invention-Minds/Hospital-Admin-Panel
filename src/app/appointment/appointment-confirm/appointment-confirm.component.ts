@@ -99,7 +99,7 @@ export class AppointmentConfirmComponent {
     // Run every 5 minutes (300,000 ms)
     setInterval(() => {
       console.log("⏳ Checking for expired appointments...");
-      this.cancelExpiredAppointments();
+      // this.cancelExpiredAppointments();
     }, 300000); // 5 minutes in milliseconds
     // Fetch appointments
     this.appointmentService.fetchAppointments()
@@ -111,7 +111,7 @@ export class AppointmentConfirmComponent {
         this.confirmedAppointments = appointments;
         this.appointments = appointments
         console.log(appointments)
-        this.cancelExpiredAppointments();
+        // this.cancelExpiredAppointments();
 
         // Sort appointments
         this.confirmedAppointments.sort((a, b) => {
@@ -122,15 +122,16 @@ export class AppointmentConfirmComponent {
 
         this.filteredAppointments = [...this.confirmedAppointments];
         
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); // Normalize to midnight (00:00:00)
+        // const today = new Date();
+        // today.setHours(0, 0, 0, 0); // Normalize to midnight (00:00:00)
 
-        // Filter out appointments that are in the past
-        this.filteredAppointments = this.filteredAppointments.filter((appointment: any) => {
-          const appointmentDate = new Date(appointment.date); // Convert appointment date to Date object
-          // If the appointment date is today or in the future
-          return appointmentDate >= today;
-        });
+        // // Filter out appointments that are in the past
+        // this.filteredAppointments = this.filteredAppointments.filter((appointment: any) => {
+        //   const appointmentDate = new Date(appointment.date); // Convert appointment date to Date object
+        //   // If the appointment date is today or in the future
+        //   return appointmentDate >= today;
+        // });
+        this.filterAppointmentsByDate(new Date());
 
         console.log(this.filteredAppointments)
         // this.filterAppointmentsByDate(new Date());
@@ -237,12 +238,27 @@ export class AppointmentConfirmComponent {
       this.currentPage = this.totalPages;
     }
   }
+
   filteredAppointments: Appointment[] = [...this.confirmedAppointments];
+  filterAppointmentsByDate(selectedDate: Date) {
+    const formattedSelectedDate = this.formatDate(selectedDate);
+
+    this.filteredAppointments = this.confirmedAppointments.filter((appointment) => {
+      const appointmentDate = appointment.date;
+      return appointmentDate >= formattedSelectedDate;
+    });
+    if (this.selectedValue.trim() !== '') {
+      this.filterAppointment();
+    }
+    this.currentPage = 1; // Reset to the first page when the filter changes
+  }
+  
   // filteredAppointments: Appointment[] = this.confirmedAppointments.filter(appointment => !appointment!.completed);
   onSearch(): void {
     this.filteredAppointments = [...this.confirmedAppointments]
 
     console.log(this.searchValue, this.selectedDateRange)
+    console.log(this.confirmedAppointments, this.filteredAppointments)
 
     this.filteredServices = this.confirmedAppointments.filter((service) => {
       let matches = true;
@@ -363,10 +379,10 @@ export class AppointmentConfirmComponent {
   }
   ngOnChanges(changes: SimpleChanges) {
     // Whenever the selected date changes, this will be triggered
-    // this.filterAppointment();
-    // if(this.selectedDateRange && this.selectedDateRange.length === 0){
-    //   this.filterAppointmentsByDate(new Date());
-    // }
+    this.filterAppointment();
+    if(this.selectedDateRange && this.selectedDateRange.length === 0){
+      this.filterAppointmentsByDate(new Date());
+    }
 
   }
   // Utility to Convert JSON to CSV
@@ -397,9 +413,9 @@ export class AppointmentConfirmComponent {
   // }
 
   // Method to handle date change (e.g., when the user selects a date from a date picker)
-  // onDateChange(newDate: Date) {
-  //   this.filterAppointmentsByDate(newDate);
-  // }
+  onDateChange(newDate: Date) {
+    this.filterAppointmentsByDate(newDate);
+  }
 
 
   filterAppointment() {

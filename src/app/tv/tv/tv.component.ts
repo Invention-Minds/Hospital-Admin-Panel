@@ -279,7 +279,7 @@ export class TvComponent implements OnInit, OnDestroy {
                 console.warn(`⏳ Alert: First checked-in patient for Dr. ${doctor.name} has exceeded waiting time!`);
     
                 // Send message to admin
-                const adminPhoneNumbers = "919342287945";
+                const adminPhoneNumbers = ["919880544866", "916364833988"]
                 this.appointmentService
                 .adminLateLoginDoctor({
                   adminPhoneNumber: adminPhoneNumbers,
@@ -917,7 +917,7 @@ export class TvComponent implements OnInit, OnDestroy {
                 );
     
                 // Step 6: Send WhatsApp notifications to Admins & Doctor
-                const adminPhoneNumbers = ["919342287945", "919698669181", "917708059010"]; // Admin List
+                const adminPhoneNumbers = ["919880544866 ", "916364833988", "919995703633 "]; // Admin List
                 let noOfPatients = pendingAppointments.length - completeAppointment.length; // Pending appointments for this doctor
                 noOfPatients = Math.max(noOfPatients, 0);
                 const adminsToSend = Array.isArray(adminPhoneNumbers) 

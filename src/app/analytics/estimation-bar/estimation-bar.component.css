@@ -117,6 +117,9 @@
   color: #fff;
   right: 0;
 }
+.hidden{
+    visibility: hidden;
+}
 
 .tooltip:hover .tooltiptext {
   visibility: visible;

@@ -2,9 +2,9 @@
     <app-loading />
 </div>
 
-<div class="root-container" *ngIf = "!isLoading">
+<div class="root-container" >
     <div class="root-container">
-        <div class="header">
+        <div class="header" *ngIf = "!isLoading">
             <div class="heading">Estimation Status Overview</div>
             <div class="view_info">
                 <div class="viewmore" (click)="report()" style="cursor: pointer;">View More</div>
@@ -19,9 +19,9 @@
                 </div>
             </div>
         </div>
-        <div class="chart">
+        <div class="chart" [ngClass]="{hidden: isLoading}">
             <div id="bar-chart" style="width: 80%; height: 315px;"></div>
-            <div class="legends">
+            <div class="legends" >
                 <div class="legend_items"><div class="indicator orange"></div><span>No. of. Pend. EST</span></div>
                 <div class="legend_items"><div class="indicator purple"></div><span>No. of. Subm. EST</span></div>
                 <div class="legend_items"><div class="indicator blue"></div><span>No. of. App. EST</span></div>

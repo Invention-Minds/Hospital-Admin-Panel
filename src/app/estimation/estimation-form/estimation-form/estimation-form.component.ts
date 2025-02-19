@@ -66,12 +66,12 @@ export class EstimationFormComponent {
   constructor(private estimationService: EstimationService, private cdr: ChangeDetectorRef, private messageService: MessageService, private doctorService: DoctorServiceService, private appointmentService: AppointmentConfirmService) {
     this.filteredRooms = [...this.availableRooms];
     this.availableRooms = [
-      { name: 'General', cost: 500 },
-      { name: 'Semi-Private', cost: 1000 },
-      { name: 'Private', cost: 1500 },
-      { name: 'Deluxe', cost: 2000 },
-      { name: 'VIP Suite', cost: 3000 },
-      { name: 'Presidential Suite', cost: 5000 }
+      { name: 'General', cost: 1600 },
+      { name: 'Semi-Private', cost: 3500 },
+      { name: 'Private/ICU', cost: 5000 },
+      { name: 'Deluxe', cost: 6000 },
+      { name: 'VIP Suite', cost: 10000 },
+      { name: 'Presidential Suite', cost: 12000 }
     ];
 
   }
@@ -95,12 +95,12 @@ export class EstimationFormComponent {
     }
   }
   availableRooms = [
-    { name: 'General', cost: 500 },
-    { name: 'Semi-Private', cost: 1000 },
-    { name: 'Private', cost: 1500 },
-    { name: 'Deluxe', cost: 2000 },
-    { name: 'VIP Suite', cost: 3000 },
-    { name: 'Presidential Suite', cost: 5000 }
+    { name: 'General', cost: 1600 },
+    { name: 'Semi-Private', cost: 3500 },
+    { name: 'Private/ICU', cost: 5000 },
+    { name: 'Deluxe', cost: 6000 },
+    { name: 'VIP Suite', cost: 10000 },
+    { name: 'Presidential Suite', cost: 12000 }
   ];
 
   // Filtered rooms (for search functionality)
@@ -385,12 +385,12 @@ export class EstimationFormComponent {
     this.setSelectedDoctorName(); // If consultantId exists, get doctor name
     this.fetchPendingEstimations();
     this.availableRooms = [
-      { name: 'General', cost: 500 },
-      { name: 'Semi-Private', cost: 1000 },
-      { name: 'Private', cost: 1500 },
-      { name: 'Deluxe', cost: 2000 },
-      { name: 'VIP Suite', cost: 3000 },
-      { name: 'Presidential Suite', cost: 5000 }
+      { name: 'General', cost: 1600 },
+      { name: 'Semi-Private', cost: 3500 },
+      { name: 'Private/ICU', cost: 5000 },
+      { name: 'Deluxe', cost: 6000 },
+      { name: 'VIP Suite', cost: 10000 },
+      { name: 'Presidential Suite', cost: 12000 }
     ];
     
 
@@ -752,7 +752,7 @@ export class EstimationFormComponent {
           (pdfResponse) => {
             console.log("✅ PDF Generated & Sent via WhatsApp:", pdfResponse);
             this.messageService.add({ severity: 'success', summary: 'Success', detail: 'PDF Generated & Sent PDF via WhatsApp:!' });
-            const to = "keerthanasaminathan0805@gmail.com"
+            const to = "itbilling@rashtrotthanahospital.com"
             this.appointmentService.sendMailtoApprover(to, estimationData.estimationId, pdfResponse.filePath).subscribe(
               (response) => {
                 console.log('Email sent successfully:', response);

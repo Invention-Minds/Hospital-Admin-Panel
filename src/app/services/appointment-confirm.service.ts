@@ -396,7 +396,7 @@ const appointmentData = appointment
   // createEstimation(doctorId:number, departmentId:number, estimation:string): Observable<any>{
   //   return this.http.post(`${environment.apiUrl}/estimation`, {doctorId, departmentId, estimation});
   // }
-  sendAdminMessage(doctorName: string, departmentName:string, startDate: string, endDate: string, adminPhoneNumber: string): Observable<any> {
+  sendAdminMessage(doctorName: string, departmentName:string, startDate: string, endDate: string, adminPhoneNumber: string[]): Observable<any> {
     return this.http.post(`${environment.apiUrl}/whatsapp/send-admin-message`, { doctorName,departmentName, startDate, endDate, adminPhoneNumber });
   }
   updateExtraWaitingTime(appointmentId: number, waitingTime: any): Observable<any> {
@@ -420,7 +420,7 @@ const appointmentData = appointment
     return this.http.post(`${environment.apiUrl}/whatsapp/send-doctor-remainder`, payload);
   }
   adminLateLoginDoctor(payload: {
-    adminPhoneNumber: string,
+    adminPhoneNumber: string[],
     noOfPatients: number,
     doctorName: string,
     doctorId: number

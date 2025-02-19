@@ -98,13 +98,13 @@ export class AppointmentCancelComponent {
         const today = new Date();
         today.setHours(0, 0, 0, 0); // Normalize to midnight (00:00:00)
 
-        // Filter out appointments that are in the past
-        this.filteredAppointments = this.filteredAppointments.filter((appointment: any) => {
-          const appointmentDate = new Date(appointment.date); // Convert appointment date to Date object
-          // If the appointment date is today or in the future
-          return appointmentDate >= today;
-        });
-        // this.filterAppointmentsByDate(new Date());
+        // // Filter out appointments that are in the past
+        // this.filteredAppointments = this.filteredAppointments.filter((appointment: any) => {
+        //   const appointmentDate = new Date(appointment.date); // Convert appointment date to Date object
+        //   // If the appointment date is today or in the future
+        //   return appointmentDate >= today;
+        // });
+        this.filterAppointmentsByDate(new Date());
         setTimeout(() => {
           // console.log('Setting isLoading to false after delay');
           this.isLoading = false; // Stop loading indicator
@@ -120,95 +120,88 @@ export class AppointmentCancelComponent {
     );
   }
   onSearch(): void {
-    this.filteredAppointments = [...this.cancelledAppointments]
+    this.filteredList = [...this.cancelledAppointments];
+    this.filteredAppointments = [...this.cancelledAppointments];
+  
+    console.log("🔎 Search Value:", this.searchValue);
+    console.log("📆 Selected Date Range:", this.selectedDateRange);
+  
+    // ✅ If selectedDateRange is provided, filter by date range
+    if (this.selectedDateRange && this.selectedDateRange.length) {
+      const startDate = this.selectedDateRange[0];
+      const endDate = this.selectedDateRange[1] ? this.selectedDateRange[1] : startDate; // Use endDate if provided, otherwise use startDate
 
-    console.log(this.searchValue, this.selectedDateRange)
+      if (startDate && endDate) {
+        if (startDate.getTime() !== endDate.getTime()) {
+          // Filtering appointments by the selected date range
+          // console.log('Start date:', startDate, 'End date:', endDate);
+          const normalizedEndDate = new Date(endDate);
+          normalizedEndDate.setHours(23, 59, 59, 999);  // Set to the last millisecond of the day
 
-    this.filteredServices = this.cancelledAppointments.filter((service) => {
+          this.filteredList = this.filteredList.filter((appointment: Appointment) => {
+            const appointmentDate = new Date(appointment.date);  // Assuming 'date' is in string format like 'YYYY-MM-DD'
+            return appointmentDate >= startDate && appointmentDate <= normalizedEndDate;
+          });
+          this.filteredAppointments = this.filteredList
+          console.log('Filtered list:', this.filteredList);
+        }
+        else if (startDate.getTime() === endDate.getTime()) {
+          // console.log('Single date selected:');
+          const startDate = this.selectedDateRange[0];
+
+          this.filteredList = this.filteredList.filter((appointment: Appointment) => {
+            const appointmentDate = new Date(appointment.date);
+            return appointmentDate.toDateString() === startDate.toDateString();  // Compare the date portion only
+          });
+          this.filteredAppointments = this.filteredList
+          console.log('Filtered list:', this.filteredList);
+        }
+      }
+      else {
+        this.filteredAppointments = [...this.cancelledAppointments]
+      }
+
+  
+      console.log("✅ Filtered Appointments based on selectedDateRange:", this.filteredAppointments);
+    }
+  
+    // ✅ Apply search filters on top of the date range filtering
+    this.filteredServices = this.filteredAppointments.filter((service) => {
       let matches = true;
-
-      // Filter by search option
+  
       if (this.selectedSearchOption && this.searchValue && service) {
         switch (this.selectedSearchOption) {
           case 'patientName':
-            matches = service.patientName
-              ?.toLowerCase()
-              .includes(this.searchValue.toLowerCase());
+            matches = service.patientName?.toLowerCase().includes(this.searchValue.toLowerCase());
             break;
           case 'doctorName':
-            matches = !!service.doctorName
-              ?.toLowerCase()
-              .includes(this.searchValue.toLowerCase());
+            matches = !!service.doctorName?.toLowerCase().includes(this.searchValue.toLowerCase());
             break;
           case 'departmentName':
-            matches = !!service.department
-              ?.toLowerCase()
-              .includes(this.searchValue.toLowerCase());
+            matches = !!service.department?.toLowerCase().includes(this.searchValue.toLowerCase());
             break;
-            case 'prnNumber':
-              const prnNumber = Number(service.prnNumber); // Convert to Number
-              const searchNumber = Number(this.searchValue); // Convert to Number
-              // ✅ Check if searchValue is a valid number and matches the prnNumber
-              matches = !isNaN(searchNumber) && prnNumber === searchNumber;
-              break;
+          case 'prnNumber':
+            const prnNumber = Number(service.prnNumber); // Convert to Number
+            const searchNumber = Number(this.searchValue); // Convert to Number
+            console.log(prnNumber, searchNumber);
+  
+            matches = !isNaN(searchNumber) && prnNumber === searchNumber;
+            break;
         }
-
       }
-      if (this.selectedDateRange && this.selectedDateRange.length) {
-        // ✅ Convert service date to a Date object and remove time component
-        const serviceDate = new Date(service.date);
-        // serviceDate.setHours(0, 0, 0, 0); // Normalize time to avoid mismatches
-    
-        // ✅ Ensure selected start date is a Date object
-        let startDate = new Date(this.selectedDateRange[0]);
-        startDate.setHours(0, 0, 0, 0); // Normalize time
-    
-        // ✅ Ensure endDate is assigned correctly
-        let endDate = this.selectedDateRange[1] ? new Date(this.selectedDateRange[1]) : startDate;
-        endDate.setHours(23, 59, 59, 999); // Ensure full-day range
-
-    
-        if (startDate=== endDate) {
-            // ✅ Single date selected - Exact match
-            matches = serviceDate.toISOString().split('T')[0] === startDate.toISOString().split('T')[0];
-            console.log(matches)
-        } else {
-            // ✅ Date range selected - Match within range
-            matches = matches && serviceDate.getTime() >= startDate.getTime() && serviceDate.getTime() <= endDate.getTime();
-        }
-    }
-    
-    
-    
-    
-    
-    
-    
-    // ✅ Filter by single specific date
-    if (this.selectedDate) {
-        const singleDate = new Date(this.selectedDate).toISOString().split('T')[0]; // ✅ Extract YYYY-MM-DD only
-        console.log(singleDate, "Selected Date (Date Only)");
-    
-        matches = matches && new Date(service.date).toDateString() === singleDate;
-    }
-    
-
-      // console.log(matches);
+  
       return matches;
     });
-
-    this.filteredAppointments = this.filteredServices
-    console.log(this.filteredAppointments)
-
-
+  
+    this.filteredAppointments = this.filteredServices;
+    console.log("✅ Final Filtered Appointments:", this.filteredAppointments);
   }
+  
 
 
   refresh() {
     this.selectedDateRange = [];
-    this.filteredAppointments = this.filteredAppointments.filter((appointment:any)=>{
-      appointment.date >= new Date()
-    })
+    this.filterAppointmentsByDate(new Date());
   }
   downloadData(): void {
     if (this.filteredServices.length === 0) {
@@ -250,7 +243,7 @@ export class AppointmentCancelComponent {
   onClear() {
     this.searchValue = '';
     this.selectedSearchOption = 'firstName';
-    this.selectedDateRange = [];
+    // this.selectedDateRange = [];
     this.filteredServices = [...this.cancelledAppointments];
   }
   

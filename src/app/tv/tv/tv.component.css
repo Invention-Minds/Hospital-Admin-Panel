@@ -79,7 +79,7 @@
 .doctor-cards {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 5px;
   justify-content: center;
   background: #f0f3ff;
   margin: 0;
@@ -94,7 +94,7 @@
   /* background: #F0F3FF; */
   /* border: 1px solid #0077b6; */
   border-radius: 8px;
-  width: 500px; /* Fixed width for uniform alignment */
+  width: 474px; /* Fixed width for uniform alignment */
 
   /* padding: 15px; */
   /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
@@ -133,7 +133,7 @@
 .doctor-details h3 {
   color: #fff;
   font-family: Poppins;
-  font-size: 18px;
+  font-size: 17px;
   font-style: normal;
   font-weight: 600;
   line-height: 30px;
@@ -143,7 +143,7 @@
 .doctor-details p {
   color: #fff;
   font-family: Poppins;
-  font-size: 18px;
+  font-size: 17px;
   font-style: normal;
   font-weight: 600;
   line-height: 30px;

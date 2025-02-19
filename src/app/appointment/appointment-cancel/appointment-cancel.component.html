@@ -67,7 +67,7 @@
           PRN
         </th>
         <th>Doctor Name</th>
-        <th>Department</th>
+        <!-- <th>Department</th> -->
         <th (click)="sortBy('date')">
           Date
           <span *ngIf="sortColumn === 'date' && sortDirection === 'asc'">&#9650;</span>
@@ -92,7 +92,7 @@
         <td>{{ appointment.patientName }}</td>
         <td>{{appointment.prnNumber}}</td>
         <td>{{ appointment.doctorName }}</td>
-        <td>{{ appointment.department }}</td>
+        <!-- <td>{{ appointment.department }}</td> -->
         <td>{{ appointment.date }}</td>
         <td>{{ appointment.time }}</td>
         <td>{{appointment.requestVia}}</td>

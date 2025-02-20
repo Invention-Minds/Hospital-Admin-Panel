@@ -243,21 +243,21 @@ export class TvComponent implements OnInit, OnDestroy {
                     notificationSent.set(doctor.userId, true);
         
                     // Step 5: Send one-time notification to the doctor
-                    this.appointmentService
-                      .lateLogin({
-                        doctorPhoneNumber: doctor.phone_number,
-                        doctorName: doctor.name,
-                        noOfPatients: todayAppointments.length,
-                        doctorId: doctor.id
-                      })
-                      .subscribe(
-                        (response) => {
-                          console.log(`✅ Reminder sent to Dr. ${doctor.name}`);
-                        },
-                        (error) => {
-                          console.error(`❌ Error sending reminder to Dr. ${doctor.name}:`, error);
-                        }
-                      );
+                    // this.appointmentService
+                    //   .lateLogin({
+                    //     doctorPhoneNumber: doctor.phone_number,
+                    //     doctorName: doctor.name,
+                    //     noOfPatients: todayAppointments.length,
+                    //     doctorId: doctor.id
+                    //   })
+                    //   .subscribe(
+                    //     (response) => {
+                    //       console.log(`✅ Reminder sent to Dr. ${doctor.name}`);
+                    //     },
+                    //     (error) => {
+                    //       console.error(`❌ Error sending reminder to Dr. ${doctor.name}:`, error);
+                    //     }
+                    //   );
                       this.messageStopForDoctor.push(doctor.id); 
                   }
                 }
@@ -281,21 +281,21 @@ export class TvComponent implements OnInit, OnDestroy {
                 // Send message to admin
                 // const adminPhoneNumbers = ["919880544866", "916364833988"]
                 const adminPhoneNumbers = ["919342287945", "919342287945"]
-                this.appointmentService
-                .adminLateLoginDoctor({
-                  adminPhoneNumber: adminPhoneNumbers,
-                  doctorName: doctor.name,
-                  noOfPatients: todayAppointments.length,
-                  doctorId: doctor.id
-                })
-                .subscribe(
-                  (response) => {
-                    console.log(`✅ Reminder sent to Dr. ${doctor.name}`);
-                  },
-                  (error) => {
-                    console.error(`❌ Error sending reminder to Dr. ${doctor.name}:`, error);
-                  }
-                );
+                // this.appointmentService
+                // .adminLateLoginDoctor({
+                //   adminPhoneNumber: adminPhoneNumbers,
+                //   doctorName: doctor.name,
+                //   noOfPatients: todayAppointments.length,
+                //   doctorId: doctor.id
+                // })
+                // .subscribe(
+                //   (response) => {
+                //     console.log(`✅ Reminder sent to Dr. ${doctor.name}`);
+                //   },
+                //   (error) => {
+                //     console.error(`❌ Error sending reminder to Dr. ${doctor.name}:`, error);
+                //   }
+                // );
                 // this.adminAlertSentForDoctor.push(doctor.id)
               }
             }
@@ -932,22 +932,22 @@ export class TvComponent implements OnInit, OnDestroy {
                 ? adminPhoneNumbers.slice(0, waitingMultiplier) 
                 : [];
 
-                this.appointmentService
-                  .sendWaitingTimeAlert({
-                    adminPhoneNumbers: adminsToSend,
-                    doctorPhoneNumber: doctorPhoneNumber,
-                    noOfPatients: noOfPatients,
-                    doctorName: doctorName,
-                    waitingMultiplier,
-                  })
-                  .subscribe(
-                    (response) => {
-                      console.log(`✅ WhatsApp message sent to Dr. ${doctorName}`, response);
-                    },
-                    (error) => {
-                      console.error(`❌ Error sending message to Dr. ${doctorName}:`, error);
-                    }
-                  );
+                // this.appointmentService
+                //   .sendWaitingTimeAlert({
+                //     adminPhoneNumbers: adminsToSend,
+                //     doctorPhoneNumber: doctorPhoneNumber,
+                //     noOfPatients: noOfPatients,
+                //     doctorName: doctorName,
+                //     waitingMultiplier,
+                //   })
+                //   .subscribe(
+                //     (response) => {
+                //       console.log(`✅ WhatsApp message sent to Dr. ${doctorName}`, response);
+                //     },
+                //     (error) => {
+                //       console.error(`❌ Error sending message to Dr. ${doctorName}:`, error);
+                //     }
+                //   );
                 
               }
             }

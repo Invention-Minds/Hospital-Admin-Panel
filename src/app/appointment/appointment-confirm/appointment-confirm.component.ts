@@ -442,6 +442,7 @@ export class AppointmentConfirmComponent {
       }
     });
     const csvContent = this.convertToCSV(this.filteredServices);
+    console.log(this.filteredServices, csvContent)
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     FileSaver.saveAs(blob, 'confirmed_appointments.csv');
   }

@@ -173,7 +173,7 @@ export class AppointmentFormComponent implements OnInit {
 
 
         if (this.appointmentStatus !== 'pending') {
-          this.appointmentForm.get('phoneNumber')?.setValue(this.getMaskedPhoneNumber(this.appointment!.phoneNumber));
+          this.appointmentForm.get('phoneNumber')?.setValue(this.appointment!.phoneNumber);
         } else {
           this.appointmentForm.get('phoneNumber')?.setValue(this.appointment!.phoneNumber);
         }
@@ -450,15 +450,15 @@ export class AppointmentFormComponent implements OnInit {
       this.showSuggestions = false;
     }, 200);
   }
-  getMaskedPhoneNumber(phoneNumber: string): string {
-    if (!phoneNumber) return ''; // If no phone number is available, return blank
+  // getMaskedPhoneNumber(phoneNumber: string): string {
+  //   if (!phoneNumber) return ''; // If no phone number is available, return blank
 
-    // Mask middle 4 digits for non-pending statuses
-    return phoneNumber.replace(/(\d{3})\d{4}(\d{3})/, '$1****$2');
-  }
+  //   // Mask middle 4 digits for non-pending statuses
+  //   return phoneNumber.replace(/(\d{3})\d{4}(\d{3})/, '$1****$2');
+  // }
 
   onPhoneFocus() {
-    if (this.appointmentStatus !== 'pending') return; // Do nothing if not pending
+     // Do nothing if not pending
 
     const originalPhone = this.appointmentForm.get('phoneNumber')?.value;
     this.appointmentForm.get('phoneNumber')?.setValue(originalPhone.replace(/\D/g, '')); // Remove masking
@@ -468,7 +468,7 @@ export class AppointmentFormComponent implements OnInit {
     if (this.appointmentStatus === 'pending') return; // Do nothing if pending
 
     const originalPhone = this.appointmentForm.get('phoneNumber')?.value;
-    this.appointmentForm.get('phoneNumber')?.setValue(this.getMaskedPhoneNumber(originalPhone));
+    this.appointmentForm.get('phoneNumber')?.setValue(originalPhone);
   }
 
 

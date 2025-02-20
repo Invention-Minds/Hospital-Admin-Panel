@@ -103,7 +103,7 @@ export class FutureConsultationsComponent {
               return doctor && doctor.userId === parseInt(this.userId) && appointment.date > this.today;
 
             });
-            // console.log(this.futureAppointments)
+            console.log(this.futureAppointments)
             this.filteredAppointments = [...this.futureAppointments];
           },
           error: (error) => {

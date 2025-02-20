@@ -38,6 +38,16 @@ export class AuthInterceptor implements HttpInterceptor {
           // Optional: Clear any tokens from local storage
           localStorage.removeItem('token');
         }
+        if (error.status === 503) {
+          console.warn('⚠️ System is under maintenance. Redirecting...');
+          
+          // Clear storage to ensure new session after maintenance
+          localStorage.clear();
+          sessionStorage.clear();
+
+          // Redirect to the maintenance page
+          this.router.navigate(['/maintenance']);
+        }
 
         // Pass the error to the caller of the function
         return throwError(() => error);

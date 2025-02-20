@@ -621,7 +621,7 @@
 
     <div class="button">
       <!-- For Subadmin -->
-      <button *ngIf="role === 'sub_admin' && formData.statusOfEstimation === 'pending' || estimationData === null" type="submit"
+      <button *ngIf="role === 'sub_admin' && (formData.statusOfEstimation === 'pending' || estimationData === null)" type="submit"
         class="submit-button" [disabled]="!estimationForm.valid">
         Submit
       </button>

@@ -279,7 +279,8 @@ export class TvComponent implements OnInit, OnDestroy {
                 console.warn(`⏳ Alert: First checked-in patient for Dr. ${doctor.name} has exceeded waiting time!`);
     
                 // Send message to admin
-                const adminPhoneNumbers = ["919880544866", "916364833988"]
+                // const adminPhoneNumbers = ["919880544866", "916364833988"]
+                const adminPhoneNumbers = ["919342287945", "919342287945"]
                 this.appointmentService
                 .adminLateLoginDoctor({
                   adminPhoneNumber: adminPhoneNumbers,
@@ -561,7 +562,13 @@ export class TvComponent implements OnInit, OnDestroy {
             const totalRemainingTime = remainingTimeMinutes + extraMinutes;
 
             // Update the doctor's remaining time
-            doctor.remainingTime = totalRemainingTime > 0 ? `${totalRemainingTime} mins` : 'No active slots';
+            if (totalRemainingTime >= 60) {
+              const hours = Math.floor(totalRemainingTime / 60);
+              const minutes = totalRemainingTime % 60;
+              doctor.remainingTime = minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+          } else {
+              doctor.remainingTime = totalRemainingTime > 0 ? `${totalRemainingTime} mins` : 'No active slots';
+          }
 
             console.log(
               `Doctor ${doctor.name} has ${extraSlotTimes.length} extra slots. Total remaining time: ${doctor.remainingTime}`
@@ -917,7 +924,8 @@ export class TvComponent implements OnInit, OnDestroy {
                 );
     
                 // Step 6: Send WhatsApp notifications to Admins & Doctor
-                const adminPhoneNumbers = ["919880544866 ", "916364833988", "919995703633 "]; // Admin List
+                // const adminPhoneNumbers = ["919880544866 ", "916364833988", "919995703633 "]; // Admin List
+                const adminPhoneNumbers = ['919342287945', '919342287945', '919342287945']
                 let noOfPatients = pendingAppointments.length - completeAppointment.length; // Pending appointments for this doctor
                 noOfPatients = Math.max(noOfPatients, 0);
                 const adminsToSend = Array.isArray(adminPhoneNumbers) 

@@ -80,6 +80,10 @@
 
  
 }
+.button-after{
+  background-color: transparent;
+  border: none;
+}
 .reload{
   border: 2px solid #fff;
   height: 36px;
@@ -589,7 +593,13 @@ h2 {
   font-weight: 400;
   line-height: normal;
 }
-
+.extra-slots-buttons{
+  display: flex;
+  margin-top: 5px;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+}
 
 /* Pagination Controls Styling */
 .pagination-controls {

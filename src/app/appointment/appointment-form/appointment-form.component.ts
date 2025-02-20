@@ -237,9 +237,10 @@ export class AppointmentFormComponent implements OnInit {
       this.appointmentForm.get('doctorName')?.valueChanges.subscribe(doctorName => {
         const date = this.appointmentForm.get('appointmentDate')?.value;
         // const doctorId = this.getDoctorIdByName(doctorName);
+
         const doctorId = this.doctorId;
         if (doctorId && date) {
-          this.checkDoctorAvailabilityAndLoadSlots(doctorId, date)
+          this.checkDoctorAvailabilityAndLoadSlots(doctorId, this.formatDate(date))
         }
       });
       this.appointmentForm.get('appointmentDate')?.valueChanges.subscribe(date => {
@@ -249,7 +250,7 @@ export class AppointmentFormComponent implements OnInit {
         const doctorId = this.doctorId;
 
         if (doctorId && date) {
-          this.checkDoctorAvailabilityAndLoadSlots(doctorId, date);
+          this.checkDoctorAvailabilityAndLoadSlots(doctorId, this.formatDate(date));
         }
       });
       this.appointmentForm.get('appointmentTime')?.valueChanges.subscribe(time => {
@@ -258,7 +259,7 @@ export class AppointmentFormComponent implements OnInit {
         // const doctorId = this.getDoctorIdByName(doctorName);
         const doctorId = this.doctorId;
         if (doctorId && date) {
-          this.checkDoctorAvailabilityAndLoadSlots(doctorId, date);
+          this.checkDoctorAvailabilityAndLoadSlots(doctorId, this.formatDate(date));
         }
       })
       // this.availableSlots = this.appointmentForm.get('appointmentTime')?.value;
@@ -287,7 +288,7 @@ export class AppointmentFormComponent implements OnInit {
     // }
     else if (this.doctorAvailability) {
       console.log(this.doctorAvailability, this.date);
-      this.date = this.formatDate(this.date)
+      // this.date = this.formatDate(this.date)
       // Format the date correctly
       this.date = new Date(this.date);
       console.log(this.date, 'date');
@@ -323,7 +324,7 @@ export class AppointmentFormComponent implements OnInit {
         this.doctorId = this.doctorAvailability.id;
         this.department = this.doctorAvailability.departmentName!
         // console.log(this.doctorId)
-        this.checkDoctorAvailabilityAndLoadSlots(this.doctorAvailability.id, this.date);
+        this.checkDoctorAvailabilityAndLoadSlots(this.doctorAvailability.id, this.formatDate(this.date));
 
         if (this.slot && this.slot.time) {
           // console.log(this.date)
@@ -584,7 +585,7 @@ export class AppointmentFormComponent implements OnInit {
         this.onDoctorChange(doctorId)
         let date = this.appointmentForm.get('appointmentDate')?.value;
         if (doctorId && date) {
-          this.checkDoctorAvailabilityAndLoadSlots(doctorId, date)
+          this.checkDoctorAvailabilityAndLoadSlots(doctorId, this.formatDate(date))
         }
       }
       // const date = this.appointmentForm.get('appointmentDate')?.value;
@@ -599,16 +600,19 @@ export class AppointmentFormComponent implements OnInit {
       // const doctorId = this.getDoctorIdByName(doctorName);
       console.log(this.doctorId)
       const doctorId = this.doctorId;
+      // date = date.toISOString().split('T')[0]
       if (doctorId !== undefined) {
         this.appointmentService.getBookedSlots(doctorId, date).subscribe(
           (bookedSlots: { time: string; complete: boolean }[]) => {
+            
             const nonCompleteBookedSlots = bookedSlots.filter(slot => !slot.complete).map(slot => slot.time);
             this.bookedSlots[doctorName] = { [date]: nonCompleteBookedSlots };
+            console.log(nonCompleteBookedSlots)
             console.log(this.bookedSlots, "booked")
           });
       }
       if (doctorId && date) {
-        this.checkDoctorAvailabilityAndLoadSlots(doctorId, date)
+        this.checkDoctorAvailabilityAndLoadSlots(doctorId, this.formatDate(date))
       }
     });
 

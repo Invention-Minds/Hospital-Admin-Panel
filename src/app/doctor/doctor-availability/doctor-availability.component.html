@@ -51,8 +51,8 @@
             <button class="unavailable-button" *ngIf="doctor.doctorType !=='Visiting Consultant'" (click)="openUnavailableModal(doctor)" [disabled]="!isTodayOrTomorrow(selectedDate) && doctor.id !== 14">Unavailable Slots</button>
           </div>
           <div class="extra-slots-buttons" *ngIf="((role === 'admin' || role === 'super_admin') && doctor.doctorType !== 'Visiting Consultant')">
-            <button type="button" (click)="addExtraSlotsBefore(doctor)">Add Extra Slots Before</button>
-            <button type="button" (click)="addExtraSlotsAfter(doctor)">Add Extra Slots After</button>
+            <button type="button" class="button-after" (click)="addExtraSlotsBefore(doctor)"><img src="/before.svg"></button>
+            <button type="button" class="button-after" (click)="addExtraSlotsAfter(doctor)"><img src="/after.svg"></button>
           </div>
         </div>
       </div>

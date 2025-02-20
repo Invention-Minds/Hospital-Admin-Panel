@@ -43,6 +43,7 @@ interface Appointment {
   isTransfer?: boolean;
   isCloseOPD?: boolean;
   isCloseOPDTime?: Date;
+  expanded?:any
 }
 
 @Component({
@@ -651,7 +652,8 @@ export class TodayConsultationsComponent {
     this.showCloseOpdPopup = false;
   }
 
-  startConsultation(appointment: Appointment): void {
+  startConsultation(appointment: any): void {
+    console.log(appointment)
     const ongoingConsultation = this.filteredAppointments.find(
       (appt) => appt.checkedOut === true && appt.endConsultationTime === null
     );
@@ -662,7 +664,9 @@ export class TodayConsultationsComponent {
       ongoingConsultation.endConsultationTime = new Date();
       ongoingConsultation.endConsultation = true // Set endConsultationTime to the current time // Set checkedOut to false for the previous patient
       // Update the appointment in the backend for the previous patient
-      this.appointmentService.updateAppointment(ongoingConsultation);
+      console.log(ongoingConsultation)
+      const { expanded, ...updatedAppointment } = ongoingConsultation;
+      this.appointmentService.updateAppointment(updatedAppointment);
 
       // console.log(`Updated endConsultationTime for patient ID: ${ongoingConsultation.id}`);
     }
@@ -678,6 +682,8 @@ export class TodayConsultationsComponent {
     if (appointment.postPond === true) {
       appointment.postPond = false
     }
+    const { expanded, ...updatedAppointment } = appointment;
+    this.appointmentService.updateAppointment(updatedAppointment)
 
 
     // console.log('Waiting time calculated:', appointment.waitingTime);
@@ -692,7 +698,7 @@ export class TodayConsultationsComponent {
     this.currentDepartmentId = this.doctor.departmentId;
     this.currentDepartmentName = this.doctor.departmentName;
     this.currentDoctorName = this.doctor.name
-    this.appointmentService.updateAppointment(appointment)
+
     this.eventService.emitConsultationStarted({
       doctorId: this.currentDoctorId,
       appointmentId: appointment.id!, // Add channelId to appointments in the backend
@@ -701,14 +707,16 @@ export class TodayConsultationsComponent {
     // console.log(this.currentDoctorId, appointment.id!)
   }
   finishConsultation(appointment: Appointment): void {
+    const { expanded, ...updatedAppointment } = appointment;
     appointment.endConsultation = true;
     appointment.endConsultationTime = new Date()
-    this.appointmentService.updateAppointment(appointment)
+    this.appointmentService.updateAppointment(updatedAppointment)
   }
   transfer(appointment: Appointment): void {
     // console.log(appointment)
+    const { expanded, ...updatedAppointment } = appointment;
     appointment.isTransfer = true;
-    this.appointmentService.updateAppointment(appointment)
+    this.appointmentService.updateAppointment(updatedAppointment)
     this.closeTransferPopup()
     this.messageService.add({
       severity: 'success',
@@ -773,7 +781,8 @@ export class TodayConsultationsComponent {
     appointment.checkedOut = false;
     appointment.checkedOutTime = undefined;
     appointment.postPond = true;
-    this.appointmentService.updateAppointment(appointment)
+    const { expanded, ...updatedAppointment } = appointment;
+    this.appointmentService.updateAppointment(updatedAppointment)
   }
 
   // Confirm and perform the Close OPD action

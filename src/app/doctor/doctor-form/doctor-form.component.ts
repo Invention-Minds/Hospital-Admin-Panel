@@ -518,7 +518,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
       const latestAvailability = allUpdatedAtNull
         ? this.doctor.availability // If all are null, consider the entire availability as "latest"
         : this.doctor.availability?.filter(avail => avail.updatedAt === latestTimestamp);
-      // console.log('Latest availability:', latestAvailability);
+      console.log('Latest availability:', latestAvailability);
 
       // Step 3: Reset availabilityDays and individualAvailability for all days
       this.availabilityDaysList.forEach(day => {

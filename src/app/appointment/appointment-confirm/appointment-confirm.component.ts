@@ -893,6 +893,21 @@ export class AppointmentConfirmComponent {
   // getFilteredAppointments() {
   //   return this.filteredAppointments;
   // }
+  handleCheckin(appointment: any): void {
+    if (appointment.checkedIn) {
+      this.messageService.add({ severity: 'warn', summary: 'Already Checked In', detail: 'You have already checked in for this appointment.' });
+      return;
+    }
+  
+    if (!this.isCheckInEnabled(appointment)) {
+      this.messageService.add({ severity: 'warn', summary: 'Check-in Not Allowed', detail: 'You can check-in only 30 minutes before or after the slot time.' });
+      return;
+    }
+  
+    // If within valid time, show check-in popup
+    this.showPopup = true;
+    this.checkinAppointment = appointment;
+  }
   isCheckInEnabled(appointment: any): boolean {
     const currentTime = new Date();
 
@@ -913,6 +928,8 @@ export class AppointmentConfirmComponent {
     // Enable if the current time is within the window
     return currentTime >= startWindow && currentTime <= endWindow;
   }
+
+
   // cancelExpiredAppointments() {
 
   //   const currentTime = new Date();

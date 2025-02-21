@@ -302,7 +302,12 @@ tbody tr:hover {
   align-items: center;
   gap: 10px;
 }
-
+.checked-in-status {
+  background-color: #0e2970; /* Color for 'checked-In' */
+  color: white;
+  padding: 5px 10px;
+  border-radius: 5px;
+}
 .close-button {
   display: flex;
   width: 150px;

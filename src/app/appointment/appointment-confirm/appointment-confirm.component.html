@@ -148,7 +148,13 @@
             </span>
           </td>
           <td>
-            <span class="status-badge">{{ appointment.status }}</span>
+            <span class="status-badge" [ngClass]="{ 
+        'confirmed-status': !appointment.checkedIn, 
+        'checked-in-status': appointment.checkedIn 
+      }">
+              {{ !appointment.checkedIn ? 'Confirmed' : 'Checked In' }}
+            </span>
+
           </td>
           <!-- <td class="button" >
             <button class="btn-action" [disabled]="appointment.checkedIn && !isCheckInEnabled(appointment)">
@@ -181,13 +187,15 @@
             </button>
             <!-- Cancel Button -->
             <button class="btn-action" [disabled]="appointment.checkedIn">
-              <img src="appt-cancel.png" alt="delete" class="action-icon" (click)="!appointment.checkedIn && cancelAppointment(appointment)"
-                pTooltip="Cancel" tooltipPosition="top">
+              <img src="appt-cancel.png" alt="delete" class="action-icon"
+                (click)="!appointment.checkedIn && cancelAppointment(appointment)" pTooltip="Cancel"
+                tooltipPosition="top">
             </button>
 
             <!-- Reschedule Button -->
             <button class="btn-action-reschedule" [disabled]="appointment.checkedIn"
-              (click)="!appointment.checkedIn && openAppointmentForm(appointment)" pTooltip="Reschedule" tooltipPosition="top">
+              (click)="!appointment.checkedIn && openAppointmentForm(appointment)" pTooltip="Reschedule"
+              tooltipPosition="top">
               <img src="icons/book.png" alt="Confirm">
             </button>
           </td>

@@ -309,7 +309,7 @@ export class DoctorAvailabilityComponent {
           const formattedUnavailableSlots = unavailableSlots.map(slot => slot.time) // Array of strings
           // console.log('unable',unavailableSlots,extraSlots,formattedUnavailableSlots);
           const formattedExtraSlots = extraSlots; // Array of strings
-          console.log(formattedExtraSlots)
+          // console.log(formattedExtraSlots)
 
           if (doctor.doctorType === 'Visiting Consultant') {
             // For Visiting Consultant, only show booked slots
@@ -414,7 +414,7 @@ export class DoctorAvailabilityComponent {
 
             const availableFrom = availableDay?.availableFrom ?? '08:00-20:00';
             doctor.availableFrom = availableFrom;
-            console.log(availableFrom, availableDay?.slotDuration)
+            // console.log(availableFrom, availableDay?.slotDuration)
             if (doctor.availableFrom === '08:00-20:00') {
               doctor.availableFrom = 'N/A';
             }
@@ -1085,7 +1085,7 @@ export class DoctorAvailabilityComponent {
     extraHoursBefore: any,
     extraHoursAfter: any
   ): Slot[] {
-    console.log('generating')
+    // console.log('generating')
     const timeRanges = availableFrom.split(',').map(range => range.trim());
     const slots: Slot[] = [];
     const currentTimeInMinutes = new Date().getHours() * 60 + new Date().getMinutes();
@@ -1398,7 +1398,7 @@ export class DoctorAvailabilityComponent {
           : this.convertTo12HourFormat(bookedStartTime);
         return formattedBookedStartTime === formattedSlotTime;
       });
-      console.log(bookedSlot)
+      // console.log(bookedSlot)
 
       if (!isUnavailableDay && !isPastDate) {
         status = isToday && current <= currentTimeInMinutes ? 'unavailable' : 'available';

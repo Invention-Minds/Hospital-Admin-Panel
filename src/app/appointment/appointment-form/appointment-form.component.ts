@@ -167,6 +167,7 @@ export class AppointmentFormComponent implements OnInit {
       // console.log("existing")
       // console.log(this.appointment)
       this.doctorId = this.appointment.doctorId;
+      this.onDoctorChange(this.doctorId)
       console.log(this.appointment.status)
       this.appointmentStatus = this.appointment.status
       setTimeout(() => {
@@ -205,18 +206,19 @@ export class AppointmentFormComponent implements OnInit {
       // })
       // this.availableSlots = this.appointmentForm.get('appointmentTime')?.value;
       // this.patchFormWithAppointment(this.appointment, appointmentDate);
-      const appointmentDate = this.appointment.date;
+      const appointmentDate = new Date(this.appointment.date);
+      console.log(appointmentDate)
       // console.log(new Date(this.appointment.date));
       this.oldDate = this.appointment.date;
       this.oldTime = this.appointment.time;
       // console.log("appointmentpatch"  ,this.appointment)
 
       this.patchFormWithAppointment(this.appointment!, appointmentDate);
-      this.checkSlotAvailability(this.appointment.doctorId, appointmentDate, this.appointment.time)
+      this.checkSlotAvailability(this.appointment.doctorId, this.formatDate(appointmentDate), this.appointment.time)
         .then(isAvailable => {
           if (isAvailable) {
             this.cdr.detectChanges();
-            this.checkDoctorAvailabilityAndLoadSlots(this.appointment!.doctorId, appointmentDate);
+            this.checkDoctorAvailabilityAndLoadSlots(this.appointment!.doctorId, this.formatDate(appointmentDate));
           } else {
             this.showAvailabilityMessage = true;
             this.availabilityMessage = '*The selected time slot is already booked. Please choose another time.';
@@ -228,7 +230,7 @@ export class AppointmentFormComponent implements OnInit {
             // console.log(this.appointmentForm.value)
 
             // Reload available slots for the given doctor and date
-            this.checkDoctorAvailabilityAndLoadSlots(this.appointment!.doctorId, appointmentDate);
+            this.checkDoctorAvailabilityAndLoadSlots(this.appointment!.doctorId, this.formatDate(appointmentDate));
           }
         })
         .catch(error => {
@@ -2164,8 +2166,9 @@ export class AppointmentFormComponent implements OnInit {
     this.disabledDays = Object.values(dayNameToIndex).filter(
       (index) => !availableDays.includes(index)
     );
+    
 
-    // console.log('Disabled Days (by index):', this.disabledDays);
+    console.log('Disabled Days (by index):', this.disabledDays);
   }
 
   onDoctorChange(doctorId: number): void {

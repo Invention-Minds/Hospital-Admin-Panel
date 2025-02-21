@@ -89,11 +89,11 @@ export class TvComponent implements OnInit, OnDestroy {
       this.updateDateTime();
     }, 60000);
     this.startAutoUpdate()
-    this.checkDoctorAvailability(); // Check patient delays
+    // this.checkDoctorAvailability(); // Check patient delays
   
-    setInterval(() => {
-      this.checkDoctorAvailability();
-    }, 300000); // Run every 5 minutes
+    // setInterval(() => {
+    //   this.checkDoctorAvailability();
+    // }, 300000); // Run every 5 minutes
 
     const today = new Date();
     const year = today.getFullYear();
@@ -150,168 +150,168 @@ export class TvComponent implements OnInit, OnDestroy {
   
   }
 
-  checkDoctorAvailability() {
-    const todayDate = new Date().toLocaleDateString('en-CA')
-    const notificationSent = new Map();
+  // checkDoctorAvailability() {
+  //   const todayDate = new Date().toLocaleDateString('en-CA')
+  //   const notificationSent = new Map();
   
-    this.doctorService.getAllDoctors().subscribe((doctors) => {
-      doctors.forEach((doctor: any) => {
-        if (!doctor || !doctor.availability || doctor.userId === null) {
-          return; // Skip if doctor data is missing or userId is null
-        }
-        const isUnavailableToday = (doctor.unavailableDates || []).some((unavailableDate: any) => {
-          const formattedUnavailableDate = new Date(unavailableDate.date).toISOString().split('T')[0];
-          return formattedUnavailableDate === todayDate;  // Compare with today's date
-        });
+  //   this.doctorService.getAllDoctors().subscribe((doctors) => {
+  //     doctors.forEach((doctor: any) => {
+  //       if (!doctor || !doctor.availability || doctor.userId === null) {
+  //         return; // Skip if doctor data is missing or userId is null
+  //       }
+  //       const isUnavailableToday = (doctor.unavailableDates || []).some((unavailableDate: any) => {
+  //         const formattedUnavailableDate = new Date(unavailableDate.date).toISOString().split('T')[0];
+  //         return formattedUnavailableDate === todayDate;  // Compare with today's date
+  //       });
   
-        if (isUnavailableToday) {
-          console.warn(`🚫 Dr. ${doctor.name} is unavailable today.`);
-          return; // Skip if doctor is unavailable today
-        }
-        const allUpdatedAtNull = doctor.availability.every((avail: any) => !avail.updatedAt);
+  //       if (isUnavailableToday) {
+  //         console.warn(`🚫 Dr. ${doctor.name} is unavailable today.`);
+  //         return; // Skip if doctor is unavailable today
+  //       }
+  //       const allUpdatedAtNull = doctor.availability.every((avail: any) => !avail.updatedAt);
 
-        // Step 2: Calculate the latest timestamp if any `updatedAt` is not null
-        let latestTimestamp: string | null = null;
-        if (!allUpdatedAtNull) {
-          const maxTimestamp = doctor.availability
-            .filter((avail: any) => avail.updatedAt) // Filter entries with non-null `updatedAt`
-            .map((avail: any) => new Date(avail.updatedAt).getTime()) // Convert to timestamp
-            .reduce((max: any, curr: any) => Math.max(max, curr), 0); // Find the max timestamp
+  //       // Step 2: Calculate the latest timestamp if any `updatedAt` is not null
+  //       let latestTimestamp: string | null = null;
+  //       if (!allUpdatedAtNull) {
+  //         const maxTimestamp = doctor.availability
+  //           .filter((avail: any) => avail.updatedAt) // Filter entries with non-null `updatedAt`
+  //           .map((avail: any) => new Date(avail.updatedAt).getTime()) // Convert to timestamp
+  //           .reduce((max: any, curr: any) => Math.max(max, curr), 0); // Find the max timestamp
 
-          // Convert the max timestamp back to an ISO string
-          latestTimestamp = new Date(maxTimestamp).toISOString();
-        }
+  //         // Convert the max timestamp back to an ISO string
+  //         latestTimestamp = new Date(maxTimestamp).toISOString();
+  //       }
 
-        // Step 3: Filter availability data based on the latest timestamp
-        const latestAvailability = allUpdatedAtNull
-          ? doctor.availability // If all are null, consider all availability as the latest
-          : doctor.availability.filter((avail: any) => avail.updatedAt === latestTimestamp);
-        // Step 1: Find today's availability
-        const today = new Date().toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
-        const todayAvailability = latestAvailability.find((avail: any) => avail.day.toLowerCase() === today);
+  //       // Step 3: Filter availability data based on the latest timestamp
+  //       const latestAvailability = allUpdatedAtNull
+  //         ? doctor.availability // If all are null, consider all availability as the latest
+  //         : doctor.availability.filter((avail: any) => avail.updatedAt === latestTimestamp);
+  //       // Step 1: Find today's availability
+  //       const today = new Date().toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
+  //       const todayAvailability = latestAvailability.find((avail: any) => avail.day.toLowerCase() === today);
   
-        if (!todayAvailability || !todayAvailability.availableFrom) {
-          console.warn(`🛑 Dr. ${doctor.name} is not available today.`);
-          return; // Skip if doctor is not available today
-        }
-        console.log(doctor)
+  //       if (!todayAvailability || !todayAvailability.availableFrom) {
+  //         console.warn(`🛑 Dr. ${doctor.name} is not available today.`);
+  //         return; // Skip if doctor is not available today
+  //       }
+  //       console.log(doctor)
   
-        // Step 2: Extract the first available time
-        const firstSlot = todayAvailability.availableFrom.split(',')[0].trim(); // Take first time slot
-        const firstAvailableTime = firstSlot.split('-')[0].trim(); // Extract first start time
-        const availableTime = this.parseTime(firstAvailableTime); // Convert to Date object
+  //       // Step 2: Extract the first available time
+  //       const firstSlot = todayAvailability.availableFrom.split(',')[0].trim(); // Take first time slot
+  //       const firstAvailableTime = firstSlot.split('-')[0].trim(); // Extract first start time
+  //       const availableTime = this.parseTime(firstAvailableTime); // Convert to Date object
 
-        this.appointmentService.getAppointmentsByDoctor(doctor.id).subscribe(
-          (appointments) => {
-            if (!appointments || !Array.isArray(appointments)) {
-              console.warn(`No valid appointments found for doctor ${doctor.id}`);
-              return;
-            }
+  //       this.appointmentService.getAppointmentsByDoctor(doctor.id).subscribe(
+  //         (appointments) => {
+  //           if (!appointments || !Array.isArray(appointments)) {
+  //             console.warn(`No valid appointments found for doctor ${doctor.id}`);
+  //             return;
+  //           }
     
-            const todayAppointments = appointments.filter(
-              (appointment: any) =>
-                appointment.checkedIn === true && 
-                appointment.date === todayDate && 
-                appointment.status === 'confirmed' 
-            );
+  //           const todayAppointments = appointments.filter(
+  //             (appointment: any) =>
+  //               appointment.checkedIn === true && 
+  //               appointment.date === todayDate && 
+  //               appointment.status === 'confirmed' 
+  //           );
     
-            if (todayAppointments.length > 0) {
-              this.authService.getUserDetails(doctor.userId).subscribe((user) => {
-                console.log('user')
-                if (user) {
-                  const { loggedInDate, loggedInTime } = user.user;
-                  console.log(user)
+  //           if (todayAppointments.length > 0) {
+  //             this.authService.getUserDetails(doctor.userId).subscribe((user) => {
+  //               console.log('user')
+  //               if (user) {
+  //                 const { loggedInDate, loggedInTime } = user.user;
+  //                 console.log(user)
                   
-                  if (loggedInDate === todayDate) {
-                    console.log(`✅ Dr. ${doctor.name} has already logged in today.`);
-                    return; // Doctor has logged in today, no need to send notification
-                  }
-                  const firstSlot = todayAvailability.availableFrom.split(',')[0].trim(); // Take first time slot
-                  const firstAvailableTime = firstSlot.split('-')[0].trim(); // Extract first start time
-                  const availableTime = this.parseTime(firstAvailableTime); // Convert to Date object
+  //                 if (loggedInDate === todayDate) {
+  //                   console.log(`✅ Dr. ${doctor.name} has already logged in today.`);
+  //                   return; // Doctor has logged in today, no need to send notification
+  //                 }
+  //                 const firstSlot = todayAvailability.availableFrom.split(',')[0].trim(); // Take first time slot
+  //                 const firstAvailableTime = firstSlot.split('-')[0].trim(); // Extract first start time
+  //                 const availableTime = this.parseTime(firstAvailableTime); // Convert to Date object
         
-                  // Step 4: Calculate notification trigger time (5 mins before shift)
-                  const notificationTime = new Date(availableTime.getTime() - 5 * 60000); // 5 minutes before availableTime
-                  const now = new Date();
-                  console.log(doctor.id)
-                  console.log(this.messageStopForDoctor)
-                  console.log(notificationTime, now)
+  //                 // Step 4: Calculate notification trigger time (5 mins before shift)
+  //                 const notificationTime = new Date(availableTime.getTime() - 5 * 60000); // 5 minutes before availableTime
+  //                 const now = new Date();
+  //                 console.log(doctor.id)
+  //                 console.log(this.messageStopForDoctor)
+  //                 console.log(notificationTime, now)
         
-                  if (now >= notificationTime && now < availableTime && !this.messageStopForDoctor.includes(doctor.id)) {
+  //                 if (now >= notificationTime && now < availableTime && !this.messageStopForDoctor.includes(doctor.id)) {
       
-                    console.warn(`🚨 Dr. ${doctor.name} has not logged in before their shift at ${firstAvailableTime}! Sending alert...`);
-                    notificationSent.set(doctor.userId, true);
+  //                   console.warn(`🚨 Dr. ${doctor.name} has not logged in before their shift at ${firstAvailableTime}! Sending alert...`);
+  //                   notificationSent.set(doctor.userId, true);
         
-                    // Step 5: Send one-time notification to the doctor
-                    // this.appointmentService
-                    //   .lateLogin({
-                    //     doctorPhoneNumber: doctor.phone_number,
-                    //     doctorName: doctor.name,
-                    //     noOfPatients: todayAppointments.length,
-                    //     doctorId: doctor.id
-                    //   })
-                    //   .subscribe(
-                    //     (response) => {
-                    //       console.log(`✅ Reminder sent to Dr. ${doctor.name}`);
-                    //     },
-                    //     (error) => {
-                    //       console.error(`❌ Error sending reminder to Dr. ${doctor.name}:`, error);
-                    //     }
-                    //   );
-                      this.messageStopForDoctor.push(doctor.id); 
-                  }
-                }
-              });
-              const firstAppointment = todayAppointments[0];
+  //                   // Step 5: Send one-time notification to the doctor
+  //                   // this.appointmentService
+  //                   //   .lateLogin({
+  //                   //     doctorPhoneNumber: doctor.phone_number,
+  //                   //     doctorName: doctor.name,
+  //                   //     noOfPatients: todayAppointments.length,
+  //                   //     doctorId: doctor.id
+  //                   //   })
+  //                   //   .subscribe(
+  //                   //     (response) => {
+  //                   //       console.log(`✅ Reminder sent to Dr. ${doctor.name}`);
+  //                   //     },
+  //                   //     (error) => {
+  //                   //       console.error(`❌ Error sending reminder to Dr. ${doctor.name}:`, error);
+  //                   //     }
+  //                   //   );
+  //                     this.messageStopForDoctor.push(doctor.id); 
+  //                 }
+  //               }
+  //             });
+  //             const firstAppointment = todayAppointments[0];
     
-              // Get doctor's available time
-            // Split by ',' in case of multiple slots
-            const firstSlot =todayAvailability.availableFrom.split(',')[0].trim(); // Take the first slot and remove extra spaces
-              const firstAvailableTime = firstSlot.split('-')[0].trim(); // Extract the first time before '-'
-              const availableTime = this.parseTime(firstAvailableTime);
+  //             // Get doctor's available time
+  //           // Split by ',' in case of multiple slots
+  //           const firstSlot =todayAvailability.availableFrom.split(',')[0].trim(); // Take the first slot and remove extra spaces
+  //             const firstAvailableTime = firstSlot.split('-')[0].trim(); // Extract the first time before '-'
+  //             const availableTime = this.parseTime(firstAvailableTime);
               
-              const thresholdTime = new Date(availableTime.getTime() + 10 * 60000); // +10 minutes
-              console.log(doctor.id)
-              const now = new Date();
-              console.log(now, thresholdTime, firstAppointment, this.adminAlertSentForDoctor)
+  //             const thresholdTime = new Date(availableTime.getTime() + 10 * 60000); // +10 minutes
+  //             console.log(doctor.id)
+  //             const now = new Date();
+  //             console.log(now, thresholdTime, firstAppointment, this.adminAlertSentForDoctor)
     
-              if (!firstAppointment.checkedOut && now > thresholdTime && !this.adminAlertSentForDoctor.includes(doctor.id) ) {
-                console.warn(`⏳ Alert: First checked-in patient for Dr. ${doctor.name} has exceeded waiting time!`);
+  //             if (!firstAppointment.checkedOut && now > thresholdTime && !this.adminAlertSentForDoctor.includes(doctor.id) ) {
+  //               console.warn(`⏳ Alert: First checked-in patient for Dr. ${doctor.name} has exceeded waiting time!`);
     
-                // Send message to admin
-                // const adminPhoneNumbers = ["919880544866", "916364833988"]
-                const adminPhoneNumbers = ["919342287945", "919342287945"]
-                // this.appointmentService
-                // .adminLateLoginDoctor({
-                //   adminPhoneNumber: adminPhoneNumbers,
-                //   doctorName: doctor.name,
-                //   noOfPatients: todayAppointments.length,
-                //   doctorId: doctor.id
-                // })
-                // .subscribe(
-                //   (response) => {
-                //     console.log(`✅ Reminder sent to Dr. ${doctor.name}`);
-                //   },
-                //   (error) => {
-                //     console.error(`❌ Error sending reminder to Dr. ${doctor.name}:`, error);
-                //   }
-                // );
-                // this.adminAlertSentForDoctor.push(doctor.id)
-              }
-            }
-          },
-          (error) => {
-            console.error(`Error fetching appointments for doctor ${doctor.doctorId}:`, error);
-          }
-        );
-        // Step 3: Check if the doctor has logged in today
+  //               // Send message to admin
+  //               // const adminPhoneNumbers = ["919880544866", "916364833988"]
+  //               const adminPhoneNumbers = ["919342287945", "919342287945"]
+  //               // this.appointmentService
+  //               // .adminLateLoginDoctor({
+  //               //   adminPhoneNumber: adminPhoneNumbers,
+  //               //   doctorName: doctor.name,
+  //               //   noOfPatients: todayAppointments.length,
+  //               //   doctorId: doctor.id
+  //               // })
+  //               // .subscribe(
+  //               //   (response) => {
+  //               //     console.log(`✅ Reminder sent to Dr. ${doctor.name}`);
+  //               //   },
+  //               //   (error) => {
+  //               //     console.error(`❌ Error sending reminder to Dr. ${doctor.name}:`, error);
+  //               //   }
+  //               // );
+  //               // this.adminAlertSentForDoctor.push(doctor.id)
+  //             }
+  //           }
+  //         },
+  //         (error) => {
+  //           console.error(`Error fetching appointments for doctor ${doctor.doctorId}:`, error);
+  //         }
+  //       );
+  //       // Step 3: Check if the doctor has logged in today
 
 
-      });
-    });
+  //     });
+  //   });
   
 
-  }
+  // }
   
 
   // checkDoctorLogin() {
@@ -606,7 +606,6 @@ export class TvComponent implements OnInit, OnDestroy {
 
 
 
-
   loadAppointmentsForDoctors() {
     console.log('Loading appointments for doctors...');
     const todayDate = new Date().toLocaleDateString('en-CA')// Format as YYYY-MM-DD
@@ -845,116 +844,116 @@ export class TvComponent implements OnInit, OnDestroy {
     };
     let nextAppointmentFound = false;
 
-    // Step 1: Filter all pending appointments
-    const pendingAppointments = this.checkedInAppointments.filter(
-      (appt: any) =>  appt.checkedIn === true
-    );
+    // // Step 1: Filter all pending appointments
+    // const pendingAppointments = this.checkedInAppointments.filter(
+    //   (appt: any) =>  appt.checkedIn === true
+    // );
     
-    // Step 2: Group pending appointments by doctor
-    const appointmentsByDoctor = pendingAppointments.reduce((acc: any, appointment: any) => {
-      const doctorId = appointment.doctorId;
+    // // Step 2: Group pending appointments by doctor
+    // const appointmentsByDoctor = pendingAppointments.reduce((acc: any, appointment: any) => {
+    //   const doctorId = appointment.doctorId;
     
-      if (!acc[doctorId]) {
-        acc[doctorId] = {
-          doctorName: appointment.doctorName,
-          doctorPhoneNumber: appointment.doctor.phone_number,
-          appointments: [],
-          slotDuration: appointment.doctor.slotDuration
-        };
-      }
+    //   if (!acc[doctorId]) {
+    //     acc[doctorId] = {
+    //       doctorName: appointment.doctorName,
+    //       doctorPhoneNumber: appointment.doctor.phone_number,
+    //       appointments: [],
+    //       slotDuration: appointment.doctor.slotDuration
+    //     };
+    //   }
     
-      acc[doctorId].appointments.push(appointment);
-      return acc;
-    }, {});
-    console.log(appointmentsByDoctor)
+    //   acc[doctorId].appointments.push(appointment);
+    //   return acc;
+    // }, {});
+    // console.log(appointmentsByDoctor)
     
-    // Step 3: Loop through each doctor's appointments
-    Object.values(appointmentsByDoctor).forEach((doctorData: any) => {
-      const { doctorName, doctorPhoneNumber, appointments, slotDuration } = doctorData;
-      console.log(appointments)
-      const averageWaitingTime = slotDuration;
+    // // Step 3: Loop through each doctor's appointments
+    // Object.values(appointmentsByDoctor).forEach((doctorData: any) => {
+    //   const { doctorName, doctorPhoneNumber, appointments, slotDuration } = doctorData;
+    //   console.log(appointments)
+    //   const averageWaitingTime = slotDuration;
     
-      // Find the currently checked-in patient who hasn't checked out yet
-      const patientInAppointment = appointments.find(
-        (appt: any) => appt.checkedOut === true && appt.endConsultationTime === null
-      );
-      const completeAppointment = pendingAppointments.filter(
-        (appt:any) => appt.checkedOut === true
-      )
+    //   // Find the currently checked-in patient who hasn't checked out yet
+    //   const patientInAppointment = appointments.find(
+    //     (appt: any) => appt.checkedOut === true && appt.endConsultationTime === null
+    //   );
+    //   const completeAppointment = pendingAppointments.filter(
+    //     (appt:any) => appt.checkedOut === true
+    //   )
     
-      console.log(patientInAppointment)
-      if (patientInAppointment) {
-        setTimeout(() => {
-          const scheduledTime = parseTimeToDate(patientInAppointment.scheduledTime);
+    //   console.log(patientInAppointment)
+    //   if (patientInAppointment) {
+    //     setTimeout(() => {
+    //       const scheduledTime = parseTimeToDate(patientInAppointment.scheduledTime);
     
-          if (scheduledTime) {
-            const elapsedTime = new Date().getTime() - scheduledTime.getTime();
-            const elapsedMinutes = Math.floor(elapsedTime / 60000);
-            console.log(scheduledTime, elapsedMinutes, elapsedTime)
-            const extraThreshold = slotDuration + 10; // Slot duration + 10 mins
-            const waitingMultiplier = Math.floor((elapsedMinutes - extraThreshold) / 5) + 1;
+    //       if (scheduledTime) {
+    //         const elapsedTime = new Date().getTime() - scheduledTime.getTime();
+    //         const elapsedMinutes = Math.floor(elapsedTime / 60000);
+    //         console.log(scheduledTime, elapsedMinutes, elapsedTime)
+    //         const extraThreshold = slotDuration + 10; // Slot duration + 10 mins
+    //         const waitingMultiplier = Math.floor((elapsedMinutes - extraThreshold) / 5) + 1;
 
-            if (elapsedMinutes >= extraThreshold && (elapsedMinutes - extraThreshold) % 5 === 0) {
-              console.warn(
-                `⏳ Alert: Patient ${patientInAppointment.patientName} under Dr. ${doctorName} has exceeded waiting time by ${
-                  elapsedMinutes - averageWaitingTime
-                } mins!`
-              );
+    //         if (elapsedMinutes >= extraThreshold && (elapsedMinutes - extraThreshold) % 5 === 0) {
+    //           console.warn(
+    //             `⏳ Alert: Patient ${patientInAppointment.patientName} under Dr. ${doctorName} has exceeded waiting time by ${
+    //               elapsedMinutes - averageWaitingTime
+    //             } mins!`
+    //           );
               
-              // const waitingMultiplier = Math.ceil((elapsedMinutes - extraThreshold) / slotDuration);
-              console.log(`Waiting Multiplier: ${waitingMultiplier}`);
-              // Step 4: Find the next appointment for the doctor
-              const nextAppointment = this.checkedInAppointments.find(
-                (appt: any) => appt.status === "Next" && appt.doctorId === patientInAppointment.doctorId
-              );
-              console.log(nextAppointment)
+    //           // const waitingMultiplier = Math.ceil((elapsedMinutes - extraThreshold) / slotDuration);
+    //           console.log(`Waiting Multiplier: ${waitingMultiplier}`);
+    //           // Step 4: Find the next appointment for the doctor
+    //           const nextAppointment = this.checkedInAppointments.find(
+    //             (appt: any) => appt.status === "Next" && appt.doctorId === patientInAppointment.doctorId
+    //           );
+    //           console.log(nextAppointment)
     
-              if (nextAppointment) {
-                nextAppointment.extraWaitingTime = elapsedMinutes - extraThreshold;
-                const extraWaitingTime = nextAppointment.extraWaitingTime;
+    //           if (nextAppointment) {
+    //             nextAppointment.extraWaitingTime = elapsedMinutes - extraThreshold;
+    //             const extraWaitingTime = nextAppointment.extraWaitingTime;
     
-                // Step 5: Update extra waiting time in DB
-                this.appointmentService.updateExtraWaitingTime(nextAppointment.id, extraWaitingTime).subscribe(
-                  (response: any) => {
-                    console.log("Waiting time updated successfully", response);
-                  },
-                  (error) => {
-                    console.error("Error updating waiting time:", error);
-                  }
-                );
+    //             // Step 5: Update extra waiting time in DB
+    //             this.appointmentService.updateExtraWaitingTime(nextAppointment.id, extraWaitingTime).subscribe(
+    //               (response: any) => {
+    //                 console.log("Waiting time updated successfully", response);
+    //               },
+    //               (error) => {
+    //                 console.error("Error updating waiting time:", error);
+    //               }
+    //             );
     
-                // Step 6: Send WhatsApp notifications to Admins & Doctor
-                // const adminPhoneNumbers = ["919880544866 ", "916364833988", "919995703633 "]; // Admin List
-                const adminPhoneNumbers = ['919342287945', '919342287945', '919342287945']
-                let noOfPatients = pendingAppointments.length - completeAppointment.length; // Pending appointments for this doctor
-                noOfPatients = Math.max(noOfPatients, 0);
-                const adminsToSend = Array.isArray(adminPhoneNumbers) 
-                ? adminPhoneNumbers.slice(0, waitingMultiplier) 
-                : [];
+    //             // Step 6: Send WhatsApp notifications to Admins & Doctor
+    //             // const adminPhoneNumbers = ["919880544866 ", "916364833988", "919995703633 "]; // Admin List
+    //             const adminPhoneNumbers = ['919342287945', '919342287945', '919342287945']
+    //             let noOfPatients = pendingAppointments.length - completeAppointment.length; // Pending appointments for this doctor
+    //             noOfPatients = Math.max(noOfPatients, 0);
+    //             const adminsToSend = Array.isArray(adminPhoneNumbers) 
+    //             ? adminPhoneNumbers.slice(0, waitingMultiplier) 
+    //             : [];
 
-                // this.appointmentService
-                //   .sendWaitingTimeAlert({
-                //     adminPhoneNumbers: adminsToSend,
-                //     doctorPhoneNumber: doctorPhoneNumber,
-                //     noOfPatients: noOfPatients,
-                //     doctorName: doctorName,
-                //     waitingMultiplier,
-                //   })
-                //   .subscribe(
-                //     (response) => {
-                //       console.log(`✅ WhatsApp message sent to Dr. ${doctorName}`, response);
-                //     },
-                //     (error) => {
-                //       console.error(`❌ Error sending message to Dr. ${doctorName}:`, error);
-                //     }
-                //   );
+    //             // this.appointmentService
+    //             //   .sendWaitingTimeAlert({
+    //             //     adminPhoneNumbers: adminsToSend,
+    //             //     doctorPhoneNumber: doctorPhoneNumber,
+    //             //     noOfPatients: noOfPatients,
+    //             //     doctorName: doctorName,
+    //             //     waitingMultiplier,
+    //             //   })
+    //             //   .subscribe(
+    //             //     (response) => {
+    //             //       console.log(`✅ WhatsApp message sent to Dr. ${doctorName}`, response);
+    //             //     },
+    //             //     (error) => {
+    //             //       console.error(`❌ Error sending message to Dr. ${doctorName}:`, error);
+    //             //     }
+    //             //   );
                 
-              }
-            }
-          }
-        }, 1000);
-      }
-    });
+    //           }
+    //         }
+    //       }
+    //     }, 1000);
+    //   }
+    // });
     
 
     appointments.forEach((appointment: any) => {

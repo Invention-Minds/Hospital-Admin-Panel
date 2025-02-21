@@ -1052,6 +1052,7 @@ export class AppointmentConfirmComponent {
 
 
   cancelAppointment(appointment: Appointment) {
+    console.log('cancel')
     const cancelled: Appointment = {
       ...appointment,
       status: 'cancelled',

@@ -2,7 +2,7 @@
     <div class="close-opd" (click)="openCloseOpdPopup()">
         <img src="/close-opd.svg"> Close OPD
     </div>
-    <button class="end-consul" [disabled]="completedAppointments.length>=1" (click)="endConsultation()" >
+    <button class="end-consul" [disabled]="isEndConsultation" (click)="completedAppointments.length < 1 && endConsultation()" >
         <img src="/end.svg" > End Consultation
     </button>
 </div>
@@ -45,7 +45,7 @@
               <button class="start" [disabled]="appointment.checkedOut === true" (click)="appointment.checkedOut === false && startConsultation(appointment)">
                 <img class="image" src="/start.svg">Start 
               </button>
-              <button class="finish" [disabled]="appointment.endConsultationTime !== null " (click)="appointment.endConsultationTime === null  && finishConsultation(appointment)">
+              <button class="finish" [disabled]="appointment.endConsultationTime !== null " (click)="appointment.checkedOut === true && appointment.endConsultationTime === null  && finishConsultation(appointment)">
                 <img class="image" src="/finish.svg">Finish
               </button>
               <button class="postPond" (click)="postPondAppointment(appointment)">
@@ -222,11 +222,11 @@
           <label class="estimation-type-label">Estimation Status:</label>
           <div class="radio-buttons">
             <label>
-              <input type="radio" name="estimationStatus" [(ngModel)]="estimationStatus" value="planned" />
+              <input type="radio" name="estimationStatus" (ngModelChange)="chooseDate()" [(ngModel)]="estimationStatus" value="planned" />
               Planned
             </label>
             <label>
-              <input type="radio" name="estimationStatus" [(ngModel)]="estimationStatus" value="immediate" />
+              <input type="radio" name="estimationStatus" (ngModelChange)="todayDate()" [(ngModel)]="estimationStatus" value="immediate" />
               Immediate
             </label>
           </div>
@@ -255,7 +255,7 @@
           (focus)="showEstimationSuggestions = true"
           class="custom-input"
         />
-        <label for="estimationText" class="custom-label">Estimation Name*</label>
+        <label for="estimationText" class="custom-label">Procedure Name*</label>
         <div *ngIf="surgeryPackage === 'multiple surgeries'" class="estimation-note">
           Note: Estimated Procedures:* (Eg: Surgery 1, Surgery 2, Surgery 3)
         </div>
@@ -283,7 +283,7 @@
             [(ngModel)]="estimationPreferedDate"
             required
           />
-          <label for="estimationDate" class="custom-label">Estimated Date*</label>
+          <label for="estimationDate" class="custom-label">Prefer Date*</label>
         </div>
         <div class="stay-container">
           <div class="input-container">

@@ -65,8 +65,8 @@
   <span>Report</span> 
   </div> 
 </a>
-<a [routerLink]="['Manager','Management','Senior Manager'].includes(adminType) || role === 'super_admin' ? '/estimation': null" routerLinkActive="active" class="icon-wrapper" *ngIf="['Manager','Management','Senior Manager'].includes(adminType) ||  role === 'super_admin'"  >
-  <div class="icon-content" *ngIf="['Manager','Management','Senior Manager'].includes(adminType) ||  role === 'super_admin'">
+<a [routerLink]="['Manager','Management','Senior Manager','IP Billing Manager'].includes(adminType) || role === 'super_admin' ? '/estimation': null" routerLinkActive="active" class="icon-wrapper" *ngIf="['Manager','Management','Senior Manager'].includes(adminType) ||  role === 'super_admin'"  >
+  <div class="icon-content" *ngIf="['Manager','Management','Senior Manager','IP Billing Manager' ].includes(adminType) ||  role === 'super_admin'">
     <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 24 24" class="icon">
       <rect width="24" height="24" fill="none" />
       <g fill="#000" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" color="#000">
@@ -91,7 +91,7 @@
   <span>Estimation</span>
   </div>
 </a>
-<a [routerLink]="['Manager','Management','Senior Manager'].includes(adminType) ? '/tv-control' : null" routerLinkActive="active" class="icon-wrapper" *ngIf="['Manager','Management','Senior Manager'].includes(adminType)" >
+<a [routerLink]="['Manager','Management','Senior Manager'].includes(adminType) || role === 'super_admin' ? '/tv-control' : null" routerLinkActive="active" class="icon-wrapper" *ngIf="['Manager','Management','Senior Manager'].includes(adminType) || role === 'super_admin'" >
   <div *ngIf="['super_admin', 'admin'].includes(role)" class="icon-content">
     <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
       <path fill="currentColor" fill-rule="evenodd" d="M3.2 5.2v12.6h17.6V5.2zM2 5a1 1 0 0 1 1-1h18a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1zm6 15.9c0-.331.266-.6.601-.6H15.4c.332 0 .601.278.601.6v.6H8zm3.665-12.004H9.81V15H8.716V8.896H6.558v-.942h5.958l1.919 5.816h.029l1.924-5.816h1.167L15.04 15h-1.196z" />

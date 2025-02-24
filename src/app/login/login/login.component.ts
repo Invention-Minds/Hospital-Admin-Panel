@@ -72,22 +72,32 @@ export class LoginComponent implements OnInit {
         console.log('Login successful:', response);
         // response = response;
         // Navigate to the desired route upon successful login
-        if (response.user.subAdminType === 'Estimator'){
-          console.log(this.subAdminType)
-          this.router.navigate(['/estimation'])
-        }else if(response.user.subAdminType === 'MHC Coordinator'){
-          this.router.navigate(['/health-checkup'])
-        }else if(response.user.role === 'admin'){
-          this.router.navigate(['/analytics']);
+        if (response.user.employeeId) {
+          const match = response.user.employeeId.match(/C(\d+)/i); // Case-insensitive match for "C" followed by a number
+          if (match && match[1]) {
+            const channelNumber = match[1]; // Extract the number part
+            console.log(`🔀 Redirecting to /channel/${channelNumber}`);
+            
+            this.router.navigate([`/channel/${channelNumber}`]); // Navigate to the appropriate channel
+          }
+          else if (response.user.subAdminType === 'Estimator'){
+            console.log(this.subAdminType)
+            this.router.navigate(['/estimation'])
+          }else if(response.user.subAdminType === 'MHC Coordinator'){
+            this.router.navigate(['/health-checkup'])
+          }else if(response.user.role === 'admin'){
+            this.router.navigate(['/analytics']);
+          }
+          else if(response.user.role!== 'doctor'){
+            console.log('role', response.user.role)
+            this.router.navigate(['/dashboard']);
+          }
+          else if(response.user.role === 'doctor'){
+            console.log('doctor',response.user.role)
+            this.router.navigate(['/doctor-appointments']);
+          }
         }
-        else if(response.user.role!== 'doctor'){
-          console.log('role', response.user.role)
-          this.router.navigate(['/dashboard']);
-        }
-        else if(response.user.role === 'doctor'){
-          console.log('doctor',response.user.role)
-          this.router.navigate(['/doctor-appointments']);
-        }
+       
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Welcome!' });
       },
       (error) => {

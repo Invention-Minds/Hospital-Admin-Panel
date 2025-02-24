@@ -500,7 +500,7 @@ export class AppointmentCancelComponent {
   }
   downloadFilteredData(): void {
     // console.log('Downloading completed appointments data...');
-    if (this.filteredList && this.filteredList.length > 0) {
+    if (this.filteredServices && this.filteredServices.length > 0) {
       // console.log('Downloading filtered data...');
 
       // const selectedFields = this.filteredList.map((appointment: Appointment) => ({
@@ -518,7 +518,7 @@ export class AppointmentCancelComponent {
       //   'Status': appointment.status,
       //   'Appointment Handled By': appointment.user!.username
       // }));
-      const selectedFields = this.filteredList.map((appointment: Appointment) => {
+      const selectedFields = this.filteredServices.map((appointment: Appointment) => {
         if(appointment.created_at){
         const createdAt = new Date(appointment?.created_at);
         const indianTime = moment.tz(createdAt, "America/New_York").tz("Asia/Kolkata");

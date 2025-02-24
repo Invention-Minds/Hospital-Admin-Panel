@@ -394,7 +394,7 @@ export class AppointmentFormComponent implements OnInit {
 
     // Filter PRN suggestions
     this.filteredPRNs = this.patients.filter(patient =>
-      String(patient.prn).startsWith(String(input)) // Convert to string before calling startsWith()
+      String(patient.prn).trim().includes(String(input)) // Convert to string before calling startsWith()
     );
     console.log(this.filteredPRNs)
 
@@ -1262,9 +1262,21 @@ export class AppointmentFormComponent implements OnInit {
   saveToLocalStorage(): void {
     localStorage.setItem('appointments', JSON.stringify(this.completeAppointment));
   }
+  getInvalidControls(form: any) {
+    const invalidControls = [];
+    for (const name in form.controls) {
+      if (form.controls[name].invalid) {
+        invalidControls.push(name);
+      }
+    }
+    return invalidControls;
+  }
   confirm() {
+
+    this.getInvalidControls(this.appointmentForm);
     if (!this.appointmentForm.valid) {
       this.messageService.add({ severity: 'warn', summary: 'Warn', detail: 'Some fields are not filled' });
+      return;
     }
     // console.log(this.appointmentForm.value)
     if (this.appointmentForm.value.appointmentStatus === 'Cancel') {

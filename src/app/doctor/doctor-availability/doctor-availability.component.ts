@@ -397,7 +397,7 @@ export class DoctorAvailabilityComponent {
               ? doctor.availability // If all are null, consider the entire availability as "latest"
               : doctor.availability?.filter(avail => avail.updatedAt === latestTimestamp);
             // console.log('Doctors available days', doctor.availabilityDays);
-            const dayOfWeek = new Date().toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
+            const dayOfWeek = this.selectedDate.toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
             // console.log(dayOfWeek)
             // const availableDay = latestAvailability?.find(avail => avail.day.toLowerCase() === dayOfWeek);
             // const availableDay = latestAvailability?.find(avail => avail.day.toLowerCase() === dayOfWeek);
@@ -431,6 +431,7 @@ export class DoctorAvailabilityComponent {
               extraHoursAfter,
 
             );
+            // console.log(generatedSlots)
 
             formattedExtraSlots.forEach(extraSlot => {
               const isAlreadyBooked = bookedSlots.some(bookedSlot => bookedSlot.time === extraSlot);

@@ -23,6 +23,7 @@ import { AnalyticsRootComponent } from './analytics/analytics-root/analytics-roo
 
 const routes: Routes = [
   { path: 'dashboard', component: DashboardOverviewComponent, canActivate:[authGuard] },
+  {path: 'maintenance', component: DashboardOverviewComponent, canActivate:[authGuard] },
   // { path:'',component:DashboardOverviewComponent},
   {path:'appointments', component:AppointmentOverviewComponent,canActivate:[authGuard]},
   { path: 'appointment-request', component: AppointmentRequestComponent,canActivate:[authGuard] },

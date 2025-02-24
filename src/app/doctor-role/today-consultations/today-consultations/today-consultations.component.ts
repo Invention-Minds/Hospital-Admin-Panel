@@ -4,6 +4,7 @@ import { DoctorServiceService } from '../../../services/doctor-details/doctor-se
 import { EstimationService } from '../../../services/estimation/estimation.service';
 import { EventService } from '../../../services/event.service';
 import { MessageService } from 'primeng/api';
+import NoSleep from "nosleep.js";
 import { ChangeDetectorRef } from '@angular/core';
 import { Doctor } from '../../../models/doctor.model';
 import { ChannelService } from '../../../services/channel/channel.service';
@@ -43,8 +44,8 @@ interface Appointment {
   isTransfer?: boolean;
   isCloseOPD?: boolean;
   isCloseOPDTime?: Date;
-  expanded?:any;
-  extraWaitingTime?:any;
+  expanded?: any;
+  extraWaitingTime?: any;
 }
 
 @Component({
@@ -117,6 +118,7 @@ export class TodayConsultationsComponent {
   surgeryPackage: string = 'single surgery';
   intervalId: any;
   isMonitoringActive: boolean = false;
+  isEndConsultation: boolean = false;
 
 
 
@@ -133,12 +135,13 @@ export class TodayConsultationsComponent {
   // Method to handle sorting by a specific column
   ngOnInit() {
     this.checkScreenSize();
+
     const today = new Date();
     const year = today.getFullYear();
     const month = (today.getMonth() + 1).toString().padStart(2, '0');
     const day = today.getDate().toString().padStart(2, '0');
     this.today = `${year}-${month}-${day}`;
-    
+
     // console.log('Setting isLoading to true');
     this.isLoading = true; // Start loading indicator
     this.userId = localStorage.getItem('userid')
@@ -146,7 +149,7 @@ export class TodayConsultationsComponent {
       this.showLeaveRequestPopup = true; // Open the leave request popup
     });
     this.loadDoctorData()
-   
+
     // this.doctorService.getDoctorByUserId(this.userId).subscribe(
     //   (response) =>{
     //     this.doctor = response;
@@ -155,11 +158,11 @@ export class TodayConsultationsComponent {
     //     console.log(this.doctor)
     //   }
     // )
-    
+
 
     // Fetch appointments
     // this.appointmentService.fetchAppointments();
-    
+
     // setInterval(() => {
     //   this.fetchAppointments();
     //   console.log('interval')
@@ -168,17 +171,17 @@ export class TodayConsultationsComponent {
     // Subscribe to confirmed appointments
     this.eventSource = new EventSource(`${environment.apiUrl}/appointments/updates`);
     this.eventSource.addEventListener('loadDoctor', (event: any) => {
-    const data = JSON.parse(event.data);
-    console.log('Reloading appointments for doctor ID:', data);
+      const data = JSON.parse(event.data);
+      console.log('Reloading appointments for doctor ID:', data);
 
-    // Refresh only the affected doctor's appointments
-    if (data === this.doctorId) {
-      console.log('🔄 Reloading appointments for Doctor ID:', data);
-      this.fetchAppointments(this.doctorId);
-    }
-    // this.checkWaitingTimes()
-    // this.monitorWaitingTimes()
-  });
+      // Refresh only the affected doctor's appointments
+      if (data === this.doctorId) {
+        console.log('🔄 Reloading appointments for Doctor ID:', data);
+        this.fetchAppointments(this.doctorId);
+      }
+      // this.checkWaitingTimes()
+      // this.monitorWaitingTimes()
+    });
 
   }
   loadDoctorData() {
@@ -187,33 +190,33 @@ export class TodayConsultationsComponent {
         this.doctor = response;
         this.doctorId = response.id;
         this.fetchAppointments(this.doctorId); // Fetch only this doctor's appointments
-        console.log(this.isMonitoringActive)
-        if (!this.isMonitoringActive) {
-          this.monitorWaitingTimes();
-        }// Start monitoring only once for this doctor
+        // console.log(this.isMonitoringActive)
+        // if (!this.isMonitoringActive) {
+        //   this.monitorWaitingTimes();
+        // }// Start monitoring only once for this doctor
       }
     );
   }
- // Store interval reference
+  // Store interval reference
 
- monitorWaitingTimes() {
-  if (this.isMonitoringActive) {
-    console.log("⏳ Waiting time monitoring already running. Skipping...");
-    return;
-  }
+  // monitorWaitingTimes() {
+  //   if (this.isMonitoringActive) {
+  //     console.log("⏳ Waiting time monitoring already running. Skipping...");
+  //     return;
+  //   }
 
-  console.log("✅ Starting waiting time monitoring...");
-  this.isMonitoringActive = true; // Set flag to true to prevent duplicates
-  console.log(this.doctorId)
+  //   console.log("✅ Starting waiting time monitoring...");
+  //   this.isMonitoringActive = true; // Set flag to true to prevent duplicates
+  //   console.log(this.doctorId)
 
-  this.intervalId = setInterval(() => {
-    if (this.doctorId) {
-      console.log(`⏳ Checking waiting times for Doctor ID: ${this.doctorId}`);
-      this.checkWaitingTimes();
-    }
-  }, 60000);
-}
-  
+  //   this.intervalId = setInterval(() => {
+  //     if (this.doctorId) {
+  //       console.log(`⏳ Checking waiting times for Doctor ID: ${this.doctorId}`);
+  //       this.checkWaitingTimes();
+  //     }
+  //   }, 60000);
+  // }
+
   ngOnDestroy() {
     if (this.intervalId) {
       clearInterval(this.intervalId);
@@ -221,7 +224,7 @@ export class TodayConsultationsComponent {
     }
     this.isMonitoringActive = false;
   }
-  
+
   toggleCard(index: number) {
     this.filteredAppointments[index].expanded = !this.filteredAppointments[index].expanded;
   }
@@ -248,8 +251,8 @@ export class TodayConsultationsComponent {
         this.filteredAppointments = this.confirmedAppointments;
         // console.log(this.doctor)
         this.completedAppointments = this.filteredAppointments.filter(appointment => !appointment.checkedOut || (!appointment.checkedOut && !appointment.isCloseOPD))
-      // this.monitorWaitingTimes()
-      // this.checkWaitingTimes()
+        // this.monitorWaitingTimes()
+        // this.checkWaitingTimes()
         // console.log(this.completedAppointments, 'complete')
         this.filteredAppointments.sort((a, b) => {
           const timeA = this.parseTimeToMinutes(a.time);
@@ -263,9 +266,9 @@ export class TodayConsultationsComponent {
       (error) => {
         console.error(`Error fetching appointments for doctor ${doctorId!}:`, error);
         this.isLoading = false
-         // Handle error gracefully by assigning an empty array
+        // Handle error gracefully by assigning an empty array
       }
-      
+
     );
   }
 
@@ -352,6 +355,12 @@ export class TodayConsultationsComponent {
     }
 
 
+  }
+  todayDate(){
+    this.estimationPreferedDate = this.formatDate(new Date())
+  }
+  chooseDate(){
+    this.estimationPreferedDate = ''
   }
   // loadSugesstionFunction(){
   //   this.doctor.filter((doc) => {
@@ -525,7 +534,7 @@ export class TodayConsultationsComponent {
   }
 
   calculateWardStay(): void {
-  
+
 
     // Ensure valid input values
     if (this.totalStay >= 0 && this.icu >= 0) {
@@ -626,8 +635,8 @@ export class TodayConsultationsComponent {
       surgeryTime: this.surgeryTime,
       estimationStatus: this.estimationStatus,
       totalDaysStay: Number(this.totalStay),
-      icuStay:Number(this.icu),
-      wardStay:Number(this.ward),
+      icuStay: Number(this.icu),
+      wardStay: Number(this.ward),
       surgeryPackage: this.surgeryPackage
     };
 
@@ -688,15 +697,15 @@ export class TodayConsultationsComponent {
         //   appointment.checkedOut = false; // Reset checked-in status
         // });
         console.log(this.filteredAppointments)
-        this.closeOpdAppointments = this.filteredAppointments.filter(appointment => 
-          appointment.checkedOut === false 
+        this.closeOpdAppointments = this.filteredAppointments.filter(appointment =>
+          appointment.checkedOut === false
         );
-        
+
         console.log(this.closeOpdAppointments)
         this.showCloseOpdPopup = true;
       }
       // console.log('Appointments to close:', this.filteredAppointments);
-    }else {
+    } else {
       this.messageService.add({ severity: 'info', summary: 'Info', detail: 'No Appointments are Scheduled' });
     }
   }
@@ -762,7 +771,7 @@ export class TodayConsultationsComponent {
   }
   finishConsultation(appointment: Appointment): void {
     console.log('finish')
- 
+
     appointment.endConsultation = true;
     appointment.endConsultationTime = new Date()
     const { expanded, ...updatedAppointment } = appointment;
@@ -770,7 +779,7 @@ export class TodayConsultationsComponent {
   }
   transfer(appointment: Appointment): void {
     // console.log(appointment)
-    
+
     appointment.isTransfer = true;
     const { expanded, ...updatedAppointment } = appointment;
     this.appointmentService.updateAppointment(updatedAppointment)
@@ -789,6 +798,8 @@ export class TodayConsultationsComponent {
     this.showTransferAppointment = false;
   }
   endConsultation() {
+    console.log('end')
+    this.isEndConsultation = true;
     const postPondAppointment = this.filteredAppointments.filter(appointment => {
       appointment.postPond === true
     })
@@ -805,8 +816,10 @@ export class TodayConsultationsComponent {
       this.currentDepartmentId = this.doctor.departmentId;
       this.currentDepartmentName = this.doctor.departmentName
       this.currentDoctorName = this.doctor.name
+      this.currentDoctorId = this.doctorId
       this.channelService.getChannelsByDoctor(this.currentDoctorId).subscribe({
         next: (response) => {
+          console.log(response)
           const channelId = response.channelId;
           const doctorData = {
             channelId: channelId,
@@ -815,6 +828,11 @@ export class TodayConsultationsComponent {
           this.channelService.removeDoctorFromChannel(doctorData).subscribe({
             next: (response) => {
               // console.log('Doctor Removed From the Channel')
+              this.messageService.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Thank you, you have completed all your consultations for today',
+              });
             },
             error: (error) => {
               console.error('Error deleting doctor from channel:', error);
@@ -977,9 +995,9 @@ export class TodayConsultationsComponent {
       startDate: this.startDate,
       endDate: this.endDate,
     };
-    // const adminPhoneNumber = ["919880544866", "916364833988"]
-    const adminPhoneNumber = ["919342287945", "919342287945"]
-    this.appointmentService.sendAdminMessage(this.currentDoctorName, this.currentDepartmentName ,this.startDate, this.endDate, adminPhoneNumber).subscribe({
+    const adminPhoneNumber = ["919880544866", "916364833988"]
+    // const adminPhoneNumber = ["919342287945", "919342287945"]
+    this.appointmentService.sendAdminMessage(this.currentDoctorName, this.currentDepartmentName, this.startDate, this.endDate, adminPhoneNumber).subscribe({
       next: (response) => {
         // console.log('Leave request submitted:', response);
         // alert('Leave request submitted successfully.');
@@ -995,104 +1013,104 @@ export class TodayConsultationsComponent {
 
   }
   checkWaitingTimes() {
-    // Step 1: Count pending appointments (Checked-in but not checked-out)
-    
-  //   const pendingAppointments = this.confirmedAppointments.filter(
-  //     (appt) => appt.checkedIn === true && appt.checkedOut === false
-  //   );
-  
-  //   const pendingCount = pendingAppointments.length;
-  //   console.log(`🚨 Pending Appointments: ${pendingCount}`);
-  
-  //   // Step 2: Find the ongoing consultation
-  //   const ongoingAppointment = this.confirmedAppointments.find(
-  //     (appt) => appt.checkedOut === true && appt.endConsultationTime === null
-  //   );
-  
-  //   if (!ongoingAppointment) {
-  //     console.log("✅ No ongoing consultation.");
-  //     return;
-  //   }
-  
-  //   // Extract appointment details
-  //   const { checkedOutTime, doctorId, doctorName, patientName } = ongoingAppointment;
-  //   const slotDuration = this.doctor?.slotDuration ?? 20; // Default slot duration of 15 mins
-  // if(!checkedOutTime){
-  //   return
-  // }
-  //   // Step 3: Calculate elapsed waiting time
-  //   const checkedOutTimestamp = new Date(checkedOutTime)!.getTime();
-  //   const currentTime = new Date().getTime();
-  //   const elapsedMinutes = Math.floor((currentTime - checkedOutTimestamp) / 60000);
-  //   console.log(`⏳ Elapsed Time for ${patientName}: ${elapsedMinutes} mins`);
-  
-  //   // Step 4: Define alert thresholds
-  //   const firstThreshold = slotDuration + 10; // Alert at slot duration + 10 mins
-  //   const repeatThreshold = 5; // Repeat alerts every 5 mins
-  //   const waitingMultiplier = Math.floor((elapsedMinutes - firstThreshold) / repeatThreshold) + 1;
-  //   console.log(waitingMultiplier)
+    // // Step 1: Count pending appointments (Checked-in but not checked-out)
 
-  //   const sortedPendingAppointments = pendingAppointments.sort((a, b) => {
-  //     return this.parseTimeToMinutes(a.time) - this.parseTimeToMinutes(b.time);
-  //   });
-  
-  //   // Step 6: Select the next patient in line based on time
-  //   const nextAppointment = sortedPendingAppointments.length > 0 ? sortedPendingAppointments[0] : null;
-  
-  //   if (!nextAppointment) {
-  //     console.log("✅ No next appointment found.");
-  //     return;
-  //   }
-  
-  //   // Step 5: Trigger alert if time exceeds threshold
-  //   if (elapsedMinutes >= firstThreshold && (elapsedMinutes - firstThreshold) % repeatThreshold === 0) {
-  //     console.warn(`⚠️ Alert: ${patientName} under Dr. ${doctorName} has exceeded waiting time by ${elapsedMinutes - slotDuration} mins!`);
-      
-  //     // Step 6: Update extra waiting time for the next appointment
-  //     // const nextAppointment = this.confirmedAppointments.find(
-  //     //   (appt: any) => appt.status === "Next" && appt.doctorId === doctorId
-  //     // );
-  
-  //     if (nextAppointment) {
-  //       nextAppointment.extraWaitingTime = elapsedMinutes - slotDuration;
-  //       const extraWaitingTime = nextAppointment.extraWaitingTime;
-  
-  //       // Update extra waiting time in DB
-  //       this.appointmentService.updateExtraWaitingTime(nextAppointment.id!, extraWaitingTime).subscribe(
-  //         (response: any) => {
-  //           console.log("✅ Extra waiting time updated successfully:", response);
-  //         },
-  //         (error) => {
-  //           console.error("❌ Error updating waiting time:", error);
-  //         }
-  //       );
-  
-  //       // Step 7: Send WhatsApp notifications to Admins & Doctor
-  //       const adminPhoneNumbers = ['919342287945', '919342287945']; // Admin List
-  //       const adminsToSend = Array.isArray(adminPhoneNumbers)
-  //         ? adminPhoneNumbers.slice(0, waitingMultiplier) // Send message to more admins based on waiting multiplier
-  //         : [];
-  
-  //       this.appointmentService
-  //         .sendWaitingTimeAlert({
-  //           adminPhoneNumbers: adminsToSend,
-  //           doctorPhoneNumber: this.doctor.phone_number,
-  //           noOfPatients: pendingCount,
-  //           doctorName: doctorName,
-  //          waitingMultiplier, // Include waiting multiplier in the alert
-  //         })
-  //         .subscribe(
-  //           (response) => {
-  //             console.log(`✅ WhatsApp alert sent to Dr. ${doctorName} and admins`, response);
-  //           },
-  //           (error) => {
-  //             console.error(`❌ Error sending alert to Dr. ${doctorName}:`, error);
-  //           }
-  //         );
-  //     }
-  //   }
+    // const pendingAppointments = this.confirmedAppointments.filter(
+    //   (appt) => appt.checkedIn === true && appt.checkedOut === false
+    // );
+
+    // const pendingCount = pendingAppointments.length;
+    // console.log(`🚨 Pending Appointments: ${pendingCount}`);
+
+    // // Step 2: Find the ongoing consultation
+    // const ongoingAppointment = this.confirmedAppointments.find(
+    //   (appt) => appt.checkedOut === true && appt.endConsultationTime === null
+    // );
+
+    // if (!ongoingAppointment) {
+    //   console.log("✅ No ongoing consultation.");
+    //   return;
+    // }
+
+    // // Extract appointment details
+    // const { checkedOutTime, doctorId, doctorName, patientName } = ongoingAppointment;
+    // const slotDuration = this.doctor?.slotDuration ?? 20; // Default slot duration of 15 mins
+    // if (!checkedOutTime) {
+    //   return
+    // }
+    // // Step 3: Calculate elapsed waiting time
+    // const checkedOutTimestamp = new Date(checkedOutTime)!.getTime();
+    // const currentTime = new Date().getTime();
+    // const elapsedMinutes = Math.floor((currentTime - checkedOutTimestamp) / 60000);
+    // console.log(`⏳ Elapsed Time for ${patientName}: ${elapsedMinutes} mins`);
+
+    // // Step 4: Define alert thresholds
+    // const firstThreshold = slotDuration + 10; // Alert at slot duration + 10 mins
+    // const repeatThreshold = 5; // Repeat alerts every 5 mins
+    // const waitingMultiplier = Math.floor((elapsedMinutes - firstThreshold) / repeatThreshold) + 1;
+    // console.log(waitingMultiplier)
+
+    // const sortedPendingAppointments = pendingAppointments.sort((a, b) => {
+    //   return this.parseTimeToMinutes(a.time) - this.parseTimeToMinutes(b.time);
+    // });
+
+    // // Step 6: Select the next patient in line based on time
+    // const nextAppointment = sortedPendingAppointments.length > 0 ? sortedPendingAppointments[0] : null;
+
+    // if (!nextAppointment) {
+    //   console.log("✅ No next appointment found.");
+    //   return;
+    // }
+
+    // // Step 5: Trigger alert if time exceeds threshold
+    // if (elapsedMinutes >= firstThreshold && (elapsedMinutes - firstThreshold) % repeatThreshold === 0) {
+    //   console.warn(`⚠️ Alert: ${patientName} under Dr. ${doctorName} has exceeded waiting time by ${elapsedMinutes - slotDuration} mins!`);
+
+    //   // Step 6: Update extra waiting time for the next appointment
+    //   // const nextAppointment = this.confirmedAppointments.find(
+    //   //   (appt: any) => appt.status === "Next" && appt.doctorId === doctorId
+    //   // );
+
+    //   if (nextAppointment) {
+    //     nextAppointment.extraWaitingTime = elapsedMinutes - slotDuration;
+    //     const extraWaitingTime = nextAppointment.extraWaitingTime;
+
+    //     // Update extra waiting time in DB
+    //     this.appointmentService.updateExtraWaitingTime(nextAppointment.id!, extraWaitingTime).subscribe(
+    //       (response: any) => {
+    //         console.log("✅ Extra waiting time updated successfully:", response);
+    //       },
+    //       (error) => {
+    //         console.error("❌ Error updating waiting time:", error);
+    //       }
+    //     );
+
+    //     // Step 7: Send WhatsApp notifications to Admins & Doctor
+    //     const adminPhoneNumbers = ['919342287945', '919342287945']; // Admin List
+    //     const adminsToSend = Array.isArray(adminPhoneNumbers)
+    //       ? adminPhoneNumbers.slice(0, waitingMultiplier) // Send message to more admins based on waiting multiplier
+    //       : [];
+
+    //     this.appointmentService
+    //       .sendWaitingTimeAlert({
+    //         adminPhoneNumbers: adminsToSend,
+    //         doctorPhoneNumber: this.doctor.phone_number,
+    //         noOfPatients: pendingCount,
+    //         doctorName: doctorName,
+    //         waitingMultiplier, // Include waiting multiplier in the alert
+    //       })
+    //       .subscribe(
+    //         (response) => {
+    //           console.log(`✅ WhatsApp alert sent to Dr. ${doctorName} and admins`, response);
+    //         },
+    //         (error) => {
+    //           console.error(`❌ Error sending alert to Dr. ${doctorName}:`, error);
+    //         }
+    //       );
+    //   }
+    // }
   }
-  
+
 
 }
 

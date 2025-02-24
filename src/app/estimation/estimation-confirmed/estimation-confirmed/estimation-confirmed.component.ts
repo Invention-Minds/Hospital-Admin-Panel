@@ -290,7 +290,7 @@ export class EstimationConfirmedComponent {
     this.currentPage = 1; // Reset to the first page after sorting
   }
   completeAppointment(estimation: any): void {
-    if(!estimation.pacDone){
+    if(!estimation.pacDone && estimation.estimationType === 'SM'){
       this.messageService.add({
               severity: 'warn',
               summary: 'Need to do PAC',

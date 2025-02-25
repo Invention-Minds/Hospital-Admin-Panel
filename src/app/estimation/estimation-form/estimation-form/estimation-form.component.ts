@@ -61,7 +61,14 @@ export class EstimationFormComponent {
   filteredRooms: { name: string; cost: number }[] = [];
   dropdownOpen: boolean = false;
   estimationCosts: number[] = []; 
-  selectedSurgeryPackage: string = 'single surgery'
+  selectedSurgeryPackage: string = 'single surgery';
+  showEstimationSuggestions: boolean = false;
+  estimationSuggestions: string[] = [];
+  selectedRoomType: any[] =[];
+  surgeries:any[]=[]
+  selectedRoomCost:string = '';
+  selectedRoom: { name: string; cost: number } | null = null;  // Stores room as "General - ₹5000"
+
 
   constructor(private estimationService: EstimationService, private cdr: ChangeDetectorRef, private messageService: MessageService, private doctorService: DoctorServiceService, private appointmentService: AppointmentConfirmService) {
     this.filteredRooms = [...this.availableRooms];
@@ -102,6 +109,11 @@ export class EstimationFormComponent {
     { name: 'VIP Suite', cost: 10000 },
     { name: 'Presidential Suite', cost: 12000 }
   ];
+  get sortedSelectedRooms(): { name: string; cost: number }[] {
+    return this.availableRooms.filter(room => 
+        this.selectedRooms.some(selected => selected.name === room.name)
+    );
+}
 
   // Filtered rooms (for search functionality)
   toggleDropdown(event: Event): void {
@@ -130,11 +142,29 @@ export class EstimationFormComponent {
 
     // Store room names & costs in formData.roomType
     this.formData.roomType = this.selectedRooms.map(r => `${r.name} - ₹${r.cost}`).join(', ');
+    this.selectedRoomType = this.selectedRooms.map(room => room.name);
+
 
     // ✅ Force validation check
     if (this.estimationForm.controls['roomType']) {
       this.estimationForm.controls['roomType'].updateValueAndValidity();
     }
+    this.surgeries = this.formData.estimationName
+    ? this.formData.estimationName.split(',').map(s => s.trim())
+    : [];
+
+  // Initialize cost strings for each room type
+  this.formData.costForGeneral = '';
+  this.formData.costForSemiPrivate = '';
+  this.formData.costForPrivate = '';
+  this.formData.costForVip = '';
+
+  // Map costs to each room type
+  this.selectedRooms.forEach(room => {
+    let costVariable = `costFor${room.name.replace(/\s/g, '')}`; // Format variable name
+    (this.formData as any)[costVariable] = this.surgeries.map(() => '').join(','); // Empty cost string
+  });
+  console.log(this.selectedRooms)
   }
 
 
@@ -229,6 +259,7 @@ export class EstimationFormComponent {
     discountPercentage: 0,
     totalEstimationAmount: 0,
     estimationType: this.selectedEstimationType,
+    roomEstimation: [],
     patientPhoneNumber: '',
     signatureOf: 'patient',
     employeeName: '',
@@ -248,6 +279,13 @@ export class EstimationFormComponent {
     procedures: '',
     multipleEstimationCost:'',
     surgeryPackage:'',
+    costForGeneral: '',
+    costForSemiPrivate: '',
+    costForPrivate: '',
+    costForVip: '',
+    costForDeluxe:'',
+    costForPresidential:'',
+    selectedRoomCost: this.selectedRoomCost,
     includedItems: {
       wardICUStay: false,
       primaryConsultant: false,
@@ -359,11 +397,11 @@ export class EstimationFormComponent {
   }
 
   loadSurgeryNames(): void {
-    if (!this.selectedDepartmentId || !this.selectedEstimationType) return;
+    if ( !this.selectedEstimationType) return;
 
-    this.estimationService.getEstimationsByDepartment(this.selectedDepartmentId, this.selectedEstimationType).subscribe(
+    this.estimationService.getEstimationsByType(this.selectedEstimationType).subscribe(
       (surgeryNames) => {
-        this.filteredSurgeryNames = surgeryNames;
+        this.estimationSuggestions = surgeryNames;
       },
       (error) => {
         console.error('Error fetching surgery names:', error);
@@ -384,6 +422,8 @@ export class EstimationFormComponent {
     this.loadDoctors();
     this.setSelectedDoctorName(); // If consultantId exists, get doctor name
     this.fetchPendingEstimations();
+    this.loadSurgeryNames();
+    this.initializeEstimationInputs()
     this.availableRooms = [
       { name: 'General', cost: 1600 },
       { name: 'Semi-Private', cost: 3500 },
@@ -411,6 +451,7 @@ export class EstimationFormComponent {
         inclusions: this.estimationData.inclusions?.map((inclusion: any) => inclusion.description) || [],
         exclusions: this.estimationData.exclusions?.map((exclusion: any) => exclusion.description) || [],
       };
+      this.initializeEstimationInputs()
       console.log(this.estimationData.roomType, this.availableRooms)
       if (this.estimationData.roomType) {
         this.selectedRooms = this.estimationData.roomType.split(',')
@@ -426,6 +467,34 @@ export class EstimationFormComponent {
       } else {
         this.selectedRooms = [];
       }
+    //   this.availableRooms.forEach(room => {
+    //     let costVariable = `costFor${room.name.replace(/\s|-/g, '')}`;
+    //     if (this.estimationData[costVariable]) {
+    //         (this.formData as any)[costVariable] = this.estimationData[costVariable];
+    //     } else {
+    //         (this.formData as any)[costVariable] = ''; // Ensure it's initialized
+    //     }
+    // });
+    this.availableRooms.forEach(room => {
+      let costVariable = `costFor${room.name.replace(/\s|-/g, '')}`;
+      console.log(costVariable)
+      if (this.estimationData?.[costVariable]) {
+          (this.formData as any)[costVariable] = this.estimationData?.[costVariable];
+          console.log(this.formData)
+      } else {
+          (this.formData as any)[costVariable] = this.surgeries.map(() => '').join('');
+      }
+  });
+// ✅ Assign a string to `selectedRoomType`
+this.selectedRoomType = this.selectedRooms.map(room => room.name);
+
+    // ✅ If a room was selected in the estimationData, update `selectedRoomCost`
+    if (this.selectedRooms.length > 0) {
+      this.selectedRoom = this.selectedRooms[0]; // Default to first selected room
+      console.log(this.selectedRoom)
+      this.selectRoom(this.selectedRoom); // Trigger room selection update
+  }
+
       this.selectedItems = {
         implants: this.parseExistingData(this.estimationData.implants),
         procedures: this.parseExistingData(this.estimationData.procedures),
@@ -610,7 +679,14 @@ export class EstimationFormComponent {
         procedures: this.formData.procedures,
         instrumentals: this.formData.instrumentals,
         surgeryPackage: this.selectedSurgeryPackage,
-        multipleEstimationCost: this.formData.multipleEstimationCost
+        multipleEstimationCost: this.formData.multipleEstimationCost,
+        costForGeneral: this.formData.costForGeneral,
+        costForSemiPrivate: this.formData.costForSemiPrivate,
+        costForVip:this.formData.costForVip,
+        costForPrivate: this.formData.costForPrivate,
+        costForPresidential:this.formData.costForPresidential,
+        costForDeluxe: this.formData.costForDeluxe,
+        selectedRoomCost: this.selectedRoomCost
       },
       inclusions: this.formData.inclusions,
       exclusions: this.formData.exclusions,
@@ -677,7 +753,14 @@ export class EstimationFormComponent {
         procedures: this.formData.procedures,
         instrumentals: this.formData.instrumentals,
         surgeryPackage: this.selectedSurgeryPackage,
-        multipleEstimationCost: this.formData.multipleEstimationCost
+        multipleEstimationCost: this.formData.multipleEstimationCost,
+        costForGeneral: this.formData.costForGeneral,
+        costForSemiPrivate: this.formData.costForSemiPrivate,
+        costForVip:this.formData.costForVip,
+        costForPrivate: this.formData.costForPrivate,
+        costForPresidential:this.formData.costForPresidential,
+        costForDeluxe: this.formData.costForDeluxe,
+        selectedRoomCost: this.selectedRoomCost
       },
       inclusions: this.formData.inclusions,
       exclusions: this.formData.exclusions,
@@ -752,7 +835,8 @@ export class EstimationFormComponent {
           (pdfResponse) => {
             console.log("✅ PDF Generated & Sent via WhatsApp:", pdfResponse);
             this.messageService.add({ severity: 'success', summary: 'Success', detail: 'PDF Generated & Sent PDF via WhatsApp:!' });
-            const to = "itbilling@rashtrotthanahospital.com"
+            // const to = "itbilling@rashtrotthanahospital.com"
+            const to = "keerthanasaminathan0805@gmail.com"
             this.appointmentService.sendMailtoApprover(to, estimationData.estimationId, pdfResponse.filePath).subscribe(
               (response) => {
                 console.log('Email sent successfully:', response);
@@ -823,7 +907,14 @@ export class EstimationFormComponent {
             procedures: this.formData.procedures,
             instrumentals: this.formData.instrumentals,
             surgeryPackage: this.selectedSurgeryPackage,
-            multipleEstimationCost: this.formData.multipleEstimationCost
+            multipleEstimationCost: this.formData.multipleEstimationCost,
+            costForGeneral: this.formData.costForGeneral,
+            costForSemiPrivate: this.formData.costForSemiPrivate,
+            costForVip:this.formData.costForVip,
+            costForPrivate: this.formData.costForPrivate,
+            costForPresidential:this.formData.costForPresidential,
+            costForDeluxe: this.formData.costForDeluxe,
+            selectedRoomCost: this.selectedRoomCost
           },
           inclusions: this.formData.inclusions,
           exclusions: this.formData.exclusions,
@@ -878,7 +969,14 @@ export class EstimationFormComponent {
             procedures: this.formData.procedures,
             instrumentals: this.formData.instrumentals,
             surgeryPackage: this.selectedSurgeryPackage,
-            multipleEstimationCost: this.formData.multipleEstimationCost
+            multipleEstimationCost: this.formData.multipleEstimationCost,
+            costForGeneral: this.formData.costForGeneral,
+            costForSemiPrivate: this.formData.costForSemiPrivate,
+            costForVip:this.formData.costForVip,
+            costForPrivate: this.formData.costForPrivate,
+            costForPresidential:this.formData.costForPresidential,
+            costForDeluxe: this.formData.costForDeluxe,
+            selectedRoomCost: this.selectedRoomCost
           },
           inclusions: this.formData.inclusions,
           exclusions: this.formData.exclusions,
@@ -1031,6 +1129,10 @@ export class EstimationFormComponent {
   
       // Ensure estimationCosts has the correct length
       const newEstimationCosts = new Array(surgeries.length).fill(0);
+
+      if(newEstimationCosts.length >1){
+        this.selectedSurgeryPackage = 'multiple surgeries'
+      }
   
       // Preserve existing costs
       for (let i = 0; i < surgeries.length; i++) {
@@ -1058,6 +1160,177 @@ export class EstimationFormComponent {
     this.formData.multipleEstimationCost = this.estimationCosts.join(', ');
     console.log("Updated multipleEstimationCost:", this.formData.multipleEstimationCost);
   }
+  // loadSurgeryNames(): void {
+  //   // if (!this.selectedDepartmentId || !this.selectedEstimationType) return;
+  //  console.log( this.selectedEstimationType)
+
+  //   this.estimationService.getEstimationsByType(this.selectedEstimationType).subscribe(
+  //     (surgeryNames) => {
+  //       this.estimationSuggestions = surgeryNames;
+  //       console.log(this.estimationSuggestions)
+  //     },
+  //     (error) => {
+  //       console.error('Error fetching surgery names:', error);
+  //     }
+  //   );
+  // }
+
+  onEstimationInput(): void {
+    // Filter suggestions based on the input text
+    console.log(this.formData.estimationName)
+    console.log(this.showEstimationSuggestions)
+    this.showEstimationSuggestions = true;
+    if (this.formData.estimationName.trim()) {
+      this.filteredSurgeryNames = this.estimationSuggestions.filter((estimation) =>
+        estimation.toLowerCase().includes(this.formData.estimationName.toLowerCase())
+      );
+    } else {
+      this.filteredSurgeryNames = [];
+    }
+   
+  }
+  onEstimationSelect(estimation: string): void {
+    this.formData.estimationName = estimation; // Set the selected suggestion in the input field
+    this.showEstimationSuggestions = false; // Hide the suggestions dropdown
+    // console.log(this.estimationText)
+  }
+  // initializeEstimationInputs() {
+  //   // Extract surgeries from estimationName
+  //   this.surgeries = this.formData.estimationName
+  //     ? this.formData.estimationName.split(',').map(s => s.trim())
+  //     : [];
+
+  //   // // Initialize cost strings for each room type
+  //   // this.formData.costForGeneral = '';
+  //   // this.formData.costForSemiPrivate = '';
+  //   // this.formData.costForPrivate = '';
+  //   // this.formData.costForVip = '';
+  //   this.availableRooms.forEach(room => {
+  //     let costVariable = `costFor${room.name.replace(/\s|-/g, '')}`;
+      
+  //     // ✅ Ensure it's a string, not undefined
+  //     if (!(this.formData as any)[costVariable]) {
+  //       (this.formData as any)[costVariable] = this.surgeries.map(() => '').join(',');
+  //     }
+  //   });
+  //   // Map costs to each room type
+  //   this.selectedRooms.forEach(room => {
+  //     let costVariable = `costFor${room.name.replace(/\s/g, '')}`; // Format variable name
+  //     (this.formData as any)[costVariable] = this.surgeries.map(() => '').join(','); // Empty cost string
+  //   });
+  //   console.log(this.selectedRooms)
+
+  //   console.log('Initialized Room Costs:', this.formData);
+  // }
+  initializeEstimationInputs() {
+    // ✅ Extract surgeries from estimationName
+
+    this.surgeries = this.formData.estimationName
+    ? this.formData.estimationName.split(',').map(s => s.trim())
+    : [];
+
+console.log("Loaded Surgeries:", this.surgeries);
+
+// ✅ Initialize cost strings for each room type
+this.availableRooms.forEach(room => {
+    let costVariable = `costFor${room.name.replace(/\s|-/g, '')}`;
+    
+    // ✅ Ensure it's a string and loads existing data
+    if (!(this.formData as any)[costVariable]) {
+        (this.formData as any)[costVariable] = this.estimationData?.[costVariable] 
+            ? this.estimationData[costVariable]
+            : this.surgeries.map(() => '').join(',');
+    }
+});
+  
+    console.log("Initialized Room Costs:", this.formData);
+  }
+  
+
+  
+
+  updateSelectedRoom() {
+    const selectedRoom = this.selectedRoomType;
+    if (selectedRoom) {
+      let costVariable = `costFor${this.selectedRoomType.join('_').replace(/\s/g, '')}`
+      this.selectedRoomCost = `${selectedRoom} - ${(this.formData as any)[costVariable]}`;
+      // console.log(this.selectedRoomCost)
+    }
+  }
+  getRoomCostVariable(roomName: string, surgery: string): string {
+    const key = `costFor${roomName.replace(/\s|-/g, '')}`;
+
+    if (!(this.formData as any)[key] || typeof (this.formData as any)[key] !== 'string') {
+        (this.formData as any)[key] = this.surgeries.map(() => '').join(',');
+    }
+
+    let costArray = (this.formData as any)[key]?.split(',');
+    // console.log((this.formData as any)[key])
+
+    const surgeryIndex = this.surgeries.indexOf(surgery);
+    if (surgeryIndex !== -1 && surgeryIndex < costArray.length) {
+        // console.log(`🔍 Fetching cost for ${surgery} in ${roomName}:`, costArray[surgeryIndex]);
+        return costArray[surgeryIndex] || '';  
+    }
+
+    return ''; 
+}
+
+
+
+updateRoomCost(roomName: string, surgery: string, value: string): void {
+  const key = `costFor${roomName.replace(/\s|-/g, '')}`;
+
+  if (typeof (this.formData as any)[key] !== 'string') {
+      (this.formData as any)[key] = this.surgeries.map(() => '').join(',');
+  }
+
+  let costArray = (this.formData as any)[key].split(',');
+
+  // ✅ Ensure the array length matches the number of surgeries
+  while (costArray.length < this.surgeries.length) {
+      costArray.push('');
+  }
+
+  // ✅ Update only the correct index
+  const surgeryIndex = this.surgeries.indexOf(surgery);
+  if (surgeryIndex !== -1) {
+      costArray[surgeryIndex] = value;
+  }
+
+  (this.formData as any)[key] = costArray.join(',');
+
+  // console.log(`📝 Updating cost for ${surgery} in ${roomName}: ${value}`);
+
+  // ✅ Force Angular to detect changes and update the UI
+  this.cdr.detectChanges();
+}
+
+private inputTimeout: any;
+
+onCostInputChange(value: string, roomName: string, surgery: string): void {
+  // ✅ Debounce input changes to prevent excessive updates
+  clearTimeout(this.inputTimeout);
+  this.inputTimeout = setTimeout(() => {
+      this.updateRoomCost(roomName, surgery, value);
+  }, 300);  // Adjust delay if needed
+}
+
+  
+  selectRoom(room: { name: string; cost: number }) {
+    this.selectedRoom = room;
+  
+    // ✅ Normalize room key (remove spaces and hyphens)
+    let costVariable = `costFor${room.name.replace(/\s|-/g, '')}`;
+  
+    // ✅ Retrieve the corresponding cost for the selected room
+    let roomCost = (this.formData as any)[costVariable] || '';
+  
+    this.selectedRoomCost = `${room.name} - ₹${roomCost}`;
+    console.log("Selected Room Cost:", this.selectedRoomCost);
+  }
+  
+  
 }
 
 

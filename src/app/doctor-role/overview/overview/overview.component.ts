@@ -54,6 +54,9 @@ export class OverviewComponent implements OnInit {
   showDoctorDetails() {
     this.activeComponent = 'details'
   }
+  showDoctorArrived() {
+    this.activeComponent = 'arrived'
+  }
 
   showDoctorForm() {
     if (this.role === 'admin'|| this.role === 'super_admin' || this.role === 'sub_admin') {

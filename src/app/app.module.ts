@@ -111,6 +111,7 @@ import { DelayReportComponent } from './analytics/delay-report/delay-report.comp
 import { TodayAnalyticsComponent } from './analytics/today-analytics/today-analytics.component';
 import { EstimationBarComponent } from './analytics/estimation-bar/estimation-bar.component';
 import { MaintainanceComponent } from './maintainance/maintainance/maintainance.component';
+import { ArrivedConsultationComponent } from './doctor-role/arrived-consultation/arrived-consultation.component';
 
 
 @NgModule({
@@ -181,7 +182,8 @@ import { MaintainanceComponent } from './maintainance/maintainance/maintainance.
     DelayReportComponent,
     TodayAnalyticsComponent,
     EstimationBarComponent,
-    MaintainanceComponent
+    MaintainanceComponent,
+    ArrivedConsultationComponent
   ],
   imports: [
     BrowserModule,

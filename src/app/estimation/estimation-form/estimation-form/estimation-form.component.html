@@ -123,29 +123,13 @@
 
         <div class="input-container">
           <!-- If estimation is null, show doctor selection & estimation type -->
-          <ng-container *ngIf="!formData.estimationName; else estimationInput">
-            <!-- Estimation Type Selection -->
 
-
-            <select id="estimationName" name="estimationName" class="custom-input custom-select" ngModel
-              [(ngModel)]="formData.estimationName" (ngModelChange)="updateEstimationCosts()"  required #estimationName="ngModel">
-              <option value="" disabled selected>Select Surgery</option>
-              <option *ngFor="let surgery of filteredSurgeryNames" [value]="surgery">
-                {{ surgery }}
-              </option>
-            </select>
-            <label for="estimationName" class="custom-label">Estimation Name*</label>
-
-          </ng-container>
-
-          <!-- Existing Input Field for Surgery Name -->
-          <ng-template #estimationInput>
             <input type="text" id="estimationName" name="estimationName" pattern="[A-Za-z0-9\- , ]+" class="custom-input"
               [(ngModel)]="formData.estimationName" (ngModelChange)="updateEstimationCosts()"  required
               [readonly]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed'" />
-            <label for="estimationName" class="custom-label">Estimation Name*</label>
+            <label for="estimationName" class="custom-label">Procedure Name*</label>
 
-          </ng-template>
+
           <div *ngIf="estimationForm.submitted && estimationForm.controls['estimationName']?.invalid"
             class="error-message">
             <span *ngIf="estimationForm.controls['estimationName']?.errors?.['required']">Surgery Name is
@@ -241,6 +225,19 @@
           </div>
         </div>
       </div>
+      <div class="type-container" *ngIf="selectedEstimationType === 'SM'">
+        <div><label class="custom-label-type">Surgical Procedure:*</label></div>
+        <div class="radio-group">
+          <label>
+            <input type="radio" name="surgeryPackage" [(ngModel)]="selectedSurgeryPackage" value="single surgery" required />
+            Single Surgery
+          </label>
+          <label>
+            <input type="radio" name="surgeryPackage" [(ngModel)]="selectedSurgeryPackage" value="multiple surgeries"  />
+            Multiple Surgeries 
+          </label>
+        </div>
+      </div>
     </div>
 
     <!-- <div class="section">
@@ -271,7 +268,7 @@
       <div class="input-container">
         <button class="input-container custom-select dropdown-btn custom-input" (click)="toggleDropdown($event)"
           [ngClass]="{'invalid': estimationForm.submitted && !formData.roomType}">
-          {{ selectedRooms.length > 0 ? formData.roomType : 'Select Room Type' }}
+          {{ selectedRooms.length > 0 ? selectedRoomType : 'Select Room Type' }}
         </button>
 
         <div class="dropdown-content" *ngIf="dropdownOpen">
@@ -279,7 +276,7 @@
           <div class="checkbox-list">
             <label *ngFor="let room of filteredRooms">
               <input type="checkbox" [checked]="isSelected(room.name)" (change)="toggleSelection(room)">
-              {{ room.name }} - ₹{{ room.cost }}
+              {{ room.name }}
             </label>
           </div>
         </div>
@@ -292,13 +289,31 @@
       <div class="error-message" *ngIf="estimationForm.submitted && !formData.roomType">
         <span>Room Type is required.</span>
       </div>
-      <!-- Selected Room Boxes -->
-      <div class="selected-rooms-container" *ngIf="selectedRooms.length > 0">
-        <div class="room-box custom-input" *ngFor="let room of selectedRooms">
-          <span class="room-name">{{ room.name }}</span>
-          <span class="room-cost">₹{{ room.cost }} per day</span>
-        </div>
+
+        <div class="selected-rooms-container" *ngIf="selectedRooms.length > 0">
+  <div class="room-box custom-input" *ngFor="let room of sortedSelectedRooms">
+    <label>
+      <input type="radio" name="selectedRoom" [value]="room" (change)="selectRoom(room)" 
+             [checked]="room.name === selectedRoom?.name">
+      {{ room.name }} Ward: <span class="room-cost">₹{{ room.cost }}  Room rent/day</span>
+    </label>
+    <div *ngFor="let surgery of surgeries; let i = index">
+      <div class="input-container">
+        <input type="text" class="custom-input"
+        [ngModel]="getRoomCostVariable(room.name, surgery)"  
+        (ngModelChange)="updateRoomCost(room.name, surgery, $event)"
+        [name]="'cost_' + room.name + '_' + surgery"  />
+      
+        <label class="custom-label">Cost for surgery {{i+1}} in {{ room.name }}</label>
       </div>
+    </div>
+    
+  </div>
+</div>
+
+<!-- Display selected room -->
+<p class="selectedRoom">Selected Room: {{ selectedRoomCost }}</p>
+
 
 
 
@@ -443,7 +458,7 @@
           </div>
         </div>
       </div>
-      <div class="type-container" *ngIf="selectedEstimationType === 'SM'">
+      <!-- <div class="type-container" *ngIf="selectedEstimationType === 'SM'">
         <div><label class="custom-label-type">Surgical Procedure:*</label></div>
         <div class="radio-group">
           <label>
@@ -455,7 +470,7 @@
             Multiple Surgeries 
           </label>
         </div>
-      </div>
+      </div> -->
       <div class="form-row" *ngIf="selectedSurgeryPackage === 'multiple surgeries'">
         <div *ngFor="let surgery of formData.estimationName.split(','); let i = index" class="input-container">
           <input type="number" id="multipleEstimationCost{{i}}" name="multipleEstimationCost{{i}}" pattern="^[0-9]*$"

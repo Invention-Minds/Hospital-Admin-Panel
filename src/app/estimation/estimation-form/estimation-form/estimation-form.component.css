@@ -194,6 +194,15 @@ select{
   font-weight: 500;
   line-height: normal;
 }
+.selectedRoom{
+  color: #000;
+  font-family: Kanit;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  margin: 10px;
+}
 
 input[type="radio"] {
   margin-right: 5px;
@@ -301,10 +310,11 @@ input[type="radio"] {
 .room-box {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  /* justify-content: space-between; */
+  gap: 20px;
   padding: 10px;
   border-radius: 4px;
-  width: 257px;
+  /* width: 257px; */
 
 }
 
@@ -429,7 +439,31 @@ input[type="radio"] {
   line-height: normal;
   background-color: transparent;
 }
+.estimation-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-top: none;
+  max-height: 150px;
+  overflow-y: auto;
+  z-index: 1000;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-family: Kanit;
+}
 
+.estimation-suggestions li {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.estimation-suggestions li:hover {
+  background-color: #f0f0f0;
+}
 .sign-clear{
   width: 100px !important;
 height: 32px !important;

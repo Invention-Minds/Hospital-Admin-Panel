@@ -11,6 +11,17 @@
           </div>
           <div class="card-content">
             <!-- <h2>40</h2> -->
+            <p>Arrived Consultations</p>
+          </div>
+        </div>
+        <div class="card" 
+        [ngClass]="{'active-card': activeComponent === 'arrived'}"
+        (click)="showDoctorArrived()">
+          <div class="card-icon">
+            <img src="/today-consul.svg" alt="OPD Icon" />
+          </div>
+          <div class="card-content">
+            <!-- <h2>40</h2> -->
             <p>Today Consultations</p>
           </div>
         </div>
@@ -25,12 +36,14 @@
             <p>Future Consultations</p>
           </div>
         </div>
+        
 
         </div>
   </div>
   <div>
     <app-today-consultations  *ngIf="activeComponent === 'availability'"></app-today-consultations>
     <app-future-consultations *ngIf="activeComponent === 'details'"></app-future-consultations>
+    <app-arrived-consultation *ngIf="activeComponent === 'arrived'"></app-arrived-consultation>
   </div>
   </div>
   

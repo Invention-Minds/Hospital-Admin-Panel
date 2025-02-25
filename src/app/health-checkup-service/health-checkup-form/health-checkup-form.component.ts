@@ -120,7 +120,8 @@ export class HealthCheckupFormComponent implements OnInit {
       return;
     }
     const now = new Date();
-  const isToday = new Date(this.selectedDate).toDateString() ===  new Date().toLocaleDateString('en-CA');
+  const isToday = new Date(this.selectedDate).toLocaleDateString('en-CA') ===  new Date().toLocaleDateString('en-CA');
+  // console.log(isToday, new Date(this.selectedDate).toLocaleDateString('en-CA'),new Date().toLocaleDateString('en-CA') )
     this.healthCheckupService.getAvailableSlots(this.selectedDate, parseInt(this.selectedPackageId)).subscribe({
       next: (response) => {
         console.log('Available Slots:', response);

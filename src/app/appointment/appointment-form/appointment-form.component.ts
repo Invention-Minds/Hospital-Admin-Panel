@@ -1026,30 +1026,52 @@ export class AppointmentFormComponent implements OnInit {
   //   console.log(slots, startTime, endTime);
   //   return slots;
   // }
+  // generateTimeSlots(availableFrom: string, slotDuration: number): string[] {
+  //   const slots: string[] = [];
+  //   const timeRanges = availableFrom.split(',').map(range => range.trim()); // Split by commas and trim spaces
+
+  //   for (const range of timeRanges) {
+  //     const [startTime, endTime] = range.split('-').map(time => time.trim()); // Split start and end times
+  //     let current = new Date(`1970-01-01T${startTime}`);
+  //     const end = new Date(`1970-01-01T${endTime}`);
+
+  //     while (current <= end) {
+  //       const slotStart = this.convertTo12HourFormat(current.toTimeString().substring(0, 5));
+  //       slots.push(slotStart);
+
+  //       // Move to the next slot
+  //       current.setMinutes(current.getMinutes() + slotDuration);
+
+  //       // Ensure it does not exceed the end time
+  //       if (current > end) break;
+  //     }
+  //   }
+
+  //   console.log(slots);
+  //   return slots;
+  // }
   generateTimeSlots(availableFrom: string, slotDuration: number): string[] {
     const slots: string[] = [];
     const timeRanges = availableFrom.split(',').map(range => range.trim()); // Split by commas and trim spaces
 
     for (const range of timeRanges) {
-      const [startTime, endTime] = range.split('-').map(time => time.trim()); // Split start and end times
-      let current = new Date(`1970-01-01T${startTime}`);
-      const end = new Date(`1970-01-01T${endTime}`);
+        const [startTime, endTime] = range.split('-').map(time => time.trim()); // Split start and end times
+        let current = new Date(`1970-01-01T${startTime}`);
+        const end = new Date(`1970-01-01T${endTime}`);
 
-      while (current <= end) {
-        const slotStart = this.convertTo12HourFormat(current.toTimeString().substring(0, 5));
-        slots.push(slotStart);
+        while (current < end) {  // Changed from <= to < to stop at 11:00 instead of 11:15
+            const slotStart = this.convertTo12HourFormat(current.toTimeString().substring(0, 5));
+            slots.push(slotStart);
 
-        // Move to the next slot
-        current.setMinutes(current.getMinutes() + slotDuration);
-
-        // Ensure it does not exceed the end time
-        if (current > end) break;
-      }
+            // Move to the next slot
+            current.setMinutes(current.getMinutes() + slotDuration);
+        }
     }
 
     console.log(slots);
     return slots;
-  }
+}
+
 
 
 

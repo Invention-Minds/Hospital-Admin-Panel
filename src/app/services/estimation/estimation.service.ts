@@ -18,6 +18,11 @@ export class EstimationService {
       `${this.apiUrl}/department/${departmentId}/${estimationType}`
     );
   }
+  getEstimationsByType(estimationType: string): Observable<any[]> {
+    return this.http.get<any[]>(
+      `${this.apiUrl}/department/${estimationType}`
+    );
+  }
   createEstimationDetails(estimationDetails: any): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/estimation-details`, estimationDetails);
   }

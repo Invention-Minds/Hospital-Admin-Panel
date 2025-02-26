@@ -68,6 +68,7 @@ export class EstimationFormComponent {
   surgeries:any[]=[]
   selectedRoomCost:string = '';
   selectedRoom: { name: string; cost: number } | null = null;  // Stores room as "General - ₹5000"
+  patients:any[]=[];
 
 
   constructor(private estimationService: EstimationService, private cdr: ChangeDetectorRef, private messageService: MessageService, private doctorService: DoctorServiceService, private appointmentService: AppointmentConfirmService) {
@@ -114,6 +115,19 @@ export class EstimationFormComponent {
         this.selectedRooms.some(selected => selected.name === room.name)
     );
 }
+mapRoomNameToCostKey(roomName: string): string {
+  let roomMapping = {
+    "General": "costForGeneral",
+    "Semi-Private": "costForSemiPrivate",
+    "Private/ICU": "costForPrivate",  // Fix the mismatch
+    "Deluxe": "costForDeluxe",
+    "VIP Suite": "costForVip",
+    "Presidential Suite": "costForPresidential"
+  };
+
+  return (roomMapping as any)[roomName] || ''; // Default empty if not found
+}
+
 
   // Filtered rooms (for search functionality)
   toggleDropdown(event: Event): void {
@@ -329,36 +343,76 @@ export class EstimationFormComponent {
     });
 
   }
-  onUHIDChange(): void {
-    console.log(this.formData.patientUHID)
-    if (!this.formData.patientUHID) {
-      // Reset fields if UHID is empty
-      this.formData.patientName = '';
-      this.formData.ageOfPatient = null;
-      this.formData.genderOfPatient = '';
-      this.formData.patientPhoneNumber = ''
-      return;
-    }
-    console.log(this.allEstimations)
-    const matchingEstimation = this.allEstimations.find(
-      (estimation) => String(estimation.patientUHID) === String(this.formData.patientUHID)
-    );
-    console.log("🔍 Matching Estimation:", matchingEstimation);
+  // onUHIDChange(): void {
+  //   console.log(this.formData.patientUHID)
+  //   if (!this.formData.patientUHID) {
+  //     // Reset fields if UHID is empty
+  //     this.formData.patientName = '';
+  //     this.formData.ageOfPatient = null;
+  //     this.formData.genderOfPatient = '';
+  //     this.formData.patientPhoneNumber = ''
+  //     return;
+  //   }
+  //   console.log(this.allEstimations)
+  //   const matchingEstimation = this.patients.find(
+  //     (estimation) => String(estimation.prn) === String(this.formData.patientUHID)
+  //   );
+  //   console.log("🔍 Matching Estimation:", matchingEstimation);
 
-    console.log(matchingEstimation)
-    if (matchingEstimation) {
-      this.formData.patientName = matchingEstimation.patientName;
-      this.formData.ageOfPatient = matchingEstimation.ageOfPatient;
-      this.formData.genderOfPatient = matchingEstimation.genderOfPatient;
-      this.formData.patientPhoneNumber = matchingEstimation.patientPhoneNumber;
-    } else {
-      // Reset if no match found
-      this.formData.patientName = '';
-      this.formData.ageOfPatient = null;
-      this.formData.genderOfPatient = '';
-      this.formData.patientPhoneNumber = ''
-    }
+  //   console.log(matchingEstimation)
+  //   if (matchingEstimation) {
+  //     this.formData.patientName = matchingEstimation.name;
+  //     this.formData.ageOfPatient = matchingEstimation.age;
+  //     this.formData.genderOfPatient = matchingEstimation.gender;
+  //     this.formData.patientPhoneNumber = matchingEstimation.mobileNumber;
+  //   } else {
+  //     // Reset if no match found
+  //     this.formData.patientName = '';
+  //     this.formData.ageOfPatient = null;
+  //     this.formData.genderOfPatient = '';
+  //     this.formData.patientPhoneNumber = ''
+  //   }
+  // }
+  uhidSuggestions: boolean = false;
+filteredUHIDPatients: any[] = []; // Filtered UHID/MRD suggestions
+
+onUHIDChange(): void {
+  console.log(this.formData.patientUHID);
+  if (!this.formData.patientUHID) {
+    // Reset fields if UHID is empty
+    this.formData.patientName = '';
+    this.formData.ageOfPatient = null;
+    this.formData.genderOfPatient = '';
+    this.formData.patientPhoneNumber = '';
+    this.uhidSuggestions = false;
+    return;
   }
+
+  // Filter patients matching UHID
+  this.filteredUHIDPatients = this.patients.filter(patient =>
+    String(patient.prn).toLowerCase().includes(this.formData.patientUHID.toLowerCase())
+  );
+
+  this.uhidSuggestions = this.filteredUHIDPatients.length > 0;
+}
+
+// Function to handle UHID selection
+selectUHID(selectedPatient: any): void {
+  if (!selectedPatient) return;
+  let cleanedAge = selectedPatient.age ? selectedPatient.age.replace(/\D/g, '') : '';
+  // Update formData with selected patient's details
+  this.formData.patientUHID = selectedPatient.prn || '';
+  this.formData.patientName = selectedPatient.name;
+  this.formData.ageOfPatient = cleanedAge;
+  this.formData.genderOfPatient = selectedPatient.gender;
+  this.formData.patientPhoneNumber = selectedPatient.mobileNumber;
+
+  console.log("UHID Selected:", selectedPatient);
+
+  // Hide suggestions after selection
+  this.uhidSuggestions = false;
+}
+
   public loadDoctors(): void {
     this.doctorService.getDoctors().subscribe(
       (doctors) => {
@@ -432,6 +486,12 @@ export class EstimationFormComponent {
       { name: 'VIP Suite', cost: 10000 },
       { name: 'Presidential Suite', cost: 12000 }
     ];
+    this.appointmentService.getAllPatients().subscribe(
+      (patients => {
+        this.patients = patients;
+        // console.log(this.patients)
+      })
+    )
     
 
     console.log(this.estimationData)
@@ -476,7 +536,7 @@ export class EstimationFormComponent {
     //     }
     // });
     this.availableRooms.forEach(room => {
-      let costVariable = `costFor${room.name.replace(/\s|-/g, '')}`;
+      let costVariable = this.mapRoomNameToCostKey(room.name);
       console.log(costVariable)
       if (this.estimationData?.[costVariable]) {
           (this.formData as any)[costVariable] = this.estimationData?.[costVariable];
@@ -488,12 +548,25 @@ export class EstimationFormComponent {
 // ✅ Assign a string to `selectedRoomType`
 this.selectedRoomType = this.selectedRooms.map(room => room.name);
 
-    // ✅ If a room was selected in the estimationData, update `selectedRoomCost`
-    if (this.selectedRooms.length > 0) {
-      this.selectedRoom = this.selectedRooms[0]; // Default to first selected room
-      console.log(this.selectedRoom)
-      this.selectRoom(this.selectedRoom); // Trigger room selection update
+
+  //   // ✅ If a room was selected in the estimationData, update `selectedRoomCost`
+  if (this.selectedRooms.length > 0 && this.estimationData.selectedRoomCost) {
+    // Extract the room name from `selectedRoomCost`
+    let selectedRoomName = this.estimationData.selectedRoomCost.split(' - ')[0].trim();
+  
+    // Find the matching room object in `selectedRooms`
+    this.selectedRoom = this.selectedRooms.find(room => room.name === selectedRoomName) || null;
+    console.log(this.selectedRoom)
+  
+    if (this.selectedRoom) {
+      console.log("Selected Room Found:", this.selectedRoom);
+      this.selectRoom(this.selectedRoom); // Update UI with selected room
+    } else {
+      console.warn("No matching room found for:", selectedRoomName);
+    }
   }
+  
+  this.selectedRoomCost = this.estimationData.selectedRoomCost
 
       this.selectedItems = {
         implants: this.parseExistingData(this.estimationData.implants),
@@ -835,8 +908,8 @@ this.selectedRoomType = this.selectedRooms.map(room => room.name);
           (pdfResponse) => {
             console.log("✅ PDF Generated & Sent via WhatsApp:", pdfResponse);
             this.messageService.add({ severity: 'success', summary: 'Success', detail: 'PDF Generated & Sent PDF via WhatsApp:!' });
-            // const to = "itbilling@rashtrotthanahospital.com"
-            const to = "keerthanasaminathan0805@gmail.com"
+            const to = "itbilling@rashtrotthanahospital.com"
+            // const to = "keerthanasaminathan0805@gmail.com"
             this.appointmentService.sendMailtoApprover(to, estimationData.estimationId, pdfResponse.filePath).subscribe(
               (response) => {
                 console.log('Email sent successfully:', response);
@@ -1233,7 +1306,7 @@ console.log("Loaded Surgeries:", this.surgeries);
 
 // ✅ Initialize cost strings for each room type
 this.availableRooms.forEach(room => {
-    let costVariable = `costFor${room.name.replace(/\s|-/g, '')}`;
+  let costVariable = this.mapRoomNameToCostKey(room.name);
     
     // ✅ Ensure it's a string and loads existing data
     if (!(this.formData as any)[costVariable]) {
@@ -1251,20 +1324,24 @@ this.availableRooms.forEach(room => {
 
   updateSelectedRoom() {
     const selectedRoom = this.selectedRoomType;
+    console.log(selectedRoom)
     if (selectedRoom) {
       let costVariable = `costFor${this.selectedRoomType.join('_').replace(/\s/g, '')}`
+      // let costVariable = this.mapRoomNameToCostKey(selectedRoom);
       this.selectedRoomCost = `${selectedRoom} - ${(this.formData as any)[costVariable]}`;
       // console.log(this.selectedRoomCost)
     }
   }
   getRoomCostVariable(roomName: string, surgery: string): string {
-    const key = `costFor${roomName.replace(/\s|-/g, '')}`;
+    let key = this.mapRoomNameToCostKey(roomName);
+    // console.log(key)
 
     if (!(this.formData as any)[key] || typeof (this.formData as any)[key] !== 'string') {
         (this.formData as any)[key] = this.surgeries.map(() => '').join(',');
     }
 
     let costArray = (this.formData as any)[key]?.split(',');
+
     // console.log((this.formData as any)[key])
 
     const surgeryIndex = this.surgeries.indexOf(surgery);
@@ -1279,7 +1356,8 @@ this.availableRooms.forEach(room => {
 
 
 updateRoomCost(roomName: string, surgery: string, value: string): void {
-  const key = `costFor${roomName.replace(/\s|-/g, '')}`;
+  let key = this.mapRoomNameToCostKey(roomName);
+  // console.log(key)
 
   if (typeof (this.formData as any)[key] !== 'string') {
       (this.formData as any)[key] = this.surgeries.map(() => '').join(',');
@@ -1321,7 +1399,8 @@ onCostInputChange(value: string, roomName: string, surgery: string): void {
     this.selectedRoom = room;
   
     // ✅ Normalize room key (remove spaces and hyphens)
-    let costVariable = `costFor${room.name.replace(/\s|-/g, '')}`;
+    // let costVariable = `costFor${room.name.replace(/\s|-/g, '')}`;
+    let costVariable = this.mapRoomNameToCostKey(room.name);
   
     // ✅ Retrieve the corresponding cost for the selected room
     let roomCost = (this.formData as any)[costVariable] || '';

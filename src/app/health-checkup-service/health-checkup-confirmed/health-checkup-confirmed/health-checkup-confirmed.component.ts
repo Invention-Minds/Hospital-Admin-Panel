@@ -60,6 +60,7 @@ export class HealthCheckupConfirmedComponent {
   @Output() reschedule = new EventEmitter<any>();
   activeComponent: string = 'confirmed';
   confirmedServices: Service[] = [];
+  today:string = ''
 
 
   // Value entered by the user (could be Patient ID or Phone Number based on selection)
@@ -75,7 +76,12 @@ this.userId = localStorage.getItem('userid')
 
 fetchConfirmedAppointments(): void {
   this.isLoading = true
+  // const today = new Date();
   const today = new Date();
+  const year = today.getFullYear();
+  const month = (today.getMonth() + 1).toString().padStart(2, '0');
+  const day = today.getDate().toString().padStart(2, '0');
+  this.today = `${year}-${month}-${day}`;
   this.healthCheckupService.getAllServices().subscribe({
     next: (services: Service[]) => {
       
@@ -355,6 +361,10 @@ onClear() {
   }    
   completeAppointment(appointment: Service): void {
     const { id: serviceId } = appointment;
+    if (appointment.appointmentDate > this.today) {
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Cannot check-in for future appointments!' });
+      return;
+    }
     const payload ={
       ...appointment,
       checkedIn: true,

@@ -33,8 +33,15 @@
             ngModel
             [(ngModel)]="formData.pnrNumber"
             placeholder=" "
+            (input)="onHealthCheckupPRNChange()" 
+            (focus)="prnSuggestions = true"
           />
           <label for="pnr" class="form-label">PRN Number</label>
+          <ul class="prn-suggestions" *ngIf="prnSuggestions && filteredHealthCheckupPRNs.length > 0">
+            <li *ngFor="let prn of filteredHealthCheckupPRNs" (click)="selectHealthCheckupPRN(prn)">
+              {{ prn.prn }} - {{ prn.name }}
+            </li>
+          </ul>
           <div *ngIf="form.submitted && form.controls['pnr']?.invalid" class="error-message">
             <span *ngIf="form.controls['pnr']?.errors?.['pattern']">Enter a valid number.</span>
           </div>

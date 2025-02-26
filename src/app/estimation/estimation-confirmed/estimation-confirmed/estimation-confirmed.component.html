@@ -91,7 +91,7 @@
                     <td>{{ estimation.estimationType }}</td>
                     <td>{{estimation.estimatedDate}}</td>
                     <td>{{ estimation.pacDone ? 'Yes' : 'No' }}</td>
-                    <td>{{estimation.ageBucketOfSurgery}}</td>
+                    <td>{{estimation.ageBucketOfSurgery || 0}}</td>
 
                       <td>
                         <span class="status-badge">{{ estimation.statusOfEstimation }}</span>
@@ -174,7 +174,7 @@
   <div *ngIf="showAdvancePopup" class="estimation-modal">
     <div class="modal-content">
       <div class="modal-header">
-        <h3>Advance Confirmation for {{ selectedEstimation.patientName }}</h3>
+        <h3>PAC Confirmation for {{ selectedEstimation.patientName }}</h3>
         <button class="popup-close" (click)="closeAdvancePopup()">
           <img src="/popup-close.svg" />
         </button>
@@ -198,7 +198,7 @@
         required
           class="custom-input"
         />
-        <label for="advance" class="custom-label">Advance Amount*</label>
+        <label for="advance" class="custom-label">PAC Amount*</label>
       </div>
 
       <div class="estimation-input-container">

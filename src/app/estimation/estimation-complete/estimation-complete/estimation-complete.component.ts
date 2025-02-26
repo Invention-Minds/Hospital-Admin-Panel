@@ -56,9 +56,9 @@ this.fetchPendingEstimations();
         );
         console.log(this.pendingEstimations)
         this.pendingEstimations.sort((a, b) => {
-          const dateA = new Date(a.createdAt!);
-          const dateB = new Date(b.createdAt!);
-          return dateB.getTime() - dateA.getTime();
+          const dateA = new Date(a.estimationCreatedTime!);
+          const dateB = new Date(b.estimationCreatedTime!);
+          return dateA.getTime() - dateB.getTime();
         });
         this.filteredEstimations = [...this.pendingEstimations];
         console.log('Services processed successfully.');

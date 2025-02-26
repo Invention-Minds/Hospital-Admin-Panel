@@ -325,7 +325,34 @@ background: #FFF;
     background-color: #f4f4f4;
   }
   
+  .prn-suggestions {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid #ccc; /* Border to define dropdown */
+    background-color: #ffffff; /* White background to resemble a dropdown */
+    max-height: 200px; /* Restrict height for better display */
+    overflow-y: auto; /* Allow scrolling if suggestions overflow */
+    position: absolute; /* Position it absolutely relative to the form group */
+    width: 53%;
+    z-index: 10;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    top: calc(100% + -2px);
+    border-radius: 4px;
+     left: 0px;
+  }
   
+  .prn-suggestions li {
+    padding: 10px;
+    cursor: pointer;
+    font-size: 16px; /* Adjust font size for readability */
+    color: #333; /* Text color */
+  }
+  
+  .prn-suggestions li:hover {
+    background-color: #f0f0f0; /* Light grey background on hover for better visibility */
+    color: #005d8c; /* Optional: Highlight text color on hover */
+  }
 
   @keyframes spinner {
     to {transform: rotate(360deg);}

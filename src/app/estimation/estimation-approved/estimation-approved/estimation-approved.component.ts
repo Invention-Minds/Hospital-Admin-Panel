@@ -207,7 +207,8 @@ import { Router } from '@angular/router';
           userId: this.selectedEstimation.userId,
           cancellerId: this.selectedEstimation.cancellerId,
           cancellerName: this.selectedEstimation.cancellerName,
-          lockedBy: this.selectedEstimation.lockedBy
+          lockedBy: this.selectedEstimation.lockedBy,
+          patientPhoneNumber:this.selectedEstimation.patientPhoneNumber
         },
         // Extract only the description values
         inclusions: this.selectedEstimation.inclusions.map((item:any) => item.description),

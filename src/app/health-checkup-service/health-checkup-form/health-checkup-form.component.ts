@@ -43,6 +43,9 @@ export class HealthCheckupFormComponent implements OnInit {
   smsSent?: boolean = false;
   messageSent?: boolean = false;
   emailSent?: boolean = false;
+  prnSuggestions: boolean = false;
+  patients: any[] = []; // List of all patients
+filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
 
 
   constructor(private confirmationService: ConfirmationService, private healthCheckupService: HealthCheckupServiceService, private messageService: MessageService, private route: ActivatedRoute, private appointmentService: AppointmentConfirmService) { }
@@ -74,6 +77,12 @@ export class HealthCheckupFormComponent implements OnInit {
     const serviceId = this.route.snapshot.paramMap.get('id');
     // this.serviceData = history.state.data; // Retrieve data passed using state
     console.log(this.serviceData)
+    this.appointmentService.getAllPatients().subscribe(
+      (patients => {
+        this.patients = patients;
+        // console.log(this.patients)
+      })
+    )
 
     if (this.serviceData) {
       this.populateForm(this.serviceData);
@@ -748,5 +757,52 @@ export class HealthCheckupFormComponent implements OnInit {
     console.log('Component destroyed');
   }
 
-
+  onHealthCheckupPRNChange() {
+    const input = this.formData.pnrNumber || '';
+    console.log(input)
+  
+    if (!input) {
+      this.filteredHealthCheckupPRNs = [];
+      return;
+    }
+  
+    // Filter PRN suggestions based on input
+    this.filteredHealthCheckupPRNs = this.patients.filter(patient =>
+      String(patient.prn).trim().includes(String(input))
+    );
+  
+    this.prnSuggestions = this.filteredHealthCheckupPRNs.length > 0;
+  }
+  
+  // Function to handle PRN selection
+  selectHealthCheckupPRN(selectedPatient: any) {
+    if (!selectedPatient) return;
+  
+    // Extract name and remove prefixes
+    const nameParts = selectedPatient.name.split(" ");
+    const titles = ["Mr.", "Ms.", "Mrs.", "Miss.", "Dr.", "Master"];
+  
+    let firstName = nameParts[0];
+    let lastName = nameParts.slice(1).join(" ");
+  
+    if (titles.includes(firstName)) {
+      firstName = nameParts[1] || "";
+      lastName = nameParts.slice(2).join(" ") || "";
+    }
+  
+    this.formData.pnrNumber = selectedPatient.prn || '';
+    this.formData.firstName = firstName || '';
+    this.formData.lastName = lastName || '';
+    this.formData.phoneNumber = selectedPatient.mobileNo || '';
+  
+    console.log("Health Checkup PRN Selected:", selectedPatient);
+  
+    // Validate age
+    
+  
+    // console.log("Health Checkup PRN Selected:", selectedPatient);
+  
+    // Hide suggestions after selection
+    this.prnSuggestions = false;
+  }
 }

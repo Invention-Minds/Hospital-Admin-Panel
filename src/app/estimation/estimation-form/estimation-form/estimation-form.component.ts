@@ -908,8 +908,8 @@ this.selectedRoomType = this.selectedRooms.map(room => room.name);
           (pdfResponse) => {
             console.log("✅ PDF Generated & Sent via WhatsApp:", pdfResponse);
             this.messageService.add({ severity: 'success', summary: 'Success', detail: 'PDF Generated & Sent PDF via WhatsApp:!' });
-            const to = "itbilling@rashtrotthanahospital.com"
-            // const to = "keerthanasaminathan0805@gmail.com"
+            // const to = "itbilling@rashtrotthanahospital.com"
+            const to = "keerthanasaminathan0805@gmail.com"
             this.appointmentService.sendMailtoApprover(to, estimationData.estimationId, pdfResponse.filePath).subscribe(
               (response) => {
                 console.log('Email sent successfully:', response);

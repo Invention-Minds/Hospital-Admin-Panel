@@ -41,7 +41,7 @@
 .datetime-container {
   background: #f0f3ff;
   clip-path: polygon(30% 0, 100% 0, 100% 100%, 0% 100%);
-  padding: 33px 20px;
+  padding: 36px 20px;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -59,8 +59,8 @@
   font-weight: 600;
   line-height: normal;
   background: #f0f3ff;
-  padding: 0 10px;
-  padding-left: 20px;
+  padding: 0 0px;
+  padding-left: 28px;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -390,8 +390,8 @@ border: 1px solid #000;
   line-height: normal;
 }
 .copy-right-container {
-  clip-path: polygon(8% 0, 100% 0, 100% 100%, 0% 100%);
-  width: 444px;
+  clip-path: polygon(18% 0, 100% 0, 100% 100%, 0% 100%);
+  width: 260px;
   height: 65px;
   flex-shrink: 0;
   background-color: #001345;

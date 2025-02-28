@@ -659,6 +659,7 @@ export class MhcFormComponent implements OnInit {
         date: this.todayDate,
         time: appt.time,
         status: 'confirmed',
+        type:'mhc',
         userId: Number(this.userId),
         serviceId: this.selectedAppointment.id
       };

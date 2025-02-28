@@ -38,5 +38,6 @@ export interface Doctor {
   ExtraSlotCount?: any;
   extraHoursBefore?:any;
   extraHoursAfter?:any;
+  roomNo?:any
   
 }

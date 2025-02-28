@@ -2,7 +2,7 @@
     <div class="close-opd" (click)="openCloseOpdPopup()">
         <img src="/close-opd.svg"> Close OPD
     </div>
-    <button class="end-consul" [disabled]="isEndConsultation" (click)="completedAppointments.length < 1 && endConsultation()" >
+    <button class="end-consul" [disabled]="isEndConsultation" (click)="endConsultation()" >
         <img src="/end.svg" > End Consultation
     </button>
 </div>
@@ -33,7 +33,11 @@
               No records to display
             </td>
           </tr>
-          <tr *ngFor="let appointment of getPaginatedAppointments(); let i = index">
+          <tr *ngFor="let appointment of getPaginatedAppointments(); let i = index"  [ngClass]="{
+            'ongoing': appointment.checkedOut === true && !appointment.endConsultation,
+            'pending': appointment.postPond === true,
+            'finished': appointment.checkedOut === true && appointment.endConsultation === true
+          }">
             <td>{{ i + 1 }}</td>
             <td>{{ appointment.patientName }}</td>
             <td>{{ appointment.date }}</td>
@@ -118,7 +122,12 @@
     <div class="mobile-appointments">
       <div *ngFor="let appointment of filteredAppointments; let i = index" 
            class="appointment-card"
-           (click)="toggleCard(i)"> <!-- ✅ Clicking toggles the full view -->
+           (click)="toggleCard(i,$event)"
+           [ngClass]="{
+            'ongoing': appointment.checkedOut === true && !appointment.endConsultation,
+            'pending': appointment.postPond === true,
+            'finished': appointment.checkedOut === true && appointment.endConsultation === true
+          }"> <!-- ✅ Clicking toggles the full view -->
     
         <!-- Compact View -->
         <div class="card-header" *ngIf="!appointment.expanded">

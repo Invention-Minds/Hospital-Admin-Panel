@@ -1,6 +1,6 @@
 .table-container {
   border-radius: 10px;
-  background-color: #f0f3ff;
+  /* background-color: #f0f3ff; */
   padding: 20px;
   padding-left: 90px;
 }
@@ -901,6 +901,24 @@ font-style: normal;
 font-weight: 400;
 line-height: normal;
 }
+/* Green for Ongoing Consultation */
+.ongoing {
+  border-radius: 16px;
+  background: rgba(65, 255, 164, 0.30) !important; /* Light Green */
+}
+
+/* White for Finished Consultation */
+.finished {
+  border-radius: 16px;
+  background-color: #ffffff !important; /* White */
+}
+
+/* Orange for Pending Appointments */
+.pending {
+  border-radius: 16px;
+  background: rgba(255, 236, 138, 0.30) !important; /* Light Orange */
+}
+
 
 /* Show the mobile cards on smaller screens */
 @media screen and (max-width: 500px) {
@@ -1111,6 +1129,23 @@ line-height: normal;
   gap: 5px;  /* Space between radio button and text */
   font-size: 16px;  /* Ensure consistent font size */
   /* white-space: nowrap; Prevent text from breaking into multiple lines */
+}
+/* Green for Ongoing Consultation */
+.ongoing {
+  border-radius: 16px;
+  background: rgba(65, 255, 164, 0.30) !important; /* Light Green */
+}
+
+/* White for Finished Consultation */
+.finished {
+  border-radius: 16px;
+  background-color: #ffffff !important; /* White */
+}
+
+/* Orange for Pending Appointments */
+.pending {
+  border-radius: 16px;
+  background: rgba(255, 236, 138, 0.30) !important; /* Light Orange */
 }
 
 .radio-buttons input[type="radio"] {

@@ -306,7 +306,7 @@ export class AdminReportComponent {
     const userId = localStorage.getItem('userid');
 
     if (role) {
-      if (role === 'sub_admin' || role === 'super_admin') {
+      if (role === 'sub_admin' || role === 'super_admin' || role === 'admin' ) {
         // console.log('Loading all appointments...');
         this.loadAllAppointments();
       }

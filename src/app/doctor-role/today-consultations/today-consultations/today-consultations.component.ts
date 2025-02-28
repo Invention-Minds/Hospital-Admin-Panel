@@ -225,9 +225,22 @@ export class TodayConsultationsComponent {
     this.isMonitoringActive = false;
   }
 
-  toggleCard(index: number) {
+  // toggleCard(index: number) {
+  //   this.filteredAppointments[index].expanded = !this.filteredAppointments[index].expanded;
+  // }
+  toggleCard(index: number, event: Event): void {
+    const targetElement = event.target as HTMLElement;
+  
+    // Check if the clicked element is a button or inside a button
+    if (targetElement.tagName === 'BUTTON' || targetElement.closest('button')) {
+      event.stopPropagation(); // ✅ Prevent the click from propagating to the card
+      return;
+    }
+  
+    // Toggle card expansion
     this.filteredAppointments[index].expanded = !this.filteredAppointments[index].expanded;
   }
+  
   parseTimeToMinutes(time: string): number {
     const [hours, minutesPart] = time.split(':');
     const minutes = parseInt(minutesPart.slice(0, 2), 10); // Extract the numeric minutes
@@ -249,6 +262,12 @@ export class TodayConsultationsComponent {
         console.log(appointments)
         this.confirmedAppointments = appointments.filter(appointment => appointment.status === 'confirmed' && (appointment as any).checkedIn === true && appointment.date === this.today);
         this.filteredAppointments = this.confirmedAppointments;
+        // this.filteredAppointments = [...this.confirmedAppointments].sort((a, b) => {
+        //   if (a.checkedOut && !a.endConsultation) return -1; // Ongoing consultations first
+        //   if (!a.checkedOut && !b.checkedOut) return 0; // Pending appointments next
+        //   if (a.checkedOut && a.endConsultation) return 1; // Completed consultations last
+        //   return 0;
+        // });
         // console.log(this.doctor)
         this.completedAppointments = this.filteredAppointments.filter(appointment => !appointment.checkedOut || (!appointment.checkedOut && !appointment.isCloseOPD))
         // this.monitorWaitingTimes()
@@ -767,6 +786,7 @@ export class TodayConsultationsComponent {
       appointmentId: appointment.id!, // Add channelId to appointments in the backend
       channelId: 2,
     });
+    // this.loadDoctorData()
     // console.log(this.currentDoctorId, appointment.id!)
   }
   finishConsultation(appointment: Appointment): void {
@@ -797,8 +817,17 @@ export class TodayConsultationsComponent {
   closeTransferPopup() {
     this.showTransferAppointment = false;
   }
-  endConsultation() {
+  async endConsultation() {
     console.log('end')
+     await this.loadDoctorData()
+    if(this.completedAppointments.length>1){
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Warning',
+        detail: 'This action can’t be done right now as there are patients for consultation.',
+      });
+      return;
+    }
     this.isEndConsultation = true;
     const postPondAppointment = this.filteredAppointments.filter(appointment => {
       appointment.postPond === true
@@ -859,6 +888,8 @@ export class TodayConsultationsComponent {
     const { expanded, ...updatedAppointment } = appointment;
     this.appointmentService.updateAppointment(updatedAppointment)
   }
+
+  
 
   // Confirm and perform the Close OPD action
   confirmCloseOpd(): void {
@@ -995,8 +1026,8 @@ export class TodayConsultationsComponent {
       startDate: this.startDate,
       endDate: this.endDate,
     };
-    const adminPhoneNumber = ["919880544866","919341227264","918904943673","918951243004","919633943037"]
-    // const adminPhoneNumber = ["919342287945", "919342287945"]
+    // const adminPhoneNumber = ["919880544866","919341227264","918904943673","918951243004","919633943037"]
+    const adminPhoneNumber = ["919342287945", "919342287945"]
     this.appointmentService.sendAdminMessage(this.currentDoctorName, this.currentDepartmentName, this.startDate, this.endDate, adminPhoneNumber).subscribe({
       next: (response) => {
         // console.log('Leave request submitted:', response);

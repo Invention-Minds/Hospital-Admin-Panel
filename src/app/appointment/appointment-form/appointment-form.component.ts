@@ -237,12 +237,17 @@ export class AppointmentFormComponent implements OnInit {
           console.error('Error checking slot availability:', error);
         });
       this.appointmentForm.get('doctorName')?.valueChanges.subscribe(doctorName => {
-        const date = this.appointmentForm.get('appointmentDate')?.value;
-        // const doctorId = this.getDoctorIdByName(doctorName);
-
         const doctorId = this.doctorId;
-        if (doctorId && date) {
-          this.checkDoctorAvailabilityAndLoadSlots(doctorId, this.formatDate(date))
+        if (doctorId) {
+          this.onDoctorChange(doctorId)
+          if(this.appointment){
+            this.appointment.doctorId = doctorId;
+          }
+          let date = this.appointmentForm.get('appointmentDate')?.value;
+          if (doctorId && date) {
+            console.log('load times',this.doctorId)
+            this.checkDoctorAvailabilityAndLoadSlots(doctorId, this.formatDate(date))
+          }
         }
       });
       this.appointmentForm.get('appointmentDate')?.valueChanges.subscribe(date => {
@@ -548,12 +553,13 @@ export class AppointmentFormComponent implements OnInit {
 
   onDoctorSelect(doctor: Doctor): void {
 
-    this.appointmentForm.get('doctorName')?.setValue(doctor.name);
+    // this.appointmentForm.get('doctorName')?.setValue(doctor.name);
+    this.appointmentForm.get('doctorName')?.setValue(doctor.name, { emitEvent: false });
     this.doctorId = doctor.id;
     this.department = doctor.departmentName!;
     console.log(this.department)
     this.doctorType = doctor.doctorType;
-    // console.log(this.doctorId)
+    console.log(this.doctorId)
     this.onDoctorChange(this.doctorId)
     this.isVisitingConsultant = doctor.doctorType === 'Visiting Consultant';
     this.showDoctorSuggestions = false;  // Hide dropdown after selecting
@@ -567,7 +573,7 @@ export class AppointmentFormComponent implements OnInit {
     //     this.appointmentForm.get('doctorName')?.setValue(selectedDoctor.name);
     //   }
     // }
-
+    this.appointmentForm.get('doctorName')?.updateValueAndValidity({ emitEvent: true });
   }
   private setupNewAppointmentFormListeners() {
     // Load available slots when doctor or date changes for new appointments only
@@ -583,10 +589,15 @@ export class AppointmentFormComponent implements OnInit {
 
       // const doctorId = this.getDoctorIdByName(doctorName);
       const doctorId = this.doctorId;
+
       if (doctorId) {
         this.onDoctorChange(doctorId)
+        if(this.appointment){
+          this.appointment.doctorId = doctorId;
+        }
         let date = this.appointmentForm.get('appointmentDate')?.value;
         if (doctorId && date) {
+          console.log('load times')
           this.checkDoctorAvailabilityAndLoadSlots(doctorId, this.formatDate(date))
         }
       }
@@ -854,7 +865,7 @@ export class AppointmentFormComponent implements OnInit {
 
                 // Check if the currently selected time in the form is still available
                 const selectedTime = this.appointmentForm.get('appointmentTime')?.value;
-                // console.log(selectedTime, "selectedTime",)
+                console.log(selectedTime, "selectedTime",)
 
                 if (selectedTime && !this.availableSlots.includes(selectedTime)) {
                   this.showAvailabilityMessage = true;

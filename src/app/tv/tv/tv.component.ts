@@ -70,7 +70,7 @@ export class TvComponent implements OnInit, OnDestroy {
   checkedInAppointments: any[] = [];
   private updateTimeInterval!: Subscription;
   private eventSource: EventSource | null = null;
-  messageStopForDoctor :any[] = [];
+  messageStopForDoctor: any[] = [];
   adminAlertSentForDoctor: any[] = []
 
   constructor(
@@ -90,7 +90,7 @@ export class TvComponent implements OnInit, OnDestroy {
     }, 60000);
     this.startAutoUpdate()
     // this.checkDoctorAvailability(); // Check patient delays
-  
+
     // setInterval(() => {
     //   this.checkDoctorAvailability();
     // }, 300000); // Run every 5 minutes
@@ -122,7 +122,7 @@ export class TvComponent implements OnInit, OnDestroy {
     this.eventSource.addEventListener('channelRemoval', (event: MessageEvent) => {
       const removedChannel = JSON.parse(event.data);
       console.log('Channel Removed:', removedChannel);
-  
+
       const currentRoute = this.router.url;
       console.log(currentRoute)
       if (currentRoute.includes(channelId!)) {
@@ -134,26 +134,26 @@ export class TvComponent implements OnInit, OnDestroy {
     this.eventSource.addEventListener('messageSent', (event: MessageEvent) => {
       const doctorId = JSON.parse(event.data);
       console.log('doctorId', doctorId);
-  
-    this.messageStopForDoctor.push(doctorId)
-    console.log(this.messageStopForDoctor)
+
+      this.messageStopForDoctor.push(doctorId)
+      console.log(this.messageStopForDoctor)
 
     });
     this.eventSource.addEventListener('adminAlertSent', (event: MessageEvent) => {
       const doctorId = JSON.parse(event.data);
       console.log('doctorId', doctorId);
-  
-    this.adminAlertSentForDoctor.push(doctorId)
-    console.log(this.adminAlertSentForDoctor)
+
+      this.adminAlertSentForDoctor.push(doctorId)
+      console.log(this.adminAlertSentForDoctor)
 
     });
-  
+
   }
 
   // checkDoctorAvailability() {
   //   const todayDate = new Date().toLocaleDateString('en-CA')
   //   const notificationSent = new Map();
-  
+
   //   this.doctorService.getAllDoctors().subscribe((doctors) => {
   //     doctors.forEach((doctor: any) => {
   //       if (!doctor || !doctor.availability || doctor.userId === null) {
@@ -163,7 +163,7 @@ export class TvComponent implements OnInit, OnDestroy {
   //         const formattedUnavailableDate = new Date(unavailableDate.date).toISOString().split('T')[0];
   //         return formattedUnavailableDate === todayDate;  // Compare with today's date
   //       });
-  
+
   //       if (isUnavailableToday) {
   //         console.warn(`🚫 Dr. ${doctor.name} is unavailable today.`);
   //         return; // Skip if doctor is unavailable today
@@ -189,13 +189,13 @@ export class TvComponent implements OnInit, OnDestroy {
   //       // Step 1: Find today's availability
   //       const today = new Date().toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
   //       const todayAvailability = latestAvailability.find((avail: any) => avail.day.toLowerCase() === today);
-  
+
   //       if (!todayAvailability || !todayAvailability.availableFrom) {
   //         console.warn(`🛑 Dr. ${doctor.name} is not available today.`);
   //         return; // Skip if doctor is not available today
   //       }
   //       console.log(doctor)
-  
+
   //       // Step 2: Extract the first available time
   //       const firstSlot = todayAvailability.availableFrom.split(',')[0].trim(); // Take first time slot
   //       const firstAvailableTime = firstSlot.split('-')[0].trim(); // Extract first start time
@@ -207,21 +207,21 @@ export class TvComponent implements OnInit, OnDestroy {
   //             console.warn(`No valid appointments found for doctor ${doctor.id}`);
   //             return;
   //           }
-    
+
   //           const todayAppointments = appointments.filter(
   //             (appointment: any) =>
   //               appointment.checkedIn === true && 
   //               appointment.date === todayDate && 
   //               appointment.status === 'confirmed' 
   //           );
-    
+
   //           if (todayAppointments.length > 0) {
   //             this.authService.getUserDetails(doctor.userId).subscribe((user) => {
   //               console.log('user')
   //               if (user) {
   //                 const { loggedInDate, loggedInTime } = user.user;
   //                 console.log(user)
-                  
+
   //                 if (loggedInDate === todayDate) {
   //                   console.log(`✅ Dr. ${doctor.name} has already logged in today.`);
   //                   return; // Doctor has logged in today, no need to send notification
@@ -229,19 +229,19 @@ export class TvComponent implements OnInit, OnDestroy {
   //                 const firstSlot = todayAvailability.availableFrom.split(',')[0].trim(); // Take first time slot
   //                 const firstAvailableTime = firstSlot.split('-')[0].trim(); // Extract first start time
   //                 const availableTime = this.parseTime(firstAvailableTime); // Convert to Date object
-        
+
   //                 // Step 4: Calculate notification trigger time (5 mins before shift)
   //                 const notificationTime = new Date(availableTime.getTime() - 5 * 60000); // 5 minutes before availableTime
   //                 const now = new Date();
   //                 console.log(doctor.id)
   //                 console.log(this.messageStopForDoctor)
   //                 console.log(notificationTime, now)
-        
+
   //                 if (now >= notificationTime && now < availableTime && !this.messageStopForDoctor.includes(doctor.id)) {
-      
+
   //                   console.warn(`🚨 Dr. ${doctor.name} has not logged in before their shift at ${firstAvailableTime}! Sending alert...`);
   //                   notificationSent.set(doctor.userId, true);
-        
+
   //                   // Step 5: Send one-time notification to the doctor
   //                   // this.appointmentService
   //                   //   .lateLogin({
@@ -263,21 +263,21 @@ export class TvComponent implements OnInit, OnDestroy {
   //               }
   //             });
   //             const firstAppointment = todayAppointments[0];
-    
+
   //             // Get doctor's available time
   //           // Split by ',' in case of multiple slots
   //           const firstSlot =todayAvailability.availableFrom.split(',')[0].trim(); // Take the first slot and remove extra spaces
   //             const firstAvailableTime = firstSlot.split('-')[0].trim(); // Extract the first time before '-'
   //             const availableTime = this.parseTime(firstAvailableTime);
-              
+
   //             const thresholdTime = new Date(availableTime.getTime() + 10 * 60000); // +10 minutes
   //             console.log(doctor.id)
   //             const now = new Date();
   //             console.log(now, thresholdTime, firstAppointment, this.adminAlertSentForDoctor)
-    
+
   //             if (!firstAppointment.checkedOut && now > thresholdTime && !this.adminAlertSentForDoctor.includes(doctor.id) ) {
   //               console.warn(`⏳ Alert: First checked-in patient for Dr. ${doctor.name} has exceeded waiting time!`);
-    
+
   //               // Send message to admin
   //               // const adminPhoneNumbers = ["919880544866", "916364833988"]
   //               const adminPhoneNumbers = ["919342287945", "919342287945"]
@@ -309,15 +309,15 @@ export class TvComponent implements OnInit, OnDestroy {
 
   //     });
   //   });
-  
+
 
   // }
-  
+
 
   // checkDoctorLogin() {
   //   const todayDate = new Date().toLocaleDateString('en-CA')
   //   const notificationSent = new Map();
-  
+
   //   this.doctorService.getAllDoctors().subscribe((doctors) => {
   //     doctors.forEach((doctor: any) => {
   //       if (!doctor || !doctor.availability || doctor.userId === null) {
@@ -327,7 +327,7 @@ export class TvComponent implements OnInit, OnDestroy {
   //         const formattedUnavailableDate = new Date(unavailableDate.date).toISOString().split('T')[0];
   //         return formattedUnavailableDate === todayDate;  // Compare with today's date
   //       });
-  
+
   //       if (isUnavailableToday) {
   //         console.warn(`🚫 Dr. ${doctor.name} is unavailable today.`);
   //         return; // Skip if doctor is unavailable today
@@ -353,37 +353,37 @@ export class TvComponent implements OnInit, OnDestroy {
   //       // Step 1: Find today's availability
   //       const today = new Date().toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
   //       const todayAvailability = latestAvailability.find((avail: any) => avail.day.toLowerCase() === today);
-  
+
   //       if (!todayAvailability || !todayAvailability.availableFrom) {
   //         console.warn(`🛑 Dr. ${doctor.name} is not available today.`);
   //         return; // Skip if doctor is not available today
   //       }
   //       console.log(doctor)
-  
+
   //       // Step 2: Extract the first available time
   //       const firstSlot = todayAvailability.availableFrom.split(',')[0].trim(); // Take first time slot
   //       const firstAvailableTime = firstSlot.split('-')[0].trim(); // Extract first start time
   //       const availableTime = this.parseTime(firstAvailableTime); // Convert to Date object
-  
+
   //       // Step 3: Check if the doctor has logged in today
   //       this.authService.getUserDetails(doctor.userId).subscribe((user) => {
   //         if (user) {
   //           const { loggedInDate, loggedInTime } = user;
-            
+
   //           if (loggedInDate === todayDate) {
   //             console.log(`✅ Dr. ${doctor.name} has already logged in today.`);
   //             return; // Doctor has logged in today, no need to send notification
   //           }
-  
+
   //           // Step 4: Calculate notification trigger time (5 mins before shift)
   //           const notificationTime = new Date(availableTime.getTime() - 5 * 60000); // 5 minutes before availableTime
   //           const now = new Date();
-  
+
   //           if (now >= notificationTime && now < availableTime) {
 
   //             console.warn(`🚨 Dr. ${doctor.name} has not logged in before their shift at ${firstAvailableTime}! Sending alert...`);
   //             notificationSent.set(doctor.userId, true);
-  
+
   //             // Step 5: Send one-time notification to the doctor
   //             this.appointmentService
   //               .lateLogin({
@@ -405,8 +405,8 @@ export class TvComponent implements OnInit, OnDestroy {
   //     });
   //   });
   // }
-  
-  
+
+
   loadDoctorsForChannel(channelId: string) {
     this.channelService.getDoctorsByChannel(channelId).subscribe(
       (response: any) => {
@@ -505,6 +505,7 @@ export class TvComponent implements OnInit, OnDestroy {
     //   }
     // });
     this.doctorService.getDoctorById(doctor.doctorId).subscribe((doctorDetails) => {
+
       if (doctorDetails && doctorDetails.availability) {
         // Step 1: Check if all `updatedAt` fields are null
         const allUpdatedAtNull = doctorDetails.availability.every((avail: any) => !avail.updatedAt);
@@ -566,9 +567,9 @@ export class TvComponent implements OnInit, OnDestroy {
               const hours = Math.floor(totalRemainingTime / 60);
               const minutes = totalRemainingTime % 60;
               doctor.remainingTime = minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
-          } else {
+            } else {
               doctor.remainingTime = totalRemainingTime > 0 ? `${totalRemainingTime} mins` : 'No active slots';
-          }
+            }
 
             console.log(
               `Doctor ${doctor.name} has ${extraSlotTimes.length} extra slots. Total remaining time: ${doctor.remainingTime}`
@@ -583,7 +584,9 @@ export class TvComponent implements OnInit, OnDestroy {
         // Step 4: Update the doctor's availableFrom time based on the latest availability
         const latestAvailableFrom = availableDay?.availableFrom || 'N/A';
         doctor.time = latestAvailableFrom;
-        doctor.image = 'sunil.svg'
+        doctor.image = 'sunil.svg';
+        doctor.roomNo = doctorDetails.roomNo
+        console.log(doctor.roomNo)
 
         console.log(`Updated Doctor Time for ${doctor.name}: ${doctor.time}`);
       } else {
@@ -631,7 +634,7 @@ export class TvComponent implements OnInit, OnDestroy {
 
           );
           this.checkedInAppointments = todayAppointments
-          todayAppointments.forEach(appointments =>{
+          todayAppointments.forEach(appointments => {
             appointments.actualTime = appointments.time
           })
           todayAppointments.sort((a, b) => {
@@ -650,7 +653,7 @@ export class TvComponent implements OnInit, OnDestroy {
             (appointment: any) =>
               appointment.checkedIn === true && appointment.date === todayDate && appointment.status === 'confirmed'
           );
-          console.log(this.todayFullAppointments,todayDate)
+          console.log(this.todayFullAppointments, todayDate)
           // Filter for checkedIn appointments
           // todayAppointments.forEach((appointment: any, index: number) => {
           //   if (appointment.checkedOut === true) {
@@ -673,7 +676,7 @@ export class TvComponent implements OnInit, OnDestroy {
           const allConsultationsEnded = todayAppointments.every(
             (appointment: any) => appointment.endConsultation === true
           );
-  
+
           if (allConsultationsEnded) {
             doctor.patients = []; // If all consultations are ended, set to empty array
           } else {
@@ -848,11 +851,11 @@ export class TvComponent implements OnInit, OnDestroy {
     // const pendingAppointments = this.checkedInAppointments.filter(
     //   (appt: any) =>  appt.checkedIn === true
     // );
-    
+
     // // Step 2: Group pending appointments by doctor
     // const appointmentsByDoctor = pendingAppointments.reduce((acc: any, appointment: any) => {
     //   const doctorId = appointment.doctorId;
-    
+
     //   if (!acc[doctorId]) {
     //     acc[doctorId] = {
     //       doctorName: appointment.doctorName,
@@ -861,18 +864,18 @@ export class TvComponent implements OnInit, OnDestroy {
     //       slotDuration: appointment.doctor.slotDuration
     //     };
     //   }
-    
+
     //   acc[doctorId].appointments.push(appointment);
     //   return acc;
     // }, {});
     // console.log(appointmentsByDoctor)
-    
+
     // // Step 3: Loop through each doctor's appointments
     // Object.values(appointmentsByDoctor).forEach((doctorData: any) => {
     //   const { doctorName, doctorPhoneNumber, appointments, slotDuration } = doctorData;
     //   console.log(appointments)
     //   const averageWaitingTime = slotDuration;
-    
+
     //   // Find the currently checked-in patient who hasn't checked out yet
     //   const patientInAppointment = appointments.find(
     //     (appt: any) => appt.checkedOut === true && appt.endConsultationTime === null
@@ -880,12 +883,12 @@ export class TvComponent implements OnInit, OnDestroy {
     //   const completeAppointment = pendingAppointments.filter(
     //     (appt:any) => appt.checkedOut === true
     //   )
-    
+
     //   console.log(patientInAppointment)
     //   if (patientInAppointment) {
     //     setTimeout(() => {
     //       const scheduledTime = parseTimeToDate(patientInAppointment.scheduledTime);
-    
+
     //       if (scheduledTime) {
     //         const elapsedTime = new Date().getTime() - scheduledTime.getTime();
     //         const elapsedMinutes = Math.floor(elapsedTime / 60000);
@@ -899,7 +902,7 @@ export class TvComponent implements OnInit, OnDestroy {
     //               elapsedMinutes - averageWaitingTime
     //             } mins!`
     //           );
-              
+
     //           // const waitingMultiplier = Math.ceil((elapsedMinutes - extraThreshold) / slotDuration);
     //           console.log(`Waiting Multiplier: ${waitingMultiplier}`);
     //           // Step 4: Find the next appointment for the doctor
@@ -907,11 +910,11 @@ export class TvComponent implements OnInit, OnDestroy {
     //             (appt: any) => appt.status === "Next" && appt.doctorId === patientInAppointment.doctorId
     //           );
     //           console.log(nextAppointment)
-    
+
     //           if (nextAppointment) {
     //             nextAppointment.extraWaitingTime = elapsedMinutes - extraThreshold;
     //             const extraWaitingTime = nextAppointment.extraWaitingTime;
-    
+
     //             // Step 5: Update extra waiting time in DB
     //             this.appointmentService.updateExtraWaitingTime(nextAppointment.id, extraWaitingTime).subscribe(
     //               (response: any) => {
@@ -921,7 +924,7 @@ export class TvComponent implements OnInit, OnDestroy {
     //                 console.error("Error updating waiting time:", error);
     //               }
     //             );
-    
+
     //             // Step 6: Send WhatsApp notifications to Admins & Doctor
     //             // const adminPhoneNumbers = ["919880544866 ", "916364833988", "919995703633 "]; // Admin List
     //             const adminPhoneNumbers = ['919342287945', '919342287945', '919342287945']
@@ -947,14 +950,14 @@ export class TvComponent implements OnInit, OnDestroy {
     //             //       console.error(`❌ Error sending message to Dr. ${doctorName}:`, error);
     //             //     }
     //             //   );
-                
+
     //           }
     //         }
     //       }
     //     }, 1000);
     //   }
     // });
-    
+
 
     appointments.forEach((appointment: any) => {
       if (adjustedTime && !isNaN(adjustedTime.getTime())) {
@@ -981,60 +984,106 @@ export class TvComponent implements OnInit, OnDestroy {
           console.error("Invalid appointment time format:", appointment.time);
         }
       }
-      // If "PatientIn" has not been found, mark the first matching appointment as "PatientIn"
-      if (!patientInFound && appointment.checkedOut === true && appointment.endConsultation === null) {
-        appointment.status = 'PatientIn';
-        appointment.scheduledTime = appointment.time
-        appointment.time = 'PatientIn';
-        patientInFound = true; // Mark that "PatientIn" is found
-        return;
-      }
-      // if (appointment.checkedOut === true && appointment.endConsultation === true) {
-      //   patientInFound = true;
-      //   return;
+      let patientInFound = false; // Track if "PatientIn" is found
+      let nextAppointmentSet = false; // Ensure only one "Next" is assigned
+      let patientInIndex = -1; // Track index of "PatientIn"
+
+      // // **Step 1: Exclude appointments with `endConsultation`**
+      // const filteredAppointments = appointments.filter(appt => !appt.endConsultation);
+
+      // // **Step 2: Sort appointments by time (earliest first)**
+      // const sortedAppointments = [...filteredAppointments].sort((a, b) => 
+      //     new Date(a.time).getTime() - new Date(b.time).getTime()
+      // );
+
+      // // **Step 3: Assign statuses**
+      // sortedAppointments.forEach((appointment, index) => {
+      //     // Reset default status
+      //     appointment.status = "Default";
+
+      //     if (appointment.checkedOut === true && !patientInFound) {
+      //         // **Assign "PatientIn" to the first checked-out appointment**
+      //         appointment.status = "PatientIn";
+      //         patientInFound = true;
+      //         patientInIndex = index; // Save the index of "PatientIn"
+      //     }
+      // });
+
+      // // **Step 4: Assign "Next" to the appointment immediately after "PatientIn"**
+      // if (patientInIndex !== -1) {
+      //     for (let i = patientInIndex + 1; i < sortedAppointments.length; i++) {
+      //         if (sortedAppointments[i].checkedOut === false) {
+      //             sortedAppointments[i].status = "Next";
+      //             break; // Ensure only one "Next" is assigned
+      //         }
+      //     }
       // }
-      console.log(patientInFound)
-      if (appointment.postPond === true) {
-        appointment.status = 'Pending'
-        appointment.time = 'Pending'
-        return
+
+      const filteredAppointments = appointments.filter(appt => !appt.endConsultation);
+
+      // **Step 2: Sort appointments by time (earliest first)**
+      const sortedAppointments = [...filteredAppointments].sort((a, b) =>
+        this.parseTimeToMinutesAppt(a.time) - this.parseTimeToMinutesAppt(b.time)
+      );
+      const sortedTimeAppointments = [...filteredAppointments].sort((a, b) =>
+        this.parseTimeToMinutesAppt(a.time) - this.parseTimeToMinutesAppt(b.time)
+      );
+
+      // **Step 3: Assign statuses (Reset all first)**
+      sortedAppointments.forEach((appointment, index) => {
+        appointment.status = "Default"; // Reset status
+
+        if (appointment.checkedOut === true && !patientInFound) {
+          // **Assign "PatientIn" to the first checked-out appointment**
+          appointment.status = "PatientIn";
+          appointment.time = "Patient-In"
+          patientInFound = true;
+          patientInIndex = index; // Save index of "PatientIn"
+        }
+        if (appointment.postPond === true) {
+          console.log('postpond')
+          appointment.status = 'Pending'
+          appointment.time = 'Pending'
+        }
+      });
+
+      // **Step 4: Select the next patient based on pending list**
+      const pendingAppointments = sortedTimeAppointments.filter(
+        (appt) => appt.checkedIn === true && appt.checkedOut === false
+      );
+
+      const sortedPendingAppointments = pendingAppointments.sort((a, b) =>
+        this.parseTimeToMinutesAppt(a.time) - this.parseTimeToMinutesAppt(b.time)
+      );
+
+      const nextAppointment = sortedPendingAppointments.length > 0 ? sortedPendingAppointments[0] : null;
+      console.log(nextAppointment)
+
+      // **Step 5: Assign "Next" only after "PatientIn"**
+      if (nextAppointment) {
+        // for (let i = patientInIndex + 1; i < sortedAppointments.length; i++) {
+        //     if (sortedAppointments[i].checkedOut === false) {
+        //         sortedAppointments[i].status = "Next";
+        //         break; // Ensure only one "Next" is assigned
+        //     }
+        // }
+        if (nextAppointment.postPond === true) {
+          nextAppointment.status = 'Pending'
+          nextAppointment.time = 'Pending'
+        } else {
+          nextAppointment.status = "Next";
+          nextAppointment.time = "Next"
+        }
+
       }
 
-      if (
-        latestCheckedOutAppointment &&
-        !nextAppointmentFound &&
-        patientInFound
-      ) {
-        appointment.status = "Next";
-        appointment.time = "Next";
-        nextAppointmentFound = true; // Ensure only one gets marked as "Next"
-        return;
-      }
-      // If "PatientIn" is already found, the next appointment becomes "Next"
-      if (
-        latestEndConsultationAppointment && // Check if the appointment exists
-        latestEndConsultationAppointment.endConsultationTime && // Check if endConsultationTime exists
-        appointment.checkedOut === false &&
-        appointment.time === formatTime(new Date(latestEndConsultationAppointment.endConsultationTime))
-      ) {
-        // If the appointment time matches the latest end consultation time and it's not checked out
-        appointment.status = 'Next';
-        appointment.time = 'Next';
-        patientInFound = false; // Reset the flag, as "Next" can only be assigned once
-        return;
-      }
 
-      if (appointment.checkedOut !== true) {
-        appointment.status = 'Default';
-        return;
-      }
 
 
       // Mark all remaining appointments as "Default"
       // appointment.status = 'Default';
     });
   }
-
 
 
   markCheckedOut(patient: any, doctor: any) {
@@ -1044,5 +1093,16 @@ export class TvComponent implements OnInit, OnDestroy {
 
   trackByFn(index: number, item: any): number {
     return item.id; // Use a unique identifier for tracking
+  }
+  parseTimeToMinutesAppt(timeString: string): number {
+    const match = timeString.match(/(\d{1,2}):(\d{2})\s?(AM|PM)/);
+    if (!match) return 0;
+
+    let [, hours, minutes, period] = match;
+    let hour = parseInt(hours);
+    if (period === "PM" && hour !== 12) hour += 12;
+    if (period === "AM" && hour === 12) hour = 0;
+
+    return hour * 60 + parseInt(minutes);
   }
 }

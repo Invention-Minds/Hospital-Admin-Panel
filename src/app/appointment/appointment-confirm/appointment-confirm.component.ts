@@ -715,6 +715,7 @@ export class AppointmentConfirmComponent {
       }
       return {
         'Patient Name': appointment.patientName,
+        'Patient PhoneNumber':appointment.phoneNumber,
         'Patient Email': appointment.email,
         'Doctor Name': appointment.doctorName,
         'Department': appointment.department,

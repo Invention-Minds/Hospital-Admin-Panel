@@ -158,7 +158,12 @@
     align-items: center;
     justify-content: center;
   }
-  
+  .checked-in-status {
+    background-color: #0e2970; /* Color for 'checked-In' */
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+  }
   .pagination-btn.next {
     background-color: #8cc152; /* Green background for next */
     color: white;

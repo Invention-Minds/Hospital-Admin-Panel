@@ -110,8 +110,17 @@
                           <img *ngIf="!service.messageSent" src="icons/not-sent.png" alt="Not Sent">
                         </span>
                       </td>
-                      <td>
+                      <!-- <td>
                         <span class="status-badge">{{ service.appointmentStatus }}</span>
+                      </td> -->
+                      <td>
+                        <span class="status-badge" [ngClass]="{ 
+                    'confirmed-status': !service.checkedIn, 
+                    'checked-in-status': service.checkedIn 
+                  }">
+                          {{ !service.checkedIn ? 'Confirmed' : 'Checked In' }}
+                        </span>
+            
                       </td>
                     <td class="button">
                         <button class="btn-action" [disabled]="service.checkedIn">

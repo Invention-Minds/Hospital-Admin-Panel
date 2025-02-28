@@ -79,10 +79,19 @@
                     <td>{{service.consultationCount}}</td>
 
                     <td class="button">
+                      <button class="btn-action" [disabled]="service.isLab" >
+                        <img src="lab.svg" alt="check" class="action-icon"  (click)="!service.isLab && labTime(service)"
+                          pTooltip="Lab" tooltipPosition="top">
+                      </button>
+                      <button class="btn-action" >
+                        <img src="radio.svg" alt="check" class="action-icon" (click)="openPopup(service)"
+                          pTooltip="Radiology" tooltipPosition="top">
+                      </button>
                         <button class="btn-action" >
                           <img src="consul-edit.svg" alt="check" class="action-icon" (click)="openAppointmentForm(service)"
-                            pTooltip="Create" tooltipPosition="top">
+                            pTooltip="Appointments" tooltipPosition="top">
                         </button>
+
                       </td>
                 </tr>
             </tbody>
@@ -104,5 +113,63 @@
       <app-delete-confirmation-dialog [showDialog]="isLockedDialogVisible"
   (close)="handleLockedDialogClose()"></app-delete-confirmation-dialog>
 
+
+  <div *ngIf="showPopup" class="close-opd-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Radiology Service </h3>
+        <button class="popup-close" (click)="closePopup()">
+          <img src="/popup-close.svg" alt="Close Popup" />
+        </button>
+      </div>
+      <hr />
+      <div class="modal-body">
+        <p>
+          Please select from below
+        </p>
+
+        <div class="checkbox-group">
+          <label>
+            <input type="checkbox" [(ngModel)]="chestXRay" [disabled]="chestXRayTime !== null">
+            Chest X-Ray 
+          </label>
+    
+          <label>
+            <input type="checkbox" [(ngModel)]="ultrasound" [disabled]="ultrasoundTime !== null">
+            Ultrasound (Abd & Plv) 
+          </label>
+    
+          <label>
+            <input type="checkbox" [(ngModel)]="boneDensitometry" [disabled]="boneDensitometryTime !== null">
+            Bone Mineral Densitometry (Single Region) 
+          </label>
+    
+          <label>
+            <input type="checkbox" [(ngModel)]="mammography" [disabled]="mammographyTime !== null">
+            Mammography 
+          </label>
+    
+          <label>
+            <input type="checkbox" [(ngModel)]="ecg" [disabled]="ecgTime !== null">
+            ECG 
+          </label>
+    
+          <label>
+            <input type="checkbox" [(ngModel)]="echoTMT" [disabled]="echoTMTTime !== null">
+            Echo OR TMT 
+          </label>
+  <!--   
+          <label>
+            <input type="checkbox" [(ngModel)]="usgEcho" [disabled]="usgEchoTime !== null">
+            USG Abdomen & Pelvis 2D Echo <span *ngIf="usgEchoTime"> (Selected at {{ usgEchoTime }})</span>
+          </label> -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="save-button" (click)="submitSelection()">Submit</button>
+        <button class="close-button" (click)="closePopup()">Cancel</button>
+      </div>
+    </div>
+  </div>
 </div>
 <div class="loader" *ngIf="isLoading"></div>

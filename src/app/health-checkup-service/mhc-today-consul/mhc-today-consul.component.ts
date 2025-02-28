@@ -354,6 +354,24 @@ export class MhcTodayConsulComponent {
     // Update UI
 
   }
+  labTime(service:any):void{
+    const {id, package: packageDate,packageId,consultationCount, ...withoutServiceId} = service;
+    
+    const payload = {
+      ...withoutServiceId,
+     isLab: true,
+     isLabTime: new Date(),
+    }
+    if (!id) return;
+    this.healthCheckupService.updateService(id,payload).subscribe({
+      next: (response) => {
+        console.log('Service marked as completed:', response);
+        this.fetchConfirmedAppointments()
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Lab is updated successfully!' });
+
+      }
+    })
+  }
   openAppointmentForm(service: any): void {
     // this.router.navigate(['/reschedule', service.id], {
     //   state: { data: service }, // Passing full service object using state
@@ -510,6 +528,103 @@ export class MhcTodayConsulComponent {
     if (this.activeServiceId && this.activeComponent !== 'form') {
       this.unlockService();
     }
+  }
+  showPopup: boolean = false;
+  selectedService: any = null;
+
+  // Radiology test states (each service will have its own)
+  chestXRay: boolean = false;
+  ultrasound: boolean = false;
+  boneDensitometry: boolean = false;
+  mammography: boolean = false;
+  ecg: boolean = false;
+  echoTMT: boolean = false;
+  // usgEcho: boolean = false;
+
+  // Timestamps
+  chestXRayTime: any | null = null;
+  ultrasoundTime: any | null = null;
+  boneDensitometryTime: any | null = null;
+  mammographyTime: any | null = null;
+  ecgTime: any | null = null;
+  echoTMTTime: any | null = null;
+  // usgEchoTime: string | null = null;
+
+
+
+  /** Open popup for the selected service */
+  openPopup(service: any) {
+    this.selectedService = service;
+    this.showPopup = true;
+
+    // ✅ Load previously selected values if the service was updated before
+    this.chestXRay = service.chestXRay || false;
+    this.ultrasound = service.ultrasound || false;
+    this.boneDensitometry = service.boneDensitometry || false;
+    this.mammography = service.mammography || false;
+    this.ecg = service.ecg || false;
+    this.echoTMT = service.echoTMT || false;
+    // this.usgEcho = service.usgEcho || false;
+
+    this.chestXRayTime = service.chestXRayTime || null;
+    this.ultrasoundTime = service.ultrasoundTime || null;
+    this.boneDensitometryTime = service.boneDensitometryTime || null;
+    this.mammographyTime = service.mammographyTime || null;
+    this.ecgTime = service.ecgTime || null;
+    this.echoTMTTime = service.echoTMTTime || null;
+    // this.usgEchoTime = service.usgEchoTime || null;
+  }
+
+  /** Close the popup */
+  closePopup() {
+    this.showPopup = false;
+    this.selectedService = null;
+  }
+
+  /** Submit the selected radiology tests */
+  submitSelection() {
+    if (!this.selectedService) return;
+    
+    const currentTime = new Date().toLocaleString(); // Capture timestamp
+
+    // ✅ Set timestamps only for newly selected tests
+    if (this.chestXRay && !this.chestXRayTime) this.chestXRayTime = new Date();
+    if (this.ultrasound && !this.ultrasoundTime) this.ultrasoundTime = new Date();
+    if (this.boneDensitometry && !this.boneDensitometryTime) this.boneDensitometryTime = new Date();
+    if (this.mammography && !this.mammographyTime) this.mammographyTime = new Date();
+    if (this.ecg && !this.ecgTime) this.ecgTime = new Date();
+    if (this.echoTMT && !this.echoTMTTime) this.echoTMTTime = new Date();
+    // if (this.usgEcho && !this.usgEchoTime) this.usgEchoTime = currentTime;
+
+    const { id: serviceId } = this.selectedService;
+    if (!serviceId) return;
+    const {id, package: packageDate,packageId,consultationCount, ...withoutServiceId} = this.selectedService;
+    const payload = {
+      ...withoutServiceId,
+      chestXRay: this.chestXRay,
+      ultrasound: this.ultrasound,
+      boneDensitometry: this.boneDensitometry,
+      mammography: this.mammography,
+      ecg: this.ecg,
+      echoTMT: this.echoTMT,
+      // usgEcho: this.usgEcho,
+      chestXRayTime: this.chestXRayTime,
+      ultrasoundTime: this.ultrasoundTime,
+      boneDensitometryTime: this.boneDensitometryTime,
+      mammographyTime: this.mammographyTime,
+      ecgTime: this.ecgTime,
+      echoTMTTime: this.echoTMTTime,
+      // usgEchoTime: this.usgEchoTime
+    };
+
+    // ✅ Update service via API
+    this.healthCheckupService.updateService(serviceId, payload).subscribe({
+      next: (response) => {
+        console.log('Service updated:', response);
+        this.closePopup(); // Close popup after update
+        this.fetchConfirmedAppointments()
+      }
+    });
   }
 
 }

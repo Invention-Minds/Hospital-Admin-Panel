@@ -511,6 +511,7 @@ export class AppointmentCompleteComponent {
       }
       return {
         'Patient Name': appointment.patientName,
+        'Patient Phone Number': appointment.phoneNumber,
         'Patient Email': appointment.email,
         'Doctor Name': appointment.doctorName,
         'Department': appointment.department,

@@ -365,6 +365,10 @@ onClear() {
       this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Cannot check-in for future appointments!' });
       return;
     }
+    if (appointment.appointmentDate < this.today) {
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Cannot check-in for past appointments!' });
+      return;
+    }
     const payload ={
       ...appointment,
       checkedIn: true,
@@ -374,6 +378,7 @@ onClear() {
     this.healthCheckupService.updateService(serviceId,payload).subscribe({
       next: (response) => {
         console.log('Service marked as completed:', response);
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Checked In Successfully!' });
         this.fetchConfirmedAppointments()
 
       }

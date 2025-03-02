@@ -136,13 +136,26 @@
           </div>
     
           <!-- Otherwise show the list of slots -->
-          <div *ngIf="generatedSlots.length > 0" class="slots-grid">
+          <!-- <div *ngIf="generatedSlots.length > 0" class="slots-grid">
             <label *ngFor="let slot of generatedSlots" class="slot-label">
               <input type="checkbox" [checked]="unavailableSlots.includes(slot.time)" 
                      (change)="onSlotSelectionChange($event, slot.time)" />
               {{ slot.time }}
             </label>
+          </div> -->
+          <div *ngIf="generatedSlots.length > 0" class="slots-grid">
+            <label *ngFor="let slot of generatedSlots" class="slot-label">
+              <input 
+                type="checkbox" 
+                [checked]="unavailableSlots.includes(slot.time)" 
+                (change)="onSlotSelectionChange($event, slot.time)" 
+                [disabled]="slot.status === 'booked'" /> <!-- Disable if booked -->
+              
+              {{ slot.time }} 
+              <!-- <span *ngIf="slot.status === 'booked'" class="booked-badge"> (Booked) </span> Show booked status -->
+            </label>
           </div>
+          
           <div class="update-button-unavailable">
             <button class="update" [disabled]="isUpdateButtonDisabled" (click)="updateUnavailableSlots()">Update</button>
             <button (click)="closeSlotDialog()" class="mark-available-button">Close</button>

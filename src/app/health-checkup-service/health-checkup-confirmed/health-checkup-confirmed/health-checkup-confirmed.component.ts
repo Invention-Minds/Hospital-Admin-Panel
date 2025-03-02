@@ -377,8 +377,9 @@ onClear() {
 
     this.healthCheckupService.updateService(serviceId,payload).subscribe({
       next: (response) => {
-        console.log('Service marked as completed:', response);
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Checked In Successfully!' });
+        console.log('Service marked as completed:', response);
+
         this.fetchConfirmedAppointments()
 
       }

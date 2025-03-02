@@ -144,7 +144,7 @@ font-weight: 500;
     text-wrap: nowrap;
   }
   
-  .doctor-card {
+  /* .doctor-card {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -154,7 +154,21 @@ font-weight: 500;
     background: rgba(255, 255, 255, 0.10);
     transition: box-shadow 0.3s ease;
     border: 1px solid #ddd;
+  } */
+  .doctor-card {
+    display: flex;
+    flex-direction: column; /* Stack name and availability info */
+    align-items: flex-start; /* Align text properly */
+    justify-content: space-between;
+    padding: 10px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.10);
+    transition: box-shadow 0.3s ease;
+    border: 1px solid #ddd;
+    min-width: 200px; /* Prevent squeezing on small screens */
+    max-width: 100%; /* Allow responsive width */
   }
+  
   .doctor-card:hover{
     box-shadow: 0px 4px 15px 0px rgba(216, 210, 252, 0.64);
   }
@@ -196,6 +210,11 @@ font-weight: 500;
   }
   .availability-status.absent{
     color: #e74c3c;
+    display: block;
+    white-space: normal; /* Allow text to wrap */
+    word-break: break-word; /* Ensure long text wraps properly */
+    overflow-wrap: break-word; /* Additional wrapping support */
+    margin-top: 5px; /* Add spacing between the doctor name and the unavailable dates */
   }
   .no-record{
     text-align: center !important;

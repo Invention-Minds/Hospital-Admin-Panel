@@ -25,9 +25,11 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
   @Input() doctor: Doctor | null = null;
   @Output() save = new EventEmitter<Doctor>(); // Emits when the form is saved
   @Output() cancel = new EventEmitter<void>(); // Emits when the edit is canceled
+  @Input() isLoading!: boolean;
   availableTimes: string = ''; // Single string storing all ranges
   availableTimesArray: string[] = ['']; // Dynamic array for input fields
   formError: string | null = null;
+  formErrors: { [key: string]: string } = {};
 
   // Define the days with a type assertion to ensure that only valid days are used
   availabilityDaysList: (keyof Doctor['availabilityDays'])[] = [
@@ -746,6 +748,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
 
   // Refactored method to handle the actual save operation
   private saveDoctorDetails(): void {
+    console.log(this.doctor)
     if (this.doctor?.doctorType === 'Visiting Consultant') {
       // console.log('Visiting Consultant', this.doctor)
       if (!this.doctor?.phone_number.startsWith('91')) {
@@ -812,6 +815,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
       // Emit the save event with the doctor details
       // this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Doctor details saved successfully' });
       this.save.emit(this.doctor!);
+      console.log(this.doctor)
       // this.doctor = null; // Reset the doctor object after saving
       // this.isEditMode = false;
     }
@@ -1087,6 +1091,12 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
   validateTimes(): boolean {
     const timePattern = /^\d{2}:\d{2}-\d{2}:\d{2}$/;
 
+      // Check if availableTimesArray is empty or contains only empty strings
+  if (this.availableTimesArray.length === 0 || this.availableTimesArray.every(time => time.trim() === '')) {
+    this.formError = 'Please enter available time.';
+    return false;
+  }
+
     for (const time of this.availableTimesArray) {
       if (time.trim() !== '' && !timePattern.test(time)) {
         this.formError = 'All times must be in the format 00:00-00:00.';
@@ -1113,9 +1123,13 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
   }
 
   addTimeRange(day: string): void {
-    this.modifiedDay = day as keyof Doctor['availabilityDays'];
-    this.individualAvailability[day].availableFromArray.push(''); // Add a new empty time range
-    this.updateAvailableFromString(day); // Update the combined string
+    this.validateTimesForIndividual()
+    if(this.formErrors){
+      this.modifiedDay = day as keyof Doctor['availabilityDays'];
+      this.individualAvailability[day].availableFromArray.push(''); // Add a new empty time range
+      this.updateAvailableFromString(day);
+    }
+ // Update the combined string
   }
 
   removeTimeRange(day: string, index: number): void {
@@ -1124,12 +1138,98 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
     this.updateAvailableFromString(day); // Update the combined string
   }
   updateAvailableFromString(day: string): void {
+    this.validateTimesForIndividual()
+    console.log(this.formErrors)
+    if(this.formErrors){
+      console.log('updating')
     this.modifiedDay = day as keyof Doctor['availabilityDays'];
     const timeArray = this.individualAvailability[day].availableFromArray || [];
     this.individualAvailability[day].availableFrom = timeArray.filter(time => time.trim() !== '').join(', '); // Join non-empty values
     // console.log('Updated available from:', this.individualAvailability[day].availableFrom);
+    }
   }
-
+  // validateTimesForIndividual(): boolean {
+  //   const timePattern = /^\d{2}:\d{2}-\d{2}:\d{2}$/;
+  //   let isValid = true; // Flag to track validation status
+  
+  //   // Reset errors for all days
+  //   this.formErrors = {};
+  
+  //   for (const day in this.individualAvailability) {
+  //     if (this.individualAvailability.hasOwnProperty(day)) {
+  //       const availableTimes = this.individualAvailability[day].availableFromArray;
+  
+  //       // Check if availableFromArray is empty or contains only empty values
+  //       if (!availableTimes || availableTimes.length === 0 || availableTimes.every(time => time.trim() === '')) {
+  //         this.formErrors[day] = `Please enter available time for ${day}.`;
+  //         isValid = false;
+  //         continue; // Skip further validation for this day
+  //       }
+  
+  //       // Validate format
+  //       for (const time of availableTimes) {
+  //         if (time.trim() !== '' && !timePattern.test(time)) {
+  //           this.formErrors[day] = `All times for ${day} must be in the format 00:00-00:00.`;
+  //           isValid = false;
+  //           break; // Stop checking once an invalid format is found
+  //         }
+  //       }
+  //       if (!this.formErrors[day]) {
+  //         delete this.formErrors[day];
+  //       }
+  //       console.log(this.formErrors[day])
+  //     }
+  //   }
+  
+  //   return isValid; // Return overall validation status
+  // }
+  validateTimesForIndividual(): boolean {
+    const timePattern = /^\d{2}:\d{2}-\d{2}:\d{2}$/;
+    let isValid = true; // Assume valid until proven otherwise
+  
+    // Reset errors for all days
+    this.formErrors = {};
+  
+    for (const day in this.individualAvailability) {
+      if (this.individualAvailability.hasOwnProperty(day)) {
+        // ✅ Skip validation if the day is NOT selected in availabilityDays
+        if (!this.doctor?.availabilityDays[day]) {
+          delete this.formErrors[day]; // Ensure old errors are cleared
+          continue;
+        }
+  
+        const availableTimes = this.individualAvailability[day]?.availableFromArray || [];
+  
+        // Check if `availableFromArray` is empty or contains only empty values
+        if (availableTimes.length === 0 || availableTimes.every(time => time.trim() === '')) {
+          this.formErrors[day] = `Please enter available time for ${day}.`;
+          isValid = false;
+          continue; // Skip further validation for this day
+        }
+  
+        // Validate format
+        let hasInvalidFormat = false;
+        for (const time of availableTimes) {
+          if (time.trim() !== '' && !timePattern.test(time)) {
+            this.formErrors[day] = `All times for ${day} must be in the format 00:00-00:00.`;
+            isValid = false;
+            hasInvalidFormat = true;
+            break; // Stop checking once an invalid format is found
+          }
+        }
+  
+        // ✅ If the day was previously invalid but is now valid, remove the error
+        if (!hasInvalidFormat) {
+          delete this.formErrors[day];
+        }
+      }
+    }
+  
+    // ✅ If `formErrors` is empty, return `true`
+    return Object.keys(this.formErrors).length === 0;
+  }
+  
+  
 
 
   generateSlots(): void {

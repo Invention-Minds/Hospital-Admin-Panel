@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, ViewChild } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, ViewChild,HostListener } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ConfirmationService } from 'primeng/api';
 import { DialogModule } from '@angular/cdk/dialog';
@@ -70,6 +70,15 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
     requestVia: '',
     appointmentStatus: '',
   };
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: Event) {
+    const targetElement = event.target as HTMLElement;
+
+    // Check if the clicked element is inside the PRN suggestion dropdown
+    if (!targetElement.closest('.prn-suggestions') && !targetElement.closest('#pnr')) {
+      this.prnSuggestions = false;
+    }
+  }
 
 
   ngOnInit(): void {
@@ -140,16 +149,40 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
           //   this.timeSlots.push(this.formData.appointmentTime);
           // }
           let availableSlots = response.availableSlots;
+          console.log(availableSlots)
 
           // Filter out past time slots if the selected date is today
+          // if (isToday) {
+          //   console.log(isToday)
+          //   const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
+          //   availableSlots = availableSlots.filter((slot: string) => {
+          //     const [hours, minutes] = slot.split(':').map(Number);
+          //     const slotTimeInMinutes = hours * 60 + minutes;
+          //     return slotTimeInMinutes >= currentTimeInMinutes; // Only include future slots
+          //   });
+          // }
           if (isToday) {
+            console.log(isToday);
+          
             const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
+          
             availableSlots = availableSlots.filter((slot: string) => {
-              const [hours, minutes] = slot.split(':').map(Number);
+              let [time, modifier] = slot.split(" ");
+              let [hours, minutes] = time.split(":").map(Number);
+          
+              // Convert 12-hour format to 24-hour format
+              if (modifier === "PM" && hours !== 12) {
+                hours += 12;
+              }
+              if (modifier === "AM" && hours === 12) {
+                hours = 0;
+              }
+          
               const slotTimeInMinutes = hours * 60 + minutes;
               return slotTimeInMinutes >= currentTimeInMinutes; // Only include future slots
             });
           }
+          
   
           this.timeSlots = availableSlots;
           console.log(this.timeSlots)
@@ -346,7 +379,7 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
         : '91' + form.value.phone;
       const selectedPackage = this.packages.find(pkg => pkg.id === parseInt(this.selectedPackageId));
       const payload = {
-        pnrNumber: form.value.pnr,
+        pnrNumber: String(form.value.pnr),
         firstName: form.value.firstName,
         lastName: form.value.lastName,
         phoneNumber: formattedPhoneNumber,

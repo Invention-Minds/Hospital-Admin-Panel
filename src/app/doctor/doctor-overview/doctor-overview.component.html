@@ -53,7 +53,7 @@
   <app-doctor-availability  *ngIf="activeComponent === 'availability'"></app-doctor-availability>
   <app-doctor-details  *ngIf="activeComponent === 'details'"></app-doctor-details>
   <app-doctor-form  *ngIf="activeComponent === 'form'" [isEditMode]="isEditMode" [doctor]="newDoctor" (save)="onSaveDoctor($event)"
-  (cancel)="onCancelForm()"></app-doctor-form>
+  (cancel)="onCancelForm()" [isLoading]="isLoading"></app-doctor-form>
   <app-doctor-appointments *ngIf="activeComponent === 'appointments' "></app-doctor-appointments>
 </div>
 </div>

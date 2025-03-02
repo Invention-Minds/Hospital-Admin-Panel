@@ -80,6 +80,9 @@ export class DoctorServiceService {
   updateDoctor(doctor: Doctor): Observable<void> {
     return this.http.put<void>(`${this.apiUrl}/doctors/${doctor.id}`, doctor);
   }
+  updateDoctorRoom(doctorId: number, roomNo: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/doctors/${doctorId}/room`, { roomNo });
+  }
 
   // Get all departments
   getDepartments(): Observable<Department[]> {

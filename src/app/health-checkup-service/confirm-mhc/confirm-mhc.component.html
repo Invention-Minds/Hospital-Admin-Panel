@@ -1,0 +1,264 @@
+<div class="form-row">
+    <!-- Dropdown for Search By -->
+    <div class="column-1">
+      <div class="p-field p-col-2">
+        <p-dropdown [options]="searchOptions" [(ngModel)]="selectedSearchOption" placeholder="Search By"
+          (ngModelChange)="onSearch()" class="custom-dropdown"></p-dropdown>
+      </div>
+  
+      <div class="p-field p-col-3">
+        <input pInputText [(ngModel)]="searchValue" placeholder="Anitha / 123456" class="custom-input-text"
+          (ngModelChange)="onSearch()" />
+      </div>
+  
+      <!-- Search and Clear Buttons -->
+      <div class="p-field p-col-2 buttons-container">
+        <!-- <img (click)="onSearch()" src="/icons/search.png"> -->
+        <svg (click)="onClear()" class="delete" xmlns="http://www.w3.org/2000/svg" width="3.5em" height="3.5em"
+          viewBox="0 0 24 24">
+          <path fill="#fff"
+            d="M7 21q-.825 0-1.412-.587T5 19V6q-.425 0-.712-.288T4 5t.288-.712T5 4h4q0-.425.288-.712T10 3h4q.425 0 .713.288T15 4h4q.425 0 .713.288T20 5t-.288.713T19 6v13q0 .825-.587 1.413T17 21zM17 6H7v13h10zm-7 11q.425 0 .713-.288T11 16V9q0-.425-.288-.712T10 8t-.712.288T9 9v7q0 .425.288.713T10 17m4 0q.425 0 .713-.288T15 16V9q0-.425-.288-.712T14 8t-.712.288T13 9v7q0 .425.288.713T14 17M7 6v13z" />
+        </svg>
+        <!-- <img (click)="onClear()" class="delete" src="/icons/delete-1.png" pTooltip="Delete"> -->
+      </div>
+    </div>
+  
+    <div class="p-field p-col-3">
+      <!-- <img src="download.png" (click)="downloadData()" pTooltip="Download" > -->
+    </div>
+  
+    <div class="p-field p-col-3 calendar">
+      <!-- <p-calendar [(ngModel)]="selectedDate" placeholder="Calendar" class="custom-calendar"></p-calendar> -->
+      <p-calendar styleClass="custom-calendar" [(ngModel)]="selectedDateRange" selectionMode="range"
+        (ngModelChange)="onSearch()" placeholder="Calendar" dateFormat="yy-mm-dd">
+        <ng-template pTemplate="date" let-date>
+          <span>
+            {{ date.day }}
+          </span>
+        </ng-template>
+      </p-calendar>
+      <i class="fa-solid fa-angle-down calendar-icon"></i>
+      <svg pTooltip="Refresh" (click)="refresh()" class="reverse" xmlns="http://www.w3.org/2000/svg" width="2.5em"
+        height="2.5em" viewBox="-1.5 -2.5 24 24">
+        <path fill="currentColor"
+          d="m4.859 5.308l1.594-.488a1 1 0 0 1 .585 1.913l-3.825 1.17a1 1 0 0 1-1.249-.665L.794 3.413a1 1 0 1 1 1.913-.585l.44 1.441C5.555.56 10.332-1.035 14.573.703a9.38 9.38 0 0 1 5.38 5.831a1 1 0 1 1-1.905.608A7.381 7.381 0 0 0 4.86 5.308zm12.327 8.195l-1.775.443a1 1 0 1 1-.484-1.94l3.643-.909a1 1 0 0 1 .61-.08a1 1 0 0 1 .84.75l.968 3.88a1 1 0 0 1-1.94.484l-.33-1.322a9.381 9.381 0 0 1-16.384-1.796l-.26-.634a1 1 0 1 1 1.851-.758l.26.633a7.381 7.381 0 0 0 13.001 1.25z" />
+      </svg>
+  
+      <svg class="p-field p-col-3 download" src="download.png"
+        *ngIf="activeComponent==='confirmed' || activeComponent === 'completed' || activeComponent === 'cancelled'"
+        (click)="downloadFilteredData()" pTooltip="Download" xmlns="http://www.w3.org/2000/svg" width="3em" height="3em"
+        viewBox="0 0 20 20">
+        <path fill="#fff" fill-rule="evenodd"
+          d="M3 17a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H4a1 1 0 0 1-1-1m3.293-7.707a1 1 0 0 1 1.414 0L9 10.586V3a1 1 0 1 1 2 0v7.586l1.293-1.293a1 1 0 1 1 1.414 1.414l-3 3a1 1 0 0 1-1.414 0l-3-3a1 1 0 0 1 0-1.414"
+          clip-rule="evenodd" />
+      </svg>
+      <svg class="p-field p-col-3 print" src="print.svg"
+        *ngIf="activeComponent==='confirmed' || activeComponent === 'completed' || activeComponent === 'cancelled'"
+        (click)="printAppointmentDetails()" pTooltip="Print" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+        viewBox="0 0 24 24">
+        <path fill="#fff"
+          d="M18 7H6V3h12zm0 5.5q.425 0 .713-.288T19 11.5t-.288-.712T18 10.5t-.712.288T17 11.5t.288.713t.712.287M16 19v-4H8v4zm2 2H6v-4H2v-6q0-1.275.875-2.137T5 8h14q1.275 0 2.138.863T22 11v6h-4z" />
+      </svg>
+  
+    </div>
+  </div>
+  <div class="table-container" *ngIf="!isLoading">
+    <div class="table-wrapper">
+      <table class="appointment-table" *ngIf="!isLoading">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th (click)="sortBy('patientName')" style="cursor: pointer; width: 200px">
+              Patient Name
+              <span *ngIf="sortColumn === 'patientName' && sortDirection === 'asc'">&#9650;</span>
+              <span *ngIf="sortColumn === 'patientName' && sortDirection === 'desc'">&#9660;</span>
+            </th>
+            <th>PRN</th>
+            <th>Doctor Name</th>
+            <!-- <th>Therapy</th> -->
+            <th (click)="sortBy('date')">
+              Date
+              <span *ngIf="sortColumn === 'date' && sortDirection === 'asc'">&#9650;</span>
+              <span *ngIf="sortColumn === 'date' && sortDirection === 'desc'">&#9660;</span>
+            </th>
+            <th>Time</th>
+            <th>Source</th>
+            <th>Type</th>
+            <th>WA</th>
+            <th>Email</th>
+            <th>SMS</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="filteredAppointments.length === 0">
+            <td colspan="11" class="no-records-message">
+              No records to display
+            </td>
+          </tr>
+          <tr *ngFor="let appointment of getPaginatedAppointments(); let i = index">
+            <td>{{ i + 1 }}</td>
+            <td style="width: 200px;">
+              <ng-container *ngIf="editingAppointmentId !== appointment.id; else editMode">
+                <div class="name-container">
+                  <span class="patient-name">{{ appointment.patientName }}</span>
+                  <img src="edit.svg" alt="Edit" class="edit-icon" (click)="enableEdit(appointment)" pTooltip="Edit"
+                    tooltipPosition="top">
+                </div>
+              </ng-container>
+  
+              <ng-template #editMode>
+                <div class="name-container">
+                  <input type="text" [(ngModel)]="editedName" class="edit-input">
+                  <img src="correct.svg" alt="Save" class="save-icon" (click)="saveEditedName(appointment)"
+                    pTooltip="Save" tooltipPosition="top">
+                  <img src="wrong.svg" alt="Cancel" class="cancel-icon" (click)="cancelEdit()" pTooltip="Cancel"
+                    tooltipPosition="top">
+                </div>
+              </ng-template>
+            </td>
+  
+            <td>{{ appointment.prnNumber ? appointment.prnNumber: '-' }}</td>
+            <td>{{ appointment.doctorName }}</td>
+            <!-- <td>{{ appointment.department }}</td> -->
+            <td>{{ appointment.date }}</td>
+            <td>{{ appointment.time }}</td>
+            <td>{{ appointment.requestVia }}</td>
+            <td style="text-transform: capitalize;">{{appointment.type ? appointment.type : '-' }}</td>
+            <td>
+              <span class="sms-status"
+                [ngClass]="{'sms-sent': appointment.smsSent, 'sms-not-sent': !appointment.smsSent}">
+                <img *ngIf="appointment.smsSent" src="icons/sent.svg" alt="Sent">
+                <img *ngIf="!appointment.smsSent" src="icons/not-sent.png" alt="Not Sent">
+              </span>
+            </td>
+            <td>
+              <span class="sms-status"
+                [ngClass]="{'sms-sent': appointment.emailSent, 'sms-not-sent': !appointment.emailSent}">
+                <img *ngIf="appointment.emailSent" src="icons/sent.svg" alt="Sent">
+                <img *ngIf="!appointment.emailSent" src="icons/not-sent.png" alt="Not Sent">
+              </span>
+            </td>
+            <td>
+              <span class="sms-status"
+                [ngClass]="{'sms-sent': appointment.messageSent, 'sms-not-sent': !appointment.messageSent}">
+                <img *ngIf="appointment.messageSent" src="icons/sent.svg" alt="Sent">
+                <img *ngIf="!appointment.messageSent" src="icons/not-sent.png" alt="Not Sent">
+              </span>
+            </td>
+            <td>
+              <span class="status-badge" [ngClass]="{ 
+          'confirmed-status': !appointment.checkedIn, 
+          'checked-in-status': appointment.checkedIn 
+        }">
+                {{ !appointment.checkedIn ? 'Confirmed' : 'Checked In' }}
+              </span>
+  
+            </td>
+            <!-- <td class="button" >
+              <button class="btn-action" [disabled]="appointment.checkedIn && !isCheckInEnabled(appointment)">
+                <img src="check-in.png" alt="check" class="action-icon" (click)="completeAppointment(appointment)"
+                  pTooltip="Check-in" tooltipPosition="top" >
+                </button>
+                <button class="btn-action" [disabled]="appointment.checkedIn">
+                  <img src="appt-cancel.png" alt="delete" class="action-icon" (click)="cancelAppointment(appointment)" 
+                  pTooltip="Cancel" tooltipPosition="top">
+                </button>
+                <button class="btn-action-reschedule" (click)="openAppointmentForm(appointment)"  pTooltip="Reschedule"  tooltipPosition="top">
+                  <img src="icons/book.png" alt="Confirm">
+              </button>
+            </td> -->
+            <td class="button">
+              <!-- Check-in Button -->
+              <!-- <button class="btn-action" 
+                      [disabled]="appointment.checkedIn || !isCheckInEnabled(appointment)"
+                      (click)="!appointment.checkedIn && openCheckinPopup(appointment)">
+                <img src="check-in.png" alt="check" 
+                     class="action-icon" 
+                    
+                     pTooltip="Check-in" tooltipPosition="top">
+              </button> -->
+  
+              <button class="btn-action" (click)="handleCheckin(appointment)">
+                <img src="check-in.png" alt="check" class="action-icon"
+                  pTooltip="{{ appointment.checkedIn ? 'Already checked in' : 'Click to check-in' }}"
+                  tooltipPosition="top">
+              </button>
+              <!-- Cancel Button -->
+              <button class="btn-action" [disabled]="appointment.checkedIn">
+                <img src="appt-cancel.png" alt="delete" class="action-icon"
+                  (click)="!appointment.checkedIn && cancelAppointment(appointment)" pTooltip="Cancel"
+                  tooltipPosition="top">
+              </button>
+  
+              <!-- Reschedule Button -->
+              <button class="btn-action-reschedule" [disabled]="appointment.checkedIn"
+                (click)="!appointment.checkedIn && openAppointmentForm(appointment)" pTooltip="Reschedule"
+                tooltipPosition="top">
+                <img src="icons/book.png" alt="Confirm">
+              </button>
+            </td>
+  
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  
+  
+    <!-- Pagination Controls -->
+    <div class="pagination">
+      <button class="pagination-btn prev" (click)="prevPage()" [disabled]="currentPage === 1">←</button>
+      <button class="pagination-btn next" (click)="nextPage()" [disabled]="currentPage === totalPages">→</button>
+      <div class="page-info">
+        Page
+        <input type="number" [(ngModel)]="currentPage" min="1" [max]="totalPages" class="page-input"
+          (change)="onPageChange()">
+        of {{ totalPages }}
+      </div>
+    </div>
+  </div>
+  <p-toast></p-toast>
+  <app-appointment-form *ngIf="showAppointmentForm" [appointment]="selectedAppointment" (close)="closeAppointmentForm()"
+    (submit)="submitAppointment(selectedAppointment, $event.status, $event.requestVia)">
+  </app-appointment-form>
+  
+  <div *ngIf="showPopup" class="close-opd-modal">
+    <div class="modal-content-transfer">
+      <div class="modal-header">
+        <h3>Appointment Type</h3>
+        <button class="popup-close" (click)="closePopup()">
+          <img src="/popup-close.svg" alt="Close Popup" />
+        </button>
+      </div>
+      <hr />
+      <div class="modal-body">
+        <label class="estimation-type-label">Select any one appointment type</label>
+        <div class="radio-buttons">
+          <label>
+            <input type="radio" name="estimationStatus" [(ngModel)]="appointmentType" value="paid" />
+            Paid
+          </label>
+          <label>
+            <input type="radio" name="estimationStatus" [(ngModel)]="appointmentType" value="followUp" />
+            Follow up
+          </label>
+          <label>
+            <input type="radio" name="estimationStatus" [(ngModel)]="appointmentType" value="camp" />
+            Camp
+          </label>
+          <label>
+            <input type="radio" name="estimationStatus" [(ngModel)]="appointmentType" value="mhc" />
+            MHC
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="save-button" (click)="completeAppointment(this.checkinAppointment!)">Check-in</button>
+        <button class="close-button" (click)="closePopup()">Cancel</button>
+      </div>
+    </div>
+  </div>
+  
+  
+  <div class="loader" *ngIf="isLoading"></div>

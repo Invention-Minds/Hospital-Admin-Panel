@@ -36,6 +36,7 @@ export interface Appointment {
   updated_at?: string;
   lockedBy?: string;
   lockExpiresAt?: Date | null;
+  type?:string;
 
 
 

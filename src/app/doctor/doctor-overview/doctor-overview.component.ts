@@ -16,6 +16,7 @@ export class DoctorOverviewComponent implements OnInit {
   activeComponent: string = 'availability';
   isEditMode: boolean = false;
   role: string = '';  // User role
+  isLoading:boolean=false;
   ngOnInit(): void {
     // Fetch role from localStorage or the authentication service
     this.role = localStorage.getItem('role') || '';  // You can also fetch this from a service
@@ -78,12 +79,15 @@ export class DoctorOverviewComponent implements OnInit {
 
   // Save doctor (either add new or update existing)
   onSaveDoctor(doctor: Doctor): void {
+    console.log('save')
+    this.isLoading = true;
     // console.log('Doctor to save:', doctor);
     doctor.slotDuration = Number(doctor.slotDuration);
     if (!doctor.departmentName || !doctor.departmentId) {
       console.error('Department must be selected.');
       return;
     }
+    console.log(doctor)
     // if (!doctor.name || !doctor.email || !doctor.phone_number || !doctor.departmentName || !doctor.qualification || !doctor.availableFrom || !doctor.slotDuration) {
     //   console.error('All fields are required.');
     //   return;
@@ -92,6 +96,7 @@ export class DoctorOverviewComponent implements OnInit {
       // Logic to add the new doctor
       this.doctorService.createDoctor(doctor).subscribe(
         () => {
+          this.isLoading = false;
           doctor.slotDuration = Number(doctor.slotDuration); // Convert slot duration to number
           // console.log('New doctor saved successfully:', doctor);
           this.messageService.add({severity:'success', summary:'Success', detail:'Doctor added successfully'});
@@ -101,10 +106,12 @@ export class DoctorOverviewComponent implements OnInit {
         },
         (error) => {
           console.error('Error saving new doctor:', error);
+          this.isLoading = false;
         }
       );
       
     } else if (this.isEditMode) {
+      this.isLoading = true;
       // Logic to update the existing doctor
       this.doctorService.updateDoctor(doctor).subscribe(
         () => {
@@ -112,9 +119,12 @@ export class DoctorOverviewComponent implements OnInit {
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Doctor details updated successfully' });
           // Redirect or update UI after successful update
           this.activeComponent = ''; // Close the form after update
+          this.isLoading = false;
         },
         (error) => {
           console.error('Error updating doctor:', error);
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error in updating doctor details' });
+          this.isLoading = false;
         }
       );
     }

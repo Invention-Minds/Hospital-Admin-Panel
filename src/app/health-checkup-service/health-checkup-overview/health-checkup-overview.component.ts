@@ -19,7 +19,8 @@ export class HealthCheckupOverviewComponent {
   service: any;
   appointment: any
   role: string = '';
-  subAdminType: string = ''
+  subAdminType: string = '';
+  appointmentTypeMhc:string = 'mhc';
 
 
   @ViewChild('healthCheckupConfirmed') healthCheckupConfirmedComponent?: HealthCheckupConfirmedComponent;

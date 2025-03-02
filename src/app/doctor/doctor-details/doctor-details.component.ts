@@ -53,68 +53,68 @@ export class DoctorDetailsComponent implements OnInit {
       });
     });
   }
-  click(){
+  click() {
     console.log('clicked');
     this.isEditMode = true;
   }
- // Method to handle deleting a doctor with a confirmation dialog
-//  deleteDoctor(doctor: Doctor): void {
-//   Swal.fire({
-//     title: 'Are you sure?',
-//     text: `Do you want to delete Dr. ${doctor.name}? This action cannot be undone.`,
-//     icon: 'warning',
-//     showCancelButton: true,
-//     confirmButtonText: 'Yes, delete it!',
-//     cancelButtonText: 'Cancel'
-//   }).then((result) => {
-//     if (result.isConfirmed) {
-//       // Proceed with deleting the doctor
-//       this.doctorService.deleteDoctor(doctor.id).subscribe(
-//         () => {
-//           Swal.fire('Deleted!', `Dr. ${doctor.name} has been deleted.`, 'success');
-//           this.fetchDepartmentsAndDoctors(); // Refresh the list after deletion
-//         },
-//         (error) => {
-//           console.error('Error deleting doctor:', error);
-//           Swal.fire('Error!', 'An error occurred while deleting the doctor.', 'error');
-//         }
-//       );
-//     } 
-//     // else if (result.dismiss === Swal.DismissReason.cancel) {
-//     //   Swal.fire('Cancelled', 'The doctor is safe :)', 'info');
-//     // }
-//   });
-// }
-doctorToDelete: Doctor | null = null; // Hold the doctor to delete
-showDeleteConfirmDialog: boolean = false; // Control the visibility of the dialog
+  // Method to handle deleting a doctor with a confirmation dialog
+  //  deleteDoctor(doctor: Doctor): void {
+  //   Swal.fire({
+  //     title: 'Are you sure?',
+  //     text: `Do you want to delete Dr. ${doctor.name}? This action cannot be undone.`,
+  //     icon: 'warning',
+  //     showCancelButton: true,
+  //     confirmButtonText: 'Yes, delete it!',
+  //     cancelButtonText: 'Cancel'
+  //   }).then((result) => {
+  //     if (result.isConfirmed) {
+  //       // Proceed with deleting the doctor
+  //       this.doctorService.deleteDoctor(doctor.id).subscribe(
+  //         () => {
+  //           Swal.fire('Deleted!', `Dr. ${doctor.name} has been deleted.`, 'success');
+  //           this.fetchDepartmentsAndDoctors(); // Refresh the list after deletion
+  //         },
+  //         (error) => {
+  //           console.error('Error deleting doctor:', error);
+  //           Swal.fire('Error!', 'An error occurred while deleting the doctor.', 'error');
+  //         }
+  //       );
+  //     } 
+  //     // else if (result.dismiss === Swal.DismissReason.cancel) {
+  //     //   Swal.fire('Cancelled', 'The doctor is safe :)', 'info');
+  //     // }
+  //   });
+  // }
+  doctorToDelete: Doctor | null = null; // Hold the doctor to delete
+  showDeleteConfirmDialog: boolean = false; // Control the visibility of the dialog
 
-// Method to open the delete confirmation dialog
-deleteDoctor(doctor: Doctor): void {
-  this.doctorToDelete = doctor;
-  this.showDeleteConfirmDialog = true; // Show the dialog
-}
-
-// Method to handle delete confirmation
-confirmDelete(): void {
-  if (this.doctorToDelete) {
-    this.doctorService.deleteDoctor(this.doctorToDelete.id).subscribe(
-      () => {
-        // console.log(`Dr. ${this.doctorToDelete!.name} has been deleted.`);
-        this.showDeleteConfirmDialog = false; // Close the dialog
-        this.fetchDepartmentsAndDoctors(); // Refresh the list after deletion
-      },
-      (error) => {
-        console.error('Error deleting doctor:', error);
-        alert('An error occurred while deleting the doctor.');
-      }
-    );
+  // Method to open the delete confirmation dialog
+  deleteDoctor(doctor: Doctor): void {
+    this.doctorToDelete = doctor;
+    this.showDeleteConfirmDialog = true; // Show the dialog
   }
-}
 
-// Method to close the dialog
-closeDeleteDialog(): void {
-  this.showDeleteConfirmDialog = false;
-}
+  // Method to handle delete confirmation
+  confirmDelete(): void {
+    if (this.doctorToDelete) {
+      this.doctorService.deleteDoctor(this.doctorToDelete.id).subscribe(
+        () => {
+          // console.log(`Dr. ${this.doctorToDelete!.name} has been deleted.`);
+          this.showDeleteConfirmDialog = false; // Close the dialog
+          this.fetchDepartmentsAndDoctors(); // Refresh the list after deletion
+        },
+        (error) => {
+          console.error('Error deleting doctor:', error);
+          alert('An error occurred while deleting the doctor.');
+        }
+      );
+    }
+  }
+
+  // Method to close the dialog
+  closeDeleteDialog(): void {
+    this.showDeleteConfirmDialog = false;
+  }
 
 
   // Fetch all departments and doctors from the backend
@@ -122,14 +122,14 @@ closeDeleteDialog(): void {
     // Fetch departments
     this.isLoading = true;
     this.doctorService.getDepartments().subscribe({
-   
+
       next: (departments: Department[]) => {
         this.isLoading = false;
         this.departments = departments.map(dep => ({
           ...dep,
           doctors: [] // Initialize empty doctors array
         }));
-  
+
         // Fetch doctors and link them to departments
         this.fetchDoctors();
       },
@@ -149,7 +149,7 @@ closeDeleteDialog(): void {
     this.doctorService.getDoctors().subscribe({
       next: (doctors: Doctor[]) => {
         const today = new Date();
-      const todayDay = this.getDayString(today);
+        const todayDay = this.getDayString(today);
         doctors.forEach((doctor) => {
           // this.isLoading = false;
           // Initialize availabilityDays object if it does not exist
@@ -168,7 +168,7 @@ closeDeleteDialog(): void {
             doctor.availabilityDays[avail.day] = true;
             // console.log('avail.day', avail.day);
             // console.log(avail.day === todayDay, 'in if');
-            
+
             if (avail.day === todayDay) {
               doctor.availableFrom = avail.availableFrom;
               doctor.slotDuration = avail.slotDuration;
@@ -176,12 +176,12 @@ closeDeleteDialog(): void {
             }
             // else{
             //   doctor.availableFrom = 'N/A';
-             
+
             // }
           });
           if (!isAvailableToday) {
             doctor.availableFrom = 'N/A';
-           // Clear slotDuration if not available
+            // Clear slotDuration if not available
           }
 
           const allUpdatedAtNull = doctor.availability?.every(avail => !avail.updatedAt);
@@ -194,7 +194,7 @@ closeDeleteDialog(): void {
                 ? curr.updatedAt
                 : latest;
             }, doctor.availability.find(avail => avail.updatedAt)?.updatedAt || '');
-    
+
           // Step 3: Filter availability data based on the latest timestamp
           const latestAvailability = allUpdatedAtNull
             ? doctor.availability // If all are null, consider the entire availability as "latest"
@@ -211,18 +211,18 @@ closeDeleteDialog(): void {
         // console.log('Doctors fetched and grouped successfully', this.departments);
       },
       error:
-      (error) => {
-        this.isLoading = false;
-        console.error('Error fetching doctors:', error);
-      },
+        (error) => {
+          this.isLoading = false;
+          console.error('Error fetching doctors:', error);
+        },
       complete: () => {
         this.isLoading = false;
         // console.log('Doctors retrieval completed.');
       }
 
-  });
+    });
   }
-  
+
   private getDayString(date: Date): keyof Doctor['availabilityDays'] {
     const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
     return days[date.getDay()];
@@ -264,7 +264,7 @@ closeDeleteDialog(): void {
         }))
         .filter((dep: Department) => (dep.doctors?.length ?? 0) > 0);
     }
-// console.log('filteredDepartments', filteredDepartments);
+    // console.log('filteredDepartments', filteredDepartments);
     return filteredDepartments;
   }
 
@@ -277,7 +277,7 @@ closeDeleteDialog(): void {
       // Add a fallback to an empty array if 'doctors' is undefined
       // console.log('department', department);
       return department ? department.doctors ?? [] : [];
-      
+
     } else {
       // Use the fallback for 'doctors' in case any department has undefined doctors
       return this.departments.flatMap((department: Department) => department.doctors ?? []);
@@ -297,7 +297,7 @@ closeDeleteDialog(): void {
       console.error("No doctor selected for editing.");
       return;
     }
-  
+
     // console.log("Editing doctor:", doctor);
     this.selectedEditDoctor = { ...doctor }; // Create a copy to avoid direct changes
 
@@ -384,32 +384,47 @@ closeDeleteDialog(): void {
   }
 
   // Handle updating the unavailable dates
-// Handle updating the unavailable dates
-onUpdate(): void {
-  if (this.unavailabilityForm.valid) {
-    const startDate = new Date(this.unavailabilityForm.value.startDate);
-    const endDate = new Date(this.unavailabilityForm.value.endDate);
+  // Handle updating the unavailable dates
+  onUpdate(): void {
+    if (this.unavailabilityForm.valid) {
+      const startDate = new Date(this.unavailabilityForm.value.startDate);
+      const endDate = new Date(this.unavailabilityForm.value.endDate);
 
-    if (endDate < startDate) {
-      console.error('End date must be after start date');
-      return;
-    }
+      if (endDate < startDate) {
+        console.error('End date must be after start date');
+        return;
+      }
+      // 🏥 Check if the doctor has any booked slots within the selected date range
+      const hasFutureAppointments = (this.selectedEditDoctor?.bookedSlots as any[])?.some((slot: any) => {
+        const slotDate = new Date(slot.date); // ✅ Ensure `date` exists and is correctly typed
+        return slotDate >= startDate && slotDate <= endDate;
+      });
+      console.log(hasFutureAppointments)
 
-    const unavailableDates = this.generateDatesBetween(startDate, endDate);
+      if (hasFutureAppointments) {
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Future Appointment Exists',
+          detail: 'The doctor has future appointments within the selected range.',
+        });
+        return;
+      }
 
-    if (this.selectedEditDoctor) {
-      this.doctorService.addUnavailableDates(this.selectedEditDoctor.id, startDate.toISOString().split('T')[0], endDate.toISOString().split('T')[0], unavailableDates).subscribe(
-        () => {
-          this.fetchDoctors(); // Refresh the list of doctors
-          this.closeUnavailableModal();
-        },
-        (error) => {
-          console.error('Error updating unavailable dates:', error);
-        }
-      );
+      const unavailableDates = this.generateDatesBetween(startDate, endDate);
+
+      if (this.selectedEditDoctor) {
+        this.doctorService.addUnavailableDates(this.selectedEditDoctor.id, startDate.toISOString().split('T')[0], endDate.toISOString().split('T')[0], unavailableDates).subscribe(
+          () => {
+            this.fetchDoctors(); // Refresh the list of doctors
+            this.closeUnavailableModal();
+          },
+          (error) => {
+            console.error('Error updating unavailable dates:', error);
+          }
+        );
+      }
     }
   }
-}
   // New Method to mark dates as available
   markAsAvailable(): void {
     const { startDate, endDate } = this.unavailabilityForm.value;

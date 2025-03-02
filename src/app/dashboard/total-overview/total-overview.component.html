@@ -1,7 +1,7 @@
 <div class="dashboard-section">
     <h1>Dashboard</h1>
     <div class="stats-cards">
-      <div class="card">
+      <div class="card" (click)="downlaodTodayAppts()">
         <div class="card-icon">
           <img src="/opd.svg" alt="OPD Icon" />
         </div>
@@ -9,45 +9,6 @@
           <p class="number">{{totalAppointmentsToday}}</p>
           <p>OPD Today</p>
         </div>
-      </div>
-      <div class="card">
-        <div class="card-icon">
-          <img src="/calendar.svg" alt="Appointment Icon" />
-        </div>
-        <div class="card-content">
-          <p  class="number">{{pendingRequestsToday}}</p>
-          <p>Appoint Request</p>
-        </div>
-      </div>
-      <div class="card"  (click)="toggleAvailableDoctors()">
-        <div class="card-icon">
-          <img src="/stethoscope.svg" alt="Doctor Available Icon" />
-        </div>
-        <div class="card-content">
-          <p  class="number">{{availableDoctorsToday}}</p>
-          <p>Doctor Available</p>
-        </div>
-        
-      </div>
-      <div class="card" (click)="toggleUnavailableDoctors()">
-        <div class="card-icon">
-          <img src="/unavailable-doctor.svg" alt="Doctor Available Icon" />
-        </div>
-        <div class="card-content">
-          <p  class="number">{{unavailableDoctorsToday}}</p>
-          <p>Doc UnAvailable</p>
-        </div>
-        
-      </div>
-      <div class="card" (click)="toggleAbsentDoctors()">
-        <div class="card-icon">
-          <img src="/absent.svg" alt="Doctor Available Icon" />
-        </div>
-        <div class="card-content">
-          <p  class="number">{{absentDoctorsToday}}</p>
-          <p>Doctor Absent</p>
-        </div>
-        
       </div>
       <div class="card" (click)="downloadFilteredData()">
         <div class="card-icon">
@@ -59,6 +20,46 @@
         </div>
         
       </div>
+      <div class="card"  (click)="toggleAvailableDoctors()">
+        <div class="card-icon">
+          <img src="/stethoscope.svg" alt="Doctor Available Icon" />
+        </div>
+        <div class="card-content">
+          <p  class="number">{{availableDoctorsToday}}/<span style="font-size: 14px;">{{totalDoctorsToday}}</span></p>
+          <p>Doctor Available</p>
+        </div>
+        
+      </div>
+      <div class="card" (click)="toggleUnavailableDoctors()">
+        <div class="card-icon">
+          <img src="/unavailable-doctor.svg" alt="Doctor Available Icon" />
+        </div>
+        <div class="card-content">
+          <p  class="number">{{unavailableDoctorsToday}}/<span style="font-size: 14px;">{{totalDoctorsToday}}</span></p>
+          <p>Doc UnAvailable</p>
+        </div>
+        
+      </div>
+      <div class="card" (click)="toggleAbsentDoctors()">
+        <div class="card-icon">
+          <img src="/absent.svg" alt="Doctor Available Icon" />
+        </div>
+        <div class="card-content">
+          <p  class="number">{{absentDoctorsToday}}/<span style="font-size: 14px;">{{totalDoctorsToday}}</span></p>
+          <p>Doctor Absent</p>
+        </div>
+        
+      </div>
+      <div class="card" (click)="toggleLeaveDoctors()">
+        <div class="card-icon">
+          <img src="/calendar.svg" alt="Appointment Icon" />
+        </div>
+        <div class="card-content">
+          <p  class="number">{{leaveDoctorsCount}}</p>
+          <p>Doc Leave Details</p>
+        </div>
+      </div>
+
     </div>
   </div>
 <div *ngIf="showAvailableDoctors" class="overlay">
@@ -96,9 +97,12 @@
           <div class="doctor-id">{{i+1}}</div>
           <div class="doctor-name">{{doctor.name}}</div>
         </div>
-        <!-- <div class="availability-status unavailable">
-          Unavailable
-        </div> -->
+        <div class="availability-status unavailable">
+          <span *ngFor="let slot of doctor.groupedUnavailableSlots">
+            {{ slot }}
+          </span>
+        </div>
+
       </div>
       
     </div>
@@ -127,6 +131,28 @@
     </div>
     <div *ngIf="absentDoctors.length === 0">
       <div class="doctor-details doctor-card no-record">No Absent Doctors to Display</div>
+    </div>
+  </div>
+</div>
+<div *ngIf="showLeaveDoctors" class="overlay">
+  <div class="container">
+    <div class="header absent">
+      Doctors Leave
+      <button class="close-button" (click)="closeLeaveDoctorList()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="doctor-list">
+      <div *ngFor="let doctor of leaveDoctors; let i=index" class="doctor-card" >
+        <div class="doctor-details">
+          <div class="doctor-id">{{i+1}}</div>
+          <div class="doctor-name">{{doctor.name}}</div>
+        </div>
+        <div class="availability-status absent">
+          {{ doctor.groupedUnavailableDates.join(', ') }}
+        </div>
+      </div>
+    </div>
+    <div *ngIf="leaveDoctors.length === 0">
+      <div class="doctor-details doctor-card no-record">No Leave Doctors to Display</div>
     </div>
   </div>
 </div>

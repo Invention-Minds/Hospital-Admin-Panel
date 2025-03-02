@@ -231,14 +231,25 @@ export class TvControlComponent {
       this.selectedDoctor.roomNo = this.roomNumber;
       console.log(this.selectedDoctor)
 
-      this.doctorService.updateDoctor(this.selectedDoctor).subscribe(
-        (response) => {
-          console.log('Doctor updated successfully:', response);
+      // this.doctorService.updateDoctor(this.selectedDoctor).subscribe(
+      //   (response) => {
+      //     console.log('Doctor updated successfully:', response);
+      //   },
+      //   (error) => {
+      //     console.error('Error updating doctor:', error);
+      //   }
+      // )
+      this.doctorService.updateDoctorRoom(this.selectedDoctor.id, this.selectedDoctor.roomNo).subscribe({
+        next: (response) => {
+          console.log('Room updated successfully:', response);
+          // alert('Room number updated successfully!');
         },
-        (error) => {
-          console.error('Error updating doctor:', error);
-        }
-      )
+        error: (error) => {
+          console.error('Error updating room:', error);
+          // alert('Failed to update room number.');
+        },
+      });
+    
       console.log('Doctor Data to Save:', doctorData);
   
       // Send the data to the backend

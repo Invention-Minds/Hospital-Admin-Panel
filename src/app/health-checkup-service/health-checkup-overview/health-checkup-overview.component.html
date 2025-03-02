@@ -120,5 +120,5 @@
     <app-mhc-form *ngIf="activeComponent === 'mhcForm' " [selectedAppointment]="selectedAppointment"
     (closeForm)="closeConsultation()"></app-mhc-form>
     <app-mhc-today-consul *ngIf="activeComponent === 'mhcToday'" (reschedule)="openConsultationForm($event)"></app-mhc-today-consul>
-    <app-appointment-confirm *ngIf="activeComponent === 'mhcConfirm' "></app-appointment-confirm>
+    <app-confirm-mhc *ngIf="activeComponent === 'mhcConfirm'"></app-confirm-mhc>
   </div>

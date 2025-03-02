@@ -76,6 +76,7 @@ line-height: normal;
   ::ng-deep .p-datepicker table td {
     padding: 0;
 }
+
 .report-filter select{
     width: 250px;
     height: 40px;
@@ -179,9 +180,4 @@ tr:hover {
   transition: opacity 0.3s;
   font-size: 12px;
   text-transform: capitalize;
-}
-
-.tooltip:hover .tooltiptext {
-  visibility: visible;
-  opacity: 1;
 }

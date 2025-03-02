@@ -1,7 +1,8 @@
 import { Component, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
+import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import * as echarts from 'echarts';
-import { download, countByDate, filteredAppointments } from '../functions';
+import { download, countByDate, filteredAppointments, getYesterdayDate, getIndividualDates, getLastThirtyDaysFromSelected } from '../functions';
 import { Console, error } from 'console';
 import { doctors } from '../../Analytics-Folder/data';
 
@@ -11,7 +12,7 @@ import { doctors } from '../../Analytics-Folder/data';
   styleUrl: './opd-request.component.css'
 })
 export class OpdRequestComponent {
-  constructor(private appointment: AppointmentConfirmService) { }
+  constructor(private appointment: AppointmentConfirmService, private docDetails: DoctorServiceService) { }
 
   appVia: any = {
     walkIn: 0,
@@ -29,6 +30,8 @@ export class OpdRequestComponent {
   } as const
 
   isLoading: boolean = true
+  @Output() reportInitializeDate = new EventEmitter<any[]>();
+
 
   // report data
   tableData: any;
@@ -36,43 +39,57 @@ export class OpdRequestComponent {
   @Output() reportData = new EventEmitter<any[]>();
   @Output() reportsColumn = new EventEmitter<any[]>();
 
+  // viewmore
+  rawData: any
+  department: any
+  departmentValue: any
+  doctors: any
+  filteredDoctors: any
+  showViewMore: boolean = false
+  dateInput: any
+  selectedViewDate: any[] = []
+  selectedViewDoctor: any = 'all'
+  viewMoreoption: any
+
   ngOnInit() {
-    this.date = ["2025-02-12"]
+    this.date = [getYesterdayDate()]
     this.appointmentData()
-    console.log(this.doctorId, "docId")
-    console.log(this.date, "date")
+    this.selectedViewDate = getLastThirtyDaysFromSelected()
+    // console.log(this.doctorId, "docId")
+    // console.log(this.date, "date")
   }
 
-appointmentData(): void {
-  this.isLoading = true; // Set loading to true before making the API call
+  appointmentData(): void {
+    this.isLoading = true; // Set loading to true before making the API call
 
-  this.appointment.getAllAppointments().subscribe({
-    next: (data) => {
-      const filteredData = data.filter((appoint: any) => this.date.includes(appoint.date));
-      const walkInData = filteredAppointments(filteredData, this.requestType.WALK_IN, this.doctorId, this.date);
-      const callData = filteredAppointments(filteredData, this.requestType.CALL, this.doctorId, this.date);
-      const onlineData = filteredAppointments(filteredData, this.requestType.ONLINE, this.doctorId, this.date);
+    this.appointment.getAllAppointments().subscribe({
+      next: (data) => {
+        this.rawData = data
+        const filteredData = data.filter((appoint: any) => this.date.includes(appoint.date));
+        const walkInData = filteredAppointments(filteredData, this.requestType.WALK_IN, this.doctorId, this.date);
+        const callData = filteredAppointments(filteredData, this.requestType.CALL, this.doctorId, this.date);
+        const onlineData = filteredAppointments(filteredData, this.requestType.ONLINE, this.doctorId, this.date);
 
-      this.appVia.walkIn = Object.values(countByDate(walkInData, 'requestVia'));
-      this.appVia.online = Object.values(countByDate(onlineData, 'requestVia'));
-      this.appVia.call = Object.values(countByDate(callData, 'requestVia'));
+        this.appVia.walkIn = Object.values(countByDate(walkInData, 'requestVia'));
+        this.appVia.online = Object.values(countByDate(onlineData, 'requestVia'));
+        this.appVia.call = Object.values(countByDate(callData, 'requestVia'));
 
-      if (this.appVia) {
-        this.chart();
+        if (this.appVia) {
+          this.chart();
+        }
+      },
+      error: (error) => {
+        console.log(error);
+        this.isLoading = false; // Set loading to false if there's an error
+      },
+      complete: () => {
+        this.isLoading = false; // Set loading to false when the subscription is complete
       }
-    },
-    error: (error) => {
-      console.log(error);
-      this.isLoading = false; // Set loading to false if there's an error
-    },
-    complete: () => {
-      this.isLoading = false; // Set loading to false when the subscription is complete
-    }
-  });
-}
-
+    });
+  }
 
   report() {
+    this.isLoading = true
     this.appointment.getAllAppointments().subscribe((data: any[]) => {
       // console.log(data, "📌 Raw API Data");
 
@@ -142,15 +159,11 @@ appointmentData(): void {
       this.reportsColumn.emit(reportColumn)
       this.reportData.emit(tableData)
       this.reportView.emit({ onoff: true, range: "range" })
+      this.reportInitializeDate.emit(this.date)
 
       // ✅ Step 5: Display the data or export it for reports
-      this.displayReport(tableData);
+      this.isLoading = false
     });
-  }
-
-
-  displayReport(report: any[]) {
-    // console.log("📊 Final Report Data: ", report);
   }
 
   chart(): void {
@@ -168,10 +181,10 @@ appointmentData(): void {
           type: 'pie',
           radius: ['40%', '70%'],
           avoidLabelOverlap: false,
-          label: {
-            show: false,
-            position: 'center'
-          },
+          // label: {
+          //   show: true,
+          //   position: 'center'
+          // },
           emphasis: {
             label: {
               show: true,
@@ -181,6 +194,13 @@ appointmentData(): void {
           },
           labelLine: {
             show: false
+          },
+          label: {
+            show: true, // Enable labels
+            position: 'inside', // Place labels inside the slices
+            formatter: '{c}', // Display the value (count) only
+            fontSize: 16, // Adjust font size as needed
+            color: '#fff' // Set label color (white for contrast, adjust as needed)
           },
           itemStyle: {
             borderRadius: 5, // Adjust the border radius for rounded corners
@@ -212,5 +232,127 @@ appointmentData(): void {
       this.appointmentData();
       console.log(this.date)
     }
+  }
+
+
+  // viewmore
+
+  async loadDepartments(): Promise<void> {
+    try {
+      const data = await this.docDetails.getDepartments().toPromise()
+      this.department = data;
+      // console.log(this.department)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  viewmore(): void {
+    this.showViewMore = true
+    this.viewMoreData()
+  }
+
+  closeViewMore(): void {
+    this.showViewMore = false
+  }
+
+  departmentOnchange(event: any): void {
+    this.docDetails.getDoctors().subscribe(({
+      next: (data: any) => {
+        this.filteredDoctors = data.filter((doc: any) => doc.departmentId === parseInt(event.target.value))
+      },
+      error: (error: any) => {
+        console.error(error)
+      },
+      complete: () => {
+
+      }
+    }))
+  }
+
+  ViewMorechart(data: any): void {
+    const chartDom = document.getElementById('viewMoreOpdReq')!;
+    const myChart = echarts.init(chartDom);
+
+    this.viewMoreoption = {
+      tooltip: {
+        trigger: 'item'
+      },
+      series: [
+        {
+          name: 'Access From',
+          type: 'pie',
+          radius: ['40%', '70%'],
+          avoidLabelOverlap: false,
+          label: {
+            show: false,
+            position: 'center'
+          },
+          emphasis: {
+            label: {
+              show: true,
+              fontSize: 25,
+              fontWeight: 'bold'
+            }
+          },
+          labelLine: {
+            show: false
+          },
+          itemStyle: {
+            borderRadius: 5,
+            borderColor: '#fff',
+            borderWidth: 1
+          },
+          data: [
+            { value: data.walkIn, name: 'Walk-in' },
+            { value: data.online, name: 'Online' },
+            { value: data.call, name: 'Call' },
+          ]
+        }
+      ]
+    };
+
+    myChart.setOption(this.viewMoreoption); // Render the chart
+  }
+
+  viewMoreData(): void {
+    this.loadDepartments();
+
+    const filteredData = this.rawData.filter((appoint: any) => this.selectedViewDate.includes(appoint.date));
+    const walkInData = filteredAppointments(filteredData, this.requestType.WALK_IN, this.selectedViewDoctor, this.selectedViewDate);
+    const callData = filteredAppointments(filteredData, this.requestType.CALL, this.selectedViewDoctor, this.selectedViewDate);
+    const onlineData = filteredAppointments(filteredData, this.requestType.ONLINE, this.selectedViewDoctor, this.selectedViewDate);
+
+    const appVia: any = {
+      walkIn: '',
+      online: '',
+      call: ''
+    }
+
+    appVia.walkIn = Object.values(countByDate(walkInData, 'requestVia'));
+    appVia.online = Object.values(countByDate(onlineData, 'requestVia'));
+    appVia.call = Object.values(countByDate(callData, 'requestVia'));
+
+    // this.isLoading = true 
+
+    this.ViewMorechart(appVia)
+
+  }
+
+  viewOnDatechange(event: any): void {
+    // console.log(event, 'dates')
+    if (Array.isArray(event) && event.length === 2) {
+      const startDate = event[0];
+      let endDate;
+      event[1] !== null ? endDate = event[1] : endDate = event[0]
+      this.selectedViewDate = getIndividualDates(startDate, endDate);
+      this.viewMoreData()
+    }
+  }
+
+  viewDoctorsOnchange(event: any): void {
+    console.log(event)
+    this.selectedViewDoctor = parseInt(event.target.value) || 'all'
+    this.viewMoreData()
   }
 }

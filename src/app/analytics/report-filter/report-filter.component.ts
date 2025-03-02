@@ -19,6 +19,7 @@ export class ReportFilterComponent implements OnChanges {
   @Input() reportData: any[] = [];
   @Input() dateSelectionType: any;
   @Input() onOf: any;
+  @Input() initializeDate: any[] = []
   emptyDate = ''
 
   @Output() onoff = new EventEmitter<boolean>
@@ -29,16 +30,16 @@ export class ReportFilterComponent implements OnChanges {
   range: any;
 
   @Input() selectedDateRange: Date[] = [];
-  individualDates: any[] = [];
+  @Input() individualDates: any[] = [];
   department: any
   departmentValue: any;
   doctors: any
   selectedDoctor: any
+  @Input() importedDoctor: any
 
   ngOnInit() {
     this.loadDepartments()
-    this.selectedDoctor = 'all'
-    this.sortByDate(); 
+    this.sortByDate();
   }
 
   async loadDepartments(): Promise<void> {
@@ -72,14 +73,16 @@ export class ReportFilterComponent implements OnChanges {
   }
 
   loadYesterday(): any {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    const formattedDate = yesterday.toISOString().split('T')[0];
-    this.individualDates = [formattedDate]
-    console.log(this.individualDates, "individual datre")
-    this.importedData = this.reportData.filter((entry: any) =>
-      this.individualDates.includes(entry.date)  //
+    // const yesterday = new Date();
+    // yesterday.setDate(yesterday.getDate() - 1);
+    // const formattedDate = yesterday.toISOString().split('T')[0];
+    this.selectedDoctor = this.importedDoctor
+    // console.log(this.individualDates, "individual date")
+    const filteredData = this.reportData.filter((entry: any) =>
+      this.individualDates.includes(entry.date)
     );
+
+    this.importedData = filteredData.filter(entry => this.individualDates.includes(entry.date))
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -87,8 +90,7 @@ export class ReportFilterComponent implements OnChanges {
       this.controlDateRange();
     }
 
-    if (changes['reportData']) {
-      // this.sortByDate(); // Sort data whenever reportData changes
+    if (((changes['reportData']) && (!changes['reportData'].firstChange)) || (changes['individualDates'] || (changes['selectedDoctor']))) {
       this.importedData = this.reportData
       this.selectedDateRange = []
       this.sortByDate()
@@ -157,47 +159,51 @@ export class ReportFilterComponent implements OnChanges {
     // Write the workbook to file
     const wb: XLSX.WorkBook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Report');
-    XLSX.writeFile(wb, 'styled_report_data.xlsx');
+    XLSX.writeFile(wb, 'report_data.xlsx');
   }
 
   onDateRangeSelect(event: any): void {
+    // console.log(event, 'dates')
     if (this.type && Array.isArray(event) && event.length === 2) {
       const startDate = event[0];
-      const endDate = event[1];
-  
+      let endDate;
+      event[1] !== null ? endDate = event[1] : endDate = event[0]
+
+      // console.log(startDate, endDate, "dates split")
+
       // Get all the individual dates between the selected range
       this.individualDates = this.getIndividualDates(startDate, endDate);
-      console.log('Individual Dates:', this.individualDates);
-  
+      // console.log('Individual Dates:', this.individualDates);
+
       // Filter report data based on both date range and selected doctor
       const filteredReportData = this.reportData.filter((entry: any) => {
-        const dateMatches = this.individualDates.includes(entry.date);  
-        return dateMatches;  // Return true if both date and doctor conditions match
+        const dateMatches = this.individualDates.includes(entry.date);
+        const selectedDoctor = this.selectedDoctor === 'all' ?  entry : this.selectedDoctor === parseInt(entry.doctorId)
+        return dateMatches && selectedDoctor;  // Return true if both date and doctor conditions match
       });
-  
+
       // Update the imported data with filtered data
       this.importedData = filteredReportData;
-      console.log('Filtered Report Data:', filteredReportData);
-  
+      // console.log('Filtered Report Data:', filteredReportData);
+
     } else if (!this.type) {
-      console.log('Selected Single Date:', event);
+      // console.log('Selected Single Date:', event);
     }
   }
 
   onChoosingDoctor(event: any): void {
     this.selectedDoctor = event.target.value === 'all' ? 'all' : parseInt(event.target.value);
-  
-    console.log('Selected Doctor:', this.selectedDoctor); // Log the selected doctor to verify
-  
+
+    // console.log('Selected Doctor:', this.selectedDoctor); // Log the selected doctor to verify
+
     // Filter the report data based on the selected doctor and the 'all' option
     const filteredReportData = this.reportData.filter((entry: any) => {
-      return this.selectedDoctor === 'all' || this.selectedDoctor === entry.doctorId;
+      return (this.selectedDoctor === 'all' || this.selectedDoctor === parseInt(entry.doctorId)) && (this.individualDates.includes(entry.date));
     });
-  
+
     // Update the imported data with the filtered report data
     this.importedData = filteredReportData;
   }
-  
 
   getIndividualDates(startDate: Date, endDate: Date): string[] {
     const dates = [];
@@ -229,7 +235,7 @@ export class ReportFilterComponent implements OnChanges {
       // Compare dates (ascending order)
       return dateA.getTime() - dateB.getTime();
     });
-    console.log('Sorted Report Data:', this.reportData);
+    // console.log('Sorted Report Data:', this.reportData);
   }
 
   getDatesInMonth(year: number, month: number): string[] {
@@ -247,16 +253,35 @@ export class ReportFilterComponent implements OnChanges {
   // closing report
   closingReport() {
     this.onoff.emit(false)
+    this.loadDepartments()
+    this.doctors = []
+    this.selectedDateRange = []
+    this.individualDates = [getYesterdayDate()]
+    this.selectedDoctor = 'all'
+    if(this.selectedDoctor === 'all'){
+      const filtererdData = this.reportData.filter((entry: any) => {
+        const dateMatches = this.individualDates.includes(entry.date);
+        const doctor = this.selectedDoctor === 'all' ? entry : this.selectedDoctor === parseInt(entry.doctorId)
+        return dateMatches && doctor;
+      });
+      this.importedData = filtererdData
+    }
   }
 
   refresh() {
     this.loadDepartments()
+    this.doctors = []
     this.selectedDateRange = []
     this.individualDates = [getYesterdayDate()]
-    const filtererdData = this.reportData.filter((entry: any) => {
-      const dateMatches = this.individualDates.includes(entry.date);  
-      return dateMatches;
-    });
-    this.importedData = filtererdData
+    this.selectedDoctor = 'all'
+    if(this.selectedDoctor === 'all'){
+      const filtererdData = this.reportData.filter((entry: any) => {
+        const dateMatches = this.individualDates.includes(entry.date);
+        const doctor = this.selectedDoctor === 'all' ? entry : this.selectedDoctor === parseInt(entry.doctorId)
+        return dateMatches && doctor;
+      });
+      this.importedData = filtererdData
+    }
+
   }
 }

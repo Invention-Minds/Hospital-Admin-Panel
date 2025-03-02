@@ -110,6 +110,7 @@ import { LoadingComponent } from './analytics/loading/loading.component';
 import { DelayReportComponent } from './analytics/delay-report/delay-report.component'; 
 import { TodayAnalyticsComponent } from './analytics/today-analytics/today-analytics.component';
 import { EstimationBarComponent } from './analytics/estimation-bar/estimation-bar.component';
+import { AgeChartComponent } from './analytics/age-chart/age-chart.component';
 import { MaintainanceComponent } from './maintainance/maintainance/maintainance.component';
 import { ArrivedConsultationComponent } from './doctor-role/arrived-consultation/arrived-consultation.component';
 import { ConfirmMhcComponent } from './health-checkup-service/confirm-mhc/confirm-mhc.component';
@@ -182,6 +183,8 @@ import { ConfirmMhcComponent } from './health-checkup-service/confirm-mhc/confir
     LoadingComponent,
     DelayReportComponent,
     TodayAnalyticsComponent,
+    EstimationBarComponent,
+    AgeChartComponent,
     EstimationBarComponent,
     MaintainanceComponent,
     ArrivedConsultationComponent,

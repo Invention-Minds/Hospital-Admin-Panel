@@ -1,7 +1,9 @@
-import { Component, Output, EventEmitter, Input, OnChanges, SimpleChanges  } from '@angular/core';
+import { Component, Output, EventEmitter, Input, OnChanges, SimpleChanges } from '@angular/core';
 import * as echarts from 'echarts';
 import { HealthCheckupServiceService } from '../../services/health-checkup/health-checkup-service.service';
-import { getYesterdayDate } from '../functions'
+import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
+import { getYesterdayDate, getIndividualDates, getLastThirtyDaysFromSelected } from '../functions'
+import { TextAlignment } from 'pdf-lib';
 
 @Component({
   selector: 'app-mhc-overview',
@@ -10,62 +12,66 @@ import { getYesterdayDate } from '../functions'
 })
 export class MhcOverviewComponent implements OnChanges {
 
-  constructor(private healthCheckup: HealthCheckupServiceService) { }
+  constructor(private healthCheckup: HealthCheckupServiceService, private docDetails: DoctorServiceService) { }
 
   option: any;
   overViewData: any;
-  dataForPiehart : any;
-  @Input() selectedDate : any[] = []
+  dataForPiehart: any;
+  @Input() selectedDate: any[] = []
 
-  isLoading : boolean = true
+  isLoading: boolean = true
 
   // report data
   reportAppointmentData: any;
   @Output() reportView = new EventEmitter<{ onoff: boolean, range: any }>();
   @Output() reportData = new EventEmitter<any[]>();
   @Output() reportsColumn = new EventEmitter<any[]>();
+  @Output() reportInitializeDate = new EventEmitter<any[]>();
+
+  // viewmore
+  rawData: any
+  department: any
+  departmentValue: any
+  doctors: any
+  filteredDoctors: any
+  showViewMore: boolean = false
+  dateInput: any
+  selectedViewDate: any[] = []
+  selectedViewDoctor: any = 'all'
+  viewMoreoption: any
 
   ngOnInit() {
     this.selectedDate = [getYesterdayDate()]
     this.getAllPackages();
+    this.selectedViewDate = getLastThirtyDaysFromSelected()
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if(changes['selectedDate']){
+    if (changes['selectedDate']) {
       this.getAllPackages()
     }
   }
 
-  // Initialize chart
+
   initChart(): void {
     const chartDom = document.getElementById('mhc-chart')!;
     const myChart = echarts.init(chartDom);
-  
-    const chartData = Object.entries(this.dataForPiehart).map(([name, value]) => {
-      return { name, value };
-    });
-    console.log(chartData, "form chart");
-  
+
+    // Use the dataForPiechart array directly, which includes name, value, and itemStyle.color
+    const chartData = this.dataForPiehart;
+
     this.option = {
       tooltip: {
         trigger: 'item',
-        // formatter: '{a} <br/>{b} : {c} ({d}%)'
       },
-      legend: {
-        type: 'scroll',
-        orient: 'vertical',
-        right: 20,  // Add space to the right side
-        top: 'center',  // Center vertically
-        bottom: 'center',  // Ensure the legend fits properly
-        data: chartData.map((entry: any) => entry.name) // Dynamically set legend
-      },
+
       series: [
         {
           name: 'Health Checkups',
           type: 'pie',
-          radius: '90%',
-          center: ['40%', '50%'],  // Shift the pie chart slightly to the left to make space for the legend
-          data: chartData, // Pass the formatted data
+          radius: '70%',
+          center: ['50%', '60%'],
+          data: chartData,
           emphasis: {
             itemStyle: {
               shadowBlur: 10,
@@ -74,22 +80,29 @@ export class MhcOverviewComponent implements OnChanges {
             }
           },
           label: {
-            show: false // This hides the labels
+            show: true,
+            formatter: '{c}',
+            position: 'inside',
+            fontSize: 14,
+            color: '#FFFFFF',
+            fontWeight: 'bold',
+            fontFamily: 'Arial, sans-serif',
+            TextAlignment: 'center',
           },
           labelLine: {
-            show: false // This hides the connecting lines
+            show: false
           }
         }
       ]
     };
-  
+
     myChart.setOption(this.option); // Render the chart
   }
-  
+
   getAllPackages(): void {
     this.isLoading = true
     this.healthCheckup.getPackages().subscribe({
-      next : (pack) => {
+      next: (pack) => {
         this.healthCheckup.getAllServices().subscribe((data: any) => {
 
           const formatDate = (date: string): string => {
@@ -99,20 +112,20 @@ export class MhcOverviewComponent implements OnChanges {
             const day = d.getDate().toString().padStart(2, '0');
             return `${year}-${month}-${day}`;
           };
-  
+
           const packageMap = pack.reduce((map: any, entry: any) => {
             map[entry.id] = entry.name;
             return map;
           }, {});
-  
+
           const result: any = {};
-  
+
           data.forEach((entry: any) => {
-            const { createdAt, appointmentStatus, packageId } = entry;
-            const date = formatDate(createdAt);
-  
+            const { appointmentDate, appointmentStatus, packageId } = entry;
+            const date = appointmentDate;
+
             const key = `${date}-${packageId}`;
-  
+
             if (!result[key]) {
               result[key] = {
                 date: date,
@@ -122,10 +135,10 @@ export class MhcOverviewComponent implements OnChanges {
                 cancelled: 0,
                 pending: 0,
                 completed: 0,
-                total : 0,
+                total: 0,
               };
             }
-  
+
             if (appointmentStatus === "Confirm") {
               result[key].confirmed += 1;
             } else if (appointmentStatus === "Cancel") {
@@ -136,63 +149,234 @@ export class MhcOverviewComponent implements OnChanges {
               result[key].completed += 1;
             }
 
-            result[key].total +=1
+            result[key].total += 1
           });
-  
-          console.log('Formatted Result:', Object.values(result));
+
+          // console.log('Formatted Result:', Object.values(result));
           this.overViewData = Object.values(result);
           this.chartData(); // Call chartData after data is processed
         });
       },
-      error : (error) => {
+      error: (error) => {
         console.log(error)
       },
-      complete : () => {
+      complete: () => {
         this.isLoading = false
       }
 
     });
   }
 
-  report():void{
-
+  report(): void {
+    this.isLoading = true
     this.reportData.emit(this.overViewData)
     const reportColumn = [
       { header: "Date", key: "date" },
-      { header : "Total", key : "total" },
+      { header: "Total", key: "total" },
       { header: "Package Name", key: "packageName" },
       { header: "Confirmed", key: "confirmed" },
       { header: "Cancelled", key: "cancelled" },
       { header: "Pending", key: "pending" },
-      { header: "Completed", key: "completed" }   
+      { header: "Completed", key: "completed" }
     ]
     this.reportsColumn.emit(reportColumn)
     this.reportView.emit({ onoff: true, range: "range" })
+    this.reportInitializeDate.emit(this.selectedDate)
+    this.isLoading = false
   }
 
-  // Process chart data for confirmed counts
   chartData(): void {
-    const rawdata = this.overViewData.filter((data: any) => data.confirmed !== null && this.selectedDate.includes(data.date)).map((entry: any) => {
-      return {
+    const rawData = this.overViewData
+      .filter((data: any) => data.completed !== null && this.selectedDate.includes(data.date))
+      .map((entry: any) => ({
         date: entry.date,
         package: entry.packageName,
-        confirmed: entry.confirmed
-      };
-    });
+        confirmed: entry.completed
+      }));
 
-    // Aggregate confirmed counts per package
-    const packageConfirmedCounts = rawdata.reduce((acc: any, entry: any) => {
+    // Define package colors based on the image
+    const packageColors: { [key: string]: string } = {
+      'Integrated Diabetic Care': '#FB9C2A', // Orange
+      'Annual Master Diabetes Care': '#0E2970', // Dark Blue
+      'Senior Citizen Health (Male)': '#FF4545', // Red
+      'Senior Citizen Health Check (Female)': '#169458', // Green
+      'Basic Health Check Up': '#FFC23A', // Yellow
+      'Executive Health Check Up (Male)': '#001345', // Dark Blue
+      'Master Health Check Up': '#544FC5', // Purple
+      'Executive Health Check Up (Female)': '#00E272', // Green
+      'Well Women check up': '#A52B0E', // Dark Red/Maroon
+      'Comprehensive Diabetic check': '#9747FF' // Purple
+    };
+
+    // Aggregate confirmed counts per package and include colors
+    const packageConfirmedCounts = rawData.reduce((acc: any, entry: any) => {
       if (acc[entry.package]) {
-        acc[entry.package] += entry.confirmed;
+        acc[entry.package].value += entry.confirmed;
       } else {
-        acc[entry.package] = entry.confirmed;
+        acc[entry.package] = {
+          value: entry.confirmed,
+          color: packageColors[entry.package] || '#000000' // Default to black if package not found
+        };
       }
       return acc;
     }, {});
 
-    this.dataForPiehart = packageConfirmedCounts
+    // Convert to array format for pie chart (optional, depending on initChart)
+    this.dataForPiehart = Object.entries(packageConfirmedCounts).map(([name, details]: [string, any]) => ({
+      name: name,
+      value: details.value,
+      itemStyle: { color: details.color }
+    }));
 
-    console.log('Total Confirmed Counts for Each Package:', this.dataForPiehart);
+    console.log(this.dataForPiehart)
+
+    // console.log('Total Confirmed Counts for Each Package:', this.dataForPiechart);
     this.initChart();
+  }
+
+
+  // viewmore
+
+  async loadDepartments(): Promise<void> {
+    try {
+      const data = await this.docDetails.getDepartments().toPromise()
+      this.department = data;
+      // console.log(this.department)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  viewmore(): void {
+    this.showViewMore = true
+    this.viewMoreData()
+  }
+
+  closeViewMore(): void {
+    this.showViewMore = false
+  }
+
+  departmentOnchange(event: any): void {
+    this.docDetails.getDoctors().subscribe(({
+      next: (data: any) => {
+        this.filteredDoctors = data.filter((doc: any) => doc.departmentId === parseInt(event.target.value))
+      },
+      error: (error: any) => {
+        console.error(error)
+      },
+      complete: () => {
+
+      }
+    }))
+  }
+
+  ViewMorechart(data: any): void {
+    const chartDom = document.getElementById('viewMoreMHCoverview');
+    const myChart = echarts.init(chartDom);
+
+    const chartData = data
+
+    this.viewMoreoption = {
+      tooltip: {
+        trigger: 'item',
+      },
+
+      series: [
+        {
+          name: 'Health Checkups',
+          type: 'pie',
+          radius: '70%',
+          center: ['50%', '60%'],
+          data: chartData,
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)'
+            }
+          },
+          label: {
+            show: true,
+            formatter: '{c}',
+            position: 'inside',
+            fontSize: 14,
+            color: '#FFFFFF',
+            fontWeight: 'bold',
+            fontFamily: 'Arial, sans-serif',
+            TextAlignment: 'center',
+          },
+          labelLine: {
+            show: false
+          }
+        }
+      ]
+    };
+
+    myChart.setOption(this.viewMoreoption); // Render the chart
+  }
+
+  viewMoreData(): void {
+    this.loadDepartments()
+
+    const rawData = this.overViewData
+      .filter((data: any) => data.completed !== null && this.selectedViewDate.includes(data.date))
+      .map((entry: any) => ({
+        date: entry.date,
+        package: entry.packageName,
+        confirmed: entry.completed
+      }));
+
+    const packageColors: { [key: string]: string } = {
+      'Integrated Diabetic Care': '#FB9C2A',
+      'Annual Master Diabetes Care': '#0E2970',
+      'Senior Citizen Health (Male)': '#FF4545',
+      'Senior Citizen Health Check (Female)': '#169458',
+      'Basic Health Check Up': '#FFC23A',
+      'Executive Health Check Up (Male)': '#001345',
+      'Master Health Check Up': '#544FC5',
+      'Executive Health Check Up (Female)': '#00E272',
+      'Well Women check up': '#A52B0E',
+      'Comprehensive Diabetic check': '#9747FF'
+    };
+
+    // Aggregate confirmed counts per package and include colors
+    const packageConfirmedCounts = rawData.reduce((acc: any, entry: any) => {
+      if (acc[entry.package]) {
+        acc[entry.package].value += entry.confirmed;
+      } else {
+        acc[entry.package] = {
+          value: entry.confirmed,
+          color: packageColors[entry.package] || '#000000' // Default to black if package not found
+        };
+      }
+      return acc;
+    }, {});
+
+    // Convert to array format for pie chart (optional, depending on initChart)
+    const data:any = Object.entries(packageConfirmedCounts).map(([name, details]: [string, any]) => ({
+      name: name,
+      value: details.value,
+      itemStyle: { color: details.color }
+    }));
+
+    this.ViewMorechart(data)
+
+  }
+
+  viewOnDatechange(event: any): void {
+    // console.log(event, 'dates')
+    if (Array.isArray(event) && event.length === 2) {
+      const startDate = event[0];
+      let endDate;
+      event[1] !== null ? endDate = event[1] : endDate = event[0]
+      this.selectedViewDate = getIndividualDates(startDate, endDate);
+      this.viewMoreData()
+    }
+  }
+
+  viewDoctorsOnchange(event: any): void {
+    console.log(event)
+    this.selectedViewDoctor = parseInt(event.target.value) || 'all'
+    this.viewMoreData()
   }
 }

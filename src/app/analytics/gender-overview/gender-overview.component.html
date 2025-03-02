@@ -1,1 +1,84 @@
-<p>gender-overview works!</p>
+<div class="loading" *ngIf="isLoading">
+    <app-loading />
+</div>
+
+<div class="root-container">
+    <div class="header" *ngIf="!isLoading">
+        <div class="common">
+            <div class="heading">Gender Overview</div>
+            <div class="info" *ngIf="!isLoading">
+                <div class="tooltip">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" >
+                        <path fill="currentColor"
+                            d="M12 17q.425 0 .713-.288T13 16v-4q0-.425-.288-.712T12 11t-.712.288T11 12v4q0 .425.288.713T12 17m0-8q.425 0 .713-.288T13 8t-.288-.712T12 7t-.712.288T11 8t.288.713T12 9m0 13q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22m0-2q3.35 0 5.675-2.325T20 12t-2.325-5.675T12 4T6.325 6.325T4 12t2.325 5.675T12 20m0-8" />
+                    </svg>
+                    <span class="tooltiptext">This pie chart represents the breakdown of patients by gender. It provides a visual representation of the male-to-female ratio within the patient population.</span>
+                </div>
+            </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="viewmore" (click)="viewmore()">View More</div>
+            <div class="viewmore" (click)="report(rawData)">Details</div>
+        </div>
+        
+    </div>
+
+    <div class="chart" [ngClass]="{hidden : isLoading}">
+        <div id="genderLineChart" style="width: 400px; height: 280px"></div>
+    </div>
+
+    <div class="legends" *ngIf="!isLoading">
+        <div class="legent_items"><div class="indicatior pink"></div><span>Female</span></div>
+        <div class="legent_items"><div class="indicatior blue"></div><span>Male</span></div>
+    </div>
+</div>
+
+<div class="viewmoreComponent" [ngClass]="{hide : !showViewMore, index : showViewMore}">
+    <div class="contents">
+        <div class="header">
+            <div class="viewMoreHeading">Gender Overview</div>
+            <i class="fa-solid fa-x" (click)="closeViewMore()" style="cursor: pointer;"></i>
+        </div>
+        <!-- filters -->
+        <div class="report-filter">
+            <select (change)="departmentOnchange($event)">
+                <option class="dummy" value="all" disabled selected hidden>Choose the Department</option>
+                <option *ngFor="let dept of viewMoreDepartment" [value]="dept.id">{{dept.name}}</option>
+                <option></option>
+            </select>
+
+            <select (change)="viewDoctorsOnchange($event)">
+                <option class="dummy" value="all" disabled selected hidden>Choose the Doctor</option>
+                <option value="all">All</option>
+                <option *ngFor="let docs of filteredDoctors" [value]="docs.id">{{docs.name}}</option>
+            </select>
+
+            <div class="date-picker">
+                <p-calendar styleClass="custom-calendar" selectionMode="range" placeholder='Please Select Date Range'
+                 [(ngModel)]="dateInput" (ngModelChange)="viewOnDatechange($event)" dateFormat="yy-mm-dd">
+                    <ng-template pTemplate="date" let-date>
+                        <span>
+                            {{ date.day }}
+                        </span>
+                    </ng-template>
+                </p-calendar>
+            </div>
+            <div class="refreh tooltip" style="cursor: pointer;" (click)="refresh()"><i class="fa-solid fa-arrows-rotate"></i><span
+                    class="tooltiptext">refresh</span></div>
+        </div>
+
+        <!-- chart -->
+        <div class="viewChart">
+            <div id="viewMoreGender"></div>
+            <div class="viewmoreLegends" *ngIf="!isLoading">
+                <div class="legent_items"><div class="indicatior pink"></div><span>Female</span></div>
+                <div class="legent_items"><div class="indicatior blue"></div><span>Male</span></div>
+            </div>
+        </div>
+
+        <!-- details -->
+        <div class="details">
+
+        </div>
+    </div>
+</div>

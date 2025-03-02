@@ -196,25 +196,25 @@ tbody tr:hover {
 }
 
 .tooltip .tooltiptext {
-  visibility: hidden;
-  width: 300px;
-  text-align: center;
-  border-radius: 5px;
-  padding: 5px;
-  position: absolute;
-  z-index: 1;
-  bottom: 0%; /* Position above the element */
-  top: 40px;
-  opacity: 0;
-  transition: opacity 0.3s;
-  font-size: 12px;
-  background-color: #7B7B7B;
-  height: 120px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: #fff;
-  right: 0;
+    visibility: hidden;
+    width: 300px;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 0%;
+    top: 40px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 12px;
+    background-color: #7B7B7B;
+    height: 120px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    right: -130px;
 }
 
 .tooltip:hover .tooltiptext {
@@ -231,7 +231,7 @@ tbody tr:hover {
     display: flex;
     justify-content: right;
     position: relative;
-    margin-top: -7px;
+    margin-top: 2px;
 }
 
 .loading{
@@ -240,6 +240,12 @@ tbody tr:hover {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.common{
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 /* Responsive */

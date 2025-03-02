@@ -1,63 +1,180 @@
-<div class="loading" *ngIf = "isLoading">
+<div class="loading" *ngIf="isLoading">
     <app-loading />
 </div>
 
 <div class="root-container">
-    <div class="header"  *ngIf = "!isLoading" >
-        <div class="heading">OPD OVERVIEW</div>
-        <div class="viewmore" (click)="overviewReport()">View More</div>
+    <div class="header" *ngIf="!isLoading">
+        <div class="common">
+            <div class="heading">OPD OVERVIEW</div>
+            <div class="info">
+                <div class="tooltip">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path fill="currentColor"
+                            d="M12 17q.425 0 .713-.288T13 16v-4q0-.425-.288-.712T12 11t-.712.288T11 12v4q0 .425.288.713T12 17m0-8q.425 0 .713-.288T13 8t-.288-.712T12 7t-.712.288T11 8t.288.713T12 9m0 13q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22m0-2q3.35 0 5.675-2.325T20 12t-2.325-5.675T12 4T6.325 6.325T4 12t2.325 5.675T12 20m0-8" />
+                    </svg>
+                    <span class="tooltiptext">This bar chart provides an overview of estimation statuses over the last
+                        week, tracking pending, submitted, approved, confirmed, completed, canceled and overdue
+                        estimations.</span>
+                </div>
+            </div>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <div class="viewmore" (click)="viewmore()">View More</div>
+            <div class="viewmore" (click)="overviewReport()">Details</div>
+        </div>
     </div>
     <div class="chart_legend">
         <div class="chart" [ngClass]="{hidden:isLoading}">
             <!-- <div class="yaxis-name" style="transform: rotate(90deg); width: 30px; text-orientation: ;">OPD Count</div> -->
             <div id="opdOverview" style="width: 100%; height: 300px"></div>
         </div>
-        <div class="legend" *ngIf = "!isLoading" >
+        <div class="legend" *ngIf="!isLoading">
             <div class="legend_items">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="8" viewBox="0 0 16 8" fill="none">
-                    <path d="M1 4H15" stroke="#2CAFFE" stroke-width="2" stroke-linecap="round"/>
-                    <path d="M8 8C6.93931 8 5.92204 7.57871 5.17193 6.82878C4.42181 6.07885 4.00027 5.06169 4 4.001C3.99973 2.94031 4.42077 1.92294 5.17051 1.17263C5.92025 0.422329 6.93731 0.000530847 7.998 5.00723e-07C9.05869 -0.000529846 10.0762 0.420251 10.8267 1.16981C11.5772 1.91936 11.9992 2.93631 12 3.997C12.0008 5.05769 11.5803 6.07527 10.8309 6.82595C10.0815 7.57663 9.06469 7.99894 8.004 8L8 8Z" fill="#2CAFFE"/>
+                    <path d="M1 4H15" stroke="#2CAFFE" stroke-width="2" stroke-linecap="round" />
+                    <path
+                        d="M8 8C6.93931 8 5.92204 7.57871 5.17193 6.82878C4.42181 6.07885 4.00027 5.06169 4 4.001C3.99973 2.94031 4.42077 1.92294 5.17051 1.17263C5.92025 0.422329 6.93731 0.000530847 7.998 5.00723e-07C9.05869 -0.000529846 10.0762 0.420251 10.8267 1.16981C11.5772 1.91936 11.9992 2.93631 12 3.997C12.0008 5.05769 11.5803 6.07527 10.8309 6.82595C10.0815 7.57663 9.06469 7.99894 8.004 8L8 8Z"
+                        fill="#2CAFFE" />
                 </svg>
                 <span>Total Appointment</span>
             </div>
             <div class="legend_items">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="8" viewBox="0 0 16 8" fill="none">
-                    <path d="M1 4H15" stroke="#544FC5" stroke-width="2" stroke-linecap="round"/>
-                    <path d="M8 0L12 4L8 8L4 4L8 0Z" fill="#544FC5"/>
+                    <path d="M1 4H15" stroke="#544FC5" stroke-width="2" stroke-linecap="round" />
+                    <path d="M8 0L12 4L8 8L4 4L8 0Z" fill="#544FC5" />
                 </svg>
                 <span>Completed</span>
             </div>
             <div class="legend_items">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="8" viewBox="0 0 16 8" fill="none">
-                    <path d="M1 4H15" stroke="#00E272" stroke-width="2" stroke-linecap="round"/>
-                    <path d="M4 0H12V8H4V0Z" fill="#00E272"/>
+                    <path d="M1 4H15" stroke="#00E272" stroke-width="2" stroke-linecap="round" />
+                    <path d="M4 0H12V8H4V0Z" fill="#00E272" />
                 </svg>
                 <span>Confirmed</span>
             </div>
             <div class="legend_items">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="8" viewBox="0 0 16 8" fill="none">
-                    <path d="M1 4H15" stroke="#6B8ABC" stroke-width="2" stroke-linecap="round"/>
-                    <path d="M4 0H12L8 8L4 0Z" fill="#6B8ABC"/>
+                    <path d="M1 4H15" stroke="#6B8ABC" stroke-width="2" stroke-linecap="round" />
+                    <path d="M4 0H12L8 8L4 0Z" fill="#6B8ABC" />
                 </svg>
                 <span>Cancelled</span>
             </div>
             <div class="legend_items">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="10" viewBox="0 0 16 10" fill="none">
-                    <path d="M1 5H15H1Z" fill="#FCE35F"/>
-                    <path d="M1 5H15" stroke="#FCE35F" stroke-width="2" stroke-linecap="round"/>
-                    <path d="M10.0149 2.19918L10.0277 2.2091L10.0411 2.21818L12.153 3.6506L11.2864 6.05081L11.2809 6.06603L11.2764 6.08157L10.5667 8.53278L8.01617 8.45026L8 8.44974L7.98383 8.45026L5.43328 8.53278L4.7236 6.08157L4.7191 6.06603L4.71361 6.05081L3.84697 3.6506L5.95891 2.21818L5.97229 2.2091L5.98507 2.19918L8 0.633243L10.0149 2.19918Z" fill="#FCE35F" stroke="#FCE35F"/>
+                    <path d="M1 5H15H1Z" fill="#FCE35F" />
+                    <path d="M1 5H15" stroke="#FCE35F" stroke-width="2" stroke-linecap="round" />
+                    <path
+                        d="M10.0149 2.19918L10.0277 2.2091L10.0411 2.21818L12.153 3.6506L11.2864 6.05081L11.2809 6.06603L11.2764 6.08157L10.5667 8.53278L8.01617 8.45026L8 8.44974L7.98383 8.45026L5.43328 8.53278L4.7236 6.08157L4.7191 6.06603L4.71361 6.05081L3.84697 3.6506L5.95891 2.21818L5.97229 2.2091L5.98507 2.19918L8 0.633243L10.0149 2.19918Z"
+                        fill="#FCE35F" stroke="#FCE35F" />
                 </svg>
                 <span>Pending</span>
             </div>
         </div>
     </div>
-    <div class="info">
-        <div class="tooltip">
-            <svg 
-                xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12 17q.425 0 .713-.288T13 16v-4q0-.425-.288-.712T12 11t-.712.288T11 12v4q0 .425.288.713T12 17m0-8q.425 0 .713-.288T13 8t-.288-.712T12 7t-.712.288T11 8t.288.713T12 9m0 13q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22m0-2q3.35 0 5.675-2.325T20 12t-2.325-5.675T12 4T6.325 6.325T4 12t2.325 5.675T12 20m0-8" />
-            </svg>
-            <span class="tooltiptext">This bar chart provides an overview of estimation statuses over the last week, tracking pending, submitted, approved, confirmed, completed, canceled and overdue estimations.</span>
+</div>
+
+<!-- viewmore section -->
+<div class="viewmoreComponent" [ngClass]="{hide : !showViewMore, index : showViewMore}">
+    <div class="contents">
+        <div class="header">
+            <div class="viewMoreHeading">OPD Overview</div>
+            <i class="fa-solid fa-x" (click)="closeViewMore()" style="cursor: pointer;"></i>
+        </div>
+        <!-- filters -->
+        <div class="report-filter">
+            <!-- <div style="font-size: 20px; cursor: pointer;" class="tooltip"><i class="fa-solid fa-download">
+                    <div class="tooltiptext">Download</div>
+                </i>
+            </div> -->
+            <select (change)="departmentOnchange($event)">
+                <option class="dummy" value="all" disabled selected hidden>Choose the Department</option>
+                <option *ngFor="let dept of department" [value]="dept.id">{{dept.name}}</option>
+                <option></option>
+            </select>
+
+            <select (change)="viewDoctorsOnchange($event)">
+                <option class="dummy" value="all" disabled selected hidden>Choose the Doctor</option>
+                <option value="all">All</option>
+                <option *ngFor="let docs of filteredDoctors" [value]="docs.id">{{docs.name}}</option>
+            </select>
+
+            <div class="date-picker">
+                <p-calendar styleClass="custom-calendar" selectionMode="range" placeholder='Please Select Date Range'
+                    [(ngModel)]="dateInput" (ngModelChange)="viewOnDatechange($event)" dateFormat="yy-mm-dd">
+                    <ng-template pTemplate="date" let-date>
+                        <span>
+                            {{ date.day }}
+                        </span>
+                    </ng-template>
+                </p-calendar>
+            </div>
+            <div class="refreh v_tooltip" style="cursor: pointer;"><i class="fa-solid fa-arrows-rotate"></i><span
+                    class="v_tooltiptext">refresh</span></div>
+        </div>
+
+        <!-- chart -->
+        <div class="viewChart">
+            <div id="viewMoreOpdOverview"></div>
+            <div class="legend viewmoreLegends">
+                <div class="legend_items">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="8" viewBox="0 0 16 8" fill="none">
+                        <path d="M1 4H15" stroke="#2CAFFE" stroke-width="2" stroke-linecap="round" />
+                        <path
+                            d="M8 8C6.93931 8 5.92204 7.57871 5.17193 6.82878C4.42181 6.07885 4.00027 5.06169 4 4.001C3.99973 2.94031 4.42077 1.92294 5.17051 1.17263C5.92025 0.422329 6.93731 0.000530847 7.998 5.00723e-07C9.05869 -0.000529846 10.0762 0.420251 10.8267 1.16981C11.5772 1.91936 11.9992 2.93631 12 3.997C12.0008 5.05769 11.5803 6.07527 10.8309 6.82595C10.0815 7.57663 9.06469 7.99894 8.004 8L8 8Z"
+                            fill="#2CAFFE" />
+                    </svg>
+                    <span>Total Appointment</span>
+                </div>
+                <div class="legend_items">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="8" viewBox="0 0 16 8" fill="none">
+                        <path d="M1 4H15" stroke="#544FC5" stroke-width="2" stroke-linecap="round" />
+                        <path d="M8 0L12 4L8 8L4 4L8 0Z" fill="#544FC5" />
+                    </svg>
+                    <span>Completed</span>
+                </div>
+                <div class="legend_items">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="8" viewBox="0 0 16 8" fill="none">
+                        <path d="M1 4H15" stroke="#00E272" stroke-width="2" stroke-linecap="round" />
+                        <path d="M4 0H12V8H4V0Z" fill="#00E272" />
+                    </svg>
+                    <span>Confirmed</span>
+                </div>
+                <div class="legend_items">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="8" viewBox="0 0 16 8" fill="none">
+                        <path d="M1 4H15" stroke="#6B8ABC" stroke-width="2" stroke-linecap="round" />
+                        <path d="M4 0H12L8 8L4 0Z" fill="#6B8ABC" />
+                    </svg>
+                    <span>Cancelled</span>
+                </div>
+                <div class="legend_items">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="10" viewBox="0 0 16 10" fill="none">
+                        <path d="M1 5H15H1Z" fill="#FCE35F" />
+                        <path d="M1 5H15" stroke="#FCE35F" stroke-width="2" stroke-linecap="round" />
+                        <path
+                            d="M10.0149 2.19918L10.0277 2.2091L10.0411 2.21818L12.153 3.6506L11.2864 6.05081L11.2809 6.06603L11.2764 6.08157L10.5667 8.53278L8.01617 8.45026L8 8.44974L7.98383 8.45026L5.43328 8.53278L4.7236 6.08157L4.7191 6.06603L4.71361 6.05081L3.84697 3.6506L5.95891 2.21818L5.97229 2.2091L5.98507 2.19918L8 0.633243L10.0149 2.19918Z"
+                            fill="#FCE35F" stroke="#FCE35F" />
+                    </svg>
+                    <span>Pending</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- details -->
+        <div class="details">
+
         </div>
     </div>
 </div>
 
+
+<!-- <div class="date-picker">
+    <p-calendar styleClass="custom-calendar" selectionMode="range"
+      [(ngModel)]="selectedDateRange" (ngModelChange)="onDateRangeSelect($event)"
+      [placeholder]="type ? 'Please Select Date Range' : 'Please Select Date'" dateFormat="yy-mm-dd">
+      <ng-template pTemplate="date" let-date>
+        <span>
+          {{ date.day }}
+        </span>
+      </ng-template>
+    </p-calendar>
+  </div> -->

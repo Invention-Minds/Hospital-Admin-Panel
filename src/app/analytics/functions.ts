@@ -52,19 +52,20 @@ export const filteredAppointments = ((data: any[], requestType: string, doctorId
 export const getDayOfWeek = (date: string): string => {
   const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
   const dayIndex = new Date(date).getDay();
-  console.log(days[dayIndex])
+  // console.log(days[dayIndex])
   return days[dayIndex];
 }
 
 export const getLastSevenDays = (): string[] => {
   const dates: string[] = [];
-  for (let i = 0; i < 7; i++) {
+  for (let i = 1; i <= 7; i++) {  // Start loop from 1 instead of 0
     const date = new Date();
-    date.setDate(date.getDate() - i);
+    date.setDate(date.getDate() - i);  // Subtract i days to get past days
     dates.push(date.toISOString().split('T')[0]); // Format as YYYY-MM-DD
   }
   return dates.reverse(); // Return dates in ascending order
 }
+
 
 export const formatDate = (date: Date): string => {
   const year = date.getFullYear();
@@ -101,7 +102,7 @@ export const utcToIst = (dateNTime:any) => {
     const indianTimeOnly = indianTime.format('HH:mm:ss');          
     dateAndTIme = indianDate + ' ' + indianTimeOnly;
 
-    console.log(dateAndTIme, 'date and Time')
+    // console.log(dateAndTIme, 'date and Time')
   }
 
   return dateAndTIme
@@ -116,7 +117,7 @@ export const utcToIstDate = (dateNTime:any) => {
     const indianTimeOnly = indianTime.format('HH:mm:ss');          
     date = indianDate;
 
-    console.log(date, 'date and Time')
+    // console.log(date, 'date and Time')
   }
 
   return date
@@ -150,13 +151,13 @@ export const getLast14Days = () => {
 export const getPositiveNegative = (percentage:any) : any => {
   let num = percentage
   if(num >=0){
-    return `+${num}%`
+    return `+${parseFloat(num).toFixed(2)}%`
   }
   else if(!num){
     return `+0%`
   }
   else{
-    return `-${num}%`
+    return `${parseFloat(num).toFixed(2)}%`
   }
 }
 
@@ -220,3 +221,56 @@ export const getTodayDate = (): string => {
   
   return `${year}-${month}-${day}`;
 }
+
+export const getLastSevenDaysFromSelected = (selectedDate: string): string[] => {
+  const date = new Date(selectedDate); // Convert selected date to a Date object
+  const lastSevenDays: string[] = [];
+
+  // Loop through the last 7 days (including the selected date)
+  for (let i = 0; i <= 7; i++) {
+    const currentDate = new Date(date);
+    currentDate.setDate(date.getDate() - i); // Subtract 'i' days from the selected date
+    const formattedDate = currentDate.toISOString().split('T')[0]; // Format as YYYY-MM-DD
+    lastSevenDays.push(formattedDate);
+  }
+
+  return lastSevenDays.reverse();
+}
+
+export const sortByDateOldToNew = (data: any[], dateKey: any): any[] => {
+  return data.sort((a, b) => new Date(a[dateKey]).getTime() - new Date(b[dateKey]).getTime());
+}
+
+
+
+export const getLastThirtyDaysFromSelected = (): string[] => {
+  const dates: string[] = [];
+  const today = new Date();
+  
+  for (let i = 0; i < 30; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() - i);
+      
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0'); // +1 because months are 0-indexed
+      const day = String(date.getDate()).padStart(2, '0');
+      
+      dates.push(`${year}-${month}-${day}`);
+  }
+  
+  return dates.reverse();
+}
+
+// export  const getIndividualDates = (startDate: Date, endDate: Date): string[] => {
+//   const dates = [];
+//   console.log(startDate, "startDate from filter")
+//   let currentDate = new Date(startDate);
+
+//   // Loop through dates from startDate to endDate
+//   while (currentDate <= endDate) {
+//     const formattedDate = this.formatDate(currentDate); // Format each date
+//     dates.push(formattedDate);
+//     currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
+//   }
+//   return dates;
+// }

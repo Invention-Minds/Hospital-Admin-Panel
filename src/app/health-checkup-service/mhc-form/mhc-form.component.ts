@@ -363,7 +363,7 @@
     fetchDoctorsForDepartments(deptIds: number[]): Promise<void> {
       return new Promise((resolve) => { // ✅ Wrap in a Promise
         this.doctorService.getAllDoctors(this.selectedAppointment.appointmentDate).subscribe((doctors: any) => {
-          console.log("🚀 Raw Doctors Data:", doctors);
+          // console.log("🚀 Raw Doctors Data:", doctors);
     
           let filteredDoctors = doctors.filter((doctor: any) => doctor.doctorType !== 'Visiting Consultant');
     

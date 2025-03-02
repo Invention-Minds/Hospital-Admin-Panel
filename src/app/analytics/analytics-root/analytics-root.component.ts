@@ -1,7 +1,8 @@
 import { Component, OnChanges, SimpleChanges } from '@angular/core';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { availability, unavailableDates, doctors } from '../../Analytics-Folder/data'
-import { getDayOfWeek, getLastSevenDays, getYesterdayDate } from '../functions';
+import { getDayOfWeek, getLastSevenDays, getYesterdayDate,getTodayDate } from '../functions';
+import { AnyCnameRecord } from 'node:dns';
 
 @Component({
   selector: 'app-analytics-root',
@@ -28,21 +29,26 @@ export class AnalyticsRootComponent implements OnChanges{
   // report variable
   reportColumn : any
   reportdata : any
+  reportInitializeDate : any[] = []
 
   // report part open and close
   onOf : boolean = false 
   range : any
+  reportDoctorId : any
+
+  // today hide and visible
+  isCurrentDate : boolean =false
 
   // loading
   isLoading: boolean = true;
 
   ngOnInit(){   
-
     this.currentDate = getYesterdayDate()
     setTimeout(() => {
       this.isLoading = false; // Set to false when data is loaded
     }, 3000); // 3 seconds delay
 
+    this.isCurrentDate = true
     this.loadDepartments()
     this.selectedDoctor = 'all'
     this.loadAvailableDoctors('2025-03-15')
@@ -53,6 +59,16 @@ export class AnalyticsRootComponent implements OnChanges{
     if((changes['reportdata'] && !changes['reportdata'].firstChange)){
       this.receiveReportData(this.reportdata)
     }  
+
+    if(changes['currentDate']){
+      this.todayAnalytics()
+    }
+  }
+
+  todayAnalytics():void{
+    const todayDate = getTodayDate()
+    console.log(todayDate, "today date form root")
+    this.currentDate === todayDate ? this.isCurrentDate = true : this.isCurrentDate = false
   }
 
   sendYesterdayDate():void{
@@ -65,7 +81,6 @@ export class AnalyticsRootComponent implements OnChanges{
     const filteredDept = this.department.filter((dept:any) => departmentId === dept.id)
     return filteredDept[0].name
   }
-  
 
   async loadDepartments():Promise<void>{
     try{
@@ -106,24 +121,33 @@ export class AnalyticsRootComponent implements OnChanges{
       if (event.length === 2) {
         // Handle the date range (start and end dates)
         const startDate = new Date(event[0]);
-        const endDate = new Date(event[1]);
-        console.log('Selected Date Range:', startDate, endDate);
+        let endDate;
+        event[1]!==null ? endDate = event[1] : endDate = event[0]
+        // console.log('Selected Date Range:', startDate, endDate);
 
         this.selectedDate = this.getIndividualDates(startDate, endDate)
-        console.log(this.selectedDate)
+        // console.log(this.selectedDate)
 
       } else if (event.length === 1) {
         // Handle the single date selection
         const startDate = new Date(event[0]);
         const endDate = startDate
         this.selectedDate = this.getIndividualDates(startDate, endDate)
-        console.log(this.selectedDate)
+        // console.log(this.selectedDate)
 
       } else {
-        console.log('No date selected');
+        // console.log('No date selected');
       }
     }
-    console.log(this.selectedDateRange, "selected date range")
+
+    this.currentDate = this.selectedDate[0]
+    this.todayAnalytics()
+    // console.log(this.selectedDateRange, "selected date range")
+  }
+
+  reportDateInititilize(event:any[]):void{
+    this.reportInitializeDate = event
+    // console.log(this.reportInitializeDate, "report date initialize")
   }
 
   getIndividualDates(startDate: Date, endDate: Date): string[] {
@@ -182,17 +206,23 @@ export class AnalyticsRootComponent implements OnChanges{
 
   receiveReportColumn(reportColumn:any):void{
     this.reportColumn = reportColumn
-    console.log(this.reportColumn, 'from root')
+    // console.log(this.reportColumn, 'from root')
   }
 
   receiveReportData(reportData:any):void{
     this.reportdata = reportData
-    console.log(this.reportdata, 'from root')
+    // console.log(this.reportdata, 'from root')
   }
 
   reportView(event : {onoff : boolean, range : string}){
     this.onOf = event.onoff
     this.range = event.range
+    // this.reportDoctorId = event.doctorId 
+  }
+
+  reportDoctor(event:any){
+    this.reportDoctorId = event
+    // console.log(this.reportDoctorId, "report doctor id")
   }
 
   reportClose(event:boolean){
@@ -215,6 +245,7 @@ export class AnalyticsRootComponent implements OnChanges{
     const formattedDate = this.formatDate(date)
     this.selectedDate = [formattedDate]
     this.currentDate = formattedDate
+    this.todayAnalytics()
   }
 
   decrementDate():void{
@@ -224,5 +255,6 @@ export class AnalyticsRootComponent implements OnChanges{
     const formattedDate = this.formatDate(date)
     this.selectedDate = [formattedDate]
     this.currentDate = formattedDate
+    this.todayAnalytics()
   }
 }

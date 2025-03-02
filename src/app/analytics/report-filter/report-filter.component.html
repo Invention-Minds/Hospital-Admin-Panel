@@ -18,7 +18,7 @@
         <option *ngFor="let doc of doctors" [value]="doc.id">{{doc.name}}</option>
       </select>
       <div class="date-picker">
-        <p-calendar styleClass="custom-calendar" [selectionMode]="type ? 'range' : 'single'"
+        <p-calendar styleClass="custom-calendar" selectionMode="range"
           [(ngModel)]="selectedDateRange" (ngModelChange)="onDateRangeSelect($event)"
           [placeholder]="type ? 'Please Select Date Range' : 'Please Select Date'" dateFormat="yy-mm-dd">
           <ng-template pTemplate="date" let-date>

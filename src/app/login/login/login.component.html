@@ -1,4 +1,4 @@
-<!-- login.component.html -->
+<!-- login.component.html
 <div class="login-container">
     <div class="login-form">
       <div class="logo">
@@ -34,4 +34,37 @@
     </div>
    <p-toast></p-toast>
   </div>
-  
+   -->
+
+   <div class="root-container">
+      <div class="box">
+        <div class="logoSection">
+          <img src="/docminds_logo.png" alt="Login Logo" />
+        </div>
+        <div class="login_text">
+          <div class="login">Login</div>
+          <div class="quote">Welcome to seamless healthcare management</div>
+        </div>
+        <div class="form">
+          <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+            <div class="input-group">
+              <label for="" class="">User ID</label>
+              <input type="text" placeholder="Username" [(ngModel)]="username"
+              name="username"
+              required />
+            </div>
+            <div class="input-group">
+                <label for="">Password</label>
+                <input [type]="isPasswordVisible ? 'text' : 'password'"  class="input-field"  [(ngModel)]="password" placeholder="Password" name="password" required/>  
+                <div class="eye">
+                  <img [src]="isPasswordVisible? '/not-show.png': '/show-password.png'" alt="Show Password" class="eye-icon" (click)="togglePasswordVisibility()">
+                </div>
+            </div>
+            <div class="login marginTop">
+                <button  type="submit" [disabled]="!loginForm.valid " mat-raised-button [class.spinner]="isLoading"><span *ngIf="!isLoading">Login Now</span></button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <p-toast />
+   </div>

@@ -1,106 +1,154 @@
-
-
 <div class="rootcontainer">
     <div class="dashboard_header">
-        <div class="dashboard">Dashboard</div>
-        <div class="filters">
-            <select (change)="departmentOnchange($event)">
-                <option class="dummy" value="all" disabled selected hidden>Choose the Department</option>
-                <option value="all">All</option>
-                <option *ngFor="let dept of department" [value]="dept.id">{{dept.name}}</option>
-            </select>
-
-            <select (change)="doctorOnchange($event)">
-                <option class="dummy" value="all" disabled selected hidden>Choose the Doctor</option>
-                <option value="all">All</option>
-                <option *ngFor="let doc of doctors" [value]="doc.id">{{doc.name}}</option>
-            </select>
-
-            <div class="calendar">
-                <p-calendar styleClass="custom-calendar" [(ngModel)]="selectedDateRange"
-                    (ngModelChange)="dateOnChange($event)" placeholder="Please Select Date Range" dateFormat="yy-mm-dd"
-                    styleClass="custom-calendar" selectionMode="range" (ngModelChange)="selectedDateRange">
-                    <ng-template pTemplate="date" let-date>
-                        <span>
-                            {{ date.day }}
-                        </span>
-                    </ng-template>
-                </p-calendar>
-                <i class="fa-solid fa-calendar-days"></i>
-            </div>
-
-            <div class="prev_next">
-                <div class="button tooltip" (click)="decrementDate()"><i class="fa-solid fa-angle-left"></i><span class="tooltiptext">Prev Date</span></div>
-                <div class="datebox">{{currentDate}}</div>
-                <div class="button tooltip" (click)="incrementDate()"><i class="fa-solid fa-angle-right"></i><span class="tooltiptext">Next Date</span></div>
-            </div>
-
-            <div class="prev_next">
-                <div class="button tooltip" (click)="refreshButton()"><i class="fa-solid fa-arrows-rotate"><span class="tooltiptext">Refresh</span></i></div>
-            </div>
-        </div>
+        <div class="dashboard" [ngClass]="{hide : !isCurrentDate}">Dashboard</div>
     </div>
 
     <div class="dashboard_components">
-        <app-today-analytics />
-        <div class="flex container_margin">
-            <div class="opd_estimations bg_color">
-                <app-opd-estimation-pie (reportData)="receiveReportData($event)"
-                    (reportsColumn)="receiveReportColumn($event)" (reportView)="reportView($event)"
-                    [selectedDate]="selectedDate" [selectedDoctor]="selectedDoctor" />
+        <!-- today analytics -->
+        <div [ngClass]="{hide : !isCurrentDate}">
+            <app-today-analytics />
+        </div>
+
+        <!-- dashboard filter -->
+        <div class="dashboard_header" style="margin-top: 40px;">
+            <div class="Yesterday" *ngIf = "isCurrentDate">-------Yesterday-------</div>
+            <div class="dashboard" *ngIf = "!isCurrentDate">Dashboard</div>
+            <div class="filters">
+                <select (change)="departmentOnchange($event)">
+                    <option class="dummy" value="all" disabled selected hidden>Choose the Department</option>
+                    <option value="all">All</option>
+                    <option *ngFor="let dept of department" [value]="dept.id">{{dept.name}}</option>
+                </select>
+
+                <select (change)="doctorOnchange($event)">
+                    <option class="dummy" value="all" disabled selected hidden>Choose the Doctor</option>
+                    <option value="all">All</option>
+                    <option *ngFor="let doc of doctors" [value]="doc.id">{{doc.name}}</option>
+                </select>
+
+                <div class="calendar">
+                    <p-calendar styleClass="custom-calendar" [(ngModel)]="selectedDateRange"
+                        (ngModelChange)="dateOnChange($event)" placeholder="Please Select Date Range"
+                        dateFormat="yy-mm-dd" styleClass="custom-calendar" selectionMode="range"
+                        (ngModelChange)="selectedDateRange">
+                        <ng-template pTemplate="date" let-date>
+                            <span>
+                                {{ date.day }}
+                            </span>
+                        </ng-template>
+                    </p-calendar>
+                    <i class="fa-solid fa-calendar-days"></i>
+                </div>
+
+                <div class="prev_next">
+                    <div class="button tooltip" (click)="decrementDate()"><i class="fa-solid fa-angle-left"></i><span
+                            class="tooltiptext">Prev Date</span></div>
+                    <div class="datebox">{{currentDate}}</div>
+                    <div class="button tooltip" (click)="incrementDate()"><i class="fa-solid fa-angle-right"></i><span
+                            class="tooltiptext">Next Date</span></div>
+                </div>
+
+                <div class="prev_next">
+                    <div class="button tooltip" (click)="refreshButton()"><i class="fa-solid fa-arrows-rotate"><span
+                                class="tooltiptext">Refresh</span></i></div>
+                </div>
             </div>
+        </div>
+
+        <!-- row 1 -->
+        <div class="flex container_margin">
+
+            <!-- opd request via -->
+            <div class="opd_request_via bg_color">
+                <app-opd-request [doctorId]="selectedDoctor" [date]="selectedDate"
+                    (reportData)="receiveReportData($event)" (reportsColumn)="receiveReportColumn($event)"
+                    (reportView)="reportView($event)" (reportInitializeDate)="reportDateInititilize($event)" />
+            </div>
+
+            <!-- opd overview -->
             <div class="opd_datewise bg_color">
                 <app-opd-overview [doctorId]="selectedDoctor" [selectedDate]="selectedDate"
                     (reportData)="receiveReportData($event)" (reportsColumn)="receiveReportColumn($event)"
-                    (reportView)="reportView($event)" />
+                    (reportView)="reportView($event)" (reportInitializeDate)="reportDateInititilize($event)"
+                    (reportDoctorId)="reportDoctor($event)" />
             </div>
         </div>
     </div>
 
+    <!-- row 2 -->
     <div class="flex container_margin">
+
+        <!-- opd type -->
+        <div class="opd_type bg_color">
+            <app-opd-type [doctorId]="selectedDoctor" [selectedDate]="selectedDate"
+                (reportData)="receiveReportData($event)" (reportsColumn)="receiveReportColumn($event)"
+                (reportView)="reportView($event)" (reportInitializeDate)="reportDateInititilize($event)" />
+        </div>
+
+        <!-- mhc overview -->
+        <div class="mhc_overview bg_color">
+            <app-mhc-overview (reportData)="receiveReportData($event)" (reportsColumn)="receiveReportColumn($event)"
+                (reportView)="reportView($event)" [selectedDate]="selectedDate"
+                (reportInitializeDate)="reportDateInititilize($event)" />
+        </div>
+
+        <!-- OPD Time Analysis -->
+        <div class="time_wise_opd bg_color">
+            <app-opd-time-wise (reportData)="receiveReportData($event)" (reportsColumn)="receiveReportColumn($event)"
+                (reportView)="reportView($event)" [selectedDate]="selectedDate"
+                (reportInitializeDate)="reportDateInititilize($event)" [selectedDoctor]="selectedDoctor" />
+        </div>
+    </div>
+
+    <!-- row 3 -->
+    <div class="flex container_margin">
+
+        <!-- opd to estimation -->
+        <div class="opd_estimations bg_color">
+            <app-opd-estimation-pie (reportData)="receiveReportData($event)"
+                (reportsColumn)="receiveReportColumn($event)" (reportView)="reportView($event)"
+                [selectedDate]="selectedDate" [selectedDoctor]="selectedDoctor"
+                (reportInitializeDate)="reportDateInititilize($event)" />
+        </div>
+
+        <!-- estimation overview -->
+        <div class="estimation bg_color">
+            <app-estimation-bar (reportData)="receiveReportData($event)" (reportsColumn)="receiveReportColumn($event)"
+                (reportView)="reportView($event)" [selectedDate]="selectedDate"
+                (reportInitializeDate)="reportDateInititilize($event)" />
+        </div>
+
+    </div>
+
+    <!-- row 4 -->
+    <div class="flex container_margin" style="padding-bottom: 10px;">
+
+        <!-- waiting time -->
         <div class="waiting_time bg_color">
             <app-average-waiting-time (reportData)="receiveReportData($event)"
                 (reportsColumn)="receiveReportColumn($event)" (reportView)="reportView($event)"
-                [department]="selectedDepartment" [date] = "selectedDate" />
+                [department]="selectedDepartment" [date]="selectedDate"
+                (reportInitializeDate)="reportDateInititilize($event)" />
         </div>
-        <div class="opd_request_via bg_color">
-            <app-opd-request [doctorId]="selectedDoctor" [date]="selectedDate" (reportData)="receiveReportData($event)"
-                (reportsColumn)="receiveReportColumn($event)" (reportView)="reportView($event)" />
-        </div>
+
+        <!-- doctor login activity -->
         <div class="doctor_login bg_color">
-            <app-doctor-login-activity [selectedDate] = "selectedDate" />
+            <app-doctor-login-activity [selectedDate]="selectedDate" />
+        </div>
+
+        <!-- gender overview -->
+        <div class="gender_overview bg_color">
+            <app-gender-overview (reportData)="receiveReportData($event)" (reportsColumn)="receiveReportColumn($event)"
+                (reportView)="reportView($event)" [selectedDate]="selectedDate"
+                (reportInitializeDate)="reportDateInititilize($event)" />
         </div>
     </div>
 
-    <div class="flex container_margin">
-        <div class="mhc_overview bg_color">
-            <app-mhc-overview (reportData)="receiveReportData($event)" (reportsColumn)="receiveReportColumn($event)"
-            (reportView)="reportView($event)" [selectedDate] = "selectedDate" />
-        </div>
-        <div class="opd_type bg_color">
-            <app-opd-type [doctorId]="selectedDoctor" [selectedDate]="selectedDate" (reportData)="receiveReportData($event)"
-            (reportsColumn)="receiveReportColumn($event)" (reportView)="reportView($event)" />
-        </div>
+    <!-- analytics part -->
+    <div class="show_analytics" [ngClass]="{'hide' : !onOf}">
+        <app-report-filter [reportData]="this.reportdata" [columns]="this.reportColumn" (onoff)="reportClose($event)"
+            [individualDates]="reportInitializeDate" [importedDoctor]="reportDoctorId" />
     </div>
-
-    <div class="flex container_margin">
-        <div class="estimation bg_color">
-            <app-estimation-bar (reportData)="receiveReportData($event)" (reportsColumn)="receiveReportColumn($event)"
-                (reportView)="reportView($event)" [selectedDate] = "selectedDate" />
-        </div>
-        <div class="gender_overview">
-            <!-- <app-gender-overview /> -->
-        </div>
-    </div>
-
-
-    <div class="hide" [ngClass]="{'show_analytics' : onOf}">
-        <app-report-filter [reportData]="this.reportdata" [columns]="this.reportColumn" (onoff)="reportClose($event)" [selectedDateRange]="emptyDate" />
-    </div>
-
-    <div>
-        <app-opd-time-wise></app-opd-time-wise>
-    </div>
-
-
 </div>
+
+<!-- <app-age-chart /> -->

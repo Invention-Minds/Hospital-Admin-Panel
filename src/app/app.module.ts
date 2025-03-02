@@ -110,6 +110,7 @@ import { LoadingComponent } from './analytics/loading/loading.component';
 import { DelayReportComponent } from './analytics/delay-report/delay-report.component'; 
 import { TodayAnalyticsComponent } from './analytics/today-analytics/today-analytics.component';
 import { EstimationBarComponent } from './analytics/estimation-bar/estimation-bar.component';
+import { AgeChartComponent } from './analytics/age-chart/age-chart.component';
 
 
 @NgModule({
@@ -179,7 +180,8 @@ import { EstimationBarComponent } from './analytics/estimation-bar/estimation-ba
     LoadingComponent,
     DelayReportComponent,
     TodayAnalyticsComponent,
-    EstimationBarComponent
+    EstimationBarComponent,
+    AgeChartComponent,
   ],
   imports: [
     BrowserModule,

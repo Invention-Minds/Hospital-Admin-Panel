@@ -4,6 +4,8 @@ import * as echarts from 'echarts';
 import { utcToIstDate, getLast14Days, getPositiveNegative, getTodayDate } from '../functions'
 import { EstimationService } from '../../services/estimation/estimation.service';
 import { HealthCheckupServiceService } from '../../services/health-checkup/health-checkup-service.service';
+import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
+import * as XLSX from 'xlsx';  // Import xlsx library
 
 @Component({
   selector: 'app-today-analytics',
@@ -11,10 +13,13 @@ import { HealthCheckupServiceService } from '../../services/health-checkup/healt
   styleUrl: './today-analytics.component.css'
 })
 export class TodayAnalyticsComponent {
-  constructor(private doctor: DoctorServiceService, private estimations: EstimationService, private healthCheckUp : HealthCheckupServiceService) { }
+  constructor(private doctor: DoctorServiceService, private estimations: EstimationService, private healthCheckUp : HealthCheckupServiceService, private appointment : AppointmentConfirmService) { }
   date: any = '';
   doctors: any[] = [];
   availableDoctorsToday: number = 0;
+  availableDoctors : any[] = []
+  unavailableDoctors : any[] = []
+  absentDoctors : any[] = []
   absentDoctorsToday: number = 0;
   estimation: any = {
     liveConfirmedEstimating: 0,
@@ -27,6 +32,15 @@ export class TodayAnalyticsComponent {
     lastSevenDays: [],
     percentage : 0
   }
+  checkIn : any
+  checkinData : any
+
+  // report
+  popUpPresentReport : boolean = false
+  popUpAbsentReport : boolean = false
+  reportColumn : any
+  reportData : any
+  availableDoctor : any
 
   private timeCache: { [key: string]: number } = {};
 
@@ -36,6 +50,9 @@ export class TodayAnalyticsComponent {
     this.confirmedEstimations();
     this.roomAvailability();
     this.mhcConfirmed()
+    this.getTodayCheckin()
+    this.popUpPresentReport  = false
+    this.popUpAbsentReport = false
   }
 
   private fetchDoctorsWithAvailability(): void {
@@ -126,10 +143,23 @@ export class TodayAnalyticsComponent {
         this.absentDoctorsToday = absentCount;
         // console.log(this.availableDoctorsToday, this.absentDoctorsToday)
 
+        this.updateDoctorLists()
       },
       (error) => {
         console.error('Error fetching doctors:', error);
       }
+    );
+  }
+
+  private updateDoctorLists(): void {
+    this.availableDoctors = this.doctors.filter(
+      (doctor) => doctor.status === 'Available'
+    );
+    this.unavailableDoctors = this.doctors.filter(
+      (doctor) => doctor.status === 'Unavailable'
+    );
+    this.absentDoctors = this.doctors.filter(
+      (doctor) => doctor.status === 'Absent'
     );
   }
 
@@ -227,36 +257,8 @@ export class TodayAnalyticsComponent {
     myChart.setOption(option);
   }
 
-
-  // getDoctorDetails():void{
-  //   this.doctor.getAllDoctors(this.date).subscribe((data) => {
-  //     console.log(data)
-  //     const availability = data.map((entry) => entry.availability)
-  //     const unavailability = data.map((entry) => entry.unavailableDates)
-
-  //     const unavailableDates = unavailability.filter((entry:any) => entry.date === this.date).map((entry:any) => entry.docId)
-  //     // const availableDates = 
-
-
-  //   })
-  // }
-
-  // loadAvailableDoctors(date:string):void{
-
-  //     const dayOfWeek = getDayOfWeek(date)
-
-  //     const unAvailableDoctors = unavailableDates.filter((entry) => entry.date === date).map((entry) => entry.docId)
-  //     const availableDoctors = availability.filter((entry) => entry.availableDay === dayOfWeek).map((entry) => entry.docId)
-
-  //     this.availableDoctors = doctors.filter((entry) => !unAvailableDoctors.includes(entry.docId) && availableDoctors.includes(entry.docId))
-  //     this.unAvailableDoctors = doctors.filter((entry) => unAvailableDoctors.includes(entry.docId) && !availableDoctors.includes(entry.docId))
-  //     // console.log(this.availableDoctors)
-  //   }
-
-
   confirmedEstimations(): void {
     this.estimations.getAllEstimation().subscribe((data: any) => {
-
       const today = new Date();
       const day = String(today.getDate()).padStart(2, '0');  
       const month = String(today.getMonth() + 1).padStart(2, '0'); 
@@ -300,7 +302,7 @@ export class TodayAnalyticsComponent {
         }
 
         this.estimation.lastSevedays = groupBydate
-        // console.log(this.estimation.lastSevedays);
+        console.log(this.estimation.lastSevedays);
         this.initChart(this.estimation.lastSevedays, "estimation", "#FB9C2A", "EST Confirmed");
 
         const last14Days = getLast14Days()
@@ -335,9 +337,9 @@ export class TodayAnalyticsComponent {
           }
         }
 
-        // console.log(firstHalfCount, secondHalfCount, "counts")
-        this.estimation.percentage = getPositiveNegative(((secondHalfCount - firstHalfCount) / secondHalfCount) * 100);
-        // console.log(`Percentage Change: ${this.estimation.percentage.toFixed(2)}%`);
+        console.log(firstHalfCount, secondHalfCount, "first and second half")
+
+        this.estimation.percentage = getPositiveNegative(((firstHalfCount - secondHalfCount) / secondHalfCount) * 100);
       }
       catch (error) {
         console.log(error, "error")
@@ -354,13 +356,13 @@ export class TodayAnalyticsComponent {
   mhcConfirmed():void{
     this.healthCheckUp.getAllServices().subscribe((data:any) => {
       try{
-        const comfirmedMhc = data.filter((entry:any) => this.date === entry.appointmentDate && entry.appointmentStatus === "Confirm").map((entry:any) => {
+        const comfirmedMhc = data.filter((entry:any) => entry.appointmentStatus === "Confirm").map((entry:any) => {
           return {
             date : entry.appointmentDate,
             status : entry.appointmentStatus
           }
         })
-        this.healthCheck.liveCount = comfirmedMhc.length 
+        this.healthCheck.liveCount = comfirmedMhc.filter((entry:any) => entry.date === this.date).length 
         // console.log(comfirmedMhc, "confirmed MHC")
 
         const last14Days = getLast14Days()
@@ -398,7 +400,7 @@ export class TodayAnalyticsComponent {
         }
 
         // console.log(firstHalfCount, secondHalfCount, "counts")
-        this.healthCheck.percentage = getPositiveNegative(((secondHalfCount - firstHalfCount) / secondHalfCount) * 100);
+        this.healthCheck.percentage = getPositiveNegative(((secondHalfCount - firstHalfCount) / firstHalfCount) * 100);
         // console.log(`Percentage mhc Change: ${this.healthCheck.percentage.toFixed(2)}%`);
         const groupBydate: any = {};
 
@@ -413,17 +415,311 @@ export class TodayAnalyticsComponent {
             }
           }
         }
-
         // console.log(groupBydate, "group data of mhc")
-        this.initChart(groupBydate, "healthCheckUp", "#6F46C1", "MHC Confirmed");
-
+        this.initChart(groupBydate, "healthCheckUp", "#6F46C1", "MHC Confirmed");      
       }
       catch(error){
         console.error("health checkup error : ", error)
       }
     })
-
   }
 
+  // mhcConfirmed(): void {
+  //   this.healthCheckUp.getAllServices().subscribe(
+  //     (data: any) => {
+  //       try {
+  //         // console.log(data, "Raw data from database");
+  //           const confirmedMhc = data.filter((entry: any) => {
+  //           return this.date === entry.appointmentDate && entry.appointmentStatus === "Confirm";
+  //         }).map((entry: any) => {
+  //           return {
+  //             date: entry.appointmentDate,
+  //             status: entry.appointmentStatus,
+  //           };
+  //         });
+  //         console.log(confirmedMhc, "Filtered confirmed MHC data");
+  //         this.healthCheck.liveCount = confirmedMhc.length;
+  
+  //         const last14Days = getLast14Days();
+  //         console.log(last14Days, "Last 14 days");
+  //         // Split into first and second halves
+  //         const firstHalf = last14Days.slice(0, 7);
+  //         const secondHalf = last14Days.slice(7);
+  
+  //         // Initialize an object to store counts for each date
+  //         const last14daysData: any = {};
+  
+  //         // Populate last14daysData with counts for each date
+  //         for (let date of last14Days) {
+  //           last14daysData[date] = { count: 0 }; // Initialize count to 0 for each date
+  //         }
+  
+  //         // Count confirmed appointments for each date
+  //         for (let entry of confirmedMhc) {
+  //           if (last14daysData[entry.date]) {
+  //             last14daysData[entry.date].count++;
+  //           }
+  //         }
+  
+  //         // Log last14daysData to verify counts
+  //         console.log(last14daysData, "Last 14 days data");
+  
+  //         // Calculate counts for first and second halves
+  //         let firstHalfCount = 0;
+  //         let secondHalfCount = 0;
+  
+  //         for (let date in last14daysData) {
+  //           if (last14daysData.hasOwnProperty(date)) {
+  //             const count = last14daysData[date].count;
+  
+  //             if (firstHalf.includes(date)) {
+  //               firstHalfCount += count;
+  //             } else if (secondHalf.includes(date)) {
+  //               secondHalfCount += count;
+  //             }
+  //           }
+  //         }
+  
+  //         console.log(firstHalfCount, "First half count");
+  //         console.log(secondHalfCount, "Second half count");
+  
+  //         // Calculate percentage change (handle division by zero)
+  //         let percentageChange = 0;
+  //         if (secondHalfCount !== 0) {
+  //           percentageChange = ((secondHalfCount - firstHalfCount) / secondHalfCount) * 100;
+  //         }
+  //         this.healthCheck.percentage = getPositiveNegative(percentageChange);
+  
+  //         // Log percentage change
+  //         console.log(`Percentage MHC Change: ${this.healthCheck.percentage.toFixed(2)}%`);
+  
+  //         // Group data by date for the second half
+  //         const groupByDate: any = {};
+  //         for (let date of secondHalf) {
+  //           groupByDate[date] = { count: 0 }; // Initialize count to 0 for each date
+  //         }
+  
+  //         // Populate groupByDate with counts for the second half
+  //         for (let entry of confirmedMhc) {
+  //           if (groupByDate[entry.date]) {
+  //             groupByDate[entry.date].count++;
+  //           }
+  //         }
+  
+  //         // Log grouped data for the second half
+  //         console.log(groupByDate, "Grouped data for the second half");
+  
+  //         // Initialize the chart with the grouped data
+  //         this.initChart(groupByDate, "healthCheckUp", "#6F46C1", "MHC Confirmed");
+  //       } catch (error:any) {
+  //         // Log detailed error message
+  //         console.error("Health checkup error:", error.message, error.stack);
+  //       }
+  //     },
+  //     (error) => {
+  //       // Log API call errors
+  //       console.error("API call error:", error.message, error.stack);
+  //     }
+  //   );
+  // }
 
+
+  getTodayCheckin():any{
+    this.appointment.getAllAppointments().subscribe({
+      next : (data:any) => {
+        const filteredData = data.filter((entry:any) => entry.checkedIn !== false && entry.date === this.date).map((entry:any) => {
+          return {
+            patientName : entry.patientName,
+            phoneNumber : entry.phoneNumber,
+            patinetEmail : entry.email,
+            DoctorName : entry.doctorName,
+            Department : entry.department,
+            AppointmentDate : entry.date,
+            AppointmentTime : entry.time,
+            AppointmentRequestVIa : entry.requestVia,
+            whatsAppSent : entry.smsSent === true ? 'yes' : 'No',
+            EmailSent : entry.emailSent === true ? 'yes' : 'No',
+            SmsSent : entry.messageSent === true ? 'yes' : 'No',
+            status : entry.status,
+            AppointmentHandledBy : entry.user.username,
+            CheckInBy : entry.checkedInBy
+          }
+        })
+        // console.log(filteredData, "filteredCheckin Data")
+        this.checkIn = filteredData.length
+        this.checkinData = filteredData
+      },
+      error : (error) => {
+        console.log(error)
+      }, 
+      complete : () => {
+
+      }
+    })
+  }
+
+  checkInReportDownload(): void {
+    const columns = [
+        'Patient Name', 'Phone Number', 'Patient Email', 'Doctor Name',
+        'Department', 'Appointment Date', 'Appointment Time', 'Appointment Request Via',
+        'Whatsapp Sent', 'Email Sent', 'SMS Sent', 'Status',
+        'Appointment Handled By', 'Check-in By'
+    ];
+    
+    const header = columns;
+
+    // Map checkinData to the rows based on the column names
+    const rows = this.checkinData.map((entry: any) => [
+        entry.patientName,
+        entry.phoneNumber,
+        entry.patinetEmail,
+        entry.DoctorName,
+        entry.Department,
+        entry.AppointmentDate,
+        entry.AppointmentTime,
+        entry.AppointmentRequestVIa,
+        entry.whatsAppSent,
+        entry.EmailSent,
+        entry.SmsSent,
+        entry.status,
+        entry.AppointmentHandledBy,
+        entry.CheckInBy
+    ]);
+
+    // Create a worksheet from the header and rows
+    const ws: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet([header, ...rows]);
+    
+    // Create a workbook and append the sheet
+    const wb: XLSX.WorkBook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Report');
+    
+    // Trigger the file download
+    XLSX.writeFile(wb, 'today_checkin_report.xlsx');
+  }
+
+  // reports function
+  docAvailReport():void{
+    this.popUpPresentReport = true
+    this.reportColumn = [
+      {header : 'Doctor Name', key : 'doctorName'},
+    ]
+  }
+
+  docAbsentReport():void{
+    this.popUpAbsentReport = true
+    this.reportColumn = [
+      {header : 'Doctor Name', key : 'doctorName'},
+    ]
+  }
+
+  closeDocAvailReport():any{
+    this.popUpPresentReport = false
+  }
+
+  closeDocAbsentReport():any{
+    this.popUpAbsentReport = false
+  }
+
+  // private fetchDoctorsWithAvailability(): void {
+  //   this.doctorService.getAllDoctors().subscribe(
+  //     (doctors) => {
+  //       const currentTime = this.timeToMinutes(new Date().toTimeString().substring(0, 5)); // Current time in minutes
+  //       const selectedDate = this.date;
+
+  //       // Initialize counts
+  //       let availableCount = 0;
+  //       let unavailableCount = 0;
+  //       let absentCount = 0;
+
+  //       this.doctors = doctors
+  //         .filter((doctor) => {
+  //           if (doctor.doctorType === 'Visiting Consultant') {
+  //             // Include only if booked slots exist for today
+  //             return (
+  //               doctor.bookedSlots &&
+  //               doctor.bookedSlots.some(
+  //                 (slot: any) =>
+  //                   new Date(slot.date).toISOString().split('T')[0] === selectedDate
+  //               )
+  //             );
+  //           }
+  //           return true; // Include all other doctors
+  //         })
+  //         .map((doctor) => {
+  //           const unavailableSlots = doctor.unavailableSlots || [];
+  //           const formattedUnavailableSlots = unavailableSlots.map((slot) => ({
+  //             time: slot.time,
+  //             duration: slot.duration || 20, // Default to 20 minutes if not provided
+  //           }));
+
+  //           let status: string;
+  //           const allUpdatedAtNull = doctor.availability?.every(avail => !avail.updatedAt);
+
+  //           // Step 2: Calculate the latest timestamp if any `updatedAt` is not null
+  //           const latestTimestamp = allUpdatedAtNull
+  //             ? null // If all are null, treat it as the "latest"
+  //             : doctor.availability?.reduce((latest, curr) => {
+  //               return curr.updatedAt && new Date(curr.updatedAt).getTime() > new Date(latest).getTime()
+  //                 ? curr.updatedAt
+  //                 : latest;
+  //             }, doctor.availability.find(avail => avail.updatedAt)?.updatedAt || '');
+
+  //           // Step 3: Filter availability data based on the latest timestamp
+  //           const latestAvailability = allUpdatedAtNull
+  //             ? doctor.availability // If all are null, consider the entire availability as "latest"
+  //             : doctor.availability?.filter(avail => avail.updatedAt === latestTimestamp);
+  //             // console.log(latestAvailability)
+  //             const dayOfWeek = new Date().toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
+  //             const availableDay = latestAvailability?.find(avail => avail.day.toLowerCase() === dayOfWeek);
+  //             doctor.availableFrom = availableDay?.availableFrom!
+  //           if (doctor.doctorType === 'Visiting Consultant') {
+  //             // Visiting Consultant with booked slots for today is Available
+  //             availableCount++;
+  //             status = 'Available';
+  //           } else {
+  //             const isAbsent =
+  //             latestAvailability?.length > 0 &&
+  //               !latestAvailability?.some(
+  //                 (avail: any) =>
+  //                   avail.day.toLowerCase() ===
+  //                   new Date(selectedDate)
+  //                     .toLocaleString('en-us', { weekday: 'short' })
+  //                     .toLowerCase()
+  //               ) ||
+  //               (doctor.unavailableDates || []).some((unavailableDate: any) => {
+  //                 const formattedUnavailableDate = new Date(
+  //                   unavailableDate.date
+  //                 ).toISOString().split('T')[0];
+  //                 return formattedUnavailableDate === selectedDate;
+  //               });
+
+  //             if (isAbsent) {
+  //               absentCount++;
+  //               status = 'Absent';
+  //             } else if (
+  //               this.isDoctorUnavailable(currentTime, formattedUnavailableSlots)
+  //             ) {
+  //               unavailableCount++;
+  //               status = 'Unavailable';
+  //             } else {
+  //               availableCount++;
+  //               status = 'Available';
+  //             }
+  //           }
+
+  //           return { ...doctor, status };
+  //         });
+
+  //       // Update counts
+  //       this.availableDoctorsToday = availableCount;
+  //       this.unavailableDoctorsToday = unavailableCount;
+  //       this.absentDoctorsToday = absentCount;
+
+  //       this.updateDoctorLists();
+  //     },
+  //     (error) => {
+  //       console.error('Error fetching doctors:', error);
+  //     }
+  //   );
+  // }
 }

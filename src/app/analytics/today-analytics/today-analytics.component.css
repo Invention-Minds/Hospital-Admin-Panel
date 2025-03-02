@@ -144,3 +144,215 @@
     position: relative;
     margin-top: -15px;
 }
+
+/* table section of report */
+
+.reportSection {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; 
+    width: 100vw;
+    background: transparent; 
+    position: fixed;
+    top: 0;
+    z-index: 10;
+}
+
+table {
+    background: #fff; 
+    border-radius: 10px; 
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); 
+    border-collapse: collapse; 
+    width: 400px;
+    overflow: hidden; 
+    transform: scale(1);
+    transition: transform 0.3s ease;
+}
+
+table:hover {
+    transform: scale(1.02); 
+}
+
+th {
+    background: #007BFF;
+    color: white;
+    padding: 12px 15px;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+}
+
+td {
+    padding: 12px 15px;
+    font-family: Arial, sans-serif;
+    border-bottom: 1px solid #eee
+}
+
+/* Remove border on last row */
+tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Optional: Add a subtle row hover effect */
+tbody tr:hover {
+    background: #f8f9fa; /* Light gray on hover */
+}
+
+.hide{
+    display: none;
+}
+
+/* overlay */
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .container {
+    width: 90vw;
+    max-height: 90vh;
+    margin: 20px auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    overflow-y: auto;
+  }
+  
+  .header {
+    background: #169458;
+    /* Green header */
+    padding: 15px 20px;
+    color: #FFF;
+    font-family: Kanit;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    border-radius: 9px 9px 0 0;
+    display: flex;
+    justify-content: space-between;
+    position: fixed;
+    width: 90vw;
+  
+  }
+  
+  .header.absent {
+    background-color: #e74c3c;
+    /* Red header for unavailable doctors */
+  }
+  
+  .header.unavailable {
+    background-color: #f5d94b;
+    /* Red header for unavailable doctors */
+  }
+  
+  .content {
+    padding: 20px;
+  }
+  
+  .close-button {
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    font-weight: bold;
+    color: #fff;
+    cursor: pointer;
+    float: right;
+    /* margin-right: 10px; */
+  }
+  
+  .close-button:hover {
+    color: #fff;
+    /* Red color for hover effect */
+  }
+  
+  .doctor-list {
+    padding: 10px;
+    margin-top: 3rem;
+    display: grid;
+    column-gap: 20px;
+    grid-template-columns: 33% 33% 33%;
+  }
+  
+  .doctor-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.10);
+    transition: box-shadow 0.3s ease;
+    width: 95%;
+  }
+  
+  .doctor-card:hover {
+    box-shadow: 0px 4px 15px 0px rgba(216, 210, 252, 0.64);
+  }
+  
+  .doctor-card:hover {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  }
+  
+  .doctor-details {
+    display: flex;
+    align-items: center;
+  }
+  
+  .doctor-id {
+    margin-right: 20px;
+    color: #000;
+    font-family: Kanit;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+  }
+  
+  .doctor-name {
+    color: #000;
+    font-family: Kanit;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+  }
+  
+  .availability-status.available {
+    color: #28a745;
+    /* Green for available doctors */
+  }
+  
+  .availability-status.unavailable {
+    color: #f5d94b;
+    /* Red for unavailable doctors */
+  }
+  
+  .availability-status.absent {
+    color: #e74c3c;
+  }
+  
+  .no-record {
+    text-align: center !important;
+    justify-content: center !important;
+    align-items: center !important;
+    font-family: Kanit;
+  }
+  
+  .available {
+    color: #169458;
+    font-family: Kanit;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+  }

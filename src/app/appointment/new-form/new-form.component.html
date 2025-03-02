@@ -1,149 +1,211 @@
 <div class="root-container">
     <div class="formContainer">
 
-        <div class="header">
+        <div class="header" [ngStyle]="{ 'background-color': isBookedSlot ? '#00914C' : '#0E2970' }">
             <div class="formHeading">Appointment Form</div>
             <div class="closeButton"><i class="fa-solid fa-x"></i></div>
         </div>
 
         <div class="formContent">
             <!-- prn number -->
-            <div class="container_margin">
-                <div class="sections">
-                    <div class="lable_name"><span>PRN:</span></div>
-                    <div class="input_field">
-                        <input type="text">
-                    </div>
-                </div>
-                <ul class="prn-suggestions" *ngIf="showSuggestions && filteredPRNs.length > 0">
-                    <li *ngFor="let prn of filteredPRNs" (click)="selectPRN(prn)">
-                        {{ prn.prn }} - {{ prn.name }}
-                    </li>
-                </ul>
-
-                <div class="errors"
-                    *ngIf="appointmentForm.get('prnNumber')?.invalid && (appointmentForm.get('prnNumber')?.touched || appointmentForm.get('prnNumber')?.dirty)">
-                    <small *ngIf="appointmentForm.get('prnNumber')?.errors?.['required']">PRN Number is required</small>
-                </div>
-            </div>
-
-            <!-- patient name -->
-            <div class="container_margin">
-                <div class="sections">
-                    <div class="lable_name"><span>Patient Name: </span></div>
-                    <div class="input_field input_flex">
-                        <input type="text">
-                        <input type="text">
-                    </div>
-                </div>
-                <div class="errors"
-                    *ngIf="appointmentForm.get('firstName')?.invalid && (appointmentForm.get('firstName')?.touched || appointmentForm.get('firstName')?.dirty)">
-                    <small *ngIf="appointmentForm.get('firstName')?.errors?.['required']">First Name is required</small>
-                    <small *ngIf="appointmentForm.get('firstName')?.errors?.['pattern']">First Name can only contain
-                        letters and
-                        spaces</small>
-                </div>
-            </div>
-
-            <!-- phone number -->
-            <div class="container_margin">
-                <div class="sections">
-                    <div class="lable_name"><span>Phone Number: </span></div>
-                    <div class="input_field">
-                        <input type="text">
-                    </div>
-                </div>
-            </div>
-
-            <!-- email id -->
-            <div class="sections container_margin">
-                <div class="sections">
-                    <div class="lable_name"><span>Email Id:</span></div>
-                    <div class="input_field">
-                        <input type="text">
-                    </div>
-                </div>
-            </div>
-
-            <!-- age -->
-            <div class="sections container_margin">
-                <div class="sections">
-                    <div class="lable_name"><span>Age: </span></div>
-                    <div class="input_field">
-                        <input type="text">
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- gender -->
-            <div class="sections container_margin">
-                <div class="sections">
-                    <div class="lable_name"><span>Gender: </span></div>
-                    <div class="input_field">
-                        <select>
-                            <option option='' disabled selected>Select Gender</option>
-                            <option value="male">Male</option>
-                            <option value="female">Female</option>
-                        </select>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="container_margin">
-                <div class="sections">
-                    <div class="selectFlex">
-                        <div class="lable_name"><span>Appointment Date:</span></div>
+            <form [formGroup]="appointmentForm">
+                <div class="container_margin">
+                    <div class="sections">
+                        <div class="lable_name"><span>PRN:</span></div>
                         <div class="input_field">
-                            <p-calendar formControlName="appointmentTime" [timeOnly]="true" hourFormat="12"
-                                [showButtonBar]="true" [showSeconds]="false" placeholder="Select Time"></p-calendar>
+                            <input type="text" placeholder="Enter PRN Number" formControlName="prnNumber" class="prn"
+                                (input)="onPRNChange()" (focus)="showSuggestions = true">
+                            <div class="errors"
+                                *ngIf="appointmentForm.get('prnNumber')?.invalid && (appointmentForm.get('prnNumber')?.touched || appointmentForm.get('prnNumber')?.dirty)">
+                                <small *ngIf="appointmentForm.get('prnNumber')?.errors?.['required']">PRN Number is
+                                    required</small>
+                            </div>
                         </div>
                     </div>
-                    <div class="selectFlex">
-                        <div class="lable_name"><span>Appointment Time:</span></div>
+                    <ul class="prn-suggestions" *ngIf="showSuggestions && filteredPRNs.length > 0">
+                        <li *ngFor="let prn of filteredPRNs" (click)="selectPRN(prn)">
+                            {{ prn.prn }} - {{ prn.name }}
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- patient name -->
+                <div class="container_margin">
+                    <div class="sections">
+                        <div class="lable_name"><span>Patient Name: </span></div>
+                        <div class="input_field input_flex">
+                            <input type="text" placeholder="First Name" formControlName="firstName">
+                            <input type="text" placeholder="Last Name" formControlName="lastName">
+                        </div>
+                    </div>
+                    <div class="sections">
+                        <div class="lable_name"><span></span></div>
+                        <div class="errors"
+                            *ngIf="appointmentForm.get('firstName')?.invalid && (appointmentForm.get('firstName')?.touched || appointmentForm.get('firstName')?.dirty)">
+                            <small *ngIf="appointmentForm.get('firstName')?.errors?.['required']">First Name is
+                                required</small>
+                            <small *ngIf="appointmentForm.get('firstName')?.errors?.['pattern']">First Name can only
+                                contain
+                                letters and
+                                spaces</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- phone number -->
+                <div class="container_margin">
+                    <div class="sections">
+                        <div class="lable_name"><span>Phone Number: </span></div>
                         <div class="input_field">
-                            <select>
-                                <option option='' disabled selected>09.15 to 09.30</option>
+                            <input class="phone" type="text" placeholder="Enter the 10 digit phone number"
+                                maxlength="10" formControlName="phoneNumber"
+                                [readonly]="appointmentStatus !== 'pending'" (focus)="onPhoneFocus()"
+                                (blur)="onPhoneBlur()">
+                            <div class="errors"
+                                *ngIf="appointmentForm.get('phoneNumber')?.invalid && (appointmentForm.get('phoneNumber')?.touched || appointmentForm.get('phoneNumber')?.dirty)">
+                                <small *ngIf="appointmentForm.get('phoneNumber')?.errors?.['required']">Phone Number is
+                                    required</small>
+                                <small *ngIf="appointmentForm.get('phoneNumber')?.errors?.['pattern']">Phone Number must
+                                    be 10
+                                    digits
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- email id -->
+                <div class="sections container_margin">
+                    <div class="sections">
+                        <div class="lable_name"><span>Email Id:</span></div>
+                        <div class="input_field">
+                            <input class="email" type="email" placeholder="abcd@gmail.com" formControlName="email">
+                            <div class="errors"
+                                *ngIf="appointmentForm.get('email')?.invalid && (appointmentForm.get('email')?.touched || appointmentForm.get('email')?.dirty)">
+                                <small *ngIf="appointmentForm.get('email')?.errors?.['required']">Email is
+                                    required</small>
+                                <small *ngIf="appointmentForm.get('email')?.errors?.['email']">Invalid email
+                                    address</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- age -->
+                <div class="sections container_margin">
+                    <div class="sections">
+                        <div class="lable_name"><span>Age: </span></div>
+                        <div class="input_field">
+                            <input class="phone" type="text" placeholder="Enter the age" formControlName="age">
+                            <div class="errors"
+                                *ngIf="appointmentForm.get('age')?.invalid && (appointmentForm.get('age')?.touched || appointmentForm.get('age')?.dirty)">
+                                <small *ngIf="appointmentForm.get('age')?.errors?.['required']">Age is required</small>
+                                <small *ngIf="appointmentForm.get('age')?.errors?.['pattern']">Age must be in number
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- gender -->
+                <div class="sections container_margin">
+                    <div class="sections">
+                        <div class="lable_name"><span>Gender: </span></div>
+                        <div class="input_field">
+                            <select formControlName="gender">
+                                <option option='' disabled selected>Select Gender</option>
                                 <option value="male">Male</option>
                                 <option value="female">Female</option>
                             </select>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="container_margin">
-                <div class="sections">
-                    <div class="radio_flex">
-                    <div class="lable_name"><span>Request Via</span></div>
-                    <div class="radioInput">
-                        <div class="radios"></div><input type="radio">
-                        <div class="radio_name">Website</div>
-                        <div class="radios"></div><input type="radio">
-                        <div class="radio_name">Call</div>
+                <!-- doctor Name -->
+                <div class="sections container_margin">
+                    <div class="sections">
+                        <div class="lable_name"><span>Doctor Name</span></div>
+                        <div class="input_field">
+                            <input type="text" placeholder="Dr. Atmaram" formControlName="doctorName"
+                                (input)="onDoctorNameInput()" (focus)="showDoctorSuggestions = true" />
+                                <div class="errors"
+                                *ngIf="appointmentForm.get('doctorName')?.invalid && (appointmentForm.get('doctorName')?.touched || appointmentForm.get('doctorName')?.dirty)">
+                                <small *ngIf="appointmentForm.get('doctorName')?.errors?.['required']">Doctor Name is
+                                    required</small>
+                                <small *ngIf="appointmentForm.get('doctorName')?.errors?.['pattern']">Doctor Name can only
+                                    contain letters,
+                                    spaces, and dots</small>
+                            </div>
+                            <ul class="doctor-suggestions" *ngIf="showDoctorSuggestions && filteredDoctors.length > 0">
+                                <li *ngFor="let doctor of filteredDoctors" (click)="onDoctorSelect(doctor)">
+                                    {{ doctor.name }} - {{ doctor.departmentName }}
+                                </li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-                <div class="radio_flex">
-                    <div class="lable_name"><span>Appointment</span></div>
-                    <div class="radioInput">
-                        <div class="radios"></div><input type="radio">
-                        <div class="radio_name">Confirm</div>
-                        <div class="radios"></div><input type="radio">
-                        <div class="radio_name">Cancel</div>
+
+                <!--  -->
+                <div class="container_margin">
+                    <div class="sections">
+                        <div class="selectFlex">
+                            <div class="lable_name"><span>Appointment Date:</span></div>
+                            <div class="input_field">
+                                <p-calendar class="email" formControlName="appointmentDate" [minDate]="minDate"
+                                    [disabledDays]="disabledDays" [showButtonBar]="true" q
+                                    placeholder="Select appointment date" (click)="preventClose($event)"></p-calendar>
+                                    <div class="errors"
+                                    *ngIf="appointmentForm.get('appointmentDate')?.invalid && appointmentForm.get('appointmentDate')?.touched">
+                                    <small>Appointment Date is required</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="selectFlex">
+                            <div class="lable_name"><span>Appointment Time:</span></div>
+                            <div class="input_field">
+                                <p-calendar formControlName="appointmentTime" [timeOnly]="true" hourFormat="12"
+                                    [showButtonBar]="true" [showSeconds]="false" placeholder="Select Time"
+                                    (onSelect)="onTimeSelect($event)" [minDate]="minTime"></p-calendar>
+                                    <div class="errors"
+                                    *ngIf="appointmentForm.get('appointmentTime')?.invalid && appointmentForm.get('appointmentTime')?.touched">
+                                    <small>Time is required</small>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            </div>
+                <div class="container_margin">
+                    <div class="sections">
+                        <div class="radio_flex">
+                            <div class="lable_name"><span>Request Via</span></div>
+                            <div class="radioInput">
+                                <input type="radio" formControlName="requestVia" value="Online" />
+                                <div class="radio_name">Online</div>
+                                <input type="radio" formControlName="requestVia" value="Walk-In" />
+                                <div class="radio_name">Walk-In</div>
+                                <input type="radio" formControlName="requestVia" value="Call" />
+                                <div class="radio_name">Call</div>
+                            </div>
+                        </div>
+                        <div class="radio_flex">
+                            <div class="lable_name"><span>Appointment</span></div>
+                            <div class="radioInput">
+                                <input type="radio" formControlName="appointmentStatus" value="Confirm" />
+                                <div class="radio_name">Confirm</div>
+                                <input type="radio" formControlName="appointmentStatus" value="Cancel" />
+                                <div class="radio_name">Cancel</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="button_section container_margin">
+                    <button class="book_btn" *ngIf="!isBookedSlot" class="btn-primary"
+                        [disabled]="!appointmentForm.valid" (click)="confirm()">Book Appointment</button>
+                </div>
+            </form>
 
-        </div>
-
-        <div class="button_section container_margin">
-            <div class="book_btn">Book Appointment</div>
-            <!-- <div class="close_btn">Close</div> -->
         </div>
     </div>
-</div>
 
-<!-- </div> -->
+    <!-- </div> -->

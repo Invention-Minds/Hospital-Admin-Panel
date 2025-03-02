@@ -4,10 +4,9 @@
 
 <div class="root-container" >
     <div class="root-container">
-        <div class="header" *ngIf = "!isLoading">
-            <div class="heading">Estimation Status Overview</div>
-            <div class="view_info">
-                <div class="viewmore" (click)="report()" style="cursor: pointer;">View More</div>
+        <div class="header">
+            <div class="common">
+                <div class="heading">Estimation Status Overview</div>
                 <div class="info">
                     <div class="tooltip">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" >
@@ -17,6 +16,10 @@
                         <span class="tooltiptext">This pie chart represents the distribution of Estimated OPD and Non-Estimated     OPD.</span>
                     </div>
                 </div>
+            </div>
+            <div style = "display: flex; gap: 10px;">
+                <div class="viewmore" (click)="viewmore()">View More</div>
+                <div class="viewmore" (click)="report()">Details</div>
             </div>
         </div>
         <div class="chart" [ngClass]="{hidden: isLoading}">
@@ -31,5 +34,65 @@
                 <div class="legend_items"><div class="indicator gold"></div><span>No. of. Over. Due</span></div>
             </div>
         </div>
+    </div>
+</div>
+
+<!-- viewmore section -->
+<div class="viewmoreComponent" [ngClass]="{hide : !showViewMore, index : showViewMore}">
+    <div class="contents">
+        <div class="header">
+            <div class="viewMoreHeading">Estimation Status Overview</div>
+            <i class="fa-solid fa-x" (click)="closeViewMore()" style="cursor: pointer;"></i>
+        </div>
+        <!-- filters -->
+        <div class="report-filter">
+            <div style="font-size: 20px; cursor: pointer;" class="tooltip"><i class="fa-solid fa-download">
+                    <div class="tooltiptext">Download</div>
+                </i>
+            </div>
+            <select (change)="departmentOnchange($event)">
+                <option class="dummy" value="all" disabled selected hidden>Choose the Department</option>
+                <option *ngFor="let dept of department" [value]="dept.id">{{dept.name}}</option>
+                <option></option>
+            </select>
+
+            <select (change)="viewDoctorsOnchange($event)">
+                <option class="dummy" value="all" disabled selected hidden>Choose the Doctor</option>
+                <option value="all">All</option>
+                <option *ngFor="let docs of filteredDoctors" [value]="docs.id">{{docs.name}}</option>
+            </select>
+
+            <div class="date-picker">
+                <p-calendar styleClass="custom-calendar" selectionMode="range" placeholder='Please Select Date Range'
+                    [(ngModel)]="dateInput" (ngModelChange)="viewOnDatechange($event)" dateFormat="yy-mm-dd">
+                    <ng-template pTemplate="date" let-date>
+                        <span>
+                            {{ date.day }}
+                        </span>
+                    </ng-template>
+                </p-calendar>
+            </div>
+            <div class="refreh v_tooltip" style="cursor: pointer;"><i class="fa-solid fa-arrows-rotate"></i><span
+                    class="v_tooltiptext">refresh</span></div>
+        </div>
+
+        <!-- chart -->
+        <div class="viewChart">
+            <div id="viewMoreEstChart"></div>
+            <div class="legends">
+                <div class="legend_items"><div class="indicator orange"></div><span>No. of. Pend. EST</span></div>
+                <div class="legend_items"><div class="indicator purple"></div><span>No. of. Subm. EST</span></div>
+                <div class="legend_items"><div class="indicator blue"></div><span>No. of. App. EST</span></div>
+                <div class="legend_items"><div class="indicator skyblue"></div><span>No. of. Conf. EST</span></div>
+                <div class="legend_items"><div class="indicator green"></div><span>No. of. Compl. EST</span></div>
+                <div class="legend_items"><div class="indicator red"></div><span>No. of. Canc EST</span></div>
+                <div class="legend_items"><div class="indicator gold"></div><span>No. of. Over. Due</span></div>
+            </div>
+        </div>
+
+        <!-- details -->
+        <div class="details">
+            
+        </div>  
     </div>
 </div>

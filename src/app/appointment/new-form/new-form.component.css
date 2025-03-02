@@ -6,15 +6,20 @@
   align-items: center;
 }
 
+.header{
+    border-top-right-radius: 15px;
+    border-top-left-radius: 15px;
+}
+
 .formContainer {
   width: 963px;
-  /* height: 776px; */
   border-radius: 15px;
   background: #FFF;
 }
 
 .formContent{
     padding : 0 4%;
+    overflow-y: scroll;
 }
 
 .formHeading{
@@ -43,6 +48,7 @@
     position: relative;
     height: 70px;
     margin-top: -70px;
+    cursor: pointer;
 }
 
 .closeButton i{
@@ -137,14 +143,16 @@
 
 
 .button_section{
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: right;
     height: 100px;
     gap: 30px;
-}
 
-.book_btn{
+}
+ 
+.button_section button{
     color: #FFF;
     font-family: Kanit;
     font-size: 16px;
@@ -161,6 +169,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    border: none;
+    cursor: pointer;
 }
 
 .close_btn{
@@ -186,3 +196,33 @@
     display: flex;
     gap: 20px;
 }
+
+.errors small{
+    color: red;
+}
+
+.doctor-suggestions{
+    position: absolute;
+    width: 44.7%;
+    height: 200px;
+    z-index: 3;
+    overflow: scroll;
+    background-color: white;
+    list-style-type: none;
+    border: 2px solid #3B3B3B;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.doctor-suggestions li {
+    padding: 10px 0;
+    cursor: pointer;
+    font-size: 16px; /* Adjust font size for readability */
+    color: #333; /* Text color */
+}
+
+.button_section button:disabled {
+    background-color: #ccc;  /* Light grey background for disabled state */
+    cursor: not-allowed;     /* Change cursor to indicate the button is not clickable */
+    opacity: 0.6;            /* Optionally reduce opacity to indicate disabled state */
+  }

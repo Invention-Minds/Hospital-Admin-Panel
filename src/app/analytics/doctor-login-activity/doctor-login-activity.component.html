@@ -4,9 +4,8 @@
 
 <div class="root-container" *ngIf="!isLoading">
     <div class="header">
-        <div class="heading">Doctor Login Activity</div>
-        <div class="view_info">
-            <div class="viewmore" (click)="openModal()">View More</div>
+        <div class="common">
+            <div class="heading">Doctor Login Activity</div>
             <div class="info tooltip">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                     <path fill="currentColor"
@@ -14,6 +13,9 @@
                 </svg>
                 <span class="tooltiptext">This table displays doctor login activity, including OPD start time and any delays in their scheduled consultations.</span>
             </div>
+        </div>
+        <div class="view_info">
+            <div class="viewmore" (click)="openModal()">View More</div>
         </div>
     </div>
     <div class="table">
@@ -50,7 +52,7 @@
         <div class="modal-filters">
             <div class="inputs">
                 <label for="datePicker"><strong>Select Date:</strong></label>
-                <input type="date" id="datePicker" [(ngModel)]="selectedDate" (change)="loadDoctorLoginDelays()">
+                <input type="date" id="datePicker" [(ngModel)]="reportDate" (change)="loadDoctorDelayReport(reportDate)">
             </div>
             <div class="download"></div>
         </div>
@@ -68,7 +70,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr *ngFor="let doctor of doctorDelays; let i = index">
+                    <tr *ngFor="let doctor of doctorDelaysForReport; let i = index">
                         <td>{{ i + 1 }}</td>
                         <td>{{ doctor.doctorName }}</td>
                         <td>{{ doctor.opdStartTime }}</td>

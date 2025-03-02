@@ -1,27 +1,144 @@
-.root-container{
-    width: 100%;
-    height: 100%;
+body {
+    margin: 0;
+    padding: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 10px;
+    min-height: 100vh;
+    background: #f9fbfc;
+    overflow: hidden;
 }
 
-.circle{
+.solar-loader {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.orbit-ring {
+    position: absolute;
+    border: 1px dashed rgba(44, 99, 186, 0.40);
+    border-radius: 50%;
+    animation: orbitSpin 3s infinite linear;
+}
+
+.orbit-ring:nth-child(1) {
+    width: 80px;
+    height: 80px;
+    animation-duration: 2.5s;
+}
+
+.orbit-ring:nth-child(2) {
+    width: 110px;
+    height: 110px;
+    animation-duration: 3.5s;
+    animation-direction: reverse;
+}
+
+.sun-core {
+    position: absolute;
     width: 30px;
     height: 30px;
-    border: 2px solid #0E2970;
-    border-top: 3px solid green;
+    background: radial-gradient(circle, #FB9C2A, #e68a1f);
     border-radius: 50%;
-    animation: rotate 1s linear infinite;
+    box-shadow: 0 0 15px rgba(251, 156, 42, 0.7);
+    animation: sunPulse 1.5s infinite ease-in-out;
 }
 
-@keyframes rotate{
-    0%{
-        transform: rotate(0);
+.planet {
+    position: absolute;
+    background: #FB9C2A;
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(251, 156, 42, 0.6);
+    animation: planetOrbit 2s infinite ease-in-out;
+}
+
+.planet:nth-child(1) {
+    width: 10px;
+    height: 10px;
+    top: 35px;
+    left: 20px;
+    animation-duration: 2.5s;
+    animation-delay: 0s;
+}
+
+.planet:nth-child(2) {
+    width: 8px;
+    height: 8px;
+    top: 20px;
+    right: 25px;
+    animation-duration: 3s;
+    animation-delay: 0.5s;
+}
+
+.planet:nth-child(3) {
+    width: 6px;
+    height: 6px;
+    bottom: 25px;
+    left: 30px;
+    animation-duration: 3.5s;
+    animation-delay: 1s;
+}
+
+.glow-halo {
+    position: absolute;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: rgba(44, 99, 186, 0.40);
+    animation: haloFade 2s infinite ease-out;
+    opacity: 0;
+}
+
+@keyframes orbitSpin {
+    0% {
+        transform: rotate(0deg);
     }
-    100%{
+    100% {
         transform: rotate(360deg);
     }
 }
 
+@keyframes sunPulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 15px rgba(251, 156, 42, 0.7);
+    }
+    50% {
+        transform: scale(1.15);
+        box-shadow: 0 0 25px rgba(251, 156, 42, 0.9);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 15px rgba(251, 156, 42, 0.7);
+    }
+}
+
+@keyframes planetOrbit {
+    0% {
+        transform: translateY(0);
+        opacity: 0.8;
+    }
+    50% {
+        transform: translateY(-10px);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 0.8;
+    }
+}
+
+@keyframes haloFade {
+    0% {
+        transform: scale(0.9);
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(1.2);
+        opacity: 0;
+    }
+}

@@ -26,9 +26,9 @@ export class OpdRequestComponent implements OnChanges{
 
   ngOnInit(){
     this.appointmentData()
-    console.log(this.doctorId)
-    console.log(this.date)
-    console.log(this.doctorId)
+    // console.log(this.doctorId)
+    // console.log(this.date)
+    // console.log(this.doctorId)
   }
   
   appointmentData(): void {
@@ -37,9 +37,9 @@ export class OpdRequestComponent implements OnChanges{
       const callData = filteredAppointments(data, this.requestType.CALL, this.doctorId, this.date);
       const onlineData = filteredAppointments(data, this.requestType.ONLINE, this.doctorId, this.date);
   
-      console.log(walkInData, "walkin");
-      console.log(callData, "call");
-      console.log(onlineData, "online");
+      // console.log(walkInData, "walkin");
+      // console.log(callData, "call");
+      // console.log(onlineData, "online");
   
       this.walkIn = Object.values(countByDate(walkInData, 'requestVia'));
       this.online = Object.values(countByDate(onlineData, 'requestVia'));
@@ -47,7 +47,7 @@ export class OpdRequestComponent implements OnChanges{
   
       this.chart();
 
-      console.log(this.date)
+      // console.log(this.date)
     });
   }
 
@@ -101,8 +101,8 @@ export class OpdRequestComponent implements OnChanges{
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    console.log('Changes detected:', changes);
-    console.log('Current date:', this.date, 'Type:', typeof this.date);
+    // console.log('Changes detected:', changes);
+    // console.log('Current date:', this.date, 'Type:', typeof this.date);
   
     if (
       (changes['doctorId'] && !changes['doctorId'].firstChange && this.doctorId != null) ||

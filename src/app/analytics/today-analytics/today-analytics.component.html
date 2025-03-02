@@ -1,6 +1,6 @@
 <div class="wrapper">
 
-    <div class="cards">
+    <div class="cards" (click)="docAvailReport()">
         <div class="text">Doc Available</div>
         <div class="flex">
             <div class="counts">
@@ -20,7 +20,7 @@
         </div>
     </div>
 
-    <div class="cards">
+    <div class="cards" (click)="docAbsentReport()">
         <div class="text">Doc Absent</div>
         <div class="flex">
             <div class="counts">
@@ -39,6 +39,47 @@
             </div>
         </div>
     </div>
+
+    <div class="cards">
+        <div class="text">Rooms Availability</div>
+        <div class="flex">
+            <div class="counts">
+                <div class="count">{{availlableRoom}}</div>
+                <div class="percentage gold" style="visibility: hidden;"><b>00</b></div>
+            </div>
+            <div class="graph">
+                <div id="chart" style="width: 90px; height: 90px;"></div>
+                <div class="info tooltip"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                        viewBox="0 0 24 24">
+                        <path fill="currentColor"
+                            d="M12 17q.425 0 .713-.288T13 16v-4q0-.425-.288-.712T12 11t-.712.288T11 12v4q0 .425.288.713T12 17m0-8q.425 0 .713-.288T13 8t-.288-.712T12 7t-.712.288T11 8t.288.713T12 9m0 13q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22m0-2q3.35 0 5.675-2.325T20 12t-2.325-5.675T12 4T6.325 6.325T4 12t2.325 5.675T12 20m0-8" />
+                    </svg>
+                    <span class="tooltiptext">Total number of rooms available today.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="cards" style="cursor: pointer;" (click)="checkInReportDownload()">
+        <div class="text">Check-In</div>
+        <div class="flex">
+            <div class="counts">
+                <div class="count">{{checkIn}}</div>
+                <div class="percentage gold" style="visibility: hidden;"><b>00</b></div>
+            </div>
+            <div class="graph">
+                <div id="chart" style="width: 90px; height: 90px;"></div>
+                <div class="info tooltip"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                        viewBox="0 0 24 24">
+                        <path fill="currentColor"
+                            d="M12 17q.425 0 .713-.288T13 16v-4q0-.425-.288-.712T12 11t-.712.288T11 12v4q0 .425.288.713T12 17m0-8q.425 0 .713-.288T13 8t-.288-.712T12 7t-.712.288T11 8t.288.713T12 9m0 13q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22m0-2q3.35 0 5.675-2.325T20 12t-2.325-5.675T12 4T6.325 6.325T4 12t2.325 5.675T12 20m0-8" />
+                    </svg>
+                    <span class="tooltiptext">Total number of Check-In today.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
 
     <div class="cards">
         <div class="text">MHC Confirmed</div>
@@ -82,29 +123,55 @@
         </div>
     </div>
 
-    <div class="cards">
-        <div class="text">Rooms Availability</div>
-        <div class="flex">
-            <div class="counts">
-                <div class="count">{{availlableRoom}}</div>
-                <div class="percentage gold" style="visibility: hidden;"><b>00</b></div>
-            </div>
-            <div class="graph">
-                <div id="chart" style="width: 90px; height: 90px;"></div>
-                <div class="info tooltip"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                        viewBox="0 0 24 24">
-                        <path fill="currentColor"
-                            d="M12 17q.425 0 .713-.288T13 16v-4q0-.425-.288-.712T12 11t-.712.288T11 12v4q0 .425.288.713T12 17m0-8q.425 0 .713-.288T13 8t-.288-.712T12 7t-.712.288T11 8t.288.713T12 9m0 13q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22m0-2q3.35 0 5.675-2.325T20 12t-2.325-5.675T12 4T6.325 6.325T4 12t2.325 5.675T12 20m0-8" />
-                    </svg>
-                    <span class="tooltiptext">Total number of rooms available today.</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
     <div class="round">
         <div class="today">Today</div>
         <div class="today"><i class="fa-solid fa-arrow-left"></i></div>
+    </div>
+</div>
+
+<div *ngIf="popUpPresentReport" class="overlay">
+    <div class="container">
+        <div class="header">
+            <div>Doctors Available</div>
+            <button class="close-button" (click)="closeDocAvailReport()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="doctor-list">
+            <div *ngFor="let doctor of availableDoctors let i=index" class="doctor-card">
+                <div class="doctor-details">
+                    <div class="doctor-id">{{i + 1}}</div>
+                    <div class="doctor-name">{{doctor.name}}<span style="margin-left: 5px;"> -
+                            ({{doctor.availableFrom}})</span></div>
+                </div>
+                <div class="availability-status available">
+                    {{'Available'}}
+                </div>
+            </div>
+            <div *ngIf="availableDoctors.length === 0">
+                <div class="doctor-details doctor-card no-record">No Available Doctors to Display</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="popUpAbsentReport" class="overlay">
+    <div class="container">
+        <div class="header absent">
+            Doctors Absent
+            <button class="close-button" (click)="closeDocAbsentReport()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="doctor-list">
+            <div *ngFor="let doctor of absentDoctors; let i=index" class="doctor-card">
+                <div class="doctor-details">
+                    <div class="doctor-id">{{i+1}}</div>
+                    <div class="doctor-name">{{doctor.name}}</div>
+                </div>
+                <div class="availability-status absent">
+                    Absent
+                </div>
+            </div>
+        </div>
+        <div *ngIf="absentDoctors.length === 0">
+            <div class="doctor-details doctor-card no-record">No Absent Doctors to Display</div>
+        </div>
     </div>
 </div>

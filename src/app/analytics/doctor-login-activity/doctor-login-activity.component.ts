@@ -16,47 +16,54 @@ export class DoctorLoginActivityComponent implements OnChanges {
   ) { }
   isModalOpen = false;
   @Input() selectedDate: any[] = []; // Default to today
+  reportDate: any = '';
   doctorDelays: any[] = [];
+  doctorDelaysForReport: any[] = [];
   detailedDoctorDelays: any[] = [];
   isLoading: boolean = true
 
   ngOnInit() {
     const yesterdayDate = getYesterdayDate()
-    this.selectedDate = [yesterdayDate]
-    this.loadDoctorLoginDelays();
+    this.selectedDate = [yesterdayDate];
+    this.reportDate = this.selectedDate[0]
+    this.loadDoctorLoginDelays(this.selectedDate[0]);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['selectedDate']) {
-      this.loadDoctorLoginDelays();
+      this.reportDate = this.selectedDate[0]
+      this.loadDoctorLoginDelays(this.selectedDate[0]);
+    }
+    if(changes['reportDate'] && !this.isModalOpen){
+      this.loadDoctorDelayReport(this.reportDate);
     }
   }
 
   openModal() {
     this.isModalOpen = true;
-    this.loadDoctorLoginDelays(); // Fetch data for detailed view
+    this.loadDoctorDelayReport(this.reportDate); // Fetch data for detailed view
   }
 
   closeModal() {
     this.isModalOpen = false;
   }
 
-  loadDoctorLoginDelays(): void {
-    ('doctor-login')
-    this.doctorsService.getAllDoctors(this.selectedDate[0]).subscribe({
+  loadDoctorLoginDelays(date: string): void {
+    // console.log('small-load')
+    this.doctorsService.getAllDoctors(date).subscribe({
 
       next: (doctors) => {
         // Filter doctors who are available and not on unavailable list
         const availableDoctors = doctors.filter(doctor => {
           const isUnavailable = (doctor.unavailableDates || []).some((unavailableDate: any) => {
             const formattedUnavailableDate = new Date(unavailableDate.date).toISOString().split('T')[0];
-            return formattedUnavailableDate === this.selectedDate[0];  // If this matches, doctor is unavailable
+            return formattedUnavailableDate === date;  // If this matches, doctor is unavailable
           });
           return !isUnavailable; // We want doctors who are NOT unavailable
         });
         (availableDoctors)
         // Process each doctor's availability
-        this.processDoctorsAvailability(availableDoctors);
+        this.processDoctorsAvailability(availableDoctors,date);
       },
       error: (error) => {
         console.log(error)
@@ -66,8 +73,75 @@ export class DoctorLoginActivityComponent implements OnChanges {
       }
     });
   }
+  loadDoctorDelayReport(date: string): void {
+    // console.log('report-load')
+    this.doctorsService.getAllDoctors(date).subscribe({
 
-  processDoctorsAvailability(doctors: any[]): void {
+      next: (doctors) => {
+        // Filter doctors who are available and not on unavailable list
+        const availableDoctors = doctors.filter(doctor => {
+          const isUnavailable = (doctor.unavailableDates || []).some((unavailableDate: any) => {
+            const formattedUnavailableDate = new Date(unavailableDate.date).toISOString().split('T')[0];
+            return formattedUnavailableDate === date;  // If this matches, doctor is unavailable
+          });
+          return !isUnavailable; // We want doctors who are NOT unavailable
+        });
+        (availableDoctors)
+        // Process each doctor's availability
+        this.processDoctorsAvailabilityforReport(availableDoctors,date);
+      },
+      error: (error) => {
+        console.log(error)
+      },
+      complete: () => {
+        this.isLoading = false
+      }
+    });
+  }
+  processDoctorsAvailabilityforReport(doctors: any[],date: string): void {
+    this.appointmentService.getAllAppointments().subscribe((appointments: any[]) => {
+
+      const todayAppointments = appointments.filter(app => app.date === this.selectedDate);
+
+      this.doctorDelaysForReport = doctors.map(doctor => {
+        const latestAvailability = this.getLatestAvailability(doctor.availability);
+
+        if (!latestAvailability) return null; // Skip if no availability
+        (latestAvailability)
+        const dayOfWeek = new Date(date).toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
+        const availableDay = latestAvailability.find((avail: any) => avail.day.toLowerCase() === dayOfWeek);
+
+        if (!availableDay) {
+          (`❌ Doctor is NOT available on ${dayOfWeek}, skipping...`);
+          return null;
+        }
+        (availableDay)
+        const availableFrom = availableDay.availableFrom?.split('-')[0]; // Extract start time
+        (availableFrom)
+        const firstCheckedOutAppointment = this.getFirstCheckedOutAppointment(todayAppointments, doctor.id);
+
+        (firstCheckedOutAppointment)
+
+        if (!firstCheckedOutAppointment) return {
+          doctorName: doctor.name,
+          opdStartTime: availableFrom,
+          delay: '- min',
+          // No checked-out appointments, infinite delay
+        };
+
+        const checkedOutTime = firstCheckedOutAppointment.checkedOutTime;
+        const delay = this.calculateDelay(availableFrom, checkedOutTime);
+
+        return {
+          doctorName: doctor.name,
+          opdStartTime: availableFrom,
+          delay: `${delay} mins`,
+          checkedOutTime: checkedOutTime
+        };
+      }).filter(entry => entry !== null);
+    });
+  }
+  processDoctorsAvailability(doctors: any[],date: string): void {
     this.appointmentService.getAllAppointments().subscribe((appointments: any[]) => {
 
       const todayAppointments = appointments.filter(app => app.date === this.selectedDate[0]);
@@ -78,7 +152,7 @@ export class DoctorLoginActivityComponent implements OnChanges {
 
         if (!latestAvailability) return null; // Skip if no availability
         (latestAvailability)
-        const dayOfWeek = new Date(this.selectedDate[0]).toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
+        const dayOfWeek = new Date(date).toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
         const availableDay = latestAvailability.find((avail: any) => avail.day.toLowerCase() === dayOfWeek);
 
         if (!availableDay) {

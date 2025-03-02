@@ -1,228 +1,163 @@
-/* login.component.css */
-.login-container {
-  display: flex;
+.root-container {
+  width: 100vw;
   height: 100vh;
-  background: url('/background.png') no-repeat center center/cover;
-  padding: 3.5rem 14rem;
-  
-}
-
-.login-form {
-  flex: 1;
-  background: #ffffff;
-  padding: 3rem;
+  background-image: url('/docMindsLogin.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-  border-radius: 24px 0px 0px 24px;
-  box-shadow: 3px 4px 100px 0px rgba(0, 0, 0, 0.15);
-
-
+  flex-direction: column;
 }
 
-.login-form h2 {
-    color: #000;
-    font-family: Kanit;
-    font-size: 30px;
-    font-style: normal;
-    font-weight: 700;
-    line-height: normal;
-    text-transform: uppercase;
-  margin-bottom: 1rem;
+.logoSection img{
+  width: 100px;
+  height: auto;
 }
 
-.login-form p {
-  margin-bottom: 2rem;
-  color: #000;
-font-family: Kanit;
-font-size: 16px;
-font-style: normal;
-font-weight: 400;
-line-height: normal;
+.box {
+  border-radius: 28.458px;
+  border: 2.134px solid rgba(88, 130, 193, 0.49);
+  background: rgba(88, 130, 193, 0.28);
+  backdrop-filter: blur(8.893229484558105px);
+  height: 552px;
+  width: 380px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.input-group {
-  margin-bottom: 1.5rem;
-  color: #1C1C1C;
-font-family: Kanit;
-font-size: 16px;
-font-style: normal;
-font-weight: 400;
-line-height: normal;
-display: flex;
-align-items: center;
-border-radius: 16px;
-background: #E8F0FE;
-width: 364px;
-  height: 52px;
+.login {
+  color: #FFF;
+  font-family: Kanit;
+  margin-top: 15px;
+  font-size: 32px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
 }
-.eye-icon{
-  padding-right: 17px;
-  cursor: pointer;
+
+.quote {
+  color: #FFF;
+  font-family: Kanit;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+
+.input-group{
+  width: 100%;
+  margin-top: 10px;
+}
+
+.input-group label {
+  color: #FFF;
+  font-family: Kanit;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin: 10px 0 5px 0;
 }
 
 .input-group input {
-    flex: 1;
-  width: 100%;
-  padding: 1rem;
-  border: none;
-  border-radius: 16px;
-  background: rgba(240, 237, 255, 0.8);
+  display: flex;
+  width: 270px;
+  height: 32px;
+  padding: 16px;
+  align-items: center;
+  gap: 10px;
   flex-shrink: 0;
-  font-size: 16px;
+  border-radius: 5px;
+  border: 0.711px solid #BCBEC0;
+  background: #FFF;
+  outline: none;
+  margin-top: 4px;
 }
 
-button {
-  color: #ffffff;
-  border: none;
-  /* padding: 1rem 2rem; */
-
-  cursor: pointer;
-  border-radius: 16px;
-  background: #F28729;
-  box-shadow: 0px 8px 21px 0px rgba(0, 0, 0, 0.16);
-  width: 124px;
-  height: 52px;
-  flex-shrink: 0;
-  color: #fff;
+.input-group input::placeholder{
+  color: #BCBEC0;
   font-family: Kanit;
-  font-size: 14px;
+  font-size: 13px;
   font-style: normal;
-  font-weight: 700;
+  font-weight: 400;
   line-height: normal;
 }
-.login{
-    display: flex;
-    width: 100%;
-      justify-content: center;
-      align-items: center;
-}
 
-.login button:disabled{
-    pointer-events: none;
-    background: #ccc;
-}
-.image{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex: 1;
-    padding: 3rem;
-    background: url("/login-bg.png") no-repeat center center/cover;
-    border-radius: 0px 24px 24px 0px;
-}
-.welcome-image {
-  /* flex: 1;
-  padding: 3rem;
+.input-group .eye{
+  position: relative;
+  right: 0;
   display: flex;
-  flex-direction: column;
+  justify-content: right;
   align-items: center;
-  justify-content: center;
-  background: url("/login-bg.png") no-repeat center center/cover; */
-  border: 1px solid rgba(255, 255, 255, 0.52);
-background: rgba(255, 255, 255, 0.21);
-backdrop-filter: blur(6.800000190734863px);
-border-radius: 46px;
-width: 412px;
-height: 524px;
-display: flex;
-flex-direction: column;
-justify-content: center;
-align-items: center;
+  cursor: pointer;
+}
 
+.eye img{
+  position: relative;
+  margin-top: -32px;
+  margin-right: 10px;
+  width: 13px;
+  height: 13px;
 }
-input:focus{
-    outline: none;
-    background: rgba(240, 237, 255, 0.8);
+
+.marginTop{
+  margin-top: 20px;
 }
-.input-group .icon {
-    width: 24px; /* Set an appropriate size for the icons */
-    height: 24px;
-    margin-right: 10px;
-    margin-left: 17px;
-  }
-.welcome-image h3 {
+
+.login button{
+  border-radius: 7.115px;
+  background: #FB9C2A;
+  width: 270px;
+  height: 40px;
+  margin-top: 8%;
+  cursor: pointer;
   color: #FFF;
   font-family: Kanit;
-  font-size: 32px;
+  font-size: 16px;
   font-style: normal;
-  font-weight: 700;
-  line-height: 46px; /* 143.75% */
-  margin-top: 1rem;
-  margin-bottom: 1rem;
-  text-align: center;
-}
-.logo img{
-  width: 90px;
-  height: 90px;
-}
-.welcome-image img {
-  /* width: 80%;
-  max-width: 400px; */
-  /* background: url("/login-doctor-bg.png") no-repeat center center/cover; */
- 
-  padding: 15px;
-  width: 410px;
-height: 410px;
-flex-shrink: 0;
-display: flex;
-justify-self: center;
-align-items: center;
+  font-weight: 600;
+  line-height: normal;
+  border: none;
 }
 
-@keyframes spinner {
-  to {transform: rotate(360deg);}
-}
 .spinner {
   position: relative;
+  pointer-events: none; /* Prevent interaction while loading */
 }
 
-.spinner:before {
+.spinner::after {
   content: '';
-  box-sizing: border-box;
   position: absolute;
-  top: 50%;
-  left: 50%;
+  margin-top: -15px;
   width: 20px;
   height: 20px;
-  margin-top: -10px;
-  margin-left: -10px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #3498db;
   border-radius: 50%;
-  border: 2px solid #ffffff;
-  border-top-color: #000000;
-  animation: spinner .8s linear infinite;
-}
-@media (max-width: 1024px) {
-  .image,.welcome-image{ /* Hide cards except the 1st one (Form) */
-    display: none; 
-  }
-  .login-container{
-    padding: 3.5rem 7rem;
-  }
-  .login-form{
-    border-radius: 24px;
-  }
+  animation: spin 0.5s linear infinite;
+  /* transform: translate(-50%, -50%); */
 }
 
-/* Mobile View (Optional if needed) */
-@media (max-width: 768px) {
-  .card, .card-1 {
-    justify-content: center;
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+
+
+
+@media(max-width : 400px){
+
+  .box{
+    width: 300px;
   }
 
-}
-@media (max-width: 500px){
-  .login-container, .login-form{
-    width: 100%;
-  }
-  .login-container{
-    padding: 3.5rem 1rem;
-  }
-  .input-group{
-    width: 100%;
-  }
-  .login-form p{
-    text-align: center;
+  .input-group input, .login button{
+    width: 250px;
   }
 }

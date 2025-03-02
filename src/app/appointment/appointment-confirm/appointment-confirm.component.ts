@@ -134,7 +134,7 @@ export class AppointmentConfirmComponent {
         // });
         this.filterAppointmentsByDate(new Date());
 
-        console.log(this.filteredAppointments)
+        // console.log(this.filteredAppointments)
         // this.filterAppointmentsByDate(new Date());
 
         // console.log('Setting isLoading to false');
@@ -145,9 +145,9 @@ export class AppointmentConfirmComponent {
 
 
 
-          console.log(this.filteredAppointments);
+          // console.log(this.filteredAppointments);
 
-          console.log(this.filteredAppointments)
+          // console.log(this.filteredAppointments)
         }, 1000); // 2-second delay
 
       },
@@ -161,7 +161,7 @@ export class AppointmentConfirmComponent {
         this.filteredAppointments = this.filteredAppointments.filter((appointment: any) => {
           appointment.date >= today
         })
-        console.log(this.filteredAppointments)
+        // console.log(this.filteredAppointments)
       }
     });
   }
@@ -808,7 +808,7 @@ export class AppointmentConfirmComponent {
     if (!this.editedName.trim()) return;
 
     try {
-      console.log(appointment.editedPatientName)
+      // console.log(appointment.editedPatientName)
       appointment.patientName = this.editedName // Update UI
       this.editingAppointmentId = null;
       appointment.nameChangedBy = this.userId
@@ -834,7 +834,7 @@ export class AppointmentConfirmComponent {
   }
 
   completeAppointment(appointment: Appointment) {
-    console.log(appointment)
+    // console.log(appointment)
     const appointmentId = appointment.id;
     appointment.type = this.appointmentType;
     appointment.checkedIn = true;

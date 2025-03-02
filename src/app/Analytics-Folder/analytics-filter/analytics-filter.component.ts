@@ -27,14 +27,14 @@ export class AnalyticsFilterComponent implements OnInit {
 
   ngOnInit(){   
     this.loadDepartments()
-    console.log(this.departmentValue, "from filter")
+    // console.log(this.departmentValue, "from filter")
   }
 
   async loadDepartments():Promise<void>{
     try{
       const data = await this.doctor.getDepartments().toPromise()
       this.department = data;
-      console.log(this.department)
+      // console.log(this.department)
     }catch(err){
       console.error(err)
     }
@@ -42,7 +42,7 @@ export class AnalyticsFilterComponent implements OnInit {
 
   departmentONchange(event : any):void{
     this.departmentValue = parseInt(event.target.value);
-    console.log(this.departmentValue, "from filter")
+    // console.log(this.departmentValue, "from filter")
     console.log()    
     // this.selectedDepartment.emit(this.departmentValue)
     this.doctor.getDoctors().subscribe(({
@@ -53,7 +53,7 @@ export class AnalyticsFilterComponent implements OnInit {
         console.error(error)
       },
       complete : ()=>{
-        console.log(this.doctors)
+        // console.log(this.doctors)
       }
     }))
   }
@@ -68,6 +68,6 @@ export class AnalyticsFilterComponent implements OnInit {
     const dateParts = date.split("-")
     const formattedDate = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`
     this.selectedDate.emit(date)
-    console.log(date)
+    // console.log(date)
   }
 }

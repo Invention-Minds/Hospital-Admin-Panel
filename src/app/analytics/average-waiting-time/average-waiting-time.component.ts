@@ -15,7 +15,7 @@ export class AverageWaitingTimeComponent implements OnInit, OnChanges {
   constructor(private appointment: AppointmentConfirmService, private docDetails: DoctorServiceService) { }
 
   option: any;
-  @Input() department: string = 'INTERNAL MEDICINE';
+  @Input() department: any
   @Input() date: any[] = [];
   waitingData: any = {
     doctorNames: [], // Renamed for clarity
@@ -46,9 +46,8 @@ export class AverageWaitingTimeComponent implements OnInit, OnChanges {
     const yersterDay = getYesterdayDate()
     this.date = [yersterDay]
     this.loadWaitingTime(this.date);
-    this.department = ''
+    this.department = 'INTERNAL MEDICINE'
     this.selectedViewDate = getLastThirtyDaysFromSelected()
-    
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -101,65 +100,6 @@ export class AverageWaitingTimeComponent implements OnInit, OnChanges {
 
     myChart.setOption(this.option);
   }
-
-  // loadWaitingTime(date: any[]): void {
-  //   this.isLoading = true
-  //   this.appointment.getAllAppointments().subscribe({
-  //     next : (data) => {
-  //       const filteredData = data.filter((entry: any) => date.includes(entry.date) && entry.department === this.department);
-  //       const formattedData: any[] = [];
-
-  //       filteredData.forEach((entry: any) => {
-  //         if (entry.waitingTime !== null) {
-  //           let range: string;
-
-  //           // Categorize waiting times into the correct range
-  //           if (entry.waitingTime <= 5) {
-  //             range = 'five_min';
-  //           } else if (entry.waitingTime <= 10) {
-  //             range = 'ten_min';
-  //           } else if (entry.waitingTime <= 15) {
-  //             range = 'fifteen_min';
-  //           } else if (entry.waitingTime <= 40) {
-  //             range = 'twenty_min';
-  //           } else {
-  //             range = 'more_than_twenty_min';
-  //           }
-
-  //           const existingEntry = formattedData.find(
-  //             (entryData) => entryData.date === entry.date && entryData.doctorId === entry.doctorId && entryData.departmentName === entry.department && entryData.doctorName === entry.doctorName
-  //           );
-
-  //           if (existingEntry) {
-  //             existingEntry[range] += 1; // Increment the count for the range
-  //           } else {
-  //             formattedData.push({
-  //               date: entry.date,
-  //               doctorId: entry.doctorId,
-  //               doctorName: entry.doctorName,
-  //               departmentName: entry.department,
-  //               five_min: range === 'five_min' ? 1 : 0,
-  //               ten_min: range === 'ten_min' ? 1 : 0,
-  //               fifteen_min: range === 'fifteen_min' ? 1 : 0,
-  //               twenty_min: range === 'twenty_min' ? 1 : 0,
-  //               more_than_twenty_min: range === 'more_than_twenty_min' ? 1 : 0
-  //             });
-  //           }
-  //         }
-  //       });
-  //       // Format the data for the chart
-  //       this.waitingData.doctorNames = formattedData.map((entry: any) => entry.doctorName);
-  //       this.waitingData.more_than_twenty_min = formattedData.map((entry: any) => entry.more_than_twenty_min);
-  //       this.initChart();
-  //     },
-  //     error:(error) => {
-  //       console.log(error)
-  //     },
-  //     complete:() => {
-  //       this.isLoading = false
-  //     }
-  //   });
-  // }
 
   loadWaitingTime(date: any[]): void {
     this.isLoading = true;
@@ -463,9 +403,11 @@ export class AverageWaitingTimeComponent implements OnInit, OnChanges {
   }
 
   refresh():void{
-    this.loadDepartments()
+    this.selectedViewDate = []
+    this.selectedViewMoreDepartment = 'INTERNAL MEDICINE'
     this.selectedViewDate = getLastThirtyDaysFromSelected()
     this.selectedViewDoctor = 'all'
+    this.viewmore()
   }
 
 }

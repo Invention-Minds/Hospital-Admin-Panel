@@ -34,6 +34,7 @@ export class TodayAnalyticsComponent {
   }
   checkIn : any
   checkinData : any
+  doctorsCount : any
 
   // report
   popUpPresentReport : boolean = false
@@ -66,6 +67,7 @@ export class TodayAnalyticsComponent {
         let unavailableCount = 0;
         let absentCount = 0;
 
+        this.doctorsCount = doctors.length
         this.doctors = doctors
           .filter((doctor) => {
             if (doctor.doctorType === 'Visiting Consultant') {

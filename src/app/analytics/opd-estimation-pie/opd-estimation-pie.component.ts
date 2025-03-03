@@ -461,4 +461,11 @@ export class OpdEstimationPieComponent implements OnChanges {
     this.viewMoreData()
   }
 
+  refresh():void{
+    this.loadDepartments()
+    this.selectedViewDate = getLastThirtyDaysFromSelected()
+    this.selectedViewDoctor = 'all'
+    this.viewmore()
+  }
+
 }

@@ -3,8 +3,8 @@
 </div>
 
 <div class="root-container" >
-    <div class="root-container">
-        <div class="header">
+    <div class="content">
+        <div class="header_c" *ngIf="!isLoading">
             <div class="common">
                 <div class="heading">Estimation Status Overview</div>
                 <div class="info">
@@ -24,7 +24,7 @@
         </div>
         <div class="chart" [ngClass]="{hidden: isLoading}">
             <div id="bar-chart" style="width: 80%; height: 315px;"></div>
-            <div class="legends" >
+            <div class="legends" *ngIf="!isLoading">
                 <div class="legend_items"><div class="indicator orange"></div><span>No. of. Pend. EST</span></div>
                 <div class="legend_items"><div class="indicator purple"></div><span>No. of. Subm. EST</span></div>
                 <div class="legend_items"><div class="indicator blue"></div><span>No. of. App. EST</span></div>
@@ -72,7 +72,7 @@
                     </ng-template>
                 </p-calendar>
             </div>
-            <div class="refreh v_tooltip" style="cursor: pointer;"><i class="fa-solid fa-arrows-rotate"></i><span
+            <div class="refreh v_tooltip" style="cursor: pointer;"><i class="fa-solid fa-arrows-rotate" (click)="refresh()"></i><span
                     class="v_tooltiptext">refresh</span></div>
         </div>
 

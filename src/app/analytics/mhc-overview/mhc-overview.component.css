@@ -1,8 +1,8 @@
 .root-container{
-    padding: 1%;
+    padding: 16px;
 }
 
-.header{
+.header-c{
     display: flex;
     justify-content: space-between;
     align-items: center;

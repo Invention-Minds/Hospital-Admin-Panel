@@ -39,6 +39,15 @@
     line-height: normal;
 }
 
+.count span{
+  color: #1C1C1C;
+  font-family: Kanit;
+  font-size: 30px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+}
+
 .round{
     width: 100px;
     height: 100px;
@@ -293,6 +302,7 @@ tbody tr:hover {
     background: rgba(255, 255, 255, 0.10);
     transition: box-shadow 0.3s ease;
     width: 95%;
+    border: 1px solid #B6B6B6;
   }
   
   .doctor-card:hover {

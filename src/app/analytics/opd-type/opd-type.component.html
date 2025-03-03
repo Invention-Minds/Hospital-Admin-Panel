@@ -52,12 +52,7 @@
             <div class="viewMoreHeading">OPD Type</div>
             <i class="fa-solid fa-x" (click)="closeViewMore()" style="cursor: pointer;"></i>
         </div>
-        <!-- filters -->
         <div class="report-filter">
-            <!-- <div style="font-size: 20px; cursor: pointer;" class="tooltip"><i class="fa-solid fa-download">
-                    <div class="tooltiptext">Download</div>
-                </i>
-            </div> -->
             <select (change)="departmentOnchange($event)">
                 <option class="dummy" value="all" disabled selected hidden>Choose the Department</option>
                 <option *ngFor="let dept of department" [value]="dept.id">{{dept.name}}</option>

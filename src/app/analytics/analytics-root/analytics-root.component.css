@@ -3,7 +3,8 @@
   margin-left: 70px;
   padding: 0 1%;
   overflow-x: hidden;
-  overflow-y: auto;
+  overflow-y: scroll;
+  height: 100%;
 }
 
 .rootcontainer::-webkit-scrollbar{
@@ -13,8 +14,9 @@
 .dashboard_header {
   display: flex;
   justify-content: space-between;
-  padding: 1% 0;
+  padding: 0% 0;
   align-items: center;
+  
 }
 
 .dashboard {
@@ -147,14 +149,14 @@ input {
 }
 
 .container_margin {
-  margin-top: 30px;
+  margin-top: 20px;
 }
 
 .flex {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 40px;
+  gap: 20px;
 }
 
 .opd_estimations {
@@ -222,6 +224,7 @@ input {
 }
 
 .loading {
+  overflow: hidden;
   width: 100vw;
   height: 100vh;
   display: flex;
@@ -291,4 +294,9 @@ input {
 
 .hide{
   display: none;
+}
+
+.hidden{
+  visibility: hidden;
+  height: 0;
 }

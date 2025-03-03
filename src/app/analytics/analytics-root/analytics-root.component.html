@@ -1,4 +1,8 @@
-<div class="rootcontainer">
+<div class="loading" *ngIf = "isLoading">
+    <app-loading />
+</div>
+
+<div class="rootcontainer" [ngClass]="{hidden : isLoading}">
     <div class="dashboard_header">
         <div class="dashboard" [ngClass]="{hide : !isCurrentDate}">Dashboard</div>
     </div>

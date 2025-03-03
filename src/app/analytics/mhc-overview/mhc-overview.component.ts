@@ -379,4 +379,11 @@ export class MhcOverviewComponent implements OnChanges {
     this.selectedViewDoctor = parseInt(event.target.value) || 'all'
     this.viewMoreData()
   }
+
+  refresh():void{
+    this.loadDepartments()
+    this.selectedViewDate = getLastThirtyDaysFromSelected()
+    this.selectedViewDoctor = 'all'
+    this.viewmore()
+  }
 }

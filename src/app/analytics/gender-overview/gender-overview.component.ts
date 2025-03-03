@@ -309,7 +309,8 @@ export class GenderOverviewComponent implements OnChanges {
   refresh():void{
     this.loadDepartments()
     this.selectedViewDate = getLastThirtyDaysFromSelected()
-    this.selectedDoctor = 'all'
+    this.selectedViewDoctor = 'all'
+    this.viewmore()
   }
 
 }

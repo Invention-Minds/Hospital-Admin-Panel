@@ -58,7 +58,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
   isSlotDurationChanged: boolean = false;
 
 
-  constructor(private doctorService: DoctorServiceService, private changeDetector: ChangeDetectorRef, private datePipe: DatePipe, private messageService: MessageService) { }
+  constructor(private doctorService: DoctorServiceService, private changeDetector: ChangeDetectorRef, private datePipe: DatePipe, private messageService: MessageService, private cdr: ChangeDetectorRef) { }
 
   // ngOnInit(): void {
   //   if(!this.isEditMode){
@@ -1142,9 +1142,11 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
     console.log(this.formErrors)
     if(this.formErrors){
       console.log('updating')
+
     this.modifiedDay = day as keyof Doctor['availabilityDays'];
     const timeArray = this.individualAvailability[day].availableFromArray || [];
     this.individualAvailability[day].availableFrom = timeArray.filter(time => time.trim() !== '').join(', '); // Join non-empty values
+    this.cdr.detectChanges();
     // console.log('Updated available from:', this.individualAvailability[day].availableFrom);
     }
   }

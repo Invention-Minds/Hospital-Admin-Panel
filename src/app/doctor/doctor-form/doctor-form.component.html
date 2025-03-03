@@ -296,6 +296,7 @@
           <div *ngFor="let time of individualAvailability[day].availableFromArray; let i = index; trackBy: trackByFn" class="availability-field-container">
             <input 
               type="text" 
+              id="availableTime{{day}}{{i}}"
               [(ngModel)]="individualAvailability[day].availableFromArray[i]" 
               placeholder="09:00-10:00" 
               name="availableTime{{day}}{{i}}" 
@@ -303,7 +304,7 @@
               required
               (ngModelChange)="updateAvailableFromString(day.toString())"
             />
-            <label class="input-label">{{ day.toString() | titlecase }} Available Times*</label>
+            <label class="input-label" for="availableTime{{day}}{{i}}">{{ day.toString() | titlecase }} Available Times*</label>
             <div class="remove" *ngIf="i > 0" type="button" (click)="removeTimeRange(day.toString(), i)"><img src="remove.png"></div>
             <div class="remove" type="button" (click)="addTimeRange(day.toString())"><img src="add.png"></div>
           </div>
@@ -326,6 +327,7 @@
           <div *ngFor="let time of individualAvailability[day].availableFromArray; let i = index;trackBy: trackByFn" class="availability-field-container">
             <input 
               type="text" 
+              id="availableTime{{day}}{{i}}"
               [(ngModel)]="individualAvailability[day].availableFromArray[i]" 
               name="availableTime{{day}}{{i}}" 
               placeholder="09:00-10:00" 
@@ -333,7 +335,7 @@
               required
               (ngModelChange)="updateAvailableFromString(day.toString())"
             />
-            <label class="input-label">{{ day.toString() | titlecase }} Available Times*</label>
+            <label class="input-label" for="availableTime{{day}}{{i}}">{{ day.toString() | titlecase }} Available Times*</label>
             <div *ngIf="i > 0" type="button" (click)="removeTimeRange(day.toString(), i)"><img src="remove.png"></div>
             <div type="button" (click)="addTimeRange(day.toString())"><img src="add.png"></div>
           </div>
@@ -420,7 +422,7 @@
 </button> -->
 <button 
   class="update-button" 
-  [disabled]="!isFormValid() || !isAnyDaySelected() || isLoading"
+  [disabled]="!isFormValid() || !isAnyDaySelected() || isLoading "
   [ngClass]="{'disabled': !isFormValid() || !isAnyDaySelected()}">
   <span *ngIf="!isLoading">{{ isEditMode ? 'Update' : 'Add' }}</span>
   <span *ngIf="isLoading" class="loader"></span>

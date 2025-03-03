@@ -244,6 +244,8 @@ export class AppointmentFormComponent implements OnInit {
             this.appointment.doctorId = doctorId;
           }
           let date = this.appointmentForm.get('appointmentDate')?.value;
+          this.appointmentForm.get('appointmentTime')?.setValue(''); 
+          console.log(this.appointmentForm.value.appointmentTime)
           if (doctorId && date) {
             console.log('load times',this.doctorId)
             this.checkDoctorAvailabilityAndLoadSlots(doctorId, this.formatDate(date))
@@ -596,6 +598,9 @@ export class AppointmentFormComponent implements OnInit {
           this.appointment.doctorId = doctorId;
         }
         let date = this.appointmentForm.get('appointmentDate')?.value;
+        this.appointmentForm.get('appointmentTime')?.setValue(''); 
+        console.log(this.appointmentForm.value.appointmentTime)
+
         if (doctorId && date) {
           console.log('load times')
           this.checkDoctorAvailabilityAndLoadSlots(doctorId, this.formatDate(date))
@@ -615,7 +620,8 @@ export class AppointmentFormComponent implements OnInit {
       const doctorId = this.doctorId;
       // date = date.toISOString().split('T')[0]
       if (doctorId !== undefined) {
-        this.appointmentService.getBookedSlots(doctorId, date).subscribe(
+        console.log(date,'booked')
+        this.appointmentService.getBookedSlots(doctorId, this.formatDate(date)).subscribe(
           (bookedSlots: { time: string; complete: boolean }[]) => {
             
             const nonCompleteBookedSlots = bookedSlots.filter(slot => !slot.complete).map(slot => slot.time);
@@ -795,6 +801,7 @@ export class AppointmentFormComponent implements OnInit {
             this.availableSlots = [...this.availableSlots, this.slot.time];
           }
           else {
+            console.log('booked',date)
             // Remove the slots that are already booked for that date
             this.appointmentService.getBookedSlots(doctorId, date).subscribe(
               (bookedSlots: { time: string; complete: boolean }[]) => {
@@ -941,6 +948,7 @@ export class AppointmentFormComponent implements OnInit {
   // }
   private checkSlotAvailability(doctorId: number, date: any, time: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
+      console.log('booked',date)
       this.appointmentService.getBookedSlots(doctorId, date).subscribe({
         next: (bookedSlots: { time: string; complete: boolean }[]) => {
           // Filter out booked slots that are complete

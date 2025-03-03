@@ -207,7 +207,7 @@ font-weight: 400;
   
   .custom-form-field label {
     position: absolute;
-    top: 12px;
+    /* top: 0px; */
     left: 10px;
     background: #fff;
     padding: 0 8px;

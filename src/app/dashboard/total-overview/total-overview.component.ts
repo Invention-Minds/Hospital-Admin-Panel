@@ -461,15 +461,29 @@ export class TotalOverviewComponent implements OnInit {
             return { ...doctor, status };
           });
         this.leaveDoctors = [];
-
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Remove time part to compare only dates
+        
         this.leaveDoctors = doctors
-        .filter((doctor) => (doctor.unavailableDates || []).length > 0)
-        .map((doctor) => ({
-          ...doctor,
-          groupedUnavailableDates: this.groupUnavailableDates(
-            doctor.unavailableDates!.map(d => d.date) // Extract only the `date` property
-          ),
-        }));
+        .map((doctor) => {
+          const futureUnavailableDates = (doctor.unavailableDates || [])
+            .map(d => new Date(d.date)) // Convert to Date objects
+            .filter(date => date >= today) // Keep only today and future dates
+            .map(date => date.toISOString().split('T')[0]); // Convert back to YYYY-MM-DD
+      
+          return futureUnavailableDates.length > 0 // ✅ Keep only doctors with future unavailability
+            ? { ...doctor, groupedUnavailableDates: this.groupUnavailableDates(futureUnavailableDates) }
+            : null; // Exclude doctors without valid unavailable dates
+        })
+        .filter(doctor => doctor !== null) as any; // Remove null values
+        // this.leaveDoctors = doctors
+        // .filter((doctor) => (doctor.unavailableDates || []).length > 0)
+        // .map((doctor) => ({
+        //   ...doctor,
+        //   groupedUnavailableDates: this.groupUnavailableDates(
+        //     doctor.unavailableDates!.map(d => d.date) // Extract only the `date` property
+        //   ),
+        // }));
       
       console.log("✅ Leave Doctors with Processed Dates:", this.leaveDoctors);
       
@@ -718,28 +732,77 @@ export class TotalOverviewComponent implements OnInit {
   closeLeaveDoctorList(): void {
     this.showLeaveDoctors = false;
   }
+  // private groupUnavailableDates(dates: string[]): string[] {
+  //   if (!dates || dates.length === 0) return [];
+  
+  //   // ✅ Convert to valid Date objects
+  //   const parsedDates = dates.map(dateStr => {
+  //     const parsedDate = new Date(dateStr);
+  //     if (isNaN(parsedDate.getTime())) {
+  //       console.error("❌ Invalid date found:", dateStr);
+  //     }
+  //     return parsedDate;
+  //   });
+  
+  //   // ✅ Remove invalid dates
+  //   const validDates = parsedDates.filter(date => !isNaN(date.getTime()));
+  
+  //   if (validDates.length === 0) {
+  //     console.error("❌ No valid dates found:", dates);
+  //     return [];
+  //   }
+  
+  //   // ✅ Sort dates in ascending order
+  //   validDates.sort((a, b) => a.getTime() - b.getTime());
+  
+  //   const groupedDates: string[] = [];
+  //   let startDate = validDates[0];
+  //   let endDate = validDates[0];
+  
+  //   for (let i = 1; i < validDates.length; i++) {
+  //     const currentDate = validDates[i];
+  //     const previousDate = new Date(endDate);
+  //     previousDate.setDate(previousDate.getDate() + 1); // Expect next day
+  
+  //     if (currentDate.getTime() === previousDate.getTime()) {
+  //       // ✅ If current date is the next day, extend the range
+  //       endDate = currentDate;
+  //     } else {
+  //       // ✅ If break in dates, store the range or single date
+  //       if (startDate.getTime() === endDate.getTime()) {
+  //         groupedDates.push(this.formatDateUnavailable(startDate)); // Single date
+  //       } else {
+  //         groupedDates.push(`${this.formatDateUnavailable(startDate)} to ${this.formatDateUnavailable(endDate)}`);
+  //       }
+  //       startDate = currentDate;
+  //       endDate = currentDate;
+  //     }
+  //   }
+  
+  //   // ✅ Add the last range or date
+  //   if (startDate.getTime() === endDate.getTime()) {
+  //     groupedDates.push(this.formatDateUnavailable(startDate));
+  //   } else {
+  //     groupedDates.push(`${this.formatDateUnavailable(startDate)} to ${this.formatDateUnavailable(endDate)}`);
+  //   }
+  
+  //   return groupedDates;
+  // }
   private groupUnavailableDates(dates: string[]): string[] {
     if (!dates || dates.length === 0) return [];
   
-    // ✅ Convert to valid Date objects
-    const parsedDates = dates.map(dateStr => {
-      const parsedDate = new Date(dateStr);
-      if (isNaN(parsedDate.getTime())) {
-        console.error("❌ Invalid date found:", dateStr);
-      }
-      return parsedDate;
-    });
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Normalize today's date
   
-    // ✅ Remove invalid dates
-    const validDates = parsedDates.filter(date => !isNaN(date.getTime()));
+    const validDates = dates
+      .map(dateStr => new Date(dateStr))
+      .filter(date => date >= today && !isNaN(date.getTime())) // Ensure only today & future
+      .sort((a, b) => a.getTime() - b.getTime()); // Sort in ascending order
   
     if (validDates.length === 0) {
-      console.error("❌ No valid dates found:", dates);
+      console.error("❌ No valid future dates found:", dates);
       return [];
     }
-  
-    // ✅ Sort dates in ascending order
-    validDates.sort((a, b) => a.getTime() - b.getTime());
   
     const groupedDates: string[] = [];
     let startDate = validDates[0];
@@ -751,37 +814,39 @@ export class TotalOverviewComponent implements OnInit {
       previousDate.setDate(previousDate.getDate() + 1); // Expect next day
   
       if (currentDate.getTime() === previousDate.getTime()) {
-        // ✅ If current date is the next day, extend the range
-        endDate = currentDate;
+        endDate = currentDate; // Extend the range
       } else {
-        // ✅ If break in dates, store the range or single date
-        if (startDate.getTime() === endDate.getTime()) {
-          groupedDates.push(this.formatDateUnavailable(startDate)); // Single date
-        } else {
-          groupedDates.push(`${this.formatDateUnavailable(startDate)} to ${this.formatDateUnavailable(endDate)}`);
-        }
+        groupedDates.push(
+          startDate.getTime() === endDate.getTime()
+            ? this.formatDateUnavailable(startDate)
+            : `${this.formatDateUnavailable(startDate)} to ${this.formatDateUnavailable(endDate)}`
+        );
         startDate = currentDate;
         endDate = currentDate;
       }
     }
   
-    // ✅ Add the last range or date
-    if (startDate.getTime() === endDate.getTime()) {
-      groupedDates.push(this.formatDateUnavailable(startDate));
-    } else {
-      groupedDates.push(`${this.formatDateUnavailable(startDate)} to ${this.formatDateUnavailable(endDate)}`);
-    }
+    // ✅ Add the last range or single date
+    groupedDates.push(
+      startDate.getTime() === endDate.getTime()
+        ? this.formatDateUnavailable(startDate)
+        : `${this.formatDateUnavailable(startDate)} to ${this.formatDateUnavailable(endDate)}`
+    );
   
     return groupedDates;
   }
-  
+   
   
   private formatDateUnavailable(date: Date): string {
     if (!(date instanceof Date) || isNaN(date.getTime())) {
       console.error("❌ Invalid Date:", date);
       return "Invalid Date";
     }
-    return date.toISOString().split('T')[0]; // Extract YYYY-MM-DD
+    const day = String(date.getDate()).padStart(2, '0'); // Ensure 2-digit day
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+    const year = date.getFullYear();
+    
+    return `${day}-${month}-${year}`;
   }
   
   

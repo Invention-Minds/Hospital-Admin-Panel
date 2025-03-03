@@ -357,7 +357,11 @@
   font-weight: 600;
   width: 84px;
 }
-
+.slot-label input:disabled + span {
+  text-decoration: line-through;
+  color: #999; /* Grey out booked slots */
+  cursor: not-allowed;
+}
 /* Color Coding Slots */
 .slot-available {
   background-color: #79cfa6; /* Green for Available */

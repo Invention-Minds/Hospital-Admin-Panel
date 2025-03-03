@@ -151,7 +151,7 @@
                 (change)="onSlotSelectionChange($event, slot.time)" 
                 [disabled]="slot.status === 'booked'" /> <!-- Disable if booked -->
               
-              {{ slot.time }} 
+                <span>{{ slot.time }}</span>
               <!-- <span *ngIf="slot.status === 'booked'" class="booked-badge"> (Booked) </span> Show booked status -->
             </label>
           </div>

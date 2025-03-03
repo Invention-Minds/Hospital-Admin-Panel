@@ -1,14 +1,14 @@
 <div class="wrapper">
 
-    <div class="cards" (click)="docAvailReport()">
+    <div class="cards" style="cursor: pointer;" (click)="docAvailReport()">
         <div class="text">Doc Available</div>
         <div class="flex">
-            <div class="counts">
-                <div class="count">{{availableDoctorsToday}}</div>
+            <div class="counts_n">
+                <div class="count">{{availableDoctorsToday}} / <span>{{doctorsCount}}</span></div>
                 <div class="percentage green" style="visibility: hidden;"><b>+2%</b></div>
             </div>
             <div class="graph">
-                <div id="chart" style="width: 90px; height: 90px;"></div>
+                <div id="chart" style="width: 20px; height: 90px;"></div>
                 <div class="info tooltip"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                         viewBox="0 0 24 24">
                         <path fill="currentColor"
@@ -20,15 +20,15 @@
         </div>
     </div>
 
-    <div class="cards" (click)="docAbsentReport()">
+    <div class="cards" style="cursor: pointer;" (click)="docAbsentReport()">
         <div class="text">Doc Absent</div>
         <div class="flex">
             <div class="counts">
-                <div class="count">{{absentDoctorsToday}}</div>
+                <div class="count">{{absentDoctorsToday}} / <span>{{doctorsCount}}</span></div>
                 <div class="percentage red" style="visibility: hidden;"><b>-5%</b></div>
             </div>
             <div class="graph">
-                <div id="chart" style="width: 90px; height: 90px;"></div>
+                <div id="chart" style="width: 20px; height: 90px;"></div>
                 <div class="info tooltip"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                         viewBox="0 0 24 24">
                         <path fill="currentColor"
@@ -41,7 +41,7 @@
     </div>
 
     <div class="cards">
-        <div class="text">Rooms Availability</div>
+        <div class="text">Occupied Rooms</div>
         <div class="flex">
             <div class="counts">
                 <div class="count">{{availlableRoom}}</div>

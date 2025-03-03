@@ -3,7 +3,7 @@
 </div>
 
 <div class="root-container">
-    <div class="header" *ngIf="!isLoading">
+    <div class="header_c" *ngIf="!isLoading">
         <div class="common">
             <div class="heading">Average Waiting time</div>
             <div class="info tooltip">
@@ -25,7 +25,7 @@
         </div>
     </div>
 
-    <div class="chart" [ngClass]="{hidden : isLoading}">
+    <div class="chart" [ngClass]="{hide : isLoading}">
         <div id="horizontal-bar-charts" style="width: 450px; height: 280px;"></div>
     </div>
 </div>
@@ -64,8 +64,8 @@
                     </ng-template>
                 </p-calendar>
             </div>
-            <div class="refreh tooltip" style="cursor: pointer;"><i class="fa-solid fa-arrows-rotate" (click)="refresh()"></i><span
-                    class="tooltiptext">refresh</span></div>
+            <div class="refreh v_tooltip" style="cursor: pointer;"><i class="fa-solid fa-arrows-rotate" (click)="refresh()"></i><span
+                    class="v_tooltiptext">refresh</span></div>
         </div>
 
         <!-- chart -->

@@ -3,7 +3,7 @@
 </div>
 
 <div class="root-container">
-    <div class="header" *ngIf="!isLoading">
+    <div class="header_c" *ngIf="!isLoading">
         <div class="common">
             <div class="heading">Gender Overview</div>
             <div class="info" *ngIf="!isLoading">
@@ -16,14 +16,14 @@
                 </div>
             </div>
         </div>
-        <div style="display: flex; align-items: center; gap: 10px;">
+        <div style="display: flex; align-items: center; justify-content: end; gap: 10px">
             <div class="viewmore" (click)="viewmore()">View More</div>
             <div class="viewmore" (click)="report(rawData)">Details</div>
         </div>
         
     </div>
 
-    <div class="chart" [ngClass]="{hidden : isLoading}">
+    <div class="chart" [ngClass]="{hide : isLoading}">
         <div id="genderLineChart" style="width: 400px; height: 280px"></div>
     </div>
 
@@ -63,8 +63,8 @@
                     </ng-template>
                 </p-calendar>
             </div>
-            <div class="refreh tooltip" style="cursor: pointer;" (click)="refresh()"><i class="fa-solid fa-arrows-rotate"></i><span
-                    class="tooltiptext">refresh</span></div>
+            <div class="refreh v_tooltip" style="cursor: pointer;"><i class="fa-solid fa-arrows-rotate" (click)="refresh()"></i><span
+                    class="v_tooltiptext">refresh</span></div>
         </div>
 
         <!-- chart -->

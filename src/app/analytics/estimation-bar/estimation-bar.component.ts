@@ -765,5 +765,6 @@ export class EstimationBarComponent implements OnChanges {
     this.loadDepartments()
     this.selectedViewDate = getLastThirtyDaysFromSelected()
     this.selectedViewDoctor = 'all'
+    this.viewmore()
   }
 }

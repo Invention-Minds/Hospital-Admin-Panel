@@ -1,5 +1,5 @@
 .root-container{
-    padding: 3%;
+    padding: 16px;
 }
 
 .header{
@@ -311,4 +311,36 @@
 
 .viewmoreLegends{
     width: 30%;
+}
+
+.v_tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.v_tooltip .v_tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    color: #000;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 0%;
+    /* Position above the element */
+    top: 40px;
+    left: 0%;
+    margin-left: -60px;
+    /* Adjust to center the tooltip */
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 12px;
+}
+
+.v_tooltip:hover .v_tooltiptext {
+    visibility: visible;
+    opacity: 1;
+    color: #000;
 }

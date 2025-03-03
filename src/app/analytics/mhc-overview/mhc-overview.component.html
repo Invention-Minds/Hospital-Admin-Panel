@@ -3,7 +3,7 @@
 </div>
 
 <div class="root-container" *ngIf = "!isLoading">
-    <div class="header">
+    <div class="header-c">
         <div class="common">
             <div class="heading">MHC  Overview</div>
             <div class="info">
@@ -75,7 +75,7 @@
                     </ng-template>
                 </p-calendar>
             </div>
-            <div class="refreh v_tooltip" style="cursor: pointer;"><i class="fa-solid fa-arrows-rotate"></i><span
+            <div class="refreh v_tooltip" style="cursor: pointer;"><i class="fa-solid fa-arrows-rotate" (click)="refresh()"></i><span
                     class="v_tooltiptext">refresh</span></div>
         </div>
 

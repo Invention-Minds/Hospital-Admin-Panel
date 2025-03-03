@@ -46,7 +46,7 @@ export class AnalyticsRootComponent implements OnChanges{
     this.currentDate = getYesterdayDate()
     setTimeout(() => {
       this.isLoading = false; // Set to false when data is loaded
-    }, 3000); // 3 seconds delay
+    }, 6000); // 3 seconds delay
 
     this.isCurrentDate = true
     this.loadDepartments()

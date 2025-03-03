@@ -1,12 +1,12 @@
 .root-container {
-    padding: 3%;
+    padding: 16px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
 }
 
-.header {
+.header_c {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -74,7 +74,9 @@
 .info svg{
     width: 18px;
     height: auto;
-
+    margin: auto 0;
+    position: relative;
+    margin-top: 4px;
 }
 
 .tooltip {

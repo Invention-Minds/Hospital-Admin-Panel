@@ -79,8 +79,8 @@
                     <td>{{service.consultationCount}}</td>
 
                     <td class="button">
-                      <button class="btn-action" [disabled]="service.isLab" >
-                        <img src="lab.svg" alt="check" class="action-icon"  (click)="!service.isLab && labTime(service)"
+                      <button class="btn-action">
+                        <img src="lab.svg" alt="check" class="action-icon"  (click)="openLabPopup(service)"
                           pTooltip="Lab" tooltipPosition="top">
                       </button>
                       <button class="btn-action" >
@@ -114,7 +114,7 @@
   (close)="handleLockedDialogClose()"></app-delete-confirmation-dialog>
 
 
-  <div *ngIf="showPopup" class="close-opd-modal">
+  <!-- <div *ngIf="showPopup" class="close-opd-modal">
     <div class="modal-content">
       <div class="modal-header">
         <h3>Radiology Service </h3>
@@ -163,13 +163,64 @@
             <input type="checkbox" [(ngModel)]="usgEcho" [disabled]="usgEchoTime !== null">
             USG Abdomen & Pelvis 2D Echo <span *ngIf="usgEchoTime"> (Selected at {{ usgEchoTime }})</span>
           </label> -->
-        </div>
+        <!-- </div>
       </div>
       <div class="modal-footer">
         <button class="save-button" (click)="submitSelection()">Submit</button>
         <button class="close-button" (click)="closePopup()">Cancel</button>
       </div>
+    </div> --> 
+    <div *ngIf="showLabPopup" class="close-opd-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Lab Service</h3>
+          <button class="popup-close" (click)="closeLabPopup()">
+            <img src="/popup-close.svg" alt="Close Popup" />
+          </button>
+        </div>
+        <hr />
+        <div class="modal-body">
+          <p>Select an action below:</p>
+        </div>
+        <div class="modal-footer">
+          <!-- ✅ Checked In Button -->
+          <button class="save-button" (click)="labEntryTime()" [disabled]="selectedService.isLab">
+            Checked In
+          </button>
+    
+          <!-- ✅ Report Done Button -->
+          <button class="close-button" (click)="labTime()" [disabled]="selectedService.isLabEntryTime!=null">
+            Report Done
+          </button>
+        </div>
+      </div>
     </div>
+    <div *ngIf="showPopup" class="close-opd-modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Radiology Service</h3>
+          <button class="popup-close" (click)="closePopup()">
+            <img src="/popup-close.svg" alt="Close Popup" />
+          </button>
+        </div>
+        <hr />
+        <div class="modal-body">
+          <p>Select an action below:</p>
+        </div>
+        <div class="modal-footer">
+          <!-- ✅ Checked In Button -->
+          <button class="save-button" (click)="markCheckedIn()" [disabled]="selectedService.chestXRayEntryTime">
+            Checked In
+          </button>
+    
+          <!-- ✅ Report Done Button -->
+          <button class="close-button" (click)="markReportDone()" [disabled]="selectedService.chestXRayTime!=null">
+            Report Done
+          </button>
+        </div>
+      </div>
+    </div>
+    
   </div>
-</div>
+
 <div class="loader" *ngIf="isLoading"></div>

@@ -38,6 +38,7 @@
   font-style: normal;
   font-weight: 600;
   line-height: normal;
+  text-align: center;
 }
 
 .quote {
@@ -47,6 +48,7 @@
   font-style: normal;
   font-weight: 400;
   line-height: normal;
+  text-align: center;
 }
 
 .input-group{

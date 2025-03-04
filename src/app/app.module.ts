@@ -114,6 +114,7 @@ import { AgeChartComponent } from './analytics/age-chart/age-chart.component';
 import { MaintainanceComponent } from './maintainance/maintainance/maintainance.component';
 import { ArrivedConsultationComponent } from './doctor-role/arrived-consultation/arrived-consultation.component';
 import { ConfirmMhcComponent } from './health-checkup-service/confirm-mhc/confirm-mhc.component';
+import { MhcReportComponent } from './health-checkup-service/mhc-report/mhc-report.component';
 
 
 @NgModule({
@@ -188,7 +189,8 @@ import { ConfirmMhcComponent } from './health-checkup-service/confirm-mhc/confir
     EstimationBarComponent,
     MaintainanceComponent,
     ArrivedConsultationComponent,
-    ConfirmMhcComponent
+    ConfirmMhcComponent,
+    MhcReportComponent
   ],
   imports: [
     BrowserModule,

@@ -419,7 +419,8 @@
         </form>
       </div>
       <div class="modal-footer">
-        <button class="save-button" (click)="submitLeaveRequest()">Submit</button>
+        <!-- <button class="save-button" (click)="submitLeaveRequest()">Submit</button> -->
+        <button  mat-raised-button  (click)="submitLeaveRequest()" class="save-button" [disabled]="!startDate && !endDate || isButtonLoading"   [class.spinner]="isButtonLoading" > <span>Submit</span></button>
         <button class="close-button" (click)="closeLeaveRequestPopup()">Close</button>
       </div>
     </div>

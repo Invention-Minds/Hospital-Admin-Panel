@@ -103,16 +103,16 @@
       <div class="form-row">
 
         <div class="input-container">
-          <ng-container *ngIf="formData.consultantId; else doctorDropdown">
+          <!-- <ng-container *ngIf="formData.consultantId; else doctorDropdown">
             <input type="text" id="consultantName" name="consultantName" pattern="^[a-zA-Z\s().]+$" class="custom-input"
               ngModel [(ngModel)]="selectedDoctorName" required
               [readonly]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'"
               placeholder=" " />
             <label for="consultantName" class="custom-label">Consultant Name*</label>
-          </ng-container>
+          </ng-container> -->
 
           <!-- Doctor Dropdown (Visible if consultantId is null or empty) -->
-          <ng-template #doctorDropdown>
+          <!-- <ng-template #doctorDropdown> -->
             <label for="estimationName" class="custom-label-consultantName">Consultant Name*</label>
             <div class="dropdown-container">
               <select id="consultantNameDropdown" name="consultantId" class="custom-input custom-select"
@@ -127,7 +127,7 @@
                 </option>
               </select>
             </div>
-          </ng-template>
+          <!-- </ng-template> -->
 
           <div *ngIf="estimationForm.submitted && estimationForm.controls['consultantId']?.invalid"
             class="error-message">
@@ -189,6 +189,7 @@
                     class="custom-input custom-select" ngModel
             [(ngModel)]="formData.surgeryTime" [required]="selectedEstimationType === 'SM' " #surgeryTime="ngModel" >
             <option value="" disabled selected>Select Surgery Level</option>
+            <option value="No Level">No Level</option>
             <option value="Level 1">Level 1</option>
             <option value="Level 1A">Level 1A</option>
             <option value="Level 2">Level 2</option>
@@ -355,9 +356,9 @@
     
   </div>
 </div>
-
+<p>Note: The cost of the room includes daily nursing and diet fees</p>
 <!-- Display selected room -->
-<p class="selectedRoom">Selected Room: {{ selectedRoomCost }}</p>
+<!-- <p class="selectedRoom">Selected Ward: {{ selectedRoomCost }}</p> -->
 
 
 
@@ -389,7 +390,7 @@
           Cross Consultation
         </label>
         <label>
-          <input type="checkbox" name="implants"
+          <input type="checkbox" name="implants"   
             [disabled]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'  "
             [(ngModel)]="formData.includedItems['implants']" />
           Implants
@@ -401,9 +402,9 @@
           Laboratory and Imaging
         </label>
         <label>
-          <input type="checkbox" name="instrumentEquipment" [(ngModel)]="formData.includedItems['instrumentEquipment']"
+          <input type="checkbox" name="instrumentEquipment" [(ngModel)]="formData.includedItems['instrumentEquipment']"   
             [disabled]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'  " />
-          Instrument/Equipment
+          Instrumentals
         </label>
         <label>
           <input type="checkbox" name="diet" [(ngModel)]="formData.includedItems['diet']"
@@ -421,9 +422,9 @@
           Surgeon, OT, Anesthesia
         </label>
         <label>
-          <input type="checkbox" name="bedsideProcedure" [(ngModel)]="formData.includedItems['bedsideProcedure']"
+          <input type="checkbox" name="bedsideProcedure" [(ngModel)]="formData.includedItems['bedsideProcedure']"   
             [disabled]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'  " />
-          Bedside Procedure
+           Procedures
         </label>
         <label>
           <input type="checkbox" name="otDrugs" [(ngModel)]="formData.includedItems['otDrugs']"
@@ -468,7 +469,7 @@
         <div class="grid-container">
           <div class="grid-items" *ngFor="let item of selectedItems[category]; let i = index">
             <input type="text" [(ngModel)]="selectedItems[category][i].name" class="custom-input"
-              placeholder="Enter {{ category }} Name" [ngModelOptions]="{standalone: true}" (ngModelChange)="updateFormData()" [readonly]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'  ">
+              placeholder="Enter {{ category }} Name" [ngModelOptions]="{standalone: true}" [readonly]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'  ">
 
             <input type="number" [(ngModel)]="selectedItems[category][i].cost" class="custom-input" placeholder="Cost"
               [ngModelOptions]="{standalone: true}" (ngModelChange)="updateFormData()" [readOnly]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'" >
@@ -516,14 +517,14 @@
           </label>
         </div>
       </div> -->
-      <div class="form-row" *ngIf="selectedSurgeryPackage === 'multiple surgeries'">
+      <!-- <div class="form-row" *ngIf="selectedSurgeryPackage === 'multiple surgeries'">
         <div *ngFor="let surgery of formData.estimationName.split(','); let i = index" class="input-container">
           <input type="number" id="multipleEstimationCost{{i}}" name="multipleEstimationCost{{i}}" pattern="^[0-9]*$"
             class="custom-input" [(ngModel)]="estimationCosts[i]" (ngModelChange)="updateEstimationCostString()"
             required placeholder=" " [readonly]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed'  || formData.statusOfEstimation === 'approved'" />
           <label for="multipleEstimationCost{{i}}" class="custom-label">Cost for {{ surgery.trim() }}*</label>
         </div>
-      </div>
+      </div> -->
       
       <div class="form-row">
         <div class="input-container">
@@ -665,7 +666,7 @@
           <div class="input-container" *ngIf="formData.signatureOf === 'attender'">
             <input type="text" id="attenderName" name="attenderName" pattern="^[a-zA-Z . ]*$" class="custom-input"
               ngModel [(ngModel)]="formData.attenderName" placeholder=" " class="custom-input"
-              [readonly]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved' " />
+              [readonly]="formData.statusOfEstimation === 'accepted'"/>
             <label for="attenderName" class="custom-label">Attender Name*</label>
             <div *ngIf="estimationForm.submitted && estimationForm.controls['attenderName']?.invalid"
               class="error-message">

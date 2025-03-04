@@ -119,6 +119,40 @@
           <span class="error-message" *ngIf=" form.submitted && form.controls['email']?.errors?.['pattern']">Enter a valid email.</span>
         </div>
       </div>
+      <!-- <div class="form-row">
+        <div class="form-group half-width">
+          <input
+            type="tel"
+            class="form-input"
+            id="age"
+            name="age"
+            ngModel
+            [(ngModel)]="formData.age"
+            pattern="^[1-9]{1,3}$"
+            placeholder=" "
+          />
+          <label for="age" class="form-label">Age</label>
+          <div *ngIf="form.submitted && form.controls['age']?.invalid" class="error-message">
+            <span *ngIf="form.controls['age']?.errors?.['required']">Age is required.</span>
+            <span *ngIf="form.controls['age']?.errors?.['pattern']">Enter a valid number.</span>
+          </div>
+        </div>
+        <div class="form-group half-width">
+          <select
+          class="form-input"
+          name="gender"
+          [(ngModel)]="formData.gender"
+          
+        >
+          <option value="" disabled>Select a Gender</option>
+          <option value="Male" disabled>Male</option>
+          <option value="Female" disabled>Female</option>
+          <option value="Other" disabled>Other</option>
+        </select>
+
+          
+        </div>
+      </div> -->
   
       <!-- Row 4 -->
       <div class="form-row">
@@ -299,7 +333,7 @@
       <!-- Buttons -->
       <div class="form-buttons">
         
-        <button  mat-raised-button type="submit" class="btn btn-submit" [disabled]="form.invalid || hasConflict || isLoading"  [class.spinner]="isLoading" > <span *ngIf="!isLoading">Book Appointment</span></button>
+        <button  mat-raised-button type="submit" class="btn btn-submit" [disabled]="form.invalid || hasConflict || isLoading"   [class.spinner]="isLoading" > <span *ngIf="!isLoading">Book Appointment</span></button>
         <button type="button" class="btn btn-cancel" (click)="cancelForm(form)">Cancel</button>
       </div>
     </form>

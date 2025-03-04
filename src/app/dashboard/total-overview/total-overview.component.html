@@ -12,7 +12,7 @@
       </div>
       <div class="card" (click)="downloadFilteredData()">
         <div class="card-icon">
-          <img src="/close-opd-overview.svg" alt="Doctor Available Icon" />
+          <img src="/receptionist.svg" alt="Doctor Available Icon" />
         </div>
         <div class="card-content">
           <p  class="number">{{checkinAppointmentsToday}}</p>
@@ -62,7 +62,7 @@
 
     </div>
   </div>
-<div *ngIf="showAvailableDoctors" class=" ">
+<div *ngIf="showAvailableDoctors" class="overlay">
   <div  class="container">
     <div class="header">
       <div>Doctors Available</div>
@@ -98,9 +98,10 @@
           <div class="doctor-name">{{doctor.name}}</div>
         </div>
         <div class="availability-status unavailable">
-          <span *ngFor="let slot of doctor.groupedUnavailableSlots">
+          <!-- <span *ngFor="let slot of doctor.groupedUnavailableSlots">
             {{ slot }}
-          </span>
+          </span> -->
+          {{ doctor.groupedUnavailableSlots.join(', ') }}
         </div>
 
       </div>

@@ -103,6 +103,17 @@
           <p>Confirmed Appts</p>
         </div>
       </div>
+      <!-- <div class="card" 
+      [ngClass]="{'active-card': activeComponent === 'mhcReport'}"
+      (click)="showMhcReport()">
+        <div class="card-icon">
+          <img src="/report-mhc.svg" alt="Doctor Available Icon" />
+        </div>
+        <div class="card-content">
+
+          <p>Report Summary</p>
+        </div>
+      </div> -->
     </div>
   </div>
   <div class="component-section">
@@ -121,4 +132,5 @@
     (closeForm)="closeConsultation()"></app-mhc-form>
     <app-mhc-today-consul *ngIf="activeComponent === 'mhcToday'" (reschedule)="openConsultationForm($event)"></app-mhc-today-consul>
     <app-confirm-mhc *ngIf="activeComponent === 'mhcConfirm'"></app-confirm-mhc>
+    <!-- <app-mhc-report *ngIf="activeComponent === 'mhcReport'"></app-mhc-report> -->
   </div>

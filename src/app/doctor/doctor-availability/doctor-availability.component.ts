@@ -737,7 +737,6 @@ export class DoctorAvailabilityComponent {
               // if (slotTimeInMinutes < currentTimeInMinutes) {
               //   return null; // Skip past slots
               // }
-
               if (this.unavailableSlots.includes(slot.time)) {
                 return { ...slot, status: 'blocked' as 'blocked' }; // ✅ Explicitly set status
               } else if (bookedSlotsForDate.includes(slot.time)) {
@@ -811,7 +810,11 @@ export class DoctorAvailabilityComponent {
                 const slotTimeInMinutes = (isPM && slotHours !== 12 ? slotHours + 12 : slotHours) * 60 + slotMinutes;
 
                 // 🚨 Exclude past slots (before the current time)
-                if (slotTimeInMinutes < currentTimeInMinutes) {
+                const today = new Date();
+                const isToday = this.selectedDate.toDateString() === today.toDateString();
+
+                // 🚨 Exclude past slots only if the selected date is today
+                if (isToday && slotTimeInMinutes < currentTimeInMinutes) {
                   return null; // Skip past slots
                 }
 
@@ -824,7 +827,18 @@ export class DoctorAvailabilityComponent {
                 }
               })
               .filter((slot): slot is any => slot !== null); // ✅ Remove `null` values & ensure correct typing
-
+            // this.generatedSlots= allSlots
+            //   .map(slot => {
+            //     if (this.unavailableSlots.includes(slot.time)) {
+            //       return { ...slot, status: 'blocked' as 'blocked' };
+            //     } else if (bookedSlotsForDate.includes(slot.time)) {
+            //       return { ...slot, status: 'booked' as 'booked' };
+            //     } else {
+            //       return { ...slot, status: 'available' as 'available' };
+            //     }
+            //   })
+            //   .filter(slot => (slot as any).status !== "extra");
+            console.log(this.generatedSlots)
 
 
 
@@ -949,7 +963,7 @@ export class DoctorAvailabilityComponent {
       doctor.ExtraSlotCount[0]?.extraHoursBefore,
       doctor.ExtraSlotCount[0]?.extraHoursAfter
     );
-    // console.log(generatedSlots)
+    console.log(generatedSlots)
     return generatedSlots; // Explicitly return the slots
   }
 

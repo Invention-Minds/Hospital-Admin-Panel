@@ -109,6 +109,10 @@ export class HealthCheckupOverviewComponent {
   showMhcConfirm() {
     this.activeComponent = 'mhcConfirm'
   }
+  showMhcReport() {
+    this.activeComponent = 'mhcReport'
+  }
+
 
   isNotMHC(): boolean {
     return !(this.role === 'sub_admin' && this.subAdminType === 'MHC Coordinator');

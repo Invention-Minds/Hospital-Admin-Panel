@@ -562,10 +562,10 @@ font-family: 900;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 .save-button {
-  background-color: #169458;
+  background-color: #001345;
   color: #fff;
   font-family: Kanit;
-  font-size: 20px;
+  font-size: 16px;
   font-style: normal;
   font-weight: 400;
   line-height: normal;
@@ -582,20 +582,21 @@ font-family: 900;
 
 .close-button {
   display: flex;
-  width: 150px;
-  padding: 7px 65px;
+  width: 170px;
+  padding: 7px 14px;
   justify-content: center;
   align-items: center;
   gap: 10px;
   cursor: pointer;
   border-radius: 4px;
-  border: 1px solid #7b7b7b;
-  color: #7b7b7b;
+  /* border: 1px solid #7b7b7b; */
+  color: #ffffff;
   font-family: Kanit;
-  font-size: 20px;
+  font-size: 16px;
   font-style: normal;
   font-weight: 400;
   line-height: normal;
+  background-color: #169458;
 }
 .modal-footer {
   display: flex;
@@ -624,6 +625,11 @@ font-family: 900;
   border: none;
   cursor: pointer;
   width: 100%;
+}
+button:disabled {
+  background-color: #f0f0f0;
+  color: #ccc;
+  cursor: not-allowed;
 }
 
 @media (max-width: 1024px) {

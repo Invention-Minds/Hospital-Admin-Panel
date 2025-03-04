@@ -207,7 +207,8 @@ h1 {
   }
   
   .availability-status.unavailable {
-    color: #f5d94b; /* Red for unavailable doctors */
+    color: #001345; /* Red for unavailable doctors */
+    text-wrap: wrap;
   }
   .availability-status.absent{
     color: #e74c3c;

@@ -43,7 +43,8 @@ export class MhcTodayConsulComponent {
   confirmedServices: any[] = [];
   today: any =  new Date().toLocaleDateString('en-CA');
   selectedAppointment: any;
-  showForm: boolean = false
+  showForm: boolean = false;
+  showLabPopup: boolean = false;
 
 
   // Value entered by the user (could be Patient ID or Phone Number based on selection)
@@ -51,6 +52,24 @@ export class MhcTodayConsulComponent {
 
   // Selected date from calendar
   selectedDate: Date | null = null;
+  isCheckedIn: boolean = false; // ✅ Tracks whether Checked In has been clicked
+  isReportDone: boolean = false; // ✅ Tracks whether Report Done has been clicked
+
+  // ✅ Stores entry and report times
+  radiologyTimes: any = {
+    chestXRayEntryTime: null,
+    chestXRayTime: null,
+    ultrasoundEntryTime: null,
+    ultrasoundTime: null,
+    boneDensitometryEntryTime: null,
+    boneDensitometryTime: null,
+    mammographyEntryTime: null,
+    mammographyTime: null,
+    ecgEntryTime: null,
+    ecgTime: null,
+    echoTMTEntryTime: null,
+    echoTMTTime: null,
+  };
   ngOnInit(): void {
     this.fetchConfirmedAppointments();
     this.userId = localStorage.getItem('userid')
@@ -354,13 +373,30 @@ export class MhcTodayConsulComponent {
     // Update UI
 
   }
-  labTime(service:any):void{
-    const {id, package: packageDate,packageId,consultationCount, ...withoutServiceId} = service;
+  labTime():void{
+    const {id, package: packageDate,packageId,consultationCount, ...withoutServiceId} = this.selectedService;
     
     const payload = {
       ...withoutServiceId,
      isLab: true,
      isLabTime: new Date(),
+    }
+    if (!id) return;
+    this.healthCheckupService.updateService(id,payload).subscribe({
+      next: (response) => {
+        console.log('Service marked as completed:', response);
+        this.fetchConfirmedAppointments()
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Lab is updated successfully!' });
+
+      }
+    })
+  }
+  labEntryTime():void{
+    const {id, package: packageDate,packageId,consultationCount, ...withoutServiceId} = this.selectedService;
+    
+    const payload = {
+      ...withoutServiceId,
+     isLabEntryTime: new Date(),
     }
     if (!id) return;
     this.healthCheckupService.updateService(id,payload).subscribe({
@@ -574,10 +610,19 @@ export class MhcTodayConsulComponent {
     this.echoTMTTime = service.echoTMTTime || null;
     // this.usgEchoTime = service.usgEchoTime || null;
   }
+  openLabPopup(service: any) {
+    this.selectedService = service;
+    this.showLabPopup = true;
+  }
 
   /** Close the popup */
   closePopup() {
     this.showPopup = false;
+    this.selectedService = null;
+  }
+
+  closeLabPopup() {
+    this.showLabPopup = false;
     this.selectedService = null;
   }
 
@@ -626,5 +671,124 @@ export class MhcTodayConsulComponent {
       }
     });
   }
+  // markCheckedIn() {
+  //   if (!this.isCheckedIn) {
+  //     const currentTime = new Date().toISOString();
+
+  //     // ✅ Set all "EntryTime" fields with current time
+  //     Object.keys(this.radiologyTimes).forEach((key) => {
+  //       if (key.includes("EntryTime") && !this.radiologyTimes[key]) {
+  //         this.radiologyTimes[key] = currentTime;
+  //       }
+  //     });
+
+  //     this.isCheckedIn = true; // ✅ Disable Checked In button
+  //     console.log("Checked In at:", this.radiologyTimes);
+      
+  //   }
+  // }
+
+  // // ✅ Function for Report Done
+  // markReportDone() {
+  //   if (this.isCheckedIn && !this.isReportDone) {
+  //     const currentTime = new Date().toISOString();
+
+  //     // ✅ Set all "Time" fields with current time
+  //     Object.keys(this.radiologyTimes).forEach((key) => {
+  //       if (key.includes("Time") && !this.radiologyTimes[key]) {
+  //         this.radiologyTimes[key] = currentTime;
+  //       }
+  //     });
+
+  //     this.isReportDone = true; // ✅ Disable Report Done button
+  //     console.log("Report Done at:", this.radiologyTimes);
+  //   }
+  // }
+  markCheckedIn() {
+    if (!this.isCheckedIn) {
+      const currentTime = new Date().toISOString();
+  
+      // ✅ Create a copy of the service object to preserve all fields
+      let payload: any = { ...this.selectedService };
+  
+      // ✅ Update all "EntryTime" fields
+      Object.keys(payload).forEach((key) => {
+        if (key.includes("EntryTime") && !payload[key]) {
+          payload[key] = currentTime;
+        }
+      });
+      payload.chestXRayEntryTime= currentTime 
+      payload.ultrasoundEntryTime= currentTime     
+      payload.boneDensitometryEntryTime= currentTime
+      payload.mammographyEntryTime  = currentTime   
+      payload.ecgEntryTime    = currentTime          
+      payload.echoTMTEntryTime = currentTime         
+      payload.usgEchoEntryTime= currentTime
+  
+      // payload.checkedIn = true; // ✅ Mark service as checked in
+      // payload.checkedInTime = currentTime; // ✅ Set general checked-in time
+  
+      console.log("Checked In Payload:", payload);
+      const {id, package: packageDate,packageId,consultationCount, ...withoutServiceId} = payload;
+  
+      // ✅ Update Service in Backend
+      this.healthCheckupService.updateService(this.selectedService.id, withoutServiceId).subscribe({
+        next: (response) => {
+          console.log('Service Updated:', response);
+          this.closePopup(); // ✅ Close popup after update
+          this.fetchConfirmedAppointments(); // ✅ Refresh data
+        },
+        error: (error) => {
+          console.error('Error updating service:', error);
+        }
+      });
+  
+      this.isCheckedIn = true; // ✅ Disable Checked In button
+    }
+  }
+  
+  markReportDone() {
+    console.log(this.selectedService)
+    if (this.selectedService.chestXRayEntryTime && this.selectedService.chestXRayTime != null) {
+      const currentTime = new Date().toISOString();
+  
+      // ✅ Create a copy of the service object to preserve all fields
+      let payload: any = { ...this.selectedService };
+  
+      // ✅ Update all "Time" fields
+      // Object.keys(payload).forEach((key) => {
+      //   // ✅ Update only if the key ends exactly with "Time" (e.g., chestXRayTime, ultrasoundTime)
+      //   if (key.endsWith("Time") && typeof payload[key] === "string" && !payload[key]) {
+      //     payload[key] = currentTime;
+      //   }
+      // });
+      payload.chestXRayTime  = currentTime           
+      payload.ultrasoundTime = currentTime           
+      payload.boneDensitometryTime = currentTime 
+      payload.mammographyTime   = currentTime        
+      payload.ecgTime    = currentTime               
+      payload.echoTMTTime  = currentTime             
+      payload.usgEchoTime= currentTime
+      
+  
+      console.log("Report Done Payload:", payload);
+      const {id, package: packageDate,packageId,consultationCount, ...withoutServiceId} = payload;
+  
+      // ✅ Update Service in Backend
+      this.healthCheckupService.updateService(this.selectedService.id, withoutServiceId).subscribe({
+        next: (response) => {
+          console.log('Service Updated:', response);
+          this.closePopup(); // ✅ Close popup after update
+          this.fetchConfirmedAppointments(); // ✅ Refresh data
+        },
+        error: (error) => {
+          console.error('Error updating service:', error);
+        }
+      });
+  
+      this.isReportDone = true; // ✅ Disable Report Done button
+    }
+  }
+  
 
 }

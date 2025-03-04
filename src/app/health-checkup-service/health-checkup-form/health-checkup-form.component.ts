@@ -69,6 +69,9 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
     numberOfTimes: null,
     requestVia: '',
     appointmentStatus: '',
+    // age:0,
+    // gender:''
+
   };
   @HostListener('document:click', ['$event'])
   onClickOutside(event: Event) {
@@ -371,6 +374,7 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
   }
   // On form submission
   onSubmit(form: NgForm): void {
+    console.log(this.getInvalidControls(form))
     if (form.valid) {
       console.log(this.repeatedDates)
       this.isLoading = true;
@@ -397,6 +401,8 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
         userId: parseInt(this.userId),
         username: this.userName,
         role: this.role,
+        // age:form.value.age,
+        // gender:form.value.gender
       };
       if (this.isRepeatChecked) {
         payload.daysInterval = form.value.days || 0; // Default to 0 if undefined
@@ -823,12 +829,14 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
       lastName = nameParts.slice(2).join(" ") || "";
     }
   
-    this.formData.pnrNumber = selectedPatient.prn || '';
+    this.formData.pnrNumber = selectedPatient.prn.toString() || '';
     this.formData.firstName = firstName || '';
     this.formData.lastName = lastName || '';
     this.formData.phoneNumber = selectedPatient.mobileNo || '';
+    // this.formData.age = selectedPatient.age ? Number(selectedPatient.age.replace(/\D/g, '')) : 0
+    // this.formData.gender = selectedPatient.gender || ''
   
-    console.log("Health Checkup PRN Selected:", selectedPatient);
+    console.log("Health Checkup PRN Selected:", selectedPatient, this.formData);
   
     // Validate age
     
@@ -837,5 +845,14 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
   
     // Hide suggestions after selection
     this.prnSuggestions = false;
+  }
+  getInvalidControls(form: any) {
+    const invalidControls = [];
+    for (const name in form.controls) {
+      if (form.controls[name].invalid) {
+        invalidControls.push(name);
+      }
+    }
+    return invalidControls;
   }
 }

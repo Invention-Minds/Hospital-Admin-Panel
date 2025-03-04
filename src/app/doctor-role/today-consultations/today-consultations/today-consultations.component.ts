@@ -119,6 +119,7 @@ export class TodayConsultationsComponent {
   intervalId: any;
   isMonitoringActive: boolean = false;
   isEndConsultation: boolean = false;
+  isButtonLoading:boolean =false;
 
 
 
@@ -1006,9 +1007,11 @@ export class TodayConsultationsComponent {
     this.endDate = null;
   }
   submitLeaveRequest(): void {
+    this.isButtonLoading = true;
     if (!this.startDate || !this.endDate) {
       // alert('Please select both start and end dates.');
       this.messageService.add({ severity: 'warn', summary: 'Warning', detail: 'Please select both start and end dates.' })
+      this.isButtonLoading = false;
       return;
     }
     // this.doctor.filter((doc:any) => {
@@ -1034,10 +1037,12 @@ export class TodayConsultationsComponent {
         // alert('Leave request submitted successfully.');
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Leave Request Submitted Successfully' })
         this.closeLeaveRequestPopup();
+        this.isButtonLoading = false;
       },
       error: (error) => {
         console.error('Error submitting leave request:', error);
         alert('Error submitting leave request. Please try again.');
+        this.isButtonLoading = false;
       }
     });
     // console.log('Submitting leave request:', leaveRequest);

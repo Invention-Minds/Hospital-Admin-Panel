@@ -297,6 +297,7 @@ export class TotalOverviewComponent implements OnInit {
       //   'Appointment Handled By': appointment.user!.username
       // }));
       const selectedFields = this.todayAppointments.map((appointment: any) => {
+        console.log(appointment)
         if (appointment.created_at) {
           const createdAt = new Date(appointment?.created_at);
           const indianTime = moment.tz(createdAt, "America/New_York").tz("Asia/Kolkata");
@@ -638,9 +639,9 @@ export class TotalOverviewComponent implements OnInit {
     this.availableDoctors = this.doctors.filter(
       (doctor) => doctor.status === 'Available'
     );
-    this.unavailableDoctors = this.doctors.filter(
-      (doctor) => doctor.status === 'Unavailable'
-    );
+    // this.unavailableDoctors = this.doctors.filter(
+    //   (doctor) => doctor.status === 'Unavailable'
+    // );
     this.absentDoctors = this.doctors.filter(
       (doctor) => doctor.status === 'Absent'
     );

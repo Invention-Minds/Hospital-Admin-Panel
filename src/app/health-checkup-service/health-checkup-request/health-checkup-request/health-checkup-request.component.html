@@ -31,7 +31,7 @@
         selectionMode="range"
         (ngModelChange)="onSearch()"
         placeholder="Calendar"
-        dateFormat="yy-mm-dd">
+        dateFormat="dd-mm-yy">
           <ng-template pTemplate="date" let-date>
               <span>
                   {{ date.day }}
@@ -84,7 +84,7 @@
                     <td>{{ service.firstName }} {{ service.lastName || '' }}</td>
                     <td>{{ service.phoneNumber }}</td>
                     <td>{{ service.packageName }}</td>
-                    <td>{{ service.appointmentDate }}</td>
+                    <td>{{ service.appointmentDate | date:'dd-MM-yyyy' }}</td>
                     <!-- <td>{{ service.appointmentTime }}</td> -->
                     <td>{{ service.requestVia }}</td>
                     <!-- <td>

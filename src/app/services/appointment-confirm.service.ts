@@ -37,6 +37,7 @@ export interface Appointment {
   lockedBy?: string;
   lockExpiresAt?: Date | null;
   type?:string;
+  serviceId?:number;
 
 
 

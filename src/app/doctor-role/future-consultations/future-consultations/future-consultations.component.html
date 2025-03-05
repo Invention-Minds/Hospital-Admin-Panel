@@ -1,10 +1,33 @@
+<div class="form-row">
 
+  <div class="p-field p-col-3 calendar">
+    <!-- <p-calendar [(ngModel)]="selectedDate" placeholder="Calendar" class="custom-calendar"></p-calendar> -->
+    <p-calendar styleClass="custom-calendar" [(ngModel)]="selectedDateRange" selectionMode="range"
+      (ngModelChange)="onSearch()" placeholder="Calendar" dateFormat="dd-mm-yy">
+      <ng-template pTemplate="date" let-date>
+        <span>
+          {{ date.day }}
+        </span>
+      </ng-template>
+    </p-calendar>
+    <i class="fa-solid fa-angle-down calendar-icon"></i>
+    <svg pTooltip="Refresh" (click)="refresh()" class="reverse" xmlns="http://www.w3.org/2000/svg" width="2.5em"
+      height="2.5em" viewBox="-1.5 -2.5 24 24">
+      <path fill="currentColor"
+        d="m4.859 5.308l1.594-.488a1 1 0 0 1 .585 1.913l-3.825 1.17a1 1 0 0 1-1.249-.665L.794 3.413a1 1 0 1 1 1.913-.585l.44 1.441C5.555.56 10.332-1.035 14.573.703a9.38 9.38 0 0 1 5.38 5.831a1 1 0 1 1-1.905.608A7.381 7.381 0 0 0 4.86 5.308zm12.327 8.195l-1.775.443a1 1 0 1 1-.484-1.94l3.643-.909a1 1 0 0 1 .61-.08a1 1 0 0 1 .84.75l.968 3.88a1 1 0 0 1-1.94.484l-.33-1.322a9.381 9.381 0 0 1-16.384-1.796l-.26-.634a1 1 0 1 1 1.851-.758l.26.633a7.381 7.381 0 0 0 13.001 1.25z" />
+    </svg>
+
+
+
+  </div>
+</div>
 <div class="table-container" *ngIf="!isLoading || !isDesktopView">
   <div class="table-wrapper">
     <table class="appointment-table" *ngIf="!isLoading">
       <thead>
         <tr>
           <th>No</th>
+          <th>PRN</th>
           <th (click)="sortBy('patientName')" style="cursor: pointer;">
             Patient Name
             <span *ngIf="sortColumn === 'patientName' && sortDirection === 'asc'">&#9650;</span>
@@ -28,8 +51,9 @@
         </tr>
         <tr *ngFor="let appointment of getPaginatedAppointments(); let i = index">
           <td>{{ i + 1 }}</td>
+          <td>{{appointment.prnNumber? appointment.prnNumber: '-'}}</td>
           <td>{{ appointment.patientName }}</td>
-          <td>{{ appointment.date }}</td>
+          <td>{{ appointment.date | date:'dd-MM-yyyy' }}</td>
           <td>
              <span class="status-badge">{{ appointment.time }}</span>
           </td>
@@ -45,7 +69,7 @@
               <img class="image" src="/pause.svg">PostPoned
             </button>
             <button class="estimation" [disabled]="true">
-              <img class="image" src="/est.svg">Estimation
+              <img class="image" src="/est.svg">P. Counselling
             </button>
             <button class="transfer" [disabled]="true">
               <img class="image" src="/transfer.svg">Transfer
@@ -62,14 +86,20 @@
           <div>
             <img src="admin-icons/admin-icon.jpg" class="profile-pic">
           </div>
-          <div>
-            <h3>{{ appointment.patientName }}</h3>
+          <div class="patient-details">
+            <div>
+              <h3>{{ appointment.patientName }}</h3>
             <p class="patient">Patient</p>
+            </div>
+            <div>
+              <p class="patient">{{appointment.prnNumber}}</p>
+            </div>
+            
           </div>
         </div>
        <div class="calendar-div">
         <p class="date-time">
-          <img src="/w-calendar.svg" alt="calendar" class="icon"> {{ appointment.date }} 
+          <img src="/w-calendar.svg" alt="calendar" class="icon"> {{ appointment.date | date:'dd-MM-yyyy'}} 
         </p>
         <p class="date-time">
           <img src="/w-time.svg" alt="calendar" class="icon"> {{ appointment.time }}
@@ -88,7 +118,7 @@
             <img class="image" src="/pause.svg">PostPoned
           </button>
           <button class="estimation" [disabled]="true">
-            <img class="image" src="/est.svg">Estimation
+            <img class="image" src="/est.svg">P. Counselling
           </button>
           <button class="transfer" [disabled]="true">
             <img class="image" src="/transfer.svg">Transfer

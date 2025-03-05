@@ -386,6 +386,7 @@ export class MhcTodayConsulComponent {
       next: (response) => {
         console.log('Service marked as completed:', response);
         this.fetchConfirmedAppointments()
+        this.showLabPopup = false;
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Lab is updated successfully!' });
 
       }
@@ -403,6 +404,7 @@ export class MhcTodayConsulComponent {
       next: (response) => {
         console.log('Service marked as completed:', response);
         this.fetchConfirmedAppointments()
+        this.showLabPopup = false;
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Lab is updated successfully!' });
 
       }
@@ -749,7 +751,7 @@ export class MhcTodayConsulComponent {
   
   markReportDone() {
     console.log(this.selectedService)
-    if (this.selectedService.chestXRayEntryTime && this.selectedService.chestXRayTime != null) {
+    if (this.selectedService.chestXRayEntryTime && this.selectedService.chestXRayTime === null) {
       const currentTime = new Date().toISOString();
   
       // ✅ Create a copy of the service object to preserve all fields

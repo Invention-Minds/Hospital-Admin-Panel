@@ -1,4 +1,4 @@
-import { Component, ViewChild, ElementRef, Input, ChangeDetectorRef, AfterViewInit, Output, EventEmitter } from '@angular/core';
+import { Component, ViewChild, ElementRef, Input, ChangeDetectorRef, AfterViewInit, Output, EventEmitter, HostListener } from '@angular/core';
 import SignaturePad from 'signature_pad';
 import { EstimationService } from '../../../services/estimation/estimation.service';
 import { HealthCheckupServiceService } from '../../../services/health-checkup/health-checkup-service.service';
@@ -70,9 +70,11 @@ export class EstimationFormComponent {
   selectedRoom: { name: string; cost: number } | null = null;  // Stores room as "General - ₹5000"
   patients: any[] = [];
   lastAddedCost: number = 0;
+  employeeName: string = ''
+  approverName: string = ''
 
 
-  constructor(private estimationService: EstimationService, private cdr: ChangeDetectorRef, private messageService: MessageService, private doctorService: DoctorServiceService, private appointmentService: AppointmentConfirmService) {
+  constructor(private estimationService: EstimationService, private cdr: ChangeDetectorRef, private messageService: MessageService, private doctorService: DoctorServiceService, private appointmentService: AppointmentConfirmService,private eRef: ElementRef) {
     this.filteredRooms = [...this.availableRooms];
     this.availableRooms = [
       { name: 'General', cost: 1600 },
@@ -82,6 +84,30 @@ export class EstimationFormComponent {
       { name: 'VIP Suite', cost: 10000 },
       { name: 'Presidential Suite', cost: 12000 }
     ];
+
+  }
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: Event) {
+    const targetElement = event.target as HTMLElement;
+
+    // Check if the clicked element is inside the PRN suggestion dropdown
+    if (!targetElement.closest('.prn-suggestions') && !targetElement.closest('#patientUHID')) {
+      this.uhidSuggestions = false;
+    }
+    if (
+      targetElement.closest('.dropdown-content') || // ✅ Keeps dropdown open when clicking inside
+      targetElement.closest('#roomButton') // ✅ Keeps dropdown open when clicking the button
+    ) {
+      return;
+    }
+    this.dropdownOpen = false
+    if (
+      targetElement.closest('.dropdown-content-1') || // ✅ Keeps dropdown open when clicking inside
+      targetElement.closest('.dropdown-btn') // ✅ Keeps dropdown open when clicking the button
+    ) {
+      return;
+    }
+    this.isDropdownOpen = false
 
   }
 
@@ -257,7 +283,7 @@ export class EstimationFormComponent {
   formData = {
     patientUHID: '',
     patientName: '',
-    ageOfPatient: null,
+    ageOfPatient: 0,
     genderOfPatient: '',
     consultantName: '',
     consultantId: 0,
@@ -300,6 +326,7 @@ export class EstimationFormComponent {
     costForVip: '',
     costForDeluxe: '',
     costForPresidential: '',
+    patientEmail:'',
     selectedRoomCost: this.selectedRoomCost,
     includedItems: {
       wardICUStay: false,
@@ -382,7 +409,7 @@ export class EstimationFormComponent {
     if (!this.formData.patientUHID) {
       // Reset fields if UHID is empty
       this.formData.patientName = '';
-      this.formData.ageOfPatient = null;
+      this.formData.ageOfPatient = 0;
       this.formData.genderOfPatient = '';
       this.formData.patientPhoneNumber = '';
       this.uhidSuggestions = false;
@@ -404,11 +431,16 @@ export class EstimationFormComponent {
     // Update formData with selected patient's details
     this.formData.patientUHID = selectedPatient.prn || '';
     this.formData.patientName = selectedPatient.name;
-    this.formData.ageOfPatient = cleanedAge;
-    this.formData.genderOfPatient = selectedPatient.gender;
-    this.formData.patientPhoneNumber = selectedPatient.mobileNumber;
+    this.formData.ageOfPatient = selectedPatient.age 
+  ? Number(selectedPatient.age.replace(/\D/g, '')) 
+  : 0;  // ✅ Ensure it's assigned null when no age is available
 
-    console.log("UHID Selected:", selectedPatient);
+    this.formData.genderOfPatient = selectedPatient.gender;
+    this.formData.patientPhoneNumber = selectedPatient.mobileNo.toString();
+    this.formData.patientEmail = selectedPatient.email
+
+    console.log("UHID Selected:", selectedPatient, this.formData);
+    
 
     // Hide suggestions after selection
     this.uhidSuggestions = false;
@@ -604,8 +636,15 @@ export class EstimationFormComponent {
     }
     this.employeeId = localStorage.getItem('employeeId') || '';
     this.role = localStorage.getItem('role')!
+    this.employeeName = localStorage.getItem('username')|| ''
     if (this.role === 'sub_admin') {
       this.formData.employeeId = this.employeeId!
+      this.formData.employeeName = this.employeeName.split(`_subadmin`)[0];
+      console.log(this.formData.employeeName)
+    }
+    if (this.role === 'admin' || this.role === 'super_admin') {
+      this.formData.approverId = this.employeeId
+      this.formData.approverName = this.employeeName.split(`_${this.role}`)[0];
     }
   }
   parseExistingData(data: string | null): { name: string; cost: number }[] {
@@ -711,6 +750,7 @@ export class EstimationFormComponent {
   approveRequest(): void {
     if (this.role === 'admin' || this.role === 'super_admin') {
       this.formData.approverId = this.employeeId
+      this.formData.approverName = this.employeeName.split(`_${this.role}`)[0];
     }
     this.updateInclusionsAndExclusions();
     this.saveAllSignatures();
@@ -760,7 +800,9 @@ export class EstimationFormComponent {
         costForPrivate: this.formData.costForPrivate,
         costForPresidential: this.formData.costForPresidential,
         costForDeluxe: this.formData.costForDeluxe,
-        selectedRoomCost: this.selectedRoomCost
+        selectedRoomCost: this.selectedRoomCost,
+        patientEmail: this.formData.patientEmail,
+        patientPhoneNumber: this.formData.patientPhoneNumber.toString()
       },
       inclusions: this.formData.inclusions,
       exclusions: this.formData.exclusions,
@@ -834,7 +876,9 @@ export class EstimationFormComponent {
         costForPrivate: this.formData.costForPrivate,
         costForPresidential: this.formData.costForPresidential,
         costForDeluxe: this.formData.costForDeluxe,
-        selectedRoomCost: this.selectedRoomCost
+        selectedRoomCost: this.selectedRoomCost,
+        patientEmail: this.formData.patientEmail,
+        patientPhoneNumber: this.formData.patientPhoneNumber.toString()
       },
       inclusions: this.formData.inclusions,
       exclusions: this.formData.exclusions,
@@ -909,7 +953,7 @@ export class EstimationFormComponent {
           (pdfResponse) => {
             console.log("✅ PDF Generated & Sent via WhatsApp:", pdfResponse);
             this.messageService.add({ severity: 'success', summary: 'Success', detail: 'PDF Generated & Sent PDF via WhatsApp:!' });
-            // const to = "itbilling@rashtrotthanahospital.com"
+            // const to = "ipbilling@rashtrotthanahospital.com"
             const to = "keerthanasaminathan0805@gmail.com"
             this.appointmentService.sendMailtoApprover(to, estimationData.estimationId, pdfResponse.filePath).subscribe(
               (response) => {
@@ -988,7 +1032,9 @@ export class EstimationFormComponent {
             costForPrivate: this.formData.costForPrivate,
             costForPresidential: this.formData.costForPresidential,
             costForDeluxe: this.formData.costForDeluxe,
-            selectedRoomCost: this.selectedRoomCost
+            selectedRoomCost: this.selectedRoomCost,
+            patientEmail: this.formData.patientEmail,
+            patientPhoneNumber: this.formData.patientPhoneNumber.toString()
           },
           inclusions: this.formData.inclusions,
           exclusions: this.formData.exclusions,
@@ -1016,7 +1062,7 @@ export class EstimationFormComponent {
             consultantId: this.formData.consultantId,
             estimationType: this.selectedEstimationType,
             estimationPreferredDate: this.formData.estimationPreferredDate,
-            patientPhoneNumber: this.formData.patientPhoneNumber,
+            patientPhoneNumber: this.formData.patientPhoneNumber.toString(),
             icuStay: this.formData.icuStay,
             wardStay: this.formData.wardStay,
             estimationCost: this.formData.estimationCost,
@@ -1050,7 +1096,8 @@ export class EstimationFormComponent {
             costForPrivate: this.formData.costForPrivate,
             costForPresidential: this.formData.costForPresidential,
             costForDeluxe: this.formData.costForDeluxe,
-            selectedRoomCost: this.selectedRoomCost
+            selectedRoomCost: this.selectedRoomCost,
+            patientEmail: this.formData.patientEmail,
           },
           inclusions: this.formData.inclusions,
           exclusions: this.formData.exclusions,
@@ -1461,7 +1508,10 @@ export class EstimationFormComponent {
     console.log("Updated Estimation Cost:", this.formData.estimationCost);
   }
   
-
+  showDatePicker(event: Event) {
+    (event.target as HTMLInputElement).showPicker(); // ✅ Opens date picker on input click
+  }
+  
 
 
 

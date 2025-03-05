@@ -162,7 +162,7 @@
               <!-- PrimeNG Time Picker for Visiting Consultant -->
               <p-calendar formControlName="appointmentTime" [timeOnly]="true" hourFormat="12" [showButtonBar]="true"
                 [showSeconds]="false" placeholder="Select Time" (onSelect)="onTimeSelect($event)"
-                [minDate]="minTime"></p-calendar>
+                [minDate]="minTime" dateFormat="dd-mm-yy"></p-calendar>
               <div *ngIf="timeError" class="error-message">
                 {{ timeError }}
               </div>

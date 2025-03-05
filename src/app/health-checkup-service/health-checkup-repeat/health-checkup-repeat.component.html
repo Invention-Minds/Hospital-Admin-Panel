@@ -32,7 +32,7 @@
         (ngModelChange)="onSearch()"
         
         placeholder="Calendar"
-        dateFormat="yy-mm-dd">
+        dateFormat="dd-mm-yy">
           <ng-template pTemplate="date" let-date>
               <span>
                   {{ date.day }}
@@ -92,7 +92,7 @@
                     <td><div class="dropdown-container-in-table">
                         <select class="dropdown-in-table">
                           <option  *ngFor="let date of service.repeatDates" [value]="date">
-                            {{ date }}
+                            {{ date | date:'dd-MM-yyyy' }}
                           </option>
                         </select>
                         </div>

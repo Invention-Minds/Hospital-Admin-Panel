@@ -24,6 +24,7 @@ interface Appointment {
   created_at?: string;
   checkedIn?: boolean;
   user?: any;
+  prnNumber?:number;
 }
 @Component({
   selector: 'app-arrived-consultation',

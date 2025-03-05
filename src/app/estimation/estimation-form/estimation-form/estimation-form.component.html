@@ -19,7 +19,7 @@
         </div> -->
         <div class="input-container">
           <input type="text" id="patientUHID" name="patientUHID" pattern="[A-Za-z0-9\-]+" class="custom-input"
-            [(ngModel)]="formData.patientUHID" placeholder=" " (ngModelChange)="onUHIDChange()"
+            [(ngModel)]="formData.patientUHID" placeholder=" " (input)="onUHIDChange()"
             (focus)="uhidSuggestions = true"
             [readonly]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed'|| formData.statusOfEstimation === 'approved'  "
             required />
@@ -92,6 +92,44 @@
         
           <div *ngIf="estimationForm.submitted && estimationForm.controls['genderOfPatient']?.invalid" class="error-message">
             <span *ngIf="estimationForm.controls['genderOfPatient']?.errors?.['required']">Gender is required.</span>
+          </div>
+        </div>
+        
+      </div>
+      <div class="form-row">
+        <div class="input-container">
+          <input type="number" id="patientPhoneNumber" name="patientPhoneNumber" placeholder=" " class="custom-input"
+          pattern="^[0-9]{10}$" ngModel [(ngModel)]="formData.patientPhoneNumber" required
+            [readonly]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved' " />
+          <label for="patientPhoneNumber" class="custom-label">PhoneNumber*</label>
+          <div *ngIf="estimationForm.submitted && estimationForm.controls['patientPhoneNumber']?.invalid"
+            class="error-message">
+            <span *ngIf="estimationForm.controls['patientPhoneNumber']?.errors?.['required']">Phone Number is required.</span>
+            <span *ngIf="estimationForm.controls['patientPhoneNumber']?.errors?.['pattern']">Invalid Phone Number format.</span>
+          </div>
+        </div>
+        <!-- <div class="input-container">
+          <input type="text" id="genderOfPatient" name="genderOfPatient" pattern="(Male|Female|Other)"
+            class="custom-input" ngModel [(ngModel)]="formData.genderOfPatient" required placeholder=" "
+            [readonly]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved' "
+            class="custom-input" />
+          <label for="genderOfPatient" class="custom-label">Gender*</label>
+          <div *ngIf="estimationForm.submitted && estimationForm.controls['genderOfPatient']?.invalid"
+            class="error-message">
+            <span *ngIf="estimationForm.controls['genderOfPatient']?.errors?.['required']">Gender is required.</span>
+            <span *ngIf="estimationForm.controls['genderOfPatient']?.errors?.['pattern']">Enter Male, Female, or
+              Other.</span>
+          </div>
+        </div> -->
+        <div class="input-container">
+          <input type="text" id="patientEmail" name="patientEmail" placeholder=" " class="custom-input"
+          pattern="^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" ngModel [(ngModel)]="formData.patientEmail"
+            [readonly]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved' " />
+          <label for="patientEmail" class="custom-label">Email Id*</label>
+          <div *ngIf="estimationForm.submitted && estimationForm.controls['patientEmail']?.invalid"
+            class="error-message">
+            <span *ngIf="estimationForm.controls['patientEmail']?.errors?.['required']">Email Id is required.</span>
+            <span *ngIf="estimationForm.controls['patientEmail']?.errors?.['pattern']">Invalid Email Id format.</span>
           </div>
         </div>
         
@@ -312,7 +350,7 @@
     <div class="section">
       <h3>Select Room Type:</h3>
       <div class="input-container">
-        <button class="input-container custom-select dropdown-btn custom-input" (click)="toggleDropdown($event)"
+        <button class="input-container custom-select dropdown-btn custom-input" (click)="toggleDropdown($event)" id="roomButton"
           [ngClass]="{'invalid': estimationForm.submitted && !formData.roomType}" [disabled]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'">
           {{ selectedRooms.length > 0 ? selectedRoomType : 'Select Room Type' }}
         </button>
@@ -404,7 +442,7 @@
         <label>
           <input type="checkbox" name="instrumentEquipment" [(ngModel)]="formData.includedItems['instrumentEquipment']"   
             [disabled]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'  " />
-          Instrumentals
+          Instruments
         </label>
         <label>
           <input type="checkbox" name="diet" [(ngModel)]="formData.includedItems['diet']"
@@ -493,7 +531,7 @@
       <div class="form-row">
         <div class="input-container">
           <input type="date" id="estimatedDate" name="estimatedDate" class="custom-input" ngModel
-            [(ngModel)]="formData.estimatedDate" required placeholder=" " class="custom-input"
+            [(ngModel)]="formData.estimatedDate" required placeholder=" " class="custom-input"  (focus)="this.showDatePicker($event)"
             [readonly]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'  " />
           <label for="estimatedDate" class="custom-label">Estimated Date*</label>
           <div *ngIf="estimationForm.submitted && estimationForm.controls['estimatedDate']?.invalid"

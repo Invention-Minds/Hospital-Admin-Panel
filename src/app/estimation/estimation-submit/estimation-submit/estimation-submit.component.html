@@ -31,7 +31,7 @@
         selectionMode="range"
         (ngModelChange)="onSearch()"
         placeholder="Calendar"
-        dateFormat="yy-mm-dd">
+        dateFormat="dd-mm-yy">
           <ng-template pTemplate="date" let-date>
               <span>
                   {{ date.day }}
@@ -90,7 +90,7 @@
                     <!-- <td>{{ estimation.appointmentTime }}</td> -->
                     <td>{{ estimation.estimationName }}</td>
                     <td>{{estimation.estimationType}}</td>
-                    <td>{{estimation.estimationPreferredDate}}</td>
+                    <td>{{estimation.estimationPreferredDate | date:'dd-MM-yyyy'}}</td>
                     <!-- <td>
                         <span class="sms-status" [ngClass]="{'sms-sent': service.smsSent, 'sms-not-sent': !service.smsSent}">
                           <img *ngIf="service.smsSent" src="icons/sent.svg" alt="Sent">

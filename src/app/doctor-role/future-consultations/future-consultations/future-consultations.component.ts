@@ -25,6 +25,7 @@ interface Appointment {
   created_at?: string;
   checkedIn?: boolean;
   user?: any;
+  prnNumber?:any;
 }
 
 @Component({
@@ -105,17 +106,29 @@ export class FutureConsultationsComponent {
             });
             console.log(this.futureAppointments)
             this.filteredAppointments = [...this.futureAppointments];
+            this.filteredAppointments.sort((a, b) => {
+              const today = new Date().setHours(0, 0, 0, 0); // ✅ Normalize today’s date (remove time)
+              const dateA = new Date(a.date!).setHours(0, 0, 0, 0);
+              const dateB = new Date(b.date!).setHours(0, 0, 0, 0);
+            
+              if (dateA < today && dateB >= today) return 1;  // ✅ Push past dates below future dates
+              if (dateA >= today && dateB < today) return -1; // ✅ Push future dates above past dates
+            
+              return dateA - dateB; // ✅ Sort from today to future dates in ascending order
+            });
           },
           error: (error) => {
             console.error('Error fetching doctor details:', error);
           }
         });
         // console.log(this.filteredAppointments)
-        this.filteredAppointments.sort((a, b) => {
-          const dateA = new Date(a.created_at!);
-          const dateB = new Date(b.created_at!);
-          return dateB.getTime() - dateA.getTime();
-        });
+        // this.filteredAppointments.sort((a, b) => {
+        //   const dateA = new Date(a.date!);
+        //   const dateB = new Date(b.date!);
+        //   return dateB.getTime() - dateA.getTime();
+        // });
+        
+        console.log(this.filteredAppointments)        
 
 
         // this.filteredAppointments = [...this.confirmedAppointments];
@@ -362,6 +375,16 @@ export class FutureConsultationsComponent {
   refresh() {
     this.selectedDateRange = [];
     this.filteredAppointments = [...this.futureAppointments];
+    this.filteredAppointments.sort((a, b) => {
+      const today = new Date().setHours(0, 0, 0, 0); // ✅ Normalize today’s date (remove time)
+      const dateA = new Date(a.date!).setHours(0, 0, 0, 0);
+      const dateB = new Date(b.date!).setHours(0, 0, 0, 0);
+    
+      if (dateA < today && dateB >= today) return 1;  // ✅ Push past dates below future dates
+      if (dateA >= today && dateB < today) return -1; // ✅ Push future dates above past dates
+    
+      return dateA - dateB; // ✅ Sort from today to future dates in ascending order
+    });
   }
 }
 

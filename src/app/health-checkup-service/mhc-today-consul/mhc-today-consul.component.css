@@ -551,6 +551,7 @@ font-family: 900;
 .popup-close {
   background-color: transparent;
   border: none;
+  cursor: pointer;
 }
 .modal-content {
   border-radius: 20px;

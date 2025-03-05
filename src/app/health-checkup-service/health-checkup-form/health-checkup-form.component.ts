@@ -69,8 +69,8 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
     numberOfTimes: null,
     requestVia: '',
     appointmentStatus: '',
-    // age:0,
-    // gender:''
+    age:0,
+    gender:''
 
   };
   @HostListener('document:click', ['$event'])
@@ -401,8 +401,8 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
         userId: parseInt(this.userId),
         username: this.userName,
         role: this.role,
-        // age:form.value.age,
-        // gender:form.value.gender
+        age:form.value.age,
+        gender:form.value.gender
       };
       if (this.isRepeatChecked) {
         payload.daysInterval = form.value.days || 0; // Default to 0 if undefined
@@ -833,8 +833,8 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
     this.formData.firstName = firstName || '';
     this.formData.lastName = lastName || '';
     this.formData.phoneNumber = selectedPatient.mobileNo || '';
-    // this.formData.age = selectedPatient.age ? Number(selectedPatient.age.replace(/\D/g, '')) : 0
-    // this.formData.gender = selectedPatient.gender || ''
+    this.formData.age = selectedPatient.age ? Number(selectedPatient.age.replace(/\D/g, '')) : 0
+    this.formData.gender = selectedPatient.gender || ''
   
     console.log("Health Checkup PRN Selected:", selectedPatient, this.formData);
   

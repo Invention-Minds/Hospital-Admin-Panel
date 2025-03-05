@@ -28,8 +28,7 @@ export class MhcReportComponent {
   sortDirection: string = 'asc';  // Default sorting direction
   searchOptions = [
     { label: 'Patient Name', value: 'patientName' },
-    { label: 'Doctor Name', value: 'doctorName' },
-    { label: 'Department', value: 'department' },
+    { label: 'Package Name', value: 'packageName' },
   ];
   selectedSearchOption: any = this.searchOptions[0];
   selectedDateRange: Date[] = [];
@@ -40,7 +39,7 @@ export class MhcReportComponent {
   @Output() reschedule = new EventEmitter<any>();
   activeComponent: string = 'confirmed';
   confirmedServices: any[] = [];
-  today: any =  new Date().toLocaleDateString('en-CA');
+  today: any = new Date().toLocaleDateString('en-CA');
   selectedAppointment: any;
   showForm: boolean = false;
   showLabPopup: boolean = false;
@@ -73,7 +72,7 @@ export class MhcReportComponent {
     this.fetchConfirmedAppointments();
     this.userId = localStorage.getItem('userid')
     this.activeComponent = 'appointments';
-    const today =  new Date().toLocaleDateString('en-CA');
+    const today = new Date().toLocaleDateString('en-CA');
     // const year = today.getFullYear();
     // const month = (today.getMonth() + 1).toString().padStart(2, '0');
     // const day = today.getDate().toString().padStart(2, '0');
@@ -85,37 +84,135 @@ export class MhcReportComponent {
     const today = new Date();
     this.healthCheckupService.getAllServices().subscribe({
       next: (services: any[]) => {
+        this.appointmentService.getAllAppointments().subscribe({
+          next: (appointments: any[]) => {
 
-        // Process the services when the API call is successful
-        this.confirmedAppointments = services
-        .filter(
-          (service) =>
-            service.appointmentStatus === 'Confirm' || service.appointmentStatus === 'completed'  &&
-            service.checkedIn === true 
-        )
-        .map((service) => ({
-          ...service,
-          labTime: service.isLabEntryTime
-            ? service.isLabEntryTime - service.isLabTime
-            : 0, // Count the number of department IDs
-        }));
-        console.log(this.confirmedAppointments)
-        // this.confirmedAppointments = services.filter(
-        //   (service) => {
-        //     const appointmentDate = new Date(service.appointmentDate);
-        //     return (
-        //       (service.appointmentStatus === 'Confirm' || service.appointmentStatus === 'confirmed') &&
-        //       appointmentDate >= today // Filter out past dates
-        //     );
-        //   }
-        // );
-        this.confirmedAppointments.sort((a, b) => {
-          const dateA = new Date(a.createdAt!);
-          const dateB = new Date(b.createdAt!);
-          return dateB.getTime() - dateA.getTime();
+            // Step 3: Calculate total waiting time per serviceId
+            const waitingTimeByServiceId: { [serviceId: string]: number } = {};
+
+            appointments.forEach(appt => {
+              if (appt.serviceId) {
+                if (!waitingTimeByServiceId[appt.serviceId]) {
+                  waitingTimeByServiceId[appt.serviceId] = 0;
+                }
+                waitingTimeByServiceId[appt.serviceId] += Number(appt.waitingTime) || 0; // Add waiting time for the service
+              }
+            });
+            console.log(waitingTimeByServiceId)
+
+            // Function to format time into hr/min format
+            function formatDuration(minutes: number): string {
+              if (!minutes || minutes <= 0) return "-"; // Handle missing values
+
+              if (minutes >= 60) {
+                const hours = Math.floor(minutes / 60);
+                const mins = Math.round(minutes % 60);
+                return mins > 0 ? `${hours} hr ${mins} mins` : `${hours} hr`;
+              } else {
+                return `${Math.round(minutes)} mins`;
+              }
+            }
+
+            // Step 4: Process the services & attach consultation time
+            // this.confirmedAppointments = services
+            //   .filter(service =>
+            //     (service.appointmentStatus === 'Confirm' || service.appointmentStatus === 'completed') &&
+            //     service.checkedIn === true
+            //   )
+            //   .map(service => ({
+            //     ...service,
+            //     labTime: service.isLabEntryTime && service.isLabTime
+            //       ? formatDuration(Math.abs((new Date(service.isLabTime).getTime() - new Date(service.isLabEntryTime).getTime()) / 60000))
+            //       : "-",
+
+            //     radiologyTime: service.chestXRayEntryTime && service.chestXRayTime
+            //       ? formatDuration(Math.abs((new Date(service.chestXRayTime).getTime() - new Date(service.chestXRayEntryTime).getTime()) / 60000))
+            //       : "-",
+
+            //     consultationTime: service.id
+            //       ? formatDuration(waitingTimeByServiceId[service.id] || 0)
+            //       : 0
+            //       const totalMinutes = extractMinutes(labTime) + extractMinutes(radiologyTime) + extractMinutes(consultationTime);
+
+            //       // ✅ Convert total minutes to `X hr Y min` format
+            //        totalTime : formatDuration(totalMinutes)
+            //   }));
+
+            this.confirmedAppointments = services
+              .filter(service =>
+                (service.appointmentStatus === 'Confirm' || service.appointmentStatus === 'completed') &&
+                service.checkedIn === true
+              )
+              .map(service => {
+                function formatDuration(minutes: number): string {
+                  if (!minutes || minutes <= 0) return "-";
+
+                  if (minutes >= 60) {
+                    const hours = Math.floor(minutes / 60);
+                    const mins = Math.round(minutes % 60);
+                    return mins > 0 ? `${hours} hr ${mins} mins` : `${hours} hr`;
+                  } else {
+                    return `${Math.round(minutes)} mins`;
+                  }
+                }
+
+                function extractMinutes(timeString: string): number {
+                  if (!timeString || timeString === "-") return 0; // Handle missing values
+
+                  const timeParts = timeString.match(/(\d+)\s*hr\s*(\d*)\s*min?/);
+                  if (timeParts) {
+                    const hours = parseInt(timeParts[1] || "0", 10);
+                    const minutes = parseInt(timeParts[2] || "0", 10);
+                    return hours * 60 + minutes;
+                  } else if (timeString.includes("mins")) {
+                    return parseInt(timeString, 10);
+                  } else {
+                    return 0;
+                  }
+                }
+
+                // ✅ Calculate individual times
+                const labTime = service.isLabEntryTime && service.isLabTime
+                  ? formatDuration(Math.abs((new Date(service.isLabTime).getTime() - new Date(service.isLabEntryTime).getTime()) / 60000))
+                  : "-";
+
+                const radiologyTime = service.chestXRayEntryTime && service.chestXRayTime
+                  ? formatDuration(Math.abs((new Date(service.chestXRayTime).getTime() - new Date(service.chestXRayEntryTime).getTime()) / 60000))
+                  : "-";
+
+                const consultationTime = service.id
+                  ? formatDuration(waitingTimeByServiceId[service.id] || 0)
+                  : "-";
+
+                // ✅ Convert to total minutes
+                const totalMinutes = extractMinutes(labTime) + extractMinutes(radiologyTime) + extractMinutes(consultationTime);
+
+                // ✅ Convert total minutes to `X hr Y min` format
+                const total = formatDuration(totalMinutes);
+
+                return {
+                  ...service,
+                  labTime,
+                  radiologyTime,
+                  consultationTime,
+                  total, // ✅ Adding total time
+                };
+              });
+
+            // Step 5: Sort by Created Date (Newest First)
+            this.confirmedAppointments.sort((a, b) => {
+              const dateA = new Date(a.createdAt!).getTime();
+              const dateB = new Date(b.createdAt!).getTime();
+              return dateB - dateA;
+            });
+
+            this.filteredServices = [...this.confirmedAppointments];
+
+            console.log(this.confirmedAppointments); // Log updated data
+          }, error: (err) => {
+            console.error('Error fetching appointments:', err);
+          }
         });
-        this.filteredServices = [...this.confirmedAppointments];
-        // console.log('Services processed successfully.');
       },
       error: (err) => {
         // Handle the error if the API call fails
@@ -133,7 +230,7 @@ export class MhcReportComponent {
     this.selectedAppointment = service; // Store selected service
     this.showForm = true; // Show the form modal
   }
-  
+
   onSearch(): void {
 
     this.filteredServices = this.confirmedAppointments.filter((service) => {
@@ -143,17 +240,22 @@ export class MhcReportComponent {
       if (this.selectedSearchOption && this.searchValue && service) {
         switch (this.selectedSearchOption) {
           case 'patientName':
-            matches = service.patientName
+            matches = service.firstName
               ?.toLowerCase()
               .includes(this.searchValue.toLowerCase());
             break;
-          case 'doctorName':
-            matches = !!service.doctorName
-              ?.toLowerCase()
-              .includes(this.searchValue.toLowerCase());
-            break;
-          case 'departmentName':
-            matches = !!service.department
+          // case 'doctorName':
+          //   matches = !!service.doctorName
+          //     ?.toLowerCase()
+          //     .includes(this.searchValue.toLowerCase());
+          //   break;
+          // case 'departmentName':
+          //   matches = !!service.department
+          //     ?.toLowerCase()
+          //     .includes(this.searchValue.toLowerCase());
+          //   break;
+          case 'packageName':
+            matches = service.packageName
               ?.toLowerCase()
               .includes(this.searchValue.toLowerCase());
             break;
@@ -163,7 +265,7 @@ export class MhcReportComponent {
 
       // Filter by date range
       if (this.selectedDateRange && this.selectedDateRange.length) {
-        const serviceDate = new Date(service.date);
+        const serviceDate = new Date(service.appointmentDate);
         const startDate = new Date(this.selectedDateRange[0]);
         const endDate = this.selectedDateRange[1]
           ? new Date(this.selectedDateRange[1])
@@ -192,7 +294,7 @@ export class MhcReportComponent {
         const singleDate = new Date(this.selectedDate);
         matches =
           matches &&
-          new Date(service.date).toDateString() === singleDate.toDateString();
+          new Date(service.appointmentDate).toDateString() === singleDate.toDateString();
       }
 
       // console.log(matches);
@@ -223,9 +325,21 @@ export class MhcReportComponent {
         service.repeatedDate = ''; // Handle cases where repeatedDates is not available
       }
     });
-    const csvContent = this.convertToCSV(this.filteredServices);
+    const filteredData = this.filteredServices.map(service => ({
+      AppointmentDate: service.appointmentDate || "-",
+      PNR: service.pnrNumber || "-",
+      Name: `${service.firstName} ${service.lastName}`.trim(),
+      Age: service.age || "-",
+      Gender: service.gender || "-",
+      Package: service.packageName || "-",
+      LabTime: service.labTime || "-",
+      RadiologyTime: service.radiologyTime || "-",
+      ConsultationTime: service.consultationTime || "-",
+      TotalTime: service.totalTime || "-"
+    }));
+    const csvContent = this.convertToCSV(filteredData);
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    FileSaver.saveAs(blob, 'confirmed_appointments.csv');
+    FileSaver.saveAs(blob, 'summary_report.csv');
   }
 
   // Utility to Convert JSON to CSV
@@ -245,7 +359,67 @@ export class MhcReportComponent {
   //   // Implement logic to download last week's data
   //   console.log('Downloading last week\'s data...');
   // }
-
+  printSummary() {
+    if (this.filteredServices.length === 0) {
+      console.warn('No data to print');
+      return;
+    }
+  
+    let printContent = `
+      <html>
+      <head>
+        <title>Summary Report</title>
+        <style>
+          table { width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; }
+          th, td { border: 1px solid black; padding: 8px; text-align: left; }
+          th { background-color: #f2f2f2; }
+        </style>
+      </head>
+      <body>
+        <h2>Summary Report</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Appointment Date</th>
+              <th>PNR</th>
+              <th>Name</th>
+              <th>Age</th>
+              <th>Gender</th>
+              <th>Package</th>
+              <th>Lab Time</th>
+              <th>Radiology Time</th>
+              <th>Consultation Time</th>
+              <th>Total Time</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
+  
+    this.filteredServices.forEach(service => {
+      printContent += `
+        <tr>
+          <td>${service.appointmentDate || "-"}</td>
+          <td>${service.pnrNumber || "-"}</td>
+          <td>${service.firstName} ${service.lastName}</td>
+          <td>${service.age || "-"}</td>
+          <td>${service.gender || "-"}</td>
+          <td>${service.packageName || "-"}</td>
+          <td>${service.labTime || "-"}</td>
+          <td>${service.radiologyTime || "-"}</td>
+          <td>${service.consultationTime || "-"}</td>
+          <td>${service.totalTime || "-"}</td>
+        </tr>
+      `;
+    });
+  
+    printContent += `</tbody></table></body></html>`;
+  
+    const popupWin = window.open('', '_blank', 'width=800,height=600');
+    popupWin?.document.open();
+    popupWin?.document.write(printContent);
+    popupWin?.document.close();
+  }
+  
   // Method to clear input fields
   onClear() {
     this.searchValue = '';
@@ -371,16 +545,16 @@ export class MhcReportComponent {
     // Update UI
 
   }
-  labTime():void{
-    const {id, package: packageDate,packageId,consultationCount, ...withoutServiceId} = this.selectedService;
-    
+  labTime(): void {
+    const { id, package: packageDate, packageId, consultationCount, ...withoutServiceId } = this.selectedService;
+
     const payload = {
       ...withoutServiceId,
-     isLab: true,
-     isLabTime: new Date(),
+      isLab: true,
+      isLabTime: new Date(),
     }
     if (!id) return;
-    this.healthCheckupService.updateService(id,payload).subscribe({
+    this.healthCheckupService.updateService(id, payload).subscribe({
       next: (response) => {
         console.log('Service marked as completed:', response);
         this.fetchConfirmedAppointments()
@@ -389,15 +563,15 @@ export class MhcReportComponent {
       }
     })
   }
-  labEntryTime():void{
-    const {id, package: packageDate,packageId,consultationCount, ...withoutServiceId} = this.selectedService;
-    
+  labEntryTime(): void {
+    const { id, package: packageDate, packageId, consultationCount, ...withoutServiceId } = this.selectedService;
+
     const payload = {
       ...withoutServiceId,
-     isLabEntryTime: new Date(),
+      isLabEntryTime: new Date(),
     }
     if (!id) return;
-    this.healthCheckupService.updateService(id,payload).subscribe({
+    this.healthCheckupService.updateService(id, payload).subscribe({
       next: (response) => {
         console.log('Service marked as completed:', response);
         this.fetchConfirmedAppointments()
@@ -627,7 +801,7 @@ export class MhcReportComponent {
   /** Submit the selected radiology tests */
   submitSelection() {
     if (!this.selectedService) return;
-    
+
     const currentTime = new Date().toLocaleString(); // Capture timestamp
 
     // ✅ Set timestamps only for newly selected tests
@@ -641,7 +815,7 @@ export class MhcReportComponent {
 
     const { id: serviceId } = this.selectedService;
     if (!serviceId) return;
-    const {id, package: packageDate,packageId,consultationCount, ...withoutServiceId} = this.selectedService;
+    const { id, package: packageDate, packageId, consultationCount, ...withoutServiceId } = this.selectedService;
     const payload = {
       ...withoutServiceId,
       chestXRay: this.chestXRay,
@@ -682,7 +856,7 @@ export class MhcReportComponent {
 
   //     this.isCheckedIn = true; // ✅ Disable Checked In button
   //     console.log("Checked In at:", this.radiologyTimes);
-      
+
   //   }
   // }
 
@@ -705,30 +879,30 @@ export class MhcReportComponent {
   markCheckedIn() {
     if (!this.isCheckedIn) {
       const currentTime = new Date().toISOString();
-  
+
       // ✅ Create a copy of the service object to preserve all fields
       let payload: any = { ...this.selectedService };
-  
+
       // ✅ Update all "EntryTime" fields
       Object.keys(payload).forEach((key) => {
         if (key.includes("EntryTime") && !payload[key]) {
           payload[key] = currentTime;
         }
       });
-      payload.chestXRayEntryTime= currentTime 
-      payload.ultrasoundEntryTime= currentTime     
-      payload.boneDensitometryEntryTime= currentTime
-      payload.mammographyEntryTime  = currentTime   
-      payload.ecgEntryTime    = currentTime          
-      payload.echoTMTEntryTime = currentTime         
-      payload.usgEchoEntryTime= currentTime
-  
+      payload.chestXRayEntryTime = currentTime
+      payload.ultrasoundEntryTime = currentTime
+      payload.boneDensitometryEntryTime = currentTime
+      payload.mammographyEntryTime = currentTime
+      payload.ecgEntryTime = currentTime
+      payload.echoTMTEntryTime = currentTime
+      payload.usgEchoEntryTime = currentTime
+
       // payload.checkedIn = true; // ✅ Mark service as checked in
       // payload.checkedInTime = currentTime; // ✅ Set general checked-in time
-  
+
       console.log("Checked In Payload:", payload);
-      const {id, package: packageDate,packageId,consultationCount, ...withoutServiceId} = payload;
-  
+      const { id, package: packageDate, packageId, consultationCount, ...withoutServiceId } = payload;
+
       // ✅ Update Service in Backend
       this.healthCheckupService.updateService(this.selectedService.id, withoutServiceId).subscribe({
         next: (response) => {
@@ -740,19 +914,19 @@ export class MhcReportComponent {
           console.error('Error updating service:', error);
         }
       });
-  
+
       this.isCheckedIn = true; // ✅ Disable Checked In button
     }
   }
-  
+
   markReportDone() {
     console.log(this.selectedService)
     if (this.selectedService.chestXRayEntryTime && this.selectedService.chestXRayTime != null) {
       const currentTime = new Date().toISOString();
-  
+
       // ✅ Create a copy of the service object to preserve all fields
       let payload: any = { ...this.selectedService };
-  
+
       // ✅ Update all "Time" fields
       // Object.keys(payload).forEach((key) => {
       //   // ✅ Update only if the key ends exactly with "Time" (e.g., chestXRayTime, ultrasoundTime)
@@ -760,18 +934,18 @@ export class MhcReportComponent {
       //     payload[key] = currentTime;
       //   }
       // });
-      payload.chestXRayTime  = currentTime           
-      payload.ultrasoundTime = currentTime           
-      payload.boneDensitometryTime = currentTime 
-      payload.mammographyTime   = currentTime        
-      payload.ecgTime    = currentTime               
-      payload.echoTMTTime  = currentTime             
-      payload.usgEchoTime= currentTime
-      
-  
+      payload.chestXRayTime = currentTime
+      payload.ultrasoundTime = currentTime
+      payload.boneDensitometryTime = currentTime
+      payload.mammographyTime = currentTime
+      payload.ecgTime = currentTime
+      payload.echoTMTTime = currentTime
+      payload.usgEchoTime = currentTime
+
+
       console.log("Report Done Payload:", payload);
-      const {id, package: packageDate,packageId,consultationCount, ...withoutServiceId} = payload;
-  
+      const { id, package: packageDate, packageId, consultationCount, ...withoutServiceId } = payload;
+
       // ✅ Update Service in Backend
       this.healthCheckupService.updateService(this.selectedService.id, withoutServiceId).subscribe({
         next: (response) => {
@@ -783,10 +957,10 @@ export class MhcReportComponent {
           console.error('Error updating service:', error);
         }
       });
-  
+
       this.isReportDone = true; // ✅ Disable Report Done button
     }
   }
-  
+
 
 }

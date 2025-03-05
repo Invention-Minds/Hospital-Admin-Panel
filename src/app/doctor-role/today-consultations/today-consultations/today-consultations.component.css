@@ -476,6 +476,8 @@ tbody tr:hover {
   padding: 20px;
   width: 673px;
   height: auto;
+  max-height: 462px;
+  overflow-y: scroll;
   flex-shrink: 0;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
@@ -863,6 +865,12 @@ input {
   line-height: normal;
   width: 30%;
 }
+.estimation-type {
+  /* display: flex; */
+  align-items: center;
+  margin: 15px 0;
+  margin-bottom: 30px;
+}
 
 .radio-buttons {
   display: flex;
@@ -944,8 +952,89 @@ line-height: normal;
   border-radius: 16px;
   background: rgba(255, 236, 138, 0.30) !important; /* Light Orange */
 }
+::ng-deep .custom-calendar .p-inputtext {
+  width: 300px;
+  height: 46px;
+  border-radius: 10px; /* Rounded edges */
+  background-color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+  border: 1px solid #e0e0e0; /* Light gray border */
+  padding-left: 15px;
+  color: #7B7B7B;
+  font-family: Kanit;
+  font-size: 16px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
 
 
+::ng-deep .custom-calendar .p-calendar-trigger {
+  /* color: #808080; Light gray arrow */
+  border-radius: 0 10px 10px 0; /* Right side rounded for trigger button */
+  background-color: transparent; /* No background */
+}
+
+::ng-deep .custom-calendar .p-datepicker {
+  border-radius: 10px; /* Rounded calendar popup */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Shadow for calendar popup */
+  background-color: white;    font-size: 12px; /* Smaller font for calendar */
+  width: 300px; /* Adjusted width for calendar popup */
+}
+
+::ng-deep .custom-calendar .p-datepicker table {
+  font-size: 14px; /* Smaller font for dates */
+}
+
+::ng-deep .custom-calendar .p-datepicker-header {
+  padding: 5px; /* Adjust header padding */
+}
+
+::ng-deep .custom-calendar .p-datepicker .p-datepicker-prev,
+::ng-deep .custom-calendar .p-datepicker .p-datepicker-next {
+  height: 25px;  /* Adjust button size */
+  width: 25px;   /* Adjust button size */
+}
+::ng-deep .p-datepicker table td {
+  padding: 0;
+}
+.p-field {
+  margin: 0 10px;
+}
+@media (max-width: 1030px) {
+
+  ::ng-deep .custom-dropdown .p-dropdown{
+    width: 235px !important;
+  }
+  ::ng-deep .custom-input-text{
+    width: 135px !important;
+  }
+  ::ng-deep .custom-calendar .p-inputtext{
+    width: 210px !important;
+  }
+}
+
+/* Mobile View (Optional if needed) */
+@media (max-width: 768px) {
+  .card, .card-1 {
+    justify-content: center;
+  }
+  ::ng-deep .custom-dropdown .p-dropdown{
+    width: 100px !important;
+  }
+  ::ng-deep .custom-input-text{
+    width: 150px !important;
+  }
+  ::ng-deep .custom-calendar .p-inputtext{
+    width: 150px !important;
+  }
+  .column-1{
+    width: 20%;
+  }
+  /* .p-field{
+    margin:0;
+  } */
+}
 /* Show the mobile cards on smaller screens */
 @media screen and (max-width: 500px) {
   .table-container {
@@ -1028,7 +1117,15 @@ line-height: normal;
     line-height: normal;
     margin: 0;
   }
-
+.patient-details{
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
+.prn{
+  display: flex;
+  justify-content: center;
+}
   .patient {
     color: #001345;
     font-family: Kanit;

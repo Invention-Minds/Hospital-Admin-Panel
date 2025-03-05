@@ -32,7 +32,7 @@
         (ngModelChange)="onSearch()"
         
         placeholder="Calendar"
-        dateFormat="yy-mm-dd">
+        dateFormat="dd-mm-yy">
           <ng-template pTemplate="date" let-date>
               <span>
                   {{ date.day }}
@@ -42,10 +42,15 @@
       <i class="fa-solid fa-angle-down calendar-icon"></i>
       <svg pTooltip="Refresh" (click)="refresh()" class="reverse" xmlns="http://www.w3.org/2000/svg" width="2.5em" height="2.5em" viewBox="-1.5 -2.5 24 24"><path fill="currentColor" d="m4.859 5.308l1.594-.488a1 1 0 0 1 .585 1.913l-3.825 1.17a1 1 0 0 1-1.249-.665L.794 3.413a1 1 0 1 1 1.913-.585l.44 1.441C5.555.56 10.332-1.035 14.573.703a9.38 9.38 0 0 1 5.38 5.831a1 1 0 1 1-1.905.608A7.381 7.381 0 0 0 4.86 5.308zm12.327 8.195l-1.775.443a1 1 0 1 1-.484-1.94l3.643-.909a1 1 0 0 1 .61-.08a1 1 0 0 1 .84.75l.968 3.88a1 1 0 0 1-1.94.484l-.33-1.322a9.381 9.381 0 0 1-16.384-1.796l-.26-.634a1 1 0 1 1 1.851-.758l.26.633a7.381 7.381 0 0 0 13.001 1.25z"/></svg>
 
-      <svg class="p-field p-col-3 download" src="download.png"   *ngIf="activeComponent==='confirmed' || activeComponent === 'completed' || activeComponent === 'cancelled'" (click)="downloadData()" pTooltip="Download" xmlns="http://www.w3.org/2000/svg" width="3em" height="3em" viewBox="0 0 20 20">
+      <svg class="p-field p-col-3 download" src="download.png"   (click)="downloadData()" pTooltip="Download" xmlns="http://www.w3.org/2000/svg" width="3em" height="3em" viewBox="0 0 20 20">
         <path fill="#fff" fill-rule="evenodd" d="M3 17a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H4a1 1 0 0 1-1-1m3.293-7.707a1 1 0 0 1 1.414 0L9 10.586V3a1 1 0 1 1 2 0v7.586l1.293-1.293a1 1 0 1 1 1.414 1.414l-3 3a1 1 0 0 1-1.414 0l-3-3a1 1 0 0 1 0-1.414" clip-rule="evenodd" />
       </svg> 
-
+      <svg class="p-field p-col-3 print" src="print.svg" (click)="printSummary()"
+      pTooltip="Print" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+      viewBox="0 0 24 24">
+      <path fill="#fff"
+        d="M18 7H6V3h12zm0 5.5q.425 0 .713-.288T19 11.5t-.288-.712T18 10.5t-.712.288T17 11.5t.288.713t.712.287M16 19v-4H8v4zm2 2H6v-4H2v-6q0-1.275.875-2.137T5 8h14q1.275 0 2.138.863T22 11v6h-4z" />
+    </svg>
       </div>
       </div>
 
@@ -66,11 +71,11 @@
                     <th>Age</th>
                     <th>Gender</th>
                     <th>Package Name</th>
-                    <th>Duration (Lab)</th>
-                    <th>Duration (Rad)</th>
-                    <th>Duration (Cons.)</th>
+                    <th>TAT (Laboratory)</th>
+                    <th>TAT (Radiology)</th>
+                    <th>TAT (Consultations)</th>
                     <th>Grand Total</th>
-                    <th>Action</th>
+                    <!-- <th>Action</th> -->
                 </tr>
             </thead>
             <tbody>
@@ -91,28 +96,6 @@
                     <td>{{service.radiologyTime? service.radiologyTime:'-'}}</td>
                     <td>{{service.consultationTime? service.consultationTime:'-'}}</td>
                     <td>{{service.total? service.total:'-'}}</td>
-                    <td class="button">
-                      <button class="btn-action">
-                        <img 
-                        src="report-download.svg" 
-                        alt="Download" 
-                        class="action-icon" 
-                        (click)="downloadData()" 
-                      />
-                      </button>
-                      <button  class="btn-action">
-                      <!-- Print button for admin roles -->
-                      <img 
-                        src="print.svg" 
-                        alt="Print" 
-                        class="action-icon" 
-                        
-                        (click)="downloadData()" 
-                      />
-                      </button>
-
-
-                      </td>
                 </tr>
             </tbody>
         </table>

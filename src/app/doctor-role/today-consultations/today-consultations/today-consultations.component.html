@@ -12,6 +12,7 @@
         <thead>
           <tr>
             <th>No</th>
+            <th>PRN</th>
             <th (click)="sortBy('patientName')" style="cursor: pointer;">
               Patient Name
               <span *ngIf="sortColumn === 'patientName' && sortDirection === 'asc'">&#9650;</span>
@@ -39,8 +40,9 @@
             'finished': appointment.checkedOut === true && appointment.endConsultation === true
           }">
             <td>{{ i + 1 }}</td>
+            <td>{{appointment.prnNumber? appointment.prnNumber: '-'}}</td>
             <td>{{ appointment.patientName }}</td>
-            <td>{{ appointment.date }}</td>
+            <td>{{ appointment.date | date:'dd-MM-yyyy' }}</td>
             <td>
                <span class="status-badge">{{ appointment.time }}</span>
             </td>
@@ -56,7 +58,7 @@
                 <img class="image" src="/pause.svg">PostPoned
               </button>
               <button class="estimation" (click)="openEstimationPopup(appointment)">
-                <img class="image" src="/est.svg">Estimation
+                <img class="image" src="/est.svg">P. Counselling
               </button>
               <button class="transfer" [disabled]="appointment.isTransfer" (click)="!appointment.isTransfer && openTransferPopup(appointment)">
                 <img class="image" src="/transfer.svg">Transfer
@@ -133,9 +135,15 @@
         <div class="card-header" *ngIf="!appointment.expanded">
           <div class="patient-info">
             <img src="admin-icons/admin-icon.jpg" class="profile-pic">
-            <div>
-              <h3>{{ appointment.patientName }}</h3>
+            <div class="patient-details">
+              <div>
+                <h3>{{ appointment.patientName }}</h3>
               <p class="patient">Patient</p>
+              </div>
+              <div class="prn">
+                <p class="patient">{{appointment.prnNumber}}</p>
+              </div>
+              
             </div>
           </div>
         </div>
@@ -152,7 +160,7 @@
             </div>
             <div class="calendar-div">
               <p class="date-time">
-                <img src="/w-calendar.svg" alt="calendar" class="icon"> {{ appointment.date }}
+                <img src="/w-calendar.svg" alt="calendar" class="icon"> {{ appointment.date | date:'dd-MM-yyyy' }}
               </p>
               <p class="date-time">
                 <img src="/w-time.svg" alt="calendar" class="icon"> {{ appointment.time }}
@@ -171,7 +179,7 @@
               <img class="image" src="/pause.svg"> Postponed
             </button>
             <button class="estimation" (click)="openEstimationPopup(appointment)">
-              <img class="image" src="/est.svg"> Estimation
+              <img class="image" src="/est.svg"> P. Counselling
             </button>
             <button class="transfer" [disabled]="appointment.isTransfer" (click)="!appointment.isTransfer && openTransferPopup(appointment)">
               <img class="image" src="/transfer.svg"> Transfer
@@ -211,10 +219,10 @@
           Patient Name<span class="space">:</span>{{ selectedAppointment?.patientName }}
         </p>
         <p>
-          Date<span class="space-1">:</span> {{ selectedAppointment?.date }}
+          Date<span class="space-1">:</span> {{ selectedAppointment?.date | date:'dd-MM-yyyy' }}
         </p>
 
-        <div class="estimation-type-container">
+        <div class="estimation-type">
           <label class="estimation-type-label">Estimation Type:</label>
           <div class="radio-buttons">
             <label>
@@ -224,6 +232,10 @@
             <label>
               <input type="radio" name="estimationType" [(ngModel)]="estimationType" value="SM" />
               Surgical Management
+            </label>
+            <label>
+              <input type="radio" name="estimationType" [(ngModel)]="estimationType" value="Maternity" />
+              Maternity Management
             </label>
           </div>
         </div>
@@ -410,11 +422,35 @@
         <form class="calendar-input">
           <div class="date-selection">
             <label for="startDate">Starting Date:</label>
-            <input type="date" id="startDate" [(ngModel)]="startDate" name="startDate" />
+            <input type="date" id="startDate" [(ngModel)]="startDate" placeholder="dd-mm-yyyy" name="startDate" min=”01-01-1920″, max=”01-01-2120″./>
+            <!-- <p-calendar 
+            id="startDate"
+            styleClass="custom-calendar" 
+            [(ngModel)]="startDate"
+            placeholder="Start Date"
+            dateFormat="dd-mm-yy">
+              <!-- <ng-template pTemplate="date" let-date>
+                  <span>
+                      {{ selectedDate | date: 'dd' }}
+                  </span>
+              </ng-template> -->
+          <!-- </p-calendar> -->
           </div>
           <div class="date-selection">
             <label for="endDate">Ending Date:</label>
-            <input type="date" id="endDate" [(ngModel)]="endDate" name="endDate" />
+            <input type="date" id="endDate" [(ngModel)]="endDate" placeholder="dd-mm-yyyy" name="endDate" min=”01-01-1920″, max=”01-01-2120″. />
+            <!-- <p-calendar 
+            id="endDate"
+            styleClass="custom-calendar" 
+            [(ngModel)]="endDate"
+            placeholder="End Date"
+            dateFormat="dd-mm-yy">
+              <!-- <ng-template pTemplate="date" let-date>
+                  <span>
+                      {{ selectedDate | date: 'dd' }}
+                  </span>
+              </ng-template> -->
+          <!-- </p-calendar> --> 
           </div>
         </form>
       </div>

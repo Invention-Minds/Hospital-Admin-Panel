@@ -32,7 +32,7 @@
         (ngModelChange)="onSearch()"
         
         placeholder="Calendar"
-        dateFormat="yy-mm-dd">
+        dateFormat="dd-mm-yy">
           <ng-template pTemplate="date" let-date>
               <span>
                   {{ date.day }}
@@ -184,12 +184,12 @@
         </div>
         <div class="modal-footer">
           <!-- ✅ Checked In Button -->
-          <button class="save-button" (click)="labEntryTime()" [disabled]="selectedService.isLab">
+          <button class="save-button" (click)="labEntryTime()" [disabled]="selectedService.isLabEntryTime!=null">
             Checked In
           </button>
     
           <!-- ✅ Report Done Button -->
-          <button class="close-button" (click)="labTime()" [disabled]="selectedService.isLabEntryTime!=null">
+          <button class="close-button" (click)="labTime()" [disabled]="selectedService.isLabTime!=null">
             Report Done
           </button>
         </div>

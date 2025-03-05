@@ -17,7 +17,8 @@
           styleClass="custom-calendar" 
           [(ngModel)]="selectedDate"
           (ngModelChange)="onDateChange($event)" 
-          placeholder="Calendar">
+          placeholder="Calendar"
+          dateFormat="dd-mm-yy">
             <!-- <ng-template pTemplate="date" let-date>
                 <span>
                     {{ selectedDate | date: 'dd' }}
@@ -129,6 +130,7 @@
           (ngModelChange)="onDateChangeInModal($event)"
           [showButtonBar]="true"
           placeholder="Select Date"
+          dateFormat="dd-mm-yy"
         ></p-calendar></div>
           
           <div *ngIf="generatedSlots.length === 0" class="no-slots-message">

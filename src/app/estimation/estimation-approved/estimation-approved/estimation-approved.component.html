@@ -30,7 +30,7 @@
   <div class="p-field p-col-3 calendar">
     <!-- <p-calendar [(ngModel)]="selectedDate" placeholder="Calendar" class="custom-calendar"></p-calendar> -->
     <p-calendar styleClass="custom-calendar" [(ngModel)]="selectedDateRange" selectionMode="range"
-      (ngModelChange)="onSearch()" placeholder="Calendar" dateFormat="yy-mm-dd">
+      (ngModelChange)="onSearch()" placeholder="Calendar" dateFormat="dd-mm-yy">
       <ng-template pTemplate="date" let-date>
         <span>
           {{ date.day }}
@@ -99,12 +99,12 @@
           <td>{{ estimation.estimationName }}</td>
           <!-- <td>{{ estimation.appointmentTime }}</td> -->
           <td>{{ estimation.estimationType }}</td>
-          <td>{{estimation.estimatedDate}}</td>
+          <td>{{estimation.estimatedDate | date:'dd-MM-yyyy'}}</td>
           <td>
             <div class="dropdown-container-in-table" *ngIf="getFollowUpDates(estimation).length > 0; else noFollowups">
               <select class="dropdown-in-table">
                 <option *ngFor="let date of getFollowUpDates(estimation)" [value]="date">
-                  {{ date }}
+                  {{ date | date:'dd-MM-yyyy' }}
                 </option>
               </select>
             </div>
@@ -241,7 +241,7 @@
         <p>
           <strong>Follow-Up {{ i + 1 }}:</strong>
         </p>
-        <p>Date: {{ followUp.date }}</p>
+        <p>Date: {{ followUp.date | date:'dd-MM-yyyy' }}</p>
         <p>Remarks: {{ followUp.remarks }}</p>
       </div>
 

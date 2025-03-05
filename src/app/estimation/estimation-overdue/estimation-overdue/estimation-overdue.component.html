@@ -31,7 +31,7 @@
         selectionMode="range"
         (ngModelChange)="onSearch()"
         placeholder="Calendar"
-        dateFormat="yy-mm-dd">
+        dateFormat="dd-mm-yy">
           <ng-template pTemplate="date" let-date>
               <span>
                   {{ date.day }}
@@ -91,7 +91,7 @@
                     <td>{{ estimation.estimationName }}</td>
                     <!-- <td>{{ estimation.appointmentTime }}</td> -->
                     <td>{{ estimation.estimationType }}</td>
-                    <td>{{estimation.estimatedDate}}</td>
+                    <td>{{estimation.estimatedDate | date:'dd-MM-yyyy'}}</td>
                     <td>{{ estimation.employeeId }}</td>
                     <td>{{estimation.approverId}}</td>
                     <td>

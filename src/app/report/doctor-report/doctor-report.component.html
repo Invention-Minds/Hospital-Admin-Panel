@@ -11,7 +11,7 @@
     selectionMode="range"
     
     placeholder="Calendar"
-    dateFormat="yy-mm-dd">
+    dateFormat="dd-mm-yy">
       <ng-template pTemplate="date" let-date>
           <span>
               {{ date.day }}
@@ -37,9 +37,9 @@
             <span *ngIf="sortColumn === 'username' && sortDirection === 'asc'">&#9650;</span>
             <span *ngIf="sortColumn === 'username' && sortDirection === 'desc'">&#9660;</span>
           </th>
-          <th>
+          <!-- <th>
             Role
-          </th>
+          </th> -->
           <th>Pack. Handled</th>
           <th>Pack. Confirmed</th>
           <!-- <th>Therapy</th> -->
@@ -78,7 +78,7 @@
           <tr *ngFor="let appointment of getPaginatedData(); let i = index">
             <td>{{ i + 1 }}</td>
             <td>{{ appointment.username }}</td>
-            <td>{{ appointment.role }}</td>
+            <!-- <td>{{ appointment.role }}</td> -->
             <td>
               {{ appointment.totalHandled }}
               <span *ngIf="appointment.trends?.totalHandled > 0">↑</span>

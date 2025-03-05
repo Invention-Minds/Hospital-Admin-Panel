@@ -32,7 +32,7 @@
         (ngModelChange)="onSearch()"
         
         placeholder="Calendar"
-        dateFormat="yy-mm-dd">
+        dateFormat="dd-mm-yy">
           <ng-template pTemplate="date" let-date>
               <span>
                   {{ date.day }}
@@ -84,7 +84,7 @@
                     <td>{{ service.patientName }}</td>
                     <td>{{ service.doctorName }}</td>
                     <td>{{service.department}}</td>
-                    <td>{{ service.date }}</td>
+                    <td>{{ service.date | date:'dd-MM-yyyy'}}</td>
                     <td>{{ service.time }}</td>
                       <td>
                         <span class="status-badge">{{ service.isTransfer ? 'Transfer' : 'Close OPD'  }}</span>

@@ -34,6 +34,7 @@ interface Appointment {
   prnNumber?: any
   checkedInBy?:any;
   checkedInTime?:any;
+  serviceId?:number;
 
 
 }
@@ -110,7 +111,7 @@ export class ConfirmMhcComponent {
     this.appointmentService.confirmedAppointments$.subscribe({
       next: (appointments) => {
         // console.log('Appointments received:', appointments);
-        this.confirmedAppointments = appointments.filter(app => app.type === 'mhc');
+        this.confirmedAppointments = appointments.filter(app => app.serviceId != null );
         this.appointments = appointments
         console.log(appointments)
         // this.cancelExpiredAppointments();

@@ -43,7 +43,6 @@ export class AnalyticsFilterComponent implements OnInit {
   departmentONchange(event : any):void{
     this.departmentValue = parseInt(event.target.value);
     // console.log(this.departmentValue, "from filter")
-    console.log()    
     // this.selectedDepartment.emit(this.departmentValue)
     this.doctor.getDoctors().subscribe(({
       next : (data : any)=> {

@@ -188,19 +188,19 @@ export class OpdRequestComponent {
           emphasis: {
             label: {
               show: true,
-              fontSize: 25,
+              fontSize: 16,
               fontWeight: 'bold'
             }
           },
           labelLine: {
-            show: false
+            show: true
           },
           label: {
             show: true, // Enable labels
-            position: 'inside', // Place labels inside the slices
+            position: 'outside', // Place labels inside the slices
             formatter: '{c}', // Display the value (count) only
             fontSize: 16, // Adjust font size as needed
-            color: '#fff' // Set label color (white for contrast, adjust as needed)
+            color: '#000' // Set label color (white for contrast, adjust as needed)
           },
           itemStyle: {
             borderRadius: 5, // Adjust the border radius for rounded corners
@@ -249,6 +249,7 @@ export class OpdRequestComponent {
 
   viewmore(): void {
     this.showViewMore = true
+    this.loadDepartments();
     this.viewMoreData()
   }
 
@@ -271,53 +272,65 @@ export class OpdRequestComponent {
   }
 
   ViewMorechart(data: any): void {
-    const chartDom = document.getElementById('viewMoreOpdReq')!;
+    // Add null check for chartDom
+    const chartDom = document.getElementById('viewMoreOpdReq');
+    if (!chartDom) {
+        console.error('Chart container element not found');
+        return;
+    }
+
+    // Ensure echarts is available
+    if (!echarts) {
+        console.error('ECharts library not found');
+        return;
+    }
+
     const myChart = echarts.init(chartDom);
 
-    this.viewMoreoption = {
-      tooltip: {
-        trigger: 'item'
-      },
-      series: [
-        {
-          name: 'Access From',
-          type: 'pie',
-          radius: ['40%', '70%'],
-          avoidLabelOverlap: false,
-          label: {
-            show: false,
-            position: 'center'
-          },
-          emphasis: {
+    // Define the option with proper typing and remove duplicate label property
+    const viewMoreOption = {
+        tooltip: {
+            trigger: 'item'
+        },
+        series: [{
+            name: 'Access From',
+            type: 'pie',
+            radius: ['40%', '70%'],
+            avoidLabelOverlap: false,
             label: {
-              show: true,
-              fontSize: 25,
-              fontWeight: 'bold'
-            }
-          },
-          labelLine: {
-            show: false
-          },
-          itemStyle: {
-            borderRadius: 5,
-            borderColor: '#fff',
-            borderWidth: 1
-          },
-          data: [
-            { value: data.walkIn, name: 'Walk-in' },
-            { value: data.online, name: 'Online' },
-            { value: data.call, name: 'Call' },
-          ]
-        }
-      ]
+                show: true,
+                position: 'outside',
+                formatter: '{c}',
+                fontSize: 16,
+                color: '#000'
+            },
+            emphasis: {
+                label: {
+                    show: true,
+                    fontSize: 25,
+                    fontWeight: 'bold'
+                }
+            },
+            labelLine: {
+                show: true
+            },
+            itemStyle: {
+                borderRadius: 5,
+                borderColor: '#fff',
+                borderWidth: 1
+            },
+            data: [
+                { value: data?.walkIn ?? 0, name: 'Walk-in' },
+                { value: data?.online ?? 0, name: 'Online' },
+                { value: data?.call ?? 0, name: 'Call' }
+            ]
+        }]
     };
 
-    myChart.setOption(this.viewMoreoption); // Render the chart
-  }
+    myChart.setOption(viewMoreOption);
+}
 
   viewMoreData(): void {
-    this.loadDepartments();
-
     const filteredData = this.rawData.filter((appoint: any) => this.selectedViewDate.includes(appoint.date));
     const walkInData = filteredAppointments(filteredData, this.requestType.WALK_IN, this.selectedViewDoctor, this.selectedViewDate);
     const callData = filteredAppointments(filteredData, this.requestType.CALL, this.selectedViewDoctor, this.selectedViewDate);
@@ -354,5 +367,15 @@ export class OpdRequestComponent {
     console.log(event)
     this.selectedViewDoctor = parseInt(event.target.value) || 'all'
     this.viewMoreData()
+  }
+
+  refresh():void{
+    this.loadDepartments()
+    this.filteredDoctors = []
+    this.selectedViewDate = []
+    this.selectedViewDate = getLastThirtyDaysFromSelected()
+    this.selectedViewDoctor = 'all'
+    this.viewmore()
+    this.dateInput = []
   }
 }

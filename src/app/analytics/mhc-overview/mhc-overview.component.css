@@ -269,7 +269,7 @@
 
 
 .report-filter select {
-    width: 250px;
+    width: 300px;
     height: 40px;
     padding: 0 12px;
     border-radius: 8px;
@@ -306,6 +306,10 @@
     width: 100%;
     height: 100%;
 }
+
+/* .packageNames{
+    width: 400px;
+} */
 
 #viewMoreMHCoverview{
     width: 60vw;

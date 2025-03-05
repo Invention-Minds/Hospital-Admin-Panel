@@ -613,10 +613,7 @@ export class TotalOverviewComponent implements OnInit {
 
     return `${hours}:${minutes.toString().padStart(2, '0')} ${period}`;
   }
-
-
-
-
+  
   private isDoctorUnavailable(
     currentTime: number,
     unavailableSlots: { time: string; duration: number }[]

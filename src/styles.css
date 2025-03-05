@@ -24,3 +24,7 @@ body { margin: 0; font-family: Kanit; background-color: #F0F3FF; }
         background-color: #D6D6D6 !important;
     }
 }
+
+.pointer{
+    cursor: pointer;
+}

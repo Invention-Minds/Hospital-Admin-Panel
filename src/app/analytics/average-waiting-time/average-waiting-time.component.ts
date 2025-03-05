@@ -4,6 +4,7 @@ import { AppointmentConfirmService } from '../../services/appointment-confirm.se
 import { getYesterdayDate, getIndividualDates, getLastThirtyDaysFromSelected } from '../functions';
 import { error } from 'console';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
+import { Header } from 'primeng/api';
 
 @Component({
   selector: 'app-average-waiting-time',
@@ -47,6 +48,7 @@ export class AverageWaitingTimeComponent implements OnInit, OnChanges {
     this.date = [yersterDay]
     this.loadWaitingTime(this.date);
     this.department = 'INTERNAL MEDICINE'
+    this.selectedViewMoreDepartment = 'INTERNAL MEDICINE'
     this.selectedViewDate = getLastThirtyDaysFromSelected()
   }
 
@@ -187,8 +189,10 @@ export class AverageWaitingTimeComponent implements OnInit, OnChanges {
             range = 'fifteen_min';
           } else if (entry.waitingTime <= 20) {
             range = 'twenty_min';
+          } else if (entry.waitingTime <= 40) {
+            range = 'fourty_min'
           } else {
-            range = 'more_than_twenty_min';
+            range = 'more_than_fourty_min';
           }
 
           const key = `${entry.date}-${entry.doctorId}`;  // Key using date and doctorId
@@ -204,7 +208,8 @@ export class AverageWaitingTimeComponent implements OnInit, OnChanges {
               ten_min: 0,
               fifteen_min: 0,
               twenty_min: 0,
-              more_than_twenty_min: 0,
+              fourty_min : 0,
+              more_than_fourty_min: 0,
             });
           }
 
@@ -227,8 +232,11 @@ export class AverageWaitingTimeComponent implements OnInit, OnChanges {
         { header: '5 - 10 min', key: 'ten_min' },
         { header: '10 - 15 min', key: 'fifteen_min' },
         { header: '15 - 20 min', key: 'twenty_min' },
-        { header: 'More than 20 mins', key: 'more_than_twenty_min' }
+        { header: '20 - 40 min', key : 'fourty_min'},
+        { header: 'More than 40 mins', key: 'more_than_fourty_min' },
       ];
+
+      console.log(reportColumn, "reportCloumn")
 
       this.reportsColumn.emit(reportColumn);
       this.reportView.emit({ onoff: true, range: 'range' });
@@ -244,7 +252,7 @@ export class AverageWaitingTimeComponent implements OnInit, OnChanges {
     try {
       const data = await this.docDetails.getDepartments().toPromise()
       this.viewMoreDepartment = data;
-      console.log(this.viewMoreDepartment)
+      // console.log(this.viewMoreDepartment)
     } catch (err) {
       console.error(err)
     }
@@ -266,7 +274,7 @@ export class AverageWaitingTimeComponent implements OnInit, OnChanges {
       next: (data: any) => {
         this.filteredDoctors = data.filter((doc: any) => doc.departmentId === parseInt(event.target.value))
         this.selectedViewMoreDepartment = this.viewMoreDepartment.filter((entry:any) => entry.id === parseInt(event.target.value))[0].name
-        console.log(this.selectedViewMoreDepartment, "department")
+        // console.log(this.selectedViewMoreDepartment, "department")
 
         this.viewMoreData()
 
@@ -397,7 +405,7 @@ export class AverageWaitingTimeComponent implements OnInit, OnChanges {
   }
 
   viewDoctorsOnchange(event: any): void {
-    console.log(event)
+    // console.log(event)
     this.selectedViewDoctor = parseInt(event.target.value) || 'all'
     this.viewMoreData()
   }

@@ -1,7 +1,7 @@
 import { Component, OnChanges, SimpleChanges } from '@angular/core';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { availability, unavailableDates, doctors } from '../../Analytics-Folder/data'
-import { getDayOfWeek, getLastSevenDays, getYesterdayDate,getTodayDate } from '../functions';
+import { getDayOfWeek, getLastSevenDays, getYesterdayDate, getTodayDate, reorderDateFormat } from '../functions';
 import { AnyCnameRecord } from 'node:dns';
 
 @Component({
@@ -133,21 +133,19 @@ export class AnalyticsRootComponent implements OnChanges{
         const startDate = new Date(event[0]);
         const endDate = startDate
         this.selectedDate = this.getIndividualDates(startDate, endDate)
-        // console.log(this.selectedDate)
+        console.log(this.selectedDate)
 
       } else {
         // console.log('No date selected');
       }
     }
-
     this.currentDate = this.selectedDate[0]
     this.todayAnalytics()
-    // console.log(this.selectedDateRange, "selected date range")
   }
 
   reportDateInititilize(event:any[]):void{
     this.reportInitializeDate = event
-    // console.log(this.reportInitializeDate, "report date initialize")
+    console.log(this.reportInitializeDate, "report date initialize")
   }
 
   getIndividualDates(startDate: Date, endDate: Date): string[] {
@@ -211,6 +209,7 @@ export class AnalyticsRootComponent implements OnChanges{
 
   receiveReportData(reportData:any):void{
     this.reportdata = reportData
+    console.log(this.reportdata)
     // console.log(this.reportdata, 'from root')
   }
 
@@ -235,6 +234,7 @@ export class AnalyticsRootComponent implements OnChanges{
     this.selectedDoctor = 'all'
     const yesterDay = getYesterdayDate()
     this.selectedDate = [yesterDay]
+    this.currentDate = this.selectedDate[0]
     // this.selectedDateRange = yesterDay
   }
 
@@ -244,7 +244,7 @@ export class AnalyticsRootComponent implements OnChanges{
     date.setDate(date.getDate() + 1)
     const formattedDate = this.formatDate(date)
     this.selectedDate = [formattedDate]
-    this.currentDate = formattedDate
+    this.currentDate = this.selectedDate[0]
     this.todayAnalytics()
   }
 
@@ -254,7 +254,7 @@ export class AnalyticsRootComponent implements OnChanges{
     date.setDate(date.getDate() - 1)
     const formattedDate = this.formatDate(date)
     this.selectedDate = [formattedDate]
-    this.currentDate = formattedDate
+    this.currentDate = this.selectedDate[0]
     this.todayAnalytics()
   }
 }

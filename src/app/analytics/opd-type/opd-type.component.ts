@@ -1,6 +1,6 @@
 import { Component, Input, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
-import { getYesterdayDate, lastSelectedSevenDays, getIndividualDates, getLastThirtyDaysFromSelected } from '../functions';
+import { getYesterdayDate, lastSelectedSevenDays, getIndividualDates, getLastThirtyDaysFromSelected, reorderDateFormat, sortByDateOldToNew } from '../functions';
 import * as echarts from 'echarts'
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 
@@ -106,7 +106,12 @@ export class OpdTypeComponent {
       },
       yAxis: {
         type: 'category',
-        data: data.map((entry: any) => entry.date)
+        data: reorderDateFormat(data.map((entry: any) => entry.date)),
+        axisLabel: {
+          fontSize: 10,
+          margin: 10,
+          rotate: 30
+        }
       },
       color : ['#91CC75', '#FAC858', '#5470C6', '#36B8B8'],
       series: [
@@ -288,6 +293,7 @@ export class OpdTypeComponent {
 
   viewmore(): void {
     this.showViewMore = true
+    this.loadDepartments();
     this.viewMoreData()
   }
 
@@ -333,7 +339,7 @@ export class OpdTypeComponent {
       },
       yAxis: {
         type: 'category',
-        data: data.map((entry: any) => entry.date)
+        data: reorderDateFormat(data.map((entry: any) => entry.date))
       },
       color : ['#91CC75', '#FAC858', '#5470C6', '#36B8B8'],
       series: [
@@ -404,9 +410,8 @@ export class OpdTypeComponent {
   }
 
   viewMoreData(): void {
-    this.loadDepartments();
-
-    const result = this.rawData.reduce((acc: any, entry: any) => {
+    const filter = this.rawData.filter((entry:any) => (this.selectedViewDate.includes(entry.date)) && (this.selectedViewDoctor === 'all' ? this.selectedViewDate.includes(entry.date) : this.selectedViewDoctor === entry.doctorId))
+    const result = filter.reduce((acc: any, entry: any) => {
       const { date, type } = entry;
 
       // Initialize the result structure for the date if it doesn't exist
@@ -435,14 +440,15 @@ export class OpdTypeComponent {
     }, {});
 
     const processedChartData = Object.values(result);
-    const filteredData = processedChartData.filter((entry:any) => this.selectedViewDate.includes(entry.date) && this.selectedViewDoctor === 'all' ? entry : this.selectedViewDoctor === entry.date)
+    const sorteddata = sortByDateOldToNew(processedChartData, 'date')
+    console.log(sorteddata, "sortedData")
+    // const filteredData = sorteddata.filter((entry:any) => this.selectedViewDate.includes(entry.date) && this.selectedViewDoctor === 'all' ? this.selectedViewDate.includes(entry.date) : this.selectedViewDoctor === entry.doctorId)
 
-    console.log(filteredData, "processed data")
-    this.ViewMorechart(filteredData) 
+    console.log(sorteddata, "processed data")
+    this.ViewMorechart(sorteddata) 
    }
 
   viewOnDatechange(event: any): void {
-    // console.log(event, 'dates')
     if (Array.isArray(event) && event.length === 2) {
       const startDate = event[0];
       let endDate;
@@ -456,6 +462,16 @@ export class OpdTypeComponent {
     console.log(event)
     this.selectedViewDoctor = parseInt(event.target.value) || 'all'
     this.viewMoreData()
+  }
+
+  refresh():void{
+    this.loadDepartments()
+    this.filteredDoctors = []
+    this.selectedViewDate = []
+    this.selectedViewDate = getLastThirtyDaysFromSelected()
+    this.selectedViewDoctor = 'all'
+    this.viewmore()
+    this.dateInput = []
   }
 
 }

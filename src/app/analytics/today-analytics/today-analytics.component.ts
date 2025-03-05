@@ -19,8 +19,12 @@ export class TodayAnalyticsComponent {
   availableDoctorsToday: number = 0;
   availableDoctors : any[] = []
   unavailableDoctors : any[] = []
+  unavailableDoctorsToday : any
   absentDoctors : any[] = []
   absentDoctorsToday: number = 0;
+  leaveDoctors: any[] = [];
+  leaveDoctorsCount: number = 0;
+
   estimation: any = {
     liveConfirmedEstimating: 0,
     lastSevenDays: [],
@@ -39,6 +43,8 @@ export class TodayAnalyticsComponent {
   // report
   popUpPresentReport : boolean = false
   popUpAbsentReport : boolean = false
+  popUpUnavailReport : boolean = false
+  showLeaveDoctors : boolean = false
   reportColumn : any
   reportData : any
   availableDoctor : any
@@ -106,7 +112,9 @@ export class TodayAnalyticsComponent {
               ? doctor.availability // If all are null, consider the entire availability as "latest"
               : doctor.availability?.filter(avail => avail.updatedAt === latestTimestamp);
             // console.log(latestAvailability)
-
+            const dayOfWeek = new Date().toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
+            const availableDay = latestAvailability?.find(avail => avail.day.toLowerCase() === dayOfWeek);
+            doctor.availableFrom = availableDay?.availableFrom!
             if (doctor.doctorType === 'Visiting Consultant') {
               // Visiting Consultant with booked slots for today is Available
               availableCount++;
@@ -128,9 +136,15 @@ export class TodayAnalyticsComponent {
                   return formattedUnavailableDate === selectedDate;
                 });
 
+
               if (isAbsent) {
                 absentCount++;
                 status = 'Absent';
+              } else if (
+                this.isDoctorUnavailable(currentTime, formattedUnavailableSlots)
+              ) {
+                unavailableCount++;
+                status = 'Unavailable';
               } else {
                 availableCount++;
                 status = 'Available';
@@ -143,9 +157,61 @@ export class TodayAnalyticsComponent {
         // Update counts
         this.availableDoctorsToday = availableCount;
         this.absentDoctorsToday = absentCount;
+        this.unavailableDoctorsToday = unavailableCount;
         // console.log(this.availableDoctorsToday, this.absentDoctorsToday)
 
         this.updateDoctorLists()
+
+        this.leaveDoctors = [];
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Remove time part to compare only dates
+        
+        this.leaveDoctors = doctors
+        .map((doctor) => {
+          const futureUnavailableDates = (doctor.unavailableDates || [])
+            .map(d => new Date(d.date)) // Convert to Date objects
+            .filter(date => date >= today) // Keep only today and future dates
+            .map(date => date.toISOString().split('T')[0]); // Convert back to YYYY-MM-DD
+      
+          return futureUnavailableDates.length > 0 // ✅ Keep only doctors with future unavailability
+            ? { ...doctor, groupedUnavailableDates: this.groupUnavailableDates(futureUnavailableDates) }
+            : null; // Exclude doctors without valid unavailable dates
+        })
+        .filter(doctor => doctor !== null) as any;
+
+        this.leaveDoctorsCount = this.leaveDoctors.length
+        console.log(this.leaveDoctors, "leavedoctors")
+
+        this.unavailableDoctors = doctors
+        .filter((doctor) => (doctor.unavailableSlots || []).length > 0)
+        .map((doctor) => {
+          const allUpdatedAtNull = doctor.availability?.every(avail => !avail.updatedAt);
+
+          // Step 2: Calculate the latest timestamp if any `updatedAt` is not null
+          const latestTimestamp = allUpdatedAtNull
+            ? null // If all are null, treat it as the "latest"
+            : doctor.availability?.reduce((latest, curr) => {
+              return curr.updatedAt && new Date(curr.updatedAt).getTime() > new Date(latest).getTime()
+                ? curr.updatedAt
+                : latest;
+            }, doctor.availability.find(avail => avail.updatedAt)?.updatedAt || '');
+
+          // Step 3: Filter availability data based on the latest timestamp
+          const latestAvailability = allUpdatedAtNull
+            ? doctor.availability // If all are null, consider the entire availability as "latest"
+            : doctor.availability?.filter(avail => avail.updatedAt === latestTimestamp);
+          // console.log(latestAvailability)
+          const dayOfWeek = new Date().toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
+          const availableDay = latestAvailability?.find(avail => avail.day.toLowerCase() === dayOfWeek);
+          // ✅ Process and group unavailable slots
+          const groupedSlots = this.groupUnavailableSlots(doctor.unavailableSlots!, availableDay!.slotDuration);
+
+          return {
+            ...doctor,
+            groupedUnavailableSlots: groupedSlots, // Store grouped slot data
+          };
+        });
+      console.log(this.unavailableDoctors)
       },
       (error) => {
         console.error('Error fetching doctors:', error);
@@ -153,13 +219,164 @@ export class TodayAnalyticsComponent {
     );
   }
 
+  private groupUnavailableSlots(slots: any[], duration: number): string[] {
+    if (!slots || slots.length === 0) return [];
+
+    // ✅ Convert time to minutes and sort slots
+    const sortedSlots = slots
+      .map((slot) => ({
+        time: slot.time,
+        timeInMinutes: this.timeToMinutes(slot.time),
+        duration: duration || 20, // Default 20 min if missing
+      }))
+      .sort((a, b) => a.timeInMinutes - b.timeInMinutes);
+
+    const groupedSlots: string[] = [];
+    let startSlot = sortedSlots[0];
+    let endSlot = sortedSlots[0];
+
+    for (let i = 1; i < sortedSlots.length; i++) {
+      const currentSlot = sortedSlots[i];
+      const expectedStartTime = endSlot.timeInMinutes + endSlot.duration; // Expected next slot start time
+
+      if (currentSlot.timeInMinutes === expectedStartTime) {
+        // ✅ Continuous slot → Extend the range
+        endSlot = currentSlot;
+      } else {
+        // ✅ Break in continuity → Save range and start new one
+        if (startSlot.timeInMinutes === endSlot.timeInMinutes) {
+          groupedSlots.push(this.formatTime(startSlot.time)); // Single time
+        } else {
+          groupedSlots.push(`${this.formatTime(startSlot.time)} to ${this.formatTime(endSlot.timeInMinutes + endSlot.duration)}`);
+        }
+        startSlot = currentSlot;
+        endSlot = currentSlot;
+      }
+    }
+
+    // ✅ Push last slot/group
+    if (startSlot.timeInMinutes === endSlot.timeInMinutes) {
+      groupedSlots.push(this.formatTime(startSlot.time));
+    } else {
+      groupedSlots.push(`${this.formatTime(startSlot.time)} to ${this.formatTime(endSlot.timeInMinutes + endSlot.duration)}`);
+    }
+
+    return groupedSlots;
+  }
+
+  private formatTime(time: string | number): string {
+    if (typeof time === 'number') {
+      // ✅ Convert minutes back to AM/PM format
+      let hours = Math.floor(time / 60);
+      let minutes = time % 60;
+      const period = hours >= 12 ? 'PM' : 'AM';
+
+      // Convert 24-hour format to 12-hour format
+      hours = hours > 12 ? hours - 12 : hours === 0 ? 12 : hours;
+      return `${hours}:${minutes.toString().padStart(2, '0')} ${period}`;
+    }
+
+    if (!time || !time.includes(':')) {
+      console.error('Invalid time format:', time);
+      return '';
+    }
+
+    const [timePart, period] = time.split(' ');
+    const [hours, minutes] = timePart.split(':').map(Number);
+
+    if (isNaN(hours) || isNaN(minutes)) {
+      console.error('Invalid time components:', time);
+      return '';
+    }
+
+    return `${hours}:${minutes.toString().padStart(2, '0')} ${period}`;
+  }
+
+  private isDoctorUnavailable(
+    currentTime: number,
+    unavailableSlots: { time: string; duration: number }[]
+  ): boolean {
+    return unavailableSlots.some((slot) => {
+      const slotStartMinutes = this.timeToMinutes(slot.time);
+      const slotDuration = slot.duration || 20; // Default duration
+      const slotEndMinutes = slotStartMinutes + slotDuration;
+
+      if (isNaN(slotStartMinutes) || isNaN(slotEndMinutes)) {
+        console.error('Invalid slot timing:', slot);
+        return false;
+      }
+
+      return currentTime >= slotStartMinutes && currentTime < slotEndMinutes;
+    });
+  }
+
+  private groupUnavailableDates(dates: string[]): string[] {
+    if (!dates || dates.length === 0) return [];
+  
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Normalize today's date
+  
+    const validDates = dates
+      .map(dateStr => new Date(dateStr))
+      .filter(date => date >= today && !isNaN(date.getTime())) // Ensure only today & future
+      .sort((a, b) => a.getTime() - b.getTime()); // Sort in ascending order
+  
+    if (validDates.length === 0) {
+      console.error("❌ No valid future dates found:", dates);
+      return [];
+    }
+  
+    const groupedDates: string[] = [];
+    let startDate = validDates[0];
+    let endDate = validDates[0];
+  
+    for (let i = 1; i < validDates.length; i++) {
+      const currentDate = validDates[i];
+      const previousDate = new Date(endDate);
+      previousDate.setDate(previousDate.getDate() + 1); // Expect next day
+  
+      if (currentDate.getTime() === previousDate.getTime()) {
+        endDate = currentDate; // Extend the range
+      } else {
+        groupedDates.push(
+          startDate.getTime() === endDate.getTime()
+            ? this.formatDateUnavailable(startDate)
+            : `${this.formatDateUnavailable(startDate)} to ${this.formatDateUnavailable(endDate)}`
+        );
+        startDate = currentDate;
+        endDate = currentDate;
+      }
+    }
+  
+    // ✅ Add the last range or single date
+    groupedDates.push(
+      startDate.getTime() === endDate.getTime()
+        ? this.formatDateUnavailable(startDate)
+        : `${this.formatDateUnavailable(startDate)} to ${this.formatDateUnavailable(endDate)}`
+    );
+  
+    return groupedDates;
+  }
+
+  private formatDateUnavailable(date: Date): string {
+    if (!(date instanceof Date) || isNaN(date.getTime())) {
+      console.error("❌ Invalid Date:", date);
+      return "Invalid Date";
+    }
+    const day = String(date.getDate()).padStart(2, '0'); // Ensure 2-digit day
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+    const year = date.getFullYear();
+    
+    return `${day}-${month}-${year}`;
+  }
+
   private updateDoctorLists(): void {
     this.availableDoctors = this.doctors.filter(
       (doctor) => doctor.status === 'Available'
     );
-    this.unavailableDoctors = this.doctors.filter(
-      (doctor) => doctor.status === 'Unavailable'
-    );
+    // this.unavailableDoctors = this.doctors.filter(
+    //   (doctor) => doctor.status === 'Unavailable'
+    // );
     this.absentDoctors = this.doctors.filter(
       (doctor) => doctor.status === 'Absent'
     );
@@ -614,12 +831,28 @@ export class TodayAnalyticsComponent {
     ]
   }
 
+  doctorUnavailReport():void{
+    this.popUpUnavailReport = true
+  }
+
+  LeaveDoctorList():void{
+    this.showLeaveDoctors = true
+  }
+
   closeDocAvailReport():any{
     this.popUpPresentReport = false
   }
 
   closeDocAbsentReport():any{
     this.popUpAbsentReport = false
+  }
+
+  closeDoctorUnavailReport():void{
+    this.popUpUnavailReport = false
+  }
+
+  closeLeaveDoctorList():void{
+    this.showLeaveDoctors = false
   }
 
   // private fetchDoctorsWithAvailability(): void {

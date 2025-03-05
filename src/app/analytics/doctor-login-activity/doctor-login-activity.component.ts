@@ -145,7 +145,7 @@ export class DoctorLoginActivityComponent implements OnChanges {
     this.appointmentService.getAllAppointments().subscribe((appointments: any[]) => {
 
       const todayAppointments = appointments.filter(app => app.date === this.selectedDate[0]);
-      console.log(todayAppointments)
+      // console.log(todayAppointments)
 
       this.doctorDelays = doctors.map(doctor => {
         const latestAvailability = this.getLatestAvailability(doctor.availability);
@@ -159,12 +159,12 @@ export class DoctorLoginActivityComponent implements OnChanges {
           (`❌ Doctor is NOT available on ${dayOfWeek}, skipping...`);
           return null;
         }
-        console.log(availableDay)
+        // console.log(availableDay)
         const availableFrom = availableDay.availableFrom?.split('-')[0]; // Extract start time
         (availableFrom)
         const firstCheckedOutAppointment =  this.getFirstCheckedOutAppointment(todayAppointments, doctor.id);
 
-        console.log(firstCheckedOutAppointment)
+        // console.log(firstCheckedOutAppointment)
 
         if (!firstCheckedOutAppointment) return {
           doctorName: doctor.name,
@@ -209,12 +209,12 @@ export class DoctorLoginActivityComponent implements OnChanges {
       .filter(app => app.doctorId === doctorId && app.checkedOutTime)
       .sort((a, b) => new Date(a.checkedOutTime).getTime() - new Date(b.checkedOutTime).getTime()); // Sort by earliest checkedOutTime
 
-      console.log(doctorAppointments)
+      // console.log(doctorAppointments)
 
     if (doctorAppointments.length === 0) return null;
 
     const checkedOutTime = utcToIst(new Date(doctorAppointments[0].checkedOutTime));
-    console.log(checkedOutTime)
+    // console.log(checkedOutTime)
     return {
       checkedOutTime: checkedOutTime.split(' ')[1].slice(0, 5) // Extract HH:MM format
     };

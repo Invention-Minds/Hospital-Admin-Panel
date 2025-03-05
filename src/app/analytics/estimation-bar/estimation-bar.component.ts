@@ -5,7 +5,7 @@ import { DoctorServiceService } from '../../services/doctor-details/doctor-servi
 import { DatePipe } from '@angular/common';
 import { formatDate } from '@angular/common';
 import { error } from 'console';
-import { getIndividualDates, getYesterdayDate, getLastThirtyDaysFromSelected } from '../functions'
+import { getIndividualDates, getYesterdayDate, getLastThirtyDaysFromSelected, reorderDateFormat } from '../functions'
 
 @Component({
   selector: 'app-estimation-bar',
@@ -95,7 +95,7 @@ export class EstimationBarComponent implements OnChanges {
       xAxis: [
         {
           type: 'category',
-          data: this.lastSevenDaysData.map((date: any) => date.date),
+          data: reorderDateFormat(this.lastSevenDaysData.map((date: any) => date.date)),
           axisLabel: {
             rotate: 0
           }
@@ -287,8 +287,6 @@ export class EstimationBarComponent implements OnChanges {
         console.error('Error locking the appointment:', error);
       },
       complete: () => {
-
-
         this.isLoading = false
       },
     })
@@ -463,7 +461,7 @@ export class EstimationBarComponent implements OnChanges {
       xAxis: [
         {
           type: 'category',
-          data: data.map((date: any) => date.date),
+          data: reorderDateFormat(data.map((date: any) => date.date)),
           axisLabel: {
             rotate: 0
           }
@@ -763,8 +761,11 @@ export class EstimationBarComponent implements OnChanges {
 
   refresh():void{
     this.loadDepartments()
+    this.filteredDoctors = []
+    this.selectedViewDate = []
     this.selectedViewDate = getLastThirtyDaysFromSelected()
     this.selectedViewDoctor = 'all'
     this.viewmore()
+    this.dateInput = []
   }
 }

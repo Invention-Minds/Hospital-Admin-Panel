@@ -3,7 +3,7 @@ import { countByDate, processAppointmentData } from '../functions';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { map } from 'rxjs/operators';
-import { getLastSevenDays, getIndividualDates, getLastThirtyDaysFromSelected } from '../functions';
+import { getLastSevenDays, getIndividualDates, getLastThirtyDaysFromSelected, reorderDateFormat } from '../functions';
 import { error } from 'console';
 import * as echarts from 'echarts';
 
@@ -113,7 +113,7 @@ export class OpdOverviewComponent {
       },
       xAxis: {
         type: 'category',
-        data: this.dates
+        data: reorderDateFormat(this.dates)
       },
       yAxis: {
         type: 'value',
@@ -254,8 +254,8 @@ export class OpdOverviewComponent {
         complete: () => {
           const reportColumn = [
             { header: "Date", key: "date" },
-            { header: "Total Appointments", key: "totalRequest" },
             { header: "Doctor Name", key: "doctorName" },
+            { header: "Total Appointments", key: "totalRequest" },
             { header: "Confirmed", key: "confirmed" },
             { header: "Cancelled", key: "cancelled" },
             { header: "Completed", key: "completed" },
@@ -266,6 +266,8 @@ export class OpdOverviewComponent {
           this.reportView.emit({ onoff: true, range: "range", })
           this.reportInitializeDate.emit(this.selectedDate)
           this.reportDoctorId.emit(this.doctorId)
+
+          console.log(this.selectedDate)
 
           this.isLoading = false
         }
@@ -287,6 +289,7 @@ export class OpdOverviewComponent {
 
   viewmore():void{
     this.showViewMore = true
+    this.loadDepartments();
     this.viewMoreData()
   }
 
@@ -325,7 +328,7 @@ export class OpdOverviewComponent {
       },
       xAxis: {
         type: 'category',
-        data: data.date
+        data: reorderDateFormat(data.date)
       },
       yAxis: {
         type: 'value',
@@ -391,7 +394,6 @@ export class OpdOverviewComponent {
   }
 
   viewMoreData(): void {
-    this.loadDepartments();
     const dateFilteredAppointments = this.rawData.filter((data: any) => this.selectedViewDate.includes(data.date));
 
     const completedData = dateFilteredAppointments.filter((appointment: any) => this.selectedViewDoctor === 'all' ? (appointment.status === "completed") : (appointment.status === 'completed' && this.selectedViewDoctor === appointment.doctorId));
@@ -400,7 +402,7 @@ export class OpdOverviewComponent {
     const cancelData = dateFilteredAppointments.filter((appointment: any) => this.selectedViewDoctor === 'all' ? (appointment.status === "cancelled") : (appointment.status === 'cancelled' && this.selectedViewDoctor === appointment.doctorId));
     const pendingData = dateFilteredAppointments.filter((appointment: any) => this.selectedViewDoctor === 'all' ? (appointment.status === "pending") : (appointment.status === 'pending' && this.selectedViewDoctor === appointment.doctorId));
 
-    console.log(requestData, "request data")
+    // console.log(requestData, "request data")
 
     const requests = countByDate(requestData, 'date');
     const date = Object.keys(requests).sort();
@@ -424,43 +426,8 @@ export class OpdOverviewComponent {
     appointmentCount.pending = processAppointmentData(pendingData, date);
 
     this.ViewMorechart(appointmentCount);
-    console.log(appointmentCount);
+    // console.log(appointmentCount);
   }
-
-  // viewMoreData(): void {
-  //   this.isLoading = true
-  //   this.appointment.getAllAppointments().subscribe({
-
-  //     next: (data) => {
-  //       this.rawData = data
-  //       const dateFilteredAppointments = data.filter((data: any) => this.selectedDate.includes(data.date))
-
-  //       const completedDate = dateFilteredAppointments.filter((appointment: any) => this.doctorId === 'all' ? (appointment.status === "completed") : (appointment.status === 'completed' && this.doctorId === appointment.doctorId))
-  //       const requestData = dateFilteredAppointments.filter((appointment: any) => this.doctorId === 'all' ? appointment : this.doctorId === appointment.doctorId)
-  //       const comfirmData = dateFilteredAppointments.filter((appointment: any) => this.doctorId === 'all' ? (appointment.status === "confirmed") : (appointment.status === 'confirmed' && this.doctorId === appointment.doctorId))
-  //       const cancelData = dateFilteredAppointments.filter((appointment: any) => this.doctorId === 'all' ? (appointment.status === "cancelled") : (appointment.status === 'cancelled' && this.doctorId === appointment.doctorId))
-  //       const pendingData = dateFilteredAppointments.filter((appointment: any) => this.doctorId === 'all' ? (appointment.status === "pending") : (appointment.status === 'pending' && this.doctorId === appointment.doctorId))
-
-  //       const requests = countByDate(requestData, 'date');
-  //       this.dates = Object.keys(requests).sort();
-
-  //       this.appointmentCount.request = processAppointmentData(requestData, this.dates);
-  //       this.appointmentCount.completed = processAppointmentData(completedDate, this.dates);
-  //       this.appointmentCount.confirm = processAppointmentData(comfirmData, this.dates);
-  //       this.appointmentCount.cancelled = processAppointmentData(cancelData, this.dates);
-  //       this.appointmentCount.pending = processAppointmentData(pendingData, this.dates);
-
-  //       this.viewMoreChart(this.appointmentCount)
-  //     },
-  //     error: (error) => {
-  //       console.log(error)
-  //     },
-  //     complete: () => {
-  //       this.isLoading = false
-  //     }
-  //   }
-  //   )
-  // }
 
   viewOnDatechange(event: any): void {
     // console.log(event, 'dates')
@@ -477,5 +444,15 @@ export class OpdOverviewComponent {
     console.log(event)
     this.selectedViewDoctor = parseInt(event.target.value) || 'all'
     this.viewMoreData()
+  }
+
+  refresh():void{
+    this.loadDepartments()
+    this.filteredDoctors = []
+    this.selectedViewDate = []
+    this.selectedViewDate = getLastThirtyDaysFromSelected()
+    this.selectedViewDoctor = 'all'
+    this.viewmore()
+    this.dateInput = []
   }
 }

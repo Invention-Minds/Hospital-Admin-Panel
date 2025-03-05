@@ -6,6 +6,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: relative;
+    z-index: 2;
 }
 
 .heading{
@@ -33,10 +35,12 @@
     align-items: center;
 }
 
-.legends, .legend_items{
+.legends{
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 15px;
+    margin-top: 20px;
 }
 
 .legend_items{

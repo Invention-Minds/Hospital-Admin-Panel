@@ -1,7 +1,7 @@
 import { Component, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import * as echarts from 'echarts'
-import { getYesterdayDate, getIndividualDates, getLastThirtyDaysFromSelected } from '../functions'
+import { getYesterdayDate, getIndividualDates, getLastThirtyDaysFromSelected, reorderDateFormat } from '../functions'
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 
 
@@ -40,7 +40,7 @@ export class GenderOverviewComponent implements OnChanges {
 
   ngOnInit() {
     this.selectedDate = [getYesterdayDate()]
-    console.log(this.selectedDate)
+    // console.log(this.selectedDate)
     this.loadDetails()
     this.selectedViewDate = getLastThirtyDaysFromSelected()
   }
@@ -58,7 +58,7 @@ export class GenderOverviewComponent implements OnChanges {
 
     this.option = {
       tooltip: { trigger: 'axis' },
-      xAxis: { type: 'category', data: data.map((entry: any) => entry.date) },
+      xAxis: { type: 'category', data: reorderDateFormat(data.map((entry: any) => entry.date))},
       yAxis: { type: 'value', name: 'Count' },
       series: [
         { name: 'Male', type: 'line', data: data.map((entry: any) => entry.male), smooth: true, lineStyle: { color: '#1f77b4' }, itemStyle: { color: '#1f77b4' } },
@@ -77,7 +77,7 @@ export class GenderOverviewComponent implements OnChanges {
         const startedDate = Array.isArray(this.selectedDate) && this.selectedDate.length > 0
           ? (this.selectedDate.length >= 7 ? this.selectedDate[6] : this.selectedDate[this.selectedDate.length - 1])
           : new Date().toISOString().split('T')[0]; // Fallback to today if undefined
-        console.log(startedDate, "start date");
+        // console.log(startedDate, "start date");
 
         const sevendays = this.getLastSevenDays(startedDate);
 
@@ -112,7 +112,7 @@ export class GenderOverviewComponent implements OnChanges {
           }, {})
         );
 
-        console.log(groupedData, "gender overview by date");
+        // console.log(groupedData, "gender overview by date");
         const sortedData = groupedData.sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
         this.initChart(sortedData);
@@ -167,7 +167,7 @@ export class GenderOverviewComponent implements OnChanges {
 
     const flattenedData = Object.values(groupedData)
       .flatMap((dateGroup: any) => Object.values(dateGroup));
-    console.log(flattenedData, "gender report by date and doctorId");
+    // console.log(flattenedData, "gender report by date and doctorId");
 
     const reportColumn = [
       { header: "Date", key: "date" },
@@ -200,7 +200,7 @@ export class GenderOverviewComponent implements OnChanges {
     try {
       const data = await this.docDetails.getDepartments().toPromise()
       this.viewMoreDepartment = data;
-      console.log(this.viewMoreDepartment)
+      // console.log(this.viewMoreDepartment)
     } catch (err) {
       console.error(err)
     }
@@ -222,7 +222,7 @@ export class GenderOverviewComponent implements OnChanges {
       next: (data: any) => {
         this.filteredDoctors = data.filter((doc: any) => doc.departmentId === parseInt(event.target.value))
         this.selectedViewMoreDepartment = this.viewMoreDepartment.filter((entry: any) => entry.id === parseInt(event.target.value))[0].name
-        console.log(this.selectedViewMoreDepartment, "department")
+        // console.log(this.selectedViewMoreDepartment, "department")
 
         this.viewMoreData()
 
@@ -239,11 +239,11 @@ export class GenderOverviewComponent implements OnChanges {
     const chartDom = document.getElementById('viewMoreGender')!;
     const myChart = echarts.init(chartDom);
 
-    console.log(data)
+    // console.log(data)
 
     this.viewMoreChart = {
       tooltip: { trigger: 'axis' },
-      xAxis: { type: 'category', data: data.map((entry: any) => entry.date) },
+      xAxis: { type: 'category', data: reorderDateFormat(data.map((entry: any) => entry.date)) },
       yAxis: { type: 'value', name: 'Count' },
       series: [
         { name: 'Male', type: 'line', data: data.map((entry: any) => entry.male), smooth: true, lineStyle: { color: '#1f77b4' }, itemStyle: { color: '#1f77b4' } },
@@ -259,7 +259,7 @@ export class GenderOverviewComponent implements OnChanges {
             entry.gender !== null &&
             entry.gender !== '' &&
             this.selectedViewDate.includes(entry.date) &&
-            (this.selectedDoctor === 'all' || this.selectedDoctor === entry.doctorId)
+            (this.selectedViewDoctor === 'all' || this.selectedViewDoctor === entry.doctorId)
           )
           .map((entry: any) => ({
             date: entry.date,
@@ -284,7 +284,7 @@ export class GenderOverviewComponent implements OnChanges {
         );
 
         const sortedData = groupedData.sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
-        console.log(sortedData, "gender overview by date");
+        // console.log(sortedData, "gender overview by date");
 
         this.ViewMorechart(sortedData);
   }
@@ -301,16 +301,19 @@ export class GenderOverviewComponent implements OnChanges {
   }
 
   viewDoctorsOnchange(event: any): void {
-    console.log(event)
+    // console.log(event)
     this.selectedViewDoctor = parseInt(event.target.value) || 'all'
     this.viewMoreData()
   }
 
   refresh():void{
     this.loadDepartments()
+    this.filteredDoctors = []
+    this.selectedViewDate = []
     this.selectedViewDate = getLastThirtyDaysFromSelected()
     this.selectedViewDoctor = 'all'
     this.viewmore()
+    this.dateInput = []
   }
 
 }

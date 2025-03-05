@@ -274,3 +274,10 @@ export const getLastThirtyDaysFromSelected = (): string[] => {
 //   }
 //   return dates;
 // }
+
+export const reorderDateFormat = (dateArray: string[]): string[] => {
+  return dateArray.map(dateStr => {
+    const [year, month, day] = dateStr.split('-');
+    return `${day}-${month}-${year}`;
+  });
+};

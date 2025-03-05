@@ -2,7 +2,7 @@ import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import * as echarts from 'echarts'
-import { getYesterdayDate, getIndividualDates, getLastSevenDaysFromSelected, getLastThirtyDaysFromSelected } from '../functions'
+import { getYesterdayDate, getIndividualDates, getLastSevenDaysFromSelected, getLastThirtyDaysFromSelected, reorderDateFormat } from '../functions'
 
 @Component({
   selector: 'app-opd-time-wise',
@@ -62,7 +62,7 @@ export class OpdTimeWiseComponent implements OnChanges {
       xAxis: [
         {
           type: 'category',
-          data: data.map((entry: any) => entry.date)
+          data: reorderDateFormat(data.map((entry: any) => entry.date))
         }
       ],
       yAxis: [
@@ -91,8 +91,8 @@ export class OpdTimeWiseComponent implements OnChanges {
           data: data.map((entry: any) => entry.after1PMCount),
           markPoint: {
             data: [
-              { name: 'Max', value: 182.2, xAxis: 7, yAxis: 183 },
-              { name: 'Min', value: 2.3, xAxis: 11, yAxis: 3 }
+              { type: 'max', name: 'Max' },
+              { type: 'min', name: 'Min' }
             ]
           },
           markLine: {
@@ -251,6 +251,7 @@ export class OpdTimeWiseComponent implements OnChanges {
 
   viewmore(): void {
     this.showViewMore = true
+    this.loadDepartments();
     this.viewMoreData()
   }
 
@@ -284,7 +285,7 @@ export class OpdTimeWiseComponent implements OnChanges {
       xAxis: [
         {
           type: 'category',
-          data: data.map((entry: any) => entry.date)
+          data: reorderDateFormat(data.map((entry: any) => entry.date))
         }
       ],
       yAxis: [
@@ -313,8 +314,8 @@ export class OpdTimeWiseComponent implements OnChanges {
           data: data.map((entry: any) => entry.after1PMCount),
           markPoint: {
             data: [
-              { name: 'Max', value: 182.2, xAxis: 7, yAxis: 183 },
-              { name: 'Min', value: 2.3, xAxis: 11, yAxis: 3 }
+              { type: 'max', name: 'Max' },
+              { type: 'min', name: 'Min' }
             ]
           },
           markLine: {
@@ -327,8 +328,6 @@ export class OpdTimeWiseComponent implements OnChanges {
   }
 
   viewMoreData(): void {
-    this.loadDepartments();
-
     const getLastThirtyDays = this.selectedViewDate
     const appointment = this.rawData.filter((entry: any) => {
       const isWithinDateRange = getLastThirtyDays.includes(entry.date);
@@ -384,5 +383,15 @@ export class OpdTimeWiseComponent implements OnChanges {
     console.log(event)
     this.selectedViewDoctor = parseInt(event.target.value) || 'all'
     this.viewMoreData()
+  }
+
+  refresh():void{
+    this.loadDepartments()
+    this.filteredDoctors = []
+    this.selectedViewDate = []
+    this.selectedViewDate = getLastThirtyDaysFromSelected()
+    this.selectedViewDoctor = 'all'
+    this.viewmore()
+    this.dateInput = []
   }
 }

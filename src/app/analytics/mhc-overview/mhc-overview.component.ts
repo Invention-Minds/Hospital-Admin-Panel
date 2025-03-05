@@ -39,6 +39,7 @@ export class MhcOverviewComponent implements OnChanges {
   selectedViewDate: any[] = []
   selectedViewDoctor: any = 'all'
   viewMoreoption: any
+  packagesName : any
 
   ngOnInit() {
     this.selectedDate = [getYesterdayDate()]
@@ -84,7 +85,7 @@ export class MhcOverviewComponent implements OnChanges {
             formatter: '{c}',
             position: 'inside',
             fontSize: 14,
-            color: '#FFFFFF',
+            color: '#fff',
             fontWeight: 'bold',
             fontFamily: 'Arial, sans-serif',
             TextAlignment: 'center',
@@ -103,6 +104,13 @@ export class MhcOverviewComponent implements OnChanges {
     this.isLoading = true
     this.healthCheckup.getPackages().subscribe({
       next: (pack) => {
+        this.packagesName = pack.map((name:any) => {
+          return{
+            id : name.id,
+            name : name.name,
+          }
+        })
+        // console.log(this.packagesName, "mhc poackages")
         this.healthCheckup.getAllServices().subscribe((data: any) => {
 
           const formatDate = (date: string): string => {
@@ -228,7 +236,7 @@ export class MhcOverviewComponent implements OnChanges {
       itemStyle: { color: details.color }
     }));
 
-    console.log(this.dataForPiehart)
+    // console.log(this.dataForPiehart)
 
     // console.log('Total Confirmed Counts for Each Package:', this.dataForPiechart);
     this.initChart();
@@ -237,15 +245,15 @@ export class MhcOverviewComponent implements OnChanges {
 
   // viewmore
 
-  async loadDepartments(): Promise<void> {
-    try {
-      const data = await this.docDetails.getDepartments().toPromise()
-      this.department = data;
-      // console.log(this.department)
-    } catch (err) {
-      console.error(err)
-    }
-  }
+  // async loadDepartments(): Promise<void> {
+  //   try {
+  //     const data = await this.docDetails.getDepartments().toPromise()
+  //     this.department = data;
+  //     // console.log(this.department)
+  //   } catch (err) {
+  //     console.error(err)
+  //   }
+  // }
 
   viewmore(): void {
     this.showViewMore = true
@@ -256,19 +264,19 @@ export class MhcOverviewComponent implements OnChanges {
     this.showViewMore = false
   }
 
-  departmentOnchange(event: any): void {
-    this.docDetails.getDoctors().subscribe(({
-      next: (data: any) => {
-        this.filteredDoctors = data.filter((doc: any) => doc.departmentId === parseInt(event.target.value))
-      },
-      error: (error: any) => {
-        console.error(error)
-      },
-      complete: () => {
+  // departmentOnchange(event: any): void {
+  //   this.docDetails.getDoctors().subscribe(({
+  //     next: (data: any) => {
+  //       this.filteredDoctors = data.filter((doc: any) => doc.departmentId === parseInt(event.target.value))
+  //     },
+  //     error: (error: any) => {
+  //       console.error(error)
+  //     },
+  //     complete: () => {
 
-      }
-    }))
-  }
+  //     }
+  //   }))
+  // }
 
   ViewMorechart(data: any): void {
     const chartDom = document.getElementById('viewMoreMHCoverview');
@@ -298,15 +306,15 @@ export class MhcOverviewComponent implements OnChanges {
           label: {
             show: true,
             formatter: '{c}',
-            position: 'inside',
+            position: 'outside',
             fontSize: 14,
-            color: '#FFFFFF',
+            color: '#000',
             fontWeight: 'bold',
             fontFamily: 'Arial, sans-serif',
             TextAlignment: 'center',
           },
           labelLine: {
-            show: false
+            show: true
           }
         }
       ]
@@ -316,15 +324,15 @@ export class MhcOverviewComponent implements OnChanges {
   }
 
   viewMoreData(): void {
-    this.loadDepartments()
-
     const rawData = this.overViewData
-      .filter((data: any) => data.completed !== null && this.selectedViewDate.includes(data.date))
+      .filter((data: any) => data.completed !== null && this.selectedViewDate.includes(data.date)  && this.selectedViewDoctor === 'all' ? this.selectedViewDate.includes(data.date) : (this.selectedViewDoctor === data.packageId && this.selectedViewDate.includes(data.date)))
       .map((entry: any) => ({
         date: entry.date,
         package: entry.packageName,
         confirmed: entry.completed
       }));
+
+    // console.log(rawData, "mhc packages")
 
     const packageColors: { [key: string]: string } = {
       'Integrated Diabetic Care': '#FB9C2A',
@@ -353,7 +361,7 @@ export class MhcOverviewComponent implements OnChanges {
     }, {});
 
     // Convert to array format for pie chart (optional, depending on initChart)
-    const data:any = Object.entries(packageConfirmedCounts).map(([name, details]: [string, any]) => ({
+    const data: any = Object.entries(packageConfirmedCounts).map(([name, details]: [string, any]) => ({
       name: name,
       value: details.value,
       itemStyle: { color: details.color }
@@ -374,16 +382,17 @@ export class MhcOverviewComponent implements OnChanges {
     }
   }
 
-  viewDoctorsOnchange(event: any): void {
+  viewPackageONchange(event: any): void {
     console.log(event)
     this.selectedViewDoctor = parseInt(event.target.value) || 'all'
     this.viewMoreData()
   }
 
   refresh():void{
-    this.loadDepartments()
     this.selectedViewDate = getLastThirtyDaysFromSelected()
-    this.selectedViewDoctor = 'all'
     this.viewmore()
+    this.dateInput = []
+    this.packagesName = []
+    this.selectedViewDoctor = 'all'
   }
 }

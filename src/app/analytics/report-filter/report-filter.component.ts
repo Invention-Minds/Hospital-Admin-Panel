@@ -40,6 +40,7 @@ export class ReportFilterComponent implements OnChanges {
   ngOnInit() {
     this.loadDepartments()
     this.sortByDate();
+    this.loadYesterday()
   }
 
   async loadDepartments(): Promise<void> {
@@ -73,16 +74,13 @@ export class ReportFilterComponent implements OnChanges {
   }
 
   loadYesterday(): any {
-    // const yesterday = new Date();
-    // yesterday.setDate(yesterday.getDate() - 1);
-    // const formattedDate = yesterday.toISOString().split('T')[0];
     this.selectedDoctor = this.importedDoctor
-    // console.log(this.individualDates, "individual date")
     const filteredData = this.reportData.filter((entry: any) =>
       this.individualDates.includes(entry.date)
     );
 
-    this.importedData = filteredData.filter(entry => this.individualDates.includes(entry.date))
+    const filtered = filteredData.filter(entry => this.individualDates.includes(entry.date))
+    this.importedData = this.convertDateFormat(filtered)
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -90,7 +88,7 @@ export class ReportFilterComponent implements OnChanges {
       this.controlDateRange();
     }
 
-    if (((changes['reportData']) && (!changes['reportData'].firstChange)) || (changes['individualDates'] || (changes['selectedDoctor']))) {
+    if (((changes['reportData']) && (!changes['reportData'].firstChange)) || (changes['individualDates'])) {
       this.importedData = this.reportData
       this.selectedDateRange = []
       this.sortByDate()
@@ -178,12 +176,13 @@ export class ReportFilterComponent implements OnChanges {
       // Filter report data based on both date range and selected doctor
       const filteredReportData = this.reportData.filter((entry: any) => {
         const dateMatches = this.individualDates.includes(entry.date);
-        const selectedDoctor = this.selectedDoctor === 'all' ?  entry : this.selectedDoctor === parseInt(entry.doctorId)
+        const selectedDoctor = this.selectedDoctor === 'all' ? entry : this.selectedDoctor === parseInt(entry.doctorId)
         return dateMatches && selectedDoctor;  // Return true if both date and doctor conditions match
       });
 
       // Update the imported data with filtered data
-      this.importedData = filteredReportData;
+      // this.importedData = filteredReportData;
+      this.importedData = this.convertDateFormat(filteredReportData)
       // console.log('Filtered Report Data:', filteredReportData);
 
     } else if (!this.type) {
@@ -203,6 +202,7 @@ export class ReportFilterComponent implements OnChanges {
 
     // Update the imported data with the filtered report data
     this.importedData = filteredReportData;
+    this.importedData = this.convertDateFormat(this.importedData)
   }
 
   getIndividualDates(startDate: Date, endDate: Date): string[] {
@@ -231,11 +231,10 @@ export class ReportFilterComponent implements OnChanges {
     this.importedData = this.importedData.sort((a: any, b: any) => {
       const dateA = new Date(a.date);
       const dateB = new Date(b.date);
-
-      // Compare dates (ascending order)
       return dateA.getTime() - dateB.getTime();
     });
-    // console.log('Sorted Report Data:', this.reportData);
+
+    this.importedData = this.convertDateFormat(this.importedData)
   }
 
   getDatesInMonth(year: number, month: number): string[] {
@@ -256,9 +255,8 @@ export class ReportFilterComponent implements OnChanges {
     this.loadDepartments()
     this.doctors = []
     this.selectedDateRange = []
-    this.individualDates = [getYesterdayDate()]
     this.selectedDoctor = 'all'
-    if(this.selectedDoctor === 'all'){
+    if (this.selectedDoctor === 'all') {
       const filtererdData = this.reportData.filter((entry: any) => {
         const dateMatches = this.individualDates.includes(entry.date);
         const doctor = this.selectedDoctor === 'all' ? entry : this.selectedDoctor === parseInt(entry.doctorId)
@@ -274,14 +272,23 @@ export class ReportFilterComponent implements OnChanges {
     this.selectedDateRange = []
     this.individualDates = [getYesterdayDate()]
     this.selectedDoctor = 'all'
-    if(this.selectedDoctor === 'all'){
+    if (this.selectedDoctor === 'all') {
       const filtererdData = this.reportData.filter((entry: any) => {
         const dateMatches = this.individualDates.includes(entry.date);
         const doctor = this.selectedDoctor === 'all' ? entry : this.selectedDoctor === parseInt(entry.doctorId)
         return dateMatches && doctor;
       });
-      this.importedData = filtererdData
+      this.importedData = this.convertDateFormat(filtererdData)
     }
+  }
 
+  convertDateFormat(dataArray: any) {
+    return dataArray.map((item: any) => {
+      const [year, month, day] = item.date.split('-');
+      return {
+        ...item,
+        date: `${day}-${month}-${year}`
+      };
+    });
   }
 }

@@ -64,42 +64,6 @@ export class OpdEstimationPieComponent implements OnChanges {
   initChart(): void {
     const chartDom = document.getElementById('pie-chart')!;
     const myChart = echarts.init(chartDom);
-    // this.option = {
-    //   tooltip: {
-    //     trigger: 'item'
-    //   },
-    //   color: ['#3366CC', '#20AA68'],
-    //   series: [
-    //     {
-    //       name: 'OPD - Estimation',
-    //       type: 'pie',
-    //       radius: ['80%'],
-    //       // emphasis: {
-    //       //   label: {
-    //       //     show: true,
-    //       //     fontSize: 20,
-    //       //   }
-    //       // },
-    //       data: [
-    //         { value: this.NoEstimations, name: 'Non EST OPD' },
-    //         { value: this.estimatedCount, name: 'EST OPD' },
-    //       ],
-    //       label: {
-    //         show: true, // Ensure labels are visible
-    //         formatter: '{c}', // Show the value (count) for each slice
-    //         // position: 'inside', // Keep labels inside the pie slices
-    //         fontSize: 14, // Set font size for labels
-    //         color: '#000', // Set label color (e.g., white for contrast against dark slices)
-    //         fontWeight: 'bold', // Make labels bold (optional)
-    //         fontFamily: 'Arial, sans-serif', // Specify font family
-    //         align: 'center' // Center-align the text horizontally
-    //       },
-    //       labelLine: {
-    //         // show: true // Hide connecting lines (not needed for inside labels)
-    //       },
-    //     }
-    //   ]
-    // };
 
     this.option = {
       tooltip: {
@@ -126,15 +90,15 @@ export class OpdEstimationPieComponent implements OnChanges {
           label: {
             show: true,
             formatter: '{c}',
-            position: 'inside',
+            position: 'outside',
             fontSize: 14,
-            color: '#FFFFFF',
+            color: '#000',
             fontWeight: 'bold',
             fontFamily: 'Arial, sans-serif',
             TextAlignment: 'center',
           },
           labelLine: {
-            show: false
+            show: true
           }
         }
       ]
@@ -300,6 +264,7 @@ export class OpdEstimationPieComponent implements OnChanges {
 
   viewmore(): void {
     this.showViewMore = true
+    this.loadDepartments();
     this.viewMoreData()
   }
 
@@ -375,15 +340,15 @@ export class OpdEstimationPieComponent implements OnChanges {
           label: {
             show: true,
             formatter: '{c}',
-            position: 'inside',
+            position: 'outside',
             fontSize: 14,
-            color: '#FFFFFF',
+            color: '#000',
             fontWeight: 'bold',
             fontFamily: 'Arial, sans-serif',
             TextAlignment: 'center',
           },
           labelLine: {
-            show: false
+            show: true
           }
         }
       ]
@@ -392,7 +357,6 @@ export class OpdEstimationPieComponent implements OnChanges {
   }
 
   viewMoreData(): void {
-    this.loadDepartments();
 
     this.isLoading = true
     this.appoinment.getAllAppointments().subscribe({
@@ -463,9 +427,12 @@ export class OpdEstimationPieComponent implements OnChanges {
 
   refresh():void{
     this.loadDepartments()
+    this.filteredDoctors = []
+    this.selectedViewDate = []
     this.selectedViewDate = getLastThirtyDaysFromSelected()
     this.selectedViewDoctor = 'all'
     this.viewmore()
+    this.dateInput = []
   }
 
 }

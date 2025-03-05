@@ -123,8 +123,8 @@ export class AppointmentCancelComponent {
     this.filteredList = [...this.cancelledAppointments];
     this.filteredAppointments = [...this.cancelledAppointments];
   
-    console.log("🔎 Search Value:", this.searchValue);
-    console.log("📆 Selected Date Range:", this.selectedDateRange);
+    // console.log("🔎 Search Value:", this.searchValue);
+    // console.log("📆 Selected Date Range:", this.selectedDateRange);
   
     // ✅ If selectedDateRange is provided, filter by date range
     if (this.selectedDateRange && this.selectedDateRange.length) {
@@ -143,7 +143,7 @@ export class AppointmentCancelComponent {
             return appointmentDate >= startDate && appointmentDate <= normalizedEndDate;
           });
           this.filteredAppointments = this.filteredList
-          console.log('Filtered list:', this.filteredList);
+          // console.log('Filtered list:', this.filteredList);
         }
         else if (startDate.getTime() === endDate.getTime()) {
           // console.log('Single date selected:');
@@ -154,7 +154,7 @@ export class AppointmentCancelComponent {
             return appointmentDate.toDateString() === startDate.toDateString();  // Compare the date portion only
           });
           this.filteredAppointments = this.filteredList
-          console.log('Filtered list:', this.filteredList);
+          // console.log('Filtered list:', this.filteredList);
         }
       }
       else {
@@ -162,7 +162,7 @@ export class AppointmentCancelComponent {
       }
 
   
-      console.log("✅ Filtered Appointments based on selectedDateRange:", this.filteredAppointments);
+      // console.log("✅ Filtered Appointments based on selectedDateRange:", this.filteredAppointments);
     }
   
     // ✅ Apply search filters on top of the date range filtering
@@ -183,7 +183,7 @@ export class AppointmentCancelComponent {
           case 'prnNumber':
             const prnNumber = Number(service.prnNumber); // Convert to Number
             const searchNumber = Number(this.searchValue); // Convert to Number
-            console.log(prnNumber, searchNumber);
+            // console.log(prnNumber, searchNumber);
   
             matches = !isNaN(searchNumber) && prnNumber === searchNumber;
             break;
@@ -194,7 +194,7 @@ export class AppointmentCancelComponent {
     });
   
     this.filteredAppointments = this.filteredServices;
-    console.log("✅ Final Filtered Appointments:", this.filteredAppointments);
+    // console.log("✅ Final Filtered Appointments:", this.filteredAppointments);
   }
   
 

@@ -1,4 +1,4 @@
-<div class="wrapper">
+<!-- <div class="wrapper">
 
     <div class="cards" style="cursor: pointer;" (click)="docAvailReport()">
         <div class="text">Doc Available</div>
@@ -44,11 +44,11 @@
         <div class="text">Occupied Rooms</div>
         <div class="flex">
             <div class="counts">
-                <div class="count">{{availlableRoom}}</div>
+                <div class="count">{{availlableRoom}} / <span>25</span></div>
                 <div class="percentage gold" style="visibility: hidden;"><b>00</b></div>
             </div>
             <div class="graph">
-                <div id="chart" style="width: 90px; height: 90px;"></div>
+                <div id="chart" style="width: 20px; height: 90px;"></div>
                 <div class="info tooltip"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                         viewBox="0 0 24 24">
                         <path fill="currentColor"
@@ -127,6 +127,56 @@
         <div class="today">Today</div>
         <div class="today"><i class="fa-solid fa-arrow-left"></i></div>
     </div>
+</div> -->
+
+<div class="wrapper">
+
+    <div class="card pointer" style="background-color: #DCFCE7;" (click)="docAvailReport()">
+        <div class="icon"><img src="/avail.svg" alt="" matTooltip="Total number of doctors available today." matTooltipPosition="above"></div>
+        <div class="count">{{availableDoctorsToday}}/<span>{{doctorsCount}}</span></div>
+        <div class="text">Doc Available</div>
+    </div>
+
+    <div class="card pointer" style="background-color: #FFE2E5;" (click)="docAbsentReport()">
+        <div class="icon"><img src="/abs.svg" alt="" matTooltip="Total number of doctors absent today." matTooltipPosition="above"></div>
+        <div class="count">{{absentDoctorsToday}}/<span>{{doctorsCount}}</span></div>
+        <div class="text">Doc Absent</div>
+    </div>
+
+    <div class="card pointer" style="background-color: #FFF4DE;" (click)="doctorUnavailReport()">
+        <div class="icon"><img src="/unavail.svg" alt="" matTooltip="Total number of doctors unavailabletoday." matTooltipPosition="above"></div>
+        <div class="count">{{unavailableDoctorsToday}}/<span>{{doctorsCount}}</span></div>
+        <div class="text">Doc Unavailable</div>
+    </div>
+
+    <div class="card" style="background-color: #9FE4FF;">
+        <div class="icon"><img src="/occupied.svg" alt="" matTooltip="Total number of rooms occupied today." matTooltipPosition="above"></div>
+        <div class="count">{{availlableRoom}}/<span>25</span></div>
+        <div class="text">Rooms Occupied</div>
+    </div>
+
+    <div class="card" style="background-color: #E8D3FF;">
+        <div class="icon"><img src="/mhc_confirmed.svg" alt="" matTooltip="Total number of Medical Health Check confirmed for today." matTooltipPosition="above"></div>
+        <div class="count">{{healthCheck.liveCount}}</div>
+        <div class="text">MHC Confirmed</div>
+    </div>
+
+    <div class="card" style="background-color: #B3D5FF;">
+        <div class="icon"><img src="/est_confirmed.svg" alt="" matTooltip="Total number of Estimation confirmed for today." matTooltipPosition="above"></div>
+        <div class="count">{{estimation.liveConfirmedEstimating}}</div>
+        <div class="text">EST Confirmed</div>
+    </div>
+
+    <div class="round">
+        <div class="today">Today</div>
+        <div class="today"><i class="fa-solid fa-arrow-left"></i></div>
+    </div>
+
+    <div class="card" style="background-color: #FF6A6F;" (click)="LeaveDoctorList()">
+        <div class="icon"><img src="/leave.svg" alt="" matTooltip="Total number of doctors absent (click to view leave details)." matTooltipPosition="above"></div>
+        <div class="count-white">{{leaveDoctorsCount}}</div>
+        <div class="text-white">Doc Leave Details</div>
+    </div>
 </div>
 
 <div *ngIf="popUpPresentReport" class="overlay">
@@ -141,9 +191,6 @@
                     <div class="doctor-id">{{i + 1}}</div>
                     <div class="doctor-name">{{doctor.name}}<span style="margin-left: 5px;"> -
                             ({{doctor.availableFrom}})</span></div>
-                </div>
-                <div class="availability-status available">
-                    {{'Available'}}
                 </div>
             </div>
             <div *ngIf="availableDoctors.length === 0">
@@ -165,9 +212,6 @@
                     <div class="doctor-id">{{i+1}}</div>
                     <div class="doctor-name">{{doctor.name}}</div>
                 </div>
-                <div class="availability-status absent">
-                    Absent
-                </div>
             </div>
         </div>
         <div *ngIf="absentDoctors.length === 0">
@@ -175,3 +219,76 @@
         </div>
     </div>
 </div>
+
+
+<!-- <div *ngIf="popUpUnavailReport" class="overlay">
+    <div class="container">
+        <div class="header unavailable">
+            Doctors Absent
+            <button class="close-button pointer" (click)="closeDoctorUnavailReport()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="doctor-list">
+            <div *ngFor="let doctor of unavailableDoctors; let i=index" class="doctor-card">
+                <div class="doctor-details">
+                    <div class="doctor-id">{{i+1}}</div>
+                    <div class="doctor-name">{{doctor.name}}</div>
+                </div>
+            </div>
+        </div>
+        <div *ngIf="unavailableDoctors.length === 0">
+            <div class="doctor-details doctor-card no-record">No unavailable Doctors to Display</div>
+        </div>
+    </div>
+</div> -->
+
+<div *ngIf="popUpUnavailReport" class="overlay">
+    <div class="container">
+      <div class="header unavailable">
+        Doctors Unavailable
+        <button class="close-button" (click)="closeDoctorUnavailReport()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="doctor-list">
+        <div *ngFor="let doctor of unavailableDoctors; let i=index" class="doctor-card-unavail" >
+          <div class="doctor-details">
+            <div class="doctor-id">{{i+1}}</div>
+            <div class="doctor-name">{{doctor.name}}</div>
+          </div>
+          <div class="availability-status unavailable">
+            <!-- <span *ngFor="let slot of doctor.groupedUnavailableSlots">
+              {{ slot }}
+            </span> -->
+            {{ doctor.groupedUnavailableSlots.join(', ') }}
+          </div>
+  
+        </div>
+        
+      </div>
+      <div *ngIf="unavailableDoctors.length === 0">
+        <div class="doctor-details doctor-card no-record">No Unavailable Doctors to Display</div>
+      </div>
+    </div>
+  </div>
+
+
+<div *ngIf="showLeaveDoctors" class="overlay">
+    <div class="container">
+      <div class="header absent">
+        Doctors Leave
+        <button class="close-button" (click)="closeLeaveDoctorList()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="doctor-list">
+        <div *ngFor="let doctor of leaveDoctors; let i=index" class="doctor-card-leave" >
+          <div class="doctor-details">
+            <div class="doctor-id">{{i+1}}</div>
+            <div class="doctor-name">{{doctor.name}}</div>
+          </div>
+          <div class="availability-status absent car-margin">
+            {{ doctor.groupedUnavailableDates.join(', ') }}
+          </div>
+        </div>
+      </div>
+      <div *ngIf="leaveDoctors.length === 0">
+        <div class="doctor-details doctor-card no-record">No Leave Doctors to Display</div>
+      </div>
+    </div>
+  </div>

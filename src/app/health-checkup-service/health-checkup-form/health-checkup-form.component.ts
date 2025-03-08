@@ -108,7 +108,7 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
   populateForm(service: any): void {
     this.formData = { ...service }; // Pre-populate form fields
     this.requestVia = service.requestVia || 'Call'; // Default to 'Call' if undefined
-    this.appointmentStatus = service.appointmentStatus || 'Confirm'; // Default to 'Confirm' if undefined
+    this.appointmentStatus = service.appointmentStatus === 'pending' ? 'Confirm' : (service.appointmentStatus || 'Confirm');    // Default to 'Confirm' if undefined
     this.selectedPackageId = service.packageId.toString();
     this.selectedDate = service.appointmentDate;
     this.formData.phoneNumber.startsWith('91') ? this.formData.phoneNumber = this.formData.phoneNumber.slice(2) : this.formData.phoneNumber;
@@ -401,7 +401,7 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
         userId: parseInt(this.userId),
         username: this.userName,
         role: this.role,
-        age:form.value.age,
+        age:Number(form.value.age),
         gender:form.value.gender
       };
       if (this.isRepeatChecked) {
@@ -430,6 +430,7 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
           payload.repeatedDates = this.repeatedDates;
         }
         this.isLoading = true;
+        // Number(payload.age)
         const updatedService = { ...this.serviceData, ...payload };
         this.healthCheckupService.updateService(this.serviceData.id, payload).subscribe({
           next: (response) => {
@@ -854,5 +855,8 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
       }
     }
     return invalidControls;
+  }
+  showDatePicker(event: Event) {
+    (event.target as HTMLInputElement).showPicker(); // ✅ Opens date picker on input click
   }
 }

@@ -134,14 +134,16 @@
         <!-- Compact View -->
         <div class="card-header" *ngIf="!appointment.expanded">
           <div class="patient-info">
-            <img src="admin-icons/admin-icon.jpg" class="profile-pic">
+            <div>
+              <img src="admin-icons/admin-icon.jpg" class="profile-pic">
+            </div>
             <div class="patient-details">
               <div>
                 <h3>{{ appointment.patientName }}</h3>
               <p class="patient">Patient</p>
               </div>
-              <div class="prn">
-                <p class="patient">{{appointment.prnNumber}}</p>
+              <div>
+                <p class="patient">PRN:{{appointment.prnNumber}}</p>
               </div>
               
             </div>
@@ -152,10 +154,18 @@
         <div class="expanded-card" *ngIf="appointment.expanded">
           <div class="card-header">
             <div class="patient-info">
-              <img src="admin-icons/admin-icon.jpg" class="profile-pic">
               <div>
-                <h3>{{ appointment.patientName }}</h3>
+                <img src="admin-icons/admin-icon.jpg" class="profile-pic">
+              </div>
+              <div class="patient-details">
+                <div>
+                  <h3>{{ appointment.patientName }}</h3>
                 <p class="patient">Patient</p>
+                </div>
+                <div>
+                  <p class="patient">PRN:{{appointment.prnNumber}}</p>
+                </div>
+                
               </div>
             </div>
             <div class="calendar-div">

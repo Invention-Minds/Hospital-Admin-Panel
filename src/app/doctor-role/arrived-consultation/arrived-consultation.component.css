@@ -1047,5 +1047,14 @@
   justify-content: space-around;
   align-items: center;
   }
+  .patient-details{
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+  }
+  .prn{
+    display: flex;
+    justify-content: center;
+  }
   }
   

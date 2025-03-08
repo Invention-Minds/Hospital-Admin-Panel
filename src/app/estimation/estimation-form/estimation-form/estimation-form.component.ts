@@ -545,6 +545,12 @@ export class EstimationFormComponent {
         exclusions: this.estimationData.exclusions?.map((exclusion: any) => exclusion.description) || [],
       };
       this.initializeEstimationInputs()
+      if (this.formData.patientPhoneNumber.startsWith('91') && this.formData.patientPhoneNumber.length === 12) {
+        this.formData.patientPhoneNumber = this.formData.patientPhoneNumber.slice(2); // Remove '91' prefix
+      } else {
+        this.formData.patientPhoneNumber = this.formData.patientPhoneNumber; // Keep as is
+      }
+      
       console.log(this.estimationData.roomType, this.availableRooms)
       if (this.estimationData.roomType) {
         this.selectedRooms = this.estimationData.roomType.split(',')
@@ -637,15 +643,34 @@ export class EstimationFormComponent {
     this.employeeId = localStorage.getItem('employeeId') || '';
     this.role = localStorage.getItem('role')!
     this.employeeName = localStorage.getItem('username')|| ''
+    // if (this.role === 'sub_admin') {
+    //   this.formData.employeeId = this.employeeId!
+    //   this.formData.employeeName = this.employeeName.split(`_subadmin`)[0].replace(/_/g, ' ');
+    //   console.log(this.formData.employeeName)
+    // }
+    // if (this.role === 'admin' || this.role === 'super_admin') {
+    //   this.formData.approverId = this.employeeId
+    //   this.formData.approverName = this.employeeName.split(`_${this.role}`)[0].replace(/_/g, ' ');
+    // }
     if (this.role === 'sub_admin') {
-      this.formData.employeeId = this.employeeId!
-      this.formData.employeeName = this.employeeName.split(`_subadmin`)[0];
-      console.log(this.formData.employeeName)
+      if (!this.formData.employeeId || this.formData.employeeId === '') {
+        this.formData.employeeId = this.employeeId!;
+      }
+      if (!this.formData.employeeName || this.formData.employeeName === '') {
+        this.formData.employeeName = this.employeeName.split(`_subadmin`)[0].replace(/_/g, ' ');
+        console.log(this.formData.employeeName);
+      }
     }
+    
     if (this.role === 'admin' || this.role === 'super_admin') {
-      this.formData.approverId = this.employeeId
-      this.formData.approverName = this.employeeName.split(`_${this.role}`)[0];
+      if (!this.formData.approverId || this.formData.approverId === '') {
+        this.formData.approverId = this.employeeId;
+      }
+      if (!this.formData.approverName || this.formData.approverName === '') {
+        this.formData.approverName = this.employeeName.split(`_${this.role}`)[0].replace(/_/g, ' ');
+      }
     }
+    
   }
   parseExistingData(data: string | null): { name: string; cost: number }[] {
     if (!data) return [];

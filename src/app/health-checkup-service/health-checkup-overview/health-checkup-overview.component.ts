@@ -40,7 +40,7 @@ export class HealthCheckupOverviewComponent {
   ngOnInit() {
     this.role = localStorage.getItem('role') || '';
     this.subAdminType = localStorage.getItem('subAdminType') || '';
-    this.activeComponent = this.subAdminType === 'MHC Coordinator' ? 'mhcForm' : 'form'
+    this.activeComponent = this.subAdminType === 'MHC Coordinator' ? 'mhcToday' : 'form'
   }
 
 

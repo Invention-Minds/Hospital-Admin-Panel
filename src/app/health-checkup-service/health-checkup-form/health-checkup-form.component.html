@@ -128,7 +128,7 @@
             name="age"
             ngModel
             [(ngModel)]="formData.age"
-            pattern="^[1-9]{1,3}$"
+            pattern="^[1-9][0-9]{0,2}$"
             placeholder=" "
           />
           <label for="age" class="form-label">Age</label>
@@ -145,9 +145,9 @@
           
         >
           <option value="" disabled>Select a Gender</option>
-          <option value="Male" disabled>Male</option>
-          <option value="Female" disabled>Female</option>
-          <option value="Other" disabled>Other</option>
+          <option value="Male" >Male</option>
+          <option value="Female" >Female</option>
+          <option value="Other" >Other</option>
         </select>
 
           
@@ -193,7 +193,7 @@
             (change)="fetchAvailableSlots()"
             (ngModelChange)="onFieldChange(form)"
             [min]="minDateString"
-
+            (focus)="this.showDatePicker($event)"
           />
           <label for="date" class="form-label">Select Date*</label>
           <div *ngIf="form.submitted && form.controls['date']?.invalid" class="error-message">

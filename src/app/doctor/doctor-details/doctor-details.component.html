@@ -63,36 +63,12 @@
           <div class="form-group-inline">
             <div class="form-group">
               <label for="startDate">Starting Date:</label>
-              <!-- <input type="date" id="startDate"  /> -->
-              <p-calendar 
-              id="startDate"
-              styleClass="custom-calendar" 
-              formControlName="startDate"
-              placeholder="Start Date"
-              dateFormat="dd-mm-yy">
-                <!-- <ng-template pTemplate="date" let-date>
-                    <span>
-                        {{ selectedDate | date: 'dd' }}
-                    </span>
-                </ng-template> -->
-            </p-calendar>
+              <input type="date" id="startDate" formControlName="startDate" />
+ 
             </div>
             <div class="form-group">
               <label for="endDate">Ending Date:</label>
-              <!-- <input type="date" id="endDate" formControlName="endDate" /> -->
-              <p-calendar 
-              id="endDate"
-              formControlName="endDate"
-              styleClass="custom-calendar" 
-              formControlName="startDate"
-              placeholder="End Date"
-              dateFormat="dd-mm-yy">
-                <!-- <ng-template pTemplate="date" let-date>
-                    <span>
-                        {{ selectedDate | date: 'dd' }}
-                    </span>
-                </ng-template> -->
-            </p-calendar>
+              <input type="date" id="endDate" formControlName="endDate" />
             </div>
           </div>
         </form>

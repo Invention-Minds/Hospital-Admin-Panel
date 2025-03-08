@@ -23,8 +23,21 @@ interface Appointment {
   requestVia?: string; // Optional property
   created_at?: string;
   checkedIn?: boolean;
+  checkedOut?: boolean;
   user?: any;
-  prnNumber?:number;
+  selectedSlot?: boolean;
+  endConsultation?: boolean;
+  checkedOutTime?: Date;
+  checkedInTime?: Date;
+  waitingTime?: string;
+  postPond?: boolean;
+  endConsultationTime?: Date;
+  isTransfer?: boolean;
+  isCloseOPD?: boolean;
+  isCloseOPDTime?: Date;
+  expanded?: any;
+  extraWaitingTime?: any;
+  prnNumber?:any
 }
 @Component({
   selector: 'app-arrived-consultation',
@@ -74,6 +87,18 @@ export class ArrivedConsultationComponent {
 
   checkScreenSize() {
     this.isDesktopView = window.innerWidth > 500; // Use table if screen width > 768px
+  }
+  toggleCard(index: number, event: Event): void {
+    const targetElement = event.target as HTMLElement;
+  
+    // Check if the clicked element is a button or inside a button
+    if (targetElement.tagName === 'BUTTON' || targetElement.closest('button')) {
+      event.stopPropagation(); // ✅ Prevent the click from propagating to the card
+      return;
+    }
+  
+    // Toggle card expansion
+    this.filteredAppointments[index].expanded = !this.filteredAppointments[index].expanded;
   }
   // Method to handle sorting by a specific column
   ngOnInit() {

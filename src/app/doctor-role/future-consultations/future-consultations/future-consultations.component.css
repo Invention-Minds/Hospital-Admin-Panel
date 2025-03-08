@@ -972,6 +972,7 @@ input {
     cursor: pointer;
     /* padding-top: 20px; */
   }
+
 /* Show the mobile cards on smaller screens */
 @media screen and (max-width: 768px) {
   .table-container {
@@ -1123,4 +1124,25 @@ display: flex;
 justify-content: space-around;
 align-items: center;
 }
+.patient-details{
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
+.prn{
+  display: flex;
+  justify-content: center;
+}
+
+}
+
+@media screen and (max-width: 400px){
+  ::ng-deep .custom-calendar .p-inputtext{
+    width: 210px !important;
+  }
+}
+@media screen and (max-width: 350px){
+  ::ng-deep .custom-calendar .p-inputtext{
+    width: 180px !important;
+  }
 }

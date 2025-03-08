@@ -46,6 +46,7 @@ interface Appointment {
   isCloseOPDTime?: Date;
   expanded?: any;
   extraWaitingTime?: any;
+  prnNumber?:any;
 }
 
 @Component({
@@ -607,7 +608,7 @@ export class TodayConsultationsComponent {
       // this.messageService.add({ severity: 'info', summary: 'Info', detail: 'Estimation already exists.' });
       // this.closeEstimationPopup();
       const estimationDetails = {
-        prnNumber: this.selectedAppointment?.id,
+        prnNumber: this.selectedAppointment?.prnNumber,
         patientName: this.selectedAppointment?.patientName,
         phoneNumber: this.selectedAppointment?.phoneNumber,
         patientEmail: this.selectedAppointment?.email,
@@ -642,7 +643,7 @@ export class TodayConsultationsComponent {
       return;
     }
     const estimationDetails = {
-      prnNumber: this.selectedAppointment?.id,
+      prnNumber: this.selectedAppointment?.prnNumber,
       patientName: this.selectedAppointment?.patientName,
       phoneNumber: this.selectedAppointment?.phoneNumber,
       patientEmail: this.selectedAppointment?.email,

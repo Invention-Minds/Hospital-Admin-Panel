@@ -22,11 +22,12 @@ export class TvControlComponent {
     this.loadDepartments();
     this.loadDoctors();
     this.loadChannels();
+    this.fetchLatestAds()
   }
 
 
-  channels :any = []; // Will be fetched from the backend
-  channelLength :number = 0;
+  channels: any = []; // Will be fetched from the backend
+  channelLength: number = 0;
   departments: any = [];
   allDoctors: any = [];
   filteredDoctors: any = [];
@@ -35,25 +36,38 @@ export class TvControlComponent {
   selectedChannelIndex: number = 0;
   selectedDoctorIndex: number = 0;
   isPopupOpen = false;
-  roomNumber : string = '';
+  roomNumber: string = '';
   isButtonClicked: boolean = true;
+  latestTextAd = '';
+  latestMediaAd = '';
+  isImage = false;
+  isVideo = false;
+  popupInterval: any;
+  selectedAdType = 'text';
+  uploadedFile: File | null = null;
+  textAd = '';
+  ads: any[] = []
+  adStatuses: { [key: string]: boolean } = {};
+  existingAds: any = {}; 
   private eventSource: EventSource | null = null;
 
-  ngOnInit(){
+
+
+  ngOnInit() {
     this.eventSource = new EventSource(`${environment.apiUrl}/appointments/updates`);
 
     this.eventSource.addEventListener('channelRemoval', (event: MessageEvent) => {
       const removedChannel = JSON.parse(event.data);
       console.log('Channel Removed:', removedChannel);
-  
+
       const currentRoute = this.router.url;
       console.log(currentRoute)
 
-        this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
-          this.router.navigate([currentRoute]); // Refresh the current route
-          // this.loadChannels()
-        });
-      
+      this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+        this.router.navigate([currentRoute]); // Refresh the current route
+        // this.loadChannels()
+      });
+
     });
   }
 
@@ -101,13 +115,13 @@ export class TvControlComponent {
     this.channelService.getChannels().subscribe(
       (channels) => {
         console.log('Fetched Channels:', channels);
-  
+
         // Map the backend channels to the frontend `channels` array
         this.channels = channels.map((channel: any) => {
           // Extract doctor assignments for the current channel
           const doctorAssignments = channel.doctorAssignments || [];
           console.log(doctorAssignments)
-  
+
           // Map doctor assignments to the `doctors` array
           const doctors = doctorAssignments.map((assignment: any) => ({
             doctorId: assignment.doctor?.id || null,
@@ -115,12 +129,12 @@ export class TvControlComponent {
             departmentName: assignment.departmentName || null,
             roomNo: assignment.doctor?.roomNo || null
           }));
-  
+
           // Fill the remaining slots (if any) with `null` to ensure max 4 slots
           while (doctors.length < 4) {
             doctors.push(null);
           }
-  
+
           return {
             id: channel.id,
             name: channel.name,
@@ -128,7 +142,7 @@ export class TvControlComponent {
             doctors,
           };
         });
-  
+
         console.log('Processed Channels:', this.channels);
       },
       (error) => {
@@ -136,11 +150,11 @@ export class TvControlComponent {
       }
     );
   }
-  
+
   filterDoctors() {
     const todayDate = new Date().toISOString().split('T')[0]; // Today's date
     const currentTime = this.timeToMinutes(new Date().toTimeString().substring(0, 5)); // Current time in minutes
-  
+
     // Create a set of doctor IDs who are already assigned to channels
     const assignedDoctorIds = new Set<number>();
     this.channels.forEach((channel: any) => {
@@ -150,8 +164,8 @@ export class TvControlComponent {
         }
       });
     });
-    console.log(assignedDoctorIds, )
-  
+    console.log(assignedDoctorIds,)
+
     // Filter doctors based on availability and assignment
     this.filteredDoctors = this.allDoctors.filter((doctor: any) => {
       const isAlreadyAssigned = assignedDoctorIds.has(doctor.id);
@@ -166,7 +180,7 @@ export class TvControlComponent {
           const formattedUnavailableDate = new Date(unavailableDate.date).toISOString().split('T')[0];
           return formattedUnavailableDate === todayDate;
         });
-    
+
       console.log(
         'Doctor:',
         doctor.name,
@@ -179,7 +193,7 @@ export class TvControlComponent {
         'Department Match:',
         doctor.departmentName === this.selectedDepartment
       );
-    
+
       return (
         isAvailableToday &&
         !isAlreadyAssigned &&
@@ -188,39 +202,39 @@ export class TvControlComponent {
       );
     });
     console.log('Filtered Doctors:', this.filteredDoctors);
-    
+
   }
   timeToMinutes(time: string): number {
     const [hours, minutes] = time.split(':').map(Number);
     return hours * 60 + minutes;
   }
-    
-  
+
+
 
   saveDoctor() {
     this.isButtonClicked = false;
     if (this.selectedDoctor && this.selectedDepartment && this.roomNumber) {
       console.log('Selected Doctor:', this.selectedDoctor);
       console.log('Selected Channel Index:', this.selectedChannelIndex, 'Selected Doctor Index:', this.selectedDoctorIndex);
-  
+
       // Get the selected channel using the channel index
       const channel = this.channels[this.selectedChannelIndex];
-  
+
       if (!channel) {
         console.error('Channel not found!');
         return;
       }
-  
+
       console.log('Selected Channel:', channel);
-  
+
       // Update the frontend channel array
       channel.doctors[this.selectedDoctorIndex] = {
         doctorName: this.selectedDoctor.name,
         departmentName: this.selectedDepartment,
       };
-  
+
       console.log('Updated Channel:', channel);
-  
+
       // Prepare data to send to the backend
       const doctorData = {
         channelId: channel.channelId, // Use the channelId from the selected channel
@@ -249,9 +263,9 @@ export class TvControlComponent {
           // alert('Failed to update room number.');
         },
       });
-    
+
       console.log('Doctor Data to Save:', doctorData);
-  
+
       // Send the data to the backend
       this.channelService.assignDoctorToChannel(doctorData).subscribe(
         (response) => {
@@ -278,9 +292,9 @@ export class TvControlComponent {
       });
     }
   }
-  
-  
-  
+
+
+
 
   // removeDoctor(channelIndex: number, doctorIndex: number) {
   //   const doctor = this.channels[channelIndex].doctors[doctorIndex];
@@ -310,16 +324,16 @@ export class TvControlComponent {
         channelId: channel.channelId, // Use channelId from the selected channel
         doctorId: doctor.doctorId,   // Ensure doctor object has the correct doctorId
       };
-  
+
       console.log('Removing Doctor:', doctorData);
-  
+
       this.channelService.removeDoctorFromChannel(doctorData).subscribe(
         (response) => {
           console.log('Doctor removed successfully:', response);
-          
+
           // Set the doctor position to null to maintain array structure
           channel.doctors[doctorIndex] = null;
-  
+
           console.log('Updated Channel:', channel);
         },
         (error) => {
@@ -330,7 +344,113 @@ export class TvControlComponent {
       console.warn('No doctor found at this position.');
     }
   }
-  
-  
-  
+  selectAdType(type: string) {
+    this.selectedAdType = type;
+    this.uploadedFile = null;
+    this.textAd = '';
+    if(this.existingAds.text){
+      this.textAd = this.existingAds.text.content;
+    }
+  }
+
+  onFileUpload(event: any) {
+    if (event.target.files.length > 0) {
+      this.uploadedFile = event.target.files[0];
+      console.log(this.uploadedFile)
+    }
+  }
+
+  isAdReady(): boolean {
+    return this.selectedAdType === 'text' ? !!this.textAd : !!this.uploadedFile;
+  }
+  submitAd() {
+    if (this.selectedAdType === 'text') {
+      this.channelService.uploadTextAd(this.textAd).subscribe(() => {
+        this.fetchLatestAds();
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Text is updated successfully',
+        });
+      });
+    } else {
+      this.channelService.uploadMediaAd(this.selectedAdType, this.uploadedFile!).subscribe(() => {
+        this.fetchLatestAds();
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Media is uploaded successfully',
+        });
+      });
+    }
+  }
+  fetchLatestAds() {
+
+    this.channelService.getAllAds().subscribe(response => {
+      this.existingAds = response.ads.reduce((acc: any, ad: any) => {
+        acc[ad.type] = ad;
+        return acc;
+      }, {});
+    
+      this.ads = response.ads;
+      this.adStatuses = response.ads.reduce((acc: any, ad: any) => {
+        acc[ad.type] = ad.isActive ?? false;
+        return acc;
+      }, {});
+    
+      // ✅ Ensure UI updates after data is set
+      setTimeout(() => {
+        console.log("Existing Text Ad:", this.existingAds.text);
+        if (this.existingAds.text) {
+          this.textAd = this.existingAds.text.content;
+        }
+      }, 0);
+    });
+    
+
+  }
+  onDragOver(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    (event.currentTarget as HTMLElement).classList.add("drag-over");
+  }
+
+  // ✅ Remove drag-over effect when leaving the drop zone
+  onDragLeave(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    (event.currentTarget as HTMLElement).classList.remove("drag-over");
+  }
+
+  // ✅ Handle drop event
+  onDrop(event: DragEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+    (event.currentTarget as HTMLElement).classList.remove("drag-over");
+    if (event.dataTransfer && event.dataTransfer.files.length > 0) {
+      this.uploadedFile = event.dataTransfer.files[0]; // Store the first dropped file
+      console.log("Stored Dragged File:", this.uploadedFile);
+    } else {
+      console.warn("No files were dropped.");
+    }
+  }
+  toggleAdStatus(type: string) {
+    const isActive = !this.adStatuses[type];
+
+    // ✅ Check if media exists before enabling Image/Video ads
+    if (isActive && (type === 'image' || type === 'video')) {
+      const mediaExists = this.ads.some(ad => ad.type === type && ad.content);
+
+      if (!mediaExists) {
+        alert(`No ${type} found. Please upload one first.`);
+        return;
+      }
+    }
+
+    this.channelService.updateAdStatus(type, isActive).subscribe(() => {
+      alert(`Ad ${isActive ? "enabled" : "disabled"} successfully.`);
+      this.fetchLatestAds();
+    });
+  }
+
 }

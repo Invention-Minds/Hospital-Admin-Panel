@@ -76,7 +76,83 @@
               </div>
             </div>
           </div>
+          <!-- <div class="upload-container">
+            <h3>Upload Advertisement</h3>
+            <label>
+                <input type="radio" name="adType" value="text" (change)="selectAdType('text')" /> Text
+            </label>
+            <label>
+                <input type="radio" name="adType" value="image" (change)="selectAdType('image')" /> Image
+            </label>
+            <label>
+                <input type="radio" name="adType" value="video" (change)="selectAdType('video')" /> Video
+            </label>
+        
+            <textarea *ngIf="selectedAdType === 'text'" [(ngModel)]="textAd"></textarea>
+            <input type="file" (change)="onFileUpload($event)" *ngIf="selectedAdType !== 'text'" />
+            <button (click)="submitAd()" [disabled]="!isAdReady()">Upload</button>
+        </div> -->
 
+      
 
   </div>
-  
+<div class="ad-container">
+  <div class="upload-container">
+    <div class="text-container">
+      <h3>Upload Advertisement:</h3>
+    <div class="ad-type">
+        <label>
+            <input type="radio" name="text" value="text" [(ngModel)]="selectedAdType" (change)="selectAdType('text')" /> 
+            <span [class.active]="selectedAdType === 'text'">Text</span>
+        </label>
+        <label>
+            <input type="radio" name="image" value="image" [(ngModel)]="selectedAdType" (change)="selectAdType('image')" /> 
+            <span [class.active]="selectedAdType === 'image'">Image</span>
+        </label>
+        <label>
+            <input type="radio" name="video" value="video" [(ngModel)]="selectedAdType" (change)="selectAdType('video')" /> 
+            <span [class.active]="selectedAdType === 'video'">Video</span>
+        </label>
+    </div>
+    </div>
+
+
+
+    <!-- Text Ad Input -->
+    <div *ngIf="selectedAdType === 'text'" class="text-ad">
+        <textarea [(ngModel)]="textAd" placeholder="Enter Your Ad Text Here"></textarea>
+        <p class="note">(Note: Text Ad max 200 Words Only)</p>
+    </div>
+
+    <!-- File Upload Section -->
+    <div *ngIf="selectedAdType !== 'text'" class="file-upload">
+        <div class="drop-zone"  (dragover)="onDragOver($event)" 
+        (dragleave)="onDragLeave($event)" 
+        (drop)="onDrop($event)">
+          <!-- Hidden file input -->
+          <input type="file" id="fileInput" multiple (change)="onFileUpload($event)" hidden/>
+      
+          <div class="upload-placeholder">
+              <img src="upload.svg" alt="Upload Icon" class="upload-icon"/>
+              <p class="upload-text">Upload files</p>
+              <label for="fileInput" class="browse-btn">Browse File</label>
+              <p class="file-note">Supported file types: JPG, PNG, MP4, 10MB max</p>
+          </div>
+     
+            <p *ngIf="uploadedFile"  class="file-name">{{ uploadedFile.name }}</p>
+      </div>
+      
+
+    </div>
+
+    <button (click)="submitAd()" [disabled]="!isAdReady()" class="upload-btn">Upload</button>
+
+    <div class="toggle-buttons">
+      <button *ngFor="let type of ['text', 'image', 'video']"
+              (click)="toggleAdStatus(type)"
+              [class.active]="adStatuses[type]">
+        {{ adStatuses[type] ? "Deactivate" : "Activate" }} {{ type }}
+      </button>
+    </div>
+</div>
+</div>

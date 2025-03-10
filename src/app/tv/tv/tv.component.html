@@ -9,7 +9,25 @@
         </div>
       </div>
     </header>
-  
+    <div *ngIf="showPopup" class="popup-overlay" >
+      <div class="popup-content">
+          <!-- Show Image -->
+          <img *ngIf="isImage" [src]="popupMedia" alt="Popup Image" class="popup-image" />
+
+          <!-- Show Video -->
+          <video  *ngIf="!isImage" 
+          #popupVideo 
+          controls 
+          autoplay  
+          playsinline
+          (canplay)="onVideoCanPlay()"
+          (ended)="showPopup=false">
+          <source [src]="popupMedia" type="video/mp4" 
+            />
+              Your browser does not support the video tag.
+          </video>
+      </div>
+  </div>
     <div *ngIf="!loading; else loaderTemplate"
       class="doctor-cards"
       [ngClass]="{ 'four-doctors-layout': isFourDoctors() }"
@@ -79,6 +97,7 @@
       <marquee>
         <!-- Surgery Package: Total Knee Replacement - Unilateral (Excluding Implant
         Charges) -->
+        {{scrollingText}}
       </marquee>
       <div class="copy-right-container">
         <p>

@@ -46,7 +46,9 @@ interface Appointment {
   isCloseOPDTime?: Date;
   expanded?: any;
   extraWaitingTime?: any;
-  prnNumber?:any;
+  prnNumber?: any;
+  overTime?: any;
+  elapsedTime?: any;
 }
 
 @Component({
@@ -62,6 +64,7 @@ export class TodayConsultationsComponent {
   appointments: Appointment[] = [
     // { id: '0001', patientName: 'Anitha Sundar', phoneNumber: '+91 7708590100', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Booked', smsSent: true },
   ];
+  timerIntervals: any = {};
 
   currentPage = 1;
   itemsPerPage = 10;
@@ -120,7 +123,7 @@ export class TodayConsultationsComponent {
   intervalId: any;
   isMonitoringActive: boolean = false;
   isEndConsultation: boolean = false;
-  isButtonLoading:boolean =false;
+  isButtonLoading: boolean = false;
 
 
 
@@ -137,6 +140,7 @@ export class TodayConsultationsComponent {
   // Method to handle sorting by a specific column
   ngOnInit() {
     this.checkScreenSize();
+
 
     const today = new Date();
     const year = today.getFullYear();
@@ -232,17 +236,17 @@ export class TodayConsultationsComponent {
   // }
   toggleCard(index: number, event: Event): void {
     const targetElement = event.target as HTMLElement;
-  
+
     // Check if the clicked element is a button or inside a button
     if (targetElement.tagName === 'BUTTON' || targetElement.closest('button')) {
       event.stopPropagation(); // ✅ Prevent the click from propagating to the card
       return;
     }
-  
+
     // Toggle card expansion
     this.filteredAppointments[index].expanded = !this.filteredAppointments[index].expanded;
   }
-  
+
   parseTimeToMinutes(time: string): number {
     const [hours, minutesPart] = time.split(':');
     const minutes = parseInt(minutesPart.slice(0, 2), 10); // Extract the numeric minutes
@@ -264,6 +268,7 @@ export class TodayConsultationsComponent {
         console.log(appointments)
         this.confirmedAppointments = appointments.filter(appointment => appointment.status === 'confirmed' && (appointment as any).checkedIn === true && appointment.date === this.today);
         this.filteredAppointments = this.confirmedAppointments;
+        this.startTimers();
         // this.filteredAppointments = [...this.confirmedAppointments].sort((a, b) => {
         //   if (a.checkedOut && !a.endConsultation) return -1; // Ongoing consultations first
         //   if (!a.checkedOut && !b.checkedOut) return 0; // Pending appointments next
@@ -377,10 +382,10 @@ export class TodayConsultationsComponent {
 
 
   }
-  todayDate(){
+  todayDate() {
     this.estimationPreferedDate = this.formatDate(new Date())
   }
-  chooseDate(){
+  chooseDate() {
     this.estimationPreferedDate = ''
   }
   // loadSugesstionFunction(){
@@ -770,6 +775,7 @@ export class TodayConsultationsComponent {
     }
     const { expanded, ...updatedAppointment } = appointment;
     this.appointmentService.updateAppointment(updatedAppointment)
+    this.startCounter(appointment);
 
 
     // console.log('Waiting time calculated:', appointment.waitingTime);
@@ -798,7 +804,18 @@ export class TodayConsultationsComponent {
 
     appointment.endConsultation = true;
     appointment.endConsultationTime = new Date()
-    const { expanded, ...updatedAppointment } = appointment;
+    appointment.checkedOutTime = new Date(Number(appointment.checkedOutTime))
+    if (this.timerIntervals[appointment.prnNumber]) {
+      clearInterval(this.timerIntervals[appointment.prnNumber]);
+      delete this.timerIntervals[appointment.prnNumber]; // Remove reference to prevent memory leaks
+    }
+
+    // Remove blinking effect
+    appointment.overTime = null;
+    appointment.elapsedTime = 0; // Reset elapsed time
+
+    const { expanded, overTime, elapsedTime, user, ...updatedAppointment } = appointment;
+
     this.appointmentService.updateAppointment(updatedAppointment)
   }
   transfer(appointment: Appointment): void {
@@ -823,8 +840,8 @@ export class TodayConsultationsComponent {
   }
   async endConsultation() {
     console.log('end')
-     await this.loadDoctorData()
-    if(this.completedAppointments.length>1){
+    await this.loadDoctorData()
+    if (this.completedAppointments.length > 1) {
       this.messageService.add({
         severity: 'warn',
         summary: 'Warning',
@@ -893,7 +910,7 @@ export class TodayConsultationsComponent {
     this.appointmentService.updateAppointment(updatedAppointment)
   }
 
-  
+
 
   // Confirm and perform the Close OPD action
   confirmCloseOpd(): void {
@@ -1148,6 +1165,60 @@ export class TodayConsultationsComponent {
     //       );
     //   }
     // }
+  }
+  startTimers() {
+    console.log(this.confirmedAppointments)
+    this.confirmedAppointments.forEach((appointment) => {
+      // console.log(appointment)
+      if (appointment.checkedOut && (appointment.endConsultation === false || appointment.endConsultation === null)) {
+        this.startCounter(appointment);
+        // console.log('logging')
+      }
+    });
+  }
+  startCounter(appointment: any) {
+    if (!appointment.checkedOutTime) {
+      appointment.checkedOutTime = new Date().getTime(); // If missing, set current timestamp
+    } else {
+      // Convert ISO string to timestamp
+      appointment.checkedOutTime = new Date(appointment.checkedOutTime).getTime();
+    }
+
+    // Clear any existing interval before starting a new one
+    if (this.timerIntervals[appointment.prnNumber]) {
+      clearInterval(this.timerIntervals[appointment.prnNumber]);
+    }
+
+    // Start counting elapsed time
+    this.timerIntervals[appointment.prnNumber] = setInterval(() => {
+      const currentTime = new Date().getTime();
+
+      if (appointment.checkedOutTime) {
+        appointment.elapsedTime = Math.floor((currentTime - appointment.checkedOutTime) / 1000); // Convert to seconds
+        if (appointment.endConsultation) {
+          clearInterval(this.timerIntervals[appointment.prnNumber]); // Stop counting
+          appointment.overTime = null; // Remove blinking class
+          return; // Exit function
+        }
+        if (appointment.elapsedTime > (appointment.doctor.slotDuration * 60 + 600)) {
+          appointment.overTime = true; // Mark as overtime
+        } else {
+          appointment.overTime = false;
+        }
+      } else {
+        appointment.elapsedTime = 0; // Ensure a valid default value
+      }
+    }, 1000);
+  }
+
+
+  formatTime(seconds: number): string {
+    if (!seconds || seconds < 0) {
+      return '0m 0s';
+    }
+    const minutes = Math.floor(seconds / 60);
+    const sec = seconds % 60;
+    return `${minutes}m ${sec}s`;
   }
 
 

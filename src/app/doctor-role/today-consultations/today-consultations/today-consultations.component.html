@@ -24,6 +24,7 @@
               <span *ngIf="sortColumn === 'date' && sortDirection === 'desc'">&#9660;</span>
             </th>
             <th>Time</th>
+            <th>Counter</th>
  
             <th><span class="action" ></span>Action</th>
           </tr>
@@ -37,7 +38,8 @@
           <tr *ngFor="let appointment of getPaginatedAppointments(); let i = index"  [ngClass]="{
             'ongoing': appointment.checkedOut === true && !appointment.endConsultation,
             'pending': appointment.postPond === true,
-            'finished': appointment.checkedOut === true && appointment.endConsultation === true
+            'finished': appointment.checkedOut === true && appointment.endConsultation === true,
+            'blinking-row': appointment.overTime,
           }">
             <td>{{ i + 1 }}</td>
             <td>{{appointment.prnNumber? appointment.prnNumber: '-'}}</td>
@@ -45,6 +47,9 @@
             <td>{{ appointment.date | date:'dd-MM-yyyy' }}</td>
             <td>
                <span class="status-badge">{{ appointment.time }}</span>
+            </td>
+            <td>
+              {{ formatTime(appointment.elapsedTime) }}
             </td>
 
             <td class="button">

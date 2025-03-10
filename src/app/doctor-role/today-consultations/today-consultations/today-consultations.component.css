@@ -1001,6 +1001,20 @@ line-height: normal;
 .p-field {
   margin: 0 10px;
 }
+.blinking-row {
+  background-color: red !important;
+  animation: blink 1s infinite;
+}
+.blinking-row.null, .blinking-row.false {
+  animation: none; /* Stop blinking when overTime is null or false */
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0.5;
+  }
+}
+
 @media (max-width: 1030px) {
 
   ::ng-deep .custom-dropdown .p-dropdown{

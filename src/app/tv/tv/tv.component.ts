@@ -1,5 +1,5 @@
 // tv.component.ts
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy,ElementRef,ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { ChannelService } from '../../services/channel/channel.service';
@@ -71,8 +71,20 @@ export class TvComponent implements OnInit, OnDestroy {
   private updateTimeInterval!: Subscription;
   private eventSource: EventSource | null = null;
   messageStopForDoctor: any[] = [];
-  adminAlertSentForDoctor: any[] = []
+  adminAlertSentForDoctor: any[] = [];
+  showPopup = false;
+  popupImage = '/popup.jpeg'; // Set a different popup image
+  popupInterval: any;
+  popupMedia = '';
+  isImage = true; 
+  currentMediaIndex = 0;
+  scrollingText = '';  // Scrolling text for marquee
+  mediaFiles: { type: string, src: string }[] = [];
+  ads: any[] = []
+  adStatuses: { [key: string]: boolean } = {};
+  existingAds: any = {}; 
 
+  @ViewChild('popupVideo') popupVideo!: ElementRef; // Reference for video tag
   constructor(
     private route: ActivatedRoute,
     private channelService: ChannelService,
@@ -85,6 +97,8 @@ export class TvComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.updateDateTime();
+    this.fetchLatestAds()
+    this.startPopupRotation();
     this.intervalId = setInterval(() => {
       this.updateDateTime();
     }, 60000);
@@ -756,6 +770,7 @@ export class TvComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    clearInterval(this.popupInterval);
     if (this.intervalId) {
       clearInterval(this.intervalId);
     }
@@ -1105,4 +1120,128 @@ export class TvComponent implements OnInit, OnDestroy {
 
     return hour * 60 + parseInt(minutes);
   }
+  // startPopupRotation() {
+  //   this.popupInterval = setInterval(() => {
+  //     this.showPopup = true;
+
+  //     // Hide popup after 5 seconds
+  //     setTimeout(() => {
+  //       this.showPopup = false;
+  //     }, 5000);
+  //   }, 30000); // Show popup every 30 seconds
+  // }
+  startPopupRotation() {
+    this.popupInterval = setInterval(() => {
+      if (this.mediaFiles.length === 0) return;
+
+      const media = this.mediaFiles[this.currentMediaIndex];
+      this.popupMedia = media.src;
+      this.isImage = media.type === 'image';
+      this.showPopup = true;
+
+      if (this.isImage) {
+        // ✅ If it's an image, hide after 5 seconds
+        setTimeout(() => {
+          this.showPopup = false;
+        }, 5000);
+      } else {
+        // ✅ If it's a video, play only if allowed by the browser
+        setTimeout(() => {
+          if (this.popupVideo) {
+            const videoElement = this.popupVideo.nativeElement;
+            
+            videoElement.muted = false; // ✅ Ensure the video starts muted
+            videoElement.play().catch((error: any) => {
+              console.error("Autoplay blocked. Waiting for user interaction:", error);
+            });
+          }
+        }, 500);
+      }
+
+      // ✅ Move to the next media
+      this.currentMediaIndex = (this.currentMediaIndex + 1) % this.mediaFiles.length;
+    }, 30000);
+}
+
+// ✅ Handle Video Playback When It Becomes Ready
+onVideoCanPlay() {
+  if (this.popupVideo) {
+    this.popupVideo.nativeElement.muted = false; // Unmute after autoplay
+  }
+}
+
+
+  // fetchLatestAds() {
+  //   this.channelService.getLatestAds().subscribe(response => {
+  //     this.mediaFiles = []; // Clear existing ads
+
+  //     // ✅ Add text ad (if available)
+  //     if (response.textAd) {
+  //       this.scrollingText = response.textAd.content;
+  //     }
+
+  //     // ✅ Add media ads (image/video)
+  //     if (response.mediaAd) {
+  //       this.mediaFiles.push({
+  //         type: response.mediaAd.type,
+  //         src: response.mediaAd.content
+  //       });
+  //     }
+  //     console.log(this.mediaFiles)
+
+  //     // ✅ Restart the popup rotation with new ads
+  //     this.currentMediaIndex = 0;
+  //   });
+  // }
+  fetchLatestAds() {
+    this.channelService.getAllAds().subscribe(response => {
+        this.mediaFiles = []; // ✅ Clear previous ads
+        this.scrollingText = ''; // ✅ Reset scrolling text
+
+        console.log("Fetched All Ads:", response);
+
+        // ✅ Store all ads for reference
+        this.ads = response.ads;
+        
+        // ✅ Convert ads array into an object by type
+        this.existingAds = response.ads.reduce((acc: any, ad: any) => {
+            acc[ad.type] = ad;
+            return acc;
+        }, {});
+
+        // ✅ Store active status of each ad type
+        this.adStatuses = response.ads.reduce((acc: any, ad: any) => {
+            acc[ad.type] = ad.isActive ?? false; // Default to false if null
+            return acc;
+        }, {});
+
+        // ✅ Display only active text ad
+        if (this.existingAds.text && this.existingAds.text.isActive) {
+            this.scrollingText = this.existingAds.text.content;
+            console.log(this.scrollingText)
+        }
+
+        // ✅ Display only active image/video ads
+        response.ads.forEach((ad:any) => {
+            if ((ad.type === 'image' || ad.type === 'video') && ad.isActive) {
+                this.mediaFiles.push({
+                    type: ad.type,
+                    src: ad.content
+                });
+            }
+        });
+
+        console.log("Updated Media Files:", this.mediaFiles);
+
+        // ✅ Restart popup rotation if media ads exist
+        if (this.mediaFiles.length > 0) {
+            this.currentMediaIndex = 0;
+            this.startPopupRotation();
+        }
+
+
+    });
+}
+
+
 }

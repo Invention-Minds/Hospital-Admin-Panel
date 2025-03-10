@@ -309,8 +309,8 @@ label {
   border: none;
 }
 .input-container {
- position: relative;
- width: 430px;
+  position: relative;
+  width: 430px;
 }
 .custom-input {
   width: 100%;
@@ -347,4 +347,215 @@ label {
   font-size: 12px;
   color: #007bff; /* Label color on focus */
   background-color: #fff;
+}
+.ad-container{
+  padding-left: 100px;
+  height: auto;
+}
+.upload-container {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  width: 630px;
+  height: auto;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.ad-type {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 6px;
+}
+.upload-text {
+  color: #222;
+  font-family: Kanit;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  margin-bottom: 8px;
+}
+.ad-type label {
+  font-size: 16px;
+  cursor: pointer;
+}
+.file-name {
+  display: inline-flex;
+
+  height: auto;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  /* border-radius: 8px;
+border: 1px solid #001345; */
+  color: #001345;
+}
+
+/* .ad-type span {
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  transition: 0.3s;
+} */
+
+/* .ad-type span.active {
+  background: #007bff;
+  color: white;
+  border: 1px solid #007bff;
+} */
+
+.text-ad {
+  text-align: left;
+}
+h3 {
+  color: #222;
+  font-family: Kanit;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+.text-ad textarea {
+  width: 100%;
+  height: 120px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+  resize: none;
+}
+.text-container {
+  display: flex;
+  align-items: center;
+}
+.text-ad .note {
+  font-size: 12px;
+  color: gray;
+  margin-top: 5px;
+}
+
+.file-upload {
+  text-align: center;
+}
+
+.drop-zone {
+  width: 100%;
+  border: 2px dashed #ddd;
+  border-radius: 10px;
+  padding: 20px;
+  background: #f9f9f9;
+  position: relative;
+  height: 180px;
+}
+
+.upload-placeholder {
+  text-align: center;
+  cursor: pointer;
+}
+
+.upload-icon {
+  width: 40px;
+  /* margin-bottom: 10px; */
+}
+
+.browse-btn {
+  display: inline-flex;
+  padding: 6px 20px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  border-radius: 40px;
+  border: 1px solid #4e7ab5;
+  color: #4e7ab5;
+  font-family: Kanit;
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
+
+.file-note {
+  font-size: 12px;
+  color: gray;
+}
+
+.uploaded-files {
+  margin-top: 15px;
+}
+
+.file-item {
+  background: #eee;
+  padding: 8px;
+  border-radius: 5px;
+  margin: 5px 0;
+  font-size: 14px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.upload-btn {
+  width: 100px;
+  margin-top: 20px;
+  padding: 10px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: 0.3s;
+}
+
+.upload-btn:disabled {
+  background: gray;
+  cursor: not-allowed;
+}
+/* Container for toggle buttons */
+.toggle-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+  justify-content: center;
+}
+
+/* Default button styles */
+.toggle-buttons button {
+  padding: 10px 15px;
+  font-size: 14px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.3s ease-in-out;
+  min-width: 120px;
+  text-transform: capitalize;
+  background: #ccc; /* Default (inactive) state */
+  color: #333;
+}
+
+/* Active button styles (when ad is enabled) */
+.toggle-buttons button.active {
+  background: #28a745; /* Green */
+  color: white;
+  font-weight: bold;
+}
+
+/* Hover effect */
+.toggle-buttons button:hover {
+  background: #007bff; /* Blue */
+  color: white;
+}
+
+/* Disabled effect (if needed) */
+.toggle-buttons button:disabled {
+  background: #aaa;
+  cursor: not-allowed;
 }

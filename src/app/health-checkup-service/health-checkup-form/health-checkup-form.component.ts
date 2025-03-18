@@ -835,7 +835,8 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
     this.formData.lastName = lastName || '';
     this.formData.phoneNumber = selectedPatient.mobileNo || '';
     this.formData.age = selectedPatient.age ? Number(selectedPatient.age.replace(/\D/g, '')) : 0
-    this.formData.gender = selectedPatient.gender || ''
+    this.formData.gender = selectedPatient.gender || '';
+    this.formData.email = selectedPatient.email || '';
   
     console.log("Health Checkup PRN Selected:", selectedPatient, this.formData);
   

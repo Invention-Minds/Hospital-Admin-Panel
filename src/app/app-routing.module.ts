@@ -20,6 +20,8 @@ import { TvComponent } from './tv/tv/tv.component';
 import { TvControlComponent } from './tv-control/tv-control/tv-control.component';
 import { EstimationOverviewComponent } from './estimation/estimation-overview/estimation-overview/estimation-overview.component';
 import { AnalyticsRootComponent } from './analytics/analytics-root/analytics-root.component';
+import { ServiceOverviewComponent } from './service-radiology/service-overview/service-overview.component';
+import { OverviewRadiologyComponent } from './radiology/overview-radiology/overview-radiology.component';
 
 const routes: Routes = [
   { path: 'dashboard', component: DashboardOverviewComponent, canActivate:[authGuard] },
@@ -34,6 +36,8 @@ const routes: Routes = [
   {path:'settings', component: SettingsComponent,canActivate:[authGuard]},
   {path:'report',component: ReportOverviewComponent,canActivate:[authGuard]},
   {path: 'health-checkup', component: HealthCheckupOverviewComponent,canActivate:[authGuard]},
+  {path: 'services', component: ServiceOverviewComponent,canActivate:[authGuard]},
+  {path: 'radiology-services', component: OverviewRadiologyComponent,canActivate:[authGuard]},
   { path: 'reschedule/:id', component: HealthCheckupFormComponent,canActivate:[authGuard] },
   {path:'doctor-appointments', component: OverviewComponent, canActivate:[authGuard]},
   {path: 'tv-control', component: TvControlComponent, canActivate:[authGuard]},

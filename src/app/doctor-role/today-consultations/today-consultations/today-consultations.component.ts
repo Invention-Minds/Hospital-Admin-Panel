@@ -49,6 +49,11 @@ interface Appointment {
   prnNumber?: any;
   overTime?: any;
   elapsedTime?: any;
+  referredDeptId?:number;
+  referredDept?:string;  
+  referredDocId?:number; 
+  referredDoc?:string;       
+  isReferred?:boolean        
 }
 
 @Component({
@@ -107,7 +112,7 @@ export class TodayConsultationsComponent {
   showTransferAppointment: boolean = false;
   estimation: any[] = [];
   countOfPending: number = 0;
-  surgeryTime: string = '';
+  surgeryTime: string = 'No Level';
   doctorId: number = 0;
   estimationStatus: string = 'planned';
   searchOptions = [
@@ -124,6 +129,13 @@ export class TodayConsultationsComponent {
   isMonitoringActive: boolean = false;
   isEndConsultation: boolean = false;
   isButtonLoading: boolean = false;
+  departments: any = [];
+  allDoctors: any = [];
+  filteredDoctors: any = [];
+  selectedDepartment:any = null;
+  selectedDoctor: any = null;
+  isPopupOpen: boolean = false;
+  isButtonClicked: boolean = false
 
 
 
@@ -140,7 +152,8 @@ export class TodayConsultationsComponent {
   // Method to handle sorting by a specific column
   ngOnInit() {
     this.checkScreenSize();
-
+    this.loadDepartments();
+    this.loadDoctors();
 
     const today = new Date();
     const year = today.getFullYear();
@@ -553,7 +566,7 @@ export class TodayConsultationsComponent {
     this.estimationText = '';
     this.estimationPreferedDate = '';
     this.remarks = '';
-    this.surgeryTime = '';
+    this.surgeryTime = 'No Level';
     this.totalStay = 0;
     this.icu = 0;
     this.ward = 0
@@ -757,6 +770,7 @@ export class TodayConsultationsComponent {
       // Update the appointment in the backend for the previous patient
       console.log(ongoingConsultation)
       const { expanded, ...updatedAppointment } = ongoingConsultation;
+      updatedAppointment.checkedOutTime = new Date(Number(updatedAppointment.checkedOutTime))
       this.appointmentService.updateAppointment(updatedAppointment);
 
       // console.log(`Updated endConsultationTime for patient ID: ${ongoingConsultation.id}`);
@@ -815,14 +829,15 @@ export class TodayConsultationsComponent {
     appointment.elapsedTime = 0; // Reset elapsed time
 
     const { expanded, overTime, elapsedTime, user, ...updatedAppointment } = appointment;
-
+    updatedAppointment.checkedOutTime = new Date(Number(updatedAppointment.checkedOutTime))
     this.appointmentService.updateAppointment(updatedAppointment)
   }
   transfer(appointment: Appointment): void {
     // console.log(appointment)
 
     appointment.isTransfer = true;
-    const { expanded, ...updatedAppointment } = appointment;
+    const { expanded,overTime, elapsedTime, user, ...updatedAppointment } = appointment;
+    updatedAppointment.checkedOutTime = new Date(Number(updatedAppointment.checkedOutTime))
     this.appointmentService.updateAppointment(updatedAppointment)
     this.closeTransferPopup()
     this.messageService.add({
@@ -835,6 +850,72 @@ export class TodayConsultationsComponent {
     this.selectedAppointment = estimation
     this.showTransferAppointment = true;
   }
+  openReferralPopup(appointment: any) {
+    this.isPopupOpen = true
+    this.selectedAppointment = appointment
+  }
+  loadDepartments(): void {
+    this.doctorService.getDepartments().subscribe(
+      (departments) => {
+        this.departments = departments;
+      },
+      (error) => {
+        console.error('Error fetching departments:', error);
+      }
+    );
+  }
+  loadDoctors(): void {
+    this.doctorService.getDoctors().subscribe(
+      (doctors) => {
+        this.allDoctors = doctors;
+      },
+      (error) => {
+        console.error('Error fetching doctors:', error);
+      }
+    );
+  }
+  closeForm() {
+    this.isPopupOpen = false;
+    this.selectedDepartment = null
+    this.selectedDoctor = ''
+  }
+
+  filterDoctors() {
+    const todayDate = new Date().toISOString().split('T')[0]; // Today's date
+    const currentTime = this.timeToMinutes(new Date().toTimeString().substring(0, 5)); // Current time in minutes
+
+    // Filter doctors based on availability and assignment
+    this.filteredDoctors = this.allDoctors.filter((doctor: any) => {
+      return (
+        doctor.departmentName === this.selectedDepartment.name
+      );
+    });
+    console.log('Filtered Doctors:', this.filteredDoctors);
+
+  }
+  timeToMinutes(time: string): number {
+    const [hours, minutes] = time.split(':').map(Number);
+    return hours * 60 + minutes;
+  }
+  saveDoctor() {
+    if (this.selectedDoctor && this.selectedDepartment && this.selectedAppointment) {
+      this.selectedAppointment.referredDeptId = this.selectedDepartment.id;
+      this.selectedAppointment.referredDept = this.selectedDepartment.name;
+      this.selectedAppointment.referredDocId = this.selectedDoctor.id;
+      this.selectedAppointment.referredDoc = this.selectedDoctor.name;
+      this.selectedAppointment.isReferred = true;
+  
+      console.log("Appointment Data:", this.selectedAppointment);
+      const { expanded, overTime, elapsedTime, user, ...updatedAppointment } = this.selectedAppointment;
+      updatedAppointment.checkedOutTime = new Date(Number(updatedAppointment.checkedOutTime))
+      this.appointmentService.updateAppointment(updatedAppointment);
+      this.isPopupOpen = false
+
+    } else {
+      console.error("Please select both department and doctor.");
+    }
+  }
+  
   closeTransferPopup() {
     this.showTransferAppointment = false;
   }
@@ -906,7 +987,8 @@ export class TodayConsultationsComponent {
     appointment.checkedOut = false;
     appointment.checkedOutTime = undefined;
     appointment.postPond = true;
-    const { expanded, ...updatedAppointment } = appointment;
+    const { expanded,overTime, elapsedTime, user, ...updatedAppointment } = appointment;
+    updatedAppointment.checkedOutTime = new Date(Number(updatedAppointment.checkedOutTime))
     this.appointmentService.updateAppointment(updatedAppointment)
   }
 
@@ -1195,7 +1277,7 @@ export class TodayConsultationsComponent {
 
       if (appointment.checkedOutTime) {
         appointment.elapsedTime = Math.floor((currentTime - appointment.checkedOutTime) / 1000); // Convert to seconds
-        if (appointment.endConsultation) {
+        if (appointment.endConsultation === true) {
           clearInterval(this.timerIntervals[appointment.prnNumber]); // Stop counting
           appointment.overTime = null; // Remove blinking class
           return; // Exit function
@@ -1209,6 +1291,8 @@ export class TodayConsultationsComponent {
         appointment.elapsedTime = 0; // Ensure a valid default value
       }
     }, 1000);
+
+    console.log(appointment.overTime)
   }
 
 

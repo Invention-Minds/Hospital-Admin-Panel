@@ -32,6 +32,7 @@ interface Appointment {
   created_at?: string;
   isAccepted?:boolean;
   prnNumber?:any;
+  prefix?:string;
 }
 const lockedAppointments = new Map<number, { userId: string; lockTime: number }>();
 @Component({
@@ -477,7 +478,8 @@ export class AppointmentRequestComponent implements OnInit {
             time: appointment?.time,
             doctorPhoneNumber: doctorPhoneNumber,
             patientPhoneNumber: appointment?.phoneNumber,
-            status: 'cancelled'
+            status: 'cancelled',
+            prefix: appointment.prefix
           }
           this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
             next: (response) => {
@@ -601,7 +603,8 @@ export class AppointmentRequestComponent implements OnInit {
           time: appointment?.time,
           doctorPhoneNumber: doctorPhoneNumber,
           patientPhoneNumber: appointment?.phoneNumber,
-          status: 'cancelled'
+          status: 'cancelled',
+          prefix: appointment.prefix
         }
         this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
           next: (response) => {

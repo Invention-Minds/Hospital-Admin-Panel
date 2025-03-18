@@ -25,22 +25,6 @@
             <option value="no-doctor" selected disabled>No Doctor Available</option>
           </ng-template>
         </select>
-
-
-
-
-
-        <!-- Time Dropdown -->
-
-        <!-- <select formControlName="time">
-            <option value="" disabled selected>Select Time*</option>
-            <option *ngFor="let slot of availableTimes[i]">{{ slot }}</option>
-          </select> -->
-        <!-- Time Dropdown -->
-        <!-- Time Dropdown -->
-        <!-- Time Dropdown -->
-        <!-- Time Dropdown -->
-        <!-- Time Dropdown -->
         <select formControlName="time">
           <option value="" disabled selected>Select Time*</option>
           <ng-container *ngIf="dept.hasDoctor; else noSlots">

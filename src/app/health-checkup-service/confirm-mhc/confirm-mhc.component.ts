@@ -35,7 +35,7 @@ interface Appointment {
   checkedInBy?:any;
   checkedInTime?:any;
   serviceId?:number;
-
+  prefix?:string;
 
 }
 @Component({
@@ -1222,7 +1222,8 @@ export class ConfirmMhcComponent {
             time: appointment?.time,
             doctorPhoneNumber: doctorPhoneNumber,
             patientPhoneNumber: appointment?.phoneNumber,
-            status: 'cancelled'
+            status: 'cancelled',
+            prefix: appointment?.prefix
           }
           this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
             next: (response) => {

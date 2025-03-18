@@ -77,8 +77,15 @@
           <img src="/mhc-form.svg" alt="OPD Icon" />
         </div>
         <div class="card-content">
-          <!-- <h2>40</h2> -->
-          <!-- <p>Health CheckUp Form</p> -->
+        </div>
+      </div>
+      <div class="card-1" 
+      [ngClass]="{'active-card': activeComponent === 'radioForm'}"
+      (click)="showRadioForm()">
+        <div class="card-icon">
+          <img src="/radio-form.svg" alt="OPD Icon" />
+        </div>
+        <div class="card-content">
         </div>
       </div>
       <div class="card" 
@@ -101,6 +108,17 @@
         <div class="card-content">
           <!-- <h2>42</h2> -->
           <p>Conf. MHC Appts</p>
+        </div>
+      </div>
+      <div class="card" 
+      [ngClass]="{'active-card': activeComponent === 'radioConfirm'}"
+      (click)="showRadioConfirm()">
+        <div class="card-icon">
+          <img src="/radio-confirm.svg" alt="Doctor Available Icon" />
+        </div>
+        <div class="card-content">
+          <!-- <h2>42</h2> -->
+          <p>Conf. Rad. Appts</p>
         </div>
       </div>
       <div class="card" 
@@ -130,7 +148,11 @@
     <app-health-checkup-repeat *ngIf="activeComponent === 'repeated'" ></app-health-checkup-repeat>
     <app-mhc-form *ngIf="activeComponent === 'mhcForm' " [selectedAppointment]="selectedAppointment"
     (closeForm)="closeConsultation()"></app-mhc-form>
-    <app-mhc-today-consul *ngIf="activeComponent === 'mhcToday'" (reschedule)="openConsultationForm($event)"></app-mhc-today-consul>
+    <app-mhc-radiology *ngIf="activeComponent === 'radioForm' " [selectedAppointment]="selectedAppointment"
+    (closeForm)="closeConsultation()" ></app-mhc-radiology>
+    <app-mhc-today-consul *ngIf="activeComponent === 'mhcToday'" (reschedule)="openConsultationForm($event)" (radiology)="openRadiologyForm($event)"></app-mhc-today-consul>
     <app-confirm-mhc *ngIf="activeComponent === 'mhcConfirm'"></app-confirm-mhc>
+    <app-confirm-radio *ngIf="activeComponent === 'radioConfirm'"></app-confirm-radio>
     <app-mhc-report *ngIf="activeComponent === 'mhcReport'"></app-mhc-report>
+
   </div>

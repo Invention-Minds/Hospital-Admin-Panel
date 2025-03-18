@@ -40,6 +40,8 @@ interface Appointment {
   doctor?: Doctor;
   age?: string;
   gender?: string;
+  patientType?: string;
+  prefix?: string;
 }
 type DayName = 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat';
 
@@ -100,7 +102,8 @@ export class AppointmentFormComponent implements OnInit {
   patients: any[] = [];
   filteredPRNs: any[] = []; // To store filtered PRN suggestions
   showSuggestions = false; // Control visibility of suggestion dropdown
-  appointmentStatus: string = 'pending'
+  appointmentStatus: string = 'pending';
+  oldDoctorId: number = 0;
 
   private subscription!: Subscription;
 
@@ -151,7 +154,9 @@ export class AppointmentFormComponent implements OnInit {
       requestVia: ['Call', Validators.required], // Set default to 'Call'
       appointmentStatus: ['Confirm', Validators.required], // Set default to 'Confirm'
       age: ['', Validators.pattern(/^[0-9]+$/)],
-      gender: ['Male']
+      gender: ['Male'],
+      prefix: ['Mr.'],
+      patientType: ['New'],
     });
     if (this.appointment?.phoneNumber.startsWith('91')) {
       this.appointment.phoneNumber = this.appointment.phoneNumber.substring(2);
@@ -164,8 +169,8 @@ export class AppointmentFormComponent implements OnInit {
     }
 
     if (this.appointment) {
-      // console.log("existing")
-      // console.log(this.appointment)
+      console.log("existing")
+      console.log(this.appointment)
       this.doctorId = this.appointment.doctorId;
       this.onDoctorChange(this.doctorId)
       console.log(this.appointment.status)
@@ -210,6 +215,8 @@ export class AppointmentFormComponent implements OnInit {
       console.log(appointmentDate)
       // console.log(new Date(this.appointment.date));
       this.oldDate = this.appointment.date;
+      this.oldDoctorId = this.appointment.doctorId;
+      console.log(this.oldDoctorId, this.appointment.doctorId)
       this.oldTime = this.appointment.time;
       // console.log("appointmentpatch"  ,this.appointment)
 
@@ -240,14 +247,14 @@ export class AppointmentFormComponent implements OnInit {
         const doctorId = this.doctorId;
         if (doctorId) {
           this.onDoctorChange(doctorId)
-          if(this.appointment){
+          if (this.appointment) {
             this.appointment.doctorId = doctorId;
           }
           let date = this.appointmentForm.get('appointmentDate')?.value;
-          this.appointmentForm.get('appointmentTime')?.setValue(''); 
+          this.appointmentForm.get('appointmentTime')?.setValue('');
           console.log(this.appointmentForm.value.appointmentTime)
           if (doctorId && date) {
-            console.log('load times',this.doctorId)
+            console.log('load times', this.doctorId)
             this.checkDoctorAvailabilityAndLoadSlots(doctorId, this.formatDate(date))
           }
         }
@@ -323,6 +330,8 @@ export class AppointmentFormComponent implements OnInit {
           appointmentTime: this.currentAppointment?.time,  // Set to null initially, prompt user to select a time
           age: this.currentAppointment?.age,
           gender: this.currentAppointment?.gender,
+          patientType: this.currentAppointment?.patientType,
+          prefix: this.currentAppointment?.prefix,
         });
 
         // Show message or handle slot selection using p-calendar for manual time selection
@@ -420,10 +429,26 @@ export class AppointmentFormComponent implements OnInit {
 
     // Extract name and remove prefixes
     const nameParts = selectedPatient.name.split(" ");
-    const titles = ["Mr.", "Ms.", "Mrs.", "Miss.", "Dr.", "Master"];
+    const titles = ["Mr.", "Ms.", "Mrs.", "Miss.", "Dr.", "Master", "Baby Of."];
+    let prefix = "";
+    let firstName = "";
+    let lastName = "";
 
-    let firstName = nameParts[0];
-    let lastName = nameParts.slice(1).join(" ");
+    if (titles.includes(nameParts[0])) {
+      prefix = nameParts[0];
+      firstName = nameParts[1] || "";
+      lastName = nameParts.slice(2).join(" ") || "";
+    } else if (nameParts[0] === "Baby" && nameParts[1] === "Of.") {
+      prefix = "Baby Of.";
+      firstName = nameParts.slice(2).join(" ") || "";
+      lastName = ""; // Adjust based on your preference
+    } else {
+      firstName = nameParts[0];
+      lastName = nameParts.slice(1).join(" ") || "";
+    }
+
+    // let firstName = nameParts[0];
+    // let lastName = nameParts.slice(1).join(" ");
 
     if (titles.includes(firstName)) {
       firstName = nameParts[1] || "";
@@ -436,7 +461,9 @@ export class AppointmentFormComponent implements OnInit {
       firstName: firstName || '',
       lastName: lastName || '',
       phoneNumber: selectedPatient.mobileNo || '', // Extract only numbers from "81 Yrs"
-      gender: selectedPatient.gender
+      gender: selectedPatient.gender,
+      email: selectedPatient.email || '',
+      prefix: prefix,
     });
     this.appointmentForm.get('age')?.clearAsyncValidators();
     this.appointmentForm.get('age')?.updateValueAndValidity();
@@ -467,7 +494,7 @@ export class AppointmentFormComponent implements OnInit {
   // }
 
   onPhoneFocus() {
-     // Do nothing if not pending
+    // Do nothing if not pending
 
     const originalPhone = this.appointmentForm.get('phoneNumber')?.value;
     this.appointmentForm.get('phoneNumber')?.setValue(originalPhone.replace(/\D/g, '')); // Remove masking
@@ -594,11 +621,11 @@ export class AppointmentFormComponent implements OnInit {
 
       if (doctorId) {
         this.onDoctorChange(doctorId)
-        if(this.appointment){
+        if (this.appointment) {
           this.appointment.doctorId = doctorId;
         }
         let date = this.appointmentForm.get('appointmentDate')?.value;
-        this.appointmentForm.get('appointmentTime')?.setValue(''); 
+        this.appointmentForm.get('appointmentTime')?.setValue('');
         console.log(this.appointmentForm.value.appointmentTime)
 
         if (doctorId && date) {
@@ -620,10 +647,10 @@ export class AppointmentFormComponent implements OnInit {
       const doctorId = this.doctorId;
       // date = date.toISOString().split('T')[0]
       if (doctorId !== undefined) {
-        console.log(date,'booked')
+        console.log(date, 'booked')
         this.appointmentService.getBookedSlots(doctorId, this.formatDate(date)).subscribe(
           (bookedSlots: { time: string; complete: boolean }[]) => {
-            
+
             const nonCompleteBookedSlots = bookedSlots.filter(slot => !slot.complete).map(slot => slot.time);
             this.bookedSlots[doctorName] = { [date]: nonCompleteBookedSlots };
             console.log(nonCompleteBookedSlots)
@@ -646,7 +673,7 @@ export class AppointmentFormComponent implements OnInit {
 
   }
   private checkDoctorAvailabilityAndLoadSlots(doctorId: number, appointmentDate: any): void {
-    console.log(this.appointmentForm.value)
+    // console.log(this.appointmentForm.value)
     // Fetch unavailable dates
     this.doctorService.getUnavailableDates(doctorId).subscribe(
       (unavailableDates) => {
@@ -801,7 +828,7 @@ export class AppointmentFormComponent implements OnInit {
             this.availableSlots = [...this.availableSlots, this.slot.time];
           }
           else {
-            console.log('booked',date)
+            console.log('booked', date)
             // Remove the slots that are already booked for that date
             this.appointmentService.getBookedSlots(doctorId, date).subscribe(
               (bookedSlots: { time: string; complete: boolean }[]) => {
@@ -948,7 +975,7 @@ export class AppointmentFormComponent implements OnInit {
   // }
   private checkSlotAvailability(doctorId: number, date: any, time: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
-      console.log('booked',date)
+      console.log('booked', date)
       this.appointmentService.getBookedSlots(doctorId, date).subscribe({
         next: (bookedSlots: { time: string; complete: boolean }[]) => {
           // Filter out booked slots that are complete
@@ -1074,22 +1101,22 @@ export class AppointmentFormComponent implements OnInit {
     const timeRanges = availableFrom.split(',').map(range => range.trim()); // Split by commas and trim spaces
 
     for (const range of timeRanges) {
-        const [startTime, endTime] = range.split('-').map(time => time.trim()); // Split start and end times
-        let current = new Date(`1970-01-01T${startTime}`);
-        const end = new Date(`1970-01-01T${endTime}`);
+      const [startTime, endTime] = range.split('-').map(time => time.trim()); // Split start and end times
+      let current = new Date(`1970-01-01T${startTime}`);
+      const end = new Date(`1970-01-01T${endTime}`);
 
-        while (current < end) {  // Changed from <= to < to stop at 11:00 instead of 11:15
-            const slotStart = this.convertTo12HourFormat(current.toTimeString().substring(0, 5));
-            slots.push(slotStart);
+      while (current < end) {  // Changed from <= to < to stop at 11:00 instead of 11:15
+        const slotStart = this.convertTo12HourFormat(current.toTimeString().substring(0, 5));
+        slots.push(slotStart);
 
-            // Move to the next slot
-            current.setMinutes(current.getMinutes() + slotDuration);
-        }
+        // Move to the next slot
+        current.setMinutes(current.getMinutes() + slotDuration);
+      }
     }
 
     console.log(slots);
     return slots;
-}
+  }
 
 
 
@@ -1112,6 +1139,7 @@ export class AppointmentFormComponent implements OnInit {
   // }
 
   private patchFormWithAppointment(appointment: Appointment, appointmentDate: any) {
+    // console.log(appointment)
     this.appointment?.doctor?.doctorType === 'Visiting Consultant' ? this.isVisitingConsultant = true : this.isVisitingConsultant = false;
     // console.log(this.appointment?.doctor?.doctorType, this.isVisitingConsultant)
     // console.log(appointment)
@@ -1156,7 +1184,9 @@ export class AppointmentFormComponent implements OnInit {
       appointmentStatus: appointment.status, // Default selection
       prnNumber: appointment.prnNumber,
       age: appointment.age,
-      gender: appointment.gender
+      gender: appointment.gender,
+      patientType: appointment.patientType,
+      prefix: appointment.prefix
     });
 
   }
@@ -1196,7 +1226,7 @@ export class AppointmentFormComponent implements OnInit {
   // }
 
   closeForm(event: Event) {
-   console.log('close')
+    console.log('close')
     this.close.emit();
     this.showForm = false;
     // console.log(this.showForm)
@@ -1211,6 +1241,21 @@ export class AppointmentFormComponent implements OnInit {
       this.showForm = false;
     }
   }
+  @HostListener('document:mousedown', ['$event'])
+  click(event: MouseEvent): void {
+    const clickedInside = (event.target as HTMLElement).closest('.prn-container');
+    if (!clickedInside) {
+      this.showSuggestions = false;
+    }
+  }
+  @HostListener('document:mousedown', ['$event'])
+  onClickOutsideDoctor(event: MouseEvent): void {
+    const clickedInsideDoctor = (event.target as HTMLElement).closest('.doctor-container');
+    if (!clickedInsideDoctor) {
+      this.showDoctorSuggestions = false;
+    }
+  }
+
   private syncFormToModel(): void {
     if (!this.appointment || !this.appointmentForm) {
       console.error("Appointment or Form is not defined");
@@ -1239,6 +1284,8 @@ export class AppointmentFormComponent implements OnInit {
     this.appointment.messageSent = true;
     this.appointment.age = formValues.age;
     this.appointment.gender = formValues.gender;
+    this.appointment.patientType = formValues.patientType;
+    this.appointment.prefix = formValues.prefix;
 
     // console.log("Updated Appointment:", this.appointment);
   }
@@ -1362,6 +1409,8 @@ export class AppointmentFormComponent implements OnInit {
         prnNumber: parseInt(this.appointmentForm.value.prnNumber),
         age: this.appointmentForm.value.age,
         gender: this.appointmentForm.value.gender,
+        patientType: this.appointmentForm.value.patientType,
+        prefix: this.appointmentForm.value.prefix
       };
       // console.log(appointmentDetails)
       this.appointmentService.addCancelledAppointment(appointmentDetails);
@@ -1389,7 +1438,8 @@ export class AppointmentFormComponent implements OnInit {
             doctorPhoneNumber: doctorPhoneNumber,
             patientPhoneNumber: appointmentDetails?.phoneNumber,
             status: 'cancelled',
-            requestVia: appointmentDetails.requestVia
+            requestVia: appointmentDetails.requestVia,
+            prefix: appointmentDetails.prefix
           }
           this.appointmentService.sendSmsMessage(appointmentDetailsforMessage).subscribe({
             next: (response) => {
@@ -1506,6 +1556,8 @@ export class AppointmentFormComponent implements OnInit {
           prnNumber: parseInt(this.appointmentForm.value.prnNumber),
           age: this.appointmentForm.value.age,
           gender: this.appointmentForm.value.gender,
+          patientType: this.appointmentForm.value.patientType,
+          prefix: this.appointmentForm.value.prefix
 
         };
         this.appointment = appointmentDetails;
@@ -1545,6 +1597,8 @@ export class AppointmentFormComponent implements OnInit {
             prnNumber: parseInt(this.appointmentForm.value.prnNumber),
             age: this.appointmentForm.value.age,
             gender: this.appointmentForm.value.gender,
+            patientType: this.appointmentForm.value.patientType,
+            prefix: this.appointmentForm.value.prefix
           };
           // console.log(this.time)
           this.appointment.time = this.time;
@@ -1569,7 +1623,8 @@ export class AppointmentFormComponent implements OnInit {
                   doctorPhoneNumber: doctorPhoneNumber,
                   patientPhoneNumber: phoneNumber,
                   status: 'rescheduled',
-                  requestVia: this.appointment!.requestVia
+                  requestVia: this.appointment!.requestVia,
+                  prefix: this.appointment!.prefix
                 }
                 this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
                   next: (response) => {
@@ -1697,6 +1752,8 @@ export class AppointmentFormComponent implements OnInit {
             prnNumber: parseInt(this.appointmentForm.value.prnNumber),
             age: this.appointmentForm.value.age,
             gender: this.appointmentForm.value.gender,
+            patientType: this.appointmentForm.value.patientType,
+            prefix: this.appointmentForm.value.prefix
 
 
           };
@@ -1728,7 +1785,8 @@ export class AppointmentFormComponent implements OnInit {
                   doctorPhoneNumber: doctorPhoneNumber,
                   patientPhoneNumber: phoneNumber,
                   status: 'rescheduled',
-                  requestVia: this.appointment!.requestVia
+                  requestVia: this.appointment!.requestVia,
+                  prefix: this.appointment!.prefix
                 }
                 this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
                   next: (response) => {
@@ -1806,7 +1864,7 @@ export class AppointmentFormComponent implements OnInit {
             });
           }
           this.appointmentService.addConfirmedAppointment(this.appointment);
-          this.doctorService.getCancelledSlots(doctorId, oldDate, oldTime).subscribe({
+          this.doctorService.getCancelledSlots(this.oldDoctorId, oldDate, oldTime).subscribe({
             next: (response) => {
               // console.log('Cancelled slots:', response);
               const cancelledSlots = response;
@@ -1866,7 +1924,8 @@ export class AppointmentFormComponent implements OnInit {
                 doctorPhoneNumber: doctorPhoneNumber,
                 patientPhoneNumber: phoneNumber,
                 status: 'confirmed',
-                requestVia: this.appointment!.requestVia
+                requestVia: this.appointment!.requestVia,
+                prefix: this.appointment!.prefix
               }
               this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
                 next: (response) => {
@@ -2032,6 +2091,8 @@ export class AppointmentFormComponent implements OnInit {
             doctorType: selectedDoctor.doctorType,
             age: this.appointmentForm.value.age,
             gender: this.appointmentForm.value.gender,
+            patientType: this.appointmentForm.value.patientType,
+            prefix: this.appointmentForm.value.prefix
 
           };
           this.appointment = appointmentDetails;
@@ -2063,7 +2124,8 @@ export class AppointmentFormComponent implements OnInit {
                   doctorPhoneNumber: doctorPhoneNumber,
                   patientPhoneNumber: this.appointment?.phoneNumber,
                   status: this.appointment?.status,
-                  requestVia: this.appointment!.requestVia
+                  requestVia: this.appointment!.requestVia,
+                  prefix: this.appointment!.prefix
                 }
                 this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
                   next: (response) => {
@@ -2219,7 +2281,7 @@ export class AppointmentFormComponent implements OnInit {
     this.disabledDays = Object.values(dayNameToIndex).filter(
       (index) => !availableDays.includes(index)
     );
-    
+
 
     console.log('Disabled Days (by index):', this.disabledDays);
   }

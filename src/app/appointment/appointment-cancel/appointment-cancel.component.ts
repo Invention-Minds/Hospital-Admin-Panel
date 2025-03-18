@@ -25,7 +25,8 @@ interface Appointment {
   created_at?: string;
   isrescheduled?: boolean;
   user?:any;
-  prnNumber?:any
+  prnNumber?:any;
+  prefix?:any
 }
 @Component({
   selector: 'app-appointment-cancel',
@@ -961,7 +962,8 @@ submitAppointment(appointment: Appointment | null, status: string, requestVia: a
             time: appointment?.time,
             doctorPhoneNumber: doctorPhoneNumber,
             patientPhoneNumber: appointment?.phoneNumber,
-            status: 'cancelled'
+            status: 'cancelled',
+            prefix:appointment.prefix
           }
           this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
             next: (response) => {

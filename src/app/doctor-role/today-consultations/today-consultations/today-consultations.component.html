@@ -35,7 +35,7 @@
               No records to display
             </td>
           </tr>
-          <tr *ngFor="let appointment of getPaginatedAppointments(); let i = index"  [ngClass]="{
+          <tr *ngFor="let appointment of getPaginatedAppointments(); let i = index"   [ngClass]="{
             'ongoing': appointment.checkedOut === true && !appointment.endConsultation,
             'pending': appointment.postPond === true,
             'finished': appointment.checkedOut === true && appointment.endConsultation === true,
@@ -67,6 +67,9 @@
               </button>
               <button class="transfer" [disabled]="appointment.isTransfer" (click)="!appointment.isTransfer && openTransferPopup(appointment)">
                 <img class="image" src="/transfer.svg">Transfer
+              </button>
+              <button class="cc" [disabled]="appointment.isReferred" (click)="openReferralPopup(appointment)">
+                <img class="image" src="/cc.svg">CC
               </button>
             </td>
           </tr>
@@ -133,7 +136,8 @@
            [ngClass]="{
             'ongoing': appointment.checkedOut === true && !appointment.endConsultation,
             'pending': appointment.postPond === true,
-            'finished': appointment.checkedOut === true && appointment.endConsultation === true
+            'finished': appointment.checkedOut === true && appointment.endConsultation === true,
+            'blinking-row': appointment.overTime,
           }"> <!-- ✅ Clicking toggles the full view -->
     
         <!-- Compact View -->
@@ -198,6 +202,9 @@
             </button>
             <button class="transfer" [disabled]="appointment.isTransfer" (click)="!appointment.isTransfer && openTransferPopup(appointment)">
               <img class="image" src="/transfer.svg"> Transfer
+            </button>
+            <button class="cc" [disabled]="appointment.isReferred" (click)="openReferralPopup(appointment)">
+              <img class="image" src="/cc.svg">CC
             </button>
           </div>
         </div>
@@ -515,5 +522,45 @@
         <button class="approval-button" (click)="cancel()">Yes</button>
         <button class="close-button" (click)="closeCancelPopup()">No</button>
       </div> -->
+    </div>
+  </div>
+  
+  <div *ngIf="isPopupOpen" class="overlay" >
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <div class="tv-control">Cross Consultation</div>
+        <button class="popup-close" (click)="closeForm()">
+            <img src="/popup-close.svg" alt="Close Popup" />
+          </button>
+      </div>
+      <hr />
+     <div class="modal-body">
+      <div class="input-type-container">
+        <div class="custom-dropdown">
+          <label for="department">Department*</label>
+          <select [(ngModel)]="selectedDepartment" id="department" (ngModelChange)="filterDoctors()">
+            <option [ngValue]="null" disabled selected>Select Department</option>
+            <option *ngFor="let dept of departments" [ngValue]="dept">{{ dept.name }}</option>
+          </select>
+        </div>
+        
+        <div class="custom-dropdown">
+          <label for="doctor">Doctor*</label>
+          <select [(ngModel)]="selectedDoctor" id="doctor">
+            <option [ngValue]="null" disabled selected>Select Doctor</option>
+            <option *ngFor="let doctor of filteredDoctors" [ngValue]="doctor">{{ doctor.name }}</option>
+          </select>
+        </div>
+
+
+      </div>
+     </div>
+      
+      
+      <div class="modal-footer">
+        <button class="save-button"  (click)="saveDoctor()">Save</button>
+        <button class="close-button" (click)="closeForm()">Close</button>
+      </div>
     </div>
   </div>

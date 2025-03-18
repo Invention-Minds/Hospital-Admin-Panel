@@ -161,6 +161,11 @@ export class TvComponent implements OnInit, OnDestroy {
       console.log(this.adminAlertSentForDoctor)
 
     });
+    this.eventSource.addEventListener('loadTv', (event: MessageEvent) => {
+      const type = JSON.parse(event.data);
+      this.fetchLatestAds()
+
+    });
 
   }
 
@@ -1132,6 +1137,7 @@ export class TvComponent implements OnInit, OnDestroy {
   // }
   startPopupRotation() {
     this.popupInterval = setInterval(() => {
+      // this.fetchLatestAds()
       if (this.mediaFiles.length === 0) return;
 
       const media = this.mediaFiles[this.currentMediaIndex];

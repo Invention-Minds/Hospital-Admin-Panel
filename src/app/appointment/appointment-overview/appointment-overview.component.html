@@ -25,17 +25,6 @@
           <p>Online Requests</p>
         </div>
       </div>
-      <div class="card" 
-      [ngClass]="{'active-card': activeComponent === 'transfer'}"
-      (click)="showTransferAppointments()">
-        <div class="card-icon">
-          <img src="/tranfer.svg" alt="Transfer Icon" />
-        </div>
-        <div class="card-content">
-          <!-- <h2>40</h2> -->
-          <p>Transfer Appt.</p>
-        </div>
-      </div>
 
       <div class="card" 
       [ngClass]="{'active-card': activeComponent === 'confirmed'}"
@@ -70,6 +59,28 @@
           <p>Completed Appt.</p>
         </div>
       </div>
+      <div class="card" 
+      [ngClass]="{'active-card': activeComponent === 'transfer'}"
+      (click)="showTransferAppointments()">
+        <div class="card-icon">
+          <img src="/tranfer.svg" alt="Transfer Icon" />
+        </div>
+        <div class="card-content">
+          <!-- <h2>40</h2> -->
+          <p>Transfer Appt.</p>
+        </div>
+      </div>
+      <div class="card" 
+      [ngClass]="{'active-card': activeComponent === 'cc'}"
+      (click)="showCCAppointments()">
+        <div class="card-icon">
+          <img src="/cc-aapts.svg" alt="Transfer Icon" />
+        </div>
+        <div class="card-content">
+          <!-- <h2>40</h2> -->
+          <p>CC Appt.</p>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -80,7 +91,9 @@
         <app-appointment-cancel *ngIf="activeComponent === 'cancelled'" #appointmentCancelComponent></app-appointment-cancel>
         <app-appointment-complete *ngIf="activeComponent === 'completed'"  #appointmentCompleteComponent></app-appointment-complete>
         <app-appointment-form *ngIf="activeComponent === 'appointment' && showForm" (submit)="showConfirmedAppointments()" (close)="closeForm()"></app-appointment-form>
+        <!-- <app-new-form *ngIf="activeComponent === 'appointment' && showForm" (submit)="showConfirmedAppointments()" (close)="closeForm()"></app-new-form> -->
         <app-appointment-transfer *ngIf="activeComponent === 'transfer' "></app-appointment-transfer>
+        <app-referred *ngIf="activeComponent === 'cc'"></app-referred>
       </div>
       
 </div>

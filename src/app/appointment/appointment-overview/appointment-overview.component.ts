@@ -130,6 +130,9 @@ activeComponent: string = 'request'; // Default to showing the request component
   showTransferAppointments(){
     this.activeComponent = 'transfer'
   }
+  showCCAppointments(){
+    this.activeComponent = 'cc'
+  }
   closeForm() {
     this.showForm = false;
     this.activeComponent = 'request'; // Reset to allow reopening

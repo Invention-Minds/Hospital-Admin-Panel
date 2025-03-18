@@ -1,0 +1,129 @@
+<div class="dashboard-section">
+    <!-- <h1>Appointments</h1> -->
+    <div class="stats-cards" *ngIf="isNotMHC()">
+      <div class="card-1" 
+      [ngClass]="{'active-card': activeComponent === 'form'}"
+      (click)="showNewAppointmentForm()">
+        <div class="card-icon">
+          <img src="/form-health.svg" alt="OPD Icon" />
+        </div>
+        <div class="card-content">
+          <!-- <h2>40</h2> -->
+          <!-- <p>Health CheckUp Form</p> -->
+        </div>
+      </div>
+      <!-- <div class="card" 
+      [ngClass]="{'active-card': activeComponent === 'request'}"
+      (click)="showAppointmentRequests()">
+        <div class="card-icon">
+          <img src="/online-health.svg" alt="Doctor Available Icon" />
+        </div>
+        <div class="card-content">
+          <p>Online Requests</p>
+        </div>
+      </div> -->
+      <div class="card" 
+      [ngClass]="{'active-card': activeComponent === 'confirmed'}"
+      (click)="showConfirmedAppointments()">
+        <div class="card-icon">
+          <img src="/confirm-health.svg" alt="Appointment Icon" />
+        </div>
+        <div class="card-content">
+          <!-- <h2>25</h2> -->
+          <p>Confirmed Services</p>
+        </div>
+      </div>
+      <div class="card" 
+      [ngClass]="{'active-card': activeComponent === 'cancelled'}"
+      (click)="showCancelledAppointments()">
+        <div class="card-icon">
+          <img src="/cancel-health.svg" alt="Doctor Available Icon" />
+        </div>
+        <div class="card-content">
+          <!-- <h2>42</h2> -->
+          <p>Cancelled Services</p>
+        </div>
+      </div>
+      <!-- <div class="card" 
+      [ngClass]="{'active-card': activeComponent === 'repeated'}"
+      (click)="showRepeatAppointments()">
+        <div class="card-icon">
+          <img src="/health-repeat.svg" alt="OPD Icon" />
+        </div>
+        <div class="card-content">
+
+          <p>Repeated Packages</p>
+        </div>
+      </div> -->
+      <div class="card" 
+      [ngClass]="{'active-card': activeComponent === 'completed'}"
+      (click)="showCompletedAppointments()">
+        <div class="card-icon">
+          <img src="/complete-health.svg" alt="OPD Icon" />
+        </div>
+        <div class="card-content">
+          <!-- <h2>40</h2> -->
+          <p>Completed Services</p>
+        </div>
+      </div>
+
+    </div>
+    <div class="stats-cards" *ngIf="isMHC()">
+      <div class="card-1" 
+      [ngClass]="{'active-card': activeComponent === 'mhcForm'}"
+      (click)="showMhcForm()">
+        <div class="card-icon">
+          <img src="/mhc-form.svg" alt="OPD Icon" />
+        </div>
+        <div class="card-content">
+          <!-- <h2>40</h2> -->
+          <!-- <p>Health CheckUp Form</p> -->
+        </div>
+      </div>
+      <div class="card" 
+      [ngClass]="{'active-card': activeComponent === 'mhcToday'}"
+      (click)="showMhcToday()">
+        <div class="card-icon">
+          <img src="/mhc-consul.svg" alt="Doctor Available Icon" />
+        </div>
+        <div class="card-content">
+          <!-- <h2>42</h2> -->
+          <p>Today MHC</p>
+        </div>
+      </div>
+      <div class="card" 
+      [ngClass]="{'active-card': activeComponent === 'mhcConfirm'}"
+      (click)="showMhcConfirm()">
+        <div class="card-icon">
+          <img src="/mhc-confirm.svg" alt="Doctor Available Icon" />
+        </div>
+        <div class="card-content">
+          <!-- <h2>42</h2> -->
+          <p>Conf. MHC Appts</p>
+        </div>
+      </div>
+      <div class="card" 
+      [ngClass]="{'active-card': activeComponent === 'mhcReport'}"
+      (click)="showMhcReport()">
+        <div class="card-icon">
+          <img src="/report-mhc.svg" alt="Doctor Available Icon" />
+        </div>
+        <div class="card-content">
+
+          <p>Report Summary</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="component-section">
+    <!-- <app-appointment-request *ngIf="activeComponent === 'request'" [selectedDateRange]="selectedDateRange" [selectedSearchOption]="selectedSearchOption"  [selectedValue]="searchValue"></app-appointment-request>
+    
+    <app-appointment-cancel *ngIf="activeComponent === 'cancelled'" [selectedDate]="selectedDate" [selectedSearchOption]="selectedSearchOption" [selectedDateRange]="selectedDateRange" [selectedValue]="searchValue" #appointmentCancelComponent></app-appointment-cancel>
+    <app-appointment-complete *ngIf="activeComponent === 'completed'"  [selectedSearchOption]="selectedSearchOption" [selectedDateRange]="selectedDateRange" [selectedValue]="searchValue" #appointmentCompleteComponent></app-appointment-complete> -->
+    <app-service-form *ngIf="activeComponent === 'form'"  [serviceData]="selectedService"
+    (closeForm)="closeForm()"></app-service-form>
+    <app-service-confirm *ngIf="activeComponent === 'confirmed'" #healthCheckupConfirmed (reschedule)="openAppointmentForm($event)"  ></app-service-confirm>
+    <app-service-cancel *ngIf="activeComponent === 'cancelled'" (reschedule)="openAppointmentForm($event)" ></app-service-cancel>
+    <app-service-complete *ngIf="activeComponent === 'completed'" ></app-service-complete>
+
+  </div>

@@ -16,6 +16,7 @@ export class TodayAnalyticsComponent {
   constructor(private doctor: DoctorServiceService, private estimations: EstimationService, private healthCheckUp : HealthCheckupServiceService, private appointment : AppointmentConfirmService) { }
   date: any = '';
   doctors: any[] = [];
+  todayTotalOpdCount:number = 0;
   availableDoctorsToday: number = 0;
   availableDoctors : any[] = []
   unavailableDoctors : any[] = []
@@ -746,6 +747,7 @@ export class TodayAnalyticsComponent {
   getTodayCheckin():any{
     this.appointment.getAllAppointments().subscribe({
       next : (data:any) => {
+        const todayTotalOpd = data.filter((entry:any) => entry.date === this.date);
         const filteredData = data.filter((entry:any) => entry.checkedIn !== false && entry.date === this.date).map((entry:any) => {
           return {
             patientName : entry.patientName,
@@ -767,6 +769,7 @@ export class TodayAnalyticsComponent {
         // console.log(filteredData, "filteredCheckin Data")
         this.checkIn = filteredData.length
         this.checkinData = filteredData
+        this.todayTotalOpdCount = todayTotalOpd.length
       },
       error : (error) => {
         console.log(error)

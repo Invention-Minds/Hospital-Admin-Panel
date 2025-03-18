@@ -302,6 +302,21 @@ tbody tr:hover {
   cursor: not-allowed; /* Change cursor to indicate the button is disabled */
   opacity: 0.6; /* Make the button less prominent */
 }
+.transfer:disabled {
+  background-color: #f0f0f0; /* Gray background for disabled button */
+  cursor: not-allowed; /* Change cursor to indicate the button is disabled */
+  opacity: 0.6; /* Make the button less prominent */
+}
+.postPond:disabled {
+  background-color: #f0f0f0; /* Gray background for disabled button */
+  cursor: not-allowed; /* Change cursor to indicate the button is disabled */
+  opacity: 0.6; /* Make the button less prominent */
+}
+.cc:disabled {
+  background-color: #f0f0f0; /* Gray background for disabled button */
+  cursor: not-allowed; /* Change cursor to indicate the button is disabled */
+  opacity: 0.6; /* Make the button less prominent */
+}
 .start {
   display: flex;
   height: 36px;
@@ -333,6 +348,25 @@ tbody tr:hover {
   border: 1px solid #0e2970;
   background: #fff;
   color: #0e2970;
+  font-family: Kanit;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  cursor: pointer;
+}
+.cc{
+  display: flex;
+  height: 36px;
+  padding: 8px 10px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  border: 1px solid #A52B0E;
+  background: #fff;
+  color: #A52B0E;
   font-family: Kanit;
   font-size: 14px;
   font-style: normal;
@@ -935,6 +969,11 @@ font-style: normal;
 font-weight: 400;
 line-height: normal;
 }
+
+.blinking-row {
+  background: red !important;
+  animation: blink 1s infinite;
+}
 /* Green for Ongoing Consultation */
 .ongoing {
   border-radius: 16px;
@@ -951,6 +990,10 @@ line-height: normal;
 .pending {
   border-radius: 16px;
   background: rgba(255, 236, 138, 0.30) !important; /* Light Orange */
+}
+
+.blinking-row.null, .blinking-row.false {
+  animation: none; /* Stop blinking when overTime is null or false */
 }
 ::ng-deep .custom-calendar .p-inputtext {
   width: 300px;
@@ -1014,7 +1057,99 @@ line-height: normal;
     opacity: 0.5;
   }
 }
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+/* Container for dropdown and label */
+.custom-dropdown {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: relative;
+  font-family: Kanit;
+}
+.tv-control {
+  color: #271e4a;
+  font-family: Kanit;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  /* border-bottom: 2px solid #271E4A; */
+}
+/* Label Styling */
+.custom-dropdown label {
+  font-size: 14px;
+  font-weight: 400;
+  color: #007bff; /* Blue color */
+  position: absolute;
+  top: -2px;
+  left: 10px;
+  background-color: white;
+  padding: 0 4px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  z-index: 10;
+}
 
+/* Select Styling */
+.custom-dropdown select {
+  width: 430px;
+  padding: 12px 20px;
+  border: 1px solid #007bff; /* Blue border */
+  border-radius: 8px;
+
+  font-size: 16px;
+  font-weight: 400;
+  color: #000; /* Black text color */
+  outline: none;
+  font-family: Kanit;
+  -webkit-appearance: none; /* Remove default dropdown styling for WebKit browsers */
+  -moz-appearance: none; /* Remove default dropdown styling for Mozilla browsers */
+  appearance: none; /* Remove default dropdown styling */
+  position: relative;
+  background-image: url(/select-down-arrow.svg);
+  background-repeat: no-repeat;
+  background-position: right 20px center;
+}
+
+/* Dropdown Arrow Customization */
+.custom-dropdown select::after {
+  content: "▼"; /* Custom arrow */
+  font-size: 16px;
+  color: #007bff;
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+label {
+  color: rgba(39, 30, 74, 0.8);
+  font-family: Kanit;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+}
+.input-type-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 15px 0;
+  margin-bottom: 40px;
+  gap: 20px;
+}
 @media (max-width: 1030px) {
 
   ::ng-deep .custom-dropdown .p-dropdown{
@@ -1069,7 +1204,9 @@ line-height: normal;
     cursor: pointer; /* ✅ Clickable effect */
   transition: all 0.8s ease-in-out;
   }
-
+.custom-dropdown select {
+  width: 362px;
+}
 
 .expanded-card{
   transition: max-height 0.8s ease-in-out, opacity 0.8s ease-in-out;
@@ -1105,7 +1242,7 @@ line-height: normal;
 
   .card-actions button {
     flex: 1;
-    min-width: 102px;
+    min-width: 110px;
     padding: 8px;
     font-size: 14px;
     text-align: center;
@@ -1266,6 +1403,9 @@ line-height: normal;
   gap: 5px;  /* Space between radio button and text */
   font-size: 16px;  /* Ensure consistent font size */
   /* white-space: nowrap; Prevent text from breaking into multiple lines */
+}
+.blinking-row.ongoing {
+  background-color: red !important; /* Ensure red overrides ongoing */
 }
 /* Green for Ongoing Consultation */
 .ongoing {

@@ -68,9 +68,20 @@ export class SidebarComponent implements OnInit {
   isEstimator():boolean {
     return(this.role === 'sub_admin' && this.subAdminType === 'Estimator')
   }
+  isIpBillingManager():boolean{
+    return(this.role === 'admin' && this.adminType === 'IP Billing Manager')
+  }
+  isNotIpBillingManager():boolean{
+    return !(this.role === 'admin' && this.adminType === 'IP Billing Manager')
+  }
   isMHC():boolean{
     return(this.role === 'sub_admin' && this.subAdminType === 'MHC Coordinator')
   }
-
+  isRadiology():boolean{
+    return(this.role === 'sub_admin' && this.subAdminType === 'Coordinator')
+  }
+  isNotRadiology():boolean{
+    return !(this.role === 'sub_admin' && this.subAdminType === 'Coordinator')
+  }
   
 }

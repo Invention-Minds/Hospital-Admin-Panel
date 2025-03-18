@@ -351,6 +351,10 @@ export class TvControlComponent {
     if(this.existingAds.text){
       this.textAd = this.existingAds.text.content;
     }
+    if(this.existingAds.image){
+      this.uploadedFile = this.existingAds.image.content.substring(this.existingAds.image.content.lastIndexOf('/') + 1);
+
+      console.log(this.uploadedFile)}
   }
 
   onFileUpload(event: any) {
@@ -403,6 +407,7 @@ export class TvControlComponent {
         console.log("Existing Text Ad:", this.existingAds.text);
         if (this.existingAds.text) {
           this.textAd = this.existingAds.text.content;
+          this.uploadedFile = this.existingAds.image?.content || this.existingAds.video?.content || null;
         }
       }, 0);
     });
@@ -452,5 +457,22 @@ export class TvControlComponent {
       this.fetchLatestAds();
     });
   }
+  activateAd(type: string): void {
+    if ((type === 'image' || type === 'video') && !this.ads.some(ad => ad.type === type && ad.content)) {
+      alert(`No ${type} found. Please upload one first.`);
+      return;
+    }
 
+    this.channelService.updateAdStatus(type, true).subscribe(() => {
+      alert(`${type.charAt(0).toUpperCase() + type.slice(1)} ad activated successfully.`);
+      this.fetchLatestAds();
+    });
+  }
+
+  deactivateAd(type: string): void {
+    this.channelService.updateAdStatus(type, false).subscribe(() => {
+      alert(`${type.charAt(0).toUpperCase() + type.slice(1)} ad deactivated successfully.`);
+      this.fetchLatestAds();
+    });
+  }
 }

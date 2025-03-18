@@ -37,6 +37,12 @@ export class HealthCheckupOverviewComponent {
     this.appointment = service
     this.activeComponent = 'mhcForm'; // Switch to the form view
   }
+  openRadiologyForm(service: any): void {
+    this.selectedAppointment = service; // Store the selected service
+    console.log(this.selectedAppointment);
+    this.appointment = service
+    this.activeComponent = 'radioForm'; // Switch to the form view
+  }
   ngOnInit() {
     this.role = localStorage.getItem('role') || '';
     this.subAdminType = localStorage.getItem('subAdminType') || '';
@@ -62,16 +68,6 @@ export class HealthCheckupOverviewComponent {
   closeConsultation(): void {
     this.activeComponent = 'mhcToday'; // Switch back to the confirmed view
     this.selectedAppointment = null; // Clear the selected service
-    // setTimeout(() => {
-    //   if (this.healthCheckupConfirmedComponent) {
-    //     this.healthCheckupConfirmedComponent.activeServiceId = this.service?.id || null; // Reset activeServiceId
-    //     console.log(this.service.id)
-    //     this.healthCheckupConfirmedComponent.unlockService();
-    //     console.log("Service unlocked");
-    //   } else {
-    //     console.log("issues");
-    //   }
-    // }, 0); // Delay execution to allow component rendering
     console.log("closing", this.activeComponent)
   }
   // Show the Appointment Request component when the "No. of Req Arrived" card is clicked
@@ -111,6 +107,12 @@ export class HealthCheckupOverviewComponent {
   }
   showMhcReport() {
     this.activeComponent = 'mhcReport'
+  }
+  showRadioForm(){
+    this.activeComponent = 'mhcRadioForm'
+  }
+  showRadioConfirm(){
+    this.activeComponent = 'radioConfirm'
   }
 
 

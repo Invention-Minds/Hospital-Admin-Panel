@@ -311,7 +311,7 @@ export class EstimationFormComponent {
     approverSign: '',
     employeeId: '',
     approverId: '',
-    surgeryTime: '',
+    surgeryTime: 'No Level',
     statusOfEstimation: '',
     staffRemarks: '',
     patientRemarks: '',

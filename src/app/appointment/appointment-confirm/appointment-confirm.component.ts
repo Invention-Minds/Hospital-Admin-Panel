@@ -33,6 +33,7 @@ interface Appointment {
   prnNumber?: any
   checkedInBy?:any;
   checkedInTime?:any;
+  prefix?:string
 
 }
 @Component({
@@ -1087,7 +1088,8 @@ export class AppointmentConfirmComponent {
           time: appointment?.time,
           doctorPhoneNumber: doctorPhoneNumber,
           patientPhoneNumber: appointment?.phoneNumber,
-          status: 'cancelled'
+          status: 'cancelled',
+          prefix: appointment?.prefix
         }
         this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
           next: (response) => {
@@ -1217,7 +1219,8 @@ export class AppointmentConfirmComponent {
             time: appointment?.time,
             doctorPhoneNumber: doctorPhoneNumber,
             patientPhoneNumber: appointment?.phoneNumber,
-            status: 'cancelled'
+            status: 'cancelled',
+            prefix:appointment?.prefix
           }
           this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
             next: (response) => {

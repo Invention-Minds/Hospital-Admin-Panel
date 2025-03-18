@@ -1,0 +1,45 @@
+<div class="container">
+    <h2>MHC - Radiology Confirmation Form</h2>
+    <form [formGroup]="doctorForm" (ngSubmit)="onSubmit()">
+
+        <!-- Patient Details -->
+        <div class="form-group">
+            <input type="text" placeholder="PNR Number*" formControlName="pnrNumber">
+            <input type="text" placeholder="Patient Name*" formControlName="patientName" readonly>
+            <input type="text" placeholder="Health Check Type*" formControlName="healthCheckType" readonly>
+        </div>
+        <!-- Radiology Fields -->
+        <div class="grid-container" formArrayName="radiologyAppointments">
+            <div class="department-box" *ngFor="let radio of radiologies; let i = index" [formGroupName]="i">
+
+                <input type="text" formControlName="radiologyName" readonly class="dept-input">
+
+                <!-- Time Dropdown -->
+                <select formControlName="time" [disabled]="getRadiologyAppointmentControl(i, 'time').disabled"
+                    (change)="onTimeSelected(i, $event)">
+                    <option value="" disabled selected>Select Time*</option>
+                    <ng-container *ngIf="availableTimes[radio.id]?.length; else noSlots">
+                        <option *ngFor="let t of availableTimes[radio.id]" [value]="t">{{ t }}</option>
+                    </ng-container>
+                    <ng-template #noSlots>
+                        <option value="no-slots" selected disabled>No Available Slots</option>
+                    </ng-template>
+                </select>
+                <!-- <select formControlName="time" [disabled]="getRadiologyAppointmentControl(i, 'time').disabled"
+                    (change)="onTimeSelected(i, $event)">
+                    <option value="" disabled selected>Select Time*</option>
+                    <option *ngFor="let t of availableTimes[radio.id]" [value]="t">{{ t }}</option>
+                </select> -->
+            </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="button-container">
+            <!-- <button class="submit" type="submit" >Book Appointment</button> -->
+            <button type="submit" class="submit" mat-raised-button [class.spinner]="isLoading"><span
+                    *ngIf="!isLoading">Book
+                    Appointment</span></button>
+            <button type="button" class="cancel">Cancel</button>
+        </div>
+    </form>
+</div>

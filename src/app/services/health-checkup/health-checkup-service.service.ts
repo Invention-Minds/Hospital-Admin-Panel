@@ -94,5 +94,7 @@ sendWhatsappMessageForService(data: any): Observable<any> {
 sendSmsMessage(data: any): Observable<any> {
   return this.http.post<any>(`${environment.apiUrl}/sms/send-sms-package`, data);
 }
-
+individualComplete(data: any): Observable<any> {
+  return this.http.post<any>(`${this.baseUrl}/mark-complete`, data);
+}
 }

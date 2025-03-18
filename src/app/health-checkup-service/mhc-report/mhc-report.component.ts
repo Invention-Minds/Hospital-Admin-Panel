@@ -1,6 +1,7 @@
 
 import { Component, Output, EventEmitter } from '@angular/core';
 import { HealthCheckupServiceService } from '../../services/health-checkup/health-checkup-service.service';
+import { RadiologyService } from '../../services/radiology/radiology.service';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import * as FileSaver from 'file-saver';
@@ -17,7 +18,7 @@ export class MhcReportComponent {
 
 
 
-  constructor(private healthCheckupService: HealthCheckupServiceService, private messageService: MessageService, private router: Router, private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService) {
+  constructor(private healthCheckupService: HealthCheckupServiceService, private messageService: MessageService, private router: Router, private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private radiologyService: RadiologyService) {
 
   }
   confirmedAppointments: any[] = [];
@@ -79,73 +80,77 @@ export class MhcReportComponent {
     // this.today = `${year}-${month}-${day}`;
   }
 
+
+
   fetchConfirmedAppointments(): void {
-    this.isLoading = true
-    const today = new Date();
+    this.isLoading = true;
+
     this.healthCheckupService.getAllServices().subscribe({
       next: (services: any[]) => {
         this.appointmentService.getAllAppointments().subscribe({
           next: (appointments: any[]) => {
 
-            // Step 3: Calculate total waiting time per serviceId
+            // ✅ Step 3: Calculate total waiting time per serviceId (Consultation)
             const waitingTimeByServiceId: { [serviceId: string]: number } = {};
+            const consultationDetailsByServiceId: { [serviceId: string]: any[] } = {};
 
             appointments.forEach(appt => {
               if (appt.serviceId) {
                 if (!waitingTimeByServiceId[appt.serviceId]) {
                   waitingTimeByServiceId[appt.serviceId] = 0;
+                  consultationDetailsByServiceId[appt.serviceId] = [];
                 }
-                waitingTimeByServiceId[appt.serviceId] += Number(appt.waitingTime) || 0; // Add waiting time for the service
+                waitingTimeByServiceId[appt.serviceId] += Number(appt.waitingTime) || 0; // Add waiting time
+                // Store department name with consultation time
+                if (appt.department && appt.waitingTime) {
+                  consultationDetailsByServiceId[appt.serviceId].push({
+                    department: appt.department,
+                    waitingTime: appt.waitingTime
+                  });
+                }
               }
             });
-            console.log(waitingTimeByServiceId)
 
-            // Function to format time into hr/min format
-            function formatDuration(minutes: number): string {
-              if (!minutes || minutes <= 0) return "-"; // Handle missing values
+            console.log("Consultation Time Per Service:", waitingTimeByServiceId);
+            console.log("Consultation Details Per Service:", consultationDetailsByServiceId);
 
-              if (minutes >= 60) {
-                const hours = Math.floor(minutes / 60);
-                const mins = Math.round(minutes % 60);
-                return mins > 0 ? `${hours} hr ${mins} mins` : `${hours} hr`;
-              } else {
-                return `${Math.round(minutes)} mins`;
-              }
-            }
+            // ✅ Step 4: Fetch Radiology Services and Compute Radiology Time
+            this.radiologyService.getAllServices().subscribe({
+              next: (radiologyServices: any[]) => {
 
-            // Step 4: Process the services & attach consultation time
-            // this.confirmedAppointments = services
-            //   .filter(service =>
-            //     (service.appointmentStatus === 'Confirm' || service.appointmentStatus === 'completed') &&
-            //     service.checkedIn === true
-            //   )
-            //   .map(service => ({
-            //     ...service,
-            //     labTime: service.isLabEntryTime && service.isLabTime
-            //       ? formatDuration(Math.abs((new Date(service.isLabTime).getTime() - new Date(service.isLabEntryTime).getTime()) / 60000))
-            //       : "-",
+                // Store Radiology Time per serviceId
+                const radiologyTimeByServiceId: { [serviceId: string]: number } = {};
+                const radiologyDetailsByServiceId: { [serviceId: string]: any[] } = {};
 
-            //     radiologyTime: service.chestXRayEntryTime && service.chestXRayTime
-            //       ? formatDuration(Math.abs((new Date(service.chestXRayTime).getTime() - new Date(service.chestXRayEntryTime).getTime()) / 60000))
-            //       : "-",
+                // ✅ Compute Total Radiology Time per Service ID
+                radiologyServices.forEach(appt => {
+                  if (appt.serviceId && appt.entryTime && appt.checkedOutTime) {
+                    const entryTime = new Date(appt.entryTime).getTime();
+                    const checkedOutTime = new Date(appt.checkedOutTime).getTime();
+                    const timeDifference = Math.abs((checkedOutTime - entryTime) / 60000); // Convert to minutes
 
-            //     consultationTime: service.id
-            //       ? formatDuration(waitingTimeByServiceId[service.id] || 0)
-            //       : 0
-            //       const totalMinutes = extractMinutes(labTime) + extractMinutes(radiologyTime) + extractMinutes(consultationTime);
+                    if (!radiologyTimeByServiceId[appt.serviceId]) {
+                      radiologyTimeByServiceId[appt.serviceId] = 0;
+                      radiologyDetailsByServiceId[appt.serviceId] = [];
+                    }
+                    radiologyTimeByServiceId[appt.serviceId] += timeDifference;
 
-            //       // ✅ Convert total minutes to `X hr Y min` format
-            //        totalTime : formatDuration(totalMinutes)
-            //   }));
+                    // Store radiology service name with waiting time
+                    if (appt.radioServiceName) {
+                      radiologyDetailsByServiceId[appt.serviceId].push({
+                        radioServiceName: appt.radioServiceName,
+                        waitingTime: timeDifference
+                      });
+                    }
+                  }
+                });
 
-            this.confirmedAppointments = services
-              .filter(service =>
-                (service.appointmentStatus === 'Confirm' || service.appointmentStatus === 'completed') &&
-                service.checkedIn === true
-              )
-              .map(service => {
+                console.log("Radiology Time Per Service:", radiologyTimeByServiceId);
+                console.log("Radiology Details Per Service:", radiologyDetailsByServiceId);
+
+                // ✅ Function to Format Time in `hr/min` format
                 function formatDuration(minutes: number): string {
-                  if (!minutes || minutes <= 0) return "-";
+                  if (!minutes || minutes <= 0) return "-"; // Handle missing values
 
                   if (minutes >= 60) {
                     const hours = Math.floor(minutes / 60);
@@ -155,7 +160,6 @@ export class MhcReportComponent {
                     return `${Math.round(minutes)} mins`;
                   }
                 }
-
                 function extractMinutes(timeString: string): number {
                   if (!timeString || timeString === "-") return 0; // Handle missing values
 
@@ -170,62 +174,89 @@ export class MhcReportComponent {
                     return 0;
                   }
                 }
+                // ✅ Step 5: Process and Format Confirmed Appointments
+                this.confirmedAppointments = services
+                  .filter(service =>
+                    (service.appointmentStatus === 'Confirm' || service.appointmentStatus === 'completed') &&
+                    service.checkedIn === true
+                  )
+                  .map(service => {
+                    // ✅ Calculate Lab Time
+                    const labTime = service.isLabEntryTime && service.isLabTime
+                      ? formatDuration(Math.abs((new Date(service.isLabTime).getTime() - new Date(service.isLabEntryTime).getTime()) / 60000))
+                      : "-";
 
-                // ✅ Calculate individual times
-                const labTime = service.isLabEntryTime && service.isLabTime
-                  ? formatDuration(Math.abs((new Date(service.isLabTime).getTime() - new Date(service.isLabEntryTime).getTime()) / 60000))
-                  : "-";
+                    // ✅ Calculate Radiology Time & Details
+                    const radiologyTime = service.id
+                      ? formatDuration(radiologyTimeByServiceId[service.id] || 0)
+                      : "-";
+                    const radiologyDetails = radiologyDetailsByServiceId[service.id] || [];
 
-                const radiologyTime = service.chestXRayEntryTime && service.chestXRayTime
-                  ? formatDuration(Math.abs((new Date(service.chestXRayTime).getTime() - new Date(service.chestXRayEntryTime).getTime()) / 60000))
-                  : "-";
+                    // ✅ Calculate Consultation Time & Details
+                    const consultationTime = service.id
+                      ? formatDuration(waitingTimeByServiceId[service.id] || 0)
+                      : "-";
+                    const consultationDetails = consultationDetailsByServiceId[service.id] || [];
+                    const totalMinutes = extractMinutes(labTime) + extractMinutes(radiologyTime) + extractMinutes(consultationTime);
 
-                const consultationTime = service.id
-                  ? formatDuration(waitingTimeByServiceId[service.id] || 0)
-                  : "-";
+                    // ✅ Convert total minutes to `X hr Y min` format
+                    const total = formatDuration(totalMinutes);
 
-                // ✅ Convert to total minutes
-                const totalMinutes = extractMinutes(labTime) + extractMinutes(radiologyTime) + extractMinutes(consultationTime);
+                    return {
+                      ...service,
+                      labTime,
+                      radiologyTime, // ✅ Adding Radiology Time
+                      consultationTime, // ✅ Adding Consultation Time
+                      radiologyDetails, // ✅ Storing individual radiology services
+                      consultationDetails, // ✅ Storing individual consultation details
+                      total
+                    };
+                  });
+                this.confirmedAppointments.sort((a, b) => {
+                  const dateA = new Date(a.createdAt!).getTime();
+                  const dateB = new Date(b.createdAt!).getTime();
+                  return dateB - dateA;
+                });
+                this.filteredServices = [...this.confirmedAppointments];
 
-                // ✅ Convert total minutes to `X hr Y min` format
-                const total = formatDuration(totalMinutes);
-
-                return {
-                  ...service,
-                  labTime,
-                  radiologyTime,
-                  consultationTime,
-                  total, // ✅ Adding total time
-                };
-              });
-
-            // Step 5: Sort by Created Date (Newest First)
-            this.confirmedAppointments.sort((a, b) => {
-              const dateA = new Date(a.createdAt!).getTime();
-              const dateB = new Date(b.createdAt!).getTime();
-              return dateB - dateA;
+                console.log("Final Confirmed Appointments:", this.confirmedAppointments);
+              },
+              error: (err) => {
+                console.error("Error fetching radiology services:", err);
+              }
             });
-
-            this.filteredServices = [...this.confirmedAppointments];
-
-            console.log(this.confirmedAppointments); // Log updated data
-          }, error: (err) => {
-            console.error('Error fetching appointments:', err);
+          },
+          error: (err) => {
+            console.error("Error fetching appointments:", err);
           }
         });
       },
       error: (err) => {
-        // Handle the error if the API call fails
-        console.error('Error fetching services:', err);
+        console.error("Error fetching services:", err);
       },
       complete: () => {
-        this.isLoading = false
-        // Optional: Actions to perform once the API call completes
-        // console.log('Service fetching process completed.');
+        this.isLoading = false;
       }
     });
-
   }
+
+  formatDuration(minutes: any): string {
+    const mins = Number(minutes); // Convert to number
+  
+    if (isNaN(mins) || mins <= 0) return "-"; // Handle invalid values
+  
+    if (mins >= 60) {
+      const hours = Math.floor(mins / 60);
+      const remainingMins = (mins % 60).toFixed(1); // Keep one decimal place
+      return parseFloat(remainingMins) > 0
+        ? `${hours} hr ${remainingMins} mins`
+        : `${hours} hr`;
+    } else {
+      return `${mins.toFixed(1)} mins`; // Keep one decimal for minutes
+    }
+  }
+  
+  
   openForm(service: any): void {
     this.selectedAppointment = service; // Store selected service
     this.showForm = true; // Show the form modal
@@ -313,57 +344,176 @@ export class MhcReportComponent {
       console.warn('No data to download');
       return;
     }
-    this.filteredServices.forEach((service) => {
-      // Check if repeatedDates exists and is an array
-      if (Array.isArray(service.repeatedDates)) {
-        // Map to extract only the date property and join with commas
-        const repeatedDates = service.repeatedDates
-          .map((rd: any) => rd.date)
-          .join(', ');
-        service.repeatedDate = repeatedDates;
-      } else {
-        service.repeatedDate = ''; // Handle cases where repeatedDates is not available
-      }
+  
+    // ✅ Find unique Radiology and Consultation service names
+    const allRadiologyNames = new Set<string>();
+    const allConsultationNames = new Set<string>();
+  
+    this.filteredServices.forEach(service => {
+      service.radiologyDetails?.forEach((rd: any) => allRadiologyNames.add(rd.radioServiceName));
+      service.consultationDetails?.forEach((cd: any) => allConsultationNames.add(cd.department));
     });
-    const filteredData = this.filteredServices.map(service => ({
-      AppointmentDate: service.appointmentDate || "-",
-      PNR: service.pnrNumber || "-",
-      Name: `${service.firstName} ${service.lastName}`.trim(),
-      Age: service.age || "-",
-      Gender: service.gender || "-",
-      Package: service.packageName || "-",
-      LabTime: service.labTime || "-",
-      RadiologyTime: service.radiologyTime || "-",
-      ConsultationTime: service.consultationTime || "-",
-      TotalTime: service.totalTime || "-"
-    }));
-    const csvContent = this.convertToCSV(filteredData);
+  
+    // ✅ Prepare header row dynamically
+    let headers = [
+      "AppointmentDate", "PNR", "Name", "Age", "Gender", "Package", "LabTime"
+    ];
+  
+    // Add Radiology and Consultation as separate columns
+    allRadiologyNames.forEach(name => headers.push(`Radiology - ${name}`));
+    allConsultationNames.forEach(name => headers.push(`Consultation - ${name}`));
+  
+    headers.push("TotalTime"); // Add final column
+  
+    // ✅ Map data to match new structure
+    const filteredData = this.filteredServices.map(service => {
+      let row: any = {
+        AppointmentDate: service.appointmentDate || "-",
+        PNR: service.pnrNumber || "-",
+        Name: `${service.firstName} ${service.lastName}`.trim(),
+        Age: service.age || "-",
+        Gender: service.gender || "-",
+        Package: service.packageName || "-",
+        LabTime: service.labTime || "-",
+        TotalTime: service.total || "-"
+      };
+  
+      // ✅ Fill in Radiology details per column
+      allRadiologyNames.forEach(name => {
+        const radioService = service.radiologyDetails?.find((rd: any) => rd.radioServiceName === name);
+        const waitingTime = radioService ? Number(radioService.waitingTime) : null;
+        row[`Radiology - ${name}`] = waitingTime !== null && !isNaN(waitingTime) ? waitingTime.toFixed(1) + " mins" : "-";
+      });
+  
+      // ✅ Fill in Consultation details per column
+      allConsultationNames.forEach(name => {
+        const consultService = service.consultationDetails?.find((cd: any) => cd.department === name);
+        const waitingTime = consultService ? Number(consultService.waitingTime) : null;
+        row[`Consultation - ${name}`] = waitingTime !== null && !isNaN(waitingTime) ? waitingTime.toFixed(1) + " mins" : "-";
+      });
+  
+      return row;
+    });
+  
+    // ✅ Convert to CSV format
+    const csvContent = this.convertToCSV(headers, filteredData);
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     FileSaver.saveAs(blob, 'summary_report.csv');
   }
+  
+  // ✅ Updated convertToCSV function to handle dynamic headers
+  private convertToCSV(headers: string[], data: any[]): string {
+    const headerRow = headers.join(',');
+    const rows = data.map(row =>
+      headers.map(header => `"${row[header] || "-"}"`).join(',')
+    ).join('\n');
+  
+    return `${headerRow}\n${rows}`;
+  }
+  
 
   // Utility to Convert JSON to CSV
-  private convertToCSV(data: any[]): string {
-    const headers = Object.keys(data[0]).join(',');
-    const rows = data
-      .map((row) =>
-        Object.values(row)
-          .map((value) => `"${value}"`)
-          .join(',')
-      )
-      .join('\n');
+  // private convertToCSV(data: any[]): string {
+  //   const headers = Object.keys(data[0]).join(',');
+  //   const rows = data
+  //     .map((row) =>
+  //       Object.values(row)
+  //         .map((value) => `"${value}"`)
+  //         .join(',')
+  //     )
+  //     .join('\n');
 
-    return `${headers}\n${rows}`;
-  }
+  //   return `${headers}\n${rows}`;
+  // }
   // downloadLastWeekData(): void {
   //   // Implement logic to download last week's data
   //   console.log('Downloading last week\'s data...');
   // }
+  // printSummary() {
+  //   if (this.filteredServices.length === 0) {
+  //     console.warn('No data to print');
+  //     return;
+  //   }
+
+  //   let printContent = `
+  //     <html>
+  //     <head>
+  //       <title>Summary Report</title>
+  //       <style>
+  //         table { width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; }
+  //         th, td { border: 1px solid black; padding: 8px; text-align: left; }
+  //         th { background-color: #f2f2f2; }
+  //       </style>
+  //     </head>
+  //     <body>
+  //       <h2>Summary Report</h2>
+  //       <table>
+  //         <thead>
+  //           <tr>
+  //             <th>Appointment Date</th>
+  //             <th>PNR</th>
+  //             <th>Name</th>
+  //             <th>Age</th>
+  //             <th>Gender</th>
+  //             <th>Package</th>
+  //             <th>Lab Time</th>
+  //             <th>Radiology Time</th>
+  //             <th>Consultation Time</th>
+  //             <th>Total Time</th>
+  //           </tr>
+  //         </thead>
+  //         <tbody>
+  //   `;
+
+  //   this.filteredServices.forEach(service => {
+  //     // Format Radiology Details
+  //     const radiologyDetails = service.radiologyDetails
+  //       ?.map((rd: any) => `${rd.radioServiceName}: ${this.formatDuration(rd.waitingTime)}`)
+  //       .join("<br>") || "-";
+
+  //     // Format Consultation Details
+  //     const consultationDetails = service.consultationDetails
+  //       ?.map((cd: any) => `${cd.department}: ${this.formatDuration(cd.waitingTime)}`)
+  //       .join("<br>") || "-";
+
+  //     printContent += `
+  //       <tr>
+  //         <td>${service.appointmentDate || "-"}</td>
+  //         <td>${service.pnrNumber || "-"}</td>
+  //         <td>${service.firstName} ${service.lastName}</td>
+  //         <td>${service.age || "-"}</td>
+  //         <td>${service.gender || "-"}</td>
+  //         <td>${service.packageName || "-"}</td>
+  //         <td>${service.labTime || "-"}</td>
+  //         <td>${radiologyDetails}</td>
+  //         <td>${consultationDetails}</td>
+  //         <td>${service.total || "-"}</td>
+  //       </tr>
+  //     `;
+  //   });
+
+  //   printContent += `</tbody></table></body></html>`;
+
+  //   const popupWin = window.open('', '_blank', 'width=800,height=600');
+  //   popupWin?.document.open();
+  //   popupWin?.document.write(printContent);
+  //   popupWin?.document.close();
+  // }
+
   printSummary() {
     if (this.filteredServices.length === 0) {
       console.warn('No data to print');
       return;
     }
+  
+    // Get unique Radiology & Consultation service names
+    const allRadiologyNames = new Set<string>();
+    const allConsultationNames = new Set<string>();
+  
+    this.filteredServices.forEach(service => {
+      service.radiologyDetails?.forEach((rd: any) => allRadiologyNames.add(rd.radioServiceName));
+      service.consultationDetails?.forEach((cd: any) => allConsultationNames.add(cd.department));
+    });
   
     let printContent = `
       <html>
@@ -387,14 +537,26 @@ export class MhcReportComponent {
               <th>Gender</th>
               <th>Package</th>
               <th>Lab Time</th>
-              <th>Radiology Time</th>
-              <th>Consultation Time</th>
+    `;
+  
+    // Add dynamic Radiology columns
+    allRadiologyNames.forEach(name => {
+      printContent += `<th>Radiology - ${name}</th>`;
+    });
+  
+    // Add dynamic Consultation columns
+    allConsultationNames.forEach(name => {
+      printContent += `<th>Consultation - ${name}</th>`;
+    });
+  
+    printContent += `
               <th>Total Time</th>
             </tr>
           </thead>
           <tbody>
     `;
   
+    // Add data for each service
     this.filteredServices.forEach(service => {
       printContent += `
         <tr>
@@ -405,11 +567,25 @@ export class MhcReportComponent {
           <td>${service.gender || "-"}</td>
           <td>${service.packageName || "-"}</td>
           <td>${service.labTime || "-"}</td>
-          <td>${service.radiologyTime || "-"}</td>
-          <td>${service.consultationTime || "-"}</td>
-          <td>${service.totalTime || "-"}</td>
-        </tr>
       `;
+  
+      // Add Radiology Times
+      allRadiologyNames.forEach(name => {
+        const radioService = service.radiologyDetails?.find((rd: any) => rd.radioServiceName === name);
+        const waitingTime = radioService ? Number(radioService.waitingTime) : null;
+    
+        printContent += `<td>${waitingTime !== null && !isNaN(waitingTime) ? waitingTime.toFixed(1) + " mins" : "-"}</td>`;
+      });
+  
+      // Add Consultation Times
+      allConsultationNames.forEach(name => {
+        const consultService = service.consultationDetails?.find((cd: any) => cd.department === name);
+        const waitingTime = consultService ? Number(consultService.waitingTime) : null;
+    
+        printContent += `<td>${waitingTime !== null && !isNaN(waitingTime) ? waitingTime.toFixed(1) + " mins" : "-"}</td>`;
+      });
+  
+      printContent += `<td>${service.total || "-"}</td></tr>`;
     });
   
     printContent += `</tbody></table></body></html>`;
@@ -420,6 +596,7 @@ export class MhcReportComponent {
     popupWin?.document.close();
   }
   
+
   // Method to clear input fields
   onClear() {
     this.searchValue = '';
@@ -616,7 +793,7 @@ export class MhcReportComponent {
           time: appointment?.time,
           doctorPhoneNumber: doctorPhoneNumber,
           patientPhoneNumber: appointment?.phoneNumber,
-          status: 'cancelled'
+          status: 'cancelled',
         }
 
         this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({

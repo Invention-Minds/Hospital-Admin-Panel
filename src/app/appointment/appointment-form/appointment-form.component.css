@@ -1,3 +1,4 @@
+
 .overlay {
   position: fixed;
   top: 0;
@@ -12,214 +13,17 @@
 }
 
 .appointment-modal {
-  width: 873px;
+  width: 65%;
   background-color: white;
   border-radius: 30px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   position: relative;
-  height: 700px;
+  max-height: 700px;
+  overflow-y: scroll;
 }
-.phone-number-input {
-  display: flex;
-  align-items: center;
-}
-.select {
-  margin-left: 32px;
-}
-.phone-number-input span {
-  margin-right: 5px;
-  font-weight: bold;
-}
-small {
-  color: #d20006;
-  font-size: 10px;
-  font-weight: 500;
-}
-.appointment-header {
-  background-color: #0e2970;
-  /* padding: 15px; */
-  text-align: center;
-  color: white;
-  font-family: "Kanit";
-  font-size: 32px;
-  font-weight: 500;
-  height: 70px;
-  border-radius: 20px 20px 0 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-h3 {
-  margin: 0;
-}
-.errors {
-  margin-top: 42px;
-  margin-bottom: 28px;
-  margin-left: -179px;
-}
-.last-name {
-  margin-left: 98px !important;
-}
-.close-button {
-  position: absolute;
-  right: 20px;
-  top: 7px;
-  border: none;
-  background: none;
-  color: white;
-  font-size: 24px;
-  cursor: pointer;
-}
-
-.form-content {
-  padding: 20px;
-}
-
-.form-group {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 5px;
-  height: 50px;
-}
-.form-group-2 {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-}
-
-.form-group label {
-  width: 170px;
-  color: #271e4a;
-  font-size: 16px;
-  font-family: Kanit;
-  font-weight: 400;
-}
-
-input[type="text"],
-input[type="number"],
-input[type="email"],
-input[type="tel"],
-input[type="date"],
-select {
-  flex: 2;
-  font-size: 14px;
-  border-radius: 4px;
-  border: 1px solid #3b3b3b;
-  padding-left: 10px;
-  height: 36px;
-  width: 100%;
-}
-input[type="date"] {
-  /* width: 170px; */
-  margin-left: 20px;
-}
-input[type="text"],
-input[type="email"],
-input[type="number"],
-input[type="tel"] {
-  margin-left: 32px;
-}
-::ng-deep .email {
-  color: black;
-}
-.radio-group {
-  display: flex;
-  gap: 0px;
-  margin-top: 20px;
-}
-.radio-group-gender {
-  display: flex;
-  gap: 0px;
-  margin-top: 0px;
-  margin-right: 124px;
-}
-
-.radio-group input {
-  margin-right: 5px;
-}
-.time label {
-  width: 182px;
-}
-.slot label {
-  margin-right: 30px;
-}
-.time {
-  margin-right: 38px;
-}
-.radio {
-}
-.email {
-  margin-right: 0px;
-}
-.phone {
-  margin-right: 52px;
-}
-.doctor {
-  margin-right: 52px;
-}
-.prn {
-  margin-right: 167px;
-}
-
-.button-group {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 20px;
-}
-
-button {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 4px;
-  font-size: 16px;
-}
-
-.btn-primary {
-  background-color: #169458;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-}
-.btn-primary:disabled {
-  background-color: #cccccc; /* Gray background for disabled button */
-  color: #666666; /* Light gray text for better readability */
-  cursor: not-allowed; /* Change cursor to indicate the button is disabled */
-  opacity: 0.6; /* Make the button less prominent */
-}
-.form-group {
-  position: relative; /* This ensures the dropdown appears relative to the input field */
-}
-.form-group {
-  position: relative; /* To ensure dropdown aligns relative to this container */
-}
-
-.doctor-suggestions {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  border: 1px solid #ccc; /* Border to define dropdown */
-  background-color: #ffffff; /* White background to resemble a dropdown */
-  max-height: 200px; /* Restrict height for better display */
-  overflow-y: auto; /* Allow scrolling if suggestions overflow */
-  position: absolute; /* Position it absolutely relative to the form group */
-  width: 75%;
-  z-index: 10;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-  top: calc(100% + -20px);
-  border-radius: 4px;
-  left: 200px;
-}
-
-.doctor-suggestions li {
-  padding: 10px;
-  cursor: pointer;
-  font-size: 16px; /* Adjust font size for readability */
-  color: #333; /* Text color */
-}
-
-.doctor-suggestions li:hover {
-  background-color: #f0f0f0; /* Light grey background on hover for better visibility */
-  color: #005d8c; /* Optional: Highlight text color on hover */
+.header{
+    border-top-right-radius: 15px;
+    border-top-left-radius: 15px;
 }
 .prn-suggestions {
   list-style: none;
@@ -233,9 +37,10 @@ button {
   width: 53%;
   z-index: 10;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-  top: calc(100% + -20px);
+  top: 18%;
   border-radius: 4px;
-  left: 200px;
+  left: 244px;
+  font-family: Kanit;
 }
 
 .prn-suggestions li {
@@ -250,15 +55,263 @@ button {
   color: #005d8c; /* Optional: Highlight text color on hover */
 }
 
-.btn-secondary {
-  cursor: not-allowed;
-  background-color: #c4c4c4;
-  color: black;
+.formContainer {
+  width: 963px;
+  border-radius: 15px;
+  background: #FFF;
 }
-.appointment-timing {
-  display: flex;
-  width: 100%;
-  justify-content: space-between;
+
+.formContent{
+    padding : 0 4%;
+    overflow-y: scroll;
+}
+
+.formHeading{
+    color: #FFF;
+    position: relative;
+    font-family: Kanit;
+    font-size: 32px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+    display: flex;
+    align-items: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 70px;
+    background: #0e2970;
+    border-top-right-radius: 15px;
+    border-top-left-radius: 15px;
+}
+
+.closeButton{
+    display: flex;
+    justify-content: right;
+    align-items: center;
+    position: relative;
+    height: 70px;
+    margin-top: -70px;
+    cursor: pointer;
+}
+.close-button {
+  position: absolute;
+  right: 20px;
+  top: 7px;
+  border: none;
+  background: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.closeButton i{
+    margin-right: 20px;
+    color: #fff;
+    font-size: 20px;
+    font-weight: bolder;
+}
+
+.sections{
+    display: flex;
+    gap: 30px;
+    width: 100%;
+}
+
+.lable_name{
+    width: 20%;
+    color: #271E4A;
+    font-family: Kanit;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.input_field{
+    width: 80%;
+}
+
+.input_field input, select{
+    border-radius: 4px;
+    border: 1px solid #3B3B3B;
+    height: 36px;
+    width: 100%;
+    padding: 5px 3%;
+    color: #271E4A;
+    font-family: Kanit;
+}
+.input_field input, select:focus{
+outline: none;
+}
+
+.input_field input::placeholder{
+    color: rgba(123, 123, 123, 0.40);
+    font-family: Kanit;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+}
+.input_field.errors{
+    border: 1px solid red;
+}
+
+.input_flex{
+    display: flex;
+    gap: 20px;
+}
+
+.selectFlex{
+    display: flex;
+    gap: 20px;
+    width: 50%;
+}
+
+.selectFlex .lable_name{    
+    width: 64%;
+}
+
+.selectFlex .input_flex{
+    width: 40%;
+}
+
+.container_margin{
+    margin-top: 20px;
+}
+
+.radio_name{
+    color: #0E2970;
+    font-family: Kanit;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.radio_flex{
+    width: 50%;
+    display: flex;
+    gap: 20px;
+    flex-direction: column;
+}
+
+.radio_flex .lable_name{
+    width: 100%;
+    display: flex;
+    gap: 20px;
+    flex-direction: column;
+}
+
+
+.button_section{
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: right;
+    height: 100px;
+    gap: 30px;
+
+}
+ 
+.button_section button{
+    color: #FFF;
+    font-family: Kanit;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    width: 200px;
+    height: 44px;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    background-color: #169458;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    cursor: pointer;
+}
+
+.close_btn{
+    display: flex;
+    width: 180px;
+    height: 44px;
+    padding: 7px 0px;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+    border-radius: 4px;
+    border: 1px solid #7B7B7B;
+    color: #7B7B7B;
+    font-family: Kanit;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+}
+
+.radio_flex .radioInput{
+    width: 100%;
+    display: flex;
+    gap: 20px;
+}
+
+.errors small{
+    color: red;
+}
+
+
+.doctor-suggestions{
+  position: absolute;
+  width: 60%;
+  z-index: 3;
+  overflow: scroll;
+  background-color: white;
+  list-style-type: none;
+  border: 2px solid #3B3B3B;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  background-color: #ffffff; 
+  max-height: 200px;
+  overflow-y: auto;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  font-family: Kanit;
+}
+
+.doctor-suggestions li {
+  padding: 10px;
+  cursor: pointer;
+  font-size: 16px; /* Adjust font size for readability */
+  color: #333; /* Text color */
+}
+
+.doctor-suggestions li:hover {
+  background-color: #f0f0f0; /* Light grey background on hover for better visibility */
+  color: #005d8c; /* Optional: Highlight text color on hover */
+}
+.button_section button:disabled {
+    background-color: #ccc;  /* Light grey background for disabled state */
+    cursor: not-allowed;     /* Change cursor to indicate the button is not clickable */
+    opacity: 0.6;            /* Optionally reduce opacity to indicate disabled state */
+  }
+  .mr select{
+    width: 60px;
+}
+
+.name_error{
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    flex-direction: column;
+}
+
+.name_error .errors{
+    width: 100%;
 }
 .availability-message {
   color: #d20006;
@@ -273,12 +326,4 @@ button {
   font-weight: 500;
   position: relative;
   bottom: 15px;
-}
-@media screen and (max-width: 1390px) {
-  .form-content {
-    padding: 32px 45px;
-  }
-  .appointment-modal {
-    height: 637px;
-  }
 }

@@ -130,7 +130,11 @@
 </div> -->
 
 <div class="wrapper">
-
+    <div class="card" style="background-color: #F7FCDC;">
+        <div class="icon"><img src="/total-analytics.svg" alt="" matTooltip="Total number of opd today." matTooltipPosition="above"></div>
+        <div class="count">{{todayTotalOpdCount}}</div>
+        <div class="text">Total OPD Today</div>
+    </div>
     <div class="card pointer" style="background-color: #DCFCE7;" (click)="docAvailReport()">
         <div class="icon"><img src="/avail.svg" alt="" matTooltip="Total number of doctors available today." matTooltipPosition="above"></div>
         <div class="count">{{availableDoctorsToday}}/<span>{{doctorsCount}}</span></div>
@@ -149,11 +153,11 @@
         <div class="text">Doc Unavailable</div>
     </div>
 
-    <div class="card" style="background-color: #9FE4FF;">
+    <!-- <div class="card" style="background-color: #9FE4FF;">
         <div class="icon"><img src="/occupied.svg" alt="" matTooltip="Total number of rooms occupied today." matTooltipPosition="above"></div>
         <div class="count">{{availlableRoom}}/<span>25</span></div>
         <div class="text">Rooms Occupied</div>
-    </div>
+    </div> -->
 
     <div class="card" style="background-color: #E8D3FF;">
         <div class="icon"><img src="/mhc_confirmed.svg" alt="" matTooltip="Total number of Medical Health Check confirmed for today." matTooltipPosition="above"></div>

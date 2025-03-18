@@ -3,6 +3,7 @@ import { Component, Output, EventEmitter } from '@angular/core';
 import { HealthCheckupServiceService } from '../../services/health-checkup/health-checkup-service.service';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
+import { RadiologyService } from '../../services/radiology/radiology.service';
 import * as FileSaver from 'file-saver';
 import { MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
@@ -18,7 +19,7 @@ export class MhcTodayConsulComponent {
 
 
 
-  constructor(private healthCheckupService: HealthCheckupServiceService, private messageService: MessageService, private router: Router, private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService) {
+  constructor(private healthCheckupService: HealthCheckupServiceService, private messageService: MessageService, private router: Router, private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private radiologyService: RadiologyService) {
 
   }
   confirmedAppointments: any[] = [];
@@ -39,9 +40,10 @@ export class MhcTodayConsulComponent {
   isLockedDialogVisible: boolean = false;
   userId: any = 0;
   @Output() reschedule = new EventEmitter<any>();
+  @Output() radiology = new EventEmitter<any>();
   activeComponent: string = 'confirmed';
   confirmedServices: any[] = [];
-  today: any =  new Date().toLocaleDateString('en-CA');
+  today: any = new Date().toLocaleDateString('en-CA');
   selectedAppointment: any;
   showForm: boolean = false;
   showLabPopup: boolean = false;
@@ -74,68 +76,238 @@ export class MhcTodayConsulComponent {
     this.fetchConfirmedAppointments();
     this.userId = localStorage.getItem('userid')
     this.activeComponent = 'appointments';
-    const today =  new Date().toLocaleDateString('en-CA');
+    const today = new Date().toLocaleDateString('en-CA');
     // const year = today.getFullYear();
     // const month = (today.getMonth() + 1).toString().padStart(2, '0');
     // const day = today.getDate().toString().padStart(2, '0');
     // this.today = `${year}-${month}-${day}`;
   }
 
+  // fetchConfirmedAppointments(): void {
+  //   this.isLoading = true
+  //   const today = new Date();
+  //   this.healthCheckupService.getAllServices().subscribe({
+  //     next: (services: any[]) => {
+
+  //       // Process the services when the API call is successful
+  //       this.confirmedAppointments = services
+  //       .filter(
+  //         (service) =>
+  //           service.appointmentStatus === 'Confirm' &&
+  //           service.checkedIn === true &&
+  //           service.appointmentDate === today.toLocaleDateString('en-CA')
+  //       )
+  //       .map((service) => ({
+  //         ...service,
+  //         consultationCount: service.package.deptIds
+  //           ? service.package.deptIds.split(',').length
+  //           : 0, // Count the number of department IDs
+  //         radiologyCount: service.package.radioIds?
+  //           service.package.radioIds.split(',').length:0
+  //       }));
+  //       console.log(this.confirmedAppointments)
+  //       // this.confirmedAppointments = services.filter(
+  //       //   (service) => {
+  //       //     const appointmentDate = new Date(service.appointmentDate);
+  //       //     return (
+  //       //       (service.appointmentStatus === 'Confirm' || service.appointmentStatus === 'confirmed') &&
+  //       //       appointmentDate >= today // Filter out past dates
+  //       //     );
+  //       //   }
+  //       // );
+  //       this.confirmedAppointments.sort((a, b) => {
+  //         const dateA = new Date(a.createdAt!);
+  //         const dateB = new Date(b.createdAt!);
+  //         return dateB.getTime() - dateA.getTime();
+  //       });
+  //       this.filteredServices = [...this.confirmedAppointments];
+  //       // console.log('Services processed successfully.');
+  //     },
+  //     error: (err) => {
+  //       // Handle the error if the API call fails
+  //       console.error('Error fetching services:', err);
+  //     },
+  //     complete: () => {
+  //       this.isLoading = false
+  //       // Optional: Actions to perform once the API call completes
+  //       // console.log('Service fetching process completed.');
+  //     }
+  //   });
+
+  // }
   fetchConfirmedAppointments(): void {
-    this.isLoading = true
+    this.isLoading = true;
     const today = new Date();
     this.healthCheckupService.getAllServices().subscribe({
       next: (services: any[]) => {
+        this.appointmentService.getAllAppointments().subscribe({
+          next: (appointments: any[]) => {
 
-        // Process the services when the API call is successful
-        this.confirmedAppointments = services
-        .filter(
-          (service) =>
-            service.appointmentStatus === 'Confirm' &&
-            service.checkedIn === true &&
-            service.appointmentDate === today.toLocaleDateString('en-CA')
-        )
-        .map((service) => ({
-          ...service,
-          consultationCount: service.package.deptIds
-            ? service.package.deptIds.split(',').length
-            : 0, // Count the number of department IDs
-        }));
-        console.log(this.confirmedAppointments)
-        // this.confirmedAppointments = services.filter(
-        //   (service) => {
-        //     const appointmentDate = new Date(service.appointmentDate);
-        //     return (
-        //       (service.appointmentStatus === 'Confirm' || service.appointmentStatus === 'confirmed') &&
-        //       appointmentDate >= today // Filter out past dates
-        //     );
-        //   }
-        // );
-        this.confirmedAppointments.sort((a, b) => {
-          const dateA = new Date(a.createdAt!);
-          const dateB = new Date(b.createdAt!);
-          return dateB.getTime() - dateA.getTime();
+            // ✅ Step 3: Calculate total waiting time per serviceId (Consultation)
+            const waitingTimeByServiceId: { [serviceId: string]: number } = {};
+            const consultationDetailsByServiceId: { [serviceId: string]: any[] } = {};
+
+            appointments.forEach(appt => {
+              if (appt.serviceId) {
+                if (!waitingTimeByServiceId[appt.serviceId]) {
+                  waitingTimeByServiceId[appt.serviceId] = 0;
+                  consultationDetailsByServiceId[appt.serviceId] = [];
+                }
+                waitingTimeByServiceId[appt.serviceId] += Number(appt.waitingTime) || 0; // Add waiting time
+                // Store department name with consultation time
+                if (appt.department && appt.waitingTime) {
+                  consultationDetailsByServiceId[appt.serviceId].push({
+                    department: appt.department,
+                    waitingTime: appt.waitingTime
+                  });
+                }
+              }
+            });
+
+            console.log("Consultation Time Per Service:", waitingTimeByServiceId);
+            console.log("Consultation Details Per Service:", consultationDetailsByServiceId);
+
+            // ✅ Step 4: Fetch Radiology Services and Compute Radiology Time
+            this.radiologyService.getAllServices().subscribe({
+              next: (radiologyServices: any[]) => {
+
+                // Store Radiology Time per serviceId
+                const radiologyTimeByServiceId: { [serviceId: string]: number } = {};
+                const radiologyDetailsByServiceId: { [serviceId: string]: any[] } = {};
+
+                // ✅ Compute Total Radiology Time per Service ID
+                radiologyServices.forEach(appt => {
+                  if (appt.serviceId && appt.entryTime && appt.checkedOutTime) {
+                    const entryTime = new Date(appt.entryTime).getTime();
+                    const checkedOutTime = new Date(appt.checkedOutTime).getTime();
+                    const timeDifference = Math.abs((checkedOutTime - entryTime) / 60000); // Convert to minutes
+
+                    if (!radiologyTimeByServiceId[appt.serviceId]) {
+                      radiologyTimeByServiceId[appt.serviceId] = 0;
+                      radiologyDetailsByServiceId[appt.serviceId] = [];
+                    }
+                    radiologyTimeByServiceId[appt.serviceId] += timeDifference;
+
+                    // Store radiology service name with waiting time
+                    if (appt.radioServiceName) {
+                      radiologyDetailsByServiceId[appt.serviceId].push({
+                        radioServiceName: appt.radioServiceName,
+                        waitingTime: timeDifference
+                      });
+                    }
+                  }
+                });
+
+                console.log("Radiology Time Per Service:", radiologyTimeByServiceId);
+                console.log("Radiology Details Per Service:", radiologyDetailsByServiceId);
+
+                // ✅ Function to Format Time in `hr/min` format
+                function formatDuration(minutes: number): string {
+                  if (!minutes || minutes <= 0) return "-"; // Handle missing values
+
+                  if (minutes >= 60) {
+                    const hours = Math.floor(minutes / 60);
+                    const mins = Math.round(minutes % 60);
+                    return mins > 0 ? `${hours} hr ${mins} mins` : `${hours} hr`;
+                  } else {
+                    return `${Math.round(minutes)} mins`;
+                  }
+                }
+                function extractMinutes(timeString: string): number {
+                  if (!timeString || timeString === "-") return 0; // Handle missing values
+
+                  const timeParts = timeString.match(/(\d+)\s*hr\s*(\d*)\s*min?/);
+                  if (timeParts) {
+                    const hours = parseInt(timeParts[1] || "0", 10);
+                    const minutes = parseInt(timeParts[2] || "0", 10);
+                    return hours * 60 + minutes;
+                  } else if (timeString.includes("mins")) {
+                    return parseInt(timeString, 10);
+                  } else {
+                    return 0;
+                  }
+                }
+                // ✅ Step 5: Process and Format Confirmed Appointments
+                this.confirmedAppointments = services
+                  .filter(service =>
+                    service.appointmentStatus === 'Confirm' &&
+                    service.checkedIn === true &&
+                    service.appointmentDate === today.toLocaleDateString('en-CA')
+                  )
+                  .map(service => {
+                    const consultationCount = service.package?.deptIds
+                      ? service.package.deptIds.split(',').length
+                      : 0; // Count the number of department IDs
+
+                    const radiologyCount = service.package?.radioIds
+                      ? service.package.radioIds.split(',').length
+                      : 0; // Count the number of radiology IDs
+                    // ✅ Calculate Lab Time
+                    const labTime = service.isLabEntryTime && service.isLabTime
+                      ? formatDuration(Math.abs((new Date(service.isLabTime).getTime() - new Date(service.isLabEntryTime).getTime()) / 60000))
+                      : "-";
+
+                    // ✅ Calculate Radiology Time & Details
+                    const radiologyTime = service.id
+                      ? formatDuration(radiologyTimeByServiceId[service.id] || 0)
+                      : "-";
+                    const radiologyDetails = radiologyDetailsByServiceId[service.id] || [];
+
+                    // ✅ Calculate Consultation Time & Details
+                    const consultationTime = service.id
+                      ? formatDuration(waitingTimeByServiceId[service.id] || 0)
+                      : "-";
+                    const consultationDetails = consultationDetailsByServiceId[service.id] || [];
+                    const totalMinutes = extractMinutes(labTime) + extractMinutes(radiologyTime) + extractMinutes(consultationTime);
+
+                    // ✅ Convert total minutes to `X hr Y min` format
+                    const total = formatDuration(totalMinutes);
+
+
+                    return {
+                      ...service,
+                      labTime,
+                      consultationCount,
+                      radiologyCount,
+                      radiologyTime, // ✅ Adding Radiology Time
+                      consultationTime, // ✅ Adding Consultation Time
+                      radiologyDetails, // ✅ Storing individual radiology services
+                      consultationDetails, // ✅ Storing individual consultation details
+                      total
+                    };
+                  });
+                this.confirmedAppointments.sort((a, b) => {
+                  const dateA = new Date(a.createdAt!).getTime();
+                  const dateB = new Date(b.createdAt!).getTime();
+                  return dateB - dateA;
+                });
+                this.filteredServices = [...this.confirmedAppointments];
+
+                console.log("Final Confirmed Appointments:", this.confirmedAppointments);
+              },
+              error: (err) => {
+                console.error("Error fetching radiology services:", err);
+              }
+            });
+          },
+          error: (err) => {
+            console.error("Error fetching appointments:", err);
+          }
         });
-        this.filteredServices = [...this.confirmedAppointments];
-        // console.log('Services processed successfully.');
       },
       error: (err) => {
-        // Handle the error if the API call fails
-        console.error('Error fetching services:', err);
+        console.error("Error fetching services:", err);
       },
       complete: () => {
-        this.isLoading = false
-        // Optional: Actions to perform once the API call completes
-        // console.log('Service fetching process completed.');
+        this.isLoading = false;
       }
     });
-
   }
   openForm(service: any): void {
     this.selectedAppointment = service; // Store selected service
     this.showForm = true; // Show the form modal
   }
-  
+
   onSearch(): void {
 
     this.filteredServices = this.confirmedAppointments.filter((service) => {
@@ -350,39 +522,112 @@ export class MhcTodayConsulComponent {
 
     this.currentPage = 1; // Reset to the first page after sorting
   }
-  completeAppointment(appointment: any): void {
-    const { id: serviceId } = appointment;
-    const payload = {
-      ...appointment,
-      status: 'completed',
-    }
-    if (!serviceId) return;
+  // completeAppointment(appointment: any): void {
 
-    this.appointmentService.individualComplete(payload).subscribe({
-      next: (response) => {
-        console.log('WhatsApp message sent successfully:', response);
-        this.fetchConfirmedAppointments()
-      },
-      error: (error) => {
-        console.error('Error sending WhatsApp message:', error);
-      }
-    });
+  //   const { id: serviceId, consultationDetails, radiologyDetails, consultationCount, radiologyCount, ...rest } = appointment;
+
+  //   // Check if service ID exists
+  //   if (!serviceId) return;
+
+  //   // Extract lengths of details
+  //   const consultationDetailsCount = consultationDetails ? consultationDetails.length : 0;
+  //   const radiologyDetailsCount = radiologyDetails ? radiologyDetails.length : 0;
+
+  //   console.log(consultationCount, consultationDetailsCount, radiologyDetailsCount, radiologyCount)
+
+  //   // Compare with expected counts
+  //   if (consultationDetailsCount < consultationCount || radiologyDetailsCount < radiologyCount) {
+  //     // Show popup if details are missing
+  //     this.showPopup = true;
+  //     return; // Stop execution
+  //   }
+
+  //   // Proceed with API call if conditions are met
+  //   const payload = {
+  //    rest,
+  //     status: 'completed',
+  //   };
+
+  //   this.healthCheckupService.individualComplete(payload).subscribe({
+  //     next: (response) => {
+  //       console.log('WhatsApp message sent successfully:', response);
+  //       this.fetchConfirmedAppointments();
+  //     },
+  //     error: (error) => {
+  //       console.error('Error sending WhatsApp message:', error);
+  //     }
+  //   });
+
+  //   console.log(appointment)
 
 
+  //   // Update UI
 
-    // Update UI
+  // }
+pendingAppointment: any = null; // Stores the appointment for confirmation
 
+completeAppointment(appointment: any, forceComplete: boolean = false): void {
+  const { consultationDetails, radiologyDetails, consultationCount, radiologyCount,total,radioServiceId,consultationTime, radiologyTime, labTime, ...rest } = appointment;
+
+  // Check if service ID exists
+  if (!appointment.id) return;
+
+  // Extract lengths of details
+  const consultationDetailsCount = consultationDetails ? consultationDetails.length : 0;
+  const radiologyDetailsCount = radiologyDetails ? radiologyDetails.length : 0;
+
+  console.log(consultationCount, consultationDetailsCount, radiologyDetailsCount, radiologyCount);
+
+  // If not forcing completion, check details
+  if (!forceComplete && (consultationDetailsCount < consultationCount || radiologyDetailsCount < radiologyCount)) {
+    // Store appointment & Show popup
+    this.pendingAppointment = appointment;
+    this.showPopup = true;
+    return;
   }
-  labTime():void{
-    const {id, package: packageDate,packageId,consultationCount, ...withoutServiceId} = this.selectedService;
-    
+
+  // Proceed with API call if conditions are met or forced
+  const payload = {
+    ...rest, // Corrected object spread
+    status: 'completed',
+  };
+
+  this.healthCheckupService.individualComplete(payload).subscribe({
+    next: (response) => {
+      console.log('WhatsApp message sent successfully:', response);
+      this.fetchConfirmedAppointments();
+    },
+    error: (error) => {
+      console.error('Error sending WhatsApp message:', error);
+    }
+  });
+
+  // Close the popup after completion
+  this.showPopup = false;
+  this.pendingAppointment = null;
+
+  console.log(appointment);
+}
+
+// Function to confirm completion from popup
+confirmCompletion(): void {
+  if (this.pendingAppointment) {
+    this.completeAppointment(this.pendingAppointment, true);
+  }
+}
+
+
+
+  labTime(): void {
+    const { id, package: packageDate, packageId, consultationCount,consultationDetails,radiologyDetails,radiologyCount,total,radioServiceId,consultationTime, radiologyTime, labTime, ...withoutServiceId } = this.selectedService;
+
     const payload = {
       ...withoutServiceId,
-     isLab: true,
-     isLabTime: new Date(),
+      isLab: true,
+      isLabTime: new Date(),
     }
     if (!id) return;
-    this.healthCheckupService.updateService(id,payload).subscribe({
+    this.healthCheckupService.updateService(id, payload).subscribe({
       next: (response) => {
         console.log('Service marked as completed:', response);
         this.fetchConfirmedAppointments()
@@ -392,15 +637,15 @@ export class MhcTodayConsulComponent {
       }
     })
   }
-  labEntryTime():void{
-    const {id, package: packageDate,packageId,consultationCount, ...withoutServiceId} = this.selectedService;
-    
+  labEntryTime(): void {
+    const { id, package: packageDate, packageId, consultationCount,consultationDetails,radiologyDetails,radiologyCount,total,radioServiceId,consultationTime, radiologyTime, labTime, ...withoutServiceId } = this.selectedService;
+
     const payload = {
       ...withoutServiceId,
-     isLabEntryTime: new Date(),
+      isLabEntryTime: new Date(),
     }
     if (!id) return;
-    this.healthCheckupService.updateService(id,payload).subscribe({
+    this.healthCheckupService.updateService(id, payload).subscribe({
       next: (response) => {
         console.log('Service marked as completed:', response);
         this.fetchConfirmedAppointments()
@@ -415,6 +660,9 @@ export class MhcTodayConsulComponent {
     //   state: { data: service }, // Passing full service object using state
     // });
     this.lockService(service);
+  }
+  openRadiologyForm(service: any): void {
+    this.radiology.emit(service);
   }
   openAppointmentFormAfterLocked(service: any): void {
     this.reschedule.emit(service);
@@ -620,7 +868,6 @@ export class MhcTodayConsulComponent {
   /** Close the popup */
   closePopup() {
     this.showPopup = false;
-    this.selectedService = null;
   }
 
   closeLabPopup() {
@@ -631,7 +878,7 @@ export class MhcTodayConsulComponent {
   /** Submit the selected radiology tests */
   submitSelection() {
     if (!this.selectedService) return;
-    
+
     const currentTime = new Date().toLocaleString(); // Capture timestamp
 
     // ✅ Set timestamps only for newly selected tests
@@ -645,7 +892,7 @@ export class MhcTodayConsulComponent {
 
     const { id: serviceId } = this.selectedService;
     if (!serviceId) return;
-    const {id, package: packageDate,packageId,consultationCount, ...withoutServiceId} = this.selectedService;
+    const { id, package: packageDate, packageId, consultationCount, ...withoutServiceId } = this.selectedService;
     const payload = {
       ...withoutServiceId,
       chestXRay: this.chestXRay,
@@ -686,7 +933,7 @@ export class MhcTodayConsulComponent {
 
   //     this.isCheckedIn = true; // ✅ Disable Checked In button
   //     console.log("Checked In at:", this.radiologyTimes);
-      
+
   //   }
   // }
 
@@ -709,30 +956,30 @@ export class MhcTodayConsulComponent {
   markCheckedIn() {
     if (!this.isCheckedIn) {
       const currentTime = new Date().toISOString();
-  
+
       // ✅ Create a copy of the service object to preserve all fields
       let payload: any = { ...this.selectedService };
-  
+
       // ✅ Update all "EntryTime" fields
       Object.keys(payload).forEach((key) => {
         if (key.includes("EntryTime") && !payload[key]) {
           payload[key] = currentTime;
         }
       });
-      payload.chestXRayEntryTime= currentTime 
-      payload.ultrasoundEntryTime= currentTime     
-      payload.boneDensitometryEntryTime= currentTime
-      payload.mammographyEntryTime  = currentTime   
-      payload.ecgEntryTime    = currentTime          
-      payload.echoTMTEntryTime = currentTime         
-      payload.usgEchoEntryTime= currentTime
-  
+      payload.chestXRayEntryTime = currentTime
+      payload.ultrasoundEntryTime = currentTime
+      payload.boneDensitometryEntryTime = currentTime
+      payload.mammographyEntryTime = currentTime
+      payload.ecgEntryTime = currentTime
+      payload.echoTMTEntryTime = currentTime
+      payload.usgEchoEntryTime = currentTime
+
       // payload.checkedIn = true; // ✅ Mark service as checked in
       // payload.checkedInTime = currentTime; // ✅ Set general checked-in time
-  
+
       console.log("Checked In Payload:", payload);
-      const {id, package: packageDate,packageId,consultationCount, ...withoutServiceId} = payload;
-  
+      const { id, package: packageDate, packageId, consultationCount,consultationDetails,radiologyDetails,radiologyCount, ...withoutServiceId } = payload;
+
       // ✅ Update Service in Backend
       this.healthCheckupService.updateService(this.selectedService.id, withoutServiceId).subscribe({
         next: (response) => {
@@ -744,19 +991,19 @@ export class MhcTodayConsulComponent {
           console.error('Error updating service:', error);
         }
       });
-  
+
       this.isCheckedIn = true; // ✅ Disable Checked In button
     }
   }
-  
+
   markReportDone() {
     console.log(this.selectedService)
     if (this.selectedService.chestXRayEntryTime && this.selectedService.chestXRayTime === null) {
       const currentTime = new Date().toISOString();
-  
+
       // ✅ Create a copy of the service object to preserve all fields
       let payload: any = { ...this.selectedService };
-  
+
       // ✅ Update all "Time" fields
       // Object.keys(payload).forEach((key) => {
       //   // ✅ Update only if the key ends exactly with "Time" (e.g., chestXRayTime, ultrasoundTime)
@@ -764,18 +1011,18 @@ export class MhcTodayConsulComponent {
       //     payload[key] = currentTime;
       //   }
       // });
-      payload.chestXRayTime  = currentTime           
-      payload.ultrasoundTime = currentTime           
-      payload.boneDensitometryTime = currentTime 
-      payload.mammographyTime   = currentTime        
-      payload.ecgTime    = currentTime               
-      payload.echoTMTTime  = currentTime             
-      payload.usgEchoTime= currentTime
-      
-  
+      payload.chestXRayTime = currentTime
+      payload.ultrasoundTime = currentTime
+      payload.boneDensitometryTime = currentTime
+      payload.mammographyTime = currentTime
+      payload.ecgTime = currentTime
+      payload.echoTMTTime = currentTime
+      payload.usgEchoTime = currentTime
+
+
       console.log("Report Done Payload:", payload);
-      const {id, package: packageDate,packageId,consultationCount, ...withoutServiceId} = payload;
-  
+      const { id, package: packageDate, packageId, consultationCount,consultationDetails,radiologyDetails,radiologyCount, ...withoutServiceId } = payload;
+
       // ✅ Update Service in Backend
       this.healthCheckupService.updateService(this.selectedService.id, withoutServiceId).subscribe({
         next: (response) => {
@@ -787,10 +1034,10 @@ export class MhcTodayConsulComponent {
           console.error('Error updating service:', error);
         }
       });
-  
+
       this.isReportDone = true; // ✅ Disable Report Done button
     }
   }
-  
+
 
 }

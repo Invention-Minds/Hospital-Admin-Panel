@@ -16,6 +16,7 @@ export class LoginComponent implements OnInit {
   isLoading: boolean = false; // Track loading state of the login form
   role: string = ''; // Track the user role
   subAdminType: string = ''
+  adminType: string = ''
   
   constructor(private authService: AuthServiceService, private router: Router,private messageService: MessageService) {}
   ngOnInit(): void {
@@ -25,14 +26,21 @@ export class LoginComponent implements OnInit {
       // Fetch role from localStorage or the authentication service
       this.role = localStorage.getItem('role') || '';
       this.subAdminType = localStorage.getItem('subAdminType') || ''
+      this.adminType = localStorage.getItem('adminType') || ''
+      console.log(this.adminType)
       // console.log('User role:', this.role);
     } else {
       console.log('localStorage is not available');
     }
     if (token) {
+      console.log(this.adminType)
       // If a token exists, redirect to the dashboard
       // this.router.navigate(['/dashboard']);
-      if(this.role === 'admin'){
+      if (this.adminType === 'IP Billing Manager'){
+        console.log(this.subAdminType)
+        this.router.navigate(['/estimation'])
+      }
+      else if(this.role === 'admin'){
         console.log('role', this.role)
         this.router.navigate(['/analytics']);
       }else if (this.subAdminType === 'Estimator'){
@@ -85,7 +93,14 @@ export class LoginComponent implements OnInit {
             this.router.navigate(['/estimation'])
           }else if(response.user.subAdminType === 'MHC Coordinator'){
             this.router.navigate(['/health-checkup'])
-          }else if(response.user.role === 'admin'){
+          }
+          else if(response.user.subAdminType === 'Coordinator'){
+            this.router.navigate(['/radiology-services'])
+          }
+          else if(response.user.adminType === 'IP Billing Manager'){
+            this.router.navigate(['/estimation'])
+          }
+            else if(response.user.role === 'admin'){
             this.router.navigate(['/analytics']);
           }
           else if(response.user.role!== 'doctor'){

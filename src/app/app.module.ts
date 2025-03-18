@@ -115,6 +115,16 @@ import { MaintainanceComponent } from './maintainance/maintainance/maintainance.
 import { ArrivedConsultationComponent } from './doctor-role/arrived-consultation/arrived-consultation.component';
 import { ConfirmMhcComponent } from './health-checkup-service/confirm-mhc/confirm-mhc.component';
 import { MhcReportComponent } from './health-checkup-service/mhc-report/mhc-report.component';
+import { ServiceFormComponent } from './service-radiology/service-form/service-form.component';
+import { ServiceConfirmComponent } from './service-radiology/service-confirm/service-confirm.component';
+import { ServiceCancelComponent } from './service-radiology/service-cancel/service-cancel.component';
+import { ServiceCompleteComponent } from './service-radiology/service-complete/service-complete.component';
+import { ServiceOverviewComponent } from './service-radiology/service-overview/service-overview.component';
+import { MhcRadiologyComponent } from './health-checkup-service/mhc-radiology/mhc-radiology.component';
+import { ConfirmRadioComponent } from './health-checkup-service/confirm-radio/confirm-radio.component';
+import { ConfirmRadiologyComponent } from './radiology/confirm-radiology/confirm-radiology.component';
+import { OverviewRadiologyComponent } from './radiology/overview-radiology/overview-radiology.component';
+import { ReferredComponent } from './appointment/referred/referred.component';
 
 
 @NgModule({
@@ -190,7 +200,17 @@ import { MhcReportComponent } from './health-checkup-service/mhc-report/mhc-repo
     MaintainanceComponent,
     ArrivedConsultationComponent,
     ConfirmMhcComponent,
-    MhcReportComponent
+    MhcReportComponent,
+    ServiceFormComponent,
+    ServiceConfirmComponent,
+    ServiceCancelComponent,
+    ServiceCompleteComponent,
+    ServiceOverviewComponent,
+    MhcRadiologyComponent,
+    ConfirmRadioComponent,
+    ConfirmRadiologyComponent,
+    OverviewRadiologyComponent,
+    ReferredComponent
   ],
   imports: [
     BrowserModule,

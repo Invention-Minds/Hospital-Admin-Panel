@@ -1240,9 +1240,36 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
       const slotDuration = this.doctor.slotDuration;
       this.isSlotDurationChanged = true;
       this.generatedSlots = this.generateTimeSlots(start, end, slotDuration);
-      // console.log('Generated slots:', this.generatedSlots);
       this.generatedSlotOptions = this.generatedSlots.map(slot => ({ label: slot, value: slot }));
-    }
+      const today = new Date();
+      const formattedDate = today.toISOString().split('T')[0];
+
+        // Step 1: Check if there are future booked slots for this doctor
+        this.doctorService.getFutureBookedSlotDuration(this.doctor.id.toString(), formattedDate).subscribe(
+          (slots) => {
+  
+            if (slots.length > 0) {
+              // Step 2: If future booked slots exist, show an error message
+              this.messageService.add({
+                severity: 'error',
+                summary: 'Doctor Update Error',
+                detail: 'This doctor has future booked slots. Please cancel them before making changes.'
+              });
+            } 
+          },
+          (error) => {
+            console.error('Error fetching future booked slots:', error);
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Error',
+              detail: 'Unable to check booked slots. Please try again later.'
+            });
+          }
+        );
+      }
+
+    
+ 
   }
 
 

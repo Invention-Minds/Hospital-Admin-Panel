@@ -1,0 +1,281 @@
+<div class="custom-dialog-overlay" *ngIf="displayDialog">
+    <div class="custom-dialog">
+      <div class="dialog-content">
+        <div class="icon-container">
+          <img src="warning.png" alt="Warning Icon" class="dialog-icon" />
+        </div>
+        <div class="dialog-text">
+          <h3>Conflict Detected</h3>
+          <p>The Following date conflict with holidays: {{ conflictDates.join(', ') }}. Do you want to proceed?</p>
+        </div>
+      </div>
+      <div class="dialog-buttons">
+        <button type="button" class="cancel" (click)="onReject(form)">No</button>
+        <button type="button" class="btn-primary" (click)="onAccept()">Yes</button>
+      </div>
+    </div>
+  </div>
+  
+    
+  
+  <div class="form-container" >
+      <h2 class="form-title">Service Form</h2>
+      <form #form="ngForm" class="health-form" (ngSubmit)="onSubmit(form)" novalidate>
+        <!-- Row 1 -->
+        <div class="form-row">
+          <div class="form-group full-width">
+            <input
+              type="text"
+              class="form-input"
+              id="pnr"
+              name="pnr"
+              pattern="^[0-9]*$"
+              ngModel
+              [(ngModel)]="formData.pnrNumber"
+              placeholder=" "
+              (input)="onHealthCheckupPRNChange()" 
+              (focus)="prnSuggestions = true"
+            />
+            <label for="pnr" class="form-label">PRN Number</label>
+            <ul class="prn-suggestions" *ngIf="prnSuggestions && filteredHealthCheckupPRNs.length > 0">
+              <li *ngFor="let prn of filteredHealthCheckupPRNs" (click)="selectHealthCheckupPRN(prn)">
+                {{ prn.prn }} - {{ prn.name }}
+              </li>
+            </ul>
+            <div *ngIf="form.submitted && form.controls['pnr']?.invalid" class="error-message">
+              <span *ngIf="form.controls['pnr']?.errors?.['pattern']">Enter a valid number.</span>
+            </div>
+          </div>
+        </div>
+    
+        <!-- Row 2 -->
+        <div class="form-row">
+          <div class="form-group half-width">
+            <input
+              type="text"
+              class="form-input"
+              id="firstName"
+              name="firstName"
+              ngModel
+              [(ngModel)]="formData.firstName"
+              required
+              placeholder=" "
+              pattern="^[a-zA-Z]*$"
+            />
+            <label for="firstName" class="form-label">First Name*</label>
+            <div *ngIf="form.submitted && form.controls['firstName']?.invalid" class="error-message">
+              First Name is required.
+              <span class="error-message" *ngIf="form.submitted && form.controls['firstName']?.errors?.['pattern']">Enter a valid name.</span>
+            </div>
+          </div>
+          <div class="form-group half-width">
+            <input
+              type="text"
+              class="form-input"
+              id="lastName"
+              name="lastName"
+              ngModel
+              [(ngModel)]="formData.lastName"
+              placeholder=" "
+              pattern="^[a-zA-Z ]*$"
+            />
+            <label for="lastName" class="form-label">Last Name</label>
+            <span class="error-message" *ngIf=" form.submitted && form.controls['lastName']?.errors?.['pattern']">Enter a valid name.</span>
+          </div>
+        </div>
+    
+        <!-- Row 3 -->
+        <div class="form-row">
+          <div class="form-group half-width">
+            <input
+              type="tel"
+              class="form-input"
+              id="phone"
+              name="phone"
+              ngModel
+              [(ngModel)]="formData.phoneNumber"
+              required
+              pattern="^[0-9]{10}$"
+              placeholder=" "
+            />
+            <label for="phone" class="form-label">Phone Number*</label>
+            <div *ngIf="form.submitted && form.controls['phone']?.invalid" class="error-message">
+              <span *ngIf="form.controls['phone']?.errors?.['required']">Phone Number is required.</span>
+              <span *ngIf="form.controls['phone']?.errors?.['pattern']">Enter a valid 10-digit phone number.</span>
+            </div>
+          </div>
+          <div class="form-group half-width">
+            <input
+              type="email"
+              class="form-input"
+              id="email"
+              name="email"
+              ngModel
+              [(ngModel)]="formData.email"
+              placeholder=" "
+              pattern="^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$"
+            />
+            <label for="email" class="form-label">Email Id</label>
+            <span class="error-message" *ngIf=" form.submitted && form.controls['email']?.errors?.['pattern']">Enter a valid email.</span>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group half-width">
+            <input
+              type="tel"
+              class="form-input"
+              id="age"
+              name="age"
+              ngModel
+              [(ngModel)]="formData.age"
+              pattern="^[1-9][0-9]{0,2}$"
+              placeholder=" "
+            />
+            <label for="age" class="form-label">Age</label>
+            <div *ngIf="form.submitted && form.controls['age']?.invalid" class="error-message">
+              <span *ngIf="form.controls['age']?.errors?.['required']">Age is required.</span>
+              <span *ngIf="form.controls['age']?.errors?.['pattern']">Enter a valid number.</span>
+            </div>
+          </div>
+          <div class="form-group half-width">
+            <select
+            class="form-input"
+            name="gender"
+            [(ngModel)]="formData.gender"
+            
+          >
+            <option value="" disabled>Select a Gender</option>
+            <option value="Male" >Male</option>
+            <option value="Female" >Female</option>
+            <option value="Other" >Other</option>
+          </select>
+  
+            
+          </div>
+        </div>
+    
+        <!-- Row 4 -->
+        <div class="form-row">
+          <div class="form-group full-width">
+            <select
+              class="form-input"
+              name="package"
+              [(ngModel)]="selectedPackageId"
+              required
+            >
+              <option value="" disabled>Select a Service</option>
+              <option *ngFor="let pkg of packages" [value]="pkg.id">
+                {{ pkg.name }}
+              </option>
+            </select>
+            <div
+              *ngIf="form.submitted && !selectedPackageId"
+              class="error-message"
+            >
+              Package selection is required.
+            </div>
+          </div>
+        </div>
+        
+    
+        <!-- Row for Date and Time -->
+        <div class="form-row">
+          <div class="form-group half-width">
+            <input
+              type="date"
+              class="form-input"
+              id="date"
+              name="date"
+              ngModel
+              required
+              placeholder=" "
+              [(ngModel)]="selectedDate"
+              (change)="fetchAvailableSlots()"
+              [min]="minDateString"
+              (focus)="this.showDatePicker($event)"
+            />
+            <label for="date" class="form-label">Select Date*</label>
+            <div *ngIf="form.submitted && form.controls['date']?.invalid" class="error-message">
+              Date selection is required.
+            </div>
+          </div>
+          <div class="form-group half-width">
+              <select class="form-input" name="time" ngModel [(ngModel)]="formData.appointmentTime" required>
+                <option value="" disabled >Select Time*</option>
+                <option *ngFor="let slot of timeSlots" [value]="slot">{{ slot }}</option>
+              </select>
+              <div *ngIf="form.submitted && form.controls['time']?.invalid" class="error-message">
+                Time selection is required.
+              </div>
+            </div>
+            
+        </div>
+    
+  
+        <!-- Radio Buttons for Request Via -->
+  <div class="form-row">
+      <div class="form-group half-width">
+        <div class="label">Request Via:</div>
+        <div class="radio-group">
+          <label>
+            <input
+              type="radio"
+              name="requestVia"
+              [(ngModel)]="requestVia"
+              value="Walk-In"
+            />
+            Walk-In
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="requestVia"
+              [(ngModel)]="requestVia"
+              value="Call"
+            />
+            Call
+          </label>
+        </div>
+      </div>
+    
+      <!-- Radio Buttons for Appointment -->
+      <div class="form-group half-width">
+        <div class="label">Appointment:</div>
+        <div class="radio-group">
+          <label>
+            <input
+              type="radio"
+              name="appointmentStatus"
+              [(ngModel)]="appointmentStatus"
+              value="Confirm"
+            />
+            Confirm
+          </label>
+          <label>
+            <input
+              type="radio"
+              name="appointmentStatus"
+              [(ngModel)]="appointmentStatus"
+              value="Cancel"
+            />
+            Cancel
+          </label>
+        </div>
+      </div>
+    </div>
+    
+    
+        <!-- Buttons -->
+        <div class="form-buttons">
+          
+          <button  mat-raised-button type="submit" class="btn btn-submit" [disabled]="form.invalid || hasConflict || isLoading"   [class.spinner]="isLoading" > <span *ngIf="!isLoading">Book Appointment</span></button>
+          <button type="button" class="btn btn-cancel" (click)="cancelForm(form)">Cancel</button>
+        </div>
+      </form>
+  
+  <p-toast></p-toast>
+    </div>
+    <!-- <div class="loading-div" *ngIf="isLoading">
+      <div class="loader" *ngIf="isLoading"></div>
+    </div> -->
+   

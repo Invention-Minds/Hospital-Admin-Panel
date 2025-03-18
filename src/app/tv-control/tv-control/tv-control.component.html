@@ -1,82 +1,75 @@
 <div class="queue-management-container">
-    <div *ngFor="let channel of channels; let channelIndex = index" class="channel-container">
-      <h3 class="channel-name">Channel No: {{ channelIndex + 1 }}</h3>
-      <div style="    position: relative;" *ngFor="let doctor of channel.doctors.slice(0,3); let doctorIndex = index">
-        <div class="doctor-card"  [class.filled]="doctor">
-            <div class="doctor-header">
-                <div  class="text" *ngIf="doctor">
-                    <div>
-                        <p class="doctor-name">Doctor Name: {{ doctor.doctorName }}</p>
-                        <p class="department-name">Department: {{ doctor.departmentName }}</p>
-                        <p class="department-name">Room No: {{ doctor.roomNo }}</p>
-                    </div>
-                </div >
-                <div *ngIf="!doctor" class="add-btn" (click)="openForm(channelIndex, doctorIndex)">
-                  <img src="./plus.svg" alt="Add">
-                </div>
-            </div>              
-        </div>
-        <div class="delete-btn-container" *ngIf="doctor">
-            <button class="remove-btn" (click)="removeDoctor(channelIndex, doctorIndex)">
-              <img src="./delete.svg" alt="Delete">
-            </button>
-        </div>
-      </div>
-      
-    </div>
-  
-    <!-- Popup Form -->
-
-        <div *ngIf="isPopupOpen" class="overlay" >
-            <div class="modal-content">
-
-              <div class="modal-header">
-                <div class="tv-control">TV Control</div>
-                <button class="popup-close" (click)="closeForm()">
-                    <img src="/popup-close.svg" alt="Close Popup" />
-                  </button>
-              </div>
-              <hr />
-             <div class="modal-body">
-              <div class="input-type-container">
-                <div class="custom-dropdown">
-                  <label for="department">Department*</label>
-                  <select [(ngModel)]="selectedDepartment" id="department" (ngModelChange)="filterDoctors()">
-                    <option value="" disabled selected>Select Department</option>
-                    <option *ngFor="let dept of departments" [value]="dept.name">{{ dept.name }}</option>
-                  </select>
-                </div>
-                
-                <div class="custom-dropdown">
-                  <label for="doctor">Doctor*</label>
-                  <select [(ngModel)]="selectedDoctor" id="doctor">
-                    <option value="" disabled selected>Select Doctor</option>
-                    <option *ngFor="let doctor of filteredDoctors" [ngValue]="doctor">{{ doctor.name }}</option>
-                  </select>
-                </div>
-  
-               <div class="input-container">
-                  <input 
-                    type="text" 
-                    id="roomNumber" 
-                    [(ngModel)]="roomNumber" 
-                    class="custom-input" 
-                    placeholder="" 
-                    required
-                  />
-                  <label class="custom-label" for="roomNumber">Room Number</label>
-               </div>
-              </div>
-             </div>
-              
-              
-              <div class="modal-footer">
-                <button class="save-button" [disabled]="!isButtonClicked" (click)="saveDoctor()">Save</button>
-                <button class="close-button" (click)="closeForm()">Close</button>
-              </div>
+  <div *ngFor="let channel of channels; let channelIndex = index" class="channel-container">
+    <h3 class="channel-name">Channel No: {{ channelIndex + 1 }}</h3>
+    <div style="    position: relative;" *ngFor="let doctor of channel.doctors.slice(0,3); let doctorIndex = index">
+      <div class="doctor-card" [class.filled]="doctor">
+        <div class="doctor-header">
+          <div class="text" *ngIf="doctor">
+            <div>
+              <p class="doctor-name">Doctor Name: {{ doctor.doctorName }}</p>
+              <p class="department-name">Department: {{ doctor.departmentName }}</p>
+              <p class="department-name">Room No: {{ doctor.roomNo }}</p>
             </div>
           </div>
-          <!-- <div class="upload-container">
+          <div *ngIf="!doctor" class="add-btn" (click)="openForm(channelIndex, doctorIndex)">
+            <img src="./plus.svg" alt="Add">
+          </div>
+        </div>
+      </div>
+      <div class="delete-btn-container" *ngIf="doctor">
+        <button class="remove-btn" (click)="removeDoctor(channelIndex, doctorIndex)">
+          <img src="./delete.svg" alt="Delete">
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Popup Form -->
+
+  <div *ngIf="isPopupOpen" class="overlay">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <div class="tv-control">TV Control</div>
+        <button class="popup-close" (click)="closeForm()">
+          <img src="/popup-close.svg" alt="Close Popup" />
+        </button>
+      </div>
+      <hr />
+      <div class="modal-body">
+        <div class="input-type-container">
+          <div class="custom-dropdown">
+            <label for="department">Department*</label>
+            <select [(ngModel)]="selectedDepartment" id="department" (ngModelChange)="filterDoctors()">
+              <option value="" disabled selected>Select Department</option>
+              <option *ngFor="let dept of departments" [value]="dept.name">{{ dept.name }}</option>
+            </select>
+          </div>
+
+          <div class="custom-dropdown">
+            <label for="doctor">Doctor*</label>
+            <select [(ngModel)]="selectedDoctor" id="doctor">
+              <option value="" disabled selected>Select Doctor</option>
+              <option *ngFor="let doctor of filteredDoctors" [ngValue]="doctor">{{ doctor.name }}</option>
+            </select>
+          </div>
+
+          <div class="input-container">
+            <input type="text" id="roomNumber" [(ngModel)]="roomNumber" class="custom-input" placeholder="" required />
+            <label class="custom-label" for="roomNumber">Room Number</label>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="modal-footer">
+        <button class="save-button" [disabled]="!isButtonClicked" (click)="saveDoctor()">Save</button>
+        <button class="close-button" (click)="closeForm()">Close</button>
+      </div>
+    </div>
+  </div>
+  <!-- <div class="upload-container">
             <h3>Upload Advertisement</h3>
             <label>
                 <input type="radio" name="adType" value="text" (change)="selectAdType('text')" /> Text
@@ -93,66 +86,80 @@
             <button (click)="submitAd()" [disabled]="!isAdReady()">Upload</button>
         </div> -->
 
-      
 
-  </div>
+
+</div>
 <div class="ad-container">
   <div class="upload-container">
     <div class="text-container">
       <h3>Upload Advertisement:</h3>
-    <div class="ad-type">
+      <div class="ad-type">
         <label>
-            <input type="radio" name="text" value="text" [(ngModel)]="selectedAdType" (change)="selectAdType('text')" /> 
-            <span [class.active]="selectedAdType === 'text'">Text</span>
+          <input type="radio" name="text" value="text" [(ngModel)]="selectedAdType" (change)="selectAdType('text')" />
+          <span [class.active]="selectedAdType === 'text'">Text</span>
         </label>
         <label>
-            <input type="radio" name="image" value="image" [(ngModel)]="selectedAdType" (change)="selectAdType('image')" /> 
-            <span [class.active]="selectedAdType === 'image'">Image</span>
+          <input type="radio" name="image" value="image" [(ngModel)]="selectedAdType"
+            (change)="selectAdType('image')" />
+          <span [class.active]="selectedAdType === 'image'">Image</span>
         </label>
-        <label>
-            <input type="radio" name="video" value="video" [(ngModel)]="selectedAdType" (change)="selectAdType('video')" /> 
-            <span [class.active]="selectedAdType === 'video'">Video</span>
-        </label>
-    </div>
+      </div>
     </div>
 
 
 
     <!-- Text Ad Input -->
     <div *ngIf="selectedAdType === 'text'" class="text-ad">
-        <textarea [(ngModel)]="textAd" placeholder="Enter Your Ad Text Here"></textarea>
-        <p class="note">(Note: Text Ad max 200 Words Only)</p>
+      <textarea [(ngModel)]="textAd" placeholder="Enter Your Ad Text Here"></textarea>
+      <p class="note">(Note: Text Ad max 200 Words Only)</p>
     </div>
 
     <!-- File Upload Section -->
     <div *ngIf="selectedAdType !== 'text'" class="file-upload">
-        <div class="drop-zone"  (dragover)="onDragOver($event)" 
-        (dragleave)="onDragLeave($event)" 
-        (drop)="onDrop($event)">
-          <!-- Hidden file input -->
-          <input type="file" id="fileInput" multiple (change)="onFileUpload($event)" hidden/>
-      
-          <div class="upload-placeholder">
-              <img src="upload.svg" alt="Upload Icon" class="upload-icon"/>
-              <p class="upload-text">Upload files</p>
-              <label for="fileInput" class="browse-btn">Browse File</label>
-              <p class="file-note">Supported file types: JPG, PNG, MP4, 10MB max</p>
-          </div>
-     
-            <p *ngIf="uploadedFile"  class="file-name">{{ uploadedFile.name }}</p>
+      <div class="drop-zone" (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
+        <!-- Hidden file input -->
+        <input type="file" id="fileInput" multiple (change)="onFileUpload($event)" hidden />
+
+        <div class="upload-placeholder">
+          <img src="upload.svg" alt="Upload Icon" class="upload-icon" />
+          <p class="upload-text">Drag files to upload</p>
+          <p class="file-note">or</p>
+          <label for="fileInput" class="browse-btn">Browse File</label>
+          <p class="file-note">Supported file types: JPG, PNG, MP4, 10MB max</p>
+        </div>
+
+    
       </div>
-      
+      <div class="uploaded-files" *ngIf="uploadedFile">
+        <div class="file-item" >
+          <img src="file-upload.svg" alt="File Icon" class="file-icon" />
+          <span class="file-name">{{ uploadedFile.name ? uploadedFile.name : uploadedFile }}</span>
+        </div>
+      </div>
+
 
     </div>
 
-    <button (click)="submitAd()" [disabled]="!isAdReady()" class="upload-btn">Upload</button>
-
     <div class="toggle-buttons">
-      <button *ngFor="let type of ['text', 'image', 'video']"
+      <button (click)="submitAd()" [disabled]="!isAdReady()" class="upload-btn">Upload</button>
+      <div *ngIf="selectedAdType === 'text'" class="toggle-group">
+        <button  (click)="activateAd('text')" [disabled]="adStatuses['text']" class="activate-btn">Activate</button>
+        <button  (click)="deactivateAd('text')" [disabled]="!adStatuses['text']" class="deactivate-btn">Deactivate </button>
+      </div>
+
+      <div *ngIf="selectedAdType === 'image'" class="toggle-group">
+        <button  (click)="activateAd('image')" [disabled]="adStatuses['image']" class="activate-btn">Activate </button>
+        <button  (click)="deactivateAd('image')" [disabled]="!adStatuses['image']" class="deactivate-btn">Deactivate </button>
+      </div>
+    </div>
+
+    <!-- <div class="toggle-buttons">
+      <button *ngFor="let type of ['text', 'image']"
               (click)="toggleAdStatus(type)"
               [class.active]="adStatuses[type]">
         {{ adStatuses[type] ? "Deactivate" : "Activate" }} {{ type }}
       </button>
-    </div>
-</div>
+    </div> -->
+
+  </div>
 </div>

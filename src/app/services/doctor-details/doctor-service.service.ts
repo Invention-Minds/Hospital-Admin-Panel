@@ -50,11 +50,11 @@ export class DoctorServiceService {
     return this.http.get<Doctor[]>(url);
   }
 
-    // getFutureBookedSlots( doctorId: string,date: string): Observable<any> {
-    //   const params = new HttpParams() .set('doctorId', doctorId)
-    //   .set('date', date);
-    //   return this.http.get(`${this.apiUrl}/doctors/futureBookedSlots`, { params });
-    // }
+    getFutureBookedSlotDuration( doctorId: string,date: string): Observable<any> {
+      const params = new HttpParams() .set('doctorId', doctorId)
+      .set('date', date);
+      return this.http.get(`${this.apiUrl}/doctors/futureslotsForSlotDuration`, { params });
+    }
 
     getFutureBookedSlots(doctorId: string, date: string, individualAvailability: boolean = false, dayOfWeek?: number): Observable<any> {
       let params = new HttpParams()

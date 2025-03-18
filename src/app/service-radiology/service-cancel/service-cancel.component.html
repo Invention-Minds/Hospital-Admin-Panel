@@ -60,7 +60,7 @@
                         <span *ngIf="sortColumn === 'firstName' && sortDirection === 'asc'">&#9650;</span>
                         <span *ngIf="sortColumn === 'firstName' && sortDirection === 'desc'">&#9660;</span>
                     </th>
-                    <th>Phone Number</th>
+                    <th>PRN Number</th>
                     <th>Service Name</th>
                     <th (click)="sortBy('appointmentDate')" style="cursor: pointer;">
                          Date
@@ -85,7 +85,7 @@
                 <tr *ngFor="let service of getPaginatedAppointments(); let i = index">
                     <td>{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
                     <td>{{ service.firstName }} {{ service.lastName || '' }}</td>
-                    <td>{{ service.phoneNumber }}</td>
+                    <td>{{ service.pnrNumber || '-' }}</td>
                     <td>{{ service.radioServiceName }}</td>
                     <td>{{ service.appointmentDate | date:'dd-MM-yyyy' }}</td>
                     <td>{{ service.appointmentTime }}</td>

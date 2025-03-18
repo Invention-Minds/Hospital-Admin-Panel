@@ -65,6 +65,21 @@
     width: 100%;
 }
 
+.mr select{
+    width: 60px;
+}
+
+.name_error{
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    flex-direction: column;
+}
+
+.name_error .errors{
+    width: 100%;
+}
+
 .lable_name{
     width: 20%;
     color: #271E4A;

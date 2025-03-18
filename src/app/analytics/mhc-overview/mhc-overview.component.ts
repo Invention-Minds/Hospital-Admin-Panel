@@ -4,6 +4,8 @@ import { HealthCheckupServiceService } from '../../services/health-checkup/healt
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { getYesterdayDate, getIndividualDates, getLastThirtyDaysFromSelected } from '../functions'
 import { TextAlignment } from 'pdf-lib';
+import { MessageService } from 'primeng/api';
+
 
 @Component({
   selector: 'app-mhc-overview',
@@ -12,7 +14,7 @@ import { TextAlignment } from 'pdf-lib';
 })
 export class MhcOverviewComponent implements OnChanges {
 
-  constructor(private healthCheckup: HealthCheckupServiceService, private docDetails: DoctorServiceService) { }
+  constructor(private healthCheckup: HealthCheckupServiceService, private docDetails: DoctorServiceService, private messageService : MessageService) { }
 
   option: any;
   overViewData: any;
@@ -27,6 +29,8 @@ export class MhcOverviewComponent implements OnChanges {
   @Output() reportData = new EventEmitter<any[]>();
   @Output() reportsColumn = new EventEmitter<any[]>();
   @Output() reportInitializeDate = new EventEmitter<any[]>();
+  @Output() blockFilters = new EventEmitter<boolean[]>();
+  @Output() reportName = new EventEmitter<string>();
 
   // viewmore
   rawData: any
@@ -187,9 +191,11 @@ export class MhcOverviewComponent implements OnChanges {
       { header: "Pending", key: "pending" },
       { header: "Completed", key: "completed" }
     ]
+    this.blockFilters.emit([true, true])
     this.reportsColumn.emit(reportColumn)
     this.reportView.emit({ onoff: true, range: "range" })
     this.reportInitializeDate.emit(this.selectedDate)
+    this.reportName.emit("MHC Overview")
     this.isLoading = false
   }
 
@@ -372,14 +378,59 @@ export class MhcOverviewComponent implements OnChanges {
   }
 
   viewOnDatechange(event: any): void {
-    // console.log(event, 'dates')
-    if (Array.isArray(event) && event.length === 2) {
-      const startDate = event[0];
-      let endDate;
-      event[1] !== null ? endDate = event[1] : endDate = event[0]
-      this.selectedViewDate = getIndividualDates(startDate, endDate);
+    if (Array.isArray(event)) {
+      if (event.length === 2) {
+        const startDate = new Date(event[0]);
+        let endDate = event[1] !== null ? new Date(event[1]) : new Date(event[0]);
+
+        // Calculate the difference in days (just for validation, should not exceed 30 due to maxDate)
+        const timeDifference = endDate.getTime() - startDate.getTime();
+        const dayDifference = Math.ceil(timeDifference / (1000 * 3600 * 24));
+
+        if (dayDifference > 30) {
+          // This should not happen due to maxDate restriction, but keeping as fallback
+          endDate = new Date(startDate);
+          endDate.setDate(startDate.getDate() + 29); // +29 for 30-day range including start
+          this.showToast("Date range cannot exceed 30 days. To view more, click on the 'Details' button.", 'warn');
+          this.dateInput = [startDate, endDate]; // Update the range
+        }
+
+        this.selectedViewDate = this.getIndividualDates(startDate, endDate);
+        console.log(this.selectedViewDate);
+      } else if (event.length === 1) {
+        const startDate = new Date(event[0]);
+        const endDate = startDate;
+        this.selectedViewDate = this.getIndividualDates(startDate, endDate);
+        this.dateInput = [startDate, endDate];
+        console.log(this.selectedViewDate);
+      }
       this.viewMoreData()
     }
+  }
+
+  showToast(message: string, type: string) {
+    this.messageService.add({ severity: type, summary: message });
+  }
+
+  getIndividualDates(startDate: Date, endDate: Date): string[] {
+    const dates = [];
+    let currentDate = new Date(startDate);
+
+    // Loop through dates from startDate to endDate
+    while (currentDate <= endDate) {
+      const formattedDate = this.formatDate(currentDate); // Format each date
+      dates.push(formattedDate);
+      currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
+    }
+    return dates;
+  }
+
+  formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-based, so add 1
+    const day = date.getDate().toString().padStart(2, '0'); // Pad single digits with a leading zero
+
+    return `${year}-${month}-${day}`;
   }
 
   viewPackageONchange(event: any): void {

@@ -41,6 +41,7 @@ export class DoctorLoginActivityComponent implements OnChanges {
 
   openModal() {
     this.isModalOpen = true;
+    console.log(this.reportDate)
     this.loadDoctorDelayReport(this.reportDate); // Fetch data for detailed view
   }
 
@@ -101,7 +102,8 @@ export class DoctorLoginActivityComponent implements OnChanges {
   processDoctorsAvailabilityforReport(doctors: any[],date: string): void {
     this.appointmentService.getAllAppointments().subscribe((appointments: any[]) => {
 
-      const todayAppointments = appointments.filter(app => app.date === this.selectedDate);
+      const todayAppointments = appointments.filter(app => app.date === this.reportDate);
+      console.log(todayAppointments)
 
       this.doctorDelaysForReport = doctors.map(doctor => {
         const latestAvailability = this.getLatestAvailability(doctor.availability);

@@ -99,10 +99,18 @@ line-height: normal;
   cursor: pointer;
 }
 
+.reportName{
+    font-family: Kanit;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 600;
+}
+
 .cancelButton{
   display: flex;
-  justify-content: right;
-  padding: 10px;
+  justify-content: space-between;
+  padding: 0 15px;
+  padding: 20px 10px;
 }
 
 .report-filter{
@@ -180,4 +188,8 @@ tr:hover {
   transition: opacity 0.3s;
   font-size: 12px;
   text-transform: capitalize;
+}
+
+.hide{
+  display: none;
 }

@@ -1,0 +1,101 @@
+<div class="root-container">
+
+    <div class="header-c">
+        <div class="common">
+            <div class="heading">MHC Waiting Time</div>
+                <div class="info pointer"
+                    matTooltip="This chart represents the count of patients who waited more than 30 minutes for their respective MHC packages in last 7 days."
+                    matTooltipPosition="above">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                        <path fill="currentColor"
+                            d="M12 17q.425 0 .713-.288T13 16v-4q0-.425-.288-.712T12 11t-.712.288T11 12v4q0 .425.288.713T12 17m0-8q.425 0 .713-.288T13 8t-.288-.712T12 7t-.712.288T11 8t.288.713T12 9m0 13q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22m0-2q3.35 0 5.675-2.325T20 12t-2.325-5.675T12 4T6.325 6.325T4 12t2.325 5.675T12 20m0-8" />
+                    </svg>
+                </div>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+            <div class="viewmore" (click)="viewmore()">View More</div>
+            <div class="viewmore" (click)="report()">Details</div>
+        </div>
+    </div>
+
+    <div class="chart">
+        <div id="MhcWaitingTime" style="height: 350px; width: 600px;"></div>
+        <div class="legends">
+            <div class="legendItems">P1- Integrated Diabetic Care</div>
+            <div class="legendItems">P2- Annual Master Diabetes Care</div>
+            <div class="legendItems">P3- Senior Citizen Health (Male)</div>
+            <div class="legendItems">P4- Senior Citizen Health Check (Female)</div>
+            <div class="legendItems">P5- Basic Health Check Up</div>
+            <div class="legendItems">P6- Executive Health Check Up (Male)</div>
+            <div class="legendItems">P7- Master Health Check Up</div>
+            <div class="legendItems">P8- Executive Health Check Up (Female)</div>
+            <div class="legendItems">P9- Well Women check up</div>
+            <div class="legendItems">P10- Comprehensive Diabetic check</div>
+        </div>
+    </div>
+
+</div>
+
+<div class="viewmoreComponent" [ngClass]="{hide : !showViewMore, index : showViewMore}">
+    <div class="contents">
+        <div class="header">
+            <div class="viewMoreHeading">MHC Waiting Time</div>
+            <i class="fa-solid fa-x pointer" matTooltip="close" matTooltipPosition="above"
+                (click)="closeViewMore()"></i>
+        </div>
+        <!-- filters -->
+        <div class="report-filter">
+            <!-- <div style="font-size: 20px; cursor: pointer;" class="tooltip"><i class="fa-solid fa-download">
+                    <div class="tooltiptext">Download</div>
+                </i>
+            </div> -->
+            <!-- <select (change)="departmentOnchange($event)">
+                <option class="dummy" value="all" disabled selected hidden>Choose the Department</option>
+                <option *ngFor="let dept of department" [value]="dept.id">{{dept.name}}</option>
+                <option></option>
+            </select> -->
+
+            <select class="packageNames" (change)="viewPackageONchange($event)">
+                <option class="dummy" value="all" disabled selected hidden>Choose the MHC package</option>
+                <option value="all">All</option>
+                <option *ngFor="let pack of packages" [value]="pack.id">{{pack.name}}</option>
+            </select>
+
+            <div class="date-picker">
+                <p-calendar styleClass="custom-calendar" selectionMode="range" placeholder='Please Select Date Range'
+                    [(ngModel)]="dateInput" (ngModelChange)="viewOnDatechange($event)" dateFormat="yy-mm-dd">
+                    <ng-template pTemplate="date" let-date>
+                        <span>
+                            {{ date.day }}
+                        </span>
+                    </ng-template>
+                </p-calendar>
+            </div>
+            <i class="fa-solid fa-arrows-rotate pointer" (click)="refresh()" matTooltip="refresh"
+                matTooltipPosition="above"></i>
+        </div>
+
+        <!-- chart -->
+        <div class="viewChart">
+            <div id="viewMoreMhcWaitingTime"></div>
+            <div class="legends">
+                <div class="legendItems">P1- Integrated Diabetic Care</div>
+                <div class="legendItems">P2- Annual Master Diabetes Care</div>
+                <div class="legendItems">P3- Senior Citizen Health (Male)</div>
+                <div class="legendItems">P4- Senior Citizen Health Check (Female)</div>
+                <div class="legendItems">P5- Basic Health Check Up</div>
+                <div class="legendItems">P6- Executive Health Check Up (Male)</div>
+                <div class="legendItems">P7- Master Health Check Up</div>
+                <div class="legendItems">P8- Executive Health Check Up (Female)</div>
+                <div class="legendItems">P9- Well Women check up</div>
+                <div class="legendItems">P10- Comprehensive Diabetic check</div>
+            </div>
+        </div>
+
+        <!-- details -->
+        <div class="details">
+
+        </div>
+    </div>
+</div>

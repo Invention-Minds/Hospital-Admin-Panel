@@ -2,7 +2,9 @@ import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import * as echarts from 'echarts'
-import { getYesterdayDate, getIndividualDates, getLastSevenDaysFromSelected, getLastThirtyDaysFromSelected, reorderDateFormat } from '../functions'
+import { getYesterdayDate, getIndividualDates, getLastSevenDaysFromSelected, getLastThirtyDaysFromSelected, reorderDateFormat, getLast7Days, getLastSevenDays } from '../functions'
+import { MessageService } from 'primeng/api';
+
 
 @Component({
   selector: 'app-opd-time-wise',
@@ -10,7 +12,7 @@ import { getYesterdayDate, getIndividualDates, getLastSevenDaysFromSelected, get
   styleUrl: './opd-time-wise.component.css'
 })
 export class OpdTimeWiseComponent implements OnChanges {
-  constructor(private appointmentService: AppointmentConfirmService, private docDetails: DoctorServiceService) { }
+  constructor(private appointmentService: AppointmentConfirmService, private docDetails: DoctorServiceService, private messageService : MessageService) { }
 
   @Input() selectedDate: any[] = [];
   @Input() selectedDoctor: any
@@ -26,11 +28,14 @@ export class OpdTimeWiseComponent implements OnChanges {
   @Output() reportData = new EventEmitter<any[]>();
   @Output() reportsColumn = new EventEmitter<any[]>();
   @Output() reportInitializeDate = new EventEmitter<any[]>();
+  @Output() blockFilters = new EventEmitter<boolean[]>();
+  @Output() reportName = new EventEmitter<string>();
+
 
   // viewmore
   rawData: any
   department: any
-  departmentValue: any
+  departmentValue: any = 'all'
   doctors: any
   filteredDoctors: any
   showViewMore: boolean = false
@@ -40,7 +45,7 @@ export class OpdTimeWiseComponent implements OnChanges {
   viewMoreoption: any
 
   ngOnInit() {
-    this.selectedDate = [getYesterdayDate()]
+    this.selectedDate = getLastSevenDays()
     this.loadAppointments()
     this.selectedViewDate = getLastThirtyDaysFromSelected()
   }
@@ -119,68 +124,78 @@ export class OpdTimeWiseComponent implements OnChanges {
 
   loadReportAppointments(): void {
     this.appointmentService.getAllAppointments().subscribe((appointments: any[]) => {
-
-      // Group appointments by doctorId and date, and count before and after 1 PM
+      // Group appointments by date, doctorId, and department
       const groupedAppointments = appointments.reduce((acc: any, appointment: any) => {
-        const { doctorId, doctorName, date, time } = appointment;
+        const { doctorId, doctorName, date, time, department } = appointment;
 
-        // Initialize doctor group if not exists
-        if (!acc[doctorId]) {
-          acc[doctorId] = {};
+        // Initialize date group if not exists
+        if (!acc[date]) {
+          acc[date] = {};
         }
 
-        // Initialize date group for each doctor if not exists
-        if (!acc[doctorId][date]) {
-          acc[doctorId][date] = {
+        // Initialize doctorId group for each date if not exists
+        if (!acc[date][doctorId]) {
+          acc[date][doctorId] = {};
+        }
+
+        // Initialize department group for each doctorId if not exists
+        if (!acc[date][doctorId][department]) {
+          acc[date][doctorId][department] = {
             doctorName,
+            department,
             before1PMCount: 0,
             after1PMCount: 0
           };
         }
+
         const appointmentTime = this.convertTo24HourFormat(time);
-        const cutoffTime = 16 * 60;
+        const cutoffTime = 16 * 60; // 1 PM in minutes
 
         if (appointmentTime < cutoffTime) {
-          acc[doctorId][date].before1PMCount++;
+          acc[date][doctorId][department].before1PMCount++;
         } else {
-          acc[doctorId][date].after1PMCount++;
+          acc[date][doctorId][department].after1PMCount++;
         }
 
         return acc;
       }, {});
 
       const result = [];
-      for (const doctorId in groupedAppointments) {
-        for (const date in groupedAppointments[doctorId]) {
-          const { doctorName, before1PMCount, after1PMCount } = groupedAppointments[doctorId][date];
-          result.push({
-            doctorId,
-            doctorName,
-            date,
-            before1PMCount,
-            after1PMCount
-          });
+      for (const date in groupedAppointments) {
+        for (const doctorId in groupedAppointments[date]) {
+          for (const departmentName in groupedAppointments[date][doctorId]) {
+            const { doctorName, before1PMCount, after1PMCount } = groupedAppointments[date][doctorId][departmentName];
+            result.push({
+              date,
+              doctorId,
+              doctorName,
+              departmentName,
+              before1PMCount,
+              after1PMCount
+            });
+          }
         }
       }
 
-      // console.log("Appointments grouped by doctorId and date:", JSON.stringify(result, null, 2));
       this.appointmentsData = result;
 
       const reportColumn = [
         { header: "Date", key: "date" },
         { header: "Doctor Name", key: "doctorName" },
+        { header: "Department", key: "departmentName" },
         { header: "Before 1 PM", key: "before1PMCount" },
         { header: "After 1 PM", key: "after1PMCount" },
-      ]
-      this.reportData.emit(this.appointmentsData)
-      this.reportsColumn.emit(reportColumn)
-      this.reportView.emit({ onoff: true, range: "range" })
-      this.reportInitializeDate.emit(this.selectedDate)
+      ];
 
-      this.isLoading = false
-
+      this.reportData.emit(this.appointmentsData);
+      this.reportsColumn.emit(reportColumn);
+      this.reportView.emit({ onoff: true, range: "range" });
+      this.reportInitializeDate.emit(this.selectedDate);
+      this.blockFilters.emit([false, false])
+      this.reportName.emit("OPD Sessions")
+      this.isLoading = false;
     });
-  }
+}
 
   loadAppointments(): void {
     this.isLoading = true
@@ -188,7 +203,8 @@ export class OpdTimeWiseComponent implements OnChanges {
       next: (appointments: any) => {
 
         this.rawData = appointments
-        const getLastSevenDays = getLastSevenDaysFromSelected(this.selectedDate.length >= 7 ? this.selectedDate[6] : this.selectedDate[this.selectedDate.length - 1])
+        // const getLastSevenDays = getLastSevenDaysFromSelected(this.selectedDate.length >= 7 ? this.selectedDate[6] : this.selectedDate[this.selectedDate.length - 1])
+        const getLastSevenDays = this.selectedDate
         const appointment = this.rawData.filter((entry: any) => {
           const isWithinDateRange = getLastSevenDays.includes(entry.date);
           const isValidDoctor = this.selectedDoctor === 'all' || this.selectedDoctor === entry.doctorId;
@@ -262,7 +278,10 @@ export class OpdTimeWiseComponent implements OnChanges {
   departmentOnchange(event: any): void {
     this.docDetails.getDoctors().subscribe(({
       next: (data: any) => {
+        this.selectedViewDoctor = 'all'
+        this.departmentValue = this.department.filter((entry:any) => entry.id === parseInt(event.target.value))[0].name
         this.filteredDoctors = data.filter((doc: any) => doc.departmentId === parseInt(event.target.value))
+        this.viewMoreData()
       },
       error: (error: any) => {
         console.error(error)
@@ -332,7 +351,8 @@ export class OpdTimeWiseComponent implements OnChanges {
     const appointment = this.rawData.filter((entry: any) => {
       const isWithinDateRange = getLastThirtyDays.includes(entry.date);
       const isValidDoctor = this.selectedViewDoctor === 'all' || this.selectedViewDoctor === entry.doctorId;
-      return isWithinDateRange && isValidDoctor;
+      const isValidDepartment = this.departmentValue === 'all' || this.departmentValue === entry.department
+      return isWithinDateRange && isValidDoctor && isValidDepartment;
     });
     const groupedAppointments = appointment.reduce((acc: any, appointment: any) => {
       const { date, time } = appointment;
@@ -369,14 +389,59 @@ export class OpdTimeWiseComponent implements OnChanges {
   }
 
   viewOnDatechange(event: any): void {
-    // console.log(event, 'dates')
-    if (Array.isArray(event) && event.length === 2) {
-      const startDate = event[0];
-      let endDate;
-      event[1] !== null ? endDate = event[1] : endDate = event[0]
-      this.selectedViewDate = getIndividualDates(startDate, endDate);
+    if (Array.isArray(event)) {
+      if (event.length === 2) {
+        const startDate = new Date(event[0]);
+        let endDate = event[1] !== null ? new Date(event[1]) : new Date(event[0]);
+
+        // Calculate the difference in days (just for validation, should not exceed 30 due to maxDate)
+        const timeDifference = endDate.getTime() - startDate.getTime();
+        const dayDifference = Math.ceil(timeDifference / (1000 * 3600 * 24));
+
+        if (dayDifference > 30) {
+          // This should not happen due to maxDate restriction, but keeping as fallback
+          endDate = new Date(startDate);
+          endDate.setDate(startDate.getDate() + 29); // +29 for 30-day range including start
+          this.showToast("Date range cannot exceed 30 days. To view more, click on the 'Details' button.", 'warn');
+          this.dateInput = [startDate, endDate]; // Update the range
+        }
+
+        this.selectedViewDate = this.getIndividualDates(startDate, endDate);
+        console.log(this.selectedViewDate);
+      } else if (event.length === 1) {
+        const startDate = new Date(event[0]);
+        const endDate = startDate;
+        this.selectedViewDate = this.getIndividualDates(startDate, endDate);
+        this.dateInput = [startDate, endDate];
+        console.log(this.selectedViewDate);
+      }
       this.viewMoreData()
     }
+  }
+
+  showToast(message: string, type: string) {
+    this.messageService.add({ severity: type, summary: message });
+  }
+
+  getIndividualDates(startDate: Date, endDate: Date): string[] {
+    const dates = [];
+    let currentDate = new Date(startDate);
+
+    // Loop through dates from startDate to endDate
+    while (currentDate <= endDate) {
+      const formattedDate = this.formatDate(currentDate); // Format each date
+      dates.push(formattedDate);
+      currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
+    }
+    return dates;
+  }
+
+  formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-based, so add 1
+    const day = date.getDate().toString().padStart(2, '0'); // Pad single digits with a leading zero
+
+    return `${year}-${month}-${day}`;
   }
 
   viewDoctorsOnchange(event: any): void {
@@ -391,6 +456,7 @@ export class OpdTimeWiseComponent implements OnChanges {
     this.selectedViewDate = []
     this.selectedViewDate = getLastThirtyDaysFromSelected()
     this.selectedViewDoctor = 'all'
+    this.departmentValue = 'all'
     this.viewmore()
     this.dateInput = []
   }

@@ -115,6 +115,8 @@ import { MaintainanceComponent } from './maintainance/maintainance/maintainance.
 import { ArrivedConsultationComponent } from './doctor-role/arrived-consultation/arrived-consultation.component';
 import { ConfirmMhcComponent } from './health-checkup-service/confirm-mhc/confirm-mhc.component';
 import { MhcReportComponent } from './health-checkup-service/mhc-report/mhc-report.component';
+import { MhcWaitingTimeComponent } from './analytics/mhc-waiting-time/mhc-waiting-time.component';
+import { EstimationTypeReportComponent } from './analytics/estimation-type-report/estimation-type-report.component';
 import { ServiceFormComponent } from './service-radiology/service-form/service-form.component';
 import { ServiceConfirmComponent } from './service-radiology/service-confirm/service-confirm.component';
 import { ServiceCancelComponent } from './service-radiology/service-cancel/service-cancel.component';
@@ -201,6 +203,7 @@ import { ReferredComponent } from './appointment/referred/referred.component';
     ArrivedConsultationComponent,
     ConfirmMhcComponent,
     MhcReportComponent,
+    EstimationTypeReportComponent,
     ServiceFormComponent,
     ServiceConfirmComponent,
     ServiceCancelComponent,
@@ -210,7 +213,8 @@ import { ReferredComponent } from './appointment/referred/referred.component';
     ConfirmRadioComponent,
     ConfirmRadiologyComponent,
     OverviewRadiologyComponent,
-    ReferredComponent
+    ReferredComponent,
+    MhcWaitingTimeComponent
   ],
   imports: [
     BrowserModule,
@@ -242,6 +246,7 @@ import { ReferredComponent } from './appointment/referred/referred.component';
     DialogModule,
     NgxLoadingButtonsModule,
     CommonModule,
+    
   ],
   exports: [PhoneMaskPipe],
   providers: [
@@ -263,4 +268,4 @@ import { ReferredComponent } from './appointment/referred/referred.component';
   ],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {}

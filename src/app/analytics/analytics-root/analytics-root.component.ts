@@ -3,6 +3,7 @@ import { DoctorServiceService } from '../../services/doctor-details/doctor-servi
 import { availability, unavailableDates, doctors } from '../../Analytics-Folder/data'
 import { getDayOfWeek, getLastSevenDays, getYesterdayDate, getTodayDate, reorderDateFormat } from '../functions';
 import { AnyCnameRecord } from 'node:dns';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-analytics-root',
@@ -10,7 +11,7 @@ import { AnyCnameRecord } from 'node:dns';
   styleUrl: './analytics-root.component.css'
 })
 export class AnalyticsRootComponent implements OnChanges{
-  constructor(private doctor : DoctorServiceService){}
+  constructor(private doctor : DoctorServiceService, private messageService : MessageService){}
 
   department:any
   departmentValue:any
@@ -23,13 +24,24 @@ export class AnalyticsRootComponent implements OnChanges{
   unAvailableDoctors : any
   availlableDoctorsCount : any
   lastSevenDaysAvailability : any
-  currentDate : any
+  currentDate : any | any[]
   emptyDate : any = ''
+  Array = Array;
+
+  maxSelectableDate : any
+  isSelectingStartDate: any;  // Maximum selectable date (7 days after start date)
 
   // report variable
   reportColumn : any
   reportdata : any
   reportInitializeDate : any[] = []
+  inputBlock : boolean = false
+  isMhc : boolean = false
+  reportName : string = ''
+
+  // estimation type report
+  viewReportSection : boolean = false
+  estiReportData : any
 
   // report part open and close
   onOf : boolean = false 
@@ -69,12 +81,15 @@ export class AnalyticsRootComponent implements OnChanges{
     const todayDate = getTodayDate()
     console.log(todayDate, "today date form root")
     this.currentDate === todayDate ? this.isCurrentDate = true : this.isCurrentDate = false
+
   }
 
   sendYesterdayDate():void{
     const yesterdayDate = new Date();
     yesterdayDate.setDate(yesterdayDate.getDate() - 1)
-    this.selectedDate = [yesterdayDate.toISOString().slice(0, 10)]
+    // this.selectedDate = [yesterdayDate.toISOString().slice(0, 10)]
+
+    this.selectedDate = getLastSevenDays()
   }
 
   getDepartMentName(departmentId: number):any {
@@ -116,32 +131,32 @@ export class AnalyticsRootComponent implements OnChanges{
     this.selectedDoctor = parseInt(e.target.value) || 'all'; 
   }
 
-  dateOnChange(event:any): void {
-    if (Array.isArray(event)) {
-      if (event.length === 2) {
-        // Handle the date range (start and end dates)
-        const startDate = new Date(event[0]);
-        let endDate;
-        event[1]!==null ? endDate = event[1] : endDate = event[0]
-        // console.log('Selected Date Range:', startDate, endDate);
+  // dateOnChange(event:any): void {
+  //   if (Array.isArray(event)) {
+  //     if (event.length === 2) {
+  //       // Handle the date range (start and end dates)
+  //       const startDate = new Date(event[0]);
+  //       let endDate;
+  //       event[1]!==null ? endDate = event[1] : endDate = event[0]
+  //       // console.log('Selected Date Range:', startDate, endDate);
 
-        this.selectedDate = this.getIndividualDates(startDate, endDate)
-        // console.log(this.selectedDate)
+  //       this.selectedDate = this.getIndividualDates(startDate, endDate)
+  //       // console.log(this.selectedDate)
 
-      } else if (event.length === 1) {
-        // Handle the single date selection
-        const startDate = new Date(event[0]);
-        const endDate = startDate
-        this.selectedDate = this.getIndividualDates(startDate, endDate)
-        console.log(this.selectedDate)
+  //     } else if (event.length === 1) {
+  //       // Handle the single date selection
+  //       const startDate = new Date(event[0]);
+  //       const endDate = startDate
+  //       this.selectedDate = this.getIndividualDates(startDate, endDate)
+  //       console.log(this.selectedDate)
 
-      } else {
-        // console.log('No date selected');
-      }
-    }
-    this.currentDate = this.selectedDate[0]
-    this.todayAnalytics()
-  }
+  //     } else {
+  //       // console.log('No date selected');
+  //     }
+  //   }
+  //   this.currentDate = this.selectedDate[0]
+  //   this.todayAnalytics()
+  // }
 
   reportDateInititilize(event:any[]):void{
     this.reportInitializeDate = event
@@ -233,28 +248,127 @@ export class AnalyticsRootComponent implements OnChanges{
     this.loadDepartments()
     this.selectedDoctor = 'all'
     const yesterDay = getYesterdayDate()
-    this.selectedDate = [yesterDay]
+    this.selectedDate = getLastSevenDays()
     this.currentDate = this.selectedDate[0]
     // this.selectedDateRange = yesterDay
   }
 
-  incrementDate():void{
-    this.selectedDateRange = []
-    let date = new Date(this.selectedDate[0])
-    date.setDate(date.getDate() + 1)
-    const formattedDate = this.formatDate(date)
-    this.selectedDate = [formattedDate]
-    this.currentDate = this.selectedDate[0]
-    this.todayAnalytics()
+  // incrementDate():void{
+  //   this.selectedDateRange = []
+  //   let date = new Date(this.selectedDate[0])
+  //   date.setDate(date.getDate() + 1)
+  //   const formattedDate = this.formatDate(date)
+  //   this.selectedDate = [formattedDate]
+  //   this.currentDate = this.selectedDate[0]
+  //   this.todayAnalytics()
+  // }
+
+  // decrementDate():void{
+  //   this.selectedDateRange = []
+  //   let date = new Date(this.selectedDate[0])
+  //   date.setDate(date.getDate() - 1)
+  //   const formattedDate = this.formatDate(date)
+  //   this.selectedDate = [formattedDate]
+  //   this.currentDate = this.selectedDate[0]
+  //   this.todayAnalytics()
+  // }
+
+  incrementDate(): void {
+    this.selectedDateRange = [];
+    let date = new Date(this.selectedDate[this.selectedDate.length - 1]); // Use the last date
+    date.setDate(date.getDate() + 1);
+    const formattedDate = this.formatDate(date);
+    this.selectedDate = [formattedDate]; // Assuming you want to update to a single date
+    this.currentDate = this.selectedDate[0];
+    this.todayAnalytics();
+  }
+  
+  decrementDate(): void {
+    this.selectedDateRange = [];
+    let date = new Date(this.selectedDate[this.selectedDate.length - 1]); // Use the last date
+    date.setDate(date.getDate() - 1);
+    const formattedDate = this.formatDate(date);
+    this.selectedDate = [formattedDate]; // Assuming you want to update to a single date
+    this.currentDate = this.selectedDate[0];
+    this.todayAnalytics();
   }
 
-  decrementDate():void{
-    this.selectedDateRange = []
-    let date = new Date(this.selectedDate[0])
-    date.setDate(date.getDate() - 1)
-    const formattedDate = this.formatDate(date)
-    this.selectedDate = [formattedDate]
-    this.currentDate = this.selectedDate[0]
-    this.todayAnalytics()
+  blockFilters(event:boolean[]):void{
+    this.inputBlock = event[0]
+    this.isMhc = event[1]
   }
+
+  dateOnChange(event: any): void {
+    if (Array.isArray(event)) {
+      if (event.length === 2) {
+        const startDate = new Date(event[0]);
+        let endDate = event[1] !== null ? new Date(event[1]) : new Date(event[0]);
+
+        // Calculate the difference in days (just for validation, should not exceed 6 due to maxDate)
+        const timeDifference = endDate.getTime() - startDate.getTime();
+        const dayDifference = Math.ceil(timeDifference / (1000 * 3600 * 24));
+
+        if (dayDifference > 6) {
+          // This should not happen due to maxDate restriction, but keeping as fallback
+          endDate = new Date(startDate);
+          endDate.setDate(startDate.getDate() + 6);
+          this.showToast("Date range cannot exceed 7 days. To view more, click on the 'View More' button.", 'warn');
+          this.selectedDateRange = [startDate, endDate]; // Update the range
+        }
+
+        this.selectedDate = this.getIndividualDates(startDate, endDate);
+        console.log(this.selectedDate);
+      } else if (event.length === 1) {
+        const startDate = new Date(event[0]);
+        const endDate = startDate;
+        this.selectedDate = this.getIndividualDates(startDate, endDate);
+        this.selectedDateRange = [startDate, endDate];
+        console.log(this.selectedDate);
+      }
+    }
+
+    this.currentDate = this.selectedDate[this.selectedDate.length - 1];
+
+    this.currentDate = this.selectedDate.length === 1 
+    ? this.selectedDate[this.selectedDate.length - 1] 
+    : [this.selectedDate[0], this.selectedDate[this.selectedDate.length - 1]];    this.todayAnalytics();
+  }
+
+  onDateSelect(event: any): void {
+    if (Array.isArray(this.selectedDateRange)) {
+      if (this.selectedDateRange.length === 1 && this.isSelectingStartDate) {
+        // Start date selected, set max selectable date to 6 days after startDate
+        const startDate = new Date(this.selectedDateRange[0]);
+        this.maxSelectableDate = new Date(startDate);
+        this.maxSelectableDate.setDate(startDate.getDate() + 6);
+        this.isSelectingStartDate = false; // Now user will select end date
+      } else if (this.selectedDateRange.length === 2) {
+        // Both start and end dates selected, process the range
+        this.dateOnChange(this.selectedDateRange);
+        this.isSelectingStartDate = true; // Reset for next selection
+        this.maxSelectableDate = null; // Reset max date for new selection
+      }
+    }
+  }
+
+  showToast(message: string, type: string) {
+    this.messageService.add({ severity: type, summary: message });
+  }
+
+  displayEstiReport(event:boolean):void{
+    this.viewReportSection = event
+  }
+
+  closeEstReport(event:boolean):void{
+    this.viewReportSection = event
+  }
+
+  importEstiData(event:any[]):void{
+    this.estiReportData = event
+  }
+
+  importReportName(event:string):void{
+    this.reportName = event
+  }
+
 }

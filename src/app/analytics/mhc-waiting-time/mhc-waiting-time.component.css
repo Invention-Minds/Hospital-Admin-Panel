@@ -1,14 +1,27 @@
 .root-container{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    gap: 10px;
-    padding: 16px;
-    overflow: hidden;
+    padding: 10px;
 }
 
-.header {
+.header-c{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.common{
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.chart{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+}
+
+.header_c {
     width: 100%;
     display: flex;
     justify-content: space-between;
@@ -34,114 +47,18 @@
     cursor: pointer;
 }
 
-
-.green {
-    background-color: #91CC75;
-}
-
-.blue {
-    background-color: #5470C6;
-}
-
-.info{
-    width: 100%;
-}
-
 .info svg{
     width: 18px;
     height: auto;
-    position: relative;
-    top: 2px;
+    margin-top: 8px;
 }
 
-.legends{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    gap: 15px;
-    margin-top: 15px;
-}
-
-.legent_items{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-}
-
-.indicatior{
-    width: 18px;
-    height: 12px;
-    border-radius: 2px;
-}
-
-.tooltip {
-  position: relative;
-  display: inline-block;
-  cursor: pointer;
-  right: 0;
-}
-
-.tooltip .tooltiptext {
-  visibility: hidden;
-  width: 300px;
-  text-align: center;
-  border-radius: 5px;
-  padding: 5px;
-  position: absolute;
-  z-index: 1;
-  bottom: 0%; /* Position above the element */
-  top: 40px;
-  opacity: 0;
-  transition: opacity 0.3s;
-  font-size: 12px;
-  background-color: #7B7B7B;
-  height: 120px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: #fff;
-  right: -170px;
-}
-
-.tooltip:hover .tooltiptext {
-  visibility: visible;
-  opacity: 1;
-}
-
-.chart{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 30px;
-    /* margin-top: 15px; */
-}
-
-.info{
-    width: 20px;
-    display: flex;
-    justify-content: right;
-    position: relative;
-    margin-top: 5px;
-}
-
-.loading{
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.hidden{
-    visibility: hidden;
-}
-
-.common{
-    display: flex;
-    align-items: center;
-    gap: 10px;
+.legendItems{
+    color: #000;
+    font-family: Kanit;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 600;
 }
 
 /* viewmore design */
@@ -294,7 +211,7 @@
 
 
 .report-filter select {
-    width: 250px;
+    width: 300px;
     height: 40px;
     padding: 0 12px;
     border-radius: 8px;
@@ -332,11 +249,47 @@
     height: 100%;
 }
 
-#viewMoreTimeWise{
+/* .packageNames{
+    width: 400px;
+} */
+
+#viewMoreMhcWaitingTime{
     width: 60vw;
     height: 500px;
 }
 
 .viewmoreLegends{
     width: 30%;
+}
+
+.v_tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.v_tooltip .v_tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    color: #000;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 0%;
+    /* Position above the element */
+    top: 40px;
+    left: 0%;
+    margin-left: -60px;
+    /* Adjust to center the tooltip */
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 12px;
+}
+
+.v_tooltip:hover .v_tooltiptext {
+    visibility: visible;
+    opacity: 1;
+    color: #000;
 }

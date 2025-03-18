@@ -5,7 +5,8 @@ import { DoctorServiceService } from '../../services/doctor-details/doctor-servi
 import { DatePipe } from '@angular/common';
 import { formatDate } from '@angular/common';
 import { error } from 'console';
-import { getIndividualDates, getYesterdayDate, getLastThirtyDaysFromSelected, reorderDateFormat } from '../functions'
+import { getIndividualDates, getYesterdayDate, getLastThirtyDaysFromSelected, reorderDateFormat, getLastSevenDays } from '../functions'
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-estimation-bar',
@@ -14,7 +15,7 @@ import { getIndividualDates, getYesterdayDate, getLastThirtyDaysFromSelected, re
 })
 export class EstimationBarComponent implements OnChanges {
 
-  constructor(private estimation: EstimationService, private datePipe: DatePipe, private docDetails: DoctorServiceService) { }
+  constructor(private estimation: EstimationService, private datePipe: DatePipe, private docDetails: DoctorServiceService, private messageService : MessageService) { }
 
   option: any;
   estimationData: any = {
@@ -36,7 +37,7 @@ export class EstimationBarComponent implements OnChanges {
   tableData: any[] = [];
   monthDates: string[] = [];
 
-  @Input() selectedDate: any[] = []
+  @Input() selectedDate: any
 
   isLoading: boolean = true
 
@@ -46,6 +47,9 @@ export class EstimationBarComponent implements OnChanges {
   @Output() reportData = new EventEmitter<any[]>();
   @Output() reportsColumn = new EventEmitter<any[]>();
   @Output() reportInitializeDate = new EventEmitter<any[]>();
+  @Output() blockFilters = new EventEmitter<boolean[]>();
+  @Output() reportName = new EventEmitter<string>()
+
 
   // viewmore
   rawData: any
@@ -63,10 +67,12 @@ export class EstimationBarComponent implements OnChanges {
 
   ngOnInit() {
     const yesterdayDate = getYesterdayDate()
-    this.selectedDate = [yesterdayDate]
-    this.loadEstimation();
+    // this.selectedDate = getLastSevenDays()
+    console.log(this.selectedDate, "from estimation")
     // Ensure this is called
     this.selectedViewDate = getLastThirtyDaysFromSelected()
+    this.loadEstimation();
+
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -375,14 +381,22 @@ export class EstimationBarComponent implements OnChanges {
     // Sort the data by date (ensure date is a string)
     this.tableData.sort((a, b) => new Date(a.date as string).getTime() - new Date(b.date as string).getTime());
 
-    const today = new Date(this.selectedDate[7] || this.selectedDate[this.selectedDate.length - 1]);
-    const lastWeek = new Date(today);
-    lastWeek.setDate(today.getDate() - 7);
+    // const today = new Date(this.selectedDate[6] || this.selectedDate[this.selectedDate.length - 1]);
+    // const lastWeek = new Date(today);
+    // lastWeek.setDate(today.getDate() - 7);
 
-    this.lastSevenDaysData = this.tableData.filter((item) => {
-      const itemDate = new Date(item.date as string);
-      return itemDate >= lastWeek && itemDate <= today; // Include only dates within the last 7 days
+    // this.lastSevenDaysData = this.tableData.filter((item) => {
+    //   const itemDate = new Date(item.date as string);
+    //   return itemDate >= lastWeek && itemDate <= today; // Include only dates within the last 7 days
+    // });
+
+    // this.lastSevenDaysData = this.tableData.filter((entry:any) => this.selectedDate.includes(entry.date))
+    this.lastSevenDaysData = this.selectedDate.map((date:any) => {
+      const existingEntry = this.tableData.find(entry => entry.date === date);
+      return existingEntry || { date, cancelled: 0, submitted: 0, approved: 0, confirmed: 0, overdue: 0, completed: 0, pending: 0 };
     });
+    
+    console.log(this.selectedDate, "from estimation bar")
 
     this.initChart();
   }
@@ -403,6 +417,8 @@ export class EstimationBarComponent implements OnChanges {
     this.reportView.emit({ onoff: true, range: "range" })
     this.reportData.emit(this.tableData)
     this.reportInitializeDate.emit(this.selectedDate)
+    this.blockFilters.emit([false, false])
+    this.reportName.emit("Estimation Status Overview")
     this.isLoading = false
   }
 
@@ -743,14 +759,59 @@ export class EstimationBarComponent implements OnChanges {
   }
 
   viewOnDatechange(event: any): void {
-    // console.log(event, 'dates')
-    if (Array.isArray(event) && event.length === 2) {
-      const startDate = event[0];
-      let endDate;
-      event[1] !== null ? endDate = event[1] : endDate = event[0]
-      this.selectedViewDate = getIndividualDates(startDate, endDate);
+    if (Array.isArray(event)) {
+      if (event.length === 2) {
+        const startDate = new Date(event[0]);
+        let endDate = event[1] !== null ? new Date(event[1]) : new Date(event[0]);
+
+        // Calculate the difference in days (just for validation, should not exceed 30 due to maxDate)
+        const timeDifference = endDate.getTime() - startDate.getTime();
+        const dayDifference = Math.ceil(timeDifference / (1000 * 3600 * 24));
+
+        if (dayDifference > 30) {
+          // This should not happen due to maxDate restriction, but keeping as fallback
+          endDate = new Date(startDate);
+          endDate.setDate(startDate.getDate() + 29); // +29 for 30-day range including start
+          this.showToast("Date range cannot exceed 30 days. To view more, click on the 'Details' button.", 'warn');
+          this.dateInput = [startDate, endDate]; // Update the range
+        }
+
+        this.selectedViewDate = this.getIndividualDates(startDate, endDate);
+        console.log(this.selectedViewDate);
+      } else if (event.length === 1) {
+        const startDate = new Date(event[0]);
+        const endDate = startDate;
+        this.selectedViewDate = this.getIndividualDates(startDate, endDate);
+        this.dateInput = [startDate, endDate];
+        console.log(this.selectedViewDate);
+      }
       this.viewMoreData()
     }
+  }
+
+  showToast(message: string, type: string) {
+    this.messageService.add({ severity: type, summary: message });
+  }
+
+  getIndividualDates(startDate: Date, endDate: Date): string[] {
+    const dates = [];
+    let currentDate = new Date(startDate);
+
+    // Loop through dates from startDate to endDate
+    while (currentDate <= endDate) {
+      const formattedDate = this.formatDate(currentDate); // Format each date
+      dates.push(formattedDate);
+      currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
+    }
+    return dates;
+  }
+
+  formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-based, so add 1
+    const day = date.getDate().toString().padStart(2, '0'); // Pad single digits with a leading zero
+
+    return `${year}-${month}-${day}`;
   }
 
   viewDoctorsOnchange(event: any): void {

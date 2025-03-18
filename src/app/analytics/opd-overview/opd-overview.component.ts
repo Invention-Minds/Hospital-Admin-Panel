@@ -3,9 +3,11 @@ import { countByDate, processAppointmentData } from '../functions';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { map } from 'rxjs/operators';
-import { getLastSevenDays, getIndividualDates, getLastThirtyDaysFromSelected, reorderDateFormat } from '../functions';
+import { getLastSevenDays, getIndividualDates, getLastThirtyDaysFromSelected, reorderDateFormat,  } from '../functions';
 import { error } from 'console';
 import * as echarts from 'echarts';
+import { MessageService } from 'primeng/api';
+
 
 @Component({
   selector: 'app-opd-overview',
@@ -13,7 +15,7 @@ import * as echarts from 'echarts';
   styleUrl: './opd-overview.component.css'
 })
 export class OpdOverviewComponent {
-  constructor(private appointment: AppointmentConfirmService, private docDetails :  DoctorServiceService) { }
+  constructor(private appointment: AppointmentConfirmService, private docDetails :  DoctorServiceService, private messageService : MessageService) { }
 
   dates: any
   appointmentCount: any = {
@@ -37,6 +39,8 @@ export class OpdOverviewComponent {
   @Output() reportsColumn = new EventEmitter<any[]>();
   @Output() reportInitializeDate = new EventEmitter<any[]>();
   @Output() reportDoctorId = new EventEmitter<any[]>()
+  @Output() blockFilters = new EventEmitter<boolean[]>();
+  @Output() reportName = new EventEmitter<string>();
 
   // viewmore
   department: any
@@ -47,6 +51,7 @@ export class OpdOverviewComponent {
   dateInput : any
   selectedViewDate : any[] =[]
   selectedViewDoctor : any = 'all'
+  selectedViewDepartment : any = 'all'
 
 
   // loading
@@ -77,6 +82,7 @@ export class OpdOverviewComponent {
         const comfirmData = dateFilteredAppointments.filter((appointment: any) => this.doctorId === 'all' ? (appointment.status === "confirmed") : (appointment.status === 'confirmed' && this.doctorId === appointment.doctorId))
         const cancelData = dateFilteredAppointments.filter((appointment: any) => this.doctorId === 'all' ? (appointment.status === "cancelled") : (appointment.status === 'cancelled' && this.doctorId === appointment.doctorId))
         const pendingData = dateFilteredAppointments.filter((appointment: any) => this.doctorId === 'all' ? (appointment.status === "pending") : (appointment.status === 'pending' && this.doctorId === appointment.doctorId))
+        const checkInData = dateFilteredAppointments.filter((appointment: any) => this.doctorId === 'all' ? (appointment.checkedIn === true) : (appointment.checkedIn === true && this.doctorId === appointment.doctorId))
 
         const requests = countByDate(requestData, 'date');
         this.dates = Object.keys(requests).sort();
@@ -85,7 +91,7 @@ export class OpdOverviewComponent {
         this.appointmentCount.completed = processAppointmentData(completedDate, this.dates);
         this.appointmentCount.confirm = processAppointmentData(comfirmData, this.dates);
         this.appointmentCount.cancelled = processAppointmentData(cancelData, this.dates);
-        this.appointmentCount.pending = processAppointmentData(pendingData, this.dates);
+        this.appointmentCount.pending = processAppointmentData(checkInData, this.dates);
 
         this.chart()
       },
@@ -128,9 +134,9 @@ export class OpdOverviewComponent {
           left: 15,
           height: 15,
         },
-        {
-          type: 'inside'    // Allows zooming via scrolling
-        }
+        // {
+        //   type: 'inside'    // Allows zooming via scrolling
+        // }
       ],
       series: [
         {
@@ -166,7 +172,7 @@ export class OpdOverviewComponent {
           }
         },
         {
-          name: 'Pending',
+          name: 'Check-In',
           type: 'line',
           data: this.appointmentCount.pending,
           itemStyle: {
@@ -179,29 +185,26 @@ export class OpdOverviewComponent {
   }
 
   overviewReport() {
-    this.isLoading = true
+    this.isLoading = true;
     this.appointment.getAllAppointments().pipe(
       map((data: any) => {
-        const groupedByDate: { [key: string]: any } = {};
-
+        const groupedDataMap: { [key: string]: any } = {};
+  
         data.forEach((item: any) => {
           const date = item.date;
           const doctorId = item.doctorId;
           const doctorName = item.doctorName;
-
-          if (!groupedByDate[date]) {
-            groupedByDate[date] = {};
-          }
-
-          if (!groupedByDate[date][doctorId]) {
-            groupedByDate[date][doctorId] = {};
-          }
-
-          if (!groupedByDate[date][doctorId][doctorName]) {
-            groupedByDate[date][doctorId][doctorName] = {
+          const departmentName = item.department; // Adjust if field name is different, e.g., item.departmentName
+  
+          // Create a unique key combining all four fields
+          const uniqueKey = `${date}-${doctorId}-${doctorName}-${departmentName}`;
+  
+          if (!groupedDataMap[uniqueKey]) {
+            groupedDataMap[uniqueKey] = {
               date: date,
               doctorId: doctorId,
               doctorName: doctorName,
+              departmentName: departmentName,
               totalRequest: 0,
               confirmed: 0,
               cancelled: 0,
@@ -209,44 +212,37 @@ export class OpdOverviewComponent {
               pending: 0,
             };
           }
-
+  
           // Increment the respective status count
-          groupedByDate[date][doctorId][doctorName].totalRequest += 1; // Increment total requests
-
+          groupedDataMap[uniqueKey].totalRequest += 1;
+  
           if (item.status === 'confirmed') {
-            groupedByDate[date][doctorId][doctorName].confirmed += 1;
+            groupedDataMap[uniqueKey].confirmed += 1;
           }
-
+  
           if (item.status === 'cancelled') {
-            groupedByDate[date][doctorId][doctorName].cancelled += 1;
+            groupedDataMap[uniqueKey].cancelled += 1;
           }
-
+  
           if (item.status === 'completed') {
-            groupedByDate[date][doctorId][doctorName].completed += 1;
+            groupedDataMap[uniqueKey].completed += 1;
           }
-
-          if (item.status === 'pending') {
-            groupedByDate[date][doctorId][doctorName].pending += 1;
+  
+          if (item.checkedIn === true) {
+            groupedDataMap[uniqueKey].pending += 1;
           }
         });
-
-        // Flatten the grouped data for easier display
-        const groupedData = [];
-        for (const date in groupedByDate) {
-          for (const doctorId in groupedByDate[date]) {
-            for (const doctorName in groupedByDate[date][doctorId]) {
-              groupedData.push(groupedByDate[date][doctorId][doctorName]);
-            }
-          }
-        }
-
+  
+        // Convert the grouped data object to an array
+        const groupedData = Object.values(groupedDataMap);
+  
         return groupedData;
       })
     )
       .subscribe({
         next: (groupedData) => {
-          this.reportData.emit(groupedData)
-          // console.log(groupedData)
+          this.reportData.emit(groupedData);
+          // console.log(groupedData);
         },
         error: (error) => {
           console.error(error); // Handle errors
@@ -254,26 +250,29 @@ export class OpdOverviewComponent {
         complete: () => {
           const reportColumn = [
             { header: "Date", key: "date" },
+            { header: "Doctor ID", key: "doctorId" }, // Added Doctor ID
             { header: "Doctor Name", key: "doctorName" },
+            { header: "Department", key: "departmentName" }, // Added Department
             { header: "Total Appointments", key: "totalRequest" },
             { header: "Confirmed", key: "confirmed" },
             { header: "Cancelled", key: "cancelled" },
             { header: "Completed", key: "completed" },
-            { header: "Pending", key: "pending" }
-          ]
-
-          this.reportsColumn.emit(reportColumn)
-          this.reportView.emit({ onoff: true, range: "range", })
-          this.reportInitializeDate.emit(this.selectedDate)
-          this.reportDoctorId.emit(this.doctorId)
-
-          console.log(this.selectedDate)
-
-          this.isLoading = false
+            { header: "Checked-In", key: "pending" }
+          ];
+  
+          this.reportsColumn.emit(reportColumn);
+          this.reportView.emit({ onoff: true, range: "range" });
+          this.reportInitializeDate.emit(this.selectedDate);
+          this.reportDoctorId.emit(this.doctorId);
+          this.blockFilters.emit([false, false])
+          this.reportName.emit('OPD Overview')
+  
+          console.log(this.selectedDate);
+  
+          this.isLoading = false;
         }
       });
   }
-
 
   // viewmore
 
@@ -300,7 +299,10 @@ export class OpdOverviewComponent {
   departmentOnchange(event: any): void {
     this.docDetails.getDoctors().subscribe(({
       next: (data: any) => {
+        this.selectedViewDoctor = 'all'
         this.filteredDoctors = data.filter((doc: any) => doc.departmentId === parseInt(event.target.value))
+        this.selectedViewDepartment = this.department.filter((entry:any) => entry.id === parseInt(event.target.value))[0].name
+        this.viewMoreData()
       },
       error: (error: any) => {
         console.error(error)
@@ -381,7 +383,7 @@ export class OpdOverviewComponent {
           }
         },
         {
-          name: 'Pending',
+          name: 'Check-In',
           type: 'line',
           data: data.pending,
           itemStyle: {
@@ -394,13 +396,14 @@ export class OpdOverviewComponent {
   }
 
   viewMoreData(): void {
-    const dateFilteredAppointments = this.rawData.filter((data: any) => this.selectedViewDate.includes(data.date));
+    const dateFilteredAppointments = this.rawData.filter((data: any) => this.selectedViewDate.includes(data.date) && this.selectedViewDepartment === 'all' ? this.selectedViewDate.includes(data.date) : this.selectedViewDepartment === data.department);
 
     const completedData = dateFilteredAppointments.filter((appointment: any) => this.selectedViewDoctor === 'all' ? (appointment.status === "completed") : (appointment.status === 'completed' && this.selectedViewDoctor === appointment.doctorId));
     const requestData = dateFilteredAppointments.filter((appointment: any) => this.selectedViewDoctor === 'all' ? appointment : this.selectedViewDoctor === appointment.doctorId);
     const comfirmData = dateFilteredAppointments.filter((appointment: any) => this.selectedViewDoctor === 'all' ? (appointment.status === "confirmed") : (appointment.status === 'confirmed' && this.selectedViewDoctor === appointment.doctorId));
     const cancelData = dateFilteredAppointments.filter((appointment: any) => this.selectedViewDoctor === 'all' ? (appointment.status === "cancelled") : (appointment.status === 'cancelled' && this.selectedViewDoctor === appointment.doctorId));
     const pendingData = dateFilteredAppointments.filter((appointment: any) => this.selectedViewDoctor === 'all' ? (appointment.status === "pending") : (appointment.status === 'pending' && this.selectedViewDoctor === appointment.doctorId));
+    const checkedInData = dateFilteredAppointments.filter((appointment: any) => this.selectedViewDoctor === 'all' ? (appointment.checkedIn === true) : (appointment.checkedIn === true && this.selectedViewDoctor === appointment.doctorId));
 
     // console.log(requestData, "request data")
 
@@ -418,26 +421,78 @@ export class OpdOverviewComponent {
         pending: ''
     };
 
+    // appointmentCount.date = date
+    // appointmentCount.request = processAppointmentData(requestData, date);
+    // appointmentCount.completed = processAppointmentData(completedData, date);
+    // appointmentCount.confirm = processAppointmentData(comfirmData, date);
+    // appointmentCount.cancelled = processAppointmentData(cancelData, date);
+    // appointmentCount.pending = processAppointmentData(checkedInData, date);
+
     appointmentCount.date = date
     appointmentCount.request = processAppointmentData(requestData, date);
     appointmentCount.completed = processAppointmentData(completedData, date);
     appointmentCount.confirm = processAppointmentData(comfirmData, date);
     appointmentCount.cancelled = processAppointmentData(cancelData, date);
-    appointmentCount.pending = processAppointmentData(pendingData, date);
+    appointmentCount.pending = processAppointmentData(checkedInData, date);
 
     this.ViewMorechart(appointmentCount);
     // console.log(appointmentCount);
   }
 
   viewOnDatechange(event: any): void {
-    // console.log(event, 'dates')
-    if (Array.isArray(event) && event.length === 2) {
-      const startDate = event[0];
-      let endDate;
-      event[1] !== null ? endDate = event[1] : endDate = event[0]
-      this.selectedViewDate = getIndividualDates(startDate, endDate);
+    if (Array.isArray(event)) {
+      if (event.length === 2) {
+        const startDate = new Date(event[0]);
+        let endDate = event[1] !== null ? new Date(event[1]) : new Date(event[0]);
+
+        // Calculate the difference in days (just for validation, should not exceed 30 due to maxDate)
+        const timeDifference = endDate.getTime() - startDate.getTime();
+        const dayDifference = Math.ceil(timeDifference / (1000 * 3600 * 24));
+
+        if (dayDifference > 30) {
+          // This should not happen due to maxDate restriction, but keeping as fallback
+          endDate = new Date(startDate);
+          endDate.setDate(startDate.getDate() + 29); // +29 for 30-day range including start
+          this.showToast("Date range cannot exceed 30 days. To view more, click on the 'Details' button.", 'warn');
+          this.dateInput = [startDate, endDate]; // Update the range
+        }
+
+        this.selectedViewDate = this.getIndividualDates(startDate, endDate);
+        console.log(this.selectedViewDate);
+      } else if (event.length === 1) {
+        const startDate = new Date(event[0]);
+        const endDate = startDate;
+        this.selectedViewDate = this.getIndividualDates(startDate, endDate);
+        this.dateInput = [startDate, endDate];
+        console.log(this.selectedViewDate);
+      }
       this.viewMoreData()
     }
+  }
+
+  showToast(message: string, type: string) {
+    this.messageService.add({ severity: type, summary: message });
+  }
+
+  getIndividualDates(startDate: Date, endDate: Date): string[] {
+    const dates = [];
+    let currentDate = new Date(startDate);
+
+    // Loop through dates from startDate to endDate
+    while (currentDate <= endDate) {
+      const formattedDate = this.formatDate(currentDate); // Format each date
+      dates.push(formattedDate);
+      currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
+    }
+    return dates;
+  }
+
+  formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-based, so add 1
+    const day = date.getDate().toString().padStart(2, '0'); // Pad single digits with a leading zero
+
+    return `${year}-${month}-${day}`;
   }
 
   viewDoctorsOnchange(event:any):void{
@@ -452,6 +507,7 @@ export class OpdOverviewComponent {
     this.selectedViewDate = []
     this.selectedViewDate = getLastThirtyDaysFromSelected()
     this.selectedViewDoctor = 'all'
+    this.selectedViewDepartment = 'all'
     this.viewmore()
     this.dateInput = []
   }

@@ -49,6 +49,28 @@ export const filteredAppointments = ((data: any[], requestType: string, doctorId
   });
 });
 
+export const viewfilteredAppointments = ((data: any[], requestType: string, doctorId: any, date: any, departmentId:any) => {
+  console.log(departmentId)
+  console.log(data.map((e:any) => e.department))
+  return data.filter((appointment: any) => {
+    if (appointment.requestVia !== requestType) {
+      return false;
+    }
+
+    if (doctorId === 'all' && date.includes(appointment.date)) {
+      return true;
+    } else if (doctorId !== 'all' && date.includes(appointment.date) && departmentId === 'all'){
+      return appointment.doctorId === doctorId;
+    } else if (doctorId === 'all' && !date.includes(appointment.date) && departmentId === 'all'){
+      return appointment.date === date;
+    } else if(doctorId === 'all' && date.includes(appointment.date) && departmentId !== 'all'){
+      return appointment.department === departmentId
+    }else {
+      return appointment.doctorId === doctorId && date.includes(appointment.date) && appointment.department === departmentId;
+    }
+  });
+});
+
 export const getDayOfWeek = (date: string): string => {
   const days = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
   const dayIndex = new Date(date).getDay();
@@ -107,6 +129,16 @@ export const utcToIst = (dateNTime:any) => {
 
   return dateAndTIme
 }
+
+export const utcToIstTime = (dateNTime: any) => {
+  if (!dateNTime) return null; // Handle null/undefined cases
+
+  const createdAt = new Date(dateNTime);
+  const indianTime = moment.tz(createdAt, "America/New_York").tz("Asia/Kolkata");
+
+  return indianTime.format('hh:mm A'); 
+};
+
 
 export const utcToIstDate = (dateNTime:any) => {
   let date : any
@@ -281,3 +313,55 @@ export const reorderDateFormat = (dateArray: string[]): string[] => {
     return `${day}-${month}-${year}`;
   });
 };
+
+
+interface Appointment {
+  doctorId: string;
+  departmentId: string;
+  date: Date; // Using Date object
+}
+
+// export const filterAppointments = (
+//   appointments: Appointment[],
+//   selectedDoctor: string = 'all',
+//   selectedDepartment: string = 'all',
+//   selectedDates: Date[] = []
+// ): Appointment[] => {
+//   if (
+//     selectedDoctor === 'all' &&
+//     selectedDepartment === 'all' &&
+//     selectedDates.length === 0
+//   ) {
+//     return appointments;
+//   }
+
+//   return appointments.filter((appointment) => {
+//     const matchesDoctor = 
+//       selectedDoctor === 'all' || 
+//       selectedDoctor === appointment.doctorId;
+
+//     const matchesDepartment = 
+//       selectedDepartment === 'all' || 
+//       selectedDepartment === appointment.departmentId;
+
+//     const matchesDate = 
+//       selectedDates.length === 0 || 
+//       selectedDates.some(date => 
+//         date.toISOString().split('T')[0] === 
+//         appointment.date.toISOString().split('T')[0]
+//       );
+
+//     return matchesDoctor && matchesDepartment && matchesDate;
+//   });
+// }
+
+export const filterAppointments = (data:any[], doctorId:any, departmentId:any, dates:any):any => {
+
+  if(doctorId === 'all' || departmentId === 'all'){
+    return data.filter((entry:any) => dates.includes(entry.date))
+  }
+  else {
+    return data.filter((entry:any) => (doctorId === entry.doctorId || entry.consultantId) && (departmentId === entry.departmentId) && (dates.includes(entry.date)))
+  }
+
+}

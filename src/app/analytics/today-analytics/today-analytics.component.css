@@ -194,18 +194,19 @@
 }
 
 table {
+  width: 100%;
   background: #fff;
   border-radius: 10px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   border-collapse: collapse;
-  width: 400px;
   overflow: hidden;
   transform: scale(1);
   transition: transform 0.3s ease;
+  margin: 15px 10px;
 }
 
 table:hover {
-  transform: scale(1.02);
+  /* transform: scale(1.02); */
 }
 
 th {
@@ -311,11 +312,21 @@ tbody tr:hover {
 }
 
 .doctor-list {
+  width: 100%;
   padding: 10px;
   margin-top: 3rem;
   display: grid;
   column-gap: 20px;
   grid-template-columns: 33% 33% 33%;
+}
+
+.doctor-list-est{
+  width: 100%;
+  padding: 10px;
+  margin-top: 3rem;
+  display: flex;
+  /* column-gap: 20px;
+  grid-template-columns: 33% 33% 33%; */
 }
 
 .doctor-card {
@@ -431,3 +442,30 @@ tbody tr:hover {
   border: 1px solid #B6B6B6;
 }
 
+.estimation{
+  background-color: #4998f9;
+}
+
+.healthCheck{
+  background-color: #c596f7;
+}
+
+/* table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: Kanit;
+  font-size: 14px;
+  background: white;
+  margin: 15px 0;
+}
+
+table th,
+table td {
+  padding: 10px;
+  text-align: left;
+  width: auto;
+}
+
+table th {
+  background: #f2f2f2;
+} */

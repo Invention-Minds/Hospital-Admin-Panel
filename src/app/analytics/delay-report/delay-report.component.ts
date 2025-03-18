@@ -151,7 +151,8 @@ export class DelayReportComponent {
   reportData(doctors: any[]): void {
     this.appointmentService.getAllAppointments().subscribe((appointments: any[]) => {
 
-      const todayAppointments = appointments.filter(app => app.date === this.selectedDate);
+      const todayAppointments = appointments.filter(app => app.date === this.selectedDate[0]);
+      console.log(todayAppointments)
 
       this.doctorDelays = doctors.map(doctor => {
         const latestAvailability = this.getLatestAvailability(doctor.availability);

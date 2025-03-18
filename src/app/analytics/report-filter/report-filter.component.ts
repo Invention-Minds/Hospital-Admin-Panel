@@ -1,119 +1,232 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
-import * as XLSX from 'xlsx';  // Import xlsx library
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, OnInit } from '@angular/core';
+import * as XLSX from 'xlsx';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { getYesterdayDate } from '../functions';
-
+import { HealthCheckupServiceService } from '../../services/health-checkup/health-checkup-service.service';
 
 @Component({
   selector: 'app-report-filter',
   templateUrl: './report-filter.component.html',
   styleUrls: ['./report-filter.component.css']
 })
-export class ReportFilterComponent implements OnChanges {
+export class ReportFilterComponent implements OnInit, OnChanges {
+  constructor(private doctor: DoctorServiceService, private healthCheckup: HealthCheckupServiceService) {}
 
-  months: any[] = ['Jan', 'Feb', 'Mar', 'April', 'May', 'June', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  date: any;
+  months: string[] = ['Jan', 'Feb', 'Mar', 'April', 'May', 'June', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   type: boolean = true;
 
   @Input() columns: { key: string; header: string }[] = [];
   @Input() reportData: any[] = [];
   @Input() dateSelectionType: any;
   @Input() onOf: any;
-  @Input() initializeDate: any[] = []
-  emptyDate = ''
-
-  @Output() onoff = new EventEmitter<boolean>
-
-  importedData: any[] = []
-
-  month: any;
-  range: any;
-
+  @Input() initializeDate: any[] = [];
   @Input() selectedDateRange: Date[] = [];
-  @Input() individualDates: any[] = [];
-  department: any
-  departmentValue: any;
-  doctors: any
-  selectedDoctor: any
-  @Input() importedDoctor: any
+  @Input() individualDates: string[] = [];
+  @Input() importedDoctor: any;
+  @Input() isFilterBlock : boolean = false
+  @Input() isMHC : boolean = false
+  @Input() reportName : any
+  blockFilter : boolean = false;
+  
+  @Output() onoff = new EventEmitter<boolean>();
 
-  ngOnInit() {
-    this.loadDepartments()
+  importedData: any[] = [];
+  department: any = [];
+  departmentValue: string | number = 'all';
+  doctors: any[] = [];
+  selectedDoctor: string | number = 'all';
+  allDoctors: any;
+  mhcPackages : any = 'all'
+  selectedPackage : any
+
+  departmentControl : boolean = false;
+  doctorControl : boolean = false
+
+  // Lifecycle hook: Initialize component
+  ngOnInit(): void {
+    this.loadDepartments();
+    this.loadMhcPackages();
+    this.loadDoctors()
+    this.individualDates = [getYesterdayDate()];
+    this.importedData = this.convertDateFormat(this.reportData);
+    console.log(this.importedData)
     this.sortByDate();
-    this.loadYesterday()
+    // this.filterData();
   }
 
+  // Lifecycle hook: React to input changes
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['reportData'] && !changes['reportData'].firstChange) {
+      this.importedData = this.convertDateFormat(this.reportData);
+      this.sortByDate();
+      this.filterData();
+    }
+  }
+
+  // Load departments from service
   async loadDepartments(): Promise<void> {
     try {
-      const data = await this.doctor.getDepartments().toPromise()
+      const data = await this.doctor.getDepartments().toPromise();
       this.department = data;
-      // console.log(this.department)
     } catch (err) {
-      console.error(err)
+      console.error('Error loading departments:', err);
     }
   }
 
+  loadMhcPackages():void{
+    this.healthCheckup.getPackages().subscribe({
+      next: (pack) => {
+        this.mhcPackages = pack.map((name:any) => {
+          return{
+            id : name.id,
+            name : name.name,
+          }
+        })
+    }})
+  }
+
+  packageOnchange(event:any):any{
+      this.selectedPackage = event.target.value
+      this.filterMhc()
+  }
+
+  loadDoctors():void{
+    this.doctor.getAllDoctors().subscribe((data:any) => {
+      this.allDoctors = data
+    })
+  }
+
+  // Handle department selection change
   departmentOnchange(event: any): void {
-    this.departmentValue = parseInt(event.target.value);
-    // console.log(this.departmentValue, "from filter")
-    this.doctor.getDoctors().subscribe(({
-      next: (data: any) => {
-        this.doctors = data.filter((doc: any) => doc.departmentId === this.departmentValue)
-      },
-      error: (error) => {
-        console.error(error)
-      },
-      complete: () => {
-        // console.log(this.doctors)
-      }
-    }))
+    const selectedDepartment = event.target.value === 'all' ? 'all' : parseInt(event.target.value);
+    this.selectedDoctor = 'all'
+    this.departmentValue = this.department.filter((entry:any) => entry.id === parseInt(event.target.value))[0].name
+    console.log(this.departmentValue)
+    this.doctors = this.allDoctors.filter((entry:any) => selectedDepartment === 'all' ? true : selectedDepartment === entry.departmentId)
+
+    console.log(selectedDepartment)
+    this.filterData();
   }
 
-  doctorOnchange(e: any): void {
-    this.selectedDoctor = parseInt(e.target.value) || 'all';
+  // Handle doctor selection change
+  onChoosingDoctor(event: any): void {
+    this.selectedDoctor = event.target.value === 'all' ? 'all' : parseInt(event.target.value);
+    this.filterData();
   }
 
-  loadYesterday(): any {
-    this.selectedDoctor = this.importedDoctor
-    const filteredData = this.reportData.filter((entry: any) =>
-      this.individualDates.includes(entry.date)
-    );
-
-    const filtered = filteredData.filter(entry => this.individualDates.includes(entry.date))
-    this.importedData = this.convertDateFormat(filtered)
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if ((changes['dateSelectionType']) || (changes['selectedDoctor'])) {
-      this.controlDateRange();
-    }
-
-    if (((changes['reportData']) && (!changes['reportData'].firstChange)) || (changes['individualDates'])) {
-      this.importedData = this.reportData
-      this.selectedDateRange = []
-      this.sortByDate()
-      this.loadYesterday()
+  // Handle date range selection
+  onDateRangeSelect(event: any): void {
+    if (this.type && Array.isArray(event) && event.length === 2) {
+      const startDate = event[0];
+      const endDate = event[1] !== null ? event[1] : event[0];
+      this.individualDates = this.getIndividualDates(startDate, endDate);
+      this.filterData();
     }
   }
 
-  constructor(private doctor: DoctorServiceService) {
+  // Filter report data based on selections
+  filterData(): void {
+    this.filterBlock()
+    const filteredData = this.reportData.filter((entry: any) => {
+      const dateMatch = this.individualDates.includes(entry.date);
+      const doctorMatch = this.selectedDoctor === 'all' || this.selectedDoctor === entry.doctorId;
+      const deptMatch = this.departmentValue === 'all' || this.departmentValue === entry.departmentName;
+      return dateMatch && doctorMatch && deptMatch;
+    });
+    this.importedData = this.convertDateFormat(filteredData);
+    console.log('Filtered Imported Data:', this.importedData);
+  }
+
+  // filterMhcData
+  filterMhc():void{
+    this.filterBlock()
+    const filteredData = this.reportData.filter((entry: any) => {
+      const dateMatch = this.individualDates.includes(entry.date)
+      const packageFilter = this.selectedPackage === 'all' || this.selectedPackage === entry.packageName 
+      return dateMatch && packageFilter
+    });
+    console.log(this.selectedPackage)
+    console.log(filteredData, "filtered data")
+    this.importedData = this.convertDateFormat(filteredData);
+    console.log('Filtered Imported Data:', this.importedData);
+    this.sortByDate();
+  }
+
+  // Generate individual dates between start and end
+  getIndividualDates(startDate: Date, endDate: Date): string[] {
+    const dates: string[] = [];
+    let currentDate = new Date(startDate);
+
+    while (currentDate <= endDate) {
+      dates.push(this.formatDate(currentDate));
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    return dates;
+  }
+
+  // Format date as YYYY-MM-DD
+  formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  // Sort data by date
+  sortByDate(): void {
+    this.importedData.sort((a: any, b: any) => {
+      const dateA = new Date(a.date);
+      const dateB = new Date(b.date);
+      return dateA.getTime() - dateB.getTime();
+    });
+  }
+
+  // Get all dates in a month
+  getDatesInMonth(year: number, month: number): string[] {
+    const dates: string[] = [];
+    const daysInMonth = new Date(year, month, 0).getDate();
+    for (let day = 1; day <= daysInMonth; day++) {
+      dates.push(new Date(year, month - 1, day).toISOString().split('T')[0]);
+    }
+    return dates;
+  }
+
+  // Close the report
+  closingReport(): void {
+    this.onoff.emit(false);
+    this.loadDepartments();
+    this.doctors = [];
     this.selectedDateRange = [];
+    this.selectedDoctor = 'all';
+    this.departmentValue = 'all';
+    this.filterData();
   }
 
-  controlDateRange(): void {
-    this.type = this.dateSelectionType === 'range';
+  // Refresh the component
+  refresh(): void {
+    this.loadDepartments();
+    this.doctors = [];
+    this.selectedDateRange = [];
+    this.individualDates = [getYesterdayDate()];
+    this.selectedDoctor = 'all';
+    this.departmentValue = 'all';
+    this.filterData();
   }
 
-  // Method to download Excel file with styling
+  // Convert date format from YYYY-MM-DD to DD-MM-YYYY  
+  convertDateFormat(dataArray: any[]): any[] {
+    return dataArray.map((item: any) => {
+      const [year, month, day] = item.date.split('-');
+      return { ...item, date: `${day}-${month}-${year}` };
+    });
+  }
+
+  // Download data as Excel file
   downloadExcel(): void {
     const header = this.columns.map(col => col.header);
-    const rows = this.reportData.map((row: any) =>
-      this.columns.map(col => row[col.key])
-    );
-
+    const rows = this.importedData.map((row: any) => this.columns.map(col => row[col.key]));
     const ws: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet([header, ...rows]);
 
-    // Apply styles to the header
     const headerStyle = {
       font: { bold: true, color: { rgb: 'FFFFFF' } },
       fill: { fgColor: { rgb: '4CAF50' } },
@@ -126,16 +239,6 @@ export class ReportFilterComponent implements OnChanges {
       }
     };
 
-    // Apply header style
-    const range = XLSX.utils.decode_range(ws['!ref']!);
-    for (let col = range.s.c; col <= range.e.c; col++) {
-      const cellAddress = { r: 0, c: col };
-      const cellRef = XLSX.utils.encode_cell(cellAddress);
-      if (!ws[cellRef]) ws[cellRef] = {};
-      ws[cellRef].s = headerStyle;
-    }
-
-    // Apply border style for data cells
     const cellStyle = {
       border: {
         top: { style: 'thin', color: { rgb: '000000' } },
@@ -145,150 +248,34 @@ export class ReportFilterComponent implements OnChanges {
       }
     };
 
+    const range = XLSX.utils.decode_range(ws['!ref']!);
+    for (let col = range.s.c; col <= range.e.c; col++) {
+      const cellRef = XLSX.utils.encode_cell({ r: 0, c: col });
+      ws[cellRef].s = headerStyle;
+    }
+
     for (let row = 1; row <= range.e.r; row++) {
       for (let col = range.s.c; col <= range.e.c; col++) {
-        const cellAddress = { r: row, c: col };
-        const cellRef = XLSX.utils.encode_cell(cellAddress);
+        const cellRef = XLSX.utils.encode_cell({ r: row, c: col });
         if (!ws[cellRef]) ws[cellRef] = {};
         ws[cellRef].s = cellStyle;
       }
     }
 
-    // Write the workbook to file
     const wb: XLSX.WorkBook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Report');
-    XLSX.writeFile(wb, 'report_data.xlsx');
+    XLSX.writeFile(wb, `${this.reportName} report.xlsx`);
   }
 
-  onDateRangeSelect(event: any): void {
-    // console.log(event, 'dates')
-    if (this.type && Array.isArray(event) && event.length === 2) {
-      const startDate = event[0];
-      let endDate;
-      event[1] !== null ? endDate = event[1] : endDate = event[0]
-
-      // console.log(startDate, endDate, "dates split")
-
-      // Get all the individual dates between the selected range
-      this.individualDates = this.getIndividualDates(startDate, endDate);
-      // console.log('Individual Dates:', this.individualDates);
-
-      // Filter report data based on both date range and selected doctor
-      const filteredReportData = this.reportData.filter((entry: any) => {
-        const dateMatches = this.individualDates.includes(entry.date);
-        const selectedDoctor = this.selectedDoctor === 'all' ? entry : this.selectedDoctor === parseInt(entry.doctorId)
-        return dateMatches && selectedDoctor;  // Return true if both date and doctor conditions match
-      });
-
-      // Update the imported data with filtered data
-      // this.importedData = filteredReportData;
-      this.importedData = this.convertDateFormat(filteredReportData)
-      // console.log('Filtered Report Data:', filteredReportData);
-
-    } else if (!this.type) {
-      // console.log('Selected Single Date:', event);
+  // filter block
+  filterBlock():void{
+    if(this.isFilterBlock === true){
+      this.blockFilter = true
     }
-  }
-
-  onChoosingDoctor(event: any): void {
-    this.selectedDoctor = event.target.value === 'all' ? 'all' : parseInt(event.target.value);
-
-    // console.log('Selected Doctor:', this.selectedDoctor); // Log the selected doctor to verify
-
-    // Filter the report data based on the selected doctor and the 'all' option
-    const filteredReportData = this.reportData.filter((entry: any) => {
-      return (this.selectedDoctor === 'all' || this.selectedDoctor === parseInt(entry.doctorId)) && (this.individualDates.includes(entry.date));
-    });
-
-    // Update the imported data with the filtered report data
-    this.importedData = filteredReportData;
-    this.importedData = this.convertDateFormat(this.importedData)
-  }
-
-  getIndividualDates(startDate: Date, endDate: Date): string[] {
-    const dates = [];
-    console.log(startDate, "startDate from filter")
-    let currentDate = new Date(startDate);
-
-    // Loop through dates from startDate to endDate
-    while (currentDate <= endDate) {
-      const formattedDate = this.formatDate(currentDate); // Format each date
-      dates.push(formattedDate);
-      currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
+    else{
+      this.blockFilter = false
     }
-    return dates;
+    console.log(this.blockFilter, "form report")
   }
 
-  formatDate(date: Date): string {
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-based, so add 1
-    const day = date.getDate().toString().padStart(2, '0'); // Pad single digits with a leading zero
-
-    return `${year}-${month}-${day}`;
-  }
-
-  sortByDate(): void {
-    this.importedData = this.importedData.sort((a: any, b: any) => {
-      const dateA = new Date(a.date);
-      const dateB = new Date(b.date);
-      return dateA.getTime() - dateB.getTime();
-    });
-
-    this.importedData = this.convertDateFormat(this.importedData)
-  }
-
-  getDatesInMonth(year: number, month: number): string[] {
-    const dates: string[] = [];
-    const daysInMonth = new Date(year, month, 0).getDate(); // Get number of days in the month
-
-    for (let day = 1; day <= daysInMonth; day++) {
-      const formattedDate = new Date(year, month - 1, day).toISOString().split("T")[0];
-      dates.push(formattedDate);
-    }
-
-    return dates;
-  }
-
-  // closing report
-  closingReport() {
-    this.onoff.emit(false)
-    this.loadDepartments()
-    this.doctors = []
-    this.selectedDateRange = []
-    this.selectedDoctor = 'all'
-    if (this.selectedDoctor === 'all') {
-      const filtererdData = this.reportData.filter((entry: any) => {
-        const dateMatches = this.individualDates.includes(entry.date);
-        const doctor = this.selectedDoctor === 'all' ? entry : this.selectedDoctor === parseInt(entry.doctorId)
-        return dateMatches && doctor;
-      });
-      this.importedData = filtererdData
-    }
-  }
-
-  refresh() {
-    this.loadDepartments()
-    this.doctors = []
-    this.selectedDateRange = []
-    this.individualDates = [getYesterdayDate()]
-    this.selectedDoctor = 'all'
-    if (this.selectedDoctor === 'all') {
-      const filtererdData = this.reportData.filter((entry: any) => {
-        const dateMatches = this.individualDates.includes(entry.date);
-        const doctor = this.selectedDoctor === 'all' ? entry : this.selectedDoctor === parseInt(entry.doctorId)
-        return dateMatches && doctor;
-      });
-      this.importedData = this.convertDateFormat(filtererdData)
-    }
-  }
-
-  convertDateFormat(dataArray: any) {
-    return dataArray.map((item: any) => {
-      const [year, month, day] = item.date.split('-');
-      return {
-        ...item,
-        date: `${day}-${month}-${year}`
-      };
-    });
-  }
 }

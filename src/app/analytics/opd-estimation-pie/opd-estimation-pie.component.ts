@@ -4,8 +4,10 @@ import { EstimationService } from '../../services/estimation/estimation.service'
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { map } from 'rxjs/operators';
-import { utcToIstDate, getYesterdayDate, getIndividualDates, getLastThirtyDaysFromSelected } from '../functions'
+import { utcToIstDate, getYesterdayDate, getIndividualDates, getLastThirtyDaysFromSelected, getLast7Days, formatDate, reorderDateFormat } from '../functions'
 import { error } from 'console';
+import { MessageService } from 'primeng/api';
+import { constants } from 'buffer';
 
 @Component({
   selector: 'app-opd-estimation-pie',
@@ -14,27 +16,22 @@ import { error } from 'console';
 })
 export class OpdEstimationPieComponent implements OnChanges {
 
-  // chart variables
-  option: any
-  estimatedOPD: any
-  NoEstimations: any
-  estimatedCount: any
-  @Input() selectedDate: any[] = [];
-  @Input() selectedDoctor: any
-  isLoading: boolean = true
+  constructor(private appointment: AppointmentConfirmService, private estimation: EstimationService, private doctor: DoctorServiceService, private messageService: MessageService) { }
 
-  // report variables
-  reportAppointmentData: any;
-  @Output() reportView = new EventEmitter<{ onoff: boolean, range: any }>();
-  @Output() reportData = new EventEmitter<any[]>();
-  @Output() reportsColumn = new EventEmitter<any[]>();
-  @Output() reportInitializeDate = new EventEmitter<any[]>();
-  @Output() reportDoctorId = new EventEmitter<any[]>()
+  rawData: any
+  prnNumber: any
+  prnFilteredData: any
+  selecetedDepartment: any = 'all'
+  filteredData: any
+  chartInstance: any
+  isLoading: boolean = false
+  @Input() selectedDate: any
+  @Input() selectedDoctor: any
 
   // viewmore
-  rawData: any
   department: any
-  departmentValue: any
+  departmentValue: any = 'all'
+  departmentDocs: any = 'all'
   doctors: any
   filteredDoctors: any
   showViewMore: boolean = false
@@ -43,43 +40,59 @@ export class OpdEstimationPieComponent implements OnChanges {
   selectedViewDoctor: any = 'all'
   viewMoreoption: any
 
-
-  constructor(private estimation: EstimationService, private appoinment: AppointmentConfirmService, private docDetails: DoctorServiceService) { }
-  // const 
+  // report
+  reportData: any
+  @Output() viewReportSection = new EventEmitter<any>
+  @Output() sendReportData = new EventEmitter<any>
+  @Output() reportInitializeDate = new EventEmitter<any>
 
   ngOnInit() {
-    this.selectedDate = [getYesterdayDate()]
-    this.loadEstimations()
-    // console.log(this.selectedDoctor, "selectedDOctor")
+    this.selectedDate = getLast7Days()
     this.selectedViewDate = getLastThirtyDaysFromSelected()
+    this.fetchingData()
+    this.loadDepartments()
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if ((changes['selectedDate'] && !changes['selectedDate'].firstChange) || (changes['selectedDoctor'] && !changes['selectedDoctor'].firstChange)) {
-      this.loadEstimations()
-      // console.log(this.selectedDoctor, "selectedDOctor")
+    if (changes['selectedDate']) {
+      this.fetchingData()
     }
   }
 
-  initChart(): void {
-    const chartDom = document.getElementById('pie-chart')!;
-    const myChart = echarts.init(chartDom);
+  fetchingData(): void {
+    this.estimation.getAllEstimation().subscribe((data: any) => {
+      this.rawData = data
+      console.log(this.rawData, "rawdata")
+      this.appointment.getAllAppointments().subscribe((data: any) => {
+        this.prnNumber = data.filter((entry: any) => entry.prnNumber !== null).map((entry: any) => entry.prnNumber)
+        console.log(this.prnNumber)
+        this.chartData(this.prnNumber)
+      })
+    })
+  }
 
-    this.option = {
+  initChart(data: any): void {
+    const chartContainer = document.getElementById('pie-chart') as HTMLElement;
+    this.chartInstance = echarts.init(chartContainer);
+
+    // Filter out data points where value is 0
+    const filteredData = [
+      { value: data.sm, name: 'SM' },
+      { value: data.mm, name: 'MM' },
+      { value: data.mater, name: 'Maternity' }
+    ].filter(item => item.value !== 0); // Removes items with value 0
+
+    const chartOptions = {
       tooltip: {
         trigger: 'item',
       },
-
       series: [
         {
           name: 'Health Checkups',
           type: 'pie',
           radius: '70%',
           center: ['50%', '60%'],
-          data: [
-            { value: this.NoEstimations, name: 'Non EST OPD' },
-            { value: this.estimatedCount, name: 'EST OPD' },
-          ],
+          data: filteredData, // Use filtered data
           emphasis: {
             itemStyle: {
               shadowBlur: 10,
@@ -89,13 +102,13 @@ export class OpdEstimationPieComponent implements OnChanges {
           },
           label: {
             show: true,
-            formatter: '{c}',
+            formatter: '{c}', // Display only values
             position: 'outside',
             fontSize: 14,
             color: '#000',
             fontWeight: 'bold',
             fontFamily: 'Arial, sans-serif',
-            TextAlignment: 'center',
+            textAlign: 'center', // Corrected from 'TextAlignment'
           },
           labelLine: {
             show: true
@@ -103,164 +116,136 @@ export class OpdEstimationPieComponent implements OnChanges {
         }
       ]
     };
-    myChart.setOption(this.option);
+
+    this.chartInstance.setOption(chartOptions);
   }
 
-  loadEstimations(): void {
+  chartData(prn: any): void {
     this.isLoading = true
-    this.appoinment.getAllAppointments().subscribe({
-      next: (data) => {
-        this.rawData = data
-        this.estimation.getAllEstimation().subscribe((est: any) => {
-          const estimationPnr = est.filter((entry: any) => entry.patientUHID !== null).map((entry: any) => entry.patientUHID)
-
-          const estimatedOpd = data.filter((entry: any) => {
-            const formattedDate = new Date(entry.date).toISOString().slice(0, 10);
-            const matchFound = this.selectedDate.includes(formattedDate);
-            const prn = estimationPnr.includes(entry.prnNumber);
-            return matchFound && prn && (this.selectedDoctor === 'all' ? entry : this.selectedDoctor === entry.doctorId);
-          }).map((entry: any) => {
-            return {
-              date: new Date(entry.date).toISOString().slice(0, 10),
-              prnNumber: entry.prnNumber
-            };
-          });
-
-          const noEstimations = data.filter((entry: any) => {
-            const formattedDate = new Date(entry.date).toISOString().slice(0, 10);
-            const matchFound = this.selectedDate.includes(formattedDate);
-            const prn = !estimationPnr.includes(entry.prnNumber);
-            return matchFound && prn && (this.selectedDoctor === 'all' ? entry : this.selectedDoctor === entry.doctorId);
-          }).map((entry: any) => {
-            return {
-              date: new Date(entry.date).toISOString().slice(0, 10),
-              prnNumber: entry.prnNumber
-            };
-          });
-          // console.log(estimatedOpd, "estimated Data")
-          // console.log(noEstimations, "no estimation data")
-          this.estimatedCount = estimatedOpd.length
-          this.NoEstimations = noEstimations.length
-
-          this.initChart()
-
-        })
-      },
-      error: (error: any) => {
-        console.log(error)
-      },
-      complete: () => {
-        this.isLoading = false
+    const prnFilteredData = this.rawData.filter((entry: any) => prn.includes(entry.patientUHID) && this.selectedDate.includes(utcToIstDate(entry.estimationCreatedTime))).map((entry: any) => {
+      return {
+        date: utcToIstDate(entry.estimationCreatedTime),
+        estimationType: entry.estimationType,
+        doctorId: entry.consuconsultantId
       }
-
-    });
-  }
-
-  loadreport() {
-    this.isLoading = true
-    let appointmentsByDate: { [key: string]: number } = {};
-
-    this.appoinment.getAllAppointments().subscribe((data) => {
-      this.reportAppointmentData = data.filter((entry: any) => (entry.date !== null) && (entry.pnrNumber !== null))
-      const totalAppointments = this.reportAppointmentData.length
-      this.reportAppointmentData.forEach((entry: any) => {
-        const date = entry.date; // Assuming `date` is in the format we want to group by
-
-        if (!appointmentsByDate[date]) {
-          appointmentsByDate[date] = 0;
-        }
-        appointmentsByDate[date]++;
-      });
-
-      this.estimation.getAllEstimation().pipe(
-        // Transform the data
-        map((data: any) => {
-          const groupedByDate: { [key: string]: any } = {};
-
-          data.forEach((item: any) => {
-            const date = utcToIstDate(item.estimationCreatedTime)
-
-            // Initialize the date group if it doesn't exist
-            if (!groupedByDate[date]) {
-              groupedByDate[date] = {
-                date: date,
-                total: 0,
-                medicalManagement: 0,
-                SurgicalManagement: 0,
-                immediate: 0,
-                planned: 0
-              };
-            }
-
-            if (item.estimationType === 'MM') {
-              groupedByDate[date].medicalManagement++;
-            }
-
-            if (item.estimationType === 'SM') {
-              groupedByDate[date].SurgicalManagement++;
-            }
-
-            if (item.estimationStatus === "immediate") {
-              groupedByDate[date].immediate++;
-            }
-
-            if (item.estimationStatus === "planned") {
-              groupedByDate[date].planned++;
-            }
-
-            groupedByDate[date].total = groupedByDate[date].medicalManagement + groupedByDate[date].SurgicalManagement;
-          });
-
-          const result = Object.values(groupedByDate);
-          result.forEach((item: any) => {
-            item.appointmentCount = appointmentsByDate[item.date] || 0; // Add appointment count (0 if no appointments)
-          });
-
-          // console.log(result, "result")
-
-          return Object.values(groupedByDate);
-        })
-      ).subscribe({
-        next: (groupedData) => {
-          this.reportData.emit(groupedData)
-          // console.log(groupedData, "groupdata")
-        },
-        error: (err) => {
-          console.error('Error fetching estimations:', err);
-        },
-        complete: () => {
-          const reportColumn = [
-            // {header : "S. No", key : "id"},
-            { header: "Date", key: "date" },
-            { header: "Estimation Raised", key: "total" },
-            { header: "Medical Management", key: "medicalManagement" },
-            { header: "Surgical Management", key: "SurgicalManagement" },
-            { header: "Immediate", key: "immediate" },
-            { header: "Planned", key: "planned" }
-          ]
-
-          this.reportsColumn.emit(reportColumn)
-          this.reportView.emit({ onoff: true, range: "range" })
-          this.reportInitializeDate.emit(this.selectedDate)
-
-          this.isLoading = false
-        }
-      });
     })
+
+    const chartData = {
+      sm: prnFilteredData.filter((entry: any) => entry.estimationType === 'SM').length,
+      mm: prnFilteredData.filter((entry: any) => entry.estimationType === 'MM').length,
+      mater: prnFilteredData.filter((entry: any) => entry.estimationType === 'Maternity').length
+    }
+
+    this.initChart(chartData)
+
+    console.log(chartData, "chartData")
+    this.isLoading = false
   }
 
+  fetchDepartmentDocs(depId: any): void {
+    this.doctor.getAllDoctors().subscribe((data: any) => {
+      this.departmentDocs = data.filter((entry: any) => depId === 'all' ? true : entry.departmentId === depId).map((entry: any) => entry.id)
+      console.log(this.departmentDocs)
+    })
+    this.viewMoreData()
+  }
+
+  loadreport(): void {
+    const prnFilteredData = this.rawData
+      .filter((entry: any) => this.prnNumber.includes(entry.patientUHID))
+      .map((entry: any) => ({
+        date: utcToIstDate(entry.estimationCreatedTime),
+        estimationType: entry.estimationType, // sm, mm, maternity
+        estimationStatus: entry.estimationStatus, // planned, immediate
+        consultantId: entry.consultantId,
+      }));
+
+    // Group and aggregate the data
+    const processedData = Object.values(
+      prnFilteredData.reduce((acc: any, entry: any) => {
+        const key = `${entry.date}_${entry.consultantId}`; // Unique key for grouping by date and consultantId
+
+        // Initialize the group if it doesn't exist
+        if (!acc[key]) {
+          acc[key] = {
+            date: entry.date,
+            consultantId: entry.consultantId,
+            sm: 0,
+            immediateSm: 0,
+            plannedSm: 0,
+            smTotal: 0,
+            mm: 0,
+            immediateMm: 0,
+            plannedMm: 0,
+            mmTotal: 0,
+            maternity: 0,
+            immediateMatenity: 0,
+            plannedMatenity: 0,
+            totalMaternity: 0,
+            totalPlannedEstimation: 0,
+            totalImmediateEstimation: 0,
+            grandTotal: 0,
+          };
+        }
+
+        // Increment counts based on estimationType and estimationStatus
+        const group = acc[key];
+        if (entry.estimationType === 'SM') {
+          group.sm++;
+          if (entry.estimationStatus === 'immediate') {
+            group.immediateSm++;
+          } else if (entry.estimationStatus === 'planned') {
+            group.plannedSm++;
+          }
+          group.smTotal = group.immediateSm + group.plannedSm;
+        } else if (entry.estimationType === 'MM') {
+          group.mm++;
+          if (entry.estimationStatus === 'immediate') {
+            group.immediateMm++;
+          } else if (entry.estimationStatus === 'planned') {
+            group.plannedMm++;
+          }
+          group.mmTotal = group.immediateMm + group.plannedMm;
+        } else if (entry.estimationType === 'Maternity') {
+          group.maternity++;
+          if (entry.estimationStatus === 'immediate') {
+            group.immediateMatenity++;
+          } else if (entry.estimationStatus === 'planned') {
+            group.plannedMatenity++;
+          }
+          group.totalMaternity = group.immediateMatenity + group.plannedMatenity;
+        }
+
+        // Update aggregated totals
+        group.totalPlannedEstimation = group.plannedSm + group.plannedMm + group.plannedMatenity;
+        group.totalImmediateEstimation = group.immediateSm + group.immediateMm + group.immediateMatenity;
+        group.grandTotal = group.smTotal + group.mmTotal + group.totalMaternity;
+
+        return acc;
+      }, {})
+    );
+
+    // Optional: Log the result for debugging
+    console.log('Processed Data:', processedData);
+    this.reportData = processedData
+    this.viewReportSection.emit(true)
+    this.sendReportData.emit(this.reportData)
+    this.reportInitializeDate.emit(this.selectedDate)
+
+  }
 
   // viewmore
 
   async loadDepartments(): Promise<void> {
     try {
-      const data = await this.docDetails.getDepartments().toPromise()
+      const data = await this.doctor.getDepartments().toPromise()
       this.department = data;
       // console.log(this.department)
     } catch (err) {
       console.error(err)
     }
   }
+
 
   viewmore(): void {
     this.showViewMore = true
@@ -273,9 +258,14 @@ export class OpdEstimationPieComponent implements OnChanges {
   }
 
   departmentOnchange(event: any): void {
-    this.docDetails.getDoctors().subscribe(({
+    this.doctor.getDoctors().subscribe(({
       next: (data: any) => {
+        this.selectedViewDoctor = 'all'
+        this.departmentValue = this.department.filter((entry: any) => entry.id === parseInt(event.target.value))[0].name
         this.filteredDoctors = data.filter((doc: any) => doc.departmentId === parseInt(event.target.value))
+        this.fetchDepartmentDocs(this.departmentValue)
+        console.log(this.departmentValue)
+        this.viewMoreData()
       },
       error: (error: any) => {
         console.error(error)
@@ -287,39 +277,13 @@ export class OpdEstimationPieComponent implements OnChanges {
   }
 
   ViewMorechart(data: any): void {
-    const chartDom = document.getElementById('viewMoreOpdEst')!;
-    const myChart = echarts.init(chartDom);
+    const chartContainer = document.getElementById('viewMoreOpdEst') as HTMLElement;
+    this.chartInstance = echarts.init(chartContainer);
 
-    // this.viewMoreoption = {
-    //   tooltip: {
-    //     trigger: 'item'
-    //   },
-    //   color: ['#3366CC', '#20AA68'], // Global colors for the two slices
-    //   series: [
-    //     {
-    //       name: 'OPD - Estimation',
-    //       type: 'pie',
-    //       radius: ['80%'],
-    //       data: [
-    //         { value: data.NoEstimations, name: 'Non EST OPD' },
-    //         { value: data.estimatedCount, name: 'EST OPD' },
-    //       ],
-    //       label: {
-    //         show: true, // Enable labels
-    //         position: 'inside', // Place labels inside the slices
-    //         formatter: '{c}', // Show only the value (count)
-    //         fontSize: 16, // Adjust font size as needed
-    //         color: '#fff' // White text for contrast (adjust as needed)
-    //       }
-    //     }
-    //   ]
-    // };
-
-    this.viewMoreoption = {
+    const chartOptions = {
       tooltip: {
         trigger: 'item',
       },
-
       series: [
         {
           name: 'Health Checkups',
@@ -327,8 +291,9 @@ export class OpdEstimationPieComponent implements OnChanges {
           radius: '70%',
           center: ['50%', '60%'],
           data: [
-            { value: data.NoEstimations, name: 'Non EST OPD' },
-            { value: data.estimatedCount, name: 'EST OPD' },
+            { value: data.sm, name: 'SM' },
+            { value: data.mm, name: 'MM' },
+            { value: data.mater, name: 'Maternity' },
           ],
           emphasis: {
             itemStyle: {
@@ -339,13 +304,13 @@ export class OpdEstimationPieComponent implements OnChanges {
           },
           label: {
             show: true,
-            formatter: '{c}',
+            formatter: '{c}', // Display only values
             position: 'outside',
             fontSize: 14,
             color: '#000',
             fontWeight: 'bold',
             fontFamily: 'Arial, sans-serif',
-            TextAlignment: 'center',
+            textAlign: 'center', // Corrected from 'TextAlignment'
           },
           labelLine: {
             show: true
@@ -353,86 +318,104 @@ export class OpdEstimationPieComponent implements OnChanges {
         }
       ]
     };
-    myChart.setOption(this.viewMoreoption); // Render the chart
+
+    this.chartInstance.setOption(chartOptions);
   }
 
   viewMoreData(): void {
+    const prnFilteredData = this.rawData
+      .filter((entry: any) => {
+        const matchesPrn = this.prnNumber.includes(entry.patientUHID);
+        const matchesDate = this.selectedViewDate.includes(utcToIstDate(entry.estimationCreatedTime));
+        const matchesDoctor = this.selectedViewDoctor === 'all' || this.selectedViewDoctor === entry.consultantId;
+        return matchesPrn && matchesDate && matchesDoctor;
+      })
+      .map((entry: any) => ({
+        date: utcToIstDate(entry.estimationCreatedTime),
+        estimationType: entry.estimationType,
+        doctorId: entry.consultantId // Fixed typo
+      }));
 
-    this.isLoading = true
-    this.appoinment.getAllAppointments().subscribe({
-      next: (data) => {
-        this.rawData = data
-        this.estimation.getAllEstimation().subscribe((est: any) => {
-          const estimationPnr = est.filter((entry: any) => entry.patientUHID !== null).map((entry: any) => entry.patientUHID)
+    const chartData = {
+      sm: prnFilteredData.filter((entry: any) => entry.estimationType === 'SM').length,
+      mm: prnFilteredData.filter((entry: any) => entry.estimationType === 'MM').length,
+      mater: prnFilteredData.filter((entry: any) => entry.estimationType === 'Maternity').length
+    }
 
-          const estimatedOpd = data.filter((entry: any) => {
-            const formattedDate = new Date(entry.date).toISOString().slice(0, 10);
-            const matchFound = this.selectedViewDate.includes(formattedDate);
-            const prn = estimationPnr.includes(entry.prnNumber);
-            return matchFound && prn && (this.selectedViewDoctor === 'all' ? entry : this.selectedViewDoctor === entry.doctorId);
-          }).map((entry: any) => {
-            return {
-              date: new Date(entry.date).toISOString().slice(0, 10),
-              prnNumber: entry.prnNumber
-            };
-          });
-
-          const noEstimations = data.filter((entry: any) => {
-            const formattedDate = new Date(entry.date).toISOString().slice(0, 10);
-            const matchFound = this.selectedViewDate.includes(formattedDate);
-            const prn = !estimationPnr.includes(entry.prnNumber);
-            return matchFound && prn && (this.selectedViewDoctor === 'all' ? entry : this.selectedViewDoctor === entry.doctorId);
-          }).map((entry: any) => {
-            return {
-              date: new Date(entry.date).toISOString().slice(0, 10),
-              prnNumber: entry.prnNumber
-            };
-          });
-          // console.log(estimatedOpd, "estimated Data")
-          // console.log(noEstimations, "no estimation data")
-          const counts = {
-            estimatedCount: estimatedOpd.length,
-            NoEstimations: noEstimations.length
-          }
-
-          this.ViewMorechart(counts)
-        })
-      },
-      error: (error: any) => {
-        console.log(error)
-      },
-      complete: () => {
-        this.isLoading = false
-      }
-
-    });
+    this.ViewMorechart(chartData)
   }
 
   viewOnDatechange(event: any): void {
-    // console.log(event, 'dates')
-    if (Array.isArray(event) && event.length === 2) {
-      const startDate = event[0];
-      let endDate;
-      event[1] !== null ? endDate = event[1] : endDate = event[0]
-      this.selectedViewDate = getIndividualDates(startDate, endDate);
+    if (Array.isArray(event)) {
+      if (event.length === 2) {
+        const startDate = new Date(event[0]);
+        let endDate = event[1] !== null ? new Date(event[1]) : new Date(event[0]);
+
+        // Calculate the difference in days (just for validation, should not exceed 30 due to maxDate)
+        const timeDifference = endDate.getTime() - startDate.getTime();
+        const dayDifference = Math.ceil(timeDifference / (1000 * 3600 * 24));
+
+        if (dayDifference > 30) {
+          // This should not happen due to maxDate restriction, but keeping as fallback
+          endDate = new Date(startDate);
+          endDate.setDate(startDate.getDate() + 29); // +29 for 30-day range including start
+          this.showToast("Date range cannot exceed 30 days. To view more, click on the 'Details' button.", 'warn');
+          this.dateInput = [startDate, endDate]; // Update the range
+        }
+
+        this.selectedViewDate = this.getIndividualDates(startDate, endDate);
+        console.log(this.selectedViewDate);
+      } else if (event.length === 1) {
+        const startDate = new Date(event[0]);
+        const endDate = startDate;
+        this.selectedViewDate = this.getIndividualDates(startDate, endDate);
+        this.dateInput = [startDate, endDate];
+        console.log(this.selectedViewDate);
+      }
       this.viewMoreData()
     }
   }
 
+  showToast(message: string, type: string) {
+    this.messageService.add({ severity: type, summary: message });
+  }
+
+  getIndividualDates(startDate: Date, endDate: Date): string[] {
+    const dates = [];
+    let currentDate = new Date(startDate);
+
+    // Loop through dates from startDate to endDate
+    while (currentDate <= endDate) {
+      const formattedDate = this.formatDate(currentDate); // Format each date
+      dates.push(formattedDate);
+      currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
+    }
+    return dates;
+  }
+
+  formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-based, so add 1
+    const day = date.getDate().toString().padStart(2, '0'); // Pad single digits with a leading zero
+
+    return `${year}-${month}-${day}`;
+  }
+
   viewDoctorsOnchange(event: any): void {
     console.log(event)
+    const value = parseInt(event.target.value)
     this.selectedViewDoctor = parseInt(event.target.value) || 'all'
     this.viewMoreData()
   }
 
-  refresh():void{
+  refresh(): void {
     this.loadDepartments()
     this.filteredDoctors = []
     this.selectedViewDate = []
+    this.departmentValue = 'all'
     this.selectedViewDate = getLastThirtyDaysFromSelected()
     this.selectedViewDoctor = 'all'
     this.viewmore()
     this.dateInput = []
   }
-
 }

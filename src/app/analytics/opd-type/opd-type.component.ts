@@ -1,8 +1,10 @@
 import { Component, Input, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
-import { getYesterdayDate, lastSelectedSevenDays, getIndividualDates, getLastThirtyDaysFromSelected, reorderDateFormat, sortByDateOldToNew } from '../functions';
+import { getYesterdayDate, lastSelectedSevenDays, getIndividualDates, getLastThirtyDaysFromSelected, reorderDateFormat, sortByDateOldToNew, getLastSevenDays } from '../functions';
 import * as echarts from 'echarts'
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
+import { MessageService } from 'primeng/api';
+
 
 @Component({
   selector: 'app-opd-type',
@@ -11,7 +13,7 @@ import { DoctorServiceService } from '../../services/doctor-details/doctor-servi
 })
 export class OpdTypeComponent {
 
-  constructor(private appointment: AppointmentConfirmService, private docDetails: DoctorServiceService) { }
+  constructor(private appointment: AppointmentConfirmService, private docDetails: DoctorServiceService, private messageService : MessageService) { }
 
   @Input() selectedDate: any[] = []
   @Input() doctorId: any
@@ -25,7 +27,7 @@ export class OpdTypeComponent {
   // viewmore
   rawData: any
   department: any
-  departmentValue: any
+  departmentValue: any = 'all'
   doctors: any
   filteredDoctors: any
   showViewMore: boolean = false
@@ -38,10 +40,12 @@ export class OpdTypeComponent {
   @Output() reportData = new EventEmitter<any[]>();
   @Output() reportsColumn = new EventEmitter<any[]>();
   @Output() reportInitializeDate = new EventEmitter<any[]>()
+  @Output() blockFilters = new EventEmitter<boolean[]>();
+  @Output() reportName = new EventEmitter<string>();
 
   ngOnInit() {
     const yesterdayDate = getYesterdayDate()
-    this.selectedDate = [yesterdayDate]
+    this.selectedDate = getLastSevenDays()
     this.loadAppointment()
     this.selectedViewDate = getLastThirtyDaysFromSelected()
   }
@@ -66,6 +70,7 @@ export class OpdTypeComponent {
             type: entry.type,
             doctorId: entry.doctorId,
             doctor: entry.doctorName,
+            department: entry.department
           }
         })
         // console.log(mappedData, "mapped data")
@@ -113,7 +118,7 @@ export class OpdTypeComponent {
           rotate: 30
         }
       },
-      color : ['#91CC75', '#FAC858', '#5470C6', '#36B8B8'],
+      color: ['#91CC75', '#FAC858', '#5470C6', '#FF4545'],
       series: [
         {
           name: 'Paid',
@@ -121,7 +126,7 @@ export class OpdTypeComponent {
           stack: 'total',
           label: {
             show: true,
-            formatter: function (params:any) {
+            formatter: function (params: any) {
               return params.value > 0 ? params.value : ''; // Show value only if > 0
             },
           },
@@ -136,7 +141,7 @@ export class OpdTypeComponent {
           stack: 'total',
           label: {
             show: true,
-            formatter: function (params:any) {
+            formatter: function (params: any) {
               return params.value > 0 ? params.value : ''; // Show value only if > 0
             },
           },
@@ -151,7 +156,7 @@ export class OpdTypeComponent {
           stack: 'total',
           label: {
             show: true,
-            formatter: function (params:any) {
+            formatter: function (params: any) {
               return params.value > 0 ? params.value : ''; // Show value only if > 0
             },
           },
@@ -166,7 +171,7 @@ export class OpdTypeComponent {
           stack: 'total',
           label: {
             show: true,
-            formatter: function (params:any) {
+            formatter: function (params: any) {
               return params.value > 0 ? params.value : ''; // Show value only if > 0
             },
           },
@@ -184,10 +189,10 @@ export class OpdTypeComponent {
 
   processData(rawData: any[]): void {
     const result = rawData.reduce((acc: any, entry: any) => {
-      const { date, doctorId, doctor, type } = entry;
+      const { date, doctorId, doctor, type, department } = entry;
 
       // Create a unique key combining date and doctorId
-      const key = `${date}-${doctorId}`;
+      const key = `${date}-${doctorId}-${department}`;
 
       // Initialize the result structure if it doesn't exist for the key
       if (!acc[key]) {
@@ -195,6 +200,7 @@ export class OpdTypeComponent {
           doctorId: doctorId,
           date: date,
           doctorName: doctor,
+          departmentName: department,
           followUp: 0,
           paid: 0,
           camp: 0,
@@ -255,11 +261,18 @@ export class OpdTypeComponent {
     this.chartData(this.processedChartData);
   }
 
-
   chartData(data: any): void {
-    const lastSevenDays = lastSelectedSevenDays(this.selectedDate[0])
-    const filterredData = data.filter((data: any) => lastSevenDays.includes(data.date))
-    this.inItChart(filterredData)
+    const lastSevenDays = this.selectedDate
+    const completedData = this.fillMissingDates(data, lastSevenDays);
+    this.inItChart(completedData);
+  }
+  
+  // Helper function to ensure missing dates have zero values
+  fillMissingDates(data: any[], lastSevenDays: string[]): any[] {
+    return lastSevenDays.map((date) => {
+      const existingEntry = data.find((entry) => entry.date === date);
+      return existingEntry ? existingEntry : { date, followUp: 0, paid: 0, camp: 0, mhc: 0 };
+    });
   }
 
   report(): void {
@@ -277,6 +290,8 @@ export class OpdTypeComponent {
     this.reportsColumn.emit(reportColumn);
     this.reportView.emit({ onoff: true, range: 'range' });
     this.reportInitializeDate.emit(this.selectedDate)
+    this.blockFilters.emit([false, false])
+    this.reportName.emit('OPD Type')
   };
 
   // viewmore
@@ -304,7 +319,11 @@ export class OpdTypeComponent {
   departmentOnchange(event: any): void {
     this.docDetails.getDoctors().subscribe(({
       next: (data: any) => {
+        this.selectedViewDoctor = 'all'
+        this.departmentValue = this.department.filter((entry: any) => entry.id === parseInt(event.target.value))[0].name
         this.filteredDoctors = data.filter((doc: any) => doc.departmentId === parseInt(event.target.value))
+        console.log(this.departmentValue)
+        this.viewMoreData()
       },
       error: (error: any) => {
         console.error(error)
@@ -341,7 +360,7 @@ export class OpdTypeComponent {
         type: 'category',
         data: reorderDateFormat(data.map((entry: any) => entry.date))
       },
-      color : ['#91CC75', '#FAC858', '#5470C6', '#36B8B8'],
+      color: ['#91CC75', '#FAC858', '#5470C6', '#FF4545'],
       series: [
         {
           name: 'Paid',
@@ -349,7 +368,7 @@ export class OpdTypeComponent {
           stack: 'total',
           label: {
             show: true,
-            formatter: function (params:any) {
+            formatter: function (params: any) {
               return params.value > 0 ? params.value : ''; // Show value only if > 0
             },
           },
@@ -364,7 +383,7 @@ export class OpdTypeComponent {
           stack: 'total',
           label: {
             show: true,
-            formatter: function (params:any) {
+            formatter: function (params: any) {
               return params.value > 0 ? params.value : ''; // Show value only if > 0
             },
           },
@@ -379,7 +398,7 @@ export class OpdTypeComponent {
           stack: 'total',
           label: {
             show: true,
-            formatter: function (params:any) {
+            formatter: function (params: any) {
               return params.value > 0 ? params.value : ''; // Show value only if > 0
             },
           },
@@ -394,7 +413,7 @@ export class OpdTypeComponent {
           stack: 'total',
           label: {
             show: true,
-            formatter: function (params:any) {
+            formatter: function (params: any) {
               return params.value > 0 ? params.value : ''; // Show value only if > 0
             },
           },
@@ -410,10 +429,17 @@ export class OpdTypeComponent {
   }
 
   viewMoreData(): void {
-    const filter = this.rawData.filter((entry:any) => (this.selectedViewDate.includes(entry.date)) && (this.selectedViewDoctor === 'all' ? this.selectedViewDate.includes(entry.date) : this.selectedViewDoctor === entry.doctorId))
+    const filter = this.rawData.filter((entry: any) =>
+      this.selectedViewDate.includes(entry.date) &&
+      (this.departmentValue === 'all' ? true : this.departmentValue === entry.department) &&
+      (this.selectedViewDoctor === 'all' ? true : this.selectedViewDoctor === entry.doctorId)
+    );
+
+    console.log(this.rawData.map((entry: any) => entry.department))
+
     const result = filter.reduce((acc: any, entry: any) => {
       const { date, type } = entry;
-
+      ;
       // Initialize the result structure for the date if it doesn't exist
       if (!acc[date]) {
         acc[date] = {
@@ -445,17 +471,73 @@ export class OpdTypeComponent {
     // const filteredData = sorteddata.filter((entry:any) => this.selectedViewDate.includes(entry.date) && this.selectedViewDoctor === 'all' ? this.selectedViewDate.includes(entry.date) : this.selectedViewDoctor === entry.doctorId)
 
     console.log(sorteddata, "processed data")
-    this.ViewMorechart(sorteddata) 
-   }
+    this.ViewMorechart(sorteddata)
+  }
+
+  // viewOnDatechange(event: any): void {
+  //   if (Array.isArray(event) && event.length === 2) {
+  //     const startDate = event[0];
+  //     let endDate;
+  //     event[1] !== null ? endDate = event[1] : endDate = event[0]
+  //     this.selectedViewDate = getIndividualDates(startDate, endDate);
+  //     this.viewMoreData()
+  //   }
+  // }
 
   viewOnDatechange(event: any): void {
-    if (Array.isArray(event) && event.length === 2) {
-      const startDate = event[0];
-      let endDate;
-      event[1] !== null ? endDate = event[1] : endDate = event[0]
-      this.selectedViewDate = getIndividualDates(startDate, endDate);
+    if (Array.isArray(event)) {
+      if (event.length === 2) {
+        const startDate = new Date(event[0]);
+        let endDate = event[1] !== null ? new Date(event[1]) : new Date(event[0]);
+
+        // Calculate the difference in days (just for validation, should not exceed 30 due to maxDate)
+        const timeDifference = endDate.getTime() - startDate.getTime();
+        const dayDifference = Math.ceil(timeDifference / (1000 * 3600 * 24));
+
+        if (dayDifference > 30) {
+          // This should not happen due to maxDate restriction, but keeping as fallback
+          endDate = new Date(startDate);
+          endDate.setDate(startDate.getDate() + 29); // +29 for 30-day range including start
+          this.showToast("Date range cannot exceed 30 days. To view more, click on the 'Details' button.", 'warn');
+          this.dateInput = [startDate, endDate]; // Update the range
+        }
+
+        this.selectedViewDate = this.getIndividualDates(startDate, endDate);
+        console.log(this.selectedViewDate);
+      } else if (event.length === 1) {
+        const startDate = new Date(event[0]);
+        const endDate = startDate;
+        this.selectedViewDate = this.getIndividualDates(startDate, endDate);
+        this.dateInput = [startDate, endDate];
+        console.log(this.selectedViewDate);
+      }
       this.viewMoreData()
     }
+  }
+
+  showToast(message: string, type: string) {
+    this.messageService.add({ severity: type, summary: message });
+  }
+
+  getIndividualDates(startDate: Date, endDate: Date): string[] {
+    const dates = [];
+    let currentDate = new Date(startDate);
+
+    // Loop through dates from startDate to endDate
+    while (currentDate <= endDate) {
+      const formattedDate = this.formatDate(currentDate); // Format each date
+      dates.push(formattedDate);
+      currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
+    }
+    return dates;
+  }
+
+  formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-based, so add 1
+    const day = date.getDate().toString().padStart(2, '0'); // Pad single digits with a leading zero
+
+    return `${year}-${month}-${day}`;
   }
 
   viewDoctorsOnchange(event: any): void {
@@ -464,10 +546,11 @@ export class OpdTypeComponent {
     this.viewMoreData()
   }
 
-  refresh():void{
+  refresh(): void {
     this.loadDepartments()
     this.filteredDoctors = []
     this.selectedViewDate = []
+    this.departmentValue = 'all'
     this.selectedViewDate = getLastThirtyDaysFromSelected()
     this.selectedViewDoctor = 'all'
     this.viewmore()

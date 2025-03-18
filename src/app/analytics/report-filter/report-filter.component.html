@@ -1,18 +1,26 @@
 <div class="roo-container">
   <div class="comtent">
     <div class="cancelButton">
+      <div class="reportName">{{reportName}}</div>
       <div style="font-size: 20px; cursor: pointer;" (click)="closingReport()" class="" matTooltip="close" matTooltipPosition="above"><i class="fa-solid fa-xmark"></i></div>
     </div>
     <div class="report-filter">
       <div (click)="downloadExcel()" style="font-size: 20px; cursor: pointer;" class="" matTooltip="download" matTooltipPosition="above"><i class="fa-solid fa-download"></i>
       </div>
-      <select (change)="departmentOnchange($event)">
+
+      <select name="" id="" [disabled]="!blockFilter" (change)="packageOnchange($event)">
+        <option class="dummy" value="all" disabled selected hidden>Choose the Package</option>
+        <option class="all">All</option>
+        <option *ngFor="let pack of mhcPackages" [value]="pack.name">{{pack.name}}</option>
+      </select>
+
+      <select (change)="departmentOnchange($event)" [disabled]="blockFilter">
         <option class="dummy" value="all" disabled selected hidden>Choose the Department</option>
         <option value="all">All</option>
         <option *ngFor="let dept of department" [value]="dept.id">{{dept.name}}</option>
       </select>
 
-      <select (change)="onChoosingDoctor($event)" >
+      <select (change)="onChoosingDoctor($event)" [disabled]="blockFilter">
         <option class="dummy" value="all" disabled selected hidden>Choose the Doctor</option>
         <option value="all">All</option>
         <option *ngFor="let doc of doctors" [value]="doc.id">{{doc.name}}</option>

@@ -1,8 +1,9 @@
 import { Component, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import * as echarts from 'echarts'
-import { getYesterdayDate, getIndividualDates, getLastThirtyDaysFromSelected, reorderDateFormat } from '../functions'
+import { getYesterdayDate, getIndividualDates, getLastSevenDays, getLastThirtyDaysFromSelected, reorderDateFormat } from '../functions'
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
+import { MessageService } from 'primeng/api';
 
 
 @Component({
@@ -12,7 +13,7 @@ import { DoctorServiceService } from '../../services/doctor-details/doctor-servi
 })
 export class GenderOverviewComponent implements OnChanges {
 
-  constructor(private appointment: AppointmentConfirmService, private docDetails: DoctorServiceService) { }
+  constructor(private appointment: AppointmentConfirmService, private docDetails: DoctorServiceService, private messageService: MessageService) { }
 
   option: any
   isLoading: boolean = false
@@ -24,12 +25,15 @@ export class GenderOverviewComponent implements OnChanges {
   @Output() reportData = new EventEmitter<any[]>();
   @Output() reportsColumn = new EventEmitter<any[]>();
   @Output() reportInitializeDate = new EventEmitter<any[]>();
+  @Output() blockFilters = new EventEmitter<boolean[]>();
+  @Output() reportName = new EventEmitter<string>();
+
 
   // viewmore
   rawData: any
   viewMoreDepartment: any
-  selectedViewMoreDepartment: any
-  departmentValue: any
+  selectedViewMoreDepartment: any = 'all'
+  x: any = 'all'
   doctors: any
   filteredDoctors: any
   showViewMore: boolean = false
@@ -37,9 +41,10 @@ export class GenderOverviewComponent implements OnChanges {
   selectedViewDate: any[] = []
   selectedViewDoctor: any = 'all'
   viewMoreChart: any
+  departmentValue: any = 'all'
 
   ngOnInit() {
-    this.selectedDate = [getYesterdayDate()]
+    this.selectedDate = getLastSevenDays()
     // console.log(this.selectedDate)
     this.loadDetails()
     this.selectedViewDate = getLastThirtyDaysFromSelected()
@@ -58,7 +63,7 @@ export class GenderOverviewComponent implements OnChanges {
 
     this.option = {
       tooltip: { trigger: 'axis' },
-      xAxis: { type: 'category', data: reorderDateFormat(data.map((entry: any) => entry.date))},
+      xAxis: { type: 'category', data: reorderDateFormat(data.map((entry: any) => entry.date)) },
       yAxis: { type: 'value', name: 'Count' },
       series: [
         { name: 'Male', type: 'line', data: data.map((entry: any) => entry.male), smooth: true, lineStyle: { color: '#1f77b4' }, itemStyle: { color: '#1f77b4' } },
@@ -87,7 +92,7 @@ export class GenderOverviewComponent implements OnChanges {
           .filter((entry: any) =>
             entry.gender !== null &&
             entry.gender !== '' &&
-            sevendays.includes(entry.date) &&
+            this.selectedDate.includes(entry.date) &&
             (this.selectedDoctor === 'all' || this.selectedDoctor === entry.doctorId)
           )
           .map((entry: any) => ({
@@ -124,64 +129,136 @@ export class GenderOverviewComponent implements OnChanges {
     });
   }
 
+  // report(data: any): void {
+
+  //   const mappedData = data.filter((entry: any) => entry.gender !== null || '').map((entry: any) => {
+  //     return {
+  //       date: entry.date,
+  //       gender: entry.gender,
+  //       doctorId: entry.doctorId,
+  //       doctorName: entry.doctorName,
+  //       departmentName : entry.department
+  //     };
+  //   });
+
+  //   const groupedData = mappedData.reduce((acc: any, entry: any) => {
+  //     const date = entry.date;
+  //     const doctor = entry.doctorId;
+  //     const departmentName = entry.departmentName
+  //     // const doctorName = entry.doctorName
+
+  //     if (!acc[date]) {
+  //       acc[date] = {};
+  //     }
+
+  //     if (!acc[date][doctor][departmentName]) {
+  //       acc[date][doctor][departmentName] = {
+  //         date: date,
+  //         doctorId: doctor,
+  //         doctorName: entry.doctorName,
+  //         departmentName : entry.departmentName,
+  //         male: 0,
+  //         female: 0
+  //       };
+  //     }
+
+  //     if (entry.gender.toLowerCase() === 'male') {
+  //       acc[date][doctor].male += 1;
+  //     } else if (entry.gender.toLowerCase() === 'female') {
+  //       acc[date][doctor].female += 1;
+  //     }
+
+  //     return acc;
+  //   }, {});
+
+  //   const flattenedData = Object.values(groupedData)
+  //     .flatMap((dateGroup: any) => Object.values(dateGroup));
+  //   // console.log(flattenedData, "gender report by date and doctorId");
+
+  //   const reportColumn = [
+  //     { header: "Date", key: "date" },
+  //     { header: "Doctor Name", key: "doctorName" },
+  //     { header : "Department", key: "departmentName" },
+  //     { header: "Male", key: "male" },
+  //     { header: "Female", key: "female" },
+  //   ]
+
+  //   this.reportsColumn.emit(reportColumn)
+  //   this.reportData.emit(flattenedData)
+  //   this.reportView.emit({ onoff: true, range: "range" })
+  //   this.reportInitializeDate.emit(this.selectedDate)
+
+  //   // this.isLoading = false
+  // }
+
   report(data: any): void {
-
-    this.isLoading = true
-
-    const mappedData = data.filter((entry: any) => entry.gender !== null || '').map((entry: any) => {
+    const mappedData = data.filter((entry: any) => entry.gender !== null && entry.gender !== '').map((entry: any) => {
       return {
         date: entry.date,
         gender: entry.gender,
         doctorId: entry.doctorId,
-        doctorName: entry.doctorName
+        doctorName: entry.doctorName,
+        departmentName: entry.department
       };
     });
 
     const groupedData = mappedData.reduce((acc: any, entry: any) => {
       const date = entry.date;
       const doctor = entry.doctorId;
-      // const doctorName = entry.doctorName
+      const departmentName = entry.departmentName;
 
+      // Initialize date object if it doesn't exist
       if (!acc[date]) {
         acc[date] = {};
       }
 
+      // Initialize doctor object if it doesn't exist
       if (!acc[date][doctor]) {
-        acc[date][doctor] = {
+        acc[date][doctor] = {};
+      }
+
+      // Initialize department object if it doesn't exist
+      if (!acc[date][doctor][departmentName]) {
+        acc[date][doctor][departmentName] = {
           date: date,
           doctorId: doctor,
           doctorName: entry.doctorName,
+          departmentName: departmentName,
           male: 0,
           female: 0
         };
       }
 
+      // Count genders correctly
       if (entry.gender.toLowerCase() === 'male') {
-        acc[date][doctor].male += 1;
+        acc[date][doctor][departmentName].male += 1;
       } else if (entry.gender.toLowerCase() === 'female') {
-        acc[date][doctor].female += 1;
+        acc[date][doctor][departmentName].female += 1;
       }
 
       return acc;
     }, {});
 
     const flattenedData = Object.values(groupedData)
-      .flatMap((dateGroup: any) => Object.values(dateGroup));
-    // console.log(flattenedData, "gender report by date and doctorId");
+      .flatMap((dateGroup: any) =>
+        Object.values(dateGroup)
+          .flatMap((doctorGroup: any) => Object.values(doctorGroup))
+      );
 
     const reportColumn = [
       { header: "Date", key: "date" },
       { header: "Doctor Name", key: "doctorName" },
+      { header: "Department", key: "departmentName" },
       { header: "Male", key: "male" },
       { header: "Female", key: "female" },
+    ];
 
-    ]
-
-    this.reportsColumn.emit(reportColumn)
-    this.reportData.emit(flattenedData)
-    this.reportView.emit({ onoff: true, range: "range" })
-    this.reportInitializeDate.emit(this.selectedDate)
-    this.isLoading = false
+    this.reportsColumn.emit(reportColumn);
+    this.reportData.emit(flattenedData);
+    this.reportView.emit({ onoff: true, range: "range" });
+    this.reportInitializeDate.emit(this.selectedDate);
+    this.blockFilters.emit([false, false])
+    this.reportName.emit("Gender Overview")
   }
 
   getLastSevenDays(startDate: string): string[] {
@@ -221,11 +298,9 @@ export class GenderOverviewComponent implements OnChanges {
     this.docDetails.getDoctors().subscribe(({
       next: (data: any) => {
         this.filteredDoctors = data.filter((doc: any) => doc.departmentId === parseInt(event.target.value))
+        this.selectedViewDoctor = 'all'
         this.selectedViewMoreDepartment = this.viewMoreDepartment.filter((entry: any) => entry.id === parseInt(event.target.value))[0].name
-        // console.log(this.selectedViewMoreDepartment, "department")
-
         this.viewMoreData()
-
       },
       error: (error: any) => {
         console.error(error)
@@ -254,59 +329,105 @@ export class GenderOverviewComponent implements OnChanges {
   }
 
   viewMoreData(): void {
-        const mappedData = this.rawData
-          .filter((entry: any) =>
-            entry.gender !== null &&
-            entry.gender !== '' &&
-            this.selectedViewDate.includes(entry.date) &&
-            (this.selectedViewDoctor === 'all' || this.selectedViewDoctor === entry.doctorId)
-          )
-          .map((entry: any) => ({
-            date: entry.date,
-            gender: entry.gender,
-            doctorId: entry.doctorId,
-            doctorName: entry.doctorName
-          }));
+    const mappedData = this.rawData
+      .filter((entry: any) =>
+        entry.gender !== null &&
+        entry.gender !== '' &&
+        this.selectedViewDate.includes(entry.date) &&
+        (this.selectedViewDoctor === 'all' || this.selectedViewDoctor === entry.doctorId) &&
+        (this.selectedViewMoreDepartment === 'all' || this.selectedViewMoreDepartment === entry.department)
+      )
+      .map((entry: any) => ({
+        date: entry.date,
+        gender: entry.gender,
+        doctorId: entry.doctorId,
+        doctorName: entry.doctorName
+      }));
 
-        const groupedData = Object.values(
-          mappedData.reduce((acc: any, entry: any) => {
-            const date = entry.date;
-            if (!acc[date]) {
-              acc[date] = { date: date, male: 0, female: 0 };
-            }
-            if (entry.gender.toLowerCase() === 'male') {
-              acc[date].male += 1;
-            } else if (entry.gender.toLowerCase() === 'female') {
-              acc[date].female += 1;
-            }
-            return acc;
-          }, {})
-        );
+    const groupedData = Object.values(
+      mappedData.reduce((acc: any, entry: any) => {
+        const date = entry.date;
+        if (!acc[date]) {
+          acc[date] = { date: date, male: 0, female: 0 };
+        }
+        if (entry.gender.toLowerCase() === 'male') {
+          acc[date].male += 1;
+        } else if (entry.gender.toLowerCase() === 'female') {
+          acc[date].female += 1;
+        }
+        return acc;
+      }, {})
+    );
 
-        const sortedData = groupedData.sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
-        // console.log(sortedData, "gender overview by date");
+    const sortedData = groupedData.sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    // console.log(sortedData, "gender overview by date");
 
-        this.ViewMorechart(sortedData);
+    this.ViewMorechart(groupedData);
+    console.log(mappedData, "from gender")
   }
 
   viewOnDatechange(event: any): void {
-    // console.log(event, 'dates')
-    if (Array.isArray(event) && event.length === 2) {
-      const startDate = event[0];
-      let endDate;
-      event[1] !== null ? endDate = event[1] : endDate = event[0]
-      this.selectedViewDate = getIndividualDates(startDate, endDate);
+    if (Array.isArray(event)) {
+      if (event.length === 2) {
+        const startDate = new Date(event[0]);
+        let endDate = event[1] !== null ? new Date(event[1]) : new Date(event[0]);
+
+        // Calculate the difference in days (just for validation, should not exceed 30 due to maxDate)
+        const timeDifference = endDate.getTime() - startDate.getTime();
+        const dayDifference = Math.ceil(timeDifference / (1000 * 3600 * 24));
+
+        if (dayDifference > 30) {
+          // This should not happen due to maxDate restriction, but keeping as fallback
+          endDate = new Date(startDate);
+          endDate.setDate(startDate.getDate() + 29); // +29 for 30-day range including start
+          this.showToast("Date range cannot exceed 30 days. To view more, click on the 'Details' button.", 'warn');
+          this.dateInput = [startDate, endDate]; // Update the range
+        }
+
+        this.selectedViewDate = this.getIndividualDates(startDate, endDate);
+        console.log(this.selectedViewDate);
+      } else if (event.length === 1) {
+        const startDate = new Date(event[0]);
+        const endDate = startDate;
+        this.selectedViewDate = this.getIndividualDates(startDate, endDate);
+        this.dateInput = [startDate, endDate];
+        console.log(this.selectedViewDate);
+      }
       this.viewMoreData()
     }
   }
 
+  showToast(message: string, type: string) {
+    this.messageService.add({ severity: type, summary: message });
+  }
+
+  getIndividualDates(startDate: Date, endDate: Date): string[] {
+    const dates = [];
+    let currentDate = new Date(startDate);
+
+    // Loop through dates from startDate to endDate
+    while (currentDate <= endDate) {
+      const formattedDate = this.formatDate(currentDate); // Format each date
+      dates.push(formattedDate);
+      currentDate.setDate(currentDate.getDate() + 1); // Move to the next day
+    }
+    return dates;
+  }
+
+  formatDate(date: Date): string {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-based, so add 1
+    const day = date.getDate().toString().padStart(2, '0'); // Pad single digits with a leading zero
+
+    return `${year}-${month}-${day}`;
+  }
   viewDoctorsOnchange(event: any): void {
     // console.log(event)
     this.selectedViewDoctor = parseInt(event.target.value) || 'all'
     this.viewMoreData()
   }
 
-  refresh():void{
+  refresh(): void {
     this.loadDepartments()
     this.filteredDoctors = []
     this.selectedViewDate = []

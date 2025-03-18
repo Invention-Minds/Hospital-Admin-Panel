@@ -60,7 +60,11 @@
 }
 
 .green{
-    background-color: #20AA68;
+    background-color: #91CC75;
+}
+
+.yellow{
+    background-color: #FAC858;
 }
 
 .info svg{
@@ -347,4 +351,25 @@
     visibility: visible;
     opacity: 1;
     color: #000;
+}
+
+.report-section{
+    position: fixed;
+    width: 100%;
+    top: 0;
+    height: 100vh;
+    background-color: #ddd;
+}
+
+.s{
+    position: absolute;
+    left: -33px;
+    top: 0px;
+    width: 407px;
+    height: 300px;
+    user-select: none;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    padding: 0px;
+    margin: 0px;
+    border-width: 0px;
 }

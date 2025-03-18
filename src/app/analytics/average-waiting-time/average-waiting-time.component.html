@@ -6,22 +6,27 @@
     <div class="header_c" *ngIf="!isLoading">
         <div class="common">
             <div class="heading">Average Waiting time</div>
-            <div class="info pointer" matTooltip="This bar chart shows the number of patients who experienced a waiting time of over 40 minutes for doctor consultation." matTooltipPosition="above">
-                <svg 
-                    xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M12 17q.425 0 .713-.288T13 16v-4q0-.425-.288-.712T12 11t-.712.288T11 12v4q0 .425.288.713T12 17m0-8q.425 0 .713-.288T13 8t-.288-.712T12 7t-.712.288T11 8t.288.713T12 9m0 13q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22m0-2q3.35 0 5.675-2.325T20 12t-2.325-5.675T12 4T6.325 6.325T4 12t2.325 5.675T12 20m0-8" />
+            <div class="info pointer"
+                matTooltip="This bar chart shows the number of patients who experienced a waiting time of over 40 minutes for doctor consultation."
+                matTooltipPosition="above">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                    <path fill="currentColor"
+                        d="M12 17q.425 0 .713-.288T13 16v-4q0-.425-.288-.712T12 11t-.712.288T11 12v4q0 .425.288.713T12 17m0-8q.425 0 .713-.288T13 8t-.288-.712T12 7t-.712.288T11 8t.288.713T12 9m0 13q-2.075 0-3.9-.788t-3.175-2.137T2.788 15.9T2 12t.788-3.9t2.137-3.175T8.1 2.788T12 2t3.9.788t3.175 2.137T21.213 8.1T22 12t-.788 3.9t-2.137 3.175t-3.175 2.138T12 22m0-2q3.35 0 5.675-2.325T20 12t-2.325-5.675T12 4T6.325 6.325T4 12t2.325 5.675T12 20m0-8" />
                 </svg>
             </div>
         </div>
-        <div style = "display: flex; gap: 10px;">
+        <div style="display: flex; gap: 10px;">
             <div class="viewmore" (click)="viewmore()">View More</div>
             <div class="viewmore" (click)="report()">Details</div>
         </div>
     </div>
 
-    <div class="legends" *ngIf="!isLoading">
-        <div class="row">
-            <div class="legend_item"><div class="indicator blue"></div><span>More than 40 Mins</span></div>
-        </div>
+    <div class="report-filter-1" *ngIf="!isLoading">
+        <select (change)="onInitDepartmentChange($event)">
+            <option class="dummy" value="all" disabled selected hidden>Choose the Department</option>
+            <option value="all">All</option>
+            <option *ngFor="let dept of initDepartments" [value]="dept.id">{{dept.name}}</option>
+        </select>
     </div>
 
     <div class="chart" [ngClass]="{hide : isLoading}">
@@ -33,7 +38,8 @@
     <div class="contents">
         <div class="header">
             <div class="viewMoreHeading">Average Waiting time</div>
-            <i class="fa-solid fa-x pointer" (click)="closeViewMore()" matTooltip="close" matTooltipPosition="above"></i>
+            <i class="fa-solid fa-x pointer" (click)="closeViewMore()" matTooltip="close"
+                matTooltipPosition="above"></i>
         </div>
         <!-- filters -->
         <div class="report-filter">
@@ -55,7 +61,7 @@
 
             <div class="date-picker">
                 <p-calendar styleClass="custom-calendar" selectionMode="range" placeholder='Please Select Date Range'
-                 [(ngModel)]="dateInput" (ngModelChange)="viewOnDatechange($event)" dateFormat="yy-mm-dd">
+                    [(ngModel)]="dateInput" (ngModelChange)="viewOnDatechange($event)" dateFormat="yy-mm-dd">
                     <ng-template pTemplate="date" let-date>
                         <span>
                             {{ date.day }}
@@ -63,14 +69,17 @@
                     </ng-template>
                 </p-calendar>
             </div>
-            <i class="fa-solid fa-arrows-rotate pointer" (click)="refresh()" matTooltip="refresh" matTooltipPosition="above"></i>
+            <i class="fa-solid fa-arrows-rotate pointer" (click)="refresh()" matTooltip="refresh"
+                matTooltipPosition="above"></i>
         </div>
 
         <!-- chart -->
         <div class="viewChart">
             <div id="viewMoreAverageWaitingTime"></div>
             <div class="row">
-                <div class="legend_item"><div class="indicator blue"></div><span>More than 40 Mins</span></div>
+                <div class="legend_item">
+                    <div class="indicator blue"></div><span>More than 40 Mins</span>
+                </div>
             </div>
         </div>
 

@@ -20,7 +20,9 @@ interface Appointment {
   requestVia?: string; // Optional property
   created_at?: string;
   user?: any;
-  prnNumber?:any}
+  prnNumber?:any;
+  patientType?:string;
+}
 @Component({
   selector: 'app-appointment-complete',
   templateUrl: './appointment-complete.component.html',

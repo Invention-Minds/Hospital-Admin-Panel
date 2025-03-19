@@ -228,7 +228,9 @@ export class MhcRadiologyComponent implements OnInit {
         appointmentStatus: 'Confirm',
         userId: Number(this.userId),
         serviceId: this.selectedAppointment.id,
-        email:this.selectedAppointment.email
+        email:this.selectedAppointment.email,
+        prefix: this.selectedAppointment.prefix,
+        patientType: this.selectedAppointment.patientType,
       }));
 
     if (validRadiologyAppointments.length === 0) {

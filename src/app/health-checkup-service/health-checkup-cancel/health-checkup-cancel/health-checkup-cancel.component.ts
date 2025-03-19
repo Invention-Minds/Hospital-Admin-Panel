@@ -27,6 +27,7 @@ export interface Service {
   packageId?: number;
   repeatedDate?: string; // Array of repeated date strings
   createdAt?: string;
+  patientType?:string;
 }
 
 @Component({

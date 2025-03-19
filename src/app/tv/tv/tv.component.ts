@@ -1149,7 +1149,7 @@ export class TvComponent implements OnInit, OnDestroy {
         // ✅ If it's an image, hide after 5 seconds
         setTimeout(() => {
           this.showPopup = false;
-        }, 5000);
+        }, 10000);
       } else {
         // ✅ If it's a video, play only if allowed by the browser
         setTimeout(() => {
@@ -1165,8 +1165,8 @@ export class TvComponent implements OnInit, OnDestroy {
       }
 
       // ✅ Move to the next media
-      this.currentMediaIndex = (this.currentMediaIndex + 1) % this.mediaFiles.length;
-    }, 30000);
+      // this.currentMediaIndex = (this.currentMediaIndex + 1) % this.mediaFiles.length;
+    }, 300000);
 }
 
 // ✅ Handle Video Playback When It Becomes Ready

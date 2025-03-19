@@ -61,7 +61,7 @@
                         <span *ngIf="sortColumn === 'firstName' && sortDirection === 'asc'">&#9650;</span>
                         <span *ngIf="sortColumn === 'firstName' && sortDirection === 'desc'">&#9660;</span>
                     </th>
-                    <th>Phone Number</th>
+                    <th>PRN</th>
                     <th>Package Name</th>
                     <th (click)="sortBy('appointmentDate')" style="cursor: pointer;">
                          Date
@@ -69,6 +69,7 @@
                         <span *ngIf="sortColumn === 'appointmentDate' && sortDirection === 'desc'">&#9660;</span>
                     </th>
                     <th>Time</th>
+                    <th>Visit Type</th>
                     <th>Source</th>
                     <th>SMS</th>
                     <th>Email</th>
@@ -86,10 +87,11 @@
                 <tr *ngFor="let service of getPaginatedAppointments(); let i = index">
                     <td>{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
                     <td>{{ service.firstName }} {{ service.lastName || '' }}</td>
-                    <td>{{ service.phoneNumber }}</td>
+                    <td>{{ service.pnrNumber }}</td>
                     <td>{{ service.packageName }}</td>
                     <td>{{ service.appointmentDate | date:'dd-MM-yyyy' }}</td>
                     <td>{{ service.appointmentTime }}</td>
+                    <td>{{service.patientType || '-'}}</td>
                     <td>{{ service.requestVia }}</td>
                     <td>
                         <span class="sms-status" [ngClass]="{'sms-sent': service.smsSent, 'sms-not-sent': !service.smsSent}">

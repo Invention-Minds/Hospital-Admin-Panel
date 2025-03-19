@@ -50,6 +50,31 @@
   
       <!-- Row 2 -->
       <div class="form-row">
+        <div class="form-group prefix-width">
+          <select
+            class="form-input"
+            id="prefix"
+            name="prefix"
+            [(ngModel)]="formData.prefix"
+            required
+          >
+            <option value="" disabled selected>Select Prefix</option>
+            <option value="Mr.">Mr.</option>
+            <option value="Mrs.">Mrs.</option>
+            <option value="Ms.">Ms.</option>
+            <option value="Baby Of.">Baby of</option>
+            <option value="Master">Master</option>
+            <option value="Miss">Miss</option>
+            <option value="Dr.">Dr.</option>
+          </select>
+          <label for="prefix" class="form-label">Prefix*</label>
+          <div
+            *ngIf="form.submitted && form.controls['prefix']?.invalid"
+            class="error-message"
+          >
+            Prefix is required.
+          </div>
+        </div>
         <div class="form-group half-width">
           <input
             type="text"
@@ -305,25 +330,25 @@
   
     <!-- Radio Buttons for Appointment -->
     <div class="form-group half-width">
-      <div class="label">Appointment:</div>
+      <div class="label">Visit Type:</div>
       <div class="radio-group">
         <label>
           <input
             type="radio"
-            name="appointmentStatus"
-            [(ngModel)]="appointmentStatus"
-            value="Confirm"
+            name="patientType"
+            [(ngModel)]="formData.patientType"
+            value="New"
           />
-          Confirm
+          New
         </label>
         <label>
           <input
             type="radio"
-            name="appointmentStatus"
-            [(ngModel)]="appointmentStatus"
-            value="Cancel"
+            name="patientType"
+            [(ngModel)]="formData.patientType"
+            value="Old"
           />
-          Cancel
+          Old
         </label>
       </div>
     </div>

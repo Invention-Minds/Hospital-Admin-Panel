@@ -21,6 +21,7 @@ export interface Service {
   radioServiceName?: string;
   radioServiceId?: number; // Array of repeated date strings
   createdAt?: string;
+  patientType?: string;
 }
 
 @Component({

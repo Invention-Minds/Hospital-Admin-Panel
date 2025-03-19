@@ -73,6 +73,7 @@
           <span *ngIf="sortColumn === 'date' && sortDirection === 'asc'">&#9650;</span>
           <span *ngIf="sortColumn === 'date' && sortDirection === 'desc'">&#9660;</span></th>
         <th>Time</th>
+        <th>Visit Type</th>
         <th>Source</th>
         <th>WA</th>
         <th>Email</th>
@@ -95,6 +96,7 @@
         <!-- <td>{{ appointment.department }}</td> -->
         <td>{{ appointment.date | date:'dd-MM-yyyy' }}</td>
         <td>{{ appointment.time }}</td>
+        <td>{{appointment.patientType || '-'}}</td>
         <td>{{appointment.requestVia}}</td>
         <td>
           <span class="sms-status" [ngClass]="{'sms-sent': appointment.smsSent, 'sms-not-sent': !appointment.smsSent}">

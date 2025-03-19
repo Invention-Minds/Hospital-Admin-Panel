@@ -23,6 +23,8 @@ export interface Service {
   radioServiceName?: string;
   radioServiceId?: number; // Array of repeated date strings
   createdAt?: string;
+  patientType?: string;
+  prefix?: string;
 }
 
 @Component({
@@ -359,6 +361,7 @@ onClear() {
     const payload ={
       ...restOfAppointment,
       checkedIn: true,
+      checkedInTime: new Date()
     }
     if (!serviceId) return;
 
@@ -400,14 +403,15 @@ onClear() {
           detail: `Appointment for ${service.firstName} has been cancelled.`,
         });
         const messagePayload = {
-          packageName: service.radioServiceName,
+          radioServiceName: service.radioServiceName,
           appointmentDate: service.appointmentDate,
           appointmentTime: service.appointmentTime,
           firstName: service.firstName,
           lastName: service.lastName,
           phoneNumber: service.phoneNumber,
           appointmentStatus: 'Cancelled',
-          requestVia: service.requestVia
+          requestVia: service.requestVia,
+          prefix: service.prefix,
         }
         const updateService = {...service}
         this.healthCheckupService.sendWhatsappMessageForService(messagePayload).subscribe({
@@ -451,7 +455,7 @@ onClear() {
           time: service.appointmentTime,
           patientPhoneNumber: service.phoneNumber,
           status: 'Cancelled',
-          packageName: service.radioServiceName,
+          radioServiceName: service.radioServiceName,
         }
         this.healthCheckupService.sendSmsMessage(smsPayload).subscribe({
           next: (response) => {
@@ -490,7 +494,7 @@ onClear() {
         });
         const appointmentDetails = {
           patientName: service.firstName + ' ' + service.lastName,
-          packageName: service.radioServiceName ? service.radioServiceName : null,
+          radioServiceName: service.radioServiceName ? service.radioServiceName : null,
           appointmentDate: service.appointmentDate,
           appointmentTime: service?.appointmentTime,
         };

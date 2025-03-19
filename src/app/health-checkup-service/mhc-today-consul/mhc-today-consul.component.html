@@ -115,7 +115,7 @@
       </div>
       <p-toast></p-toast>
       <app-delete-confirmation-dialog [showDialog]="isLockedDialogVisible"
-  (close)="handleLockedDialogClose()"></app-delete-confirmation-dialog>
+      (close)="handleLockedDialogClose()"></app-delete-confirmation-dialog>
 
 
   <!-- <div *ngIf="showPopup" class="close-opd-modal">
@@ -209,12 +209,16 @@
         </div>
         <hr />
         <div class="modal-body">
-          <p>Some consultation or radiology services are missing. Please verify before marking as complete.</p>
+          <p>Some consultation and radiology appointments are still pending for this package.
+            Do you want to proceed with completing the package?
+            <br>
+          </p>
+          <i class="font-italic">Note: All incomplete appointments will be marked as cancelled upon proceeding.</i>
         </div>
         <div class="modal-footer">
           <!-- ✅ Checked In Button -->
           <button class="save-button" (click)="confirmCompletion()" >
-            Yes
+            Yes, Proceed
           </button>
     
           <!-- ✅ Report Done Button -->

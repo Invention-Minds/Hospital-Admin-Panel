@@ -82,6 +82,7 @@
               <span *ngIf="sortColumn === 'date' && sortDirection === 'desc'">&#9660;</span>
             </th>
             <th>Time</th>
+            <th>Visit Type</th>
             <th>Source</th>
             <th>Type</th>
             <th>WA</th>
@@ -125,6 +126,7 @@
             <td>{{ appointment.date| date:'dd-MM-yyyy' }}</td>
             <td>{{ appointment.time }}</td>
             <td>{{ appointment.requestVia }}</td>
+            <td>{{appointment.patientType || '-'}}</td>
             <td style="text-transform: capitalize;">{{appointment.type ? appointment.type : '-' }}</td>
             <td>
               <span class="sms-status"

@@ -661,7 +661,9 @@ export class MhcFormComponent implements OnInit {
         status: 'confirmed',
         type:'mhc',
         userId: Number(this.userId),
-        serviceId: this.selectedAppointment.id
+        serviceId: this.selectedAppointment.id,
+        prefix: this.selectedAppointment.prefix,
+        patientType: this.selectedAppointment.patientType,
       };
     }).filter((appt: any) => appt !== null && appt.doctorId !== 0 && appt.time !== "" && appt.doctorId !== "no-doctor" && appt.time !== "no-slots"); // Remove any null entries
 

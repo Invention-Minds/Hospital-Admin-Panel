@@ -36,6 +36,7 @@ interface Appointment {
   checkedInTime?:any;
   serviceId?:number;
   prefix?:string;
+  patientType?: string;
 
 }
 @Component({

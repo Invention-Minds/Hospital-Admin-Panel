@@ -627,12 +627,23 @@ confirmCompletion(): void {
       isLabTime: new Date(),
     }
     if (!id) return;
+    const messagePayload = {
+      firstName: this.selectedService.firstName,
+      lastName: this.selectedService.lastName,
+      phoneNumber: this.selectedService.phoneNumber,
+      prefix: this.selectedService.prefix,
+    }
     this.healthCheckupService.updateService(id, payload).subscribe({
       next: (response) => {
         console.log('Service marked as completed:', response);
         this.fetchConfirmedAppointments()
         this.showLabPopup = false;
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Lab is updated successfully!' });
+        this.radiologyService.sendLabDone(messagePayload).subscribe({
+          next: (response) =>{
+            console.log('Whatsapp message sent successfully:', response);
+          }
+        })
 
       }
     })

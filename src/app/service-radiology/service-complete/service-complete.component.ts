@@ -21,6 +21,7 @@ export interface Service {
   radioServiceName?: string;
   radioServiceId?: number; // Array of repeated date strings
   createdAt?: string;
+  patientType?: string;
 }
 
 @Component({
@@ -68,7 +69,7 @@ fetchCompletedAppointments(): void {
       // Filter and process confirmed appointments
       this.completedAppointments = services.filter(
         (service) =>
-          service.appointmentStatus === 'Completed' || service.appointmentStatus === 'complete'
+          service.appointmentStatus === 'Completed' || service.appointmentStatus === 'complete' || service.appointmentStatus === 'completed'
       );
 
       // Sort appointments by creation date (newest first)

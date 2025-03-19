@@ -409,6 +409,13 @@ onClear() {
     };
     
     if (!serviceId) return;
+    const messagePayload = {
+      firstName: appointment.firstName,
+      lastName: appointment.lastName,
+      phoneNumber: appointment.phoneNumber,
+      radioServiceName: appointment.radioServiceName,
+      prefix: appointment.prefix
+    }
 
     this.healthCheckupService.updateService(serviceId,payload).subscribe({
       next: (response) => {
@@ -416,6 +423,11 @@ onClear() {
         console.log('Service marked as completed:', response);
 
         this.fetchConfirmedAppointments()
+        this.healthCheckupService.sendRadioDone(messagePayload).subscribe({
+          next: (response) =>{
+            console.log('Whatsapp message sent successfully:', response);
+          }
+        })
 
       }
     })
@@ -482,7 +494,7 @@ onClear() {
           detail: `Appointment for ${service.firstName} has been cancelled.`,
         });
         const messagePayload = {
-          packageName: service.radioServiceName,
+          radioServiceName: service.radioServiceName,
           appointmentDate: service.appointmentDate,
           appointmentTime: service.appointmentTime,
           firstName: service.firstName,

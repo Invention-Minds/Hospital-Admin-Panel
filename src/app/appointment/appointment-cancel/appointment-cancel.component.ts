@@ -26,7 +26,8 @@ interface Appointment {
   isrescheduled?: boolean;
   user?:any;
   prnNumber?:any;
-  prefix?:any
+  prefix?:any;
+  patientType?:any;
 }
 @Component({
   selector: 'app-appointment-cancel',

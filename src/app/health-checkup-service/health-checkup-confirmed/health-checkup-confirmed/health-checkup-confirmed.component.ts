@@ -28,6 +28,8 @@ export interface Service {
   packageName?: string;
   repeatedDate?: string; // Array of repeated date strings
   createdAt?: string;
+  patientType?: string;
+  prefix?:string
 }
 @Component({
   selector: 'app-health-checkup-confirmed',
@@ -420,7 +422,8 @@ onClear() {
           lastName: service.lastName,
           phoneNumber: service.phoneNumber,
           appointmentStatus: 'Cancelled',
-          requestVia: service.requestVia
+          requestVia: service.requestVia,
+          prefix: service.prefix
         }
         const updateService = {...service}
         this.healthCheckupService.sendWhatsappMessageForService(messagePayload).subscribe({

@@ -93,7 +93,9 @@
   font-size: 14px;
   margin-top: 5px;
 }
-
+.prefix-width{
+  width: auto;
+}
 .half-width {
   width: 48%;
 }

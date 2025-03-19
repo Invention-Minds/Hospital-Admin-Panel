@@ -53,7 +53,8 @@ interface Appointment {
   referredDept?:string;  
   referredDocId?:number; 
   referredDoc?:string;       
-  isReferred?:boolean        
+  isReferred?:boolean;
+  patientType?:string;    
 }
 
 @Component({
@@ -611,6 +612,7 @@ export class TodayConsultationsComponent {
 
 
   saveEstimation(): void {
+    this.isButtonLoading = true;
     if (!this.estimationText) {
       // alert('Please enter an estimation.');
       this.messageService.add({ severity: 'warn', summary: 'Warning', detail: 'Please enter an estimation.' })
@@ -651,11 +653,13 @@ export class TodayConsultationsComponent {
           // console.log('Estimation Details saved:', response);
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Estimation Details Saved Successfully' });
           this.closeEstimationPopup();
+          this.isButtonLoading = false;
 
         },
         error: (error) => {
           console.error('Error saving estimation details:', error);
           this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error saving estimation details. Please try again.' });
+          this.isButtonLoading = false;
         }
       });
       return;
@@ -706,10 +710,12 @@ export class TodayConsultationsComponent {
             // console.log('Estimation Details saved:', response);
             this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Estimation Details Saved Successfully' });
             this.closeEstimationPopup();
+            this.isButtonLoading = false;
           },
           error: (error) => {
             console.error('Error saving estimation details:', error);
             this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error saving estimation details. Please try again.' });
+            this.isButtonLoading = false;
           }
         });
       },
@@ -1131,8 +1137,8 @@ export class TodayConsultationsComponent {
       startDate: this.startDate,
       endDate: this.endDate,
     };
-    // const adminPhoneNumber = ["919880544866","919341227264","918904943673","918951243004","919633943037"]
-    const adminPhoneNumber = ["919342287945", "919342287945"]
+    const adminPhoneNumber = ["919880544866","919341227264","918904943673","918951243004","919633943037"]
+    // const adminPhoneNumber = ["919342287945", "919342287945"]
     this.appointmentService.sendAdminMessage(this.currentDoctorName, this.currentDepartmentName, this.startDate, this.endDate, adminPhoneNumber).subscribe({
       next: (response) => {
         // console.log('Leave request submitted:', response);

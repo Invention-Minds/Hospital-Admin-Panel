@@ -62,8 +62,8 @@ export class RadiologyService {
     return this.http.delete(`${this.baseUrl}/${id}`);
   }
 
-  getAvailableSlots(date: string, packageId: number): Observable<any> {
-    return this.http.get(`${this.baseUrl}/available-slots?date=${date}&packageId=${packageId}`);
+  getAvailableSlots(date: string, radioServiceId: number): Observable<any> {
+    return this.http.get(`${this.baseUrl}/available-slots?date=${date}&packageId=${radioServiceId}`);
   }
 
   stopRepeat(serviceId: number, stopDate: string): Observable<any> {
@@ -94,6 +94,12 @@ sendWhatsappMessageForService(data: any): Observable<any> {
 }
 sendSmsMessage(data: any): Observable<any> {
   return this.http.post<any>(`${environment.apiUrl}/sms/send-sms-radiology`, data);
+}
+sendLabDone(data: any): Observable<any> {
+  return this.http.post<any>(`${environment.apiUrl}/whatsapp/send-lab-message`, data);
+}
+sendRadioDone(data: any): Observable<any> {
+  return this.http.post<any>(`${environment.apiUrl}/whatsapp/send-radio-message`, data);
 }
 
 getAppointmentsByServiceId(serviceId: any, date?: string): Observable<any> {

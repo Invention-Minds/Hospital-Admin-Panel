@@ -69,7 +69,9 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
     requestVia: '',
     appointmentStatus: '',
     age:0,
-    gender:''
+    gender:'',
+    prefix:'Mr.',
+    patientType:'New'
 
   };
   @HostListener('document:click', ['$event'])
@@ -317,13 +319,16 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
       requestVia: 'Call',           // Default value for requestVia radio button
       appointmentStatus: 'Confirm', // Default value for appointmentStatus radio button
       package: this.defaultPackage, // Reset package dropdown to default
-      time: this.defaultTime        // Reset time dropdown to default
+      time: this.defaultTime ,
+      patientType:'New',
+      prefix:'Mr.'       // Reset time dropdown to default
     });
     this.requestVia = 'Call';
     this.appointmentStatus = 'Confirm';
     this.isRepeatChecked = false;   // Reset checkbox state
     this.hasConflict = false;
     this.repeatedDates = [];
+    
   }
   // On form submission
   onSubmit(form: NgForm): void {
@@ -346,12 +351,14 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
         appointmentDate: form.value.date,
         appointmentTime: form.value.time,
         requestVia: form.value.requestVia,
-        appointmentStatus: form.value.appointmentStatus, // Include all repeated dates
+        appointmentStatus: 'Confirm', // Include all repeated dates
         userId: parseInt(this.userId),
         username: this.userName,
         role: this.role,
         age:Number(form.value.age),
-        gender:form.value.gender
+        gender:form.value.gender,
+        patientType: form.value.patientType,
+        prefix:form.value.prefix,
       };
 
       console.log('Submitting Payload:', payload);
@@ -393,7 +400,8 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
               lastName: form.value.lastName,
               phoneNumber: formattedPhoneNumber,
               appointmentStatus: status,
-              requestVia: form.value.requestVia
+              requestVia: form.value.requestVia,
+              prefix: form.value.prefix,
             }
             this.healthCheckupService.sendWhatsappMessageForService(messagePayload).subscribe({
               next: (response) => {
@@ -544,7 +552,8 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
               lastName: form.value.lastName,
               phoneNumber: formattedPhoneNumber,
               appointmentStatus: 'confirmed',
-              requestVia: form.value.requestVia
+              requestVia: form.value.requestVia,
+              prefix: form.value.prefix,
             }
             const patientDetails = {
               prn: form.value.pnr,
@@ -747,11 +756,27 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
   
     // Extract name and remove prefixes
     const nameParts = selectedPatient.name.split(" ");
-    const titles = ["Mr.", "Ms.", "Mrs.", "Miss.", "Dr.", "Master"];
-  
-    let firstName = nameParts[0];
-    let lastName = nameParts.slice(1).join(" ");
-  
+    const titles = ["Mr.", "Ms.", "Mrs.", "Miss.", "Dr.", "Master", "Baby Of."];
+    let prefix = "";
+    let firstName = "";
+    let lastName = "";
+
+    if (titles.includes(nameParts[0])) {
+      prefix = nameParts[0];
+      firstName = nameParts[1] || "";
+      lastName = nameParts.slice(2).join(" ") || "";
+    } else if (nameParts[0] === "Baby" && nameParts[1] === "Of.") {
+      prefix = "Baby Of.";
+      firstName = nameParts.slice(2).join(" ") || "";
+      lastName = ""; // Adjust based on your preference
+    } else {
+      firstName = nameParts[0];
+      lastName = nameParts.slice(1).join(" ") || "";
+    }
+
+    // let firstName = nameParts[0];
+    // let lastName = nameParts.slice(1).join(" ");
+
     if (titles.includes(firstName)) {
       firstName = nameParts[1] || "";
       lastName = nameParts.slice(2).join(" ") || "";
@@ -764,6 +789,7 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
     this.formData.age = selectedPatient.age ? Number(selectedPatient.age.replace(/\D/g, '')) : 0
     this.formData.gender = selectedPatient.gender || '';
     this.formData.email = selectedPatient.email || ''; 
+    this.formData.prefix = prefix || '';
   
     console.log("Health Checkup PRN Selected:", selectedPatient, this.formData);
   

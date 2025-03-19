@@ -33,7 +33,8 @@ interface Appointment {
   prnNumber?: any
   checkedInBy?:any;
   checkedInTime?:any;
-  prefix?:string
+  prefix?:string;
+  patientType?:string;
 
 }
 @Component({

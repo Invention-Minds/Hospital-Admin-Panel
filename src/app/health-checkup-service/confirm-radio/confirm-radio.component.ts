@@ -26,6 +26,7 @@ export interface Service {
   radioServiceName?: string;
   radioServiceId?: number; // Array of repeated date strings
   createdAt?: string;
+  patientType?: string;
 }
 
 
@@ -362,6 +363,7 @@ onClear() {
     const payload ={
       ...restOfAppointment,
       checkedIn: true,
+      checkedInTime: new Date()
     }
     if (!serviceId) return;
 

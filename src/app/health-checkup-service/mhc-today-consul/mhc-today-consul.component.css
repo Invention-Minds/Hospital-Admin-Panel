@@ -33,6 +33,7 @@
     font-family: Kanit;
     font-weight: 400;
     height: 54px;
+    
   }
   thead th {
     padding: 12px;
@@ -547,6 +548,10 @@ font-family: 900;
   font-weight: 500;
   line-height: normal;
   margin: 10px 0;
+}
+.modal-body i {
+  color: rgba(39, 30, 74, 0.8);
+  font-family: Kanit;
 }
 .popup-close {
   background-color: transparent;

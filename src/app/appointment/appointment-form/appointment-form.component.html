@@ -15,7 +15,7 @@
           <div class="sections" (click)="$event.stopPropagation()">
             <div class="lable_name"><span>PRN:</span></div>
             <div class="input_field">
-              <input type="text" placeholder="Enter PRN Number" formControlName="prnNumber" class="prn" id="prn" required
+              <input type="text" placeholder="Enter PRN Number" formControlName="prnNumber" class="prn" id="prn"
                 (input)="onPRNChange()" (focus)="showSuggestions = true" />
                 <div class="errors"
                 *ngIf="appointmentForm.get('prnNumber')?.invalid && (appointmentForm.get('prnNumber')?.touched || appointmentForm.get('prnNumber')?.dirty)">

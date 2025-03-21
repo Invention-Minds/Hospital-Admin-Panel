@@ -27,21 +27,21 @@
             <th>Visit Type</th>
             <th>Counter</th>
  
-            <th><span class="action" ></span>Action</th>
+            <th><span></span>Action</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody [@sortAnimation] *ngIf="filteredAppointments.length > 0">
           <tr *ngIf="filteredAppointments.length === 0">
             <td colspan="11" class="no-records-message">
               No records to display
             </td>
           </tr>
-          <tr *ngFor="let appointment of getPaginatedAppointments(); let i = index"   [ngClass]="{
+          <tr *ngFor="let appointment of getPaginatedAppointments(); trackBy: trackById; let i = index"   [ngClass]="{
             'ongoing': appointment.checkedOut === true && !appointment.endConsultation,
             'pending': appointment.postPond === true,
             'finished': appointment.checkedOut === true && appointment.endConsultation === true,
             'blinking-row': appointment.overTime,
-          }">
+          }" >
             <td>{{ i + 1 }}</td>
             <td>{{appointment.prnNumber? appointment.prnNumber: '-'}}</td>
             <td>{{ appointment.patientName }}</td>

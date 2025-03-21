@@ -20,13 +20,16 @@ export class DoctorLoginActivityComponent implements OnChanges {
   doctorDelays: any[] = [];
   doctorDelaysForReport: any[] = [];
   detailedDoctorDelays: any[] = [];
-  isLoading: boolean = true
+  isLoading: boolean = true;
+  doctors:any[] = [];
+  appointments:any[] = [];
 
   ngOnInit() {
     const yesterdayDate = getYesterdayDate()
     this.selectedDate = [yesterdayDate];
     this.reportDate = this.selectedDate[0]
     this.loadDoctorLoginDelays(this.selectedDate[0]);
+    this.loadAllAppointments();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -48,7 +51,15 @@ export class DoctorLoginActivityComponent implements OnChanges {
   closeModal() {
     this.isModalOpen = false;
   }
-
+  
+loadAllAppointments(){
+  this.appointmentService.getAllAppointments().subscribe({
+    next: (appointments) => {
+      this.appointments = appointments;
+      console.log(appointments)    
+    }
+  }); 
+}
   loadDoctorLoginDelays(date: string): void {
     // console.log('small-load')
     this.doctorsService.getAllDoctors(date).subscribe({
@@ -100,9 +111,9 @@ export class DoctorLoginActivityComponent implements OnChanges {
     });
   }
   processDoctorsAvailabilityforReport(doctors: any[],date: string): void {
-    this.appointmentService.getAllAppointments().subscribe((appointments: any[]) => {
+    
 
-      const todayAppointments = appointments.filter(app => app.date === this.reportDate);
+      const todayAppointments = this.appointments.filter(app => app.date === this.reportDate);
       console.log(todayAppointments)
 
       this.doctorDelaysForReport = doctors.map(doctor => {
@@ -141,12 +152,12 @@ export class DoctorLoginActivityComponent implements OnChanges {
           checkedOutTime: checkedOutTime
         };
       }).filter(entry => entry !== null);
-    });
+    
   }
   processDoctorsAvailability(doctors: any[],date: string): void {
-    this.appointmentService.getAllAppointments().subscribe((appointments: any[]) => {
+ 
 
-      const todayAppointments = appointments.filter(app => app.date === this.selectedDate[0]);
+      const todayAppointments = this.appointments.filter(app => app.date === this.selectedDate[0]);
       // console.log(todayAppointments)
 
       this.doctorDelays = doctors.map(doctor => {
@@ -185,7 +196,7 @@ export class DoctorLoginActivityComponent implements OnChanges {
           checkedOutTime: checkedOutTime
         };
       }).filter(entry => entry !== null);
-    });
+    
   }
 
   getLatestAvailability(availability: any[]): any {
@@ -230,9 +241,10 @@ export class DoctorLoginActivityComponent implements OnChanges {
   }
 
   reportData(doctors: any[]): void {
-    this.appointmentService.getAllAppointments().subscribe((appointments: any[]) => {
 
-      const todayAppointments = appointments.filter(app => app.date === this.selectedDate);
+    // this.appointmentService.getAllAppointments().subscribe((appointments: any[]) => {
+
+      const todayAppointments = this.appointments.filter(app => app.date === this.selectedDate);
 
       this.doctorDelays = doctors.map(doctor => {
         const latestAvailability = this.getLatestAvailability(doctor.availability);
@@ -270,6 +282,6 @@ export class DoctorLoginActivityComponent implements OnChanges {
           checkedOutTime: checkedOutTime
         };
       }).filter(entry => entry !== null);
-    });
+ 
   }
 }

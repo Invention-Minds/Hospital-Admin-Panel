@@ -360,7 +360,26 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
     });
   }
 
-
+  onPrefixChange() {
+    switch (this.formData.prefix) {
+      case 'Mr.':
+      case 'Master':
+        this.formData.gender = 'Male';
+        break;
+  
+      case 'Mrs.':
+      case 'Ms.':
+      case 'Miss':
+      case 'Dr.':
+      case 'Baby Of.':
+        this.formData.gender = 'Female';
+        break;
+  
+      default:
+        this.formData.gender = '';
+        break;
+    }
+  }
   resetForm(form: NgForm): void {
     form.resetForm({
       requestVia: 'Call',           // Default value for requestVia radio button

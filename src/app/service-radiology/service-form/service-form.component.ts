@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, ViewChild,HostListener } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, ViewChild, HostListener } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ConfirmationService } from 'primeng/api';
 import { DialogModule } from '@angular/cdk/dialog';
@@ -41,13 +41,13 @@ export class ServiceFormComponent implements OnInit {
   userName: string = ''; // Username of the logged-in admin
   role: string = ''; // Role of the logged-in admin
   minDate: Date = new Date();
-  minDateString: string =  new Date().toLocaleDateString('en-CA');
+  minDateString: string = new Date().toLocaleDateString('en-CA');
   smsSent?: boolean = false;
   messageSent?: boolean = false;
   emailSent?: boolean = false;
   prnSuggestions: boolean = false;
   patients: any[] = []; // List of all patients
-filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
+  filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
 
 
   constructor(private confirmationService: ConfirmationService, private healthCheckupService: RadiologyService, private messageService: MessageService, private route: ActivatedRoute, private appointmentService: AppointmentConfirmService) { }
@@ -68,10 +68,10 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
     appointmentTime: '',
     requestVia: '',
     appointmentStatus: '',
-    age:0,
-    gender:'',
-    prefix:'Mr.',
-    patientType:'New'
+    age: 0,
+    gender: '',
+    prefix: 'Mr.',
+    patientType: 'New'
 
   };
   @HostListener('document:click', ['$event'])
@@ -134,14 +134,34 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
   onClose(): void {
     this.closeForm.emit(); // Notify parent component to switch back
   }
+  onPrefixChange() {
+    switch (this.formData.prefix) {
+      case 'Mr.':
+      case 'Master':
+        this.formData.gender = 'Male';
+        break;
+
+      case 'Mrs.':
+      case 'Ms.':
+      case 'Miss':
+      case 'Dr.':
+      case 'Baby Of.':
+        this.formData.gender = 'Female';
+        break;
+
+      default:
+        this.formData.gender = '';
+        break;
+    }
+  }
   fetchAvailableSlots(): void {
     if (!this.selectedDate) {
 
       return;
     }
     const now = new Date();
-  const isToday = new Date(this.selectedDate).toLocaleDateString('en-CA') ===  new Date().toLocaleDateString('en-CA');
-  // console.log(isToday, new Date(this.selectedDate).toLocaleDateString('en-CA'),new Date().toLocaleDateString('en-CA') )
+    const isToday = new Date(this.selectedDate).toLocaleDateString('en-CA') === new Date().toLocaleDateString('en-CA');
+    // console.log(isToday, new Date(this.selectedDate).toLocaleDateString('en-CA'),new Date().toLocaleDateString('en-CA') )
     this.healthCheckupService.getAvailableSlots(this.selectedDate, parseInt(this.selectedPackageId)).subscribe({
       next: (response) => {
         console.log('Available Slots:', response);
@@ -150,13 +170,13 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
           console.log(availableSlots)
           if (isToday) {
             console.log(isToday);
-          
+
             const currentTimeInMinutes = now.getHours() * 60 + now.getMinutes();
-          
+
             availableSlots = availableSlots.filter((slot: string) => {
               let [time, modifier] = slot.split(" ");
               let [hours, minutes] = time.split(":").map(Number);
-          
+
               // Convert 12-hour format to 24-hour format
               if (modifier === "PM" && hours !== 12) {
                 hours += 12;
@@ -164,16 +184,16 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
               if (modifier === "AM" && hours === 12) {
                 hours = 0;
               }
-          
+
               const slotTimeInMinutes = hours * 60 + minutes;
               return slotTimeInMinutes >= currentTimeInMinutes; // Only include future slots
             });
           }
-          
-  
+
+
           this.timeSlots = availableSlots;
           console.log(this.timeSlots)
-  
+
           // Include already selected appointment time if it exists
           if (this.formData.appointmentTime && !this.timeSlots.includes(this.formData.appointmentTime)) {
             this.timeSlots.push(this.formData.appointmentTime);
@@ -319,16 +339,16 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
       requestVia: 'Call',           // Default value for requestVia radio button
       appointmentStatus: 'Confirm', // Default value for appointmentStatus radio button
       package: this.defaultPackage, // Reset package dropdown to default
-      time: this.defaultTime ,
-      patientType:'New',
-      prefix:'Mr.'       // Reset time dropdown to default
+      time: this.defaultTime,
+      patientType: 'New',
+      prefix: 'Mr.'       // Reset time dropdown to default
     });
     this.requestVia = 'Call';
     this.appointmentStatus = 'Confirm';
     this.isRepeatChecked = false;   // Reset checkbox state
     this.hasConflict = false;
     this.repeatedDates = [];
-    
+
   }
   // On form submission
   onSubmit(form: NgForm): void {
@@ -355,10 +375,10 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
         userId: parseInt(this.userId),
         username: this.userName,
         role: this.role,
-        age:Number(form.value.age),
-        gender:form.value.gender,
+        age: Number(form.value.age),
+        gender: form.value.gender,
         patientType: form.value.patientType,
-        prefix:form.value.prefix,
+        prefix: form.value.prefix,
       };
 
       console.log('Submitting Payload:', payload);
@@ -383,11 +403,11 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
             const isRescheduled =
               this.serviceData.appointmentDate !== payload.appointmentDate ||
               this.serviceData.appointmentTime !== payload.appointmentTime ||
-              this.serviceData.radioServiceName !== payload.radioServiceName 
+              this.serviceData.radioServiceName !== payload.radioServiceName
 
             let status = isRescheduled ? 'rescheduled' : 'confirmed';
 
-            if(form.value.appointmentStatus === 'Cancel') {
+            if (form.value.appointmentStatus === 'Cancel') {
               status = 'cancelled';
             }
 
@@ -406,7 +426,7 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
             this.healthCheckupService.sendWhatsappMessageForService(messagePayload).subscribe({
               next: (response) => {
                 console.log('Whatsapp message sent successfully:', response);
-                const whatsappPayload ={
+                const whatsappPayload = {
                   messageSent: true
                 }
                 updatedService.messageSent = true;
@@ -424,7 +444,7 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
               },
               error: (error) => {
                 console.error('Error sending whatsapp message:', error);
-                this.healthCheckupService.updateServiceMessageStatus(serviceId, {messageSent: false}).subscribe({
+                this.healthCheckupService.updateServiceMessageStatus(serviceId, { messageSent: false }).subscribe({
                   next: (updateResponse) => {
                     console.log('Service updated with messageSent status:', updateResponse);
                   },
@@ -448,7 +468,7 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
             this.healthCheckupService.sendSmsMessage(smsPayload).subscribe({
               next: (response) => {
                 console.log('SMS sent successfully:', response);
-                const smsPayload ={
+                const smsPayload = {
                   smsSent: true
                 }
                 updatedService.smsSent = true;
@@ -467,7 +487,7 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
               },
               error: (error) => {
                 console.error('Error sending SMS:', error);
-                this.healthCheckupService.updateServiceMessageStatus(serviceId, {smsSent: false}).subscribe({
+                this.healthCheckupService.updateServiceMessageStatus(serviceId, { smsSent: false }).subscribe({
                   next: (updateResponse) => {
                     console.log('Service updated with smsSent status:', updateResponse);
                   },
@@ -488,10 +508,10 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
               appointmentTime: form.value?.time,
             };
             const patientEmail = form.value.email;
-            this.appointmentService.sendEmailHealthCheckup(patientEmail,status,appointmentDetails).subscribe({
+            this.appointmentService.sendEmailHealthCheckup(patientEmail, status, appointmentDetails).subscribe({
               next: (response) => {
                 console.log('Email sent successfully:', response);
-                const emailPayload ={
+                const emailPayload = {
                   emailSent: true
                 }
                 updatedService.emailSent = true;
@@ -509,7 +529,7 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
               },
               error: (error) => {
                 console.error('Error sending email:', error);
-                this.healthCheckupService.updateServiceMessageStatus(serviceId, {emailSent: false}).subscribe({
+                this.healthCheckupService.updateServiceMessageStatus(serviceId, { emailSent: false }).subscribe({
                   next: (updateResponse) => {
                     console.log('Service updated with emailSent status:', updateResponse);
                   },
@@ -533,7 +553,7 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
           },
         });
       } else {
-        this.isLoading=true;
+        this.isLoading = true;
         // New Appointment: Create a new service
         this.healthCheckupService.createService(payload).subscribe({
           next: (response) => {
@@ -569,11 +589,11 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
             //     console.error('Error adding patient:', error);
             //   },
             // });
-            const updatedSerive = {...payload, response}
+            const updatedSerive = { ...payload, response }
             this.healthCheckupService.sendWhatsappMessageForService(messagePayload).subscribe({
               next: (response) => {
                 console.log('Whatsapp message sent successfully:', response);
-                const whatsappPayload ={
+                const whatsappPayload = {
                   messageSent: true
                 }
                 // updatedSerive.messageSent = true;
@@ -588,11 +608,11 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
                     this.isLoading = false;
                   },
                 });
-                
+
               },
               error: (error) => {
                 console.error('Error sending whatsapp message:', error);
-                this.healthCheckupService.updateServiceMessageStatus(serviceId, {messageSent: false}).subscribe({
+                this.healthCheckupService.updateServiceMessageStatus(serviceId, { messageSent: false }).subscribe({
                   next: (updateResponse) => {
                     console.log('Service updated with messageSent status:', updateResponse);
                   },
@@ -616,7 +636,7 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
             this.healthCheckupService.sendSmsMessage(smsPayload).subscribe({
               next: (response) => {
                 console.log('SMS sent successfully:', response);
-                const smsPayload ={
+                const smsPayload = {
                   smsSent: true
                 }
                 this.healthCheckupService.updateServiceMessageStatus(serviceId, smsPayload).subscribe({
@@ -633,7 +653,7 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
               },
               error: (error) => {
                 console.error('Error sending SMS:', error);
-                this.healthCheckupService.updateServiceMessageStatus(serviceId, {smsSent: false}).subscribe({
+                this.healthCheckupService.updateServiceMessageStatus(serviceId, { smsSent: false }).subscribe({
                   next: (updateResponse) => {
                     console.log('Service updated with smsSent status:', updateResponse);
                   },
@@ -654,10 +674,10 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
             };
             const patientEmail = form.value.email;
             const status = 'confirmed';
-            this.appointmentService.sendEmailHealthCheckup(patientEmail,status,appointmentDetails).subscribe({
+            this.appointmentService.sendEmailHealthCheckup(patientEmail, status, appointmentDetails).subscribe({
               next: (response) => {
                 console.log('Email sent successfully:', response);
-                const emailPayload ={
+                const emailPayload = {
                   emailSent: true
                 }
                 this.healthCheckupService.updateServiceMessageStatus(serviceId, emailPayload).subscribe({
@@ -674,7 +694,7 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
               },
               error: (error) => {
                 console.error('Error sending email:', error);
-                this.healthCheckupService.updateServiceMessageStatus(serviceId, {emailSent: false}).subscribe({
+                this.healthCheckupService.updateServiceMessageStatus(serviceId, { emailSent: false }).subscribe({
                   next: (updateResponse) => {
                     console.log('Service updated with emailSent status:', updateResponse);
                   },
@@ -736,24 +756,24 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
   onHealthCheckupPRNChange() {
     const input = this.formData.pnrNumber || '';
     console.log(input)
-  
+
     if (!input) {
       this.filteredHealthCheckupPRNs = [];
       return;
     }
-  
+
     // Filter PRN suggestions based on input
     this.filteredHealthCheckupPRNs = this.patients.filter(patient =>
       String(patient.prn).trim().includes(String(input))
     );
-  
+
     this.prnSuggestions = this.filteredHealthCheckupPRNs.length > 0;
   }
-  
+
   // Function to handle PRN selection
   selectHealthCheckupPRN(selectedPatient: any) {
     if (!selectedPatient) return;
-  
+
     // Extract name and remove prefixes
     const nameParts = selectedPatient.name.split(" ");
     const titles = ["Mr.", "Ms.", "Mrs.", "Miss.", "Dr.", "Master", "Baby Of."];
@@ -781,23 +801,23 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
       firstName = nameParts[1] || "";
       lastName = nameParts.slice(2).join(" ") || "";
     }
-  
+
     this.formData.pnrNumber = selectedPatient.prn.toString() || '';
     this.formData.firstName = firstName || '';
     this.formData.lastName = lastName || '';
     this.formData.phoneNumber = selectedPatient.mobileNo || '';
     this.formData.age = selectedPatient.age ? Number(selectedPatient.age.replace(/\D/g, '')) : 0
     this.formData.gender = selectedPatient.gender || '';
-    this.formData.email = selectedPatient.email || ''; 
+    this.formData.email = selectedPatient.email || '';
     this.formData.prefix = prefix || '';
-  
+
     console.log("Health Checkup PRN Selected:", selectedPatient, this.formData);
-  
+
     // Validate age
-    
-  
+
+
     // console.log("Health Checkup PRN Selected:", selectedPatient);
-  
+
     // Hide suggestions after selection
     this.prnSuggestions = false;
   }

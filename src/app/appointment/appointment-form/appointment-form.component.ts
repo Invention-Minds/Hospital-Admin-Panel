@@ -158,6 +158,29 @@ export class AppointmentFormComponent implements OnInit {
       prefix: ['Mr.'],
       patientType: ['New'],
     });
+    // Subscribe to prefix changes to set gender automatically
+  this.appointmentForm.get('prefix')?.valueChanges.subscribe(prefix => {
+    const genderControl = this.appointmentForm.get('gender');
+    if (!genderControl) return;
+
+    switch (prefix) {
+      case 'Mr.':
+      case 'Master':
+        genderControl.setValue('Male');
+        break;
+
+      case 'Mrs.':
+      case 'Ms.':
+      case 'Miss':
+      case 'Dr.':
+      case 'Baby Of.':
+        genderControl.setValue('Female');
+        break;
+
+      default:
+        genderControl.setValue('');
+    }
+  });
     if (this.appointment?.phoneNumber.startsWith('91')) {
       this.appointment.phoneNumber = this.appointment.phoneNumber.substring(2);
     }

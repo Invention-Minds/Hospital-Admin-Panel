@@ -111,10 +111,14 @@ font-weight: 400;
 text-transform: capitalize;
   }
   .approved {
-    background-color: #0E2970;
+    background-color: #FB9C2A;
     color: white;
   }
-  
+  .sign{
+    display: flex;
+        gap: 6px;
+    cursor: pointer;
+  }
   .accepted {
     background-color: #169458;
     color: white;

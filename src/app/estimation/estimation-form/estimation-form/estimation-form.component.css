@@ -237,6 +237,15 @@ input[type="radio"] {
   font-family: Kanit;
   /* max-width: 900px; */
 }
+.reject-reason{
+  color: #7b7b7b;
+  font-family: Kanit;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  font-family: Kanit;
+}
 /* Dropdown Button */
 .dropdown-btn {
   width: 50%;
@@ -358,6 +367,14 @@ input[type="radio"] {
   font-size: 20px;
   font-style: normal;
   font-weight: 600;
+  line-height: normal;
+}
+.sign-reason {
+  color: #000;
+  font-family: Kanit;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
   line-height: normal;
 }
 
@@ -557,7 +574,164 @@ background: #D20006;
   background-color: #f0f0f0; /* Light grey background on hover for better visibility */
   color: #005d8c; /* Optional: Highlight text color on hover */
 }
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
 
+.modal-header h3 {
+  color: #271e4a;
+  font-family: Kanit;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  margin: 0;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.modal-body {
+  margin-bottom: 20px;
+}
+
+.modal-body p {
+  color: rgba(39, 30, 74, 0.8);
+  font-family: Kanit;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  margin: 10px 0;
+}
+.popup-close {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
+input[type="text"]::placeholder {
+  color: rgba(39, 30, 74, 0.8);
+  font-family: Kanit;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  margin-top: 30px;
+}
+.estimation-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  border-radius: 20px;
+  background: #fff;
+  padding: 20px;
+  width: 673px;
+  height: auto;
+  flex-shrink: 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+.custom-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  background-color: #fff; /* Background color like the first image */
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  font-family: Kanit;
+}
+
+.custom-input:focus {
+  border-color: #007bff; /* Focus border color like the second image */
+  box-shadow: 0 0 3px #007bff;
+}
+
+.custom-label {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: #aaa;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.custom-input:focus + .custom-label,
+.custom-input:not(:placeholder-shown) + .custom-label {
+  top: -3px;
+  left: 10px;
+  font-size: 12px;
+  color: #007bff; /* Label color on focus */
+  background-color: #fff;
+}
+.estimation-input-container {
+  position: relative;
+  /* padding-top: 16px; */
+  /* width: 300px; */
+  margin-top: 35px;
+}
+.save-button {
+  background-color: #169458;
+  color: #fff;
+  font-family: Kanit;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  width: 150px;
+  padding: 7px 14px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.close-button {
+  display: flex;
+  width: 150px;
+  padding: 7px 65px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  border: 1px solid #7b7b7b;
+  color: #7b7b7b;
+  font-family: Kanit;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+}
 @media (min-width: 1024px) {
   .grid-container {
     grid-template-columns: repeat(3, 1fr); /* 5 columns */

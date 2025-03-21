@@ -80,7 +80,9 @@ export class AppointmentConfirmComponent {
   selectedDate: Date | null = null;
 
   filteredServices: any[] = [];
-  username: any
+  username: any;
+  showPrnPopup = false;
+  enteredPrn = '';
 
   searchOptions = [
     { label: 'Patient Name', value: 'patientName' },
@@ -897,7 +899,47 @@ export class AppointmentConfirmComponent {
   // getFilteredAppointments() {
   //   return this.filteredAppointments;
   // }
+  prnCheck(appointment: any): void {
+    const prn = appointment.prnNumber !== undefined && appointment.prnNumber !== null
+    ? appointment.prnNumber.toString().trim()
+    : '';
+
+  if (!prn) {
+    this.checkinAppointment = appointment;
+    this.showPrnPopup = true;
+    return;
+  }
+
+  
+    this.handleCheckin(appointment);
+  }
+  
+  // Separate method to handle the original logic after PRN is available
+  // Called when user submits PRN from popup
+  submitPrn(prnValue: string): void {
+    if (!prnValue || prnValue.trim() === '') {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Invalid PRN',
+        detail: 'Please enter a valid PRN number.'
+      });
+      return;
+    }
+  
+    // Assign PRN to appointment
+    this.checkinAppointment.prnNumber = Number(prnValue.trim());
+    this.appointmentService.updateAppointment(this.checkinAppointment);
+    this.enteredPrn = ''
+    
+    // Close PRN popup and proceed
+    this.showPrnPopup = false;
+  
+    // Continue with next checks
+    this.handleCheckin(this.checkinAppointment);
+  }
+  
   handleCheckin(appointment: any): void {
+    console.log('Checking in:');
     if (appointment.checkedIn) {
       this.messageService.add({ severity: 'warn', summary: 'Already Checked In', detail: 'You have already checked in for this appointment.' });
       return;

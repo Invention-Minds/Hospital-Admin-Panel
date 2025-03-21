@@ -99,6 +99,9 @@
 .half-width {
   width: 48%;
 }
+.name-width{
+  width: 38.5%;
+}
 
 .checkbox-container {
   display: flex;

@@ -718,12 +718,21 @@
 
     </div>
 
+    <div class="section" *ngIf="formData.rejectReason && (formData.statusOfEstimation === 'submitted' || formData.statusOfEstimation === 'rejected')">
+      <p class="sign">Rejection Reason:</p>
+      <p class="sign-reason">{{formData.rejectReason}}</p>
+    </div>
+
     <div class="button">
       <!-- For Subadmin -->
       <button *ngIf="role === 'sub_admin' && (formData.statusOfEstimation === 'pending' || estimationData === null)" type="submit"
         class="submit-button" [disabled]="!estimationForm.valid">
         Submit
       </button>
+      <button *ngIf="role === 'sub_admin' && (formData.statusOfEstimation === 'rejected')" type="submit"
+      class="submit-button" [disabled]="!estimationForm.valid">
+      Re-Submit
+    </button>
       <button *ngIf="role === 'sub_admin'" type="button" class="clear-button" (click)="clearForm()">
         Clear
       </button>
@@ -743,4 +752,35 @@
     </div>
 
   </form>
+</div>
+<!-- Reject Reason Popup -->
+<div *ngIf="showRejectReasonPopup" class="estimation-modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Kindly specify the reason for rejection</h3>
+      <button class="popup-close" (click)="cancelRejection()">
+        <img src="/popup-close.svg" />
+      </button>
+    </div>
+    <hr />
+    <div class="modal-body">
+    <div class="estimation-input-container">
+      <!-- Input field for estimation -->
+      <!-- <textarea 
+        type="text" 
+        [(ngModel)]="rejectionReason" 
+        required
+        class="custom-input"
+      tex/> -->
+      <textarea [(ngModel)]="rejectionReason" class="custom-input"
+      required></textarea>
+      <label for="receiptNumber" class="custom-label">Enter the Reason*</label>
+    </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="save-button" (click)="submitRejection()">Save</button>
+      <button class="close-button" (click)="cancelRejection()">Close</button>
+    </div>
+  </div>
 </div>

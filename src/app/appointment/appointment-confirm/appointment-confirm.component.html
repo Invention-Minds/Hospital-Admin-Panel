@@ -182,7 +182,7 @@
                    pTooltip="Check-in" tooltipPosition="top">
             </button> -->
 
-            <button class="btn-action" (click)="handleCheckin(appointment)">
+            <button class="btn-action" (click)="prnCheck(appointment)">
               <img src="check-in.png" alt="check" class="action-icon"
                 pTooltip="{{ appointment.checkedIn ? 'Already checked in' : 'Click to check-in' }}"
                 tooltipPosition="top">
@@ -261,6 +261,30 @@
     </div>
   </div>
 </div>
+<!-- PRN Input Popup -->
+<div class="close-opd-modal" *ngIf="showPrnPopup">
+<div class="modal-content-transfer">
+  <div class="modal-header">
+    <h3>Missing PRN Number</h3>
+    <button class="popup-close" (click)="showPrnPopup = false">
+      <img src="/popup-close.svg" alt="Close Popup" />
+    </button>
+  </div>
+  <hr />
+  <div class="modal-body">
+    <h3>Enter PRN to proceed</h3>
+    <div class="input-container">
+      <input type="text" class="custom-input" [(ngModel)]="enteredPrn" placeholder="Enter PRN" />
+    </div>
+
+    <div class="modal-footer">
+      <button class="save-button" (click)="submitPrn(enteredPrn)">Submit</button>
+      <button class="close-button" (click)="showPrnPopup = false">Cancel</button></div>
+  </div>
+</div>
+</div>
+
+
 
 
 <div class="loader" *ngIf="isLoading"></div>

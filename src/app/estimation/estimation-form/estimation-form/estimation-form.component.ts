@@ -71,7 +71,10 @@ export class EstimationFormComponent {
   patients: any[] = [];
   lastAddedCost: number = 0;
   employeeName: string = ''
-  approverName: string = ''
+  approverName: string = '';
+  showRejectReasonPopup = false;
+rejectionReason = '';
+
 
 
   constructor(private estimationService: EstimationService, private cdr: ChangeDetectorRef, private messageService: MessageService, private doctorService: DoctorServiceService, private appointmentService: AppointmentConfirmService,private eRef: ElementRef) {
@@ -328,6 +331,7 @@ export class EstimationFormComponent {
     costForPresidential: '',
     patientEmail:'',
     selectedRoomCost: this.selectedRoomCost,
+    rejectReason:'',
     includedItems: {
       wardICUStay: false,
       primaryConsultant: false,
@@ -544,6 +548,8 @@ export class EstimationFormComponent {
         inclusions: this.estimationData.inclusions?.map((inclusion: any) => inclusion.description) || [],
         exclusions: this.estimationData.exclusions?.map((exclusion: any) => exclusion.description) || [],
       };
+      this.formData.rejectReason = this.estimationData.rejectReason
+      console.log(this.formData.rejectReason)
       this.initializeEstimationInputs()
       if (this.formData.patientPhoneNumber.startsWith('91') && this.formData.patientPhoneNumber.length === 12) {
         this.formData.patientPhoneNumber = this.formData.patientPhoneNumber.slice(2); // Remove '91' prefix
@@ -856,70 +862,71 @@ export class EstimationFormComponent {
       this.formData.wardStay = Math.max(0, totalDaysStay - icuStay);
     }
   }
-  rejectRequest(): void {
-    this.formData.statusOfEstimation = 'rejected'
-    const estimationData = {
-      estimationId: this.estimationData.estimationId, // Replace this with the actual ID from your context
-      updateFields: {
-        patientUHID: this.formData.patientUHID,
-        patientName: this.formData.patientName,
-        ageOfPatient: this.formData.ageOfPatient,
-        genderOfPatient: this.formData.genderOfPatient,
-        consultantName: this.formData.consultantName,
-        estimationPreferredDate: this.formData.estimationPreferredDate,
-        icuStay: this.formData.icuStay,
-        wardStay: this.formData.wardStay,
-        estimationCost: this.formData.estimationCost,
-        estimationName: this.formData.estimationName,
-        remarks: this.formData.remarks,
-        roomType: this.formData.roomType,
-        estimatedDate: this.formData.estimatedDate,
-        discountPercentage: this.formData.discountPercentage,
-        totalEstimationAmount: this.formData.totalEstimationAmount,
-        signatureOf: this.formData.signatureOf,
-        employeeName: this.formData.employeeName,
-        approverName: this.formData.approverName,
-        patientSign: this.formData.patientSign,
-        employeeSign: this.formData.employeeSign,
-        approverSign: this.formData.approverSign,
-        statusOfEstimation: this.formData.statusOfEstimation,
-        employeeId: this.formData.employeeId,
-        approverId: this.formData.approverId,
-        totalDaysStay: this.formData.totalDaysStay,
-        attenderName: this.formData.attenderName,
-        surgeryTime: this.formData.surgeryTime,
-        staffRemarks: this.formData.staffRemarks,
-        patientRemarks: this.formData.patientRemarks,
-        implants: this.formData.implants,
-        procedures: this.formData.procedures,
-        instrumentals: this.formData.instrumentals,
-        surgeryPackage: this.selectedSurgeryPackage,
-        multipleEstimationCost: this.formData.multipleEstimationCost,
-        costForGeneral: this.formData.costForGeneral,
-        costForSemiPrivate: this.formData.costForSemiPrivate,
-        costForVip: this.formData.costForVip,
-        costForPrivate: this.formData.costForPrivate,
-        costForPresidential: this.formData.costForPresidential,
-        costForDeluxe: this.formData.costForDeluxe,
-        selectedRoomCost: this.selectedRoomCost,
-        patientEmail: this.formData.patientEmail,
-        patientPhoneNumber: this.formData.patientPhoneNumber.toString()
-      },
-      inclusions: this.formData.inclusions,
-      exclusions: this.formData.exclusions,
-    };
-    console.log(estimationData);
-    this.estimationService.updateEstimationDetails(estimationData.estimationId, estimationData).subscribe(
-      (response) => {
-        console.log('Estimation updated successfully:', response);
-        this.clearForm();
-      },
-      (error) => {
-        console.error('Error updating estimation:', error);
-      }
-    );
+  // rejectRequest(): void {
 
-  }
+  //   this.formData.statusOfEstimation = 'rejected'
+  //   const estimationData = {
+  //     estimationId: this.estimationData.estimationId, // Replace this with the actual ID from your context
+  //     updateFields: {
+  //       patientUHID: this.formData.patientUHID,
+  //       patientName: this.formData.patientName,
+  //       ageOfPatient: this.formData.ageOfPatient,
+  //       genderOfPatient: this.formData.genderOfPatient,
+  //       consultantName: this.formData.consultantName,
+  //       estimationPreferredDate: this.formData.estimationPreferredDate,
+  //       icuStay: this.formData.icuStay,
+  //       wardStay: this.formData.wardStay,
+  //       estimationCost: this.formData.estimationCost,
+  //       estimationName: this.formData.estimationName,
+  //       remarks: this.formData.remarks,
+  //       roomType: this.formData.roomType,
+  //       estimatedDate: this.formData.estimatedDate,
+  //       discountPercentage: this.formData.discountPercentage,
+  //       totalEstimationAmount: this.formData.totalEstimationAmount,
+  //       signatureOf: this.formData.signatureOf,
+  //       employeeName: this.formData.employeeName,
+  //       approverName: this.formData.approverName,
+  //       patientSign: this.formData.patientSign,
+  //       employeeSign: this.formData.employeeSign,
+  //       approverSign: this.formData.approverSign,
+  //       statusOfEstimation: this.formData.statusOfEstimation,
+  //       employeeId: this.formData.employeeId,
+  //       approverId: this.formData.approverId,
+  //       totalDaysStay: this.formData.totalDaysStay,
+  //       attenderName: this.formData.attenderName,
+  //       surgeryTime: this.formData.surgeryTime,
+  //       staffRemarks: this.formData.staffRemarks,
+  //       patientRemarks: this.formData.patientRemarks,
+  //       implants: this.formData.implants,
+  //       procedures: this.formData.procedures,
+  //       instrumentals: this.formData.instrumentals,
+  //       surgeryPackage: this.selectedSurgeryPackage,
+  //       multipleEstimationCost: this.formData.multipleEstimationCost,
+  //       costForGeneral: this.formData.costForGeneral,
+  //       costForSemiPrivate: this.formData.costForSemiPrivate,
+  //       costForVip: this.formData.costForVip,
+  //       costForPrivate: this.formData.costForPrivate,
+  //       costForPresidential: this.formData.costForPresidential,
+  //       costForDeluxe: this.formData.costForDeluxe,
+  //       selectedRoomCost: this.selectedRoomCost,
+  //       patientEmail: this.formData.patientEmail,
+  //       patientPhoneNumber: this.formData.patientPhoneNumber.toString()
+  //     },
+  //     inclusions: this.formData.inclusions,
+  //     exclusions: this.formData.exclusions,
+  //   };
+  //   console.log(estimationData);
+  //   this.estimationService.updateEstimationDetails(estimationData.estimationId, estimationData).subscribe(
+  //     (response) => {
+  //       console.log('Estimation updated successfully:', response);
+  //       this.clearForm();
+  //     },
+  //     (error) => {
+  //       console.error('Error updating estimation:', error);
+  //     }
+  //   );
+
+  // }
   loadSignatureToCanvas(canvasRef: ElementRef<HTMLCanvasElement>, base64Data: string): void {
     if (!canvasRef || !canvasRef.nativeElement) {
       console.error("Canvas reference is missing!");
@@ -1123,6 +1130,7 @@ export class EstimationFormComponent {
             costForDeluxe: this.formData.costForDeluxe,
             selectedRoomCost: this.selectedRoomCost,
             patientEmail: this.formData.patientEmail,
+            submittedDateAndTime: new Date()
           },
           inclusions: this.formData.inclusions,
           exclusions: this.formData.exclusions,
@@ -1539,6 +1547,91 @@ export class EstimationFormComponent {
   
 
 
+
+  rejectRequest(): void {
+    // Show popup to input rejection reason
+    this.rejectionReason = ''; // Reset previous reason
+    this.showRejectReasonPopup = true;
+  }
+  submitRejection(): void {
+    if (!this.rejectionReason.trim()) {
+      alert('Please enter a valid reason for rejection.');
+      return;
+    }
+  
+    this.formData.statusOfEstimation = 'rejected'; // Assuming 'staffRemarks' is the field to store rejection reason
+  
+    const estimationData = {
+      estimationId: this.estimationData.estimationId,
+      updateFields: {
+        patientUHID: this.formData.patientUHID,
+        patientName: this.formData.patientName,
+        ageOfPatient: this.formData.ageOfPatient,
+        genderOfPatient: this.formData.genderOfPatient,
+        consultantName: this.formData.consultantName,
+        estimationPreferredDate: this.formData.estimationPreferredDate,
+        icuStay: this.formData.icuStay,
+        wardStay: this.formData.wardStay,
+        estimationCost: this.formData.estimationCost,
+        estimationName: this.formData.estimationName,
+        remarks: this.formData.remarks,
+        roomType: this.formData.roomType,
+        estimatedDate: this.formData.estimatedDate,
+        discountPercentage: this.formData.discountPercentage,
+        totalEstimationAmount: this.formData.totalEstimationAmount,
+        signatureOf: this.formData.signatureOf,
+        employeeName: this.formData.employeeName,
+        approverName: this.formData.approverName,
+        patientSign: this.formData.patientSign,
+        employeeSign: this.formData.employeeSign,
+        approverSign: this.formData.approverSign,
+        statusOfEstimation: this.formData.statusOfEstimation,
+        employeeId: this.formData.employeeId,
+        approverId: this.formData.approverId,
+        totalDaysStay: this.formData.totalDaysStay,
+        attenderName: this.formData.attenderName,
+        surgeryTime: this.formData.surgeryTime,
+        staffRemarks: this.formData.staffRemarks, // Updated rejection reason
+        patientRemarks: this.formData.patientRemarks,
+        implants: this.formData.implants,
+        procedures: this.formData.procedures,
+        instrumentals: this.formData.instrumentals,
+        surgeryPackage: this.selectedSurgeryPackage,
+        multipleEstimationCost: this.formData.multipleEstimationCost,
+        costForGeneral: this.formData.costForGeneral,
+        costForSemiPrivate: this.formData.costForSemiPrivate,
+        costForVip: this.formData.costForVip,
+        costForPrivate: this.formData.costForPrivate,
+        costForPresidential: this.formData.costForPresidential,
+        costForDeluxe: this.formData.costForDeluxe,
+        selectedRoomCost: this.selectedRoomCost,
+        patientEmail: this.formData.patientEmail,
+        patientPhoneNumber: this.formData.patientPhoneNumber.toString(),
+        rejectReason: this.rejectionReason,
+      },
+      inclusions: this.formData.inclusions,
+      exclusions: this.formData.exclusions,
+    };
+  
+    this.estimationService.updateEstimationDetails(estimationData.estimationId, estimationData)
+      .subscribe(
+        (response) => {
+          console.log('Estimation rejected successfully:', response);
+          this.clearForm();
+          this.showRejectReasonPopup = false;
+          this.rejectionReason = '';
+        },
+        (error) => {
+          console.error('Error rejecting estimation:', error);
+        }
+      );
+  }
+  
+  cancelRejection(): void {
+    this.showRejectReasonPopup = false;
+    this.rejectionReason = '';
+  }
+    
 
 }
 

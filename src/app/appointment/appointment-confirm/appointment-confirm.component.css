@@ -385,6 +385,15 @@ tbody tr:hover {
   line-height: normal;
   margin: 0;
 }
+h3{
+  color: #271e4a;
+  font-family: Kanit;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  margin: 0;
+}
 .form-row {
   display: flex;
   align-items: center;
@@ -615,6 +624,29 @@ width:39px
  .print img{
   width: 39px;
  }
+ .input-container {
+  position: relative;
+  margin: 20px 0;
+  flex: 1; /* Ensures equal width for both inputs */
+  min-width: 200px; /* Optional, to prevent shrinking too small */
+  margin-top: 10px;
+}
+.custom-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  background-color: #fff; /* Background color like the first image */
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  font-family: Kanit;
+}
+
+.custom-input:focus {
+  border-color: #007bff; /* Focus border color like the second image */
+  box-shadow: 0 0 3px #007bff;
+}
  @media (max-width: 1030px) {
 
   ::ng-deep .custom-dropdown .p-dropdown{

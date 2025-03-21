@@ -1,4 +1,5 @@
-import { Component, Input, OnChanges, SimpleChanges, Output, EventEmitter, HostListener } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, Output, EventEmitter, HostListener  } from '@angular/core';
+import { trigger, state, style, transition, animate, query, stagger } from '@angular/animations';
 import { AppointmentConfirmService } from '../../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../../services/doctor-details/doctor-service.service';
 import { EstimationService } from '../../../services/estimation/estimation.service';
@@ -60,7 +61,26 @@ interface Appointment {
 @Component({
   selector: 'app-today-consultations',
   templateUrl: './today-consultations.component.html',
-  styleUrl: './today-consultations.component.css'
+  styleUrl: './today-consultations.component.css',
+  animations: [
+    trigger('sortAnimation', [
+      transition(':enter', [
+        style({ opacity: 0, transform: 'translateY(-10px)' }),
+        animate('300ms ease-out', style({ opacity: 1, transform: 'translateY(0)' }))
+      ]),
+      transition(':leave', [
+        animate('300ms ease-in', style({ opacity: 0, transform: 'translateY(10px)' }))
+      ]),
+      transition('* => *', [
+        query('tr', [
+          style({ transform: 'translateY(-10px)', opacity: 0 }),
+          stagger('100ms', [
+            animate('300ms ease-out', style({ transform: 'translateY(0)', opacity: 1 }))
+          ])
+        ], { optional: true })
+      ])
+    ])
+  ]
 })
 export class TodayConsultationsComponent {
   confirmedAppointments: Appointment[] = [];
@@ -136,7 +156,8 @@ export class TodayConsultationsComponent {
   selectedDepartment:any = null;
   selectedDoctor: any = null;
   isPopupOpen: boolean = false;
-  isButtonClicked: boolean = false
+  isButtonClicked: boolean = false;
+  triggerAnimation: boolean = false;
 
 
 
@@ -294,11 +315,12 @@ export class TodayConsultationsComponent {
         // this.monitorWaitingTimes()
         // this.checkWaitingTimes()
         // console.log(this.completedAppointments, 'complete')
-        this.filteredAppointments.sort((a, b) => {
-          const timeA = this.parseTimeToMinutes(a.time);
-          const timeB = this.parseTimeToMinutes(b.time);
-          return timeA - timeB; // Ascending order
-        });
+        // this.filteredAppointments.sort((a, b) => {
+        //   const timeA = this.parseTimeToMinutes(a.time);
+        //   const timeB = this.parseTimeToMinutes(b.time);
+        //   return timeA - timeB; // Ascending order
+        // });
+        this.sortAppointments()
         this.filterAppointmentsByDate(new Date());
         this.isLoading = false;
         // console.log(`Loaded ${doctor.patients.length} patients for doctor ${doctor.name}`);
@@ -775,9 +797,12 @@ export class TodayConsultationsComponent {
       ongoingConsultation.endConsultation = true // Set endConsultationTime to the current time // Set checkedOut to false for the previous patient
       // Update the appointment in the backend for the previous patient
       console.log(ongoingConsultation)
-      const { expanded, ...updatedAppointment } = ongoingConsultation;
+      const { expanded, overTime, elapsedTime, user, ...updatedAppointment } = ongoingConsultation;
       updatedAppointment.checkedOutTime = new Date(Number(updatedAppointment.checkedOutTime))
       this.appointmentService.updateAppointment(updatedAppointment);
+      this.sortAppointments();
+
+      
 
       // console.log(`Updated endConsultationTime for patient ID: ${ongoingConsultation.id}`);
     }
@@ -837,7 +862,33 @@ export class TodayConsultationsComponent {
     const { expanded, overTime, elapsedTime, user, ...updatedAppointment } = appointment;
     updatedAppointment.checkedOutTime = new Date(Number(updatedAppointment.checkedOutTime))
     this.appointmentService.updateAppointment(updatedAppointment)
+    this.sortAppointments();
   }
+  // sortAppointments(): void {
+  //   this.filteredAppointments.sort((a, b) => {
+  //     // Move finished consultations to the bottom
+  //     if (a.endConsultation && !b.endConsultation) return 1;
+  //     if (!a.endConsultation && b.endConsultation) return -1;
+  //     return 0; // Keep existing order for others
+  //   });
+  // }
+  sortAppointments(): void {
+    this.filteredAppointments.sort((a, b) => {
+      // 1. Move finished consultations to the bottom
+      if (a.endConsultation && !b.endConsultation) return 1;
+      if (!a.endConsultation && b.endConsultation) return -1;
+  
+      // 2. Sort by appointment time (earliest first)
+      const timeA = this.parseTimeToMinutes(a.time);
+      const timeB = this.parseTimeToMinutes(b.time);
+      return timeA - timeB;
+    });
+    this.cdRef.detectChanges();
+  }
+  trackById(index: number, appointment: any): number {
+    return appointment.id; // Ensure that each row has a unique ID
+  }
+  
   transfer(appointment: Appointment): void {
     // console.log(appointment)
 

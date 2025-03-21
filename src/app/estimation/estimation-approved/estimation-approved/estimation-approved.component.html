@@ -138,13 +138,14 @@
           </td>
           <td>
             <span class="status-badge" [ngClass]="{
-    'accepted': estimation.statusOfEstimation === 'accepted',
-    'approved': estimation.statusOfEstimation === 'approved'
-  }">
-              {{ estimation.statusOfEstimation }}
+              'accepted': estimation.statusOfEstimation === 'accepted',
+              'approved': estimation.statusOfEstimation === 'approved'
+            }">
+              {{ estimation.statusOfEstimation === 'approved' ? 'Action Needed' : estimation.statusOfEstimation }}
             </span>
           </td>
-          <td class="button">
+          
+          <td class="button" *ngIf=" estimation.statusOfEstimation === 'accepted'">
             <button class="btn-action" (click)="openFollowUpPopup(estimation)" pTooltip="Follow-Ups"
               tooltipPosition="top">
               <img src="/follow-up.svg" alt="Confirm">
@@ -164,6 +165,18 @@
             </button>
             <!-- <img src="appt-cancel.png" alt="delete" class="action-icon" (click)="cancelAppointment(estimation)"
                           pTooltip="Cancel" tooltipPosition="top"> -->
+          </td>
+          <td class="button" *ngIf=" estimation.statusOfEstimation === 'approved'">
+            <!-- <button class="btn-action" (click)="openAppointmentForm(estimation)" pTooltip="Patient Signature"
+              tooltipPosition="top">
+              <img src="/patient-sign.svg" alt="Confirm">
+            </button> -->
+            <div class="status-badge" (click)="openAppointmentForm(estimation)">
+              <div class="sign">
+                <img class="image" src="/sign.svg" alt="Confirm">
+                Patient Signature
+              </div>
+            </div>
           </td>
         </tr>
       </tbody>

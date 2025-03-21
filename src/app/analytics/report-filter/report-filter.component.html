@@ -5,7 +5,7 @@
       <div style="font-size: 20px; cursor: pointer;" (click)="closingReport()" class="" matTooltip="close" matTooltipPosition="above"><i class="fa-solid fa-xmark"></i></div>
     </div>
     <div class="report-filter">
-      <div (click)="downloadExcel()" style="font-size: 20px; cursor: pointer;" class="" matTooltip="download" matTooltipPosition="above"><i class="fa-solid fa-download"></i>
+      <div (click)="downloadExcel(importedData)" style="font-size: 20px; cursor: pointer;" class="" matTooltip="download" matTooltipPosition="above"><i class="fa-solid fa-download"></i>
       </div>
 
       <select name="" id="" [disabled]="!blockFilter" (change)="packageOnchange($event)">

@@ -76,7 +76,7 @@
         <div class="opd_request_via bg_color">
             <app-opd-request [doctorId]="selectedDoctor" [date]="selectedDate" (reportData)="receiveReportData($event)"
                 (reportsColumn)="receiveReportColumn($event)" (reportView)="reportView($event)"
-                (reportInitializeDate)="reportDateInititilize($event)" (blockFilters)="blockFilters($event)"
+                (blockFilters)="blockFilters($event)"
                 (reportName)="importReportName($event)" />
         </div>
 
@@ -84,7 +84,7 @@
         <div class="time_wise_opd bg_color">
             <app-opd-time-wise (reportData)="receiveReportData($event)" (reportsColumn)="receiveReportColumn($event)"
                 (reportView)="reportView($event)" [selectedDate]="selectedDate"
-                (reportInitializeDate)="reportDateInititilize($event)" [selectedDoctor]="selectedDoctor"
+                [selectedDoctor]="selectedDoctor"
                 (blockFilters)="blockFilters($event)" (reportName)="importReportName($event)" />
         </div>
 
@@ -97,17 +97,15 @@
         <div class="opd_datewise bg_color">
             <app-opd-overview [doctorId]="selectedDoctor" [selectedDate]="selectedDate"
                 (reportData)="receiveReportData($event)" (reportsColumn)="receiveReportColumn($event)"
-                (reportView)="reportView($event)" (reportInitializeDate)="reportDateInititilize($event)"
-                (reportDoctorId)="reportDoctor($event)" (blockFilters)="blockFilters($event)"
-                (reportName)="importReportName($event)" />
+                (reportView)="reportView($event)"                 (reportDoctorId)="reportDoctor($event)" (blockFilters)="blockFilters($event)"
+                (reportName)="importReportName($event)" [importedRawData] = "allAppointmentRawData" />
         </div>
 
         <!-- opd type -->
         <div class="opd_type bg_color">
             <app-opd-type [doctorId]="selectedDoctor" [selectedDate]="selectedDate"
                 (reportData)="receiveReportData($event)" (reportsColumn)="receiveReportColumn($event)"
-                (reportView)="reportView($event)" (reportInitializeDate)="reportDateInititilize($event)"
-                (blockFilters)="blockFilters($event)" (reportName)="importReportName($event)" />
+                (reportView)="reportView($event)"                 (blockFilters)="blockFilters($event)" (reportName)="importReportName($event)" />
         </div>
     </div>
 
@@ -117,8 +115,7 @@
         <!-- opd to estimation -->
         <div class="opd_estimations bg_color">
             <app-opd-estimation-pie (reportData)="receiveReportData($event)"
-                (reportsColumn)="receiveReportColumn($event)" (reportInitializeDate)="reportDateInititilize($event)"
-                [selectedDate]="selectedDate" [selectedDoctor]="selectedDoctor"
+                (reportsColumn)="receiveReportColumn($event)"                 [selectedDate]="selectedDate" [selectedDoctor]="selectedDoctor"
                 (sendReportData)="importEstiData($event)" (viewReportSection)="displayEstiReport($event)" />
         </div>
 
@@ -126,7 +123,7 @@
         <div class="estimation bg_color">
             <app-estimation-bar (reportData)="receiveReportData($event)" (reportsColumn)="receiveReportColumn($event)"
                 (reportView)="reportView($event)" [selectedDate]="selectedDate"
-                (reportInitializeDate)="reportDateInititilize($event)" (blockFilters)="blockFilters($event)" (reportName)="importReportName($event)"  />
+                (blockFilters)="blockFilters($event)" (reportName)="importReportName($event)"  />
         </div>
 
     </div>
@@ -139,7 +136,7 @@
             <app-average-waiting-time (reportData)="receiveReportData($event)"
                 (reportsColumn)="receiveReportColumn($event)" (reportView)="reportView($event)"
                 [department]="selectedDepartment" [date]="selectedDate"
-                (reportInitializeDate)="reportDateInititilize($event)" (blockFilters)="blockFilters($event)"
+                (blockFilters)="blockFilters($event)"
                 (blockFilters)="blockFilters($event)" (reportName)="importReportName($event)"  />
         </div>
 
@@ -152,7 +149,7 @@
         <div class="gender_overview bg_color">
             <app-gender-overview (reportData)="receiveReportData($event)" (reportsColumn)="receiveReportColumn($event)"
                 (reportView)="reportView($event)" [selectedDate]="selectedDate"
-                (reportInitializeDate)="reportDateInititilize($event)" (blockFilters)="blockFilters($event)"
+                (blockFilters)="blockFilters($event)"
                 (reportName)="importReportName($event)"  />
         </div>
     </div>
@@ -163,7 +160,7 @@
         <div class="mhc_waiting_time bg_color">
             <app-mhc-waiting-time [selectedDate]="selectedDate" (reportData)="receiveReportData($event)"
             (reportsColumn)="receiveReportColumn($event)" (reportView)="reportView($event)"
-            (reportInitializeDate)="reportDateInititilize($event)" (blockFilters)="blockFilters($event)"
+            (blockFilters)="blockFilters($event)"
             (reportName)="importReportName($event)"/>
         </div>
 
@@ -171,7 +168,7 @@
         <div class="mhc_overview bg_color">
             <app-mhc-overview (reportData)="receiveReportData($event)" (reportsColumn)="receiveReportColumn($event)"
                 (reportView)="reportView($event)" [selectedDate]="selectedDate"
-                (reportInitializeDate)="reportDateInititilize($event)" (blockFilters)="blockFilters($event)"
+                (blockFilters)="blockFilters($event)"
                 (reportName)="importReportName($event)"  />
         </div>
     </div>

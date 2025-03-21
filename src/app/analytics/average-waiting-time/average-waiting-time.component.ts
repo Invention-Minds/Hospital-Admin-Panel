@@ -54,7 +54,7 @@ export class AverageWaitingTimeComponent implements OnInit, OnChanges {
   ngOnInit(): void {
     const yersterDay = getYesterdayDate()
     this.date = getLastSevenDays()
-    this.loadWaitingTime(this.date);
+    // this.loadWaitingTime(this.date);
     this.department = 'INTERNAL MEDICINE'
     this.selectedViewMoreDepartment = 'INTERNAL MEDICINE'
     this.selectedViewDate = getLastThirtyDaysFromSelected()

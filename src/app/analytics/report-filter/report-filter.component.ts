@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, OnInit } from '@angular/core';
 import * as XLSX from 'xlsx';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
-import { getYesterdayDate } from '../functions';
+import { getLastThirtyDaysFromSelected, getYesterdayDate } from '../functions';
 import { HealthCheckupServiceService } from '../../services/health-checkup/health-checkup-service.service';
 
 @Component({
@@ -47,10 +47,10 @@ export class ReportFilterComponent implements OnInit, OnChanges {
     this.loadDepartments();
     this.loadMhcPackages();
     this.loadDoctors()
-    this.individualDates = [getYesterdayDate()];
+    this.individualDates = getLastThirtyDaysFromSelected();
     this.importedData = this.convertDateFormat(this.reportData);
     console.log(this.importedData)
-    this.sortByDate();
+    // this.sortByDate();
     // this.filterData();
   }
 
@@ -58,7 +58,7 @@ export class ReportFilterComponent implements OnInit, OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['reportData'] && !changes['reportData'].firstChange) {
       this.importedData = this.convertDateFormat(this.reportData);
-      this.sortByDate();
+      // this.sortByDate();
       this.filterData();
     }
   }
@@ -133,7 +133,14 @@ export class ReportFilterComponent implements OnInit, OnChanges {
       const deptMatch = this.departmentValue === 'all' || this.departmentValue === entry.departmentName;
       return dateMatch && doctorMatch && deptMatch;
     });
-    this.importedData = this.convertDateFormat(filteredData);
+
+    const sortedData = filteredData.sort((a: any, b: any) => {
+      const dateA = new Date(a.date); // Convert date strings to Date objects
+      const dateB = new Date(b.date);
+      return dateA.getTime() - dateB.getTime(); // Compare the dates
+    });
+    // const sortedData:any = this.sortByDate(filteredData)
+    this.importedData = this.convertDateFormat(sortedData);
     console.log('Filtered Imported Data:', this.importedData);
   }
 
@@ -149,7 +156,7 @@ export class ReportFilterComponent implements OnInit, OnChanges {
     console.log(filteredData, "filtered data")
     this.importedData = this.convertDateFormat(filteredData);
     console.log('Filtered Imported Data:', this.importedData);
-    this.sortByDate();
+    // this.sortByDate();
   }
 
   // Generate individual dates between start and end
@@ -173,8 +180,8 @@ export class ReportFilterComponent implements OnInit, OnChanges {
   }
 
   // Sort data by date
-  sortByDate(): void {
-    this.importedData.sort((a: any, b: any) => {
+  sortByDate(data:any): void {
+    data.sort((a: any, b: any) => {
       const dateA = new Date(a.date);
       const dateB = new Date(b.date);
       return dateA.getTime() - dateB.getTime();
@@ -222,9 +229,9 @@ export class ReportFilterComponent implements OnInit, OnChanges {
   }
 
   // Download data as Excel file
-  downloadExcel(): void {
+  downloadExcel(data:any): void {
     const header = this.columns.map(col => col.header);
-    const rows = this.importedData.map((row: any) => this.columns.map(col => row[col.key]));
+    const rows = data.map((row: any) => this.columns.map(col => row[col.key]));
     const ws: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet([header, ...rows]);
 
     const headerStyle = {

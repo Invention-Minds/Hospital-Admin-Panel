@@ -31,6 +31,7 @@ export class OpdOverviewComponent {
   rawData: any
   @Input() selectedDate: any[] = [""]
   @Input() doctorId: any
+  @Input() importedRawData : any
 
   // report variables
   reportAppointmentData: any;
@@ -61,11 +62,16 @@ export class OpdOverviewComponent {
     this.appointmentData()
     this.selectedDate = getLastSevenDays()
     this.selectedViewDate = getLastThirtyDaysFromSelected()
+    
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if ((changes['doctorId'] && !changes['doctorId'].firstChange) || (changes['selectedDate'] && !changes['selectedDate'].firstChange)) {
       this.appointmentData()
+    }
+
+    if(changes['importedRawData']){
+      console.log(this.importedRawData, "form opd overview")
     }
   }
 
@@ -250,9 +256,7 @@ export class OpdOverviewComponent {
         complete: () => {
           const reportColumn = [
             { header: "Date", key: "date" },
-            { header: "Doctor ID", key: "doctorId" }, // Added Doctor ID
             { header: "Doctor Name", key: "doctorName" },
-            { header: "Department", key: "departmentName" }, // Added Department
             { header: "Total Appointments", key: "totalRequest" },
             { header: "Confirmed", key: "confirmed" },
             { header: "Cancelled", key: "cancelled" },

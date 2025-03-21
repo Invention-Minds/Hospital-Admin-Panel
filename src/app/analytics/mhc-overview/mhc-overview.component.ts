@@ -47,7 +47,7 @@ export class MhcOverviewComponent implements OnChanges {
 
   ngOnInit() {
     this.selectedDate = [getYesterdayDate()]
-    this.getAllPackages();
+    // this.getAllPackages();
     this.selectedViewDate = getLastThirtyDaysFromSelected()
   }
 

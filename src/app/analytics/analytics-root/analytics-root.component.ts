@@ -4,14 +4,14 @@ import { availability, unavailableDates, doctors } from '../../Analytics-Folder/
 import { getDayOfWeek, getLastSevenDays, getYesterdayDate, getTodayDate, reorderDateFormat } from '../functions';
 import { AnyCnameRecord } from 'node:dns';
 import { MessageService } from 'primeng/api';
-
+import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 @Component({
   selector: 'app-analytics-root',
   templateUrl: './analytics-root.component.html',
   styleUrl: './analytics-root.component.css'
 })
 export class AnalyticsRootComponent implements OnChanges{
-  constructor(private doctor : DoctorServiceService, private messageService : MessageService){}
+  constructor(private doctor : DoctorServiceService, private messageService : MessageService, private appointment : AppointmentConfirmService){}
 
   department:any
   departmentValue:any
@@ -65,6 +65,7 @@ export class AnalyticsRootComponent implements OnChanges{
     this.selectedDoctor = 'all'
     this.loadAvailableDoctors('2025-03-15')
     this.sendYesterdayDate()
+    this.getAllAppointments()
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -74,6 +75,10 @@ export class AnalyticsRootComponent implements OnChanges{
 
     if(changes['currentDate']){
       this.todayAnalytics()
+    }
+
+    if(changes['allAppointmentRawData']){
+      this.getAllAppointments()
     }
   }
 
@@ -371,4 +376,15 @@ export class AnalyticsRootComponent implements OnChanges{
     this.reportName = event
   }
 
+  // api calls
+
+  // vars
+  allAppointmentRawData:any
+
+  getAllAppointments():void{
+    this.appointment.getAllAppointments().subscribe((data:any) => {
+      this.allAppointmentRawData = data
+      console.log(this.allAppointmentRawData, "appointment data fro root")
+    })
+  }
 }

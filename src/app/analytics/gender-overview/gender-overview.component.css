@@ -284,6 +284,7 @@
     padding: 1% 0;
     justify-content: space-between;
     font-size: 18px;
+    height: 10%;
 }
 
 .viewMoreHeading {
@@ -301,6 +302,8 @@
     align-items: center;
     gap: 20px;
     padding-right: 20px;
+    height: 10%;
+    margin-bottom: 30px;
 }
 
 
@@ -338,7 +341,7 @@
 .viewChart {
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: start;
     width: 100%;
     height: 100%;
 }
@@ -352,8 +355,11 @@
     width: 30%;
     display: flex;
     flex-direction: column;
-    align-items: start;
+    align-items: column;
+    justify-content: center;
     gap: 10px;
+    height: 500px;
+
 }
 
 .v_tooltip {

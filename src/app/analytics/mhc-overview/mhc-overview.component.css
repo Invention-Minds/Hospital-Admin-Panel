@@ -248,6 +248,7 @@
     padding: 1% 0;
     justify-content: space-between;
     font-size: 18px;
+    height: 10%;
 }
 
 .viewMoreHeading{
@@ -265,6 +266,7 @@
     align-items: center;
     gap: 20px;
     padding-right: 20px;
+    height: 10%;
 }
 
 
@@ -302,9 +304,9 @@
 .viewChart{
     display: flex;
     justify-content: center;
-    align-items: start;
+    align-items: start  ;
     width: 100%;
-    height: 100%;
+    height: 80%;
 }
 
 /* .packageNames{
@@ -318,6 +320,10 @@
 
 .viewmoreLegends{
     width: 30%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
 }
 
 .v_tooltip {

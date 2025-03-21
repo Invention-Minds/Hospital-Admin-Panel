@@ -273,6 +273,14 @@
     font-size: 18px;
 }
 
+.c_header{
+    display: flex;
+    padding: 1% 0;
+    justify-content: space-between;
+    font-size: 18px;
+    height: 10%;
+}
+
 .viewMoreHeading{
     color: #333;
     font-family: Kanit;
@@ -288,6 +296,7 @@
     align-items: center;
     gap: 20px;
     padding-right: 20px;
+    height: 10%;
 }
 
 
@@ -325,7 +334,7 @@
 .viewChart{
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: start;
     width: 100%;
     height: 100%;
 }
@@ -337,10 +346,13 @@
 
 .viewmoreLegends{
     width: 30%;
+    height: 500px;
     display: flex;
     flex-direction: column;
     align-items: start;
+    justify-content: center;
     gap: 20px;
+    margin-left: 20px;
 }
 
 .v_tooltip {

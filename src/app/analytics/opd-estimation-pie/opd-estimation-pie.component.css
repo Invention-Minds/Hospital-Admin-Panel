@@ -334,7 +334,7 @@
     justify-content: center;
     gap: 10px;
     flex-direction: column;
-}
+}   
 
 .v_tooltip {
     position: relative;

@@ -214,7 +214,7 @@ export class ReportFilterComponent implements OnInit, OnChanges {
     this.loadDepartments();
     this.doctors = [];
     this.selectedDateRange = [];
-    this.individualDates = [getYesterdayDate()];
+    this.individualDates = getLastThirtyDaysFromSelected();
     this.selectedDoctor = 'all';
     this.departmentValue = 'all';
     this.filterData();

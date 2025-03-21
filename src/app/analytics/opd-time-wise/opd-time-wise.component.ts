@@ -12,7 +12,7 @@ import { MessageService } from 'primeng/api';
   styleUrl: './opd-time-wise.component.css'
 })
 export class OpdTimeWiseComponent implements OnChanges {
-  constructor(private appointmentService: AppointmentConfirmService, private docDetails: DoctorServiceService, private messageService : MessageService) { }
+  constructor(private appointmentService: AppointmentConfirmService, private docDetails: DoctorServiceService, private messageService: MessageService) { }
 
   @Input() selectedDate: any[] = [];
   @Input() selectedDoctor: any
@@ -123,78 +123,78 @@ export class OpdTimeWiseComponent implements OnChanges {
   }
 
   loadReportAppointments(): void {
-      // Group appointments by date, doctorId, and department
-      const groupedAppointments = this.rawData.reduce((acc: any, appointment: any) => {
-        const { doctorId, doctorName, date, time, department } = appointment;
+    // Group appointments by date, doctorId, and department
+    const groupedAppointments = this.rawData.reduce((acc: any, appointment: any) => {
+      const { doctorId, doctorName, date, time, department } = appointment;
 
-        // Initialize date group if not exists
-        if (!acc[date]) {
-          acc[date] = {};
-        }
-
-        // Initialize doctorId group for each date if not exists
-        if (!acc[date][doctorId]) {
-          acc[date][doctorId] = {};
-        }
-
-        // Initialize department group for each doctorId if not exists
-        if (!acc[date][doctorId][department]) {
-          acc[date][doctorId][department] = {
-            doctorName,
-            department,
-            before1PMCount: 0,
-            after1PMCount: 0
-          };
-        }
-
-        const appointmentTime = this.convertTo24HourFormat(time);
-        const cutoffTime = 16 * 60; // 1 PM in minutes
-
-        if (appointmentTime < cutoffTime) {
-          acc[date][doctorId][department].before1PMCount++;
-        } else {
-          acc[date][doctorId][department].after1PMCount++;
-        }
-
-        return acc;
-      }, {});
-
-      const result = [];
-      for (const date in groupedAppointments) {
-        for (const doctorId in groupedAppointments[date]) {
-          for (const departmentName in groupedAppointments[date][doctorId]) {
-            const { doctorName, before1PMCount, after1PMCount } = groupedAppointments[date][doctorId][departmentName];
-            result.push({
-              date,
-              doctorId,
-              doctorName,
-              departmentName,
-              before1PMCount,
-              after1PMCount
-            });
-          }
-        }
+      // Initialize date group if not exists
+      if (!acc[date]) {
+        acc[date] = {};
       }
 
-      this.appointmentsData = result;
+      // Initialize doctorId group for each date if not exists
+      if (!acc[date][doctorId]) {
+        acc[date][doctorId] = {};
+      }
 
-      const reportColumn = [
-        { header: "Date", key: "date" },
-        { header: "Doctor Name", key: "doctorName" },
-        { header: "Department", key: "departmentName" },
-        { header: "Before 4 PM", key: "before1PMCount" },
-        { header: "After 4 PM", key: "after1PMCount" },
-      ];
+      // Initialize department group for each doctorId if not exists
+      if (!acc[date][doctorId][department]) {
+        acc[date][doctorId][department] = {
+          doctorName,
+          department,
+          before1PMCount: 0,
+          after1PMCount: 0
+        };
+      }
 
-      this.reportData.emit(this.appointmentsData);
-      this.reportsColumn.emit(reportColumn);
-      this.reportView.emit({ onoff: true, range: "range" });
-      this.reportInitializeDate.emit(this.selectedDate);
-      this.blockFilters.emit([false, false])
-      this.reportName.emit("OPD Sessions")
-      this.isLoading = false;
-    
-}
+      const appointmentTime = this.convertTo24HourFormat(time);
+      const cutoffTime = 16 * 60; // 1 PM in minutes
+
+      if (appointmentTime < cutoffTime) {
+        acc[date][doctorId][department].before1PMCount++;
+      } else {
+        acc[date][doctorId][department].after1PMCount++;
+      }
+
+      return acc;
+    }, {});
+
+    const result = [];
+    for (const date in groupedAppointments) {
+      for (const doctorId in groupedAppointments[date]) {
+        for (const departmentName in groupedAppointments[date][doctorId]) {
+          const { doctorName, before1PMCount, after1PMCount } = groupedAppointments[date][doctorId][departmentName];
+          result.push({
+            date,
+            doctorId,
+            doctorName,
+            departmentName,
+            before1PMCount,
+            after1PMCount
+          });
+        }
+      }
+    }
+
+    this.appointmentsData = result;
+
+    const reportColumn = [
+      { header: "Date", key: "date" },
+      { header: "Doctor Name", key: "doctorName" },
+      { header: "Department", key: "departmentName" },
+      { header: "Before 4 PM", key: "before1PMCount" },
+      { header: "After 4 PM", key: "after1PMCount" },
+    ];
+
+    this.reportData.emit(this.appointmentsData);
+    this.reportsColumn.emit(reportColumn);
+    this.reportView.emit({ onoff: true, range: "range" });
+    this.reportInitializeDate.emit(this.selectedDate);
+    this.blockFilters.emit([false, false])
+    this.reportName.emit("OPD Sessions")
+    this.isLoading = false;
+
+  }
 
   loadAppointments(): void {
     this.isLoading = true
@@ -208,7 +208,7 @@ export class OpdTimeWiseComponent implements OnChanges {
           const isWithinDateRange = getLastSevenDays.includes(entry.date);
           const isValidDoctor = this.selectedDoctor === 'all' || this.selectedDoctor === entry.doctorId;
           return isWithinDateRange && isValidDoctor;
-        });        const groupedAppointments = appointment.reduce((acc: any, appointment: any) => {
+        }); const groupedAppointments = appointment.reduce((acc: any, appointment: any) => {
           const { date, time } = appointment;
           if (!acc[date]) {
             acc[date] = {
@@ -278,7 +278,7 @@ export class OpdTimeWiseComponent implements OnChanges {
     this.docDetails.getDoctors().subscribe(({
       next: (data: any) => {
         this.selectedViewDoctor = 'all'
-        this.departmentValue = this.department.filter((entry:any) => entry.id === parseInt(event.target.value))[0].name
+        this.departmentValue = this.department.filter((entry: any) => entry.id === parseInt(event.target.value))[0].name
         this.filteredDoctors = data.filter((doc: any) => doc.departmentId === parseInt(event.target.value))
         this.viewMoreData()
       },
@@ -449,7 +449,7 @@ export class OpdTimeWiseComponent implements OnChanges {
     this.viewMoreData()
   }
 
-  refresh():void{
+  refresh(): void {
     this.loadDepartments()
     this.filteredDoctors = []
     this.selectedViewDate = []

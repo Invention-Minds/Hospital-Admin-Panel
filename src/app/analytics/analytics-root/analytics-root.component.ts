@@ -76,10 +76,6 @@ export class AnalyticsRootComponent implements OnChanges{
     if(changes['currentDate']){
       this.todayAnalytics()
     }
-
-    if(changes['allAppointmentRawData']){
-      this.getAllAppointments()
-    }
   }
 
   todayAnalytics():void{
@@ -384,7 +380,7 @@ export class AnalyticsRootComponent implements OnChanges{
   getAllAppointments():void{
     this.appointment.getAllAppointments().subscribe((data:any) => {
       this.allAppointmentRawData = data
-      console.log(this.allAppointmentRawData, "appointment data fro root")
+      console.log(this.allAppointmentRawData, "appointment data")
     })
   }
 }

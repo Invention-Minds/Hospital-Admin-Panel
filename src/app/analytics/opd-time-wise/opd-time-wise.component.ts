@@ -46,12 +46,12 @@ export class OpdTimeWiseComponent implements OnChanges {
 
   ngOnInit() {
     this.selectedDate = getLastSevenDays()
-    this.loadAppointments()
+    // this.loadAppointments()
     this.selectedViewDate = getLastThirtyDaysFromSelected()
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['selectedDate'] || changes['selectedDoctor']) {
+    if ((changes['selectedDate']) || changes['selectedDoctor']) {
       this.loadAppointments()
     }
   }
@@ -123,9 +123,8 @@ export class OpdTimeWiseComponent implements OnChanges {
   }
 
   loadReportAppointments(): void {
-    this.appointmentService.getAllAppointments().subscribe((appointments: any[]) => {
       // Group appointments by date, doctorId, and department
-      const groupedAppointments = appointments.reduce((acc: any, appointment: any) => {
+      const groupedAppointments = this.rawData.reduce((acc: any, appointment: any) => {
         const { doctorId, doctorName, date, time, department } = appointment;
 
         // Initialize date group if not exists
@@ -183,8 +182,8 @@ export class OpdTimeWiseComponent implements OnChanges {
         { header: "Date", key: "date" },
         { header: "Doctor Name", key: "doctorName" },
         { header: "Department", key: "departmentName" },
-        { header: "Before 1 PM", key: "before1PMCount" },
-        { header: "After 1 PM", key: "after1PMCount" },
+        { header: "Before 4 PM", key: "before1PMCount" },
+        { header: "After 4 PM", key: "after1PMCount" },
       ];
 
       this.reportData.emit(this.appointmentsData);
@@ -194,7 +193,7 @@ export class OpdTimeWiseComponent implements OnChanges {
       this.blockFilters.emit([false, false])
       this.reportName.emit("OPD Sessions")
       this.isLoading = false;
-    });
+    
 }
 
   loadAppointments(): void {

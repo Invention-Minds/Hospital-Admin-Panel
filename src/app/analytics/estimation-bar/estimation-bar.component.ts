@@ -71,7 +71,7 @@ export class EstimationBarComponent implements OnChanges {
     console.log(this.selectedDate, "from estimation")
     // Ensure this is called
     this.selectedViewDate = getLastThirtyDaysFromSelected()
-    this.loadEstimation();
+    // this.loadEstimation();
 
   }
 
@@ -114,15 +114,15 @@ export class EstimationBarComponent implements OnChanges {
       ],
       series: [
         {
-          name: 'Approved',
+          name: 'Pending',
           type: 'bar',
           stack: 'total',
           emphasis: {
             focus: 'series'
           },
-          data: this.lastSevenDaysData.map((data: any) => data.approved),
+          data: this.lastSevenDaysData.map((data: any) => data.pending),
           itemStyle: {
-            color: '#0E2970'
+            color: '#FB9C2A'
           },
           label: {
             show: true, // Enable labels
@@ -143,7 +143,28 @@ export class EstimationBarComponent implements OnChanges {
           },
           data: this.lastSevenDaysData.map((data: any) => data.submitted),
           itemStyle: {
-            color: '#6F46C1'
+            color: '#0096F0'
+          },
+          label: {
+            show: true, // Enable labels
+            position: 'inside', // Place inside the bars
+            formatter: function (params:any) {
+              return params.value > 0 ? params.value : ''; // Show value only if > 0
+            },
+            fontSize: 12, // Adjust font size
+            color: '#fff' // White text for contrast
+          }
+        },
+        {
+          name: 'Approved',
+          type: 'bar',
+          stack: 'total',
+          emphasis: {
+            focus: 'series'
+          },
+          data: this.lastSevenDaysData.map((data: any) => data.approved),
+          itemStyle: {
+            color: '#700E10'
           },
           label: {
             show: true, // Enable labels
@@ -219,27 +240,6 @@ export class EstimationBarComponent implements OnChanges {
           }
         },
         {
-          name: 'Pending',
-          type: 'bar',
-          stack: 'total',
-          emphasis: {
-            focus: 'series'
-          },
-          data: this.lastSevenDaysData.map((data: any) => data.pending),
-          itemStyle: {
-            color: '#FB9C2A'
-          },
-          label: {
-            show: true, // Enable labels
-            position: 'inside', // Place inside the bars
-            formatter: function (params:any) {
-              return params.value > 0 ? params.value : ''; // Show value only if > 0
-            },
-            fontSize: 12, // Adjust font size
-            color: '#fff' // White text for contrast
-          }
-        },
-        {
           name: 'Over Due',
           type: 'bar',
           stack: 'total',
@@ -248,7 +248,7 @@ export class EstimationBarComponent implements OnChanges {
           },
           data: this.lastSevenDaysData.map((data: any) => data.overdue),
           itemStyle: {
-            color: '#FFC23A'
+            color: '#EB3AFF'
           },
           label: {
             show: true, // Enable labels
@@ -399,6 +399,8 @@ export class EstimationBarComponent implements OnChanges {
     console.log(this.selectedDate, "from estimation bar")
 
     this.initChart();
+
+    console.log(this.tableData, "tabledaat")
   }
 
   report(): void {
@@ -490,24 +492,24 @@ export class EstimationBarComponent implements OnChanges {
       ],
       series: [
         {
-          name: 'Approved',
+          name: 'Pending',
           type: 'bar',
           stack: 'total',
           emphasis: {
             focus: 'series'
           },
-          data: data.map((data: any) => data.approved),
+          data: data.map((data: any) => data.pending),
           itemStyle: {
-            color: '#0E2970'
+            color: '#FB9C2A'
           },
           label: {
-            show: true, // Enable labels
-            position: 'inside', // Place inside the bars
+            show: true,
+            position: 'inside',
             formatter: function (params:any) {
-              return params.value > 0 ? params.value : ''; // Show value only if > 0
+              return params.value > 0 ? params.value : '';
             },
-            fontSize: 12, // Adjust font size
-            color: '#fff' // White text for contrast
+            fontSize: 12,
+            color: '#fff'
           }
         },
         {
@@ -519,7 +521,7 @@ export class EstimationBarComponent implements OnChanges {
           },
           data: data.map((data: any) => data.submitted),
           itemStyle: {
-            color: '#6F46C1'
+            color: '#0096F0'
           },
           label: {
             show: true,
@@ -529,6 +531,27 @@ export class EstimationBarComponent implements OnChanges {
             },
             fontSize: 12,
             color: '#fff'
+          }
+        },
+        {
+          name: 'Approved',
+          type: 'bar',
+          stack: 'total',
+          emphasis: {
+            focus: 'series'
+          },
+          data: data.map((data: any) => data.approved),
+          itemStyle: {
+            color: '#700E10'
+          },
+          label: {
+            show: true, // Enable labels
+            position: 'inside', // Place inside the bars
+            formatter: function (params:any) {
+              return params.value > 0 ? params.value : ''; // Show value only if > 0
+            },
+            fontSize: 12, // Adjust font size
+            color: '#fff' // White text for contrast
           }
         },
         {
@@ -595,27 +618,6 @@ export class EstimationBarComponent implements OnChanges {
           }
         },
         {
-          name: 'Pending',
-          type: 'bar',
-          stack: 'total',
-          emphasis: {
-            focus: 'series'
-          },
-          data: data.map((data: any) => data.pending),
-          itemStyle: {
-            color: '#FB9C2A'
-          },
-          label: {
-            show: true,
-            position: 'inside',
-            formatter: function (params:any) {
-              return params.value > 0 ? params.value : '';
-            },
-            fontSize: 12,
-            color: '#fff'
-          }
-        },
-        {
           name: 'Over Due',
           type: 'bar',
           stack: 'total',
@@ -624,7 +626,7 @@ export class EstimationBarComponent implements OnChanges {
           },
           data: data.map((data: any) => data.overdue),
           itemStyle: {
-            color: '#FFC23A'
+            color: '#EB3AFF'
           },
           label: {
             show: true,

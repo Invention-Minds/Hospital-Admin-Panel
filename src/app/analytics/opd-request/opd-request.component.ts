@@ -178,56 +178,46 @@ export class OpdRequestComponent {
     const chartContainer = document.getElementById('chart-container') as HTMLElement;
     this.chartInstance = echarts.init(chartContainer);
 
-    const chartOptions = {
+    const viewMoreOption = {
       tooltip: {
-        trigger: 'item'
+          trigger: 'item'
       },
-      series: [
-        {
+      series: [{
           name: 'Access From',
           type: 'pie',
           radius: ['40%', '70%'],
           avoidLabelOverlap: false,
-          // label: {
-          //   show: true,
-          //   position: 'center'
-          // },
-          emphasis: {
-            label: {
+          label: {
               show: true,
+              position: 'outside',
+              formatter: '{c}',
               fontSize: 16,
-              fontWeight: 'bold',
-              formatter: function (params:any) {
-                return params.value === 0 ? '' : `${params.name}: ${params.value}`;
+              color: '#000'
+          },
+          emphasis: {
+              label: {
+                  show: true,
+                  fontSize: 25,
+                  fontWeight: 'bold'
               }
-              
-            }
           },
           labelLine: {
-            show: true
-          },
-          label: {
-            show: true, // Enable labels
-            position: 'outside', // Place labels inside the slices
-            formatter: '{c}', // Display the value (count) only
-            fontSize: 16, // Adjust font size as needed
-            color: '#000' // Set label color (white for contrast, adjust as needed)
+              show: true
           },
           itemStyle: {
-            borderRadius: 5, // Adjust the border radius for rounded corners
-            borderColor: '#fff', // Optional: Add a border color to separate slices
-            borderWidth: 1 // Optional: Add a border width
+              borderRadius: 5,
+              borderColor: '#fff',
+              borderWidth: 1
           },
           data: [
             { value: this.appVia.walkIn, name: 'Walk-in' },
             { value: this.appVia.online, name: 'Online' },
             { value: this.appVia.call, name: 'Call' },
           ]
-        }
-      ]
-    };
+      }]
+  };
 
-    this.chartInstance.setOption(chartOptions);
+    this.chartInstance.setOption(viewMoreOption);
   }
 
   report() {

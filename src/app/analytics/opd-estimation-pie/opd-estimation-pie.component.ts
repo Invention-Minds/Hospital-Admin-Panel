@@ -49,7 +49,7 @@ export class OpdEstimationPieComponent implements OnChanges {
   ngOnInit() {
     this.selectedDate = getLast7Days()
     this.selectedViewDate = getLastThirtyDaysFromSelected()
-    this.fetchingData()
+    // this.fetchingData()
     this.loadDepartments()
   }
 

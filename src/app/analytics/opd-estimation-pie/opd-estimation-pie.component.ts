@@ -60,6 +60,7 @@ export class OpdEstimationPieComponent implements OnChanges {
   }
 
   fetchingData(): void {
+    this.isLoading = true
     this.estimation.getAllEstimation().subscribe((data: any) => {
       this.rawData = data
       console.log(this.rawData, "rawdata")
@@ -69,6 +70,7 @@ export class OpdEstimationPieComponent implements OnChanges {
         this.chartData(this.prnNumber)
       })
     })
+    this.isLoading = false
   }
 
   initChart(data: any): void {
@@ -88,11 +90,15 @@ export class OpdEstimationPieComponent implements OnChanges {
       },
       series: [
         {
-          name: 'Health Checkups',
+          name: 'OPD Estimation Types',
           type: 'pie',
           radius: '70%',
           center: ['50%', '60%'],
-          data: filteredData, // Use filtered data
+          data: [
+            { value: data.sm, name: 'SM' },
+            { value: data.mm, name: 'MM' },
+            { value: data.mater, name: 'Maternity' },
+          ],
           emphasis: {
             itemStyle: {
               shadowBlur: 10,
@@ -121,7 +127,6 @@ export class OpdEstimationPieComponent implements OnChanges {
   }
 
   chartData(prn: any): void {
-    this.isLoading = true
     const prnFilteredData = this.rawData.filter((entry: any) => prn.includes(entry.patientUHID) && this.selectedDate.includes(utcToIstDate(entry.estimationCreatedTime))).map((entry: any) => {
       return {
         date: utcToIstDate(entry.estimationCreatedTime),
@@ -131,15 +136,14 @@ export class OpdEstimationPieComponent implements OnChanges {
     })
 
     const chartData = {
-      sm: prnFilteredData.filter((entry: any) => entry.estimationType === 'SM').length,
-      mm: prnFilteredData.filter((entry: any) => entry.estimationType === 'MM').length,
-      mater: prnFilteredData.filter((entry: any) => entry.estimationType === 'Maternity').length
+      sm: prnFilteredData.filter((entry: any) => entry.estimationType === 'SM').length || 0,
+      mm: prnFilteredData.filter((entry: any) => entry.estimationType === 'MM').length || 0,
+      mater: prnFilteredData.filter((entry: any) => entry.estimationType === 'Maternity').length || 0
     }
 
     this.initChart(chartData)
 
     console.log(chartData, "chartData")
-    this.isLoading = false
   }
 
   fetchDepartmentDocs(depId: any): void {
@@ -286,7 +290,7 @@ export class OpdEstimationPieComponent implements OnChanges {
       },
       series: [
         {
-          name: 'Health Checkups',
+          name: 'OPD Estimation Types',
           type: 'pie',
           radius: '70%',
           center: ['50%', '60%'],
@@ -337,9 +341,9 @@ export class OpdEstimationPieComponent implements OnChanges {
       }));
 
     const chartData = {
-      sm: prnFilteredData.filter((entry: any) => entry.estimationType === 'SM').length,
-      mm: prnFilteredData.filter((entry: any) => entry.estimationType === 'MM').length,
-      mater: prnFilteredData.filter((entry: any) => entry.estimationType === 'Maternity').length
+      sm: prnFilteredData.filter((entry: any) => entry.estimationType === 'SM').length || 0,
+      mm: prnFilteredData.filter((entry: any) => entry.estimationType === 'MM').length || 0,
+      mater: prnFilteredData.filter((entry: any) => entry.estimationType === 'Maternity').length || 0
     }
 
     this.ViewMorechart(chartData)

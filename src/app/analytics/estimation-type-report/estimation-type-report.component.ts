@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, OnIni
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
-import { getYesterdayDate } from '../functions';
+import { getLastThirtyDaysFromSelected, getYesterdayDate } from '../functions';
 import { HealthCheckupServiceService } from '../../services/health-checkup/health-checkup-service.service';
 
 @Component({
@@ -221,7 +221,7 @@ export class EstimationTypeReportComponent {
       this.loadDepartments();
       this.doctors = [];
       this.selectedDateRange = [];
-      this.individualDates = [getYesterdayDate()];
+      this.individualDates = getLastThirtyDaysFromSelected();
       this.selectedDoctor = 'all';
       this.departmentValue = 'all';
       this.filterData();

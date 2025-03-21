@@ -2,7 +2,7 @@ import { Component, Output, EventEmitter, Input, OnChanges, SimpleChanges } from
 import * as echarts from 'echarts';
 import { HealthCheckupServiceService } from '../../services/health-checkup/health-checkup-service.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
-import { getYesterdayDate, getIndividualDates, getLastThirtyDaysFromSelected } from '../functions'
+import { getYesterdayDate, getIndividualDates, getLastThirtyDaysFromSelected, getLastSevenDays } from '../functions'
 import { TextAlignment } from 'pdf-lib';
 import { MessageService } from 'primeng/api';
 
@@ -46,7 +46,7 @@ export class MhcOverviewComponent implements OnChanges {
   packagesName : any
 
   ngOnInit() {
-    this.selectedDate = [getYesterdayDate()]
+    this.selectedDate = getLastSevenDays()
     // this.getAllPackages();
     this.selectedViewDate = getLastThirtyDaysFromSelected()
   }
@@ -236,10 +236,16 @@ export class MhcOverviewComponent implements OnChanges {
     }, {});
 
     // Convert to array format for pie chart (optional, depending on initChart)
+    // this.dataForPiehart = Object.entries(packageConfirmedCounts).map(([name, details]: [string, any]) => ({
+    //   name: name,
+    //   value: details.value,
+    //   itemStyle: { color: details.color }
+    // }));
+
     this.dataForPiehart = Object.entries(packageConfirmedCounts).map(([name, details]: [string, any]) => ({
       name: name,
-      value: details.value,
-      itemStyle: { color: details.color }
+      value: details?.value ?? 0, // Use optional chaining and nullish coalescing to set value to 0 if not present
+      itemStyle: { color: details?.color || '#ccc' } // Set a default color if none is provided
     }));
 
     // console.log(this.dataForPiehart)
@@ -369,12 +375,11 @@ export class MhcOverviewComponent implements OnChanges {
     // Convert to array format for pie chart (optional, depending on initChart)
     const data: any = Object.entries(packageConfirmedCounts).map(([name, details]: [string, any]) => ({
       name: name,
-      value: details.value,
-      itemStyle: { color: details.color }
+      value: details?.value ?? 0, // Use optional chaining and nullish coalescing to set value to 0 if not present
+      itemStyle: { color: details?.color || '#ccc' } // Set a default color if none is provided
     }));
 
     this.ViewMorechart(data)
-
   }
 
   viewOnDatechange(event: any): void {

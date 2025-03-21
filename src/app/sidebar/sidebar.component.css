@@ -7,7 +7,7 @@
   left: 0;
   padding-top: 20px;
   color: white;
-  z-index: 1;
+  z-index: 3;
   transition: all 0.3s ease-in-out; /* Smooth transition for expanding */
   overflow: hidden;
 }

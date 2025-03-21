@@ -109,6 +109,15 @@ font-family: Kanit;
 font-weight: 400;
 text-transform: capitalize;
   }
+  .approved {
+    background-color: #FB9C2A;
+    color: white;
+  }
+  .accepted {
+    background-color: #FFD700;
+    color: #0E2970;
+
+  }
   .checkin-badge {
     display: inline-block;
     color: white;

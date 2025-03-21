@@ -5,7 +5,7 @@ import { DoctorServiceService } from '../../services/doctor-details/doctor-servi
 import { DatePipe } from '@angular/common';
 import { formatDate } from '@angular/common';
 import { error } from 'console';
-import { getIndividualDates, getYesterdayDate, getLastThirtyDaysFromSelected, reorderDateFormat, getLastSevenDays } from '../functions'
+import { getIndividualDates, getYesterdayDate, getLastThirtyDaysFromSelected, reorderDateFormat, getLastSevenDays, getTodayDate } from '../functions'
 import { MessageService } from 'primeng/api';
 
 @Component({
@@ -286,6 +286,8 @@ export class EstimationBarComponent implements OnChanges {
           };
         });
 
+        console.log(this.modJson)
+
         this.generateMonthDates();
         this.mapStatusesToDates();
       },
@@ -299,15 +301,19 @@ export class EstimationBarComponent implements OnChanges {
   }
 
   generateMonthDates() {
+    const todayDate = getTodayDate()
     const dates = this.modJson.filter((date: any) => date.estimationDate !== null).map((date: any) => date.estimationDate)
     const sort = dates.sort((a: any, b: any) => new Date(a).getTime() - new Date(b).getTime());
     const startDate = new Date(sort[0])
-    const endDate = sort[sort.length - 1]
+    const endDate = todayDate
     this.monthDates = getIndividualDates(new Date(startDate), new Date(endDate))
   }
 
   mapStatusesToDates() {
     const statusCount: any = {};
+
+    console.log(this.modJson)
+    console.log(this.monthDates)
 
     if (this.monthDates) {
       for (let date of this.monthDates) {
@@ -322,8 +328,10 @@ export class EstimationBarComponent implements OnChanges {
             const confirmedDate = entry.confirmedDate;
             const overdueDate = entry.overDueDate;
             const completedDate = entry.completedDate;
-            const pendingDate = entry.estimationDate
-            const submittedDate = entry.submittedDate
+            const pendingDate = entry.estimationDate;
+            const submittedDate = entry.submittedDate;
+
+            console.log(formattedDate,overdueDate)
 
             if (entry.status === 'cancelled' && formattedDate === cancelledDate) {
               // console.log('Cancelled matched:', entry);
@@ -341,7 +349,7 @@ export class EstimationBarComponent implements OnChanges {
             }
 
             if (entry.status === 'overDue' && formattedDate === overdueDate) {
-              // console.log('Overdue matched:', entry);
+              console.log('Overdue matched:', entry);
               statusCount[date].overdue += 1;
             }
 

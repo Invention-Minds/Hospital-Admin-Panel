@@ -719,8 +719,12 @@
     </div>
 
     <div class="section" *ngIf="formData.rejectReason && (formData.statusOfEstimation === 'submitted' || formData.statusOfEstimation === 'rejected')">
-      <p class="sign">Rejection Reason:</p>
-      <p class="sign-reason">{{formData.rejectReason}}</p>
+      <div class="note">
+        <p>
+          <strong>Rejection Reason:</strong><br>
+          {{formData.rejectReason}}
+        </p>
+      </div>
     </div>
 
     <div class="button">

@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges, Output, EventEmitter, HostListener  } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, Output, EventEmitter, HostListener, ViewChildren, ElementRef, QueryList } from '@angular/core';
 import { trigger, state, style, transition, animate, query, stagger } from '@angular/animations';
 import { AppointmentConfirmService } from '../../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../../services/doctor-details/doctor-service.service';
@@ -50,12 +50,12 @@ interface Appointment {
   prnNumber?: any;
   overTime?: any;
   elapsedTime?: any;
-  referredDeptId?:number;
-  referredDept?:string;  
-  referredDocId?:number; 
-  referredDoc?:string;       
-  isReferred?:boolean;
-  patientType?:string;    
+  referredDeptId?: number;
+  referredDept?: string;
+  referredDocId?: number;
+  referredDoc?: string;
+  isReferred?: boolean;
+  patientType?: string;
 }
 
 @Component({
@@ -82,6 +82,7 @@ interface Appointment {
     ])
   ]
 })
+
 export class TodayConsultationsComponent {
   confirmedAppointments: Appointment[] = [];
   @Output() consultationStarted = new EventEmitter<{ doctorId: number, appointmentId: number }>();
@@ -153,7 +154,7 @@ export class TodayConsultationsComponent {
   departments: any = [];
   allDoctors: any = [];
   filteredDoctors: any = [];
-  selectedDepartment:any = null;
+  selectedDepartment: any = null;
   selectedDoctor: any = null;
   isPopupOpen: boolean = false;
   isButtonClicked: boolean = false;
@@ -169,6 +170,11 @@ export class TodayConsultationsComponent {
   checkScreenSize() {
     this.isDesktopView = window.innerWidth > 500; // Use table if screen width > 768px
   }
+
+  @ViewChildren('row') rows!: QueryList<ElementRef>;
+  rowPositions: { [key: number]: number } = {};
+  rowTransforms: { [key: number]: string } = {};
+  rowTransitions: { [key: number]: string } = {};
 
   private eventSource: EventSource | null = null;
   // Method to handle sorting by a specific column
@@ -320,7 +326,17 @@ export class TodayConsultationsComponent {
         //   const timeB = this.parseTimeToMinutes(b.time);
         //   return timeA - timeB; // Ascending order
         // });
-        this.sortAppointments()
+        // this.sortAppointments()
+        this.filteredAppointments.sort((a, b) => {
+          // 1. Move finished consultations to the bottom
+          if (a.endConsultation && !b.endConsultation) return 1;
+          if (!a.endConsultation && b.endConsultation) return -1;
+
+          // 2. Sort by appointment time (earliest first)
+          const timeA = this.parseTimeToMinutes(a.time);
+          const timeB = this.parseTimeToMinutes(b.time);
+          return timeA - timeB;
+        });
         this.filterAppointmentsByDate(new Date());
         this.isLoading = false;
         // console.log(`Loaded ${doctor.patients.length} patients for doctor ${doctor.name}`);
@@ -802,7 +818,7 @@ export class TodayConsultationsComponent {
       this.appointmentService.updateAppointment(updatedAppointment);
       this.sortAppointments();
 
-      
+
 
       // console.log(`Updated endConsultationTime for patient ID: ${ongoingConsultation.id}`);
     }
@@ -872,28 +888,77 @@ export class TodayConsultationsComponent {
   //     return 0; // Keep existing order for others
   //   });
   // }
+  // sortAppointments(): void {
+  //   this.filteredAppointments.sort((a, b) => {
+  //     // 1. Move finished consultations to the bottom
+  //     if (a.endConsultation && !b.endConsultation) return 1;
+  //     if (!a.endConsultation && b.endConsultation) return -1;
+
+  //     // 2. Sort by appointment time (earliest first)
+  //     const timeA = this.parseTimeToMinutes(a.time);
+  //     const timeB = this.parseTimeToMinutes(b.time);
+  //     return timeA - timeB;
+  //   });
+  //   this.cdRef.detectChanges();
+  // }
   sortAppointments(): void {
-    this.filteredAppointments.sort((a, b) => {
-      // 1. Move finished consultations to the bottom
+    // Step 1: Record current positions
+    this.rows.forEach((rowRef, index) => {
+      const id = this.getPaginatedAppointments()[index].id;
+      this.rowPositions[id] = rowRef.nativeElement.offsetTop;
+    });
+
+    // Step 2: Sort the data
+    this.filteredAppointments = [...this.filteredAppointments].sort((a, b) => {
       if (a.endConsultation && !b.endConsultation) return 1;
       if (!a.endConsultation && b.endConsultation) return -1;
-  
-      // 2. Sort by appointment time (earliest first)
+
       const timeA = this.parseTimeToMinutes(a.time);
       const timeB = this.parseTimeToMinutes(b.time);
       return timeA - timeB;
     });
-    this.cdRef.detectChanges();
+
+    // Step 3: Wait for DOM update, then calculate new positions
+    setTimeout(() => {
+      const newPositions: { [key: number]: number } = {};
+      const transforms: { [key: number]: string } = {};
+      const transitions: { [key: number]: string } = {};
+
+      this.rows.forEach((rowRef, index) => {
+        const appointment = this.getPaginatedAppointments()[index];
+        const newY = rowRef.nativeElement.offsetTop;
+        const prevY = this.rowPositions[appointment.id] ?? newY;
+
+        const deltaY = prevY - newY;
+        if (deltaY !== 0) {
+          transforms[appointment.id] = `translateY(${deltaY}px)`;
+          transitions[appointment.id] = 'transform 0s';
+        }
+
+        newPositions[appointment.id] = newY;
+      });
+
+      this.rowTransforms = transforms;
+      this.rowTransitions = transitions;
+
+      // Step 4: Animate to new position
+      setTimeout(() => {
+        for (let id in this.rowTransforms) {
+          this.rowTransforms[id] = 'translateY(0)';
+          this.rowTransitions[id] = 'transform 700ms ease';
+        }
+      });
+    });
   }
   trackById(index: number, appointment: any): number {
     return appointment.id; // Ensure that each row has a unique ID
   }
-  
+
   transfer(appointment: Appointment): void {
     // console.log(appointment)
 
     appointment.isTransfer = true;
-    const { expanded,overTime, elapsedTime, user, ...updatedAppointment } = appointment;
+    const { expanded, overTime, elapsedTime, user, ...updatedAppointment } = appointment;
     updatedAppointment.checkedOutTime = new Date(Number(updatedAppointment.checkedOutTime))
     this.appointmentService.updateAppointment(updatedAppointment)
     this.closeTransferPopup()
@@ -961,7 +1026,7 @@ export class TodayConsultationsComponent {
       this.selectedAppointment.referredDocId = this.selectedDoctor.id;
       this.selectedAppointment.referredDoc = this.selectedDoctor.name;
       this.selectedAppointment.isReferred = true;
-  
+
       console.log("Appointment Data:", this.selectedAppointment);
       const { expanded, overTime, elapsedTime, user, ...updatedAppointment } = this.selectedAppointment;
       updatedAppointment.checkedOutTime = new Date(Number(updatedAppointment.checkedOutTime))
@@ -972,7 +1037,7 @@ export class TodayConsultationsComponent {
       console.error("Please select both department and doctor.");
     }
   }
-  
+
   closeTransferPopup() {
     this.showTransferAppointment = false;
   }
@@ -1044,7 +1109,7 @@ export class TodayConsultationsComponent {
     appointment.checkedOut = false;
     appointment.checkedOutTime = undefined;
     appointment.postPond = true;
-    const { expanded,overTime, elapsedTime, user, ...updatedAppointment } = appointment;
+    const { expanded, overTime, elapsedTime, user, ...updatedAppointment } = appointment;
     updatedAppointment.checkedOutTime = new Date(Number(updatedAppointment.checkedOutTime))
     this.appointmentService.updateAppointment(updatedAppointment)
   }

@@ -36,12 +36,14 @@
               No records to display
             </td>
           </tr>
-          <tr *ngFor="let appointment of getPaginatedAppointments(); trackBy: trackById; let i = index"   [ngClass]="{
+          <tr *ngFor="let appointment of getPaginatedAppointments(); trackBy: trackById; let i = index" #row   [ngClass]="{
             'ongoing': appointment.checkedOut === true && !appointment.endConsultation,
             'pending': appointment.postPond === true,
             'finished': appointment.checkedOut === true && appointment.endConsultation === true,
             'blinking-row': appointment.overTime,
-          }" >
+          }" 
+           [style.transform]="rowTransforms[appointment.id]"
+           [style.transition]="rowTransitions[appointment.id]">
             <td>{{ i + 1 }}</td>
             <td>{{appointment.prnNumber? appointment.prnNumber: '-'}}</td>
             <td>{{ appointment.patientName }}</td>

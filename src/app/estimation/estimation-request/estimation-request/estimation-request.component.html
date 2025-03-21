@@ -111,7 +111,12 @@
                         </span>
                       </td> -->
                       <td>
-                        <span class="status-badge">{{ estimation.statusOfEstimation }}</span>
+                        <span class="status-badge" [ngClass]="{
+                          'accepted': estimation.statusOfEstimation === 'pending',
+                          'approved': estimation.statusOfEstimation === 'rejected'
+                        }">
+                          {{estimation.statusOfEstimation }}
+                        </span>
                       </td>
                     <td class="button">
                         <button class="btn-action" (click)="openAppointmentForm(estimation)"  pTooltip="Submit" tooltipPosition="top">

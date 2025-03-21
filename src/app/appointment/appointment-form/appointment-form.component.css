@@ -19,7 +19,11 @@
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   position: relative;
   max-height: 700px;
-  overflow-y: scroll;
+  overflow-y: auto;
+}
+
+.appointment-modal::-webkit-scrollbar{
+    display: none;
 }
 .header{
     border-top-right-radius: 15px;

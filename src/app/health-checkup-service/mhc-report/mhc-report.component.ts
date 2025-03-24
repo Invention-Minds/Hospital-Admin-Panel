@@ -794,6 +794,7 @@ export class MhcReportComponent {
           doctorPhoneNumber: doctorPhoneNumber,
           patientPhoneNumber: appointment?.phoneNumber,
           status: 'cancelled',
+          prefix: appointment.prefix
         }
 
         this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
@@ -1138,6 +1139,11 @@ export class MhcReportComponent {
       this.isReportDone = true; // ✅ Disable Report Done button
     }
   }
-
+  isMissingTime(service: any): boolean {
+    return [service.labTime, service.radiologyTime, service.consultationTime, service.total].some(
+      val => !val || val === '-'
+    );
+  }
+  
 
 }

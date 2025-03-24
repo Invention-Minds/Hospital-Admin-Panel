@@ -946,7 +946,7 @@ export class AppointmentConfirmComponent {
     }
   
     if (!this.isCheckInEnabled(appointment)) {
-      this.messageService.add({ severity: 'warn', summary: 'Check-in Not Allowed', detail: 'You can check-in only 90 minutes before or 30 minutes after the slot time.' });
+      this.messageService.add({ severity: 'warn', summary: 'Check-in Not Allowed', detail: 'You can check-in only 90 minutes before or 90 minutes after the slot time.' });
       return;
     }
   
@@ -969,7 +969,7 @@ export class AppointmentConfirmComponent {
 
     // Define the time window (30 mins before and after)
     const startWindow = new Date(appointmentDate.getTime() - 90 * 60000); // 30 mins before
-    const endWindow = new Date(appointmentDate.getTime() + 30 * 60000);   // 30 mins after
+    const endWindow = new Date(appointmentDate.getTime() + 90 * 60000);   // 30 mins after
 
     // Enable if the current time is within the window
     return currentTime >= startWindow && currentTime <= endWindow;

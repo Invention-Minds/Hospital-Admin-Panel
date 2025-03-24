@@ -464,6 +464,7 @@ export class ServiceFormComponent implements OnInit {
               patientPhoneNumber: formattedPhoneNumber,
               status: status,
               radioServiceName: selectedPackage ? selectedPackage.name : null,
+              prefix: form.value.prefix
             }
             this.healthCheckupService.sendSmsMessage(smsPayload).subscribe({
               next: (response) => {
@@ -632,6 +633,7 @@ export class ServiceFormComponent implements OnInit {
               patientPhoneNumber: formattedPhoneNumber,
               status: 'confirmed',
               radioServiceName: selectedPackage ? selectedPackage.name : null,
+              prefix: form.value.prefix
             }
             this.healthCheckupService.sendSmsMessage(smsPayload).subscribe({
               next: (response) => {

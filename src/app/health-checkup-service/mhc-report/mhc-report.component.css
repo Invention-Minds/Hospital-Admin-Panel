@@ -649,6 +649,11 @@ button:disabled {
    .print img{
     width: 39px;
    }
+   .missing-time {
+    background-color: #f8d7da !important; /* light red background */
+    color: #721c24 !important;            /* dark red text for contrast */
+  }
+  
 /* 
 @media (max-width: 1024px) {
 

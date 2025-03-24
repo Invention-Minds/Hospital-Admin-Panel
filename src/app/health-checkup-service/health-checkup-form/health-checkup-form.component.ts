@@ -536,6 +536,7 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
               patientPhoneNumber: formattedPhoneNumber,
               status: status,
               packageName: selectedPackage ? selectedPackage.name : null,
+              prefix: form.value.prefix
             }
             this.healthCheckupService.sendSmsMessage(smsPayload).subscribe({
               next: (response) => {
@@ -704,6 +705,7 @@ filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
               patientPhoneNumber: formattedPhoneNumber,
               status: 'confirmed',
               packageName: selectedPackage ? selectedPackage.name : null,
+              prefix: form.value.prefix
             }
             this.healthCheckupService.sendSmsMessage(smsPayload).subscribe({
               next: (response) => {

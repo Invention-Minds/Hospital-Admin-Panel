@@ -705,7 +705,8 @@ confirmCompletion(): void {
           time: appointment?.time,
           doctorPhoneNumber: doctorPhoneNumber,
           patientPhoneNumber: appointment?.phoneNumber,
-          status: 'cancelled'
+          status: 'cancelled',
+          prefix: appointment.prefix
         }
 
         this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({

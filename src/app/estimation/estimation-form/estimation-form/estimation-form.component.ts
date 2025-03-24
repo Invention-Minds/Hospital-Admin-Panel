@@ -254,9 +254,9 @@ rejectionReason = '';
   }
   clearAllSignatures(): void {
     // Clear all signature pads and reset their corresponding formData properties
-    this.patientSignaturePad.clear();
-    this.staffSignaturePad.clear();
-    this.approverSignaturePad.clear();
+    this.patientSignaturePad?.clear();
+    this.staffSignaturePad?.clear();
+    this.approverSignaturePad?.clear();
 
     this.formData.patientSign = '';
     this.formData.employeeSign = '';

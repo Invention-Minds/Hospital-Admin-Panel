@@ -27,7 +27,9 @@ export interface Service {
   packageName?: string;
   packageId?: number;
   createdAt?: string;
+  prefix?:string;
 }
+
 
 @Component({
   selector: 'app-health-checkup-request',
@@ -440,6 +442,7 @@ this.fetchPendingAppointments();
           patientPhoneNumber: service.phoneNumber,
           status: 'Cancelled',
           packageName: service.packageName,
+          prefix: service.prefix
         }
         this.healthCheckupService.sendSmsMessage(smsPayload).subscribe({
           next: (response) => {

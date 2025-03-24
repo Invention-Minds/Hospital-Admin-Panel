@@ -159,6 +159,7 @@ export class TodayConsultationsComponent {
   isPopupOpen: boolean = false;
   isButtonClicked: boolean = false;
   triggerAnimation: boolean = false;
+  minDate: string = ''
 
 
 

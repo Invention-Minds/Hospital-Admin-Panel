@@ -83,6 +83,7 @@
 .button-after{
   background-color: transparent;
   border: none;
+  cursor: pointer;
 }
 .reload{
   border: 2px solid #fff;

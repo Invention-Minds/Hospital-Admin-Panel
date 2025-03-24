@@ -451,35 +451,11 @@
         <form class="calendar-input">
           <div class="date-selection">
             <label for="startDate">Starting Date:</label>
-            <input type="date" id="startDate" [(ngModel)]="startDate" placeholder="dd-mm-yyyy" name="startDate" min=”01-01-1920″, max=”01-01-2120″./>
-            <!-- <p-calendar 
-            id="startDate"
-            styleClass="custom-calendar" 
-            [(ngModel)]="startDate"
-            placeholder="Start Date"
-            dateFormat="dd-mm-yy">
-              <!-- <ng-template pTemplate="date" let-date>
-                  <span>
-                      {{ selectedDate | date: 'dd' }}
-                  </span>
-              </ng-template> -->
-          <!-- </p-calendar> -->
+            <input type="date" id="startDate" [(ngModel)]="startDate" placeholder="dd-mm-yyyy" name="startDate" [min]="today" max=”01-01-2120″./>
           </div>
           <div class="date-selection">
             <label for="endDate">Ending Date:</label>
-            <input type="date" id="endDate" [(ngModel)]="endDate" placeholder="dd-mm-yyyy" name="endDate" min=”01-01-1920″, max=”01-01-2120″. />
-            <!-- <p-calendar 
-            id="endDate"
-            styleClass="custom-calendar" 
-            [(ngModel)]="endDate"
-            placeholder="End Date"
-            dateFormat="dd-mm-yy">
-              <!-- <ng-template pTemplate="date" let-date>
-                  <span>
-                      {{ selectedDate | date: 'dd' }}
-                  </span>
-              </ng-template> -->
-          <!-- </p-calendar> --> 
+            <input type="date" id="endDate" [(ngModel)]="endDate" placeholder="dd-mm-yyyy" name="endDate" [min]='today' max=”01-01-2120″. />
           </div>
         </form>
       </div>

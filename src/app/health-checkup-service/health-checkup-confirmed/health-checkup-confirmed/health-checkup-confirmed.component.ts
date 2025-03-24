@@ -468,6 +468,7 @@ onClear() {
           patientPhoneNumber: service.phoneNumber,
           status: 'Cancelled',
           packageName: service.packageName,
+          prefix: service.prefix
         }
         this.healthCheckupService.sendSmsMessage(smsPayload).subscribe({
           next: (response) => {

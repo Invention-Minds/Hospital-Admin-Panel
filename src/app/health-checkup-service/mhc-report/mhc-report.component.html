@@ -84,7 +84,9 @@
                   No records to display
                 </td>
               </tr>
-                <tr *ngFor="let service of getPaginatedAppointments(); let i = index">
+                <tr *ngFor="let service of getPaginatedAppointments(); let i = index"  [ngClass]="{
+                  'missing-time': isMissingTime(service)
+                }">
                     <td>{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
                     <td>{{service.appointmentDate | date:'dd-MM-yyyy'}}</td>
                     <td>{{service.pnrNumber? service.pnrNumber : "-"}}</td>

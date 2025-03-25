@@ -127,6 +127,12 @@ import { ConfirmRadioComponent } from './health-checkup-service/confirm-radio/co
 import { ConfirmRadiologyComponent } from './radiology/confirm-radiology/confirm-radiology.component';
 import { OverviewRadiologyComponent } from './radiology/overview-radiology/overview-radiology.component';
 import { ReferredComponent } from './appointment/referred/referred.component';
+import { SamrakshaApptComponent } from './samraksha/samraksha-appt/samraksha-appt.component';
+import { SamraskhaApptOverviewComponent } from './samraksha/samraskha-appt-overview/samraskha-appt-overview.component';
+import { SamrakshaApptConfirmComponent } from './samraksha/samraksha-appt-confirm/samraksha-appt-confirm.component';
+import { SamrakshaApptCancelComponent } from './samraksha/samraksha-appt-cancel/samraksha-appt-cancel.component';
+import { SamrakshaApptCompleteComponent } from './samraksha/samraksha-appt-complete/samraksha-appt-complete.component';
+import { SamrakshaApptRepeatComponent } from './samraksha/samraksha-appt-repeat/samraksha-appt-repeat.component';
 
 
 @NgModule({
@@ -214,7 +220,13 @@ import { ReferredComponent } from './appointment/referred/referred.component';
     ConfirmRadiologyComponent,
     OverviewRadiologyComponent,
     ReferredComponent,
-    MhcWaitingTimeComponent
+    MhcWaitingTimeComponent,
+    SamrakshaApptComponent,
+    SamraskhaApptOverviewComponent,
+    SamrakshaApptConfirmComponent,
+    SamrakshaApptCancelComponent,
+    SamrakshaApptCompleteComponent,
+    SamrakshaApptRepeatComponent
   ],
   imports: [
     BrowserModule,

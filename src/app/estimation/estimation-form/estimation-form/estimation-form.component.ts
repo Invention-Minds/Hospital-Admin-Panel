@@ -74,6 +74,7 @@ export class EstimationFormComponent {
   approverName: string = '';
   showRejectReasonPopup = false;
 rejectionReason = '';
+roomCost: number =0;
 
 
 
@@ -1240,6 +1241,7 @@ rejectionReason = '';
     event.preventDefault()
     this.selectedItems[category].splice(index, 1);
     this.updateFormData()
+    // this.updateEstimationCost()
   }
 
   // ✅ Format data for form submission
@@ -1270,7 +1272,7 @@ rejectionReason = '';
       .join(", ") || '';
 
     console.log("Updated formData:", this.formData);
-    // this.updateEstimationCost()
+    this.updateEstimationCost()
   }
 
   trackByIndex(index: number, item: any) {
@@ -1501,45 +1503,84 @@ rejectionReason = '';
 
     // ✅ Store the total cost in formData for estimation
     this.formData.estimationCost = totalCost;
+    this.roomCost = totalCost
 
     console.log("Total Estimation Cost:", this.formData.estimationCost, this.formData.multipleEstimationCost);
   }
+  // updateEstimationCost() {
+  //   // ✅ Ensure estimationCost is initialized correctly
+  //   this.formData.estimationCost = this.formData.estimationCost || 0;
+  
+  //   let additionalCost = 0;
+  
+  //   // ✅ Mapping of formData fields to their corresponding checkboxes in includedItems
+  //   const categoryCheckboxMapping: { [key: string]: string } = {
+  //     "implants": "implants",
+  //     "procedures": "bedsideProcedure", // Procedures is linked to bedsideProcedure checkbox
+  //     "instrumentals": "instrumentEquipment",
+  //   };
+  
+  //   // ✅ Loop through the defined categories
+  //   Object.keys(categoryCheckboxMapping).forEach((category) => {
+  //     let checkboxKey = categoryCheckboxMapping[category]; // Get the corresponding checkbox key
+  
+  //     let isChecked = (this.formData.includedItems as any)[checkboxKey]; // Check if the category is selected
+  
+  //     if (!isChecked) {
+  //       let categoryString = (this.formData as any)[category] || "";
+  //       console.log(category, ":", categoryString);
+  
+  //       // ✅ Extract and sum the numerical values correctly
+  //       let extractedNumbers = categoryString.match(/\d+/g)?.map(Number) || [];
+  //       let categoryTotal = extractedNumbers.reduce((sum:any, num:any) => sum + num, 0);
+  
+  //       additionalCost += categoryTotal;
+  //     }
+  //   });
+  
+  //   // ✅ Ensure the cost updates correctly
+  //   this.formData.estimationCost = Number(this.formData.estimationCost) + additionalCost;
+  
+  //   console.log("Updated Estimation Cost:", this.formData.estimationCost);
+  // }
+
   updateEstimationCost() {
-    // ✅ Ensure estimationCost is initialized correctly
-    this.formData.estimationCost = this.formData.estimationCost || 0;
+    // Reset estimationCost each time to avoid duplication
+    let baseEstimationCost = 0; // Start from 0 and rebuild the total cost
   
-    let additionalCost = 0;
-  
-    // ✅ Mapping of formData fields to their corresponding checkboxes in includedItems
     const categoryCheckboxMapping: { [key: string]: string } = {
       "implants": "implants",
-      "procedures": "bedsideProcedure", // Procedures is linked to bedsideProcedure checkbox
+      "procedures": "bedsideProcedure",
       "instrumentals": "instrumentEquipment",
     };
   
-    // ✅ Loop through the defined categories
+    // Loop through each category to sum costs conditionally
     Object.keys(categoryCheckboxMapping).forEach((category) => {
-      let checkboxKey = categoryCheckboxMapping[category]; // Get the corresponding checkbox key
-  
-      let isChecked = (this.formData.includedItems as any)[checkboxKey]; // Check if the category is selected
+      const checkboxKey = categoryCheckboxMapping[category];
+      let isChecked = (this.formData.includedItems as any)[checkboxKey]; 
   
       if (!isChecked) {
         let categoryString = (this.formData as any)[category] || "";
         console.log(category, ":", categoryString);
   
-        // ✅ Extract and sum the numerical values correctly
-        let extractedNumbers = categoryString.match(/\d+/g)?.map(Number) || [];
-        let categoryTotal = extractedNumbers.reduce((sum:any, num:any) => sum + num, 0);
+        // Extract and sum numerical values safely
+        const extractedNumbers = categoryString.match(/\d+/g)?.map(Number) || [];
+        const categoryTotal = extractedNumbers.reduce((sum:any, num:any) => sum + num, 0);
   
-        additionalCost += categoryTotal;
+        baseEstimationCost += categoryTotal;
       }
+      
     });
   
-    // ✅ Ensure the cost updates correctly
-    this.formData.estimationCost = Number(this.formData.estimationCost) + additionalCost;
+    // Assign the recalculated total cost directly
+    this.formData.estimationCost = this.roomCost + baseEstimationCost;
+
   
     console.log("Updated Estimation Cost:", this.formData.estimationCost);
   }
+  
+
+  
   
   showDatePicker(event: Event) {
     (event.target as HTMLInputElement).showPicker(); // ✅ Opens date picker on input click

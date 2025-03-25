@@ -428,7 +428,7 @@
           Cross Consultation
         </label>
         <label>
-          <input type="checkbox" name="implants"   
+          <input type="checkbox" name="implants"   (change)="updateEstimationCost()"
             [disabled]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'  "
             [(ngModel)]="formData.includedItems['implants']" />
           Implants
@@ -440,7 +440,7 @@
           Laboratory and Imaging
         </label>
         <label>
-          <input type="checkbox" name="instrumentEquipment" [(ngModel)]="formData.includedItems['instrumentEquipment']"   
+          <input type="checkbox" name="instrumentEquipment" [(ngModel)]="formData.includedItems['instrumentEquipment']" (change)="updateEstimationCost()"   
             [disabled]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'  " />
           Instruments
         </label>
@@ -460,7 +460,7 @@
           Surgeon, OT, Anesthesia
         </label>
         <label>
-          <input type="checkbox" name="bedsideProcedure" [(ngModel)]="formData.includedItems['bedsideProcedure']"   
+          <input type="checkbox" name="bedsideProcedure" [(ngModel)]="formData.includedItems['bedsideProcedure']"  (change)="updateEstimationCost()" 
             [disabled]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'  " />
            Procedures
         </label>
@@ -509,7 +509,7 @@
             <input type="text" [(ngModel)]="selectedItems[category][i].name" class="custom-input"
               placeholder="Enter {{ category }} Name" [ngModelOptions]="{standalone: true}" [readonly]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'  ">
 
-            <input type="number" [(ngModel)]="selectedItems[category][i].cost" class="custom-input" placeholder="Cost"
+            <input type="number" [(ngModel)]="selectedItems[category][i].cost" class="custom-input" placeholder="Cost" 
               [ngModelOptions]="{standalone: true}" (ngModelChange)="updateFormData()" [readOnly]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'" >
 
             <button class="remove-btn" (click)="removeItem(category, i, $event)">❌</button>

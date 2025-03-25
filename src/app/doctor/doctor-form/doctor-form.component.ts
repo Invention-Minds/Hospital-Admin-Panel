@@ -796,21 +796,21 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
       }
 
       // Add unavailable slots for each date
-      Object.keys(this.unavailableSlotsPerDate).forEach(date => {
-        const times = this.unavailableSlotsPerDate[date].map(slot => slot.value);
+      // Object.keys(this.unavailableSlotsPerDate).forEach(date => {
+      //   const times = this.unavailableSlotsPerDate[date].map(slot => slot.value);
 
-        if (this.doctor?.id) {
-          // console.log('Adding unavailable slots for doctor:', this.doctor.id, date, times);
-          this.doctorService.addUnavailableSlots(this.doctor.id, date, times).subscribe(
-            response => {
-              // Successfully added unavailable slots
-            },
-            error => {
-              console.error('Error adding unavailable slots:', error);
-            }
-          );
-        }
-      });
+      //   if (this.doctor?.id) {
+      //     // console.log('Adding unavailable slots for doctor:', this.doctor.id, date, times);
+      //     this.doctorService.addUnavailableSlots(this.doctor.id, date, times).subscribe(
+      //       response => {
+      //         // Successfully added unavailable slots
+      //       },
+      //       error => {
+      //         console.error('Error adding unavailable slots:', error);
+      //       }
+      //     );
+      //   }
+      // });
 
       // Emit the save event with the doctor details
       // this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Doctor details saved successfully' });

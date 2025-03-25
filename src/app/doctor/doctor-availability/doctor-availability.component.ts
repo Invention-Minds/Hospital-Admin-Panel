@@ -341,46 +341,6 @@ export class DoctorAvailabilityComponent {
               return formattedUnavailableDate === formattedDate;
             });
 
-            // Check if the doctor is available on the given day of the week
-            // const dayOfWeek = this.selectedDate.toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
-            // const availableDay = doctor.availability?.find(avail =>
-            //   avail.day.toLowerCase() === dayOfWeek
-            // );
-
-            // const isUnavailableDueToSchedule = !availableDay;
-            // const latestTimestamp = doctor.availability?.reduce((latest, curr) => {
-            //   return curr.updatedAt && new Date(curr.updatedAt).getTime() > new Date(latest).getTime()
-            //     ? curr.updatedAt
-            //     : latest;
-            // }, doctor.availability[0]?.updatedAt || '');
-
-            // // Step 2: Filter availability data to include only entries with the latest `updatedAt` timestamp
-            // const latestAvailability = doctor.availability?.filter(
-            //   avail => avail.updatedAt === latestTimestamp
-            // );
-
-            // Step 3: Check if the doctor is available on the given day of the week
-            // const dayOfWeek = this.selectedDate.toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
-            // const availableDay = latestAvailability?.find(avail => avail.day.toLowerCase() === dayOfWeek);
-            // Step 1: Determine if all `updatedAt` fields are null
-            // const allUpdatedAtNull = doctor.availability?.every(avail => !avail.updatedAt);
-
-            // // Step 2: Calculate the latest timestamp if any `updatedAt` is not null
-            // const latestTimestamp = allUpdatedAtNull
-            //   ? null // If all are null, treat it as the "latest"
-            //   : doctor.availability?.reduce((latest, curr) => {
-            //     return curr.updatedAt && new Date(curr.updatedAt).getTime() > new Date(latest).getTime()
-            //       ? curr.updatedAt
-            //       : latest;
-            //   }, doctor.availability.find(avail => avail.updatedAt)?.updatedAt || '');
-
-            // // Step 3: Filter availability data based on the latest timestamp
-            // const latestAvailability = allUpdatedAtNull
-            //   ? doctor.availability // If all are null, consider the entire availability as "latest"
-            //   : doctor.availability?.filter(avail => avail.updatedAt === latestTimestamp);
-
-            // // Step 4: Check if the doctor is available on the given day of the week
-            // const dayOfWeek = this.selectedDate.toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
             const allUpdatedAtNull = doctor.availability?.every(avail => !avail.updatedAt);
 
             // Step 2: Calculate the latest timestamp if any `updatedAt` is not null
@@ -398,9 +358,6 @@ export class DoctorAvailabilityComponent {
               : doctor.availability?.filter(avail => avail.updatedAt === latestTimestamp);
             // console.log('Doctors available days', doctor.availabilityDays);
             const dayOfWeek = this.selectedDate.toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
-            // console.log(dayOfWeek)
-            // const availableDay = latestAvailability?.find(avail => avail.day.toLowerCase() === dayOfWeek);
-            // const availableDay = latestAvailability?.find(avail => avail.day.toLowerCase() === dayOfWeek);
             const matchingDays = latestAvailability
               ?.filter(avail => avail.day.toLowerCase() === dayOfWeek); // Get all matching days
 
@@ -416,7 +373,7 @@ export class DoctorAvailabilityComponent {
             const availableFrom = availableDay?.availableFrom ?? '08:00-20:00';
             doctor.availableFrom = availableFrom;
             console.log(availableFrom.split('-')[1], doctor.id)
-            // console.log(availableFrom, availableDay?.slotDuration)
+            console.log(availableFrom, availableDay?.slotDuration, doctor.id)
             if (doctor.availableFrom === '08:00-20:00') {
               doctor.availableFrom = 'N/A';
             }

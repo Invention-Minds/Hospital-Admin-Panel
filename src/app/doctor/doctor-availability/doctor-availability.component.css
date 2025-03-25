@@ -329,7 +329,10 @@
   line-height: normal;
   margin: 0;
 }
-
+.slots-scroll-container {
+  overflow-x: auto;
+  width: 100%;
+}
 /* Slots Styling */
 .slots-wrapper {
   display: grid;

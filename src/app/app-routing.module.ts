@@ -22,6 +22,7 @@ import { EstimationOverviewComponent } from './estimation/estimation-overview/es
 import { AnalyticsRootComponent } from './analytics/analytics-root/analytics-root.component';
 import { ServiceOverviewComponent } from './service-radiology/service-overview/service-overview.component';
 import { OverviewRadiologyComponent } from './radiology/overview-radiology/overview-radiology.component';
+import { SamraskhaApptOverviewComponent } from './samraksha/samraskha-appt-overview/samraskha-appt-overview.component';
 
 const routes: Routes = [
   { path: 'dashboard', component: DashboardOverviewComponent, canActivate:[authGuard] },
@@ -44,6 +45,7 @@ const routes: Routes = [
   { path: 'channel/:channelId', component: TvComponent },
   {path: 'estimation', component: EstimationOverviewComponent, canActivate:[authGuard]},
   {path: 'analytics', component: AnalyticsRootComponent, canActivate:[authGuard]},
+  {path: 'blood-appointments', component: SamraskhaApptOverviewComponent, canActivate:[authGuard]},
   {
     path: 'form',
     component: HealthCheckupFormComponent,

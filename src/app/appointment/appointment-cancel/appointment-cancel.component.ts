@@ -70,7 +70,8 @@ export class AppointmentCancelComponent {
   isSubmitting: boolean = false;
   isLoading: boolean = false;
   filteredServices:any[] = [];
-  today: string = ''
+  today: string = '';
+  lockedUser: string = ''
   ngOnInit() {
     const today = new Date();
     const year = today.getFullYear();
@@ -712,6 +713,7 @@ lockAndAccessAppointment(appointment:Appointment): void {
       if (error.status === 409) {
         // Show lock modal if the appointment is locked by another user
         this.isLockedDialogVisible = true;
+        this.lockedUser = error.error?.lockedByUsername
         console.warn('The appointment is currently locked by another user.');
       } else if (error.status === 401) {
         // If unauthorized, do NOT redirect automatically, show a custom message instead

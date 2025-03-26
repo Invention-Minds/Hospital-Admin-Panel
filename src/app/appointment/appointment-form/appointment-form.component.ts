@@ -1,5 +1,5 @@
 
-import { Component, OnInit, Output, EventEmitter, Input, HostListener } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, Input, HostListener, Query } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { Doctor } from '../../models/doctor.model';
@@ -239,6 +239,7 @@ export class AppointmentFormComponent implements OnInit {
       // console.log(new Date(this.appointment.date));
       this.oldDate = this.appointment.date;
       this.oldDoctorId = this.appointment.doctorId;
+      this.department = this.appointment.department;
       console.log(this.oldDoctorId, this.appointment.doctorId)
       this.oldTime = this.appointment.time;
       // console.log("appointmentpatch"  ,this.appointment)
@@ -270,6 +271,14 @@ export class AppointmentFormComponent implements OnInit {
         const doctorId = this.doctorId;
         if (doctorId) {
           this.onDoctorChange(doctorId)
+          this.doctorService.getDoctorDetails(doctorId).subscribe({
+            next: (response) => {
+              if (response.departmentName && this.appointment) {
+                this.appointment.department = response.departmentName;
+              }
+            }
+          });
+          
           if (this.appointment) {
             this.appointment.doctorId = doctorId;
           }
@@ -644,6 +653,14 @@ export class AppointmentFormComponent implements OnInit {
 
       if (doctorId) {
         this.onDoctorChange(doctorId)
+        this.doctorService.getDoctorDetails(doctorId).subscribe({
+          next: (response) => {
+            if (response.departmentName && this.appointment) {
+              this.appointment.department = response.departmentName;
+            }
+          }
+        });
+        
         if (this.appointment) {
           this.appointment.doctorId = doctorId;
         }

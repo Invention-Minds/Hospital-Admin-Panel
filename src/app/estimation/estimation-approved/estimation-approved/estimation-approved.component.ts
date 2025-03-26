@@ -74,7 +74,7 @@ import { Router } from '@angular/router';
           this.pendingEstimations.sort((a, b) => {
             const dateA = new Date(a.submittedDateAndTime!);
             const dateB = new Date(b.submittedDateAndTime!);
-            return dateA.getTime() - dateB.getTime();
+            return dateB.getTime() - dateA.getTime();
           });
           this.filteredEstimations = [...this.pendingEstimations];
           // console.log('Services processed successfully.');
@@ -409,7 +409,7 @@ import { Router } from '@angular/router';
         const valueB = b[column];
   
         // Handle appointmentDate separately
-        if (column === 'appointmentDate') {
+        if (column === 'estimationName') {
           const dateA = new Date(valueA as string); // Convert string to Date
           const dateB = new Date(valueB as string);
   

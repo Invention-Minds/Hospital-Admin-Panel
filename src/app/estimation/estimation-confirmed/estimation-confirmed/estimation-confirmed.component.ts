@@ -263,7 +263,7 @@ export class EstimationConfirmedComponent {
       const valueB = b[column];
 
       // Handle appointmentDate separately
-      if (column === 'appointmentDate') {
+      if (column === 'estimationName') {
         const dateA = new Date(valueA as string); // Convert string to Date
         const dateB = new Date(valueB as string);
 

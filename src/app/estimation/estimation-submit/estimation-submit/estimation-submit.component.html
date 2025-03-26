@@ -54,20 +54,20 @@
             <thead>
                 <tr>
                     <th>No</th>
-                    <th (click)="sortBy('firstName')" style="cursor: pointer;">
-                        Estimation ID
-                        <span *ngIf="sortColumn === 'firstName' && sortDirection === 'asc'">&#9650;</span>
-                        <span *ngIf="sortColumn === 'firstName' && sortDirection === 'desc'">&#9660;</span>
-                    </th>
-                    <th>Patient Name</th>
-                    <!-- <th>Phone Number</th> -->
-                    <th (click)="sortBy('appointmentDate')" style="cursor: pointer;">
-                         Consultant Name
-                        <span *ngIf="sortColumn === 'appointmentDate' && sortDirection === 'asc'">&#9650;</span>
-                        <span *ngIf="sortColumn === 'appointmentDate' && sortDirection === 'desc'">&#9660;</span>
-                    </th>
-                    <!-- <th>Time</th> -->
-                    <th>Estimation Name</th>
+                    <th >
+                      Estimation ID
+                  </th>
+                  <th>Patient Name</th>
+                  <!-- <th>Phone Number</th> -->
+                  <th>
+                       Consultant Name
+                  </th>
+                  <!-- <th>Time</th> -->
+                  <th (click)="sortBy('estimationName')" style="cursor: pointer;">
+                    Estimation Name
+                    <span *ngIf="sortColumn === 'estimationName' && sortDirection === 'asc'">&#9650;</span>
+                    <span *ngIf="sortColumn === 'estimationName' && sortDirection === 'desc'">&#9660;</span>
+                  </th>
                    
                     <th>Estimation Type</th>
                     <th>Estimation Prefer Date</th>
@@ -137,7 +137,7 @@
         </div>
       </div>
       <p-toast></p-toast>
-      <app-delete-confirmation-dialog [showDialog]="isLockedDialogVisible"
-      (close)="handleLockedDialogClose()"></app-delete-confirmation-dialog>
+      <app-estimation-lock [showDialog]="isLockedDialogVisible" [userId]="lockedUser"
+      (close)="handleLockedDialogClose()"></app-estimation-lock>
 </div>
 <div class="loader" *ngIf="isLoading"></div>

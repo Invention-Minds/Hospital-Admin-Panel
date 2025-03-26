@@ -132,7 +132,55 @@ roomCost: number =0;
 
       this.loadSignatureToCanvas(this.approverCanvasRef, this.formData.approverSign);
     }
+    this.disableSignaturePadsBasedOnStatus(this.formData.statusOfEstimation);
+    if(this.estimationData === null){
+      this.patientSignaturePad.off();
+      this.approverSignaturePad.off();
+    }
+
+    
   }
+  disableSignaturePadsBasedOnStatus(status: string): void {
+    // Enable all first (reset state)
+    this.patientSignaturePad.on();
+    this.staffSignaturePad.on();
+    this.approverSignaturePad.on();
+  
+    switch (status) {
+      case 'accepted':
+      case 'cancelled':
+      case 'confirmed':
+      case 'overdue':
+        this.patientSignaturePad.off();
+        this.staffSignaturePad.off();
+        this.approverSignaturePad.off();
+        break;
+  
+      case 'submitted':
+        this.patientSignaturePad.off();
+        this.staffSignaturePad.off();
+        break;
+  
+      case 'pending':
+        this.patientSignaturePad.off();
+        this.approverSignaturePad.off();
+        break;
+  
+      case 'approved':
+        this.staffSignaturePad.off();
+        this.approverSignaturePad.off();
+        break;
+  
+      default:
+        // Optionally handle unknown status
+        console.warn(`Unknown status: ${status}`);
+        break;
+    }
+  }
+  isApproverReadonly(): boolean {
+    return ['accepted', 'confirmed', 'approved'].includes(this.formData.statusOfEstimation);
+  }
+  
   availableRooms = [
     { name: 'General', cost: 1600 },
     { name: 'Semi-Private', cost: 3500 },

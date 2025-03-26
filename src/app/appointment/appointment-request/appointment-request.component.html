@@ -128,7 +128,7 @@
 <app-appointment-form *ngIf="showAppointmentForm" [appointment]="selectedAppointment" (close)="closeAppointmentForm()"
   (submit)="submitAppointment(selectedAppointment, $event.status, $event.requestVia)">
 </app-appointment-form>
-<app-delete-confirmation-dialog [showDialog]="isLockedDialogVisible"
+<app-delete-confirmation-dialog [showDialog]="isLockedDialogVisible" [userId]="lockedUser"
   (close)="handleLockedDialogClose()"></app-delete-confirmation-dialog>
 
   <div class="overlay" *ngIf="showDeleteConfirmDialog">

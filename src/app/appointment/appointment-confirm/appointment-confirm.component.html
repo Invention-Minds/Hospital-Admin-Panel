@@ -283,7 +283,11 @@
   </div>
 </div>
 </div>
-
+<app-delete-confirmation-dialog
+  [showDialog]="isLockedDialogVisible"
+  [userId]="lockedUser"
+  (close)="handleLockedDialogClose()"
+></app-delete-confirmation-dialog>
 
 
 

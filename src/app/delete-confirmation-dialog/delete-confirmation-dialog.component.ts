@@ -8,6 +8,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 })
 export class DeleteConfirmationDialogComponent {
   @Input() showDialog: boolean = false; // Controls visibility
+  @Input() userId: string = 'another user';
   @Output() close = new EventEmitter<void>(); // Emits event when dialog is closed
 
   closeDialog(): void {

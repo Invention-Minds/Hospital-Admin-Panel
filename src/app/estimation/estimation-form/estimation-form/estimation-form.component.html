@@ -651,7 +651,8 @@
         <div class="signature-section">
           <label class="sign">Staff Signature</label>
           <canvas #staffSignatureCanvas width="500" height="200" style="border: 1px solid black;"></canvas>
-          <button class="clear-button sign-clear" (click)="clearStaffSign()">Clear</button>
+          <!-- <button class="clear-button sign-clear" (click)="clearStaffSign()">Clear</button> -->
+          <button class="clear-button sign-clear" (click)="clearStaffSign()" *ngIf="formData.statusOfEstimation === 'pending' || estimationData === null">Clear</button>
           <div class="input-container">
             <input type="text" id="employeeName" name="employeeName" pattern="^[a-zA-Z . ]*$" class="custom-input"
               ngModel [(ngModel)]="formData.employeeName" required placeholder=" " class="custom-input"
@@ -668,12 +669,12 @@
         <div class="signature-section">
           <label class="sign">Approver Signature:</label>
           <canvas #approverSignatureCanvas width="500" height="200" style="border: 1px solid black;"></canvas>
-          <button class="clear-button sign-clear" (click)="clearApproverSign()">Clear</button>
-          <div class="input-container">
+          <button class="clear-button sign-clear" (click)="clearApproverSign()" *ngIf="formData.statusOfEstimation === 'submitted' && this.role==='admin' " >Clear</button>
+          <div class="input-container"  *ngIf="(formData.statusOfEstimation === 'submitted' && this.role === 'admin') || isApproverReadonly()" >
             <input type="text" id="approverName" name="approverName" pattern="^[a-zA-Z . ]*$" class="custom-input"
               ngModel [(ngModel)]="formData.approverName" [required]="role === 'admin' || role === 'super_admin'"
               placeholder=" " class="custom-input"
-              [readonly]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'" />
+              [readonly]="isApproverReadonly()"/>
             <label for="approverName" class="custom-label">Approver Name*</label>
             <div *ngIf="estimationForm.submitted && estimationForm.controls['approverName']?.invalid"
               class="error-message">
@@ -699,9 +700,9 @@
           <!-- <button (click)="saveSignature()">Save</button>
             <button (click)="clearSignature()">Clear</button> -->
           <button class="clear-button sign-clear" style="margin-bottom:10px ;"
-            *ngIf="formData.statusOfEstimation === 'submitted' || formData.statusOfEstimation === 'approved'"
+            *ngIf="formData.statusOfEstimation === 'approved'"
             (click)="clearPatientSign()">Clear</button>
-          <div class="input-container" *ngIf="formData.signatureOf === 'attender'">
+          <div class="input-container" *ngIf="formData.signatureOf === 'attender' && (formData.statusOfEstimation === 'approved' || formData.statusOfEstimation === 'accepted') ">
             <input type="text" id="attenderName" name="attenderName" pattern="^[a-zA-Z . ]*$" class="custom-input"
               ngModel [(ngModel)]="formData.attenderName" placeholder=" " class="custom-input"
               [readonly]="formData.statusOfEstimation === 'accepted'"/>
@@ -729,7 +730,7 @@
 
     <div class="button">
       <!-- For Subadmin -->
-      <button *ngIf="role === 'sub_admin' && (formData.statusOfEstimation === 'pending' || estimationData === null)" type="submit"
+      <button *ngIf="role === 'sub_admin' && (formData.statusOfEstimation === 'pending' || estimationData === null || formData.statusOfEstimation === 'submitted')" type="submit"
         class="submit-button" [disabled]="!estimationForm.valid">
         Submit
       </button>

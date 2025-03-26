@@ -54,20 +54,20 @@
             <thead>
                 <tr>
                     <th>No</th>
-                    <th (click)="sortBy('firstName')" style="cursor: pointer;">
+                    <th >
                         Estimation ID
-                        <span *ngIf="sortColumn === 'firstName' && sortDirection === 'asc'">&#9650;</span>
-                        <span *ngIf="sortColumn === 'firstName' && sortDirection === 'desc'">&#9660;</span>
                     </th>
                     <th>Patient Name</th>
                     <!-- <th>Phone Number</th> -->
-                    <th (click)="sortBy('appointmentDate')" style="cursor: pointer;">
+                    <th>
                          Consultant Name
-                        <span *ngIf="sortColumn === 'appointmentDate' && sortDirection === 'asc'">&#9650;</span>
-                        <span *ngIf="sortColumn === 'appointmentDate' && sortDirection === 'desc'">&#9660;</span>
                     </th>
                     <!-- <th>Time</th> -->
-                    <th>Estimation Name</th>
+                    <th (click)="sortBy('estimationName')" style="cursor: pointer;">
+                      Estimation Name
+                      <span *ngIf="sortColumn === 'estimationName' && sortDirection === 'asc'">&#9650;</span>
+                      <span *ngIf="sortColumn === 'estimationName' && sortDirection === 'desc'">&#9660;</span>
+                    </th>
                    
                     <th>Estimation Type</th>
                     <th>Estimation Prefer Date</th>
@@ -119,11 +119,14 @@
                         </span>
                       </td>
                     <td class="button">
-                        <button class="btn-action" (click)="openAppointmentForm(estimation)"  pTooltip="Submit" tooltipPosition="top">
+                        <button class="btn-action"  *ngIf="estimation.statusOfEstimation !== 'submitted' || estimation === null "  (click)="openAppointmentForm(estimation)"  pTooltip="Submit" tooltipPosition="top">
                             <img src="icons/book.png" alt="Confirm">
                           </button>
                           <!-- <img src="appt-cancel.png" alt="delete" class="action-icon" (click)="cancelAppointment(estimation)"
                           pTooltip="Cancel" tooltipPosition="top"> -->
+                          <button class="btn-action" *ngIf="estimation.statusOfEstimation === 'submitted'" (click)="openAppointmentForm(estimation)"  pTooltip="Edit" tooltipPosition="top">
+                            <img src="/est-edit.svg" alt="Confirm">
+                          </button>
                       </td>
                 </tr>
             </tbody>
@@ -142,7 +145,7 @@
         </div>
       </div>
       <p-toast></p-toast>
-      <app-delete-confirmation-dialog [showDialog]="isLockedDialogVisible"
-      (close)="handleLockedDialogClose()"></app-delete-confirmation-dialog>
+      <app-estimation-lock [showDialog]="isLockedDialogVisible" [userId]="lockedUser"
+      (close)="handleLockedDialogClose()"></app-estimation-lock>
 </div>
 <div class="loader" *ngIf="isLoading"></div>

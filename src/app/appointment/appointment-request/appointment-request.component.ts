@@ -55,6 +55,7 @@ export class AppointmentRequestComponent implements OnInit {
   isLoading: boolean = false;
   searchValue: string = '';
   activeComponent: string = 'confirmed';
+  lockedUser: string = ''
 
   filteredServices:any[] = []
 
@@ -678,6 +679,7 @@ export class AppointmentRequestComponent implements OnInit {
         if (error.status === 409) {
           // Show lock modal if the appointment is locked by another user
           this.isLockedDialogVisible = true;
+          this.lockedUser = error.error?.lockedByUsername
           console.warn('The appointment is currently locked by another user.');
         } else if (error.status === 401) {
           // If unauthorized, do NOT redirect automatically, show a custom message instead

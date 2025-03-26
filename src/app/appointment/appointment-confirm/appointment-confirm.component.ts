@@ -83,6 +83,7 @@ export class AppointmentConfirmComponent {
   username: any;
   showPrnPopup = false;
   enteredPrn = '';
+  lockedUser: string = ''
 
   searchOptions = [
     { label: 'Patient Name', value: 'patientName' },
@@ -1356,6 +1357,7 @@ export class AppointmentConfirmComponent {
         if (error.status === 409) {
           // Show lock modal if the appointment is locked by another user
           this.isLockedDialogVisible = true;
+          this.lockedUser = error.error?.lockedByUsername
           console.warn('The appointment is currently locked by another user.');
         } else if (error.status === 401) {
           // If unauthorized, do NOT redirect automatically, show a custom message instead
@@ -1367,5 +1369,9 @@ export class AppointmentConfirmComponent {
       }
 
     });
+  }
+  handleLockedDialogClose(): void {
+    // Hide the locked dialog
+    this.isLockedDialogVisible = false;
   }
 }

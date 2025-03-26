@@ -36,6 +36,7 @@ export class EstimationSubmitComponent {
   @Output() reschedule = new EventEmitter<any>();
   // Value entered by the user (could be Patient ID or Phone Number based on selection)
   searchValue: string = '';
+  lockedUser: string = ''
 
   // Selected date from calendar
   selectedDate: Date | null = null;
@@ -246,7 +247,7 @@ this.fetchPendingEstimations();
       const valueB = b[column];
 
       // Handle appointmentDate separately
-      if (column === 'appointmentDate') {
+      if (column === 'estimationName') {
         const dateA = new Date(valueA as string); // Convert string to Date
         const dateB = new Date(valueB as string);
 
@@ -278,7 +279,6 @@ this.fetchPendingEstimations();
     //   state: { data: service }, // Passing full service object using state
     // });
     this.lockService(service);
-    this.openAppointmentFormAfterLocked(service)
   }
   openAppointmentFormAfterLocked(service: any): void {
     this.reschedule.emit(service);
@@ -303,6 +303,7 @@ this.fetchPendingEstimations();
       error: (error) => {
         if (error.status === 409) {
           this.isLockedDialogVisible = true; // Show dialog if locked by another user
+          this.lockedUser = error.error?.lockedByUsername
           console.warn('Estimation is already locked by another user.');
         } else {
           console.error('Error locking Estimation:', error);

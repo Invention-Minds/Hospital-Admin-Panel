@@ -32,6 +32,7 @@ export class EstimationRequestComponent {
     selectedDateRange: Date[] = [];
     activeServiceId: number | null = null;
     isLockedDialogVisible: boolean = false;
+    lockedUser: string = ''
     userId: any = 0;
     activeComponent: string = 'cancelled'; // Default to the cancelled appointments view
     messageSent: boolean = false;
@@ -56,7 +57,7 @@ export class EstimationRequestComponent {
           
           // Process the services when the API call is successful
           this.pendingEstimations = estimation.filter(
-            (estimation) => estimation.statusOfEstimation === 'pending' || estimation.statusOfEstimation === 'rejected'
+            (estimation) => estimation.statusOfEstimation === 'pending' || estimation.statusOfEstimation === 'rejected' || estimation.statusOfEstimation === 'submitted'
           );
           console.log(this.pendingEstimations)
           this.pendingEstimations.sort((a, b) => {
@@ -249,7 +250,7 @@ export class EstimationRequestComponent {
         const valueB = b[column];
   
         // Handle appointmentDate separately
-        if (column === 'appointmentDate') {
+        if (column === 'estimationName') {
           const dateA = new Date(valueA as string); // Convert string to Date
           const dateB = new Date(valueB as string);
   
@@ -281,7 +282,7 @@ export class EstimationRequestComponent {
       //   state: { data: service }, // Passing full service object using state
       // });
       this.lockService(service);
-      this.openAppointmentFormAfterLocked(service)
+      // this.openAppointmentFormAfterLocked(service)
     }
     openAppointmentFormAfterLocked(service: any): void {
       this.reschedule.emit(service);
@@ -307,6 +308,7 @@ export class EstimationRequestComponent {
           if (error.status === 409) {
             this.isLockedDialogVisible = true; // Show dialog if locked by another user
             console.warn('Estimation is already locked by another user.');
+            this.lockedUser = error.error?.lockedByUsername
           } else {
             console.error('Error locking Estimation:', error);
             this.messageService.add({

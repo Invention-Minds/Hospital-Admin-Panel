@@ -133,6 +133,7 @@ import { SamrakshaApptConfirmComponent } from './samraksha/samraksha-appt-confir
 import { SamrakshaApptCancelComponent } from './samraksha/samraksha-appt-cancel/samraksha-appt-cancel.component';
 import { SamrakshaApptCompleteComponent } from './samraksha/samraksha-appt-complete/samraksha-appt-complete.component';
 import { SamrakshaApptRepeatComponent } from './samraksha/samraksha-appt-repeat/samraksha-appt-repeat.component';
+import { EstimationLockComponent } from './estimation-lock/estimation-lock.component';
 
 
 @NgModule({
@@ -226,7 +227,8 @@ import { SamrakshaApptRepeatComponent } from './samraksha/samraksha-appt-repeat/
     SamrakshaApptConfirmComponent,
     SamrakshaApptCancelComponent,
     SamrakshaApptCompleteComponent,
-    SamrakshaApptRepeatComponent
+    SamrakshaApptRepeatComponent,
+    EstimationLockComponent
   ],
   imports: [
     BrowserModule,

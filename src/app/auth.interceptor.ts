@@ -29,15 +29,6 @@ export class AuthInterceptor implements HttpInterceptor {
     // Handle the request and catch any errors
     return next.handle(authReq).pipe(
       catchError((error: HttpErrorResponse) => {
-        if (error.status === 403) {
-          console.warn('403 error encountered. Redirecting to login page...');
-          
-          // Redirect to the login page
-          this.router.navigate(['/login']);
-
-          // Optional: Clear any tokens from local storage
-          localStorage.removeItem('token');
-        }
         if (error.status === 503) {
           console.warn('⚠️ System is under maintenance. Redirecting...');
           
@@ -47,6 +38,15 @@ export class AuthInterceptor implements HttpInterceptor {
 
           // Redirect to the maintenance page
           this.router.navigate(['/maintenance']);
+        }
+        if (error.status === 403) {
+          console.warn('403 error encountered. Redirecting to login page...');
+          
+          // Redirect to the login page
+          this.router.navigate(['/login']);
+
+          // Optional: Clear any tokens from local storage
+          localStorage.removeItem('token');
         }
 
         // Pass the error to the caller of the function

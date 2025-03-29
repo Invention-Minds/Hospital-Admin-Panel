@@ -150,7 +150,7 @@ fetchConfirmedAppointments(): void {
         const completedVisits = allServices.filter(
           (otherService) =>
             otherService.pnrNumber === service.pnrNumber && // Match by PNR
-            otherService.appointmentStatus === 'complete' &&
+            ['complete', 'completed'].includes(otherService.appointmentStatus ?? '')&&
             otherService.firstName === service.firstName &&
             otherService.lastName === service.lastName &&
             otherService.phoneNumber === service.phoneNumber &&

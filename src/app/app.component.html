@@ -13,7 +13,7 @@
 <router-outlet></router-outlet>
 
   <p-toast></p-toast> -->
-  <div *ngIf="!isChannelRoute(); else channelTemplate">
+  <!-- <div *ngIf="!isChannelRoute(); else channelTemplate">
     <div *ngIf="!isLoginRoute(); else loginTemplate">
       <app-sidebar></app-sidebar>
       <div class="content">
@@ -36,8 +36,42 @@
     </div>
   </div>
   
-  <p-toast></p-toast>
+  <p-toast></p-toast> -->
 
+<!-- Main app layout -->
+<div *ngIf="!isMaintenanceRoute(); else maintenanceTemplate">
+  <div *ngIf="!isChannelRoute(); else channelTemplate">
+    <div *ngIf="!isLoginRoute(); else loginTemplate">
+      <app-sidebar></app-sidebar>
+      <div class="content">
+        <app-dashboard-module></app-dashboard-module>
+      </div>
+    </div>
+    <ng-template #loginTemplate>
+      <app-login></app-login>
+    </ng-template>
+  </div>
+</div>
+
+<!-- Maintenance Template -->
+<ng-template #maintenanceTemplate>
+  <app-maintainance></app-maintainance>
+</ng-template>
+
+<!-- Channel Template -->
+<ng-template #channelTemplate>
+  <router-outlet></router-outlet>
+</ng-template>
+
+<!-- Modal and toast -->
+<div *ngIf="showSettingsModal" class="settings-modal-overlay" (click)="closeSettings()">
+  <div class="settings-modal" (click)="preventClose($event)">
+    <div class="modal-header"></div>
+    <app-settings></app-settings>
+  </div>
+</div>
+
+<p-toast></p-toast>
 
 
   <!-- <app-mhc-waiting-time /> -->

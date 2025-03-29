@@ -53,4 +53,8 @@ export class AppComponent {
   private isDoctorRoute(): boolean {
     return this.router.url.startsWith('/doctor-appointments');
   }
+  isMaintenanceRoute(): boolean {
+    return this.router.url === '/maintenance';
+  }
+  
 }

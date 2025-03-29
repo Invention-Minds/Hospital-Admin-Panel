@@ -23,10 +23,11 @@ import { AnalyticsRootComponent } from './analytics/analytics-root/analytics-roo
 import { ServiceOverviewComponent } from './service-radiology/service-overview/service-overview.component';
 import { OverviewRadiologyComponent } from './radiology/overview-radiology/overview-radiology.component';
 import { SamraskhaApptOverviewComponent } from './samraksha/samraskha-appt-overview/samraskha-appt-overview.component';
+import { MaintainanceComponent } from './maintainance/maintainance/maintainance.component';
 
 const routes: Routes = [
   { path: 'dashboard', component: DashboardOverviewComponent, canActivate:[authGuard] },
-  {path: 'maintenance', component: DashboardOverviewComponent, canActivate:[authGuard] },
+  {path: 'maintenance', component: MaintainanceComponent, canActivate:[authGuard] },
   // { path:'',component:DashboardOverviewComponent},
   {path:'appointments', component:AppointmentOverviewComponent,canActivate:[authGuard]},
   { path: 'appointment-request', component: AppointmentRequestComponent,canActivate:[authGuard] },

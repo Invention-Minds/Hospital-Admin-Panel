@@ -121,20 +121,24 @@ roomCost: number =0;
     this.approverSignaturePad = new SignaturePad(this.approverCanvasRef.nativeElement);
     this.cdr.detectChanges();
     if (this.formData.patientSign) {
-      this.loadSignatureToCanvas(this.patientCanvasRef, this.formData.patientSign);
+      this.loadSignatureToCanvas(this.patientCanvasRef, this.formData.patientSign, this.patientSignaturePad);
     }
     if (this.formData.employeeSign) {
-      this.loadSignatureToCanvas(this.staffCanvasRef, this.formData.employeeSign);
+      this.loadSignatureToCanvas(this.staffCanvasRef, this.formData.employeeSign,this.staffSignaturePad);
     }
     if (this.formData.approverSign) {
       console.log(this.formData.approverSign)
       console.log(this.formData.approverSign, this.approverCanvasRef)
 
-      this.loadSignatureToCanvas(this.approverCanvasRef, this.formData.approverSign);
+      this.loadSignatureToCanvas(this.approverCanvasRef, this.formData.approverSign, this.approverSignaturePad);
     }
     this.disableSignaturePadsBasedOnStatus(this.formData.statusOfEstimation);
     if(this.estimationData === null){
       this.patientSignaturePad.off();
+      this.approverSignaturePad.off();
+    }
+    if(this.role === "sub_admin" && this.formData.statusOfEstimation === 'submitted'){
+      this.staffSignaturePad.on();
       this.approverSignaturePad.off();
     }
 
@@ -285,22 +289,41 @@ roomCost: number =0;
   // Stores the selected room types
 
 
-  saveAllSignatures(): void {
-    // Save signatures to formData
-    //   if (this.approverSignaturePad.isEmpty()) {
-    //     console.error("Approver Signature is empty. Skipping save.");
-    //     return;
-    // }
-    this.formData.patientSign = this.patientSignaturePad.toDataURL();
-    this.formData.employeeSign = this.staffSignaturePad.toDataURL();
-    this.formData.approverSign = this.approverSignaturePad.toDataURL();
+  // saveAllSignatures(): void {
+  //   // Save signatures to formData
+  //   //   if (this.approverSignaturePad.isEmpty()) {
+  //   //     console.error("Approver Signature is empty. Skipping save.");
+  //   //     return;
+  //   // }
+  //   this.formData.patientSign = this.patientSignaturePad.toDataURL();
+  //   this.formData.employeeSign = this.staffSignaturePad.toDataURL();
+  //   this.formData.approverSign = this.approverSignaturePad.toDataURL();
 
+  //   console.log('Form Data with Signatures:', this.formData);
+  //   console.log("Patient Signature Base64:", this.formData.patientSign.substring(0, 100));
+  //   console.log("Employee Signature Base64:", this.formData.employeeSign.substring(0, 100));
+  //   console.log("Approver Signature Base64:", this.formData.approverSign.substring(0, 100));
+  //   console.log(this.approverCanvasRef, this.formData.approverSign)
+  // }
+  saveAllSignatures(): void {
+    if (!this.patientSignaturePad.isEmpty()) {
+      this.formData.patientSign = this.patientSignaturePad.toDataURL();
+    }
+  
+    if (!this.staffSignaturePad.isEmpty()) {
+      this.formData.employeeSign = this.staffSignaturePad.toDataURL();
+    }
+  
+    if (!this.approverSignaturePad.isEmpty()) {
+      this.formData.approverSign = this.approverSignaturePad.toDataURL();
+    }
+  
     console.log('Form Data with Signatures:', this.formData);
-    console.log("Patient Signature Base64:", this.formData.patientSign.substring(0, 100));
-    console.log("Employee Signature Base64:", this.formData.employeeSign.substring(0, 100));
-    console.log("Approver Signature Base64:", this.formData.approverSign.substring(0, 100));
-    console.log(this.approverCanvasRef, this.formData.approverSign)
+    console.log("Patient Signature Base64:", this.formData.patientSign?.substring(0, 100));
+    console.log("Employee Signature Base64:", this.formData.employeeSign?.substring(0, 100));
+    console.log("Approver Signature Base64:", this.formData.approverSign?.substring(0, 100));
   }
+  
   clearAllSignatures(): void {
     // Clear all signature pads and reset their corresponding formData properties
     this.patientSignaturePad?.clear();
@@ -832,6 +855,7 @@ roomCost: number =0;
       this.formData.approverId = this.employeeId
       this.formData.approverName = this.employeeName.split(`_${this.role}`)[0];
     }
+
     this.updateInclusionsAndExclusions();
     this.saveAllSignatures();
     this.formData.statusOfEstimation = 'approved'
@@ -898,6 +922,34 @@ roomCost: number =0;
         console.error('Error updating estimation:', error);
       }
     );
+    // this.estimationService.updateEstimationDetails(estimationData.estimationId, estimationData).subscribe(
+    //   (response) => {
+    //     console.log('Estimation updated successfully:', response);
+    //     this.clearForm();
+    //     this.closeForm.emit()
+    //     this.estimationService.generateAndSendPdf(estimationData.estimationId, estimationData).subscribe(
+    //       (pdfResponse) => {
+    //         console.log("✅ PDF Generated & Sent via WhatsApp:", pdfResponse);
+    //         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'PDF Generated & Sent PDF via WhatsApp:!' });
+    //         // const to = "ipbilling@rashtrotthanahospital.com"
+    //         const to = "keerthanasaminathan0805@gmail.com"
+    //         this.appointmentService.sendMailtoApprover(to, estimationData.estimationId, pdfResponse.filePath).subscribe(
+    //           (response) => {
+    //             console.log('Email sent successfully:', response);
+    //           }, (error) => {
+    //             console.error("❌ Error sending mail:", error);
+    //           }
+    //         )
+    //       },
+    //       (pdfError) => {
+    //         console.error("❌ Error generating PDF:", pdfError);
+    //       }
+    //     );
+    //   },
+    //   (error) => {
+    //     console.error('Error updating estimation:', error);
+    //   }
+    // );
     if (!this.estimationData.estimationId) {
 
     }
@@ -976,7 +1028,7 @@ roomCost: number =0;
   //   );
 
   // }
-  loadSignatureToCanvas(canvasRef: ElementRef<HTMLCanvasElement>, base64Data: string): void {
+  loadSignatureToCanvas(canvasRef: ElementRef<HTMLCanvasElement>, base64Data: string, pad:SignaturePad): void {
     if (!canvasRef || !canvasRef.nativeElement) {
       console.error("Canvas reference is missing!");
       return;
@@ -985,20 +1037,26 @@ roomCost: number =0;
       console.error("Invalid Base64 data:", base64Data);
       return;
     }
-    const canvas = canvasRef.nativeElement;
-    const ctx = canvas.getContext('2d');
-    if (ctx) {
-      const img = new Image();
-      img.src = base64Data;
+    // const canvas = canvasRef.nativeElement;
+    // const ctx = canvas.getContext('2d');
+    // if (ctx) {
+    //   const img = new Image();
+    //   img.src = base64Data;
 
-      img.onload = () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear any existing signature
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height); // Draw the new signature
-      };
+    //   img.onload = () => {
+    //     ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear any existing signature
+    //     ctx.drawImage(img, 0, 0, canvas.width, canvas.height); // Draw the new signature
+    //   };
 
-      img.onerror = () => {
-        console.error('Error loading signature image');
-      };
+    //   img.onerror = () => {
+    //     console.error('Error loading signature image');
+    //   };
+    // }
+    try {
+      pad.fromDataURL(base64Data);
+      pad['_isEmpty'] = false; // Manually set _isEmpty to false
+    } catch (err) {
+      console.error("Error loading signature from base64:", err);
     }
   }
   getInvalidControls(form: NgForm) {
@@ -1511,11 +1569,34 @@ roomCost: number =0;
     (this.formData as any)[key] = costArray.join(',');
 
     // console.log(`📝 Updating cost for ${surgery} in ${roomName}: ${value}`);
+    this.calculateEstimationCostForRoom(roomName);
 
     // ✅ Force Angular to detect changes and update the UI
     this.cdr.detectChanges();
   }
-
+  calculateEstimationCostForRoom(roomName: string): void {
+    let key = this.mapRoomNameToCostKey(roomName);
+    const costString = (this.formData as any)[key] || '';
+  
+    let extractedNumbers = costString.match(/\d+/g)?.map(Number) || [];
+    
+    if (costString.includes(',')) {
+      this.formData.multipleEstimationCost = extractedNumbers.join(',');
+    } else {
+      this.formData.multipleEstimationCost = '';
+    }
+  
+    const totalCost = extractedNumbers.reduce((sum: number, num: number) => sum + num, 0);
+    this.formData.estimationCost = totalCost;
+    this.roomCost = totalCost;
+    if (this.selectedRoom?.name === roomName) {
+      this.selectedRoomCost = `${roomName} - ₹${totalCost}`;
+    }
+    console.log(this.selectedRoomCost)
+  
+    console.log("Updated Estimation Cost:", totalCost, this.formData.multipleEstimationCost);
+  }
+  
   private inputTimeout: any;
 
   onCostInputChange(value: string, roomName: string, surgery: string): void {
@@ -1540,18 +1621,19 @@ roomCost: number =0;
 
     this.selectedRoomCost = `${room.name} - ₹${roomCost}`;
     console.log("Selected Room Cost:", this.selectedRoomCost);
-    let extractedNumbers = roomCostString.match(/\d+/g)?.map(Number) || [];
-    if (roomCostString.includes(',')) {
-      this.formData.multipleEstimationCost = extractedNumbers.join(',');
-    } else {
-      this.formData.multipleEstimationCost = ''; // Reset if no comma
-    }
+    // let extractedNumbers = roomCostString.match(/\d+/g)?.map(Number) || [];
+    // if (roomCostString.includes(',')) {
+    //   this.formData.multipleEstimationCost = extractedNumbers.join(',');
+    // } else {
+    //   this.formData.multipleEstimationCost = ''; // Reset if no comma
+    // }
 
-    let totalCost = extractedNumbers.reduce((sum: any, num: any) => sum + num, 0);
+    // let totalCost = extractedNumbers.reduce((sum: any, num: any) => sum + num, 0);
 
-    // ✅ Store the total cost in formData for estimation
-    this.formData.estimationCost = totalCost;
-    this.roomCost = totalCost
+    // // ✅ Store the total cost in formData for estimation
+    // this.formData.estimationCost = totalCost;
+    // this.roomCost = totalCost
+    this.calculateEstimationCostForRoom(room.name);
 
     console.log("Total Estimation Cost:", this.formData.estimationCost, this.formData.multipleEstimationCost);
   }
@@ -1720,7 +1802,40 @@ roomCost: number =0;
     this.showRejectReasonPopup = false;
     this.rejectionReason = '';
   }
-    
+  isRequiredSignatureMissing(): boolean {
+    const status = this.formData.statusOfEstimation;
+
+    // console.log(this.approverSignaturePad)
+  
+    // Case 1: If it's a new estimation, staff signature is always required
+    if (this.estimationData === null) {
+      return this.staffSignaturePad?.isEmpty?.() ?? true;
+    }
+  
+    // Case 2: Role-based override for sub_admin
+    if (this.role === 'sub_admin') {
+      if (status === 'pending' || status === 'submitted') {
+        return this.staffSignaturePad?.isEmpty?.() ?? true;
+      }
+    }
+  
+    // Case 3: Generic fallback based on status
+    switch (status) {
+      case 'pending':
+        return this.staffSignaturePad?.isEmpty?.() ?? true;
+      case 'submitted':
+        console.log('submitted')
+        return this.approverSignaturePad?.isEmpty?.() ?? true;
+      case 'approved':
+        return this.patientSignaturePad?.isEmpty?.() ?? true;
+      default:
+        return false;
+    }
+  }
+  
+  
+  
+  
 
 }
 

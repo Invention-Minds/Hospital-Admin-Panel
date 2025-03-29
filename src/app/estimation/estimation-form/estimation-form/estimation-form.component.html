@@ -123,7 +123,7 @@
         </div> -->
         <div class="input-container">
           <input type="text" id="patientEmail" name="patientEmail" placeholder=" " class="custom-input"
-          pattern="^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" ngModel [(ngModel)]="formData.patientEmail"
+          pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" ngModel [(ngModel)]="formData.patientEmail"
             [readonly]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved' " />
           <label for="patientEmail" class="custom-label">Email Id*</label>
           <div *ngIf="estimationForm.submitted && estimationForm.controls['patientEmail']?.invalid"
@@ -731,7 +731,7 @@
     <div class="button">
       <!-- For Subadmin -->
       <button *ngIf="role === 'sub_admin' && (formData.statusOfEstimation === 'pending' || estimationData === null || formData.statusOfEstimation === 'submitted')" type="submit"
-        class="submit-button" [disabled]="!estimationForm.valid">
+        class="submit-button" [disabled]="!estimationForm.valid || isRequiredSignatureMissing()">
         Submit
       </button>
       <button *ngIf="role === 'sub_admin' && (formData.statusOfEstimation === 'rejected')" type="submit"
@@ -743,14 +743,14 @@
       </button>
 
       <button *ngIf="role === 'sub_admin' && formData.statusOfEstimation === 'approved'" type="button"
-        class="submit-button" (click)="acceptRequest()" [disabled]="estimationForm.invalid">Accept</button>
+        class="submit-button" (click)="acceptRequest()" [disabled]="estimationForm.invalid || isRequiredSignatureMissing()">Accept</button>
 
       <!-- For Superadmin and Admin -->
       <button *ngIf="role === 'admin' || role === 'super_admin'" type="button" class="submit-button"
-        (click)="approveRequest()" [disabled]="estimationForm.invalid">
+        (click)="approveRequest()" [disabled]="estimationForm.invalid || isRequiredSignatureMissing()">
         Approve
       </button>
-      <button *ngIf="role === 'admin' || role === 'super_admin'" type="button" class="reject-button"
+      <button *ngIf="(role === 'admin' || role === 'super_admin') && formData.statusOfEstimation === 'submitted'" type="button" class="reject-button"
         (click)="rejectRequest()">
         Reject
       </button>

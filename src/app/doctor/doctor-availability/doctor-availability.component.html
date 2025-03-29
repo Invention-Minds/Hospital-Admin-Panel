@@ -51,10 +51,18 @@
           <div class="unavailable">
             <button class="unavailable-button" *ngIf="doctor.doctorType !=='Visiting Consultant'" (click)="openUnavailableModal(doctor)" [disabled]="!isTodayOrTomorrow(selectedDate) && doctor.id !== 14">Unavailable Slots</button>
           </div>
-          <div class="extra-slots-buttons" *ngIf="((role === 'admin' || role === 'super_admin') && doctor.doctorType !== 'Visiting Consultant')">
+          <!-- <div class="extra-slots-buttons" *ngIf="((role === 'admin' || role === 'super_admin') && doctor.doctorType !== 'Visiting Consultant')">
             <button type="button" class="button-after" (click)="addExtraSlotsBefore(doctor)"><img src="/before.svg"></button>
             <button type="button" class="button-after" (click)="addExtraSlotsAfter(doctor)"><img src="/after.svg"></button>
+          </div> -->
+          <div *ngFor="let range of doctor.availableFrom.split(',')">
+            <div class="extra-slots-buttons" *ngIf="((role === 'admin' || role === 'super_admin') && doctor.doctorType !== 'Visiting Consultant')">
+              <span class="doctor-name">{{ range }}</span>
+              <button  type="button" class="button-after" (click)="addExtraSlotsBefore(doctor, range)"><img src="/before.svg"></button>
+              <button  type="button" class="button-after" (click)="addExtraSlotsAfter(doctor, range)"><img src="/after.svg"></button>
+            </div>
           </div>
+          
         </div>
       </div>
       <div class="slots-scroll-container" *ngIf="!isLoading">

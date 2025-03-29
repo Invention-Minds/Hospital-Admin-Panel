@@ -56,6 +56,8 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
   unavailableSlotsPerDate: { [date: string]: { label: string; value: string }[] } = {};
   modifiedDay: keyof Doctor['availabilityDays'] | null = null;
   isSlotDurationChanged: boolean = false;
+  previousAvailability:any[]=[];
+  needsSlotCheck: boolean = false;
 
 
   constructor(private doctorService: DoctorServiceService, private changeDetector: ChangeDetectorRef, private datePipe: DatePipe, private messageService: MessageService, private cdr: ChangeDetectorRef) { }
@@ -225,81 +227,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
       };
     });
   }
-  // private setDoctorAvailability(): void {
-  //   if (this.doctor?.availability && this.doctor.availability.length > 0) {
-  //     this.doctor.availability.forEach((availability) => {
-  //       if (this.doctor?.availabilityDays) {
-  //         this.doctor.availabilityDays[availability.day as keyof Doctor['availabilityDays']] = true;
-  //       }
-  //       this.individualAvailability[availability.day] = {
-  //         availableFrom: availability.availableFrom,
-  //         slotDuration: availability.slotDuration
-  //       };
-  //     });
-  //     const uniqueAvailableTimes = new Set(this.doctor.availability.map(avail => avail.availableFrom));
-  //     this.useSameTimeForAllDays = uniqueAvailableTimes.size === 1;
-  //     if (this.useSameTimeForAllDays) {
-  //       this.generalAvailableFrom = this.doctor.availability[0].availableFrom;
-  //       this.generalSlotDuration = this.doctor.availability[0].slotDuration;
-  //     }
-  //   }
-  // }
-  // private setDoctorAvailability(): void {
-  //   if (this.doctor?.availability && this.doctor.availability.length > 0) {
-  //     const updatedIndividualAvailability: { [key: string]: { availableFrom: string; slotDuration: number } } = {};
-  //     // Loop through availability and initialize individualAvailability
-  //     console.log('Doctor availability:', this.doctor.availability);
-  //     this.availabilityDaysList.forEach(day => {
-  //       const dayAvailability = this.doctor?.availability.find(avail => avail.day === day);
-  //       if (dayAvailability) {
-  //         this.doctor!.availabilityDays[day] = true; // Mark day as available
-  //         this.individualAvailability[day] = {
-  //           availableFrom: dayAvailability.availableFrom,
-  //           slotDuration: dayAvailability.slotDuration
-  //         };
-  //         console.log('Day availabitlity',this.individualAvailability[day])
-  //       } else {
-  //         this.doctor!.availabilityDays[day] = false;
-  //         this.individualAvailability[day] = {
-  //           availableFrom: '', // Reset if no availability
-  //           slotDuration: 20 // Default value
-  //         };
-  //       }
-  //     });
 
-  //     // Determine if we should use the same time for all days
-  //     const uniqueTimes = new Set(this.doctor.availability.map(avail => avail.availableFrom));
-  //     this.useSameTimeForAllDays = uniqueTimes.size === 1;
-
-  //     if (this.useSameTimeForAllDays) {
-  //       // Set general values if all times are the same
-  //       this.generalAvailableFrom = this.doctor.availability[0].availableFrom;
-  //       this.generalSlotDuration = this.doctor.availability[0].slotDuration;
-  //     }
-  //   }
-  // }
-  // onDateSelect(event: any): void {
-  //   this.selectedDate = event;
-  //   if (this.selectedDate) {
-  //     // Determine the day of the week (e.g., 'mon', 'tue') based on the selected date
-  //     const dayOfWeek = this.selectedDate.toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
-
-  //     // Look for the availability corresponding to that day
-  //     const availability = this.doctor?.availability.find(avail => avail.day === dayOfWeek);
-
-  //     if (availability) {
-  //       // Generate slots based on the availability's start and end time
-  //       const [start, end] = availability.availableFrom.split('-');
-  //       this.generatedSlotOptions = this.generateTimeSlots(start, end, availability.slotDuration).map(slot => ({
-  //         label: slot,
-  //         value: slot
-  //       }));
-  //     } else {
-  //       // If no availability found, clear the slots
-  //       this.generatedSlotOptions = [];
-  //     }
-  //   }
-  // }
   onDateSelect(): void {
     if (!this.selectedDate || !this.doctor) return;
     // console.log('Selected date:', this.selectedDate);
@@ -346,133 +274,6 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
   }
 
 
-  // private setDoctorAvailability(): void {
-  //   if (this.doctor?.availability && this.doctor.availability.length > 0) {
-  //     // Loop through availability and initialize individualAvailability
-  //     // console.log('Doctor availability:', this.doctor.availability);
-  //     this.availabilityDaysList.forEach(day => {
-  //       const dayAvailability = this.doctor?.availability.find(avail => avail.day === day);
-  //       if (dayAvailability) {
-  //         this.doctor!.availabilityDays[day] = true; // Mark day as available
-  //         this.individualAvailability[day] = {
-  //           availableFrom: dayAvailability.availableFrom,
-  //           slotDuration: dayAvailability.slotDuration,
-  //           availableFromArray: dayAvailability.availableFrom
-  //           ? dayAvailability.availableFrom.includes(',')
-  //             ? dayAvailability.availableFrom.split(',').map(time => time.trim()) // Split by commas
-  //             : [dayAvailability.availableFrom.trim()] // Single item array
-  //           : [''] // Default to one empty string if no value
-  //         };
-  //         this.generalSlotDuration = dayAvailability.slotDuration;
-  //         // console.log('Day availability', this.individualAvailability[day]);
-  //       } else {
-  //         if (!this.individualAvailability[day]) {
-  //           this.individualAvailability[day] = {
-  //             availableFrom: '', // Reset if no availability
-  //             slotDuration: 20,
-  //             availableFromArray: [''] // Default value
-  //           };
-  //         }
-  //         this.doctor!.availabilityDays[day] = false;
-  //       }
-  //     });
-
-  //     // Determine if we should use the same time for all days
-  //     const uniqueTimes = new Set(this.doctor.availability.map(avail => avail.availableFrom));
-  //     this.useSameTimeForAllDays = uniqueTimes.size === 1;
-
-  //     if (this.useSameTimeForAllDays) {
-  //       // Set general values if all times are the same
-  //       this.generalAvailableFrom = this.doctor.availability[0].availableFrom;
-  //       this.availableTimesArray = this.generalAvailableFrom.split(',');
-  //       this.generalSlotDuration = this.doctor.availability[0].slotDuration;
-  //     }
-  //   }
-  //   console.log(this.useSameTimeForAllDays)
-  // }
-  // private setDoctorAvailability(): void {
-  //   if (this.doctor?.availability && this.doctor.availability.length > 0) {
-  //     this.availabilityDaysList.forEach(day => {
-  //             const dayAvailability = this.doctor?.availability.find(avail => avail.day === day);
-  //             if (dayAvailability) {
-  //               this.doctor!.availabilityDays[day] = true; // Mark day as available
-  //               this.individualAvailability[day] = {
-  //                 availableFrom: dayAvailability.availableFrom,
-  //                 slotDuration: dayAvailability.slotDuration,
-  //                 availableFromArray: dayAvailability.availableFrom
-  //                 ? dayAvailability.availableFrom.includes(',')
-  //                   ? dayAvailability.availableFrom.split(',').map(time => time.trim()) // Split by commas
-  //                   : [dayAvailability.availableFrom.trim()] // Single item array
-  //                 : [''] // Default to one empty string if no value
-  //               };
-  //               this.generalSlotDuration = dayAvailability.slotDuration;
-  //               // console.log('Day availability', this.individualAvailability[day]);
-  //             } else {
-  //               if (!this.individualAvailability[day]) {
-  //                 this.individualAvailability[day] = {
-  //                   availableFrom: '', // Reset if no availability
-  //                   slotDuration: 20,
-  //                   availableFromArray: [''] // Default value
-  //                 };
-  //               }
-  //               this.doctor!.availabilityDays[day] = false;
-  //             }
-  //           });
-  //     // Step 1: Find the latest `updatedAt` timestamp
-  //     const latestTimestamp = this.doctor.availability.reduce((latest, curr) => {
-  //       return curr.updatedAt && new Date(curr.updatedAt).getTime() > new Date(latest).getTime()
-  //         ? curr.updatedAt
-  //         : latest;
-  //     }, this.doctor.availability[0].updatedAt || '');
-
-  //     // Step 2: Filter entries with the latest `updatedAt` timestamp
-  //     const latestAvailability = this.doctor.availability.filter(
-  //       avail => avail.updatedAt === latestTimestamp
-  //     );
-
-  //     // Step 3: Reset availabilityDays and individualAvailability for all days
-
-
-  //     // Step 5: Check if all days in the latest update have the same time and duration
-  //     const uniqueTimes = new Set(latestAvailability.map(avail => avail.availableFrom));
-  //     const uniqueDurations = new Set(latestAvailability.map(avail => avail.slotDuration));
-
-  //     this.useSameTimeForAllDays = uniqueTimes.size === 1 && uniqueDurations.size === 1;
-
-  //     if (this.useSameTimeForAllDays) {
-  //       // Set general values if all times and durations are the same
-  //       this.generalAvailableFrom = latestAvailability[0].availableFrom;
-  //       this.availableTimesArray = this.generalAvailableFrom.includes(',')
-  //         ? this.generalAvailableFrom.split(',').map(time => time.trim())
-  //         : [this.generalAvailableFrom.trim()];
-  //       this.generalSlotDuration = latestAvailability[0].slotDuration;
-  //     }
-  //     // } else {
-  //     //   // Reset general values if times or durations differ
-  //     //   this.generalAvailableFrom = '';
-  //     //   this.availableTimesArray = [];
-  //     //   this.generalSlotDuration = 20;
-  //     // }
-  //   }
-  //   //  else {
-  //   //   // Reset all values if no availability
-  //   //   this.availabilityDaysList.forEach(day => {
-  //   //     this.doctor!.availabilityDays[day] = false;
-  //   //     this.individualAvailability[day] = {
-  //   //       availableFrom: '',
-  //   //       slotDuration: 20,
-  //   //       availableFromArray: ['']
-  //   //     };
-  //   //   });
-  //   //   this.useSameTimeForAllDays = false;
-  //   //   this.generalAvailableFrom = '';
-  //   //   this.availableTimesArray = [];
-  //   //   this.generalSlotDuration = 20;
-  //   // }
-
-  //   console.log(this.useSameTimeForAllDays);
-  // }
-
 
   private setDoctorAvailability(): void {
     if (this.doctor?.availability && this.doctor.availability.length > 0) {
@@ -505,6 +306,10 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
       // const latestAvailability = this.doctor.availability.filter(
       //   avail => avail.updatedAt === latestTimestamp || avail.updatedAt === null
       // );
+      this.previousAvailability = this.doctor.availability.map((a: any) => ({
+        day: a.day,
+        availableFrom: a.availableFrom
+      }));
       const allUpdatedAtNull = this.doctor.availability?.every(avail => !avail.updatedAt);
 
       // Step 2: Calculate the latest timestamp if any `updatedAt` is not null
@@ -640,7 +445,31 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
 
     if (this.doctor.id) {
       const doctorid = (this.doctor.id);
-
+      
+      if (this.useSameTimeForAllDays) {
+        this.availabilityDaysList.forEach(day => {
+          if (this.doctor?.availabilityDays?.[day]) {
+            const old = this.previousAvailability?.find((a: any) => a.day === day);
+            if (old && this.isTimeReduced(old.availableFrom, this.generalAvailableFrom)) {
+              this.needsSlotCheck = true;
+            }
+          }
+        });
+      } else {
+        this.availabilityDaysList.forEach(day => {
+          if (this.doctor?.availabilityDays?.[day]) {
+            const newTime = this.individualAvailability[day]?.availableFrom;
+            const old = this.previousAvailability?.find((a: any) => a.day === day);
+            if (old && this.isTimeReduced(old.availableFrom, newTime)) {
+              this.needsSlotCheck = true;
+            }
+          }
+        });
+      }
+      if (!this.needsSlotCheck) {
+        this.saveDoctorDetails();
+        return;
+      }
       if (this.useSameTimeForAllDays) {
         // Step 1: Check if there are future booked slots for this doctor
         this.doctorService.getFutureBookedSlots(doctorid.toString(), formattedDate, false).subscribe(
@@ -670,32 +499,6 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
         );
       }
       else {
-        // const dayOfWeek = this.selectedDate?.getDay() ?? today.getDay();
-        // this.doctorService.getFutureBookedSlots(doctorid.toString(), formattedDate, true, ).subscribe(
-        //   (slots) => {
-        //     console.log(slots)
-        //     if (slots.length > 0) {
-        //       // Step 2: If future booked slots exist, show an error message
-        //       this.messageService.add({
-        //         severity: 'error',
-        //         summary: 'Doctor Update Error',
-        //         detail: 'This doctor has future booked slots for the specific day. Please cancel them before making changes.'
-        //       });
-        //     } else {
-        //       // Step 3: Proceed with saving doctor details if no future booked slots exist
-        //       this.saveDoctorDetails();
-        //     }
-        //   },
-        //   (error) => {
-        //     console.error('Error fetching future booked slots:', error);
-        //     this.messageService.add({
-        //       severity: 'error',
-        //       summary: 'Error',
-        //       detail: 'Unable to check booked slots. Please try again later.'
-        //     });
-        //   }
-        // );
-
         // Assuming each input box corresponds to a day, you can detect which day is being modified.
         const dayOfWeek = this.getModifiedDay();
         // console.log(dayOfWeek)
@@ -729,7 +532,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
           );
         } else {
           // Handle the case where no specific day is modified
-         this.saveDoctorDetails()
+          this.saveDoctorDetails()
 
 
         }
@@ -790,6 +593,9 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
           }
         });
       }
+     
+
+
 
       if (!this.doctor?.phone_number.startsWith('91')) {
         this.doctor!.phone_number = '91' + this.doctor?.phone_number;
@@ -823,78 +629,17 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
     ;
     // Exit edit mode after saving
   }
-  // saveDoctor(): void {
-  //   // console.log('Doctor:', this.doctor);
-  //   if (!this.doctor) {
-  //     this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Doctor details are missing' });
-  //     return;
-  //   }
+  isTimeReduced(oldTime: string, newTime: string): boolean {
+    const [oldStart, oldEnd] = oldTime.split('-').map(t => this.stringToMinutes(t.trim()));
+    const [newStart, newEnd] = newTime.split('-').map(t => this.stringToMinutes(t.trim()));
 
-  //   // Initialize availability
-  //   this.doctor.availability = [];
-
-  //   if (this.useSameTimeForAllDays) {
-  //     // Set availability for all selected days
-  //     this.availabilityDaysList.forEach(day => {
-  //       if (this.doctor?.availabilityDays?.[day]) {
-  //         this.doctor.availability.push({
-  //           id: 0, // Placeholder ID, will be replaced by backend
-  //           day: day as string,
-  //           availableFrom: this.generalAvailableFrom,
-  //           slotDuration: this.generalSlotDuration,
-  //         });
-  //       }
-  //     });
-  //   } else {
-  //     // Set individual availability for each selected day
-  //     this.availabilityDaysList.forEach(day => {
-  //       // console.log('Day:', day);
-  //       if (this.doctor?.availabilityDays?.[day]) {
-  //         const availability = this.individualAvailability[day];
-  //         // console.log('Availability:', availability);
-  //         if (availability.availableFrom && availability.slotDuration !== undefined) {
-  //           this.doctor.availability.push({
-  //             id: 0,
-  //             day: day as string,
-  //             availableFrom: availability.availableFrom,
-  //             slotDuration: this.generalSlotDuration,
-  //           });
-  //         }
-  //       }
-  //     });
-  //   }
-  //   if (!this.doctor?.phone_number.startsWith('91')) {
-  //     this.doctor!.phone_number = '91' + this.doctor?.phone_number;
-  //   }
-  //   // const unavailableSlotValues = this.unavailableSlots.map(slot => slot.value);
-  //   // console.log('Unavailable slots:', unavailableSlotValues);
-  //   // this.doctor!.unavailableSlots = unavailableSlotValues; // Assign the values array to doctor
-  //   // Add unavailable slots for each date
-  //   // console.log('Unavailable slots per date:', this.unavailableSlotsPerDate);
-  //   Object.keys(this.unavailableSlotsPerDate).forEach(date => {
-  //     const times = this.unavailableSlotsPerDate[date].map(slot => slot.value);
-  //     // console.log('Adding unavailable slots for date:', date, times);
-
-  //     // Call the addUnavailableSlots API for each date
-  //     if (this.doctor?.id) {
-  //       this.doctorService.addUnavailableSlots(this.doctor.id, date, times).subscribe(
-  //         response => {
-  //           // console.log('Unavailable slots added successfully:', response);
-  //         },
-  //         error => {
-  //           console.error('Error adding unavailable slots:', error);
-  //         }
-  //       );
-  //     }
-  //   });
-  //   // console.log('Doctor:', this.doctor);
-
-  //   // Emit the save event with the doctor details
-  //   this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Doctor details saved successfully' });
-  //   this.save.emit(this.doctor);
-  //   this.doctor = null; // Reset the doctor object after saving
-  //   this.isEditMode = false; // Exit edit mode after saving
-  // }
+    // If new starts later or ends earlier => it's a reduction
+    return newStart > oldStart || newEnd < oldEnd;
+  }
+  stringToMinutes(time: string): number {
+    const [hours, minutes] = time.split(':').map(Number);
+    return hours * 60 + minutes;
+  }
 
   onDoctorTypeChange(): void {
     if (this.doctor?.doctorType === 'Visiting Consultant') {
@@ -1091,11 +836,11 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
   validateTimes(): boolean {
     const timePattern = /^\d{2}:\d{2}-\d{2}:\d{2}$/;
 
-      // Check if availableTimesArray is empty or contains only empty strings
-  if (this.availableTimesArray.length === 0 || this.availableTimesArray.every(time => time.trim() === '')) {
-    this.formError = 'Please enter available time.';
-    return false;
-  }
+    // Check if availableTimesArray is empty or contains only empty strings
+    if (this.availableTimesArray.length === 0 || this.availableTimesArray.every(time => time.trim() === '')) {
+      this.formError = 'Please enter available time.';
+      return false;
+    }
 
     for (const time of this.availableTimesArray) {
       if (time.trim() !== '' && !timePattern.test(time)) {
@@ -1124,12 +869,12 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
 
   addTimeRange(day: string): void {
     this.validateTimesForIndividual()
-    if(this.formErrors){
+    if (this.formErrors) {
       this.modifiedDay = day as keyof Doctor['availabilityDays'];
       this.individualAvailability[day].availableFromArray.push(''); // Add a new empty time range
       this.updateAvailableFromString(day);
     }
- // Update the combined string
+    // Update the combined string
   }
 
   removeTimeRange(day: string, index: number): void {
@@ -1140,34 +885,34 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
   updateAvailableFromString(day: string): void {
     this.validateTimesForIndividual()
     console.log(this.formErrors)
-    if(this.formErrors){
+    if (this.formErrors) {
       console.log('updating')
 
-    this.modifiedDay = day as keyof Doctor['availabilityDays'];
-    const timeArray = this.individualAvailability[day].availableFromArray || [];
-    this.individualAvailability[day].availableFrom = timeArray.filter(time => time.trim() !== '').join(', '); // Join non-empty values
-    this.cdr.detectChanges();
-    // console.log('Updated available from:', this.individualAvailability[day].availableFrom);
+      this.modifiedDay = day as keyof Doctor['availabilityDays'];
+      const timeArray = this.individualAvailability[day].availableFromArray || [];
+      this.individualAvailability[day].availableFrom = timeArray.filter(time => time.trim() !== '').join(', '); // Join non-empty values
+      this.cdr.detectChanges();
+      // console.log('Updated available from:', this.individualAvailability[day].availableFrom);
     }
   }
   // validateTimesForIndividual(): boolean {
   //   const timePattern = /^\d{2}:\d{2}-\d{2}:\d{2}$/;
   //   let isValid = true; // Flag to track validation status
-  
+
   //   // Reset errors for all days
   //   this.formErrors = {};
-  
+
   //   for (const day in this.individualAvailability) {
   //     if (this.individualAvailability.hasOwnProperty(day)) {
   //       const availableTimes = this.individualAvailability[day].availableFromArray;
-  
+
   //       // Check if availableFromArray is empty or contains only empty values
   //       if (!availableTimes || availableTimes.length === 0 || availableTimes.every(time => time.trim() === '')) {
   //         this.formErrors[day] = `Please enter available time for ${day}.`;
   //         isValid = false;
   //         continue; // Skip further validation for this day
   //       }
-  
+
   //       // Validate format
   //       for (const time of availableTimes) {
   //         if (time.trim() !== '' && !timePattern.test(time)) {
@@ -1182,16 +927,16 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
   //       console.log(this.formErrors[day])
   //     }
   //   }
-  
+
   //   return isValid; // Return overall validation status
   // }
   validateTimesForIndividual(): boolean {
     const timePattern = /^\d{2}:\d{2}-\d{2}:\d{2}$/;
     let isValid = true; // Assume valid until proven otherwise
-  
+
     // Reset errors for all days
     this.formErrors = {};
-  
+
     for (const day in this.individualAvailability) {
       if (this.individualAvailability.hasOwnProperty(day)) {
         // ✅ Skip validation if the day is NOT selected in availabilityDays
@@ -1199,16 +944,16 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
           delete this.formErrors[day]; // Ensure old errors are cleared
           continue;
         }
-  
+
         const availableTimes = this.individualAvailability[day]?.availableFromArray || [];
-  
+
         // Check if `availableFromArray` is empty or contains only empty values
         if (availableTimes.length === 0 || availableTimes.every(time => time.trim() === '')) {
           this.formErrors[day] = `Please enter available time for ${day}.`;
           isValid = false;
           continue; // Skip further validation for this day
         }
-  
+
         // Validate format
         let hasInvalidFormat = false;
         for (const time of availableTimes) {
@@ -1219,19 +964,19 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
             break; // Stop checking once an invalid format is found
           }
         }
-  
+
         // ✅ If the day was previously invalid but is now valid, remove the error
         if (!hasInvalidFormat) {
           delete this.formErrors[day];
         }
       }
     }
-  
+
     // ✅ If `formErrors` is empty, return `true`
     return Object.keys(this.formErrors).length === 0;
   }
-  
-  
+
+
 
 
   generateSlots(): void {
@@ -1244,32 +989,32 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
       const today = new Date();
       const formattedDate = today.toISOString().split('T')[0];
 
-        // Step 1: Check if there are future booked slots for this doctor
-        this.doctorService.getFutureBookedSlotDuration(this.doctor.id.toString(), formattedDate).subscribe(
-          (slots) => {
-  
-            if (slots.length > 0) {
-              // Step 2: If future booked slots exist, show an error message
-              this.messageService.add({
-                severity: 'error',
-                summary: 'Doctor Update Error',
-                detail: 'This doctor has future booked slots. Please cancel them before making changes.'
-              });
-            } 
-          },
-          (error) => {
-            console.error('Error fetching future booked slots:', error);
+      // Step 1: Check if there are future booked slots for this doctor
+      this.doctorService.getFutureBookedSlotDuration(this.doctor.id.toString(), formattedDate).subscribe(
+        (slots) => {
+
+          if (slots.length > 0) {
+            // Step 2: If future booked slots exist, show an error message
             this.messageService.add({
               severity: 'error',
-              summary: 'Error',
-              detail: 'Unable to check booked slots. Please try again later.'
+              summary: 'Doctor Update Error',
+              detail: 'This doctor has future booked slots. Please cancel them before making changes.'
             });
           }
-        );
-      }
+        },
+        (error) => {
+          console.error('Error fetching future booked slots:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Unable to check booked slots. Please try again later.'
+          });
+        }
+      );
+    }
 
-    
- 
+
+
   }
 
 

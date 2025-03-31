@@ -3,7 +3,7 @@ import { countByDate, processAppointmentData } from '../functions';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { map } from 'rxjs/operators';
-import { getLastSevenDays, getIndividualDates, getLastThirtyDaysFromSelected, reorderDateFormat,  } from '../functions';
+import { getLastSevenDays, getIndividualDates, getLastThirtyDaysFromSelected, reorderDateFormat, captureScreenshot  } from '../functions';
 import { error } from 'console';
 import * as echarts from 'echarts';
 import { MessageService } from 'primeng/api';
@@ -58,6 +58,9 @@ export class OpdOverviewComponent {
   // loading
   isLoading: boolean = true
 
+  // screen shot
+  screenShot : Function = captureScreenshot
+
   ngOnInit(): void {
     this.appointmentData()
     this.selectedDate = getLastSevenDays()
@@ -97,7 +100,7 @@ export class OpdOverviewComponent {
         this.appointmentCount.completed = processAppointmentData(completedDate, this.dates);
         this.appointmentCount.confirm = processAppointmentData(comfirmData, this.dates);
         this.appointmentCount.cancelled = processAppointmentData(cancelData, this.dates);
-        this.appointmentCount.pending = processAppointmentData(checkInData, this.dates);
+        // this.appointmentCount.pending = processAppointmentData(checkInData, this.dates);
 
         this.chart()
       },
@@ -437,7 +440,7 @@ export class OpdOverviewComponent {
     appointmentCount.completed = processAppointmentData(completedData, date);
     appointmentCount.confirm = processAppointmentData(comfirmData, date);
     appointmentCount.cancelled = processAppointmentData(cancelData, date);
-    appointmentCount.pending = processAppointmentData(checkedInData, date);
+    // appointmentCount.pending = processAppointmentData(checkedInData, date);
 
     this.ViewMorechart(appointmentCount);
     // console.log(appointmentCount);

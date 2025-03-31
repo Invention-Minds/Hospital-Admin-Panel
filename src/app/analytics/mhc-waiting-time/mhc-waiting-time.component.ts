@@ -7,7 +7,7 @@ import { AppointmentConfirmService } from '../../services/appointment-confirm.se
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
-import { getLast7Days, getLastThirtyDaysFromSelected } from '../functions'
+import { captureScreenshot, getLast7Days, getLastThirtyDaysFromSelected } from '../functions'
 
 @Component({
   selector: 'app-mhc-waiting-time',
@@ -51,8 +51,11 @@ export class MhcWaitingTimeComponent implements OnChanges {
   @Output() blockFilters = new EventEmitter<boolean[]>();
   @Output() reportName = new EventEmitter<string>();
 
+  // screenshot
+  screenShot : Function = captureScreenshot
+
   ngOnInit() {
-    this.loadChartData()
+    // this.loadChartData()
     this.selectedDate = getLast7Days()
     this.selectedViewDate = getLastThirtyDaysFromSelected()
   }

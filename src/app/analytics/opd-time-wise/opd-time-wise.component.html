@@ -2,7 +2,7 @@
     <app-loading />
 </div>
 
-<div class="root-container">
+<div class="root-container" id="OPDsessionsImage">
     <div class="header"*ngIf = '!isLoading'>
         <div class="common">
             <div class="heading">OPD Sessions</div>
@@ -14,6 +14,7 @@
                     </svg>
                 </div>
             </div>
+            <div class="downloadbutton pointer" matTooltipPosition="above" matTooltip="Download" (click)="screenShot('OPDsessionsImage', 'OPD Session')"><i class="fa-solid fa-download downloadButtonLanding"></i></div>
         </div>
         <div style = "display: flex; gap: 10px;">
             <div class="viewmore" (click)="viewmore()">View More</div>
@@ -32,7 +33,7 @@
 
 
 <!-- viewmore section -->
-<div class="viewmoreComponent" [ngClass]="{hide : !showViewMore, index : showViewMore}">
+<div class="viewmoreComponent" id = "viewmoreOPDsessions" [ngClass]="{hide : !showViewMore, index : showViewMore}">
     <div class="contents">
         <div class="header">
             <div class="viewMoreHeading">OPD Sessions</div>
@@ -44,6 +45,8 @@
                     <div class="tooltiptext">Download</div>
                 </i>
             </div> -->
+            <div class="downloadbutton pointer" matTooltipPosition="above" matTooltip="Download" (click)="screenShot('viewmoreOPDsessions', 'OPD Session')"><i class="fa-solid fa-download downloadButtonViewMore"></i></div>
+
             <select (change)="departmentOnchange($event)">
                 <option class="dummy" value="all" disabled selected hidden>Choose the Department</option>
                 <option value="all">All</option>

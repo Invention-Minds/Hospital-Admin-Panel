@@ -2,7 +2,7 @@
     <app-loading />
 </div>
 
-<div class="root-container" *ngIf="!isLoading">
+<div class="root-container" id="MHCoverviewImage" *ngIf="!isLoading">
     <div class="header-c">
         <div class="common">
             <div class="heading">MHC Overview</div>
@@ -16,6 +16,7 @@
                     </svg>
                 </div>
             </div>
+            <div class="downloadbutton pointer" matTooltipPosition="above" matTooltip="Download" (click)="screenShot('MHCoverviewImage', 'MHC Overview')"><i class="fa-solid fa-download downloadButtonLanding"></i></div>
         </div>
 
         <div style="display: flex; gap: 10px;">
@@ -67,7 +68,7 @@
 
 
 <!-- viewmore section -->
-<div class="viewmoreComponent" [ngClass]="{hide : !showViewMore, index : showViewMore}">
+<div class="viewmoreComponent" id="MHCoverviewImageViewMore" [ngClass]="{hide : !showViewMore, index : showViewMore}">
     <div class="contents">
         <div class="header">
             <div class="viewMoreHeading">MHC Overview</div>
@@ -85,6 +86,8 @@
                 <option *ngFor="let dept of department" [value]="dept.id">{{dept.name}}</option>
                 <option></option>
             </select> -->
+
+            <div class="downloadbutton pointer" matTooltipPosition="above" matTooltip="Download" (click)="screenShot('MHCoverviewImageViewMore', 'MHC Overview')"><i class="fa-solid fa-download downloadButtonViewMore"></i></div>
 
             <select class="packageNames" (change)="viewPackageONchange($event)">
                 <option class="dummy" value="all" disabled selected hidden>Choose the MHC package</option>

@@ -16,7 +16,7 @@ export class TodayAnalyticsComponent {
   constructor(private doctor: DoctorServiceService, private estimations: EstimationService, private healthCheckUp: HealthCheckupServiceService, private appointment: AppointmentConfirmService) { }
   date: any = '';
   doctors: any[] = [];
-  todayTotalOpdCount:number = 0;
+  todayTotalOpdCount: number = 0;
   availableDoctorsToday: number = 0;
   availableDoctors: any[] = []
   unavailableDoctors: any[] = []
@@ -49,8 +49,8 @@ export class TodayAnalyticsComponent {
   popUpAbsentReport: boolean = false
   popUpUnavailReport: boolean = false
   showLeaveDoctors: boolean = false
-  showEstimationReport : boolean = false
-  showMhcReport : boolean = false
+  showEstimationReport: boolean = false
+  showMhcReport: boolean = false
   reportColumn: any
   reportData: any
   availableDoctor: any
@@ -594,13 +594,13 @@ export class TodayAnalyticsComponent {
           return {
             date: entry.appointmentDate,
             status: entry.appointmentStatus,
-            patientName : `${entry.firstName} ${entry.lastName?entry.lastName:''}`,
-            packageName : entry.packageName,
-            age : entry.age
+            patientName: `${entry.firstName} ${entry.lastName ? entry.lastName : ''}`,
+            packageName: entry.packageName,
+            age: entry.age
           }
         })
         this.healthCheck.liveCount = comfirmedMhc.filter((entry: any) => entry.date === this.date).length
-        const dateFiltered = comfirmedMhc.filter((entry:any) => entry.date === this.date)
+        const dateFiltered = comfirmedMhc.filter((entry: any) => entry.date === this.date)
         this.mhcTableData = dateFiltered
         // console.log(comfirmedMhc, "confirmed MHC")
 
@@ -766,7 +766,7 @@ export class TodayAnalyticsComponent {
   getTodayCheckin(): any {
     this.appointment.getAllAppointments().subscribe({
       next: (data: any) => {
-        const todayTotalOpd = data.filter((entry:any) => entry.date === this.date);
+        const todayTotalOpd = data.filter((entry: any) => entry.date === this.date);
         const filteredData = data.filter((entry: any) => entry.checkedIn !== false && entry.date === this.date).map((entry: any) => {
           return {
             patientName: entry.patientName,
@@ -861,11 +861,11 @@ export class TodayAnalyticsComponent {
     this.showLeaveDoctors = true
   }
 
-  showEstimationTable():void{
+  showEstimationTable(): void {
     this.showEstimationReport = true
   }
 
-  showMhcTable():void{
+  showMhcTable(): void {
     this.showMhcReport = true
   }
 
@@ -885,11 +885,11 @@ export class TodayAnalyticsComponent {
     this.showLeaveDoctors = false
   }
 
-  closeEstTable():any{
+  closeEstTable(): any {
     this.showEstimationReport = false
   }
 
-  closeMhcTable():void{
+  closeMhcTable(): void {
     this.showMhcReport = false
   }
 

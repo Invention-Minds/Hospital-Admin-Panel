@@ -2,7 +2,7 @@
     <app-loading />
 </div>
 
-<div class="root-container">
+<div class="root-container" id = "downloadOpdOverviewChart">
     <div class="header_c" *ngIf="!isLoading">
         <div class="common">
             <div class="heading">OPD OVERVIEW</div>
@@ -14,6 +14,8 @@
                     </svg>
                 </div>
             </div>
+            <div class="downloadbutton pointer" matTooltip="Download" matTooltipPosition="above" (click)="screenShot('downloadOpdOverviewChart', 'OPD Estimation Type')"><i class="fa-solid fa-download downloadButtonLanding"></i></div>
+
         </div>
         <div style="display: flex; gap: 10px;">
             <div class="viewmore" (click)="viewmore()">View More</div>
@@ -56,7 +58,7 @@
                 </svg>
                 <span>Cancelled</span>
             </div>
-            <div class="legend_items">
+            <!-- <div class="legend_items">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="10" viewBox="0 0 16 10" fill="none">
                     <path d="M1 5H15H1Z" fill="#FCE35F" />
                     <path d="M1 5H15" stroke="#FCE35F" stroke-width="2" stroke-linecap="round" />
@@ -65,13 +67,13 @@
                         fill="#FCE35F" stroke="#FCE35F" />
                 </svg>
                 <span>Check-In</span>
-            </div>
+            </div> -->
         </div>
     </div>
 </div>
 
 <!-- viewmore section -->
-<div class="viewmoreComponent" [ngClass]="{hide : !showViewMore, index : showViewMore}">
+<div id = "ssOPDOverview" class="viewmoreComponent" [ngClass]="{hide : !showViewMore, index : showViewMore}">
     <div class="contents">
         <div class="header">
             <div class="viewMoreHeading">OPD Overview</div>
@@ -79,6 +81,9 @@
         </div>
         <!-- filters -->
         <div class="report-filter">
+
+            <div class="downloadbutton pointer" matTooltipPosition="above" matTooltip="Download" (click)="screenShot('ssOPDOverview', 'OPD Estimation Type')"><i class="fa-solid fa-download downloadButtonViewMore"></i></div>
+
             <select (change)="departmentOnchange($event)">
                 <option class="dummy" value="all" disabled selected hidden>Choose the Department</option>
                 <option value="all">All</option>
@@ -138,7 +143,7 @@
                     </svg>
                     <span>Cancelled</span>
                 </div>
-                <div class="legend_items">
+                <!-- <div class="legend_items">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="10" viewBox="0 0 16 10" fill="none">
                         <path d="M1 5H15H1Z" fill="#FCE35F" />
                         <path d="M1 5H15" stroke="#FCE35F" stroke-width="2" stroke-linecap="round" />
@@ -147,7 +152,7 @@
                             fill="#FCE35F" stroke="#FCE35F" />
                     </svg>
                     <span>Check-In</span>
-                </div>
+                </div> -->
             </div>
         </div>
 

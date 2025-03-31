@@ -2,10 +2,11 @@ import { Component, Input, OnChanges, SimpleChanges, Output, EventEmitter } from
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import * as echarts from 'echarts';
-import { download, countByDate, filteredAppointments, getYesterdayDate, getIndividualDates, getLastThirtyDaysFromSelected, viewfilteredAppointments, getLastSevenDays } from '../functions';
+import { download, countByDate, filteredAppointments, getLastThirtyDaysFromSelected, getLastSevenDays, captureScreenshot } from '../functions';
 import { Console, error } from 'console';
 import { doctors } from '../../Analytics-Folder/data';
 import { MessageService } from 'primeng/api';
+import { title } from 'process';
 
 
 @Component({
@@ -59,9 +60,9 @@ export class OpdRequestComponent {
     this.date = getLastSevenDays()
     this.appointmentData()
     this.selectedViewDate = getLastThirtyDaysFromSelected()
-    // console.log(this.doctorId, "docId")
-    // console.log(this.date, "date")
   }
+
+  screenShot : Function = captureScreenshot
 
   appointmentData(): void {
     this.isLoading = true; // Set loading to true before making the API call
@@ -179,6 +180,9 @@ export class OpdRequestComponent {
     this.chartInstance = echarts.init(chartContainer);
 
     const viewMoreOption = {
+      // title :{
+      //   text : "OPD Request Via"
+      // },
       tooltip: {
           trigger: 'item'
       },

@@ -2,7 +2,7 @@ import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import * as echarts from 'echarts'
-import { getYesterdayDate, getIndividualDates, getLastSevenDaysFromSelected, getLastThirtyDaysFromSelected, reorderDateFormat, getLast7Days, getLastSevenDays } from '../functions'
+import { getYesterdayDate, getIndividualDates, getLastSevenDaysFromSelected, getLastThirtyDaysFromSelected, reorderDateFormat, getLast7Days, getLastSevenDays, captureScreenshot } from '../functions'
 import { MessageService } from 'primeng/api';
 
 
@@ -43,6 +43,9 @@ export class OpdTimeWiseComponent implements OnChanges {
   selectedViewDate: any[] = []
   selectedViewDoctor: any = 'all'
   viewMoreoption: any
+
+  // screen shot
+  screenShot : Function = captureScreenshot
 
   ngOnInit() {
     this.selectedDate = getLastSevenDays()

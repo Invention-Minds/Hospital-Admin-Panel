@@ -5,7 +5,7 @@ import { DoctorServiceService } from '../../services/doctor-details/doctor-servi
 import { DatePipe } from '@angular/common';
 import { formatDate } from '@angular/common';
 import { error } from 'console';
-import { getIndividualDates, getYesterdayDate, getLastThirtyDaysFromSelected, reorderDateFormat, getLastSevenDays, getTodayDate } from '../functions'
+import { getIndividualDates, getYesterdayDate, getLastThirtyDaysFromSelected, reorderDateFormat, getLastSevenDays, getTodayDate, captureScreenshot } from '../functions'
 import { MessageService } from 'primeng/api';
 
 @Component({
@@ -64,6 +64,9 @@ export class EstimationBarComponent implements OnChanges {
   selectedViewDoctor: any = 'all'
   viewMoreoption: any
   viewMonthDates: any
+
+  // screenshot
+  screenShot : Function = captureScreenshot
 
   ngOnInit() {
     const yesterdayDate = getYesterdayDate()
@@ -248,7 +251,7 @@ export class EstimationBarComponent implements OnChanges {
           },
           data: this.lastSevenDaysData.map((data: any) => data.overdue),
           itemStyle: {
-            color: '#EB3AFF'
+            color: '#959595'
           },
           label: {
             show: true, // Enable labels
@@ -634,7 +637,7 @@ export class EstimationBarComponent implements OnChanges {
           },
           data: data.map((data: any) => data.overdue),
           itemStyle: {
-            color: '#EB3AFF'
+            color: '#959595'
           },
           label: {
             show: true,

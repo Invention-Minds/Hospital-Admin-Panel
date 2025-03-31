@@ -2,7 +2,7 @@
     <app-loading />
 </div>
 
-<div class="root-container">
+<div class="root-container" id="genderOverViewImage">
     <div class="header_c" *ngIf="!isLoading">
         <div class="common">
             <div class="heading">Gender Overview</div>
@@ -14,6 +14,7 @@
                     </svg>
                 </div>
             </div>
+            <div class="downloadbutton pointer" matTooltipPosition="above" matTooltip="Download" (click)="screenShot('genderOverViewImage', 'Gender Overview')"><i class="fa-solid fa-download downloadButtonLanding"></i></div>
         </div>
         <div style="display: flex; align-items: center; justify-content: end; gap: 10px">
             <div class="viewmore" (click)="viewmore()">View More</div>
@@ -32,7 +33,7 @@
     </div>
 </div>
 
-<div class="viewmoreComponent" [ngClass]="{hide : !showViewMore, index : showViewMore}">
+<div class="viewmoreComponent" id="genderOverImageViewMore" [ngClass]="{hide : !showViewMore, index : showViewMore}">
     <div class="contents">
         <div class="header">
             <div class="viewMoreHeading">Gender Overview</div>
@@ -40,6 +41,8 @@
         </div>
         <!-- filters -->
         <div class="report-filter">
+            <div class="downloadbutton pointer" matTooltipPosition="above" matTooltip="Download" (click)="screenShot('genderOverImageViewMore', 'Gender Overview')"><i class="fa-solid fa-download downloadButtonLanding"></i></div>
+
             <select (change)="departmentOnchange($event)">
                 <option class="dummy" value="all" disabled selected hidden>Choose the Department</option>
                 <option value="all">All</option>

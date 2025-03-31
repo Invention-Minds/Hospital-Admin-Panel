@@ -1,7 +1,7 @@
 import { Component, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import * as echarts from 'echarts'
-import { getYesterdayDate, getIndividualDates, getLastSevenDays, getLastThirtyDaysFromSelected, reorderDateFormat } from '../functions'
+import { getYesterdayDate, getIndividualDates, getLastSevenDays, getLastThirtyDaysFromSelected, reorderDateFormat, captureScreenshot } from '../functions'
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { MessageService } from 'primeng/api';
 
@@ -42,6 +42,9 @@ export class GenderOverviewComponent implements OnChanges {
   selectedViewDoctor: any = 'all'
   viewMoreChart: any
   departmentValue: any = 'all'
+
+  // screenshot
+  screenShot : Function = captureScreenshot
 
   ngOnInit() {
     this.selectedDate = getLastSevenDays()

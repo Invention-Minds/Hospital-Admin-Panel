@@ -1,6 +1,6 @@
 import { Component, Input, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
-import { getYesterdayDate, lastSelectedSevenDays, getIndividualDates, getLastThirtyDaysFromSelected, reorderDateFormat, sortByDateOldToNew, getLastSevenDays } from '../functions';
+import { getYesterdayDate, lastSelectedSevenDays, getIndividualDates, getLastThirtyDaysFromSelected, reorderDateFormat, sortByDateOldToNew, getLastSevenDays, captureScreenshot } from '../functions';
 import * as echarts from 'echarts'
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { MessageService } from 'primeng/api';
@@ -42,6 +42,10 @@ export class OpdTypeComponent {
   @Output() reportInitializeDate = new EventEmitter<any[]>()
   @Output() blockFilters = new EventEmitter<boolean[]>();
   @Output() reportName = new EventEmitter<string>();
+
+  // screenshot
+
+  screenShot : Function = captureScreenshot
 
   ngOnInit() {
     const yesterdayDate = getYesterdayDate()

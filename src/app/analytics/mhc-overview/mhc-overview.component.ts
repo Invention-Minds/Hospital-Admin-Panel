@@ -2,7 +2,7 @@ import { Component, Output, EventEmitter, Input, OnChanges, SimpleChanges } from
 import * as echarts from 'echarts';
 import { HealthCheckupServiceService } from '../../services/health-checkup/health-checkup-service.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
-import { getYesterdayDate, getIndividualDates, getLastThirtyDaysFromSelected, getLastSevenDays } from '../functions'
+import { getYesterdayDate, getIndividualDates, getLastThirtyDaysFromSelected, getLastSevenDays, captureScreenshot } from '../functions'
 import { TextAlignment } from 'pdf-lib';
 import { MessageService } from 'primeng/api';
 
@@ -44,6 +44,9 @@ export class MhcOverviewComponent implements OnChanges {
   selectedViewDoctor: any = 'all'
   viewMoreoption: any
   packagesName : any
+
+  // screenShot
+  screenShot : Function = captureScreenshot
 
   ngOnInit() {
     this.selectedDate = getLastSevenDays()

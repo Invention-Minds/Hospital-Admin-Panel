@@ -2,7 +2,7 @@
     <app-loading />
 </div>
 
-<div class="root-container" >
+<div class="root-container" id="opdOverViewImage">
     <div class="content">
         <div class="header_c" *ngIf="!isLoading">
             <div class="common">
@@ -15,6 +15,7 @@
                         </svg>
                     </div>
                 </div>
+                <div class="downloadbutton pointer" matTooltipPosition="above" matTooltip="Download" (click)="screenShot('opdOverViewImage', 'Estimation Status Overview')"><i class="fa-solid fa-download downloadButtonLanding"></i></div>
             </div>
             <div style = "display: flex; gap: 10px;">
                 <div class="viewmore" (click)="viewmore()">View More</div>
@@ -30,14 +31,14 @@
                 <div class="legend_items"><div class="indicator" style="background-color: #00EBEB;"></div><span>No. of. Conf. EST</span></div>
                 <div class="legend_items"><div class="indicator" style="background-color: #169458;"></div><span>No. of. Compl. EST</span></div>
                 <div class="legend_items"><div class="indicator" style="background-color: #FF4545;"></div><span>No. of. Canc EST</span></div>
-                <div class="legend_items"><div class="indicator" style="background-color: #EB3AFF;"></div><span>No. of. Over Due</span></div>
+                <div class="legend_items"><div class="indicator" style="background-color: #959595;"></div><span>No. of. Over Due</span></div>
             </div>
         </div>
     </div>
 </div>
 
 <!-- viewmore section -->
-<div class="viewmoreComponent" [ngClass]="{hide : !showViewMore, index : showViewMore}">
+<div class="viewmoreComponent" id="estimationBarImageViewmore" [ngClass]="{hide : !showViewMore, index : showViewMore}">
     <div class="contents">
         <div class="header">
             <div class="viewMoreHeading">Estimation Status Overview</div>
@@ -45,6 +46,7 @@
         </div>
         <!-- filters -->
         <div class="report-filter">
+            <div class="downloadbutton pointer" matTooltipPosition="above" matTooltip="Download" (click)="screenShot('estimationBarImageViewmore', 'Estimation Status Overview')"><i class="fa-solid fa-download downloadButtonViewMore"></i></div>
             
             <select (change)="departmentOnchange($event)">
                 <option class="dummy" value="all" disabled selected hidden>Choose the Department</option>

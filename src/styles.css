@@ -28,3 +28,13 @@ body { margin: 0; font-family: Kanit; background-color: #F0F3FF; }
 .pointer{
     cursor: pointer;
 }
+
+.downloadButtonLanding{
+    font-size: 16px;
+    color: #0096f0;
+}
+
+.downloadButtonViewMore{
+    font-size: 20px;
+    color: #0096f0;
+}

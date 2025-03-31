@@ -4,7 +4,7 @@ import { EstimationService } from '../../services/estimation/estimation.service'
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { map } from 'rxjs/operators';
-import { utcToIstDate, getYesterdayDate, getIndividualDates, getLastThirtyDaysFromSelected, getLast7Days, formatDate, reorderDateFormat } from '../functions'
+import { utcToIstDate, getYesterdayDate, getIndividualDates, getLastThirtyDaysFromSelected, getLast7Days, formatDate, reorderDateFormat, captureScreenshot } from '../functions'
 import { error } from 'console';
 import { MessageService } from 'primeng/api';
 import { constants } from 'buffer';
@@ -45,6 +45,9 @@ export class OpdEstimationPieComponent implements OnChanges {
   @Output() viewReportSection = new EventEmitter<any>
   @Output() sendReportData = new EventEmitter<any>
   @Output() reportInitializeDate = new EventEmitter<any>
+
+  // screenshot
+  screenShot : Function = captureScreenshot
 
   ngOnInit() {
     this.selectedDate = getLast7Days()

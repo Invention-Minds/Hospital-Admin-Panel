@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import * as echarts from 'echarts';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
-import { getYesterdayDate, getIndividualDates, utcToIstTime, getLastThirtyDaysFromSelected, getLastSevenDays } from '../functions';
+import { getYesterdayDate, getIndividualDates, utcToIstTime, getLastThirtyDaysFromSelected, getLastSevenDays, captureScreenshot } from '../functions';
 import { error } from 'console';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { Header } from 'primeng/api';
@@ -50,6 +50,9 @@ export class AverageWaitingTimeComponent implements OnInit, OnChanges {
   selectedViewDoctor: any = 'all'
   viewMoreChart: any
   mt_40_min: any
+
+  // screenshot
+  screenShot : Function = captureScreenshot
 
   ngOnInit(): void {
     const yersterDay = getYesterdayDate()

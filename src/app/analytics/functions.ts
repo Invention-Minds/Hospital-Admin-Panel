@@ -1,4 +1,6 @@
 import * as moment from 'moment-timezone';
+import html2canvas from 'html2canvas';
+
 
 export const download : Function = (name:any, containerName : any) => {
 const image = containerName.getDataURL({
@@ -364,4 +366,21 @@ export const filterAppointments = (data:any[], doctorId:any, departmentId:any, d
     return data.filter((entry:any) => (doctorId === entry.doctorId || entry.consultantId) && (departmentId === entry.departmentId) && (dates.includes(entry.date)))
   }
 
+}
+
+export const captureScreenshot = (divId: string, name : String): void => {
+  const element = document.getElementById(divId);
+  if (element) {
+    html2canvas(element).then((canvas) => {
+      // Convert canvas to image and trigger download
+      const link = document.createElement('a');
+      link.download = `${name} - screenshot.png`; // Filename for the downloaded image
+      link.href = canvas.toDataURL('image/png'); // Convert canvas to PNG data URL
+      link.click(); // Trigger download
+    }).catch((error) => {
+      console.error('Error capturing screenshot:', error);
+    });
+  } else {
+    console.error(`Element with ID ${divId} not found`);
+  }
 }

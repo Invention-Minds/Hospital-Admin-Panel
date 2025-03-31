@@ -2,7 +2,7 @@
     <app-loading />
 </div>
 
-<div class="root-container">
+<div class="root-container" id="estimationTypeImage">
     <div class="header" *ngIf="!isLoading">
         <div class="common">
             <div class="heading">OPD Estimation Types</div>
@@ -14,6 +14,8 @@
                     </svg>
                 </div>
             </div>
+            <div class="downloadbutton pointer" matTooltipPosition="above" matTooltip="Download" (click)="screenShot('estimationTypeImage', 'OPD Estimation Type')"><i class="fa-solid fa-download downloadButtonLanding"></i></div>
+
         </div>
         <div style = "display: flex; gap: 10px;">
             <div class="viewmore" (click)="viewmore()">View More</div>
@@ -37,7 +39,7 @@
 </div>
 
 <!-- viewmore section -->
-<div class="viewmoreComponent" [ngClass]="{hide : !showViewMore, index : showViewMore}">
+<div class="viewmoreComponent" id="estimationTypeImageViewMOre" [ngClass]="{hide : !showViewMore, index : showViewMore}">
     <div class="contents">
         <div class="c_header">
             <div class="viewMoreHeading">OPD Estimation Types</div>
@@ -45,10 +47,7 @@
         </div>
         <!-- filters -->
         <div class="report-filter"> 
-            <div style="font-size: 20px; cursor: pointer;" class="tooltip"><i class="fa-solid fa-download">
-                    <div class="tooltiptext">Download</div>
-                </i>
-            </div>
+            <div class="downloadbutton pointer" matTooltipPosition="above" matTooltip="Download" (click)="screenShot('estimationTypeImageViewMOre', 'OPD Estimation Type')"><i class="fa-solid fa-download downloadButtonViewMore"></i></div>
             <select (change)="departmentOnchange($event)">
                 <option class="dummy" value="all" disabled selected hidden>Choose the Department</option>
                 <option value="all">All</option>

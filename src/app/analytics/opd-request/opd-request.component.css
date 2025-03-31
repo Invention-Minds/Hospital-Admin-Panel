@@ -117,6 +117,7 @@
     display: flex;
     position: relative;
     margin-top: 5px;
+    gap: 10px;
 }
 
 .loading {

@@ -895,7 +895,20 @@
   .mobile-appointments {
     display: none;
   }
+  .status-badge.completed {
+    background: #79CFA6; /* Green */
+    color: white;
+  }
   
+  .status-badge.cancelled {
+    background-color: #FF4747; /* Red */
+    color: white;
+  }
+  
+  .status-badge.confirmed {
+    background-color: #0E2970; /* Teal */
+    color: white;
+  }
   /* Show the mobile cards on smaller screens */
   @media screen and (max-width: 768px) {
     .table-container {
@@ -1056,5 +1069,6 @@
     display: flex;
     justify-content: center;
   }
+  
   }
   

@@ -134,6 +134,7 @@ import { SamrakshaApptCancelComponent } from './samraksha/samraksha-appt-cancel/
 import { SamrakshaApptCompleteComponent } from './samraksha/samraksha-appt-complete/samraksha-appt-complete.component';
 import { SamrakshaApptRepeatComponent } from './samraksha/samraksha-appt-repeat/samraksha-appt-repeat.component';
 import { EstimationLockComponent } from './estimation-lock/estimation-lock.component';
+import { PastConsultationsComponent } from './doctor-role/past-consultations/past-consultations.component';
 
 
 @NgModule({
@@ -228,7 +229,8 @@ import { EstimationLockComponent } from './estimation-lock/estimation-lock.compo
     SamrakshaApptCancelComponent,
     SamrakshaApptCompleteComponent,
     SamrakshaApptRepeatComponent,
-    EstimationLockComponent
+    EstimationLockComponent,
+    PastConsultationsComponent
   ],
   imports: [
     BrowserModule,

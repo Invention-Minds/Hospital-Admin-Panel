@@ -50,7 +50,7 @@ export class ArrivedConsultationComponent {
 
   constructor(private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private messageService: MessageService, private cdRef: ChangeDetectorRef) { }
   appointments: Appointment[] = [
-    // { id: '0001', patientName: 'Anitha Sundar', phoneNumber: '+91 7708590100', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Booked', smsSent: true },
+    // { id: '0001', patientName: 'Search Sundar', phoneNumber: '+91 7708590100', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Booked', smsSent: true },
   ];
 
   currentPage = 1;
@@ -118,7 +118,7 @@ export class ArrivedConsultationComponent {
       next: (appointments) => {
         // console.log('All Appointments received:', appointments);
         this.allAppointments = appointments;
-        this.confirmedAppointments = appointments.filter(appointment => appointment.status === 'confirmed');
+        this.confirmedAppointments = this.allAppointments
 
         this.doctorService.getAllDoctors().subscribe({
           next: (doctors) => {

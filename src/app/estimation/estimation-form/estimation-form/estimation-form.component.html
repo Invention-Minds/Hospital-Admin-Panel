@@ -652,7 +652,7 @@
           <label class="sign">Staff Signature</label>
           <canvas #staffSignatureCanvas width="500" height="200" style="border: 1px solid black;"></canvas>
           <!-- <button class="clear-button sign-clear" (click)="clearStaffSign()">Clear</button> -->
-          <button class="clear-button sign-clear" (click)="clearStaffSign()" *ngIf="formData.statusOfEstimation === 'pending' || estimationData === null">Clear</button>
+          <button class="clear-button sign-clear" (click)="clearStaffSign()" *ngIf="formData.statusOfEstimation === 'pending' || estimationData === null || (role === 'sub_admin' && (formData.statusOfEstimation === 'pending' || estimationData === null || formData.statusOfEstimation === 'submitted'))">Clear</button>
           <div class="input-container">
             <input type="text" id="employeeName" name="employeeName" pattern="^[a-zA-Z . ]*$" class="custom-input"
               ngModel [(ngModel)]="formData.employeeName" required placeholder=" " class="custom-input"
@@ -728,8 +728,7 @@
       </div>
     </div>
 
-    <div class="button">
-      <!-- For Subadmin -->
+    <!-- <div class="button">
       <button *ngIf="role === 'sub_admin' && (formData.statusOfEstimation === 'pending' || estimationData === null || formData.statusOfEstimation === 'submitted')" type="submit"
         class="submit-button" [disabled]="!estimationForm.valid || isRequiredSignatureMissing()">
         Submit
@@ -745,7 +744,6 @@
       <button *ngIf="role === 'sub_admin' && formData.statusOfEstimation === 'approved'" type="button"
         class="submit-button" (click)="acceptRequest()" [disabled]="estimationForm.invalid || isRequiredSignatureMissing()">Accept</button>
 
-      <!-- For Superadmin and Admin -->
       <button *ngIf="role === 'admin' || role === 'super_admin'" type="button" class="submit-button"
         (click)="approveRequest()" [disabled]="estimationForm.invalid || isRequiredSignatureMissing()">
         Approve
@@ -754,7 +752,35 @@
         (click)="rejectRequest()">
         Reject
       </button>
+    </div>  -->
+    <div class="button" *ngIf="formData.statusOfEstimation === 'pending' || formData.statusOfEstimation === 'submitted' || formData.statusOfEstimation === 'rejected' || estimationData === null">
+      <!-- For Subadmin -->
+      <button *ngIf="role === 'sub_admin' && (formData.statusOfEstimation === 'pending' || estimationData === null || formData.statusOfEstimation === 'submitted')" type="submit"
+        class="submit-button" [disabled]="!estimationForm.valid || isRequiredSignatureMissing() || this.selectedRoomCost === '' || !isAnyCheckboxChecked">
+        Submit
+      </button>
+      <button *ngIf="role === 'sub_admin' && (formData.statusOfEstimation === 'rejected')" type="submit"
+      class="submit-button" [disabled]="!estimationForm.valid">
+      Re-Submit
+    </button>
+      <button *ngIf="role === 'sub_admin'" type="button" class="clear-button" (click)="clearForm()">
+        Clear
+      </button>
+
+      <!-- <button *ngIf="role === 'sub_admin' && formData.statusOfEstimation === 'approved'" type="button"
+        class="submit-button" (click)="acceptRequest()" [disabled]="estimationForm.invalid || isRequiredSignatureMissing()">Accept</button> -->
+
+      <!-- For Superadmin and Admin -->
+      <button *ngIf="role === 'admin' || role === 'super_admin'" type="button" class="submit-button"
+        (click)="approveRequest()" [disabled]="estimationForm.invalid || isRequiredSignatureMissing() || this.selectedRoomCost === '' || !isAnyCheckboxChecked">
+        Approve
+      </button>
+      <button *ngIf="role === 'admin' || role === 'super_admin'" type="button" class="reject-button"
+        (click)="rejectRequest()">
+        Reject
+      </button>
     </div>
+
 
   </form>
 </div>

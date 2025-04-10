@@ -317,6 +317,11 @@ tbody tr:hover {
   cursor: not-allowed; /* Change cursor to indicate the button is disabled */
   opacity: 0.6; /* Make the button less prominent */
 }
+.save-button:disabled{
+  background-color: #f0f0f0; /* Gray background for disabled button */
+  cursor: not-allowed; /* Change cursor to indicate the button is disabled */
+  opacity: 0.6; /* Make the button less prominent */
+}
 .start {
   display: flex;
   height: 36px;

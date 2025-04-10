@@ -7,7 +7,7 @@
     </div>
 
     <div class="p-field p-col-3">
-      <input pInputText [(ngModel)]="searchValue" placeholder="Anitha / 123456" class="custom-input-text"
+      <input pInputText [(ngModel)]="searchValue" placeholder="Search / 123456" class="custom-input-text"
         (ngModelChange)="onSearch()" />
     </div>
 
@@ -139,7 +139,7 @@
               <img *ngIf="!estimation.messageSent" src="icons/not-sent.png" alt="Not Sent">
             </span>
           </td>
-          <td>
+          <!-- <td>
             <span class="status-badge" [ngClass]="{
               'accepted': estimation.statusOfEstimation === 'accepted',
               'approved': estimation.statusOfEstimation === 'approved'
@@ -166,21 +166,40 @@
             <button class="btn-action" (click)="print(estimation)" pTooltip="Print" tooltipPosition="top">
               <img src="/print.svg" alt="Confirm">
             </button>
+          </td> -->
+          <td>
+            <span class="status-badge accepted">{{estimation.statusOfEstimation}}</span>
+          </td>
+          
+          <td class="button">
+            <button class="btn-action" (click)="openFollowUpPopup(estimation)" pTooltip="Follow-Ups"
+              tooltipPosition="top">
+              <img src="/follow-up.svg" alt="Confirm">
+            </button>
+            <button class="btn-action" (click)="openAppointmentForm(estimation)" pTooltip="View" tooltipPosition="top">
+              <img src="/view.svg" alt="Confirm">
+            </button>
+            <button class="btn-action" (click)="openAdvancePopup(estimation)" pTooltip="Advance Amount"
+              tooltipPosition="top">
+              <img src="/paid.svg" alt="Confirm">
+            </button>
+            <button class="btn-action" (click)="resend(estimation)" pTooltip="Resend" tooltipPosition="top">
+              <img src="/resend.svg" alt="Confirm">
+            </button>
+            <button class="btn-action" (click)="print(estimation)" pTooltip="Print" tooltipPosition="top">
+              <img src="/print.svg" alt="Confirm">
+            </button>
             <!-- <img src="appt-cancel.png" alt="delete" class="action-icon" (click)="cancelAppointment(estimation)"
                           pTooltip="Cancel" tooltipPosition="top"> -->
           </td>
-          <td class="button" *ngIf=" estimation.statusOfEstimation === 'approved'">
-            <!-- <button class="btn-action" (click)="openAppointmentForm(estimation)" pTooltip="Patient Signature"
-              tooltipPosition="top">
-              <img src="/patient-sign.svg" alt="Confirm">
-            </button> -->
+          <!-- <td class="button" *ngIf=" estimation.statusOfEstimation === 'approved'">
             <div class="status-badge" (click)="openAppointmentForm(estimation)">
               <div class="sign">
                 <img class="image" src="/sign.svg" alt="Confirm">
                 Patient Signature
               </div>
             </div>
-          </td>
+          </td> -->
         </tr>
       </tbody>
     </table>

@@ -83,10 +83,10 @@ roomCost: number =0;
     this.availableRooms = [
       { name: 'General', cost: 1600 },
       { name: 'Semi-Private', cost: 3500 },
-      { name: 'Private/ICU', cost: 5000 },
-      { name: 'Deluxe', cost: 6000 },
-      { name: 'VIP Suite', cost: 10000 },
-      { name: 'Presidential Suite', cost: 12000 }
+      { name: 'Private/ICU', cost: 6000 },
+      { name: 'Deluxe', cost: 7000 },
+      { name: 'VIP Suite', cost: 12000 },
+      { name: 'Presidential Suite', cost: 14000 }
     ];
 
   }
@@ -173,6 +173,7 @@ roomCost: number =0;
       case 'approved':
         this.staffSignaturePad.off();
         this.approverSignaturePad.off();
+        this.patientSignaturePad.off();
         break;
   
       default:
@@ -188,10 +189,10 @@ roomCost: number =0;
   availableRooms = [
     { name: 'General', cost: 1600 },
     { name: 'Semi-Private', cost: 3500 },
-    { name: 'Private/ICU', cost: 5000 },
-    { name: 'Deluxe', cost: 6000 },
-    { name: 'VIP Suite', cost: 10000 },
-    { name: 'Presidential Suite', cost: 12000 }
+    { name: 'Private/ICU', cost: 6000 },
+    { name: 'Deluxe', cost: 7000 },
+    { name: 'VIP Suite', cost: 12000 },
+    { name: 'Presidential Suite', cost: 14000 }
   ];
   get sortedSelectedRooms(): { name: string; cost: number }[] {
     return this.availableRooms.filter(room =>
@@ -590,10 +591,10 @@ roomCost: number =0;
     this.availableRooms = [
       { name: 'General', cost: 1600 },
       { name: 'Semi-Private', cost: 3500 },
-      { name: 'Private/ICU', cost: 5000 },
-      { name: 'Deluxe', cost: 6000 },
-      { name: 'VIP Suite', cost: 10000 },
-      { name: 'Presidential Suite', cost: 12000 }
+      { name: 'Private/ICU', cost: 6000 },
+      { name: 'Deluxe', cost: 7000 },
+      { name: 'VIP Suite', cost: 12000 },
+      { name: 'Presidential Suite', cost: 14000 }
     ];
     this.appointmentService.getAllPatients().subscribe(
       (patients => {
@@ -707,6 +708,7 @@ roomCost: number =0;
 
       this.selectedEstimationType = this.estimationData.estimationType;
       this.selectedSurgeryPackage = this.estimationData.surgeryPackage;
+      this.formData.estimationCost = this.estimationData.estimationCost;
 
 
 
@@ -922,34 +924,34 @@ roomCost: number =0;
         console.error('Error updating estimation:', error);
       }
     );
-    // this.estimationService.updateEstimationDetails(estimationData.estimationId, estimationData).subscribe(
-    //   (response) => {
-    //     console.log('Estimation updated successfully:', response);
-    //     this.clearForm();
-    //     this.closeForm.emit()
-    //     this.estimationService.generateAndSendPdf(estimationData.estimationId, estimationData).subscribe(
-    //       (pdfResponse) => {
-    //         console.log("✅ PDF Generated & Sent via WhatsApp:", pdfResponse);
-    //         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'PDF Generated & Sent PDF via WhatsApp:!' });
-    //         // const to = "ipbilling@rashtrotthanahospital.com"
-    //         const to = "keerthanasaminathan0805@gmail.com"
-    //         this.appointmentService.sendMailtoApprover(to, estimationData.estimationId, pdfResponse.filePath).subscribe(
-    //           (response) => {
-    //             console.log('Email sent successfully:', response);
-    //           }, (error) => {
-    //             console.error("❌ Error sending mail:", error);
-    //           }
-    //         )
-    //       },
-    //       (pdfError) => {
-    //         console.error("❌ Error generating PDF:", pdfError);
-    //       }
-    //     );
-    //   },
-    //   (error) => {
-    //     console.error('Error updating estimation:', error);
-    //   }
-    // );
+    this.estimationService.updateEstimationDetails(estimationData.estimationId, estimationData).subscribe(
+      (response) => {
+        console.log('Estimation updated successfully:', response);
+        this.clearForm();
+        this.closeForm.emit()
+        this.estimationService.generateAndSendPdf(estimationData.estimationId, estimationData).subscribe(
+          (pdfResponse) => {
+            console.log("✅ PDF Generated & Sent via WhatsApp:", pdfResponse);
+            this.messageService.add({ severity: 'success', summary: 'Success', detail: 'PDF Generated & Sent PDF via WhatsApp:!' });
+            // const to = "ipbilling@rashtrotthanahospital.com"
+            const to = "keerthanasaminathan0805@gmail.com"
+            this.appointmentService.sendMailtoApprover(to, estimationData.estimationId, pdfResponse.filePath).subscribe(
+              (response) => {
+                console.log('Email sent successfully:', response);
+              }, (error) => {
+                console.error("❌ Error sending mail:", error);
+              }
+            )
+          },
+          (pdfError) => {
+            console.error("❌ Error generating PDF:", pdfError);
+          }
+        );
+      },
+      (error) => {
+        console.error('Error updating estimation:', error);
+      }
+    );
     if (!this.estimationData.estimationId) {
 
     }
@@ -1083,34 +1085,34 @@ roomCost: number =0;
       inclusions: this.formData.inclusions,
       exclusions: this.formData.exclusions,
     }
-    this.estimationService.updateEstimationDetails(estimationData.estimationId, estimationData).subscribe(
-      (response) => {
-        console.log('Estimation updated successfully:', response);
-        this.clearForm();
-        this.closeForm.emit()
-        this.estimationService.generateAndSendPdf(estimationData.estimationId, estimationData).subscribe(
-          (pdfResponse) => {
-            console.log("✅ PDF Generated & Sent via WhatsApp:", pdfResponse);
-            this.messageService.add({ severity: 'success', summary: 'Success', detail: 'PDF Generated & Sent PDF via WhatsApp:!' });
-            // const to = "ipbilling@rashtrotthanahospital.com"
-            const to = "keerthanasaminathan0805@gmail.com"
-            this.appointmentService.sendMailtoApprover(to, estimationData.estimationId, pdfResponse.filePath).subscribe(
-              (response) => {
-                console.log('Email sent successfully:', response);
-              }, (error) => {
-                console.error("❌ Error sending mail:", error);
-              }
-            )
-          },
-          (pdfError) => {
-            console.error("❌ Error generating PDF:", pdfError);
-          }
-        );
-      },
-      (error) => {
-        console.error('Error updating estimation:', error);
-      }
-    );
+    // this.estimationService.updateEstimationDetails(estimationData.estimationId, estimationData).subscribe(
+    //   (response) => {
+    //     console.log('Estimation updated successfully:', response);
+    //     this.clearForm();
+    //     this.closeForm.emit()
+    //     this.estimationService.generateAndSendPdf(estimationData.estimationId, estimationData).subscribe(
+    //       (pdfResponse) => {
+    //         console.log("✅ PDF Generated & Sent via WhatsApp:", pdfResponse);
+    //         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'PDF Generated & Sent PDF via WhatsApp:!' });
+    //         // const to = "ipbilling@rashtrotthanahospital.com"
+    //         const to = "keerthanasaminathan0805@gmail.com"
+    //         this.appointmentService.sendMailtoApprover(to, estimationData.estimationId, pdfResponse.filePath).subscribe(
+    //           (response) => {
+    //             console.log('Email sent successfully:', response);
+    //           }, (error) => {
+    //             console.error("❌ Error sending mail:", error);
+    //           }
+    //         )
+    //       },
+    //       (pdfError) => {
+    //         console.error("❌ Error generating PDF:", pdfError);
+    //       }
+    //     );
+    //   },
+    //   (error) => {
+    //     console.error('Error updating estimation:', error);
+    //   }
+    // );
   }
 
   onSubmit(form: any) {
@@ -1286,14 +1288,7 @@ roomCost: number =0;
   ngOnDestroy(): void {
     this.clearForm()
     this.closeForm.emit()
-    // this.healthCheckupService.unlockService(this.estimationData.id).subscribe({
-    //   next: (response) => {
-    //     console.log('Service unlocked successfully:', response);
-    //   },
-    //   error: (error) => {
-    //     console.error('Error unlocking service:', error);
-    //   },
-    // });
+
   }
   categories: Array<"implants" | "procedures" | "instrumentals"> = ["implants", "procedures", "instrumentals"];
 

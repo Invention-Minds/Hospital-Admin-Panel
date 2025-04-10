@@ -26,6 +26,17 @@
           </div>
         </div>
         <div class="card" 
+        [ngClass]="{'active-card': activeComponent === 'past'}"
+        (click)="showPastDetails()">
+          <div class="card-icon">
+            <img src="/past-consul.svg" alt="Doctor Available Icon" />
+          </div>
+          <div class="card-content">
+            <!-- <h2>42</h2> -->
+            <p>Past Consultations</p>
+          </div>
+        </div>
+        <div class="card" 
         [ngClass]="{'active-card': activeComponent === 'details'}"
         (click)="showDoctorDetails()">
           <div class="card-icon">
@@ -36,7 +47,6 @@
             <p>Future Consultations</p>
           </div>
         </div>
-        
 
         </div>
   </div>
@@ -44,6 +54,7 @@
     <app-today-consultations  *ngIf="activeComponent === 'availability'"></app-today-consultations>
     <app-future-consultations *ngIf="activeComponent === 'details'"></app-future-consultations>
     <app-arrived-consultation *ngIf="activeComponent === 'arrived'"></app-arrived-consultation>
+    <app-past-consultations *ngIf="activeComponent === 'past'"></app-past-consultations>
   </div>
   </div>
   

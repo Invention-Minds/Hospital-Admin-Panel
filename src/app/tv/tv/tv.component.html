@@ -28,19 +28,21 @@
           </video>
       </div>
   </div>
-    <div *ngIf="!loading; else loaderTemplate"
-      class="doctor-cards"
-      [ngClass]="{ 'four-doctors-layout': isFourDoctors() }"
-      [ngClass]="{'two-doctors-layout': isTwoDoctors()}"
+    <!-- <div *ngIf="!loading; else loaderTemplate"
+      class="doctor-cards doctor-cards-wrapper"
+      [ngClass]="{
+        'two-doctors-layout': doctorsPages[slideIndex].length === 2,
+        'one-doctor-layout': doctorsPages[slideIndex].length === 1
+      }"
     >
+    
       <div
         class="doctor-card"
-        *ngFor="let doctor of doctors"
+        *ngFor="let doctor of doctorsPages[slideIndex]"
       >
         <div class="doctor-header" >
-          <div class="doctor-image" *ngIf="!isFourDoctors()">
-            <!-- <img  class="image" src="/doctor-image.jpg" alt="Doctor Image" /> -->
-            <img class="image" 
+          <div class="doctor-image">
+        <img class="image" 
             [src]="doctor.doctorId ? '/doctor-image/' + doctor.doctorId + '.png' : '/assets/default-doctor.png'" 
             alt="Doctor Image">
           </div>
@@ -89,7 +91,83 @@
           </tbody>
         </table>
       </div>
+    </div>   -->
+    <div *ngIf="!loading; else loaderTemplate" class="carousel-container">
+      <div
+        class="carousel-slide"
+        [style.transform]="'translateX(-' + slideIndex * 100 + '%)'"
+        [style.transition]="'transform 1s ease-in-out'"
+      >
+        <div
+          class="doctor-slide"
+          *ngFor="let group of doctorsPages"
+          [ngClass]="{
+            'two-doctors-layout': group.length === 2,
+            'one-doctor-layout': group.length === 1
+          }"
+        >
+          <div
+            class="doctor-card"
+            *ngFor="let doctor of group"
+          >
+            <div class="doctor-header">
+              <div class="doctor-image">
+                <img
+                  class="image"
+                  [src]="doctor.doctorId ? '/doctor-image/' + doctor.doctorId + '.png' : '/assets/default-doctor.png'"
+                  alt="Doctor Image"
+                />
+              </div>
+              <div class="doctor-details">
+                <h3>Name: {{ doctor.name }}</h3>
+                <p>Department: {{ doctor.department }}</p>
+                <p>Room No: {{ doctor.roomNo }}</p>
+                <p>Avail. Time: {{ doctor.remainingTime }}</p>
+              </div>
+            </div>
+    
+            <table class="queue-table">
+              <thead>
+                <tr>
+                  <th style="text-align: center;">No.</th>
+                  <th>Name</th>
+                  <th style="text-align: center;">Actual Time</th>
+                  <th style="text-align: center;">Predict Time</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngIf="doctor.patients && doctor.patients.length === 0">
+                  <td colspan="4" style="text-align: center;">No Active Waitlists</td>
+                </tr>
+                <tr
+                  *ngFor="let patient of doctor.patients; let i = index; trackBy: trackByFn"
+                  [class.removed]="patient.endConsultation"
+                  @fadeInOut
+                >
+                  <td style="text-align: center;">{{ i + 1 }}</td>
+                  <td class="patient-name">
+                    <span *ngIf="patient.patientName.length > 10" class="scrolling-name">
+                      {{ patient.patientName }}
+                    </span>
+                    <span *ngIf="patient.patientName.length <= 10">
+                      {{ patient.patientName }}
+                    </span>
+                  </td>
+                  <td style="text-align: center;">
+                    <span class="status">{{ patient.actualTime }}</span>
+                  </td>
+                  <td style="text-align: center;">
+                    <span class="status" [ngClass]="patient.status">{{ patient.time }}</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
+    
+
     <ng-template #loaderTemplate>
         <div class="loader"></div>
       </ng-template>

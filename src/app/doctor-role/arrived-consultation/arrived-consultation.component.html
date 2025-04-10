@@ -6,7 +6,7 @@
           <tr>
             <th>No</th>
             <th>PRN</th>
-            <th (click)="sortBy('patientName')" style="cursor: pointer;">
+            <th (click)="sortBy('patientName')" style="cursor: pointer;text-align: left;">
               Patient Name
               <span *ngIf="sortColumn === 'patientName' && sortDirection === 'asc'">&#9650;</span>
               <span *ngIf="sortColumn === 'patientName' && sortDirection === 'desc'">&#9660;</span>
@@ -17,7 +17,7 @@
               <span *ngIf="sortColumn === 'date' && sortDirection === 'desc'">&#9660;</span>
             </th>
             <th>Time</th>
-  
+            <th>Status</th>
             <th><span class="action" ></span>Action</th>
           </tr>
         </thead>
@@ -30,11 +30,16 @@
           <tr *ngFor="let appointment of getPaginatedAppointments(); let i = index">
             <td>{{ i + 1 }}</td>
             <td>{{appointment.prnNumber? appointment.prnNumber: '-'}}</td>
-            <td>{{ appointment.patientName }}</td>
+            <td style="text-align: left;">{{ appointment.patientName }}</td>
             <td>{{ appointment.date | date:'dd-MM-yyyy' }}</td>
             <td>
                <span class="status-badge">{{ appointment.time }}</span>
             </td>
+            <td>
+              <span class="status-badge" [ngClass]="appointment.status.toLowerCase()">
+                  {{ appointment.status }}
+                </span>
+             </td>
   
             <td class="button">
               <button class="start" [disabled]="true">

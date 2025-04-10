@@ -415,7 +415,7 @@ border: 1px solid #000;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   height: 100vh;
-  margin-left: 50px;
+  /* margin-left: 50px; */
 }
 .two-doctors-layout .doctor-card {
   width: 680px;
@@ -477,3 +477,53 @@ border: 1px solid #000;
   height: 80vh;
   display: block;
 }
+.doctor-cards-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  transition: all 1s ease;
+}
+
+.doctor-card {
+  flex: 1 1 30%;
+  margin: 10px;
+}
+
+.two-doctors-layout .doctor-card {
+  flex: 1 1 45%;
+}
+/* .one-doctor-layout {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+} */
+.one-doctor-layout .doctor-card {
+  width: 474px;
+  margin: 10px;
+  flex: none;
+
+}
+
+.carousel-container {
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  height: 100vh;
+}
+
+.carousel-slide {
+  display: flex;
+  height: 100%;
+}
+
+.doctor-slide {
+  min-width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 100px;
+  transition: all 0.5s ease;
+}
+
+/* Already existing layout classes should remain as is */

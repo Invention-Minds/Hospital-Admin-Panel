@@ -129,7 +129,6 @@ export class TvControlComponent {
             departmentName: assignment.departmentName || null,
             roomNo: assignment.doctor?.roomNo || null
           }));
-
           // Fill the remaining slots (if any) with `null` to ensure max 4 slots
           while (doctors.length < 4) {
             doctors.push(null);
@@ -142,6 +141,7 @@ export class TvControlComponent {
             doctors,
           };
         });
+        this.doctorSlideIndices = this.channels.map(() => 0);
 
         console.log('Processed Channels:', this.channels);
       },
@@ -317,6 +317,7 @@ export class TvControlComponent {
   removeDoctor(channelIndex: number, doctorIndex: number) {
     const channel = this.channels[channelIndex];
     const doctor = channel.doctors[doctorIndex];
+    console.log(channelIndex, doctorIndex)
 
 
     if (doctor) {
@@ -475,4 +476,40 @@ export class TvControlComponent {
       this.fetchLatestAds();
     });
   }
+  // Declare per-channel sliding index
+doctorSlideIndices: number[] = [];
+
+// Returns only 3 doctors from current sliding index
+getVisibleDoctors(channelIndex: number) {
+  const start = this.doctorSlideIndices[channelIndex];
+  const end = start + 3;
+  const channel = this.channels[channelIndex];
+
+  const visible = channel.doctors.slice(start, end);
+
+  // Pad with nulls if fewer than 3, but only if total doctors < 6
+  const remaining = Math.max(0, 3 - visible.length);
+  const canAdd = channel.doctors.length < 6 ? Array(remaining).fill(null) : [];
+
+  return [...visible, ...canAdd];
+}
+
+
+prevDoctorSlide(channelIndex: number) {
+  this.doctorSlideIndices[channelIndex] = Math.max(0, this.doctorSlideIndices[channelIndex] - 3);
+}
+
+nextDoctorSlide(channelIndex: number) {
+  const channel = this.channels[channelIndex];
+  const totalDoctors = channel.doctors.length;
+
+  // Round down the maximum valid start index to nearest multiple of 3
+  const maxStartIndex = Math.floor((totalDoctors - 1) / 3) * 3;
+
+  this.doctorSlideIndices[channelIndex] = Math.min(
+    this.doctorSlideIndices[channelIndex] + 3,
+    maxStartIndex
+  );
+}
+
 }

@@ -1,7 +1,14 @@
 <div class="queue-management-container">
   <div *ngFor="let channel of channels; let channelIndex = index" class="channel-container">
-    <h3 class="channel-name">Channel No: {{ channelIndex + 1 }}</h3>
-    <div style="    position: relative;" *ngFor="let doctor of channel.doctors.slice(0,3); let doctorIndex = index">
+    <div class="heading">
+      <h3 class="channel-name">Channel No: {{ channelIndex + 1 }}</h3>
+      <div class="arrow-nav" *ngIf="channel.doctors.length > 3">
+        <button (click)="prevDoctorSlide(channelIndex)">&#8249;</button>
+        <button (click)="nextDoctorSlide(channelIndex)">&#8250;</button>
+      </div>
+    </div>
+
+    <div style="position: relative;" *ngFor="let doctor of getVisibleDoctors(channelIndex) let i = index">
       <div class="doctor-card" [class.filled]="doctor">
         <div class="doctor-header">
           <div class="text" *ngIf="doctor">
@@ -11,17 +18,18 @@
               <p class="department-name">Room No: {{ doctor.roomNo }}</p>
             </div>
           </div>
-          <div *ngIf="!doctor" class="add-btn" (click)="openForm(channelIndex, doctorIndex)">
+          <div *ngIf="!doctor" class="add-btn" (click)="openForm(channelIndex, i + doctorSlideIndices[channelIndex])">
             <img src="./plus.svg" alt="Add">
           </div>
         </div>
       </div>
       <div class="delete-btn-container" *ngIf="doctor">
-        <button class="remove-btn" (click)="removeDoctor(channelIndex, doctorIndex)">
+        <button class="remove-btn" (click)="removeDoctor(channelIndex, i + doctorSlideIndices[channelIndex])">
           <img src="./delete.svg" alt="Delete">
         </button>
       </div>
     </div>
+
 
   </div>
 
@@ -128,10 +136,10 @@
           <p class="file-note">Supported file types: JPG, PNG, MP4, 10MB max</p>
         </div>
 
-    
+
       </div>
       <div class="uploaded-files" *ngIf="uploadedFile">
-        <div class="file-item" >
+        <div class="file-item">
           <img src="file-upload.svg" alt="File Icon" class="file-icon" />
           <span class="file-name">{{ uploadedFile.name ? uploadedFile.name : uploadedFile }}</span>
         </div>
@@ -143,13 +151,15 @@
     <div class="toggle-buttons">
       <button (click)="submitAd()" [disabled]="!isAdReady()" class="upload-btn">Upload</button>
       <div *ngIf="selectedAdType === 'text'" class="toggle-group">
-        <button  (click)="activateAd('text')" [disabled]="adStatuses['text']" class="activate-btn">Activate</button>
-        <button  (click)="deactivateAd('text')" [disabled]="!adStatuses['text']" class="deactivate-btn">Deactivate </button>
+        <button (click)="activateAd('text')" [disabled]="adStatuses['text']" class="activate-btn">Activate</button>
+        <button (click)="deactivateAd('text')" [disabled]="!adStatuses['text']" class="deactivate-btn">Deactivate
+        </button>
       </div>
 
       <div *ngIf="selectedAdType === 'image'" class="toggle-group">
-        <button  (click)="activateAd('image')" [disabled]="adStatuses['image']" class="activate-btn">Activate </button>
-        <button  (click)="deactivateAd('image')" [disabled]="!adStatuses['image']" class="deactivate-btn">Deactivate </button>
+        <button (click)="activateAd('image')" [disabled]="adStatuses['image']" class="activate-btn">Activate </button>
+        <button (click)="deactivateAd('image')" [disabled]="!adStatuses['image']" class="deactivate-btn">Deactivate
+        </button>
       </div>
     </div>
 

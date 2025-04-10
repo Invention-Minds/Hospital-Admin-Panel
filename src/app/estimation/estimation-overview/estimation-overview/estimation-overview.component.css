@@ -145,3 +145,8 @@
     width: 210px !important;
   }
 }
+@media (max-width: 500px){
+  .dashboard-section{
+    padding-left: 12px;
+  }
+}

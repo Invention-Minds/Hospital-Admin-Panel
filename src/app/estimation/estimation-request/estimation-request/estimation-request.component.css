@@ -504,3 +504,19 @@ font-family: 900;
     width: 210px !important;
   }
 }
+@media (max-width: 500px){
+  .table-container{
+    padding-left: 12px;
+  }
+  .form-row{
+    padding-left: 12px;
+    flex-direction: column;
+  }
+  .column-1{
+    width: 100%;
+  }
+  .calendar{
+    width: 100%;
+  }
+
+}

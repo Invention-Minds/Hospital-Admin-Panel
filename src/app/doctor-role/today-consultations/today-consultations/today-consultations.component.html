@@ -398,7 +398,7 @@
       </div>
       <div class="modal-footer">
         <!-- <button class="save-button" (click)="saveEstimation()">Save</button> -->
-        <button  mat-raised-button  (click)="saveEstimation()" class="save-button" [class.spinner]="isButtonLoading" > <span>Save</span></button>
+        <button  mat-raised-button  (click)="!isButtonClicked && saveEstimation()" class="save-button" [disabled]="isButtonClicked" [class.spinner]="isButtonLoading" > <span>Save</span></button>
         <button class="close-button" (click)="closeEstimationPopup()">Close</button>
       </div>
     </div>

@@ -117,4 +117,7 @@ export class OverviewComponent implements OnInit {
   onCancelForm(): void {
     this.activeComponent = 'details'; // Hide the form component on cancel
   }
+  showPastDetails(){
+    this.activeComponent = 'past';
+  }
 }

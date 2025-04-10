@@ -224,7 +224,7 @@ export class MhcRadiologyComponent implements OnInit {
         radiologyId: this.radiologies[index].id,
         radiologyName: this.radiologies[index].name,
         appointmentTime: appt.time,
-        requestVia: 'Walk-In',
+        requestVia: this.selectedAppointment.requestVia === 'Samraksha' ? 'Samraksha' : 'Walk-In',
         appointmentStatus: 'Confirm',
         userId: Number(this.userId),
         serviceId: this.selectedAppointment.id,

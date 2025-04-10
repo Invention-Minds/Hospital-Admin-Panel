@@ -1,0 +1,240 @@
+<div class="form-row">
+
+    <div class="p-field p-col-3 calendar">
+      <!-- <p-calendar [(ngModel)]="selectedDate" placeholder="Calendar" class="custom-calendar"></p-calendar> -->
+      <p-calendar styleClass="custom-calendar" [(ngModel)]="selectedDateRange" selectionMode="range"
+        (ngModelChange)="onSearch()" placeholder="Calendar" dateFormat="dd-mm-yy">
+        <ng-template pTemplate="date" let-date>
+          <span>
+            {{ date.day }}
+          </span>
+        </ng-template>
+      </p-calendar>
+      <i class="fa-solid fa-angle-down calendar-icon"></i>
+      <svg pTooltip="Refresh" (click)="refresh()" class="reverse" xmlns="http://www.w3.org/2000/svg" width="2.5em"
+        height="2.5em" viewBox="-1.5 -2.5 24 24">
+        <path fill="currentColor"
+          d="m4.859 5.308l1.594-.488a1 1 0 0 1 .585 1.913l-3.825 1.17a1 1 0 0 1-1.249-.665L.794 3.413a1 1 0 1 1 1.913-.585l.44 1.441C5.555.56 10.332-1.035 14.573.703a9.38 9.38 0 0 1 5.38 5.831a1 1 0 1 1-1.905.608A7.381 7.381 0 0 0 4.86 5.308zm12.327 8.195l-1.775.443a1 1 0 1 1-.484-1.94l3.643-.909a1 1 0 0 1 .61-.08a1 1 0 0 1 .84.75l.968 3.88a1 1 0 0 1-1.94.484l-.33-1.322a9.381 9.381 0 0 1-16.384-1.796l-.26-.634a1 1 0 1 1 1.851-.758l.26.633a7.381 7.381 0 0 0 13.001 1.25z" />
+      </svg>
+  
+  
+  
+    </div>
+  </div>
+  <div class="table-container" *ngIf="!isLoading || !isDesktopView">
+    <div class="table-wrapper">
+      <table class="appointment-table" *ngIf="!isLoading">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>PRN</th>
+            <th (click)="sortBy('patientName')" style="cursor: pointer; text-align: left;">
+              Patient Name
+              <span *ngIf="sortColumn === 'patientName' && sortDirection === 'asc'">&#9650;</span>
+              <span *ngIf="sortColumn === 'patientName' && sortDirection === 'desc'">&#9660;</span>
+            </th>
+            <th (click)="sortBy('date')">
+              Date
+              <span *ngIf="sortColumn === 'date' && sortDirection === 'asc'">&#9650;</span>
+              <span *ngIf="sortColumn === 'date' && sortDirection === 'desc'">&#9660;</span>
+            </th>
+            <th>Time</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="filteredAppointments.length === 0">
+            <td colspan="11" class="no-records-message">
+              No records to display
+            </td>
+          </tr>
+          <tr *ngFor="let appointment of getPaginatedAppointments(); let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{appointment.prnNumber? appointment.prnNumber: '-'}}</td>
+            <td style="text-align: left;">{{ appointment.patientName }}</td>
+            <td>{{ appointment.date | date:'dd-MM-yyyy' }}</td>
+            <td>
+               <span class="status-badge">{{ appointment.time }}</span>
+            </td>
+           <td>
+            <span class="status-badge" [ngClass]="appointment.status.toLowerCase()">
+                {{ appointment.status }}
+              </span>
+           </td>
+              
+            <td class="button">
+              <button class="start" [disabled]="true">
+                <img class="image" src="/start.svg">Start 
+              </button>
+              <button class="finish" [disabled]="true">
+                <img class="image" src="/finish.svg">Finish
+              </button>
+              <button class="postPond" [disabled]="true">
+                <img class="image" src="/pause.svg">PostPoned
+              </button>
+              <button class="estimation" [disabled]="true">
+                <img class="image" src="/est.svg">P. Counselling
+              </button>
+              <button class="transfer" [disabled]="true">
+                <img class="image" src="/transfer.svg">Transfer
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  
+    <!-- Pagination Controls -->
+    <div class="pagination">
+      <button class="pagination-btn prev" (click)="prevPage()" [disabled]="currentPage === 1 || totalPages === 0">←</button>
+      <button class="pagination-btn next" (click)="nextPage()" [disabled]="currentPage === totalPages || totalPages === 0">→</button>
+      <div class="page-info">
+        Page
+        <input type="number" [(ngModel)]="currentPage" min="1" [max]="totalPages" class="page-input"
+          (change)="onPageChange()">
+        of {{ totalPages }}
+      </div>
+    </div>
+  </div>
+  <div class="mobile-appointments" *ngIf="!isDesktopView">
+    <!-- <div *ngFor="let appointment of filteredAppointments" class="appointment-card">
+      <div class="card-header">
+        <div class="patient-info">
+          <div>
+            <img src="admin-icons/admin-icon.jpg" class="profile-pic">
+          </div>
+          <div class="patient-details">
+            <div>
+              <h3>{{ appointment.patientName }}</h3>
+            <p class="patient">Patient</p>
+            </div>
+            <div>
+              <p class="patient">PRN:{{appointment.prnNumber}}</p>
+            </div>
+            
+          </div>
+        </div>
+       <div class="calendar-div">
+        <p class="date-time">
+          <img src="/w-calendar.svg" alt="calendar" class="icon"> {{ appointment.date | date:'dd-MM-yyyy'}} 
+        </p>
+        <p class="date-time">
+          <img src="/w-time.svg" alt="calendar" class="icon"> {{ appointment.time }}
+        </p>
+       </div>
+      </div>
+      <div class="card-actions">
+  
+          <button class="start" [disabled]="true">
+            <img class="image" src="/start.svg">Start 
+          </button>
+          <button class="finish" [disabled]="true">
+            <img class="image" src="/finish.svg">Finish
+          </button>
+          <button class="postPond" [disabled]="true">
+            <img class="image" src="/pause.svg">PostPoned
+          </button>
+          <button class="estimation" [disabled]="true">
+            <img class="image" src="/est.svg">P. Counselling
+          </button>
+          <button class="transfer" [disabled]="true">
+            <img class="image" src="/transfer.svg">Transfer
+          </button>
+  
+      </div>
+    </div> -->
+    <div class="mobile-appointments">
+      <div *ngFor="let appointment of filteredAppointments; let i = index" 
+           class="appointment-card"
+           (click)="toggleCard(i,$event)">
+  
+    
+        <!-- Compact View -->
+        <div class="card-header" *ngIf="!appointment.expanded">
+          <div class="patient-info">
+            <div>
+              <img src="admin-icons/admin-icon.jpg" class="profile-pic">
+            </div>
+            <div class="patient-details">
+              <div>
+                <h3>{{ appointment.patientName }}</h3>
+              <p class="patient">Patient</p>
+              </div>
+              <div>
+                <p class="patient">PRN:{{appointment.prnNumber}}</p>
+              </div>
+              
+            </div>
+          </div>
+        </div>
+    
+        <!-- Expanded View -->
+        <div class="expanded-card" *ngIf="appointment.expanded">
+          <div class="card-header">
+            <div class="patient-info">
+              <div>
+                <img src="admin-icons/admin-icon.jpg" class="profile-pic">
+              </div>
+              <div class="patient-details">
+                <div>
+                  <h3>{{ appointment.patientName }}</h3>
+                <p class="patient">Patient</p>
+                </div>
+                <div>
+                  <p class="patient">PRN:{{appointment.prnNumber}}</p>
+                </div>
+                
+              </div>
+            </div>
+            <div class="calendar-div">
+              <p class="date-time">
+                <img src="/w-calendar.svg" alt="calendar" class="icon"> {{ appointment.date | date:'dd-MM-yyyy' }}
+              </p>
+              <p class="date-time">
+                <img src="/w-time.svg" alt="calendar" class="icon"> {{ appointment.time }}
+              </p>
+            </div>
+          </div>
+    
+          <div class="card-actions">
+            <button class="start" [disabled]="true" >
+              <img class="image" src="/start.svg"> Start 
+            </button>
+            <button class="finish" [disabled]="true" >
+              <img class="image" src="/finish.svg"> Finish
+            </button>
+            <button class="postPond" [disabled]="true" >
+              <img class="image" src="/pause.svg"> Postponed
+            </button>
+            <button class="estimation" [disabled]="true" >
+              <img class="image" src="/est.svg"> P. Counselling
+            </button>
+            <button class="transfer" [disabled]="true" >
+              <img class="image" src="/transfer.svg"> Transfer
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pagination">
+      <button class="pagination-btn prev" (click)="prevPage()" [disabled]="currentPage === 1 || totalPages === 0">←</button>
+      <button class="pagination-btn next" (click)="nextPage()" [disabled]="currentPage >= totalPages || totalPages === 0">→</button>
+      <div class="page-info">
+        Page
+        <input type="number" [(ngModel)]="currentPage" min="1" [max]="totalPages" class="page-input"
+          (change)="onPageChange()">
+        of {{ totalPages }}
+      </div>
+    </div>
+  </div>
+  
+    <p-toast></p-toast>
+    <!-- <app-appointment-form 
+      *ngIf="showAppointmentForm" 
+      [appointment]="selectedAppointment" 
+      (close)="closeAppointmentForm()" 
+      (submit)="submitAppointment(selectedAppointment, $event.status, $event.requestVia)">
+    </app-appointment-form> -->
+    
+    <div class="loader" *ngIf="isLoading"></div>

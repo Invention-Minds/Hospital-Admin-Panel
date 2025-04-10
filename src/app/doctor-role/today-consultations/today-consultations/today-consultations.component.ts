@@ -89,7 +89,7 @@ export class TodayConsultationsComponent {
 
   constructor(private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private messageService: MessageService, private cdRef: ChangeDetectorRef, private eventService: EventService, private estimationService: EstimationService, private channelService: ChannelService) { }
   appointments: Appointment[] = [
-    // { id: '0001', patientName: 'Anitha Sundar', phoneNumber: '+91 7708590100', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Booked', smsSent: true },
+    // { id: '0001', patientName: 'Search Sundar', phoneNumber: '+91 7708590100', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Booked', smsSent: true },
   ];
   timerIntervals: any = {};
 
@@ -652,9 +652,12 @@ export class TodayConsultationsComponent {
 
   saveEstimation(): void {
     this.isButtonLoading = true;
+    this.isButtonClicked = true;
     if (!this.estimationText) {
       // alert('Please enter an estimation.');
       this.messageService.add({ severity: 'warn', summary: 'Warning', detail: 'Please enter an estimation.' })
+      this.isButtonLoading = false;
+      this.isButtonClicked = false;
       return;
     }
 
@@ -693,12 +696,15 @@ export class TodayConsultationsComponent {
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Estimation Details Saved Successfully' });
           this.closeEstimationPopup();
           this.isButtonLoading = false;
+          this.isButtonClicked = false;
 
         },
         error: (error) => {
           console.error('Error saving estimation details:', error);
           this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error saving estimation details. Please try again.' });
           this.isButtonLoading = false;
+          this.isButtonClicked = false;
+          
         }
       });
       return;
@@ -750,11 +756,13 @@ export class TodayConsultationsComponent {
             this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Estimation Details Saved Successfully' });
             this.closeEstimationPopup();
             this.isButtonLoading = false;
+            this.isButtonClicked = false;
           },
           error: (error) => {
             console.error('Error saving estimation details:', error);
             this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error saving estimation details. Please try again.' });
             this.isButtonLoading = false;
+            this.isButtonClicked = false;
           }
         });
       },

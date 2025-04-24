@@ -1,0 +1,3371 @@
+<div #topScrollAnchor></div>
+
+<div class="full">
+    <div class="top">
+        <div class=part1>
+            <img class="logimg" src="help-center/logo.svg" alt="logo">
+            <p class="para1 flex ">Doc Minds</p>
+        </div>
+        <div class="part1">
+            <img class="compimg" src="help-center/compeny-logo.svg" alt="compeny-logo">
+            <p class="para gap ">Powered By <br><span class="im">Invention Minds</span></p>
+        </div>
+    </div>
+
+    <div *ngIf="component === 'default'">
+        <div class="part2">
+            <h1>Help Center</h1>
+            <p>Explore our <span class="sp1">Help Center</span> for answers to your question and assistance with your
+                <span class="sp2">DocMinds</span> experience.
+            </p>
+            <!-- Analytics: -->
+            <div class="part2-1 mtop cursor"(click)="moduleController('Analytics','Analytics')" >
+                <div class="part2-2">
+                    <div>
+                        <h2 class="sub-heading " >Analytics
+                        </h2>
+                    </div>
+                    <div>
+                        <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add"
+                        >
+                    </div>
+                </div>
+            </div>
+
+            <!-- DASHBOARD: -->
+            <div class="part2-1 cursor" (click)="moduleController('DASHBOARD','Dashboard')">
+                <div class="part2-2">
+                    <div>
+                        <h2 class="sub-heading " >DashBoard
+                        </h2>
+                    </div>
+                    <div>
+                        <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Appointment Module -->
+
+            <div class="part2-1 cursor" (click)="accordian('showList')">
+                <div class="part2-2">
+                    <div>
+                        <h2 class="sub-heading  ">Appointment Module</h2>
+                    </div>
+                    <div>
+                        <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add" *ngIf="!accordionStates.showList">
+                        <!-- *nfIf = "showlist === false" -->
+                        <img class="img" src="help-center/lsicon_minus-filled.svg" alt="lsicon_minus-filled"
+                            *ngIf="accordionStates.showList">
+                        <!-- *nfIf = "showlist === true" -->
+                    </div>
+                </div>
+                <hr *ngIf="showLine && accordionStates?.showList">
+                <div class="list" *ngIf="accordionStates.showList">
+
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div  (click)="moduleController('form','AppointmentModule')">New Appointment Form </div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('online' ,'AppointmentModule')">Online Request</div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div  (click)="moduleController('confirmed','AppointmentModule')">Confirmed Appointment</div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('cancelled','AppointmentModule')">Cancelled Appointment</div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div  (click)="moduleController('completed','AppointmentModule')">Completed Appointment</div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div  (click)="moduleController('transfer','AppointmentModule')">Transfer Appointment</div>
+                    </div>
+                    <div class="lis">
+                        <svg  xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div  (click)="moduleController('cross','AppointmentModule')">Cross Consultation Appointment
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <!--Doctor Module  -->
+        <div class="part2-1 cursor" (click)="accordian('viewList')">
+            <div class="part2-2">
+                <div>
+                    <h2 class="sub-heading ">Doctor Module</h2>
+                </div>
+                <div>
+                    <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add"
+                         *ngIf="!accordionStates.viewList">
+                    <!-- *nfIf = "showlist === false" -->
+                    <img class="img" src="help-center/lsicon_minus-filled.svg" alt="lsicon_minus-filled"
+                     *ngIf="accordionStates.viewList">
+                    <!-- *nfIf = "showlist === true" -->
+                </div>
+            </div>
+            <hr *ngIf="showLine && accordionStates.viewList">
+            <div class="list" *ngIf="accordionStates.viewList">
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('availability','DoctorModule')"> Doctor Availability</div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('management' ,'DoctorModule')"> Doctor Details Management</div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('information','DoctorModule')"> Edit Doctor Information</div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('doctor','DoctorModule')"> Add New Doctor</div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('dates','DoctorModule')">Mark Unavailable Dates</div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('bookslots','DoctorModule')"> Booking Slots</div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('markslots','DoctorModule')"> Mark Unavailable Slots</div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('opdrequest','DoctorModule')"> Close OPD Request</div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('multavailability','DoctorModule')"> Doctor Multiple Availability
+                    </div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('surgeon','DoctorModule')"> Appointment-Based Doctor - Visiting
+                        Consultant (Surgeon)
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- MHC Module -->
+
+        <div class="part2-1 cursor" (click)="accordian('mhcModule')">
+            <div class="part2-2">
+                <div>
+                    <h2 class="sub-heading ">MHC Module (Master Health Check-up)</h2>
+                </div>
+                <div>
+                    <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add"
+                         *ngIf="!accordionStates.mhcModule">
+                    <!-- *nfIf = "showlist === true" -->
+                    <img class="img" src="help-center/lsicon_minus-filled.svg" alt="lsicon_minus-filled"
+                         *ngIf="accordionStates.mhcModule">
+                    <!-- *nfIf = "showlist === false" -->
+                </div>
+            </div>
+            <hr *ngIf="showLine && accordionStates.mhcModule">
+            <div class="list" *ngIf="accordionStates.mhcModule">
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('mhcform','MHCModule')">New Appointment Form</div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('mhconline','MHCModule')"> Online Requests</div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('mhcconfirmed','MHCModule')">Confirmed Appointments</div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('mhccancelled','MHCModule')"> Cancelled Appointments</div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('mhccompleted','MHCModule')"> Completed Visits</div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('mhcpackages','MHCModule')"> Repeated Packages</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Service Module -->
+
+        <div class="part2-1 cursor" (click)="accordian('serviceModule')">
+            <div class="part2-2">
+                <div>
+                    <h2 class="sub-heading ">Service Module</h2>
+                </div>
+                <div>
+                    <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add"
+                         *ngIf="!accordionStates.serviceModule">
+                    <!-- *nfIf = "showlist === true" -->
+                    <img class="img" src="help-center/lsicon_minus-filled.svg" alt="lsicon_minus-filled"
+                        *ngIf="accordionStates.serviceModule">
+                    <!-- *nfIf = "showlist === false" -->
+                </div>
+            </div>
+            <hr *ngIf="showLine && accordionStates.serviceModule">
+            <div class="list" *ngIf="accordionStates.serviceModule">
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('ServiceAppointmentForm','Service Module')"> New Appointment Form
+                    </div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('ServiceConfirmed','Service Module')">Confirmed Appointments</div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('ServiceCancelled','Service Module')"> Cancelled Appointments</div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('ServiceCompleted','Service Module')"> Completed Services</div>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- 5. Estimation Module -->
+
+        <div class="part2-1 cursor"  (click)="accordian('estimationModule')">
+            <div class="part2-2">
+                <div>
+                    <h2 class="sub-heading ">Estimation Module</h2>
+                </div>
+                <div>
+                    <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add"
+                        *ngIf="!accordionStates.estimationModule">
+                    <!-- *nfIf = "showlist === true" -->
+                    <img class="img" src="help-center/lsicon_minus-filled.svg" alt="lsicon_minus-filled"
+                         *ngIf="accordionStates.estimationModule">
+                    <!-- *nfIf = "showlist === false" -->
+                </div>
+            </div>
+            <hr *ngIf="showLine && accordionStates.estimationModule ">
+            <div class="list" *ngIf="accordionStates.estimationModule">
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('EstimationCreation','EstimationModule')">Estimation Creation</div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('EstimationRequest','EstimationModule')"> Estimation Request from
+                        Doctor</div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('EstimatorApproval','EstimationModule')">Estimation Request from
+                        Estimator for Approval
+                    </div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('AcceptedEstimations','EstimationModule')"> Approved/ Accepted
+                        Estimations</div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('ConfirmedEstimation','EstimationModule')"> Confirmed Estimation
+                    </div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('Complete/CancelEST','EstimationModule')"> Complete/Cancel EST</div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('OverdueEstimation','EstimationModule')">Overdue Estimation</div>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!--TV Control  -->
+
+        <div class="part2-1 cursor" (click)="moduleController('TV Control','TVControlModule')">
+            <div class="part2-2">
+                <div>
+                    <h2 class="sub-heading " >TV Control
+                        Module</h2>
+                </div>
+                <div>
+                    <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add">
+                </div>
+            </div>
+        </div>
+
+
+        <!--6. Individual Doctor Module   -->
+        <div class="part2-1 cursor"  (click)="accordian('doctorModule')">
+            <div class="part2-2">
+                <div>
+                    <h2 class="sub-heading  ">Individual Doctor Module </h2>
+                </div>
+                <div>
+                    <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add" *ngIf="!accordionStates.doctorModule"
+                       >
+                    <!-- *nfIf = "showlist === true" -->
+                    <img class="img" src="help-center/lsicon_minus-filled.svg" alt="lsicon_minus-filled"
+                        *ngIf="accordionStates.doctorModule">
+                    <!-- *nfIf = "showlist === false" -->
+                </div>
+            </div>
+            <hr *ngIf="showLine && accordionStates.doctorModule">
+            <div class="list" *ngIf="accordionStates.doctorModule">
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div  (click)="moduleController('Checked - In','IndividualDoctorModule')">Checked - In Consultations
+                    </div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('Today Consultations','IndividualDoctorModule')">Today's
+                        Consultations</div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('Future Consultations','IndividualDoctorModule')">Future
+                        Consultations</div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('Past Consultations','IndividualDoctorModule')">Past Consultations
+                    </div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('Leave Information','IndividualDoctorModule')"> Leave Information
+                    </div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('Close OPD','IndividualDoctorModule')">Close OPD </div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('End Consultation','IndividualDoctorModule')">End Consultation</div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 4. Report Module: -->
+        <div class="part2-1 cursor" (click)="accordian('reportModule')">
+            <div class="part2-2">
+                <div>
+                    <h2 class="sub-heading ">Report Module</h2>
+                </div>
+                <div>
+                    <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add"
+                         *ngIf="!accordionStates.reportModule">
+                    <!-- *nfIf = "showlist === true" -->
+                    <img class="img" src="help-center/lsicon_minus-filled.svg" alt="lsicon_minus-filled"
+                        *ngIf="accordionStates.reportModule">
+                    <!-- *nfIf = "showlist === false" -->
+                </div>
+            </div>
+            <hr *ngIf="showLine && accordionStates.reportModule">
+            <div class="list" *ngIf="accordionStates.reportModule">
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('AppointmentReport','ReportModule')">Doctor Appointment Report</div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('HealthCheckup','ReportModule')">Health Checkup Appointment Report
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- MHC Coordinator Module: -->
+        <div class="part2-1 cursor" (click)="accordian('MHCCoordinatorModule')">
+            <div class="part2-2">
+                <div>
+                    <h2 class="sub-heading ">MHC Coordinator Module</h2>
+                </div>
+                <div>
+                    <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add"
+                        *ngIf="!accordionStates.MHCCoordinatorModule" >
+                    <!-- *nfIf = "showlist === true" -->
+                    <img class="img" src="help-center/lsicon_minus-filled.svg" alt="lsicon_minus-filled"
+                        *ngIf="accordionStates.MHCCoordinatorModule" >
+                    <!-- *nfIf = "showlist === false" -->
+                </div>
+            </div>
+            <hr *ngIf="showLine && accordionStates.MHCCoordinatorModule">
+            <div class="list" *ngIf="accordionStates.MHCCoordinatorModule">
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('Today MHC Appointments','MHCCoordinatorModule')">Today's MHC
+                        Appointments</div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('Confirmed Consultation Appointments','MHCCoordinatorModule')">
+                        Confirmed Consultation
+                        Appointments</div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('Confirmed Radiology Appointments','MHCCoordinatorModule')">Confirmed
+                        Radiology Appointments
+                    </div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('Report Summary','MHCCoordinatorModule')">Report Summary</div>
+                </div>
+            </div>
+
+        </div>
+        <!-- Co-ordinator Module -->
+        <div class="part2-1 cursor" (click)="moduleController('Co-ordinator Module','CoordinatorModule')">
+            <div class="part2-2">
+                <div>
+                    <h2 class="sub-heading ">Co-ordinator Module</h2>
+                </div>
+                <div>
+                    <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add"
+                        >
+                </div>
+            </div>
+        </div>
+        <!-- Profile Management Module -->
+        <div class="part2-1 cursor" (click)="accordian('profileModule')">
+            <div class="part2-2">
+                <div>
+                    <h2 class="sub-heading " >Profile Management Module</h2>
+                </div>
+                <div>
+                    <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add" *ngIf="!accordionStates.profileModule"
+                       >
+                    <!-- *nfIf = "showlist === true" -->
+                    <img class="img" src="help-center/lsicon_minus-filled.svg" alt="lsicon_minus-filled"
+                        *ngIf="accordionStates.profileModule">
+                    <!-- *nfIf = "showlist === false" -->
+                </div>
+            </div>
+            <hr *ngIf="showLine && accordionStates.profileModule">
+            <div class="list" *ngIf="accordionStates.profileModule">
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('Profile Details Tab','ProfileManagementModule')">Profile Details Tab
+                    </div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('Reset Password Tab','ProfileManagementModule')">Reset Password Tab
+                    </div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('Account Creation Tab','ProfileManagementModule')"> Account Creation
+                        Tab (Super Admin & Admin
+                        Only)</div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('Delete Account Tab','ProfileManagementModule')"> Delete Account Tab
+                        (Super Admin & Admin Only)
+                    </div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('Logged In Details','ProfileManagementModule')"> Logged In Details
+                    </div>
+                </div>
+                <div class="lis">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <path
+                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div (click)="moduleController('Access Control','ProfileManagementModule')">Access Control</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Appointment Form -->
+
+    <div *ngIf="component === 'form'">
+        <div class="full">
+            <div>
+                <div class="part5">
+                    <div class="main-heading">
+                        <div (click)="ngOnInit()">Appointment Module</div>
+                    </div>
+                    <div>
+                        <img class="arrow" src="help-center/arrow-up.svg" alt="">
+                    </div>
+                    <div class="main-heading inside-headding ">
+                        <div>New Appointment Form</div>
+                    </div>
+                </div>
+            </div>
+            <div class="part6">
+                <div class="bold ">Form Fields for Appointment Booking :</div>
+                <ul>
+                    <li class="gap1"><span class="bold">PRN </span>– Field to enter the patient's PRN.</li>
+                    <li class="gap1"><span class="bold">Patient Name </span>– Fields for entering the patient's first
+                        and last name.
+                    </li>
+                    <li class="gap1"><span class="bold">Phone Number</span> – Field to enter a valid 10-digit phone
+                        number.</li>
+                    <li class="gap1"><span class="bold">Email ID </span>– Optional field for providing an email address
+                        for
+                        communication.
+                    </li>
+                    <li class="gap1"><span class="bold">Doctor Selection</span> – Dropdown menu to select a doctor for
+                        the
+                        appointment.</li>
+                    <li class="gap1"><span class="bold">Appointment Date and Time</span> – Fields to choose a specific
+                        date and time for the appointment. If a slot is already booked or the doctor is unavailable on
+                        the selected date, that slot will not be displayed.</li>
+                    <li class="gap1"><span class="bold">Request Via Options </span>– Radio buttons to specify how the
+                        appointment was requested (e.g., online, call, or walk-in). </li>
+                    <li class="gap1"><span class="bold">Appointment Visit Type</span> – Option to indicate whether the
+                        patient is new
+                        or
+                        returning.</li>
+                    <li class="gap1"><span class="bold">Prefix </span>– Provides prefix options for the patient's name.
+                    </li>
+                </ul>
+            </div>
+            <img class="form" src="help-center/new form.jpg" alt="newAppointment form">
+        </div>
+        <div>
+        </div>
+        <div>
+
+        </div>
+    </div>
+    <!-- Online Request -->
+
+    <div class="full" *ngIf="component === 'online'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Appointment Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Online Requests</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This section shows all appointment requests received through the hospital website and chatbot. </div>
+            <div class="txt">Admins or front desk staff can review each request and take quick actions:</div>
+            <ul>
+                <li class="gap1">Confirm - Approve the slot and notify the patient</li>
+                <li class="gap1">Reschedule - Change date/time if the chosen slot isn’t available</li>
+                <li class="gap1">Cancel - Decline the request with an optional reason</li>
+            </ul>
+            <div class="txt">Helps manage online bookings efficiently without missing any incoming requests.</div>
+        </div>
+        <img class="form1" src="help-center/Online Requests.jpg" alt="Online Requests">
+
+    </div>
+
+    <!-- Confirmed Appointment -->
+    <div class="full" *ngIf="component === 'confirmed'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Appointment Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Confirmed Appointments</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This section lists all appointments that have been successfully confirmed by the admin or sub admin. It
+                helps track and manage upcoming visits in real time. </div>
+            <div class="txt">Here’s what you can do : </div>
+            <ul>
+                <li class="gap1"><span class="bold">Reschedule or Cancel : </span> Modify appointment time or cancel if
+                    required
+                </li>
+                <li class="gap1"><span class="bold">Check-In :</span> Once the patient arrives, click Check-In to notify
+                    the doctor
+                    and update the TV/queue display</li>
+            </ul>
+            <div class="txt">Check-In Timing Rule :</div>
+            <ul>
+                <li class="gap1">Allowed only 30 minutes before or after the scheduled time</li>
+                <li class="gap1">If not checked in within this window, the system auto-cancels the appointment</li>
+                <li class="gap1">Notifications are sent to both the patient and doctor on auto-cancel</li>
+            </ul>
+            <div class="txt">This ensures smoother queue management and timely consultations.</div>
+        </div>
+        <img class="form3" src="help-center/Confirmed Appointments.jpg" alt="Confirmed Appointments">
+
+    </div>
+
+    <!--Cancelled Appointment  -->
+
+    <div class="full" *ngIf="component === 'cancelled'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Appointment Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Cancelled Appointments</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This section helps staff track and manage all canceled appointments within the Appointment Module.
+            </div><br>
+            <div class="bold txt ">Key Functionalities :</div>
+            <ul>
+                <li class="gap1"><span class="bold">View all canceled bookings</span>– Includes patient details, doctor
+                    name, date,
+                    time, visit type, and source </li>
+                <li class="gap1"><span class="bold">Search & Filter </span>– Easily filter by patient, PRN, doctor, or
+                    date range
+                </li>
+                <li class="gap1"><span class="bold">Communication Log</span> – Shows if cancellation alerts were sent
+                    via WhatsApp,
+                    Email, or SMS </li>
+                <li class="gap1"><span class="bold">Reschedule Button </span>– Allows staff to quickly rebook the
+                    appointment without
+                    filling in everything again</li>
+                <li class="gap1"><span class="bold">Auto-Cancellation Tracking </span> – Lists both manually and
+                    system-cancelled
+                    appointments for transparency</li>
+            </ul>
+            <div class="gap1">This feature ensures better follow-ups and rebooking efficiency, reducing missed
+                consultation
+                opportunities.</div>
+        </div>
+        <img class="form3" src="help-center/Cancelled Appointments.jpg" alt="Cancelled Appointments">
+
+    </div>
+
+    <!-- Completed Appointment -->
+    <div class="full" *ngIf="component === 'completed'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Appointment Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Completed Appointments</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This section displays all appointments that have been successfully completed — meaning the patient was
+                seen by the doctor and the consultation was finished. </div><br>
+            <div class="bold txt ">Key Functionalities : </div>
+            <ul>
+                <li class="gap1"><span class="bold">View Completed Records :</span> Shows completed appointments with
+                    key details -
+                    Patient Name, PRN, Doctor, Date, Time, Visit Type and Booking Source.</li>
+                <li class="gap1"><span class="bold">Search & Filter :</span> Allows filtering by patient, PRN, doctor
+                    name and custom
+                    date range to quickly locate specific records. </li>
+                <li class="gap1"><span class="bold">Communication Log:</span> Icons display whether WhatsApp, Email, or
+                    SMS
+                    notifications were sent to patients post-consultation. </li>
+                <li class="gap1"><span class="bold">Status Tag : </span> Every entry is marked as “Completed” in green
+                    for easy visual
+                    tracking.
+                </li>
+            </ul>
+            <div>This view helps in follow-ups and feedback collection.</div>
+        </div>
+        <img class="form3" src="help-center/Completed Appointments.1.jpg" alt="Completed Appointments">
+
+    </div>
+    <!-- Transfer Appointment -->
+    <div class="full" *ngIf="component === 'transfer'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Appointment Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Transferred Appointments</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This section displays appointments that were transferred by the doctor to another doctor or department.
+            </div>
+            <div class="bold gap1 ">Doctor's Action :</div>
+            <ul>
+                <li class="gap1"> The doctor initiates a transfer when a case needs referral or another department’s
+                    opinion. After
+                    transfer, the original appointment must be either Completed or Canceled. This decision is taken
+                    based on the doctor's notes or instructions at the time of transfer</li>
+                <li class="gap1">After completing or canceling, sub-admin must manually create a new walk-in appointment
+                    under the
+                    referred doctor to continue the patient’s journey.</li>
+                <li class="gap1">This ensures proper tracking of both the original consultation status and the new
+                    follow-up with the
+                    transferred doctor.</li>
+            </ul>
+        </div>
+        <img class="form1" src="help-center/Transferred Appointments.jpg" alt="Transferred Appointments">
+
+    </div>
+
+    <!-- Cross Consultation Appointment -->
+    <div class="full" *ngIf="component === 'cross'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Appointment Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Cross Consultation Appointment</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This section lists all appointments that have been referred by a doctor to another doctor or department
+                for further consultation.</div>
+            <ul>
+                <li class="gap1"> Doctor's Action : Marks the appointment as CC when referring the patient to another
+                    doctor.</li>
+                <li class="gap1">Sub-Admin Role : View all CC-marked appointmentsli>
+            </ul>
+            <div>Create a new Walk-in Appointment for the referred doctor using the same patient details
+                This helps ensure smooth patient handover and avoids missing follow-up consultations across departments.
+            </div>
+        </div>
+        <img class="form1" src="help-center/CC Appointments.jpg" alt="CC Appointments">
+
+    </div>
+
+
+    <!-- Doctor Module -->
+    <!-- 1. Doctor Availability-->
+
+
+    <div class="full" *ngIf="component === 'availability'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Doctor Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Doctor Availability</div>
+            </div>
+        </div>
+
+        <div class="part6">
+            <div>This section helps the admin manage and view a doctor’s appointment slots efficiently.</div>
+            <div class="bold ">Slot Color Coding :</div>
+            <ul>
+                <li class="gap1"><span class="bold">Green Slot : </span>Available slots that patients can book for
+                    appointments.</li>
+                <li class="gap1"><span class="bold">Grey Slot : </span>Unavailable slots, indicating times when the
+                    doctor is not
+                    available.</li>
+                <li class="gap1"><span class="bold">Red Slot : </span>Booked slots that are already scheduled.</li>
+                <li class="gap1"><span class="bold">Blue Slot : </span>Completed slots, indicating that the consultation
+                    has been
+                    completed.</li>
+                <li class="gap1"><span class="bold">Yellow Slot : </span>Blocked slots that cannot be booked.</li>
+                <li class="gap1"><span class="bold">Violet Slot : </span>Extra slots added beyond the doctor’s regular
+                    OPD hours.
+                </li>
+            </ul>
+            <div class="bold flex">Date Navigation :</div>
+            <div class="txt">Admins can use the <span class="bold">"< Prev"</span> and<span class="bold"> "Next
+                            >"</span> buttons to navigate across different dates and view availability.
+            </div>
+            <div class="bold flex">Search Doctor & Date Filter :</div>
+            <div class="txt">Admins can search for a specific doctor or select a particular date to view their slot
+                availability.</div>
+            <div class="bold flex">Unavailable Slots :</div>
+            <div class="txt">If a doctor is unavailable due to emergencies or has to leave the OPD early, slots can be
+                marked as unavailable.</div>
+            <div class="bold flex">Add Slots :</div>
+            <div class="txt">Admins can add extra slots before or after the doctor’s standard OPD time if required.
+            </div>
+        </div>
+        <img class="form2" src="help-center/Doctor Availability 1.1.jpg" alt="Doctor Availability ">
+        <img class="form1" src="help-center/Doctor Availability 1.jpg" alt="Doctor Availability ">
+
+    </div>
+
+    <!--2. Doctor Details Management -->
+
+    <div class="full" *ngIf="component === 'management'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Doctor Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Doctor Details Management</div>
+            </div>
+        </div>
+
+        <div class="part6">
+            <div>This section allows admins to manage all registered doctors and their essential information within each
+                department.</div>
+            <div class="bold ">Doctor List :</div>
+            <div class="txt">Displays a list of all doctors under the selected department, including their name,
+                specialty, and contact information.</div>
+            <div class="bold">Edit and Delete Options:</div>
+            <ul>
+                <li class="gap1"><span class="bold flex">Edit Profile : </span>
+                    <div class="txt">Allows the admin to update the doctor's details such as availability,
+                        qualifications, and contact information.</div>
+                </li>
+                <li class="gap1"><span class="bold flex">Delete Doctor :</span>
+                    <div class="txt"> A red delete icon is provided to remove a doctor from the system. A confirmation
+                        prompt (“Are you sure?”) appears to prevent accidental deletion. </div>
+                </li>
+            </ul>
+            <div class="bold flex">Unavailable Days (Doctor Leave) :</div>
+            <div class="txt">If a doctor is on leave or unavailable, the admin can mark the respective day as leave.
+                This status will reflect in the <span class="bold">Doctor Leave Details</span> section of the dashboard.
+            </div>
+        </div>
+        <img class="form1" src="help-center/Doctor Details Management.jpg" alt="newAppointment form">
+
+    </div>
+
+    <!--3. Edit Doctor Information-->
+
+    <div class="full" *ngIf="component === 'information'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Doctor Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Edit Doctor Information</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This section allows admins to update and manage a doctor’s profile and availability.</div>
+            <div class="bold txt">Editable Fields :</div>
+            <ul>
+                <li><span class="bold flex">Doctor Name, Email, Mobile Number :</span>
+                    <div class="txt">Update the doctor’s basic contact information.</div>
+                </li>
+                <li><span class="bold flex">Qualification and Department :</span>
+                    <div class="txt">View and modify the doctor’s qualifications and assigned department.</div>
+                </li>
+                <li><span class="bold flex">Availability Days :</span>
+                    <div class="txt">Select the days of the week the doctor is available using checkboxes.</div>
+                </li>
+                <li><span class="bold flex">Available Time and Slot Duration :</span>
+                    <div class="txt">Set the doctor’s daily OPD timing (e.g., 10:00 AM to 4:00 PM) and define the slot
+                        duration (e.g., 20 minutes per appointment).</div>
+                </li>
+            </ul>
+            <div>This ensures that the doctor’s profile and scheduling are always accurate and up to date.</div>
+        </div>
+        <img class="form3" src="help-center/Edit Doctor Information.jpg" alt="newAppointment form">
+
+    </div>
+
+    <!--4. Add New Doctor-->
+
+    <div class="full" *ngIf="component === 'doctor'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Doctor Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Add New Doctor</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This section allows the admin to add a new doctor to the system with complete profile and availability
+                details. </div>
+            <div class="bold txt">Add Doctor Form :</div>
+            <ul>
+                <li><span class="bold flex">Doctor Name, Qualification, Email, Mobile Number : </span>
+                    <div class="txt"> Enter the basic information and contact details of the new doctor.</div>
+                </li>
+                <li><span class="bold flex">Department Assignment and Availability Settings : </span>
+                    <div class="txt">Assign the doctor to a specific department. Configure their availability by
+                        selecting working days, setting OPD hours (start and end time), and defining slot duration
+                        (e.g., 15 or 20 minutes per consultation).</div>
+                </li>
+                <li><span class="bold flex">Flexible Availability Configuration : </span>
+                    <div class="txt">Admins can choose to apply the same time slots across all selected days, or set
+                        different availability timings for each day as needed.</div>
+                </li>
+
+            </ul>
+            <div>This section ensures that newly added doctors are properly listed in the system with accurate
+                schedules, enabling smooth appointment booking from day one.</div>
+        </div>
+        <img class="form3" src="help-center/Add New Doctor.jpg" alt="newAppointment form">
+
+    </div>
+
+    <!--5. Mark Unavailable Dates-->
+
+    <div class="full" *ngIf="component === 'dates'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Doctor Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Mark Unavailable Dates</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This feature allows admins to manage <span class="bold">planned doctor leaves or time-offs</span> in
+                advance, ensuring no appointments are booked during those periods. </div>
+            <div class="bold txt">Key Functionalities :</div>
+            <ul>
+                <li><span class="bold flex">Select Start and End Date : </span>
+                    <div class="txt"> Admins can choose a single date or a date range when the doctor will not be
+                        available. This helps manage vacations, conferences, or extended absences effectively.</div>
+                </li>
+                <li><span class="bold flex">Mark as Available :</span>
+                    <div class="txt"> If plans change, previously blocked dates can be restored using this option,
+                        allowing appointments to be scheduled again for those dates.</div>
+                </li>
+
+            </ul>
+            <div>Marking unavailable dates ensures <span class="bold">accurate schedule visibility</span> for both
+                patients and staff, avoiding booking errors or last-minute cancellations.</div>
+        </div>
+        <img class="form3" src="help-center/Mark Unavailable Dates.jpg" alt="Mark Unavailable Dates">
+
+    </div>
+
+    <!--6. Booking Slots-->
+
+    <div class="full" *ngIf="component === 'bookslots'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Doctor Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Booking Slots</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>Slot booking is directly integrated into the <span class="bold">Doctor Availability</span> interface,
+                offering a centralized view of the doctor's schedule.</div>
+            <div class="bold txt">Key Functionalities :</div>
+            <ul>
+                <li>
+                    <div class="txt"> Admins can<span class="bold"> view real-time availability,</span> including
+                        color-coded slots indicating booked, available, completed, or blocked times.</div>
+                </li>
+                <li>
+                    <div class="txt">Appointment slots can be<span class="bold">added, modified, or managed
+                        </span>easily from this view.</div>
+                </li>
+                <li>
+                    <div class="txt">Enables faster, error-free booking without switching between multiple pages or
+                        modules.</div>
+                </li>
+            </ul>
+            <div>This streamlined approach helps admins maintain efficiency in slot allocation and provides complete
+                control over doctor schedules.</div>
+        </div>
+        <img class="form3" src="help-center/Booking Slots.jpg" alt="Booking Slots">
+
+    </div>
+
+    <!--7. Mark Unavailable Slots-->
+
+    <div class="full" *ngIf="component === 'markslots'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Doctor Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div> Mark Unavailable Slots</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This feature allows doctors or admins to block <span class="bold"> specific time slots </span>for<span
+                    class="bold"> today and tomorrow, </span> interface, offering a centralized view of the doctor's
+                schedule.</div>
+            <div class="bold txt">Key Functionalities :</div>
+            <ul>
+                <li>
+                    <div class="txt"> Doctors can mark one or more individual slots as unavailable due to urgent
+                        situations like emergency cases or personal time.</div>
+                </li>
+                <li>
+                    <div class="txt">These slots will immediately appear as unavailable in the Doctor Availability view,
+                        preventing any new bookings.</div>
+                </li>
+                <li>
+                    <div class="txt">Admins can also update this on behalf of the doctor if needed.</div>
+                </li>
+            </ul>
+            <div>This ensures better <span class="bold">short-term schedule control </span> disrupting the overall OPD
+                plan, keeping patients informed and minimizing confusion at the front desk.</div>
+        </div>
+        <img class="form3" src="help-center/Mark Unavailable Slots.jpg" alt="Mark Unavailable Slots">
+
+    </div>
+
+
+    <!--8. Close OPD Request-->
+
+    <div class="full" *ngIf="component === 'opdrequest'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Doctor Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Close OPD Request</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This feature is used when a doctor needs to <span class="bold"> close their OPD for the day </span>due
+                to emergencies or sudden unavailability.</div>
+            <div class="bold txt">Key Functionalities:</div>
+            <ul>
+                <li><span class="bold">Doctor Request :</span>
+                    <div class="txt">When a doctor raises a request to close the OPD, it is sent to the admin for
+                        approval and action.</div>
+                </li>
+                <li><span class="bold">Admin Action :</span>
+                    <div class="txt"> The manager/admin will:</div>
+                </li>
+                <ul>
+                    <li>
+                        <div class="bold txt">Mark all upcoming slots as unavailable</div>
+                    </li>
+                    <li>
+                        <div class="txt">Use the <span class="bold">bulk cancel option</span> to cancel all affected
+                            appointments</div>
+                    </li>
+                </ul>
+                <li><span class="bold">Patient Coordination :</span>
+                    <div class="txt">Based on patient discussions, a new <span class="bold">walk-in appointment </span>
+                        be scheduled for either :</div>
+                </li>
+                <ul>
+                    <li>
+                        <div class="txt">The<span class="bold"> same doctor </span>on another day, or</div>
+                    </li>
+                    <li>
+                        <div class="txt">An <span class="bold">alternate available doctor</span></div>
+                    </li>
+                </ul>
+            </ul>
+            <div>This ensures timely communication and rescheduling while maintaining patient satisfaction and system
+                integrity.</div>
+        </div>
+        <img class="form3" src="help-center/Close OPD Request.jpg" alt="Close OPD Request">
+
+    </div>
+
+
+    <!--9. Doctor Multiple Availability-->
+
+    <div class="full" *ngIf="component === 'multavailability'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Doctor Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Doctor Multiple Availability</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This feature allows admins to configure<span class="bold"> multiple availability windows</span> for a
+                doctor on the <span class="bold">same day</span>, if required.</div>
+            <div class="bold txt">Key Functionalities :</div>
+            <ul>
+                <li><span class="bold">Add Multiple Time Slots :</span>
+                    <div class="txt">Admins can create more than one time block (e.g., 10:00 AM–12:00 PM and 3:00
+                        PM–5:00 PM) to reflect the doctor’s split-shift or flexible OPD schedule.</div>
+                </li>
+                <li><span class="bold">Remove Availability :</span>
+                    <div class="txt"> Any previously added time slots can be removed or adjusted based on changes in the
+                        doctor’s schedule.</div>
+                </li>
+            </ul>
+            <div>This functionality ensures <span class="bold">accurate scheduling for doctors with dynamic
+                    timings</span>, helping avoid overlaps and missed bookings.</div>
+        </div>
+        <img class="form3" src="help-center/Doctor Multiple Availability.jpg" alt="Doctor Multiple Availability">
+
+    </div>
+
+    <!--10. Appointment-Based Doctor - Visiting Consultant (Surgeon)-->
+
+    <div class="full" *ngIf="component === 'surgeon'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Doctor Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Appointment-Based Doctor - Visiting Consultant (Surgeon)</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This feature is designed for doctors who work on an <span class="bold">appointment-only basis</span>
+                without fixed OPD schedules, such as <span class="bold">visiting consultants or surgeons</span>.</div>
+            <div class="bold txt">Flexible Slot Addition:</div>
+            <ul>
+                <li>
+                    <div class="txt">Visiting consultants typically do not have predefined working hours.</div>
+                </li>
+                <li>
+                    <div class="txt">Admins can <span class="bold">manually add slots</span> as needed based on the
+                        consultant’s availability or surgical schedule.</div>
+                </li>
+            </ul>
+            <div class="bold">Doctor Type Selection :</div>
+            <div>While adding a doctor to the system, the admin must select the appropriate doctor type:</div>
+            <ul>
+                <li><span class="bold">Retain Doctor :</span>
+                    <div class="txt">Assigned with <span class="bold">predefined availability slots</span> that follow a
+                        regular OPD schedule.</div>
+                </li>
+                <li><span class="bold">Visiting Consultant (VC) :</span>
+                    <div class="txt"><span class="bold">No fixed slots.</span> Slots must be added manually whenever the
+                        consultant is available.</div>
+                </li>
+            </ul>
+            <div class="bold">Doctor Availability View :</div>
+            <ul>
+                <li>
+                    <div class="txt">For <span class="bold">Visiting Consultants</span>, only the <span
+                            class="bold">booked slots </span> appear in the Doctor Availability section.</div>
+                </li>
+                <li>
+                    <div class="txt">Unbooked or future slots will not be displayed unless manually created.</div>
+                </li>
+            </ul>
+            <div>This ensures that <span class="bold">visiting doctors’ availability is managed flexibly</span>,
+                allowing hospitals to accommodate specialists without affecting standard scheduling workflows.</div>
+        </div>
+        <img class="form3" src="help-center/Appointment-Based Doctor - Visiting Consultant (Surgeon).jpg"
+            alt="Appointment-Based Doctor - Visiting Consultant (Surgeon)">
+
+    </div>
+
+
+    <!--  MHC Module: -->
+
+
+    <!-- A. New Appointment Form: -->
+    <div class="full" *ngIf="component === 'mhcform'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">MHC Module (Master Health Check-up)</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>New Appointment Form</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This section allows admins to manually book health checkup appointments for walk-in or call-in
+                patients, specifically for Master Health Check (MHC) packages.</div>
+            <div class="bold txt">Key Functionalities :</div>
+            <ul>
+                <li><span class="bold">Patient & Package Details :</span>
+                    <div class="txt">The form includes fields to capture essential patient information and select the
+                        desired health checkup package.</div>
+                </li>
+                <li><span class="bold">Repeat Option for Recurring Checkups :</span>
+                    <div class="txt">Since health checkups are often recurring, the system provides a <span
+                            class="bold">Repeat Appointment</span> option.</div>
+                </li>
+            </ul>
+            <ul class="txt1">
+                <li type="circle">
+                    <div>When enabled, the admin can set :</div>
+                </li>
+                <ul>
+                    <li type="square" class="txt"><span class="bold">Frequency</span>(e.g., every 30 days)</li>
+                    <li type="square" class="txt"><span class="bold">Number of repetitions </span> required</li>
+                </ul>
+                <li type="circle">
+                    <div>Based on this input, the system will <span class="bold">automatically generate future
+                            appointments</span> ahead of each repeat date.</div>
+                </li>
+            </ul>
+            <ul>
+                <li><span class="bold">Holiday Conflict Check :</span>
+                    <div class="txt">If any of the repeat dates fall on a holiday or non-working day, a <span
+                            class="bold">repetition conflict popup </span> appear, prompting the user to review and
+                        confirm or adjust the schedule.</div>
+                </li>
+            </ul>
+            <div>This ensures a smooth booking experience while supporting <span class="bold">automated scheduling for
+                    recurring health checkups</span>, reducing manual effort and improving patient follow-up.</div>
+        </div>
+        <img class="form3 gap1" src="help-center/mhcNew Appointment Form.jpg" alt="New Appointment Form">
+    </div>
+
+    <!--  B. Online Requests: -->
+
+    <div class="full" *ngIf="component === 'mhconline'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">MHC Module (Master Health Check-up)</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Online Requests</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This section displays all Master Health Check (MHC) appointment requests submitted through the
+                hospital's website.</div>
+            <div class="bold txt">Key Functionalities :</div>
+            <ul>
+                <li><span class="bold">Appointment Request Overview :</span>
+                    <div class="txt">Shows patient details, phone number, selected health package, appointment date,
+                        request source, and current status.</div>
+                </li>
+                <li><span class="bold">Status :</span>
+                    <div class="txt">Appointments initially appear with a Pending status until action is taken.</div>
+                </li>
+                <li><span class="bold">Available Actions :</span>
+                    <div class="txt"> Admins can :</div>
+                </li>
+                <ul class="txt1">
+                    <li type="circle" class="txt">
+                        <div>Confirm - Approve and schedule the appointment</div>
+                    </li>
+                    <li type="circle" class="txt">
+                        <div>Reschedule - Modify the date/time before confirmation</div>
+                    </li>
+                    <li type="circle" class="txt">
+                        <div>Cancel - Decline the request with or without a reason</div>
+                    </li>
+                </ul>
+                <li><span class="bold">Search & Filter :</span>
+                    <div class="txt"> Use patient name, PRN, or calendar filters to find and manage requests
+                        efficiently.</div>
+                </li>
+            </ul>
+            <div>This section ensures all online MHC bookings are tracked and managed promptly, helping streamline the
+                patient onboarding process.</div>
+        </div>
+        <img class="form3" src="help-center/mhcOnline Requests.jpg" alt="Online Requests">
+
+    </div>
+
+    <!-- C. Confirmed Appointments:-->
+
+    <div class="full" *ngIf="component === 'mhcconfirmed'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">MHC Module (Master Health Check-up)</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Confirmed Appointments</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This section displays all confirmed Master Health Check (MHC) appointments, helping admins and front
+                desk teams monitor upcoming visits efficiently.</div>
+            <div class="bold txt">Key Functionalities :</div>
+            <ul>
+                <li><span class="bold">Appointment Tracking :</span>
+                    <div class="txt">Shows confirmed appointments with patient details, selected health package, date,
+                        time, and source of booking.</div>
+                </li>
+                <li><span class="bold">Check-In Process :</span>
+                    <div class="txt">When a patient arrives, the admin can check them in using the available action
+                        button.</div>
+                </li>
+                <ul class="txt1">
+                    <li type="circle" class="txt">
+                        <div>Once checked in, the appointment will be visible to the MHC coordinator for further
+                            processing (e.g., sample collection, consultation, diagnostics).</div>
+                    </li>
+                </ul>
+                <li><span class="bold">Modify Appointments :</span>
+                    <div class="bold txt"> Admins can :</div>
+                </li>
+                <ul class="txt1">
+                    <li type="circle" class="txt">
+                        <div>Reschedule - Change the appointment date or time</div>
+                    </li>
+                    <li type="circle" class="txt">
+                        <div>Cancel - Cancel the appointment if the patient cannot attend</div>
+                    </li>
+                </ul>
+                <li><span class="bold">Search & Filter :</span>
+                    <div class="txt"> Appointments can be filtered by patient name, PRN, or by date using the calendar
+                        filter for quick access.</div>
+                </li>
+            </ul>
+            <div>This section ensures smooth coordination between the front desk and MHC team, reducing delays and
+                enhancing patient experience.</div>
+        </div>
+        <img class="form3" src="help-center/mhcConfirmed Appointments.jpg" alt="Confirmed Appointments">
+
+    </div>
+
+    <!-- D. Cancelled Appointments: -->
+    <div class="full" *ngIf="component === 'mhccancelled'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">MHC Module (Master Health Check-up)</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Cancelled Appointments</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This section displays all <span class="bold">cancelled Master Health Check (MHC) appointments</span>,
+                allowing admins to track and take action when needed.</div>
+            <div class="bold txt">Key Functionalities :</div>
+            <ul>
+                <li><span class="bold">View Cancelled Appointments :</span>
+                    <div class="txt"> Displays patient name, contact number, package name, date, time, source, and
+                        communication status (WhatsApp, Email, SMS).</div>
+                </li>
+                <li><span class="bold">Reschedule Option :</span>
+                    <div class="txt"> A green action button is available to <span class="bold">reschedule </span>the
+                        cancelled appointment without needing to re-enter all details.</div>
+                </li>
+                <li><span class="bold">Search & Filter :</span>
+                    <div class="txt"> Allows filtering by patient name, phone number, or date for quick reference and
+                        action.</div>
+                </li>
+            </ul>
+            <div>This section ensures that no cancelled appointment is missed and enables the admin to <span
+                    class="bold">follow up or rebook appointments efficiently</span>, improving patient continuity of
+                care.</div>
+        </div>
+        <img class="form1" src="help-center/mhcCancelled Appointments.jpg" alt="Cancelled Appointments">
+
+    </div>
+
+    <!-- E. Completed Visits: -->
+    <div class="full" *ngIf="component === 'mhccompleted'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">MHC Module (Master Health Check-up)</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Completed Visits</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This section displays all successfully completed Master Health Check (MHC) appointments, helping admins
+                track patient flow and generate reports as needed.</div>
+            <div class="bold txt">Key Functionalities :</div>
+            <ul>
+                <li><span class="bold">View Completed Appointments :</span>
+                    <div class="txt">Displays a list of patients whose MHC appointments have been marked as Completed,
+                        along with details like PRN, package name, date, time, and source of booking.</div>
+                </li>
+                <li><span class="bold">Status Tracking :</span>
+                    <div class="txt">Completed appointments are labeled with a green “Completed” status for easy
+                        identification.</div>
+                </li>
+                <li><span class="bold">Communication Log :</span>
+                    <div class="txt">Shows if post-visit notifications were sent via WhatsApp, Email, or SMS.</div>
+                </li>
+                <li><span class="bold">Search & Filter :</span>
+                    <div class="txt">Allows filtering by patient name, PRN, or appointment date for quick reference.
+                    </div>
+                </li>
+            </ul>
+            <div>This section helps maintain a complete record of health checkup visits, supporting follow-ups,
+                documentation, and patient care continuity.</div>
+        </div>
+        <img class="form3" src="help-center/mhcCompleted Visits.jpg" alt="Completed Visits">
+
+    </div>
+
+    <!--F. Repeated Packages:  -->
+    <div class="full" *ngIf="component === 'mhcpackages'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">MHC Module (Master Health Check-up)</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Repeated Packages</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>The Repeated Packages section allows admins to monitor and manage health checkup packages that require
+                recurring visits based on a predefined schedule.</div>
+            <div class="bold gap1">Key Functionalities :</div>
+            <ul>
+                <li class="txt"><span class="bold">Track Repetitions :</span> View the total number of repeats, along
+                    with the completed and pending visits for each patient.</li>
+                <li class="txt"><span class="bold">Repeated Dates :</span> Displays the scheduled dates for each
+                    repetition, allowing staff to plan and prepare accordingly.</li>
+                <li class="txt"><span class="bold">Stop Repetition Option :</span> An action button is available to stop
+                    the repetition process if required (e.g., patient request or treatment completion).</li>
+                <li class="txt"><span class="bold">Patient Overview :</span> Lists essential patient details including
+                    phone number, package name, and current repetition status.</li>
+                <li class="txt"><span class="bold">Search & Filter :</span> Admins can filter by patient name or date to
+                    quickly locate and manage specific repeated appointments.</li>
+            </ul>
+            <div>This section ensures seamless tracking of recurring health checkups, helping reduce manual errors and
+                improve patient care consistency.</div>
+        </div>
+        <img class="form1" src="help-center/mhcRepeated Packages.jpg" alt="Repeated Packages">
+    </div>
+    <!-- Service Module -->
+    <!-- A. New Appointment Form -->
+    <div class="full" *ngIf="component === 'ServiceAppointmentForm'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Service Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div> New Appointment Form</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This form is used to manually book service-based appointments for walk-in or call-in patients. It
+                allows admins to capture all essential patient and service information for smooth scheduling.</div>
+            <div class="bold txt">Key Fields & Functions :</div>
+            <ul>
+                <li><span class="bold">PRN Number :</span>
+                    <div class="txt"> Used to link the appointment to an existing patient profile, if available.</div>
+                </li>
+                <li><span class="bold">Patient Details :</span> </li>
+                <ul>
+                    <li type="circle" class="txt">Prefix, First Name, Last Name - For identifying the patient </li>
+                    <li type="circle" class="txt">Phone Number & Email ID - For communication and reminders</li>
+                    <li type="circle" class="txt">Age & Gender - For demographic and service categorization</li>
+                </ul>
+
+                <li><span class="bold">Service Selection :</span>
+                    <div class="txt">Choose the desired hospital service (e.g., physiotherapy, lab test, imaging, etc.)
+                        from the dropdown.</div>
+                </li>
+                <li><span class="bold">Date & Time :</span>
+                    <div class="txt">Select the preferred date and time for the appointment based on service
+                        availability.</div>
+                </li>
+                <li><span class="bold">Request Via :</span>
+                    <div>Indicates how the booking was made:</div>
+                    <ul>
+                        <li type="circle" class="txt"><span class="bold">Walk-In -</span> Directly at the hospital</li>
+                        <li type="circle" class="txt"><span class="bold">Call -</span> Scheduled over a phone call</li>
+                    </ul>
+                </li>
+                <li><span class="bold">Visit Type :</span>
+                    <ul>
+                        <li type="circle" class="txt"><span class="bold">New :</span> First-time service request/li>
+                        <li type="circle" class="txt"><span class="bold">Old :</span> Follow-up or repeat service
+                            request
+                        </li>
+                    </ul>
+                </li>
+                <li><span class="bold">Book Appointment :</span>
+                    <div class="txt">Once all details are filled in, the appointment can be submitted using the Book
+                        Appointment button.</div>
+                </li>
+            </ul>
+            <div>This form ensures service appointments are booked quickly and accurately, keeping the patient journey
+                organized and hassle-free.</div>
+        </div>
+        <img class="form" src="help-center/ServiceAppointment Form.jpg" alt="ServiceAppointment Form">
+    </div>
+
+    <!-- B.  Confirmed Appointments:-->
+    <div class="full" *ngIf="component === 'ServiceConfirmed'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Service Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Confirmed Appointments</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This section displays all<span class="bold"> confirmed service appointments</span>, allowing admins to
+                efficiently track and manage upcoming visits.</div>
+            <div class="bold txt">Key Functionalities :</div>
+            <ul>
+                <li><span class="bold">View Appointment Details :</span>
+                    <div class="txt"> Displays patient information, PRN, selected service, date, time, visit type, and
+                        booking source.</div>
+                </li>
+                <li><span class="bold">Check-In Option :</span>
+                    <div class="txt">Once the patient arrives, admins can <span class="bold">check them in</span>.</div>
+                </li>
+                <ul>
+                    <li type="circle" class="txt">After check-in, the appointment becomes visible to the <span
+                            class="bold">Service Coordinator</span> for further processing.</li>
+                </ul>
+
+                <li><span class="bold">Modify Appointments :</span>
+                    <div class="txt"> Admins can :</div>
+                </li>
+                <ul>
+                    <li type="circle" class="txt"><span class="bold">Reschedule -</span> Change the date/time if needed
+                    </li>
+                    <li type="circle" class="txt"><span class="bold">Cancel -</span> Remove the appointment in case the
+                        patient is unavailable</li>
+                </ul>
+                <li><span class="bold">Status Indicators :</span>
+                    <ul>
+                        <li type="circle" class="txt"><span class="bold">Confirmed - </span> Appointment is scheduled
+                            but not yet checked in</li>
+                        <li type="circle" class="txt"><span class="bold">Checked In -</span> Patient has arrived and is
+                            ready for the service</li>
+                    </ul>
+                </li>
+                <li><span class="bold">Communication Log :</span>
+                    <div class="txt">Icons indicate whether SMS, Email, or WhatsApp notifications have been sent to the
+                        patient.</div>
+                </li>
+                <li><span class="bold">Search & Filter :</span>
+                    <div class="txt">Use filters to quickly locate appointments by patient name, PRN, or date.</div>
+                </li>
+            </ul>
+            <div>This section helps maintain a <span class="bold">smooth check-in process</span>, ensuring service
+                departments are updated in real time.</div>
+        </div>
+        <img class="form3" src="help-center/ServiceConfirmedAppointments.jpg" alt="ServiceConfirmedAppointments">
+    </div>
+    <!-- C. Cancelled Appointments: -->
+
+    <div class="full" *ngIf="component === 'ServiceCancelled'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Service Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Cancelled Appointments</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This section lists all <span class="bold">cancelled service appointments</span>, allowing admins to
+                take further actions if required.</div>
+            <div class="bold txt">Key Functionalities :</div>
+            <ul>
+                <li class="txt2"><span class="bold">View Cancelled Appointments : </span>
+                    <div class="txt">Displays details such as patient name, PRN, service name, date, time, visit type
+                        and source of booking.</div>
+                </li>
+                <li class="txt2"><span class="bold">Reschedule Option :</span>
+                    <div class="txt">Admins can <span class="bold">reschedule </span>the cancelled appointment using the
+                        available action button, helping ensure the patient does not miss the required service.</div>
+                </li>
+                <li class="txt2"><span class="bold">Status Indicator :</span>
+                    <div class="txt">Appointments marked as <span class="bold">"Cancel"</span> are clearly highlighted
+                        in red for easy identification.</div>
+                </li>
+                <li class="txt2"><span class="bold">Communication Status :</span>
+                    <div class="txt">Shows whether cancellation updates have been sent via <span class="bold">WhatsApp,
+                            Email, or SMS</span>.</div>
+                </li>
+                <li class="txt2"><span class="bold">Search & Filter :</span>
+                    <div class="txt">Easily search by patient name or PRN and filter by date to manage rescheduling
+                        efficiently.</div>
+                </li>
+            </ul>
+            <div>This section helps the team handle <span class="bold">missed or cancelled service appointments</span>
+                effectively and ensures a smooth rebooking process.</div>
+        </div>
+        <img class="form3" src="help-center/cancelledservice.jpg" alt="cancelledservice">
+    </div>
+
+    <!-- D. Completed Services: -->
+    <div class="full" *ngIf="component === 'ServiceCompleted'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Service Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Completed Services</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This section displays all <span class="bold">successfully completed service appointments</span>,
+                helping admins maintain accurate records and follow-up workflows.</div>
+            <div class="bold txt">Key Functionalities :</div>
+            <ul>
+                <li class="txt2"><span class="bold">View Completed Appointments : </span>
+                    <div class="txt">Shows essential details such as patient name, PRN, service name, appointment date
+                        and time, and the source of booking.</div>
+                </li>
+                <li class="txt2"><span class="bold">Status Indicator :</span>
+                    <div class="txt">Appointments that have been completed are clearly marked with a<span class="bold">
+                            "Completed"</span> status in green.</div>
+                </li>
+                <li class="txt2"><span class="bold">Communication Log :</span>
+                    <div class="txt">Displays whether<span class="bold"> WhatsApp, Email, or SMS</span> notifications
+                        were sent post-completion.</div>
+                </li>
+                <li class="txt2"><span class="bold">Search & Filter :</span>
+                    <div class="txt">Easily search by patient name, PRN or filter by date using the calendar to find
+                        specific records quickly.</div>
+                </li>
+            </ul>
+            <div>This section helps keep a proper record of all completed service appointments, making it easier to
+                manage billing, reports and patient follow-ups.</div>
+        </div>
+        <img class="form1" src="help-center/completedservice.jpg" alt="completedservice">
+    </div>
+
+    <!-- 4. Report Module -->
+    <!--A. Doctor Appointment Report -->
+    <div class="full" *ngIf="component === 'AppointmentReport'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Report Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Doctor Appointment Report</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>The Doctor Appointment Report provides detailed insights into appointment activity for both admins and
+                doctors.</div>
+            <div class="bold gap1">Key Functionalities :</div>
+            <ul>
+                <li><span class="bold">Individual Reports :</span>
+                    <div class="txt"> Allows generation of reports specific to each doctor or admin.</div>
+                </li>
+                <li><span class="bold">Flexible Report Duration :</span>
+                    <div class="txt">Reports can be generated for different time frames : </div>
+                </li>
+                <ul>
+                    <li type="circle" class="txt"><span class="bold">Daily </span></li>
+                    <li type="circle" class="txt"><span class="bold">Weekly</span></li>
+                    <li type="circle" class="txt"><span class="bold">Monthly</span></li>
+                </ul>
+
+                <li><span class="bold">Included Metrics:</span></li>
+                <ul>
+                    <li type="circle" class="txt"><span class="bold">Total Appointments</span></li>
+                    <li type="circle" class="txt"><span class="bold">Confirmed Appointments</span> </li>
+                    <li type="circle" class="txt"><span class="bold">Cancelled Appointments</span> </li>
+                    <li type="circle" class="txt"><span class="bold">Completed Appointments</span> </li>
+                    <li type="circle" class="txt"><span class="bold">Appointment Sources </span>- Categorized as Online,
+                        Call, or Walk-In </li>
+                </ul>
+                <li><span class="bold txt">Export Options :</span>
+                    <div class="gap1 txt">Reports are available in<span class="bold"> Excel</span> and <span
+                            class="bold">Print</span> formats for easy sharing and documentation.</div>
+                </li>
+                <li><span class="bold txt">Summary Report :</span>
+                    <div class="gap1 txt">An overall summary view is also available, giving a consolidated look at
+                        doctor-wise performance.</div>
+                </li>
+            </ul>
+            <div>This section helps in <span class="bold">monitoring productivity</span>, tracking appointment trends
+                and supporting data-driven decisions.</div>
+        </div>
+        <img class="form3" src="help-center/Appointment Report.jpg" alt="Appointment Report">
+    </div>
+    <!-- B. Health Checkup Appointment Report: -->
+    <div class="full" *ngIf="component === 'HealthCheckup'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Report Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Health Checkup Appointment Report</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>The <span class="bold">Health Checkup Appointment Report</span> provides detailed reporting for all
+                health checkup-related appointments, helping admins track package-wise activity and performance.</div>
+            <div class="bold gap1">Key Functionalities :</div>
+            <ul>
+                <li><span class="bold">Similar to Doctor Appointment Report :</span>
+                    <div class="gap1"> Offers the same reporting structure but focused on health checkup packages
+                        instead
+                        of individual doctors.</div>
+                </li>
+                <li><span class="bold">Report for Admins & Packages :</span>
+                    <div class="gap1">Tracks appointment data linked to each health checkup package, including senior
+                        citizen, diabetic care and other predefined packages.</div>
+                </li>
+                <li><span class="bold">Metrics Included :</span></li>
+                <ul>
+                    <li type="circle" class="gap1"><span class="bold">Total Packages Handled</span></li>
+                    <li type="circle" class="gap1"><span class="bold">Confirmed Packages</span></li>
+                    <li type="circle" class="gap1"><span class="bold">Cancelled Packages</span></li>
+                    <li type="circle" class="gap1"><span class="bold">Completed Packages</span></li>
+                    <li type="circle" class="gap1"><span class="bold">Request Sources</span>- Online, Call and Walk-In
+                        requests</li>
+                </ul>
+                <li><span class="bold">Filter by Date :</span>
+                    <div class="gap1"> Allows users to generate reports for specific date ranges using the calendar
+                        filter.</div>
+                </li>
+                <li><span class="bold">Export Options :</span>
+                    <div class="gap1"> Reports can be downloaded in Excel format or sent for printing directly.</div>
+                </li>
+            </ul>
+            <div>This section ensures better visibility into the performance of health checkup services and helps with
+                operational planning, follow-up management and reporting.</div>
+        </div>
+        <img class="form3" src="help-center/HealthCheckup.jpg" alt="HealthCheckup">
+    </div>
+    <!-- 5. Estimation Module -->
+    <!--A. Estimation Creation -->
+    <div class="full" *ngIf="component === 'EstimationCreation'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Estimation Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Estimation Creation</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This section allows the Estimator to create a detailed cost estimation for procedures or surgeries,
+                capturing all necessary information for clarity and accuracy.</div>
+            <div class="bold gap1">Key Sections & Functionalities :</div>
+            <ul>
+                <span class="bold">a. Patient Information</span>
+                <ul>
+                    <li class="gap1" type="disc"> Enter the patient's UHID, Name, Age and Gender to link the estimation
+                        with the correct patient profile.</li>
+                </ul>
+                <span class="bold">b. Doctor Information</span>
+                <ul>
+                    <li class="gap1" type="disc">Select the Doctor’s Name responsible for the procedure or consultation.
+                    </li>
+                </ul>
+                <span class="bold">c. Estimation Details</span>
+                <ul>
+                    <li class="gap1" type="disc">Choose the Estimation Type</li>
+                    <li class="gap1" type="disc">Enter the EST Name and Surgery Level</li>
+                    <li class="gap1" type="disc">Provide the Doctor’s Preferred Date for the surgery</li>
+                </ul>
+                <span class="bold">d. Stay Information</span>
+                <ul>
+                    <li class="gap1" type="disc">Input the total number of stay days</li>
+                    <li class="gap1" type="disc">Specify if ICU or Ward requirements are applicable</li>
+                </ul>
+                <span class="bold">e. Room Information</span>
+                <ul>
+                    <li class="gap1" type="disc">View and select from the available room types</li>
+                    <li class="gap1" type="disc">Enter the room-wise charges for cost calculation</li>
+                </ul>
+                <span class="bold">f. Inclusions and Exclusions</span>
+                <ul>
+                    <li class="gap1" type="disc">Select items and services that should be included in the estimation
+                    </li>
+                    <li class="gap1" type="disc">Unselected items will be automatically treated as exclusions</li>
+                    <li class="gap1" type="disc">Helps define the exact scope of services provided</li>
+                </ul>
+                <span class="bold">g. Implants, Procedures, and Instruments</span>
+                <ul>
+                    <li class="gap1" type="disc">Add multiple items under each category</li>
+                    <li class="gap1" type="disc">Assign cost values individually</li>
+                    <li class="gap1" type="disc">If marked as included, their cost will not be added to the final
+                        estimation</li>
+                </ul>
+                <span class="bold">h. Estimation Summary</span>
+                <ul>
+                    <li class="gap1 bold" type="disc">Displays :</li>
+                    <ul>
+                        <li type="circle" class="gap1">Estimation Date</li>
+                        <li type="circle" class="gap1">Total Estimated Cost </li>
+                        <li type="circle" class="gap1">Automated Cost Calculation (based on room charges and excluded
+                            items)</li>
+                        <li type="circle" class="gap1">Internal Remarks (for internal staff use)</li>
+                        <li type="circle" class="gap1">External Remarks (shared with the patient)</li>
+                    </ul>
+                </ul>
+                <span class="bold">i. Signatures</span>
+                <ul>
+                    <li class="bold gap1" type="disc">Mandatory digital signatures from:</li>
+                    <ul>
+                        <li type="circle" class="gap1">Staff</li>
+                        <li type="circle" class="gap1">Approver</li>
+                        <li type="circle" class="gap1">Patient or Attender</li>
+                    </ul>
+                </ul>
+                <span class="bold">j. Rejection Reason</span>
+                <ul>
+                    <li class="gap1" type="disc">If an estimation is rejected, the approver must provide a valid reason
+                        for documentation and clarity.</li>
+                </ul>
+            </ul>
+            <div>This feature ensures transparency, accuracy and accountability in cost planning for patients and
+                supports smooth pre-admission processes.</div>
+        </div>
+        <img class="form3" src="help-center/Appointment Report.jpg" alt="Appointment Report">
+    </div>
+
+    <!-- B. Estimation Request from Doctor -->
+
+    <div class="full" *ngIf="component === 'EstimationRequest'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Estimation Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Estimation Request from Doctor</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This section displays all estimation requests submitted by doctors, allowing the estimator to review
+                and take action based on the request details.</div>
+            <div class="bold gap1">Key Functionalities :</div>
+            <ul>
+                <li><span class="bold">Pending Requests Table :</span>
+                    <div class="gap1">A table lists all incoming estimation requests with a Pending or Rejected status,
+                        along with:</div>
+                </li>
+                <ul>
+                    <li class="gap1">Estimation ID</li>
+                    <li class="gap1">Patient Name</li>
+                    <li class="gap1">Consultant Name</li>
+                    <li class="gap1">Estimation Name and Type</li>
+                    <li class="gap1">Preferred Date</li>
+                </ul>
+                <li><span class="bold">Action by Estimator :</span>
+                    <div class="gap1">The estimator reviews the provided information and, using the available action
+                        button, proceeds to create a detailed estimation based on the doctor’s input.</div>
+                </li>
+            </ul>
+            <div>This feature ensures a smooth handover between the clinical and estimation teams, allowing for quick
+                and accurate cost planning.</div>
+        </div>
+        <img class="form1" src="help-center/EstimationRequest.jpg" alt=" Estimation Request">
+    </div>
+
+    <!-- C. Estimation Request from Estimator for Approval -->
+
+    <div class="full" *ngIf="component === 'EstimatorApproval'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Estimation Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Estimation Request from Estimator for Approval</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This section displays all <span class="bold">estimation requests submitted by the estimator</span> that
+                are awaiting approval.</div>
+            <div class="bold gap1">Key Functionalities:</div>
+            <ul>
+                <li><span class="bold">Submitted Requests Table :</span>
+                    <div class="gap1"> Shows a list of estimations marked with the status <span
+                            class="bold">Submitted</span>, including:</div>
+                </li>
+                <ul>
+                    <li class="gap1">Estimation ID</li>
+                    <li class="gap1">Patient Name</li>
+                    <li class="gap1">Consultant Name</li>
+                    <li class="gap1">Estimation Type and Name</li>
+                    <li class="gap1">Preferred Date for the procedure</li>
+                </ul>
+                <li><span class="bold">Action by Approver :</span>
+                    <div class="gap1"> The <span class="bold">approver reviews the estimation details</span> and can
+                        either:</div>
+                </li>
+                <ul>
+                    <li class="gap1"><span class="bold">Approve</span> the estimation, moving it to the next stage, or
+                    </li>
+                    <li class="gap1"><span class="bold">Reject</span> the estimation, with a reason required for
+                        documentation</li>
+                </ul>
+            </ul>
+            <div>This section ensures a clear approval workflow, allowing estimations to be reviewed and finalized
+                efficiently.</div>
+        </div>
+        <img class="form3" src="help-center/EstimatorApproval.jpg" alt=" EstimatorApproval">
+    </div>
+
+
+    <!-- D. Approved/ Accepted Estimations -->
+    <div class="full" *ngIf="component === 'AcceptedEstimations'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Estimation Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div> Approved/ Accepted Estimations</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>Once an estimation is approved by the approver, it appears in the <span class="bold">Approved
+                    Estimation </span>section. The estimator must complete further steps, including capturing the
+                patient’s signature and updating follow-up or financial details.</div>
+            <div class="bold txt">Key Functionalities :</div>
+            <div class="bold">a. Patient Signature Collection :</div>
+            <ul>
+                <li>If the status is marked <span class="bold">"Action Needed"</span>, the estimator must collect the
+                    <span class="bold">patient's signature</span> to proceed.
+                </li>
+            </ul>
+            <div class="bold">b. Estimation Details Displayed :</div>
+            <ul>
+                <span>Each row includes :</span>
+                <ul>
+                    <li class="gap1" type="disc">Estimation ID</li>
+                    <li class="gap1" type="disc">Patient Name</li>
+                    <li class="gap1" type="disc">Estimation Name</li>
+                    <li class="gap1" type="disc">Estimation Type</li>
+                    <li class="gap1" type="disc">Estimation Date</li>
+                    <li class="gap1" type="disc">Follow-up Information</li>
+                    <li class="gap1" type="disc">Age Bucket</li>
+                    <li class="gap1" type="disc">SMS Status</li>
+                    <li class="gap1" type="disc">Action Buttons</li>
+                </ul>
+            </ul>
+            <div class="bold">c. Available Actions :</div>
+            <ul>
+                <li><span class="bold">Follow-Up :</span>
+                    <div class="gap1">Add up to five follow-ups, including <span class="bold">follow-up dates</span> and
+                        <span class="bold">patient feedback</span> entries.
+                    </div>
+                </li>
+                <li><span class="bold">View :</span>
+                    <div class="gap1">Displays the full estimation form. Once approved, the form becomes <span
+                            class="bold">read-only</span> and cannot be edited. </div>
+                </li>
+                <li><span class="bold">Advance Amount :</span>
+                    <div class="gap1">Enter the <span class="bold">receipt number</span> and <span class="bold">advance
+                            amount</span>. Once entered, the estimation status updates to <span
+                            class="bold">Confirmed</span>.</div>
+                </li>
+                <li><span class="bold">Resend :</span>
+                    <div class="gap1">Allows the estimator to resend the generated PDF to the patient via Whatsapp.
+                    </div>
+                </li>
+                <li><span class="bold">Print :</span>
+                    <div class="gap1">Opens the estimation PDF for viewing and printing.</div>
+                </li>
+
+            </ul>
+            <div class="bold">Process Flow:</div>
+            <ul>
+                <li>After approval and acceptance, the <span class="bold">estimation PDF is auto-generated</span>.</li>
+                <li>The PDF is then shared with the <span class="bold">patient</span> and sent to the <span
+                        class="bold">IP billing team </span>for processing.</li>
+            </ul>
+            <div>This section ensures a <span class="bold">seamless handoff from approval to billing</span>, while
+                keeping all records updated and accessible.</div>
+        </div>
+        <img class="form3" src="help-center/Accepted Estimations.jpg" alt=" Accepted Estimations">
+    </div>
+
+    <!-- E. Confirmed Estimation -->
+
+    <div class="full" *ngIf="component === 'ConfirmedEstimation'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Estimation Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div> Confirmed Estimation</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This section displays all estimations that have been reviewed, approved, and confirmed for further
+                processing.</div>
+            <div class="bold gap1">Key Functionalities :</div>
+            <ul>
+                <li><span class="bold">Extended Actions:</span>
+                    <div class="gap1"> The same table format is retained, but with additional action buttons for:</div>
+                </li>
+                <ul>
+                    <li class="gap1" type="circle">PAC Done</li>
+                    <li class="gap1" type="circle">Complete</li>
+                    <li class="gap1" type="circle">Cancel</li>
+                    <li class="gap1" type="circle">View</li>
+                    <li class="gap1" type="circle">PAC Done Button</li>
+                </ul>
+
+                <li><span class="bold">PAC Requirement:</span>
+                    <div class="gap1">If the <span class="bold">Estimation Type</span> is marked as <span
+                            class="bold">SM</span>, completing <span class="bold">PAC (Pre-Anesthesia Check Up)</span>
+                        is <span class="bold">mandatory</span> before marking the estimation as completed.</div>
+                </li>
+                <li><span class="bold">Cancellation Workflow:</span>
+                    <div class="gap1">Cancellation of a confirmed estimation must be <span class="bold"> approved by the
+                            Senior Manager</span>, along with proper <span class="bold">feedback or
+                            justification</span>. </div>
+                </li>
+            </ul>
+            <div>This section ensures that <span class="bold">only validated estimations proceed to final billing or
+                    surgery</span>, maintaining clinical and administrative accountability.</div>
+        </div>
+        <img class="form3" src="help-center/Confirmed Estimation.jpg" alt="Confirmed Estimation">
+    </div>
+
+    <!-- F. Complete/Cancel EST -->
+
+    <div class="full" *ngIf="component === 'Complete/CancelEST'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Estimation Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div> Complete/Cancel EST</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This section displays all <span class="bold">completed and canceled estimations</span>, helping track
+                the final status of each estimation.</div>
+            <div class="bold gap1">Key Functionalities :</div>
+            <ul>
+                <li><span class="bold">Estimation List View :</span>
+                    <div class="gap1">Shows both Completed and Canceled estimations in a single table with details such
+                        as:</div>
+                </li>
+                <ul>
+                    <li class="gap1" type="circle">Estimation ID</li>
+                    <li class="gap1" type="circle">Patient Name</li>
+                    <li class="gap1" type="circle">Estimation Name and Type</li>
+                    <li class="gap1" type="circle">Estimation Date</li>
+                    <li class="gap1" type="circle">Estimation Handled By</li>
+                    <li class="gap1" type="circle">Approved By</li>
+                    <li class="gap1" type="circle">SMS Status</li>
+                    <li class="gap1" type="circle">Final Status (Completed or Canceled)</li>
+                </ul>
+
+                <li class="bold">Status Indicators:</li>
+                <ul>
+                    <li class="gap1"><span class="bold">Completed</span> estimations are marked in green</li>
+                    <li class="gap1"><span class="bold">Canceled</span> estimations are marked in red</li>
+                </ul>
+            </ul>
+            <span class="bold">Actions Available:</span>
+            <div class="gap1"><span class="bold">Download :</span> Allows the user to download the estimation PDF, which
+                can be used to view or print as needed.</div>
+            <div class="gap1">This section ensures clear visibility of <span class="bold">closed estimations</span>,
+                supporting administrative audits and historical reference.</div>
+        </div>
+        <img class="form3" src="help-center/Complete Cancel EST.jpg" alt="Complete/Cancel EST">
+    </div>
+
+    <!-- G. Overdue Estimation -->
+
+    <div class="full" *ngIf="component === 'OverdueEstimation'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Estimation Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div> Overdue Estimation</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This section highlights estimations that have not been acted upon within a defined timeframe and are
+                considered overdue.</div>
+            <div class="bold gap1">Key Functionalities :</div>
+            <ul>
+                <li><span class="bold">Overdue Criteria :</span>
+                    <div class="gap1"> An estimation is marked as<span class="bold"> Overdue</span> if :</div>
+                </li>
+                <ul>
+                    <li class="gap1" type="circle">The <span class="bold">Age Bucket exceeds 20 days</span>, or</li>
+                    <li class="gap1" type="circle">The <span class="bold">Estimation Date has passed</span></li>
+                </ul>
+                <li><span class="bold">Automatic Reminder:</span>
+                    <div class="gap1">Once marked as overdue, the system automatically sends a <span
+                            class="bold">reminder message </span>to the patient for follow-up action. </div>
+                </li>
+                <li><span class="bold">Table View:</span>
+                    <div class="gap1"> Displays key details such as :</div>
+                </li>
+                <ul>
+                    <li class="gap1" type="circle">Estimation ID</li>
+                    <li class="gap1" type="circle">Patient Name</li>
+                    <li class="gap1" type="circle">Estimation Name and Type</li>
+                    <li class="gap1" type="circle">Estimation Date</li>
+                    <li class="gap1" type="circle">Estimation Handled By and Approved By</li>
+                    <li class="gap1" type="circle">SMS Status</li>
+                    <li class="gap1" type="circle">Final Status as "Overdue"</li>
+                </ul>
+            </ul>
+            <span class="bold">Action Available (for Senior Manager) :</span>
+            <div class="gap1"><span class="bold">Cancel with Feedback : </span> The Senior Manager must cancel the
+                overdue estimation and provide feedback based on the patient's follow-up status or lack of response.
+                This helps close old estimations properly and keeps the system up to date.</div>
+            <div class="gap1">This section helps ensure<span class="bold"> timely communication and follow-up</span>,
+                reducing the chances of pending estimations being forgotten or left unresolved.</div>
+        </div>
+        <img class="form3" src="help-center/Overdue Estimation.jpg" alt="Overdue Estimation">
+    </div>
+
+    <!-- Individual Doctor Module  -->
+    <!-- 1. Checked - In Consultations -->
+
+    <div class="full" *ngIf="component === 'Checked - In'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Individual Doctor Module </div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div> Checked - In Consultations</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This section displays the list of patients who have checked in for today's appointments. Doctors can
+                take actions directly from this view to manage their consultations efficiently.</div>
+            <div class="bold gap1 ">Table Types :</div>
+            <div class="bold gap1">The doctor’s screen is divided into three views :</div>
+            <ol>
+                <li class="gap1"><span class="bold">Checked-In Consultations -</span> Patients currently waiting or
+                    being seen</li>
+                <li class="gap1"><span class="bold">Today’s Consultations -</span> All scheduled appointments for the
+                    day</li>
+                <li class="gap1"><span class="bold">Future Consultations -</span> Upcoming patient appointments</li>
+                <li class="gap1"><span class="bold">Past Consultations -</span> Past patient appointments</li>
+            </ol>
+            <div class="bold">Actions Available (Checked-In Tab) :</div>
+            <ul>
+                <li><span class="bold">Start :</span>
+                    <div class="gap1"><span class="bold">Begins the consultation. </span>On the TV screen, the patient
+                        status updates to "Patient-In".</div>
+                </li>
+                <li><span class="bold">Finish :</span>
+                    <div class="gap1"><span class="bold">Ends the consultation.</span> On the TV screen, the patient's
+                        name is removed from the display.</div>
+                </li>
+                <li><span class="bold">Postpone :</span>
+                    <div class="gap1"><span class="bold">Postpones the appointment.</span> The status is updated to
+                        "Pending" on the TV display.</div>
+                </li>
+                <li><span class="bold">P. Counselling (Patient Counselling) :</span>
+                    <div class="gap1">Creates a new estimation request with details like:</div>
+                    <ul>
+                        <li type="cricle" class="gap1">Estimation Name</li>
+                        <li type="cricle" class="gap1">Estimation Type (SM, MM, Maternity)</li>
+                        <li type="cricle" class="gap1">Preferred Date</li>
+                        <li type="cricle" class="gap1">Stay Duration</li>
+                        <li type="cricle" class="gap1">Surgery Level</li>
+                        <li type="cricle" class="gap1">Type (Immediate or Planned)</li>
+                        <li type="cricle" class="gap1">Doctor’s Remarks</li>
+                    </ul>
+                </li>
+                <li><span class="bold">Transfer :</span>
+                    <div class="gap1">Sends a request to the manager to transfer the appointment to another doctor or
+                        department.</div>
+                </li>
+                <li><span class="bold">CC (Consultation Referral) :</span>
+                    <div class="gap1">Sends a referral request to the sub-admin, suggesting the patient consult another
+                        doctor for additional opinion or treatment.</div>
+                </li>
+            </ul>
+            <div class="bold">Visual Indicators :</div>
+            <ul>
+                <li><span class="bold">Color-Coded Buttons :</span>
+                    <div class="gap1">Each action button is uniquely colored for easy identification.</div>
+                </li>
+                <li><span class="bold">Timer Display:</span>
+                    <div class="gap1">A live timer tracks how long each consultation is ongoing.</div>
+                    <ul>
+                        <li type="circle">If the consultation exceeds 10 minutes from the slot duration of that doctor,
+                            the row starts blinking in red to indicate delay.</li>
+                    </ul>
+                </li>
+            </ul>
+            <div class="gap1">This module helps doctors manage patient flow smoothly, communicate with other departments
+                and ensure timely consultations.</div>
+        </div>
+        <img class="form3" src="help-center/Checked - In Consultations.jpg" alt="Checked - In Consultations">
+    </div>
+
+    <!-- Today's Consultations -->
+    <div class="full" *ngIf="component === 'Today Consultations'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Individual Doctor Module </div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Today's Consultations</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This section displays all <span class="bold">consultations scheduled for the current day.</span></div>
+            <div class="bold gap1 ">Key Functionalities :</div>
+            <li class="gap1"><span class="bold">Patient List :</span>
+                <div class="gap1"> Shows a table of all patients scheduled for today, including :</div>
+                <ul>
+                    <li type="circle" class="gap1">PRN Number</li>
+                    <li type="circle" class="gap1">Patient Name</li>
+                    <li type="circle" class="gap1">Date</li>
+                    <li type="circle" class="gap1">Appointment Time</li>
+                </ul>
+            </li>
+            <div class="gap1">This view helps doctors <span class="bold">stay organized and complete their daily
+                    consultations on time</span>, with quick access to necessary actions for each appointment.</div>
+        </div>
+        <img class="form3" src="help-center/Today Consultations.jpg" alt="Today's Consultations">
+    </div>
+
+    <!-- Future Consultations: -->
+
+    <div class="full" *ngIf="component === 'Future Consultations'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Individual Doctor Module </div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Future Consultations</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This section displays all <b>upcoming consultations</b> scheduled for future dates, helping doctors
+                stay informed and plan ahead.</div>
+            <div class="bold gap1 ">Key Functionalities :</div>
+            <li class="gap1"><b>Appointment Overview :</b>
+                <div class="gap1"> Displays upcoming appointments along with:</div>
+                <ul>
+                    <li type="circle" class="gap1">PRN Number</li>
+                    <li type="circle" class="gap1">Patient Name</li>
+                    <li type="circle" class="gap1">Appointment Date and Time</li>
+                </ul>
+            </li>
+            <li class="gap1"><span class="bold">Action Buttons :</span>
+                <ul>
+                    <li type="circle" class="gap1"><b>Start, Finish, Postpone, P. Counselling, Transfer</b></li>
+                    <li type="circle" class="gap1">These buttons remain <b>inactive</b> until the <b>appointment date
+                            arrives</b>.</li>
+                    <li type="circle" class="gap1">Once the scheduled date is reached, the actions become <b>active</b>
+                        and usable.</li>
+                </ul>
+            </li>
+        </div>
+        <img class="form1" src="help-center/Future Consultations.jpg" alt="Future Consultations">
+    </div>
+
+
+    <!-- Past  Consultations -->
+
+    <div class="full" *ngIf="component === 'Past Consultations'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Individual Doctor Module </div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div> Past Consultations </div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This section displays <b>all past consultations with all appointment status.</b></div>
+            <div class="bold gap1 ">Key Functionalities :</div>
+            <li class="gap1"><b>Patient List :</b>
+                <div class="gap1"> Shows a table of all patients scheduled for today, including :</div>
+                <ul>
+                    <li type="circle" class="gap1">PRN Number</li>
+                    <li type="circle" class="gap1">Patient Name</li>
+                    <li type="circle" class="gap1">Date</li>
+                    <li type="circle" class="gap1">Appointment Time</li>
+                    <li type="circle" class="gap1">Appointment Status </li>
+                </ul>
+            </li>
+        </div>
+        <img class="form3" src="help-center/Past  Consultations.jpg" alt="Past  Consultations">
+    </div>
+
+    <!-- Leave Information -->
+    <div class="full" *ngIf="component === 'Leave Information'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Individual Doctor Module </div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div> Leave Information</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This feature allows doctors to notify their <b>managers and HR</b> about planned leaves directly from
+                the system.</div>
+            <div class="bold gap1 ">Key Functionalities :</div>
+            <li class="gap1"><b>Select Leave Dates :</b>
+                <div class="gap1"> Doctors can choose the <b>starting</b> and <b>ending dates</b> of their leave using a
+                    simple date picker form.</div>
+            </li>
+            <li class="gap1"><b>Submit Request :</b>
+                <div class="gap1"> Once submitted, the leave information is sent to the <b>manager and HR team</b> for
+                    scheduling adjustments.</div>
+            </li>
+            <div>This ensures that all leave requests are properly documented and shared with the relevant departments
+                to manage OPD scheduling in advance.</div>
+        </div>
+        <img class="form3" src="help-center/Leave Information.jpg" alt="Leave Information">
+    </div>
+
+    <!-- Close OPD: -->
+
+    <div class="full" *ngIf="component === 'Close OPD'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Individual Doctor Module </div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div> Close OPD</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This feature allows doctors to <b>close their OPD slots for checked-in consultation for the day</b> in
+                case of emergencies or sudden unavailability.</div>
+            <div class="bold gap1 ">Key Functionalities :</div>
+            <li class="gap1"><b>Select Slots to Close :</b>
+                <div class="gap1"> Doctors can choose specific <b>available appointment slots</b> that need to be closed
+                    for the day.</div>
+            </li>
+            <li class="gap1"><b>Slot Selection :</b>
+                <div class="gap1"> A list of available time slots is shown. Doctors can :</div>
+                <ul>
+                    <li type="circle" class="txt">Select individual slots</li>
+                    <li type="circle" class="txt">Or use <b>Select All</b> to close all remaining slots at once</li>
+                </ul>
+            </li>
+            <li class="gap1"><b>Submit Action :</b>
+                <div class="gap1">Once submitted, the selected slots are <b>closed immediately</b>, preventing any
+                    further bookings or check-ins for those times.</div>
+            </li>
+            <div>This feature ensures smooth handling of <b>unexpected changes in the doctor’s schedule</b>, while
+                keeping patients and staff informed.</div>
+        </div>
+        <img class="form3" src="help-center/Close OPD.jpg" alt="Close OPD">
+    </div>
+
+    <!-- End Consultation -->
+
+    <div class="full" *ngIf="component === 'End Consultation'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Individual Doctor Module </div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div> End Consultation </div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This feature is used by doctors to <b>end their OPD for the day</b> after all scheduled consultations
+                are completed.</div>
+            <div class="bold gap1 ">Key Functionalities :</div>
+            <li class="gap1"><b>Remove from Queue :</b>
+                <div class="gap1"> Once clicked, the doctor is<b> removed from the live queue</b>, and their name will
+                    no
+                    longer appear on the display screens or patient list for the day.</div>
+            </li>
+            <div>This helps ensure the system reflects <b>real-time availability</b>, preventing any further patient
+                flow to the doctor once the day’s consultations are finished.</div>
+        </div>
+    </div>
+
+
+    <!-- TV Control -->
+    <div class="full" *ngIf="component === 'TV Control'">
+        <div class="part5">
+            <div class="main-heading inside-headding">
+                <div (click)="ngOnInit()">TV Control Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+        </div>
+        <div class="part6">
+            <div>This module manages the real-time display of doctor appointments, patient queue flow, and promotional
+                content on hospital TV screens.</div>
+            <ol>
+                <b>1. Queue Management</b>
+                <ul>
+                    <li type="disc">Displays<b>doctor-wise appointments</b> in each TV channel.</li>
+                    <li type="disc">Shows real-time statuses such as:
+                        <ul>
+                            <li class="bold txt" type="circle">Patient In</li>
+                            <li class="bold txt" type="circle">Next</li>
+                            <li class="bold txt" type="circle">Appointment Time</li>
+                            <li class="bold txt" type="circle">Pending</li>
+                        </ul>
+                    </li>
+                    <li type="disc">Includes actual and predicted wait times for better queue visibility.</li>
+                </ul>
+            </ol>
+        </div>
+        <img class="form3" src="help-center/Queue Management.jpg" alt="Queue Management">
+        <div class="part6">
+            <ol>
+                <b>2.Advertisements</b>
+                <ul>
+                    <li class="gap1">Allows the display of <b>text and image-based advertisements</b> on the TV
+                        screen.</li>
+                    <li class="gap1">Ads are managed and scheduled through the <b>queue management system</b> to run
+                        between appointment updates.</li>
+                </ul>
+            </ol>
+        </div>
+        <img class="form3" src="help-center/Advertisements.1.jpg" alt="Advertisements">
+        <img class="form3" src="help-center/Advertisements.2.jpg" alt="Advertisements">
+        <div class="part6">
+            <ol>
+                <b>3.Doctor Assignment in Channel</b>
+                <ul>
+                    <li class="gap1">An <b>automated system </b>assigns doctors to specific TV channels based on
+                        their <b>room numbers</b>.</li>
+                    <li class="gap1">Ensures that patients see only the relevant doctor queues per department or
+                        area.</li>
+                </ul>
+            </ol>
+            <div>This module helps in streamlining <b>patient flow visibility</b>, while also offering <b>space for
+                    promotions and information display</b> across hospital premises.</div>
+        </div>
+        <img class="form3" src="help-center/Doctor Assignment in Channel.jpg" alt="Doctor Assignment in Channel">
+    </div>
+
+    <!-- Analytics -->
+    <div class="full" *ngIf="component === 'Analytics'">
+        <div class="part5">
+            <div class="main-heading inside-headding">
+                <div (click)="ngOnInit()">Analytics</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+        </div>
+        <div class="part6">
+            <div><b> Previous Analytics Data</b></div>
+            <ol>
+                <li class="gap1"><b>OPD Request via -</b>This chart displays the distribution of OPD requests over the
+                    last seven days based on booking mode - Online, Call or Walk-In. It highlights patient preferences,
+                    helping promote online booking for better convenience and reduced call volume.</li>
+                <li class="gap1"><b>OPD Sessions -</b>This chart compares OPD visits during Morning and Evening
+                    sessions. It provides insights into patient preferences, enabling efficient staff allocation and
+                    resource planning.</li>
+                <li class="gap1"><b>OPD Overview -</b> This chart tracks OPD appointment statuses, including Total
+                    Appointments, Confirmed, Completed, Canceled and Check-Ins. It helps monitor operational performance
+                    and identify trends in patient flow.</li>
+                <li class="gap1"><b>OPD Type -</b> This chart categorizes OPD visits into Paid, Follow-up, Camp, and
+                    MHC. It offers insights into appointment types, assisting in resource allocation and service
+                    optimization.</li>
+                <li class="gap1"><b>OPD Estimation Types -</b>This chart displays the distribution of estimation types
+                    from OPD visits, categorized as MM, SM, or Maternity. It helps in understanding predominant
+                    estimation types for better resource planning.</li>
+                <li class="gap1"><b>Estimation Status Overview - </b>This chart tracks the status of OPD estimations,
+                    including Pending, Submitted, Approved, Confirmed, Completed, Cancelled and Overdue. It helps
+                    monitor estimation progress and identify bottlenecks.</li>
+                <li class="gap1"><b>Average Waiting Time -</b>This chart shows the number of patients who waited over 40
+                    minutes for a doctor consultation. It helps identify delays and improve operational efficiency.</li>
+                <li class="gap1"><b>Gender Overview -</b>This chart displays the gender distribution of patients over
+                    the past seven days, visualizing the male-to-female ratio for demographic insights.</li>
+                <li class="gap1"><b>MHC Waiting Time -</b>This chart tracks the number of patients who waited more than
+                    30 minutes for their respective MHC (Master Health Check) packages in the last seven days. The
+                    packages include various health check-ups such as Diabetic Care, Senior Citizen Health Checks, and
+                    Executive Health Checks.</li>
+                <li class="gap1"><b>MHC Overview - </b>This pie chart provides an overview of MHC package bookings over
+                    the last seven days. It highlights the number of people who booked each package, including options
+                    like Integrated Diabetic Care, Annual Master Diabetes Care, Senior Citizen Health Checks, and
+                    Executive Health Checks.</li>
+            </ol>
+            <div class="gap1"><b>View More</b></div>
+            <div class="gap1">Each chart includes a <b>"View More"</b> button, which, when clicked, provides an
+                in-depth, enlarged view of one month data for better visibility and detailed analysis.</div>
+            <div class="gap1"><b>Details</b></div>
+            <div class="gap1">Each chart features a <b>"Details"</b> button that directs users to the report section.
+                Here, admins can download reports in Excel format for further analysis.</div>
+            <div class="gap1"><b>Filters</b></div>
+            <div class="gap1">The dashboard includes filters that allow users to refine data based on department,
+                doctors, date, and package. These filters offer flexibility in viewing specific information, making
+                analysis more precise.</div>
+            <div class="gap1"><b>Today's Analytics</b></div>
+            <div class="gap1">The <b>Live Count Overview</b> provides real-time insights into daily hospital operations,
+                including :</div>
+            <ul>
+                <li class="gap1"><b>Total OPD Today - </b>Displays the total number of patients who visited the OPD
+                    today.</li>
+                <li class="gap1"><b>Doctors Available -</b>Shows how many doctors are available out of the total count.
+                </li>
+                <li class="gap1"><b>Doctors Absent -</b>Indicates the number of doctors absent today.</li>
+                <li class="gap1"><b>Doctors Unavailable -</b>Lists the doctors who are currently marked as unavailable.
+                </li>
+                <li class="gap1"><b>MHC Confirmed -</b>Displays the number of confirmed Medical Health Check (MHC)
+                    appointments.</li>
+                <li class="gap1"><b>Estimation Confirmed -</b>Indicates the number of confirmed estimation appointments.
+                </li>
+            </ul>
+        </div>
+        <img class="form3 height" src="help-center/Analytics.1.jpg" alt="Analytics">
+        <img class="form3 height" src="help-center/Analytics.2.jpg" alt="Analytics">
+        <img class="form3 height" src="help-center/Analytics.3.jpg" alt="Analytics">
+    </div>
+
+    <!-- DASHBOARD: -->
+
+    <div class="full" *ngIf="component === 'DASHBOARD'">
+        <div class="part5">
+            <div class="main-heading inside-headding">
+                <div (click)="ngOnInit()">DASHBOARD</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+        </div>
+        <div class="part6">
+            <ol>
+                <li class="gap1">Number of OPDs for the Day</li>
+                <li class="gap1">Total Number of Checked-in Appointments</li>
+                <li class="gap1">Number of Available Doctors for the Day - Displays a list of available doctors.</li>
+                <li class="gap1">Number of Absent Doctors for the Day - Displays a list of absent doctors.</li>
+                <li class="gap1">Number of Doctors on Leave for the Day - Displays future leave dates of doctors.</li>
+                <li class="gap1">Number of Unavailable Doctors for the Time - Displays a list of unavailable doctors.
+                </li>
+                <li class="gap1">Doctors Overview - Displays a list of up to four doctors, including their name, icon,
+                    and availability status. Clicking "See All" redirects to the Doctors page.</li>
+                <li class="gap1">Pending Appointments - Displays up to four pending appointments, including the
+                    patient's name, doctor's name, department, appointment time, and date. Clicking "See All" redirects
+                    to the website request section in the Appointment module.</li>
+                <li class="gap1">Hospital Name</li>
+                <li class="gap1">User Profile - Displays username and role.</li>
+                <li class="gap1">Notifications :</li>
+                <ul>
+                    <li class="gap1" type="disc">Doctor appointment requests from the website.</li>
+                    <li class="gap1" type="disc">Health checkup package requests from the website.</li>
+                    <li class="gap1" type="disc">Hourly notifications for incomplete or canceled appointments, sent to
+                        receptionists.</li>
+                    <li class="gap1" type="disc">Pending website requests for both receptionists and tele-callers.</li>
+                    <li class="gap1" type="disc">Estimation requests raised by doctors, notified to estimators.</li>
+                    <li class="gap1" type="disc">Notifications to approvers when estimators submit for approval.</li>
+                </ul>
+                <li class="gap1">Profile Shortcuts - Includes options for Logout, Settings and Reports.</li>
+            </ol>
+        </div>
+        <img class="form3" src="help-center/DashBoard.5.jpg" alt="DashBoard">
+        <img class="form3" src="help-center/DashBoard.1.jpg" alt="DashBoard">
+        <img class="form3" src="help-center/DashBoard.2.jpg" alt="DashBoard">
+        <img class="form3" src="help-center/DashBoard.3.jpg" alt="DashBoard">
+        <img class="form3" src="help-center/DashBoard.4.jpg" alt="DashBoard">
+        <img class="form1" src="help-center/DashBoard.6.jpg" alt="DashBoard">
+        <img class="form3" src="help-center/DashBoard.7.jpg" alt="DashBoard">
+    </div>
+
+    <!-- Co-ordinator Module -->
+    <div class="full" *ngIf="component === 'Co-ordinator Module'">
+        <div class="part5">
+            <div class="main-heading inside-headding">
+                <div (click)="ngOnInit()">Co-ordinator Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+        </div>
+        <div class="part6">
+            <div>This module helps service coordinators manage <b>today’s service appointments</b> efficiently by
+                tracking patient flow and appointment status in real time.</div>
+            <div class="gap1"><b> Key Functionalities :</b></div>
+            <ul>
+                <li class="gap1"><b>Entry :</b>
+                    <div class="gap1">Marks that the <b>patient has arrived</b> and the service has been initiated.
+                    </div>
+                </li>
+                <li class="gap1"><b>Report Done :</b>
+                    <div class="gap1">Updates the appointment once the <b>service is completed</b> and the <b>report is
+                            ready </b>for delivery.</div>
+                </li>
+                <li class="gap1"><b>Cancel :</b>
+                    <div class="gap1">Cancels the appointment if the patient is not availing the service, with a prompt
+                        to <b>enter the cancellation reason.</b></div>
+                </li>
+                <li class="gap1"><b>Postpone :</b>
+                    <div class="gap1">Postpones the appointment to a <b>later time or date</b>.</div>
+                </li>
+            </ul>
+            <div>This module ensures smooth coordination between patients and service departments by offering clear,
+                actionable steps for each appointment.</div>
+        </div>
+        <img class="form3" src="help-center/Co-ordinator Module.jpg" alt="Co-ordinator Module">
+    </div>
+
+    <!-- Profile Management Module -->
+
+    <!-- A. Profile Details Tab -->
+    <div class="full" *ngIf="component === 'Profile Details Tab'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Profile Management Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Profile Details Tab</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div class="gap1">Displays user-specific information :</div>
+            <ul>
+                <li class="gap1"><b>User ID :</b> The email address or unique identifier.</li>
+                <li class="gap1"><b>Role :</b> The assigned user role (e.g., Super Admin, Admin, Sub Admin).</li>
+                <li class="gap1"><b>Appointments Handled :</b> Shows the total number of appointments managed by the
+                    user.</li>
+                <li class="gap1"><b>Logout Option :</b> A red <b>"Logout"</b> button to allow users to sign out of the
+                    system.</li>
+            </ul>
+        </div>
+        <img class="form3" src="help-center/Profile Details.jpg" alt="Profile Details Tab">
+    </div>
+
+    <!-- B. Reset Password Tab -->
+    <div class="full" *ngIf="component === 'Reset Password Tab'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Profile Management Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Reset Password Tab</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div class="gap1 bold">Super Admin Privileges :</div>
+            <ul>
+                <li class="gap1"><b>Reset Password for All Users :</b> Super Admins can reset the password of any user
+                    by selecting their name from a dropdown list.</li>
+            </ul>
+            <div class="gap1 bold">Admin, Sub Admin, and Doctor Privileges :</div>
+            <ul>
+                <li class="gap1"><b>Self Password Reset Only :</b> Admins, Sub Admins, and Doctors can only reset their
+                    own passwords.</li>
+            </ul>
+            <div class="gap1 bold">Reset Fields :</div>
+            <ul>
+                <li class="gap1"><b>Select User :</b> A dropdown to choose the user whose password needs to be reset.
+                </li>
+                <li class="gap1"><b>New Password & Confirm New Password :</b> Fields to enter and confirm the new
+                    password.</li>
+            </ul>
+        </div>
+        <img class="form3" src="help-center/Reset Password Tab.jpg" alt="Reset Password Tab">
+    </div>
+    <!-- C. Account Creation Tab (Super Admin & Admin Only) -->
+    <div class="full" *ngIf="component === 'Account Creation Tab'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Profile Management Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Account Creation Tab (Super Admin & Admin Only)</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div class="gap1">Super Admins and Admins can create new user accounts.</div>
+            <ol>
+                <li><b>Account Type Selection</b></li>
+                <div class="gap1">Users can create one of the following account types :</div>
+                <ul>
+                    <li type="disc" class="gap1"><b>Admin</b></li>
+                    <li type="disc" class="gap1"><b>Sub Admin</b></li>
+                    <li type="disc" class="gap1"><b>Doctor</b></li>
+                </ul>
+                <div>(Only one type can be selected at a time, and relevant fields will appear based on the selection.)
+                </div>
+                <div class="gap1"><b>a. Admin Account Fields</b></div>
+
+                <div class="gap1">When creating an <b>Admin account</b>, the following details are required:</div>
+                <ul>
+                    <li type="disc" class="gap1"><b>Admin Type* :</b> A dropdown with options like:
+                        <ul>
+                            <li type="circle">Manager</li>
+                            <li type="circle">Senior Manager</li>
+                            <li type="circle">Management</li>
+                            <li type="circle">IP Billing Manager</li>
+                        </ul>
+                    </li>
+                    <li type="disc" class="gap1"><b>Name* :</b> Full name of the admin.</li>
+                    <li type="disc" class="gap1"><b>Employee ID* :</b> A unique employee identifier.</li>
+                    <li type="disc" class="gap1"><b>Password* :</b> Account password (with a show/hide toggle).</li>
+                </ul>
+            </ol>
+        </div>
+        <img class="img1" src="help-center/Admin Account Fields1.jpg" alt="Admin Account Fields">
+        <img class="img1" src="help-center/Admin Account Fields.jpg" alt="Admin Account Fields">
+
+        <div class="part6">
+            <ol>
+                <div class="gap1"><b>b.Sub Admin Account Fields</b></div>
+                <div class="gap1">When creating a <b>Sub Admin</b> account, the following details are required:</div>
+                <ul>
+                    <li type="disc" class="gap1"><b>Sub Admin Type* :</b> A dropdown with options such as:
+                        <ul>
+                            <li type="circle">Front Desk</li>
+                            <li type="circle">Tele Caller</li>
+                            <li type="circle">Estimator</li>
+                            <li type="circle">MHC Coordinator</li>
+                            <li type="circle">Coordinator</li>
+                        </ul>
+                    </li>
+                    <li type="disc" class="gap1"><b>Name* :</b> Full name of the Sub Admin.</li>
+                    <li type="disc" class="gap1"><b>Employee ID* :</b> Unique employee identifier.</li>
+                    <li type="disc" class="gap1"><b>Password* :</b> Account password (with a show/hide toggle).</li>
+                </ul>
+            </ol>
+        </div>
+        <img class="img1" src="help-center/Sub Admin Account Fields.jpg" alt="Admin Account Fields">
+        <img class="img1" src="help-center/Sub Admin Account Fields.1.jpg" alt="Admin Account Fields">
+        <div class="part6">
+            <ol>
+                <div class="gap1"><b>c.Doctor Account Fields</b></div>
+                <div class="gap1">When creating a <b>Doctor</b> account, the following details are required:</div>
+                <ul>
+                    <li type="disc" class="gap1"><b>Department* : </b>A dropdown to select the doctor’s department.</li>
+                    <li type="disc" class="gap1"><b>Doctor* : </b>A dropdown to select the specific doctor (filtered by
+                        department).</li>
+                    <li type="disc" class="gap1"><b>Employee ID* : </b>Unique employee identifier.</li>
+                    <li type="disc" class="gap1"><b>Password* : </b> Account password (with a show/hide toggle).</li>
+                </ul>
+            </ol>
+        </div>
+        <img class="img1" src="help-center/Doctor Account Fields.jpg" alt="Doctor Account Fields">
+        <img class="img1" src="help-center/Doctor Account Fields.1.jpg" alt="Doctor Account Fields">
+        <img class="img1" src="help-center/Doctor Account Fields.2.jpg" alt="Doctor Account Fields">
+        <div class="part6">
+            <div><b>Create Account Button</b></div>
+            <ul>
+                <li class="gap1"><b>Disabled by default.</b></li>
+                <li class="gap1">*Enabled only when all mandatory fields (marked with ) are completed based on the
+                    selected account type.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- D. Delete Account Tab (Super Admin & Admin Only)-->
+    <div class="full" *ngIf="component === 'Delete Account Tab'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Profile Management Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Delete Account Tab</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div><b>Delete User Account</b></div>
+            <ul>
+                <li class="gap1"><b>User Selection :</b> Displays the User ID of the account to be deleted.</li>
+                <li class="gap1"><b>Delete Account Button : </b>Allows Admins and Super Admins to permanently delete a
+                    user account.</li>
+            </ul>
+        </div>
+        <img class="form3" src="help-center/Delete Account Tab.jpg" alt="Delete Account Tab">
+    </div>
+    <!-- Logged In Details -->
+    <div class="full" *ngIf="component === 'Logged In Details'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Profile Management Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Logged In Details</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>This feature allows <b>only the admin</b> to track staff login activities for monitoring and security
+                purposes.</div>
+            <div class="gap1"><b>Key Functionalities:</b></div>
+            <ul>
+                <li class="gap1">Displays a table listing the<b> login details</b> of all users, including :
+                    <ul>
+                        <li type="circle" class="gap1"><b>Staff Name</b></li>
+                        <li type="circle" class="gap1"><b>Role</b> (e.g., super_admin, sub_admin, doctor, etc.)</li>
+                        <li type="circle" class="gap1"><b>Account Created Date</b></li>
+                        <li type="circle" class="gap1"><b>Last Login Date</b></li>
+                        <li type="circle" class="gap1"><b>Log-In Time</b></li>
+                    </ul>
+                </li>
+                <li>Helps administrators :
+                    <ul>
+                        <li class="gap1" type="circle">Monitor <b>who logged in</b>,</li>
+                        <li class="gap1" type="circle"><b>When</b> they logged in, and</li>
+                        <li class="gap1" type="circle">From which <b>account role</b>.</li>
+                    </ul>
+                </li>
+            </ul>
+            <div>This module ensures that all system access is <b>accountable and traceable</b>, enhancing operational
+                transparency and user accountability.</div>
+        </div>
+        <img class="form3" src="help-center/Logged In Details.jpg" alt="Logged In Details">
+    </div>
+    <!-- E Access Control -->
+    <div class="full" *ngIf="component === 'Access Control'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">Profile Management Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Access Control</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div><b>Super Admin & Admin :</b></div>
+            <ul>
+                <li class="gap1">Have access to all four tabs : <b>Profile Details, Reset Password, Account Creation,
+                        and Delete Account.</b></li>
+                <li class="gap1">Can<b> reset passwords </b>for any user.</li>
+                <li class="gap1">Have the authority to <b>create new accounts</b> and <b>delete accounts</b>.</li>
+            </ul>
+            <div><b>Sub Admin & Doctor :</b></div>
+            <ul>
+                <li class="gap1">Have access <b>only </b>to the <b>Profile Details</b> and <b>Reset Password </b>tabs.
+                </li>
+                <li class="gap1">Can <b>reset only their own passwords</b>.</li>
+            </ul>
+        </div>
+    </div>
+    <!-- MHC Coordinator Module: -->
+    <!-- Today's MHC Appointments -->
+
+    <div class="full" *ngIf="component === 'Today MHC Appointments'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">MHC Coordinator Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Today's MHC Appointments</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>Displays the list of patients scheduled for MHC along with the following :</div>
+            <ul>
+                <li class="gap1"><b>Patient Name</b> and <b>Package Name</b></li>
+                <li class="gap1">Number of <b>Consultations</b> and <b>Radiology Services</b> included in the package
+                </li>
+            </ul>
+            <div><b>Actions Available :</b></div>
+        </div>
+        <img class="form3" src="help-center/Today's MHC Appointments.jpg" alt="Today's MHC Appointments">
+        <div class="part6">
+            <ul>
+                <li class="gap1"><b>Lab:</b>
+                    <div class="gap1"> Opens a popup to <b>mark the patient's lab check-in</b> and <b>update the report
+                            completion status.</b></div>
+                </li>
+            </ul>
+        </div>
+        <img class="img1" src="help-center/Lab.jpg" alt="Lab">
+        <div class="part6">
+            <ul>
+                <li class="gap1"><b>Radiology:</b>
+                    <div class="gap1"> Opens a form displaying:</div>
+                    <ul>
+                        <li type="circle" class="gap1">PRN</li>
+                        <li type="circle" class="gap1">Patient Name</li>
+                        <li type="circle" class="gap1">Package Name</li>
+                        <li type="circle" class="gap1">List of included radiology services</li>
+                        <li type="circle" class="gap1">Available slots<div class="gap1">The coordinator can <b>book
+                                    radiology appointments</b>, which will then appear in the<b> Confirmed Radiology
+                                    Appointments</b> table.</div>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <img class="img1" src="help-center/Radiology.jpg" alt="Radiology">
+        <div class="part6">
+            <ul>
+                <li><b>Consultation:</b>
+                    <div class="gap1"> Opens a form with:</div>
+                    <ul>
+                        <li type="circle" class="gap1">PRN</li>
+                        <li type="circle" class="gap1">Patient Name</li>
+                        <li type="circle" class="gap1">Package Name</li>
+                        <li type="circle" class="gap1">List of departments and available doctors</li>
+                        <li type="circle" class="gap1">Available consultation slots<div class="gap1">Once booked,
+                                theappointments are shown in the <b>Confirmed Consultation Appointments</b> table.</div>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <img class="img1" src="help-center/Consultation.jpg" alt="Consultation">
+        <div class="part6">
+            <ul>
+                <li><b>Complete :</b>
+                    <div class="gap1"> Used to mark the MHC package as completed.</div>
+                    <ul>
+                        <li type="circle" class="gap1">If any <b>consultation or radiology appointments</b> are not
+                            checked in, they will be <b>auto-cancelled with acknowledgement</b> from the MHC
+                            Coordinator.</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <img class="form3" src="help-center/complete.jpg" alt="complete">
+    </div>
+
+    <!-- A. Confirmed Consultation Appointments -->
+    <div class="full" *ngIf="component === 'Confirmed Consultation Appointments'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">MHC Coordinator Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Confirmed Consultation Appointments</div>
+            </div>
+        </div>
+        <div class="part6">
+            <ul>
+                <li class="gap1">Displays a list of consultation appointments booked under the MHC package.</li>
+                <li class="gap1">Options include :
+                    <ul>
+                        <li type="circle" class="gap1"><b>Check-in</b> - Marks patient as arrived (visible on doctor’s
+                            dashboard and queue screen)</li>
+                        <li type="circle" class="gap1"><b>Cancel</b> - Remove the appointment</li>
+                        <li type="circle" class="gap1"><b>Reschedule </b> - Change to a different slot</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <img class="form3" src="help-center/Confirmed Consultation Appointments.jpg"
+            alt="Confirmed Consultation Appointments">
+    </div>
+    <!-- B. Confirmed Radiology Appointments  -->
+
+    <div class="full" *ngIf="component === 'Confirmed Radiology Appointments'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">MHC Coordinator Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Confirmed Radiology Appointments</div>
+            </div>
+        </div>
+        <div class="part6">
+            <ul>
+                <li class="gap1">Shows all radiology appointments booked under the package.</li>
+                <li class="gap1">Options include :
+                    <ul>
+                        <li type="circle" class="gap1"><b>Check-in</b> -Notifies the coordinator that the patient has
+                            arrived for the scan</li>
+                        <li type="circle" class="gap1"><b>Cancel</b> - Remove the appointment if not required</li>
+                        <li type="circle" class="gap1"><b>Reschedule </b>- Shift to another available slot</li>
+                    </ul>
+                    <div>Once checked in, the appointment reflects for <b>further proceedings</b> by the concerned team.
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <img class="form3" src="help-center/Confirmed Radiology Appointments.1.jpg"
+            alt="Confirmed Radiology Appointments">
+    </div>
+    <!-- C. Report Summary -->
+    <div class="full" *ngIf="component === 'Report Summary'">
+        <div class="part5">
+            <div class="main-heading">
+                <div (click)="ngOnInit()">MHC Coordinator Module</div>
+            </div>
+            <div>
+                <img class="arrow" src="help-center/arrow-up.svg" alt="">
+            </div>
+            <div class="main-heading inside-headding ">
+                <div>Report Summary</div>
+            </div>
+        </div>
+        <div class="part6">
+            <div>The <b>Report Summary</b> section provides a consolidated view of each patient's <b>Turnaround Time
+                    (TAT)</b> across various services included in their MHC package.</div>
+            <div class="gap1"><b>Key Functionalities :</b></div>
+            <ul>
+                <li class="gap1"><b>Patient and Package Details :</b></li>
+                <li class="gap1"> Displays :
+                    <ul>
+                        <li type="circle" class="gap1">Date</li>
+                        <li type="circle" class="gap1">PRN</li>
+                        <li type="circle" class="gap1">Patient Name</li>
+                        <li type="circle" class="gap1">Age</li>
+                        <li type="circle" class="gap1">Gender</li>
+                        <li type="circle" class="gap1">Package Name</li>
+                    </ul>
+                </li>
+                <li class="gap1"><b>TAT Tracking :</b>
+                    <ul>
+                        <li type="circle" class="gap1"><b>TAT (Laboratory) :</b> Time taken to complete lab-related
+                            services</li>
+                        <li type="circle" class="gap1"><b>TAT (Radiology) :</b> Time recorded for completing radiology
+                            procedures</li>
+                        <li type="circle" class="gap1"><b>TAT (Consultations) :</b> Duration for completing all doctor
+                            consultations</li>
+                        <li type="circle" class="gap1"><b>Grand Total :</b> Cumulative time spent across all services
+                            for the patient</li>
+                    </ul>
+                </li>
+                <li class="gap1"><b>Filters and Export Options :</b>
+                    <div class="gap1">Users can <b>filter by date</b> using the calendar and <b>export or print</b> the
+                        summary for documentation or review purposes.</div>
+                </li>
+            </ul>
+            <div class="gap1">This section helps coordinators and admin teams monitor the <b>efficiency of service
+                    delivery</b> and improve the overall experience for MHC patients.</div>
+        </div>
+        <img class="form3" src="help-center/Report Summary.jpg" alt="Report Summary">
+    </div>
+
+    <div>
+        <app-faq [FAQDetails]="faqs"></app-faq>
+    </div>
+
+</div>

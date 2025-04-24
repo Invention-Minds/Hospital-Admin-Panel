@@ -134,6 +134,11 @@ import { SamrakshaApptCancelComponent } from './samraksha/samraksha-appt-cancel/
 import { SamrakshaApptCompleteComponent } from './samraksha/samraksha-appt-complete/samraksha-appt-complete.component';
 import { SamrakshaApptRepeatComponent } from './samraksha/samraksha-appt-repeat/samraksha-appt-repeat.component';
 import { EstimationLockComponent } from './estimation-lock/estimation-lock.component';
+import { SidebarHelpComponent } from './sidebar-help/sidebar-help.component';
+import { HelpCenterComponent } from './help-center/help-center.component';
+import { FAQComponent } from './help-center/faq/faq.component';
+
+
 import { PastConsultationsComponent } from './doctor-role/past-consultations/past-consultations.component';
 import { ApptFollowUpComponent } from './appointment/appt-follow-up/appt-follow-up.component';
 
@@ -233,6 +238,9 @@ import { ApptFollowUpComponent } from './appointment/appt-follow-up/appt-follow-
     EstimationLockComponent,
     PastConsultationsComponent,
     ApptFollowUpComponent,
+    SidebarHelpComponent,
+    HelpCenterComponent,
+    FAQComponent,
   ],
   imports: [
     BrowserModule,
@@ -264,8 +272,7 @@ import { ApptFollowUpComponent } from './appointment/appt-follow-up/appt-follow-
     DialogModule,
     NgxLoadingButtonsModule,
     CommonModule,
-    
-  ],
+   ],
   exports: [PhoneMaskPipe],
   providers: [
     DatePipe,

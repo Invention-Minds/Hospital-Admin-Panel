@@ -1,182 +1,154 @@
-<div  class="doctor-availability-wrapper">
+<div class="doctor-availability-wrapper">
 
-    <!-- Navigation Header -->
-    <div class="navigation-header">
-      <div class="navigation-left">
-      
-        <input type="text" [(ngModel)]="departmentSearchQuery" (input)="onSearchChange()" placeholder="Search Department" class="search-box" />
-        <input type="text" [(ngModel)]="doctorSearchQuery" (input)="onSearchChange()" placeholder="Search Doctor" class="search-box" />
-      </div>
-      <div class="navigation-right">
-        <button (click)="prevDay()" class="prev-button">&lt; Prev</button>
-        <div class="date-display">{{ selectedDate | date: 'EEEE, dd MMM, yyyy' }}</div>
-        <button (click)="nextDay()" class="next-button">Next &gt;</button>
-        <div class="calendar-dropdown">
-          <!-- <input type="date" [(ngModel)]="selectedDate" (change)="onDateChange($event)" class="calendar-input" /> -->
-          <p-calendar 
-          styleClass="custom-calendar" 
-          [(ngModel)]="selectedDate"
-          (ngModelChange)="onDateChange($event)" 
-          placeholder="Calendar"
-          dateFormat="dd-mm-yy">
-            <!-- <ng-template pTemplate="date" let-date>
+  <!-- Navigation Header -->
+  <div class="navigation-header">
+    <div class="navigation-left">
+
+      <input type="text" [(ngModel)]="departmentSearchQuery" (input)="onSearchChange()" placeholder="Search Department"
+        class="search-box" />
+      <input type="text" [(ngModel)]="doctorSearchQuery" (input)="onSearchChange()" placeholder="Search Doctor"
+        class="search-box" />
+    </div>
+    <div class="navigation-right">
+      <button (click)="prevDay()" class="prev-button">&lt; Prev</button>
+      <div class="date-display">{{ selectedDate | date: 'EEEE, dd MMM, yyyy' }}</div>
+      <button (click)="nextDay()" class="next-button">Next &gt;</button>
+      <div class="calendar-dropdown">
+        <!-- <input type="date" [(ngModel)]="selectedDate" (change)="onDateChange($event)" class="calendar-input" /> -->
+        <p-calendar styleClass="custom-calendar" [(ngModel)]="selectedDate" (ngModelChange)="onDateChange($event)"
+          placeholder="Calendar" dateFormat="dd-mm-yy">
+          <!-- <ng-template pTemplate="date" let-date>
                 <span>
                     {{ selectedDate | date: 'dd' }}
                 </span>
             </ng-template> -->
         </p-calendar>
         <i class="fa-solid fa-angle-down calendar-icon"></i>
-        </div>
-        <div (click)="reloadData()" class="reload"> <svg pTooltip="Refresh" class="reload-button" xmlns="http://www.w3.org/2000/svg" width="2.5em" height="2.5em" viewBox="-1.5 -2.5 24 24"><path fill="currentColor" d="m4.859 5.308l1.594-.488a1 1 0 0 1 .585 1.913l-3.825 1.17a1 1 0 0 1-1.249-.665L.794 3.413a1 1 0 1 1 1.913-.585l.44 1.441C5.555.56 10.332-1.035 14.573.703a9.38 9.38 0 0 1 5.38 5.831a1 1 0 1 1-1.905.608A7.381 7.381 0 0 0 4.86 5.308zm12.327 8.195l-1.775.443a1 1 0 1 1-.484-1.94l3.643-.909a1 1 0 0 1 .61-.08a1 1 0 0 1 .84.75l.968 3.88a1 1 0 0 1-1.94.484l-.33-1.322a9.381 9.381 0 0 1-16.384-1.796l-.26-.634a1 1 0 1 1 1.851-.758l.26.633a7.381 7.381 0 0 0 13.001 1.25z"/></svg></div>
+
       </div>
+      <!-- Trigger Button -->
+      <div (click)="reloadData()" class="reload"> <svg pTooltip="Refresh" class="reload-button"
+          xmlns="http://www.w3.org/2000/svg" width="2.5em" height="2.5em" viewBox="-1.5 -2.5 24 24">
+          <path fill="currentColor"
+            d="m4.859 5.308l1.594-.488a1 1 0 0 1 .585 1.913l-3.825 1.17a1 1 0 0 1-1.249-.665L.794 3.413a1 1 0 1 1 1.913-.585l.44 1.441C5.555.56 10.332-1.035 14.573.703a9.38 9.38 0 0 1 5.38 5.831a1 1 0 1 1-1.905.608A7.381 7.381 0 0 0 4.86 5.308zm12.327 8.195l-1.775.443a1 1 0 1 1-.484-1.94l3.643-.909a1 1 0 0 1 .61-.08a1 1 0 0 1 .84.75l.968 3.88a1 1 0 0 1-1.94.484l-.33-1.322a9.381 9.381 0 0 1-16.384-1.796l-.26-.634a1 1 0 1 1 1.851-.758l.26.633a7.381 7.381 0 0 0 13.001 1.25z" />
+        </svg></div>
+        <div (click)="openDialog()" class="bulk-unavailable" pTooltip="Bulk Absent"><img src="/unavailable-dates.svg">
+        </div>
     </div>
-  
-    <!-- OPD Available Time Header -->
-    <div class="opd-available-header">
-      <span class="opd-doctor-name">Doctor</span>
-      <div class="line"><img src="line.png"></div>
-      <span class="opd-available-time">OPD Available Time: 8AM to 8PM</span>
-      <div class="line-1"><img src="line.png"></div>
-    </div>
-  
-    <!-- Doctor Details & Slots -->
-    <div  class="doctor-slot-container" *ngFor="let doctor of filteredDoctors">
-      <div class="doctor-profile" [ngClass]="{ 'unavailable-doctor': doctor.isUnavailable }" *ngIf="!isLoading">
-        <img src="/male-doctor.png" alt="Doctor Image" class="doctor-avatar" />
-        <div class="doctor-info">
-          <h3 class="doctor-name">{{ doctor.name }}</h3>
-          <p class="doctor-department">{{ doctor.departmentName }}</p>
-          <p class="doctor-availability-time">{{ doctor.doctorType === 'Visiting Consultant' ? '': 'Availability:'}}</p>
-          <p class="doctor-availability-time"> {{ doctor.doctorType === 'Visiting Consultant' ? doctor.doctorType: doctor.availableFrom }}</p>
-          <div class="unavailable">
-            <button class="unavailable-button" *ngIf="doctor.doctorType !=='Visiting Consultant'" (click)="openUnavailableModal(doctor)" [disabled]="!isTodayOrTomorrow(selectedDate) && doctor.id !== 14">Unavailable Slots</button>
-          </div>
-          <!-- <div class="extra-slots-buttons" *ngIf="((role === 'admin' || role === 'super_admin') && doctor.doctorType !== 'Visiting Consultant')">
+  </div>
+
+  <!-- OPD Available Time Header -->
+  <div class="opd-available-header">
+    <span class="opd-doctor-name">Doctor</span>
+    <div class="line"><img src="line.png"></div>
+    <span class="opd-available-time">OPD Available Time: 8AM to 8PM</span>
+    <div class="line-1"><img src="line.png"></div>
+  </div>
+
+  <!-- Doctor Details & Slots -->
+  <div class="doctor-slot-container" *ngFor="let doctor of filteredDoctors">
+    <div class="doctor-profile" [ngClass]="{ 'unavailable-doctor': doctor.isUnavailable }" *ngIf="!isLoading">
+      <img src="/icons/male-doctor.svg" alt="Doctor Image" class="doctor-avatar" />
+      <div class="doctor-info">
+        <h3 class="doctor-name">{{ doctor.name }}</h3>
+        <p class="doctor-department">{{ doctor.departmentName }}</p>
+        <p class="doctor-availability-time">{{ doctor.doctorType === 'Visiting Consultant' ? '': 'Availability:'}}</p>
+        <p class="doctor-availability-time"> {{ doctor.doctorType === 'Visiting Consultant' ? doctor.doctorType:
+          doctor.availableFrom }}</p>
+        <div class="unavailable">
+          <button class="unavailable-button" *ngIf="doctor.doctorType !=='Visiting Consultant'"
+            (click)="openUnavailableModal(doctor)"
+            [disabled]="!isTodayOrTomorrow(selectedDate) && doctor.id !== 14">Unavailable Slots</button>
+        </div>
+        <!-- <div class="extra-slots-buttons" *ngIf="((role === 'admin' || role === 'super_admin') && doctor.doctorType !== 'Visiting Consultant')">
             <button type="button" class="button-after" (click)="addExtraSlotsBefore(doctor)"><img src="/before.svg"></button>
             <button type="button" class="button-after" (click)="addExtraSlotsAfter(doctor)"><img src="/after.svg"></button>
           </div> -->
-          <div *ngFor="let range of doctor.availableFrom.split(',')">
-            <div class="extra-slots-buttons" *ngIf="((role === 'admin' || role === 'super_admin') && doctor.doctorType !== 'Visiting Consultant')">
-              <span class="doctor-name">{{ range }}</span>
-              <button  type="button" class="button-after" (click)="addExtraSlotsBefore(doctor, range)"><img src="/before.svg"></button>
-              <button  type="button" class="button-after" (click)="addExtraSlotsAfter(doctor, range)"><img src="/after.svg"></button>
-            </div>
+        <div *ngFor="let range of doctor.availableFrom.split(',')">
+          <div class="extra-slots-buttons"
+            *ngIf="((role === 'admin' || role === 'super_admin') && doctor.doctorType !== 'Visiting Consultant')">
+            <span class="doctor-name">{{ range }}</span>
+            <button type="button" class="button-after" (click)="addExtraSlotsBefore(doctor, range)"><img
+                src="/before.svg"></button>
+            <button type="button" class="button-after" (click)="addExtraSlotsAfter(doctor, range)"><img
+                src="/after.svg"></button>
           </div>
-          
         </div>
+
       </div>
-      <div class="slots-scroll-container" *ngIf="!isLoading">
-        <div class="slots-wrapper">
-          <ng-container *ngFor="let slot of doctor.slots">
-            <div *ngIf="slot.status !== 'extra' || (role === 'admin' || role === 'super_admin')"
-                 class="slot-box"
-                 [pTooltip]="
+    </div>
+    <div class="slots-scroll-container" *ngIf="!isLoading">
+      <div class="slots-wrapper">
+        <ng-container *ngFor="let slot of doctor.slots">
+          <div *ngIf="slot.status !== 'extra' || (role === 'admin' || role === 'super_admin')" class="slot-box"
+            [pTooltip]="
                  slot.status === 'booked' ? 'Booked' : 
                  slot.status === 'extra' ? 'Extra':
                  slot.status === 'blocked' ? 'Blocked':
                  slot.status === 'unavailable' ? 'Unavailable' :
                  slot.status === 'available' ? 'Available' :
                  slot.status === 'complete' ? 'Complete' : 
-                 ''"
-                 [ngClass]="{
+                 ''" [ngClass]="{
                    'slot-available': slot.status === 'available',
                    'slot-booked': slot.status === 'booked',
                    'slot-unavailable': slot.status === 'unavailable',
                    'complete': slot.status === 'complete',
                    'blocked': slot.status === 'extra' && (role === 'admin' || role === 'super_admin'),
                    'unavailale-slot-by-user': doctor.unavailableSlots!.includes(slot.time)
-                 }"
-               (click)="onSlotClick(doctor, slot)">
-              {{ slot.time }}
-            </div>
-          </ng-container>
-          
-          <div *ngIf="doctor.doctorType === 'Visiting Consultant'" class="add-appointment-wrapper">
-            <button class="add-slot-button" (click)="onAddSlotClick(doctor)" >Add Slot</button>
+                 }" (click)="onSlotClick(doctor, slot)">
+            {{ slot.time }}
           </div>
-        </div>
-      </div>
+        </ng-container>
 
-
-      
-    </div>
-    <div class="modal-overlay" *ngIf="isSlotDialogOpen">
-      <div class="modal">
-        <div class="modal-content">
-        
-         <div class="heading-calendar"> 
-          <h2>Select Unavailable Slots for  {{ selectedDoctor?.name }}</h2>
-          <p-calendar 
-          [(ngModel)]="selectedDate"
-          [minDate]="todayforUnavialable"
-          [maxDate]="tomorrow"
-          [showIcon]="false"
-          (ngModelChange)="onDateChangeInModal($event)"
-          [showButtonBar]="true"
-          placeholder="Select Date"
-          dateFormat="dd-mm-yy"
-        ></p-calendar></div>
-          
-          <div *ngIf="generatedSlots.length === 0" class="no-slots-message">
-            No available slots for this day.
-          </div>
-    
-          <!-- Otherwise show the list of slots -->
-          <!-- <div *ngIf="generatedSlots.length > 0" class="slots-grid">
-            <label *ngFor="let slot of generatedSlots" class="slot-label">
-              <input type="checkbox" [checked]="unavailableSlots.includes(slot.time)" 
-                     (change)="onSlotSelectionChange($event, slot.time)" />
-              {{ slot.time }}
-            </label>
-          </div> -->
-          <div *ngIf="generatedSlots.length > 0" class="slots-grid">
-            <label *ngFor="let slot of generatedSlots" class="slot-label">
-              <input 
-                type="checkbox" 
-                [checked]="unavailableSlots.includes(slot.time)" 
-                (change)="onSlotSelectionChange($event, slot.time)" 
-                [disabled]="slot.status === 'booked'" /> <!-- Disable if booked -->
-              
-                <span>{{ slot.time }}</span>
-              <!-- <span *ngIf="slot.status === 'booked'" class="booked-badge"> (Booked) </span> Show booked status -->
-            </label>
-          </div>
-          
-          <div class="update-button-unavailable">
-            <button class="update" [disabled]="isUpdateButtonDisabled" (click)="updateUnavailableSlots()">Update</button>
-            <button (click)="closeSlotDialog()" class="mark-available-button">Close</button>
-          </div>
-         
+        <div *ngIf="doctor.doctorType === 'Visiting Consultant'" class="add-appointment-wrapper">
+          <button class="add-slot-button" (click)="onAddSlotClick(doctor)">Add Slot</button>
         </div>
       </div>
     </div>
 
-    <!-- Appointment Form Component -->
-    <app-appointment-form
-    *ngIf="showForm"
-    [doctorAvailability]="selectedDoctor"
-    [slot]="selectedSlot"
-    [date]="selectedDate"
-    (close)="closeForm()"
-    [isBookedSlot]="isBookedSlot"
-    [currentAppointment]="currentAppointment" 
+
+
+  </div>
+  <div class="modal-overlay" *ngIf="isSlotDialogOpen">
+    <div class="modal">
+      <div class="modal-content">
+
+        <div class="heading-calendar">
+          <h2>Select Unavailable Slots for {{ selectedDoctor?.name }}</h2>
+          <p-calendar [(ngModel)]="selectedDate" [minDate]="todayforUnavialable" [maxDate]="tomorrow" [showIcon]="false"
+            (ngModelChange)="onDateChangeInModal($event)" [showButtonBar]="true" placeholder="Select Date"
+            dateFormat="dd-mm-yy"></p-calendar>
+        </div>
+
+        <div *ngIf="generatedSlots.length === 0" class="no-slots-message">
+          No available slots for this day.
+        </div>
+        <div *ngIf="generatedSlots.length > 0" class="slots-grid">
+          <label *ngFor="let slot of generatedSlots" class="slot-label">
+            <input type="checkbox" [checked]="unavailableSlots.includes(slot.time)"
+              (change)="onSlotSelectionChange($event, slot.time)" [disabled]="slot.status === 'booked'" />
+            <!-- Disable if booked -->
+
+            <span>{{ slot.time }}</span>
+            <!-- <span *ngIf="slot.status === 'booked'" class="booked-badge"> (Booked) </span> Show booked status -->
+          </label>
+        </div>
+
+        <div class="update-button-unavailable">
+          <button class="update" [disabled]="isUpdateButtonDisabled" (click)="updateUnavailableSlots()">Update</button>
+          <button (click)="closeSlotDialog()" class="mark-available-button">Close</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Appointment Form Component -->
+  <app-appointment-form *ngIf="showForm" [doctorAvailability]="selectedDoctor" [slot]="selectedSlot"
+    [date]="selectedDate" (close)="closeForm()" [isBookedSlot]="isBookedSlot" [currentAppointment]="currentAppointment"
     (statusChange)="onStatusChange($event)">
   </app-appointment-form>
-  <!-- <div class="pagination fixed-pagination">
-    <button class="pagination-btn prev" (click)="prevPage()" [disabled]="currentPage === 1">
-      ←
-    </button>
-    <button class="pagination-btn next" (click)="nextPage()" [disabled]="currentPage === totalPages">
-      →
-    </button>
 
-    <div class="page-info">
-      Page
-      <input type="number" [(ngModel)]="currentPage" min="1" [max]="totalPages" class="page-input"
-        (change)="onPageInputChange()">
-      of {{ totalPages }}
-    </div>
-  </div> -->
   <div class="fixed-container">
     <!-- Slot Legend Section -->
     <div class="slot-legend">
@@ -197,10 +169,10 @@
       </div>
       <div class="slot-item">
         <span class="color-box complete-slot"></span> <span class="label">Completed Slot</span>
+      </div>
     </div>
-    </div>
-    
-  
+
+
     <!-- Pagination Controls Section -->
     <div class="pagination">
       <button class="pagination-btn prev" (click)="prevPage()" [disabled]="currentPage === 1">
@@ -209,7 +181,7 @@
       <button class="pagination-btn next" (click)="nextPage()" [disabled]="currentPage === totalPages">
         →
       </button>
-  
+
       <div class="page-info">
         Page
         <input type="number" [(ngModel)]="currentPage" min="1" [max]="totalPages" class="page-input"
@@ -218,8 +190,77 @@
       </div>
     </div>
   </div>
+
+  <div class="custom-dialog-backdrop" *ngIf="showDialog">
+    <div class="custom-dialog">
+      <h3 class="heading-unavailable">Doctor Unavailability - Bulk Update</h3>
   
+      <!-- Multi-select doctor dropdown -->
+      <div class="multi-select-container" tabindex="0" (focusout)="handleBlur($event)">
+        <div class="dropdown-header" (click)="toggleDoctorDropdown()">
+          <div class="selected-doctors">
+            <ng-container *ngIf="selectedDoctorNames.length; else placeholder">
+              <span *ngFor="let name of selectedDoctorNames" class="selected-pill">{{ name }}</span>
+            </ng-container>
+            <ng-template #placeholder>
+              <span class="placeholder">Select Doctors</span>
+            </ng-template>
+          </div>
+          <span class="dropdown-arrow">▼</span>
+        </div>
   
+        <div class="doctor-options" *ngIf="showDoctorDropdown" (click)="$event.stopPropagation()">
+          <input type="text" [(ngModel)]="doctorSearch" placeholder="Search doctors..." class="dropdown-search" />
   
+          <div class="select-actions">
+            <button class="select-all-button" (click)="selectAllDoctors()">Select All</button>
+            <button class="unselect-all-button" (click)="deselectAllDoctors()">Deselect All</button>
+          </div>
+  
+          <label *ngFor="let doctor of filteredUnavailableDoctors()">
+            <input type="checkbox" [(ngModel)]="doctor.selected" />
+            {{ doctor.name }}
+          </label>
+        </div>
+      </div>
+  
+
+      <div class="modal-body-date">
+        <form class="calendar-input">
+          <div class="date-selection">
+            <label for="startDate">Starting Date:</label>
+            <input type="date" id="startDate" [(ngModel)]="unavailableStartDate" placeholder="dd-mm-yyyy" name="startDate" [min]="today" max=”01-01-2120″./>
+          </div>
+          <div class="date-selection">
+            <label for="endDate">Ending Date:</label>
+            <input type="date" id="endDate" [(ngModel)]="unavailableEndDate" placeholder="dd-mm-yyyy" name="endDate" [min]='today' max=”01-01-2120″. />
+          </div>
+        </form>
+      </div>
+  
+      <!-- Buttons -->
+      <div class="dialog-actions">
+        <button class="update-unavailable" (click)="checkFutureAppointments()">Update</button>
+        <button class="cancel" (click)="closeDialog()">Cancel</button>
+      </div>
+    </div>
   </div>
-  <div class="loader" *ngIf="isLoading"></div>
+  
+
+  <!-- Warning Dialog for future appointments -->
+  <div class="custom-dialog-backdrop" *ngIf="showWarningDialog">
+    <div class="custom-dialog">
+      <h3 class="heading-unavailable">Conflict Detected: Existing Appointments Found!</h3>
+      <p style="color: black;">The following doctors have scheduled appointments within the selected unavailability dates:</p>
+      <ul>
+        <li style="color:black" *ngFor="let slot of conflictingSlots">{{ slot.doctorName }} - {{ slot.date }} {{ slot.time }}</li>
+      </ul>
+      <div class="dialog-actions">
+        <button class="cancel" (click)="showWarningDialog = false">Close</button>
+      </div>
+    </div>
+  </div>
+
+
+</div>
+<div class="loader" *ngIf="isLoading"></div>

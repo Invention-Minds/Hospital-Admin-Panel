@@ -56,6 +56,7 @@
     font-family: Kanit;
     font-weight: 400;
     padding-bottom: 0px;
+    text-wrap: nowrap;
   }
   
   tbody tr:hover {
@@ -93,6 +94,14 @@
     border: none;
   
   
+  }
+  .btn-action img {
+    width: 30px;
+    height: 30px;
+  }
+  .btn-action img {
+    width: 30px;
+    height: 30px;
   }
   .button{
     display: flex;

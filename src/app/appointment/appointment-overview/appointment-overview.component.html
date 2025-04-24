@@ -81,6 +81,16 @@
           <p>CC Appt.</p>
         </div>
       </div>
+      <div class="card" 
+      [ngClass]="{'active-card': activeComponent === 'followup'}"
+      (click)="showFollowupAppointments()">
+        <div class="card-icon">
+          <img src="/follow-up-appts.svg" alt="Transfer Icon" />
+        </div>
+        <div class="card-content">
+          <p>Follow-up Appt.</p>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -94,6 +104,7 @@
         <!-- <app-new-form *ngIf="activeComponent === 'appointment' && showForm" (submit)="showConfirmedAppointments()" (close)="closeForm()"></app-new-form> -->
         <app-appointment-transfer *ngIf="activeComponent === 'transfer' "></app-appointment-transfer>
         <app-referred *ngIf="activeComponent === 'cc'"></app-referred>
+        <app-appt-follow-up *ngIf="activeComponent === 'followup'"></app-appt-follow-up>
       </div>
       
 </div>

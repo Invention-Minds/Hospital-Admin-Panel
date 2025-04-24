@@ -56,7 +56,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
   unavailableSlotsPerDate: { [date: string]: { label: string; value: string }[] } = {};
   modifiedDay: keyof Doctor['availabilityDays'] | null = null;
   isSlotDurationChanged: boolean = false;
-  previousAvailability:any[]=[];
+  previousAvailability: any[] = [];
   needsSlotCheck: boolean = false;
 
 
@@ -445,7 +445,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
 
     if (this.doctor.id) {
       const doctorid = (this.doctor.id);
-      
+
       if (this.useSameTimeForAllDays) {
         this.availabilityDaysList.forEach(day => {
           if (this.doctor?.availabilityDays?.[day]) {
@@ -474,8 +474,13 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
         // Step 1: Check if there are future booked slots for this doctor
         this.doctorService.getFutureBookedSlots(doctorid.toString(), formattedDate, false).subscribe(
           (slots) => {
+            console.log(this.generalAvailableFrom, 'allTime');
+            const outOfNewTimeSlots = slots.filter((slot: any) =>
+              this.isSlotOutsideNewTime(slot.time, this.generalAvailableFrom)
+            );
+            console.log(slots, outOfNewTimeSlots, 'oneTime');
 
-            if (slots.length > 0) {
+            if (outOfNewTimeSlots.length > 0) {
               // Step 2: If future booked slots exist, show an error message
               this.messageService.add({
                 severity: 'error',
@@ -505,10 +510,23 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
 
         if (dayOfWeek !== undefined) {
           // Send the modified day to the backend for checking
+          console.log(dayOfWeek, this.individualAvailability['fri'])
+          const shortDayNames = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'];
+          const dayName = shortDayNames[dayOfWeek].toLowerCase();
+
+          console.log(dayOfWeek, dayName, this.individualAvailability[dayName]);
+
+          const dayTimeRange = this.individualAvailability[dayName]?.availableFrom;
+          console.log(dayTimeRange, 'dayTimeRange');
           this.doctorService.getFutureBookedSlots(doctorid.toString(), formattedDate, true, dayOfWeek).subscribe(
             (slots) => {
+
+              const outOfNewTimeSlots = slots.filter((slot: any) =>
+                this.isSlotOutsideNewTime(slot.time, dayTimeRange)
+              );
+              console.log(slots, outOfNewTimeSlots, dayTimeRange, 'individual');
               // console.log(slots);
-              if (slots.length > 0) {
+              if (outOfNewTimeSlots.length > 0) {
                 // Step 2: If future booked slots exist, show an error message
                 this.messageService.add({
                   severity: 'error',
@@ -548,6 +566,49 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
       this.saveDoctorDetails();
     }
   }
+  isSlotOutsideNewTime(slotTime: string, availableTimeRange: string): boolean {
+    if (!availableTimeRange || !availableTimeRange.includes('-')) {
+      console.warn('Invalid or missing time range:', availableTimeRange);
+      return false; // or return true based on your app logic
+    }
+
+    // Normalize and extract from-to
+    const [from, to] = availableTimeRange.includes(' - ')
+      ? availableTimeRange.split(' - ')
+      : availableTimeRange.split('-');
+
+    const toMinutes = (time: string): number => {
+      const [h, m] = time?.split(':')?.map(Number) || [];
+      return h * 60 + m;
+    };
+
+    const parseSlotTime = (time: string): number => {
+      if (!time || !time.includes(' ')) return NaN;
+      const [t, meridian] = time.split(' ');
+      const [hourStr, minStr] = t.split(':');
+      let hour = parseInt(hourStr, 10);
+      const minute = parseInt(minStr, 10);
+
+      if (meridian === 'PM' && hour !== 12) hour += 12;
+      if (meridian === 'AM' && hour === 12) hour = 0;
+
+      return hour * 60 + minute;
+    };
+
+    const slotMinutes = parseSlotTime(slotTime);
+    const startMinutes = toMinutes(from);
+    const endMinutes = toMinutes(to);
+
+    if (isNaN(slotMinutes) || isNaN(startMinutes) || isNaN(endMinutes)) {
+      console.warn('Invalid time values:', { slotTime, from, to });
+      return false;
+    }
+
+    return slotMinutes < startMinutes || slotMinutes > endMinutes;
+  }
+
+
+
 
   // Refactored method to handle the actual save operation
   private saveDoctorDetails(): void {
@@ -593,7 +654,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
           }
         });
       }
-     
+
 
 
 

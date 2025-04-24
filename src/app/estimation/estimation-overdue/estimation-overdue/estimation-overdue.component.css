@@ -98,6 +98,10 @@
     align-items: center;
     padding-top: 10px !important;
   }
+  .btn-action img {
+    width: 30px;
+    height: 30px;
+  }
   .status-badge {
     border-radius: 4px;
     background: #FB9C2A;

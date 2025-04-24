@@ -42,6 +42,7 @@ interface Appointment {
   gender?: string;
   patientType?: string;
   prefix?: string;
+  type?: string; // Added type to track the appointment type (New/Follow Up)
 }
 type DayName = 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat';
 
@@ -88,6 +89,7 @@ export class AppointmentFormComponent implements OnInit {
   @Input() date!: any;
   @Input() isBookedSlot: boolean = false; // Add input to accept the value from parent component
   @Input() currentAppointment: Appointment | null = null;
+  @Input() followUp: Appointment | null = null;
   @Output() statusChange = new EventEmitter<{ slotTime: string; status: 'available' | 'booked' | 'unavailable' | 'complete' }>();
   oldDate: string = '';
   oldTime: string = '';
@@ -190,7 +192,15 @@ export class AppointmentFormComponent implements OnInit {
 
       this.patchFormWithAppointment(this.currentAppointment, new Date(this.currentAppointment.date));
     }
-
+    if(this.followUp){
+      console.log(this.followUp)
+      this.followUp.time = ''
+      this.patchFormWithAppointment(this.followUp, new Date());
+      this.doctorId = this.followUp.doctorId;
+      this.department = this.followUp.department;
+      this.followUp.type = 'followUp'
+      this.checkDoctorAvailabilityAndLoadSlots(this.followUp.doctorId, this.formatDate(new Date()));
+    }
     if (this.appointment) {
       console.log("existing")
       console.log(this.appointment)

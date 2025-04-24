@@ -30,7 +30,7 @@
     <h2 class="department" *ngIf="!isLoading">{{ department.name }}</h2>
     <div class="doctor-cards-container" *ngIf="!isLoading">
       <div class="doctor-card" *ngFor="let doctor of department.doctors">
-        <img src="/male-doctor.png" class="doctor-avatar" alt="Doctor Avatar">
+        <img src="/icons/male-doctor.svg" class="doctor-avatar" alt="Doctor Avatar">
         <div class="doctor-info">
           <h3 class="doctor-name">{{ doctor.name }}</h3>
           <!-- <p class="doctor-specialty">{{ department.name }}</p> -->

@@ -94,20 +94,20 @@
                     <!-- <td>
                         <span class="sms-status" [ngClass]="{'sms-sent': service.smsSent, 'sms-not-sent': !service.smsSent}">
                           <img *ngIf="service.smsSent" src="icons/sent.svg" alt="Sent">
-                          <img *ngIf="!service.smsSent" src="icons/not-sent.png" alt="Not Sent">
+                          <img *ngIf="!service.smsSent" src="icons/not-sent.svg" alt="Not Sent">
                         </span>
                       </td>
                       <td>
                         <span class="sms-status"
                           [ngClass]="{'sms-sent': service.emailSent, 'sms-not-sent': !service.emailSent}">
                           <img *ngIf="service.emailSent" src="icons/sent.svg" alt="Sent">
-                          <img *ngIf="!service.emailSent" src="icons/not-sent.png" alt="Not Sent">
+                          <img *ngIf="!service.emailSent" src="icons/not-sent.svg" alt="Not Sent">
                         </span>
                       </td>
                       <td>
                         <span class="sms-status" [ngClass]="{'sms-sent': service.messageSent, 'sms-not-sent': !service.messageSent}">
                           <img *ngIf="service.messageSent" src="icons/sent.svg" alt="Sent">
-                          <img *ngIf="!service.messageSent" src="icons/not-sent.png" alt="Not Sent">
+                          <img *ngIf="!service.messageSent" src="icons/not-sent.svg" alt="Not Sent">
                         </span>
                       </td> -->
                       <!-- <td>
@@ -124,7 +124,7 @@
                       </td> -->
                     <td class="button">
                         <!-- <button class="btn-action" [disabled]="service.entry">
-                          <img src="check-in.png" alt="check" class="action-icon" (click)="completeAppointment(service)"
+                          <img src="check-in.svg" alt="check" class="action-icon" (click)="completeAppointment(service)"
                             pTooltip="Entry" tooltipPosition="top">
                         </button> -->
                         <button class="start" [disabled]="service.entry" (click)="completeAppointment(service)">

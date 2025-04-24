@@ -94,7 +94,7 @@
       </thead>
       <tbody>
         <tr *ngIf="filteredAppointments.length === 0">
-          <td colspan="11" class="no-records-message">
+          <td colspan="14" class="no-records-message">
             No records to display
           </td>
         </tr>
@@ -132,21 +132,21 @@
             <span class="sms-status"
               [ngClass]="{'sms-sent': appointment.smsSent, 'sms-not-sent': !appointment.smsSent}">
               <img *ngIf="appointment.smsSent" src="icons/sent.svg" alt="Sent">
-              <img *ngIf="!appointment.smsSent" src="icons/not-sent.png" alt="Not Sent">
+              <img *ngIf="!appointment.smsSent" src="icons/not-sent.svg" alt="Not Sent">
             </span>
           </td>
           <td>
             <span class="sms-status"
               [ngClass]="{'sms-sent': appointment.emailSent, 'sms-not-sent': !appointment.emailSent}">
               <img *ngIf="appointment.emailSent" src="icons/sent.svg" alt="Sent">
-              <img *ngIf="!appointment.emailSent" src="icons/not-sent.png" alt="Not Sent">
+              <img *ngIf="!appointment.emailSent" src="icons/not-sent.svg" alt="Not Sent">
             </span>
           </td>
           <td>
             <span class="sms-status"
               [ngClass]="{'sms-sent': appointment.messageSent, 'sms-not-sent': !appointment.messageSent}">
               <img *ngIf="appointment.messageSent" src="icons/sent.svg" alt="Sent">
-              <img *ngIf="!appointment.messageSent" src="icons/not-sent.png" alt="Not Sent">
+              <img *ngIf="!appointment.messageSent" src="icons/not-sent.svg" alt="Not Sent">
             </span>
           </td>
           <td>
@@ -160,15 +160,15 @@
           </td>
           <!-- <td class="button" >
             <button class="btn-action" [disabled]="appointment.checkedIn && !isCheckInEnabled(appointment)">
-              <img src="check-in.png" alt="check" class="action-icon" (click)="completeAppointment(appointment)"
+              <img src="check-in.svg" alt="check" class="action-icon" (click)="completeAppointment(appointment)"
                 pTooltip="Check-in" tooltipPosition="top" >
               </button>
               <button class="btn-action" [disabled]="appointment.checkedIn">
-                <img src="appt-cancel.png" alt="delete" class="action-icon" (click)="cancelAppointment(appointment)" 
+                <img src="appt-cancel.svg" alt="delete" class="action-icon" (click)="cancelAppointment(appointment)" 
                 pTooltip="Cancel" tooltipPosition="top">
               </button>
               <button class="btn-action-reschedule" (click)="openAppointmentForm(appointment)"  pTooltip="Reschedule"  tooltipPosition="top">
-                <img src="icons/book.png" alt="Confirm">
+                <img src="book.svg" alt="Confirm">
             </button>
           </td> -->
           <td class="button">
@@ -176,29 +176,29 @@
             <!-- <button class="btn-action" 
                     [disabled]="appointment.checkedIn || !isCheckInEnabled(appointment)"
                     (click)="!appointment.checkedIn && openCheckinPopup(appointment)">
-              <img src="check-in.png" alt="check" 
+              <img src="check-in.svg" alt="check" 
                    class="action-icon" 
                   
                    pTooltip="Check-in" tooltipPosition="top">
             </button> -->
 
             <button class="btn-action" (click)="prnCheck(appointment)">
-              <img src="check-in.png" alt="check" class="action-icon"
+              <img src="check-in.svg" alt="check" class="action-icon"
                 pTooltip="{{ appointment.checkedIn ? 'Already checked in' : 'Click to check-in' }}"
                 tooltipPosition="top">
             </button>
             <!-- Cancel Button -->
             <button class="btn-action" [disabled]="appointment.checkedIn">
-              <img src="appt-cancel.png" alt="delete" class="action-icon"
+              <img src="appt-cancel.svg" alt="delete" class="action-icon"
                 (click)="!appointment.checkedIn && cancelAppointment(appointment)" pTooltip="Cancel"
                 tooltipPosition="top">
             </button>
 
             <!-- Reschedule Button -->
-            <button class="btn-action-reschedule" [disabled]="appointment.checkedIn"
+            <button class="btn-action" [disabled]="appointment.checkedIn"
               (click)="!appointment.checkedIn && openAppointmentForm(appointment)" pTooltip="Reschedule"
               tooltipPosition="top">
-              <img src="icons/book.png" alt="Confirm">
+              <img src="book.svg" alt="Confirm">
             </button>
           </td>
 

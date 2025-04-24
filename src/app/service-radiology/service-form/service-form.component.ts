@@ -68,7 +68,7 @@ export class ServiceFormComponent implements OnInit {
     appointmentTime: '',
     requestVia: '',
     appointmentStatus: '',
-    age: 0,
+    age: null as number | null,
     gender: '',
     prefix: 'Mr.',
     patientType: 'New'
@@ -808,7 +808,7 @@ export class ServiceFormComponent implements OnInit {
     this.formData.firstName = firstName || '';
     this.formData.lastName = lastName || '';
     this.formData.phoneNumber = selectedPatient.mobileNo || '';
-    this.formData.age = selectedPatient.age ? Number(selectedPatient.age.replace(/\D/g, '')) : 0
+    this.formData.age = selectedPatient.age ? Number(selectedPatient.age.replace(/\D/g, '')) : null
     this.formData.gender = selectedPatient.gender || '';
     this.formData.email = selectedPatient.email || '';
     this.formData.prefix = prefix || '';

@@ -89,10 +89,10 @@
                       </td>
                     <td class="button">
                         <button class="btn-action" >
-                          <img src="check-in.png" alt="check" class="action-icon" (click)="completeAppointment(service)"
+                          <img src="check-in.svg" alt="check" class="action-icon" (click)="completeAppointment(service)"
                             pTooltip="Check-in" tooltipPosition="top">
                           <button class="btn-action">
-                            <img src="appt-cancel.png" alt="delete" class="action-icon" (click)="cancelAppointment(service)" 
+                            <img src="appt-cancel.svg" alt="delete" class="action-icon" (click)="cancelAppointment(service)" 
                             pTooltip="Cancel" tooltipPosition="top">
                           </button>
                         </button>
@@ -117,7 +117,7 @@
         
             <!-- Show "Cancel" button if already accepted -->
             <button class="btn-action cancel-btn" (click)="cancelAppointment(summary)" *ngIf="summary.isAccepted">
-              <img src="appt-cancel.png" alt="Cancel" class="action-icon" pTooltip="Cancel" tooltipPosition="top">
+              <img src="appt-cancel.svg" width="30px" height="30px" alt="Cancel" class="action-icon" pTooltip="Cancel" tooltipPosition="top">
             </button>
             <!-- Print Button -->
             <button class="btn-action" (click)="printAppointments(summary)">

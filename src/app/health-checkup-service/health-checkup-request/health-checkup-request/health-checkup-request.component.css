@@ -99,6 +99,10 @@
     align-items: center;
     padding-top: 10px !important;
   }
+  .btn-action img {
+    width: 30px;
+    height: 30px;
+  }
   .status-badge {
     background-color: #FFD700; /* Yellow status */
     padding: 5px 10px;

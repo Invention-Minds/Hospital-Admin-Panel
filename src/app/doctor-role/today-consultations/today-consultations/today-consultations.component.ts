@@ -56,6 +56,7 @@ interface Appointment {
   referredDoc?: string;
   isReferred?: boolean;
   patientType?: string;
+  isfollowup?: boolean;
 }
 
 @Component({
@@ -704,7 +705,7 @@ export class TodayConsultationsComponent {
           this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error saving estimation details. Please try again.' });
           this.isButtonLoading = false;
           this.isButtonClicked = false;
-          
+
         }
       });
       return;
@@ -984,6 +985,17 @@ export class TodayConsultationsComponent {
   openReferralPopup(appointment: any) {
     this.isPopupOpen = true
     this.selectedAppointment = appointment
+  }
+  followUp(appointment: any) {
+    appointment.isfollowup = true
+    appointment.isFollowupTime = new Date();
+    const { expanded, overTime, elapsedTime, user, ...updatedAppointment } = appointment;
+    this.appointmentService.updateAppointment(updatedAppointment)
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Success',
+      detail: 'Followup added successfully.',
+    });
   }
   loadDepartments(): void {
     this.doctorService.getDepartments().subscribe(

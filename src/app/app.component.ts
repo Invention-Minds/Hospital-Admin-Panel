@@ -56,5 +56,10 @@ export class AppComponent {
   isMaintenanceRoute(): boolean {
     return this.router.url === '/maintenance';
   }
+  openWhatsApp(): void {
+    const phone = '919844005600'; // Change to your WhatsApp number
+    const message = encodeURIComponent('Hello! I need assistance.');
+    window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+  }
   
 }

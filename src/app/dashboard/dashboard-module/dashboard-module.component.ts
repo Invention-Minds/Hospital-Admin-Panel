@@ -66,187 +66,17 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
   public hasNewAppointment: boolean = false;
   isDropdownOpen: boolean = false;
   showLogoutConfirmDialog: boolean = false;
+  showBubble: boolean = true; // Flag to show the bubble
   @Output() leaveRequestClicked = new EventEmitter<void>();
   constructor(private authService: AuthServiceService, private router: Router, private appointmentService: AppointmentConfirmService, private changeDetector: ChangeDetectorRef, private messageService: MessageService, private elementRef: ElementRef) { }
 
-  // ngOnInit(): void {
-  //   if (typeof window !== 'undefined' && window.localStorage) {
-  //     // Fetch role from localStorage or the authentication service
-  //     const storedUsername = localStorage.getItem('username');
-  //     const storedRole = localStorage.getItem('role');
-  //     const user = this.authService.getUser();
-  //     if (storedUsername && storedRole) {
-  //       this.username = storedUsername;
-  //       this.role = storedRole;
-  //     }
-  //     // console.log(this.username, this.role);
-  //   } else {
-  //     console.log('localStorage is not available');
-  //   }
-  //   console.log('Connecting to server to receive new appointments...',this.apiUrl,environment.apiUrl);
-  //   this.eventSource = new EventSource(`${environment.apiUrl}/appointments/updates`);
-  //   this.eventSource.onopen = () => {
-  //     console.log('Connection to server opened.');
-  //   };
 
-  //   this.eventSource.onerror = (error) => {
-  //     console.error('Error connecting to server:', error);
-  //   };
-  //   this.eventSource.onmessage = (event) => {
-  //     console.log('New pending appointment received:', event.data);
-
-  //     this.appointmentService.getNotifications().subscribe((notifications: Notification[]) => {
-  //       const userId = Number(localStorage.getItem('userid')); // Assuming a method to get the current logged-in user's ID
-  //       console.log('User ID:', userId);
-  //   const userNotifications = notifications.filter(
-  //     (notification) => notification.userId === userId 
-  //   );
-
-  //   console.log('User Notifications:', userNotifications);
-  //       const sortedNotifications = userNotifications.sort((a, b) => {
-  //         const dateA = new Date(a.createdAt || 0).getTime(); // Default to epoch if undefined
-  //         const dateB = new Date(b.createdAt || 0).getTime(); // Default to epoch if undefined
-  //         return dateB - dateA; // Sort in descending order by creation date
-  //       });
-  //       this.notifications = sortedNotifications;
-
-  //       console.log('Notifications:', notifications);
-  //       this.changeDetector.detectChanges()
-
-  //       this.audio.load()
-  //       this.audio.play();
-  //     });
-  //   };
-
-  //   this.appointmentService.getNotifications().subscribe((notifications: Notification[]) => {
-  //     const sortedNotifications = notifications.sort((a, b) => {
-  //       const dateA = new Date(a.createdAt || 0).getTime(); // Default to epoch if undefined
-  //       const dateB = new Date(b.createdAt || 0).getTime(); // Default to epoch if undefined
-  //       return dateB - dateA; // Sort in descending order by creation date
-  //     });
-  //     this.notifications = sortedNotifications;
-  //     console.log('Notifications:', notifications);
-
-  //   });
-  // }
-  // ngOnInit(): void {
-  //   if (typeof window !== 'undefined' && window.localStorage) {
-  //     const storedUsername = localStorage.getItem('username');
-  //     const storedRole = localStorage.getItem('role');
-  //     this.subAdminType = localStorage.getItem('subAdminType') || "";
-  //     this.adminType = localStorage.getItem('adminType') || "";
-  //     const isReceptionist = localStorage.getItem('isReceptionist') === 'true'; // Check if receptionist
-  //     this.isReceptionist = localStorage.getItem('isReceptionist') === 'true';
-
-  //     if (storedUsername && storedRole) {
-  //       this.username = storedUsername;
-  //       // this.role = storedRole;
-  //       this.role = storedRole.replace(/_/g, ''); // Removes all underscores
-
-  //     }
-  //     if(this.role !== 'doctor'){
-  //       this.username = this.username.split(`_${this.role}`)[0]
-  //       console.log(this.username)
-  //     }
-  //     else if(this.role === 'doctor'){
-  //       this.username = `Dr. ${this.username.split('_doctor')[0]}`
-  //     }
-
-  //     console.log('Connecting to server to receive new appointments...', this.apiUrl, environment.apiUrl);
-  //     this.eventSource = new EventSource(`${environment.apiUrl}/appointments/updates`);
-
-  //     this.eventSource.addEventListener('appointment', (event: MessageEvent) => {
-  //       console.log('New notification received:', event.data);
-  //       const userId = localStorage.getItem('userid');
-
-  //       if (!userId) {
-  //         console.error('User ID is not available.');
-  //         return; // Exit early or handle accordingly
-  //       }
-  //       const newNotification: Notification = JSON.parse(event.data);
-
-  //       // Determine if the notification should trigger a toast
-  //       if (
-  //         this.role !== 'super_admin' && // Exclude super admin
-  //         this.role !== 'admin' && // Exclude admin
-  //         this.role !== 'doctor' &&
-  //         (
-  //           (newNotification.type === 'appointment_request') || // For both tele callers and receptionists
-  //           (this.isReceptionist && (newNotification.type === 'appointment_remainder' || newNotification.type === 'service_reminder')) // For receptionists only
-  //         )
-  //       ) {
-  //         console.log('New Notification Processed:', newNotification);
-
-  //         // Play audio notification
-  //         this.audio.load();
-  //         this.audio.play();
-
-  //         // Display a toast for the notification
-  //         const toastSummary = newNotification.type === 'appointment_request'
-  //           ? 'New Appointment Request'
-  //           : 'Appointment Reminder';
-
-  //         this.messageService.add({
-  //           severity: 'info', // Severity type: success, info, warn, error
-  //           summary: toastSummary,
-  //           detail: newNotification.message,
-  //           life: 5000, // Duration in milliseconds
-  //         });
-  //       }
-
-
-  //       // Fetch notifications based on role
-  //       this.appointmentService.getNotifications().subscribe((notifications: Notification[]) => {
-  //         const filteredNotifications = notifications.filter(notification =>
-  //           notification.type === 'appointment_request' ||
-  //           (this.isReceptionist && (notification.type === 'appointment_remainder' || notification.type === 'service_reminder'))
-  //         );
-  //         console.log('Filtered Notifications:', filteredNotifications);
-  //         const sortedNotifications = filteredNotifications.sort((a, b) => {
-  //           const dateA = new Date(a.createdAt || 0).getTime();
-  //           const dateB = new Date(b.createdAt || 0).getTime();
-  //           return dateB - dateA;
-  //         });
-
-
-
-  //         this.notifications = sortedNotifications;
-
-  //         console.log('Filtered Notifications:', sortedNotifications);
-
-
-  //       });
-  //     });
-  //     this.appointmentService.getNotifications().subscribe((notifications: Notification[]) => {
-  //       // const userId = Number(localStorage.getItem('userid'));
-  //       // console.log('User ID:', userId);
-  //       // const userNotifications = notifications.filter(
-  //       //   (notification) => notification.userId === userId
-  //       // );
-  //       const filteredNotifications = notifications.filter(notification =>
-  //         notification.type === 'appointment_request' ||
-  //         (this.isReceptionist && (notification.type === 'appointment_remainder' || notification.type === 'service_reminder'))
-  //       );
-  //       console.log('Filtered Notifications:', filteredNotifications);
-  //       const sortedNotifications = filteredNotifications.sort((a, b) => {
-  //         const dateA = new Date(a.createdAt || 0).getTime();
-  //         const dateB = new Date(b.createdAt || 0).getTime();
-  //         return dateB - dateA;
-  //       });
-
-
-
-  //       this.notifications = sortedNotifications;
-
-  //       // this.audio.load();
-  //       // this.audio.play();
-  //     }
-  //     );
-  //   }
-  // }
 
   ngOnInit(): void {
     if (typeof window !== 'undefined' && window.localStorage) {
+      setTimeout(() => {
+        this.showBubble = false;
+      }, 6000);
       const storedUsername = localStorage.getItem('username');
       const storedRole = localStorage.getItem('role');
       this.subAdminType = localStorage.getItem('subAdminType') || ""; // Identify subAdminType
@@ -508,4 +338,9 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
   //   console.log('Logging out...');
   //   // Add logout logic here
   // }
+  openWhatsApp(): void {
+    const phone = '919844005600'; // Change to your WhatsApp number
+    const message = encodeURIComponent('Hello! I need assistance.');
+    window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+  }
 }

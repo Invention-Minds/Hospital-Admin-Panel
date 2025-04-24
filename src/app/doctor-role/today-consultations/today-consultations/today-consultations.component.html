@@ -77,6 +77,9 @@
               <button class="cc" [disabled]="appointment.isReferred" (click)="openReferralPopup(appointment)">
                 <img class="image" src="/cc.svg">CC
               </button>
+              <button class="followup" [disabled]="appointment.isfollowup || appointment.type === 'followUp'" (click)="!appointment.isfollowup && appointment.type ==='followUp' && followUp(appointment)">
+                <img class="image" src="/follow-up-icon.svg">Followup
+              </button>
             </td>
           </tr>
         </tbody>

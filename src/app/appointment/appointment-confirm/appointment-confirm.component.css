@@ -86,15 +86,17 @@ tbody tr:hover {
   display: flex;
   gap: 10px;
 }
+.btn-action img{
+  width: 30px;
+  height: 30px;
+}
 .btn-action-reschedule {
   background-color: transparent;
   cursor: pointer;
   outline: none;
   border: none;
-
-
 }
-.button{
+.button {
   display: flex;
   justify-content: center;
   align-items: center;

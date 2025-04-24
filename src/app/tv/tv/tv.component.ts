@@ -886,6 +886,10 @@ groupDoctorsForSlides() {
 nextSlide() {
   this.slideIndex = (this.slideIndex + 1) % this.doctorsPages.length;
 }
+handleImageError(event: Event) {
+  const target = event.target as HTMLImageElement;
+  target.src = '/doctor-image.jpg'; // Fallback image
+}
 
 
 }

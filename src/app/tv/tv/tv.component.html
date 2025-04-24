@@ -114,9 +114,15 @@
               <div class="doctor-image">
                 <img
                   class="image"
-                  [src]="doctor.doctorId ? '/doctor-image/' + doctor.doctorId + '.png' : '/assets/default-doctor.png'"
+                  [src]="doctor.doctorId ? '/doctor-image/' + doctor.doctorId + '.png' : '/doctor-image.jpg'"
                   alt="Doctor Image"
+                  (error)="handleImageError($event)"
                 />
+                <!-- <img
+                class="image"
+                src="/doctor-image.jpg"
+                alt="Doctor Image"
+              /> -->
               </div>
               <div class="doctor-details">
                 <h3>Name: {{ doctor.name }}</h3>

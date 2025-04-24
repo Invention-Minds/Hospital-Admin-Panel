@@ -102,7 +102,7 @@
                     <td>{{ service.completedVisits }}</td>
                     <td>{{ service.pendingVisits }}</td>
                     <td class="button">
-                        <button class="btn-action-reschedule" pTooltip="Stop Repeat"  tooltipPosition="top"  *ngIf="service.repeatChecked"  (click)="stopRepeatedAppointments(service)">
+                        <button class="btn-action" pTooltip="Stop Repeat"  tooltipPosition="top"  *ngIf="service.repeatChecked"  (click)="stopRepeatedAppointments(service)">
                             <img src="icons/repeat.svg" alt="Confirm">
                         </button>
                         <!-- </button> -->

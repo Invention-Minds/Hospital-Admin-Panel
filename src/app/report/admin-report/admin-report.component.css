@@ -107,6 +107,10 @@ tbody tr:hover {
   text-transform: capitalize;
   /* background: #79CFA6; border-radius: 4px; */
 }
+.btn-action img {
+  width: 30px;
+  height: 30px;
+}
 /* Define different colors based on status */
 .status-cancelled {
   background: #ff4d4f; /* Red color for cancelled */
@@ -223,6 +227,10 @@ tbody tr:hover {
   border: none;
   gap: 10px;
   display: flex;
+}
+.btn-action img {
+  width: 30px;
+  height: 30px;
 }
 .filter-input:focus {
   outline: none;

@@ -133,6 +133,9 @@ activeComponent: string = 'request'; // Default to showing the request component
   showCCAppointments(){
     this.activeComponent = 'cc'
   }
+  showFollowupAppointments(){
+    this.activeComponent = 'followup'
+  }
   closeForm() {
     this.showForm = false;
     this.activeComponent = 'request'; // Reset to allow reopening

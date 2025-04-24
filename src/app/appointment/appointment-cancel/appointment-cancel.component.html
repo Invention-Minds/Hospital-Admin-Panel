@@ -84,7 +84,7 @@
     </thead>
     <tbody>
       <tr *ngIf="filteredAppointments.length === 0">
-        <td colspan="11" class="no-records-message">
+        <td colspan="13" class="no-records-message">
           No records to display
         </td>
       </tr>
@@ -101,19 +101,19 @@
         <td>
           <span class="sms-status" [ngClass]="{'sms-sent': appointment.smsSent, 'sms-not-sent': !appointment.smsSent}">
             <img *ngIf="appointment.smsSent" src="icons/sent.svg" alt="Sent">
-            <img *ngIf="!appointment.smsSent" src="icons/not-sent.png" alt="Not Sent">
+            <img *ngIf="!appointment.smsSent" src="icons/not-sent.svg" alt="Not Sent">
           </span>
         </td>
         <td>
           <span class="sms-status" [ngClass]="{'sms-sent': appointment.emailSent, 'sms-not-sent': !appointment.emailSent}">
             <img *ngIf="appointment.emailSent" src="icons/sent.svg" alt="Sent">
-            <img *ngIf="!appointment.emailSent" src="icons/not-sent.png" alt="Not Sent">
+            <img *ngIf="!appointment.emailSent" src="icons/not-sent.svg" alt="Not Sent">
           </span>
         </td>
         <td>
           <span class="sms-status" [ngClass]="{'sms-sent': appointment.messageSent, 'sms-not-sent': !appointment.messageSent}">
             <img *ngIf="appointment.messageSent" src="icons/sent.svg" alt="Sent">
-            <img *ngIf="!appointment.messageSent" src="icons/not-sent.png" alt="Not Sent">
+            <img *ngIf="!appointment.messageSent" src="icons/not-sent.svg" alt="Not Sent">
           </span>
         </td>
         <td>
@@ -121,7 +121,7 @@
         </td>
         <td class="button">
           <button class="btn-action" (click)="openAppointmentForm(appointment)"  pTooltip="Reschedule" tooltipPosition="top">
-            <img src="icons/book.png" alt="Confirm">
+            <img src="book.svg" alt="Confirm">
           </button>
         </td>
       </tr>

@@ -96,20 +96,20 @@
                     <td>
                         <span class="sms-status" [ngClass]="{'sms-sent': service.smsSent, 'sms-not-sent': !service.smsSent}">
                           <img *ngIf="service.smsSent" src="icons/sent.svg" alt="Sent">
-                          <img *ngIf="!service.smsSent" src="icons/not-sent.png" alt="Not Sent">
+                          <img *ngIf="!service.smsSent" src="icons/not-sent.svg" alt="Not Sent">
                         </span>
                       </td>
                       <td>
                         <span class="sms-status"
                           [ngClass]="{'sms-sent': service.emailSent, 'sms-not-sent': !service.emailSent}">
                           <img *ngIf="service.emailSent" src="icons/sent.svg" alt="Sent">
-                          <img *ngIf="!service.emailSent" src="icons/not-sent.png" alt="Not Sent">
+                          <img *ngIf="!service.emailSent" src="icons/not-sent.svg" alt="Not Sent">
                         </span>
                       </td>
                       <td>
                         <span class="sms-status" [ngClass]="{'sms-sent': service.messageSent, 'sms-not-sent': !service.messageSent}">
                           <img *ngIf="service.messageSent" src="icons/sent.svg" alt="Sent">
-                          <img *ngIf="!service.messageSent" src="icons/not-sent.png" alt="Not Sent">
+                          <img *ngIf="!service.messageSent" src="icons/not-sent.svg" alt="Not Sent">
                         </span>
                       </td>
                       <!-- <td>
@@ -126,14 +126,14 @@
                       </td>
                     <td class="button">
                         <button class="btn-action" [disabled]="service.checkedIn">
-                          <img src="check-in.png" alt="check" class="action-icon" (click)="completeAppointment(service)"
+                          <img src="check-in.svg" alt="check" class="action-icon" (click)="completeAppointment(service)"
                             pTooltip="Check-in" tooltipPosition="top">
                           <button class="btn-action" [disabled]="service.checkedIn">
-                            <img src="appt-cancel.png" alt="delete" class="action-icon" (click)="!service.checkedIn && cancelAppointment(service)" 
+                            <img src="appt-cancel.svg" alt="delete" class="action-icon" (click)="!service.checkedIn && cancelAppointment(service)" 
                             pTooltip="Cancel" tooltipPosition="top">
                           </button>
-                          <button class="btn-action-reschedule" (click)="!service.checkedIn && openAppointmentForm(service)"  pTooltip="Reschedule"  tooltipPosition="top">
-                            <img src="icons/book.png" alt="Confirm">
+                          <button class="btn-action" (click)="!service.checkedIn && openAppointmentForm(service)"  pTooltip="Reschedule"  tooltipPosition="top">
+                            <img src="book.svg" alt="Confirm">
                         </button>
                         <!-- <button class="btn-action-reschedule" pTooltip="Stop Repeat"  tooltipPosition="top"  *ngIf="service.repeatChecked"  (click)="stopRepeatedAppointments(service)">
                             <img src="icons/repeat.png" alt="Confirm">

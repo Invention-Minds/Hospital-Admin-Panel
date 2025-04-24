@@ -92,6 +92,10 @@
     outline: none;
     border: none;
   }
+  .btn-action img {
+    width: 30px;
+    height: 30px;
+  }
   .button {
     display: flex;
     justify-content: center;

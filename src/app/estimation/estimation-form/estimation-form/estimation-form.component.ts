@@ -73,12 +73,13 @@ export class EstimationFormComponent {
   employeeName: string = ''
   approverName: string = '';
   showRejectReasonPopup = false;
-rejectionReason = '';
-roomCost: number =0;
+  rejectionReason = '';
+  roomCost: number = 0;
+  selectedSurgeryCostIndex: { [roomName: string]: number } = {};
 
 
 
-  constructor(private estimationService: EstimationService, private cdr: ChangeDetectorRef, private messageService: MessageService, private doctorService: DoctorServiceService, private appointmentService: AppointmentConfirmService,private eRef: ElementRef) {
+  constructor(private estimationService: EstimationService, private cdr: ChangeDetectorRef, private messageService: MessageService, private doctorService: DoctorServiceService, private appointmentService: AppointmentConfirmService, private eRef: ElementRef) {
     this.filteredRooms = [...this.availableRooms];
     this.availableRooms = [
       { name: 'General', cost: 1600 },
@@ -124,7 +125,7 @@ roomCost: number =0;
       this.loadSignatureToCanvas(this.patientCanvasRef, this.formData.patientSign, this.patientSignaturePad);
     }
     if (this.formData.employeeSign) {
-      this.loadSignatureToCanvas(this.staffCanvasRef, this.formData.employeeSign,this.staffSignaturePad);
+      this.loadSignatureToCanvas(this.staffCanvasRef, this.formData.employeeSign, this.staffSignaturePad);
     }
     if (this.formData.approverSign) {
       console.log(this.formData.approverSign)
@@ -133,23 +134,22 @@ roomCost: number =0;
       this.loadSignatureToCanvas(this.approverCanvasRef, this.formData.approverSign, this.approverSignaturePad);
     }
     this.disableSignaturePadsBasedOnStatus(this.formData.statusOfEstimation);
-    if(this.estimationData === null){
-      this.patientSignaturePad.off();
+    if (this.estimationData === null) {
       this.approverSignaturePad.off();
     }
-    if(this.role === "sub_admin" && this.formData.statusOfEstimation === 'submitted'){
+    if (this.role === "sub_admin" && this.formData.statusOfEstimation === 'submitted') {
       this.staffSignaturePad.on();
       this.approverSignaturePad.off();
     }
 
-    
+
   }
   disableSignaturePadsBasedOnStatus(status: string): void {
     // Enable all first (reset state)
     this.patientSignaturePad.on();
     this.staffSignaturePad.on();
     this.approverSignaturePad.on();
-  
+
     switch (status) {
       case 'accepted':
       case 'cancelled':
@@ -159,23 +159,23 @@ roomCost: number =0;
         this.staffSignaturePad.off();
         this.approverSignaturePad.off();
         break;
-  
+
       case 'submitted':
         this.patientSignaturePad.off();
         this.staffSignaturePad.off();
         break;
-  
+
       case 'pending':
-        this.patientSignaturePad.off();
+        // this.patientSignaturePad.off();
         this.approverSignaturePad.off();
         break;
-  
+
       case 'approved':
         this.staffSignaturePad.off();
         this.approverSignaturePad.off();
         this.patientSignaturePad.off();
         break;
-  
+
       default:
         // Optionally handle unknown status
         console.warn(`Unknown status: ${status}`);
@@ -185,7 +185,7 @@ roomCost: number =0;
   isApproverReadonly(): boolean {
     return ['accepted', 'confirmed', 'approved'].includes(this.formData.statusOfEstimation);
   }
-  
+
   availableRooms = [
     { name: 'General', cost: 1600 },
     { name: 'Semi-Private', cost: 3500 },
@@ -310,21 +310,21 @@ roomCost: number =0;
     if (!this.patientSignaturePad.isEmpty()) {
       this.formData.patientSign = this.patientSignaturePad.toDataURL();
     }
-  
+
     if (!this.staffSignaturePad.isEmpty()) {
       this.formData.employeeSign = this.staffSignaturePad.toDataURL();
     }
-  
+
     if (!this.approverSignaturePad.isEmpty()) {
       this.formData.approverSign = this.approverSignaturePad.toDataURL();
     }
-  
+
     console.log('Form Data with Signatures:', this.formData);
     console.log("Patient Signature Base64:", this.formData.patientSign?.substring(0, 100));
     console.log("Employee Signature Base64:", this.formData.employeeSign?.substring(0, 100));
     console.log("Approver Signature Base64:", this.formData.approverSign?.substring(0, 100));
   }
-  
+
   clearAllSignatures(): void {
     // Clear all signature pads and reset their corresponding formData properties
     this.patientSignaturePad?.clear();
@@ -402,9 +402,9 @@ roomCost: number =0;
     costForVip: '',
     costForDeluxe: '',
     costForPresidential: '',
-    patientEmail:'',
+    patientEmail: '',
     selectedRoomCost: this.selectedRoomCost,
-    rejectReason:'',
+    rejectReason: '',
     includedItems: {
       wardICUStay: false,
       primaryConsultant: false,
@@ -508,16 +508,16 @@ roomCost: number =0;
     // Update formData with selected patient's details
     this.formData.patientUHID = selectedPatient.prn || '';
     this.formData.patientName = selectedPatient.name;
-    this.formData.ageOfPatient = selectedPatient.age 
-  ? Number(selectedPatient.age.replace(/\D/g, '')) 
-  : 0;  // ✅ Ensure it's assigned null when no age is available
+    this.formData.ageOfPatient = selectedPatient.age
+      ? Number(selectedPatient.age.replace(/\D/g, ''))
+      : 0;  // ✅ Ensure it's assigned null when no age is available
 
     this.formData.genderOfPatient = selectedPatient.gender;
     this.formData.patientPhoneNumber = selectedPatient.mobileNo.toString();
     this.formData.patientEmail = selectedPatient.email
 
     console.log("UHID Selected:", selectedPatient, this.formData);
-    
+
 
     // Hide suggestions after selection
     this.uhidSuggestions = false;
@@ -629,7 +629,7 @@ roomCost: number =0;
       } else {
         this.formData.patientPhoneNumber = this.formData.patientPhoneNumber; // Keep as is
       }
-      
+
       console.log(this.estimationData.roomType, this.availableRooms)
       if (this.estimationData.roomType) {
         this.selectedRooms = this.estimationData.roomType.split(',')
@@ -709,7 +709,25 @@ roomCost: number =0;
       this.selectedEstimationType = this.estimationData.estimationType;
       this.selectedSurgeryPackage = this.estimationData.surgeryPackage;
       this.formData.estimationCost = this.estimationData.estimationCost;
-
+      if (this.selectedRoom && this.selectedRoomCost) {
+        const selectedRoomName = this.selectedRoom.name;
+        const costPart = this.selectedRoomCost.split(' - ₹')[1]?.trim(); // Extract cost string (e.g. 1200)
+      
+        if (costPart) {
+          const key = this.mapRoomNameToCostKey(selectedRoomName);
+          const costArray = ((this.formData as any)[key] || '').split(',');
+      
+          const selectedIndex = costArray.findIndex((val: string) => val.trim() === costPart);
+      
+          if (selectedIndex !== -1) {
+            this.selectedSurgeryCostIndex = {
+              ...this.selectedSurgeryCostIndex,
+              [selectedRoomName]: selectedIndex
+            };
+          }
+        }
+      }
+      
 
 
       this.cdr.detectChanges();
@@ -722,7 +740,7 @@ roomCost: number =0;
     }
     this.employeeId = localStorage.getItem('employeeId') || '';
     this.role = localStorage.getItem('role')!
-    this.employeeName = localStorage.getItem('username')|| ''
+    this.employeeName = localStorage.getItem('username') || ''
     // if (this.role === 'sub_admin') {
     //   this.formData.employeeId = this.employeeId!
     //   this.formData.employeeName = this.employeeName.split(`_subadmin`)[0].replace(/_/g, ' ');
@@ -741,7 +759,7 @@ roomCost: number =0;
         console.log(this.formData.employeeName);
       }
     }
-    
+
     if (this.role === 'admin' || this.role === 'super_admin') {
       if (!this.formData.approverId || this.formData.approverId === '') {
         this.formData.approverId = this.employeeId;
@@ -750,7 +768,7 @@ roomCost: number =0;
         this.formData.approverName = this.employeeName.split(`_${this.role}`)[0].replace(/_/g, ' ');
       }
     }
-    
+
   }
   parseExistingData(data: string | null): { name: string; cost: number }[] {
     if (!data) return [];
@@ -1030,7 +1048,7 @@ roomCost: number =0;
   //   );
 
   // }
-  loadSignatureToCanvas(canvasRef: ElementRef<HTMLCanvasElement>, base64Data: string, pad:SignaturePad): void {
+  loadSignatureToCanvas(canvasRef: ElementRef<HTMLCanvasElement>, base64Data: string, pad: SignaturePad): void {
     if (!canvasRef || !canvasRef.nativeElement) {
       console.error("Canvas reference is missing!");
       return;
@@ -1572,15 +1590,15 @@ roomCost: number =0;
   calculateEstimationCostForRoom(roomName: string): void {
     let key = this.mapRoomNameToCostKey(roomName);
     const costString = (this.formData as any)[key] || '';
-  
+
     let extractedNumbers = costString.match(/\d+/g)?.map(Number) || [];
-    
+
     if (costString.includes(',')) {
       this.formData.multipleEstimationCost = extractedNumbers.join(',');
     } else {
       this.formData.multipleEstimationCost = '';
     }
-  
+
     const totalCost = extractedNumbers.reduce((sum: number, num: number) => sum + num, 0);
     this.formData.estimationCost = totalCost;
     this.roomCost = totalCost;
@@ -1588,10 +1606,31 @@ roomCost: number =0;
       this.selectedRoomCost = `${roomName} - ₹${totalCost}`;
     }
     console.log(this.selectedRoomCost)
-  
+
     console.log("Updated Estimation Cost:", totalCost, this.formData.multipleEstimationCost);
   }
-  
+  calculateEstimationCostForRoomMaternity(roomName: string): void {
+    const key = this.mapRoomNameToCostKey(roomName);
+    const costString = (this.formData as any)[key] || '';
+
+    let extractedNumbers = costString.split(',').map((num: any) => parseInt(num, 10)).filter((n: any) => !isNaN(n));
+    this.formData.multipleEstimationCost = costString;
+
+    let selectedIndex = this.selectedSurgeryCostIndex[roomName];
+
+    let selectedCost = selectedIndex !== undefined ? extractedNumbers[selectedIndex] || 0 : 0;
+
+    this.formData.estimationCost = selectedCost;
+    this.roomCost = selectedCost;
+
+    if (this.selectedRoom?.name === roomName) {
+      this.selectedRoomCost = `${roomName} - ₹${selectedCost}`;
+    }
+
+    console.log("Updated Estimation Cost:", this.selectedRoomCost, this.formData.multipleEstimationCost);
+  }
+
+
   private inputTimeout: any;
 
   onCostInputChange(value: string, roomName: string, surgery: string): void {
@@ -1615,102 +1654,104 @@ roomCost: number =0;
     let roomCostString = (this.formData as any)[costVariable] || '';
 
     this.selectedRoomCost = `${room.name} - ₹${roomCost}`;
+    // ✅ Reset other selected surgery indexes
+    for (let key in this.selectedSurgeryCostIndex) {
+      if (key !== room.name) {
+        delete this.selectedSurgeryCostIndex[key]; // Clear selection
+      }
+    }
     console.log("Selected Room Cost:", this.selectedRoomCost);
-    // let extractedNumbers = roomCostString.match(/\d+/g)?.map(Number) || [];
-    // if (roomCostString.includes(',')) {
-    //   this.formData.multipleEstimationCost = extractedNumbers.join(',');
-    // } else {
-    //   this.formData.multipleEstimationCost = ''; // Reset if no comma
-    // }
-
-    // let totalCost = extractedNumbers.reduce((sum: any, num: any) => sum + num, 0);
-
-    // // ✅ Store the total cost in formData for estimation
-    // this.formData.estimationCost = totalCost;
-    // this.roomCost = totalCost
     this.calculateEstimationCostForRoom(room.name);
 
     console.log("Total Estimation Cost:", this.formData.estimationCost, this.formData.multipleEstimationCost);
   }
+
+
+  onSurgeryCostSelect(roomName: string, index: number): void {
+    this.selectedSurgeryCostIndex[roomName] = index;
+    console.log("Selected Surgery Cost Index:", this.selectedSurgeryCostIndex);
+    this.calculateEstimationCostForRoomMaternity(roomName);
+  }
+
   // updateEstimationCost() {
   //   // ✅ Ensure estimationCost is initialized correctly
   //   this.formData.estimationCost = this.formData.estimationCost || 0;
-  
+
   //   let additionalCost = 0;
-  
+
   //   // ✅ Mapping of formData fields to their corresponding checkboxes in includedItems
   //   const categoryCheckboxMapping: { [key: string]: string } = {
   //     "implants": "implants",
   //     "procedures": "bedsideProcedure", // Procedures is linked to bedsideProcedure checkbox
   //     "instrumentals": "instrumentEquipment",
   //   };
-  
+
   //   // ✅ Loop through the defined categories
   //   Object.keys(categoryCheckboxMapping).forEach((category) => {
   //     let checkboxKey = categoryCheckboxMapping[category]; // Get the corresponding checkbox key
-  
+
   //     let isChecked = (this.formData.includedItems as any)[checkboxKey]; // Check if the category is selected
-  
+
   //     if (!isChecked) {
   //       let categoryString = (this.formData as any)[category] || "";
   //       console.log(category, ":", categoryString);
-  
+
   //       // ✅ Extract and sum the numerical values correctly
   //       let extractedNumbers = categoryString.match(/\d+/g)?.map(Number) || [];
   //       let categoryTotal = extractedNumbers.reduce((sum:any, num:any) => sum + num, 0);
-  
+
   //       additionalCost += categoryTotal;
   //     }
   //   });
-  
+
   //   // ✅ Ensure the cost updates correctly
   //   this.formData.estimationCost = Number(this.formData.estimationCost) + additionalCost;
-  
+
   //   console.log("Updated Estimation Cost:", this.formData.estimationCost);
   // }
 
   updateEstimationCost() {
     // Reset estimationCost each time to avoid duplication
     let baseEstimationCost = 0; // Start from 0 and rebuild the total cost
-  
+
     const categoryCheckboxMapping: { [key: string]: string } = {
       "implants": "implants",
       "procedures": "bedsideProcedure",
       "instrumentals": "instrumentEquipment",
     };
-  
+
     // Loop through each category to sum costs conditionally
     Object.keys(categoryCheckboxMapping).forEach((category) => {
       const checkboxKey = categoryCheckboxMapping[category];
-      let isChecked = (this.formData.includedItems as any)[checkboxKey]; 
-  
+      let isChecked = (this.formData.includedItems as any)[checkboxKey];
+
       if (!isChecked) {
         let categoryString = (this.formData as any)[category] || "";
         console.log(category, ":", categoryString);
-  
+
         // Extract and sum numerical values safely
         const extractedNumbers = categoryString.match(/\d+/g)?.map(Number) || [];
-        const categoryTotal = extractedNumbers.reduce((sum:any, num:any) => sum + num, 0);
-  
+        const categoryTotal = extractedNumbers.reduce((sum: any, num: any) => sum + num, 0);
+
         baseEstimationCost += categoryTotal;
       }
-      
+
     });
-  
+
     // Assign the recalculated total cost directly
     this.formData.estimationCost = this.roomCost + baseEstimationCost;
 
-  
+
     console.log("Updated Estimation Cost:", this.formData.estimationCost);
   }
-  
 
-  
-  
+
+
+
   showDatePicker(event: Event) {
     (event.target as HTMLInputElement).showPicker(); // ✅ Opens date picker on input click
   }
-  
+
 
 
 
@@ -1724,9 +1765,9 @@ roomCost: number =0;
       alert('Please enter a valid reason for rejection.');
       return;
     }
-  
+
     this.formData.statusOfEstimation = 'rejected'; // Assuming 'staffRemarks' is the field to store rejection reason
-  
+
     const estimationData = {
       estimationId: this.estimationData.estimationId,
       updateFields: {
@@ -1778,7 +1819,7 @@ roomCost: number =0;
       inclusions: this.formData.inclusions,
       exclusions: this.formData.exclusions,
     };
-  
+
     this.estimationService.updateEstimationDetails(estimationData.estimationId, estimationData)
       .subscribe(
         (response) => {
@@ -1792,7 +1833,7 @@ roomCost: number =0;
         }
       );
   }
-  
+
   cancelRejection(): void {
     this.showRejectReasonPopup = false;
     this.rejectionReason = '';
@@ -1801,19 +1842,27 @@ roomCost: number =0;
     const status = this.formData.statusOfEstimation;
 
     // console.log(this.approverSignaturePad)
-  
+
     // Case 1: If it's a new estimation, staff signature is always required
     if (this.estimationData === null) {
-      return this.staffSignaturePad?.isEmpty?.() ?? true;
+      // return this.staffSignaturePad?.isEmpty?.() ?? true;
+      return (
+        (this.staffSignaturePad?.isEmpty?.() ?? true) ||
+        (this.patientSignaturePad?.isEmpty?.() ?? true)
+      );
     }
-  
+
     // Case 2: Role-based override for sub_admin
     if (this.role === 'sub_admin') {
       if (status === 'pending' || status === 'submitted') {
-        return this.staffSignaturePad?.isEmpty?.() ?? true;
+        // return this.staffSignaturePad?.isEmpty?.() ?? true;
+        return (
+          (this.staffSignaturePad?.isEmpty?.() ?? true) ||
+          (this.patientSignaturePad?.isEmpty?.() ?? true)
+        );
       }
     }
-  
+
     // Case 3: Generic fallback based on status
     switch (status) {
       case 'pending':
@@ -1827,10 +1876,10 @@ roomCost: number =0;
         return false;
     }
   }
-  
-  
-  
-  
+
+
+
+
 
 }
 

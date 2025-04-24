@@ -96,6 +96,10 @@ tbody tr:hover {
   border: none;
   cursor: pointer;
 }
+.btn-action img {
+  width: 30px;
+  height: 30px;
+}
 .status-badge {
   display: inline-block;
   color: white;
@@ -223,6 +227,10 @@ tbody tr:hover {
   border: none;
   gap: 10px;
   display: flex;
+}
+.btn-action img {
+  width: 30px;
+  height: 30px;
 }
 .filter-input:focus {
   outline: none;

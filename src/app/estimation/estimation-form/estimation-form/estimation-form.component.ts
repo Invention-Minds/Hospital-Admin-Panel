@@ -404,6 +404,8 @@ export class EstimationFormComponent {
     costForPresidential: '',
     patientEmail: '',
     selectedRoomCost: this.selectedRoomCost,
+    submittedDateAndTime: new Date(),
+    estimationCreatedTime: new Date(),
     rejectReason: '',
     includedItems: {
       wardICUStay: false,
@@ -926,27 +928,30 @@ export class EstimationFormComponent {
         costForDeluxe: this.formData.costForDeluxe,
         selectedRoomCost: this.selectedRoomCost,
         patientEmail: this.formData.patientEmail,
-        patientPhoneNumber: this.formData.patientPhoneNumber.toString()
+        patientPhoneNumber: this.formData.patientPhoneNumber.toString(),
+        submittedDateAndTime: this.formData.submittedDateAndTime,
+        estimationCreatedTime: this.formData.estimationCreatedTime,
       },
       inclusions: this.formData.inclusions,
       exclusions: this.formData.exclusions,
     };
     console.log(estimationData);
-    this.estimationService.updateEstimationDetails(estimationData.estimationId, estimationData).subscribe(
-      (response) => {
-        console.log('Estimation updated successfully:', response);
-        this.closeForm.emit();
-        this.estimationForm.resetForm();
-      },
-      (error) => {
-        console.error('Error updating estimation:', error);
-      }
-    );
+    // this.estimationService.updateEstimationDetails(estimationData.estimationId, estimationData).subscribe(
+    //   (response) => {
+    //     console.log('Estimation updated successfully:', response);
+    //     this.closeForm.emit();
+        
+    //   },
+    //   (error) => {
+    //     console.error('Error updating estimation:', error);
+    //   }
+    // );
     this.estimationService.updateEstimationDetails(estimationData.estimationId, estimationData).subscribe(
       (response) => {
         console.log('Estimation updated successfully:', response);
         this.clearForm();
-        this.closeForm.emit()
+        this.closeForm.emit();
+        this.estimationForm.resetForm();
         this.estimationService.generateAndSendPdf(estimationData.estimationId, estimationData).subscribe(
           (pdfResponse) => {
             console.log("✅ PDF Generated & Sent via WhatsApp:", pdfResponse);

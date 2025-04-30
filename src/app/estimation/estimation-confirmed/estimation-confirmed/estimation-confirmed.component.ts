@@ -290,11 +290,11 @@ export class EstimationConfirmedComponent {
     this.currentPage = 1; // Reset to the first page after sorting
   }
   completeAppointment(estimation: any): void {
-    if(!estimation.pacDone && estimation.estimationType === 'SM'){
+    if(!estimation.advanceAmountPaid){
       this.messageService.add({
               severity: 'warn',
-              summary: 'Need to do PAC',
-              detail: `Kindly Do PAC`,
+              summary: 'Need to do pay Advance Amount',
+              detail: `Kindly pay the advance amount to complete the estimation`,
             });
       return
     }
@@ -317,27 +317,53 @@ export class EstimationConfirmedComponent {
     );
 
   }
-  savePAC(estimation: any){
-    this.selectedEstimation = estimation;
+  // savePAC(estimation: any){
+  //   this.selectedEstimation = estimation;
+  //   const estimationData = {
+  //     estimationId: this.selectedEstimation.estimationId,
+  //     updateFields: {
+  //       pacDone: true,
+  //       pacAmountPaid: this.advanceAmount,
+  //       pacReceiptNumber: this.receiptNumber
+  //     }
+
+  //   }
+  //   this.estimationService.updateEstimationPacDone(estimationData.estimationId, estimationData).subscribe(
+  //     (response) => {
+  //       console.log('Estimation updated successfully:', response);
+  //       this.fetchPendingEstimations();
+  //       this.closeAdvancePopup()
+  //     },
+  //     (error) => {
+  //       console.error('Error updating estimation:', error);
+  //     }
+  //   );
+  // }
+  saveEstimation(): void {
     const estimationData = {
       estimationId: this.selectedEstimation.estimationId,
-      updateFields: {
-        pacDone: true,
-        pacAmountPaid: this.advanceAmount,
-        pacReceiptNumber: this.receiptNumber
-      }
+      advanceAmountPaid: Number(this.advanceAmount),
+      receiptNumber: this.receiptNumber,
+
+
 
     }
-    this.estimationService.updateEstimationPacDone(estimationData.estimationId, estimationData).subscribe(
+    this.estimationService.updateAdvanceDetails(estimationData.estimationId, estimationData).subscribe(
       (response) => {
-        console.log('Estimation updated successfully:', response);
-        this.fetchPendingEstimations();
-        this.closeAdvancePopup()
+        // console.log('Estimation updated successfully:', response);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Advance amount updated successfully.',
+        });
+        this.closeAdvancePopup();
+        this.fetchPendingEstimations()
       },
       (error) => {
         console.error('Error updating estimation:', error);
       }
     );
+
   }
   openAppointmentForm(service: any): void {
     // this.router.navigate(['/reschedule', service.id], {
@@ -466,5 +492,88 @@ export class EstimationConfirmedComponent {
 
 
   }
+  resend(estimation: any) {
+    this.selectedEstimation = estimation;
+    console.log('Inclusions before:', this.selectedEstimation.inclusions);
+    const estimationData = {
+      estimationId: this.selectedEstimation.estimationId, // Use selectedEstimation
+      updateFields: {
+        patientUHID: this.selectedEstimation.patientUHID,
+        patientName: this.selectedEstimation.patientName,
+        ageOfPatient: this.selectedEstimation.ageOfPatient,
+        genderOfPatient: this.selectedEstimation.genderOfPatient,
+        consultantName: this.selectedEstimation.consultantName,
+        estimationPreferredDate: this.selectedEstimation.estimationPreferredDate,
+        icuStay: this.selectedEstimation.icuStay,
+        wardStay: this.selectedEstimation.wardStay,
+        estimationCost: this.selectedEstimation.estimationCost,
+        estimationName: this.selectedEstimation.estimationName,
+        remarks: this.selectedEstimation.remarks,
+        roomType: this.selectedEstimation.roomType,
+        estimatedDate: this.selectedEstimation.estimatedDate,
+        discountPercentage: this.selectedEstimation.discountPercentage,
+        totalEstimationAmount: this.selectedEstimation.totalEstimationAmount,
+        signatureOf: this.selectedEstimation.signatureOf,
+        employeeName: this.selectedEstimation.employeeName,
+        approverName: this.selectedEstimation.approverName,
+        patientSign: this.selectedEstimation.patientSign,
+        employeeSign: this.selectedEstimation.employeeSign,
+        approverSign: this.selectedEstimation.approverSign,
+        statusOfEstimation: this.selectedEstimation.statusOfEstimation,
+        employeeId: this.selectedEstimation.employeeId,
+        approverId: this.selectedEstimation.approverId,
+        totalDaysStay: this.selectedEstimation.totalDaysStay,
+        attenderName: this.selectedEstimation.attenderName,
+        approvedDateAndTime: new Date(),
+        pdfLink: this.selectedEstimation.pdfLink,  // Including PDF link
+        estimationType: this.selectedEstimation.estimationType,
+        advanceAmountPaid: this.selectedEstimation.advanceAmountPaid,
+        ageBucketOfSurgery: this.selectedEstimation.ageBucketOfSurgery,
+        messageSent: this.selectedEstimation.messageSent,
+        messageSentDateAndTime: this.selectedEstimation.messageSentDateAndTime,
+        pacDone: this.selectedEstimation.pacDone,
+        receiptNumber: this.selectedEstimation.receiptNumber,
+        userId: this.selectedEstimation.userId,
+        cancellerId: this.selectedEstimation.cancellerId,
+        cancellerName: this.selectedEstimation.cancellerName,
+        lockedBy: this.selectedEstimation.lockedBy,
+        patientPhoneNumber: this.selectedEstimation.patientPhoneNumber,
+        surgeryTime: this.selectedEstimation.surgeryTime,
+        staffRemarks: this.selectedEstimation.staffRemarks,
+        patientRemarks: this.selectedEstimation.patientRemarks,
+        implants: this.selectedEstimation.implants,
+        procedures: this.selectedEstimation.procedures,
+        instrumentals: this.selectedEstimation.instrumentals,
+        surgeryPackage: this.selectedEstimation.surgeryPackage,
+        multipleEstimationCost: this.selectedEstimation.multipleEstimationCost,
+        costForGeneral: this.selectedEstimation.costForGeneral,
+        costForSemiPrivate: this.selectedEstimation.costForSemiPrivate,
+        costForVip: this.selectedEstimation.costForVip,
+        costForPrivate: this.selectedEstimation.costForPrivate,
+        costForPresidential: this.selectedEstimation.costForPresidential,
+        costForDeluxe: this.selectedEstimation.costForDeluxe,
+        selectedRoomCost: this.selectedEstimation.selectedRoomCost,
+        patientEmail: this.selectedEstimation.patientEmail,
+        submittedDateAndTime: this.selectedEstimation.submittedDateAndTime,
+        estimationCreatedTime: this.selectedEstimation.estimationCreatedTime,
+      },
+      // Extract only the description values
+      // inclusions: this.selectedEstimation.inclusions.map((item:any) => item.description),
+      // exclusions: this.selectedEstimation.exclusions.map((item:any) => item.description),
+      inclusions: Array.from(new Set(this.selectedEstimation.inclusions.map((item: any) => item.description))),
+      exclusions: Array.from(new Set(this.selectedEstimation.exclusions.map((item: any) => item.description))),
 
+    };
+    // console.log(estimationData)
+    this.estimationService.generateAndSendPdf(estimationData.estimationId, estimationData).subscribe(
+      (pdfResponse) => {
+        // console.log("✅ PDF Generated & Sent via WhatsApp:", pdfResponse);
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'PDF Generated & Sent PDF via WhatsApp:!' });
+      },
+      (pdfError) => {
+        console.error("❌ Error generating PDF:", pdfError);
+      }
+    );
+
+  }
 }

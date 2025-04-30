@@ -69,8 +69,10 @@
                       <span *ngIf="sortColumn === 'estimationName' && sortDirection === 'desc'">&#9660;</span>
                     </th>
                    
-                    <th>Estimation Type</th>
-                    <th>Estimation Prefer Date</th>
+                    <th>EST Type</th>
+                    <th>EST Created Date</th>
+                    <th>EST Prefer Date</th>
+                    <th>Surgery Date</th>
                     <th>Status</th>
                     <th>Action</th>
                 </tr>
@@ -90,7 +92,15 @@
                     <!-- <td>{{ estimation.appointmentTime }}</td> -->
                     <td>{{ estimation.estimationName }}</td>
                     <td>{{estimation.estimationType}}</td>
+                    <td>
+                      {{
+                        estimation.estimationPreferredDate 
+                          ? (estimation.estimationCreatedTime | date:'dd-MM-yyyy') 
+                          : (estimation.submittedDateAndTime | date:'dd-MM-yyyy')
+                      }}
+                    </td>
                     <td>{{estimation.estimationPreferredDate | date:'dd-MM-yyyy'}}</td>
+                  <td>{{estimation.estimatedDate | date: 'dd-MM-yyyy'}}</td>
                     <!-- <td>
                         <span class="sms-status" [ngClass]="{'sms-sent': service.smsSent, 'sms-not-sent': !service.smsSent}">
                           <img *ngIf="service.smsSent" src="icons/sent.svg" alt="Sent">

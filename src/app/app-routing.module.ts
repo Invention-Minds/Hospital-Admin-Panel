@@ -24,6 +24,9 @@ import { ServiceOverviewComponent } from './service-radiology/service-overview/s
 import { OverviewRadiologyComponent } from './radiology/overview-radiology/overview-radiology.component';
 import { SamraskhaApptOverviewComponent } from './samraksha/samraskha-appt-overview/samraskha-appt-overview.component';
 import { MaintainanceComponent } from './maintainance/maintainance/maintainance.component';
+import { HelpCenterComponent } from './help-center/help-center.component';
+import { RedirectorComponent } from './redirector/redirector.component';
+import { LabOverviewComponent } from './lab/lab-overview/lab-overview.component';
 
 const routes: Routes = [
   { path: 'dashboard', component: DashboardOverviewComponent, canActivate:[authGuard] },
@@ -47,6 +50,10 @@ const routes: Routes = [
   {path: 'estimation', component: EstimationOverviewComponent, canActivate:[authGuard]},
   {path: 'analytics', component: AnalyticsRootComponent, canActivate:[authGuard]},
   {path: 'blood-appointments', component: SamraskhaApptOverviewComponent, canActivate:[authGuard]},
+  {path:'help-center', component: HelpCenterComponent, canActivate:[authGuard]},
+  {path: 'lab', component: LabOverviewComponent, canActivate:[authGuard]},
+  { path: 'redirector', component: RedirectorComponent },
+
   {
     path: 'form',
     component: HealthCheckupFormComponent,

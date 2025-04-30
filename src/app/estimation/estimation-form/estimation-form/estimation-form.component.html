@@ -414,7 +414,7 @@
 
         </div>
       </div>
-      <p>Note: The cost of the room includes daily nursing and diet fees</p>
+      <p>Note: The cost of the room includes daily nursing</p>
       <!-- Display selected room -->
       <!-- <p class="selectedRoom">Selected Ward: {{ selectedRoomCost }}</p> -->
 
@@ -634,7 +634,7 @@
       </div>
       <div class="form-row">
         <div class="input-container">
-          <input type="text" id="staffRemarks" name="staffRemarks" pattern="^[a-zA-Z . ]*$" class="custom-input" ngModel
+          <input type="text" id="staffRemarks" name="staffRemarks" pattern="^[a-zA-Z0-9\s\W_]*$" class="custom-input" ngModel
             [(ngModel)]="formData.staffRemarks" placeholder=" " class="custom-input"
             [readonly]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'" />
           <label for="staffRemarks" class="custom-label">Internal Remarks</label>
@@ -646,7 +646,7 @@
           </div>
         </div>
         <div class="input-container">
-          <input type="text" id="patientRemarks" name="patientRemarks" pattern="^[a-zA-Z . ]*$" class="custom-input"
+          <input type="text" id="patientRemarks" name="patientRemarks" pattern="^[a-zA-Z0-9\s\W_]*$" class="custom-input"
             ngModel [(ngModel)]="formData.patientRemarks" placeholder=" " class="custom-input"
             [readonly]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'" />
           <label for="patientRemarks" class="custom-label">External Remarks</label>

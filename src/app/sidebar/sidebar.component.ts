@@ -80,10 +80,16 @@ export class SidebarComponent implements OnInit {
     return(this.role === 'sub_admin' && this.subAdminType === 'MHC Coordinator')
   }
   isRadiology():boolean{
-    return(this.role === 'sub_admin' && this.subAdminType === 'Coordinator')
+    return(this.role === 'sub_admin' && this.subAdminType === 'Radiology Coordinator')
   }
   isNotRadiology():boolean{
-    return !(this.role === 'sub_admin' && this.subAdminType === 'Coordinator')
+    return !(this.role === 'sub_admin' && this.subAdminType === 'Radiology Coordinator')
+  }
+  isLab():boolean{
+    return(this.role === 'sub_admin' && this.subAdminType === 'Lab Coordinator')
+  }
+  isNotLab():boolean{
+    return !(this.role === 'sub_admin' && this.subAdminType === 'Lab Coordinator')
   }
   isMukund():boolean{
     return(this.role === 'admin' && this.username === 'Mukund Parathasarthy_admin@rashtrotthana')

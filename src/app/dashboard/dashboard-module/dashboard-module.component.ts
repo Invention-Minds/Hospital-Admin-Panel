@@ -317,10 +317,11 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
     this.router.navigate(['/doctor-appointments'])
   }
 
+  
   gotoHelp(): void {
-    // console.log('Navigating to Help Center...');
-    // Add navigation logic here
+    this.router.navigate(['/help-center']);
   }
+  
   confirmLogout() {
     // Clear user session and redirect to login
     localStorage.removeItem('username');

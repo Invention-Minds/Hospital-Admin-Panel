@@ -44,6 +44,8 @@ export class EstimationOverdueComponent {
 
   // Selected date from calendar
   selectedDate: Date | null = null;
+  date: Date | null = null;
+  showCalendar: boolean = false;
   ngOnInit(): void {
 
   this.userId = localStorage.getItem('userid');
@@ -398,5 +400,99 @@ this.fetchPendingEstimations();
       }
     );
   }
+  openDatePicker(estimation:any) {
+    this.showCalendar = true;
+    this.selectedEstimation = estimation
+  }
+  closePopup(){
+    this.showCalendar = false;
+  }
+  updateStatusBasedOnLatestDate(estimation: any): any {
+    if (!estimation) {
+      return;
+    }
+  
+    // Collect the fields with their values
+    const dateFields = {
+      approvedDateAndTime: estimation.approvedDateAndTime,
+      estimationCreatedTime: estimation.estimationCreatedTime,
+      cancellationDateAndTime: estimation.cancellationDateAndTime,
+      confirmedDateAndTime: estimation.confirmedDateAndTime,
+      completedDateAndTime: estimation.completedDateAndTime,
+      submittedDateAndTime: estimation.submittedDateAndTime
+    };
+  
+    // Find the latest date and corresponding field
+    let latestField = null;
+    let latestDate = null;
+  
+    for (const [field, value] of Object.entries(dateFields)) {
+      if (value) {
+        const dateValue = new Date(value);
+        if (!latestDate || dateValue > latestDate) {
+          latestDate = dateValue;
+          latestField = field;
+        }
+      }
+    }
+  
+    if (!latestField) {
+      // No valid dates found
+      return;
+    }
+  
+    // Map field to new status
+    const statusMapping: { [key: string]: string } = {
+      approvedDateAndTime: 'approved',
+      estimationCreatedTime: 'pending',
+      cancellationDateAndTime: 'cancelled',
+      confirmedDateAndTime: 'confirmed',
+      completedDateAndTime: 'completed',
+      submittedDateAndTime: 'submitted'
+    };
+  
+    const newStatus = statusMapping[latestField];
+  
+    if (newStatus) {
+      const estimationId = estimation.estimationId;
+      const updateData = {
+        statusOfEstimation: newStatus,
+        overDueDateAndTIme: null,
+        estimatedDate: this.date,
+      };
+      return updateData
+    }
+  }
+  
+  updateDate(){
+    if (!this.selectedEstimation || !this.date) {
+      return;
+    }
+    const data = this.updateStatusBasedOnLatestDate(this.selectedEstimation)
+    console.log(data)
+    const estimationId = this.selectedEstimation.estimationId;
+    this.estimationService.updateSurgeryDate(estimationId, data).subscribe({
+      next: (response) => {
+        console.log('Date updated successfully:', response);
+        this.closePopup()
+        this.fetchPendingEstimations();
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Date updated successfully',
+        });
+      },
+      error: (error) => {
+        console.error('Error updating date:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to update date',
+        });
+      }
+    }
 
+    )
+
+  }
 }

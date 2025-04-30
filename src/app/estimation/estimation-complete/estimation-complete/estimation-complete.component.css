@@ -22,6 +22,7 @@
     font-family: Kanit;
     font-weight: 400;
     height: 54px;
+    text-wrap: nowrap;
   }
   thead th {
     padding: 12px;
@@ -39,6 +40,7 @@
     border-radius: 16px;
     height: 60px;
     border-radius: 16px;
+    text-wrap: nowrap;
   }
   
   tbody tr:nth-child(even) {

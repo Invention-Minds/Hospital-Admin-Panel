@@ -27,7 +27,7 @@
       </div>
       <div class="card" 
       [ngClass]="{'active-card': activeComponent === 'details'}"
-      (click)="showDoctorDetails()" *ngIf="role === 'admin' || role === 'super_admin'">
+      (click)="showDoctorDetails()" *ngIf="role === 'admin' || role === 'super_admin' || subAdminType === 'Tele Caller' || employeeId === 'JMRH124'">
         <div class="card-icon">
           <img src="/details-doctor.svg" alt="Doctor Available Icon" />
         </div>
@@ -38,7 +38,7 @@
       </div>
       <div class="card" 
       [ngClass]="{'active-card': activeComponent === 'form'}"
-      (click)="showDoctorForm()"  *ngIf="role === 'admin' || role === 'super_admin'">
+      (click)="showDoctorForm()"  *ngIf="role === 'admin' || role === 'super_admin' ">
         <div class="card-icon">
           <img src="/add-doctor.svg" alt="Doctor Available Icon" />
         </div>

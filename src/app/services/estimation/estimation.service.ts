@@ -56,6 +56,14 @@ updateEstimationPacDone(estimationId: string, data: any): Observable<any>{
   const encodedEstimationId = encodeURIComponent(estimationId);
   return this.http.put(`${this.apiUrl}/estimation-details/${encodedEstimationId}/pacDone`,data);
 }
+updateSurgeryDate(estimationId: string, data: any): Observable<any>{
+  const encodedEstimationId = encodeURIComponent(estimationId);
+  return this.http.put(`${this.apiUrl}/estimation-details/${encodedEstimationId}/updateDate`,data);
+}
+updateEstimationConfirm(estimationId: string, data: any): Observable<any>{
+  const encodedEstimationId = encodeURIComponent(estimationId);
+  return this.http.put(`${this.apiUrl}/estimation-details/${encodedEstimationId}/confirm`,data);
+}
 generateAndSendPdf(estimationId: string, estimationData: any): Observable<any> {
   return this.http.post(`${this.apiUrl}/generate-pdf`, estimationData);
 }

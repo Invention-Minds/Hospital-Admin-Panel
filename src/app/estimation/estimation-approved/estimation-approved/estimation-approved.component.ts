@@ -106,27 +106,7 @@ export class EstimationApprovedComponent {
       this.receiptNumber = ''
 
   }
-  saveEstimation(): void {
-    const estimationData = {
-      estimationId: this.selectedEstimation.estimationId,
-      advanceAmountPaid: Number(this.advanceAmount),
-      receiptNumber: this.receiptNumber,
 
-
-
-    }
-    this.estimationService.updateAdvanceDetails(estimationData.estimationId, estimationData).subscribe(
-      (response) => {
-        // console.log('Estimation updated successfully:', response);
-        this.closeAdvancePopup();
-        this.fetchPendingEstimations()
-      },
-      (error) => {
-        console.error('Error updating estimation:', error);
-      }
-    );
-
-  }
   openFollowUpPopup(estimation: any) {
     this.selectedEstimation = estimation
     this.showFollowUps = true;
@@ -226,6 +206,8 @@ export class EstimationApprovedComponent {
         costForDeluxe: this.selectedEstimation.costForDeluxe,
         selectedRoomCost: this.selectedEstimation.selectedRoomCost,
         patientEmail: this.selectedEstimation.patientEmail,
+        submittedDateAndTime: this.selectedEstimation.submittedDateAndTime,
+        estimationCreatedTime: this.selectedEstimation.estimationCreatedTime,
       },
       // Extract only the description values
       // inclusions: this.selectedEstimation.inclusions.map((item:any) => item.description),
@@ -534,6 +516,48 @@ export class EstimationApprovedComponent {
       this.unlockService();
     }
   }
+  savePAC(estimation: any){
+    this.selectedEstimation = estimation;
+    const estimationData = {
+      estimationId: this.selectedEstimation.estimationId,
+      updateFields: {
+        pacDone: true,
+        pacAmountPaid: this.advanceAmount,
+        pacReceiptNumber: this.receiptNumber,
+        statusOfEstimation: 'pacDone',
+      }
 
-
+    }
+    this.estimationService.updateEstimationPacDone(estimationData.estimationId, estimationData).subscribe(
+      (response) => {
+        console.log('Estimation updated successfully:', response);
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'PAC is updated and EST is confirmed successfully!' });
+        this.fetchPendingEstimations();
+        this.closeAdvancePopup()
+      },
+      (error) => {
+        console.error('Error updating estimation:', error);
+      }
+    );
+  }
+  confirm(estimation:any){
+    this.selectedEstimation = estimation;
+    const estimationData = {
+      estimationId: this.selectedEstimation.estimationId,
+      updateFields: {
+        statusOfEstimation: 'confirmed',
+        confirmedDateAndTime: new Date(),
+      }
+    }
+    this.estimationService.updateEstimationConfirm(estimationData.estimationId, estimationData).subscribe(
+      (response) => {
+        console.log('Estimation updated successfully:', response);
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Estimation confirmed successfully!' });
+        this.fetchPendingEstimations();
+      },
+      (error) => {
+        console.error('Error updating estimation:', error);
+      }
+    );
+  }
 }

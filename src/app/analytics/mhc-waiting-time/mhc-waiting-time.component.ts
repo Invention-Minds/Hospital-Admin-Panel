@@ -422,16 +422,19 @@ export class MhcWaitingTimeComponent implements OnChanges {
       }
 
       // Categorize sumOfThreeWaitingTime
-      if (entry.sumOfThreeWaitingTime <= 5) {
+      if (entry.sumOfThreeWaitingTime > 1 && entry.sumOfThreeWaitingTime <= 5) {
         acc[key].five_min += 1;
-      } else if (entry.sumOfThreeWaitingTime <= 10) {
+      } else if (entry.sumOfThreeWaitingTime > 5 && entry.sumOfThreeWaitingTime <= 10) {
         acc[key].ten_min += 1;
-      } else if (entry.sumOfThreeWaitingTime <= 20) {
+      } else if (entry.sumOfThreeWaitingTime > 10 && entry.sumOfThreeWaitingTime <= 20) {
         acc[key].tweenty_min += 1;
-      } else if (entry.sumOfThreeWaitingTime <= 30) {
+      } else if (entry.sumOfThreeWaitingTime > 20 && entry.sumOfThreeWaitingTime <= 30) {
         acc[key].thirty_min += 1;
-      } else {
+      } else if (entry.sumOfThreeWaitingTime > 30){
         acc[key].more_than_thirty_min += 1;
+      }
+      else{
+        console.log("no data")
       }
 
       return acc;

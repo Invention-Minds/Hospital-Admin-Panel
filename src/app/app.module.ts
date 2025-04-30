@@ -141,6 +141,9 @@ import { FAQComponent } from './help-center/faq/faq.component';
 
 import { PastConsultationsComponent } from './doctor-role/past-consultations/past-consultations.component';
 import { ApptFollowUpComponent } from './appointment/appt-follow-up/appt-follow-up.component';
+import { RedirectorComponent } from './redirector/redirector.component';
+import { LabConsultationsComponent } from './lab/lab-consultations/lab-consultations.component';
+import { LabOverviewComponent } from './lab/lab-overview/lab-overview.component';
 
 
 @NgModule({
@@ -241,6 +244,9 @@ import { ApptFollowUpComponent } from './appointment/appt-follow-up/appt-follow-
     SidebarHelpComponent,
     HelpCenterComponent,
     FAQComponent,
+    RedirectorComponent,
+    LabConsultationsComponent,
+    LabOverviewComponent,
   ],
   imports: [
     BrowserModule,

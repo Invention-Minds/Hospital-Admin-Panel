@@ -1,6 +1,7 @@
 <!-- Main app layout -->
 <div *ngIf="!isMaintenanceRoute(); else maintenanceTemplate">
   <div *ngIf="!isChannelRoute(); else channelTemplate">
+    <div *ngIf="!isHelpDesk(); else helpdeskTemplate">
     <div *ngIf="!isLoginRoute(); else loginTemplate">
       <app-sidebar></app-sidebar>
       <div class="content">
@@ -10,6 +11,7 @@
     <ng-template #loginTemplate>
       <app-login></app-login>
     </ng-template>
+  </div>
   </div>
 </div>
 
@@ -23,6 +25,9 @@
   <router-outlet></router-outlet>
 </ng-template>
 
+<ng-template #helpdeskTemplate>
+  <app-help-center></app-help-center>
+</ng-template>
 <!-- Modal and toast -->
 <div *ngIf="showSettingsModal" class="settings-modal-overlay" (click)="closeSettings()">
   <div class="settings-modal" (click)="preventClose($event)">
@@ -32,6 +37,7 @@
 </div>
 
 <p-toast></p-toast>
+
 <!-- WhatsApp Button -->
 <!-- <button 
   class="whatsapp-button" 

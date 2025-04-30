@@ -51,6 +51,8 @@ export class DoctorAvailabilityComponent {
   role: string = '';
   doctorsList: any[] = [];
   unavailableDoctorList: any[] = [];
+  subAdminType: string = ''; // Sub-admin type
+  employeeId: string = ''; // Employee ID
 
 
 
@@ -64,7 +66,10 @@ export class DoctorAvailabilityComponent {
   ngOnInit(): void {
     this.fetchDoctors();
     this.role = localStorage.getItem('role') || ''
-    console.log(this.role)
+    console.log(this.role);
+    this.subAdminType = localStorage.getItem('subAdminType') || ''; // Fetch sub-admin type from localStorage
+    this.employeeId = localStorage.getItem('employeeId') || ''; // Fetch employee ID from localStorage
+    console.log(this.subAdminType)
   }
 
 

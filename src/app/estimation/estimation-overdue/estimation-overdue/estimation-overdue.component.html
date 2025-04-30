@@ -70,11 +70,12 @@
                       <span *ngIf="sortColumn === 'estimationName' && sortDirection === 'desc'">&#9660;</span>
                     </th>
                     <!-- <th>Time</th> -->
-                    <th>Estimation Type</th>
-                    <th>Estimation Date</th>
+                    <th>EST Type</th>
+                    <th>EST Created Date</th>
+                    <th>Surgery Date</th>
                     <th>Est. Handled By</th>
                     <th>Est. Approved By</th>
-                    <th>SMS</th>
+                    <th>WA</th>
                     <th>Status</th>
                     <th>Action</th>
 
@@ -94,7 +95,14 @@
                     <td>{{ estimation.estimationName }}</td>
                     <!-- <td>{{ estimation.appointmentTime }}</td> -->
                     <td>{{ estimation.estimationType }}</td>
-                    <td>{{estimation.estimatedDate | date:'dd-MM-yyyy'}}</td>
+                    <td>
+                      {{
+                        estimation.estimationPreferredDate 
+                          ? (estimation.estimationCreatedTime | date:'dd-MM-yyyy') 
+                          : (estimation.submittedDateAndTime | date:'dd-MM-yyyy')
+                      }}
+                    </td>
+                  <td>{{estimation.estimatedDate | date: 'dd-MM-yyyy'}}</td>
                     <td>{{ estimation.employeeId }}</td>
                     <td>{{estimation.approverId}}</td>
                     <td>
@@ -103,21 +111,6 @@
                         <img *ngIf="!estimation.messageSent" src="icons/not-sent.svg" alt="Not Sent">
                       </span>
                     </td>
-
-                    <!-- <td>
-                        <span class="sms-status" [ngClass]="{'sms-sent': service.smsSent, 'sms-not-sent': !service.smsSent}">
-                          <img *ngIf="service.smsSent" src="icons/sent.svg" alt="Sent">
-                          <img *ngIf="!service.smsSent" src="icons/not-sent.svg" alt="Not Sent">
-                        </span>
-                      </td>
-                      <td>
-                        <span class="sms-status"
-                          [ngClass]="{'sms-sent': service.emailSent, 'sms-not-sent': !service.emailSent}">
-                          <img *ngIf="service.emailSent" src="icons/sent.svg" alt="Sent">
-                          <img *ngIf="!service.emailSent" src="icons/not-sent.svg" alt="Not Sent">
-                        </span>
-                      </td>
-                       -->
                       <td>
                         <span class="status-badge">{{ estimation.statusOfEstimation }}</span>
                       </td>
@@ -125,8 +118,9 @@
                       <button class="btn-action" [disabled]="adminType !== 'Senior Manager'" (click)="openCancelFeedback(estimation)"  pTooltip="Cancel" tooltipPosition="top">
                         <img src="/cancel-est.svg" alt="Confirm">
                       </button>
-                          <!-- <img src="appt-cancel.svg" alt="delete" class="action-icon" (click)="cancelAppointment(estimation)"
-                          pTooltip="Cancel" tooltipPosition="top"> -->
+                      <button class="btn-action" (click)="openDatePicker(estimation)" pTooltip="Date Change" tooltipPosition="top">
+                        <img src="/est-edit.svg" alt="Confirm">
+                      </button>
                       </td>
                 </tr>
             </tbody>
@@ -182,6 +176,42 @@
     <div class="modal-footer">
       <button class="save-button" (click)="saveFeedback()">Save</button>
       <button class="close-button" (click)="closeCancelFeedback()">Close</button>
+    </div>
+  </div>
+</div>
+<div *ngIf="showCalendar" class="estimation-modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Update Date for {{ selectedEstimation.patientName }}</h3>
+      <button class="popup-close" (click)="closePopup()">
+        <img src="/popup-close.svg" />
+      </button>
+    </div>
+    <hr />
+    <div class="modal-body">
+      <p>
+        Patient Name<span class="space">:</span>{{ selectedEstimation?.patientName }}
+      </p>
+      <p>
+        Prev Surgery Date<span class="space-1">:</span> {{ selectedEstimation?.estimatedDate }}
+      </p>
+
+
+    <div class="estimation-input-container">
+      <!-- Input field for estimation -->
+      <input 
+        type="date" 
+        [(ngModel)]="date" 
+        required
+        class="custom-input"
+      />
+      <label for="receiptNumber" class="custom-label">Select the Date*</label>
+    </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="save-button" (click)="updateDate()">Update</button>
+      <button class="close-button" (click)="closePopup()">Close</button>
     </div>
   </div>
 </div>

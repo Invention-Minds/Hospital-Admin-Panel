@@ -66,7 +66,7 @@
           </div> -->
         <div *ngFor="let range of doctor.availableFrom.split(',')">
           <div class="extra-slots-buttons"
-            *ngIf="((role === 'admin' || role === 'super_admin') && doctor.doctorType !== 'Visiting Consultant')">
+            *ngIf="((role === 'admin' || role === 'super_admin' || subAdminType === 'Tele Caller' || employeeId === 'JMRH124') && doctor.doctorType !== 'Visiting Consultant')">
             <span class="doctor-name">{{ range }}</span>
             <button type="button" class="button-after" (click)="addExtraSlotsBefore(doctor, range)"><img
                 src="/before.svg"></button>
@@ -80,7 +80,7 @@
     <div class="slots-scroll-container" *ngIf="!isLoading">
       <div class="slots-wrapper">
         <ng-container *ngFor="let slot of doctor.slots">
-          <div *ngIf="slot.status !== 'extra' || (role === 'admin' || role === 'super_admin')" class="slot-box"
+          <div *ngIf="slot.status !== 'extra' || (role === 'admin' || role === 'super_admin' || subAdminType === 'Tele Caller' || employeeId === 'JMRH124')" class="slot-box"
             [pTooltip]="
                  slot.status === 'booked' ? 'Booked' : 
                  slot.status === 'extra' ? 'Extra':
@@ -93,7 +93,7 @@
                    'slot-booked': slot.status === 'booked',
                    'slot-unavailable': slot.status === 'unavailable',
                    'complete': slot.status === 'complete',
-                   'blocked': slot.status === 'extra' && (role === 'admin' || role === 'super_admin'),
+                   'blocked': slot.status === 'extra' && (role === 'admin' || role === 'super_admin' || subAdminType === 'Tele Caller' || employeeId === 'JMRH124'),
                    'unavailale-slot-by-user': doctor.unavailableSlots!.includes(slot.time)
                  }" (click)="onSlotClick(doctor, slot)">
             {{ slot.time }}

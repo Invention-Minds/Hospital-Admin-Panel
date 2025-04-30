@@ -17,9 +17,13 @@ export class DoctorOverviewComponent implements OnInit {
   isEditMode: boolean = false;
   role: string = '';  // User role
   isLoading:boolean=false;
+  subAdminType: string = ''; // Sub-admin type
+  employeeId: string = ''; // Employee ID
   ngOnInit(): void {
     // Fetch role from localStorage or the authentication service
     this.role = localStorage.getItem('role') || '';  // You can also fetch this from a service
+    this.subAdminType = localStorage.getItem('subAdminType') || ''; // Fetch sub-admin type from localStorage
+    this.employeeId = localStorage.getItem('employeeId') || ''; // Fetch employee ID from localStorage
     // console.log('User role:', this.role);
   }
   newDoctor: Doctor = {

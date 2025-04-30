@@ -75,12 +75,13 @@
                         <span *ngIf="sortColumn === 'appointmentDate' && sortDirection === 'desc'">&#9660;</span>
                     </th>
                     <!-- <th>Time</th> -->
-                    <th>Estimation Type</th>
+                    <th>EST Type</th>
 
-                    <th>Estimation Date</th>
+                    <th>EST Created Date</th>
+                    <th>Surgery Date</th>
                     <th>Est. Handled By</th>
                     <th>Est. Approved By</th>
-                    <th>SMS</th>
+                    <th>WA</th>
                     <th>Status</th>
                     <th>Action</th>
                 </tr>
@@ -99,6 +100,13 @@
                     <td>{{ estimation.estimationName }}</td>
                     <!-- <td>{{ estimation.appointmentTime }}</td> -->
                     <td>{{ estimation.estimationType }}</td>
+                    <td>
+                        {{
+                        estimation.estimationPreferredDate
+                        ? (estimation.estimationCreatedTime | date:'dd-MM-yyyy')
+                        : (estimation.submittedDateAndTime | date:'dd-MM-yyyy')
+                        }}
+                    </td>
                     <td>{{estimation.estimatedDate | date:'dd-MM-yyyy'}}</td>
                     <td>{{estimation.employeeId}}</td>
                     <td>{{estimation.approverId}}</td>
@@ -132,10 +140,11 @@
                         </span>
                     </td>
                     <td class="button">
-                          <button class="btn-action" (click)="print(estimation)"  pTooltip="Download" tooltipPosition="top">
+                        <button class="btn-action" (click)="print(estimation)" pTooltip="Download"
+                            tooltipPosition="top">
                             <img src="/report-download.svg" alt="Confirm">
-                          </button>
-                          <!-- <img src="appt-cancel.svg" alt="delete" class="action-icon" (click)="cancelAppointment(estimation)"
+                        </button>
+                        <!-- <img src="appt-cancel.svg" alt="delete" class="action-icon" (click)="cancelAppointment(estimation)"
                           pTooltip="Cancel" tooltipPosition="top"> -->
                     </td>
                 </tr>

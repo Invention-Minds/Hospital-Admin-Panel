@@ -1,7 +1,7 @@
 export const environment = {
     production: false,
     //  apiUrl: 'https://backend-812956739285.us-east4.run.app/api',  // Development API URL
-    // apiUrl: 'http://192.168.9.139:3000/api',  // Development API URL
+    apiUrl: 'http://192.168.9.139:3000/api',  // Development API URL
     // apiUrl: 'http://129.159.228.254:3000/api' 
     // apiUrl:'http://backendapi.hrproindia.in/api'
     // apiUrl: 'https://rashtrotthana-backend-812956739285.us-east4.run.app/api',

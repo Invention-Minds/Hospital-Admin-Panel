@@ -58,7 +58,7 @@
         <div class="unavailable">
           <button class="unavailable-button" *ngIf="doctor.doctorType !=='Visiting Consultant'"
             (click)="openUnavailableModal(doctor)"
-            [disabled]="!isTodayOrTomorrow(selectedDate) && doctor.id !== 14">Unavailable Slots</button>
+            [disabled]="!(role === 'admin' || role === 'super_admin' || subAdminType === 'Tele Caller' || employeeId === 'JMRH124')">Unavailable Slots</button>
         </div>
         <!-- <div class="extra-slots-buttons" *ngIf="((role === 'admin' || role === 'super_admin') && doctor.doctorType !== 'Visiting Consultant')">
             <button type="button" class="button-after" (click)="addExtraSlotsBefore(doctor)"><img src="/before.svg"></button>
@@ -115,7 +115,7 @@
 
         <div class="heading-calendar">
           <h2>Select Unavailable Slots for {{ selectedDoctor?.name }}</h2>
-          <p-calendar [(ngModel)]="selectedDate" [minDate]="todayforUnavialable" [maxDate]="tomorrow" [showIcon]="false"
+          <p-calendar [(ngModel)]="selectedDate" [minDate]="todayforUnavialable"  [showIcon]="false"
             (ngModelChange)="onDateChangeInModal($event)" [showButtonBar]="true" placeholder="Select Date"
             dateFormat="dd-mm-yy"></p-calendar>
         </div>

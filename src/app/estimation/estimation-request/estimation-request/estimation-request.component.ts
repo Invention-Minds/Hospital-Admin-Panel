@@ -61,8 +61,8 @@ export class EstimationRequestComponent {
           );
           console.log(this.pendingEstimations)
           this.pendingEstimations.sort((a, b) => {
-            const dateA = new Date(a.estimationCreatedTime!);
-            const dateB = new Date(b.estimationCreatedTime!);
+            const dateA = new Date(a.submittedDateAndTime!);
+            const dateB = new Date(b.submittedDateAndTime!);
             return dateB.getTime() - dateA.getTime();
           });
           this.filteredEstimations = [...this.pendingEstimations];

@@ -1,7 +1,7 @@
 <div class="form-container">
   <h2 class="form-title">Estimation Form</h2>
   <hr class="line">
-  <form #estimationForm="ngForm" (ngSubmit)="onSubmit(estimationForm)" novalidate>
+  <form #estimationForm="ngForm" [class.submitted]="estimationForm.submitted" (ngSubmit)="onSubmit(estimationForm)" novalidate>
     <div class="section">
       <h3>Patient Information:</h3>
       <div class="form-row">
@@ -33,7 +33,7 @@
 
           <div *ngIf="estimationForm.submitted && estimationForm.controls['patientUHID']?.invalid"
             class="error-message">
-            <span *ngIf="estimationForm.controls['patientUHID']?.errors?.['required']">UHID is required.</span>
+            <!-- <span *ngIf="estimationForm.controls['patientUHID']?.errors?.['required']">UHID is required.</span> -->
             <span *ngIf="estimationForm.controls['patientUHID']?.errors?.['pattern']">Invalid UHID format.</span>
           </div>
         </div>
@@ -46,7 +46,7 @@
           <label for="patientName" class="custom-label">Patient Name*</label>
           <div *ngIf="estimationForm.submitted && estimationForm.controls['patientName']?.invalid"
             class="error-message">
-            <span *ngIf="estimationForm.controls['patientName']?.errors?.['required']">Patient Name is required.</span>
+            <!-- <span *ngIf="estimationForm.controls['patientName']?.errors?.['required']">Patient Name is required.</span> -->
             <span *ngIf="estimationForm.controls['patientName']?.errors?.['pattern']">Invalid Name format.</span>
           </div>
         </div>
@@ -60,7 +60,7 @@
           <label for="ageOfPatient" class="custom-label">Age*</label>
           <div *ngIf="estimationForm.submitted && estimationForm.controls['ageOfPatient']?.invalid"
             class="error-message">
-            <span *ngIf="estimationForm.controls['ageOfPatient']?.errors?.['required']">Age is required.</span>
+            <!-- <span *ngIf="estimationForm.controls['ageOfPatient']?.errors?.['required']">Age is required.</span> -->
             <span *ngIf="estimationForm.controls['ageOfPatient']?.errors?.['pattern']">Invalid Age format.</span>
             <span *ngIf="estimationForm.controls['ageOfPatient']?.errors?.['min']">Age must be greater than 0.</span>
             <span *ngIf="estimationForm.controls['ageOfPatient']?.errors?.['max']">Days cannot exceed 150.</span>
@@ -92,7 +92,7 @@
 
           <div *ngIf="estimationForm.submitted && estimationForm.controls['genderOfPatient']?.invalid"
             class="error-message">
-            <span *ngIf="estimationForm.controls['genderOfPatient']?.errors?.['required']">Gender is required.</span>
+            <!-- <span *ngIf="estimationForm.controls['genderOfPatient']?.errors?.['required']">Gender is required.</span> -->
           </div>
         </div>
 
@@ -105,8 +105,8 @@
           <label for="patientPhoneNumber" class="custom-label">PhoneNumber*</label>
           <div *ngIf="estimationForm.submitted && estimationForm.controls['patientPhoneNumber']?.invalid"
             class="error-message">
-            <span *ngIf="estimationForm.controls['patientPhoneNumber']?.errors?.['required']">Phone Number is
-              required.</span>
+            <!-- <span *ngIf="estimationForm.controls['patientPhoneNumber']?.errors?.['required']">Phone Number is -->
+              <!-- required.</span> -->
             <span *ngIf="estimationForm.controls['patientPhoneNumber']?.errors?.['pattern']">Invalid Phone Number
               format.</span>
           </div>
@@ -131,7 +131,7 @@
           <label for="patientEmail" class="custom-label">Email Id*</label>
           <div *ngIf="estimationForm.submitted && estimationForm.controls['patientEmail']?.invalid"
             class="error-message">
-            <span *ngIf="estimationForm.controls['patientEmail']?.errors?.['required']">Email Id is required.</span>
+            <!-- <span *ngIf="estimationForm.controls['patientEmail']?.errors?.['required']">Email Id is required.</span> -->
             <span *ngIf="estimationForm.controls['patientEmail']?.errors?.['pattern']">Invalid Email Id format.</span>
           </div>
         </div>
@@ -170,9 +170,9 @@
 
           <div *ngIf="estimationForm.submitted && estimationForm.controls['consultantId']?.invalid"
             class="error-message">
-            <span *ngIf="estimationForm.controls['consultantId']?.errors?.['required']">
+            <!-- <span *ngIf="estimationForm.controls['consultantId']?.errors?.['required']">
               Consultant is required.
-            </span>
+            </span> -->
           </div>
         </div>
 
@@ -184,19 +184,19 @@
             <label>
               <input type="radio" name="estimationType" [(ngModel)]="selectedEstimationType" value="MM"
                 [disabled]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'"
-                required />
+                 />
               MM
             </label>
             <label>
               <input type="radio" name="estimationType" [(ngModel)]="selectedEstimationType" value="SM"
                 [disabled]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'"
-                (change)="loadSurgeryNames()" required />
+                (change)="loadSurgeryNames()"  />
               SM
             </label>
             <label>
               <input type="radio" name="estimationType" [(ngModel)]="selectedEstimationType" value="Maternity"
                 [disabled]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'"
-                (change)="loadSurgeryNames()" required />
+                (change)="loadSurgeryNames()"  />
               Maternity
             </label>
           </div>
@@ -215,8 +215,8 @@
 
           <div *ngIf="estimationForm.submitted && estimationForm.controls['estimationName']?.invalid"
             class="error-message">
-            <span *ngIf="estimationForm.controls['estimationName']?.errors?.['required']">Surgery Name is
-              required.</span>
+            <!-- <span *ngIf="estimationForm.controls['estimationName']?.errors?.['required']">Surgery Name is -->
+              <!-- required.</span> -->
             <span *ngIf="estimationForm.controls['estimationName']?.errors?.['pattern']">Invalid Name format.</span>
           </div>
         </div>
@@ -250,8 +250,8 @@
           <label for="surgeryTime" class="custom-label">Surgery Level*</label>
           <div *ngIf="estimationForm.submitted && estimationForm.controls['surgeryTime']?.invalid"
             class="error-message">
-            <span *ngIf="estimationForm.controls['surgeryTime']?.errors?.['required']">Surgery Level is
-              required.</span>
+            <!-- <span *ngIf="estimationForm.controls['surgeryTime']?.errors?.['required']">Surgery Level is -->
+              <!-- required.</span> -->
           </div>
         </div>
       </div>
@@ -262,7 +262,7 @@
             [(ngModel)]="formData.remarks" placeholder=" " class="custom-input" />
           <label for="remarks" class="custom-label">Remarks</label>
           <div *ngIf="estimationForm.submitted && estimationForm.controls['remarks']?.invalid" class="error-message">
-            <span *ngIf="estimationForm.controls['remarks']?.errors?.['required']">Remarks is required.</span>
+            <!-- <span *ngIf="estimationForm.controls['remarks']?.errors?.['required']">Remarks is required.</span> -->
             <span *ngIf="estimationForm.controls['remarks']?.errors?.['pattern']">Invalid Remarks format.</span>
           </div>
         </div>
@@ -274,8 +274,8 @@
           <label for="estimationPreferredDate" class="custom-label">Preferred Date by Doctor*</label>
           <div *ngIf="estimationForm.submitted && estimationForm.controls['estimationPreferredDate']?.invalid"
             class="error-message">
-            <span *ngIf="estimationForm.controls['estimationPreferredDate']?.errors?.['required']">Preferred Date by
-              Doctor is required.</span>
+            <!-- <span *ngIf="estimationForm.controls['estimationPreferredDate']?.errors?.['required']">Preferred Date by -->
+              <!-- Doctor is required.</span> -->
             <span *ngIf="estimationForm.controls['estimationPreferredDate']?.errors?.['pattern']">Invalid Date
               format.</span>
           </div>
@@ -377,9 +377,9 @@
       <input type="hidden" name="roomType" [(ngModel)]="formData.roomType" required />
 
       <!-- Validation Error Message -->
-      <div class="error-message" *ngIf="estimationForm.submitted && !formData.roomType">
+      <!-- <div class="error-message" *ngIf="estimationForm.submitted && !formData.roomType">
         <span>Room Type is required.</span>
-      </div>
+      </div> -->
 
       <div class="selected-rooms-container" *ngIf="selectedRooms.length > 0">
         <div class="room-box custom-input" *ngFor="let room of sortedSelectedRooms">
@@ -562,8 +562,8 @@
           <label for="estimatedDate" class="custom-label">Estimated Date*</label>
           <div *ngIf="estimationForm.submitted && estimationForm.controls['estimatedDate']?.invalid"
             class="error-message">
-            <span *ngIf="estimationForm.controls['estimatedDate']?.errors?.['required']">Estimated Date is
-              required.</span>
+            <!-- <span *ngIf="estimationForm.controls['estimatedDate']?.errors?.['required']">Estimated Date is
+              required.</span> -->
             <span *ngIf="estimationForm.controls['estimatedDate']?.errors?.['pattern']">Invalid format.</span>
           </div>
         </div>
@@ -598,8 +598,8 @@
           <label for="estimationCost" class="custom-label">Estimation Cost*</label>
           <div *ngIf="estimationForm.submitted && estimationForm.controls['estimationCost']?.invalid"
             class="error-message">
-            <span *ngIf="estimationForm.controls['estimationCost']?.errors?.['required']">Estimation Cost is
-              required.</span>
+            <!-- <span *ngIf="estimationForm.controls['estimationCost']?.errors?.['required']">Estimation Cost is
+              required.</span> -->
             <span *ngIf="estimationForm.controls['estimationCost']?.errors?.['pattern']">Invalid Cost format.</span>
           </div>
         </div>
@@ -626,35 +626,35 @@
           <label for="totalEstimationAmount" class="custom-label">Grand Total*</label>
           <div *ngIf="estimationForm.submitted && estimationForm.controls['totalEstimationAmount']?.invalid"
             class="error-message">
-            <span *ngIf="estimationForm.controls['totalEstimationAmount']?.errors?.['pattern']">Invalid Grand Total
-              format.</span>
+            <!-- <span *ngIf="estimationForm.controls['totalEstimationAmount']?.errors?.['pattern']">Invalid Grand Total
+              format.</span> -->
             <span *ngIf="estimationForm.controls['totalEstimationAmount']?.errors?.['max']">Enter below 100.</span>
           </div>
         </div>
       </div>
       <div class="form-row">
         <div class="input-container">
-          <input type="text" id="staffRemarks" name="staffRemarks" pattern="^[a-zA-Z0-9\s\W_]*$" class="custom-input" ngModel
+          <input type="text" id="staffRemarks" name="staffRemarks"  class="custom-input" ngModel
             [(ngModel)]="formData.staffRemarks" placeholder=" " class="custom-input"
             [readonly]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'" />
-          <label for="staffRemarks" class="custom-label">Internal Remarks</label>
+          <label for="staffRemarks" class="custom-remarks">Internal Remarks</label>
           <div *ngIf="estimationForm.submitted && estimationForm.controls['staffRemarks']?.invalid"
             class="error-message">
-            <span *ngIf="estimationForm.controls['staffRemarks']?.errors?.['required']">Internal Remarks is
-              required.</span>
-            <span *ngIf="estimationForm.controls['staffRemarks']?.errors?.['pattern']">Invalid Name format.</span>
+            <!-- <span *ngIf="estimationForm.controls['staffRemarks']?.errors?.['required']">Internal Remarks is
+              required.</span> -->
+            <!-- <span *ngIf="estimationForm.controls['staffRemarks']?.errors?.['pattern']">Invalid Name format.</span> -->
           </div>
         </div>
         <div class="input-container">
-          <input type="text" id="patientRemarks" name="patientRemarks" pattern="^[a-zA-Z0-9\s\W_]*$" class="custom-input"
+          <input type="text" id="patientRemarks" name="patientRemarks"  class="custom-input"
             ngModel [(ngModel)]="formData.patientRemarks" placeholder=" " class="custom-input"
             [readonly]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'" />
-          <label for="patientRemarks" class="custom-label">External Remarks</label>
+          <label for="patientRemarks" class="custom-remarks">External Remarks</label>
           <div *ngIf="estimationForm.submitted && estimationForm.controls['patientRemarks']?.invalid"
             class="error-message">
-            <span *ngIf="estimationForm.controls['patientRemarks']?.errors?.['required']">External Remarks is
-              required.</span>
-            <span *ngIf="estimationForm.controls['patientRemarks']?.errors?.['pattern']">Invalid Name format.</span>
+            <!-- <span *ngIf="estimationForm.controls['patientRemarks']?.errors?.['required']">External Remarks is
+              required.</span> -->
+            <!-- <span *ngIf="estimationForm.controls['patientRemarks']?.errors?.['pattern']">Invalid Name format.</span> -->
           </div>
         </div>
       </div>
@@ -730,15 +730,15 @@
           <button class="clear-button sign-clear" style="margin-bottom:10px ;"
             *ngIf="formData.statusOfEstimation === 'pending' || estimationData === null" (click)="clearPatientSign()">Clear</button>
           <div class="input-container"
-            *ngIf="formData.signatureOf === 'attender' && (formData.statusOfEstimation === 'approved' || formData.statusOfEstimation === 'accepted') ">
+            *ngIf="formData.signatureOf === 'attender'">
             <input type="text" id="attenderName" name="attenderName" pattern="^[a-zA-Z . ]*$" class="custom-input"
               ngModel [(ngModel)]="formData.attenderName" placeholder=" " class="custom-input"
-              [readonly]="formData.statusOfEstimation === 'accepted'" />
+              [readonly]="formData.statusOfEstimation === 'approved'" [required]="formData.signatureOf ==='attender'" />
             <label for="attenderName" class="custom-label">Attender Name*</label>
             <div *ngIf="estimationForm.submitted && estimationForm.controls['attenderName']?.invalid"
               class="error-message">
-              <span *ngIf="estimationForm.controls['attenderName']?.errors?.['required']">Attender Name is
-                required.</span>
+              <!-- <span *ngIf="estimationForm.controls['attenderName']?.errors?.['required']">Attender Name is
+                required.</span> -->
               <span *ngIf="estimationForm.controls['attenderName']?.errors?.['pattern']">Invalid Name format.</span>
             </div>
           </div>
@@ -787,8 +787,8 @@
       <!-- For Subadmin -->
       <button
         *ngIf="role === 'sub_admin' && (formData.statusOfEstimation === 'pending' || estimationData === null || formData.statusOfEstimation === 'submitted')"
-        type="submit" class="submit-button"
-        [disabled]="!estimationForm.valid || isRequiredSignatureMissing() || this.selectedRoomCost === '' || !isAnyCheckboxChecked">
+        type="submit" class="submit-button" [disabled]="isButtonClicked"
+        >
         Submit
       </button>
       <button *ngIf="role === 'sub_admin' && (formData.statusOfEstimation === 'rejected')" type="submit"

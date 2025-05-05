@@ -161,30 +161,33 @@ export class AppointmentFormComponent implements OnInit {
       patientType: ['New'],
     });
     // Subscribe to prefix changes to set gender automatically
-  this.appointmentForm.get('prefix')?.valueChanges.subscribe(prefix => {
-    const genderControl = this.appointmentForm.get('gender');
-    if (!genderControl) return;
+    this.appointmentForm.get('prefix')?.valueChanges.subscribe(prefix => {
+      const genderControl = this.appointmentForm.get('gender');
+      if (!genderControl) return;
 
-    switch (prefix) {
-      case 'Mr.':
-      case 'Master':
-        genderControl.setValue('Male');
-        break;
+      switch (prefix) {
+        case 'Mr.':
+        case 'Master':
+          genderControl.setValue('Male');
+          break;
 
-      case 'Mrs.':
-      case 'Ms.':
-      case 'Miss':
-      case 'Dr.':
-      case 'Baby Of.':
-        genderControl.setValue('Female');
-        break;
+        case 'Mrs.':
+        case 'Ms.':
+        case 'Miss':
+        case 'Dr.':
+        case 'Baby Of.':
+          genderControl.setValue('Female');
+          break;
 
-      default:
-        genderControl.setValue('');
-    }
-  });
-    if (this.appointment?.phoneNumber.startsWith('91')) {
-      this.appointment.phoneNumber = this.appointment.phoneNumber.substring(2);
+        default:
+          genderControl.setValue('');
+      }
+    });
+    // if (this.appointment?.phoneNumber.startsWith('91')) {
+    //   this.appointment.phoneNumber = this.appointment.phoneNumber.substring(2);
+    // }
+    if (this.appointment?.phoneNumber.startsWith('91') && this.appointment?.phoneNumber.length > 10) {
+      this.appointment.phoneNumber = this.appointment?.phoneNumber.substring(2);
     }
     // console.log(this.currentAppointment)
     if (this.currentAppointment) {
@@ -192,7 +195,7 @@ export class AppointmentFormComponent implements OnInit {
 
       this.patchFormWithAppointment(this.currentAppointment, new Date(this.currentAppointment.date));
     }
-    if(this.followUp){
+    if (this.followUp) {
       console.log(this.followUp)
       this.followUp.time = ''
       this.patchFormWithAppointment(this.followUp, new Date());
@@ -288,7 +291,7 @@ export class AppointmentFormComponent implements OnInit {
               }
             }
           });
-          
+
           if (this.appointment) {
             this.appointment.doctorId = doctorId;
           }
@@ -670,7 +673,7 @@ export class AppointmentFormComponent implements OnInit {
             }
           }
         });
-        
+
         if (this.appointment) {
           this.appointment.doctorId = doctorId;
         }
@@ -1198,10 +1201,14 @@ export class AppointmentFormComponent implements OnInit {
     // if (!phoneNumber.startsWith('91')) {
     //   phoneNumber = '91' + phoneNumber;
     // }
-    if (phoneNumber.startsWith('91')) {
-      phoneNumber = phoneNumber.substring(2);
+    // if (phoneNumber.startsWith('91')) {
+    //   phoneNumber = phoneNumber.substring(2);
 
+    // }
+    if (phoneNumber.startsWith('91') && phoneNumber.length > 10) {
+      phoneNumber = phoneNumber.substring(2);
     }
+
     // console.log(typeof (appointment.time))
     if (!this.isBookedSlot) {
       appointment.status = 'Confirm';
@@ -1319,9 +1326,19 @@ export class AppointmentFormComponent implements OnInit {
     if (selectedDoctor && selectedDoctor.doctorType === 'Visiting Consultant') {
       time = this.formatTimeTo12Hour(time);
     }
+    let phone = formValues.phoneNumber;
+
+    // Remove leading '91' only if it's a country code (i.e. total length > 10)
+    if (phone.startsWith('91') && phone.length > 10) {
+      phone = phone.substring(2);
+    }
+
+    // Always add '91' to get the final number
+    this.appointment.phoneNumber = '91' + phone;
+
     const date = this.formatDate(new Date(formValues.appointmentDate));
     this.appointment.patientName = formValues.firstName + ' ' + formValues.lastName;
-    this.appointment.phoneNumber = formValues.phoneNumber.startsWith('91') ? formValues.phoneNumber : '91' + formValues.phoneNumber;
+    // this.appointment.phoneNumber = formValues.phoneNumber.startsWith('91') ? formValues.phoneNumber : '91' + formValues.phoneNumber;
     this.appointment.email = formValues.email;
     this.appointment.doctorName = formValues.doctorName;
     this.appointment.date = date;
@@ -1425,9 +1442,14 @@ export class AppointmentFormComponent implements OnInit {
       const department = this.department ?? 'Default Department';
       let phoneNumber = this.appointmentForm.value.phoneNumber;
 
+      if (phoneNumber.startsWith('91') && phoneNumber.length > 10) {
+        phoneNumber = phoneNumber.substring(2);
+      }
+
       if (!phoneNumber.startsWith('91')) {
         phoneNumber = '91' + phoneNumber;
       }
+
       // console.log(this.appointment)
       // console.log(this.appointmentForm.value.appointmentTime)
       // const time = this.appointmentForm.value.appointmentTime;
@@ -1568,7 +1590,9 @@ export class AppointmentFormComponent implements OnInit {
         const doctorId = this.appointment.doctorId
         const department = this.department ?? 'Default Department';
         let phoneNumber = this.appointmentForm.value.phoneNumber;
-
+        if (phoneNumber.startsWith('91') && phoneNumber.length > 10) {
+          phoneNumber = phoneNumber.substring(2);
+        }
         if (!phoneNumber.startsWith('91')) {
           phoneNumber = '91' + phoneNumber;
         }
@@ -1661,7 +1685,9 @@ export class AppointmentFormComponent implements OnInit {
               next: (response) => {
                 const doctorPhoneNumber = response?.phone_number;
                 let phoneNumber = this.appointment!.phoneNumber;
-
+                if (phoneNumber.startsWith('91') && phoneNumber.length > 10) {
+                  phoneNumber = phoneNumber.substring(2);
+                }
                 if (!phoneNumber.startsWith('91')) {
                   phoneNumber = '91' + phoneNumber;
                 }
@@ -1823,7 +1849,9 @@ export class AppointmentFormComponent implements OnInit {
               next: (response) => {
                 const doctorPhoneNumber = response?.phone_number;
                 let phoneNumber = this.appointment!.phoneNumber;
-
+                if (phoneNumber.startsWith('91') && phoneNumber.length > 10) {
+                  phoneNumber = phoneNumber.substring(2);
+                }
                 if (!phoneNumber.startsWith('91')) {
                   phoneNumber = '91' + phoneNumber;
                 }
@@ -1962,7 +1990,9 @@ export class AppointmentFormComponent implements OnInit {
             next: (response) => {
               const doctorPhoneNumber = response?.phone_number;
               let phoneNumber = this.appointment!.phoneNumber;
-
+              if (phoneNumber.startsWith('91') && phoneNumber.length > 10) {
+                phoneNumber = phoneNumber.substring(2);
+              }
               if (!phoneNumber.startsWith('91')) {
                 phoneNumber = '91' + phoneNumber;
               }
@@ -2111,7 +2141,9 @@ export class AppointmentFormComponent implements OnInit {
           const doctorId = this.doctorId;
           const department = this.department ?? 'Default Department'; // Assuming departmentName is a property in the doctor model
           let phoneNumber = this.appointmentForm.value.phoneNumber;
-
+          if (phoneNumber.startsWith('91') && phoneNumber.length > 10) {
+            phoneNumber = phoneNumber.substring(2);
+          }
           if (!phoneNumber.startsWith('91')) {
             phoneNumber = '91' + phoneNumber;
           }

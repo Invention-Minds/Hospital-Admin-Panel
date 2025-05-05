@@ -65,7 +65,7 @@ body {
   left: 10px;
   font-size: 12px;
   color: #007bff; /* Label color on focus */
-  background-color: #f6f8ff;
+  background-color: #F0F3FF;  ;
 }
 
 .custom-input.ng-invalid.ng-touched {
@@ -79,8 +79,9 @@ body {
 .error-message {
   font-size: 12px;
   color: red;
-  margin-top: 5px;
   position: absolute;
+  z-index: 10000000000000;
+
 }
 .custom-label-surgery {
   position: absolute;
@@ -91,7 +92,7 @@ body {
   font-size: 12px;
   transition: all 0.3s ease;
   pointer-events: none;
-  background-color: #f6f8ff;
+  background-color: #F0F3FF;
   
 }
 .custom-select {
@@ -748,6 +749,42 @@ input[type="text"]::placeholder {
   display: flex;
   align-items: center;
   gap: 10px; /* space between input and radio */
+}
+input.ng-invalid.ng-touched, input.ng-invalid.ng-dirty, select.ng-invalid.ng-touched, textarea.ng-invalid.ng-dirty {
+  border: 1px solid red;
+}
+form.submitted .custom-input.ng-invalid,
+form.submitted .custom-select.ng-invalid,
+form.submitted input.ng-invalid,
+form.submitted select.ng-invalid,
+form.submitted textarea.ng-invalid {
+  border: 1px solid #ff4d4d !important;
+  box-shadow: 0 0 3px rgba(255, 77, 77, 0.4);
+}
+
+form.submitted .custom-label,
+form.submitted .custom-label-consultantName {
+  color: #ff4d4d;
+}
+
+.custom-remarks {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: #aaa;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.custom-input:focus + .custom-remarks,
+.custom-input:not(:placeholder-shown) + .custom-remarks {
+  top: -3px;
+  left: 10px;
+  font-size: 12px;
+  color: #007bff; /* Label color on focus */
+  background: #f0f3ff;
 }
 @media (min-width: 1024px) {
   .grid-container {

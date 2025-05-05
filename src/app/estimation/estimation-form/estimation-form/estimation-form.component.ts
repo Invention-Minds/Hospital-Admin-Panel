@@ -76,6 +76,7 @@ export class EstimationFormComponent {
   rejectionReason = '';
   roomCost: number = 0;
   selectedSurgeryCostIndex: { [roomName: string]: number } = {};
+  isButtonClicked: boolean = false; // Track if the button was clicked
 
 
 
@@ -1145,13 +1146,27 @@ export class EstimationFormComponent {
     console.log(this.getInvalidControls(form))
     if (!this.isAnyCheckboxChecked) {
       console.error('At least one inclusion must be selected.');
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'At least one inclusion must be selected.' });
       return;
     }
-    // if (this.estimationData.statusOfEstimation === 'pending') {
-    //   this.formData.statusOfEstimation = 'submitted'
-    // }
+    if(this.selectedRoomCost === ''){
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Please select a room type.' });
+      return;
+    }
+    if (!form.valid) {
+      // Mark all fields as touched to trigger validation messages
+      Object.values(form.controls).forEach((control:any) => {
+        control.markAsTouched();
+      });
+      return; // prevent actual submission
+    }
+    if(this.isRequiredSignatureMissing()){
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Please provide all required signatures.' });
+      return;
+    }
 
     if (form.valid) {
+      this.isButtonClicked = true;
       if (this.estimationData && this.estimationData.estimationId) {
         const estimationData = {
           estimationId: this.estimationData.estimationId, // Replace this with the actual ID from your context
@@ -1208,10 +1223,12 @@ export class EstimationFormComponent {
           (response) => {
             console.log('Estimation updated successfully:', response);
             this.clearForm();
-            this.closeForm.emit()
+            this.closeForm.emit();
+            this.isButtonClicked = false;
           },
           (error) => {
             console.error('Error updating estimation:', error);
+            this.isButtonClicked = false;
           }
         );
       } else {
@@ -1272,10 +1289,12 @@ export class EstimationFormComponent {
           (response) => {
             console.log('Estimation updated successfully:', response);
             this.clearForm();
-            this.closeForm.emit()
+            this.closeForm.emit();
+            this.isButtonClicked = false;
           },
           (error) => {
             console.error('Error updating estimation:', error);
+            this.isButtonClicked = false;
           }
         );
       }

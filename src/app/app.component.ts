@@ -61,5 +61,9 @@ export class AppComponent {
     const message = encodeURIComponent('Hello! I need assistance.');
     window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
   }
+
+  isHelpDesk():boolean{
+    return this.router.url === '/help-center';
+  }
   
 }

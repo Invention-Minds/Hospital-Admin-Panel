@@ -1,13 +1,16 @@
 .part4{
-    display: grid;
-    grid-template-columns: 0.5fr 1fr;
-    margin:0px 270px;
-    padding: 50px 50px 50px 0px;
-    gap: 80px;
-}
-
-.part4-1 span{
     display: flex;
+    justify-content: center;
+    padding: 50px 0px;
+    gap: 40px; 
+}
+.part4-1{
+  width: 30%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.part4-1 span{
     color: #F28729;
     font-family: Kanit;
     font-size: 54px;
@@ -22,6 +25,7 @@
     font-style: normal;
     font-weight: 600;
     line-height: 120%; /* 64.8px */
+    width: 50%;
 }
 .part4-1 p{
     color: #000;
@@ -30,10 +34,12 @@
     font-style: normal;
     font-weight: 400;
     line-height: 20px; /* 166.667% */
+    width: 50%;
 }
 .part4-2{
     height: 300px;
     overflow-y: scroll;
+    width: 38%;
 }
 /* .part4-2::-webkit-scrollbar {
     display: none;
@@ -44,36 +50,14 @@
     transition: all 0.3s ease;
     cursor: pointer;
     background: #FFF;
-    margin-top: 9px;
+    margin-top: 10px;
     width: 531px;
     border-radius: 8px;
   }
   
   .question-header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-right: 15px;
-   
-
-  }
-  
-  .accordion-icon {
-    font-size: 20px;
-    font-weight: bold;
-    color: #2C63BA;
-    margin-left: 10px;
-
-  }
-  
-  .qust.active {
-    background: #FFFFFF;
-  }
-  
-  .answer {
-    overflow: hidden;
-    transition: max-height 0.3s ease;
-    padding: 0 10px;
+    justify-content: space-between;  
   }
   .answer{
     color: #000;
@@ -81,12 +65,6 @@
     font-size: 14px;
     padding: 14px 0px 0px 10px;
   }
-  
-  .qust.active .answer {
-    max-height: 500px;
-    padding: 5px 10px 15px;
-  }
-
   .question-header h3{
     color: #000;
     font-family: Kanit;

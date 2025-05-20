@@ -11,23 +11,24 @@
             <p class="para gap ">Powered By <br><span class="im">Invention Minds</span></p>
         </div>
     </div>
-
-    <div *ngIf="component === 'default'">
-        <div class="part2">
-            <h1>Help Center</h1>
-            <p>Explore our <span class="sp1">Help Center</span> for answers to your question and assistance with your
-                <span class="sp2">DocMinds</span> experience.
-            </p>
+    <div class="bottom">
+        <div *ngIf="component === 'default'">
+            <div class="part2">
+                <h1>Help Center</h1>
+                <p>Explore our <span class="sp1">Help Center</span> for answers to your question and assistance with
+                    your
+                    <span class="sp2">DocMinds</span> experience.
+                </p>
+            </div>
             <!-- Analytics: -->
-            <div class="part2-1 mtop cursor"(click)="moduleController('Analytics','Analytics')" >
+            <div class="part2-1 mtop cursor" (click)="moduleController('Analytics','Analytics')">
                 <div class="part2-2">
                     <div>
-                        <h2 class="sub-heading " >Analytics
+                        <h2 class="sub-heading ">Analytics
                         </h2>
                     </div>
                     <div>
-                        <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add"
-                        >
+                        <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add">
                     </div>
                 </div>
             </div>
@@ -36,7 +37,7 @@
             <div class="part2-1 cursor" (click)="moduleController('DASHBOARD','Dashboard')">
                 <div class="part2-2">
                     <div>
-                        <h2 class="sub-heading " >DashBoard
+                        <h2 class="sub-heading ">DashBoard
                         </h2>
                     </div>
                     <div>
@@ -53,7 +54,8 @@
                         <h2 class="sub-heading  ">Appointment Module</h2>
                     </div>
                     <div>
-                        <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add" *ngIf="!accordionStates.showList">
+                        <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add"
+                            *ngIf="!accordionStates.showList">
                         <!-- *nfIf = "showlist === false" -->
                         <img class="img" src="help-center/lsicon_minus-filled.svg" alt="lsicon_minus-filled"
                             *ngIf="accordionStates.showList">
@@ -69,7 +71,7 @@
                                 d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
-                        <div  (click)="moduleController('form','AppointmentModule')">New Appointment Form </div>
+                        <div (click)="moduleController('form','AppointmentModule')">New Appointment Form </div>
                     </div>
                     <div class="lis">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -85,7 +87,7 @@
                                 d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
-                        <div  (click)="moduleController('confirmed','AppointmentModule')">Confirmed Appointment</div>
+                        <div (click)="moduleController('confirmed','AppointmentModule')">Confirmed Appointment</div>
                     </div>
                     <div class="lis">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -101,7 +103,7 @@
                                 d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
-                        <div  (click)="moduleController('completed','AppointmentModule')">Completed Appointment</div>
+                        <div (click)="moduleController('completed','AppointmentModule')">Completed Appointment</div>
                     </div>
                     <div class="lis">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -109,613 +111,628 @@
                                 d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
-                        <div  (click)="moduleController('transfer','AppointmentModule')">Transfer Appointment</div>
+                        <div (click)="moduleController('transfer','AppointmentModule')">Transfer Appointment</div>
                     </div>
                     <div class="lis">
-                        <svg  xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
                             <path
                                 d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
-                        <div  (click)="moduleController('cross','AppointmentModule')">Cross Consultation Appointment
+                        <div (click)="moduleController('cross','AppointmentModule')">Cross Consultation Appointment
                         </div>
                     </div>
 
                 </div>
             </div>
-        </div>
-        <!--Doctor Module  -->
-        <div class="part2-1 cursor" (click)="accordian('viewList')">
-            <div class="part2-2">
-                <div>
-                    <h2 class="sub-heading ">Doctor Module</h2>
-                </div>
-                <div>
-                    <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add"
-                         *ngIf="!accordionStates.viewList">
-                    <!-- *nfIf = "showlist === false" -->
-                    <img class="img" src="help-center/lsicon_minus-filled.svg" alt="lsicon_minus-filled"
-                     *ngIf="accordionStates.viewList">
-                    <!-- *nfIf = "showlist === true" -->
-                </div>
-            </div>
-            <hr *ngIf="showLine && accordionStates.viewList">
-            <div class="list" *ngIf="accordionStates.viewList">
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('availability','DoctorModule')"> Doctor Availability</div>
-                </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('management' ,'DoctorModule')"> Doctor Details Management</div>
-                </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('information','DoctorModule')"> Edit Doctor Information</div>
-                </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('doctor','DoctorModule')"> Add New Doctor</div>
-                </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('dates','DoctorModule')">Mark Unavailable Dates</div>
-                </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('bookslots','DoctorModule')"> Booking Slots</div>
-                </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('markslots','DoctorModule')"> Mark Unavailable Slots</div>
-                </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('opdrequest','DoctorModule')"> Close OPD Request</div>
-                </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('multavailability','DoctorModule')"> Doctor Multiple Availability
+            <!--Doctor Module  -->
+            <div class="part2-1 cursor" (click)="accordian('viewList')">
+                <div class="part2-2">
+                    <div>
+                        <h2 class="sub-heading ">Doctor Module</h2>
+                    </div>
+                    <div>
+                        <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add"
+                            *ngIf="!accordionStates.viewList">
+                        <!-- *nfIf = "showlist === false" -->
+                        <img class="img" src="help-center/lsicon_minus-filled.svg" alt="lsicon_minus-filled"
+                            *ngIf="accordionStates.viewList">
+                        <!-- *nfIf = "showlist === true" -->
                     </div>
                 </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('surgeon','DoctorModule')"> Appointment-Based Doctor - Visiting
-                        Consultant (Surgeon)
+                <hr *ngIf="showLine && accordionStates.viewList">
+                <div class="list" *ngIf="accordionStates.viewList">
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('availability','DoctorModule')"> Doctor Availability</div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('management' ,'DoctorModule')"> Doctor Details Management</div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('information','DoctorModule')"> Edit Doctor Information</div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('doctor','DoctorModule')"> Add New Doctor</div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('dates','DoctorModule')">Mark Unavailable Dates</div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('bookslots','DoctorModule')"> Booking Slots</div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('markslots','DoctorModule')"> Mark Unavailable Slots</div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('opdrequest','DoctorModule')"> Close OPD Request</div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('multavailability','DoctorModule')"> Doctor Multiple Availability
+                        </div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('surgeon','DoctorModule')"> Appointment-Based Doctor - Visiting
+                            Consultant (Surgeon)
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <!-- MHC Module -->
+            <!-- MHC Module -->
 
-        <div class="part2-1 cursor" (click)="accordian('mhcModule')">
-            <div class="part2-2">
-                <div>
-                    <h2 class="sub-heading ">MHC Module (Master Health Check-up)</h2>
-                </div>
-                <div>
-                    <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add"
-                         *ngIf="!accordionStates.mhcModule">
-                    <!-- *nfIf = "showlist === true" -->
-                    <img class="img" src="help-center/lsicon_minus-filled.svg" alt="lsicon_minus-filled"
-                         *ngIf="accordionStates.mhcModule">
-                    <!-- *nfIf = "showlist === false" -->
-                </div>
-            </div>
-            <hr *ngIf="showLine && accordionStates.mhcModule">
-            <div class="list" *ngIf="accordionStates.mhcModule">
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('mhcform','MHCModule')">New Appointment Form</div>
-                </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('mhconline','MHCModule')"> Online Requests</div>
-                </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('mhcconfirmed','MHCModule')">Confirmed Appointments</div>
-                </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('mhccancelled','MHCModule')"> Cancelled Appointments</div>
-                </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('mhccompleted','MHCModule')"> Completed Visits</div>
-                </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('mhcpackages','MHCModule')"> Repeated Packages</div>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Service Module -->
-
-        <div class="part2-1 cursor" (click)="accordian('serviceModule')">
-            <div class="part2-2">
-                <div>
-                    <h2 class="sub-heading ">Service Module</h2>
-                </div>
-                <div>
-                    <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add"
-                         *ngIf="!accordionStates.serviceModule">
-                    <!-- *nfIf = "showlist === true" -->
-                    <img class="img" src="help-center/lsicon_minus-filled.svg" alt="lsicon_minus-filled"
-                        *ngIf="accordionStates.serviceModule">
-                    <!-- *nfIf = "showlist === false" -->
-                </div>
-            </div>
-            <hr *ngIf="showLine && accordionStates.serviceModule">
-            <div class="list" *ngIf="accordionStates.serviceModule">
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('ServiceAppointmentForm','Service Module')"> New Appointment Form
+            <div class="part2-1 cursor" (click)="accordian('mhcModule')">
+                <div class="part2-2">
+                    <div>
+                        <h2 class="sub-heading ">MHC Module (Master Health Check-up)</h2>
+                    </div>
+                    <div>
+                        <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add"
+                            *ngIf="!accordionStates.mhcModule">
+                        <!-- *nfIf = "showlist === true" -->
+                        <img class="img" src="help-center/lsicon_minus-filled.svg" alt="lsicon_minus-filled"
+                            *ngIf="accordionStates.mhcModule">
+                        <!-- *nfIf = "showlist === false" -->
                     </div>
                 </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('ServiceConfirmed','Service Module')">Confirmed Appointments</div>
-                </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('ServiceCancelled','Service Module')"> Cancelled Appointments</div>
-                </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('ServiceCompleted','Service Module')"> Completed Services</div>
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- 5. Estimation Module -->
-
-        <div class="part2-1 cursor"  (click)="accordian('estimationModule')">
-            <div class="part2-2">
-                <div>
-                    <h2 class="sub-heading ">Estimation Module</h2>
-                </div>
-                <div>
-                    <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add"
-                        *ngIf="!accordionStates.estimationModule">
-                    <!-- *nfIf = "showlist === true" -->
-                    <img class="img" src="help-center/lsicon_minus-filled.svg" alt="lsicon_minus-filled"
-                         *ngIf="accordionStates.estimationModule">
-                    <!-- *nfIf = "showlist === false" -->
-                </div>
-            </div>
-            <hr *ngIf="showLine && accordionStates.estimationModule ">
-            <div class="list" *ngIf="accordionStates.estimationModule">
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('EstimationCreation','EstimationModule')">Estimation Creation</div>
-                </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('EstimationRequest','EstimationModule')"> Estimation Request from
-                        Doctor</div>
-                </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('EstimatorApproval','EstimationModule')">Estimation Request from
-                        Estimator for Approval
+                <hr *ngIf="showLine && accordionStates.mhcModule">
+                <div class="list" *ngIf="accordionStates.mhcModule">
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('mhcform','MHCModule')">New Appointment Form</div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('mhconline','MHCModule')"> Online Requests</div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('mhcconfirmed','MHCModule')">Confirmed Appointments</div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('mhccancelled','MHCModule')"> Cancelled Appointments</div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('mhccompleted','MHCModule')"> Completed Visits</div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('mhcpackages','MHCModule')"> Repeated Packages</div>
                     </div>
                 </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('AcceptedEstimations','EstimationModule')"> Approved/ Accepted
-                        Estimations</div>
-                </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('ConfirmedEstimation','EstimationModule')"> Confirmed Estimation
+
+            </div>
+
+            <!-- Service Module -->
+
+            <div class="part2-1 cursor" (click)="accordian('serviceModule')">
+                <div class="part2-2">
+                    <div>
+                        <h2 class="sub-heading ">Service Module</h2>
+                    </div>
+                    <div>
+                        <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add"
+                            *ngIf="!accordionStates.serviceModule">
+                        <!-- *nfIf = "showlist === true" -->
+                        <img class="img" src="help-center/lsicon_minus-filled.svg" alt="lsicon_minus-filled"
+                            *ngIf="accordionStates.serviceModule">
+                        <!-- *nfIf = "showlist === false" -->
                     </div>
                 </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('Complete/CancelEST','EstimationModule')"> Complete/Cancel EST</div>
+                <hr *ngIf="showLine && accordionStates.serviceModule">
+                <div class="list" *ngIf="accordionStates.serviceModule">
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('ServiceAppointmentForm','Service Module')"> New Appointment Form
+                        </div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('ServiceConfirmed','Service Module')">Confirmed Appointments
+                        </div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('ServiceCancelled','Service Module')"> Cancelled Appointments
+                        </div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('ServiceCompleted','Service Module')"> Completed Services</div>
+                    </div>
+
                 </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('OverdueEstimation','EstimationModule')">Overdue Estimation</div>
-                </div>
+
             </div>
 
-        </div>
 
+            <!-- 5. Estimation Module -->
 
-        <!--TV Control  -->
-
-        <div class="part2-1 cursor" (click)="moduleController('TV Control','TVControlModule')">
-            <div class="part2-2">
-                <div>
-                    <h2 class="sub-heading " >TV Control
-                        Module</h2>
-                </div>
-                <div>
-                    <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add">
-                </div>
-            </div>
-        </div>
-
-
-        <!--6. Individual Doctor Module   -->
-        <div class="part2-1 cursor"  (click)="accordian('doctorModule')">
-            <div class="part2-2">
-                <div>
-                    <h2 class="sub-heading  ">Individual Doctor Module </h2>
-                </div>
-                <div>
-                    <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add" *ngIf="!accordionStates.doctorModule"
-                       >
-                    <!-- *nfIf = "showlist === true" -->
-                    <img class="img" src="help-center/lsicon_minus-filled.svg" alt="lsicon_minus-filled"
-                        *ngIf="accordionStates.doctorModule">
-                    <!-- *nfIf = "showlist === false" -->
-                </div>
-            </div>
-            <hr *ngIf="showLine && accordionStates.doctorModule">
-            <div class="list" *ngIf="accordionStates.doctorModule">
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div  (click)="moduleController('Checked - In','IndividualDoctorModule')">Checked - In Consultations
+            <div class="part2-1 cursor" (click)="accordian('estimationModule')">
+                <div class="part2-2">
+                    <div>
+                        <h2 class="sub-heading ">Estimation Module</h2>
+                    </div>
+                    <div>
+                        <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add"
+                            *ngIf="!accordionStates.estimationModule">
+                        <!-- *nfIf = "showlist === true" -->
+                        <img class="img" src="help-center/lsicon_minus-filled.svg" alt="lsicon_minus-filled"
+                            *ngIf="accordionStates.estimationModule">
+                        <!-- *nfIf = "showlist === false" -->
                     </div>
                 </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('Today Consultations','IndividualDoctorModule')">Today's
-                        Consultations</div>
-                </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('Future Consultations','IndividualDoctorModule')">Future
-                        Consultations</div>
-                </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('Past Consultations','IndividualDoctorModule')">Past Consultations
+                <hr *ngIf="showLine && accordionStates.estimationModule ">
+                <div class="list" *ngIf="accordionStates.estimationModule">
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('EstimationCreation','EstimationModule')">Estimation Creation
+                        </div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('EstimationRequest','EstimationModule')"> Estimation Request from
+                            Doctor</div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('EstimatorApproval','EstimationModule')">Estimation Request from
+                            Estimator for Approval
+                        </div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('AcceptedEstimations','EstimationModule')"> Approved/ Accepted
+                            Estimations</div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('ConfirmedEstimation','EstimationModule')"> Confirmed Estimation
+                        </div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('Complete/CancelEST','EstimationModule')"> Complete/Cancel EST
+                        </div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('OverdueEstimation','EstimationModule')">Overdue Estimation</div>
                     </div>
                 </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('Leave Information','IndividualDoctorModule')"> Leave Information
+
+            </div>
+
+
+            <!--TV Control  -->
+
+            <div class="part2-1 cursor" (click)="moduleController('TV Control','TVControlModule')">
+                <div class="part2-2">
+                    <div>
+                        <h2 class="sub-heading ">TV Control
+                            Module</h2>
                     </div>
-                </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('Close OPD','IndividualDoctorModule')">Close OPD </div>
-                </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('End Consultation','IndividualDoctorModule')">End Consultation</div>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- 4. Report Module: -->
-        <div class="part2-1 cursor" (click)="accordian('reportModule')">
-            <div class="part2-2">
-                <div>
-                    <h2 class="sub-heading ">Report Module</h2>
-                </div>
-                <div>
-                    <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add"
-                         *ngIf="!accordionStates.reportModule">
-                    <!-- *nfIf = "showlist === true" -->
-                    <img class="img" src="help-center/lsicon_minus-filled.svg" alt="lsicon_minus-filled"
-                        *ngIf="accordionStates.reportModule">
-                    <!-- *nfIf = "showlist === false" -->
-                </div>
-            </div>
-            <hr *ngIf="showLine && accordionStates.reportModule">
-            <div class="list" *ngIf="accordionStates.reportModule">
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('AppointmentReport','ReportModule')">Doctor Appointment Report</div>
-                </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('HealthCheckup','ReportModule')">Health Checkup Appointment Report
+                    <div>
+                        <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add">
                     </div>
                 </div>
             </div>
 
-        </div>
 
-        <!-- MHC Coordinator Module: -->
-        <div class="part2-1 cursor" (click)="accordian('MHCCoordinatorModule')">
-            <div class="part2-2">
-                <div>
-                    <h2 class="sub-heading ">MHC Coordinator Module</h2>
-                </div>
-                <div>
-                    <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add"
-                        *ngIf="!accordionStates.MHCCoordinatorModule" >
-                    <!-- *nfIf = "showlist === true" -->
-                    <img class="img" src="help-center/lsicon_minus-filled.svg" alt="lsicon_minus-filled"
-                        *ngIf="accordionStates.MHCCoordinatorModule" >
-                    <!-- *nfIf = "showlist === false" -->
-                </div>
-            </div>
-            <hr *ngIf="showLine && accordionStates.MHCCoordinatorModule">
-            <div class="list" *ngIf="accordionStates.MHCCoordinatorModule">
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('Today MHC Appointments','MHCCoordinatorModule')">Today's MHC
-                        Appointments</div>
-                </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('Confirmed Consultation Appointments','MHCCoordinatorModule')">
-                        Confirmed Consultation
-                        Appointments</div>
-                </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('Confirmed Radiology Appointments','MHCCoordinatorModule')">Confirmed
-                        Radiology Appointments
+            <!--6. Individual Doctor Module   -->
+            <div class="part2-1 cursor" (click)="accordian('doctorModule')">
+                <div class="part2-2">
+                    <div>
+                        <h2 class="sub-heading  ">Individual Doctor Module </h2>
+                    </div>
+                    <div>
+                        <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add"
+                            *ngIf="!accordionStates.doctorModule">
+                        <!-- *nfIf = "showlist === true" -->
+                        <img class="img" src="help-center/lsicon_minus-filled.svg" alt="lsicon_minus-filled"
+                            *ngIf="accordionStates.doctorModule">
+                        <!-- *nfIf = "showlist === false" -->
                     </div>
                 </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('Report Summary','MHCCoordinatorModule')">Report Summary</div>
+                <hr *ngIf="showLine && accordionStates.doctorModule">
+                <div class="list" *ngIf="accordionStates.doctorModule">
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('Checked - In','IndividualDoctorModule')">Checked - In
+                            Consultations
+                        </div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('Today Consultations','IndividualDoctorModule')">Today's
+                            Consultations</div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('Future Consultations','IndividualDoctorModule')">Future
+                            Consultations</div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('Past Consultations','IndividualDoctorModule')">Past
+                            Consultations
+                        </div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('Leave Information','IndividualDoctorModule')"> Leave Information
+                        </div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('Close OPD','IndividualDoctorModule')">Close OPD </div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('End Consultation','IndividualDoctorModule')">End Consultation
+                        </div>
+                    </div>
                 </div>
+
             </div>
 
-        </div>
-        <!-- Co-ordinator Module -->
-        <div class="part2-1 cursor" (click)="moduleController('Co-ordinator Module','CoordinatorModule')">
-            <div class="part2-2">
-                <div>
-                    <h2 class="sub-heading ">Co-ordinator Module</h2>
+            <!-- 4. Report Module: -->
+            <div class="part2-1 cursor" (click)="accordian('reportModule')">
+                <div class="part2-2">
+                    <div>
+                        <h2 class="sub-heading ">Report Module</h2>
+                    </div>
+                    <div>
+                        <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add"
+                            *ngIf="!accordionStates.reportModule">
+                        <!-- *nfIf = "showlist === true" -->
+                        <img class="img" src="help-center/lsicon_minus-filled.svg" alt="lsicon_minus-filled"
+                            *ngIf="accordionStates.reportModule">
+                        <!-- *nfIf = "showlist === false" -->
+                    </div>
                 </div>
-                <div>
-                    <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add"
-                        >
+                <hr *ngIf="showLine && accordionStates.reportModule">
+                <div class="list" *ngIf="accordionStates.reportModule">
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('AppointmentReport','ReportModule')">Doctor Appointment Report
+                        </div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('HealthCheckup','ReportModule')">Health Checkup Appointment
+                            Report
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- MHC Coordinator Module: -->
+            <div class="part2-1 cursor" (click)="accordian('MHCCoordinatorModule')">
+                <div class="part2-2">
+                    <div>
+                        <h2 class="sub-heading ">MHC Coordinator Module</h2>
+                    </div>
+                    <div>
+                        <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add"
+                            *ngIf="!accordionStates.MHCCoordinatorModule">
+                        <!-- *nfIf = "showlist === true" -->
+                        <img class="img" src="help-center/lsicon_minus-filled.svg" alt="lsicon_minus-filled"
+                            *ngIf="accordionStates.MHCCoordinatorModule">
+                        <!-- *nfIf = "showlist === false" -->
+                    </div>
+                </div>
+                <hr *ngIf="showLine && accordionStates.MHCCoordinatorModule">
+                <div class="list" *ngIf="accordionStates.MHCCoordinatorModule">
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('Today MHC Appointments','MHCCoordinatorModule')">Today's MHC
+                            Appointments</div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('Confirmed Consultation Appointments','MHCCoordinatorModule')">
+                            Confirmed Consultation
+                            Appointments</div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('Confirmed Radiology Appointments','MHCCoordinatorModule')">
+                            Confirmed
+                            Radiology Appointments
+                        </div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('Report Summary','MHCCoordinatorModule')">Report Summary</div>
+                    </div>
+                </div>
+
+            </div>
+            <!-- Co-ordinator Module -->
+            <div class="part2-1 cursor" (click)="moduleController('Co-ordinator Module','CoordinatorModule')">
+                <div class="part2-2">
+                    <div>
+                        <h2 class="sub-heading ">Co-ordinator Module</h2>
+                    </div>
+                    <div>
+                        <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add">
+                    </div>
                 </div>
             </div>
-        </div>
-        <!-- Profile Management Module -->
-        <div class="part2-1 cursor" (click)="accordian('profileModule')">
-            <div class="part2-2">
-                <div>
-                    <h2 class="sub-heading " >Profile Management Module</h2>
-                </div>
-                <div>
-                    <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add" *ngIf="!accordionStates.profileModule"
-                       >
-                    <!-- *nfIf = "showlist === true" -->
-                    <img class="img" src="help-center/lsicon_minus-filled.svg" alt="lsicon_minus-filled"
-                        *ngIf="accordionStates.profileModule">
-                    <!-- *nfIf = "showlist === false" -->
-                </div>
-            </div>
-            <hr *ngIf="showLine && accordionStates.profileModule">
-            <div class="list" *ngIf="accordionStates.profileModule">
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('Profile Details Tab','ProfileManagementModule')">Profile Details Tab
+            <!-- Profile Management Module -->
+            <div class="part2-1 cursor" (click)="accordian('profileModule')">
+                <div class="part2-2">
+                    <div>
+                        <h2 class="sub-heading ">Profile Management Module</h2>
+                    </div>
+                    <div>
+                        <img class="img" src="help-center/gridicons_add.svg" alt="gridicons_add"
+                            *ngIf="!accordionStates.profileModule">
+                        <!-- *nfIf = "showlist === true" -->
+                        <img class="img" src="help-center/lsicon_minus-filled.svg" alt="lsicon_minus-filled"
+                            *ngIf="accordionStates.profileModule">
+                        <!-- *nfIf = "showlist === false" -->
                     </div>
                 </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('Reset Password Tab','ProfileManagementModule')">Reset Password Tab
+                <hr *ngIf="showLine && accordionStates.profileModule">
+                <div class="list" *ngIf="accordionStates.profileModule">
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('Profile Details Tab','ProfileManagementModule')">Profile Details
+                            Tab
+                        </div>
                     </div>
-                </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('Account Creation Tab','ProfileManagementModule')"> Account Creation
-                        Tab (Super Admin & Admin
-                        Only)</div>
-                </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('Delete Account Tab','ProfileManagementModule')"> Delete Account Tab
-                        (Super Admin & Admin Only)
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('Reset Password Tab','ProfileManagementModule')">Reset Password
+                            Tab
+                        </div>
                     </div>
-                </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('Logged In Details','ProfileManagementModule')"> Logged In Details
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('Account Creation Tab','ProfileManagementModule')"> Account
+                            Creation
+                            Tab (Super Admin & Admin
+                            Only)</div>
                     </div>
-                </div>
-                <div class="lis">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                        <path
-                            d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <div (click)="moduleController('Access Control','ProfileManagementModule')">Access Control</div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('Delete Account Tab','ProfileManagementModule')"> Delete Account
+                            Tab
+                            (Super Admin & Admin Only)
+                        </div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('Logged In Details','ProfileManagementModule')"> Logged In
+                            Details
+                        </div>
+                    </div>
+                    <div class="lis">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                            <path
+                                d="M11.25 8.25L14.25 11.25M14.25 11.25L11.25 14.25M14.25 11.25H6C5.20435 11.25 4.44129 10.9339 3.87868 10.3713C3.31607 9.80871 3 9.04565 3 8.25C3 7.45435 3.31607 6.69129 3.87868 6.12868C4.44129 5.56607 5.20435 5.25 6 5.25H6.75"
+                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div (click)="moduleController('Access Control','ProfileManagementModule')">Access Control</div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
 
     <!-- New Appointment Form -->
 
@@ -795,7 +812,7 @@
             </ul>
             <div class="txt">Helps manage online bookings efficiently without missing any incoming requests.</div>
         </div>
-        <img class="form1" src="help-center/Online Requests.jpg" alt="Online Requests">
+        <img class="form3" src="help-center/Online Requests.png" alt="Online Requests">
 
     </div>
 
@@ -1616,7 +1633,7 @@
                     class="bold">follow up or rebook appointments efficiently</span>, improving patient continuity of
                 care.</div>
         </div>
-        <img class="form1" src="help-center/mhcCancelled Appointments.jpg" alt="Cancelled Appointments">
+        <img class="form3" src="help-center/mhcCancelled Appointments.png" alt="Cancelled Appointments">
 
     </div>
 
@@ -1693,7 +1710,7 @@
             <div>This section ensures seamless tracking of recurring health checkups, helping reduce manual errors and
                 improve patient care consistency.</div>
         </div>
-        <img class="form1" src="help-center/mhcRepeated Packages.jpg" alt="Repeated Packages">
+        <img class="form3" src="help-center/mhcRepeated Packages.png" alt="Repeated Packages">
     </div>
     <!-- Service Module -->
     <!-- A. New Appointment Form -->
@@ -2230,30 +2247,30 @@
             </ul>
             <div class="bold">c. Available Actions :</div>
             <ul>
-                <li><span class="bold">Follow-Up :</span>
+                <li class="gap1"><span class="bold">Follow-Up :</span>
                     <div class="gap1">Add up to five follow-ups, including <span class="bold">follow-up dates</span> and
                         <span class="bold">patient feedback</span> entries.
                     </div>
                 </li>
-                <li><span class="bold">View :</span>
+                <li class="gap1"><span class="bold">View :</span>
                     <div class="gap1">Displays the full estimation form. Once approved, the form becomes <span
                             class="bold">read-only</span> and cannot be edited. </div>
                 </li>
-                <li><span class="bold">Advance Amount :</span>
+                <li class="gap1"><span class="bold">Advance Amount :</span>
                     <div class="gap1">Enter the <span class="bold">receipt number</span> and <span class="bold">advance
                             amount</span>. Once entered, the estimation status updates to <span
                             class="bold">Confirmed</span>.</div>
                 </li>
-                <li><span class="bold">Resend :</span>
+                <li class="gap1"><span class="bold">Resend :</span>
                     <div class="gap1">Allows the estimator to resend the generated PDF to the patient via Whatsapp.
                     </div>
                 </li>
-                <li><span class="bold">Print :</span>
+                <li class="gap1"><span class="bold">Print :</span>
                     <div class="gap1">Opens the estimation PDF for viewing and printing.</div>
                 </li>
 
             </ul>
-            <div class="bold">Process Flow:</div>
+            <div class="bold">Process Flow :</div>
             <ul>
                 <li>After approval and acceptance, the <span class="bold">estimation PDF is auto-generated</span>.</li>
                 <li>The PDF is then shared with the <span class="bold">patient</span> and sent to the <span
@@ -2295,12 +2312,12 @@
                     <li class="gap1" type="circle">PAC Done Button</li>
                 </ul>
 
-                <li><span class="bold">PAC Requirement:</span>
+                <li class="gap1" ><span class="bold">PAC Requirement:</span>
                     <div class="gap1">If the <span class="bold">Estimation Type</span> is marked as <span
                             class="bold">SM</span>, completing <span class="bold">PAC (Pre-Anesthesia Check Up)</span>
                         is <span class="bold">mandatory</span> before marking the estimation as completed.</div>
                 </li>
-                <li><span class="bold">Cancellation Workflow:</span>
+                <li class="gap1"><span class="bold">Cancellation Workflow:</span>
                     <div class="gap1">Cancellation of a confirmed estimation must be <span class="bold"> approved by the
                             Senior Manager</span>, along with proper <span class="bold">feedback or
                             justification</span>. </div>
@@ -2346,7 +2363,7 @@
                     <li class="gap1" type="circle">Final Status (Completed or Canceled)</li>
                 </ul>
 
-                <li class="bold">Status Indicators:</li>
+                <li class="bold gap1">Status Indicators:</li>
                 <ul>
                     <li class="gap1"><span class="bold">Completed</span> estimations are marked in green</li>
                     <li class="gap1"><span class="bold">Canceled</span> estimations are marked in red</li>
@@ -2387,11 +2404,11 @@
                     <li class="gap1" type="circle">The <span class="bold">Age Bucket exceeds 20 days</span>, or</li>
                     <li class="gap1" type="circle">The <span class="bold">Estimation Date has passed</span></li>
                 </ul>
-                <li><span class="bold">Automatic Reminder:</span>
+                <li class="gap1"><span class="bold">Automatic Reminder:</span>
                     <div class="gap1">Once marked as overdue, the system automatically sends a <span
                             class="bold">reminder message </span>to the patient for follow-up action. </div>
                 </li>
-                <li><span class="bold">Table View:</span>
+                <li class="gap1"><span class="bold">Table View:</span>
                     <div class="gap1"> Displays key details such as :</div>
                 </li>
                 <ul>
@@ -2444,19 +2461,19 @@
             </ol>
             <div class="bold">Actions Available (Checked-In Tab) :</div>
             <ul>
-                <li><span class="bold">Start :</span>
+                <li class="gap1" ><span class="bold">Start :</span>
                     <div class="gap1"><span class="bold">Begins the consultation. </span>On the TV screen, the patient
                         status updates to "Patient-In".</div>
                 </li>
-                <li><span class="bold">Finish :</span>
+                <li class="gap1"><span class="bold">Finish :</span>
                     <div class="gap1"><span class="bold">Ends the consultation.</span> On the TV screen, the patient's
                         name is removed from the display.</div>
                 </li>
-                <li><span class="bold">Postpone :</span>
+                <li class="gap1"><span class="bold">Postpone :</span>
                     <div class="gap1"><span class="bold">Postpones the appointment.</span> The status is updated to
                         "Pending" on the TV display.</div>
                 </li>
-                <li><span class="bold">P. Counselling (Patient Counselling) :</span>
+                <li class="gap1"><span class="bold">P. Counselling (Patient Counselling) :</span>
                     <div class="gap1">Creates a new estimation request with details like:</div>
                     <ul>
                         <li type="cricle" class="gap1">Estimation Name</li>
@@ -2468,23 +2485,23 @@
                         <li type="cricle" class="gap1">Doctor’s Remarks</li>
                     </ul>
                 </li>
-                <li><span class="bold">Transfer :</span>
+                <li class="gap1"><span class="bold">Transfer :</span>
                     <div class="gap1">Sends a request to the manager to transfer the appointment to another doctor or
                         department.</div>
                 </li>
-                <li><span class="bold">CC (Consultation Referral) :</span>
+                <li class="gap1"><span class="bold">CC (Consultation Referral) :</span>
                     <div class="gap1">Sends a referral request to the sub-admin, suggesting the patient consult another
                         doctor for additional opinion or treatment.</div>
                 </li>
             </ul>
             <div class="bold">Visual Indicators :</div>
             <ul>
-                <li><span class="bold">Color-Coded Buttons :</span>
+                <li class="gap1"><span class="bold">Color-Coded Buttons :</span>
                     <div class="gap1">Each action button is uniquely colored for easy identification.</div>
                 </li>
-                <li><span class="bold">Timer Display:</span>
+                <li class="gap1"><span class="bold">Timer Display :</span>
                     <div class="gap1">A live timer tracks how long each consultation is ongoing.</div>
-                    <ul>
+                    <ul class="gap1">
                         <li type="circle">If the consultation exceeds 10 minutes from the slot duration of that doctor,
                             the row starts blinking in red to indicate delay.</li>
                     </ul>
@@ -3364,7 +3381,7 @@
         <img class="form3" src="help-center/Report Summary.jpg" alt="Report Summary">
     </div>
 
-    <div>
+    <div class="faq-container">
         <app-faq [FAQDetails]="faqs"></app-faq>
     </div>
 

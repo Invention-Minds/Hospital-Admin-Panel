@@ -88,15 +88,18 @@
     color: #0E2970;
     font-weight: 700;
 }
+.bottom{
+    display: flex;
+    justify-content: center;
+}
 .part2-1{
     background-color: #FFFFFF;
     width: 900px;
     height: auto;
     transition: 0.5s;
     flex-shrink: 0;
-    margin:10px 270px 0px;
+    margin-top: 10px;
     border-radius: 8px;
-    /* padding-bottom: 10px; */
 }
 .mtop{
     margin-top: 50px;
@@ -222,8 +225,8 @@ a{
     cursor: pointer;
 }
 .form3{
-    width: 1000px;
-    height: 498px;
+    width: 1050px;
+    height: 500px;
     flex-shrink: 0;
     aspect-ratio: 350/249;
     margin:40px 250px ;
@@ -271,4 +274,8 @@ a{
 }
 .lis svg:hover {
     color: #2CAFFE;
+}
+.faq-container{
+    display: flex;
+    width: 100%;
 }

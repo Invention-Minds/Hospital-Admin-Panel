@@ -1,4 +1,4 @@
-<!-- Main app layout -->
+<!-- Main app layout
 <div *ngIf="!isMaintenanceRoute(); else maintenanceTemplate">
   <div *ngIf="!isChannelRoute(); else channelTemplate">
     <div *ngIf="!isLoginRoute(); else loginTemplate">
@@ -14,24 +14,24 @@
 </div>
 
 <!-- Maintenance Template -->
-<ng-template #maintenanceTemplate>
+<!-- <ng-template #maintenanceTemplate>
   <app-maintainance></app-maintainance>
-</ng-template>
+</ng-template> -->
 
 <!-- Channel Template -->
-<ng-template #channelTemplate>
+<!-- <ng-template #channelTemplate>
   <router-outlet></router-outlet>
-</ng-template>
+</ng-template> -->
 
 <!-- Modal and toast -->
-<div *ngIf="showSettingsModal" class="settings-modal-overlay" (click)="closeSettings()">
+<!-- <div *ngIf="showSettingsModal" class="settings-modal-overlay" (click)="closeSettings()">
   <div class="settings-modal" (click)="preventClose($event)">
     <div class="modal-header"></div>
     <app-settings></app-settings>
   </div>
 </div>
 
-<p-toast></p-toast>
+<p-toast></p-toast> --> 
 <!-- WhatsApp Button -->
 <!-- <button 
   class="whatsapp-button" 
@@ -41,3 +41,4 @@
   💬 Chat on WhatsApp
 </button> -->
 
+<app-help-center></app-help-center>

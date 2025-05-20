@@ -1,14 +1,13 @@
 <div class="part4">
   <div class="part4-1">
-    <h1>Frequently <br> Asked <span>Questions?</span></h1>
+    <h1>Frequently Asked <span>Questions?</span></h1>
     <p>Got a question? We've got the clicks to the answers.
       Welcome to the <b>DocMinds Help Center</b> - where help is always just one tap away.</p>
   </div>
-  
+
   <div class="part4-2">
-    <div class="qust" *ngFor="let item of FAQDetails; let i = index" 
-         (click)="toggleAnswer(i)"
-         [class.active]="activeIndex === i">
+    <div class="qust" *ngFor="let item of FAQDetails; let i = index" (click)="toggleAnswer(i)"
+      [class.active]="activeIndex === i">
       <div class="question-header">
         <h3>{{ i+1 }}. {{ item.question }}</h3>
         <!-- <span class="accordion-icon">{{ activeIndex === i ? '' : '+' }}</span> -->
@@ -18,4 +17,4 @@
       </div>
     </div>
   </div>
- 
+</div>

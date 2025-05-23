@@ -94,5 +94,8 @@ export class SidebarComponent implements OnInit {
   isMukund():boolean{
     return(this.role === 'admin' && this.username === 'Mukund Parathasarthy_admin@rashtrotthana')
   }
-  
+  isNotNursing():boolean{
+    return !(this.role === 'sub_admin' && this.subAdminType === 'Nursing')
+  }
+
 }

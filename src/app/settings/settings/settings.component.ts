@@ -449,7 +449,10 @@ resetPassword() {
     localStorage.removeItem('employeeId');
     localStorage.removeItem('subAdminType');
     localStorage.removeItem('adminType');
-    localStorage.removeItem('userId')
+    localStorage.removeItem('userId');
+    localStorage.removeItem('nurseId');
+    localStorage.removeItem('name');
+    localStorage.removeItem('blockId');
     this.router.navigate(['/login']);
     this.showLogoutConfirmDialog = false;
    this.closeSettings()

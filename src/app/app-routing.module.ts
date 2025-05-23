@@ -27,6 +27,8 @@ import { MaintainanceComponent } from './maintainance/maintainance/maintainance.
 import { HelpCenterComponent } from './help-center/help-center.component';
 import { RedirectorComponent } from './redirector/redirector.component';
 import { LabOverviewComponent } from './lab/lab-overview/lab-overview.component';
+import { PatientOverviewComponent } from './patient/patient-overview/patient-overview.component';
+import { NursingOverviewComponent } from './nursing/nursing-overview/nursing-overview.component';
 
 const routes: Routes = [
   { path: 'dashboard', component: DashboardOverviewComponent, canActivate:[authGuard] },
@@ -47,11 +49,13 @@ const routes: Routes = [
   {path:'doctor-appointments', component: OverviewComponent, canActivate:[authGuard]},
   {path: 'tv-control', component: TvControlComponent, canActivate:[authGuard]},
   { path: 'channel/:channelId', component: TvComponent },
+  {path:'nursing/:blockId', component: NursingOverviewComponent},
   {path: 'estimation', component: EstimationOverviewComponent, canActivate:[authGuard]},
   {path: 'analytics', component: AnalyticsRootComponent, canActivate:[authGuard]},
   {path: 'blood-appointments', component: SamraskhaApptOverviewComponent, canActivate:[authGuard]},
   {path:'help-center', component: HelpCenterComponent, canActivate:[authGuard]},
   {path: 'lab', component: LabOverviewComponent, canActivate:[authGuard]},
+  {path:'patient', component: PatientOverviewComponent, canActivate:[authGuard]},
   { path: 'redirector', component: RedirectorComponent },
 
   {

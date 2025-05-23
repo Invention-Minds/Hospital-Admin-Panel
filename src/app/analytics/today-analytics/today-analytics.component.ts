@@ -764,39 +764,57 @@ export class TodayAnalyticsComponent {
 
 
   getTodayCheckin(): any {
-    this.appointment.getAllAppointments().subscribe({
-      next: (data: any) => {
-        const todayTotalOpd = data.filter((entry: any) => entry.date === this.date);
-        const filteredData = data.filter((entry: any) => entry.checkedIn !== false && entry.date === this.date).map((entry: any) => {
-          return {
-            patientName: entry.patientName,
-            phoneNumber: entry.phoneNumber,
-            patinetEmail: entry.email,
-            DoctorName: entry.doctorName,
-            Department: entry.department,
-            AppointmentDate: entry.date,
-            AppointmentTime: entry.time,
-            AppointmentRequestVIa: entry.requestVia,
-            whatsAppSent: entry.smsSent === true ? 'yes' : 'No',
-            EmailSent: entry.emailSent === true ? 'yes' : 'No',
-            SmsSent: entry.messageSent === true ? 'yes' : 'No',
-            status: entry.status,
-            AppointmentHandledBy: entry.user.username,
-            CheckInBy: entry.checkedInBy
-          }
-        })
-        // console.log(filteredData, "filteredCheckin Data")
-        this.checkIn = filteredData.length
-        this.checkinData = filteredData
-        this.todayTotalOpdCount = todayTotalOpd.length
-      },
-      error: (error) => {
-        console.log(error)
-      },
-      complete: () => {
+    // this.appointment.getAllAppointments().subscribe({
+    //   next: (data: any) => {
+    //     const todayTotalOpd = data.filter((entry: any) => entry.date === this.date);
+    //     const filteredData = data.filter((entry: any) => entry.checkedIn !== false && entry.date === this.date).map((entry: any) => {
+    //       return {
+    //         patientName: entry.patientName,
+    //         phoneNumber: entry.phoneNumber,
+    //         patinetEmail: entry.email,
+    //         DoctorName: entry.doctorName,
+    //         Department: entry.department,
+    //         AppointmentDate: entry.date,
+    //         AppointmentTime: entry.time,
+    //         AppointmentRequestVIa: entry.requestVia,
+    //         whatsAppSent: entry.smsSent === true ? 'yes' : 'No',
+    //         EmailSent: entry.emailSent === true ? 'yes' : 'No',
+    //         SmsSent: entry.messageSent === true ? 'yes' : 'No',
+    //         status: entry.status,
+    //         AppointmentHandledBy: entry.user.username,
+    //         CheckInBy: entry.checkedInBy
+    //       }
+    //     })
+    //     // console.log(filteredData, "filteredCheckin Data")
+    //     this.checkIn = filteredData.length
+    //     this.checkinData = filteredData
+    //     this.todayTotalOpdCount = todayTotalOpd.length
+    //   },
+    //   error: (error) => {
+    //     console.log(error)
+    //   },
+    //   complete: () => {
 
-      }
-    })
+    //   }
+    // })
+        this.appointment
+      .getTotalAppointmentsCountForToday(this.date)
+      .subscribe(
+        (totalAppointments) => {
+          this.todayTotalOpdCount = totalAppointments.count;
+        },
+        (error) => {
+          console.error('Error fetching total appointments:', error);
+        }
+      );
+      this.appointment.getTotalCheckinToday(this.date).subscribe(
+        (totalCheckin) => {
+          this.checkIn = totalCheckin.count;
+        },
+        (error) => {
+          console.error('Error fetching total check-ins:', error);
+        }
+      );
   }
 
   checkInReportDownload(): void {

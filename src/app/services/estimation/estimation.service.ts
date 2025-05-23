@@ -29,6 +29,9 @@ export class EstimationService {
   getAllEstimation(): Observable<any>{
     return this.http.get<any>(`${this.apiUrl}` )
   }
+  getFollowUpEstimation():Observable<any>{
+    return this.http.get<any>(`${this.apiUrl}/estimation-details/followups`)
+  }
   updateEstimationDetails(estimationId: string, estimationData: any): Observable<any> {
     const encodedEstimationId = encodeURIComponent(estimationId);
     return this.http.put<any>(`${this.apiUrl}/estimation-details/${encodedEstimationId}`, estimationData);

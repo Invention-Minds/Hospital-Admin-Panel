@@ -144,6 +144,15 @@ import { ApptFollowUpComponent } from './appointment/appt-follow-up/appt-follow-
 import { RedirectorComponent } from './redirector/redirector.component';
 import { LabConsultationsComponent } from './lab/lab-consultations/lab-consultations.component';
 import { LabOverviewComponent } from './lab/lab-overview/lab-overview.component';
+import { MaternityEstimationComponent } from './estimation/maternity-estimation/maternity-estimation.component';
+import { FollowupEstimationComponent } from './estimation/followup-estimation/followup-estimation.component';
+import { EstimationCancelComponent } from './estimation/estimation-cancel/estimation-cancel.component';
+import { PatientInfoComponent } from './patient/patient-info/patient-info.component';
+import { PatientDetailsComponent } from './patient/patient-details/patient-details.component';
+import { PatientNewComponent } from './patient/patient-new/patient-new.component';
+import { PatientOverviewComponent } from './patient/patient-overview/patient-overview.component';
+import { NursingOverviewComponent } from './nursing/nursing-overview/nursing-overview.component';
+import { NursingVitalsComponent } from './nursing/nursing-vitals/nursing-vitals.component';
 
 
 @NgModule({
@@ -247,6 +256,15 @@ import { LabOverviewComponent } from './lab/lab-overview/lab-overview.component'
     RedirectorComponent,
     LabConsultationsComponent,
     LabOverviewComponent,
+    MaternityEstimationComponent,
+    FollowupEstimationComponent,
+    EstimationCancelComponent,
+    PatientInfoComponent,
+    PatientDetailsComponent,
+    PatientNewComponent,
+    PatientOverviewComponent,
+    NursingOverviewComponent,
+    NursingVitalsComponent,
   ],
   imports: [
     BrowserModule,

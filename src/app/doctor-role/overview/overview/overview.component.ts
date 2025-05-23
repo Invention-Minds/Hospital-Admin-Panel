@@ -18,6 +18,8 @@ export class OverviewComponent implements OnInit {
   activeComponent: string = 'availability';
   isEditMode: boolean = false;
   role: string = '';  // User role
+  selectedPatient:any
+
   ngOnInit(): void {
     // Fetch role from localStorage or the authentication service
     this.role = localStorage.getItem('role') || '';  // You can also fetch this from a service
@@ -119,5 +121,9 @@ export class OverviewComponent implements OnInit {
   }
   showPastDetails(){
     this.activeComponent = 'past';
+  }
+  showPatientInfo(patient: any) {
+    this.selectedPatient = patient;
+    this.activeComponent = 'info';
   }
 }

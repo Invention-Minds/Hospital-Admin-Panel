@@ -428,49 +428,43 @@ export class DoctorAvailabilityComponent {
     this.applySearchFilter(); // Apply filter when either search value changes
   }
   onSlotClick(doctor: Doctor, slot: any): void {
-    // console.log(doctor.unavailableSlots, "unavailableSlots while click")
-    // console.log(doctor.unavailableSlots,"unavailableSlots while click")
+    console.log('Slot clicked:', slot);
     if (doctor.unavailableSlots!.includes(slot.time)) {
-      // console.log('unavailableSlots', doctor.unavailableSlots);
       slot.status = 'blocked'
-      this.showForm = false; // Ensure form is not shown
-      return; // Stop further execution
+      this.showForm = false;
+      console.log('Slot is blocked:', slot);
+      return;
     }
     if (slot.status === 'booked' || slot.status === "complete") {
-      // console.log('booked slot',slot)
+      console.log('Slot is booked:', slot);
       this.isBookedSlot = true;
-
-
-      // Retrieve booked appointment details
       this.appointmentService.getAppointmentsBySlot(doctor.id, this.formatDate(this.selectedDate), slot.time)
         .subscribe((appointment) => {
           this.selectedDoctor = doctor;
           this.selectedSlot = slot;
           this.showForm = true;
-          this.currentAppointment = appointment; // Store the current appointment to pass to the form
+          this.currentAppointment = appointment;
           if (this.currentAppointment.status === 'complete' && this.currentAppointment.time === slot.time) {
             this.slotComplete = true;
           }
-          // console.log('appointment',this.currentAppointment)
         });
     } else if (slot.status === 'available') {
+      console.log('Slot is available:', slot);
       this.isBookedSlot = false;
       this.selectedDoctor = doctor;
       this.selectedSlot = slot;
       this.currentAppointment = null;
-      this.showForm = true;
+      this.showForm = false;
+      setTimeout(() => {
+        this.showForm = true;
+      }, 0);
+    
     }
     else if (slot.status === 'extra') {
-      //  slot.status = 'available';
+      console.log('Slot is extra:', slot);
       this.doctorService.addExtraSlots(doctor.id, this.formatDate(this.selectedDate), slot.time).subscribe(
         (response) => {
-          // console.log('Extra slot added successfully:', response);
           this.fetchDoctors();
-          // this.isBookedSlot = false;
-          // this.selectedDoctor = doctor;
-          // this.selectedSlot = slot;
-          // this.currentAppointment = null;
-          // this.showForm = true;
         },
         (error) => {
           console.error('Error adding extra slot:', error);

@@ -1,0 +1,267 @@
+<div class="form-row">
+    <!-- Dropdown for Search By -->
+    <div class="column-1">
+        <div class="p-field p-col-2">
+            <p-dropdown [options]="searchOptions" [(ngModel)]="selectedSearchOption" placeholder="Search By"
+                (ngModelChange)="onSearch()" class="custom-dropdown"></p-dropdown>
+        </div>
+
+        <div class="p-field p-col-3">
+            <input pInputText [(ngModel)]="searchValue" placeholder="Search / 123456" class="custom-input-text"
+                (ngModelChange)="onSearch()" />
+        </div>
+
+        <!-- Search and Clear Buttons -->
+        <div class="p-field p-col-2 buttons-container">
+            <!-- <img (click)="onSearch()" src="/icons/search.png"> -->
+            <svg (click)="onClear()" class="delete" xmlns="http://www.w3.org/2000/svg" width="3.5em" height="3.5em"
+                viewBox="0 0 24 24">
+                <path fill="#fff"
+                    d="M7 21q-.825 0-1.412-.587T5 19V6q-.425 0-.712-.288T4 5t.288-.712T5 4h4q0-.425.288-.712T10 3h4q.425 0 .713.288T15 4h4q.425 0 .713.288T20 5t-.288.713T19 6v13q0 .825-.587 1.413T17 21zM17 6H7v13h10zm-7 11q.425 0 .713-.288T11 16V9q0-.425-.288-.712T10 8t-.712.288T9 9v7q0 .425.288.713T10 17m4 0q.425 0 .713-.288T15 16V9q0-.425-.288-.712T14 8t-.712.288T13 9v7q0 .425.288.713T14 17M7 6v13z" />
+            </svg>
+            <!-- <img (click)="onClear()" class="delete" src="/icons/delete-1.png" pTooltip="Delete"> -->
+        </div>
+    </div>
+
+    <div class="p-field p-col-3">
+        <!-- <img src="download.png" (click)="downloadData()" pTooltip="Download" > -->
+    </div>
+
+    <!-- <div class="p-field p-col-3 calendar">
+        <p-calendar styleClass="custom-calendar" [(ngModel)]="selectedDateRange" selectionMode="range"
+            (ngModelChange)="onSearch()" placeholder="Calendar" dateFormat="dd-mm-yy">
+            <ng-template pTemplate="date" let-date>
+                <span>
+                    {{ date.day }}
+                </span>
+            </ng-template>
+        </p-calendar>
+        <i class="fa-solid fa-angle-down calendar-icon"></i>
+        <svg pTooltip="Refresh" (click)="refresh()" class="reverse" xmlns="http://www.w3.org/2000/svg" width="2.5em"
+            height="2.5em" viewBox="-1.5 -2.5 24 24">
+            <path fill="currentColor"
+                d="m4.859 5.308l1.594-.488a1 1 0 0 1 .585 1.913l-3.825 1.17a1 1 0 0 1-1.249-.665L.794 3.413a1 1 0 1 1 1.913-.585l.44 1.441C5.555.56 10.332-1.035 14.573.703a9.38 9.38 0 0 1 5.38 5.831a1 1 0 1 1-1.905.608A7.381 7.381 0 0 0 4.86 5.308zm12.327 8.195l-1.775.443a1 1 0 1 1-.484-1.94l3.643-.909a1 1 0 0 1 .61-.08a1 1 0 0 1 .84.75l.968 3.88a1 1 0 0 1-1.94.484l-.33-1.322a9.381 9.381 0 0 1-16.384-1.796l-.26-.634a1 1 0 1 1 1.851-.758l.26.633a7.381 7.381 0 0 0 13.001 1.25z" />
+        </svg>
+
+
+    </div> -->
+</div>
+<div class="table-container" *ngIf="!isLoading|| !isDesktopView">
+    <div class="table-wrapper">
+        <table class="appointment-table" *ngIf="!isLoading">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th (click)="sortBy('patientName')" style="cursor: pointer; width: 200px">
+                        Patient Name
+                        <span *ngIf="sortColumn === 'patientName' && sortDirection === 'asc'">&#9650;</span>
+                        <span *ngIf="sortColumn === 'patientName' && sortDirection === 'desc'">&#9660;</span>
+                    </th>
+                    <th>PRN</th>
+                    <th>Doctor Name</th>
+                    <!-- <th>Therapy</th> -->
+                    <th (click)="sortBy('date')">
+                        Date
+                        <span *ngIf="sortColumn === 'date' && sortDirection === 'asc'">&#9650;</span>
+                        <span *ngIf="sortColumn === 'date' && sortDirection === 'desc'">&#9660;</span>
+                    </th>
+                    <th>Time</th>
+                    <th>Visit Type</th>
+                    <th>Source</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngIf="filteredAppointments.length === 0">
+                    <td colspan="14" class="no-records-message">
+                        No records to display
+                    </td>
+                </tr>
+                <tr *ngFor="let appointment of getPaginatedAppointments(); let i = index">
+                    <td>{{ i + 1 }}</td>
+                    <td style="width: 200px;">
+                        <ng-container *ngIf="editingAppointmentId !== appointment.id; else editMode">
+                            <div class="name-container">
+                                <span class="patient-name">{{ appointment.patientName }}</span>
+                                <img src="edit.svg" alt="Edit" class="edit-icon" (click)="enableEdit(appointment)"
+                                    pTooltip="Edit" tooltipPosition="top">
+                            </div>
+                        </ng-container>
+
+                        <ng-template #editMode>
+                            <div class="name-container">
+                                <input type="text" [(ngModel)]="editedName" class="edit-input">
+                                <img src="correct.svg" alt="Save" class="save-icon"
+                                    (click)="saveEditedName(appointment)" pTooltip="Save" tooltipPosition="top">
+                                <img src="wrong.svg" alt="Cancel" class="cancel-icon" (click)="cancelEdit()"
+                                    pTooltip="Cancel" tooltipPosition="top">
+                            </div>
+                        </ng-template>
+                    </td>
+
+                    <td>{{ appointment.prnNumber ? appointment.prnNumber: '-' }}</td>
+                    <td>{{ appointment.doctorName }}</td>
+                    <!-- <td>{{ appointment.department }}</td> -->
+                    <td>{{ appointment.date | date:'dd-MM-yyyy' }}</td>
+                    <td>{{ appointment.time }}</td>
+                    <td>{{appointment.patientType || '-'}}</td>
+                    <td>{{ appointment.requestVia }}</td>
+                    <td style="text-transform: capitalize;">{{appointment.type ? appointment.type : '-' }}</td>
+                    <td>
+                        <span class="status-badge" [ngClass]="{ 
+          'confirmed-status': !appointment.checkedIn, 
+          'checked-in-status': appointment.checkedIn 
+        }">
+                            {{ !appointment.checkedIn ? 'Confirmed' : 'Checked In' }}
+                        </span>
+
+                    </td>
+                    <td class="button">
+                        <button class="btn-action" [disabled]="appointment.arrived">
+                            <img src="check-in.png" alt="check" class="action-icon"
+                                (click)="!appointment.arrived && completeAppointment(appointment)" pTooltip="Arrived"
+                                tooltipPosition="top">
+                        </button>
+                    </td>
+
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+
+    <!-- Pagination Controls -->
+    <div class="pagination">
+        <button class="pagination-btn prev" (click)="prevPage()" [disabled]="currentPage === 1">←</button>
+        <button class="pagination-btn next" (click)="nextPage()" [disabled]="currentPage === totalPages">→</button>
+        <div class="page-info">
+            Page
+            <input type="number" [(ngModel)]="currentPage" min="1" [max]="totalPages" class="page-input"
+                (change)="onPageChange()">
+            of {{ totalPages }}
+        </div>
+    </div>
+</div>
+<div class="mobile-appointments" *ngIf="!isDesktopView">
+    <div class="mobile-appointments">
+      <div *ngFor="let appointment of filteredAppointments; let i = index" 
+           class="appointment-card"> <!-- ✅ Clicking toggles the full view -->
+    
+        <!-- Compact View -->
+        <div class="card-header">
+          <div class="patient-info">
+            <div>
+              <img src="admin-icons/admin-icon.jpg" class="profile-pic">
+            </div>
+            <div class="patient-details">
+              <div>
+                <h3>{{ appointment.patientName }}</h3>
+              <p class="patient">{{appointment.doctorName}}</p>
+              </div>
+              <div>
+                <p class="patient">PRN:{{appointment.prnNumber}}</p>
+                <div class="arrived-status">
+                    <img src="check-in.svg" alt="check" class="action-icon"
+                    (click)="!appointment.arrived && completeAppointment(appointment)" pTooltip="Arrived"
+                    tooltipPosition="top">
+                </div>
+              </div>
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="pagination">
+      <button class="pagination-btn prev" (click)="prevPage()" [disabled]="currentPage === 1 || totalPages === 0">←</button>
+      <button class="pagination-btn next" (click)="nextPage()" [disabled]="currentPage >= totalPages || totalPages === 0">→</button>
+      <div class="page-info">
+        Page
+        <input type="number" [(ngModel)]="currentPage" min="1" [max]="totalPages" class="page-input"
+          (change)="onPageChange()">
+        of {{ totalPages }}
+      </div>
+    </div>
+  </div>
+
+<p-toast></p-toast>
+
+
+
+<app-delete-confirmation-dialog [showDialog]="isLockedDialogVisible" [userId]="lockedUser"
+    (close)="handleLockedDialogClose()"></app-delete-confirmation-dialog>
+
+<!-- ✅ Vitals Popup -->
+<div class="estimation-modal" *ngIf="showVitalsPopup">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Vital Info Update</h3>
+            <button class="popup-close" (click)="cancelVitals()">
+                <img src="/popup-close.svg" />
+            </button>
+        </div>
+        <hr />
+
+        <div class="modal-body">
+            <div class="vitals-grid">
+                <div class="form-group name-width" *ngFor="let field of vitalsFields">
+                    <input type="text" class="form-input" id="firstName" [name]="vitalsData[field.key]" ngModel
+                        [(ngModel)]="vitalsData[field.key]" required placeholder=" " pattern="^[a-zA-Z]*$" />
+                    <label [for]="field.label" class="form-label">{{ field.label }}</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer-close-opd">
+            <button class="save-button" [disabled]="!allVitalsFilled() || isButtonLoading" (click)="submitVitals()">
+                <ng-container *ngIf="!isButtonLoading; else loading">
+                    Submit
+                </ng-container>
+                <ng-template #loading>
+                    <span class="spinner"></span> Saving...
+                </ng-template>
+            </button>
+
+            <button class="close-button" (click)="cancelVitals()">Cancel</button>
+        </div>
+    </div>
+</div>
+<div class="estimation-modal" *ngIf="showPopup">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Nurse Details</h3>
+        </div>
+        <hr />
+
+        <div class="modal-body">
+            <div class="vitals-grid">
+                <div class="form-group name-width">
+                    <input type="text" class="form-input" id="firstName" [name]="name" ngModel
+                        [(ngModel)]="name" required placeholder=" " pattern="^[a-zA-Z]*$" />
+                    <label [for]="name" class="form-label">Name</label>
+                </div>
+                <div class="form-group name-width">
+                    <input type="text" class="form-input" id="firstName" [name]="employeeId" ngModel
+                        [(ngModel)]="employeeId" required placeholder=" " pattern="^[a-zA-Z]*$" />
+                    <label [for]="employeeId" class="form-label">Employee ID</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer-close-opd">
+            <button class="save-button" (click)="updateDetails()">
+                <ng-container *ngIf="!isButtonLoading; else loading">
+                    Submit
+                </ng-container>
+                <ng-template #loading>
+                    <span class="spinner"></span> Saving...
+                </ng-template>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="loader" *ngIf="isLoading"></div>

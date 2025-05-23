@@ -50,7 +50,7 @@
   
 
   <div *ngIf="isEditMode" class="edit-form-container">
-    <app-doctor-form  *ngIf="selectedEditDoctor" [doctor]="selectedEditDoctor" [isEditMode]="isEditMode" (save)="onSaveDoctor($event)" (cancel)="cancelEdit()"></app-doctor-form>
+    <app-doctor-form  *ngIf="selectedEditDoctor" [doctor]="selectedEditDoctor" [isEditMode]="isEditMode" [isButtonLoading]="isButtonLoading" (save)="onSaveDoctor($event)" (cancel)="cancelEdit()"></app-doctor-form>
   </div>
   <div *ngIf="showUnavailableModal" class="modal-backdrop">
     <div class="modal-content">

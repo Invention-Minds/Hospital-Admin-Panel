@@ -163,5 +163,7 @@ export class DoctorServiceService {
   setUnavailableForDoctors(data: { doctorIds: number[], startDate: string, endDate: string }) {
     return this.http.post(`${this.apiUrl}/doctors/add-unavailable-dates`, data);
   }
-  
+  getDoctorWithDepartment(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/doctors/docbydept`);
+  } 
 }

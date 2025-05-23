@@ -40,7 +40,11 @@ export class EstimationConfirmedComponent {
   adminType: string = '';
   receiptNumber: string = '';
   advanceAmount: string = '';
-  showAdvancePopup: boolean = false
+  showAdvancePopup: boolean = false;
+  showFollowUps: boolean = false;
+  followUpDate: string = ''
+  followUps: any[] = [];
+  followUpDateArray: any[] = [];
 
   @Output() reschedule = new EventEmitter<any>();
   // Value entered by the user (could be Patient ID or Phone Number based on selection)
@@ -576,4 +580,45 @@ export class EstimationConfirmedComponent {
     );
 
   }
+  openFollowUpPopup(estimation: any) {
+    this.selectedEstimation = estimation
+    this.showFollowUps = true;
+    this.followUps = estimation.followUpDates || [];
+  }
+  closeFollowUpPopup() {
+    this.showFollowUps = false;
+    this.feedback = ''
+    this.followUpDate = ''
+  }
+  saveFollowUp(): void {
+    if (!this.followUpDate || !this.feedback) {
+      alert('Please fill in all fields!');
+      return;
+    }
+
+    if (this.followUps.length >= 5) {
+      alert('You can only add up to 5 follow-ups.');
+      return;
+    }
+
+    const newFollowUp = { date: this.followUpDate, remarks: this.feedback };
+    // console.log(newFollowUp)
+    this.estimationService.updateFollowUps(this.selectedEstimation.estimationId, newFollowUp)
+      .subscribe(
+        (response: any) => {
+          this.followUps.push(response.followUp); // Update the UI with the new follow-up
+          this.followUpDate = '';
+          this.feedback = '';
+          alert('Follow-up saved successfully!');
+        },
+        (error) => {
+          console.error('Error saving follow-up:', error);
+          alert('Error saving follow-up. Please try again.');
+        }
+      );
+  }
+  getFollowUpDates(estimation: any): string[] {
+    return estimation.followUpDates ? estimation.followUpDates.map((followUp: any) => followUp.date) : [];
+  }
 }
+

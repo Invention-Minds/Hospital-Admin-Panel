@@ -7,6 +7,17 @@ import { environment } from '../../environment/environment.prod';
 import { tap } from 'rxjs/operators';
 import { Doctor } from '../models/doctor.model';
 
+export interface InvestigationOrderPayload {
+  prn: string;
+  doctorId: number;
+  doctorName: string;
+  remarks?: string;
+  date?: string; // ISO format date: 'YYYY-MM-DD'
+  labTests: number[];
+  radiologyTests: number[];
+  packages: number[];
+}
+
 export interface Appointment {
   id?: number;
   patientName: string;
@@ -58,6 +69,9 @@ export class AppointmentConfirmService {
 
   private apiUrl = `${environment.apiUrl}/appointments`; // Update this with your actual backend endpoint
   private url = `${environment.apiUrl}/doctors`; // Update this with your actual backend endpoint
+  private baseUrl = `${environment.apiUrl}/doctor-notes`;
+  private historyUrl = `${environment.apiUrl}/history-notes`;
+    private investigationUrl = `${environment.apiUrl}/investigation`
 
   constructor(private http: HttpClient, private authService: AuthServiceService) { }
 
@@ -221,6 +235,11 @@ const appointmentData = appointment
   // Method to get today's total appointments count
   getTotalAppointmentsCountForToday(date: string): Observable<{ count: number }> {
     return this.http.get<{ count: number }>(`${this.apiUrl}/total`, {
+      params: { date: date }
+    });
+  }
+  getTotalCheckinToday(date: string): Observable<{ count: number }> {
+    return this.http.get<{ count: number }>(`${this.apiUrl}/check-in`, {
       params: { date: date }
     });
   }
@@ -389,6 +408,12 @@ const appointmentData = appointment
   getAllPatients(): Observable<any> {
     return this.http.get(`${environment.apiUrl}/patients`);
   }
+  getDetailsByPRN(prnNumber: string): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/patients/get-details-by-prn`, { prnNumber });
+  }
+  updatePatientByPRN(prn: string, data: any): Observable<any> {
+    return this.http.put(`${environment.apiUrl}/patients/${prn}`, data);
+  }
   checkedinAppointment(appointmentId: number, username: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/${appointmentId}/checkin`, { username });
   }
@@ -466,5 +491,61 @@ const appointmentData = appointment
   
     return this.http.get<any>(apiUrl);
   }
-  
+  createNote(noteData: any): Observable<any> {
+    return this.http.post(`${this.baseUrl}`, noteData);
+  }
+
+  // Get all doctor notes
+  getAllNotes(): Observable<any> {
+    return this.http.get(`${this.baseUrl}`);
+  }
+
+
+  createPatient(data: any): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/patients`, data);
+  }
+  getDoctorNoteByPRNAndDate(prn: number, date: string): Observable<any> {
+    const params = new HttpParams().set('date', date);
+    return this.http.get(`${this.baseUrl}/${prn}`, { params });
+  }
+
+  saveDoctorNote(prn: number, date: string, data: any): Observable<any> {
+    const params = new HttpParams().set('date', date);
+    return this.http.put(`${this.baseUrl}/${prn}`, data, { params });
+  }
+  getTodayCheckin(date: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/today-checkin`, {
+      params: { date: date }
+    });
+  }
+  updateAppointmentVitals(appointmentId: number, vitals: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${appointmentId}/vitals`, vitals);
+  }
+  createHistoryNote(noteData: any): Observable<any> {
+    return this.http.post(`${this.historyUrl}`, noteData);
+  }
+
+  // Get all doctor notes
+  getAllHistoryNotes(): Observable<any> {
+    return this.http.get(`${this.historyUrl}`);
+  }
+  getHistoryNoteByPRNAndDate(prn: number, date: string): Observable<any> {
+    const params = new HttpParams().set('date', date);
+    return this.http.get(`${this.historyUrl}/${prn}`, { params });
+  }
+
+  saveHistoryNote(prn: number, date: string, data: any): Observable<any> {
+    const params = new HttpParams().set('date', date);
+    return this.http.put(`${this.historyUrl}/${prn}`, data, { params });
+  }
+  getLabTests(): Observable<any[]> {
+    return this.http.get<any[]>(`${environment.apiUrl}/investigation/lab-tests`);
+  }
+
+  getRadiologyTests(): Observable<any[]> {
+    return this.http.get<any[]>(`${environment.apiUrl}/investigation/radiology-tests`);
+  }
+  createOrder(payload: InvestigationOrderPayload): Observable<any> {
+    return this.http.post(`${this.investigationUrl}/investigation-orders`, payload);
+  }
 }

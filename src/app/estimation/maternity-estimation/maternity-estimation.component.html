@@ -1,0 +1,160 @@
+<div class="form-row">
+    <!-- Dropdown for Search By -->
+    <div class="column-1">
+        <div class="p-field p-col-2">
+            <p-dropdown [options]="searchOptions" [(ngModel)]="selectedSearchOption" placeholder="Search By"
+                class="custom-dropdown" (ngModelChange)="onSearch()"></p-dropdown>
+        </div>
+
+        <div class="p-field p-col-3">
+            <input pInputText [(ngModel)]="searchValue" placeholder="Search / 123456" class="custom-input-text"
+                (ngModelChange)="onSearch()" />
+        </div>
+
+        <!-- Search and Clear Buttons -->
+        <div class="p-field p-col-2 buttons-container">
+            <!-- <img (click)="onSearch()" src="/icons/search.png"> -->
+            <svg (click)="onClear()" class="delete" xmlns="http://www.w3.org/2000/svg" width="3.5em" height="3.5em"
+                viewBox="0 0 24 24">
+                <path fill="#fff"
+                    d="M7 21q-.825 0-1.412-.587T5 19V6q-.425 0-.712-.288T4 5t.288-.712T5 4h4q0-.425.288-.712T10 3h4q.425 0 .713.288T15 4h4q.425 0 .713.288T20 5t-.288.713T19 6v13q0 .825-.587 1.413T17 21zM17 6H7v13h10zm-7 11q.425 0 .713-.288T11 16V9q0-.425-.288-.712T10 8t-.712.288T9 9v7q0 .425.288.713T10 17m4 0q.425 0 .713-.288T15 16V9q0-.425-.288-.712T14 8t-.712.288T13 9v7q0 .425.288.713T14 17M7 6v13z" />
+            </svg>
+            <!-- <img (click)="onClear()" class="delete" src="/icons/delete-1.png" pTooltip="Delete"> -->
+        </div>
+    </div>
+
+    <!-- <div class="p-field p-col-3 download">
+      <img src="download.png" (click)="downloadData()" pTooltip="Download" >
+     </div> -->
+
+    <div class="p-field p-col-3 calendar">
+        <!-- <p-calendar [(ngModel)]="selectedDate" placeholder="Calendar" class="custom-calendar"></p-calendar> -->
+        <p-calendar styleClass="custom-calendar" [(ngModel)]="selectedDateRange" selectionMode="range"
+            (ngModelChange)="onSearch()" placeholder="Calendar" dateFormat="dd-mm-yy">
+            <ng-template pTemplate="date" let-date>
+                <span>
+                    {{ date.day }}
+                </span>
+            </ng-template>
+        </p-calendar>
+        <i class="fa-solid fa-angle-down calendar-icon"></i>
+        <svg pTooltip="Refresh" (click)="refresh()" class="reverse" xmlns="http://www.w3.org/2000/svg" width="2.5em"
+            height="2.5em" viewBox="-1.5 -2.5 24 24">
+            <path fill="currentColor"
+                d="m4.859 5.308l1.594-.488a1 1 0 0 1 .585 1.913l-3.825 1.17a1 1 0 0 1-1.249-.665L.794 3.413a1 1 0 1 1 1.913-.585l.44 1.441C5.555.56 10.332-1.035 14.573.703a9.38 9.38 0 0 1 5.38 5.831a1 1 0 1 1-1.905.608A7.381 7.381 0 0 0 4.86 5.308zm12.327 8.195l-1.775.443a1 1 0 1 1-.484-1.94l3.643-.909a1 1 0 0 1 .61-.08a1 1 0 0 1 .84.75l.968 3.88a1 1 0 0 1-1.94.484l-.33-1.322a9.381 9.381 0 0 1-16.384-1.796l-.26-.634a1 1 0 1 1 1.851-.758l.26.633a7.381 7.381 0 0 0 13.001 1.25z" />
+        </svg>
+
+    </div>
+</div>
+
+<div class="table-container" [ngClass]="{'loading': isLoading}" *ngIf="!isLoading">
+    <div class="table-wrapper">
+        <table class="appointment-table">
+            <thead>
+                <tr>
+                    <th>No</th>
+                    <th (click)="sortBy('firstName')" style="cursor: pointer;">
+                        Estimation ID
+                        <span *ngIf="sortColumn === 'firstName' && sortDirection === 'asc'">&#9650;</span>
+                        <span *ngIf="sortColumn === 'firstName' && sortDirection === 'desc'">&#9660;</span>
+                    </th>
+                    <th>Patient Name</th>
+                    <!-- <th>Phone Number</th> -->
+                    <th (click)="sortBy('appointmentDate')" style="cursor: pointer;">
+                        Estimation Name
+                        <span *ngIf="sortColumn === 'appointmentDate' && sortDirection === 'asc'">&#9650;</span>
+                        <span *ngIf="sortColumn === 'appointmentDate' && sortDirection === 'desc'">&#9660;</span>
+                    </th>
+                    <!-- <th>Time</th> -->
+                    <th>EST Type</th>
+
+                    <th>EST Created Date</th>
+                    <th>Surgery Date</th>
+                    <th>Est. Handled By</th>
+                    <th>Est. Approved By</th>
+                    <th>WA</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngIf="filteredEstimations.length === 0">
+                    <td colspan="11" class="no-records-message">
+                        No records to display
+                    </td>
+                </tr>
+                <tr *ngFor="let estimation of getPaginatedAppointments(); let i = index">
+                    <td>{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
+                    <td>{{ estimation.estimationId }}</td>
+                    <td>{{ estimation.patientName }}</td>
+                    <!-- <td>{{ estimation.patientPhoneNumber }}</td> -->
+                    <td>{{ estimation.estimationName }}</td>
+                    <!-- <td>{{ estimation.appointmentTime }}</td> -->
+                    <td>{{ estimation.estimationType }}</td>
+                    <td>
+                        {{
+                        estimation.estimationPreferredDate
+                        ? (estimation.estimationCreatedTime | date:'dd-MM-yyyy')
+                        : (estimation.submittedDateAndTime | date:'dd-MM-yyyy')
+                        }}
+                    </td>
+                    <td>{{estimation.estimatedDate | date:'dd-MM-yyyy'}}</td>
+                    <td>{{estimation.employeeId}}</td>
+                    <td>{{estimation.approverId}}</td>
+                    <!-- <td>
+                        <span class="sms-status" [ngClass]="{'sms-sent': service.smsSent, 'sms-not-sent': !service.smsSent}">
+                          <img *ngIf="service.smsSent" src="icons/sent.svg" alt="Sent">
+                          <img *ngIf="!service.smsSent" src="icons/not-sent.svg" alt="Not Sent">
+                        </span>
+                      </td>
+                      <td>
+                        <span class="sms-status"
+                          [ngClass]="{'sms-sent': service.emailSent, 'sms-not-sent': !service.emailSent}">
+                          <img *ngIf="service.emailSent" src="icons/sent.svg" alt="Sent">
+                          <img *ngIf="!service.emailSent" src="icons/not-sent.svg" alt="Not Sent">
+                        </span>
+                      </td>
+                       -->
+                    <td>
+                        <span class="sms-status"
+                            [ngClass]="{'sms-sent': estimation.messageSent, 'sms-not-sent': !estimation.messageSent}">
+                            <img *ngIf="estimation.messageSent" src="icons/sent.svg" alt="Sent">
+                            <img *ngIf="!estimation.messageSent" src="icons/not-sent.svg" alt="Not Sent">
+                        </span>
+                    </td>
+                    <td>
+                        <span class="status-badge" [ngClass]="{
+    'status-complete': estimation.statusOfEstimation === 'complete',
+    'status-cancelled': estimation.statusOfEstimation === 'cancelled'
+  }">
+                            {{ estimation.statusOfEstimation }}
+                        </span>
+                    </td>
+                    <td class="button">
+                        <button class="btn-action" (click)="print(estimation)" pTooltip="Download"
+                            tooltipPosition="top">
+                            <img src="/report-download.svg" alt="Confirm">
+                        </button>
+                        <!-- <img src="appt-cancel.svg" alt="delete" class="action-icon" (click)="cancelAppointment(estimation)"
+                          pTooltip="Cancel" tooltipPosition="top"> -->
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="pagination">
+        <button class="pagination-btn prev" (click)="prevPage()" [disabled]="currentPage === 1">←</button>
+        <button class="pagination-btn next" (click)="nextPage()" [disabled]="currentPage === totalPages">→</button>
+        <div class="page-info">
+            Page
+            <input type="number" [(ngModel)]="currentPage" min="1" [max]="totalPages" class="page-input"
+                (change)="onPageChange()">
+            of {{ totalPages }}
+        </div>
+    </div>
+    <p-toast></p-toast>
+
+</div>
+<div class="loader" *ngIf="isLoading"></div>

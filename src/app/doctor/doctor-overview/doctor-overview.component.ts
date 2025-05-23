@@ -117,7 +117,9 @@ export class DoctorOverviewComponent implements OnInit {
     } else if (this.isEditMode) {
       this.isLoading = true;
       // Logic to update the existing doctor
-      this.doctorService.updateDoctor(doctor).subscribe(
+      console.log(doctor)
+      const {bookedSlots, ...rest} = doctor;
+      this.doctorService.updateDoctor(rest).subscribe(
         () => {
           // console.log('Doctor updated successfully:', doctor);
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Doctor details updated successfully' });

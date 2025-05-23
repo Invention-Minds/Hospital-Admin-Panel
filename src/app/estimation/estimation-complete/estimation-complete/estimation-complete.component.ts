@@ -52,12 +52,12 @@ this.fetchPendingEstimations();
         
         // Process the services when the API call is successful
         this.pendingEstimations = estimation.filter(
-          (estimation) => estimation.statusOfEstimation === 'completed' || estimation.statusOfEstimation === 'cancelled'
+          (estimation) => estimation.statusOfEstimation === 'completed'
         );
         console.log(this.pendingEstimations)
         this.pendingEstimations.sort((a, b) => {
-          const dateA = new Date(a.estimationCreatedTime!);
-          const dateB = new Date(b.estimationCreatedTime!);
+          const dateA = new Date(a.completedDateAndTime!);
+          const dateB = new Date(b.completedDateAndTime!);
           return dateA.getTime() - dateB.getTime();
         });
         this.filteredEstimations = [...this.pendingEstimations];

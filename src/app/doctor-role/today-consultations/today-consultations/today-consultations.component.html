@@ -77,8 +77,14 @@
               <button class="cc" [disabled]="appointment.isReferred" (click)="openReferralPopup(appointment)">
                 <img class="image" src="/cc.svg">CC
               </button>
-              <button class="followup" [disabled]="appointment.isfollowup || appointment.type === 'followUp'" (click)="!appointment.isfollowup && appointment.type ==='followUp' && followUp(appointment)">
+              <button class="followup" [disabled]="appointment.isfollowup || appointment.type === 'followUp'" (click)="!(appointment.isfollowup && appointment.type ==='followUp') && followUp(appointment)">
                 <img class="image" src="/follow-up-icon.svg">Followup
+              </button>
+              <button class="prescription" (click)="openModal('history',appointment)">
+                <img class="image" src="/notes.svg">OPD Notes
+              </button>
+              <button class="history" (click)="view({ prn: appointment.prnNumber })">
+                <img class="image" src="/p-history.svg">P. History
               </button>
             </td>
           </tr>
@@ -100,44 +106,6 @@
     </div>
   </div>
   <div class="mobile-appointments" *ngIf="!isDesktopView">
-    <!-- <div *ngFor="let appointment of filteredAppointments" class="appointment-card">
-      <div class="card-header">
-        <div class="patient-info">
-          <div>
-            <img src="admin-icons/admin-icon.jpg" class="profile-pic">
-          </div>
-          <div>
-            <h3>{{ appointment.patientName }}</h3>
-            <p class="patient">Patient</p>
-          </div>
-        </div>
-       <div class="calendar-div">
-        <p class="date-time">
-          <img src="/w-calendar.svg" alt="calendar" class="icon"> {{ appointment.date }} 
-        </p>
-        <p class="date-time">
-          <img src="/w-time.svg" alt="calendar" class="icon"> {{ appointment.time }}
-        </p>
-       </div>
-      </div>
-      <div class="card-actions">
-        <button class="start" [disabled]="appointment.checkedOut === true" (click)="appointment.checkedOut === false && startConsultation(appointment)">
-          <img class="image" src="/start.svg">Start 
-        </button>
-        <button class="finish" [disabled]="appointment.endConsultationTime !== null " (click)="appointment.endConsultationTime === null  && finishConsultation(appointment)">
-          <img class="image" src="/finish.svg">Finish
-        </button>
-        <button class="postPond" (click)="postPondAppointment(appointment)">
-          <img class="image" src="/pause.svg">PostPoned
-        </button>
-        <button class="estimation" (click)="openEstimationPopup(appointment)">
-          <img class="image" src="/est.svg">Estimation
-        </button>
-        <button class="transfer" [disabled]="appointment.isTransfer" (click)="!appointment.isTransfer && openTransferPopup(appointment)">
-          <img class="image" src="/transfer.svg">Transfer
-        </button>
-      </div>
-    </div> -->
     <div class="mobile-appointments">
       <div *ngFor="let appointment of filteredAppointments; let i = index" 
            class="appointment-card"
@@ -550,3 +518,726 @@
       </div>
     </div>
   </div>
+  <div class="estimation-modal" *ngIf="showNotesPopup">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Doctor Notes</h3>
+        <button class="popup-close" (click)="closeNotesPopup()">
+          <img src="/popup-close.svg" />
+        </button>
+      </div>
+      <hr />
+      <div class="modal-body">
+        <div class="vitals-grid">
+          <div class="form-group name-width" *ngFor="let field of noteSections">
+            <textarea [name]="doctorNoteData[field.key]" [(ngModel)]="doctorNoteData[field.key]" class="form-input"
+              id="firstName" rows="4" placeholder="" rows="4" required></textarea>
+            <label [for]="field.label" class="form-label">{{ field.label }}</label>
+          </div>
+        </div>
+      </div>
+  
+      <div class="modal-footer-close-opd">
+        <button class="save-button" [disabled]="!hasAnyNotesFilled() || isButtonLoading" (click)="submitDoctorNotes()">
+          <ng-container *ngIf="!isButtonLoading; else loading">
+            Submit
+          </ng-container>
+          <ng-template #loading>
+            <span class="spinner"></span> Saving...
+          </ng-template>
+        </button>
+  
+        <button class="close-button" (click)="closeNotesPopup()">Cancel</button>
+      </div>
+    </div>
+  </div>
+ 
+  <div *ngIf="showPrescription" class="estimation-modal">
+    <div class="popup">
+      <h2 class="title-bar">Prescription</h2>
+  
+      <div class="top-menu">
+        <span class="section-title">Add New Drug</span>
+        <div class="menu-actions">
+          <span (click)="openFavorite()" class="favorites">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path
+                d="M1.6 3.2V14.4H12.8V16H0.8C0.32 16 0 15.68 0 15.2V3.2H1.6ZM4.8 0H14.4C14.8243 0 15.2313 0.168571 15.5314 0.468629C15.8314 0.768687 16 1.17565 16 1.6V11.2C16 12.088 15.288 12.8 14.4 12.8H4.8C4.37565 12.8 3.96869 12.6314 3.66863 12.3314C3.36857 12.0313 3.2 11.6243 3.2 11.2V1.6C3.2 0.72 3.92 0 4.8 0ZM11.44 9.04L11.12 6.96L12.64 5.44L10.56 5.12L9.6 3.2L8.64 5.12L6.56 5.44L8.08 6.88L7.68 8.96L9.6 8L11.44 9.04Z"
+                fill="white" />
+            </svg>
+            Favorite</span>
+          <span (click)="openAllergyPopup()" class="allergies">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path
+                d="M14.2765 1.72294C13.7311 1.17677 13.0834 0.743459 12.3703 0.447817C11.6572 0.152175 10.8929 0 10.1209 0C9.34894 0 8.58457 0.152175 7.8715 0.447817C7.15844 0.743459 6.51068 1.17677 5.9653 1.72294L4.44071 3.25584C4.39758 3.28128 4.36162 3.31724 4.33617 3.36035L1.72258 5.97324C1.17686 6.51825 0.743859 7.16537 0.448298 7.87767C0.152737 8.58998 0.000405298 9.3535 8.08754e-07 10.1247C-0.000816095 11.6821 0.617248 13.176 1.71823 14.2779C2.8192 15.3797 4.31291 15.9992 5.87074 16C7.42858 16.0008 8.92293 15.3829 10.0251 14.2822L14.2504 10.0581C14.8023 9.51408 15.2411 8.86623 15.5414 8.15188C15.8417 7.43753 15.9975 6.67081 16 5.89594C16.0024 5.12108 15.8514 4.3534 15.5556 3.63718C15.2598 2.92096 14.825 2.27037 14.2765 1.72294ZM7.38535 3.16003C7.81976 2.72163 8.37515 2.4228 8.98043 2.30177C9.58571 2.18075 10.2133 2.24304 10.783 2.48068C11.1594 2.63745 11.5 2.86826 11.7849 3.16003C11.9471 3.32322 12.0382 3.54396 12.0382 3.77406C12.0382 4.00416 11.9471 4.2249 11.7849 4.38809C11.6216 4.55031 11.4008 4.64136 11.1707 4.64136C10.9405 4.64136 10.7197 4.55031 10.5565 4.38809C10.3652 4.19707 10.1217 4.067 9.85652 4.01429C9.59137 3.96159 9.31655 3.98861 9.06675 4.09196C8.89859 4.15665 8.74685 4.25778 8.62244 4.38809C8.45793 4.54421 8.23906 4.6301 8.01225 4.62755C7.78544 4.625 7.56855 4.5342 7.4076 4.37442C7.24665 4.21465 7.1543 3.99846 7.15014 3.77174C7.14599 3.54502 7.23036 3.3256 7.38535 3.16003ZM11.0792 11.3732C9.66138 10.7076 8.38847 9.76942 7.33307 8.61226C6.19342 7.57154 5.26982 6.31673 4.61495 4.91938L5.60811 3.92648C6.19531 5.35572 7.08723 6.63974 8.22169 7.68904C9.28027 8.85567 10.5831 9.77458 12.0375 10.3803L11.0792 11.3732Z"
+                fill="white" />
+              <path d="M1.59766 1.60059L13.5977 13.6006" stroke="#9C0005" stroke-width="2.5" stroke-linecap="round" />
+            </svg>
+            Allergies</span>
+          <span (click)="openPastRx()" class="past-rx">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
+              <path
+                d="M8 0L4.36364 2.125L8 4.25V2.83333C11.6036 2.83333 14.5455 5.69854 14.5455 9.20833C14.5455 12.7181 11.6036 15.5833 8 15.5833C4.39636 15.5833 1.45455 12.7181 1.45455 9.20833C1.45455 7.47079 2.09673 5.97125 3.27273 4.82517L2.25018 3.82996C0.807273 5.23458 0 7.12087 0 9.20833C0 13.4902 3.60364 17 8 17C12.3964 17 16 13.4902 16 9.20833C16 4.92646 12.3964 1.41667 8 1.41667V0ZM6.47709 4.64879L5.15927 5.26858L7 8.81025C6.94359 8.93598 6.91272 9.07117 6.90909 9.20833V9.25296L4.568 11.5317L5.61455 12.5517L7.95564 10.2715H8C8.28933 10.2715 8.5668 10.1596 8.77139 9.96034C8.97598 9.76108 9.09091 9.49083 9.09091 9.20904C9.09091 8.72029 8.75709 8.31442 8.29527 8.19046L6.47709 4.64879Z"
+                fill="white" />
+            </svg>
+            Past Rx</span>
+          <span (click)="openPreviousRx()" class="previous-rx">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="17" height="15" viewBox="0 0 17 15" fill="none">
+              <path
+                d="M15.1171 14.0558C13.5824 11.7177 11.6858 10.9836 9.35242 10.7975V12.1414C9.35242 12.6408 9.1579 13.1103 8.80439 13.4638C8.09737 14.1708 6.86195 14.1661 6.16428 13.4684L0.279 7.66359C0.190636 7.57657 0.120463 7.47284 0.072565 7.35845C0.0246668 7.24405 0 7.12127 0 6.99725C0 6.87323 0.0246668 6.75045 0.072565 6.63606C0.120463 6.52166 0.190636 6.41793 0.279 6.33091L6.15961 0.529797C6.86476 -0.176287 8.0983 -0.177223 8.80532 0.530732C9.1579 0.884242 9.35242 1.35372 9.35242 1.85312V3.44672C13.6722 4.31927 16.8341 8.11997 16.8341 12.6081V13.5433C16.8346 13.7448 16.77 13.9412 16.6497 14.103C16.5295 14.2648 16.3602 14.3833 16.167 14.441C15.9739 14.4986 15.7673 14.4923 15.578 14.4228C15.3888 14.3534 15.2271 14.2246 15.1171 14.0558ZM8.43872 8.87843C10.5027 8.9308 12.7762 9.2469 14.7589 10.862C14.401 9.36559 13.5897 8.01624 12.4358 6.99846C11.2819 5.98067 9.84185 5.34415 8.31246 5.17593C7.84112 5.12356 7.482 5.1273 7.482 5.1273V1.85686L2.26726 6.99678L7.482 12.1404V8.86814L8.43872 8.87843Z"
+                fill="white" />
+            </svg>
+            Previous Rx</span>
+        </div>
+      </div>
+  
+      <div class="header-row">
+        <button class="add-btn" (click)="addTablet()">Add +</button>
+        <span class="column column-w-18">Generic name</span>
+        <span class="column column-w-18">Brand Name</span>
+        <span class="column column-w-12">Frequency</span>
+        <span class="column column-w-11">Duration</span>
+        <span class="column column-w-20">Instruction</span>
+        <span class="column column-w-8">Qty</span>
+      </div>
+  
+      <form [formGroup]="form">
+        <div class="tablet-rows-wrapper">
+          <div formArrayName="tablets" class="tablet-rows scrollable">
+            <div *ngFor="let tab of tablets.controls; let i = index" [formGroupName]="i" class="tablet-row">
+              <button type="button" (click)="removeTablet(i)" class="delete-btn"><img src="./pres-delete.svg"></button>
+              <button type="button" (click)="toggleFavorite(i)" class="favorite-btn">
+                <!-- <img [src]="isFavorite(i) ? '/star-filled.svg' : '/star-outlined.svg'" alt="Favorite" class="star-icon" /> -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" *ngIf="!isFavorite(i)">
+                  <path fill="none" stroke="#36B8B8" stroke-linejoin="round" stroke-width="1.5"
+                    d="m12 2l3.104 6.728l7.358.873l-5.44 5.03l1.444 7.268L12 18.28L5.534 21.9l1.444-7.268L1.538 9.6l7.359-.873z" />
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" *ngIf="isFavorite(i)">
+                  <path fill="#36B8B8" fill-rule="evenodd"
+                    d="M12.908 1.581a1 1 0 0 0-1.816 0l-2.87 6.22l-6.801.807a1 1 0 0 0-.562 1.727l5.03 4.65l-1.335 6.72a1 1 0 0 0 1.469 1.067L12 19.426l5.977 3.346a1 1 0 0 0 1.47-1.068l-1.335-6.718l5.029-4.651a1 1 0 0 0-.562-1.727L15.777 7.8z"
+                    clip-rule="evenodd" stroke-width="0.5" stroke="#36B8B8" />
+                </svg>
+              </button>
+              <select formControlName="genericName" (change)="onGenericChange(i)" class="w-18">
+                <option value="">Select Generic</option>
+                <option *ngFor="let item of genericOptions" [value]="item">{{ item }}</option>
+              </select>
+  
+              <select formControlName="brandName" class="w-18" (change)="onBrandChange(i)">
+                <option value="">Select Brand</option>
+                <option *ngFor="let item of filteredBrandOptions[i]" [value]="item">{{ item }}</option>
+              </select>
+  
+              <select formControlName="frequency" class="w-8">
+                <option value="">Select Frequency</option>
+                <option *ngFor="let item of frequencyOptions" [value]="item">{{ item }}</option>
+              </select>
+  
+              <select formControlName="duration" class="w-8">
+                <option value="">Select Duration</option>
+                <option *ngFor="let item of durationOptions" [value]="item">{{ item }}</option>
+              </select>
+  
+              <input formControlName="instructions" placeholder="Type Instruction" class="w-20" />
+              <input formControlName="quantity" type="number" placeholder="999" class="w-8" />
+            </div>
+          </div>
+        </div>
+  
+        <div class="remarks-fixed">
+          <div class="remarks-box">
+            <textarea formControlName="remarks" placeholder="Remarks"></textarea>
+          </div>
+  
+          <div class="actions">
+            <button type="button" (click)="save()" class="save-button">Save</button>
+            <button type="button" [disabled]="!saved" (click)="saved && print()" class="save-button">Print</button>
+            <button type="button" class="close-button" (click)="closePrescription()">Close</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  
+  </div>
+  <div *ngIf="showFavorite" class="estimation-modal">
+    <div class="popup-fav">
+      <h2 class="title-bar-fav">
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path
+            d="M1.6 3.2V14.4H12.8V16H0.8C0.32 16 0 15.68 0 15.2V3.2H1.6ZM4.8 0H14.4C14.8243 0 15.2313 0.168571 15.5314 0.468629C15.8314 0.768687 16 1.17565 16 1.6V11.2C16 12.088 15.288 12.8 14.4 12.8H4.8C4.37565 12.8 3.96869 12.6314 3.66863 12.3314C3.36857 12.0313 3.2 11.6243 3.2 11.2V1.6C3.2 0.72 3.92 0 4.8 0ZM11.44 9.04L11.12 6.96L12.64 5.44L10.56 5.12L9.6 3.2L8.64 5.12L6.56 5.44L8.08 6.88L7.68 8.96L9.6 8L11.44 9.04Z"
+            fill="white" />
+        </svg>
+        Favorite
+      </h2>
+  
+      <div class="header-row-fav">
+        <button class="add-btn-fav" (click)="addFavorite()">Add +</button>
+        <span class="column column-name">Generic name</span>
+        <span class="column column-name">Brand Name</span>
+        <span class="column column-name-1">Frequency</span>
+        <span class="column column-name-2">Duration</span>
+        <span class="column column-name-3">Instruction</span>
+        <span class="column column-name-4">Select</span>
+      </div>
+  
+      <form [formGroup]="favoritesForm">
+        <div class="tablet-rows-wrapper-fav">
+          <div formArrayName="favorites" class="tablet-rows">
+            <div *ngFor="let fav of favorites.controls; let i = index" [formGroupName]="i" class="tablet-row">
+              <button type="button" (click)="removeFavorite(i)" class="delete-btn">
+                <img src="./pres-delete.svg" />
+              </button>
+              <button class="favorite-btn" disabled>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24">
+                  <path fill="#36B8B8" fill-rule="evenodd"
+                    d="M12.908 1.581a1 1 0 0 0-1.816 0l-2.87 6.22l-6.801.807a1 1 0 0 0-.562 1.727l5.03 4.65l-1.335 6.72a1 1 0 0 0 1.469 1.067L12 19.426l5.977 3.346a1 1 0 0 0 1.47-1.068l-1.335-6.718l5.029-4.651a1 1 0 0 0-.562-1.727L15.777 7.8z"
+                    clip-rule="evenodd" stroke-width="0.5" stroke="#36B8B8" />
+                </svg>
+              </button>
+  
+              <select formControlName="genericName" class="column-name" (change)="onGenericChange(i)">
+                <option value="">Select Generic</option>
+                <option *ngFor="let item of genericOptions" [value]="item">{{ item }}</option>
+              </select>
+  
+              <select formControlName="brandName" class="column-name" (change)="onBrandChange(i)">
+                <option value="">Select Brand</option>
+                <option *ngFor="let item of filteredBrandOptionsFavorites[i]" [value]="item">{{ item }}</option>
+              </select>
+  
+              <select formControlName="frequency" class="column-name">
+                <option value="">Select Frequency</option>
+                <option *ngFor="let item of frequencyOptions" [value]="item">{{ item }}</option>
+              </select>
+  
+              <select formControlName="duration" class="column-name">
+                <option value="">Select Duration</option>
+                <option *ngFor="let item of durationOptions" [value]="item">{{ item }}</option>
+              </select>
+  
+              <input type="text" formControlName="instructions" class="column-name" placeholder="Instruction" />
+              <button type="button" class="add-to-pres-btn add-btn-fav"  (click)="addFavoriteToPrescription(i)"
+                title="Add to Prescription">
+                Add +
+              </button>
+            </div>
+          </div>
+        </div>
+  
+        <div class="actions">
+          <button type="button" (click)="saveFavorites()" class="save-button">Save</button>
+          <button type="button" class="close-button" (click)="closeFavorites()">Close</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <div *ngIf="showAllergy" class="estimation-modal">
+    <div class="popup-fav">
+      <h2 class="title-bar-fav">
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path
+            d="M14.2765 1.72294C13.7311 1.17677 13.0834 0.743459 12.3703 0.447817C11.6572 0.152175 10.8929 0 10.1209 0C9.34894 0 8.58457 0.152175 7.8715 0.447817C7.15844 0.743459 6.51068 1.17677 5.9653 1.72294L4.44071 3.25584C4.39758 3.28128 4.36162 3.31724 4.33617 3.36035L1.72258 5.97324C1.17686 6.51825 0.743859 7.16537 0.448298 7.87767C0.152737 8.58998 0.000405298 9.3535 8.08754e-07 10.1247C-0.000816095 11.6821 0.617248 13.176 1.71823 14.2779C2.8192 15.3797 4.31291 15.9992 5.87074 16C7.42858 16.0008 8.92293 15.3829 10.0251 14.2822L14.2504 10.0581C14.8023 9.51408 15.2411 8.86623 15.5414 8.15188C15.8417 7.43753 15.9975 6.67081 16 5.89594C16.0024 5.12108 15.8514 4.3534 15.5556 3.63718C15.2598 2.92096 14.825 2.27037 14.2765 1.72294ZM7.38535 3.16003C7.81976 2.72163 8.37515 2.4228 8.98043 2.30177C9.58571 2.18075 10.2133 2.24304 10.783 2.48068C11.1594 2.63745 11.5 2.86826 11.7849 3.16003C11.9471 3.32322 12.0382 3.54396 12.0382 3.77406C12.0382 4.00416 11.9471 4.2249 11.7849 4.38809C11.6216 4.55031 11.4008 4.64136 11.1707 4.64136C10.9405 4.64136 10.7197 4.55031 10.5565 4.38809C10.3652 4.19707 10.1217 4.067 9.85652 4.01429C9.59137 3.96159 9.31655 3.98861 9.06675 4.09196C8.89859 4.15665 8.74685 4.25778 8.62244 4.38809C8.45793 4.54421 8.23906 4.6301 8.01225 4.62755C7.78544 4.625 7.56855 4.5342 7.4076 4.37442C7.24665 4.21465 7.1543 3.99846 7.15014 3.77174C7.14599 3.54502 7.23036 3.3256 7.38535 3.16003ZM11.0792 11.3732C9.66138 10.7076 8.38847 9.76942 7.33307 8.61226C6.19342 7.57154 5.26982 6.31673 4.61495 4.91938L5.60811 3.92648C6.19531 5.35572 7.08723 6.63974 8.22169 7.68904C9.28027 8.85567 10.5831 9.77458 12.0375 10.3803L11.0792 11.3732Z"
+            fill="white" />
+          <path d="M1.59766 1.60059L13.5977 13.6006" stroke="#9C0005" stroke-width="2.5" stroke-linecap="round" />
+        </svg>
+        Allergies
+      </h2>
+  
+      <div class="header-row-fav">
+        <button class="add-btn-allergy" (click)="addAllergy()">Add +</button>
+        <span class="column column-name-allergy">Generic name</span>
+      </div>
+  
+      <form [formGroup]="allergyForm">
+        <div class="tablet-rows-wrapper-fav">
+          <div formArrayName="allergies" class="tablet-rows">
+            <div *ngFor="let fav of allergies.controls; let i = index" [formGroupName]="i" class="tablet-row">
+              <button type="button" (click)="removeAllergies(i)" class="delete-btn"><img src="./pres-delete.svg"></button>
+              <select formControlName="genericName" class="column-name">
+                <option value="">Select Generic</option>
+                <option *ngFor="let item of genericOptions" [value]="item">{{ item }}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+  
+        <div class="actions">
+          <button type="button" (click)="saveAllergies()" class="save-button">Save</button>
+          <button type="button" class="close-button" (click)="closeAllergies()">Close</button>
+        </div>
+      </form>
+    </div>
+  
+  </div>
+  <div *ngIf="showPreviousRx" class="estimation-modal">
+    <div class="popup-previous">
+      <div class="title-bar-fav">
+        <div>
+          <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="17" height="15" viewBox="0 0 17 15" fill="none">
+            <path
+              d="M15.1171 14.0558C13.5824 11.7177 11.6858 10.9836 9.35242 10.7975V12.1414C9.35242 12.6408 9.1579 13.1103 8.80439 13.4638C8.09737 14.1708 6.86195 14.1661 6.16428 13.4684L0.279 7.66359C0.190636 7.57657 0.120463 7.47284 0.072565 7.35845C0.0246668 7.24405 0 7.12127 0 6.99725C0 6.87323 0.0246668 6.75045 0.072565 6.63606C0.120463 6.52166 0.190636 6.41793 0.279 6.33091L6.15961 0.529797C6.86476 -0.176287 8.0983 -0.177223 8.80532 0.530732C9.1579 0.884242 9.35242 1.35372 9.35242 1.85312V3.44672C13.6722 4.31927 16.8341 8.11997 16.8341 12.6081V13.5433C16.8346 13.7448 16.77 13.9412 16.6497 14.103C16.5295 14.2648 16.3602 14.3833 16.167 14.441C15.9739 14.4986 15.7673 14.4923 15.578 14.4228C15.3888 14.3534 15.2271 14.2246 15.1171 14.0558ZM8.43872 8.87843C10.5027 8.9308 12.7762 9.2469 14.7589 10.862C14.401 9.36559 13.5897 8.01624 12.4358 6.99846C11.2819 5.98067 9.84185 5.34415 8.31246 5.17593C7.84112 5.12356 7.482 5.1273 7.482 5.1273V1.85686L2.26726 6.99678L7.482 12.1404V8.86814L8.43872 8.87843Z"
+              fill="white" />
+          </svg>
+          Previous Prescription
+        </div>
+        <div>
+          <button class="popup-close" (click)="showPreviousRx = false">
+            <img src="/white-close.svg" />
+          </button>
+        </div>
+      </div>
+      <div>
+        <div class="header-row">
+          <span class="column column-w-12">Date</span>
+          <span class="column column-w-18">Generic name</span>
+          <span class="column column-w-18">Brand Name</span>
+          <span class="column column-w-12">Frequency</span>
+          <span class="column column-w-11">Duration</span>
+          <span class="column column-w-20">Instruction</span>
+          <span class="column column-w-8">Qty</span>
+        </div>
+  
+        <div *ngFor="let tab of previousPrescription.tablets" class="tablet-row">
+          <input type="text" [value]="previousPrescription.prescribedDate | date:'dd-MM-yyyy'" class="w-12" readonly />
+          <input type="text" [value]="tab.genericName" class="w-18" readonly />
+          <input type="text" [value]="tab.brandName" class="w-18" readonly />
+          <input type="text" [value]="tab.frequency" class="w-8" readonly />
+          <input type="text" [value]="tab.duration" class="w-8" readonly />
+          <input type="text" [value]="tab.instructions" class="w-20" readonly />
+          <input type="text" [value]="tab.quantity" class="w-8" readonly />
+        </div>
+      </div>
+    </div>
+  
+  </div>
+  <div *ngIf="showPastRx" class="estimation-modal">
+    <div class="popup-past">
+        <div class="title-bar-fav">
+          <div>
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
+              <path
+                d="M8 0L4.36364 2.125L8 4.25V2.83333C11.6036 2.83333 14.5455 5.69854 14.5455 9.20833C14.5455 12.7181 11.6036 15.5833 8 15.5833C4.39636 15.5833 1.45455 12.7181 1.45455 9.20833C1.45455 7.47079 2.09673 5.97125 3.27273 4.82517L2.25018 3.82996C0.807273 5.23458 0 7.12087 0 9.20833C0 13.4902 3.60364 17 8 17C12.3964 17 16 13.4902 16 9.20833C16 4.92646 12.3964 1.41667 8 1.41667V0ZM6.47709 4.64879L5.15927 5.26858L7 8.81025C6.94359 8.93598 6.91272 9.07117 6.90909 9.20833V9.25296L4.568 11.5317L5.61455 12.5517L7.95564 10.2715H8C8.28933 10.2715 8.5668 10.1596 8.77139 9.96034C8.97598 9.76108 9.09091 9.49083 9.09091 9.20904C9.09091 8.72029 8.75709 8.31442 8.29527 8.19046L6.47709 4.64879Z"
+                fill="white" />
+            </svg>
+            Past Prescription
+          </div>
+          <div>
+            <button class="popup-close" (click)="showPastRx = false">
+              <img src="/white-close.svg" />
+            </button>
+          </div>
+        </div>
+  
+      <div class="tablet-rows-wrapper-past">
+        <div *ngFor="let pres of pastPrescriptions" class="prescription-block" (click)="selectPrescription(pres)">
+  
+          <!-- Header Info -->
+          <div class="prescription-header">
+            <strong>Rx ID:</strong> {{ pres.prescriptionId }} |
+            <strong>Date:</strong> {{ pres.prescribedDate | date: 'dd-MM-yyyy' }}
+          </div>
+        </div>
+  
+      </div>
+      <!-- <div class="actions">
+        <button type="button" class="close-button" (click)="showPastRx = false">Close</button>
+      </div> -->
+    </div>
+  </div>
+  <div class="estimation-modal" *ngIf="selectedPrescription">
+    <div *ngIf="selectedPrescription" class="popup-select-pres">
+      <div class="title-bar-pres">
+        <div>
+          <strong>Prescription ID:</strong> {{ selectedPrescription.prescriptionId }} |
+          <strong>Date:</strong> {{ selectedPrescription.prescribedDate | date: 'dd-MM-yyyy' }}
+        </div>
+        <div>
+          <button class="popup-close" (click)="selectedPrescription = null">
+            <img src="/white-close.svg" />
+          </button>
+        </div>
+      </div>
+      <div>
+        <div class="header-row">
+          <span class="column column-w-12">Date</span>
+          <span class="column column-w-18">Generic name</span>
+          <span class="column column-w-18">Brand Name</span>
+          <span class="column column-w-12">Frequency</span>
+          <span class="column column-w-11">Duration</span>
+          <span class="column column-w-20">Instruction</span>
+          <span class="column column-w-8">Qty</span>
+        </div>
+  
+        <div *ngFor="let tab of selectedPrescription.tablets" class="tablet-row">
+          <input type="text" [value]="selectedPrescription.prescribedDate | date:'dd-MM-yyyy'" class="w-12" readonly />
+          <input type="text" [value]="tab.genericName" class="w-18" readonly />
+          <input type="text" [value]="tab.brandName" class="w-18" readonly />
+          <input type="text" [value]="tab.frequency" class="w-8" readonly />
+          <input type="text" [value]="tab.duration" class="w-8" readonly />
+          <input type="text" [value]="tab.instructions" class="w-20" readonly />
+          <input type="text" [value]="tab.quantity" class="w-8" readonly />
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="display: none;" *ngIf="selectedAppointment && selectPrescriptionPrint" #printSection class="print-container">
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px; height
+      : 100px;">
+        <tr>
+            <td style="width: 15%; vertical-align: top;">
+                <img src="./rash-logo.png" alt="Clinic Logo" style="width:200px; height: auto;" />
+            </td>
+            <td style="text-align: center;">
+              <h2 style="margin: 0; font-size: 26px;">Rashtrotthana Hospital</h2>
+              <p style="margin: 4px 0;">RajaRajeshwari Nagar, Bangalore - 560098</p>
+              <p style="margin: 4px 0;">Phone: 080 6923 9999 | <span
+                      style="color: #000;">www.rashtrotthanahospital.com</span></p>
+          </td>
+        </tr>
+    </table>
+  
+    <div class="patient-info">
+        <p><strong>Patient Name:</strong> {{ selectedPrint?.patientName }}</p>
+        <p><strong>PRN:</strong> {{ selectedPrint?.prn }}</p>
+    </div>
+  
+    <div *ngFor="let prescription of selectPrescriptionPrint" class="prescription-block">
+        <h3>
+            Prescription ID: {{ prescription.prescriptionId }} |
+            Date: {{ prescription.prescribedDate | date: 'dd-MM-yyyy' }}
+        </h3>
+  
+        <table>
+            <thead>
+                <tr>
+                    <th>Prescribed By</th>
+                    <th>Generic</th>
+                    <th>Brand</th>
+                    <th>Type</th>
+                    <th>Frequency</th>
+                    <th>Duration</th>
+                    <th>Instruction</th>
+                    <th>Qty</th>
+                    <th>Route</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let tab of prescription.tablets">
+                    <td>{{ prescription.prescribedBy}}</td>
+                    <td>{{ tab.genericName }}</td>
+                    <td>{{ tab.brandName }}</td>
+                    <td>{{ tab.type || '—' }}</td>
+                    <td>{{ tab.frequency }}</td>
+                    <td>{{ tab.duration }}</td>
+                    <td>{{ tab.instructions }}</td>
+                    <td>{{ tab.quantity }}</td>
+                    <td>{{ tab.route || '—' }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div>
+      <p>Doctor: {{prescribedBy}}</p>
+      <p>KMC#: {{prescribedByKMC}}</p>
+      <p>Date: {{this.today}}</p>
+    </div>
+  
+  
+  </div>
+
+<!-- Modal Wrapper -->
+<div class="modal-overlay" *ngIf="showModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h2>Op Consulting Notes</h2>
+      <button class="close-btn" (click)="closeModal()">
+        <img src="/popup-close.svg" />
+      </button>
+    </div>
+
+    <div class="tab-container">
+      <div class="tabs">
+        <button
+          *ngFor="let tab of tabs"
+          class="tab-btn"
+          [class.active]="activeTab === tab.key"
+          (click)="setActiveTab(tab.key)">
+          {{ tab.label }}
+        </button>
+  
+      </div>
+      <div class="print-section">
+        <svg class="p-field p-col-3 print" src="print.svg" pTooltip="Print" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+        viewBox="0 0 24 24"
+        (click)="printVisitSummary(selectedService)">
+        <path fill="#fff"
+          d="M18 7H6V3h12zm0 5.5q.425 0 .713-.288T19 11.5t-.288-.712T18 10.5t-.712.288T17 11.5t.288.713t.712.287M16 19v-4H8v4zm2 2H6v-4H2v-6q0-1.275.875-2.137T5 8h14q1.275 0 2.138.863T22 11v6h-4z" />
+      </svg>
+      </div>
+     </div>
+
+     <div class="tab-content" id="clinical" style="display: block;" *ngIf="activeTab === 'clinical'">
+      <div class="clinical-modal-wrapper"> <!-- Flex container -->
+    
+        <!-- Optional Top Header or Spacer -->
+        <div class="header-bg"></div>
+    
+        <!-- Scrollable Body -->
+        <div class="modal-body-vitals">
+          <div class="vitals-grid">
+            <div class="form-group name-width" *ngFor="let field of noteSections">
+              <div class="textarea-wrapper">
+                <label class="textarea-label">{{ field.label }}</label>
+                <textarea
+                  [(ngModel)]="doctorNoteData[field.key]"
+                  class="textarea-input"
+                  rows="4"
+                  required>
+                </textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+    
+        <!-- Fixed Footer -->
+        <div class="modal-footer">
+          <button class="save-button" [disabled]="!hasAnyNotesFilled() || isButtonLoading" (click)="submitDoctorNotes()">
+            <ng-container *ngIf="!isButtonLoading; else loading">
+              Submit
+            </ng-container>
+            <ng-template #loading>
+              <span class="spinner"></span> Saving...
+            </ng-template>
+          </button>
+          <button class="close-button" (click)="closeNotesPopup()">Cancel</button>
+        </div>
+    
+      </div>
+    </div>
+    <div class="tab-content" id="history" style="display: block;" *ngIf="activeTab === 'history'">
+      <div class="clinical-modal-wrapper"> <!-- Flex container -->
+    
+        <!-- Optional Top Header or Spacer -->
+        <div class="header-bg"></div>
+    
+        <!-- Scrollable Body -->
+        <div class="modal-body-vitals">
+          <div class="vitals-grid">
+            <div class="form-group name-width" *ngFor="let field of historySections">
+              <div class="textarea-wrapper">
+                <label class="textarea-label">{{ field.label }}</label>
+                <textarea
+                  [(ngModel)]="historyData[field.key]"
+                  class="textarea-input"
+                  rows="4"
+                  required>
+                </textarea>
+              </div>
+            </div>
+          </div>
+        </div>
+    
+        <!-- Fixed Footer -->
+        <div class="modal-footer">
+          <button class="save-button" [disabled]="!hasAnyHistoryNotesFilled() || isButtonLoading" (click)="submitHistoryNotes()">
+            <ng-container *ngIf="!isButtonLoading; else loading">
+              Submit
+            </ng-container>
+            <ng-template #loading>
+              <span class="spinner"></span> Saving...
+            </ng-template>
+          </button>
+          <button class="close-button" (click)="closeHistoryPopup()">Cancel</button>
+        </div>
+    
+      </div>
+    </div>
+    <div class="tab-content" id="prescription" style="display:block" *ngIf="activeTab === 'prescription'" >
+      <div class="top-menu">
+        <span class="section-title">Add New Drug</span>
+        <div class="menu-actions">
+          <span (click)="openFavorite()" class="favorites">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path
+                d="M1.6 3.2V14.4H12.8V16H0.8C0.32 16 0 15.68 0 15.2V3.2H1.6ZM4.8 0H14.4C14.8243 0 15.2313 0.168571 15.5314 0.468629C15.8314 0.768687 16 1.17565 16 1.6V11.2C16 12.088 15.288 12.8 14.4 12.8H4.8C4.37565 12.8 3.96869 12.6314 3.66863 12.3314C3.36857 12.0313 3.2 11.6243 3.2 11.2V1.6C3.2 0.72 3.92 0 4.8 0ZM11.44 9.04L11.12 6.96L12.64 5.44L10.56 5.12L9.6 3.2L8.64 5.12L6.56 5.44L8.08 6.88L7.68 8.96L9.6 8L11.44 9.04Z"
+                fill="white" />
+            </svg>
+            Favorite</span>
+          <span (click)="openAllergyPopup()" class="allergies">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path
+                d="M14.2765 1.72294C13.7311 1.17677 13.0834 0.743459 12.3703 0.447817C11.6572 0.152175 10.8929 0 10.1209 0C9.34894 0 8.58457 0.152175 7.8715 0.447817C7.15844 0.743459 6.51068 1.17677 5.9653 1.72294L4.44071 3.25584C4.39758 3.28128 4.36162 3.31724 4.33617 3.36035L1.72258 5.97324C1.17686 6.51825 0.743859 7.16537 0.448298 7.87767C0.152737 8.58998 0.000405298 9.3535 8.08754e-07 10.1247C-0.000816095 11.6821 0.617248 13.176 1.71823 14.2779C2.8192 15.3797 4.31291 15.9992 5.87074 16C7.42858 16.0008 8.92293 15.3829 10.0251 14.2822L14.2504 10.0581C14.8023 9.51408 15.2411 8.86623 15.5414 8.15188C15.8417 7.43753 15.9975 6.67081 16 5.89594C16.0024 5.12108 15.8514 4.3534 15.5556 3.63718C15.2598 2.92096 14.825 2.27037 14.2765 1.72294ZM7.38535 3.16003C7.81976 2.72163 8.37515 2.4228 8.98043 2.30177C9.58571 2.18075 10.2133 2.24304 10.783 2.48068C11.1594 2.63745 11.5 2.86826 11.7849 3.16003C11.9471 3.32322 12.0382 3.54396 12.0382 3.77406C12.0382 4.00416 11.9471 4.2249 11.7849 4.38809C11.6216 4.55031 11.4008 4.64136 11.1707 4.64136C10.9405 4.64136 10.7197 4.55031 10.5565 4.38809C10.3652 4.19707 10.1217 4.067 9.85652 4.01429C9.59137 3.96159 9.31655 3.98861 9.06675 4.09196C8.89859 4.15665 8.74685 4.25778 8.62244 4.38809C8.45793 4.54421 8.23906 4.6301 8.01225 4.62755C7.78544 4.625 7.56855 4.5342 7.4076 4.37442C7.24665 4.21465 7.1543 3.99846 7.15014 3.77174C7.14599 3.54502 7.23036 3.3256 7.38535 3.16003ZM11.0792 11.3732C9.66138 10.7076 8.38847 9.76942 7.33307 8.61226C6.19342 7.57154 5.26982 6.31673 4.61495 4.91938L5.60811 3.92648C6.19531 5.35572 7.08723 6.63974 8.22169 7.68904C9.28027 8.85567 10.5831 9.77458 12.0375 10.3803L11.0792 11.3732Z"
+                fill="white" />
+              <path d="M1.59766 1.60059L13.5977 13.6006" stroke="#9C0005" stroke-width="2.5" stroke-linecap="round" />
+            </svg>
+            Allergies</span>
+          <span (click)="openPastRx()" class="past-rx">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
+              <path
+                d="M8 0L4.36364 2.125L8 4.25V2.83333C11.6036 2.83333 14.5455 5.69854 14.5455 9.20833C14.5455 12.7181 11.6036 15.5833 8 15.5833C4.39636 15.5833 1.45455 12.7181 1.45455 9.20833C1.45455 7.47079 2.09673 5.97125 3.27273 4.82517L2.25018 3.82996C0.807273 5.23458 0 7.12087 0 9.20833C0 13.4902 3.60364 17 8 17C12.3964 17 16 13.4902 16 9.20833C16 4.92646 12.3964 1.41667 8 1.41667V0ZM6.47709 4.64879L5.15927 5.26858L7 8.81025C6.94359 8.93598 6.91272 9.07117 6.90909 9.20833V9.25296L4.568 11.5317L5.61455 12.5517L7.95564 10.2715H8C8.28933 10.2715 8.5668 10.1596 8.77139 9.96034C8.97598 9.76108 9.09091 9.49083 9.09091 9.20904C9.09091 8.72029 8.75709 8.31442 8.29527 8.19046L6.47709 4.64879Z"
+                fill="white" />
+            </svg>
+            Past Rx</span>
+          <span (click)="openPreviousRx()" class="previous-rx">
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="17" height="15" viewBox="0 0 17 15" fill="none">
+              <path
+                d="M15.1171 14.0558C13.5824 11.7177 11.6858 10.9836 9.35242 10.7975V12.1414C9.35242 12.6408 9.1579 13.1103 8.80439 13.4638C8.09737 14.1708 6.86195 14.1661 6.16428 13.4684L0.279 7.66359C0.190636 7.57657 0.120463 7.47284 0.072565 7.35845C0.0246668 7.24405 0 7.12127 0 6.99725C0 6.87323 0.0246668 6.75045 0.072565 6.63606C0.120463 6.52166 0.190636 6.41793 0.279 6.33091L6.15961 0.529797C6.86476 -0.176287 8.0983 -0.177223 8.80532 0.530732C9.1579 0.884242 9.35242 1.35372 9.35242 1.85312V3.44672C13.6722 4.31927 16.8341 8.11997 16.8341 12.6081V13.5433C16.8346 13.7448 16.77 13.9412 16.6497 14.103C16.5295 14.2648 16.3602 14.3833 16.167 14.441C15.9739 14.4986 15.7673 14.4923 15.578 14.4228C15.3888 14.3534 15.2271 14.2246 15.1171 14.0558ZM8.43872 8.87843C10.5027 8.9308 12.7762 9.2469 14.7589 10.862C14.401 9.36559 13.5897 8.01624 12.4358 6.99846C11.2819 5.98067 9.84185 5.34415 8.31246 5.17593C7.84112 5.12356 7.482 5.1273 7.482 5.1273V1.85686L2.26726 6.99678L7.482 12.1404V8.86814L8.43872 8.87843Z"
+                fill="white" />
+            </svg>
+            Previous Rx</span>
+        </div>
+      </div>
+  
+      <div class="header-row">
+        <button class="add-btn" (click)="addTablet()">Add +</button>
+        <span class="column column-w-18">Generic name</span>
+        <span class="column column-w-18">Brand Name</span>
+        <span class="column column-w-12">Frequency</span>
+        <span class="column column-w-11">Duration</span>
+        <span class="column column-w-20">Instruction</span>
+        <span class="column column-w-8">Qty</span>
+      </div>
+  
+      <form [formGroup]="form">
+        <div class="tablet-rows-wrapper">
+          <div formArrayName="tablets" class="tablet-rows scrollable">
+            <div *ngFor="let tab of tablets.controls; let i = index" [formGroupName]="i" class="tablet-row">
+              <button type="button" (click)="removeTablet(i)" class="delete-btn"><img src="./pres-delete.svg"></button>
+              <button type="button" (click)="toggleFavorite(i)" class="favorite-btn">
+                <!-- <img [src]="isFavorite(i) ? '/star-filled.svg' : '/star-outlined.svg'" alt="Favorite" class="star-icon" /> -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" *ngIf="!isFavorite(i)">
+                  <path fill="none" stroke="#36B8B8" stroke-linejoin="round" stroke-width="1.5"
+                    d="m12 2l3.104 6.728l7.358.873l-5.44 5.03l1.444 7.268L12 18.28L5.534 21.9l1.444-7.268L1.538 9.6l7.359-.873z" />
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" *ngIf="isFavorite(i)">
+                  <path fill="#36B8B8" fill-rule="evenodd"
+                    d="M12.908 1.581a1 1 0 0 0-1.816 0l-2.87 6.22l-6.801.807a1 1 0 0 0-.562 1.727l5.03 4.65l-1.335 6.72a1 1 0 0 0 1.469 1.067L12 19.426l5.977 3.346a1 1 0 0 0 1.47-1.068l-1.335-6.718l5.029-4.651a1 1 0 0 0-.562-1.727L15.777 7.8z"
+                    clip-rule="evenodd" stroke-width="0.5" stroke="#36B8B8" />
+                </svg>
+              </button>
+              <select formControlName="genericName" (change)="onGenericChange(i)" class="w-18">
+                <option value="">Select Generic</option>
+                <option *ngFor="let item of genericOptions" [value]="item">{{ item }}</option>
+              </select>
+  
+              <select formControlName="brandName" class="w-18" (change)="onBrandChange(i)">
+                <option value="">Select Brand</option>
+                <option *ngFor="let item of filteredBrandOptions[i]" [value]="item">{{ item }}</option>
+              </select>
+  
+              <select formControlName="frequency" class="w-8">
+                <option value="">Select Frequency</option>
+                <option *ngFor="let item of frequencyOptions" [value]="item">{{ item }}</option>
+              </select>
+  
+              <select formControlName="duration" class="w-8">
+                <option value="">Select Duration</option>
+                <option *ngFor="let item of durationOptions" [value]="item">{{ item }}</option>
+              </select>
+  
+              <input formControlName="instructions" placeholder="Type Instruction" class="w-20" />
+              <input formControlName="quantity" type="number" placeholder="999" class="w-8" />
+            </div>
+          </div>
+        </div>
+  
+        <div class="remarks-fixed">
+          <div class="remarks-box">
+            <textarea formControlName="remarks" placeholder="Remarks"></textarea>
+          </div>
+  
+          <div class="actions">
+            <!-- <button type="button" [disabled]="tablets.length === 0" (click)="save()" class="save-button">Save</button> -->
+            <button class="save-button" [disabled]="tablets.length === 0 || isButtonLoading" (click)="save()">
+              <ng-container *ngIf="!isButtonLoading; else loading">
+                Save
+              </ng-container>
+              <ng-template #loading>
+                <span class="spinner"></span> Saving...
+              </ng-template>
+            </button>
+            <button type="button" [disabled]="!saved" (click)="saved && print()" class="save-button">Print</button>
+            <!-- <button type="button" class="close-button" (click)="closePrescription()">Close</button> -->
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class="tab-content" id="investigation" style="display:block" *ngIf="activeTab === 'investigation'">
+      <!-- Tab Switch -->
+      <div class="tab-switch">
+        <label><input type="radio" name="tab" (change)="activeInvestigationTab = 'lab'" [checked]="activeInvestigationTab === 'lab'"> Lab</label>
+        <label><input type="radio" name="tab" (change)="activeInvestigationTab = 'radiology'" [checked]="activeInvestigationTab === 'radiology'"> Radiology</label>
+        <!-- <label><input type="radio" name="tab" (change)="activeInvestigationTab = 'package'" [checked]="activeInvestigationTab === 'package'"> Package</label> -->
+      </div>
+      
+      <div class="add-section">
+        <!-- Lab -->
+        <ng-container *ngIf="activeInvestigationTab === 'lab'">
+          <select class="investigation-dropdown" [(ngModel)]="selectedLabId">
+            <option [ngValue]="null" disabled>Select Lab Test</option>
+            <option *ngFor="let lab of allLabTests" [value]="lab.id">{{ lab.description }}</option>
+          </select>
+          <input type="text"  placeholder="Department" class="investigation-dropdown" [(ngModel)]="selectedLabDepartment">
+        </ng-container>
+      
+        <!-- Radiology -->
+        <ng-container *ngIf="activeInvestigationTab === 'radiology'">
+          <select class="investigation-dropdown"  [(ngModel)]="selectedRadiologyId">
+            <option [ngValue]="null" disabled>Select Radiology Test</option>
+            <option *ngFor="let r of allRadiologyTests" [value]="r.id">{{ r.description }}</option>
+          </select>
+          <input type="text"  placeholder="Department" class="investigation-dropdown" [(ngModel)]="selectedRadiologyDepartment">
+        </ng-container>
+      
+        <!-- Package -->
+        <ng-container *ngIf="activeInvestigationTab === 'package'">
+          <select class="investigation-dropdown"  [(ngModel)]="selectedPackageId">
+            <option [ngValue]="null" disabled>Select Package</option>
+            <option *ngFor="let p of allPackages" [value]="p.id">{{ p.name }}</option>
+          </select>
+        </ng-container>
+        <button class="add-btn" (click)="addSelected()">Add +</button>
+      </div>
+      
+      <!-- List of Added Tests -->
+      <div class="added-list">
+        <div *ngFor="let item of activeInvestigationTab === 'lab' ? addedLabTests : activeInvestigationTab === 'radiology' ? addedRadiologyTests : addedPackages">
+      
+          <div class="added-item">
+            <input *ngIf="activeInvestigationTab !== 'package'" type="text" [(ngModel)]="item.description" class="investigation-dropdown">
+             
+            <input  *ngIf="activeInvestigationTab !== 'package'" type="text" [(ngModel)]="item.department" class="investigation-dropdown">
+      
+            <input  *ngIf="activeInvestigationTab === 'package'" type="text" [(ngModel)]="item.name" class="investigation-dropdown">
+
+            <div class="delete-investigation">
+              <button type="button" (click)="removeItem(item, activeInvestigationTab)" class="remove-btn"><img src="./pres-delete.svg"></button>
+            </div>
+             
+          </div>
+        </div>
+      </div>
+      
+      <div class="remarks-fixed">
+        <div class="remarks-box">
+          <textarea [(ngModel)]="investigationRemarks" placeholder="Remarks"></textarea>
+        </div>
+      
+      <!-- Save -->
+      <div class="modal-footer actions">
+        <button class="save-button" [disabled]="isInvestigationEmpty || isButtonLoading" (click)="saveInvestigation()">
+          <ng-container *ngIf="!isButtonLoading; else loading">
+            Submit
+          </ng-container>
+          <ng-template #loading>
+            <span class="spinner"></span> Saving...
+          </ng-template>
+        </button>
+        <!-- <button class="close-button" (click)="close()">Cancel</button> -->
+      </div>
+          </div>
+        </div>
+  </div>
+</div>

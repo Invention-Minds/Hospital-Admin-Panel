@@ -656,6 +656,40 @@ font-family: 900;
     font-weight: 400;
     line-height: normal;
   }
+  .dropdown-container-in-table {
+    display: flex;
+    justify-content: center; /* Center align within the cell */
+    align-items: center;
+    width: 100%; /* Ensure it stretches across the cell */
+  }
+  
+  /* Dropdown styling */
+  .dropdown-in-table {
+    width: 100%; /* Adjust width to fit inside the table cell */
+    padding: 6px 8px;
+    font-size: 14px;
+    border-radius: 4px;
+    background-color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    border: 1px solid #e0e0e0; /* Light gray border */
+    color: #7b7b7b;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: Kanit;
+  }
+  
+  /* Hover and focus effects */
+  .dropdown-in-table:hover,
+  .dropdown-in-table:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
+  }
+  
+  /* Option styling */
+  .dropdown-in-table option {
+    font-size: 14px;
+    padding: 4px;
+  }
   @media (max-width: 1024px) {
     .card:not(:nth-child(2)), /* Hide cards except the 2nd one (Request) */
     .card-1:not(:nth-child(1)) { /* Hide cards except the 1st one (Form) */

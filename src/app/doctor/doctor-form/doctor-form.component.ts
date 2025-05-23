@@ -26,6 +26,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
   @Output() save = new EventEmitter<Doctor>(); // Emits when the form is saved
   @Output() cancel = new EventEmitter<void>(); // Emits when the edit is canceled
   @Input() isLoading!: boolean;
+  @Input() isButtonLoading: boolean = false; // Loading state for the button
   availableTimes: string = ''; // Single string storing all ranges
   availableTimesArray: string[] = ['']; // Dynamic array for input fields
   formError: string | null = null;
@@ -619,6 +620,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
         this.doctor!.phone_number = '91' + this.doctor?.phone_number;
       }
       this.save.emit(this.doctor!);
+      this.isButtonLoading = true;
     }
     else {
       this.doctor!.availability = [];
@@ -682,7 +684,8 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
       // Emit the save event with the doctor details
       // this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Doctor details saved successfully' });
       this.save.emit(this.doctor!);
-      console.log(this.doctor)
+      console.log(this.doctor);
+      this.isButtonLoading = true;
       // this.doctor = null; // Reset the doctor object after saving
       // this.isEditMode = false;
     }

@@ -118,9 +118,15 @@
                       <button class="btn-action" [disabled]="adminType !== 'Senior Manager'" (click)="openCancelFeedback(estimation)"  pTooltip="Cancel" tooltipPosition="top">
                         <img src="/cancel-est.svg" alt="Confirm">
                       </button>
-                      <button class="btn-action" (click)="openDatePicker(estimation)" pTooltip="Date Change" tooltipPosition="top">
+                      <!-- <button class="btn-action" (click)="openDatePicker(estimation)" pTooltip="Date Change" tooltipPosition="top">
                         <img src="/est-edit.svg" alt="Confirm">
                       </button>
+                      <button class="btn-action" (click)="openAppointmentForm(estimation)" pTooltip="Edit" tooltipPosition="top">
+                        <img src="/book.svg" alt="Confirm">
+                        </button> -->
+                        <button class="btn-action" (click)="print(estimation)" pTooltip="Print" tooltipPosition="top">
+                          <img src="/print.svg" alt="Confirm">
+                        </button>
                       </td>
                 </tr>
             </tbody>

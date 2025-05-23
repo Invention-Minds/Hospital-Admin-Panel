@@ -47,6 +47,8 @@ export class EstimationApprovedComponent {
 
   advanceAmount: any = '';
   receiptNumber: any = '';
+  isPACDone: boolean = false;
+  pacNotDoneReason: string = ''
 
   // Selected date from calendar
   selectedDate: Date | null = null;
@@ -439,15 +441,11 @@ export class EstimationApprovedComponent {
   }
   completeAppointment(appointment: any): void { }
   openAppointmentForm(service: any): void {
-    // this.router.navigate(['/reschedule', service.id], {
-    //   state: { data: service }, // Passing full service object using state
-    // });
-    // this.lockService(service);
+
     this.openAppointmentFormAfterLocked(service)
   }
   openAppointmentFormAfterLocked(service: any): void {
     this.reschedule.emit(service);
-    // console.log('Opening appointment form:', service);
   }
 
   lockService(service: any): void {
@@ -525,6 +523,7 @@ export class EstimationApprovedComponent {
         pacAmountPaid: this.advanceAmount,
         pacReceiptNumber: this.receiptNumber,
         statusOfEstimation: 'pacDone',
+        pacNotDoneReason: this.pacNotDoneReason,
       }
 
     }

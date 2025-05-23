@@ -397,10 +397,10 @@
   [ngClass]="{'disabled': !isFormValid() || !isAnyDaySelected()}">
   {{ isEditMode ? 'Update' : 'Add' }}
 </button> -->
-            <button class="update-button" [disabled]="!isFormValid() || !isAnyDaySelected() || isLoading "
+            <button class="update-button" [disabled]="!isFormValid() || !isAnyDaySelected() || isLoading || isButtonLoading "
               [ngClass]="{'disabled': !isFormValid() || !isAnyDaySelected()}">
               <span *ngIf="!isLoading">{{ isEditMode ? 'Update' : 'Add' }}</span>
-              <span *ngIf="isLoading" class="loader"></span>
+              <span *ngIf="isLoading || isButtonLoading" class="loader"></span>
             </button>
 
 

@@ -1,0 +1,511 @@
+<!-- patient-info.component.html -->
+<div class="patient-info-container">
+    <div class="sidebar">
+        <!-- <div class="profile-section">
+            <img src="patient.svg" class="profile-img" />
+            <div class="profile-info">
+                <p>PRN: {{ patientData?.prn }}</p>
+                <p>Patient Name: {{ patientData?.name }}</p>
+                <p>Blood Group: {{ patientData?.bloodGroup }}</p>
+                <p>Age/Sex: {{ patientData?.age }}/{{ patientData?.gender }}</p>
+                <p class="type">Type: {{ patientData?.patientType }}</p>
+            </div>
+        </div> -->
+        <div class="profile-section">
+            <img src="patient.svg" class="profile-img" />
+            <div class="profile-info">
+                <div class="info-row"><span class="label">PRN</span>: <span class="value">{{ patientData?.prn }}</span>
+                </div>
+                <div class="info-row"><span class="label">Patient Name</span>: <span class="value">{{ patientData?.name
+                        }}</span></div>
+                <div class="info-row"><span class="label">Blood Group</span>: <span class="value">{{
+                        patientData?.bloodGroup }}</span></div>
+                <div class="info-row"><span class="label">Age/Sex</span>: <span class="value">{{ patientData?.age }}/{{
+                        patientData?.gender }}</span></div>
+                <div class="info-row type-row">
+                    <span class="label-1">Type</span>: <span class="value">{{ patientData?.patientType }}</span>
+                </div>
+            </div>
+        </div>
+        <hr class="profile-separator" />
+
+
+        <div class="opd-dates">
+            <div class="visit-list" [ngClass]="{ expanded: expandedVisitIndex === i }"
+                *ngFor="let date of opdDates;index as i">
+                <div class="visit-header" (click)="toggleVisit(i)">
+                    <img src="plus-arrow.svg">
+                    <div>OPD Visit {{ date.label }} — {{ date.date }}</div>
+                </div>
+                <div class="visit-options" *ngIf="expandedVisitIndex === i">
+                    <div (click)="toggleView('history', date.date)"><img src="patient-arrow.svg"> History</div>
+                    <div (click)="toggleView('notes', date.date)"><img src="patient-arrow.svg"> OPD Notes</div>
+                    <div (click)="toggleView('vitals', date.date)"><img src="patient-arrow.svg"> Vitals Details</div>
+                    <div (click)="toggleView('services', date.date)"><img src="patient-arrow.svg"> Investigation Requisition</div>
+                    <div (click)="toggleView('prescription', date.date)"><img src="patient-arrow.svg"> Prescription</div>
+                    <div (click)="printVisitSummary(date.date)"><img src="patient-arrow.svg">Print Full OPD Summary</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="note-section" *ngIf="activeView === 'notes'">
+            <div class="note-block">
+                <h3 class="note-heading">Chief Complaints</h3>
+                <p>{{ selectedVisit?.chiefComplaints || '-' }}</p>
+            </div>
+            <div class="note-block">
+                <h3 class="note-heading">Diagnosis</h3>
+                <p>{{ selectedVisit?.diagnosis || '-' }}</p>
+            </div>
+
+            <div class="note-block">
+                <h3 class="note-heading">General Examination</h3>
+                <p>{{ selectedVisit?.generalExamination || '-' }}</p>
+            </div>
+
+            <div class="note-block">
+                <h3 class="note-heading">Clinical Notes</h3>
+                <p>{{ selectedVisit?.clinicalNotes || '-' }}</p>
+            </div>
+            <div class="note-block">
+                <h3 class="note-heading">CVS</h3>
+                <p>{{ selectedVisit?.cvs || '-' }}</p>
+            </div>
+            <div class="note-block">
+                <h3 class="note-heading">RS</h3>
+                <p>{{ selectedVisit?.rs || '-' }}</p>
+            </div>
+            <div class="note-block">
+                <h3 class="note-heading">CNS</h3>
+                <p>{{ selectedVisit?.cns || '-' }}</p>
+            </div>
+            <div class="note-block">
+                <h3 class="note-heading">P/A</h3>
+                <p>{{ selectedVisit?.pa || '-' }}</p>
+            </div>
+
+
+        </div>
+
+        <div class="note-section" *ngIf="activeView === 'history'">
+            <div class="note-block">
+                <h3 class="note-heading">Medical History</h3>
+                <p>{{ selectedHistoryNotes?.medicalHistory || '-' }}</p>
+            </div>
+            <div class="note-block">
+                <h3 class="note-heading">Family History</h3>
+                <p>{{ selectedHistoryNotes?.familyHistory || '-' }}</p>
+            </div>
+
+            <div class="note-block">
+                <h3 class="note-heading">Social History</h3>
+                <p>{{ selectedHistoryNotes?.socialHistory || '-' }}</p>
+            </div>
+        </div>
+
+        <div class="note-section" *ngIf="activeView === 'services'">
+            <div *ngIf="investigationOrders.length > 0">
+                <h3 style="font-family: Kanit;"><u>Investigation Requisition</u></h3>
+              
+                <div *ngFor="let order of investigationOrders">
+                  <p><strong>Order ID:</strong> {{ order.id }} |
+                     <strong>Date:</strong> {{ order.date | date:'M/d/yyyy' }} |
+                     <strong>Doctor:</strong> {{ order.doctorName }}</p>
+              
+                  <table class="appointment-table">
+                    <thead>
+                      <tr>
+                        <th style="padding-left: 20px;">Type</th>
+                        <th>Test / Package</th>
+                        <!-- <th>Department</th> -->
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <!-- Lab Tests -->
+                      <tr *ngFor="let lab of order.labTests">
+                        <td style="padding-left: 20px;">Lab</td>
+                        <td>{{ lab.description }}</td>
+                        <!-- <td>{{ lab.department }}</td> -->
+                      </tr>
+              
+                      <!-- Radiology Tests -->
+                      <tr *ngFor="let radio of order.radiologyTests">
+                        <td style="padding-left: 20px;">Radiology</td>
+                        <td>{{ radio.description }}</td>
+                        <!-- <td>{{ radio.department }}</td> -->
+                      </tr>
+              
+                      <!-- Packages -->
+                      <!-- <tr *ngFor="let pack of order.packages">
+                        <td style="padding-left: 20px;">Package</td>
+                        <td>{{ pack.name }}</td>
+                        <td>—</td>
+                      </tr> -->
+                    </tbody>
+                  </table>
+              
+                  <br />
+                </div>
+              </div>
+              
+              <!-- Fallback for no orders -->
+              <div *ngIf="investigationOrders.length === 0">
+                <p>No investigation orders found.</p>
+              </div>
+              
+              
+
+        </div>
+
+        <!-- <div class="note-section" *ngIf="activeView === 'vitals'">
+        <h3>Vitals</h3>
+        <p *ngIf="selectedVitals">Temp: {{ selectedVitals.temp }} | Pulse: {{ selectedVitals.pulse }}</p>
+        <p *ngIf="!selectedVitals">No vitals recorded for this date</p>
+      </div> -->
+        <div class="note-section" *ngIf="activeView === 'vitals'">
+            <h3>Vital Description :</h3>
+
+            <div *ngIf="selectedVitals; else noVitals" class="vital-grid">
+                <div class="vital-pair">
+                    <div class="form-group">
+                        <input class="readonly-input form-input" [value]="selectedVitals.height || '-'" readonly />
+                        <label class="form-label">Height(cm)</label>
+                    </div>
+                </div>
+                <div class="vital-pair">
+                    <div class="form-group">
+                        <input class="readonly-input form-input" [value]="selectedVitals.weight || '-'" readonly />
+                        <label class="form-label">Weight(kg)</label>
+                    </div>
+                </div>
+
+                <div class="vital-pair">
+                    <div class="form-group">
+                        <input class="readonly-input form-input" [value]="selectedVitals.temp || '-'" readonly />
+                        <label class="form-label">Temperature(F)</label>
+                    </div>
+
+                </div>
+                <div class="vital-pair">
+                    <div class="form-group">
+                        <input class="readonly-input form-input" [value]="selectedVitals.pulse || '-'" readonly />
+                        <label class="form-label">Pulse(P/M)</label>
+                    </div>
+                </div>
+
+                <div class="vital-pair">
+                    <div class="form-group">
+                        <input class="readonly-input form-input" [value]="selectedVitals.RR || '-'" readonly />
+                        <label class="form-label">Respiratory Rate(P/M)</label>
+                    </div>
+                </div>
+                <div class="vital-pair">
+                    <div class="form-group">
+                        <input class="readonly-input form-input" [value]="selectedVitals.BPs || '-'" readonly />
+                        <label class="form-label">BP Systolic(Hg)</label>
+                    </div>
+                </div>
+
+
+                <div class="vital-pair">
+                    <div class="form-group">
+                        <input class="readonly-input form-input" [value]="selectedVitals.BPd || '-'" readonly />
+                        <label class="form-label">BP Diastolic(Hg)</label>
+                    </div>
+
+                </div>
+                <div class="vital-pair">
+                    <div class="form-group">
+                        <input class="readonly-input form-input" [value]="selectedVitals.spo2 || '-'" readonly />
+                        <label class="form-label">SpO2 (%)</label>
+                    </div>
+
+                </div>
+                <div class="vital-pair">
+                    <div class="form-group">
+                        <input class="readonly-input form-input" [value]="selectedVitals.hb || '-'" readonly />
+                        <label class="form-label">Hemoglobin (g/dL)</label>
+                    </div>
+                </div>
+                <div class="vital-pair">
+                    <div class="form-group">
+                        <input class="readonly-input form-input" [value]="selectedVitals.sFerritin || '-'" readonly />
+                        <label class="form-label">Serum Ferritin (ng/mL)</label>
+                    </div>
+                </div>
+            </div>
+
+            <ng-template #noVitals>
+                <p class="no-vitals-msg">No vitals recorded for this date</p>
+            </ng-template>
+        </div>
+        <div class="note-section" *ngIf="activeView === 'prescription'">
+            <div class="print-icon">
+                <img src="print.svg" (click)="printPrescription()" *ngIf="selectedPrescription" />
+            </div>
+            <div *ngFor="let prescription of selectedPrescription" class="prescription-display">
+                <h3 class="prescription-heading">
+                    Prescription ID: {{ prescription.prescriptionId }} |
+                    Date: {{ prescription.prescribedDate | date: 'dd-MM-yyyy' }}
+                </h3>
+
+                <div class="table-wrapper">
+                    <table class="appointment-table">
+                        <thead>
+                            <tr>
+                                <th style="padding-left: 24px;">Doctor Name</th>
+                                <th>Generic Name</th>
+                                <th>Brand Name</th>
+                                <th>Type</th>
+                                <th>Frequency</th>
+                                <th>Duration</th>
+                                <th>Instruction</th>
+                                <th>Qty</th>
+                                <th>Route</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let tab of prescription.tablets">
+                                <td style="padding-left: 24px;">{{ prescription.prescribedBy }}</td>
+                                <td>{{ tab.genericName }}</td>
+                                <td>{{ tab.brandName }}</td>
+                                <td>{{ tab.type || 'N/A' }}</td>
+                                <td>{{ tab.frequency }}</td>
+                                <td>{{ tab.duration }}</td>
+                                <td><input type="text" [value]="tab.instructions" readonly class="text" /></td>
+                                <td>{{ tab.quantity }}</td>
+                                <td>{{ tab.route || 'N/A' }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+
+        </div>
+        <div style="display: none;" #printSection class="print-container">
+            <!-- <div class="header">
+              <img src="assets/logo.png" alt="Clinic Logo" class="logo" />
+              <div class="clinic-info">
+                <h1>Rashtrotthana Hospital</h1>
+                <p>RajaRajeshwari Nagar, Bangalore - 560098</p>
+                <p>Phone: 080 6923 9999 | www.rashtrotthanahospital.com</p>
+              </div>
+            </div> -->
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px; height
+              : 100px;">
+                <tr>
+                    <td style="width: 15%; vertical-align: top;">
+                        <img src="./rash-logo.png" alt="Clinic Logo" style="width:200px; height: auto;" />
+                    </td>
+                    <td style="text-align: center;">
+                        <h2 style="margin: 0; font-size: 26px;">Rashtrotthana Hospital</h2>
+                        <p style="margin: 4px 0;">RajaRajeshwari Nagar, Bangalore - 560098</p>
+                        <p style="margin: 4px 0;">Phone: 080 6923 9999 | <span
+                                style="color: #000;">www.rashtrotthanahospital.com</span></p>
+                    </td>
+                </tr>
+            </table>
+
+            <div class="patient-info">
+                <p><strong>Patient Name:</strong> {{ patientData?.name }}</p>
+                <p><strong>PRN:</strong> {{ patientData?.prn }}</p>
+            </div>
+
+            <div *ngFor="let prescription of selectedPrescription" class="prescription-block">
+                <h3>
+                    Prescription ID: {{ prescription.prescriptionId }} |
+                    Date: {{ prescription.prescribedDate | date: 'dd-MM-yyyy' }}
+                </h3>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Prescribed By</th>
+                            <th>Generic</th>
+                            <th>Brand</th>
+                            <th>Type</th>
+                            <th>Frequency</th>
+                            <th>Duration</th>
+                            <th>Instruction</th>
+                            <th>Qty</th>
+                            <th>Route</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let tab of prescription.tablets">
+                            <td>{{ prescription.prescribedBy }}</td>
+                            <td>{{ tab.genericName }}</td>
+                            <td>{{ tab.brandName }}</td>
+                            <td>{{ tab.type || '—' }}</td>
+                            <td>{{ tab.frequency }}</td>
+                            <td>{{ tab.duration }}</td>
+                            <td>{{ tab.instructions }}</td>
+                            <td>{{ tab.quantity }}</td>
+                            <td>{{ tab.route || '—' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div>
+                    <p>Doctor: {{prescription.prescribedBy}}</p>
+                    <p>KMC#: {{prescription.prescribedByKMC}}</p>
+                    <p>Date: {{prescription.prescribedDate}}</p>
+                  </div>
+            </div>
+
+
+        </div>
+        <div id="printFullSection" style="display: none">
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 16px; height
+            : 100px;">
+                <tr>
+                    <td style="width: 15%; vertical-align: top;">
+                        <img src="./rash-logo.png" alt="Clinic Logo" style="width:200px; height: auto;" />
+                    </td>
+                    <td style="text-align: center;">
+                        <h2 style="margin: 0; font-size: 26px;">Rashtrotthana Hospital</h2>
+                        <p style="margin: 4px 0;">RajaRajeshwari Nagar, Bangalore - 560098</p>
+                        <p style="margin: 4px 0;">Phone: 080 6923 9999 | <span
+                                style="color: #000;">www.rashtrotthanahospital.com</span></p>
+                    </td>
+                </tr>
+            </table>
+            <h2>OPD Visit Summary</h2>
+            <div class="print-patient-header">
+                <table style="width: 100%; border-collapse: collapse; margin-top: 20px; margin-bottom: 20px;">
+                    <tr>
+                      <!-- Left Column -->
+                      <td style="width: 50%; vertical-align: top; padding: 8px;">
+                        <p><strong>PRN:</strong> {{ patientData?.prn }}</p>
+                        <p><strong>Name:</strong> {{ patientData?.name }}</p>
+                        <p><strong>Type:</strong> {{ patientData?.patientType }}</p>
+                      </td>
+                  
+                      <!-- Right Column -->
+                      <td style="width: 50%; vertical-align: top; padding: 8px;">
+                        <p><strong>Age/Sex:</strong> {{ patientData?.age }}/{{ patientData?.gender }}</p>
+                        <p><strong>Blood Group:</strong> {{ patientData?.bloodGroup }}</p>
+                      </td>
+                    </tr>
+                  </table>
+            </div>
+              
+            <div *ngIf="selectedVitals" class="vital-print">
+                <h3>Vitals</h3>
+                <div class="vitals-columns">
+                    <div class="vital-column">
+                        <p><strong>Height:</strong> {{ selectedVitals.height || '-' }} cm</p>
+                        <p><strong>Weight:</strong> {{ selectedVitals.weight || '-' }} kg</p>
+                        <p><strong>Temp:</strong> {{ selectedVitals.temp || '-' }} °F</p>
+                        <p><strong>Pulse:</strong> {{ selectedVitals.pulse || '-' }}</p>
+                        <p><strong>RR:</strong> {{ selectedVitals.RR || '-' }}</p>
+                    </div>
+                    <div class="vital-column">
+                        <p><strong>BP:</strong> {{ selectedVitals.BPs || '-' }}/{{ selectedVitals.BPd || '-' }}</p>
+                        <p><strong>SpO2:</strong> {{ selectedVitals.spo2 || '-' }}%</p>
+                        <p><strong>Hb:</strong> {{ selectedVitals.hb || '-' }}</p>
+                        <p><strong>Serum Ferritin:</strong> {{ selectedVitals.sFerritin || '-' }}</p>
+                    </div>
+                </div>
+            </div>
+            <h2>OPD Notes</h2>
+            <h3>Chief Complaints</h3>
+            <p>{{ selectedVisit?.chiefComplaints || '-' }}</p>
+
+            <h3>Diagnosis</h3>
+            <p>{{ selectedVisit?.diagnosis || '-' }}</p>
+
+            <h3>General Examination</h3>
+            <p>{{ selectedVisit?.generalExamination || '-' }}</p>
+
+            <h3>Clinical Notes</h3>
+            <p>{{ selectedVisit?.clinicalNotes || '-' }}</p>
+
+
+            <h3>CVS</h3>
+            <p>{{ selectedVisit?.cvs || '-' }}</p>
+
+            <h3>RS</h3>
+            <p>{{ selectedVisit?.rs || '-' }}</p>
+
+            <h3>CNS</h3>
+            <p>{{ selectedVisit?.cns || '-' }}</p>
+
+            <h3>P/A</h3>
+            <p>{{ selectedVisit?.pa || '-' }}</p>
+
+            <div *ngIf="!selectedVitals" class="no-vitals-msg">
+                <p>No vitals recorded for this date</p>
+            </div>
+
+
+            <h3>Investigation Requisition</h3>
+            <table border="1" cellpadding="6" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Service</th>
+                        <th>Source</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngIf="selectedServices.length === 0">
+                        <td colspan="10" class="no-records-message">
+                            No records to display
+                        </td>
+                    </tr>
+                    <tr *ngFor="let appt of selectedService; let i = index">
+                        <td>{{ i + 1 }}</td>
+                        <td>{{ appt.radioServiceName }}</td>
+                        <td>{{ appt.requestVia }}</td>
+                        <td>{{ appt.appointmentDate | date: 'dd-MM-yy' }}</td>
+                        <td>{{ appt.reportDoneBy ? 'Done' : 'Incomplete' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Prescription</h3>
+            <div *ngFor="let prescription of selectedPrescription">
+                <p><strong>Prescription ID:</strong> {{ prescription.prescriptionId }} |
+                    <strong>Date:</strong> {{ prescription.prescribedDate | date: 'dd-MM-yyyy' }}
+                </p>
+
+                <table border="1" cellpadding="6" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Doctor</th>
+                            <th>Generic</th>
+                            <th>Brand</th>
+                            <th>Type</th>
+                            <th>Frequency</th>
+                            <th>Duration</th>
+                            <th>Instruction</th>
+                            <th>Qty</th>
+                            <th>Route</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let tab of prescription.tablets">
+                            <td>{{ prescription.prescribedBy }}</td>
+                            <td>{{ tab.genericName }}</td>
+                            <td>{{ tab.brandName }}</td>
+                            <td>{{ tab.type || 'N/A' }}</td>
+                            <td>{{ tab.frequency }}</td>
+                            <td>{{ tab.duration }}</td>
+                            <td>{{ tab.instructions }}</td>
+                            <td>{{ tab.quantity }}</td>
+                            <td>{{ tab.route || 'N/A' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+    </div>
+</div>

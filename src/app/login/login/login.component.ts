@@ -81,12 +81,18 @@ export class LoginComponent implements OnInit {
         // response = response;
         // Navigate to the desired route upon successful login
         if (response.user.employeeId) {
+          const blockId = response.user.employeeId.match(/B(\d+)/i); // Split by "C" and take the first part
           const match = response.user.employeeId.match(/C(\d+)/i); // Case-insensitive match for "C" followed by a number
           if (match && match[1]) {
             const channelNumber = match[1]; // Extract the number part
             console.log(`🔀 Redirecting to /channel/${channelNumber}`);
             
             this.router.navigate([`/channel/${channelNumber}`]); // Navigate to the appropriate channel
+          }
+          else if (blockId && blockId[1]) {
+            const blockNumber = blockId[1]; // Extract the number part
+            console.log(`🔀 Redirecting to /nursing/${blockNumber}`);
+            this.router.navigate([`/nursing/${blockNumber}`]); // Navigate to the appropriate channel
           }
           else if (response.user.subAdminType === 'Estimator'){
             console.log(this.subAdminType)

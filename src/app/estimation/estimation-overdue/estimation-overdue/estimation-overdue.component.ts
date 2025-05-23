@@ -290,10 +290,6 @@ this.fetchPendingEstimations();
   }
   completeAppointment(appointment: any): void { }
   openAppointmentForm(service: any): void {
-    // this.router.navigate(['/reschedule', service.id], {
-    //   state: { data: service }, // Passing full service object using state
-    // });
-    // this.lockService(service);
     this.openAppointmentFormAfterLocked(service)
   }
   openAppointmentFormAfterLocked(service: any): void {
@@ -494,5 +490,20 @@ this.fetchPendingEstimations();
 
     )
 
+  }
+  openForm(estimation: any) {
+    this.activeComponent = 'form';
+  }
+  print(estimation: any): void {
+    if (estimation.pdfLink) {
+      const pdfWindow = window.open(estimation.pdfLink, '_blank'); // Open the PDF in a new tab
+      if (pdfWindow) {
+        pdfWindow.onload = () => {
+          pdfWindow.print(); // Automatically triggers the print dialog
+        };
+      }
+    } else {
+      console.error("No PDF link available for this estimation.");
+    }
   }
 }

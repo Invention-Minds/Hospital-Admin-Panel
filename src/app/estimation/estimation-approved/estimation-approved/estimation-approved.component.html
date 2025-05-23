@@ -244,30 +244,51 @@
       <p>
         Surgery Date<span class="space-1">:</span> {{ selectedEstimation?.estimatedDate }}
       </p>
+      <div class="estimation-input">
+        <div>
+          <p class="label">PAC Done:</p>
+        </div>
+        <div class="radio-group">
+          <label>
+            <input type="radio" [(ngModel)]="isPACDone" [value]="true" /> Yes
+          </label>
+          <label>
+            <input type="radio" [(ngModel)]="isPACDone" [value]="false" /> No
+          </label>
+        </div>
+      </div>
+      
 
+<div *ngIf="isPACDone">
+  <div class="estimation-input-container">
+    <!-- Input field for estimation -->
+    <input 
+      type="text" 
+      name="advance"
+      [(ngModel)]="advanceAmount" 
+    required
+      class="custom-input"
+    />
+    <label for="advance" class="custom-label">PAC Amount*</label>
+  </div>
 
-    <div class="estimation-input-container">
-      <!-- Input field for estimation -->
-      <input 
-        type="text" 
-        name="advance"
-        [(ngModel)]="advanceAmount" 
+  <div class="estimation-input-container">
+    <!-- Input field for estimation -->
+    <input 
+      type="text" 
+      [(ngModel)]="receiptNumber" 
       required
-        class="custom-input"
-      />
-      <label for="advance" class="custom-label">PAC Amount*</label>
-    </div>
-
-    <div class="estimation-input-container">
-      <!-- Input field for estimation -->
-      <input 
-        type="text" 
-        [(ngModel)]="receiptNumber" 
-        required
-        class="custom-input"
-      />
-      <label for="receiptNumber" class="custom-label">Receipt Number*</label>
-    </div>
+      class="custom-input"
+    />
+    <label for="receiptNumber" class="custom-label">Receipt Number*</label>
+  </div>
+</div>
+<div *ngIf="isPACDone === false">
+  <div class="estimation-input-container">
+    <textarea [(ngModel)]="pacNotDoneReason" required class="custom-input" rows="3"></textarea>
+    <label class="custom-label">Reason for not completing PAC*</label>
+  </div>
+</div>
 
     </div>
     <div class="modal-footer">

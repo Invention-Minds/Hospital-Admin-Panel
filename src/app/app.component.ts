@@ -65,8 +65,5 @@ export class AppComponent {
   isHelpDesk():boolean{
     return this.router.url === '/help-center';
   }
-  
-  isHelpDesk():boolean{
-    return this.router.url === '/help-center';
-  }
+
 }

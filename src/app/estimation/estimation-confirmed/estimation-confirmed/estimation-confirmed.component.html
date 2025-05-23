@@ -73,6 +73,7 @@
                     <th>EST Type</th>
                     <td>EST Created Date</td>
                     <th>Surgery Date</th>
+                    <th>Follow-Up</th>
                     <th>PAC Done</th>
                     <th>Age Bucket</th>
                     <th>Status</th>
@@ -101,6 +102,19 @@
                       }}
                     </td>
                   <td>{{estimation.estimatedDate | date: 'dd-MM-yyyy'}}</td>
+                  <td>
+                    <div class="dropdown-container-in-table" *ngIf="getFollowUpDates(estimation).length > 0; else noFollowups">
+                      <select class="dropdown-in-table">
+                        <option *ngFor="let date of getFollowUpDates(estimation)" [value]="date">
+                          {{ date | date:'dd-MM-yyyy' }}
+                        </option>
+                      </select>
+                    </div>
+                    <!-- Fallback if array is empty -->
+                    <ng-template #noFollowups>
+                      <span>No follow-ups</span>
+                    </ng-template>
+                  </td>
                     <td>{{ estimation.pacDone ? 'Yes' : 'No' }}</td>
                     <td>{{estimation.ageBucketOfSurgery || 0}}</td>
 
@@ -109,7 +123,7 @@
                       </td>
                     <td class="button">
                         <button class="btn-action" (click)="completeAppointment(estimation)"  pTooltip="Complete" tooltipPosition="top">
-                            <img src="/check-in.svg" alt="Confirm">
+                            <img src="check-in.svg" alt="Confirm">
                           </button>
                           <button class="btn-action" [disabled]="adminType !== 'Senior Manager'" (click)="openCancelFeedback(estimation)"  pTooltip="Cancel" tooltipPosition="top">
                             <img src="/cancel-est.svg" alt="Confirm">
@@ -117,9 +131,10 @@
                           <button class="btn-action" (click)="openAppointmentForm(estimation)"  pTooltip="View" tooltipPosition="top">
                             <img src="/view.svg" alt="Confirm">
                           </button>
-                          <!-- <button class="btn-action" *ngIf="estimation.estimationType !== 'MM' " (click)="openAdvancePopup(estimation)"  pTooltip="PAC" tooltipPosition="top">
-                            <img src="/pac.svg" alt="Confirm">
-                          </button> -->
+                          <button class="btn-action" (click)="openFollowUpPopup(estimation)" pTooltip="Follow-Ups"
+                          tooltipPosition="top">
+                          <img src="/follow-up.svg" alt="Confirm">
+                        </button>
                           <button class="btn-action" (click)="openAdvancePopup(estimation)" pTooltip="Advance Amount"
                           tooltipPosition="top">
                           <img src="/paid.svg" alt="Confirm">
@@ -268,6 +283,50 @@
     <div class="modal-footer">
       <button class="save-button" (click)="saveEstimation()">Save</button>
       <button class="close-button" (click)="closeAdvancePopup()">Close</button>
+    </div>
+  </div>
+</div>
+<div *ngIf="showFollowUps" class="estimation-modal">
+  <div class="modal-content-follow-up">
+    <div class="modal-header">
+      <h3>Follow-Up FeedBack of {{ selectedEstimation.patientName }}</h3>
+      <button class="popup-close" (click)="closeFollowUpPopup()">
+        <img src="/popup-close.svg" />
+      </button>
+    </div>
+    <hr />
+    <div class="modal-body">
+      <p>
+        Patient Name<span class="space">:</span>{{ selectedEstimation?.patientName }}
+      </p>
+      <div *ngFor="let followUp of followUps; let i = index" class="follow-up-item">
+        <p>
+          <strong>Follow-Up {{ i + 1 }}:</strong>
+        </p>
+        <p>Date: {{ followUp.date | date:'dd-MM-yyyy' }}</p>
+        <p>Remarks: {{ followUp.remarks }}</p>
+      </div>
+
+
+      <div class="estimation-input-container">
+        <!-- Input field for estimation -->
+        <input type="date" name="advance" [(ngModel)]="followUpDate" required class="custom-input" />
+        <label for="followUpDate" class="custom-label">Follow-up Date*</label>
+      </div>
+
+      <div class="estimation-input-container">
+        <!-- Input field for estimation -->
+        <input type="text" [(ngModel)]="feedback" required class="custom-input" />
+        <label for="feedback" class="custom-label">FeedBack*</label>
+        <div *ngIf="followUps.length >= 5" class="error-message">
+          Maximum of 5 follow-ups reached.
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button *ngIf="followUps.length < 5" class="save-button" (click)="saveFollowUp()">Save</button>
+      <button class="close-button" (click)="closeFollowUpPopup()">Close</button>
     </div>
   </div>
 </div>

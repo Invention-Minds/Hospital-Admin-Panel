@@ -29,6 +29,7 @@ export class DoctorDetailsComponent implements OnInit {
   unavailabilityForm: FormGroup;
   isLoading: boolean = false;
   role: string = '';
+  isButtonLoading: boolean = false; // Flag to control button loading state
 
   constructor(
     private doctorService: DoctorServiceService,
@@ -329,18 +330,24 @@ export class DoctorDetailsComponent implements OnInit {
   // Handle saving the edited doctor
   onSaveDoctor(updatedDoctor: Doctor): void {
     if (this.isEditMode && this.selectedEditDoctor) {
-      this.doctorService.updateDoctor(updatedDoctor).subscribe(
+      console.log(updatedDoctor)
+      this.isButtonLoading = true; // Start loading state
+      const {bookedSlots,unavailableDates, ...rest} = updatedDoctor;
+      this.doctorService.updateDoctor(rest).subscribe(
         () => {
           updatedDoctor.slotDuration = Number(updatedDoctor.slotDuration);
           this.fetchDepartmentsAndDoctors(); // Refresh the list of doctors
           this.isEditMode = false;
+          this.isButtonLoading = false; // Stop loading state
           this.selectedEditDoctor = null;
         },
         (error) => {
+          this.isButtonLoading = false; // Stop loading state
           console.error('Error updating doctor:', error);
         }
       );
     } else {
+      this.isButtonLoading = true; // Start loading state
       // Find the department ID based on the name provided
       const department = this.departments.find(dep => dep.name === updatedDoctor.departmentName);
       if (department) {
@@ -352,9 +359,11 @@ export class DoctorDetailsComponent implements OnInit {
 
             this.fetchDepartmentsAndDoctors(); // Refresh the list of doctors
             this.selectedEditDoctor = null;
+            this.isButtonLoading = false;
             // console.log('Doctor created successfully');
           },
           (error) => {
+            this.isButtonLoading = false; // Stop loading state
             console.error('Error creating doctor:', error);
           }
         );

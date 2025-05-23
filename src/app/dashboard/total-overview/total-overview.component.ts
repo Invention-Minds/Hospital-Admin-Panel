@@ -51,16 +51,16 @@ export class TotalOverviewComponent implements OnInit {
   private fetchStatistics(): void {
     const currentDate = this.date;
 
-    // this.appointmentService
-    //   .getTotalAppointmentsCountForToday(currentDate)
-    //   .subscribe(
-    //     (totalAppointments) => {
-    //       this.totalAppointmentsToday = totalAppointments.count;
-    //     },
-    //     (error) => {
-    //       console.error('Error fetching total appointments:', error);
-    //     }
-    //   );
+    this.appointmentService
+      .getTotalAppointmentsCountForToday(currentDate)
+      .subscribe(
+        (totalAppointments) => {
+          this.totalAppointmentsToday = totalAppointments.count;
+        },
+        (error) => {
+          console.error('Error fetching total appointments:', error);
+        }
+      );
 
     // this.appointmentService.fetchPendingAppointmentsCount().subscribe(
     //   (pendingRequests) => {
@@ -74,9 +74,9 @@ export class TotalOverviewComponent implements OnInit {
       next: (services: any[]) => {
 
         // Process the services when the API call is successful
-        this.totalAppointmentsToday = services.filter(
-          (service) => service.date === currentDate
-        ).length;
+        // this.totalAppointmentsToday = services.filter(
+        //   (service) => service.date === currentDate
+        // ).length;
         this.pendingRequestsToday = services.filter(
           (service) => service.date === currentDate && service.status === 'pending'
         ).length;

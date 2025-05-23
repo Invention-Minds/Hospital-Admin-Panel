@@ -957,8 +957,8 @@ export class EstimationFormComponent {
           (pdfResponse) => {
             console.log("✅ PDF Generated & Sent via WhatsApp:", pdfResponse);
             this.messageService.add({ severity: 'success', summary: 'Success', detail: 'PDF Generated & Sent PDF via WhatsApp:!' });
-            // const to = "ipbilling@rashtrotthanahospital.com"
-            const to = "keerthanasaminathan0805@gmail.com"
+            const to = "ipbilling@rashtrotthanahospital.com"
+            // const to = "keerthanasaminathan0805@gmail.com"
             this.appointmentService.sendMailtoApprover(to, estimationData.estimationId, pdfResponse.filePath).subscribe(
               (response) => {
                 console.log('Email sent successfully:', response);
@@ -1213,7 +1213,9 @@ export class EstimationFormComponent {
             costForDeluxe: this.formData.costForDeluxe,
             selectedRoomCost: this.selectedRoomCost,
             patientEmail: this.formData.patientEmail,
-            patientPhoneNumber: this.formData.patientPhoneNumber.toString()
+            patientPhoneNumber: this.formData.patientPhoneNumber.toString(),
+            surgeryTime: this.formData.surgeryTime,
+            overDueDateAndTIme: null
           },
           inclusions: this.formData.inclusions,
           exclusions: this.formData.exclusions,
@@ -1232,6 +1234,7 @@ export class EstimationFormComponent {
           }
         );
       } else {
+        console.log(this.formData)
         const estimationData = {
           // Replace this with the actual ID from your context
           updateFields: {
@@ -1279,7 +1282,8 @@ export class EstimationFormComponent {
             costForDeluxe: this.formData.costForDeluxe,
             selectedRoomCost: this.selectedRoomCost,
             patientEmail: this.formData.patientEmail,
-            submittedDateAndTime: new Date()
+            submittedDateAndTime: new Date(),
+            overDueDateAndTIme: null
           },
           inclusions: this.formData.inclusions,
           exclusions: this.formData.exclusions,

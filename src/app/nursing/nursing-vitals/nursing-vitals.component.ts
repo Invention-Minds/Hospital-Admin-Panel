@@ -117,7 +117,7 @@ export class NursingVitalsComponent {
     BPs: '',
     BPd: '',
     spo2: '',
-    bloodGroup: '',
+    // bloodGroup: '',
   };
 
   vitalsFields = [
@@ -129,7 +129,7 @@ export class NursingVitalsComponent {
     { key: 'BPs', label: 'BP Systolic (Hg)' },
     { key: 'BPd', label: 'BP Diastolic (Hg)' },
     { key: 'spo2', label: 'SpO2 (%)' },
-    { key: 'bloodGroup', label: 'Blood Group' },
+    // { key: 'bloodGroup', label: 'Blood Group' },
   ];
   allVitalsFilled(): boolean {
     return this.vitalsFields.every(field => {

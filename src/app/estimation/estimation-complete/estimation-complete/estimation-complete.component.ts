@@ -22,6 +22,7 @@ export class EstimationCompleteComponent {
     { label: 'Patient Name', value: 'patientName' },
     { label: 'Estimation ID', value: 'estimationId' },
     { label: 'Doctor Name', value: 'consultantName' },
+    { label: 'PRN', value: 'patientUHID'}
   ];
   isLoading = false;
   selectedSearchOption: any = this.searchOptions[0];
@@ -58,7 +59,7 @@ this.fetchPendingEstimations();
         this.pendingEstimations.sort((a, b) => {
           const dateA = new Date(a.completedDateAndTime!);
           const dateB = new Date(b.completedDateAndTime!);
-          return dateA.getTime() - dateB.getTime();
+          return dateB.getTime() - dateA.getTime();
         });
         this.filteredEstimations = [...this.pendingEstimations];
         console.log('Services processed successfully.');
@@ -110,6 +111,13 @@ this.fetchPendingEstimations();
               ?.toLowerCase()
               .includes(this.searchValue.toLowerCase());
             break;
+            case 'patientUHID':
+              const prnNumber = Number(service.patientUHID); // Convert to Number
+              const searchNumber = Number(this.searchValue); // Convert to Number
+              console.log(prnNumber, searchNumber);
+    
+              matches = !isNaN(searchNumber) && prnNumber === searchNumber;
+              break;
         }
         
       }

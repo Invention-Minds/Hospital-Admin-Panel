@@ -58,6 +58,7 @@
                       Estimation ID
                     </th>
                     <th>Patient Name</th>
+                    <th>PRN</th>
                     <!-- <th>Phone Number</th> -->
                     <!-- <th (click)="sortBy('appointmentDate')" style="cursor: pointer;">
                       Estimation Name
@@ -91,6 +92,7 @@
                     <td>{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
                     <td>{{ estimation.estimationId }}</td>
                     <td>{{ estimation.patientName }}</td>
+                    <td>{{estimation.patientUHID || '-'}}</td>
                     <!-- <td>{{ estimation.patientPhoneNumber }}</td> -->
                     <td>{{ estimation.estimationName }}</td>
                     <!-- <td>{{ estimation.appointmentTime }}</td> -->

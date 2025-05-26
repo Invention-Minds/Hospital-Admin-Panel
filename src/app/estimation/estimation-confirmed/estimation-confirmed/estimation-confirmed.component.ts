@@ -22,6 +22,7 @@ export class EstimationConfirmedComponent {
     { label: 'Patient Name', value: 'patientName' },
     { label: 'Estimation ID', value: 'estimationId' },
     { label: 'Doctor Name', value: 'consultantName' },
+    { label: 'PRN', value: 'patientUHID'}
   ];
   isLoading = false;
   selectedSearchOption: any = this.searchOptions[0];
@@ -120,6 +121,13 @@ export class EstimationConfirmedComponent {
               ?.toLowerCase()
               .includes(this.searchValue.toLowerCase());
             break;
+            case 'patientUHID':
+              const prnNumber = Number(service.patientUHID); // Convert to Number
+              const searchNumber = Number(this.searchValue); // Convert to Number
+              console.log(prnNumber, searchNumber);
+    
+              matches = !isNaN(searchNumber) && prnNumber === searchNumber;
+              break;
         }
 
       }

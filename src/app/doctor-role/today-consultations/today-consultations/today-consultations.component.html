@@ -1104,15 +1104,6 @@
                 <option *ngFor="let item of genericOptions" [value]="item">{{ item }}</option>
               </select>
 
-              <!-- <select formControlName="brandName" class="w-18" (change)="onBrandChange(i)">
-                <option value="">Select Brand</option>
-                <option *ngFor="let item of filteredBrandOptions[i]" [value]="item">{{ item }}</option>
-              </select> -->
-              <!-- <input type="text" formControlName="brandName" (blur)="onBrandBlur(i)" placeholder="Enter or select brand" [attr.list]="'brandList' + i" />
-
-              <datalist [attr.id]="'brandList' + i">
-                <option *ngFor="let brand of brandOptions" [value]="brand"></option>
-              </datalist> -->
               <div class="brand-input-container">
                 <!-- Input for Brand Name -->
                 <input type="text"
@@ -1124,14 +1115,6 @@
                        placeholder="Enter or select brand"
                        (keydown)="onBrandKeydown($event, i)"
  />
-                <!-- Suggestions dropdown -->
-                <!-- <ul class="brand-suggestions" *ngIf="showBrandSuggestions[i] && filteredBrandNames[i]?.length">
-                  <li *ngFor="let brand of filteredBrandNames[i]; let j = index"
-                  #brandOptionElements
-                  [class.highlighted]="highlightedBrandIndex[i] === j" (mousedown)="onBrandSelect(i, brand)">
-                    {{ brand }}
-                  </li>
-                </ul> -->
                 <ul class="brand-suggestions" *ngIf="showBrandSuggestions[i] && filteredBrandNames[i]?.length">
                   <li *ngFor="let brand of filteredBrandNames[i]; let j = index"
                       [id]="'brand-option-' + i + '-' + j"

@@ -58,6 +58,7 @@
                       Estimation ID
                   </th>
                   <th>Patient Name</th>
+                  <th>PRN</th>
                   <!-- <th>Phone Number</th> -->
                   <th>
                        Consultant Name
@@ -87,6 +88,7 @@
                     <td>{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
                     <td>{{ estimation.estimationId }}</td>
                     <td>{{ estimation.patientName }}</td>
+                    <td>{{estimation.patientUHID}}</td>
                     <!-- <td>{{ estimation.patientPhoneNumber }}</td> -->
                     <td>{{ estimation.consultantName }}</td>
                     <!-- <td>{{ estimation.appointmentTime }}</td> -->

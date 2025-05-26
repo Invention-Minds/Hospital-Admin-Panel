@@ -61,8 +61,10 @@ export class EstimationOverviewComponent {
   selectedEstimationType: string = ''; // Default (no filter)
   monthWiseRaisedEST: any[] = [];
   totalMonthWiseRaisedEST: number = 0;
-
+  showMonthWiseDate: boolean = false;
   currentMonth: string = '';
+  totalOverallEstimations: number = 0;
+  totalEstimationsOverall:any[]= []
 
 
   
@@ -87,6 +89,8 @@ export class EstimationOverviewComponent {
       next: (estimations: any[]) => {
         console.log(estimations);
         this.estimations = estimations;
+        this.totalEstimationsOverall = estimations;
+        this.totalOverallEstimations = this.totalEstimationsOverall.length
         this.processTodayEstimations(estimations);
         this.processMonthlyRaised(this.estimations)
         this.doctorService.getDepartments().subscribe((departments: any[]) => {
@@ -130,6 +134,7 @@ export class EstimationOverviewComponent {
         dateToCheck.getFullYear() === currentYear
       );
     });
+    console.log(this.monthWiseRaisedEST)
     this.totalMonthWiseRaisedEST = this.monthWiseRaisedEST.length
   
     // Optional: total count
@@ -152,6 +157,7 @@ export class EstimationOverviewComponent {
     // Refresh summary based on both filters
     this.doctorWiseCompletedSummary(this.estimations, this.selectedDept, this.selectedDoctorName);
     this.doctorWiseNonCompletedSummary(this.estimations, this.selectedDept, this.selectedDoctorName);
+    this.overAllESTSummary(this.estimations, this.selectedDoctorName)
 
   }
 
@@ -390,6 +396,17 @@ export class EstimationOverviewComponent {
     this.selectedEstimationType = '';
     this.onSearch(); 
   }
+  totalSummaryClose() {
+    this.showMonthWiseDate = false;
+    this.selectedDept = '';
+    this.selectedDoctorName = '';
+    this.selectedDateRange = [];
+    this.selectedDept = '';
+    this.selectedDoctorName = '';
+    this.selectedStatus = '';
+    this.selectedEstimationType = '';
+    this.totalSearch(); 
+  }
   // doctorWiseNonCompletedSummary(estimations: any[], selectedDept?: string, selectedDoctorName?: string) {
   //   console.log(estimations, selectedDept);
   //   const completedEstimations = estimations.filter(e => e.statusOfEstimation !== 'completed');
@@ -585,6 +602,99 @@ export class EstimationOverviewComponent {
     this.selectedEstimationType = '';
     this.onNonCompleteSearch(); // reloads with no date filter
   }
+  totalSearch() {
+    let startDate: Date | undefined = undefined;
+    let endDate: Date | undefined = undefined;
+
+
+    if (this.selectedDateRange instanceof Date) {
+      startDate = new Date(this.selectedDateRange);
+      endDate = new Date(this.selectedDateRange);
+    } else if (Array.isArray(this.selectedDateRange)) {
+      if (this.selectedDateRange[0]) {
+        startDate = new Date(this.selectedDateRange[0]);
+      }
+      if (this.selectedDateRange[1]) {
+        endDate = new Date(this.selectedDateRange[1]);
+      }
+    }
+    console.log(startDate, endDate);
+
+    this.overAllESTSummary(
+      this.estimations,
+      this.selectedDoctorName,
+    );
+  }
+  totalRefresh() {
+    this.selectedDateRange = [];
+    this.selectedDept = '';
+    this.selectedDoctorName = '';
+    this.selectedStatus = '';
+    this.selectedEstimationType = '';
+    this.totalSearch(); // reloads with no date filter
+  }
+  showOverall(){
+    this.showMonthWiseDate = true
+    console.log('open')
+  }
+  overAllESTSummary(estimations: any[],selectedDoctorName?: string) {
+    console.log('filtering')
+    const overAllSummary = estimations.filter(e => {
+      let matches = true;
+
+      if (this.selectedDateRange && this.selectedDateRange.length) {
+        const serviceDate = new Date(e.estimatedDate); // use completedDateAndTime
+        const startDate = new Date(this.selectedDateRange[0]);
+
+        // If end date is missing (i.e., single date selected), treat both as the same
+        const endDate = this.selectedDateRange[1]
+          ? new Date(this.selectedDateRange[1])
+          : new Date(this.selectedDateRange[0]);
+
+        // Normalize start date (remove time)
+        startDate.setHours(0, 0, 0, 0);
+
+        // Normalize end date to the end of the day
+        endDate.setHours(23, 59, 59, 999);
+
+        // Final comparison (inclusive)
+        matches = matches && serviceDate >= startDate && serviceDate <= endDate;
+      }
+      // Status filter
+      if (this.selectedStatus && e.statusOfEstimation !== this.selectedStatus) {
+        return false;
+      }
+      if( selectedDoctorName && e.consultantName !== selectedDoctorName){
+        return false;
+      }
+      // Estimation type filter
+      if (this.selectedEstimationType && e.estimationType !== this.selectedEstimationType) {
+        return false;
+      }
+      return matches
+    });
+    this.totalEstimationsOverall = overAllSummary
+
+}
+exportToExcel(data: any[], fileName: string = 'Estimation-Summary') {
+  const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(data);
+  const workbook: XLSX.WorkBook = {
+    Sheets: { 'data': worksheet },
+    SheetNames: ['data']
+  };
+  const excelBuffer: any = XLSX.write(workbook, {
+    bookType: 'xlsx',
+    type: 'array'
+  });
+
+  const blob: Blob = new Blob([excelBuffer], {
+    type:
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8'
+  });
+
+  FileSaver.saveAs(blob, `${fileName}_${new Date().toISOString().slice(0, 10)}.xlsx`);
 }
 
+
+}
 

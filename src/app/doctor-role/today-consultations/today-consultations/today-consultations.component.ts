@@ -2813,6 +2813,7 @@ export class TodayConsultationsComponent {
         this.addedRadiologyTests.push(rad);
       }
       this.selectedRadiologyId = null; // 👈 reset the dropdown
+      this.radiologySearchText = ''
     }
 
     if (this.activeInvestigationTab === 'package' && this.selectedPackageId !== null) {
@@ -2821,7 +2822,6 @@ export class TodayConsultationsComponent {
         this.addedPackages.push(pack);
       }
       this.selectedPackageId = null; // 👈 reset the dropdown
-      this.radiologySearchText = ''
     }
     setTimeout(() => {
       if (this.activeInvestigationTab === 'lab' && this.labInput) {

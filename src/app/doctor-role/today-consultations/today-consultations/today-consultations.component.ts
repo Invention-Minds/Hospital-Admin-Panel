@@ -101,6 +101,11 @@ export class TodayConsultationsComponent {
 
 
   @ViewChild('printSection') printSection!: ElementRef;
+  @ViewChild('labInput') labInput!: ElementRef;
+  @ViewChild('radiologyInput') radiologyInput!: ElementRef;
+  @ViewChildren('labOption') labOptions!: QueryList<ElementRef>;
+  @ViewChildren('radiologyOption') radiologyOptions!: QueryList<ElementRef>;
+
   confirmedAppointments: Appointment[] = [];
   @Output() consultationStarted = new EventEmitter<{ doctorId: number, appointmentId: number }>();
 
@@ -233,7 +238,7 @@ export class TodayConsultationsComponent {
   prescribedByKMC: string = ''; // Variable to store the KMC number of the doctor who prescribed the medication
   showModal = false; // Flag to control the visibility of the modal
   activeTab: string = 'history';
-  investigationRemarks: string =''
+  investigationRemarks: string = ''
   activeInvestigationTab: 'lab' | 'radiology' | 'package' = 'lab';
 
   allLabTests: any[] = [];
@@ -250,13 +255,18 @@ export class TodayConsultationsComponent {
 
   search = '';
   department = '';
-
+  // Show/hide suggestion flags
+  showBrandSuggestions: boolean[] = [];
+  filteredBrandNames: string[][] = []; // List of filtered suggestions per input
+  showFavBrandSuggestions: boolean[] = [];
+  filteredFavBrandNames: string[][] = []; // List of filtered suggestions per input
   tabs = [
     { key: 'history', label: 'History' },
     { key: 'clinical', label: 'Clinical Notes' },
     { key: 'prescription', label: 'Prescription' },
     { key: 'investigation', label: 'Investigation' },
   ];
+  
 
 
   get tablets(): FormArray {
@@ -328,6 +338,11 @@ export class TodayConsultationsComponent {
     this.allergyForm = this.fb.group({
       allergies: this.fb.array([])
     });
+    this.showBrandSuggestions.push(false);
+    this.filteredBrandNames.push([]);
+    this.showFavBrandSuggestions.push(false);
+    this.filteredFavBrandNames.push([]);
+
 
     this.appointmentService.getLabTests().subscribe(data => this.allLabTests = data);
     this.appointmentService.getRadiologyTests().subscribe(data => this.allRadiologyTests = data);
@@ -1454,7 +1469,9 @@ export class TodayConsultationsComponent {
       const matchingTablets = this.allTablets.filter(tab => tab.genericName === selectedGeneric);
       this.brandOptions = matchingTablets.map(tab => tab.brandName);
       this.filteredBrandOptions[index] = this.brandOptions;
+      this.filteredFavBrandNames[index] = this.brandOptions;
       this.filteredBrandOptionsFavorites[index] = this.brandOptions;
+      this.filteredFavBrandNames[index] = this.brandOptions
       console.log(this.filteredBrandOptions)
 
       // Reset brand and tabletId if generic changes
@@ -1519,6 +1536,10 @@ export class TodayConsultationsComponent {
     })
   }
   addTablet() {
+    const last = this.tablets.at(this.tablets.length - 1);
+    if (last && !last.get('genericName')?.value && !last.get('brandName')?.value) {
+      return; // prevent adding duplicate empty rows
+    }
     const tabletsForm = this.form.get('tablets') as FormArray;
     tabletsForm.push(this.fb.group({
       genericName: [''],
@@ -1531,11 +1552,17 @@ export class TodayConsultationsComponent {
     }));
 
     this.filteredBrandOptions.push([]);
+    // Ensure per-row filtered suggestion state
+    console.log(this.brandOptions);
+    this.brandOptions = this.allTablets.map((b: any) => b.brandName)
+    this.filteredBrandNames.push([...this.brandOptions]); // default to full list
   }
 
   removeTablet(index: number) {
     this.tablets.removeAt(index);               // Remove the tablet form control
     this.filteredBrandOptions.splice(index, 1); // Remove the corresponding brand options
+    this.filteredBrandNames.splice(index, 1);
+    this.showBrandSuggestions.splice(index, 1);
   }
 
   save() {
@@ -1559,9 +1586,14 @@ export class TodayConsultationsComponent {
           .filter((tablet: any) => this.favoriteSet.has(tablet.index));
         console.log(favoriteTablets)
         const favPayload = favoriteTablets.map((t: any) => {
-          const matched = this.allTablets.find(
+          let matched = this.allTablets.find(
             (tab) => tab.genericName === t.genericName && tab.brandName === t.brandName
           );
+          // Fallback: try match only brand
+          if (!matched) {
+            matched = this.allTablets.find(tab => tab.brandName === t.brandName);
+          }
+
           return matched ? {
             tabletId: matched.id, userId: this.username, frequency: t.frequency,
             duration: t.duration,
@@ -1591,13 +1623,98 @@ export class TodayConsultationsComponent {
       }
     });
   }
+  onBrandBlur(index: number): void {
+    console.log('blurinng0', index)
+    const array = this.showFavorite ? this.favorites : this.tablets;
+    const brandName = array.at(index).get('brandName')?.value?.trim();
+    let genericName = array.at(index).get('genericName')?.value?.trim();
+
+    if (!brandName) return;
+
+    // Check if this brand exists in your allTablets or allTabletMasters
+    const existingTablet = this.allTablets.find(t => t.brandName === brandName);
+    console.log(existingTablet)
+
+    if (existingTablet) {
+      // Use existing brand
+      array.at(index).patchValue({
+        tabletId: existingTablet.id,
+        genericName: existingTablet.genericName,
+      });
+      return;
+    }
+
+    // If brand not found, create a new TabletMaster entry
+    const type = 'default'; // or let user input/select type
+    const description = ''; // optional
+
+    this.prescriptionService.createTablet({
+      brandName,
+      genericName: genericName || brandName, // fallback if no generic selected
+      type,
+      description
+    }).subscribe((newTablet: any) => {
+      // Save the new tablet ID
+      array.at(index).patchValue({
+        tabletId: newTablet.id,
+        genericName: newTablet.genericName,
+      });
+
+      // Add to local tablet cache
+      this.allTablets.push(newTablet);
+      this.brandOptions.push(newTablet.brandName);
+    });
+  }
+  onFavBrandBlur(index: number): void {
+    console.log('blurinng0', index)
+    const array = this.showFavorite ? this.favorites : this.tablets;
+    const brandName = array.at(index).get('brandName')?.value?.trim();
+    let genericName = array.at(index).get('genericName')?.value?.trim();
+
+    if (!brandName) return;
+
+    // Check if this brand exists in your allTablets or allTabletMasters
+    const existingTablet = this.allTablets.find(t => t.brandName === brandName);
+    console.log(existingTablet)
+
+    if (existingTablet) {
+      // Use existing brand
+      array.at(index).patchValue({
+        tabletId: existingTablet.id,
+        genericName: existingTablet.genericName,
+      });
+      return;
+    }
+
+    // If brand not found, create a new TabletMaster entry
+    const type = 'default'; // or let user input/select type
+    const description = ''; // optional
+
+    this.prescriptionService.createTablet({
+      brandName,
+      genericName: genericName || brandName, // fallback if no generic selected
+      type,
+      description
+    }).subscribe((newTablet: any) => {
+      // Save the new tablet ID
+      array.at(index).patchValue({
+        tabletId: newTablet.id,
+        genericName: newTablet.genericName,
+      });
+
+      // Add to local tablet cache
+      this.allTablets.push(newTablet);
+      this.brandOptions.push(newTablet.brandName);
+    });
+  }
+
   print() {
     console.log(this.selectPrescriptionPrint)
     if (!this.selectedAppointment || !this.selectPrescriptionPrint) {
       console.error('Print data is not ready');
       return;
     }
-  
+
     if (!this.printSection) {
       console.error('printSection is not available in the DOM');
       return;
@@ -1690,6 +1807,9 @@ export class TodayConsultationsComponent {
     this.favorites.insert(0, group);
     // this.filteredBrandOptions.splice(0, 0, []); // Add a new entry to the filteredBrandOptions array
     this.filteredBrandOptionsFavorites.splice(0, 0, []); // Add a new entry to the filteredBrandOptions array
+    // this.filteredFavBrandNames.splice(0,0, []);
+    this.brandOptions = this.allTablets.map((b: any) => b.brandName)
+    this.filteredBrandNames.push([...this.brandOptions]); // default to full list
   }
 
 
@@ -1715,6 +1835,7 @@ export class TodayConsultationsComponent {
             this.favorites.removeAt(index);
             // this.filteredBrandOptions.splice(index, 1); // keep it in sync
             this.filteredBrandOptionsFavorites.splice(index, 1); // keep it in sync
+            this.filteredFavBrandNames.splice(index,1)
             this.messageService.add({ severity: 'info', summary: 'Deleted', detail: 'Favorite removed from DB' });
           },
           error: () => {
@@ -1724,6 +1845,7 @@ export class TodayConsultationsComponent {
       } else {
         this.favorites.removeAt(index); // fallback
         this.filteredBrandOptionsFavorites.splice(index, 1); // keep it in sync
+        this.filteredFavBrandNames.splice(index,1)
         // this.filteredBrandOptions.splice(index, 1); // keep it in sync
       }
 
@@ -1731,6 +1853,7 @@ export class TodayConsultationsComponent {
       // New entry not saved yet, just remove from the form
       this.favorites.removeAt(index);
       this.filteredBrandOptionsFavorites.splice(index, 1); // keep it in sync
+      this.filteredFavBrandNames.splice(index,1);
       // this.filteredBrandOptions.splice(index, 1); // keep it in sync
     }
   }
@@ -1791,6 +1914,7 @@ export class TodayConsultationsComponent {
       this.favorites.clear();
       // this.filteredBrandOptions = [];
       this.filteredBrandOptionsFavorites = [];
+      this.filteredFavBrandNames = []
 
       favs.forEach((fav: any) => {
         this.favorites.push(this.fb.group({
@@ -1809,7 +1933,8 @@ export class TodayConsultationsComponent {
         const brands = this.tabletsMap[fav.tablet.genericName] || [];
         // this.filteredBrandOptions.push(brandOptions);
         this.filteredBrandOptionsFavorites.push(brandOptions);
-        console.log(this.filteredBrandOptions)
+        this.filteredFavBrandNames.push(brandOptions);
+        console.log(this.filteredFavBrandNames)
       });
 
       this.showFavorite = true;
@@ -2070,7 +2195,7 @@ export class TodayConsultationsComponent {
         prescriptionData,
         services,
         serviceAppointments,
-        investigationOrders, 
+        investigationOrders,
         historyData
       } = res;
 
@@ -2107,7 +2232,7 @@ export class TodayConsultationsComponent {
   }
 
 
-  generatePdfWithPatient(patient: any, vitals: any, visit: any, history: any, prescriptions: any[],  filteredInvestigationOrders: any[]) {
+  generatePdfWithPatient(patient: any, vitals: any, visit: any, history: any, prescriptions: any[], filteredInvestigationOrders: any[]) {
     console.log('Generating PDF with patient data:', patient, vitals, visit, history, prescriptions);
     const patientInfo = patient;
     const docDefinition: any = {
@@ -2280,18 +2405,18 @@ export class TodayConsultationsComponent {
         { text: 'P/A', style: 'section' },
         { text: visit?.pa || '-', margin: [0, 0, 0, 10] },
 
-        
+
         {
           text: 'OPD History Notes:',
           style: 'section',
-          decoration:'underline',
+          decoration: 'underline',
         },
         { text: 'Medical/ Surgical History', style: 'section' },
         { text: history?.medicalHistory || '-', margin: [0, 0, 0, 10] },
-  
+
         { text: 'Family History', style: 'section' },
         { text: history?.familyHistory || '-', margin: [0, 0, 0, 10] },
-  
+
         { text: 'Social History', style: 'section' },
         { text: history?.socialHistory || '-', margin: [0, 0, 0, 10] },
 
@@ -2299,22 +2424,22 @@ export class TodayConsultationsComponent {
 
         ...filteredInvestigationOrders.map((order: any) => {
           const rows: any[] = [];
-        
+
           // Add Lab Tests
           order.labTests.forEach((lab: any) => {
             rows.push(['Lab', lab.description]);
           });
-        
+
           // Add Radiology Tests
           order.radiologyTests.forEach((r: any) => {
             rows.push(['Radiology', r.description]);
           });
-        
+
           // Add Packages
           // order.packages.forEach((p: any) => {
           //   rows.push(['Package', p.name]);
           // });
-        
+
           return [
             {
               text: `Order ID: ${order.id} | Date: ${new Date(order.date).toLocaleDateString()} | Doctor: ${order.doctorName}`,
@@ -2536,6 +2661,11 @@ export class TodayConsultationsComponent {
 
   closeModal() {
     this.showModal = false;
+    this.closePrescription();
+    this.addedLabTests = [];
+    this.addedRadiologyTests = [];
+    this.labSearchText = '';
+    this.radiologySearchText = '';
   }
 
   setActiveTab(tab: string) {
@@ -2548,7 +2678,7 @@ export class TodayConsultationsComponent {
     if (tab == 'history') {
       this.openHistoryNotes(this.selectedService);
     }
-    if(tab == 'prescription'){
+    if (tab == 'prescription') {
       this.openPrescriptionPopup(this.selectedService);
     }
   }
@@ -2612,8 +2742,8 @@ export class TodayConsultationsComponent {
       this.activeInvestigationTab === 'lab'
         ? this.allLabTests
         : this.activeInvestigationTab === 'radiology'
-        ? this.allRadiologyTests
-        : this.allPackages;
+          ? this.allRadiologyTests
+          : this.allPackages;
 
     return source.filter(test =>
       test.description.toLowerCase().includes(this.search.toLowerCase()) &&
@@ -2626,8 +2756,8 @@ export class TodayConsultationsComponent {
       this.activeInvestigationTab === 'lab'
         ? this.addedLabTests
         : this.activeInvestigationTab === 'radiology'
-        ? this.addedRadiologyTests
-        : this.addedPackages;
+          ? this.addedRadiologyTests
+          : this.addedPackages;
 
     if (!list.find((item: any) => item.id === test.id)) {
       list.push(test);
@@ -2674,6 +2804,7 @@ export class TodayConsultationsComponent {
         console.log(this.addedLabTests)
       }
       this.selectedLabId = null; // 👈 reset the dropdown
+      this.labSearchText = ''
     }
 
     if (this.activeInvestigationTab === 'radiology' && this.selectedRadiologyId !== null) {
@@ -2690,7 +2821,15 @@ export class TodayConsultationsComponent {
         this.addedPackages.push(pack);
       }
       this.selectedPackageId = null; // 👈 reset the dropdown
+      this.radiologySearchText = ''
     }
+    setTimeout(() => {
+      if (this.activeInvestigationTab === 'lab' && this.labInput) {
+        this.labInput.nativeElement.focus();
+      } else if (this.activeInvestigationTab === 'radiology' && this.radiologyInput) {
+        this.radiologyInput.nativeElement.focus();
+      }
+    });
   }
   removeItem(item: any, type: 'lab' | 'radiology' | 'package') {
     if (type === 'lab') {
@@ -2717,5 +2856,323 @@ export class TodayConsultationsComponent {
       this.addedPackages.length === 0
     );
   }
-  
+  // Called on input
+  onBrandInput(index: number): void {
+    const control = this.tablets.at(index);
+    const typed = control.get('brandName')?.value?.toLowerCase();
+
+    this.filteredBrandNames[index] = typed
+      ? this.brandOptions.filter(name => name.toLowerCase().includes(typed))
+      : [...this.brandOptions]; // full list
+    console.log(this.filteredBrandNames)
+  }
+
+  // Called when user selects a suggestion
+  onBrandSelect(index: number, brand: string): void {
+    this.tablets.at(index).patchValue({ brandName: brand });
+    this.filteredBrandNames[index] = [];
+    this.showBrandSuggestions[index] = false;
+    this.onBrandBlur(index); // existing logic to fetch/create tablet
+  }
+
+  // Optionally delay hiding so mousedown can register
+  hideBrandSuggestionsWithDelay(index: number): void {
+    setTimeout(() => {
+      this.showBrandSuggestions[index] = false;
+      this.filteredBrandNames[index] = [];
+      this.onBrandBlur(index);
+    }, 200);
+  }
+  onBrandEnter(index: number): void {
+    this.showBrandSuggestions[index] = false;
+    this.onBrandBlur(index);
+  }
+  onFavBrandInput(index: number): void {
+    const control = this.favorites.at(index);
+    const typed = control.get('brandName')?.value?.toLowerCase();
+
+    this.filteredFavBrandNames[index] = typed
+      ? this.brandOptions.filter(name => name.toLowerCase().includes(typed))
+      : [...this.brandOptions]; // full list
+    console.log(this.filteredFavBrandNames)
+  }
+
+  // Called when user selects a suggestion
+  onFavBrandSelect(index: number, brand: string): void {
+    this.favorites.at(index).patchValue({ brandName: brand });
+    this.filteredFavBrandNames[index] = [];
+    this.showFavBrandSuggestions[index] = false;
+    this.onFavBrandBlur(index);
+  }
+
+  // Optionally delay hiding so mousedown can register
+  hideFavBrandSuggestionsWithDelay(index: number): void {
+    setTimeout(() => {
+      this.showFavBrandSuggestions[index] = false;
+      this.filteredFavBrandNames[index] = [];
+      this.onFavBrandBlur(index);
+    }, 200);
+  }
+  onFavBrandEnter(index: number): void {
+    this.showFavBrandSuggestions[index] = false;
+    this.onFavBrandBlur(index);
+  }
+  // Lab
+labSearchText = '';
+showLabSuggestions = false;
+filteredLabTests: any[] = [];
+
+onLabSearchChange() {
+  this.filteredLabTests = this.allLabTests.filter(t =>
+    t.description.toLowerCase().includes(this.labSearchText.toLowerCase())
+  );
+}
+
+hideLabSuggestionsWithDelay() {
+  setTimeout(() => this.showLabSuggestions = false, 200);
+}
+
+selectLabTest(test: any) {
+  this.selectedLabId = test.id;
+  this.labSearchText = test.description;
+  // this.selectedLabDepartment = test.department || '';
+  this.showLabSuggestions = false;
+}
+
+
+// Radiology
+radiologySearchText = '';
+showRadiologySuggestions = false;
+filteredRadiologyTests: any[] = [];
+// selectedRadiologyId: number | null = null;
+// selectedRadiologyDepartment = '';
+
+onRadiologySearchChange() {
+  this.filteredRadiologyTests = this.allRadiologyTests.filter(t =>
+    t.description.toLowerCase().includes(this.radiologySearchText.toLowerCase())
+  );
+}
+
+hideRadiologySuggestionsWithDelay() {
+  setTimeout(() => this.showRadiologySuggestions = false, 200);
+}
+
+selectRadiologyTest(test: any) {
+  this.selectedRadiologyId = test.id;
+  this.radiologySearchText = test.description;
+  // this.selectedRadiologyDepartment = test.department || '';
+  this.showRadiologySuggestions = false;
+}
+
+
+handleLabBlur(): void {
+  setTimeout(() => {
+    this.showLabSuggestions = false;
+
+    const existing = this.allLabTests.find(t =>
+      t.description.toLowerCase() === this.labSearchText.toLowerCase()
+    );
+
+    if (existing) {
+      this.selectLabTest(existing);
+    } else if (this.labSearchText.trim()) {
+      const payload = {
+        description: this.labSearchText.trim(),
+        department: this.selectedLabDepartment,
+        type: this.activeInvestigationTab as 'lab' | 'radiology'
+      };
+      this.appointmentService.addLabTest(payload).subscribe(newTest => {
+        this.allLabTests.push(newTest);
+        this.selectLabTest(newTest);
+      });
+    }
+  }, 200);
+}
+handleRadiologyBlur(): void {
+  setTimeout(() => {
+    this.showRadiologySuggestions = false;
+
+    const existing = this.allRadiologyTests.find(t =>
+      t.description.toLowerCase() === this.radiologySearchText.toLowerCase()
+    );
+
+    if (existing) {
+      this.selectRadiologyTest(existing);
+    } else if (this.radiologySearchText.trim()) {
+      const payload = {
+        description: this.radiologySearchText.trim(),
+        department: this.selectedRadiologyDepartment,
+        type: this.activeInvestigationTab as 'lab' | 'radiology'
+      };
+      this.appointmentService.addRadiologyTest(payload).subscribe(newTest => {
+        this.allRadiologyTests.push(newTest);
+        this.selectRadiologyTest(newTest);
+      });
+    }
+  }, 200);
+}
+highlightedLabIndex = -1;
+
+handleLabKeydown(event: KeyboardEvent) {
+  const length = this.filteredLabTests.length;
+
+  if (!length) return;
+
+  switch (event.key) {
+    case 'ArrowDown':
+      event.preventDefault();
+      this.highlightedLabIndex = (this.highlightedLabIndex + 1) % length;
+      break;
+
+    case 'ArrowUp':
+      event.preventDefault();
+      this.highlightedLabIndex =
+        (this.highlightedLabIndex - 1 + length) % length;
+      break;
+
+    case 'Enter':
+      event.preventDefault();
+      if (this.highlightedLabIndex >= 0 && this.highlightedLabIndex < length) {
+        const selected = this.filteredLabTests[this.highlightedLabIndex];
+        this.selectLabTest(selected);
+        this.highlightedLabIndex = -1;
+        this.showLabSuggestions = false;
+      }
+      break;
+
+    case 'Escape':
+      this.showLabSuggestions = false;
+      this.highlightedLabIndex = -1;
+      break;
+  }
+}
+ngAfterViewChecked() {
+  this.scrollHighlightedIntoView();
+}
+
+scrollHighlightedIntoView() {
+  if (this.labOptions && this.highlightedLabIndex >= 0) {
+    const el = this.labOptions.toArray()[this.highlightedLabIndex];
+    if (el) {
+      el.nativeElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  }
+}
+highlightedRadiologyIndex = -1;
+
+handleRadiologyKeydown(event: KeyboardEvent) {
+  const length = this.filteredRadiologyTests.length;
+
+  if (!length) return;
+
+  switch (event.key) {
+    case 'ArrowDown':
+      event.preventDefault();
+      this.highlightedRadiologyIndex = (this.highlightedRadiologyIndex + 1) % length;
+      break;
+
+    case 'ArrowUp':
+      event.preventDefault();
+      this.highlightedRadiologyIndex =
+        (this.highlightedRadiologyIndex - 1 + length) % length;
+      break;
+
+    case 'Enter':
+      event.preventDefault();
+      if (this.highlightedRadiologyIndex >= 0 && this.highlightedRadiologyIndex < length) {
+        const selected = this.filteredRadiologyTests[this.highlightedRadiologyIndex];
+        this.selectRadiologyTest(selected);
+        this.highlightedRadiologyIndex = -1;
+        this.showRadiologySuggestions = false;
+      }
+      break;
+
+    case 'Escape':
+      this.showRadiologySuggestions = false;
+      this.highlightedRadiologyIndex = -1;
+      break;
+  }
+
+  // Scroll the item into view
+  setTimeout(() => this.scrollRadiologyHighlightedIntoView(), 0);
+}
+
+scrollRadiologyHighlightedIntoView() {
+  if (this.radiologyOptions && this.highlightedRadiologyIndex >= 0) {
+    const el = this.radiologyOptions.toArray()[this.highlightedRadiologyIndex];
+    if (el) {
+      el.nativeElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
+  }
+}
+onQuantityKeydown(event: KeyboardEvent, index: number) {
+  if (event.key === 'Tab' && index === this.tablets.length - 1) {
+    // Prevent default tab to manually handle focus
+    event.preventDefault();
+    this.addTablet();
+
+    // Wait a tick for the form array to render the new row
+    setTimeout(() => {
+      const nextGenericInput = document.querySelector(`#generic-${this.tablets.length - 1}`) as HTMLElement;
+      if (nextGenericInput) {
+        nextGenericInput.focus();
+      }
+    });
+  }
+}
+highlightedBrandIndex: number[] = [];
+
+onBrandKeydown(event: KeyboardEvent, rowIndex: number) {
+  const list = this.filteredBrandNames[rowIndex] || [];
+  const length = list.length;
+
+  if (!length) return;
+
+  // Initialize if undefined
+  if (this.highlightedBrandIndex[rowIndex] === undefined) {
+    this.highlightedBrandIndex[rowIndex] = -1;
+  }
+
+  switch (event.key) {
+    case 'ArrowDown':
+      event.preventDefault();
+      this.highlightedBrandIndex[rowIndex] = (this.highlightedBrandIndex[rowIndex] + 1) % length;
+      break;
+
+    case 'ArrowUp':
+      event.preventDefault();
+      this.highlightedBrandIndex[rowIndex] = (this.highlightedBrandIndex[rowIndex] - 1 + length) % length;
+      break;
+
+    case 'Enter':
+      event.preventDefault();
+      const index = this.highlightedBrandIndex[rowIndex];
+      if (index >= 0 && index < list.length) {
+        this.onBrandSelect(rowIndex, list[index]);
+        this.highlightedBrandIndex[rowIndex] = -1;
+        this.showBrandSuggestions[rowIndex] = false;
+      }
+      break;
+
+    case 'Escape':
+      this.showBrandSuggestions[rowIndex] = false;
+      this.highlightedBrandIndex[rowIndex] = -1;
+      break;
+  }
+
+  // Optional: Scroll the selected item into view
+  setTimeout(() => this.scrollBrandItemIntoView(rowIndex), 0);
+}
+@ViewChildren('brandOption', { read: ElementRef }) brandOptionElements!: QueryList<ElementRef>;
+
+
+scrollBrandItemIntoView(rowIndex: number) {
+  const index = this.highlightedBrandIndex[rowIndex];
+  const element = document.getElementById(`brand-option-${rowIndex}-${index}`);
+  if (element) {
+    element.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+}
+
+
 }

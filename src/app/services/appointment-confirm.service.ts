@@ -548,4 +548,13 @@ const appointmentData = appointment
   createOrder(payload: InvestigationOrderPayload): Observable<any> {
     return this.http.post(`${this.investigationUrl}/investigation-orders`, payload);
   }
+  addLabTest(payload: { description: string; department: string }) {
+    return this.http.post<any>(`${this.investigationUrl}/lab-tests`, payload);
+  }
+  
+  addRadiologyTest(payload: { description: string; department: string }) {
+    return this.http.post<any>(`${this.investigationUrl}/radiology-tests`, payload);
+  }
+  
+  
 }

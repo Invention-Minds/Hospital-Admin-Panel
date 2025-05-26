@@ -59,8 +59,13 @@ export class EstimationOverviewComponent {
   statusOptions: string[] = ['pending', 'overDue', 'approved', 'rejected', 'submitted', 'confirmed', 'cancelled']; // adjust as per your app's actual statuses
   estimationTypeOptions: string[] = ['MM', 'SM', 'Maternity'];
   selectedEstimationType: string = ''; // Default (no filter)
+  monthWiseRaisedEST: any[] = [];
+  totalMonthWiseRaisedEST: number = 0;
+
+  currentMonth: string = '';
 
 
+  
 
 
 
@@ -69,6 +74,8 @@ export class EstimationOverviewComponent {
   constructor(private estimationService: EstimationService, private doctorService: DoctorServiceService, private messageService: MessageService) { }
 
   ngOnInit() {
+    const date = new Date();
+    this.currentMonth = date.toLocaleString('en-US', { month: 'long' }); // "May"
     this.role = localStorage.getItem('role')!;
     if (this.role === 'sub_admin') {
       this.activeComponent = 'request'
@@ -81,6 +88,7 @@ export class EstimationOverviewComponent {
         console.log(estimations);
         this.estimations = estimations;
         this.processTodayEstimations(estimations);
+        this.processMonthlyRaised(this.estimations)
         this.doctorService.getDepartments().subscribe((departments: any[]) => {
           this.departmentList = departments.map(d => d.name);
         });
@@ -106,6 +114,28 @@ export class EstimationOverviewComponent {
       }
     });
   }
+  processMonthlyRaised(estimationList: any[]) {
+    const currentMonth = new Date().getMonth(); // 0 = Jan, 11 = Dec
+    const currentYear = new Date().getFullYear();
+  
+    this.monthWiseRaisedEST = estimationList.filter(est => {
+      const created = est.estimationCreatedTime ? new Date(est.estimationCreatedTime) : null;
+      const submitted = est.submittedDateAndTime ? new Date(est.submittedDateAndTime) : null;
+  
+      const dateToCheck = created || submitted;
+  
+      return (
+        dateToCheck &&
+        dateToCheck.getMonth() === currentMonth &&
+        dateToCheck.getFullYear() === currentYear
+      );
+    });
+    this.totalMonthWiseRaisedEST = this.monthWiseRaisedEST.length
+  
+    // Optional: total count
+    console.log('Total estimations raised this month:', this.monthWiseRaisedEST.length);
+  }
+  
   applyDeptFilter() {
     if (this.selectedDept) {
       const filtered = this.consultants.filter(c => c.departmentName === this.selectedDept);
@@ -342,13 +372,23 @@ export class EstimationOverviewComponent {
   }
   closeDoctorSummary() {
     this.showDoctorSummary = false;
+    this.selectedDateRange = [];
     this.selectedDept = '';
     this.selectedDoctorName = '';
+    this.selectedStatus = '';
+    this.selectedEstimationType = '';
+    this.onNonCompleteSearch(); // reloads with no date filter
   }
   closeDWSummary() {
     this.showDWSummary = false;
     this.selectedDept = '';
     this.selectedDoctorName = '';
+    this.selectedDateRange = [];
+    this.selectedDept = '';
+    this.selectedDoctorName = '';
+    this.selectedStatus = '';
+    this.selectedEstimationType = '';
+    this.onSearch(); 
   }
   // doctorWiseNonCompletedSummary(estimations: any[], selectedDept?: string, selectedDoctorName?: string) {
   //   console.log(estimations, selectedDept);

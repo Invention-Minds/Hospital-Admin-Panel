@@ -1516,7 +1516,7 @@ label {
 .column-w-18 {
   display: inline-block;
   width: 19%;
-  padding-left: 23px;
+  /* padding-left: 23px; */
 }
 .column-w-20 {
   display: inline-block;
@@ -1525,8 +1525,8 @@ label {
 }
 .column-w-12 {
   display: inline-block;
-  width: 11%;
-  padding-left: 23px;
+  width: 8%;
+  /* padding-left: 23px; */
 }
 .column-w-11 {
   display: inline-block;
@@ -1907,6 +1907,7 @@ select:disabled {
   display: flex;
   justify-content: flex-start;
   align-items: center;
+  gap: 7px;
 }
 
 .add-section {
@@ -1996,6 +1997,7 @@ line-height: normal;
   height: 40px;
  }
 
+
  .print img{
   width: 39px;
  }
@@ -2027,6 +2029,68 @@ line-height: normal;
   line-height: normal;
   margin: 10px 0;
 }
+.fav-brand-input-container{
+  position: relative;
+  width: 100%;
+}
+.brand-input-container {
+  position: relative;
+  /* width: 100%; */
+}
+
+.brand-suggestions {
+  position: absolute;
+  background: white;
+  border: 1px solid #ccc;
+  width: 100%;
+  z-index: 10;
+  max-height: 150px;
+  overflow-y: auto;
+  padding: 0;
+  margin: 0;
+  list-style-type: none;
+}
+
+.brand-suggestions li {
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.brand-suggestions li:hover {
+  background-color: #f0f0f0;
+}
+.brand-suggestions li.highlighted {
+  background-color: #cce4ff;
+}
+.suggestions {
+  border: 1px solid #ccc;
+  max-height: 150px;
+  overflow-y: auto;
+  background: white;
+  position: absolute;
+  z-index: 1000;
+  width: 300px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.suggestions li.highlighted {
+  background-color: #e0e0e0;
+}
+
+.suggestion-container{
+  position: relative;
+}
+
+.suggestions li {
+  padding: 8px;
+  cursor: pointer;
+}
+
+.suggestions li:hover {
+  background-color: #f0f0f0;
+}
+
 @media (max-width: 1030px) {
   ::ng-deep .custom-dropdown .p-dropdown {
     width: 235px !important;

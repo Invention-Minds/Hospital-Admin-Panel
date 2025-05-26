@@ -511,6 +511,12 @@ export class TotalOverviewComponent implements OnInit {
             // console.log(latestAvailability)
             const dayOfWeek = new Date().toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
             const availableDay = latestAvailability?.find(avail => avail.day.toLowerCase() === dayOfWeek);
+            console.log(latestAvailability)
+            console.log(availableDay, doctor.id)
+            if (!availableDay) {
+              console.warn(`No availability for today (${dayOfWeek}) found for doctor ${doctor.id}`);
+              return null; // Or skip this doctor, or handle it differently
+            }
             // ✅ Process and group unavailable slots
             const groupedSlots = this.groupUnavailableSlots(doctor.unavailableSlots!, availableDay!.slotDuration);
 

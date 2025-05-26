@@ -1058,6 +1058,9 @@
     background: transparent; /* Hide track */
   }
 
+  .form-row{
+    padding-left: 21px;
+  }
   
   /* Ensure dropdown icon appears properly */
 

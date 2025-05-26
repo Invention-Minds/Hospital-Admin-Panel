@@ -121,6 +121,7 @@ h1 {
  grid-auto-flow: column;
  grid-auto-columns: max-content;
  overflow-x: auto; /* For horizontal scroll if needed */
+ overflow-y: hidden;
 }
 
 .icon {

@@ -127,15 +127,27 @@
                     <td>{{estimation.ageBucketOfSurgery || 0}}</td>
 
                       <td>
-                        <span class="status-badge">{{ estimation.statusOfEstimation }}</span>
-                      </td>
+                        <!-- <span class="status-badge">{{ estimation.statusOfEstimation }}</span> -->
+                        <ng-container class="dropdown-container-in-table" *ngIf="estimation.statusOfEstimation === 'confirmed'; else plainTextStatus">
+                          <select class="dropdown-in-table" (change)="onConfirmedAction($event, estimation)">
+                            <option disabled selected>Confirmed</option>
+                            <option value="completed">Complete</option>
+                            <option value="cancelled">Cancel</option>
+                          </select>
+                        </ng-container>
+                    
+                        <!-- Fallback for statuses other than 'approved' or 'confirmed' -->
+                        <ng-template #plainTextStatus>
+                          <span class="status-badge">{{ estimation.statusOfEstimation }}</span>
+                        </ng-template>
+                      </td> 
                     <td class="button">
-                        <button class="btn-action" (click)="completeAppointment(estimation)"  pTooltip="Complete" tooltipPosition="top">
+                        <!-- <button class="btn-action" (click)="completeAppointment(estimation)"  pTooltip="Complete" tooltipPosition="top">
                             <img src="check-in.svg" alt="Confirm">
                           </button>
                           <button class="btn-action" [disabled]="adminType !== 'Senior Manager'" (click)="openCancelFeedback(estimation)"  pTooltip="Cancel" tooltipPosition="top">
                             <img src="/cancel-est.svg" alt="Confirm">
-                          </button>
+                          </button> -->
                           <button class="btn-action" (click)="openAppointmentForm(estimation)"  pTooltip="View" tooltipPosition="top">
                             <img src="/view.svg" alt="Confirm">
                           </button>
@@ -143,10 +155,10 @@
                           tooltipPosition="top">
                           <img src="/follow-up.svg" alt="Confirm">
                         </button>
-                          <button class="btn-action" (click)="openAdvancePopup(estimation)" pTooltip="Advance Amount"
+                          <!-- <button class="btn-action" (click)="openAdvancePopup(estimation)" pTooltip="Advance Amount"
                           tooltipPosition="top">
                           <img src="/paid.svg" alt="Confirm">
-                        </button>
+                        </button> -->
                         <button class="btn-action" (click)="resend(estimation)" pTooltip="Resend" tooltipPosition="top">
                           <img src="/resend.svg" alt="Confirm">
                         </button>

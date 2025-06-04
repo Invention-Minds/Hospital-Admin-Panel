@@ -665,7 +665,7 @@ font-family: 900;
   
   /* Dropdown styling */
   .dropdown-in-table {
-    width: 100%; /* Adjust width to fit inside the table cell */
+    /* width: 100%; Adjust width to fit inside the table cell */
     padding: 6px 8px;
     font-size: 14px;
     border-radius: 4px;
@@ -689,6 +689,11 @@ font-family: 900;
   .dropdown-in-table option {
     font-size: 14px;
     padding: 4px;
+  }
+  .status-dropdown {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 14px;
   }
   @media (max-width: 1024px) {
     .card:not(:nth-child(2)), /* Hide cards except the 2nd one (Request) */

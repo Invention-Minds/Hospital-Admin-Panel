@@ -187,7 +187,17 @@ export class EstimationConfirmedComponent {
     this.selectedSearchOption = this.searchOptions[0];
     // this.selectedDateRange = [];
   }
-
+  onConfirmedAction(event: Event, estimation: any): void {
+    const selectElement = event.target as HTMLSelectElement;
+    const action = selectElement.value;
+  
+    if (action === 'completed') {
+      this.openAdvancePopup(estimation);
+    } else if (action === 'cancelled') {
+      this.openCancelFeedback(estimation);
+    }
+  }
+  
   sortedAppointments() {
 
     if (!this.sortColumn) {
@@ -350,7 +360,8 @@ export class EstimationConfirmedComponent {
           detail: 'Advance amount updated successfully.',
         });
         this.closeAdvancePopup();
-        this.fetchPendingEstimations()
+        // this.fetchPendingEstimations()
+        this.completeAppointment(this.selectedEstimation)
       },
       (error) => {
         console.error('Error updating estimation:', error);
@@ -372,6 +383,11 @@ export class EstimationConfirmedComponent {
 
   openCancelFeedback(estimation: any) {
     if (this.adminType !== 'Senior Manager') {
+             this.messageService.add({
+          severity: 'warn',
+          summary: 'No Access',
+          detail: `Only Senior Manager can cancel the Estimation.`,
+        });
       return;  // Do nothing if the user is not a Senior Manager
     }
   

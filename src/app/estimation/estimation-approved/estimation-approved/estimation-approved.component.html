@@ -23,9 +23,6 @@
     </div>
   </div>
 
-  <!-- <div class="p-field p-col-3 download">
-      <img src="download.png" (click)="downloadData()" pTooltip="Download" >
-     </div> -->
 
   <div class="p-field p-col-3 calendar">
     <!-- <p-calendar [(ngModel)]="selectedDate" placeholder="Calendar" class="custom-calendar"></p-calendar> -->
@@ -45,8 +42,7 @@
     </svg>
 
     <svg class="p-field p-col-3 download" src="download.png"
-      *ngIf="activeComponent==='confirmed' || activeComponent === 'completed' || activeComponent === 'cancelled'"
-      (click)="downloadData()" pTooltip="Download" xmlns="http://www.w3.org/2000/svg" width="3em" height="3em"
+      (click)="downloadData(filteredEstimations)" pTooltip="Download" xmlns="http://www.w3.org/2000/svg" width="3em" height="3em"
       viewBox="0 0 20 20">
       <path fill="#fff" fill-rule="evenodd"
         d="M3 17a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H4a1 1 0 0 1-1-1m3.293-7.707a1 1 0 0 1 1.414 0L9 10.586V3a1 1 0 1 1 2 0v7.586l1.293-1.293a1 1 0 1 1 1.414 1.414l-3 3a1 1 0 0 1-1.414 0l-3-3a1 1 0 0 1 0-1.414"
@@ -101,8 +97,13 @@
           <td>{{ estimation.patientName }}</td>
           <td>{{estimation.patientUHID || '-'}}</td>
           <!-- <td>{{ estimation.patientPhoneNumber }}</td> -->
-          <td>{{ estimation.estimationName }}</td>
+          <!-- <td>{{ estimation.estimationName }}</td> -->
           <!-- <td>{{ estimation.appointmentTime }}</td> -->
+          <td>
+            <span [pTooltip]="estimation.estimationName" tooltipPosition="top">
+              {{ estimation.estimationName | slice:0:10 }}{{ estimation.estimationName.length > 10 ? '...' : '' }}
+            </span>
+          </td>
           <td>{{ estimation.estimationType }}</td>
           <td>
             {{
@@ -135,42 +136,92 @@
               <img *ngIf="!estimation.messageSent" src="icons/not-sent.svg" alt="Not Sent">
             </span>
           </td>
-          <td>
+          <!-- <td>
             <span class="status-badge accepted">{{estimation.statusOfEstimation}}</span>
+          </td> -->
+
+          
+          <!-- <td>
+            <ng-container *ngIf="estimation.statusOfEstimation === 'approved' || estimation.statusOfEstimation === 'confirmed' else statusText">
+              <select class="status-dropdown" (change)="onStatusChange($event, estimation)">
+                <option [value]="'approved'" [selected]="estimation.statusOfEstimation === 'approved'">Approved</option>
+                <option [value]="'confirmed'" [selected]="estimation.statusOfEstimation === 'confirmed'">Confirmed</option>
+              </select>
+              
+            </ng-container>
+            <ng-template #statusText>
+              <span class="status-badge">{{ estimation.statusOfEstimation }}</span>
+            </ng-template>
+            <ng-container *ngIf="estimation.statusOfEstimation === 'confirmed'">
+              <select class="status-dropdown" (change)="onConfirmedAction($event, estimation)">
+                <option disabled selected>Confirmed</option>
+                <option value="completed">Complete</option>
+                <option value="cancelled">Cancel</option>
+              </select>
+              
+            </ng-container>
+            
+          </td> -->
+          <td>
+            <!-- Show dropdown for 'approved' only -->
+            <ng-container class="dropdown-container-in-table" *ngIf="estimation.statusOfEstimation === 'approved'; else otherStatus">
+              <select class="dropdown-in-table" (change)="onStatusChange($event, estimation)">
+                <option [value]="'approved'" [selected]="estimation.statusOfEstimation === 'approved'">Approved</option>
+                <option [value]="'confirmed'" [selected]="estimation.statusOfEstimation === 'confirmed'">Confirmed</option>
+              </select>
+            </ng-container>
+          
+            <!-- Template for confirmed / other statuses -->
+            <ng-template #otherStatus>
+              <!-- Only show second dropdown for 'confirmed' -->
+              <ng-container class="dropdown-container-in-table" *ngIf="estimation.statusOfEstimation === 'confirmed'; else plainTextStatus">
+                <select class="dropdown-in-table" (change)="onConfirmedAction($event, estimation)">
+                  <option disabled selected>Confirmed</option>
+                  <option value="completed">Complete</option>
+                  <option value="cancelled">Cancel</option>
+                </select>
+              </ng-container>
+          
+              <!-- Fallback for statuses other than 'approved' or 'confirmed' -->
+              <ng-template #plainTextStatus>
+                <span class="status-badge">{{ estimation.statusOfEstimation }}</span>
+              </ng-template>
+            </ng-template>
           </td>
           
+          
+          
           <td class="button">
-            <button class="btn-action" (click)="openFollowUpPopup(estimation)" pTooltip="Follow-Ups"
+            <!-- <button class="btn-action" *ngIf="estimation.statusOfEstimation === 'confirmed'"  (click)="completeAppointment(estimation)"  pTooltip="Complete" tooltipPosition="top">
+              <img src="check-in.svg" alt="Confirm">
+            </button>
+            <button class="btn-action" *ngIf="estimation.statusOfEstimation === 'confirmed'" [disabled]="adminType !== 'Senior Manager'" (click)="openCancelFeedback(estimation)"  pTooltip="Cancel" tooltipPosition="top">
+              <img src="/cancel-est.svg" alt="Confirm">
+            </button> -->
+            <!-- <button class="btn-action" *ngIf="estimation.statusOfEstimation === 'confirmed'  " (click)="openAdvancePopup(estimation)" pTooltip="Advance Amount"
+            tooltipPosition="top">
+            <img src="/paid.svg" alt="Confirm">
+          </button> -->
+            <button class="btn-action" *ngIf="estimation.statusOfEstimation !== 'completed'" (click)="openFollowUpPopup(estimation)" pTooltip="Follow-Ups"
               tooltipPosition="top">
               <img src="/follow-up.svg" alt="Confirm">
             </button>
             <button class="btn-action" (click)="openAppointmentForm(estimation)" pTooltip="View" tooltipPosition="top">
               <img src="/view.svg" alt="Confirm">
             </button>
-            <button class="btn-action" *ngIf="estimation.estimationType === 'SM'  " (click)="openAdvancePopup(estimation)"  pTooltip="PAC" tooltipPosition="top">
+            <!-- <button class="btn-action" *ngIf="estimation.estimationType === 'SM'  && estimation.statusOfEstimation === 'approved'" (click)="openPacPopup(estimation)"  pTooltip="PAC" tooltipPosition="top">
               <img src="/pac.svg" alt="Confirm">
             </button>
-            <button class="btn-action" *ngIf="estimation.estimationType === 'MM' || estimation.estimationType === 'Maternity' " (click)="confirm(estimation)" pTooltip="Confirm" tooltipPosition="top">
+            <button class="btn-action" *ngIf="(estimation.estimationType === 'MM' || estimation.estimationType === 'Maternity') && estimation.statusOfEstimation === 'approved' " (click)="confirm(estimation)" pTooltip="Confirm" tooltipPosition="top">
               <img src="/mm-confirm.svg" alt="Confirm">
-            </button>
-            <button class="btn-action" (click)="resend(estimation)" pTooltip="Resend" tooltipPosition="top">
+            </button> -->
+            <button class="btn-action" *ngIf="estimation.statusOfEstimation !== 'completed'" (click)="resend(estimation)" pTooltip="Resend" tooltipPosition="top">
               <img src="/resend.svg" alt="Confirm">
             </button>
-            <button class="btn-action" (click)="print(estimation)" pTooltip="Print" tooltipPosition="top">
+            <button class="btn-action"  (click)="print(estimation)" pTooltip="Print" tooltipPosition="top">
               <img src="/print.svg" alt="Confirm">
             </button>
-
-            <!-- <img src="appt-cancel.svg" alt="delete" class="action-icon" (click)="cancelAppointment(estimation)"
-                          pTooltip="Cancel" tooltipPosition="top"> -->
           </td>
-          <!-- <td class="button" *ngIf=" estimation.statusOfEstimation === 'approved'">
-            <div class="status-badge" (click)="openAppointmentForm(estimation)">
-              <div class="sign">
-                <img class="image" src="/sign.svg" alt="Confirm">
-                Patient Signature
-              </div>
-            </div>
-          </td> -->
         </tr>
       </tbody>
     </table>
@@ -192,7 +243,7 @@
     (close)="handleLockedDialogClose()"></app-delete-confirmation-dialog>
 </div>
 <div class="loader" *ngIf="isLoading"></div>
-<!-- 
+
 <div *ngIf="showAdvancePopup" class="estimation-modal">
   <div class="modal-content">
     <div class="modal-header">
@@ -229,12 +280,12 @@
       <button class="close-button" (click)="closeAdvancePopup()">Close</button>
     </div>
   </div>
-</div> -->
-<div *ngIf="showAdvancePopup" class="estimation-modal">
+</div>
+<div *ngIf="showPacPopup" class="estimation-modal">
   <div class="modal-content">
     <div class="modal-header">
       <h3>PAC Confirmation for {{ selectedEstimation.patientName }}</h3>
-      <button class="popup-close" (click)="closeAdvancePopup()">
+      <button class="popup-close" (click)="closePacPopup()">
         <img src="/popup-close.svg" />
       </button>
     </div>
@@ -295,7 +346,7 @@
     </div>
     <div class="modal-footer">
       <button class="save-button" (click)="savePAC(selectedEstimation)">Save</button>
-      <button class="close-button" (click)="closeAdvancePopup()">Close</button>
+      <button class="close-button" (click)="closePacPopup()">Close</button>
     </div>
   </div>
 </div>
@@ -340,6 +391,42 @@
     <div class="modal-footer">
       <button *ngIf="followUps.length < 5" class="save-button" (click)="saveFollowUp()">Save</button>
       <button class="close-button" (click)="closeFollowUpPopup()">Close</button>
+    </div>
+  </div>
+</div>
+<div *ngIf="showCancelFeedback" class="estimation-modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Cancellation for {{ selectedEstimation.patientName }}</h3>
+      <button class="popup-close" (click)="closeCancelFeedback()">
+        <img src="/popup-close.svg" />
+      </button>
+    </div>
+    <hr />
+    <div class="modal-body">
+      <p>
+        Patient Name<span class="space">:</span>{{ selectedEstimation?.patientName }}
+      </p>
+      <p>
+        Surgery Date<span class="space-1">:</span> {{ selectedEstimation?.estimatedDate }}
+      </p>
+
+
+    <div class="estimation-input-container">
+      <!-- Input field for estimation -->
+      <input 
+        type="text" 
+        [(ngModel)]="feedback" 
+        required
+        class="custom-input"
+      />
+      <label for="receiptNumber" class="custom-label">Enter the FeedBack*</label>
+    </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="save-button" (click)="saveFeedback()">Save</button>
+      <button class="close-button" (click)="closeCancelFeedback()">Close</button>
     </div>
   </div>
 </div>

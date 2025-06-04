@@ -166,4 +166,7 @@ export class DoctorServiceService {
   getDoctorWithDepartment(): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/doctors/docbydept`);
   } 
+  getFourDoctor():Observable<any>{
+    return this.http.get<any>(`${this.apiUrl}/doctors/top-doctors`)
+  }
 }

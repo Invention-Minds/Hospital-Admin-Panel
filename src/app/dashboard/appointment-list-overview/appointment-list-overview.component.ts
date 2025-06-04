@@ -19,7 +19,7 @@ export class AppointmentListOverviewComponent implements OnInit {
   }
 
   private fetchPendingAppointments(): void {
-    this.appointmentService.fetchPendingAppointments().subscribe(
+    this.appointmentService.getPendingAppointments().subscribe(
       (appointments: Appointment[]) => {
         // Filter appointments by appointment date and status 'pending'
         // const filteredAppointments = appointments.filter(appointment => appointment.date === this.date);

@@ -55,152 +55,32 @@ export class TotalOverviewComponent implements OnInit {
       .getTotalAppointmentsCountForToday(currentDate)
       .subscribe(
         (totalAppointments) => {
-          this.totalAppointmentsToday = totalAppointments.count;
+          this.todayAppointments = totalAppointments.count
+          this.totalAppointmentsToday = this.todayAppointments.length;
+          console.log(this.totalAppointmentsToday, this.todayAppointments)
         },
         (error) => {
           console.error('Error fetching total appointments:', error);
         }
       );
-
-    // this.appointmentService.fetchPendingAppointmentsCount().subscribe(
-    //   (pendingRequests) => {
-    //     this.pendingRequestsToday = pendingRequests;
-    //   },
-    //   (error) => {
-    //     console.error('Error fetching pending requests:', error);
-    //   }
-    // );
-    this.appointmentService.getAllAppointments().subscribe({
-      next: (services: any[]) => {
-
-        // Process the services when the API call is successful
-        // this.totalAppointmentsToday = services.filter(
-        //   (service) => service.date === currentDate
-        // ).length;
-        this.pendingRequestsToday = services.filter(
-          (service) => service.date === currentDate && service.status === 'pending'
-        ).length;
-        this.checkinAppointmentsToday = services.filter(
-          (service) => service.date === currentDate && service.checkedIn === true
-        ).length;
-        this.appointments = services.filter(
-          (service) => service.date === currentDate && service.checkedIn === true
-        )
-        this.todayAppointments = services.filter(
-          (service) => service.date === currentDate
-        )
-
-        // console.log('Services processed successfully.');
-      },
-      error: (err) => {
-        // Handle the error if the API call fails
-        console.error('Error fetching services:', err);
-      },
-      complete: () => {
-
-        // Optional: Actions to perform once the API call completes
-        // console.log('Service fetching process completed.');
-      }
-    });
+      this.appointmentService.getTodayCheckin(this.date).subscribe({
+        next: (data) => {
+          this.appointments = data;
+          this.checkinAppointmentsToday = this.appointments.length
+          console.log('Check-in data:', data);
+        },
+        error: (err) => {
+          console.error('Failed to fetch check-in data:', err);
+        }
+      });
   }
 
-  // private fetchDoctorsWithAvailability(): void {
-  //   this.doctorService.getAllDoctors().subscribe(
-  //     (doctors) => {
-  //       const currentTime = this.timeToMinutes(new Date().toTimeString().substring(0, 5));
-  //       const currentDay = new Date(this.date)
-  //         .toLocaleString('en-us', { weekday: 'short' })
-  //         .toLowerCase();
-  //       const selectedDate = this.date;
 
-  //       // Initialize counts
-  //       let availableCount = 0;
-  //       let unavailableCount = 0;
-  //       let absentCount = 0;
-
-  //       this.doctors = doctors
-  //         .filter((doctor) => {
-  //           // Filter for Visiting Consultants
-  //           if (doctor.doctorType === 'Visiting Consultant') {
-  //             return doctor.bookedSlots && doctor.bookedSlots.length > 0; // Include only if booked slots exist
-  //           }
-  //           return true; // Include all other doctors
-  //         })
-  //         .map((doctor) => {
-  //           const unavailableSlots = doctor.unavailableSlots || [];
-  //           const formattedUnavailableSlots = unavailableSlots.map((slot) => ({
-  //             time: slot.time,
-  //             duration: slot.duration || 20, // Default to 20 minutes if not provided
-  //           }));
-
-  //           const isAbsent =
-  //             !doctor.availability?.some(
-  //               (avail: any) => avail.day.toLowerCase() === currentDay
-  //             ) ||
-  //             (doctor.unavailableDates || []).some((unavailableDate: any) => {
-  //               const formattedUnavailableDate = new Date(
-  //                 unavailableDate.date
-  //               ).toISOString().split('T')[0];
-  //               return formattedUnavailableDate === selectedDate;
-  //             });
-
-  //           let status: string;
-  //           if (doctor.doctorType === 'Visiting Consultant') {
-  //             if(doctor.bookedSlots)
-  //             // Visiting Consultant with booked slots is marked as Available
-  //             availableCount++;
-  //             status = 'Available';
-  //           }
-  //           if (isAbsent) {
-  //             absentCount++;
-  //             status = 'Absent';
-  //           } else if (
-  //             this.isDoctorUnavailable(currentTime, formattedUnavailableSlots)
-  //           ) {
-  //             unavailableCount++;
-  //             status = 'Unavailable';
-  //           } else {
-  //             availableCount++;
-  //             status = 'Available';
-  //           }
-
-  //           return { ...doctor, status };
-  //         });
-
-  //       // Update counts
-  //       this.availableDoctorsToday = availableCount;
-  //       this.unavailableDoctorsToday = unavailableCount;
-  //       this.absentDoctorsToday = absentCount;
-
-  //       this.updateDoctorLists();
-  //     },
-  //     (error) => {
-  //       console.error('Error fetching doctors:', error);
-  //     }
-  //   );
-  // }
 
 
   downloadFilteredData(): void {
     // console.log('Downloading completed appointments data...');
     if (this.appointments && this.appointments.length > 0) {
-      // console.log('Downloading filtered data...');
-
-      // const selectedFields = this.appointments.map((appointment: Appointment) => ({
-      //   'Patient Name': appointment.patientName,
-      //   'Patient Phone Number': appointment.phoneNumber,
-      //   'Patient Email': appointment.email,
-      //   'Doctor Name': appointment.doctorName,
-      //   'Department': appointment.department,
-      //   'Appointment Date': appointment.date,
-      //   'Appointment Time': appointment.time,
-      //   'Appointment Created Time': appointment.created_at,
-      //   'Request Via': appointment.requestVia,
-      //   'SMS Sent': appointment.smsSent ? 'Yes' : 'No',
-      //   'Email Sent': appointment.emailSent ? 'Yes' : 'No',
-      //   'Status': appointment.status,
-      //   'Appointment Handled By': appointment.user!.username
-      // }));
       const selectedFields = this.appointments.map((appointment: any) => {
         if (appointment.created_at) {
           const createdAt = new Date(appointment?.created_at);
@@ -279,23 +159,6 @@ export class TotalOverviewComponent implements OnInit {
   downlaodTodayAppts(): void {
     // console.log('Downloading completed appointments data...');
     if (this.todayAppointments && this.todayAppointments.length > 0) {
-      // console.log('Downloading filtered data...');
-
-      // const selectedFields = this.todayAppointments.map((appointment: Appointment) => ({
-      //   'Patient Name': appointment.patientName,
-      //   'Patient Phone Number': appointment.phoneNumber,
-      //   'Patient Email': appointment.email,
-      //   'Doctor Name': appointment.doctorName,
-      //   'Department': appointment.department,
-      //   'Appointment Date': appointment.date,
-      //   'Appointment Time': appointment.time,
-      //   'Appointment Created Time': appointment.created_at,
-      //   'Request Via': appointment.requestVia,
-      //   'SMS Sent': appointment.smsSent ? 'Yes' : 'No',
-      //   'Email Sent': appointment.emailSent ? 'Yes' : 'No',
-      //   'Status': appointment.status,
-      //   'Appointment Handled By': appointment.user!.username
-      // }));
       const selectedFields = this.todayAppointments.map((appointment: any) => {
         console.log(appointment)
         if (appointment.created_at) {
@@ -369,7 +232,7 @@ export class TotalOverviewComponent implements OnInit {
   }
 
   private fetchDoctorsWithAvailability(): void {
-    this.doctorService.getAllDoctors().subscribe(
+    this.doctorService.getAllDoctors(this.date).subscribe(
       (doctors) => {
         const currentTime = this.timeToMinutes(new Date().toTimeString().substring(0, 5)); // Current time in minutes
         const selectedDate = this.date;
@@ -477,14 +340,6 @@ export class TotalOverviewComponent implements OnInit {
             : null; // Exclude doctors without valid unavailable dates
         })
         .filter(doctor => doctor !== null) as any; // Remove null values
-        // this.leaveDoctors = doctors
-        // .filter((doctor) => (doctor.unavailableDates || []).length > 0)
-        // .map((doctor) => ({
-        //   ...doctor,
-        //   groupedUnavailableDates: this.groupUnavailableDates(
-        //     doctor.unavailableDates!.map(d => d.date) // Extract only the `date` property
-        //   ),
-        // }));
       
       console.log("✅ Leave Doctors with Processed Dates:", this.leaveDoctors);
       
@@ -736,62 +591,7 @@ export class TotalOverviewComponent implements OnInit {
   closeLeaveDoctorList(): void {
     this.showLeaveDoctors = false;
   }
-  // private groupUnavailableDates(dates: string[]): string[] {
-  //   if (!dates || dates.length === 0) return [];
-  
-  //   // ✅ Convert to valid Date objects
-  //   const parsedDates = dates.map(dateStr => {
-  //     const parsedDate = new Date(dateStr);
-  //     if (isNaN(parsedDate.getTime())) {
-  //       console.error("❌ Invalid date found:", dateStr);
-  //     }
-  //     return parsedDate;
-  //   });
-  
-  //   // ✅ Remove invalid dates
-  //   const validDates = parsedDates.filter(date => !isNaN(date.getTime()));
-  
-  //   if (validDates.length === 0) {
-  //     console.error("❌ No valid dates found:", dates);
-  //     return [];
-  //   }
-  
-  //   // ✅ Sort dates in ascending order
-  //   validDates.sort((a, b) => a.getTime() - b.getTime());
-  
-  //   const groupedDates: string[] = [];
-  //   let startDate = validDates[0];
-  //   let endDate = validDates[0];
-  
-  //   for (let i = 1; i < validDates.length; i++) {
-  //     const currentDate = validDates[i];
-  //     const previousDate = new Date(endDate);
-  //     previousDate.setDate(previousDate.getDate() + 1); // Expect next day
-  
-  //     if (currentDate.getTime() === previousDate.getTime()) {
-  //       // ✅ If current date is the next day, extend the range
-  //       endDate = currentDate;
-  //     } else {
-  //       // ✅ If break in dates, store the range or single date
-  //       if (startDate.getTime() === endDate.getTime()) {
-  //         groupedDates.push(this.formatDateUnavailable(startDate)); // Single date
-  //       } else {
-  //         groupedDates.push(`${this.formatDateUnavailable(startDate)} to ${this.formatDateUnavailable(endDate)}`);
-  //       }
-  //       startDate = currentDate;
-  //       endDate = currentDate;
-  //     }
-  //   }
-  
-  //   // ✅ Add the last range or date
-  //   if (startDate.getTime() === endDate.getTime()) {
-  //     groupedDates.push(this.formatDateUnavailable(startDate));
-  //   } else {
-  //     groupedDates.push(`${this.formatDateUnavailable(startDate)} to ${this.formatDateUnavailable(endDate)}`);
-  //   }
-  
-  //   return groupedDates;
-  // }
+
   private groupUnavailableDates(dates: string[]): string[] {
     if (!dates || dates.length === 0) return [];
   

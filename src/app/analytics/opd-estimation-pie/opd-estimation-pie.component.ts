@@ -38,7 +38,8 @@ export class OpdEstimationPieComponent implements OnChanges {
   dateInput: any
   selectedViewDate: any[] = []
   selectedViewDoctor: any = 'all'
-  viewMoreoption: any
+  viewMoreoption: any;
+  allDoctors:any[] = []
 
   // report
   reportData: any
@@ -64,10 +65,10 @@ export class OpdEstimationPieComponent implements OnChanges {
 
   fetchingData(): void {
     this.isLoading = true
-    this.estimation.getAllEstimation().subscribe((data: any) => {
+    this.estimation.getOpdConversion().subscribe((data: any) => {
       this.rawData = data
       console.log(this.rawData, "rawdata")
-      this.appointment.getAllAppointments().subscribe((data: any) => {
+      this.appointment.getprnWise().subscribe((data: any) => {
         this.prnNumber = data.filter((entry: any) => entry.prnNumber !== null).map((entry: any) => entry.prnNumber)
         console.log(this.prnNumber)
         this.chartData(this.prnNumber)
@@ -134,7 +135,7 @@ export class OpdEstimationPieComponent implements OnChanges {
       return {
         date: utcToIstDate(entry.estimationCreatedTime),
         estimationType: entry.estimationType,
-        doctorId: entry.consuconsultantId
+        doctorId: entry.consultantId
       }
     })
 
@@ -158,6 +159,7 @@ export class OpdEstimationPieComponent implements OnChanges {
   }
 
   loadreport(): void {
+    console.log(this.rawData)
     const prnFilteredData = this.rawData
       .filter((entry: any) => this.prnNumber.includes(entry.patientUHID))
       .map((entry: any) => ({
@@ -166,6 +168,8 @@ export class OpdEstimationPieComponent implements OnChanges {
         estimationStatus: entry.estimationStatus, // planned, immediate
         consultantId: entry.consultantId,
       }));
+  
+    console.log(prnFilteredData)
 
     // Group and aggregate the data
     const processedData = Object.values(
@@ -257,31 +261,58 @@ export class OpdEstimationPieComponent implements OnChanges {
   viewmore(): void {
     this.showViewMore = true
     this.loadDepartments();
-    this.viewMoreData()
+    this.viewMoreData();
+    this.fetchDoctors()
   }
 
   closeViewMore(): void {
     this.showViewMore = false
   }
 
-  departmentOnchange(event: any): void {
-    this.doctor.getDoctors().subscribe(({
-      next: (data: any) => {
-        this.selectedViewDoctor = 'all'
-        this.departmentValue = this.department.filter((entry: any) => entry.id === parseInt(event.target.value))[0].name
-        this.filteredDoctors = data.filter((doc: any) => doc.departmentId === parseInt(event.target.value))
-        this.fetchDepartmentDocs(this.departmentValue)
-        console.log(this.departmentValue)
-        this.viewMoreData()
-      },
-      error: (error: any) => {
-        console.error(error)
-      },
-      complete: () => {
-
-      }
-    }))
+  fetchDoctors():void{
+    this.doctor.getDoctorWithDepartment().subscribe((data: any[]) => {
+      this.allDoctors = data;
+    });
   }
+  departmentOnchange(event: any): void {
+    this.selectedViewDoctor = 'all';
+  
+    if (event.target.value === 'all') {
+      this.departmentValue = 'all';
+      this.filteredDoctors = this.allDoctors; // Show all doctors
+    } else {
+      const selectedDeptId = parseInt(event.target.value);
+      const selectedDept = this.department.find((entry: any) => entry.id === selectedDeptId);
+  
+      if (selectedDept) {
+        this.departmentValue = selectedDept.name;
+        this.filteredDoctors = this.allDoctors.filter((doc: any) => doc.departmentId === selectedDeptId);
+      } else {
+        this.departmentValue = '';
+        this.filteredDoctors = [];
+      }
+    }
+  
+    this.viewMoreData(); // Call after filtering
+  }
+  // departmentOnchange(event: any): void {
+  //   this.doctor.getDoctors().subscribe(({
+  //     next: (data: any) => {
+  //       this.selectedViewDoctor = 'all'
+  //       this.departmentValue = this.department.filter((entry: any) => entry.id === parseInt(event.target.value))[0].name
+  //       this.filteredDoctors = data.filter((doc: any) => doc.departmentId === parseInt(event.target.value))
+  //       this.fetchDepartmentDocs(this.departmentValue)
+  //       console.log(this.departmentValue)
+  //       this.viewMoreData()
+  //     },
+  //     error: (error: any) => {
+  //       console.error(error)
+  //     },
+  //     complete: () => {
+
+  //     }
+  //   }))
+  // }
 
   ViewMorechart(data: any): void {
     const chartContainer = document.getElementById('viewMoreOpdEst') as HTMLElement;

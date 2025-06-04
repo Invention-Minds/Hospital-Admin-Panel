@@ -401,11 +401,7 @@ doctorSlides: any[][] = [];
             return;
           }
 
-          const todayAppointments = appointments.filter(
-            (appointment: any) =>
-              appointment.checkedIn === true && appointment.date === todayDate && appointment.status === 'confirmed'
-
-          );
+          const todayAppointments = appointments
           this.checkedInAppointments = todayAppointments
           todayAppointments.forEach(appointments => {
             appointments.actualTime = appointments.time

@@ -64,6 +64,7 @@ export class EstimationBarComponent implements OnChanges {
   selectedViewDoctor: any = 'all'
   viewMoreoption: any
   viewMonthDates: any
+  allDoctors: any[] = []
 
   // screenshot
   screenShot : Function = captureScreenshot
@@ -270,7 +271,7 @@ export class EstimationBarComponent implements OnChanges {
   }
 
   loadEstimation(): void {
-    this.estimation.getAllEstimation().subscribe({
+    this.estimation.getStatusEstimation().subscribe({
       next: (data) => {
 
         this.rawData = data
@@ -456,18 +457,31 @@ export class EstimationBarComponent implements OnChanges {
     this.showViewMore = false
   }
 
+  fetchDoctors():void{
+    this.docDetails.getDoctorWithDepartment().subscribe((data: any[]) => {
+      this.allDoctors = data;
+    });
+  }
   departmentOnchange(event: any): void {
-    this.docDetails.getDoctors().subscribe(({
-      next: (data: any) => {
-        this.filteredDoctors = data.filter((doc: any) => doc.departmentId === parseInt(event.target.value))
-      },
-      error: (error: any) => {
-        console.error(error)
-      },
-      complete: () => {
-
+    this.selectedViewDoctor = 'all';
+  
+    if (event.target.value === 'all') {
+      this.departmentValue = 'all';
+      this.filteredDoctors = this.allDoctors; // Show all doctors
+    } else {
+      const selectedDeptId = parseInt(event.target.value);
+      const selectedDept = this.department.find((entry: any) => entry.id === selectedDeptId);
+  
+      if (selectedDept) {
+        this.departmentValue = selectedDept.name;
+        this.filteredDoctors = this.allDoctors.filter((doc: any) => doc.departmentId === selectedDeptId);
+      } else {
+        this.departmentValue = '';
+        this.filteredDoctors = [];
       }
-    }))
+    }
+  
+    this.viewMoreData(); // Call after filtering
   }
 
   ViewMorechart(data: any): void {
@@ -657,6 +671,7 @@ export class EstimationBarComponent implements OnChanges {
 
   viewMoreData(): void {
     this.loadDepartments();
+    this.fetchDoctors();
 
     this.viewModJson = this.rawData.filter((entry:any) => this.selectedViewDoctor === 'all' ? entry : entry.consultantId === this.selectedViewDoctor).map((entry: any) => {
       return {

@@ -57,38 +57,22 @@ export class ApptFollowUpComponent {
   fetchConfirmedAppointments(): void {
     this.isLoading = true
     const today = new Date();
-    this.appointmentService.getAllAppointments().subscribe({
+    this.appointmentService.getFollowUpAppointments().subscribe({
       next: (services: any[]) => {
-
-        // Process the services when the API call is successful
-        this.confirmedAppointments = services.filter(
-          (service) => service.isfollowup === true 
-        );
-        // this.confirmedAppointments = services.filter(
-        //   (service) => {
-        //     const appointmentDate = new Date(service.appointmentDate);
-        //     return (
-        //       (service.appointmentStatus === 'Confirm' || service.appointmentStatus === 'confirmed') &&
-        //       appointmentDate >= today // Filter out past dates
-        //     );
-        //   }
-        // );
+        this.confirmedAppointments = services
         this.confirmedAppointments.sort((a, b) => {
           const dateA = new Date(a.createdAt!);
           const dateB = new Date(b.createdAt!);
           return dateB.getTime() - dateA.getTime();
         });
         this.filteredServices = [...this.confirmedAppointments];
-        // console.log('Services processed successfully.');
       },
       error: (err) => {
-        // Handle the error if the API call fails
         console.error('Error fetching services:', err);
       },
       complete: () => {
         this.isLoading = false
-        // Optional: Actions to perform once the API call completes
-        // console.log('Service fetching process completed.');
+
       }
     });
 

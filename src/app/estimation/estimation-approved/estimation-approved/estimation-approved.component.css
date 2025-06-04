@@ -373,7 +373,7 @@ tbody tr:hover {
 }
 .column-1 {
   display: flex;
-  width: 50%;
+  width: 42%;
   /* gap: 20px; */
   padding-top: 20px;
   position: relative;
@@ -718,7 +718,7 @@ input[type="text"]::placeholder {
 
 /* Dropdown styling */
 .dropdown-in-table {
-  width: 100%; /* Adjust width to fit inside the table cell */
+  /* width: 100%; Adjust width to fit inside the table cell */
   padding: 6px 8px;
   font-size: 14px;
   border-radius: 4px;
@@ -743,6 +743,12 @@ input[type="text"]::placeholder {
   font-size: 14px;
   padding: 4px;
 }
+.status-dropdown {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
 
 @media (max-width: 1024px) {
   .card:not(:nth-child(2)), /* Hide cards except the 2nd one (Request) */

@@ -35,6 +35,7 @@ export class OpdTypeComponent {
   selectedViewDate: any[] = []
   selectedViewDoctor: any = 'all'
   viewMoreoption: any
+  allDoctors:any[]=[]
 
   @Output() reportView = new EventEmitter<{ onoff: boolean, range: any }>();
   @Output() reportData = new EventEmitter<any[]>();
@@ -66,9 +67,9 @@ export class OpdTypeComponent {
 
   loadAppointment(): void {
     this.isLoading = true
-    this.appointment.getAllAppointments().subscribe({
+    this.appointment.getopdTypeWise().subscribe({
       next: (data) => {
-        const mappedData = data.filter((data: any) => data.type !== null).map((entry: any) => {
+        const mappedData = data.map((entry: any) => {
           return {
             date: entry.date,
             type: entry.type,
@@ -313,29 +314,56 @@ export class OpdTypeComponent {
   viewmore(): void {
     this.showViewMore = true
     this.loadDepartments();
-    this.viewMoreData()
+    this.viewMoreData();
+    this.fetchDoctors();
   }
 
   closeViewMore(): void {
     this.showViewMore = false
   }
 
-  departmentOnchange(event: any): void {
-    this.docDetails.getDoctors().subscribe(({
-      next: (data: any) => {
-        this.selectedViewDoctor = 'all'
-        this.departmentValue = this.department.filter((entry: any) => entry.id === parseInt(event.target.value))[0].name
-        this.filteredDoctors = data.filter((doc: any) => doc.departmentId === parseInt(event.target.value))
-        console.log(this.departmentValue)
-        this.viewMoreData()
-      },
-      error: (error: any) => {
-        console.error(error)
-      },
-      complete: () => {
+  // departmentOnchange(event: any): void {
+  //   this.docDetails.getDoctors().subscribe(({
+  //     next: (data: any) => {
+  //       this.selectedViewDoctor = 'all'
+  //       this.departmentValue = this.department.filter((entry: any) => entry.id === parseInt(event.target.value))[0].name
+  //       this.filteredDoctors = data.filter((doc: any) => doc.departmentId === parseInt(event.target.value))
+  //       console.log(this.departmentValue)
+  //       this.viewMoreData()
+  //     },
+  //     error: (error: any) => {
+  //       console.error(error)
+  //     },
+  //     complete: () => {
 
+  //     }
+  //   }))
+  // }
+  fetchDoctors():void{
+    this.docDetails.getDoctorWithDepartment().subscribe((data: any[]) => {
+      this.allDoctors = data;
+    });
+  }
+  departmentOnchange(event: any): void {
+    this.selectedViewDoctor = 'all';
+  
+    if (event.target.value === 'all') {
+      this.departmentValue = 'all';
+      this.filteredDoctors = this.allDoctors; // Show all doctors
+    } else {
+      const selectedDeptId = parseInt(event.target.value);
+      const selectedDept = this.department.find((entry: any) => entry.id === selectedDeptId);
+  
+      if (selectedDept) {
+        this.departmentValue = selectedDept.name;
+        this.filteredDoctors = this.allDoctors.filter((doc: any) => doc.departmentId === selectedDeptId);
+      } else {
+        this.departmentValue = '';
+        this.filteredDoctors = [];
       }
-    }))
+    }
+  
+    this.viewMoreData(); // Call after filtering
   }
 
   ViewMorechart(data: any): void {

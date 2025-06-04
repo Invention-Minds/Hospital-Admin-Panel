@@ -67,12 +67,8 @@ export class AppointmentCompleteComponent {
     const month = (today.getMonth() + 1).toString().padStart(2, '0');
     const day = today.getDate().toString().padStart(2, '0');
     this.today = `${year}-${month}-${day}`;
-    // this.appointmentService.completedAppointments$.subscribe(appointments => {
-    //   this.completedAppointments = appointments;
-    //   this.filteredAppointments = [...this.completedAppointments];
-    //   console.log('Confirmed appointments from component:', this.completedAppointments);
     this.isLoading = true; // Start loading indicator
-    this.appointmentService.completedAppointments$.subscribe(appointments => {
+    this.appointmentService.getCompletedAppointments().subscribe(appointments => {
       this.completedAppointments = appointments;
       this.completedAppointments.sort((a, b) => {
         const dateA = new Date(a.created_at!);
@@ -100,10 +96,7 @@ export class AppointmentCompleteComponent {
       this.isLoading = false; // Stop loading indicator
     }
     );
-  
-    // Fetch appointments from backend to initialize the data
-    this.appointmentService.fetchAppointments();
-    // });
+
   }
    // Method to filter appointments by a specific date
    filterAppointmentsByDate(selectedDate: Date) {
@@ -301,7 +294,7 @@ export class AppointmentCompleteComponent {
     });
     const csvContent = this.convertToCSV(this.filteredServices);
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    FileSaver.saveAs(blob, 'confirmed_appointments.csv');
+    FileSaver.saveAs(blob, 'completed_appointments.csv');
   }
 
   // Utility to Convert JSON to CSV

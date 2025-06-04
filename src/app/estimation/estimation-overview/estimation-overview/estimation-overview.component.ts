@@ -65,6 +65,9 @@ export class EstimationOverviewComponent {
   currentMonth: string = '';
   totalOverallEstimations: number = 0;
   totalEstimationsOverall:any[]= []
+  filteredEstimations:any[]=[];
+  totalFollowUp:number = 0;
+  totalMaternity:number = 0;
 
 
   
@@ -90,7 +93,11 @@ export class EstimationOverviewComponent {
         console.log(estimations);
         this.estimations = estimations;
         this.totalEstimationsOverall = estimations;
-        this.totalOverallEstimations = this.totalEstimationsOverall.length
+        this.totalOverallEstimations = this.totalEstimationsOverall.length;
+        this.totalMaternity = this.estimations.filter(e => e.estimationType === 'Maternity').length;
+        this.totalFollowUp = this.estimations.filter(e =>
+          Array.isArray(e.followUpDates) && e.followUpDates.length > 0
+        ).length;        
         this.processTodayEstimations(estimations);
         this.processMonthlyRaised(this.estimations)
         this.doctorService.getDepartments().subscribe((departments: any[]) => {
@@ -635,6 +642,7 @@ export class EstimationOverviewComponent {
   }
   showOverall(){
     this.showMonthWiseDate = true
+    this.activeComponent = 'overAll'
     console.log('open')
   }
   overAllESTSummary(estimations: any[],selectedDoctorName?: string) {
@@ -676,8 +684,71 @@ export class EstimationOverviewComponent {
     this.totalEstimationsOverall = overAllSummary
 
 }
+downloadEstimationSummary() {
+  if (this.selectedDateRange && this.selectedDateRange.length) {
+    const startDate = new Date(this.selectedDateRange[0]);
+    const endDate = new Date(
+      this.selectedDateRange[1] || this.selectedDateRange[0]
+    );
+
+    const diffInMs = endDate.getTime() - startDate.getTime();
+    const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
+
+    if (diffInDays > 62) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Warning',
+        detail: 'Please select a date range of 62 days or less for download.',
+        life: 5000,
+      });
+      // alert('You can only download estimation summary for up to 62 days. Please reduce the date range.');
+      return; // Stop export
+    }
+  }
+
+  // Proceed to export
+  this.exportToExcel(this.totalEstimationsOverall, 'Estimation-Summary');
+}
+
 exportToExcel(data: any[], fileName: string = 'Estimation-Summary') {
-  const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(data);
+  const dateFieldsToConvert = [
+    'estimationCreatedTime',
+    'approvedDateAndTime',
+    'confirmedDateAndTime',
+    'cancellationDateAndTime',
+    'completedDateAndTime',
+    'overDueDateAndTIme',
+    'submittedDateAndTime'
+  ];
+
+  const filteredData = data.map(item => {
+    const {
+      patientSign,
+      employeeSign,
+      approverSign,
+      pdfLink,
+      ...rest
+    } = item;
+
+    // Convert date fields from UTC to IST
+    for (const field of dateFieldsToConvert) {
+      if (rest[field]) {
+        rest[field] = new Date(rest[field]).toLocaleString('en-IN', {
+          timeZone: 'Asia/Kolkata',
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+        });
+      }
+    }
+
+    return rest;
+  });
+
+  const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(filteredData);
   const workbook: XLSX.WorkBook = {
     Sheets: { 'data': worksheet },
     SheetNames: ['data']
@@ -694,6 +765,19 @@ exportToExcel(data: any[], fileName: string = 'Estimation-Summary') {
 
   FileSaver.saveAs(blob, `${fileName}_${new Date().toISOString().slice(0, 10)}.xlsx`);
 }
+globalSearchText: string = '';
+filteredEstimationsOverall: any[] = [];
+
+applyGlobalSearch() {
+  const searchText = this.globalSearchText.toLowerCase();
+  this.totalEstimationsOverall = this.estimations.filter((estimation) =>
+    estimation.patientUHID?.toLowerCase().includes(searchText) ||
+    estimation.patientName?.toLowerCase().includes(searchText) ||
+    estimation.consultantName?.toLowerCase().includes(searchText)
+  );
+}
+
+
 
 
 }

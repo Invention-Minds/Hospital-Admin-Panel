@@ -50,6 +50,7 @@ export class AverageWaitingTimeComponent implements OnInit, OnChanges {
   selectedViewDoctor: any = 'all'
   viewMoreChart: any
   mt_40_min: any
+  allDoctors:any[]=[]
 
   // screenshot
   screenShot : Function = captureScreenshot
@@ -292,26 +293,53 @@ export class AverageWaitingTimeComponent implements OnInit, OnChanges {
     this.showViewMore = true
     this.loadDepartments()
     this.viewMoreData()
+    this.fetchDoctors()
   }
 
   closeViewMore(): void {
     this.showViewMore = false
   }
 
-  departmentOnchange(event: any): void {
+  // departmentOnchange(event: any): void {
 
-    this.docDetails.getDoctors().subscribe(({
-      next: (data: any) => {
-        this.filteredDoctors = data.filter((doc: any) => doc.departmentId === parseInt(event.target.value))
-        this.selectedViewMoreDepartment = this.viewMoreDepartment.filter((entry: any) => entry.id === parseInt(event.target.value))[0].name
-        this.viewMoreData()
-      },
-      error: (error: any) => {
-        console.error(error)
-      },
-      complete: () => {
+  //   this.docDetails.getDoctors().subscribe(({
+  //     next: (data: any) => {
+  //       this.filteredDoctors = data.filter((doc: any) => doc.departmentId === parseInt(event.target.value))
+  //       this.selectedViewMoreDepartment = this.viewMoreDepartment.filter((entry: any) => entry.id === parseInt(event.target.value))[0].name
+  //       this.viewMoreData()
+  //     },
+  //     error: (error: any) => {
+  //       console.error(error)
+  //     },
+  //     complete: () => {
+  //     }
+  //   }))
+  // }
+  fetchDoctors():void{
+    this.docDetails.getDoctorWithDepartment().subscribe((data: any[]) => {
+      this.allDoctors = data;
+    });
+  }
+  departmentOnchange(event: any): void {
+    this.selectedViewDoctor = 'all';
+  
+    if (event.target.value === 'all') {
+      this.departmentValue = 'all';
+      this.filteredDoctors = this.allDoctors; // Show all doctors
+    } else {
+      const selectedDeptId = parseInt(event.target.value);
+      const selectedDept = this.viewMoreDepartment.find((entry: any) => entry.id === selectedDeptId);
+  
+      if (selectedDept) {
+        this.departmentValue = selectedDept.name;
+        this.filteredDoctors = this.allDoctors.filter((doc: any) => doc.departmentId === selectedDeptId);
+      } else {
+        this.departmentValue = '';
+        this.filteredDoctors = [];
       }
-    }))
+    }
+  
+    this.viewMoreData(); // Call after filtering
   }
 
   // ViewMorechart(data: any): void {

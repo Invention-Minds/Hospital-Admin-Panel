@@ -1,130 +1,127 @@
 <div class="dashboard-section">
   <!-- <h1>Appointments</h1> -->
-  <div class="wrapper">
-    <!-- Total EST -->
-    <div class="card-today pointer" style="background-color: #F7FCDC;">
+  <div class="wrapper" *ngIf="false">
+    <div class="card-today pointer" style="background-color: #b0c3c155;" (click)="showOverall()">
       <div class="flex space-top">
-        <div class="count">{{ totalEstimations }}</div>
-        <div class="icon icon-bg">
-          <img src="est-icon-1.svg" alt="Leave Icon" pTooltip="New EST Created Today" tooltipPosition="top">
-        </div>
+        <div class="count">{{ totalOverallEstimations }}</div>
+        <div class="text text-center">Overall EST</div>
       </div>
-      <div class="text text-center">New EST Created</div>
-    </div>
 
-    <!-- Pending EST -->
-    <div class="card-today pointer" style="background-color: #DCFCE7;">
-      <div class="flex space-top">
-        <div class="count">{{ pendingEstimations }}</div>
-        <div class="icon icon-bg">
-          <img src="/est-icon-2.svg" alt="Available Doctors" pTooltip="EST Pending and Submitted Today" tooltipPosition="top">
-        </div>
-      </div>
-      <div class="text text-center">Pending EST</div>
-    </div>
-
-    <!-- Approved EST -->
-    <div class="card-today pointer" style="background-color: #FFE2E5;">
-      <div class="flex space-top">
-        <div class="count">{{ approvedEstimations }}</div>
-        <div class="icon icon-bg">
-          <img src="/est-icon-3.svg" alt="Absent Doctors" pTooltip="EST Approved Today" tooltipPosition="top">
-        </div>
-      </div>
-      <div class="text text-center">Approved EST</div>
-    </div>
-
-    <!-- Confirmed EST -->
-    <div class="card-today pointer" style="background-color: #FFF4DE;">
-      <div class="flex space-top">
-        <div class="count">{{ confirmedEstimations }}</div>
-        <div class="icon icon-bg">
-          <img src="/est-icon-4.svg" alt="MHC Confirmed"
-          pTooltip="EST Confirmed Today" tooltipPosition="top">
-        </div>
-      </div>
-      <div class="text text-center">Confirmed EST</div>
-    </div>
-
-    <!-- Completed EST -->
-    <div class="card-today pointer" style="background-color: #9FE4FF;">
-      <div class="flex space-top">
-        <div class="count">{{ completedEstimations }}</div>
-        <div class="icon icon-bg">
-          <img src="/est-icon-5.svg" alt="MHC Completed"
-            pTooltip="EST Completed Today" tooltipPosition="top">
-        </div>
-      </div>
-      <div class="text text-center">Completed EST</div>
-    </div>
-
-    <!-- Cancelled EST -->
-    <div class="card-today pointer" style="background-color: #E8D3FF;">
-      <div class="flex space-top">
-        <div class="count">{{ cancelledEstimations }}</div>
-        <div class="icon icon-bg">
-          <img src="/est-icon-6.svg" alt="EST Cancelled" 
-            pTooltip="EST Cancelled Today" tooltipPosition="top">
-        </div>
-      </div>
-      <div class="text text-center">Cancelled EST</div>
-    </div>
-
-    <!-- OverDue EST -->
-    <div class="card-today pointer" style="background-color: #B3D5FF;">
-      <div class="flex space-top">
-        <div class="count">{{ overDueEstimations }}</div>
-        <div class="icon icon-bg">
-          <img src="/est-icon-7.svg" alt="Overdue EST"
-            pTooltip="EST Overdue Today" tooltipPosition="top">
-        </div>
-      </div>
-      <div class="text text-center">OverDue EST</div>
-    </div>
-    <div class="card-today pointer" style="background-color: #B3B4FF;" (click)="showDoctorSummary = true">
-      <div class="flex space-top">
-        <div class="count">{{ completedEstimationsList }}</div>
-        <div class="icon icon-bg">
-          <img src="/est-icon-8.svg" alt="Overdue EST"
-            pTooltip="Total EST Completed with DWS" tooltipPosition="top">
-        </div>
-      </div>
-      <div class="text text-center">DWS - Compl.</div>
-    </div>
-    <div class="card-today pointer" style="background-color: #FFC1C3;" (click)="showDWSummary = true">
-      <div class="flex space-top">
-        <div class="count">{{ nonCompletedEstimationsList }}</div>
-        <div class="icon icon-bg">
-          <img src="/est-icon-9.svg" alt="Overdue EST"
-            pTooltip="Total EST Non Completed with DWS" tooltipPosition="top">
-        </div>
-      </div>
-      <div class="text text-center">DWS - Non Compl.</div>
     </div>
     <div class="card-today pointer" style="background-color: #D3FFF8;">
       <div class="flex space-top">
         <div class="count">{{ totalMonthWiseRaisedEST }}</div>
-        <div class="icon icon-bg">
-          <img src="/est-icon-10.svg" alt="Overdue EST"
-            pTooltip="Total EST Raised this Month" tooltipPosition="top">
-        </div>
+        <!-- <div class="icon icon-bg">
+          <img src="/est-icon-10.svg" alt="Overdue EST" pTooltip="Total EST Raised this Month" tooltipPosition="top">
+        </div> -->
+        <div class="text text-center">Raised in {{currentMonth}}</div>
       </div>
-      <div class="text text-center">Raised in {{currentMonth}}</div>
     </div>
-    <div class="card-today pointer" style="background-color: #b0c3c155;"  (click)="showOverall()">
+    <!-- Total EST -->
+    <div class="card-today pointer" style="background-color: #F7FCDC;">
       <div class="flex space-top">
-        <div class="count">{{ totalOverallEstimations }}</div>
-        <div class="icon icon-bg"             pTooltip="Total EST Raised" tooltipPosition="top">
-          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
-            <path d="M31.7145 16.0252C31.7145 24.7042 24.6788 31.7399 15.9998 31.7399C7.32086 31.7399 0.285156 24.7042 0.285156 16.0252C0.285156 7.34625 7.32086 0.310547 15.9998 0.310547C24.6788 0.310547 31.7145 7.34625 31.7145 16.0252Z" fill="grey"/>
-            <path d="M14.5328 9.73828C13.7548 9.73828 13.0087 10.0571 12.4586 10.6247C11.9085 11.1923 11.5994 11.9621 11.5994 12.7648C11.5994 13.5675 11.9085 14.3373 12.4586 14.9049C13.0087 15.4725 13.7548 15.7913 14.5328 15.7913C15.3108 15.7913 16.0569 15.4725 16.6071 14.9049C17.1572 14.3373 17.4662 13.5675 17.4662 12.7648C17.4662 11.9621 17.1572 11.1923 16.6071 10.6247C16.0569 10.0571 15.3108 9.73828 14.5328 9.73828ZM20.033 16.548C18.1996 16.548 16.7329 18.0612 16.7329 19.9528C16.7329 21.8444 18.1996 23.3577 20.033 23.3577C21.8663 23.3577 23.3331 21.8444 23.3331 19.9528C23.3331 18.0612 21.8663 16.548 20.033 16.548ZM14.5328 17.3046C11.2914 17.3046 8.66602 18.659 8.66602 20.3311V21.8444H15.6329C15.3908 21.245 15.2662 20.6021 15.2662 19.9528C15.2693 19.0557 15.5102 18.1765 15.9629 17.4105C15.5009 17.35 15.0315 17.3046 14.5328 17.3046ZM20.033 17.6829C21.2503 17.6829 22.233 18.6968 22.233 19.9528C22.233 20.3765 22.123 20.77 21.925 21.0878L18.9329 18.0007C19.2409 17.7964 19.6223 17.6829 20.033 17.6829ZM18.1409 18.8179L21.133 21.9049C20.825 22.1092 20.4436 22.2227 20.033 22.2227C18.8156 22.2227 17.8329 21.2088 17.8329 19.9528C17.8329 19.5291 17.9429 19.1357 18.1409 18.8179Z" fill="white"/>
-          </svg>
-          <!-- <img src="/est-icon-10.svg" alt="Overdue EST"
-            pTooltip="Total EST Raised" tooltipPosition="top"> -->
-        </div>
-
+        <div class="count">{{ totalEstimations }}</div>
+        <!-- <div class="icon icon-bg">
+          <img src="est-icon-1.svg" alt="Leave Icon" pTooltip="New EST Created Today" tooltipPosition="top">
+        </div> -->
+        <div class="text text-center">New EST Created</div>
       </div>
-      <div class="text text-center">Overall EST</div>
+
+    </div>
+
+    <!-- Pending EST -->
+    <div class="card-today pointer bg-pending"
+      [ngClass]="{ 'active-card': activeComponent === 'submitted' || activeComponent === 'request' }"
+      (click)="role === 'sub_admin' ? showAppointmentRequests() : showSubmittedRequest()">
+      <div class="flex space-top">
+        <div class="count">{{ pendingEstimations }}</div>
+        <div class="text text-center">Pending EST</div>
+      </div>
+    </div>
+
+
+    <!-- Approved EST -->
+    <div class="card-today pointer bg-approved" [ngClass]="{'active-card': activeComponent === 'approved'}"
+      (click)="showApprovedAppointments()">
+      <div class="flex space-top">
+        <div class="count">{{ approvedEstimations }}</div>
+        <!-- <div class="icon icon-bg">
+          <img src="/est-icon-3.svg" alt="Absent Doctors" pTooltip="EST Approved Today" tooltipPosition="top">
+        </div> -->
+        <div class="text text-center">Approved EST</div>
+      </div>
+    </div>
+
+    <!-- Confirmed EST -->
+    <div class="card-today pointer bg-confirmed" [ngClass]="{'active-card': activeComponent === 'confirmed'}"
+      (click)="showConfirmedAppointments()">
+      <div class="flex space-top">
+        <div class="count">{{ confirmedEstimations }}</div>
+        <!-- <div class="icon icon-bg">
+          <img src="/est-icon-4.svg" alt="MHC Confirmed" pTooltip="EST Confirmed Today" tooltipPosition="top">
+        </div> -->
+        <div class="text text-center">Confirmed EST</div>
+      </div>
+
+    </div>
+
+    <!-- Completed EST -->
+    <div class="card-today pointer bg-completed" [ngClass]="{'active-card': activeComponent === 'completed'}"
+      (click)="showCompletedAppointments()">
+      <div class="flex space-top">
+        <div class="count">{{ completedEstimations }}</div>
+        <!-- <div class="icon icon-bg">
+          <img src="/est-icon-5.svg" alt="MHC Completed" pTooltip="EST Completed Today" tooltipPosition="top">
+        </div> -->
+        <div class="text text-center">Completed EST</div>
+      </div>
+
+    </div>
+
+    <!-- Cancelled EST -->
+    <div class="card-today pointer bg-cancelled" [ngClass]="{'active-card': activeComponent === 'cancelled'}"
+      (click)="showCancelEstimation()">
+      <div class="flex space-top">
+        <div class="count">{{ cancelledEstimations }}</div>
+        <!-- <div class="icon icon-bg">
+          <img src="/est-icon-6.svg" alt="EST Cancelled" pTooltip="EST Cancelled Today" tooltipPosition="top">
+        </div> -->
+        <div class="text text-center">Cancelled EST</div>
+      </div>
+
+    </div>
+
+    <!-- OverDue EST -->
+    <div class="card-today pointer bg-overdue" [ngClass]="{'active-card': activeComponent === 'overDue'}"
+      (click)="showOverDueAppointment()">
+      <div class="flex space-top">
+        <div class="count">{{ overDueEstimations }}</div>
+        <!-- <div class="icon icon-bg">
+          <img src="/est-icon-7.svg" alt="Overdue EST" pTooltip="EST Overdue Today" tooltipPosition="top">
+        </div> -->
+        <div class="text text-center">OverDue EST</div>
+      </div>
+
+    </div>
+    <div class="card-today pointer" style="background-color: #B3B4FF;" (click)="showDoctorSummary = true">
+      <div class="flex space-top">
+        <div class="count">{{ completedEstimationsList }}</div>
+        <!-- <div class="icon icon-bg">
+          <img src="/est-icon-8.svg" alt="Overdue EST" pTooltip="Total EST Completed with DWS" tooltipPosition="top">
+        </div> -->
+        <div class="text text-center">DWS - Compl.</div>
+      </div>
+
+    </div>
+    <div class="card-today pointer" style="background-color: #FFC1C3;" (click)="showDWSummary = true">
+      <div class="flex space-top">
+        <div class="count">{{ nonCompletedEstimationsList }}</div>
+        <!-- <div class="icon icon-bg">
+          <img src="/est-icon-9.svg" alt="Overdue EST" pTooltip="Total EST Non Completed with DWS"
+            tooltipPosition="top">
+        </div> -->
+        <div class="text text-center">DWS - Non Compl.</div>
+      </div>
     </div>
   </div>
   <!--   
@@ -168,10 +165,38 @@
       <div class="card-content">
       </div>
     </div>
+    <div class="card" [ngClass]="{'active-card': activeComponent === 'overAll'}" (click)="showOverall()">
+      <div class="card-icon">
+        <!-- <img src="/est-req.svg" alt="Doctor Available Icon" /> -->
+        <div class="count">{{ totalOverallEstimations }}</div>
+      </div>
+      <div class="card-content">
+        <p>Overall EST</p>
+      </div>
+    </div>
+    <div class="card" [ngClass]="{'active-card': activeComponent === 'month'}" (click)="showOverall()">
+      <div class="card-icon">
+        <!-- <img src="/est-req.svg" alt="Doctor Available Icon" /> -->
+        <div class="count">{{ totalMonthWiseRaisedEST }}</div>
+      </div>
+      <div class="card-content">
+        <p>Raised in {{currentMonth}}</p>
+      </div>
+    </div>
+    <div class="card" [ngClass]="{'active-card': activeComponent === 'today'}" (click)="showOverall()">
+      <div class="card-icon">
+        <!-- <img src="/est-req.svg" alt="Doctor Available Icon" /> -->
+        <div class="count">{{ totalEstimations }}</div>
+      </div>
+      <div class="card-content">
+        <p>New EST Created</p>
+      </div>
+    </div>
     <div class="card" *ngIf="role === 'sub_admin'" [ngClass]="{'active-card': activeComponent === 'request'}"
       (click)="showAppointmentRequests()">
       <div class="card-icon">
-        <img src="/est-req.svg" alt="Doctor Available Icon" />
+        <!-- <img src="/est-req.svg" alt="Doctor Available Icon" /> -->
+        <div class="count">{{ pendingEstimations }}</div>
       </div>
       <div class="card-content">
         <p>EST Request</p>
@@ -180,15 +205,17 @@
     <div class="card" *ngIf="role === 'admin' || role === 'super_admin' "
       [ngClass]="{'active-card': activeComponent === 'submitted'}" (click)="showSubmittedRequest()">
       <div class="card-icon">
-        <img src="/est-req.svg" alt="Doctor Available Icon" />
+        <!-- <img src="/est-req.svg" alt="Doctor Available Icon" /> -->
+        <div class="count">{{ pendingEstimations }}</div>
       </div>
       <div class="card-content">
-        <p>Estimation Request</p>
+        <p>EST Request</p>
       </div>
     </div>
     <div class="card" [ngClass]="{'active-card': activeComponent === 'approved'}" (click)="showApprovedAppointments()">
       <div class="card-icon">
-        <img src="/est-appr.svg" alt="Appointment Icon" />
+        <!-- <img src="/est-appr.svg" alt="Appointment Icon" /> -->
+        <div class="count">{{ approvedEstimations }}</div>
       </div>
       <div class="card-content">
         <p>Apprv./Acc. </p>
@@ -196,7 +223,8 @@
     </div>
     <div class="card" [ngClass]="{'active-card': activeComponent === 'follow-up'}" (click)="showFollowUpEstimation()">
       <div class="card-icon">
-        <img src="/followup-EST.svg" alt="OPD Icon" />
+        <!-- <img src="/followup-EST.svg" alt="OPD Icon" /> -->
+         <div class="count">{{ totalFollowUp}}</div>
       </div>
       <div class="card-content">
         <p>Follow-Up</p>
@@ -204,7 +232,8 @@
     </div>
     <div class="card" [ngClass]="{'active-card': activeComponent === 'maternity'}" (click)="showMaternityEstimation()">
       <div class="card-icon">
-        <img src="/MM-EST.svg" alt="OPD Icon" />
+        <!-- <img src="/MM-EST.svg" alt="OPD Icon" /> -->
+         <div class="count">{{totalMaternity}}</div>
       </div>
       <div class="card-content">
         <p>Maternity </p>
@@ -213,7 +242,8 @@
     <div class="card" [ngClass]="{'active-card': activeComponent === 'confirmed'}"
       (click)="showConfirmedAppointments()">
       <div class="card-icon">
-        <img src="/est-confirm.svg" alt="Doctor Available Icon" />
+        <!-- <img src="/est-confirm.svg" alt="Doctor Available Icon" /> -->
+        <div class="count">{{ confirmedEstimations }}</div>
       </div>
       <div class="card-content">
         <p>Confirmed </p>
@@ -222,7 +252,8 @@
     <div class="card" [ngClass]="{'active-card': activeComponent === 'completed'}"
       (click)="showCompletedAppointments()">
       <div class="card-icon">
-        <img src="/est-cancel.svg" alt="OPD Icon" />
+        <!-- <img src="/est-cancel.svg" alt="OPD Icon" /> -->
+        <div class="count">{{ completedEstimations }}</div>
       </div>
       <div class="card-content">
         <p>Completed</p>
@@ -230,7 +261,8 @@
     </div>
     <div class="card" [ngClass]="{'active-card': activeComponent === 'cancelled'}" (click)="showCancelEstimation()">
       <div class="card-icon">
-        <img src="/Cancel_EST.svg" alt="OPD Icon" />
+        <!-- <img src="/Cancel_EST.svg" alt="OPD Icon" /> -->
+        <div class="count">{{ cancelledEstimations }}</div>
       </div>
       <div class="card-content">
         <p>Cancelled </p>
@@ -238,7 +270,8 @@
     </div>
     <div class="card" [ngClass]="{'active-card': activeComponent === 'overdue'}" (click)="showOverDueAppointment()">
       <div class="card-icon">
-        <img src="/est-overdue.svg" alt="OPD Icon" />
+        <!-- <img src="/est-overdue.svg" alt="OPD Icon" /> -->
+        <div class="count">{{ overDueEstimations }}</div>
       </div>
       <div class="card-content">
         <p>OverDue</p>
@@ -269,6 +302,155 @@
   <app-maternity-estimation *ngIf="activeComponent === 'maternity'"></app-maternity-estimation>
   <app-followup-estimation *ngIf="activeComponent === 'follow-up'"></app-followup-estimation>
   <app-estimation-cancel *ngIf="activeComponent === 'cancelled'"></app-estimation-cancel>
+  <div class="container" *ngIf="showMonthWiseDate && activeComponent ==='overAll'">
+    <div class="filters">
+      <div>
+        <input type="text" [(ngModel)]="globalSearchText" (ngModelChange)="applyGlobalSearch()"
+          placeholder="Search by Estimation ID, Patient or Doctor" class="by-search" />
+      </div>
+
+      <div>
+        <select class="doctor" id="doctorFilter" class="department" [(ngModel)]="selectedDoctorName"
+          (change)="applyDeptFilter()">
+          <option value="">Select Doctor</option>
+          <option *ngFor="let doc of filteredDoctorNames" [value]="doc">{{ doc }}</option>
+        </select>
+      </div>
+      <div>
+        <select class="department" [(ngModel)]="selectedStatus" (change)="applyDeptFilter()">
+          <option value="">Select Status</option>
+          <option *ngFor="let status of statusOptions" [value]="status">{{ status.toUpperCase() }}</option>
+        </select>
+      </div>
+      <div>
+        <select class="department" [(ngModel)]="selectedEstimationType" (change)="applyDeptFilter()">
+          <option value="">Select Type</option>
+          <option *ngFor="let status of estimationTypeOptions" [value]="status">{{ status.toUpperCase() }}</option>
+        </select>
+      </div>
+      <div>
+        <p-calendar styleClass="custom-calendar" [(ngModel)]="selectedDateRange" selectionMode="range"
+          (ngModelChange)="totalSearch()" placeholder="Calendar" dateFormat="dd-mm-yy">
+          <ng-template pTemplate="date" let-date>
+            <span>
+              {{ date.day }}
+            </span>
+          </ng-template>
+        </p-calendar>
+        <i class="fa-solid fa-angle-down calendar-icon"></i>
+        <svg pTooltip="Refresh" (click)="totalRefresh()" class="reverse" xmlns="http://www.w3.org/2000/svg"
+          width="2.5em" height="2.5em" viewBox="-1.5 -2.5 24 24">
+          <path fill="currentColor"
+            d="m4.859 5.308l1.594-.488a1 1 0 0 1 .585 1.913l-3.825 1.17a1 1 0 0 1-1.249-.665L.794 3.413a1 1 0 1 1 1.913-.585l.44 1.441C5.555.56 10.332-1.035 14.573.703a9.38 9.38 0 0 1 5.38 5.831a1 1 0 1 1-1.905.608A7.381 7.381 0 0 0 4.86 5.308zm12.327 8.195l-1.775.443a1 1 0 1 1-.484-1.94l3.643-.909a1 1 0 0 1 .61-.08a1 1 0 0 1 .84.75l.968 3.88a1 1 0 0 1-1.94.484l-.33-1.322a9.381 9.381 0 0 1-16.384-1.796l-.26-.634a1 1 0 1 1 1.851-.758l.26.633a7.381 7.381 0 0 0 13.001 1.25z" />
+        </svg>
+        <svg class="p-field p-col-3 download" src="download.png" (click)="downloadEstimationSummary()"
+          pTooltip="Download" xmlns="http://www.w3.org/2000/svg" width="3em" height="3em" viewBox="0 0 20 20">
+          <path fill="#fff" fill-rule="evenodd"
+            d="M3 17a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H4a1 1 0 0 1-1-1m3.293-7.707a1 1 0 0 1 1.414 0L9 10.586V3a1 1 0 1 1 2 0v7.586l1.293-1.293a1 1 0 1 1 1.414 1.414l-3 3a1 1 0 0 1-1.414 0l-3-3a1 1 0 0 1 0-1.414"
+            clip-rule="evenodd" />
+        </svg>
+      </div>
+    </div>
+
+
+    <!-- Doctor Summary Table -->
+    <!-- <div class="doctor-list " >
+      <table class="summary-table">
+        <thead>
+          <tr>
+            <th>No.</th>
+            <th>Doctor Name</th>
+            <th>Estimation ID</th>
+            <th>Patient Name</th>
+            <th>PRN</th>
+            <th>Surgery Date</th>
+            <th>Status</th>
+            <th>PAC Status</th>
+            <th>Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let doc of totalEstimationsOverall;let i=index">
+            <td>{{i+1}}</td>
+            <td>{{ doc.consultantName }}</td>
+            <td>{{doc.estimationId}}</td>
+            <td>{{doc.patientName}}</td>
+            <td>{{doc.patientUHID}}</td>
+            <td>{{doc.estimatedDate}}</td>
+            <td>{{ doc.statusOfEstimation ? doc.statusOfEstimation.toUpperCase() : '-' }}</td>
+            <td>
+              <ng-container *ngIf="doc.estimationType === 'MM'; else checkPac">
+                PAC not required
+              </ng-container>
+              <ng-template #checkPac>
+                {{ doc.pacDone ? 'Done' : 'Not Done' }}
+              </ng-template>
+            </td>
+            
+            <td>{{ doc.estimationType }}</td>
+          </tr>
+
+
+          <tr *ngIf="totalEstimationsOverall.length === 0">
+            <td colspan="8" class="no-record">No records found</td>
+          </tr>
+
+        </tbody>
+      </table>
+    </div> -->
+
+    <div class="doctor-list scrollable-table-container">
+      <table class="summary-table">
+        <thead>
+          <tr>
+            <th>No.</th>
+            <th>Doctor Name</th>
+            <th>Estimation ID</th>
+            <th>Patient Name</th>
+            <th>PRN</th>
+            <th>Surgery Date</th>
+            <th>Status</th>
+            <th>PAC Status</th>
+            <th>Type</th>
+          </tr>
+        </thead>
+      </table>
+      <div class="table-body-wrapper">
+        <table class="summary-table">
+          <tbody>
+            <tr *ngFor="let doc of totalEstimationsOverall; let i = index">
+              <td>{{ i + 1 }}</td>
+              <td>{{ doc.consultantName }}</td>
+              <td>{{ doc.estimationId }}</td>
+              <td>{{ doc.patientName }}</td>
+              <td>{{ doc.patientUHID }}</td>
+              <td>{{ doc.estimatedDate }}</td>
+              <td>{{ doc.statusOfEstimation ? doc.statusOfEstimation.toUpperCase() : '-' }}</td>
+              <td>
+                <ng-container *ngIf="doc.estimationType === 'MM'; else checkPac">
+                  PAC not required
+                </ng-container>
+                <ng-template #checkPac>
+                  {{ doc.pacDone ? 'Done' : 'Not Done' }}
+                </ng-template>
+              </td>
+              <td>{{ doc.estimationType }}</td>
+            </tr>
+            <tr *ngIf="totalEstimationsOverall.length === 0">
+              <td colspan="9" class="no-record">No records found</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Fixed footer -->
+    <div class="summary-footer">
+      Showing {{ totalEstimationsOverall.length }} of {{ totalOverallEstimations }} records
+    </div>
+
+
+  </div>
 </div>
 <p-toast></p-toast>
 <div *ngIf="showDoctorSummary" class="overlay">
@@ -283,7 +465,7 @@
 
     <div class="filters">
       <!-- Department Filter -->
-      <div >
+      <div>
         <!-- <label for="deptFilter">Department:</label> -->
         <select class="department" id="deptFilter" [(ngModel)]="selectedDept" (change)="applyDeptFilter()">
           <option value="">Select Department</option>
@@ -291,7 +473,7 @@
         </select>
       </div>
       <!-- Doctor Name Filter -->
-      <div >
+      <div>
         <!-- <label for="doctorFilter">Doctor:</label> -->
         <select class="doctor" id="doctorFilter" class="department" [(ngModel)]="selectedDoctorName"
           (change)="applyDeptFilter()">
@@ -301,19 +483,19 @@
       </div>
       <div>
         <p-calendar styleClass="custom-calendar" [(ngModel)]="selectedDateRange" selectionMode="range"
-        (ngModelChange)="onSearch()" placeholder="Calendar" dateFormat="dd-mm-yy">
-        <ng-template pTemplate="date" let-date>
+          (ngModelChange)="onSearch()" placeholder="Calendar" dateFormat="dd-mm-yy">
+          <ng-template pTemplate="date" let-date>
             <span>
-                {{ date.day }}
+              {{ date.day }}
             </span>
-        </ng-template>
-    </p-calendar>
-    <i class="fa-solid fa-angle-down calendar-icon"></i>
-    <svg pTooltip="Refresh" (click)="refresh()" class="reverse" xmlns="http://www.w3.org/2000/svg" width="2.5em"
-        height="2.5em" viewBox="-1.5 -2.5 24 24">
-        <path fill="currentColor"
+          </ng-template>
+        </p-calendar>
+        <i class="fa-solid fa-angle-down calendar-icon"></i>
+        <svg pTooltip="Refresh" (click)="refresh()" class="reverse" xmlns="http://www.w3.org/2000/svg" width="2.5em"
+          height="2.5em" viewBox="-1.5 -2.5 24 24">
+          <path fill="currentColor"
             d="m4.859 5.308l1.594-.488a1 1 0 0 1 .585 1.913l-3.825 1.17a1 1 0 0 1-1.249-.665L.794 3.413a1 1 0 1 1 1.913-.585l.44 1.441C5.555.56 10.332-1.035 14.573.703a9.38 9.38 0 0 1 5.38 5.831a1 1 0 1 1-1.905.608A7.381 7.381 0 0 0 4.86 5.308zm12.327 8.195l-1.775.443a1 1 0 1 1-.484-1.94l3.643-.909a1 1 0 0 1 .61-.08a1 1 0 0 1 .84.75l.968 3.88a1 1 0 0 1-1.94.484l-.33-1.322a9.381 9.381 0 0 1-16.384-1.796l-.26-.634a1 1 0 1 1 1.851-.758l.26.633a7.381 7.381 0 0 0 13.001 1.25z" />
-    </svg>
+        </svg>
       </div>
     </div>
 
@@ -356,8 +538,8 @@
             <td>{{ grandTotalSM }}</td>
             <td>{{ grandTotalMaternity }}</td>
           </tr>
-          
-          
+
+
           <tr *ngIf="doctorSummaryList.length === 0">
             <td colspan="7" class="no-record">No doctors found for selected department</td>
           </tr>
@@ -380,7 +562,7 @@
 
     <div class="filters">
       <!-- Department Filter -->
-      <div >
+      <div>
         <!-- <label for="deptFilter">Department:</label> -->
         <select class="department" id="deptFilter" [(ngModel)]="selectedDept" (change)="applyDeptFilter()">
           <option value="">Select Department</option>
@@ -388,7 +570,7 @@
         </select>
       </div>
       <!-- Doctor Name Filter -->
-      <div >
+      <div>
         <!-- <label for="doctorFilter">Doctor:</label> -->
         <select class="doctor" id="doctorFilter" class="department" [(ngModel)]="selectedDoctorName"
           (change)="applyDeptFilter()">
@@ -410,19 +592,19 @@
       </div>
       <div>
         <p-calendar styleClass="custom-calendar" [(ngModel)]="selectedDateRange" selectionMode="range"
-        (ngModelChange)="onNonCompleteSearch()" placeholder="Calendar" dateFormat="dd-mm-yy">
-        <ng-template pTemplate="date" let-date>
+          (ngModelChange)="onNonCompleteSearch()" placeholder="Calendar" dateFormat="dd-mm-yy">
+          <ng-template pTemplate="date" let-date>
             <span>
-                {{ date.day }}
+              {{ date.day }}
             </span>
-        </ng-template>
-    </p-calendar>
-    <i class="fa-solid fa-angle-down calendar-icon"></i>
-    <svg pTooltip="Refresh" (click)="refreshNonComplete()" class="reverse" xmlns="http://www.w3.org/2000/svg" width="2.5em"
-        height="2.5em" viewBox="-1.5 -2.5 24 24">
-        <path fill="currentColor"
+          </ng-template>
+        </p-calendar>
+        <i class="fa-solid fa-angle-down calendar-icon"></i>
+        <svg pTooltip="Refresh" (click)="refreshNonComplete()" class="reverse" xmlns="http://www.w3.org/2000/svg"
+          width="2.5em" height="2.5em" viewBox="-1.5 -2.5 24 24">
+          <path fill="currentColor"
             d="m4.859 5.308l1.594-.488a1 1 0 0 1 .585 1.913l-3.825 1.17a1 1 0 0 1-1.249-.665L.794 3.413a1 1 0 1 1 1.913-.585l.44 1.441C5.555.56 10.332-1.035 14.573.703a9.38 9.38 0 0 1 5.38 5.831a1 1 0 1 1-1.905.608A7.381 7.381 0 0 0 4.86 5.308zm12.327 8.195l-1.775.443a1 1 0 1 1-.484-1.94l3.643-.909a1 1 0 0 1 .61-.08a1 1 0 0 1 .84.75l.968 3.88a1 1 0 0 1-1.94.484l-.33-1.322a9.381 9.381 0 0 1-16.384-1.796l-.26-.634a1 1 0 1 1 1.851-.758l.26.633a7.381 7.381 0 0 0 13.001 1.25z" />
-    </svg>
+        </svg>
       </div>
     </div>
 
@@ -452,14 +634,13 @@
             <td>{{ doc.statusOfEstimation ? doc.statusOfEstimation.toUpperCase() : '-' }}</td>
             <td>{{ doc.estimationType }}</td>
             <td class="button">
-              <button class="btn-action" (click)="openFollowUpPopup(doc)" pTooltip="View"
-                  tooltipPosition="top">
-                  <img src="/view.svg" alt="Confirm">
+              <button class="btn-action" (click)="openFollowUpPopup(doc)" pTooltip="View" tooltipPosition="top">
+                <img src="/view.svg" alt="Confirm">
               </button>
-          </td>
+            </td>
           </tr>
-          
-          
+
+
           <tr *ngIf="nonCompletedEstimations.length === 0">
             <td colspan="8" class="no-record">No records found</td>
           </tr>
@@ -470,28 +651,24 @@
 
 
     <!-- Fixed footer -->
-<div class="summary-footer">
-  Showing {{ nonCompletedEstimations.length }} of {{ nonCompletedEstimationsList }} records
-</div>
+    <div class="summary-footer">
+      Showing {{ nonCompletedEstimations.length }} of {{ nonCompletedEstimationsList }} records
+    </div>
 
 
   </div>
 </div>
-<div *ngIf="showMonthWiseDate" class="overlay">
+<!-- <div *ngIf="showMonthWiseDate" class="overlay">
   <div class="container">
     <div class="header-1">
       <div>Overall Estimations</div>
       <button class="close-button" (click)="totalSummaryClose()">
-        <!-- <img src="/popup-close.svg" /> -->
         <i class="fa-solid fa-xmark"></i>
       </button>
     </div>
 
     <div class="filters">
-      <!-- Department Filter -->
-      <!-- Doctor Name Filter -->
-      <div >
-        <!-- <label for="doctorFilter">Doctor:</label> -->
+      <div>
         <select class="doctor" id="doctorFilter" class="department" [(ngModel)]="selectedDoctorName"
           (change)="applyDeptFilter()">
           <option value="">Select Doctor</option>
@@ -512,31 +689,29 @@
       </div>
       <div>
         <p-calendar styleClass="custom-calendar" [(ngModel)]="selectedDateRange" selectionMode="range"
-        (ngModelChange)="totalSearch()" placeholder="Calendar" dateFormat="dd-mm-yy">
-        <ng-template pTemplate="date" let-date>
+          (ngModelChange)="totalSearch()" placeholder="Calendar" dateFormat="dd-mm-yy">
+          <ng-template pTemplate="date" let-date>
             <span>
-                {{ date.day }}
+              {{ date.day }}
             </span>
-        </ng-template>
-    </p-calendar>
-    <i class="fa-solid fa-angle-down calendar-icon"></i>
-    <svg pTooltip="Refresh" (click)="totalRefresh()" class="reverse" xmlns="http://www.w3.org/2000/svg" width="2.5em"
-        height="2.5em" viewBox="-1.5 -2.5 24 24">
-        <path fill="currentColor"
+          </ng-template>
+        </p-calendar>
+        <i class="fa-solid fa-angle-down calendar-icon"></i>
+        <svg pTooltip="Refresh" (click)="totalRefresh()" class="reverse" xmlns="http://www.w3.org/2000/svg"
+          width="2.5em" height="2.5em" viewBox="-1.5 -2.5 24 24">
+          <path fill="currentColor"
             d="m4.859 5.308l1.594-.488a1 1 0 0 1 .585 1.913l-3.825 1.17a1 1 0 0 1-1.249-.665L.794 3.413a1 1 0 1 1 1.913-.585l.44 1.441C5.555.56 10.332-1.035 14.573.703a9.38 9.38 0 0 1 5.38 5.831a1 1 0 1 1-1.905.608A7.381 7.381 0 0 0 4.86 5.308zm12.327 8.195l-1.775.443a1 1 0 1 1-.484-1.94l3.643-.909a1 1 0 0 1 .61-.08a1 1 0 0 1 .84.75l.968 3.88a1 1 0 0 1-1.94.484l-.33-1.322a9.381 9.381 0 0 1-16.384-1.796l-.26-.634a1 1 0 1 1 1.851-.758l.26.633a7.381 7.381 0 0 0 13.001 1.25z" />
-    </svg>
-    <svg class="p-field p-col-3 download" src="download.png"
-      (click)="exportToExcel(totalEstimationsOverall)" pTooltip="Download" xmlns="http://www.w3.org/2000/svg" width="3em" height="3em"
-      viewBox="0 0 20 20">
-      <path fill="#fff" fill-rule="evenodd"
-        d="M3 17a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H4a1 1 0 0 1-1-1m3.293-7.707a1 1 0 0 1 1.414 0L9 10.586V3a1 1 0 1 1 2 0v7.586l1.293-1.293a1 1 0 1 1 1.414 1.414l-3 3a1 1 0 0 1-1.414 0l-3-3a1 1 0 0 1 0-1.414"
-        clip-rule="evenodd" />
-    </svg>
+        </svg>
+        <svg class="p-field p-col-3 download" src="download.png" (click)="downloadEstimationSummary()"
+          pTooltip="Download" xmlns="http://www.w3.org/2000/svg" width="3em" height="3em" viewBox="0 0 20 20">
+          <path fill="#fff" fill-rule="evenodd"
+            d="M3 17a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H4a1 1 0 0 1-1-1m3.293-7.707a1 1 0 0 1 1.414 0L9 10.586V3a1 1 0 1 1 2 0v7.586l1.293-1.293a1 1 0 1 1 1.414 1.414l-3 3a1 1 0 0 1-1.414 0l-3-3a1 1 0 0 1 0-1.414"
+            clip-rule="evenodd" />
+        </svg>
       </div>
     </div>
 
 
-    <!-- Doctor Summary Table -->
     <div class="doctor-list">
       <table class="summary-table">
         <thead>
@@ -562,8 +737,8 @@
             <td>{{ doc.statusOfEstimation ? doc.statusOfEstimation.toUpperCase() : '-' }}</td>
             <td>{{ doc.estimationType }}</td>
           </tr>
-          
-          
+
+
           <tr *ngIf="totalEstimationsOverall.length === 0">
             <td colspan="8" class="no-record">No records found</td>
           </tr>
@@ -573,14 +748,14 @@
     </div>
 
 
-    <!-- Fixed footer -->
-<div class="summary-footer">
-  Showing {{ totalEstimationsOverall.length }} of {{ totalOverallEstimations }} records
-</div>
+   
+    <div class="summary-footer">
+      Showing {{ totalEstimationsOverall.length }} of {{ totalOverallEstimations }} records
+    </div>
 
 
   </div>
-</div>
+</div> -->
 <div *ngIf="showFollowUps" class="estimation-modal">
   <div class="modal-content-follow-up">
     <div class="modal-header">
@@ -601,6 +776,5 @@
         <p>Date: {{ followUp.date | date:'dd-MM-yyyy' }}</p>
         <p>Remarks: {{ followUp.remarks }}</p>
       </div>
+    </div>
   </div>
-</div>
-

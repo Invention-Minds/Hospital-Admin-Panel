@@ -54,12 +54,13 @@ export class OpdRequestComponent {
   dateInput: any
   selectedViewDate: any[] = []
   selectedViewDoctor: any = 'all'
-  viewMoreoption: any
+  viewMoreoption: any;
+  allDoctors: any[] = []
 
   ngOnInit() {
     this.date = getLastSevenDays()
     this.appointmentData()
-    this.selectedViewDate = getLastThirtyDaysFromSelected()
+    this.selectedViewDate = getLastThirtyDaysFromSelected();
   }
 
   screenShot : Function = captureScreenshot
@@ -67,7 +68,7 @@ export class OpdRequestComponent {
   appointmentData(): void {
     this.isLoading = true; // Set loading to true before making the API call
 
-    this.appointment.getAllAppointments().subscribe({
+    this.appointment.getopdRequestvia().subscribe({
       next: (data) => {
         this.rawData = data
         const filteredData = data.filter((appoint: any) => this.date.includes(appoint.date));
@@ -226,9 +227,9 @@ export class OpdRequestComponent {
 
   report() {
     this.isLoading = true;
-    this.appointment.getAllAppointments().subscribe((data: any[]) => {
+    // this.appointment.getAllAppointments().subscribe((data: any[]) => {
       // Step 1: Transform data into a structured format with Doctor ID, Name, and Department
-      let reportData = data.map((entry: any) => ({
+      let reportData = this.rawData.map((entry: any) => ({
         date: entry.date,
         doctorId: entry.doctorId,
         departmentName: entry.department,
@@ -302,7 +303,7 @@ export class OpdRequestComponent {
       console.log(tableData, "table data")
       // Step 5: Display the data or export it for reports
       this.isLoading = false;
-    });
+    // });
   }
 
   downloadChart() {
@@ -333,37 +334,64 @@ export class OpdRequestComponent {
     }
   }
 
+
   viewmore(): void {
     this.showViewMore = true
     this.loadDepartments();
-    this.viewMoreData()
+    this.viewMoreData();
+    this.fetchDoctors();
   }
 
   closeViewMore(): void {
     this.showViewMore = false
   }
 
-  departmentOnchange(event: any): void {
-    this.docDetails.getDoctors().subscribe(({
-      next: (data: any) => {
-        this.selectedViewDoctor = 'all'
-        if(event.target.value === 'all'){
-          this.departmentValue = 'all'
-        }
-        else{
-          this.departmentValue = this.department.filter((entry:any) => entry.id === parseInt(event.target.value))[0].name
-          this.filteredDoctors = data.filter((doc: any) => doc.departmentId === parseInt(event.target.value))
-          this.viewMoreData()
-        }
-      },
-      error: (error: any) => {
-        console.error(error)
-      },
-      complete: () => {
-      }
-    }))
+  fetchDoctors():void{
+    this.docDetails.getDoctorWithDepartment().subscribe((data: any[]) => {
+      this.allDoctors = data;
+    });
   }
-
+  departmentOnchange(event: any): void {
+    this.selectedViewDoctor = 'all';
+  
+    if (event.target.value === 'all') {
+      this.departmentValue = 'all';
+      this.filteredDoctors = this.allDoctors; // Show all doctors
+    } else {
+      const selectedDeptId = parseInt(event.target.value);
+      const selectedDept = this.department.find((entry: any) => entry.id === selectedDeptId);
+  
+      if (selectedDept) {
+        this.departmentValue = selectedDept.name;
+        this.filteredDoctors = this.allDoctors.filter((doc: any) => doc.departmentId === selectedDeptId);
+      } else {
+        this.departmentValue = '';
+        this.filteredDoctors = [];
+      }
+    }
+  
+    this.viewMoreData(); // Call after filtering
+  }
+    // departmentOnchange(event: any): void {
+  //   this.docDetails.getDoctors().subscribe(({
+  //     next: (data: any) => {
+  //       this.selectedViewDoctor = 'all'
+  //       if(event.target.value === 'all'){
+  //         this.departmentValue = 'all'
+  //       }
+  //       else{
+  //         this.departmentValue = this.department.filter((entry:any) => entry.id === parseInt(event.target.value))[0].name
+  //         this.filteredDoctors = data.filter((doc: any) => doc.departmentId === parseInt(event.target.value))
+  //         this.viewMoreData()
+  //       }
+  //     },
+  //     error: (error: any) => {
+  //       console.error(error)
+  //     },
+  //     complete: () => {
+  //     }
+  //   }))
+  // }
   ViewMorechart(data: any): void {
     // Add null check for chartDom
     const chartDom = document.getElementById('viewMoreOpdReq');

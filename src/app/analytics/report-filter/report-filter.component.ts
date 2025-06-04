@@ -91,7 +91,7 @@ export class ReportFilterComponent implements OnInit, OnChanges {
   }
 
   loadDoctors():void{
-    this.doctor.getAllDoctors().subscribe((data:any) => {
+    this.doctor.getDoctorWithDepartment().subscribe((data:any) => {
       this.allDoctors = data
     })
   }

@@ -78,7 +78,7 @@ export class AppointmentRequestComponent implements OnInit {
 
   fetchPendingAppointments(): void {
     this.isLoading = true;
-    this.appointmentService.fetchPendingAppointments().subscribe((appointments) => {
+    this.appointmentService.getPendingAppointments().subscribe((appointments) => {
       this.isLoading = false;
       this.pendingAppointments = appointments;
       this.pendingAppointments.sort((a, b) => {

@@ -371,7 +371,7 @@ line-height: normal;
   }
   .column-1{
     display: flex;
-    width: 50%;
+    width: 42%;
     /* gap: 20px; */
     padding-top: 20px;
     position: relative;

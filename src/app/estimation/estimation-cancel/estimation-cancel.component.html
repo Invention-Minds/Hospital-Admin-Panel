@@ -45,8 +45,7 @@
         </svg>
 
         <svg class="p-field p-col-3 download" src="download.png"
-            *ngIf="activeComponent==='confirmed' || activeComponent === 'completed' || activeComponent === 'cancelled'"
-            (click)="downloadData()" pTooltip="Download" xmlns="http://www.w3.org/2000/svg" width="3em" height="3em"
+            (click)="downloadData(filteredEstimations)" pTooltip="Download" xmlns="http://www.w3.org/2000/svg" width="3em" height="3em"
             viewBox="0 0 20 20">
             <path fill="#fff" fill-rule="evenodd"
                 d="M3 17a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H4a1 1 0 0 1-1-1m3.293-7.707a1 1 0 0 1 1.414 0L9 10.586V3a1 1 0 1 1 2 0v7.586l1.293-1.293a1 1 0 1 1 1.414 1.414l-3 3a1 1 0 0 1-1.414 0l-3-3a1 1 0 0 1 0-1.414"
@@ -101,8 +100,13 @@
                     <td>{{estimation.patientUHID || '-'}}</td>
                     <td>{{estimation.consultantName}}</td>
                     <!-- <td>{{ estimation.patientPhoneNumber }}</td> -->
-                    <td>{{ estimation.estimationName }}</td>
+                    <!-- <td>{{ estimation.estimationName }}</td> -->
                     <!-- <td>{{ estimation.appointmentTime }}</td> -->
+                    <td>
+                        <span [pTooltip]="estimation.estimationName" tooltipPosition="top">
+                          {{ estimation.estimationName | slice:0:10 }}{{ estimation.estimationName.length > 10 ? '...' : '' }}
+                        </span>
+                      </td>
                     <td>{{ estimation.estimationType }}</td>
                     <td>
                         {{

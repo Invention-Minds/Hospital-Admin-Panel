@@ -74,13 +74,11 @@ this.fetchPendingAppointments();
   }
   fetchPendingAppointments(): void {
     this.isLoading = true
-    this.healthCheckupService.getAllServices().subscribe({
+    this.healthCheckupService.getPendingAppointments().subscribe({
       next: (services: Service[]) => {
         
         // Process the services when the API call is successful
-        this.pendingAppointments = services.filter(
-          (service) => service.appointmentStatus === 'pending'
-        );
+        this.pendingAppointments = services
         this.pendingAppointments.sort((a, b) => {
           const dateA = new Date(a.createdAt!);
           const dateB = new Date(b.createdAt!);

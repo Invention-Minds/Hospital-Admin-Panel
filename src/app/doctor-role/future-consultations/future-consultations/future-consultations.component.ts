@@ -113,21 +113,18 @@ export class FutureConsultationsComponent {
     // console.log('Setting isLoading to true');
     this.isLoading = true; // Start loading indicator
     this.userId = localStorage.getItem('userid')
-
-    // Fetch appointments
-    this.appointmentService.fetchAppointments();
-    this.appointmentService.getAllAppointments().subscribe({
+    this.appointmentService.getFutureAppointments().subscribe({
       next: (appointments) => {
         // console.log('All Appointments received:', appointments);
         this.allAppointments = appointments;
-        this.confirmedAppointments = appointments.filter(appointment => appointment.status === 'confirmed');
+        this.confirmedAppointments = appointments;
 
-        this.doctorService.getAllDoctors().subscribe({
+        this.doctorService.getDoctorWithDepartment().subscribe({
           next: (doctors) => {
             this.futureAppointments = this.confirmedAppointments.filter(appointment => {
-              const doctor = doctors.find(doc => doc.id === appointment.doctorId);
+              const doctor = doctors.find((doc:any) => doc.id === appointment.doctorId);
               // console.log('Doctor:', doctor?.userId,this.userId);
-              return doctor && doctor.userId === parseInt(this.userId) && appointment.date > this.today;
+              return doctor && doctor.userId === parseInt(this.userId);
 
             });
             console.log(this.futureAppointments)

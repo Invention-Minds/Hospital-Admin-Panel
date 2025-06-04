@@ -369,10 +369,6 @@ export class TodayConsultationsComponent {
         console.log(this.doctor)
         this.doctorId = response.id;
         this.fetchAppointments(this.doctorId); // Fetch only this doctor's appointments
-        // console.log(this.isMonitoringActive)
-        // if (!this.isMonitoringActive) {
-        //   this.monitorWaitingTimes();
-        // }// Start monitoring only once for this doctor
       }
     );
   }
@@ -439,26 +435,10 @@ export class TodayConsultationsComponent {
     this.appointmentService.getAppointmentsByDoctor(doctorId!).subscribe(
       (appointments) => {
         console.log(appointments)
-        this.confirmedAppointments = appointments.filter(appointment => appointment.status === 'confirmed' && (appointment as any).checkedIn === true && appointment.date === this.today);
+        this.confirmedAppointments = appointments
         this.filteredAppointments = this.confirmedAppointments;
         this.startTimers();
-        // this.filteredAppointments = [...this.confirmedAppointments].sort((a, b) => {
-        //   if (a.checkedOut && !a.endConsultation) return -1; // Ongoing consultations first
-        //   if (!a.checkedOut && !b.checkedOut) return 0; // Pending appointments next
-        //   if (a.checkedOut && a.endConsultation) return 1; // Completed consultations last
-        //   return 0;
-        // });
-        // console.log(this.doctor)
         this.completedAppointments = this.filteredAppointments.filter(appointment => !appointment.checkedOut || (!appointment.checkedOut && !appointment.isCloseOPD))
-        // this.monitorWaitingTimes()
-        // this.checkWaitingTimes()
-        // console.log(this.completedAppointments, 'complete')
-        // this.filteredAppointments.sort((a, b) => {
-        //   const timeA = this.parseTimeToMinutes(a.time);
-        //   const timeB = this.parseTimeToMinutes(b.time);
-        //   return timeA - timeB; // Ascending order
-        // });
-        // this.sortAppointments()
         this.filteredAppointments.sort((a, b) => {
           // 1. Move finished consultations to the bottom
           if (a.endConsultation && !b.endConsultation) return 1;

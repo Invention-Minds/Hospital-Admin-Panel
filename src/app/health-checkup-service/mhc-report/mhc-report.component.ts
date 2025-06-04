@@ -87,7 +87,7 @@ export class MhcReportComponent {
 
     this.healthCheckupService.getAllServices().subscribe({
       next: (services: any[]) => {
-        this.appointmentService.getAllAppointments().subscribe({
+        this.appointmentService.getMHCReportAppointments().subscribe({
           next: (appointments: any[]) => {
 
             // ✅ Step 3: Calculate total waiting time per serviceId (Consultation)

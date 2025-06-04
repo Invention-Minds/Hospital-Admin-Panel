@@ -63,9 +63,10 @@ export class EstimationTypeReportComponent {
     // Lifecycle hook: Initialize component
     ngOnInit(): void {
       this.loadDepartments();
-      this.loadMhcPackages();
+      // this.loadMhcPackages();
       this.loadDoctors()
       this.individualDates = [getYesterdayDate()];
+      console.log(this.reportData)
       this.importedData = this.convertDateFormat(this.reportData);
       console.log(this.importedData)
       this.sortByDate();
@@ -108,7 +109,7 @@ export class EstimationTypeReportComponent {
     }
   
     loadDoctors():void{
-      this.doctor.getAllDoctors().subscribe((data:any) => {
+      this.doctor.getDoctorWithDepartment().subscribe((data:any) => {
         this.allDoctors = data
       })
     }

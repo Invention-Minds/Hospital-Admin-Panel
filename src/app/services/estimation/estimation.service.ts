@@ -78,4 +78,13 @@ lockService(serviceId: number, userId: number): Observable<any> {
 unlockService(serviceId: number): Observable<any> {
   return this.http.put(`${this.apiUrl}/${serviceId}/unlock`, {});
 }
+getConfirmedServiceAnalytics():Observable<any>{
+  return this.http.get(`${this.apiUrl}/get-confirmed`)
+}
+getOpdConversion():Observable<any>{
+  return this.http.get(`${this.apiUrl}/opd-estimation`)
+}
+getStatusEstimation():Observable<any>{
+  return this.http.get(`${this.apiUrl}/status-estimation`)
+}
 }

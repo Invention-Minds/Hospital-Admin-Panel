@@ -84,22 +84,12 @@ fetchConfirmedAppointments(): void {
   const month = (today.getMonth() + 1).toString().padStart(2, '0');
   const day = today.getDate().toString().padStart(2, '0');
   this.today = `${year}-${month}-${day}`;
-  this.healthCheckupService.getAllServices().subscribe({
+  this.healthCheckupService.getConfirmedAppointments().subscribe({
     next: (services: Service[]) => {
       
       // Process the services when the API call is successful
-      this.confirmedAppointments = services.filter(
-        (service) => service.appointmentStatus === 'Confirm' || service.appointmentStatus === 'confirmed'
-      );
-      // this.confirmedAppointments = services.filter(
-      //   (service) => {
-      //     const appointmentDate = new Date(service.appointmentDate);
-      //     return (
-      //       (service.appointmentStatus === 'Confirm' || service.appointmentStatus === 'confirmed') &&
-      //       appointmentDate >= today // Filter out past dates
-      //     );
-      //   }
-      // );
+      this.confirmedAppointments = services
+
       this.confirmedAppointments.sort((a, b) => {
         const dateA = new Date(a.createdAt!);
         const dateB = new Date(b.createdAt!);

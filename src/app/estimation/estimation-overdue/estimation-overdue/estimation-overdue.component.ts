@@ -2,6 +2,8 @@ import { Component, Output, EventEmitter } from '@angular/core';
 import { EstimationService } from '../../../services/estimation/estimation.service';
 import { MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
+import * as XLSX from 'xlsx';
+import * as FileSaver from 'file-saver';
 
 @Component({
   selector: 'app-estimation-overdue',
@@ -74,9 +76,9 @@ this.fetchPendingEstimations();
         );
         console.log(this.pendingEstimations)
         this.pendingEstimations.sort((a, b) => {
-          const dateA = new Date(a.estimationCreatedTime!);
-          const dateB = new Date(b.estimationCreatedTime!);
-          return dateA.getTime() - dateB.getTime();
+          const dateA = new Date(a.overDueDateAndTIme!);
+          const dateB = new Date(b.overDueDateAndTIme!);
+          return dateB.getTime() - dateA.getTime();
         });
         this.filteredEstimations = [...this.pendingEstimations];
         console.log('Services processed successfully.');
@@ -170,30 +172,9 @@ this.fetchPendingEstimations();
     this.selectedDateRange = []
     this.filteredEstimations = [...this.pendingEstimations]
   }
-  downloadData(): void {
-    // if (this.selectedDateRange && this.selectedDateRange.length > 0 && this.activeComponent === 'confirmed') {
-    //   // Call the download method in the appointment confirm component
-    //   this.appointmentConfirmComponent?.downloadFilteredData();
-    // } 
-    // else if(this.selectedDateRange && this.selectedDateRange.length > 0) {
-    //   // console.log('Downloading completed appointments data...');
-    //   // console.log(this.appointmentCompleteComponent)
-    //   this.appointmentCompleteComponent?.downloadFilteredData();
-    // }
-    // else if(this.activeComponent === 'cancelled' && this.selectedDateRange && this.selectedDateRange.length > 0) {
-    //   // console.log('Downloading cancelled appointments data...');
-    //   this.appointmentCancelComponent?.downloadFilteredData();
-    // }
-    // else if(this.selectedDateRange && this.selectedDateRange.length === 0) {
-    //   // Download last week's data if no component is active
-    //   this.messageService.add({ severity: 'info', summary: 'Info', detail: 'Select a date to download the report' });
-    // }
-
+  downloadData(data:any): void {
+    this.exportToExcel(data, 'Estimation-OverDued-Summary');
   }
-  // downloadLastWeekData(): void {
-  //   // Implement logic to download last week's data
-  //   console.log('Downloading last week\'s data...');
-  // }
 
   // Method to clear input fields
   onClear() {
@@ -513,5 +494,60 @@ this.fetchPendingEstimations();
     } else {
       console.error("No PDF link available for this estimation.");
     }
+  }
+  exportToExcel(data: any[], fileName: string = 'Estimation-Summary') {
+    const dateFieldsToConvert = [
+      'estimationCreatedTime',
+      'approvedDateAndTime',
+      'confirmedDateAndTime',
+      'cancellationDateAndTime',
+      'completedDateAndTime',
+      'overDueDateAndTIme',
+      'submittedDateAndTime'
+    ];
+  
+    const filteredData = data.map(item => {
+      const {
+        patientSign,
+        employeeSign,
+        approverSign,
+        pdfLink,
+        ...rest
+      } = item;
+  
+      // Convert date fields from UTC to IST
+      for (const field of dateFieldsToConvert) {
+        if (rest[field]) {
+          rest[field] = new Date(rest[field]).toLocaleString('en-IN', {
+            timeZone: 'Asia/Kolkata',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+          });
+        }
+      }
+  
+      return rest;
+    });
+  
+    const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(filteredData);
+    const workbook: XLSX.WorkBook = {
+      Sheets: { 'data': worksheet },
+      SheetNames: ['data']
+    };
+    const excelBuffer: any = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array'
+    });
+  
+    const blob: Blob = new Blob([excelBuffer], {
+      type:
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8'
+    });
+  
+    FileSaver.saveAs(blob, `${fileName}_${new Date().toISOString().slice(0, 10)}.xlsx`);
   }
 }

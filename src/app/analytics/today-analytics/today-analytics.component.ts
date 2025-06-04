@@ -65,7 +65,7 @@ export class TodayAnalyticsComponent {
     this.date = getTodayDate()
     this.fetchDoctorsWithAvailability();
     this.confirmedEstimations();
-    this.roomAvailability();
+    // this.roomAvailability();
     this.mhcConfirmed()
     this.getTodayCheckin()
     this.popUpPresentReport = false
@@ -73,7 +73,7 @@ export class TodayAnalyticsComponent {
   }
 
   private fetchDoctorsWithAvailability(): void {
-    this.doctor.getAllDoctors().subscribe(
+    this.doctor.getAllDoctors(this.date).subscribe(
       (doctors) => {
         const currentTime = this.timeToMinutes(new Date().toTimeString().substring(0, 5)); // Current time in minutes
         const selectedDate = this.date;
@@ -487,7 +487,7 @@ export class TodayAnalyticsComponent {
   }
 
   confirmedEstimations(): void {
-    this.estimations.getAllEstimation().subscribe((data: any) => {
+    this.estimations.getConfirmedServiceAnalytics().subscribe((data: any) => {
       const today = new Date();
       const day = String(today.getDate()).padStart(2, '0');
       const month = String(today.getMonth() + 1).padStart(2, '0');
@@ -495,9 +495,9 @@ export class TodayAnalyticsComponent {
       const date = `${day}/${month}/${year}`;
 
       try {
-        this.estimation.liveConfirmedEstimating = data.filter((confirm: any) => this.date === utcToIstDate(confirm.confirmedDateAndTime) && confirm.statusOfEstimation === 'confirmed').length
+        this.estimation.liveConfirmedEstimating = data.filter((confirm: any) => this.date === utcToIstDate(confirm.confirmedDateAndTime)).length
 
-        const mapconfirmedEstimation = data.filter((data: any) => this.date === utcToIstDate(data.confirmedDateAndTime) && data.statusOfEstimation === 'confirmed').map((confirm: any) => {
+        const mapconfirmedEstimation = data.filter((data: any) => this.date === utcToIstDate(data.confirmedDateAndTime)).map((confirm: any) => {
           return {
             date: utcToIstDate(confirm.confirmedDateAndTime),
             status: confirm.statusOfEstimation,
@@ -581,16 +581,16 @@ export class TodayAnalyticsComponent {
     })
   }
 
-  roomAvailability(): void {
-    this.doctor.getAllDoctors().subscribe((data: any) => {
-      this.availlableRoom = data.filter((room: any) => room.roomNo !== null && room.roomNo !== '').length
-    })
-  }
+  // roomAvailability(): void {
+  //   this.doctor.getAllDoctors().subscribe((data: any) => {
+  //     this.availlableRoom = data.filter((room: any) => room.roomNo !== null && room.roomNo !== '').length
+  //   })
+  // }
 
   mhcConfirmed(): void {
-    this.healthCheckUp.getAllServices().subscribe((data: any) => {
+    this.healthCheckUp.getTodayConfirmedServices().subscribe((data: any) => {
       try {
-        const comfirmedMhc = data.filter((entry: any) => entry.appointmentStatus === "Confirm").map((entry: any) => {
+        const comfirmedMhc = data.map((entry: any) => {
           return {
             date: entry.appointmentDate,
             status: entry.appointmentStatus,
@@ -599,9 +599,8 @@ export class TodayAnalyticsComponent {
             age: entry.age
           }
         })
-        this.healthCheck.liveCount = comfirmedMhc.filter((entry: any) => entry.date === this.date).length
-        const dateFiltered = comfirmedMhc.filter((entry: any) => entry.date === this.date)
-        this.mhcTableData = dateFiltered
+        this.healthCheck.liveCount = comfirmedMhc.length
+        this.mhcTableData = comfirmedMhc
         // console.log(comfirmedMhc, "confirmed MHC")
 
         const last14Days = getLast14Days()
@@ -801,7 +800,8 @@ export class TodayAnalyticsComponent {
       .getTotalAppointmentsCountForToday(this.date)
       .subscribe(
         (totalAppointments) => {
-          this.todayTotalOpdCount = totalAppointments.count;
+          const totalTodayAppointments = totalAppointments.count;
+          this.todayTotalOpdCount = totalTodayAppointments.length;
         },
         (error) => {
           console.error('Error fetching total appointments:', error);

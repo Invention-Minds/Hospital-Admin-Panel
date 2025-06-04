@@ -138,162 +138,34 @@ export class MhcTodayConsulComponent {
   fetchConfirmedAppointments(): void {
     this.isLoading = true;
     const today = new Date();
-    this.healthCheckupService.getAllServices().subscribe({
+    this.healthCheckupService.getConfirmedAppointments().subscribe({
       next: (services: any[]) => {
-        this.appointmentService.getAllAppointments().subscribe({
-          next: (appointments: any[]) => {
+        this.confirmedAppointments = services.filter(service =>
+          service.checkedIn === true &&
+          service.appointmentDate === today.toLocaleDateString('en-CA')
+        )
+        .map(service => {
+          const consultationCount = service.package?.deptIds
+            ? service.package.deptIds.split(',').length
+            : 0; // Count the number of department IDs
 
-            // ✅ Step 3: Calculate total waiting time per serviceId (Consultation)
-            const waitingTimeByServiceId: { [serviceId: string]: number } = {};
-            const consultationDetailsByServiceId: { [serviceId: string]: any[] } = {};
-
-            appointments.forEach(appt => {
-              if (appt.serviceId) {
-                if (!waitingTimeByServiceId[appt.serviceId]) {
-                  waitingTimeByServiceId[appt.serviceId] = 0;
-                  consultationDetailsByServiceId[appt.serviceId] = [];
-                }
-                waitingTimeByServiceId[appt.serviceId] += Number(appt.waitingTime) || 0; // Add waiting time
-                // Store department name with consultation time
-                if (appt.department && appt.waitingTime) {
-                  consultationDetailsByServiceId[appt.serviceId].push({
-                    department: appt.department,
-                    waitingTime: appt.waitingTime
-                  });
-                }
-              }
-            });
-
-            console.log("Consultation Time Per Service:", waitingTimeByServiceId);
-            console.log("Consultation Details Per Service:", consultationDetailsByServiceId);
-
-            // ✅ Step 4: Fetch Radiology Services and Compute Radiology Time
-            this.radiologyService.getAllServices().subscribe({
-              next: (radiologyServices: any[]) => {
-
-                // Store Radiology Time per serviceId
-                const radiologyTimeByServiceId: { [serviceId: string]: number } = {};
-                const radiologyDetailsByServiceId: { [serviceId: string]: any[] } = {};
-
-                // ✅ Compute Total Radiology Time per Service ID
-                radiologyServices.forEach(appt => {
-                  if (appt.serviceId && appt.entryTime && appt.checkedOutTime) {
-                    const entryTime = new Date(appt.entryTime).getTime();
-                    const checkedOutTime = new Date(appt.checkedOutTime).getTime();
-                    const timeDifference = Math.abs((checkedOutTime - entryTime) / 60000); // Convert to minutes
-
-                    if (!radiologyTimeByServiceId[appt.serviceId]) {
-                      radiologyTimeByServiceId[appt.serviceId] = 0;
-                      radiologyDetailsByServiceId[appt.serviceId] = [];
-                    }
-                    radiologyTimeByServiceId[appt.serviceId] += timeDifference;
-
-                    // Store radiology service name with waiting time
-                    if (appt.radioServiceName) {
-                      radiologyDetailsByServiceId[appt.serviceId].push({
-                        radioServiceName: appt.radioServiceName,
-                        waitingTime: timeDifference
-                      });
-                    }
-                  }
-                });
-
-                console.log("Radiology Time Per Service:", radiologyTimeByServiceId);
-                console.log("Radiology Details Per Service:", radiologyDetailsByServiceId);
-
-                // ✅ Function to Format Time in `hr/min` format
-                function formatDuration(minutes: number): string {
-                  if (!minutes || minutes <= 0) return "-"; // Handle missing values
-
-                  if (minutes >= 60) {
-                    const hours = Math.floor(minutes / 60);
-                    const mins = Math.round(minutes % 60);
-                    return mins > 0 ? `${hours} hr ${mins} mins` : `${hours} hr`;
-                  } else {
-                    return `${Math.round(minutes)} mins`;
-                  }
-                }
-                function extractMinutes(timeString: string): number {
-                  if (!timeString || timeString === "-") return 0; // Handle missing values
-
-                  const timeParts = timeString.match(/(\d+)\s*hr\s*(\d*)\s*min?/);
-                  if (timeParts) {
-                    const hours = parseInt(timeParts[1] || "0", 10);
-                    const minutes = parseInt(timeParts[2] || "0", 10);
-                    return hours * 60 + minutes;
-                  } else if (timeString.includes("mins")) {
-                    return parseInt(timeString, 10);
-                  } else {
-                    return 0;
-                  }
-                }
-                // ✅ Step 5: Process and Format Confirmed Appointments
-                this.confirmedAppointments = services
-                  .filter(service =>
-                    service.appointmentStatus === 'Confirm' &&
-                    service.checkedIn === true &&
-                    service.appointmentDate === today.toLocaleDateString('en-CA')
-                  )
-                  .map(service => {
-                    const consultationCount = service.package?.deptIds
-                      ? service.package.deptIds.split(',').length
-                      : 0; // Count the number of department IDs
-
-                    const radiologyCount = service.package?.radioIds
-                      ? service.package.radioIds.split(',').length
-                      : 0; // Count the number of radiology IDs
-                    // ✅ Calculate Lab Time
-                    const labTime = service.isLabEntryTime && service.isLabTime
-                      ? formatDuration(Math.abs((new Date(service.isLabTime).getTime() - new Date(service.isLabEntryTime).getTime()) / 60000))
-                      : "-";
-
-                    // ✅ Calculate Radiology Time & Details
-                    const radiologyTime = service.id
-                      ? formatDuration(radiologyTimeByServiceId[service.id] || 0)
-                      : "-";
-                    const radiologyDetails = radiologyDetailsByServiceId[service.id] || [];
-
-                    // ✅ Calculate Consultation Time & Details
-                    const consultationTime = service.id
-                      ? formatDuration(waitingTimeByServiceId[service.id] || 0)
-                      : "-";
-                    const consultationDetails = consultationDetailsByServiceId[service.id] || [];
-                    const totalMinutes = extractMinutes(labTime) + extractMinutes(radiologyTime) + extractMinutes(consultationTime);
-
-                    // ✅ Convert total minutes to `X hr Y min` format
-                    const total = formatDuration(totalMinutes);
-
-
-                    return {
-                      ...service,
-                      labTime,
-                      consultationCount,
-                      radiologyCount,
-                      radiologyTime, // ✅ Adding Radiology Time
-                      consultationTime, // ✅ Adding Consultation Time
-                      radiologyDetails, // ✅ Storing individual radiology services
-                      consultationDetails, // ✅ Storing individual consultation details
-                      total
-                    };
-                  });
-                this.confirmedAppointments.sort((a, b) => {
-                  const dateA = new Date(a.createdAt!).getTime();
-                  const dateB = new Date(b.createdAt!).getTime();
-                  return dateB - dateA;
-                });
-                this.filteredServices = [...this.confirmedAppointments];
-
-                console.log("Final Confirmed Appointments:", this.confirmedAppointments);
-              },
-              error: (err) => {
-                console.error("Error fetching radiology services:", err);
-              }
-            });
-          },
-          error: (err) => {
-            console.error("Error fetching appointments:", err);
-          }
+          const radiologyCount = service.package?.radioIds
+            ? service.package.radioIds.split(',').length
+            : 0; // Count the number of radiology IDs
+          return {
+            ...service,
+            consultationCount,
+            radiologyCount,
+          };
         });
+      this.confirmedAppointments.sort((a, b) => {
+        const dateA = new Date(a.createdAt!).getTime();
+        const dateB = new Date(b.createdAt!).getTime();
+        return dateB - dateA;
+      });
+      this.filteredServices = [...this.confirmedAppointments];
+
+      console.log("Final Confirmed Appointments:", this.confirmedAppointments);
       },
       error: (err) => {
         console.error("Error fetching services:", err);
@@ -767,6 +639,7 @@ confirmCompletion(): void {
           detail: `Service ID ${service.id} has been locked successfully.`,
         });
         this.openAppointmentFormAfterLocked(service);
+        console.log(service)
         this.activeComponent = 'form';
       },
       error: (error) => {

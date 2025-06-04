@@ -74,6 +74,8 @@ export class ArrivedConsultationComponent {
   today: string = '';
   futureAppointments: Appointment[] = [];
   isDesktopView: boolean = true;
+  doctor:any[]=[];
+  doctorId:number=0;
 
   searchOptions = [
     { label: 'Patient Name', value: 'patientName' },
@@ -100,6 +102,46 @@ export class ArrivedConsultationComponent {
     // Toggle card expansion
     this.filteredAppointments[index].expanded = !this.filteredAppointments[index].expanded;
   }
+
+  loadDoctorData() {
+    this.doctorService.getDoctorByUserId(this.userId).subscribe(
+      (response) => {
+        this.doctor = response;
+        console.log(this.doctor)
+        this.doctorId = response.id;
+        this.fetchAppointments(this.doctorId); // Fetch only this doctor's appointments
+      }
+    );
+  }
+  fetchAppointments(doctorId?: number) {
+    this.appointmentService.getAppointmentsByDoctor(doctorId!).subscribe(
+      (appointments) => {
+        console.log(appointments)
+        this.confirmedAppointments = appointments
+        this.filteredAppointments = this.confirmedAppointments;
+        this.futureAppointments = this.filteredAppointments.filter(appointment => !appointment.checkedOut || (!appointment.checkedOut && !appointment.isCloseOPD))
+        this.filteredAppointments.sort((a, b) => {
+          // 1. Move finished consultations to the bottom
+          if (a.endConsultation && !b.endConsultation) return 1;
+          if (!a.endConsultation && b.endConsultation) return -1;
+
+          // 2. Sort by appointment time (earliest first)
+          const timeA = this.parseTimeToMinutes(a.time);
+          const timeB = this.parseTimeToMinutes(b.time);
+          return timeA - timeB;
+        });
+        // this.filterAppointmentsByDate(new Date());
+        this.isLoading = false;
+        // console.log(`Loaded ${doctor.patients.length} patients for doctor ${doctor.name}`);
+      },
+      (error) => {
+        console.error(`Error fetching appointments for doctor ${doctorId!}:`, error);
+        this.isLoading = false
+        // Handle error gracefully by assigning an empty array
+      }
+
+    );
+  }
   // Method to handle sorting by a specific column
   ngOnInit() {
     const today = new Date();
@@ -111,51 +153,67 @@ export class ArrivedConsultationComponent {
     // console.log('Setting isLoading to true');
     this.isLoading = true; // Start loading indicator
     this.userId = localStorage.getItem('userid')
+    this.loadDoctorData()
 
     // Fetch appointments
-    this.appointmentService.fetchAppointments();
-    this.appointmentService.getAllAppointments().subscribe({
-      next: (appointments) => {
-        // console.log('All Appointments received:', appointments);
-        this.allAppointments = appointments;
-        this.confirmedAppointments = this.allAppointments
+    // this.appointmentService.fetchAppointments();
+    // this.appointmentService.getAllAppointments().subscribe({
+    //   next: (appointments) => {
+    //     // console.log('All Appointments received:', appointments);
+    //     this.allAppointments = appointments;
+    //     this.confirmedAppointments = this.allAppointments
 
-        this.doctorService.getAllDoctors().subscribe({
-          next: (doctors) => {
-            this.futureAppointments = this.confirmedAppointments.filter(appointment => {
-              const doctor = doctors.find(doc => doc.id === appointment.doctorId);
-              // console.log('Doctor:', doctor?.userId,this.userId);
-              return doctor && doctor.userId === parseInt(this.userId) && appointment.date === this.today;
+    //     this.doctorService.getAllDoctors().subscribe({
+    //       next: (doctors) => {
+    //         this.futureAppointments = this.confirmedAppointments.filter(appointment => {
+    //           const doctor = doctors.find(doc => doc.id === appointment.doctorId);
 
-            });
-            console.log(this.futureAppointments)
-            this.filteredAppointments = [...this.futureAppointments];
-          },
-          error: (error) => {
-            console.error('Error fetching doctor details:', error);
-          }
-        });
-        // console.log(this.filteredAppointments)
-        this.filteredAppointments.sort((a, b) => {
-          const dateA = new Date(a.created_at!);
-          const dateB = new Date(b.created_at!);
-          return dateB.getTime() - dateA.getTime();
-        });
+    //           return doctor && doctor.userId === parseInt(this.userId) && appointment.date === this.today;
+
+    //         });
+    //         console.log(this.futureAppointments)
+    //         this.filteredAppointments = [...this.futureAppointments];
+    //       },
+    //       error: (error) => {
+    //         console.error('Error fetching doctor details:', error);
+    //       }
+    //     });
+    //     // console.log(this.filteredAppointments)
+    //     this.filteredAppointments.sort((a, b) => {
+    //       const dateA = new Date(a.created_at!);
+    //       const dateB = new Date(b.created_at!);
+    //       return dateB.getTime() - dateA.getTime();
+    //     });
 
 
-        // this.filteredAppointments = [...this.confirmedAppointments];
-        // this.filterAppointmentsByDate(new Date());
+    //     // this.filteredAppointments = [...this.confirmedAppointments];
+    //     // this.filterAppointmentsByDate(new Date());
 
-        // console.log('Setting isLoading to false');
-        setTimeout(() => {
-          // console.log('Setting isLoading to false after delay');
-          this.isLoading = false; // Stop loading indicator
-        }, 1000); // 2-second delay
-      }
-    })
+    //     // console.log('Setting isLoading to false');
+    //     setTimeout(() => {
+    //       // console.log('Setting isLoading to false after delay');
+    //       this.isLoading = false; // Stop loading indicator
+    //     }, 1000); // 2-second delay
+    //   }
+    // })
 
     // Subscribe to confirmed appointments
 
+  }
+
+  parseTimeToMinutes(time: string): number {
+    const [hours, minutesPart] = time.split(':');
+    const minutes = parseInt(minutesPart.slice(0, 2), 10); // Extract the numeric minutes
+    const isPM = time.toLowerCase().includes('pm');
+
+    let hoursInMinutes = parseInt(hours, 10) * 60;
+    if (isPM && parseInt(hours, 10) !== 12) {
+      hoursInMinutes += 12 * 60; // Add 12 hours for PM times
+    } else if (!isPM && parseInt(hours, 10) === 12) {
+      hoursInMinutes -= 12 * 60; // Subtract 12 hours for 12 AM
+    }
+
+    return hoursInMinutes + minutes;
   }
 
 

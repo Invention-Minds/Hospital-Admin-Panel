@@ -233,8 +233,8 @@ const appointmentData = appointment
     return this.http.get<{ time: string; complete: boolean }[]>(bookedSlotsUrl);
   }
   // Method to get today's total appointments count
-  getTotalAppointmentsCountForToday(date: string): Observable<{ count: number }> {
-    return this.http.get<{ count: number }>(`${this.apiUrl}/total`, {
+  getTotalAppointmentsCountForToday(date: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/total`, {
       params: { date: date }
     });
   }
@@ -556,5 +556,59 @@ const appointmentData = appointment
     return this.http.post<any>(`${this.investigationUrl}/radiology-tests`, payload);
   }
   
-  
+  getConfirmedAppointments():Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/confirmed-appts`)
+  }
+  getCancelledAppointments():Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/cancelled-appts`)
+  }
+  getCompletedAppointments():Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/completed-appts`)
+  }
+  getPendingAppointments():Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/pending-appts`)
+  }
+  getTransferAppointments():Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/transfer-appts`)
+  }
+  getReferredAppointments():Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/referred-appts`)
+  }
+  getFollowUpAppointments():Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/followup-appts`)
+  }
+  getPastAppointments():Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/past-consultations`)
+  }
+  getFutureAppointments():Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/future-consultations`)
+  }
+  getMHCAppointments():Observable<any[]>{
+    return this.http.get<any[]>(`${this.apiUrl}/mhc-appts`)
+  }
+  getMHCReportAppointments():Observable<any[]>{
+    return this.http.get<any[]>(`${this.apiUrl}/mhc-report-appts`)
+  }
+
+  getopdRequestvia():Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/opd-requestVia`)
+  }
+  getopdTimeWise():Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/opd-time`)
+  }
+  getopdTypeWise():Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/opd-type`)
+  }
+  getopdStatusWise():Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/opd-status`)
+  }
+  getprnWise():Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/prn-wise`)
+  }
+  getopdGenderWise():Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/opd-gender`)
+  }
+  getCheckedOut():Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/get-checkedOut`)
+  }
 }

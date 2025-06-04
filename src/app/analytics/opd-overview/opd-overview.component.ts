@@ -52,7 +52,8 @@ export class OpdOverviewComponent {
   dateInput : any
   selectedViewDate : any[] =[]
   selectedViewDoctor : any = 'all'
-  selectedViewDepartment : any = 'all'
+  selectedViewDepartment : any = 'all';
+  allDoctors:any[]=[]
 
 
   // loading
@@ -80,7 +81,7 @@ export class OpdOverviewComponent {
 
   appointmentData(): void {
     this.isLoading = true
-    this.appointment.getAllAppointments().subscribe({
+    this.appointment.getopdStatusWise().subscribe({
 
       next: (data) => {
         this.rawData = data
@@ -193,96 +194,137 @@ export class OpdOverviewComponent {
     myChart.setOption(this.chartoption); // Render the chart
   }
 
+
+  // overviewReport() {
+  //   // this.isLoading = true;
+  //   this.rawData.map((data: any) => {
+  //       const groupedDataMap: { [key: string]: any } = {};
+  
+  //       data.forEach((item: any) => {
+  //         const date = item.date;
+  //         const doctorId = item.doctorId;
+  //         const doctorName = item.doctorName;
+  //         const departmentName = item.department; // Adjust if field name is different, e.g., item.departmentName
+  
+  //         // Create a unique key combining all four fields
+  //         const uniqueKey = `${date}-${doctorId}-${doctorName}-${departmentName}`;
+  
+  //         if (!groupedDataMap[uniqueKey]) {
+  //           groupedDataMap[uniqueKey] = {
+  //             date: date,
+  //             doctorId: doctorId,
+  //             doctorName: doctorName,
+  //             departmentName: departmentName,
+  //             totalRequest: 0,
+  //             confirmed: 0,
+  //             cancelled: 0,
+  //             completed: 0,
+  //             pending: 0,
+  //           };
+  //         }
+  
+  //         // Increment the respective status count
+  //         groupedDataMap[uniqueKey].totalRequest += 1;
+  
+  //         if (item.status === 'confirmed') {
+  //           groupedDataMap[uniqueKey].confirmed += 1;
+  //         }
+  
+  //         if (item.status === 'cancelled') {
+  //           groupedDataMap[uniqueKey].cancelled += 1;
+  //         }
+  
+  //         if (item.status === 'completed') {
+  //           groupedDataMap[uniqueKey].completed += 1;
+  //         }
+  
+  //         if (item.checkedIn === true) {
+  //           groupedDataMap[uniqueKey].pending += 1;
+  //         }
+  //       });
+  
+  //       // Convert the grouped data object to an array
+  //       const groupedData = Object.values(groupedDataMap);
+  
+  //       this.reportData.emit(groupedData);
+  //       const reportColumn = [
+  //         { header: "Date", key: "date" },
+  //         { header: "Doctor Name", key: "doctorName" },
+  //         { header: "Total Appointments", key: "totalRequest" },
+  //         { header: "Confirmed", key: "confirmed" },
+  //         { header: "Cancelled", key: "cancelled" },
+  //         { header: "Completed", key: "completed" },
+  //         { header: "Checked-In", key: "pending" }
+  //       ];
+
+  //       this.reportsColumn.emit(reportColumn);
+  //       this.reportView.emit({ onoff: true, range: "range" });
+  //       this.reportInitializeDate.emit(this.selectedDate);
+  //       this.reportDoctorId.emit(this.doctorId);
+  //       this.blockFilters.emit([false, false])
+  //       this.reportName.emit('OPD Overview')
+
+  //       console.log(this.selectedDate);
+
+  //       // this.isLoading = false;
+        
+  //     })
+
+  //       }
   overviewReport() {
-    this.isLoading = true;
-    this.appointment.getAllAppointments().pipe(
-      map((data: any) => {
-        const groupedDataMap: { [key: string]: any } = {};
+    const groupedDataMap: { [key: string]: any } = {};
   
-        data.forEach((item: any) => {
-          const date = item.date;
-          const doctorId = item.doctorId;
-          const doctorName = item.doctorName;
-          const departmentName = item.department; // Adjust if field name is different, e.g., item.departmentName
+    this.rawData.forEach((item: any) => {
+      const date = item.date;
+      const doctorId = item.doctorId;
+      const doctorName = item.doctorName;
+      const departmentName = item.department;
   
-          // Create a unique key combining all four fields
-          const uniqueKey = `${date}-${doctorId}-${doctorName}-${departmentName}`;
+      const uniqueKey = `${date}-${doctorId}-${doctorName}-${departmentName}`;
   
-          if (!groupedDataMap[uniqueKey]) {
-            groupedDataMap[uniqueKey] = {
-              date: date,
-              doctorId: doctorId,
-              doctorName: doctorName,
-              departmentName: departmentName,
-              totalRequest: 0,
-              confirmed: 0,
-              cancelled: 0,
-              completed: 0,
-              pending: 0,
-            };
-          }
+      if (!groupedDataMap[uniqueKey]) {
+        groupedDataMap[uniqueKey] = {
+          date,
+          doctorId,
+          doctorName,
+          departmentName,
+          totalRequest: 0,
+          confirmed: 0,
+          cancelled: 0,
+          completed: 0,
+          pending: 0,
+        };
+      }
   
-          // Increment the respective status count
-          groupedDataMap[uniqueKey].totalRequest += 1;
+      groupedDataMap[uniqueKey].totalRequest += 1;
   
-          if (item.status === 'confirmed') {
-            groupedDataMap[uniqueKey].confirmed += 1;
-          }
+      if (item.status === 'confirmed') groupedDataMap[uniqueKey].confirmed += 1;
+      if (item.status === 'cancelled') groupedDataMap[uniqueKey].cancelled += 1;
+      if (item.status === 'completed') groupedDataMap[uniqueKey].completed += 1;
+      if (item.checkedIn === true) groupedDataMap[uniqueKey].pending += 1;
+    });
   
-          if (item.status === 'cancelled') {
-            groupedDataMap[uniqueKey].cancelled += 1;
-          }
+    const groupedData = Object.values(groupedDataMap);
   
-          if (item.status === 'completed') {
-            groupedDataMap[uniqueKey].completed += 1;
-          }
+    this.reportData.emit(groupedData);
+    this.reportsColumn.emit([
+      { header: "Date", key: "date" },
+      { header: "Doctor Name", key: "doctorName" },
+      { header: "Total Appointments", key: "totalRequest" },
+      { header: "Confirmed", key: "confirmed" },
+      { header: "Cancelled", key: "cancelled" },
+      { header: "Completed", key: "completed" },
+      { header: "Checked-In", key: "pending" }
+    ]);
+    this.reportView.emit({ onoff: true, range: "range" });
+    this.reportInitializeDate.emit(this.selectedDate);
+    this.reportDoctorId.emit(this.doctorId);
+    this.blockFilters.emit([false, false]);
+    this.reportName.emit('OPD Overview');
   
-          if (item.checkedIn === true) {
-            groupedDataMap[uniqueKey].pending += 1;
-          }
-        });
-  
-        // Convert the grouped data object to an array
-        const groupedData = Object.values(groupedDataMap);
-  
-        return groupedData;
-      })
-    )
-      .subscribe({
-        next: (groupedData) => {
-          this.reportData.emit(groupedData);
-          // console.log(groupedData);
-        },
-        error: (error) => {
-          console.error(error); // Handle errors
-        },
-        complete: () => {
-          const reportColumn = [
-            { header: "Date", key: "date" },
-            { header: "Doctor Name", key: "doctorName" },
-            { header: "Total Appointments", key: "totalRequest" },
-            { header: "Confirmed", key: "confirmed" },
-            { header: "Cancelled", key: "cancelled" },
-            { header: "Completed", key: "completed" },
-            { header: "Checked-In", key: "pending" }
-          ];
-  
-          this.reportsColumn.emit(reportColumn);
-          this.reportView.emit({ onoff: true, range: "range" });
-          this.reportInitializeDate.emit(this.selectedDate);
-          this.reportDoctorId.emit(this.doctorId);
-          this.blockFilters.emit([false, false])
-          this.reportName.emit('OPD Overview')
-  
-          console.log(this.selectedDate);
-  
-          this.isLoading = false;
-        }
-      });
+    console.log(this.selectedDate);
   }
-
-  // viewmore
-
+  
   async loadDepartments(): Promise<void> {
     try {
       const data = await this.docDetails.getDepartments().toPromise()
@@ -296,28 +338,55 @@ export class OpdOverviewComponent {
   viewmore():void{
     this.showViewMore = true
     this.loadDepartments();
-    this.viewMoreData()
+    this.viewMoreData();
+    this.fetchDoctors()
   }
 
   closeViewMore():void{
     this.showViewMore = false
   }
 
-  departmentOnchange(event: any): void {
-    this.docDetails.getDoctors().subscribe(({
-      next: (data: any) => {
-        this.selectedViewDoctor = 'all'
-        this.filteredDoctors = data.filter((doc: any) => doc.departmentId === parseInt(event.target.value))
-        this.selectedViewDepartment = this.department.filter((entry:any) => entry.id === parseInt(event.target.value))[0].name
-        this.viewMoreData()
-      },
-      error: (error: any) => {
-        console.error(error)
-      },
-      complete: () => {
+  // departmentOnchange(event: any): void {
+  //   this.docDetails.getDoctors().subscribe(({
+  //     next: (data: any) => {
+  //       this.selectedViewDoctor = 'all'
+  //       this.filteredDoctors = data.filter((doc: any) => doc.departmentId === parseInt(event.target.value))
+  //       this.selectedViewDepartment = this.department.filter((entry:any) => entry.id === parseInt(event.target.value))[0].name
+  //       this.viewMoreData()
+  //     },
+  //     error: (error: any) => {
+  //       console.error(error)
+  //     },
+  //     complete: () => {
 
+  //     }
+  //   }))
+  // }
+  fetchDoctors():void{
+    this.docDetails.getDoctorWithDepartment().subscribe((data: any[]) => {
+      this.allDoctors = data;
+    });
+  }
+  departmentOnchange(event: any): void {
+    this.selectedViewDoctor = 'all';
+  
+    if (event.target.value === 'all') {
+      this.departmentValue = 'all';
+      this.filteredDoctors = this.allDoctors; // Show all doctors
+    } else {
+      const selectedDeptId = parseInt(event.target.value);
+      const selectedDept = this.department.find((entry: any) => entry.id === selectedDeptId);
+  
+      if (selectedDept) {
+        this.departmentValue = selectedDept.name;
+        this.filteredDoctors = this.allDoctors.filter((doc: any) => doc.departmentId === selectedDeptId);
+      } else {
+        this.departmentValue = '';
+        this.filteredDoctors = [];
       }
-    }))
+    }
+  
+    this.viewMoreData(); // Call after filtering
   }
 
   ViewMorechart(data: any): void {

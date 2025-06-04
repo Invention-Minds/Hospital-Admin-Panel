@@ -47,9 +47,7 @@ export class AppointmentConfirmComponent {
   confirmedAppointments: Appointment[] = [];
 
   constructor(private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private messageService: MessageService, private cdRef: ChangeDetectorRef) { }
-  appointments: any[] = [
-    // { id: '0001', patientName: 'Search Sundar', phoneNumber: '+91 7708590100', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Booked', smsSent: true },
-  ];
+  appointments: any[] = [];
 
   currentPage = 1;
   itemsPerPage = 10;
@@ -106,67 +104,26 @@ export class AppointmentConfirmComponent {
     this.username = localStorage.getItem('username')
     console.log(this.username)
 
-    // Run every 5 minutes (300,000 ms)
-    // Fetch appointments
-    this.appointmentService.fetchAppointments()
-
-    // Subscribe to confirmed appointments
-    this.appointmentService.confirmedAppointments$.subscribe({
+    this.appointmentService.getConfirmedAppointments().subscribe({
       next: (appointments) => {
-        // console.log('Appointments received:', appointments);
         this.confirmedAppointments = appointments;
         this.appointments = appointments
         console.log(appointments)
-        // this.cancelExpiredAppointments();
-
-        // Sort appointments
         this.confirmedAppointments.sort((a, b) => {
           const dateA = new Date(a.created_at!);
           const dateB = new Date(b.created_at!);
           return dateB.getTime() - dateA.getTime();
         });
-
         this.filteredAppointments = [...this.confirmedAppointments];
-        
-        // const today = new Date();
-        // today.setHours(0, 0, 0, 0); // Normalize to midnight (00:00:00)
 
-        // // Filter out appointments that are in the past
-        // this.filteredAppointments = this.filteredAppointments.filter((appointment: any) => {
-        //   const appointmentDate = new Date(appointment.date); // Convert appointment date to Date object
-        //   // If the appointment date is today or in the future
-        //   return appointmentDate >= today;
-        // });
         this.filterAppointmentsByDate(new Date());
-
-        // console.log(this.filteredAppointments)
-        // this.filterAppointmentsByDate(new Date());
-
-        // console.log('Setting isLoading to false');
-        setTimeout(() => {
-
-
-          this.isLoading = false; // Stop loading indicator
-
-
-
-          // console.log(this.filteredAppointments);
-
-          // console.log(this.filteredAppointments)
-        }, 1000); // 2-second delay
+        this.isLoading=false
 
       },
       error: (error) => {
         console.error('Error fetching appointments:', error);
-        // this.errorMessage = 'Failed to fetch appointments.';
-        // console.log('Setting isLoading to false due to error');
+
         this.isLoading = false; // Stop loading indicator even on error
-      },
-      complete: () => {
-        this.filteredAppointments = this.filteredAppointments.filter((appointment: any) => {
-          appointment.date >= today
-        })
-        // console.log(this.filteredAppointments)
       }
     });
   }
@@ -191,6 +148,7 @@ export class AppointmentConfirmComponent {
 
   // Method to sort appointments based on the selected column and direction
   sortedAppointments() {
+    console.log(this.filteredAppointments)
     if (!this.sortColumn) {
       // If no sorting column is selected, return the appointments as is (unsorted)
       return [...this.filteredAppointments];
@@ -253,98 +211,13 @@ export class AppointmentConfirmComponent {
       const appointmentDate = appointment.date;
       return appointmentDate >= formattedSelectedDate;
     });
+    console.log(this.filteredAppointments)
     if (this.selectedValue.trim() !== '') {
       this.filterAppointment();
     }
     this.currentPage = 1; // Reset to the first page when the filter changes
   }
   
-  // onSearch(): void {
-  //   this.filteredAppointments = [...this.confirmedAppointments]
-
-  //   console.log(this.searchValue, this.selectedDateRange)
-
-  //   this.filteredServices = this.confirmedAppointments.filter((service) => {
-  //     let matches = true;
-
-  //     // Filter by search option
-  //     if (this.selectedSearchOption && this.searchValue && service) {
-  //       switch (this.selectedSearchOption) {
-  //         case 'patientName':
-  //           matches = service.patientName
-  //             ?.toLowerCase()
-  //             .includes(this.searchValue.toLowerCase());
-  //           break;
-  //         case 'doctorName':
-  //           matches = !!service.doctorName
-  //             ?.toLowerCase()
-  //             .includes(this.searchValue.toLowerCase());
-  //           break;
-  //         case 'departmentName':
-  //           matches = !!service.department
-  //             ?.toLowerCase()
-  //             .includes(this.searchValue.toLowerCase());
-  //           break;
-  //         case 'prnNumber':
-  //           const prnNumber = Number(service.prnNumber); // Convert to Number
-           
-  //           const searchNumber = Number(this.searchValue); // Convert to Number
-  //           console.log(prnNumber, searchNumber)
-    
-  //           // ✅ Check if searchValue is a valid number and matches the prnNumber
-  //           matches = !isNaN(searchNumber) && prnNumber === searchNumber;
-  //           break;
-  //       }
-
-  //     }
-  //     if (this.selectedDateRange && this.selectedDateRange.length) {
-  //       // ✅ Convert service date to a Date object and remove time component
-  //       const serviceDate = new Date(service.date);
-  //       // serviceDate.setHours(0, 0, 0, 0); // Normalize time to avoid mismatches
-    
-  //       // ✅ Ensure selected start date is a Date object
-  //       let startDate = new Date(this.selectedDateRange[0]);
-  //       startDate.setHours(0, 0, 0, 0); // Normalize time
-    
-  //       // ✅ Ensure endDate is assigned correctly
-  //       let endDate = this.selectedDateRange[1] ? new Date(this.selectedDateRange[1]) : startDate;
-  //       endDate.setHours(23, 59, 59, 999); // Ensure full-day range
-
-    
-  //       if (startDate=== endDate) {
-  //           // ✅ Single date selected - Exact match
-  //           matches = serviceDate.toISOString().split('T')[0] === startDate.toISOString().split('T')[0];
-  //           console.log(matches)
-  //       } else {
-  //           // ✅ Date range selected - Match within range
-  //           matches = matches && serviceDate.getTime() >= startDate.getTime() && serviceDate.getTime() <= endDate.getTime();
-  //       }
-  //   }
-    
-    
-    
-    
-    
-    
-    
-  //   // ✅ Filter by single specific date
-  //   if (this.selectedDate) {
-  //       const singleDate = new Date(this.selectedDate).toISOString().split('T')[0]; // ✅ Extract YYYY-MM-DD only
-  //       console.log(singleDate, "Selected Date (Date Only)");
-    
-  //       matches = matches && new Date(service.date).toDateString() === singleDate;
-  //   }
-    
-
-  //     // console.log(matches);
-  //     return matches;
-  //   });
-
-  //   this.filteredAppointments = this.filteredServices
-  //   console.log(this.filteredAppointments)
-
-
-  // }
   onSearch(): void {
     this.filteredList = [...this.confirmedAppointments];
     this.filteredAppointments = [...this.confirmedAppointments];
@@ -503,6 +376,7 @@ export class AppointmentConfirmComponent {
 
 
   filterAppointment() {
+    console.log(this.confirmedAppointments)
     // If there's no date range or value to filter, return the unfiltered appointments
     this.filteredList = [...this.confirmedAppointments];
 

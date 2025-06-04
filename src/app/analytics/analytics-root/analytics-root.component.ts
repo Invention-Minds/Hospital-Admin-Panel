@@ -52,20 +52,20 @@ export class AnalyticsRootComponent implements OnChanges{
   isCurrentDate : boolean =false
 
   // loading
-  isLoading: boolean = true;
+  isLoading: boolean = false;
 
   ngOnInit(){   
     this.currentDate = getYesterdayDate()
-    setTimeout(() => {
-      this.isLoading = false; // Set to false when data is loaded
-    }, 6000); // 3 seconds delay
+    // setTimeout(() => {
+    //   this.isLoading = false; // Set to false when data is loaded
+    // }, 6000); // 3 seconds delay
 
     this.isCurrentDate = true
     this.loadDepartments()
     this.selectedDoctor = 'all'
-    this.loadAvailableDoctors('2025-03-15')
+    // this.loadAvailableDoctors('2025-03-15')
     this.sendYesterdayDate()
-    this.getAllAppointments()
+    // this.getAllAppointments()
   }
 
   ngOnChanges(changes: SimpleChanges): void {

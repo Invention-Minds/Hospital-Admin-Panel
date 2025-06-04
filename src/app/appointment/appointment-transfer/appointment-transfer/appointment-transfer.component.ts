@@ -53,38 +53,21 @@ export class AppointmentTransferComponent {
   fetchConfirmedAppointments(): void {
     this.isLoading = true
     const today = new Date();
-    this.appointmentService.getAllAppointments().subscribe({
+    this.appointmentService.getTransferAppointments().subscribe({
       next: (services: any[]) => {
-
-        // Process the services when the API call is successful
-        this.confirmedAppointments = services.filter(
-          (service) => service.status === 'confirmed' && service.isTransfer === true
-        );
-        // this.confirmedAppointments = services.filter(
-        //   (service) => {
-        //     const appointmentDate = new Date(service.appointmentDate);
-        //     return (
-        //       (service.appointmentStatus === 'Confirm' || service.appointmentStatus === 'confirmed') &&
-        //       appointmentDate >= today // Filter out past dates
-        //     );
-        //   }
-        // );
+        this.confirmedAppointments = services
         this.confirmedAppointments.sort((a, b) => {
           const dateA = new Date(a.createdAt!);
           const dateB = new Date(b.createdAt!);
           return dateB.getTime() - dateA.getTime();
         });
         this.filteredServices = [...this.confirmedAppointments];
-        // console.log('Services processed successfully.');
       },
       error: (err) => {
-        // Handle the error if the API call fails
         console.error('Error fetching services:', err);
       },
       complete: () => {
-        this.isLoading = false
-        // Optional: Actions to perform once the API call completes
-        // console.log('Service fetching process completed.');
+        this.isLoading = false;
       }
     });
 
@@ -184,7 +167,7 @@ export class AppointmentTransferComponent {
     });
     const csvContent = this.convertToCSV(this.filteredServices);
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    FileSaver.saveAs(blob, 'confirmed_appointments.csv');
+    FileSaver.saveAs(blob, 'transfer_appointments.csv');
   }
 
   // Utility to Convert JSON to CSV
@@ -200,12 +183,7 @@ export class AppointmentTransferComponent {
 
     return `${headers}\n${rows}`;
   }
-  // downloadLastWeekData(): void {
-  //   // Implement logic to download last week's data
-  //   console.log('Downloading last week\'s data...');
-  // }
 
-  // Method to clear input fields
   onClear() {
     this.searchValue = '';
     this.selectedSearchOption = 'firstName';
@@ -234,33 +212,28 @@ export class AppointmentTransferComponent {
     });
   }
 
-  // Method to return paginated appointments after sorting
   getPaginatedAppointments() {
     const sorted = this.sortedAppointments();  // First, sort the data (or not)
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
     return sorted.slice(startIndex, startIndex + this.itemsPerPage); // Return paginated data
   }
 
-  // Method to calculate total pages
   get totalPages() {
     return Math.ceil(this.confirmedAppointments.length / this.itemsPerPage);
   }
 
-  // Method to go to the previous page
   prevPage() {
     if (this.currentPage > 1) {
       this.currentPage--;
     }
   }
 
-  // Method to go to the next page
   nextPage() {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
     }
   }
 
-  // Handle page number change
   onPageChange() {
     if (this.currentPage < 1) {
       this.currentPage = 1;
@@ -280,9 +253,8 @@ export class AppointmentTransferComponent {
       const valueA = a[column];
       const valueB = b[column];
 
-      // Handle appointmentDate separately
       if (column === 'appointmentDate') {
-        const dateA = new Date(valueA as string); // Convert string to Date
+        const dateA = new Date(valueA as string);
         const dateB = new Date(valueB as string);
 
         return this.sortDirection === 'asc'
@@ -302,10 +274,10 @@ export class AppointmentTransferComponent {
         return this.sortDirection === 'asc' ? valueA - valueB : valueB - valueA;
       }
 
-      return 0; // Default case
+      return 0; 
     });
 
-    this.currentPage = 1; // Reset to the first page after sorting
+    this.currentPage = 1; 
   }
   completeAppointment(appointment: any): void {
     const { id: serviceId } = appointment;
@@ -324,23 +296,14 @@ export class AppointmentTransferComponent {
         console.error('Error sending WhatsApp message:', error);
       }
     });
-
-
-
-    // Update UI
-
   }
   openAppointmentForm(service: any): void {
-    // this.router.navigate(['/reschedule', service.id], {
-    //   state: { data: service }, // Passing full service object using state
-    // });
     this.lockService(service);
   }
   openAppointmentFormAfterLocked(service: any): void {
     this.reschedule.emit(service);
   }
   cancelAppointment(appointment: any) {
-    // appointment.date = this.convertDateToISO(appointment.date);
     const cancel: any = {
       ...appointment,
       status: 'cancelled',
@@ -348,14 +311,6 @@ export class AppointmentTransferComponent {
     };
 
     this.appointmentService.addCancelledAppointment(cancel);
-    // this.appointmentService.sendWhatsAppMessage(cancel).subscribe({
-    //   next: (response) => {
-    //     console.log('WhatsApp message sent successfully:', response);
-    //   },
-    //   error: (error) => {
-    //     console.error('Error sending WhatsApp message:', error);
-    //   }
-    // });
     this.doctorService.getDoctorDetails(appointment.doctorId).subscribe({
       next: (response) => {
         const doctorPhoneNumber = response?.phone_number;
@@ -372,7 +327,6 @@ export class AppointmentTransferComponent {
 
         this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
           next: (response) => {
-            // console.log('SMS message sent successfully:', response);
             this.messageService.add({ severity: 'success', summary: 'Success', detail: 'SMS message sent successfully!' });
           },
           error: (error) => {
@@ -381,7 +335,6 @@ export class AppointmentTransferComponent {
         });
         this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
           next: (response) => {
-            // console.log('WhatsApp message sent successfully:', response);
             this.messageService.add({ severity: 'success', summary: 'Success', detail: 'WhatsApp message sent successfully!' });
           },
           error: (error) => {
@@ -403,7 +356,6 @@ export class AppointmentTransferComponent {
     const emailStatus = 'cancelled';
     this.appointmentService.sendEmail(patientEmail, emailStatus, appointmentDetails, 'patient').subscribe({
       next: (response) => {
-        // console.log('Email sent to patient successfully:', response);
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to patient successfully!' });
       },
       error: (error) => {
@@ -414,13 +366,11 @@ export class AppointmentTransferComponent {
     this.fetchConfirmedAppointments()
 
   }
-  // Lock a service
   lockService(service: any): void {
     if (!service.id) return;
     this.isLoading = true;
     this.healthCheckupService.lockService(service.id, this.userId).subscribe({
       next: (response) => {
-        // console.log('Service locked:', response);
         this.activeServiceId = service.id!;
         this.messageService.add({
           severity: 'success',
@@ -432,7 +382,7 @@ export class AppointmentTransferComponent {
       },
       error: (error) => {
         if (error.status === 409) {
-          this.isLockedDialogVisible = true; // Show dialog if locked by another user
+          this.isLockedDialogVisible = true; 
           console.warn('Service is already locked by another user.');
         } else {
           console.error('Error locking service:', error);
@@ -451,21 +401,19 @@ export class AppointmentTransferComponent {
   handleLockedDialogClose() {
     this.isLockedDialogVisible = false;
   }
-  // Unlock a service
+
   unlockService(): void {
-    // console.log('Unlocking service:', this.activeServiceId);
     if (!this.activeServiceId) return;
     this.isLoading = true;
     this.healthCheckupService.unlockService(this.activeServiceId).subscribe({
       next: (response) => {
-        // console.log('Service unlocked:', response);
         this.activeServiceId = null;
         this.messageService.add({
           severity: 'success',
           summary: 'Unlocked',
           detail: 'Service has been unlocked successfully.',
         });
-        this.activeComponent = 'confirmed'; // Navigate back to the confirmed appointments
+        this.activeComponent = 'confirmed'; 
       },
       error: (error) => {
         console.error('Error unlocking service:', error);
@@ -482,8 +430,6 @@ export class AppointmentTransferComponent {
   }
 
   ngOnDestroy(): void {
-    // Unlock the service on component destroy if locked
-    // console.log('Destroying confirmed component...', this.activeComponent);
     if (this.activeServiceId && this.activeComponent !== 'form') {
       this.unlockService();
     }

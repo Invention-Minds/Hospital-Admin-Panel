@@ -66,13 +66,10 @@ ngOnInit(): void {
 fetchCompletedAppointments(): void {
   this.isLoading = true; // Set loading to true before fetching data
 
-  this.healthCheckupService.getAllServices().subscribe({
+  this.healthCheckupService.getCompletedAppointments().subscribe({
     next: (services: Service[]) => {
       // Filter and process confirmed appointments
-      this.completedAppointments = services.filter(
-        (service) =>
-          service.appointmentStatus === 'Completed' || service.appointmentStatus === 'complete' || service.appointmentStatus === 'completed'
-      );
+      this.completedAppointments = services
 
       // Sort appointments by creation date (newest first)
       this.completedAppointments.sort((a, b) => {

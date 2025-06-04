@@ -1,7 +1,10 @@
 import { Component, Output, EventEmitter } from '@angular/core';
+import { ChangeDetectorRef } from '@angular/core';
 import { EstimationService } from '../../../services/estimation/estimation.service';
 import { MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
+import * as XLSX from 'xlsx';
+import * as FileSaver from 'file-saver';
 
 
 @Component({
@@ -13,7 +16,7 @@ import { Router } from '@angular/router';
 export class EstimationApprovedComponent {
 
 
-  constructor(private estimationService: EstimationService, private messageService: MessageService, private router: Router) { }
+  constructor(private estimationService: EstimationService, private messageService: MessageService, private router: Router, private cdr: ChangeDetectorRef) { }
   pendingEstimations: any[] = [];
   filteredEstimations: any[] = [];
   currentPage = 1;
@@ -24,7 +27,8 @@ export class EstimationApprovedComponent {
     { label: 'Patient Name', value: 'patientName' },
     { label: 'Estimation ID', value: 'estimationId' },
     { label: 'Doctor Name', value: 'consultantName' },
-    { label: 'PRN', value: 'patientUHID'}
+    { label: 'PRN', value: 'patientUHID'},
+    { label: 'Status', value: 'statusOfEstimation'}
   ];
   isLoading = false;
   selectedSearchOption: any = this.searchOptions[0];
@@ -49,7 +53,14 @@ export class EstimationApprovedComponent {
   advanceAmount: any = '';
   receiptNumber: any = '';
   isPACDone: boolean = false;
-  pacNotDoneReason: string = ''
+  pacNotDoneReason: string = '';
+  showCancelFeedback: boolean = false;
+  cancellerId: string = '';
+  cancellerName: string = '';
+  cancelFeedback: string = ''
+  role: string = '';
+  adminType: string = '';
+  showPacPopup: boolean = false;
 
   // Selected date from calendar
   selectedDate: Date | null = null;
@@ -67,7 +78,8 @@ export class EstimationApprovedComponent {
 
         // Process the services when the API call is successful
         this.pendingEstimations = estimation.filter(
-          (estimation) => estimation.statusOfEstimation === 'approved' || estimation.statusOfEstimation === 'accepted'
+          (estimation) => estimation.statusOfEstimation === 'approved' || estimation.statusOfEstimation === 'accepted' || estimation.statusOfEstimation === 'confirmed' 
+          || estimation.statusOfEstimation === 'completed' || estimation.statusOfEstimation === 'cancelled'
         );
         // this.followUpDateArray = this.pendingEstimations.map((estimation) =>
         //   estimation.followUpDates.map((followUp: any) => followUp.date)
@@ -109,7 +121,17 @@ export class EstimationApprovedComponent {
       this.receiptNumber = ''
 
   }
+  openPacPopup(estimation: any): void {
+    this.selectedEstimation = estimation
+    this.showPacPopup = true;
+  }
 
+  closePacPopup(): void {
+    this.showPacPopup = false;
+    this.advanceAmount = '',
+    this.receiptNumber = ''
+
+  }
   openFollowUpPopup(estimation: any) {
     this.selectedEstimation = estimation
     this.showFollowUps = true;
@@ -267,6 +289,11 @@ export class EstimationApprovedComponent {
               ?.toLowerCase()
               .includes(this.searchValue.toLowerCase());
             break;
+          case 'statusOfEstimation':
+              matches = !!service.statusOfEstimation
+                ?.toLowerCase()
+                .includes(this.searchValue.toLowerCase());
+              break;
           case 'patientUHID':
             const prnNumber = Number(service.patientUHID); // Convert to Number
             const searchNumber = Number(this.searchValue); // Convert to Number
@@ -321,30 +348,10 @@ export class EstimationApprovedComponent {
     this.selectedDateRange = []
     this.filteredEstimations = [...this.pendingEstimations]
   }
-  downloadData(): void {
-    // if (this.selectedDateRange && this.selectedDateRange.length > 0 && this.activeComponent === 'confirmed') {
-    //   // Call the download method in the appointment confirm component
-    //   this.appointmentConfirmComponent?.downloadFilteredData();
-    // } 
-    // else if(this.selectedDateRange && this.selectedDateRange.length > 0) {
-    //   // console.log('Downloading completed appointments data...');
-    //   // console.log(this.appointmentCompleteComponent)
-    //   this.appointmentCompleteComponent?.downloadFilteredData();
-    // }
-    // else if(this.activeComponent === 'cancelled' && this.selectedDateRange && this.selectedDateRange.length > 0) {
-    //   // console.log('Downloading cancelled appointments data...');
-    //   this.appointmentCancelComponent?.downloadFilteredData();
-    // }
-    // else if(this.selectedDateRange && this.selectedDateRange.length === 0) {
-    //   // Download last week's data if no component is active
-    //   this.messageService.add({ severity: 'info', summary: 'Info', detail: 'Select a date to download the report' });
-    // }
-
+  downloadData(data:any): void {
+    this.exportToExcel(data, 'Estimation-Approved-Summary');
   }
-  // downloadLastWeekData(): void {
-  //   // Implement logic to download last week's data
-  //   console.log('Downloading last week\'s data...');
-  // }
+
 
   // Method to clear input fields
   onClear() {
@@ -447,7 +454,34 @@ export class EstimationApprovedComponent {
 
     this.currentPage = 1; // Reset to the first page after sorting
   }
-  completeAppointment(appointment: any): void { }
+  completeAppointment(estimation: any): void { 
+    if(!estimation.advanceAmountPaid){
+      this.messageService.add({
+              severity: 'warn',
+              summary: 'Need to do pay Advance Amount',
+              detail: `Kindly pay the advance amount to complete the estimation`,
+            });
+      return
+    }
+    this.selectedEstimation = estimation;
+    const estimationData = {
+      estimationId: this.selectedEstimation.estimationId,
+      updateFields: {
+        statusOfEstimation: 'completed'
+      }
+
+    }
+    this.estimationService.markComplete(estimationData.estimationId, estimationData).subscribe(
+      (response) => {
+        console.log('Estimation updated successfully:', response);
+        this.fetchPendingEstimations()
+      },
+      (error) => {
+        console.error('Error updating estimation:', error);
+      }
+    );
+
+  }
   openAppointmentForm(service: any): void {
 
     this.openAppointmentFormAfterLocked(service)
@@ -566,5 +600,145 @@ export class EstimationApprovedComponent {
         console.error('Error updating estimation:', error);
       }
     );
+  }
+  openCancelFeedback(estimation: any) {
+    if (this.adminType !== 'Senior Manager') {
+      return;  // Do nothing if the user is not a Senior Manager
+    }
+  
+    this.showCancelFeedback = true;
+    this.selectedEstimation = estimation
+  }
+  closeCancelFeedback() {
+    this.showCancelFeedback = false;
+    this.cancelFeedback = '';
+  }
+  saveFeedback() {
+    if (!this.selectedEstimation || !this.cancelFeedback.trim()) {
+      return;
+    }
+    const estimationId = this.selectedEstimation.estimationId;
+    const data = {
+      statusOfEstimation: 'cancelled',
+      cancellerId: this.cancellerId, // Replace with dynamic user ID if available
+      cancellerName: this.cancellerName, // Replace with dynamic user name if available
+      feedback: this.cancelFeedback,
+    };
+    this.estimationService.updateEstimationFeedback(estimationId, data).subscribe(
+      (response) => {
+        this.closeCancelFeedback();
+        this.fetchPendingEstimations()
+      },
+      (error) => {
+        console.error('Error saving feedback:', error);
+      }
+    );
+  }
+  onStatusChange(event: Event, estimation: any): void {
+    const selectElement = event.target as HTMLSelectElement;
+    const newStatus = selectElement.value;
+  
+    if (newStatus === 'confirmed') {
+      if (estimation.estimationType === 'SM') {
+        this.openPacPopup(estimation);
+      } else if (estimation.estimationType === 'MM' || estimation.estimationType === 'Maternity') {
+        this.confirm(estimation);
+      }
+    }
+  }
+  
+  onConfirmedAction(event: Event, estimation: any): void {
+    const selectElement = event.target as HTMLSelectElement;
+    const action = selectElement.value;
+  
+    if (action === 'completed') {
+      this.openAdvancePopup(estimation);
+    } else if (action === 'cancelled') {
+      this.openCancelFeedback(estimation);
+    }
+  }
+  
+  
+  saveEstimation(): void {
+    const estimationData = {
+      estimationId: this.selectedEstimation.estimationId,
+      advanceAmountPaid: Number(this.advanceAmount),
+      receiptNumber: this.receiptNumber,
+
+
+
+    }
+    this.estimationService.updateAdvanceDetails(estimationData.estimationId, estimationData).subscribe(
+      (response) => {
+        // console.log('Estimation updated successfully:', response);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Advance amount updated successfully.',
+        });
+        this.closeAdvancePopup();
+        this.completeAppointment(this.selectedEstimation)
+        // this.fetchPendingEstimations()
+      },
+      (error) => {
+        console.error('Error updating estimation:', error);
+      }
+    );
+
+  }
+  exportToExcel(data: any[], fileName: string = 'Estimation-Summary') {
+    const dateFieldsToConvert = [
+      'estimationCreatedTime',
+      'approvedDateAndTime',
+      'confirmedDateAndTime',
+      'cancellationDateAndTime',
+      'completedDateAndTime',
+      'overDueDateAndTIme',
+      'submittedDateAndTime'
+    ];
+  
+    const filteredData = data.map(item => {
+      const {
+        patientSign,
+        employeeSign,
+        approverSign,
+        pdfLink,
+        ...rest
+      } = item;
+  
+      // Convert date fields from UTC to IST
+      for (const field of dateFieldsToConvert) {
+        if (rest[field]) {
+          rest[field] = new Date(rest[field]).toLocaleString('en-IN', {
+            timeZone: 'Asia/Kolkata',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+          });
+        }
+      }
+  
+      return rest;
+    });
+  
+    const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(filteredData);
+    const workbook: XLSX.WorkBook = {
+      Sheets: { 'data': worksheet },
+      SheetNames: ['data']
+    };
+    const excelBuffer: any = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array'
+    });
+  
+    const blob: Blob = new Blob([excelBuffer], {
+      type:
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8'
+    });
+  
+    FileSaver.saveAs(blob, `${fileName}_${new Date().toISOString().slice(0, 10)}.xlsx`);
   }
 }

@@ -91,15 +91,6 @@ fetchConfirmedAppointments(): void {
       this.confirmedAppointments = services.filter(
         (service) => service.appointmentStatus === 'Confirm' || service.appointmentStatus === 'confirmed'
       );
-      // this.confirmedAppointments = services.filter(
-      //   (service) => {
-      //     const appointmentDate = new Date(service.appointmentDate);
-      //     return (
-      //       (service.appointmentStatus === 'Confirm' || service.appointmentStatus === 'confirmed') &&
-      //       appointmentDate >= today // Filter out past dates
-      //     );
-      //   }
-      // );
       this.confirmedAppointments.sort((a, b) => {
         const dateA = new Date(a.createdAt!);
         const dateB = new Date(b.createdAt!);

@@ -114,22 +114,19 @@ export class PastConsultationsComponent {
     this.isLoading = true; // Start loading indicator
     this.userId = localStorage.getItem('userid')
 
-    // Fetch appointments
-    this.appointmentService.fetchAppointments();
-    this.appointmentService.getAllAppointments().subscribe({
+    this.appointmentService.getPastAppointments().subscribe({
       next: (appointments) => {
         // console.log('All Appointments received:', appointments);
         this.allAppointments = appointments;
         this.confirmedAppointments = this.allAppointments
 
-        this.doctorService.getAllDoctors().subscribe({
+        this.doctorService.getDoctorWithDepartment().subscribe({
           next: (doctors) => {
             this.futureAppointments = this.confirmedAppointments.filter(appointment => {
-              const doctor = doctors.find(doc => doc.id === appointment.doctorId);
-              // console.log('Doctor:', doctor?.userId,this.userId);
-              return doctor && doctor.userId === parseInt(this.userId) && appointment.date < this.today;
-
+              const doctor = doctors.find((doc:any) => doc.id === appointment.doctorId);
+              return doctor && doctor.userId === parseInt(this.userId)
             });
+            this.isLoading = false
             console.log(this.futureAppointments)
             this.filteredAppointments = [...this.futureAppointments];
             this.filteredAppointments.sort((a, b) => {
@@ -144,27 +141,10 @@ export class PastConsultationsComponent {
             });
           },
           error: (error) => {
+            this.isLoading = false
             console.error('Error fetching doctor details:', error);
           }
-        });
-        // console.log(this.filteredAppointments)
-        // this.filteredAppointments.sort((a, b) => {
-        //   const dateA = new Date(a.date!);
-        //   const dateB = new Date(b.date!);
-        //   return dateB.getTime() - dateA.getTime();
-        // });
-        
-        console.log(this.filteredAppointments)        
-
-
-        // this.filteredAppointments = [...this.confirmedAppointments];
-        // this.filterAppointmentsByDate(new Date());
-
-        // console.log('Setting isLoading to false');
-        setTimeout(() => {
-          // console.log('Setting isLoading to false after delay');
-          this.isLoading = false; // Stop loading indicator
-        }, 1000); // 2-second delay
+        });        
       }
     })
 
@@ -246,91 +226,6 @@ export class PastConsultationsComponent {
     }
   }
   filteredAppointments: Appointment[] = [...this.futureAppointments];
-  // filteredAppointments: Appointment[] = this.confirmedAppointments.filter(appointment => !appointment!.completed);
-
-  // ngOnChanges(changes: SimpleChanges) {
-  //   // Whenever the selected date changes, this will be triggered
-  //   this.filterAppointment();
-  //   if(this.selectedDateRange && this.selectedDateRange.length === 0){
-  //     this.filterAppointmentsByDate(new Date());
-  //   }
-
-  // }
-
-  // Method to filter appointments by a specific date
-  //  filterAppointmentsByDate(selectedDate: Date) {
-  //   const formattedSelectedDate = this.formatDate(selectedDate);
-
-  //   this.filteredAppointments = this.confirmedAppointments.filter((appointment) => {
-  //     const appointmentDate = appointment.date;
-  //     return appointmentDate >= formattedSelectedDate;
-  //   });
-  //   if (this.selectedValue.trim() !== '') {
-  //     this.filterAppointment();
-  //   }
-  //   this.currentPage = 1; // Reset to the first page when the filter changes
-  // }
-
-  // Method to handle date change (e.g., when the user selects a date from a date picker)
-  // onDateChange(newDate: Date) {
-  //   this.filterAppointmentsByDate(newDate);
-  // }
-
-
-  // filterAppointment() {
-  //   // If there's no date range or value to filter, return the unfiltered appointments
-  //   this.filteredList = [...this.filteredAppointments];
-
-  //   // Handle filtering by date range if selected
-  //   if (this.selectedDateRange && this.selectedDateRange.length === 2) {
-  //     const startDate = this.selectedDateRange[0];
-  //     const endDate = this.selectedDateRange[1] ? this.selectedDateRange[1] : startDate; // Use endDate if provided, otherwise use startDate
-
-  //     if (startDate && endDate) {
-  //       if(startDate.getTime() !== endDate.getTime()) {
-  //       // Filtering appointments by the selected date range
-  //       // console.log('Start date:', startDate, 'End date:', endDate);
-  //       const normalizedEndDate = new Date(endDate);
-  //   normalizedEndDate.setHours(23, 59, 59, 999);  // Set to the last millisecond of the day
-
-  //       this.filteredList = this.filteredList.filter((appointment: Appointment) => {
-  //         const appointmentDate = new Date(appointment.date);  // Assuming 'date' is in string format like 'YYYY-MM-DD'
-  //         return appointmentDate >= startDate && appointmentDate <= normalizedEndDate;
-  //       });
-  //       // console.log('Filtered list:', this.filteredList);
-  //     }
-  //     else if (startDate.getTime() === endDate.getTime()) {
-  //       // console.log('Single date selected:');
-  //       const startDate = this.selectedDateRange[0];
-
-  //       this.filteredList = this.filteredList.filter((appointment: Appointment) => {
-  //         const appointmentDate = new Date(appointment.date);
-  //         return appointmentDate.toDateString() === startDate.toDateString();  // Compare the date portion only
-  //       });
-  //       // console.log('Filtered list:', this.filteredList);
-  //     }
-  //   }
-  //   else{
-  //     this.filteredAppointments = []
-  //   }
-  //   }
-
-  //   else {
-  //         // If no valid range is selected, show all appointments
-  //         this.filteredAppointments = [...this.filteredAppointments];
-  //       }
-
-
-  //   // Update the filtered appointments with the final result
-  //   this.filteredAppointments = this.filteredList;
-  //   this.currentPage = 1; // Reset to first page whenever new filters are applied
-  // }
-
-
-
-
-
-  // Utility method to format the date in 'dd/mm/yy' format
   formatDate(date: Date): string {
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
@@ -340,17 +235,6 @@ export class PastConsultationsComponent {
   saveToLocalStorage(): void {
     localStorage.setItem('appointments', JSON.stringify(this.appointments));
   }
-
-
-  // Method to return the filtered appointments for display
-  // getFilteredAppointments() {
-  //   return this.filteredAppointments;
-  // }
-
-
-
-
-
 
   onSearch() {
     this.filteredList = [...this.filteredAppointments];

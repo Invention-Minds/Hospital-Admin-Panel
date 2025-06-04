@@ -111,5 +111,8 @@ getAppointmentsByServiceId(serviceId: any, date?: string): Observable<any> {
 
   return this.http.get<any>(apiUrl);
 }
+getTodayCheckinServices():Observable<any[]> {
+  return this.http.get<any[]>(`${this.baseUrl}/today-services`)
+}
 
 }

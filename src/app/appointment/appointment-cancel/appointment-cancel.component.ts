@@ -84,9 +84,7 @@ export class AppointmentCancelComponent {
   fetchCancelledAppointments() {
 
     this.isLoading = true; // Start loading
-    // console.log('Fetching cancelled appointments...');
-    this.appointmentService.fetchAppointments();
-    this.appointmentService.canceledAppointments$.subscribe(
+    this.appointmentService.getCancelledAppointments().subscribe(
       (appointments) => {
         this.cancelledAppointments = appointments;
   

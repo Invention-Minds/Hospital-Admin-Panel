@@ -42,7 +42,8 @@ export class OpdTimeWiseComponent implements OnChanges {
   dateInput: any
   selectedViewDate: any[] = []
   selectedViewDoctor: any = 'all'
-  viewMoreoption: any
+  viewMoreoption: any;
+  allDoctors:any[] =[]
 
   // screen shot
   screenShot : Function = captureScreenshot
@@ -201,7 +202,7 @@ export class OpdTimeWiseComponent implements OnChanges {
 
   loadAppointments(): void {
     this.isLoading = true
-    this.appointmentService.getAllAppointments().subscribe({
+    this.appointmentService.getopdTimeWise().subscribe({
       next: (appointments: any) => {
 
         this.rawData = appointments
@@ -270,29 +271,55 @@ export class OpdTimeWiseComponent implements OnChanges {
   viewmore(): void {
     this.showViewMore = true
     this.loadDepartments();
-    this.viewMoreData()
+    this.viewMoreData();
+    this.fetchDoctors();
   }
 
   closeViewMore(): void {
     this.showViewMore = false
   }
-
-  departmentOnchange(event: any): void {
-    this.docDetails.getDoctors().subscribe(({
-      next: (data: any) => {
-        this.selectedViewDoctor = 'all'
-        this.departmentValue = this.department.filter((entry: any) => entry.id === parseInt(event.target.value))[0].name
-        this.filteredDoctors = data.filter((doc: any) => doc.departmentId === parseInt(event.target.value))
-        this.viewMoreData()
-      },
-      error: (error: any) => {
-        console.error(error)
-      },
-      complete: () => {
-
-      }
-    }))
+  fetchDoctors():void{
+    this.docDetails.getDoctorWithDepartment().subscribe((data: any[]) => {
+      this.allDoctors = data;
+    });
   }
+  departmentOnchange(event: any): void {
+    this.selectedViewDoctor = 'all';
+  
+    if (event.target.value === 'all') {
+      this.departmentValue = 'all';
+      this.filteredDoctors = this.allDoctors; // Show all doctors
+    } else {
+      const selectedDeptId = parseInt(event.target.value);
+      const selectedDept = this.department.find((entry: any) => entry.id === selectedDeptId);
+  
+      if (selectedDept) {
+        this.departmentValue = selectedDept.name;
+        this.filteredDoctors = this.allDoctors.filter((doc: any) => doc.departmentId === selectedDeptId);
+      } else {
+        this.departmentValue = '';
+        this.filteredDoctors = [];
+      }
+    }
+  
+    this.viewMoreData(); // Call after filtering
+  }
+  // departmentOnchange(event: any): void {
+  //   this.docDetails.getDoctors().subscribe(({
+  //     next: (data: any) => {
+  //       this.selectedViewDoctor = 'all'
+  //       this.departmentValue = this.department.filter((entry: any) => entry.id === parseInt(event.target.value))[0].name
+  //       this.filteredDoctors = data.filter((doc: any) => doc.departmentId === parseInt(event.target.value))
+  //       this.viewMoreData()
+  //     },
+  //     error: (error: any) => {
+  //       console.error(error)
+  //     },
+  //     complete: () => {
+
+  //     }
+  //   }))
+  // }
 
   ViewMorechart(data: any): void {
     const chartDom = document.getElementById('viewMoreTimeWise')!;

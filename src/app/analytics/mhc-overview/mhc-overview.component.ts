@@ -5,6 +5,7 @@ import { DoctorServiceService } from '../../services/doctor-details/doctor-servi
 import { getYesterdayDate, getIndividualDates, getLastThirtyDaysFromSelected, getLastSevenDays, captureScreenshot } from '../functions'
 import { TextAlignment } from 'pdf-lib';
 import { MessageService } from 'primeng/api';
+import { app } from '../../../../server';
 
 
 @Component({
@@ -118,7 +119,7 @@ export class MhcOverviewComponent implements OnChanges {
           }
         })
         // console.log(this.packagesName, "mhc poackages")
-        this.healthCheckup.getAllServices().subscribe((data: any) => {
+        this.healthCheckup.getMhcOverview().subscribe((data: any) => {
 
           const formatDate = (date: string): string => {
             const d = new Date(date);
@@ -154,13 +155,13 @@ export class MhcOverviewComponent implements OnChanges {
               };
             }
 
-            if (appointmentStatus === "Confirm") {
+            if (appointmentStatus === "Confirm" || appointmentStatus === 'confirmed') {
               result[key].confirmed += 1;
-            } else if (appointmentStatus === "Cancel") {
+            } else if (appointmentStatus === "Cancel" || appointmentStatus === 'Cancelled') {
               result[key].cancelled += 1;
             } else if (appointmentStatus === "pending") {
               result[key].pending += 1;
-            } else if (appointmentStatus === "complete") {
+            } else if (appointmentStatus === "complete" || appointmentStatus === 'Completed' || appointmentStatus === 'completed') {
               result[key].completed += 1;
             }
 

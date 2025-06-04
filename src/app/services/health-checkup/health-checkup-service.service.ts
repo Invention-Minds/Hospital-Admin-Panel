@@ -97,4 +97,25 @@ sendSmsMessage(data: any): Observable<any> {
 individualComplete(data: any): Observable<any> {
   return this.http.post<any>(`${this.baseUrl}/mark-complete`, data);
 }
+getConfirmedAppointments():Observable<any[]> {
+  return this.http.get<any[]>(`${this.baseUrl}/confirmed-appts`)
+}
+getCancelledAppointments():Observable<any[]> {
+  return this.http.get<any[]>(`${this.baseUrl}/cancelled-appts`)
+}
+getCompletedAppointments():Observable<any[]> {
+  return this.http.get<any[]>(`${this.baseUrl}/completed-appts`)
+}
+getPendingAppointments():Observable<any[]> {
+  return this.http.get<any[]>(`${this.baseUrl}/pending-appts`)
+}
+getTodayCheckinServices():Observable<any[]> {
+  return this.http.get<any[]>(`${this.baseUrl}/today-services`)
+}
+getTodayConfirmedServices():Observable<any[]> {
+  return this.http.get<any[]>(`${this.baseUrl}/today-confirmed`)
+}
+getMhcOverview():Observable<any[]> {
+  return this.http.get<any[]>(`${this.baseUrl}/get-mhc-overview`)
+}
 }

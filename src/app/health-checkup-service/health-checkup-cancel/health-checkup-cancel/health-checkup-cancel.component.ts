@@ -74,13 +74,10 @@ ngOnInit(): void {
 getCancelledAppointments(): void {
   this.isLoading = true; // Set loading to true before fetching data
 
-  this.healthCheckupService.getAllServices().subscribe({
+  this.healthCheckupService.getCancelledAppointments().subscribe({
     next: (services: Service[]) => {
       // Filter and process confirmed appointments
-      this.cancelledAppointments = services.filter(
-        (service) =>
-          service.appointmentStatus === 'Cancel' || service.appointmentStatus === 'Cancelled'
-      );
+      this.cancelledAppointments = services
 
       // Sort appointments by creation date (newest first)
       this.cancelledAppointments.sort((a, b) => {

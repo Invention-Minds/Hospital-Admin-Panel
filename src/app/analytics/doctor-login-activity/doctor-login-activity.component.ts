@@ -53,7 +53,7 @@ export class DoctorLoginActivityComponent implements OnChanges {
   }
   
 loadAllAppointments(){
-  this.appointmentService.getAllAppointments().subscribe({
+  this.appointmentService.getCheckedOut().subscribe({
     next: (appointments) => {
       this.appointments = appointments;
       console.log(appointments)    

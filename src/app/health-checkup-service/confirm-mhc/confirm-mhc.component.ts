@@ -103,21 +103,12 @@ export class ConfirmMhcComponent {
     this.userId = localStorage.getItem('userid')
     this.username = localStorage.getItem('username')
     console.log(this.username)
-
-    // Run every 5 minutes (300,000 ms)
-    // Fetch appointments
-    this.appointmentService.fetchAppointments()
-
-    // Subscribe to confirmed appointments
-    this.appointmentService.confirmedAppointments$.subscribe({
+    this.appointmentService.getMHCAppointments().subscribe({
       next: (appointments) => {
         // console.log('Appointments received:', appointments);
-        this.confirmedAppointments = appointments.filter(app => app.serviceId != null );
+        this.confirmedAppointments = appointments
         this.appointments = appointments
         console.log(appointments)
-        // this.cancelExpiredAppointments();
-
-        // Sort appointments
         this.confirmedAppointments.sort((a, b) => {
           const dateA = new Date(a.created_at!);
           const dateB = new Date(b.created_at!);
@@ -125,16 +116,7 @@ export class ConfirmMhcComponent {
         });
 
         this.filteredAppointments = [...this.confirmedAppointments];
-        
-        // const today = new Date();
-        // today.setHours(0, 0, 0, 0); // Normalize to midnight (00:00:00)
 
-        // // Filter out appointments that are in the past
-        // this.filteredAppointments = this.filteredAppointments.filter((appointment: any) => {
-        //   const appointmentDate = new Date(appointment.date); // Convert appointment date to Date object
-        //   // If the appointment date is today or in the future
-        //   return appointmentDate >= today;
-        // });
         this.filterAppointmentsByDate(new Date());
 
         console.log(this.filteredAppointments)

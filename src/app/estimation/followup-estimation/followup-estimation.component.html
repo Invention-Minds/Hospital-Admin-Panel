@@ -90,7 +90,12 @@
                     <td>{{estimation.patientUHID}}</td>
                     <td>{{ estimation.patientName }}</td>
                     <!-- <td>{{ estimation.patientPhoneNumber }}</td> -->
-                    <td>{{ estimation.estimationName }}</td>
+                    <!-- <td>{{ estimation.estimationName }}</td> -->
+                    <td>
+                      <span [pTooltip]="estimation.estimationName" tooltipPosition="top">
+                        {{ estimation.estimationName | slice:0:10 }}{{ estimation.estimationName.length > 10 ? '...' : '' }}
+                      </span>
+                    </td>
                     <!-- <td>{{ estimation.appointmentTime }}</td> -->
                     <td>{{ estimation.estimationType }}</td>
                     <td>

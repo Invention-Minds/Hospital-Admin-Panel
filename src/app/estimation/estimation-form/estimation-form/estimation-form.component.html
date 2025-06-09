@@ -783,7 +783,7 @@
       </button>
     </div>  -->
     <div class="button"
-      *ngIf="formData.statusOfEstimation === 'pending' || formData.statusOfEstimation === 'submitted' || formData.statusOfEstimation === 'rejected' || estimationData === null">
+      *ngIf="formData.statusOfEstimation === 'pending' || formData.statusOfEstimation === 'submitted' || formData.statusOfEstimation === 'rejected' || formData.statusOfEstimation === 'overDue' || estimationData === null">
       <!-- For Subadmin -->
       <button
         *ngIf="role === 'sub_admin' && (formData.statusOfEstimation === 'pending' || estimationData === null || formData.statusOfEstimation === 'submitted')"
@@ -791,7 +791,7 @@
         >
         Submit
       </button>
-      <button *ngIf="role === 'sub_admin' && (formData.statusOfEstimation === 'rejected')" type="submit"
+      <button *ngIf="role === 'sub_admin' && (formData.statusOfEstimation === 'rejected' || formData.statusOfEstimation === 'overDue')" type="submit"
         class="submit-button" [disabled]="!estimationForm.valid">
         Re-Submit
       </button>

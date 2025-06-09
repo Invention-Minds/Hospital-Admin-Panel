@@ -715,13 +715,13 @@ export class EstimationFormComponent {
       if (this.selectedRoom && this.selectedRoomCost) {
         const selectedRoomName = this.selectedRoom.name;
         const costPart = this.selectedRoomCost.split(' - ₹')[1]?.trim(); // Extract cost string (e.g. 1200)
-      
+
         if (costPart) {
           const key = this.mapRoomNameToCostKey(selectedRoomName);
           const costArray = ((this.formData as any)[key] || '').split(',');
-      
+
           const selectedIndex = costArray.findIndex((val: string) => val.trim() === costPart);
-      
+
           if (selectedIndex !== -1) {
             this.selectedSurgeryCostIndex = {
               ...this.selectedSurgeryCostIndex,
@@ -730,7 +730,7 @@ export class EstimationFormComponent {
           }
         }
       }
-      
+
 
 
       this.cdr.detectChanges();
@@ -941,7 +941,7 @@ export class EstimationFormComponent {
     //   (response) => {
     //     console.log('Estimation updated successfully:', response);
     //     this.closeForm.emit();
-        
+
     //   },
     //   (error) => {
     //     console.error('Error updating estimation:', error);
@@ -953,6 +953,20 @@ export class EstimationFormComponent {
         this.clearForm();
         this.closeForm.emit();
         this.estimationForm.resetForm();
+        // Update status based on PAC and advance amount, but only if corresponding date/time exists
+        if (response.pacDone && response.confirmedDateAndTime) {
+          estimationData.updateFields.statusOfEstimation = 'confirmed';
+        } else if (!(response.pacDone) && response.approvedDateAndTime) {
+          estimationData.updateFields.statusOfEstimation = 'approved';
+        }
+        this.estimationService.updateEstimationDetails(estimationData.estimationId, estimationData).subscribe(
+          () => {
+            console.log("✅ Status updated based on PAC and payment conditions");
+          },
+          (statusError) => {
+            console.error("❌ Error updating status:", statusError);
+          }
+        );
         this.estimationService.generateAndSendPdf(estimationData.estimationId, estimationData).subscribe(
           (pdfResponse) => {
             console.log("✅ PDF Generated & Sent via WhatsApp:", pdfResponse);
@@ -1149,18 +1163,18 @@ export class EstimationFormComponent {
       this.messageService.add({ severity: 'error', summary: 'Error', detail: 'At least one inclusion must be selected.' });
       return;
     }
-    if(this.selectedRoomCost === ''){
+    if (this.selectedRoomCost === '') {
       this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Please select a room type.' });
       return;
     }
     if (!form.valid) {
       // Mark all fields as touched to trigger validation messages
-      Object.values(form.controls).forEach((control:any) => {
+      Object.values(form.controls).forEach((control: any) => {
         control.markAsTouched();
       });
       return; // prevent actual submission
     }
-    if(this.isRequiredSignatureMissing()){
+    if (this.isRequiredSignatureMissing()) {
       this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Please provide all required signatures.' });
       return;
     }

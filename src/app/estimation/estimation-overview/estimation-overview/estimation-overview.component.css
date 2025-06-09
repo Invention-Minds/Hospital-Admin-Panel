@@ -745,6 +745,19 @@ button {
   /* border-bottom: 1px solid #ddd; */
 }
 
+.info-icon {
+  position: absolute;
+  bottom: 6px;
+  right: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  text-align: center;
+  line-height: 18px;
+  font-weight: bold;
+}
 
 /* Tablet View (768px - 1024px) */
 @media (max-width: 1024px) {

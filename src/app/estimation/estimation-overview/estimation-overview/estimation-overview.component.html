@@ -11,9 +11,9 @@
     <div class="card-today pointer" style="background-color: #D3FFF8;">
       <div class="flex space-top">
         <div class="count">{{ totalMonthWiseRaisedEST }}</div>
-        <!-- <div class="icon icon-bg">
+        <div class="icon icon-bg">
           <img src="/est-icon-10.svg" alt="Overdue EST" pTooltip="Total EST Raised this Month" tooltipPosition="top">
-        </div> -->
+        </div>
         <div class="text text-center">Raised in {{currentMonth}}</div>
       </div>
     </div>
@@ -165,116 +165,274 @@
       <div class="card-content">
       </div>
     </div>
-    <div class="card" [ngClass]="{'active-card': activeComponent === 'overAll'}" (click)="showOverall()">
+    <!-- <div class="card" [ngClass]="{'active-card': activeComponent === 'overAll'}" (click)="showOverall()">
       <div class="card-icon">
-        <!-- <img src="/est-req.svg" alt="Doctor Available Icon" /> -->
+        <div class="count">{{ totalOverallEstimations }}</div>
+      </div>
+      <div class="card-content">
+        <p>
+          Overall EST
+          <span class="info-icon" title="This shows the total number of estimation created overall."><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
+	<g fill="#fff" stroke-width="0.5" stroke="#fff">
+		<path d="M13.895 15.553a1 1 0 0 1-.448 1.341l-1 .5A1 1 0 0 1 11 16.5V13a1 1 0 0 1-.447-1.894l1-.5A1 1 0 0 1 13 11.5V15a1 1 0 0 1 .895.553M12 9.5a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3" />
+		<path fill-rule="evenodd" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2S2 6.477 2 12s4.477 10 10 10m0-2a8 8 0 1 0 0-16a8 8 0 0 0 0 16" clip-rule="evenodd" />
+	</g>
+</svg></span>
+        </p>
+      </div>
+    </div> -->
+    <div class="card" [ngClass]="{'active-card': activeComponent === 'overAll'}" (click)="showOverall()"
+      style="position: relative;">
+      <div class="info-icon" title="This shows the total number of estimation requests submitted overall."><svg
+          xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
+          <g fill="#000" stroke-width="0.5" stroke="#000">
+            <path
+              d="M13.895 15.553a1 1 0 0 1-.448 1.341l-1 .5A1 1 0 0 1 11 16.5V13a1 1 0 0 1-.447-1.894l1-.5A1 1 0 0 1 13 11.5V15a1 1 0 0 1 .895.553M12 9.5a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3" />
+            <path fill-rule="evenodd"
+              d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2S2 6.477 2 12s4.477 10 10 10m0-2a8 8 0 1 0 0-16a8 8 0 0 0 0 16"
+              clip-rule="evenodd" />
+          </g>
+        </svg></div>
+
+      <div class="card-icon">
         <div class="count">{{ totalOverallEstimations }}</div>
       </div>
       <div class="card-content">
         <p>Overall EST</p>
       </div>
     </div>
-    <div class="card" [ngClass]="{'active-card': activeComponent === 'month'}" (click)="showOverall()">
+
+
+    <div class="card" [ngClass]="{'active-card': activeComponent === 'month'}" (click)="showOverall()"
+      style="position: relative;">
+      <div class="info-icon" title="This shows the total number of estimation raised in current month."><svg
+          xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
+          <g fill="#000" stroke-width="0.5" stroke="#000">
+            <path
+              d="M13.895 15.553a1 1 0 0 1-.448 1.341l-1 .5A1 1 0 0 1 11 16.5V13a1 1 0 0 1-.447-1.894l1-.5A1 1 0 0 1 13 11.5V15a1 1 0 0 1 .895.553M12 9.5a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3" />
+            <path fill-rule="evenodd"
+              d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2S2 6.477 2 12s4.477 10 10 10m0-2a8 8 0 1 0 0-16a8 8 0 0 0 0 16"
+              clip-rule="evenodd" />
+          </g>
+        </svg></div>
       <div class="card-icon">
         <!-- <img src="/est-req.svg" alt="Doctor Available Icon" /> -->
         <div class="count">{{ totalMonthWiseRaisedEST }}</div>
       </div>
       <div class="card-content">
-        <p>Raised in {{currentMonth}}</p>
+        <p>Raised in {{currentMonth}}
+        </p>
       </div>
     </div>
-    <div class="card" [ngClass]="{'active-card': activeComponent === 'today'}" (click)="showOverall()">
+    <div class="card" [ngClass]="{'active-card': activeComponent === 'today'}" (click)="showOverall()"
+      style="position: relative;">
+      <div class="info-icon" title="This shows the total number of estimation created today."><svg
+          xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
+          <g fill="#000" stroke-width="0.5" stroke="#000">
+            <path
+              d="M13.895 15.553a1 1 0 0 1-.448 1.341l-1 .5A1 1 0 0 1 11 16.5V13a1 1 0 0 1-.447-1.894l1-.5A1 1 0 0 1 13 11.5V15a1 1 0 0 1 .895.553M12 9.5a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3" />
+            <path fill-rule="evenodd"
+              d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2S2 6.477 2 12s4.477 10 10 10m0-2a8 8 0 1 0 0-16a8 8 0 0 0 0 16"
+              clip-rule="evenodd" />
+          </g>
+        </svg></div>
       <div class="card-icon">
         <!-- <img src="/est-req.svg" alt="Doctor Available Icon" /> -->
-        <div class="count">{{ totalEstimations }}</div>
+        <div class="count">{{ totalEstimations }}
+        </div>
       </div>
       <div class="card-content">
-        <p>New EST Created</p>
+        <p>New EST Created
+        </p>
       </div>
     </div>
     <div class="card" *ngIf="role === 'sub_admin'" [ngClass]="{'active-card': activeComponent === 'request'}"
-      (click)="showAppointmentRequests()">
+      (click)="showAppointmentRequests()" style="position: relative;">
+      <div class="info-icon" title="This shows the total number of estimation in pending today."><svg
+          xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
+          <g fill="#000" stroke-width="0.5" stroke="#000">
+            <path
+              d="M13.895 15.553a1 1 0 0 1-.448 1.341l-1 .5A1 1 0 0 1 11 16.5V13a1 1 0 0 1-.447-1.894l1-.5A1 1 0 0 1 13 11.5V15a1 1 0 0 1 .895.553M12 9.5a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3" />
+            <path fill-rule="evenodd"
+              d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2S2 6.477 2 12s4.477 10 10 10m0-2a8 8 0 1 0 0-16a8 8 0 0 0 0 16"
+              clip-rule="evenodd" />
+          </g>
+        </svg></div>
       <div class="card-icon">
         <!-- <img src="/est-req.svg" alt="Doctor Available Icon" /> -->
         <div class="count">{{ pendingEstimations }}</div>
       </div>
       <div class="card-content">
-        <p>EST Request</p>
+        <p>EST Request
+        </p>
       </div>
     </div>
     <div class="card" *ngIf="role === 'admin' || role === 'super_admin' "
-      [ngClass]="{'active-card': activeComponent === 'submitted'}" (click)="showSubmittedRequest()">
+      [ngClass]="{'active-card': activeComponent === 'submitted'}" (click)="showSubmittedRequest()"
+      style="position: relative;">
+      <div class="info-icon" title="This shows the total number of estimation in pending today."><svg
+          xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
+          <g fill="#000" stroke-width="0.5" stroke="#000">
+            <path
+              d="M13.895 15.553a1 1 0 0 1-.448 1.341l-1 .5A1 1 0 0 1 11 16.5V13a1 1 0 0 1-.447-1.894l1-.5A1 1 0 0 1 13 11.5V15a1 1 0 0 1 .895.553M12 9.5a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3" />
+            <path fill-rule="evenodd"
+              d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2S2 6.477 2 12s4.477 10 10 10m0-2a8 8 0 1 0 0-16a8 8 0 0 0 0 16"
+              clip-rule="evenodd" />
+          </g>
+        </svg></div>
       <div class="card-icon">
         <!-- <img src="/est-req.svg" alt="Doctor Available Icon" /> -->
         <div class="count">{{ pendingEstimations }}</div>
       </div>
       <div class="card-content">
-        <p>EST Request</p>
+        <p>EST Request
+        </p>
       </div>
     </div>
-    <div class="card" [ngClass]="{'active-card': activeComponent === 'approved'}" (click)="showApprovedAppointments()">
+    <div class="card" [ngClass]="{'active-card': activeComponent === 'approved'}" (click)="showApprovedAppointments()"
+      style="position: relative;">
+      <div class="info-icon" title="This shows the total number of estimation approved today."><svg
+          xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
+          <g fill="#000" stroke-width="0.5" stroke="#000">
+            <path
+              d="M13.895 15.553a1 1 0 0 1-.448 1.341l-1 .5A1 1 0 0 1 11 16.5V13a1 1 0 0 1-.447-1.894l1-.5A1 1 0 0 1 13 11.5V15a1 1 0 0 1 .895.553M12 9.5a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3" />
+            <path fill-rule="evenodd"
+              d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2S2 6.477 2 12s4.477 10 10 10m0-2a8 8 0 1 0 0-16a8 8 0 0 0 0 16"
+              clip-rule="evenodd" />
+          </g>
+        </svg></div>
       <div class="card-icon">
         <!-- <img src="/est-appr.svg" alt="Appointment Icon" /> -->
         <div class="count">{{ approvedEstimations }}</div>
       </div>
       <div class="card-content">
-        <p>Apprv./Acc. </p>
+        <p>Apprv./Acc.</p>
       </div>
     </div>
-    <div class="card" [ngClass]="{'active-card': activeComponent === 'follow-up'}" (click)="showFollowUpEstimation()">
+    <div class="card" [ngClass]="{'active-card': activeComponent === 'follow-up'}" (click)="showFollowUpEstimation()"
+      style="position: relative;">
+      <div class="info-icon" title="This shows the total number of follow-up done."><svg
+          xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
+          <g fill="#000" stroke-width="0.5" stroke="#000">
+            <path
+              d="M13.895 15.553a1 1 0 0 1-.448 1.341l-1 .5A1 1 0 0 1 11 16.5V13a1 1 0 0 1-.447-1.894l1-.5A1 1 0 0 1 13 11.5V15a1 1 0 0 1 .895.553M12 9.5a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3" />
+            <path fill-rule="evenodd"
+              d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2S2 6.477 2 12s4.477 10 10 10m0-2a8 8 0 1 0 0-16a8 8 0 0 0 0 16"
+              clip-rule="evenodd" />
+          </g>
+        </svg></div>
       <div class="card-icon">
         <!-- <img src="/followup-EST.svg" alt="OPD Icon" /> -->
-         <div class="count">{{ totalFollowUp}}</div>
+        <div class="count">{{ totalFollowUp}}</div>
       </div>
       <div class="card-content">
-        <p>Follow-Up</p>
+        <p>Follow-Up
+        </p>
       </div>
     </div>
-    <div class="card" [ngClass]="{'active-card': activeComponent === 'maternity'}" (click)="showMaternityEstimation()">
+    <div class="card" [ngClass]="{'active-card': activeComponent === 'maternity'}" (click)="showMaternityEstimation()"
+      style="position: relative;">
+      <div class="info-icon" title="This shows the total number of maternity estimation created overall."><svg
+          xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
+          <g fill="#000" stroke-width="0.5" stroke="#000">
+            <path
+              d="M13.895 15.553a1 1 0 0 1-.448 1.341l-1 .5A1 1 0 0 1 11 16.5V13a1 1 0 0 1-.447-1.894l1-.5A1 1 0 0 1 13 11.5V15a1 1 0 0 1 .895.553M12 9.5a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3" />
+            <path fill-rule="evenodd"
+              d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2S2 6.477 2 12s4.477 10 10 10m0-2a8 8 0 1 0 0-16a8 8 0 0 0 0 16"
+              clip-rule="evenodd" />
+          </g>
+        </svg></div>
       <div class="card-icon">
         <!-- <img src="/MM-EST.svg" alt="OPD Icon" /> -->
-         <div class="count">{{totalMaternity}}</div>
+        <div class="count">{{totalMaternity}}</div>
       </div>
       <div class="card-content">
-        <p>Maternity </p>
+        <p>Maternity
+        </p>
       </div>
     </div>
-    <div class="card" [ngClass]="{'active-card': activeComponent === 'confirmed'}"
-      (click)="showConfirmedAppointments()">
+    <div class="card" [ngClass]="{'active-card': activeComponent === 'confirmed'}" (click)="showConfirmedAppointments()"
+      style="position: relative;">
+      <div class="info-icon" title="This shows the total number of estimation confirmed today."><svg
+          xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
+          <g fill="#000" stroke-width="0.5" stroke="#000">
+            <path
+              d="M13.895 15.553a1 1 0 0 1-.448 1.341l-1 .5A1 1 0 0 1 11 16.5V13a1 1 0 0 1-.447-1.894l1-.5A1 1 0 0 1 13 11.5V15a1 1 0 0 1 .895.553M12 9.5a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3" />
+            <path fill-rule="evenodd"
+              d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2S2 6.477 2 12s4.477 10 10 10m0-2a8 8 0 1 0 0-16a8 8 0 0 0 0 16"
+              clip-rule="evenodd" />
+          </g>
+        </svg></div>
       <div class="card-icon">
         <!-- <img src="/est-confirm.svg" alt="Doctor Available Icon" /> -->
         <div class="count">{{ confirmedEstimations }}</div>
       </div>
       <div class="card-content">
-        <p>Confirmed </p>
+        <p>Confirmed
+        </p>
       </div>
     </div>
-    <div class="card" [ngClass]="{'active-card': activeComponent === 'completed'}"
-      (click)="showCompletedAppointments()">
+    <div class="card" [ngClass]="{'active-card': activeComponent === 'completed'}" (click)="showCompletedAppointments()"
+      style="position: relative;">
+      <div class="info-icon" title="This shows the total number of estimation completed today."><svg
+          xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
+          <g fill="#000" stroke-width="0.5" stroke="#000">
+            <path
+              d="M13.895 15.553a1 1 0 0 1-.448 1.341l-1 .5A1 1 0 0 1 11 16.5V13a1 1 0 0 1-.447-1.894l1-.5A1 1 0 0 1 13 11.5V15a1 1 0 0 1 .895.553M12 9.5a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3" />
+            <path fill-rule="evenodd"
+              d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2S2 6.477 2 12s4.477 10 10 10m0-2a8 8 0 1 0 0-16a8 8 0 0 0 0 16"
+              clip-rule="evenodd" />
+          </g>
+        </svg></div>
       <div class="card-icon">
         <!-- <img src="/est-cancel.svg" alt="OPD Icon" /> -->
         <div class="count">{{ completedEstimations }}</div>
       </div>
       <div class="card-content">
-        <p>Completed</p>
+        <p>Completed
+        </p>
       </div>
     </div>
-    <div class="card" [ngClass]="{'active-card': activeComponent === 'cancelled'}" (click)="showCancelEstimation()">
+    <div class="card" [ngClass]="{'active-card': activeComponent === 'cancelled'}" (click)="showCancelEstimation()"
+      style="position: relative;">
+      <div class="info-icon" title="This shows the total number of estimation cancelled today."><svg
+          xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
+          <g fill="#000" stroke-width="0.5" stroke="#000">
+            <path
+              d="M13.895 15.553a1 1 0 0 1-.448 1.341l-1 .5A1 1 0 0 1 11 16.5V13a1 1 0 0 1-.447-1.894l1-.5A1 1 0 0 1 13 11.5V15a1 1 0 0 1 .895.553M12 9.5a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3" />
+            <path fill-rule="evenodd"
+              d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2S2 6.477 2 12s4.477 10 10 10m0-2a8 8 0 1 0 0-16a8 8 0 0 0 0 16"
+              clip-rule="evenodd" />
+          </g>
+        </svg></div>
       <div class="card-icon">
         <!-- <img src="/Cancel_EST.svg" alt="OPD Icon" /> -->
         <div class="count">{{ cancelledEstimations }}</div>
       </div>
       <div class="card-content">
-        <p>Cancelled </p>
+        <p>Cancelled
+        </p>
       </div>
     </div>
-    <div class="card" [ngClass]="{'active-card': activeComponent === 'overdue'}" (click)="showOverDueAppointment()">
+    <div class="card" [ngClass]="{'active-card': activeComponent === 'overdue'}" (click)="showOverDueAppointment()"
+      style="position: relative;">
+      <div class="info-icon" title="This shows the total number of estimation overDue today."><svg
+          xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
+          <g fill="#000" stroke-width="0.5" stroke="#000">
+            <path
+              d="M13.895 15.553a1 1 0 0 1-.448 1.341l-1 .5A1 1 0 0 1 11 16.5V13a1 1 0 0 1-.447-1.894l1-.5A1 1 0 0 1 13 11.5V15a1 1 0 0 1 .895.553M12 9.5a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3" />
+            <path fill-rule="evenodd"
+              d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2S2 6.477 2 12s4.477 10 10 10m0-2a8 8 0 1 0 0-16a8 8 0 0 0 0 16"
+              clip-rule="evenodd" />
+          </g>
+        </svg></div>
       <div class="card-icon">
         <!-- <img src="/est-overdue.svg" alt="OPD Icon" /> -->
         <div class="count">{{ overDueEstimations }}</div>
       </div>
       <div class="card-content">
-        <p>OverDue</p>
+        <p>OverDue
+        </p>
       </div>
     </div>
   </div>
@@ -296,7 +454,7 @@
   <app-estimation-complete *ngIf="activeComponent === 'completed'"></app-estimation-complete>
   <app-estimation-request #estimationApproved *ngIf="activeComponent === 'request'"
     (reschedule)="openAppointmentForm($event)"></app-estimation-request>
-  <app-estimation-overdue *ngIf="activeComponent === 'overdue'"></app-estimation-overdue>
+  <app-estimation-overdue *ngIf="activeComponent === 'overdue'" #estimationApproved (reschedule)="openAppointmentForm($event)"></app-estimation-overdue>
   <app-estimation-submit #estimationApproved *ngIf="activeComponent === 'submitted'"
     (reschedule)="openAppointmentForm($event)"></app-estimation-submit>
   <app-maternity-estimation *ngIf="activeComponent === 'maternity'"></app-maternity-estimation>
@@ -408,6 +566,7 @@
             <th>Estimation ID</th>
             <th>Patient Name</th>
             <th>PRN</th>
+            <th>EST Created Date</th>
             <th>Surgery Date</th>
             <th>Status</th>
             <th>PAC Status</th>
@@ -424,6 +583,13 @@
               <td>{{ doc.estimationId }}</td>
               <td>{{ doc.patientName }}</td>
               <td>{{ doc.patientUHID }}</td>
+              <td>
+                {{
+                doc.estimationPreferredDate
+                ? (doc.estimationCreatedTime | date:'dd-MM-yyyy')
+                : (doc.submittedDateAndTime | date:'dd-MM-yyyy')
+                }}
+              </td>
               <td>{{ doc.estimatedDate }}</td>
               <td>{{ doc.statusOfEstimation ? doc.statusOfEstimation.toUpperCase() : '-' }}</td>
               <td>

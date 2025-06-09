@@ -509,6 +509,7 @@ export class AppointmentConfirmComponent {
   // Method to download the filtered data as Excel
   downloadFilteredData(): void {
     if (this.filteredServices && this.filteredServices.length > 0) {
+      console.log(this.filteredServices)
 
       const selectedFields = this.filteredServices.map((appointment: Appointment) => {
         // console.log('Appointment:', appointment.created_at);

@@ -92,7 +92,12 @@ export class EstimationOverviewComponent {
       next: (estimations: any[]) => {
         console.log(estimations);
         this.estimations = estimations;
-        this.totalEstimationsOverall = estimations;
+        this.totalEstimationsOverall = estimations.sort((a, b) => {
+          const dateA = new Date(a.submittedDateAndTime).getTime() || 0;
+          const dateB = new Date(b.submittedDateAndTime).getTime() || 0;
+          return dateB - dateA;
+        });
+        
         this.totalOverallEstimations = this.totalEstimationsOverall.length;
         this.totalMaternity = this.estimations.filter(e => e.estimationType === 'Maternity').length;
         this.totalFollowUp = this.estimations.filter(e =>

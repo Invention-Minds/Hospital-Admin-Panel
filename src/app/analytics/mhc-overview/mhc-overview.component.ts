@@ -205,11 +205,11 @@ export class MhcOverviewComponent implements OnChanges {
 
   chartData(): void {
     const rawData = this.overViewData
-      .filter((data: any) => data.completed !== null && this.selectedDate.includes(data.date))
+      .filter((data: any) => data.confirmed !== null && this.selectedDate.includes(data.date))
       .map((entry: any) => ({
         date: entry.date,
         package: entry.packageName,
-        confirmed: entry.completed
+        confirmed: entry.confirmed
       }));
 
     // Define package colors based on the image
@@ -341,11 +341,11 @@ export class MhcOverviewComponent implements OnChanges {
 
   viewMoreData(): void {
     const rawData = this.overViewData
-      .filter((data: any) => data.completed !== null && this.selectedViewDate.includes(data.date)  && this.selectedViewDoctor === 'all' ? this.selectedViewDate.includes(data.date) : (this.selectedViewDoctor === data.packageId && this.selectedViewDate.includes(data.date)))
+      .filter((data: any) => data.confirmed !== null && this.selectedViewDate.includes(data.date)  && this.selectedViewDoctor === 'all' ? this.selectedViewDate.includes(data.date) : (this.selectedViewDoctor === data.packageId && this.selectedViewDate.includes(data.date)))
       .map((entry: any) => ({
         date: entry.date,
         package: entry.packageName,
-        confirmed: entry.completed
+        confirmed: entry.confirmed
       }));
 
     // console.log(rawData, "mhc packages")

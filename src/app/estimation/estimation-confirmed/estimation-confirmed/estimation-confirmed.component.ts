@@ -81,9 +81,9 @@ export class EstimationConfirmedComponent {
         );
         console.log(this.pendingEstimations)
         this.pendingEstimations.sort((a, b) => {
-          const dateA = new Date(a.estimationCreatedTime!);
-          const dateB = new Date(b.estimationCreatedTime!);
-          return dateA.getTime() - dateB.getTime();
+          const dateA = new Date(a.confirmedDateAndTime!);
+          const dateB = new Date(b.confirmedDateAndTime!);
+          return dateB.getTime() - dateA.getTime();
         });
         this.filteredEstimations = [...this.pendingEstimations];
         console.log('Services processed successfully.');

@@ -128,10 +128,16 @@ export class EstimationFormComponent {
     if (this.formData.employeeSign) {
       this.loadSignatureToCanvas(this.staffCanvasRef, this.formData.employeeSign, this.staffSignaturePad);
     }
-    if (this.formData.approverSign) {
-      console.log(this.formData.approverSign)
-      console.log(this.formData.approverSign, this.approverCanvasRef)
+    // if (this.formData.approverSign) {
+    //   console.log(this.formData.approverSign)
+    //   console.log(this.formData.approverSign, this.approverCanvasRef)
 
+    //   this.loadSignatureToCanvas(this.approverCanvasRef, this.formData.approverSign, this.approverSignaturePad);
+    // }
+    if (this.formData.statusOfEstimation === 'overDue') {
+      this.approverSignaturePad.clear(); // Clear any existing signature
+      console.log("⚠️ Status is 'overDue' — approver must sign again.");
+    } else if (this.formData.approverSign) {
       this.loadSignatureToCanvas(this.approverCanvasRef, this.formData.approverSign, this.approverSignaturePad);
     }
     this.disableSignaturePadsBasedOnStatus(this.formData.statusOfEstimation);

@@ -185,7 +185,8 @@
       style="position: relative;">
       <div class="info-icon" title="This shows the total number of estimation requests submitted overall."><svg
           xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
-          <g fill="#000" stroke-width="0.5" stroke="#000">
+          <g [attr.fill]="activeComponent === 'overAll' ? '#fff' : '#000'" stroke-width="0.5"
+            [attr.stroke]="activeComponent === 'overAll' ? '#fff' : '#000'">
             <path
               d="M13.895 15.553a1 1 0 0 1-.448 1.341l-1 .5A1 1 0 0 1 11 16.5V13a1 1 0 0 1-.447-1.894l1-.5A1 1 0 0 1 13 11.5V15a1 1 0 0 1 .895.553M12 9.5a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3" />
             <path fill-rule="evenodd"
@@ -207,7 +208,8 @@
       style="position: relative;">
       <div class="info-icon" title="This shows the total number of estimation raised in current month."><svg
           xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
-          <g fill="#000" stroke-width="0.5" stroke="#000">
+          <g [attr.fill]="activeComponent === 'month' ? '#fff' : '#000'" stroke-width="0.5"
+            [attr.stroke]="activeComponent === 'month' ? '#fff' : '#000'">
             <path
               d="M13.895 15.553a1 1 0 0 1-.448 1.341l-1 .5A1 1 0 0 1 11 16.5V13a1 1 0 0 1-.447-1.894l1-.5A1 1 0 0 1 13 11.5V15a1 1 0 0 1 .895.553M12 9.5a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3" />
             <path fill-rule="evenodd"
@@ -228,7 +230,8 @@
       style="position: relative;">
       <div class="info-icon" title="This shows the total number of estimation created today."><svg
           xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
-          <g fill="#000" stroke-width="0.5" stroke="#000">
+          <g [attr.fill]="activeComponent === 'today' ? '#fff' : '#000'" stroke-width="0.5"
+            [attr.stroke]="activeComponent === 'today' ? '#fff' : '#000'">
             <path
               d="M13.895 15.553a1 1 0 0 1-.448 1.341l-1 .5A1 1 0 0 1 11 16.5V13a1 1 0 0 1-.447-1.894l1-.5A1 1 0 0 1 13 11.5V15a1 1 0 0 1 .895.553M12 9.5a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3" />
             <path fill-rule="evenodd"
@@ -250,7 +253,8 @@
       (click)="showAppointmentRequests()" style="position: relative;">
       <div class="info-icon" title="This shows the total number of estimation in pending today."><svg
           xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
-          <g fill="#000" stroke-width="0.5" stroke="#000">
+          <g [attr.fill]="activeComponent === 'request' ? '#fff' : '#000'" stroke-width="0.5"
+            [attr.stroke]="activeComponent === 'request' ? '#fff' : '#000'">
             <path
               d="M13.895 15.553a1 1 0 0 1-.448 1.341l-1 .5A1 1 0 0 1 11 16.5V13a1 1 0 0 1-.447-1.894l1-.5A1 1 0 0 1 13 11.5V15a1 1 0 0 1 .895.553M12 9.5a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3" />
             <path fill-rule="evenodd"
@@ -272,7 +276,8 @@
       style="position: relative;">
       <div class="info-icon" title="This shows the total number of estimation in pending today."><svg
           xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
-          <g fill="#000" stroke-width="0.5" stroke="#000">
+          <g [attr.fill]="activeComponent === 'submitted' ? '#fff' : '#000'" stroke-width="0.5"
+            [attr.stroke]="activeComponent === 'submitted' ? '#fff' : '#000'">
             <path
               d="M13.895 15.553a1 1 0 0 1-.448 1.341l-1 .5A1 1 0 0 1 11 16.5V13a1 1 0 0 1-.447-1.894l1-.5A1 1 0 0 1 13 11.5V15a1 1 0 0 1 .895.553M12 9.5a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3" />
             <path fill-rule="evenodd"
@@ -293,7 +298,8 @@
       style="position: relative;">
       <div class="info-icon" title="This shows the total number of estimation approved today."><svg
           xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
-          <g fill="#000" stroke-width="0.5" stroke="#000">
+          <g [attr.fill]="activeComponent === 'approved' ? '#fff' : '#000'" stroke-width="0.5"
+            [attr.stroke]="activeComponent === 'approved' ? '#fff' : '#000'">
             <path
               d="M13.895 15.553a1 1 0 0 1-.448 1.341l-1 .5A1 1 0 0 1 11 16.5V13a1 1 0 0 1-.447-1.894l1-.5A1 1 0 0 1 13 11.5V15a1 1 0 0 1 .895.553M12 9.5a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3" />
             <path fill-rule="evenodd"
@@ -313,7 +319,8 @@
       style="position: relative;">
       <div class="info-icon" title="This shows the total number of follow-up done."><svg
           xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
-          <g fill="#000" stroke-width="0.5" stroke="#000">
+          <g [attr.fill]="activeComponent === 'follow-up' ? '#fff' : '#000'" stroke-width="0.5"
+            [attr.stroke]="activeComponent === 'follow-up' ? '#fff' : '#000'">
             <path
               d="M13.895 15.553a1 1 0 0 1-.448 1.341l-1 .5A1 1 0 0 1 11 16.5V13a1 1 0 0 1-.447-1.894l1-.5A1 1 0 0 1 13 11.5V15a1 1 0 0 1 .895.553M12 9.5a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3" />
             <path fill-rule="evenodd"
@@ -334,7 +341,8 @@
       style="position: relative;">
       <div class="info-icon" title="This shows the total number of maternity estimation created overall."><svg
           xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
-          <g fill="#000" stroke-width="0.5" stroke="#000">
+          <g [attr.fill]="activeComponent === 'maternity' ? '#fff' : '#000'" stroke-width="0.5"
+            [attr.stroke]="activeComponent === 'maternity' ? '#fff' : '#000'">
             <path
               d="M13.895 15.553a1 1 0 0 1-.448 1.341l-1 .5A1 1 0 0 1 11 16.5V13a1 1 0 0 1-.447-1.894l1-.5A1 1 0 0 1 13 11.5V15a1 1 0 0 1 .895.553M12 9.5a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3" />
             <path fill-rule="evenodd"
@@ -355,7 +363,8 @@
       style="position: relative;">
       <div class="info-icon" title="This shows the total number of estimation confirmed today."><svg
           xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
-          <g fill="#000" stroke-width="0.5" stroke="#000">
+          <g [attr.fill]="activeComponent === 'confirmed' ? '#fff' : '#000'" stroke-width="0.5"
+            [attr.stroke]="activeComponent === 'confirmed' ? '#fff' : '#000'">
             <path
               d="M13.895 15.553a1 1 0 0 1-.448 1.341l-1 .5A1 1 0 0 1 11 16.5V13a1 1 0 0 1-.447-1.894l1-.5A1 1 0 0 1 13 11.5V15a1 1 0 0 1 .895.553M12 9.5a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3" />
             <path fill-rule="evenodd"
@@ -376,7 +385,8 @@
       style="position: relative;">
       <div class="info-icon" title="This shows the total number of estimation completed today."><svg
           xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
-          <g fill="#000" stroke-width="0.5" stroke="#000">
+          <g [attr.fill]="activeComponent === 'completed' ? '#fff' : '#000'" stroke-width="0.5"
+            [attr.stroke]="activeComponent === 'completed' ? '#fff' : '#000'">
             <path
               d="M13.895 15.553a1 1 0 0 1-.448 1.341l-1 .5A1 1 0 0 1 11 16.5V13a1 1 0 0 1-.447-1.894l1-.5A1 1 0 0 1 13 11.5V15a1 1 0 0 1 .895.553M12 9.5a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3" />
             <path fill-rule="evenodd"
@@ -397,7 +407,8 @@
       style="position: relative;">
       <div class="info-icon" title="This shows the total number of estimation cancelled today."><svg
           xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
-          <g fill="#000" stroke-width="0.5" stroke="#000">
+          <g [attr.fill]="activeComponent === 'cancelled' ? '#fff' : '#000'" stroke-width="0.5"
+            [attr.stroke]="activeComponent === 'cancelled' ? '#fff' : '#000'">
             <path
               d="M13.895 15.553a1 1 0 0 1-.448 1.341l-1 .5A1 1 0 0 1 11 16.5V13a1 1 0 0 1-.447-1.894l1-.5A1 1 0 0 1 13 11.5V15a1 1 0 0 1 .895.553M12 9.5a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3" />
             <path fill-rule="evenodd"
@@ -418,7 +429,8 @@
       style="position: relative;">
       <div class="info-icon" title="This shows the total number of estimation overDue today."><svg
           xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
-          <g fill="#000" stroke-width="0.5" stroke="#000">
+          <g [attr.fill]="activeComponent === 'overdue' ? '#fff' : '#000'" stroke-width="0.5"
+            [attr.stroke]="activeComponent === 'overdue' ? '#fff' : '#000'">
             <path
               d="M13.895 15.553a1 1 0 0 1-.448 1.341l-1 .5A1 1 0 0 1 11 16.5V13a1 1 0 0 1-.447-1.894l1-.5A1 1 0 0 1 13 11.5V15a1 1 0 0 1 .895.553M12 9.5a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3" />
             <path fill-rule="evenodd"
@@ -454,7 +466,8 @@
   <app-estimation-complete *ngIf="activeComponent === 'completed'"></app-estimation-complete>
   <app-estimation-request #estimationApproved *ngIf="activeComponent === 'request'"
     (reschedule)="openAppointmentForm($event)"></app-estimation-request>
-  <app-estimation-overdue *ngIf="activeComponent === 'overdue'" #estimationApproved (reschedule)="openAppointmentForm($event)"></app-estimation-overdue>
+  <app-estimation-overdue *ngIf="activeComponent === 'overdue'" #estimationApproved
+    (reschedule)="openAppointmentForm($event)"></app-estimation-overdue>
   <app-estimation-submit #estimationApproved *ngIf="activeComponent === 'submitted'"
     (reschedule)="openAppointmentForm($event)"></app-estimation-submit>
   <app-maternity-estimation *ngIf="activeComponent === 'maternity'"></app-maternity-estimation>

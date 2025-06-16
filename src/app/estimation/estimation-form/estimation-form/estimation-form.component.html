@@ -391,7 +391,7 @@
           </label>
           <div *ngFor="let surgery of surgeries; let i = index" class="input-radio-wrapper">
             <div class="input-container input-container-1">
-              <div *ngIf="selectedEstimationType === 'Maternity'" class="surgery-radio">
+              <div class="surgery-radio">
                 <label>
                   <input type="radio"
                     name="selectedSurgeryCost_{{ room.name }}"
@@ -484,7 +484,7 @@
           <input type="checkbox" name="bedsideProcedure" [(ngModel)]="formData.includedItems['bedsideProcedure']"
             (change)="updateEstimationCost()"
             [disabled]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'  " />
-          Procedures
+          Add. Procedures
         </label>
         <label>
           <input type="checkbox" name="otDrugs" [(ngModel)]="formData.includedItems['otDrugs']"
@@ -496,7 +496,7 @@
             [disabled]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'  " />
           Drugs and Consumables
         </label>
-        <label>
+        <label  *ngIf="selectedEstimationType === 'Maternity'">
           <input type="checkbox" name="cSection" [(ngModel)]="formData.includedItems['cSection']"
             [disabled]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'  " />
           C-Section

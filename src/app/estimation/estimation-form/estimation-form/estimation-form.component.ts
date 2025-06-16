@@ -738,7 +738,6 @@ export class EstimationFormComponent {
       }
 
 
-
       this.cdr.detectChanges();
       console.log(this.formData)
       // Manually mark surgeryTime as touched if it has a value
@@ -1337,6 +1336,9 @@ export class EstimationFormComponent {
     const uncheckedExclusions: string[] = [];
 
     for (const key in includedItems) {
+      if (key === 'cSection' && this.selectedEstimationType !== 'Maternity') {
+        continue;
+      }
       if (includedItems[key as keyof InclusionsType]) {
         checkedInclusions.push(key); // Add names of checked inclusions
       } else {
@@ -1925,10 +1927,25 @@ export class EstimationFormComponent {
     }
   }
 
+  setEstimationTypeLogic() {
+    if (this.selectedEstimationType !== 'Maternity') {
+      this.formData.includedItems.cSection = false;
+  
+      // Optional: If you’re managing exclusions too
+      const index = this.formData.exclusions.indexOf('cSection');
+      if (index > -1) {
+        this.formData.exclusions.splice(index, 1);
+      }
+  
+      const incIndex = this.formData.inclusions.indexOf('cSection');
+      if (incIndex > -1) {
+        this.formData.inclusions.splice(incIndex, 1);
+      }
+    }
+  }
 
-
-
-
+  
+  
 }
 
 

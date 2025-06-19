@@ -1632,7 +1632,7 @@ export class EstimationFormComponent {
     (this.formData as any)[key] = costArray.join(',');
 
     // console.log(`📝 Updating cost for ${surgery} in ${roomName}: ${value}`);
-    this.calculateEstimationCostForRoom(roomName);
+    // this.calculateEstimationCostForRoom(roomName);
 
     // ✅ Force Angular to detect changes and update the UI
     this.cdr.detectChanges();
@@ -1676,7 +1676,7 @@ export class EstimationFormComponent {
     if (this.selectedRoom?.name === roomName) {
       this.selectedRoomCost = `${roomName} - ₹${selectedCost}`;
     }
-
+    this.updateEstimationCost(); // Update the overall estimation cost
     console.log("Updated Estimation Cost:", this.selectedRoomCost, this.formData.multipleEstimationCost);
   }
 
@@ -1712,6 +1712,7 @@ export class EstimationFormComponent {
     }
     console.log("Selected Room Cost:", this.selectedRoomCost);
     this.calculateEstimationCostForRoom(room.name);
+    this.updateEstimationCost();
 
     console.log("Total Estimation Cost:", this.formData.estimationCost, this.formData.multipleEstimationCost);
   }
@@ -1762,6 +1763,7 @@ export class EstimationFormComponent {
 
   updateEstimationCost() {
     // Reset estimationCost each time to avoid duplication
+    console.log("Calculating Estimation Cost...");
     let baseEstimationCost = 0; // Start from 0 and rebuild the total cost
 
     const categoryCheckboxMapping: { [key: string]: string } = {

@@ -559,7 +559,7 @@
             [(ngModel)]="formData.estimatedDate" required placeholder=" " class="custom-input"
             (focus)="this.showDatePicker($event)"
             [readonly]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'  " />
-          <label for="estimatedDate" class="custom-label">Estimated Date*</label>
+          <label for="estimatedDate" class="custom-label">Admission Date*</label>
           <div *ngIf="estimationForm.submitted && estimationForm.controls['estimatedDate']?.invalid"
             class="error-message">
             <!-- <span *ngIf="estimationForm.controls['estimatedDate']?.errors?.['required']">Estimated Date is
@@ -618,7 +618,7 @@
         </div> -->
       </div>
       <div class="form-row">
-        <div class="input-container" *ngIf="formData.statusOfEstimation === 'accepted' ">
+        <div class="input-container" *ngIf="formData.statusOfEstimation === 'accepted'">
           <input type="number" id="totalEstimationAmount" name="totalEstimationAmount" pattern="^[0-9]*$"
             class="custom-input" [max]="100" ngModel readonly [(ngModel)]="formData.totalEstimationAmount"
             placeholder=" " class="custom-input"

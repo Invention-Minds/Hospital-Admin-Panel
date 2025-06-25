@@ -574,7 +574,7 @@ export class EstimationApprovedComponent {
         console.log('Estimation updated successfully:', response);
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'PAC is updated and EST is confirmed successfully!' });
         this.fetchPendingEstimations();
-        this.closeAdvancePopup()
+        this.closePacPopup()
       },
       (error) => {
         console.error('Error updating estimation:', error);
@@ -677,6 +677,8 @@ export class EstimationApprovedComponent {
           detail: 'Advance amount updated successfully.',
         });
         this.closeAdvancePopup();
+        console.log(response);
+        this.selectedEstimation.advanceAmountPaid = estimationData.advanceAmountPaid;
         this.completeAppointment(this.selectedEstimation)
         // this.fetchPendingEstimations()
       },

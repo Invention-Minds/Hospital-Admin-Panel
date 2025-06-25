@@ -749,7 +749,10 @@ exportToExcel(data: any[], fileName: string = 'Estimation-Summary') {
         });
       }
     }
-
+    if (rest.estimatedDate) {
+      rest['Procedure Date'] = rest.estimatedDate;
+      delete rest.estimatedDate;
+    }
     return rest;
   });
 

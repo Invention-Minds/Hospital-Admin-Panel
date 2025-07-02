@@ -44,7 +44,7 @@
               <div class="custom-form-field">
                 <input type="email" id="email" [(ngModel)]="doctor!.email" name="email" placeholder=""
                   #email="ngModel" />
-                <label for="email" class="input-label">Email*</label>
+                <label for="email" class="input-label">Email</label>
                 <div *ngIf="email.invalid && (email.dirty || email.touched)" class="error-message">
                   <!-- <small *ngIf="email.errors && email.errors['required']">Email is required</small> -->
                   <small *ngIf="email.errors && email.errors['pattern']">Valid email is required</small>
@@ -91,11 +91,11 @@
               <div>
                 <label>
                   <input type="radio" name="doctorType" [(ngModel)]="doctor!.doctorType" [value]="'Regular'"
-                    (change)="onDoctorTypeChange()" /> Retain
+                    (change)="onDoctorTypeChange()" /> Consultant
                 </label>
                 <label>
                   <input type="radio" name="doctorType" [(ngModel)]="doctor!.doctorType" [value]="'Visiting Consultant'"
-                    (change)="onDoctorTypeChange()" /> Visiting Consultant
+                    (change)="onDoctorTypeChange()" /> On-Demand Consultant
                 </label>
               </div>
             </div>

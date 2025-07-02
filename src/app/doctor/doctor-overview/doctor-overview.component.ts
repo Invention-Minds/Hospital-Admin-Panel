@@ -8,26 +8,30 @@ import { MessageService } from 'primeng/api';
   selector: 'app-doctor-overview',
   templateUrl: './doctor-overview.component.html',
   styleUrls: ['./doctor-overview.component.css'],
-  providers:[MessageService]
+  providers: [MessageService]
 })
 export class DoctorOverviewComponent implements OnInit {
-  constructor(private router: Router, private doctorService: DoctorServiceService, private messageService: MessageService) {}
+  constructor(private router: Router, private doctorService: DoctorServiceService, private messageService: MessageService) { }
 
   activeComponent: string = 'availability';
   isEditMode: boolean = false;
   role: string = '';  // User role
-  isLoading:boolean=false;
+  isLoading: boolean = false;
+  userId: string = ''; // User ID
   subAdminType: string = ''; // Sub-admin type
   employeeId: string = ''; // Employee ID
+  adminType: string = ''; // Admin type
   ngOnInit(): void {
     // Fetch role from localStorage or the authentication service
     this.role = localStorage.getItem('role') || '';  // You can also fetch this from a service
     this.subAdminType = localStorage.getItem('subAdminType') || ''; // Fetch sub-admin type from localStorage
+    this.adminType = localStorage.getItem('adminType') || ''; // Fetch admin type from localStorage
     this.employeeId = localStorage.getItem('employeeId') || ''; // Fetch employee ID from localStorage
+    this.userId = localStorage.getItem('userid') || ''; // Fetch user ID from localStorage
     // console.log('User role:', this.role);
   }
   newDoctor: Doctor = {
-    id:0,
+    id: 0,
     name: '',
     qualification: '',
     departmentId: 0,
@@ -65,7 +69,7 @@ export class DoctorOverviewComponent implements OnInit {
   }
 
   showDoctorForm() {
-    if (this.role === 'admin'|| this.role === 'super_admin' || this.role === 'sub_admin') {
+    if (this.role === 'admin' || this.role === 'super_admin' || this.role === 'sub_admin') {
       this.activeComponent = 'form';
     } else {
       console.error('Access denied: Only sub_admin or admin can add a new doctor.');
@@ -75,8 +79,8 @@ export class DoctorOverviewComponent implements OnInit {
     this.activeComponent = componentName;
   }
 
-  showAppointments(){
-    if(this.role === 'admin' || this.role === 'super_admin'){
+  showAppointments() {
+    if (this.role === 'admin' || this.role === 'super_admin') {
       this.activeComponent = 'appointments'
     }
   }
@@ -98,12 +102,13 @@ export class DoctorOverviewComponent implements OnInit {
     // }
     if (this.activeComponent === 'form' && !this.isEditMode) {
       // Logic to add the new doctor
+      doctor.createdBy = this.userId; // Set createdBy to the current user ID
       this.doctorService.createDoctor(doctor).subscribe(
         () => {
           this.isLoading = false;
           doctor.slotDuration = Number(doctor.slotDuration); // Convert slot duration to number
           // console.log('New doctor saved successfully:', doctor);
-          this.messageService.add({severity:'success', summary:'Success', detail:'Doctor added successfully'});
+          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Doctor added successfully' });
           // Redirect or update UI after successful save
           this.activeComponent = ''; // Close the form after save
 
@@ -113,12 +118,13 @@ export class DoctorOverviewComponent implements OnInit {
           this.isLoading = false;
         }
       );
-      
+
     } else if (this.isEditMode) {
       this.isLoading = true;
       // Logic to update the existing doctor
       console.log(doctor)
-      const {bookedSlots, ...rest} = doctor;
+      const { bookedSlots, ...rest } = doctor;
+      doctor.updatedBy = this.userId; // Set updatedBy to the current user ID
       this.doctorService.updateDoctor(rest).subscribe(
         () => {
           // console.log('Doctor updated successfully:', doctor);

@@ -1,41 +1,45 @@
 <div class="settings-container">
   <!-- <div class="profile-wrapper"> -->
-    <!-- Tab Menu -->
-    <div class="settings-sidebar">
-      <div class="settings-tab" [ngClass]="{ 'active-tab': selectedTab === 'profile' }" (click)="switchTab('profile')"
-        *ngIf="canAccessTab('profile')">
-        Profile Details
-      </div>
-      <div class="settings-tab" [ngClass]="{ 'active-tab': selectedTab === 'reset' }" (click)="switchTab('reset')"
-        *ngIf="canAccessTab('reset')">
-        Reset Password
-      </div>
-      <div class="settings-tab" [ngClass]="{ 'active-tab': selectedTab === 'login' }" (click)="switchTab('login')"
-        *ngIf="canAccessTab('login')">
-        Account Creation
-      </div>
-      <div class="settings-tab" [ngClass]="{'active-tab': selectedTab === 'delete'}" (click)="switchTab('delete')"
-        *ngIf="canAccessTab('delete')">
-        Delete Account
-      </div>
-      <div class="settings-tab" [ngClass]="{'active-tab': selectedTab === 'login_details'}" (click)="switchTab('login_details')"
-      *ngIf="canAccessTab('login_details')" >
-        Logged In Details
+  <!-- Tab Menu -->
+  <div class="settings-sidebar">
+    <div class="settings-tab" [ngClass]="{ 'active-tab': selectedTab === 'profile' }" (click)="switchTab('profile')"
+      *ngIf="canAccessTab('profile')">
+      Profile Details
     </div>
+    <div class="settings-tab" [ngClass]="{ 'active-tab': selectedTab === 'reset' }" (click)="switchTab('reset')"
+      *ngIf="canAccessTab('reset')">
+      Reset Password
+    </div>
+    <div class="settings-tab" [ngClass]="{ 'active-tab': selectedTab === 'login' }" (click)="switchTab('login')"
+      *ngIf="canAccessTab('login')">
+      Account Creation
+    </div>
+    <div class="settings-tab" [ngClass]="{'active-tab': selectedTab === 'delete'}" (click)="switchTab('delete')"
+      *ngIf="canAccessTab('delete')">
+      Delete Account
+    </div>
+    <div class="settings-tab" [ngClass]="{'active-tab': selectedTab === 'login_details'}"
+      (click)="switchTab('login_details')" *ngIf="canAccessTab('login_details')">
+      Logged In Details
+    </div>
+    <div class="settings-tab" [ngClass]="{'active-tab': selectedTab === 'est_locked'}" (click)="switchTab('est_locked')"
+      *ngIf="loggedInAdminType === 'IT Manager' || role === 'super_admin'">
+      Locked Ids
+    </div>
+  </div>
+
+  <div class="settings-content" *ngIf="selectedTab === 'profile'">
+    <!-- Profile Picture -->
+    <div class="profile-picture">
+      <img src="/login-profile-pic.svg" alt="Profile Picture">
     </div>
 
-    <div class="settings-content" *ngIf="selectedTab === 'profile'">
-      <!-- Profile Picture -->
-      <div class="profile-picture">
-        <img src="/login-profile-pic.svg" alt="Profile Picture">
-      </div>
-
-      <!-- Email Input -->
-      <!-- <div class="input">
+    <!-- Email Input -->
+    <!-- <div class="input">
         <input type="text" class="input-field" [(ngModel)]="username" placeholder="Username_admin@rashtrotthana" disabled> -->
 
-        <!-- Password Input -->
-        <!-- <div class="password-container">
+    <!-- Password Input -->
+    <!-- <div class="password-container">
           <input [type]="isPasswordVisible ? 'text' : 'password'" class="input-field" [(ngModel)]="password"
             placeholder="********">
           <img [src]="isPasswordVisible? '/not-show.png': '/show-password.png'" alt="Show Password" class="eye-icon"
@@ -43,73 +47,73 @@
         </div>
       </div> -->
 
-      <!-- Save Button -->
-      <!-- <button class="save-button" (click)="changePassword()">Save Changes</button> -->
-       <!-- User Info -->
-  <!-- User Info -->
-<div class="profile-info">
-  <div class="profile-item">
-    <span class="label">User Id :</span>
-    <span class="value">{{loggedInName}}</span>
-  </div>
-  <div class="profile-item">
-    <span class="label">Role :</span>
-    <span class="value">{{role}}</span>
-  </div>
-  <div class="profile-item">
-    <span class="label">No. of Appointments handled :</span>
-    <span class="value">{{appointmentsCount}}</span>
-  </div>
-</div>
-
-
-      <!-- Delete Account -->
-      <div class="delete-account">
-        <button class="delete-button" (click)="logout()">
-          Logout<img src="logout.svg" alt="Delete Icon"> 
-        </button>
+    <!-- Save Button -->
+    <!-- <button class="save-button" (click)="changePassword()">Save Changes</button> -->
+    <!-- User Info -->
+    <!-- User Info -->
+    <div class="profile-info">
+      <div class="profile-item">
+        <span class="label">User Id :</span>
+        <span class="value">{{loggedInName}}</span>
+      </div>
+      <div class="profile-item">
+        <span class="label">Role :</span>
+        <span class="value">{{role}}</span>
+      </div>
+      <div class="profile-item">
+        <span class="label">No. of Appointments handled :</span>
+        <span class="value">{{appointmentsCount}}</span>
       </div>
     </div>
-    <div class="settings-content" *ngIf="selectedTab === 'reset'">
-      <!-- Profile Picture -->
-      <div class="profile-picture">
-        <img src="/login-profile-pic.svg" alt="Profile Picture">
-      </div>
 
-      <!-- Email Input -->
-      <div *ngIf="currentUserRole !== 'super_admin' && currentUserRole !== 'admin'" class="input">
-        <input type="text" class="input-field" [(ngModel)]="employeeId" placeholder="JMRH01" (ngModelChange)="validPasswords()">
-        <div *ngIf="usernameErrorMessage" class="error-message">{{ usernameErrorMessage }}</div>
-         <!-- <div class="password-container">
+
+    <!-- Delete Account -->
+    <div class="delete-account">
+      <button class="delete-button" (click)="logout()">
+        Logout<img src="logout.svg" alt="Delete Icon">
+      </button>
+    </div>
+  </div>
+  <div class="settings-content" *ngIf="selectedTab === 'reset'">
+    <!-- Profile Picture -->
+    <div class="profile-picture">
+      <img src="/login-profile-pic.svg" alt="Profile Picture">
+    </div>
+
+    <!-- Email Input -->
+    <div *ngIf="currentUserRole !== 'super_admin' && currentUserRole !== 'admin'" class="input">
+      <input type="text" class="input-field" [(ngModel)]="employeeId" placeholder="JMRH01"
+        (ngModelChange)="validPasswords()">
+      <div *ngIf="usernameErrorMessage" class="error-message">{{ usernameErrorMessage }}</div>
+      <!-- <div class="password-container">
                   <input [type]="isOldPasswordVisible ? 'text' : 'password'"  class="input-field" [(ngModel)]="oldPassword" placeholder="Old Password">
                   <img [src]="isOldPasswordVisible? '/not-show.png': '/show-password.png'" alt="Show Password" class="eye-icon" (click)="toggleOldPasswordVisibility()" >
                 </div>  -->
-        <div class="password-container">
-          <input [type]="isNewPasswordVisible ? 'text' : 'password'" class="input-field" [(ngModel)]="newPassword"
-            placeholder="New Password" (ngModelChange)="validPasswords()" required
-            minlength="6">
-          <img [src]="isNewPasswordVisible? '/not-show.png': '/show-password.png'" alt="Show Password" class="eye-icon"
-            (click)="toggleNewPasswordVisibility()">
-        </div>
-        <div *ngIf="passwordErrorMessage" class="error-message">{{ passwordErrorMessage }}</div>
-
-        <!-- Password Input -->
-         <div class="password-container">
-          <input [type]="isConfirmPasswordVisible ? 'text' : 'password'" class="input-field"
-            [(ngModel)]="confirmPassword" placeholder="Confirm New Password" (ngModelChange)="validPasswords()" required
-            minlength="6">
-          <img [src]="isConfirmPasswordVisible? '/not-show.png': '/show-password.png'" alt="Show Password"
-            class="eye-icon" (click)="toggleConfirmPasswordVisibility()" >
-        </div>
-        <div *ngIf="passwordErrorMessage" class="error-message">{{ passwordErrorMessage }}</div>
-      </div> 
-      <div *ngIf="currentUserRole !== 'super_admin' && currentUserRole !== 'admin'" >
-        <button class="save-button" (click)="resetPassword()"  [disabled]="buttonClicked || !isFormValid">Reset Password</button>
+      <div class="password-container">
+        <input [type]="isNewPasswordVisible ? 'text' : 'password'" class="input-field" [(ngModel)]="newPassword"
+          placeholder="New Password" (ngModelChange)="validPasswords()" required minlength="6">
+        <img [src]="isNewPasswordVisible? '/not-show.png': '/show-password.png'" alt="Show Password" class="eye-icon"
+          (click)="toggleNewPasswordVisibility()">
       </div>
+      <div *ngIf="passwordErrorMessage" class="error-message">{{ passwordErrorMessage }}</div>
 
-      
-<!-- Select User for Super Admin -->
-  <!-- <div *ngIf="currentUserRole === 'super_admin'" class="form-group">
+      <!-- Password Input -->
+      <div class="password-container">
+        <input [type]="isConfirmPasswordVisible ? 'text' : 'password'" class="input-field" [(ngModel)]="confirmPassword"
+          placeholder="Confirm New Password" (ngModelChange)="validPasswords()" required minlength="6">
+        <img [src]="isConfirmPasswordVisible? '/not-show.png': '/show-password.png'" alt="Show Password"
+          class="eye-icon" (click)="toggleConfirmPasswordVisibility()">
+      </div>
+      <div *ngIf="passwordErrorMessage" class="error-message">{{ passwordErrorMessage }}</div>
+    </div>
+    <div *ngIf="currentUserRole !== 'super_admin' && currentUserRole !== 'admin'">
+      <button class="save-button" (click)="resetPassword()" [disabled]="buttonClicked || !isFormValid">Reset
+        Password</button>
+    </div>
+
+
+    <!-- Select User for Super Admin -->
+    <!-- <div *ngIf="currentUserRole === 'super_admin'" class="form-group">
     <label for="userSelect">Select User to Reset Password:</label>
     <select id="userSelect" [(ngModel)]="selectedUser">
       <option *ngFor="let user of users" [value]="user.username">
@@ -117,44 +121,44 @@
       </option>
     </select>
   </div> -->
-  <div *ngIf="currentUserRole === 'super_admin' || currentUserRole === 'admin' " class="form-group">
-    <select id="userSelect" [(ngModel)]="employeeId" class="styled-select password-container" (ngModelChange)="validPasswords()" >
-      <option value="" disabled selected hidden>Select User to Reset Password</option>
-      <option *ngFor="let user of users" [value]="user.employeeId">
-        {{ user.employeeId }}
-      </option>
-    </select>
-  </div>
-  <div *ngIf="usernameErrorMessageinReset" class="error-message">{{ usernameErrorMessageinReset }}</div>
+    <div *ngIf="currentUserRole === 'super_admin' || currentUserRole === 'admin' " class="form-group">
+      <select id="userSelect" [(ngModel)]="employeeId" class="styled-select password-container"
+        (ngModelChange)="validPasswords()">
+        <option value="" disabled selected hidden>Select User to Reset Password</option>
+        <option *ngFor="let user of users" [value]="user.employeeId">
+          {{ user.employeeId }}
+        </option>
+      </select>
+    </div>
+    <div *ngIf="usernameErrorMessageinReset" class="error-message">{{ usernameErrorMessageinReset }}</div>
 
-<!-- New Password Input Fields -->
-<div *ngIf="currentUserRole === 'super_admin' || currentUserRole === 'admin'" class="password-container">
-  <input [type]="isNewPasswordVisible ? 'text' : 'password'" class="input-field" [(ngModel)]="newPassword"
-    placeholder="New Password" (ngModelChange)="validPasswords()" required
-    minlength="6">
-  <img [src]="isNewPasswordVisible ? '/not-show.svg' : '/show-password.svg'" alt="Show Password" class="eye-icon"
-    (click)="toggleNewPasswordVisibility()">
-</div>
-<div *ngIf="passwordErrorMessageinReset" class="error-message">{{ passwordErrorMessageinReset }}</div>
+    <!-- New Password Input Fields -->
+    <div *ngIf="currentUserRole === 'super_admin' || currentUserRole === 'admin'" class="password-container">
+      <input [type]="isNewPasswordVisible ? 'text' : 'password'" class="input-field" [(ngModel)]="newPassword"
+        placeholder="New Password" (ngModelChange)="validPasswords()" required minlength="6">
+      <img [src]="isNewPasswordVisible ? '/not-show.svg' : '/show-password.svg'" alt="Show Password" class="eye-icon"
+        (click)="toggleNewPasswordVisibility()">
+    </div>
+    <div *ngIf="passwordErrorMessageinReset" class="error-message">{{ passwordErrorMessageinReset }}</div>
 
-<div *ngIf="currentUserRole === 'super_admin' || currentUserRole === 'admin'" class="password-container">
-  <input [type]="isConfirmPasswordVisible ? 'text' : 'password'" class="input-field" [(ngModel)]="confirmPassword"
-    placeholder="Confirm New Password" (ngModelChange)="validPasswords()" required
-    minlength="6">
-  <img [src]="isConfirmPasswordVisible ? '/not-show.svg' : '/show-password.svg'" alt="Show Password"
-    class="eye-icon" (click)="toggleConfirmPasswordVisibility()">
-</div>
-<div *ngIf="passwordErrorMessageinReset" class="error-message">{{ passwordErrorMessageinReset }}</div>
+    <div *ngIf="currentUserRole === 'super_admin' || currentUserRole === 'admin'" class="password-container">
+      <input [type]="isConfirmPasswordVisible ? 'text' : 'password'" class="input-field" [(ngModel)]="confirmPassword"
+        placeholder="Confirm New Password" (ngModelChange)="validPasswords()" required minlength="6">
+      <img [src]="isConfirmPasswordVisible ? '/not-show.svg' : '/show-password.svg'" alt="Show Password"
+        class="eye-icon" (click)="toggleConfirmPasswordVisibility()">
+    </div>
+    <div *ngIf="passwordErrorMessageinReset" class="error-message">{{ passwordErrorMessageinReset }}</div>
 
-<!-- Button to Reset Password for Super Admin -->
-<div *ngIf="currentUserRole === 'super_admin' || currentUserRole === 'admin'">
-  <button class="save-button" (click)="resetUserPassword()"  [disabled]="buttonClicked || !isFormValid">Reset User Password</button>
-</div>
-<p-toast />
-
+    <!-- Button to Reset Password for Super Admin -->
+    <div *ngIf="currentUserRole === 'super_admin' || currentUserRole === 'admin'">
+      <button class="save-button" (click)="resetUserPassword()" [disabled]="buttonClicked || !isFormValid">Reset User
+        Password</button>
+    </div>
+    <p-toast />
 
 
-      <!-- 
+
+    <!-- 
              <div class="input">
               <input type="text" class="input-field" [(ngModel)]="username" placeholder="Username_admin@rashtrotthana">
             
@@ -179,265 +183,274 @@
             </div> -->
 
 
-      <!-- Save Button -->
-      <!-- <button class="save-button" (click)="resetPassword()">Save Changes</button> -->
+    <!-- Save Button -->
+    <!-- <button class="save-button" (click)="resetPassword()">Save Changes</button> -->
 
-      <!-- Delete Account
+    <!-- Delete Account
             <div class="delete-account">
               <button class="delete-button" (click)="openDeleteDialog()">
                 <img src="doc-delete.svg" alt="Delete Icon"> Delete Account
               </button>
             </div> -->
+  </div>
+  <div class="settings-content" *ngIf="selectedTab === 'login'">
+    <!-- Account Type Selection -->
+    <div class="account-type">
+      <label>Account Type:</label>
+      <div>
+        <label>
+          <input type="checkbox" [(ngModel)]="isAdmin" (change)="onAccountTypeChange('admin')" /> Admin
+        </label>
+        <label>
+          <input type="checkbox" [(ngModel)]="isSubAdmin" (change)="onAccountTypeChange('subadmin')" /> Sub Admin
+        </label>
+        <label>
+          <input type="checkbox" [(ngModel)]="isDoctor" (change)="onAccountTypeChange('doctor')" /> Doctor
+        </label>
+      </div>
     </div>
-    <div class="settings-content" *ngIf="selectedTab === 'login'">
-      <!-- Account Type Selection -->
-      <div class="account-type">
-        <label>Account Type:</label>
-        <div>
-          <label>
-            <input type="checkbox" [(ngModel)]="isAdmin" (change)="onAccountTypeChange('admin')" /> Admin
-          </label>
-          <label>
-            <input type="checkbox" [(ngModel)]="isSubAdmin" (change)="onAccountTypeChange('subadmin')" /> Sub Admin
-          </label>
-          <label>
-            <input type="checkbox" [(ngModel)]="isDoctor" (change)="onAccountTypeChange('doctor')" /> Doctor
-          </label>
-        </div>
-      </div>
-    
-      <!-- Admin Inputs -->
-      <div *ngIf="isAdmin">
-        <div class="input">
-          <div class="floating-label">
-            <select id="adminType" [(ngModel)]="adminType" (ngModelChange)="typeChange()" class="styled-select">
-              <option value="Manager">Manager</option>
-              <option value="Senior Manager">Senior Manager</option>
-              <option value="Management">Management</option>
-              <option value="IP Billing Manager">IP Billing Manager</option>
-            </select>
-            <label for="adminType"> Admin Type*</label>
-          </div>
-          <div class="floating-label">
-            <input type="text" id="name" name="name" placeholder=" " [(ngModel)]="name" required />
-            <label for="name">Name*</label>
-          </div>
-          <div class="floating-label">
-            <input type="text" id="employeeId" name="employeeId" placeholder=" "  [(ngModel)]="employeeId" required  (ngModelChange)="validateEmployeeID()"/>
-            <label for="employeeId">Employee ID*</label>
-            <div *ngIf="employeeIdErrorMessage" class="error-message">{{ employeeIdErrorMessage }}</div>
-          </div>
-          <div class="password-container floating-label">
-            <input
-            [type]="isCreatePasswordVisible ? 'text' : 'password'"
-              id="password"
-              name="password"
-              placeholder=" "
-              [(ngModel)]="password"
-              required
-              minlength="6"
-              (ngModelChange)="validateInputs()"
-            />
-            <label for="password">Password*</label>
-            <img
-              [src]="isCreatePasswordVisible ? '/not-show.svg' : '/show-password.svg'"
-              alt="Show Password"
-              class="eye-icon"
-              (click)="toggleCreatePasswordVisibility()"
-            />
-          </div>
-        </div>
-      </div>
-    
-      <!-- Sub Admin Inputs -->
-      <div *ngIf="isSubAdmin">
-        <div class="input">
-          <div class="floating-label">
-            <select id="subAdminType" [(ngModel)]="subAdminType" (ngModelChange)="typeChange()" class="styled-select">
-              <option value="Front Desk">Front Desk</option>
-              <option value="Tele Caller">Tele Caller</option>
-              <option value="Estimator">Estimator</option>
-              <option value="MHC Coordinator">MHC Coordinator</option>
-              <option value="Radiology Coordinator">Radiology Coordinator</option>
-              <option value="Lab Coordinator">Lab Coordinator</option>
-              <option value="Nursing">Nursing</option>
-            </select>
-            <label for="subAdminType">Sub Admin Type*</label>
-          </div>
-          <div class="floating-label">
-            <input type="text" id="name" name="name" placeholder=" " [(ngModel)]="name" required />
-            <label for="name">Name*</label>
-          </div>
-          <div class="floating-label">
-            <input type="text" id="employeeId" name="employeeId" placeholder=" " [(ngModel)]="employeeId" required (ngModelChange)="validateEmployeeID()" />
-            <label for="employeeId">Employee ID*</label>
-            <div *ngIf="employeeIdErrorMessage" class="error-message">{{ employeeIdErrorMessage }}</div>
-          </div>
 
-          <div class="password-container floating-label">
-            <input
-            [type]="isCreatePasswordVisible ? 'text' : 'password'"
-              id="password"
-              name="password"
-              placeholder=" "
-              [(ngModel)]="password"
-              required
-              minlength="6"
-              (ngModelChange)="validateInputs()"
-            />
-            <label for="password">Password*</label>
-            <img
-              [src]="isCreatePasswordVisible ? '/not-show.svg' : '/show-password.svg'"
-              alt="Show Password"
-              class="eye-icon"
-              (click)="toggleCreatePasswordVisibility()"
-            />
-          </div>
-          <div *ngIf="passwordErrorMessage" class="error-message">{{ passwordErrorMessage }}</div>
-        </div>
-      </div>
-    
-      <!-- Doctor Inputs -->
-      <div *ngIf="isDoctor">
-        <div class="input">
-          <div class="floating-label">
-            <select id="department" [(ngModel)]="selectedDepartment" (change)="onDepartmentChange()" class="styled-select">
-              <option *ngFor="let department of departments" [value]="department.name">{{ department.name }}</option>
-            </select>
-            <label for="department">Department*</label>
-          </div>
-          <div class="floating-label">
-            <select id="doctor" [(ngModel)]="selectedDoctor" class="styled-select">
-              <option *ngFor="let doctor of filteredDoctors" [ngValue]="doctor">{{ doctor.name }}</option>
-            </select>
-            <label for="doctor">Doctor*</label>
-          </div>
-          <div class="floating-label">
-            <input type="text" id="employeeId" name="employeeId" placeholder=" " [(ngModel)]="employeeId" required (ngModelChange)="validateEmployeeID()" />
-            <label for="employeeId">Employee ID*</label>
-            <div *ngIf="employeeIdErrorMessage" class="error-message">{{ employeeIdErrorMessage }}</div>
-          </div>
-          <div class="password-container floating-label">
-            <input
-            [type]="isCreatePasswordVisible ? 'text' : 'password'"
-              id="password"
-              name="password"
-              placeholder=" "
-              [(ngModel)]="password"
-              required
-              minlength="6"
-              (ngModelChange)="validateInputs()"
-            />
-            <label for="password">Password*</label>
-            <img
-              [src]="isCreatePasswordVisible ? '/not-show.svg' : '/show-password.svg'"
-              alt="Show Password"
-              class="eye-icon"
-              (click)="toggleCreatePasswordVisibility()"
-            />
-          </div>
-          <div *ngIf="passwordErrorMessage" class="error-message">{{ passwordErrorMessage }}</div>
-        </div>
-      </div>
-    
-      <!-- Save Button -->
-      <button class="create-button" (click)="createAccount()" [disabled]="!isFormValid">Create Account</button>
-      <p-toast></p-toast>
-    </div>
-    
-    
-    
-    <div class="settings-content" *ngIf="selectedTab === 'delete'">
-      <!-- Profile Picture -->
-      <div class="profile-picture">
-        <img src="/login-profile-pic.svg" alt="Profile Picture">
-      </div>
-
-      <!-- Email Input -->
+    <!-- Admin Inputs -->
+    <div *ngIf="isAdmin">
       <div class="input">
-        <input type="text" class="input-field" [(ngModel)]="username" placeholder="Username_admin@rashtrotthana" (ngModelChange)="validDelete()">
+        <div class="floating-label">
+          <select id="adminType" [(ngModel)]="adminType" (ngModelChange)="typeChange()" class="styled-select">
+            <option value="Manager">Manager</option>
+            <option value="IT Manager">IT Manager</option>
+            <option value="Senior Manager">Senior Manager</option>
+            <option value="Management">Management</option>
+            <option value="IP Billing Manager">IP Billing Manager</option>
+          </select>
+          <label for="adminType"> Admin Type*</label>
+        </div>
+        <div class="floating-label">
+          <input type="text" id="name" name="name" placeholder=" " [(ngModel)]="name" required />
+          <label for="name">Name*</label>
+        </div>
+        <div class="floating-label">
+          <input type="text" id="employeeId" name="employeeId" placeholder=" " [(ngModel)]="employeeId" required
+            (ngModelChange)="validateEmployeeID()" />
+          <label for="employeeId">Employee ID*</label>
+          <div *ngIf="employeeIdErrorMessage" class="error-message">{{ employeeIdErrorMessage }}</div>
+        </div>
+        <div class="password-container floating-label">
+          <input [type]="isCreatePasswordVisible ? 'text' : 'password'" id="password" name="password" placeholder=" "
+            [(ngModel)]="password" required minlength="6" (ngModelChange)="validateInputs()" />
+          <label for="password">Password*</label>
+          <img [src]="isCreatePasswordVisible ? '/not-show.svg' : '/show-password.svg'" alt="Show Password"
+            class="eye-icon" (click)="toggleCreatePasswordVisibility()" />
+        </div>
+      </div>
+    </div>
 
-        <!-- Password Input -->
-        <!-- <div class="password-container">
+    <!-- Sub Admin Inputs -->
+    <div *ngIf="isSubAdmin">
+      <div class="input">
+        <div class="floating-label">
+          <select id="subAdminType" [(ngModel)]="subAdminType" (ngModelChange)="typeChange()" class="styled-select">
+            <option value="Front Desk">Front Desk</option>
+            <option value="Tele Caller">Tele Caller</option>
+            <option value="Estimator">Estimator</option>
+            <option value="MHC Coordinator">MHC Coordinator</option>
+            <option value="Radiology Coordinator">Radiology Coordinator</option>
+            <option value="Lab Coordinator">Lab Coordinator</option>
+            <option value="Nursing">Nursing</option>
+          </select>
+          <label for="subAdminType">Sub Admin Type*</label>
+        </div>
+        <div class="floating-label">
+          <input type="text" id="name" name="name" placeholder=" " [(ngModel)]="name" required />
+          <label for="name">Name*</label>
+        </div>
+        <div class="floating-label">
+          <input type="text" id="employeeId" name="employeeId" placeholder=" " [(ngModel)]="employeeId" required
+            (ngModelChange)="validateEmployeeID()" />
+          <label for="employeeId">Employee ID*</label>
+          <div *ngIf="employeeIdErrorMessage" class="error-message">{{ employeeIdErrorMessage }}</div>
+        </div>
+
+        <div class="password-container floating-label">
+          <input [type]="isCreatePasswordVisible ? 'text' : 'password'" id="password" name="password" placeholder=" "
+            [(ngModel)]="password" required minlength="6" (ngModelChange)="validateInputs()" />
+          <label for="password">Password*</label>
+          <img [src]="isCreatePasswordVisible ? '/not-show.svg' : '/show-password.svg'" alt="Show Password"
+            class="eye-icon" (click)="toggleCreatePasswordVisibility()" />
+        </div>
+        <div *ngIf="passwordErrorMessage" class="error-message">{{ passwordErrorMessage }}</div>
+      </div>
+    </div>
+
+    <!-- Doctor Inputs -->
+    <div *ngIf="isDoctor">
+      <div class="input">
+        <div class="floating-label">
+          <select id="department" [(ngModel)]="selectedDepartment" (change)="onDepartmentChange()"
+            class="styled-select">
+            <option *ngFor="let department of departments" [value]="department.name">{{ department.name }}</option>
+          </select>
+          <label for="department">Department*</label>
+        </div>
+        <div class="floating-label">
+          <select id="doctor" [(ngModel)]="selectedDoctor" class="styled-select">
+            <option *ngFor="let doctor of filteredDoctors" [ngValue]="doctor">{{ doctor.name }}</option>
+          </select>
+          <label for="doctor">Doctor*</label>
+        </div>
+        <div class="floating-label">
+          <input type="text" id="employeeId" name="employeeId" placeholder=" " [(ngModel)]="employeeId" required
+            (ngModelChange)="validateEmployeeID()" />
+          <label for="employeeId">Employee ID*</label>
+          <div *ngIf="employeeIdErrorMessage" class="error-message">{{ employeeIdErrorMessage }}</div>
+        </div>
+        <div class="password-container floating-label">
+          <input [type]="isCreatePasswordVisible ? 'text' : 'password'" id="password" name="password" placeholder=" "
+            [(ngModel)]="password" required minlength="6" (ngModelChange)="validateInputs()" />
+          <label for="password">Password*</label>
+          <img [src]="isCreatePasswordVisible ? '/not-show.svg' : '/show-password.svg'" alt="Show Password"
+            class="eye-icon" (click)="toggleCreatePasswordVisibility()" />
+        </div>
+        <div *ngIf="passwordErrorMessage" class="error-message">{{ passwordErrorMessage }}</div>
+      </div>
+    </div>
+
+    <!-- Save Button -->
+    <button class="create-button" (click)="createAccount()" [disabled]="!isFormValid">Create Account</button>
+    <p-toast></p-toast>
+  </div>
+
+
+
+  <div class="settings-content" *ngIf="selectedTab === 'delete'">
+    <!-- Profile Picture -->
+    <div class="profile-picture">
+      <img src="/login-profile-pic.svg" alt="Profile Picture">
+    </div>
+
+    <!-- Email Input -->
+    <div class="input">
+      <input type="text" class="input-field" [(ngModel)]="username" placeholder="Username_admin@rashtrotthana"
+        (ngModelChange)="validDelete()">
+
+      <!-- Password Input -->
+      <!-- <div class="password-container">
                 <input [type]="isPasswordVisible ? 'text' : 'password'"  class="input-field"  [(ngModel)]="password" placeholder="********">
                 <img [src]="isPasswordVisible? '/not-show.png': '/show-password.png'" alt="Show Password" class="eye-icon" (click)="togglePasswordVisibility()">
               </div> -->
-      </div>
+    </div>
 
-      <!-- Save Button -->
-      <button class="delete-accounts-button" (click)="openDeleteDialog()"  [disabled]="buttonClicked || !isFormValid">Delete Account</button>
+    <!-- Save Button -->
+    <button class="delete-accounts-button" (click)="openDeleteDialog()"
+      [disabled]="buttonClicked || !isFormValid">Delete Account</button>
 
-      <p-toast />
-      <!-- Delete Account
+    <p-toast />
+    <!-- Delete Account
             <div class="delete-account">
               <button class="delete-button" (click)="openDeleteDialog()">
                 <img src="doc-delete.svg" alt="Delete Icon"> Delete Account
               </button>
             </div> -->
+  </div>
+  <div class="settings-content" *ngIf="selectedTab === 'login_details'">
+    <div class="table-container">
+      <table class="styled-table">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Staff Name</th>
+            <th>Role</th>
+            <th>Account Created Date</th>
+            <th>Log In Date</th>
+            <th>Log In Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let staff of users; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ firstNames[i] }}</td>
+            <td>{{ staff.role }}</td>
+            <td>{{staff.createdAt}}</td>
+            <td>{{ staff.loggedInDate }}</td>
+            <td>{{ staff.loggedInTime}}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
-    <div class="settings-content" *ngIf="selectedTab === 'login_details'">
-      <div class="table-container">
-        <table class="styled-table">
-          <thead>
-            <tr>
-              <th>No</th>
-              <th>Staff Name</th>
-              <th>Role</th>
-              <th>Account Created Date</th>
-              <th>Log In Date</th>
-              <th>Log In Time</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let staff of users; let i = index">
-              <td>{{ i + 1 }}</td>
-              <td>{{ firstNames[i] }}</td>
-              <td>{{ staff.role }}</td>
-              <td>{{staff.createdAt}}</td>
-              <td>{{ staff.loggedInDate }}</td>
-              <td>{{ staff.loggedInTime}}</td>
-            </tr>
-          </tbody>
-        </table>
+
+  </div>
+  <div class="settings-content" *ngIf="selectedTab === 'est_locked'">
+    <div class="table-container-1">
+      <div class="bulk-actions">
+        <button (click)="bulkUnlock()" class="bulk-button"><img src="/unlock.svg">Unlock</button>
       </div>
+      <table class="locked-table">
+        <thead>
+          <tr>
+            <th>
+              <input type="checkbox" [(ngModel)]="selectAll" (change)="toggleAll()" />
+            </th>
+            <th>Estimation ID</th>
+            <th>Locked By</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let estimation of lockedEstimations">
+            <td>
+              <input type="checkbox" [(ngModel)]="estimation.selected" />
+            </td>
+            <td>{{ estimation.estimationId }}</td>
+            <td>{{ estimation.empId || estimation.lockedBy }} - {{estimation.username}}</td>
+            <td>
+              <button class="unlock-button" *ngIf="estimation.lockedBy" (click)="unlockEstimation(estimation)">
+               <!-- <img src="/unlock.svg" alt="Unlock Icon" class="unlock-icon" pTooltip="Unlock Estimation" tooltipPosition="top"> -->
+               <img *ngIf="!estimation.isUnlocking" src="/lock.svg" alt="Locked" class="lock-icon" pTooltip="Locked" tooltipPosition="top" />
+               <img *ngIf="estimation.isUnlocking" src="/unlock.svg" alt="Unlocked" class="lock-icon" pTooltip="Unlocked" tooltipPosition="top" />
+           
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
       
     </div>
-    <!-- Delete Confirmation Modal -->
-    <!-- Delete Account Confirmation Dialog -->
-    <div class="overlay" *ngIf="showDeleteConfirmDialog">
-      <div class="dialog-container">
-        <div class="dialog-header">
-          <img src="/danger.png" alt="Warning Icon" class="warning-icon">
+
+  </div>
+  <!-- Delete Confirmation Modal -->
+  <!-- Delete Account Confirmation Dialog -->
+  <div class="overlay" *ngIf="showDeleteConfirmDialog">
+    <div class="dialog-container">
+      <div class="dialog-header">
+        <img src="/danger.png" alt="Warning Icon" class="warning-icon">
+      </div>
+      <div class="dialog-body">
+        <div class="dialog-title">Are You Sure!</div>
+        <div class="dialog-message">
+          Do you really want to delete this account? This action cannot be undone.
         </div>
-        <div class="dialog-body">
-          <div class="dialog-title">Are You Sure!</div>
-          <div class="dialog-message">
-            Do you really want to delete this account? This action cannot be undone.
-          </div>
-          <div class="dialog-actions">
-            <button class="delete-account-button" [disabled]="loading"  (click)="deleteUser()">Yes, Delete it!</button>
-            <!-- <div *ngIf="loading" class="loader">Loading...</div> -->
-            <button class="cancel-account-button" (click)="closeDeleteDialog()">Cancel</button>
-          </div>
+        <div class="dialog-actions">
+          <button class="delete-account-button" [disabled]="loading" (click)="deleteUser()">Yes, Delete it!</button>
+          <!-- <div *ngIf="loading" class="loader">Loading...</div> -->
+          <button class="cancel-account-button" (click)="closeDeleteDialog()">Cancel</button>
         </div>
       </div>
     </div>
-    <div class="overlay" *ngIf="showLogoutConfirmDialog">
-      <div class="dialog-container">
-          <div class="dialog-header">
-              <img src="/danger.png" alt="Warning Icon" class="warning-icon">
-          </div>
-          <div class="dialog-body">
-              <div class="dialog-title">Are You Sure!</div>
-              <div class="dialog-message">
-                  Do you really want to log out? This action will end your session.
-              </div>
-              <div class="dialog-actions">
-                  <button class="delete-account-button" (click)="confirmLogout()">Yes, Log Out</button>
-                  <button class="cancel-account-button" (click)="closeLogoutDialog()">Cancel</button>
-              </div>
-          </div>
+  </div>
+  <div class="overlay" *ngIf="showLogoutConfirmDialog">
+    <div class="dialog-container">
+      <div class="dialog-header">
+        <img src="/danger.png" alt="Warning Icon" class="warning-icon">
       </div>
+      <div class="dialog-body">
+        <div class="dialog-title">Are You Sure!</div>
+        <div class="dialog-message">
+          Do you really want to log out? This action will end your session.
+        </div>
+        <div class="dialog-actions">
+          <button class="delete-account-button" (click)="confirmLogout()">Yes, Log Out</button>
+          <button class="cancel-account-button" (click)="closeLogoutDialog()">Cancel</button>
+        </div>
+      </div>
+    </div>
   </div>
 
 

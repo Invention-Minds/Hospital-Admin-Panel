@@ -93,11 +93,9 @@ export class DoctorServiceService {
     return this.http.get<{ time: string; complete: boolean }[]>(bookedSlotsUrl);
   }
   // Method to mark a booked slot as complete
-  markSlotAsComplete(doctorId: number, date: string, time: string): Observable<any> {
+  markSlotAsComplete(doctorId: number, date: string, time: string, userId: string): Observable<any> {
     const markCompleteUrl = `${this.apiUrl}/doctors/mark-complete`;
-
-
-    const body = { doctorId, date, time };
+    const body = { doctorId, date, time, userId };
 
     return this.http.post<any>(markCompleteUrl, body);
   }
@@ -105,12 +103,13 @@ export class DoctorServiceService {
     const bookingData = { doctorId, date, time };
     return this.http.post(`${environment.apiUrl}/doctors/cancel-booked-slot`, bookingData);
   }
-  addUnavailableDates(doctorId: number, startDate: string, endDate: string, unavailableDates: string[]): Observable<any> {
+  addUnavailableDates(doctorId: number, startDate: string, endDate: string, unavailableDates: string[], userId: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/doctors/unavailable-dates`, {
       doctorId,
       startDate,
       endDate,
       unavailableDates,
+      userId
     });
   }
   getUnavailableDates(doctorId: number): Observable<{ date: string }[]> {
@@ -129,8 +128,8 @@ export class DoctorServiceService {
 
 
 
-  addUnavailableSlots(doctorId: number, date: string, times: string[]): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/doctors/unavailableSlots`, { doctorId, date, times });
+  addUnavailableSlots(doctorId: number, date: string, times: string[], userId: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/doctors/unavailableSlots`, { doctorId, date, times, userId });
   }
 
 
@@ -140,8 +139,8 @@ export class DoctorServiceService {
       endDate
     });
   }
-  addExtraSlots(doctorId: number, date: string, time: string[]): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/doctors/add-extra-slots`, { doctorId, date, time });
+  addExtraSlots(doctorId: number, date: string, time: string[], userId: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/doctors/add-extra-slots`, { doctorId, date, time, userId });
   }
   getExtraSlots(doctorId: number, date?: string): Observable<{ date: string; time: string }[]> {
     let url = `${this.apiUrl}/doctors/${doctorId}/extraSlots`;
@@ -169,4 +168,17 @@ export class DoctorServiceService {
   getFourDoctor():Observable<any>{
     return this.http.get<any>(`${this.apiUrl}/doctors/top-doctors`)
   }
+
+  
+  removeUnavailableDate(doctorId: number, date: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/unavailable-dates/remove`, { doctorId, date });
+  }
+  addUnavailableDatesForMultiple(doctorId: number, dates: string[], userId: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/unavailable-dates/add-multiple`, {
+      doctorId,
+      dates,
+      userId,
+    });
+  }
+  
 }

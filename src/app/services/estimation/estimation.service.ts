@@ -87,4 +87,8 @@ getOpdConversion():Observable<any>{
 getStatusEstimation():Observable<any>{
   return this.http.get(`${this.apiUrl}/status-estimation`)
 }
+bulkUnlock(ids: number[]): Observable<any> {
+  return this.http.put(`${this.apiUrl}/unlock-bulk`, { ids });
+}
+
 }

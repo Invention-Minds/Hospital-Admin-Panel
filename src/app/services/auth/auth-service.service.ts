@@ -98,17 +98,17 @@ initializeUserFromStorage(): void {
     // console.log(this.user);
   }
 
-  register(username: string, password: string, isReceptionist: boolean, employeeId: string, role:string, adminType: string, subAdminType: string): Observable<any> {
+  register(username: string, password: string, isReceptionist: boolean, employeeId: string, role:string, adminType: string, subAdminType: string, createdBy: string): Observable<any> {
     // const role = this.extractRoleFromUsername(username);  // Extract role
-    return this.http.post(`${this.apiUrl}/register`, { username, password, isReceptionist, employeeId, role, adminType, subAdminType }).pipe(
+    return this.http.post(`${this.apiUrl}/register`, { username, password, isReceptionist, employeeId, role, adminType, subAdminType, createdBy }).pipe(
       tap(response => {
         this.role = role;  // Save the role
       })
     );
   }
 
-  resetPassword(employeeId: string,newPassword: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/reset-password`, { employeeId,newPassword });
+  resetPassword(employeeId: string,newPassword: string, updatedBy:string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/reset-password`, { employeeId,newPassword, updatedBy });
   }
 
   changePassword(currentPassword: string, newPassword: string, oldPassword: string): Observable<any> {
@@ -136,6 +136,10 @@ initializeUserFromStorage(): void {
       })
     );
   }
+  getLockedEstimations(): Observable<any> {
+    return this.http.get(`${environment.apiUrl}/estimation/locked`);
+  }
+  
   // Utility function to extract role from username
   private extractRoleFromUsername(username: string): string {
     const parts = username.split('_');

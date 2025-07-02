@@ -224,8 +224,8 @@ const appointmentData = appointment
     const availabilityUrl = `${environment.apiUrl}/doctors/availability?doctorId=${doctorId}&date=${date}`;
     return this.http.get<any>(availabilityUrl);
   }
-  addBookedSlot(doctorId: number, date: string, time: string): Observable<any> {
-    const bookingData = { doctorId, date, time };
+  addBookedSlot(doctorId: number, date: string, time: string, userId: string): Observable<any> {
+    const bookingData = { doctorId, date, time, userId };
     return this.http.post(`${environment.apiUrl}/doctors/booked-slots`, bookingData);
   }
   getBookedSlots(doctorId: number, date: string): Observable<{ time: string; complete: boolean }[]> {
@@ -509,9 +509,13 @@ const appointmentData = appointment
     return this.http.get(`${this.baseUrl}/${prn}`, { params });
   }
 
-  saveDoctorNote(prn: number, date: string, data: any): Observable<any> {
+  saveDoctorNote(prn: number, date: string, updatedBy:string, data: any): Observable<any> {
     const params = new HttpParams().set('date', date);
-    return this.http.put(`${this.baseUrl}/${prn}`, data, { params });
+    const payload = {
+      ...data,
+      updatedBy
+    };
+    return this.http.put(`${this.baseUrl}/${prn}`, payload, { params });
   }
   getTodayCheckin(date: string): Observable<any> {
     return this.http.get(`${this.apiUrl}/today-checkin`, {
@@ -534,9 +538,13 @@ const appointmentData = appointment
     return this.http.get(`${this.historyUrl}/${prn}`, { params });
   }
 
-  saveHistoryNote(prn: number, date: string, data: any): Observable<any> {
+  saveHistoryNote(prn: number, date: string,updatedBy:string, data: any): Observable<any> {
     const params = new HttpParams().set('date', date);
-    return this.http.put(`${this.historyUrl}/${prn}`, data, { params });
+    const payload = {
+      ...data,
+      updatedBy
+    }
+    return this.http.put(`${this.historyUrl}/${prn}`, payload, { params });
   }
   getLabTests(): Observable<any[]> {
     return this.http.get<any[]>(`${environment.apiUrl}/investigation/lab-tests`);

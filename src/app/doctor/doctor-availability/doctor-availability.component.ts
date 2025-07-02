@@ -53,6 +53,7 @@ export class DoctorAvailabilityComponent {
   unavailableDoctorList: any[] = [];
   subAdminType: string = ''; // Sub-admin type
   employeeId: string = ''; // Employee ID
+  userId: string = ''; // User ID
 
 
 
@@ -69,6 +70,7 @@ export class DoctorAvailabilityComponent {
     console.log(this.role);
     this.subAdminType = localStorage.getItem('subAdminType') || ''; // Fetch sub-admin type from localStorage
     this.employeeId = localStorage.getItem('employeeId') || ''; // Fetch employee ID from localStorage
+    this.userId = localStorage.getItem('userid') || ''; // Fetch user ID from localStorage
     console.log(this.subAdminType)
   }
 
@@ -462,7 +464,7 @@ export class DoctorAvailabilityComponent {
     }
     else if (slot.status === 'extra') {
       console.log('Slot is extra:', slot);
-      this.doctorService.addExtraSlots(doctor.id, this.formatDate(this.selectedDate), slot.time).subscribe(
+      this.doctorService.addExtraSlots(doctor.id, this.formatDate(this.selectedDate), slot.time, this.userId).subscribe(
         (response) => {
           this.fetchDoctors();
         },
@@ -694,7 +696,7 @@ export class DoctorAvailabilityComponent {
       const date = this.formatDate(this.selectedDate);
 
       // Store the unavailable slots in the database
-      this.doctorService.addUnavailableSlots(this.selectedDoctor.id, date, this.unavailableSlots)
+      this.doctorService.addUnavailableSlots(this.selectedDoctor.id, date, this.unavailableSlots,this.userId)
         .subscribe(
           response => {
             // console.log('Unavailable slots added successfully:', response);
@@ -965,6 +967,7 @@ export class DoctorAvailabilityComponent {
       timeRange: timeRange.trim(),
       extraHoursBefore: Number(slot?.extraHoursBefore || 0),
       extraHoursAfter: Number(slot?.extraHoursAfter || 0),
+      createdBy: this.userId, // Assuming userId is available in the component
     };
 
     console.log("🔁 Updating extraSlot:", extraSlotData);

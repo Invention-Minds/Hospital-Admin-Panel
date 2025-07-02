@@ -18,11 +18,13 @@ export class OverviewComponent implements OnInit {
   activeComponent: string = 'availability';
   isEditMode: boolean = false;
   role: string = '';  // User role
-  selectedPatient:any
+  selectedPatient:any;
+  userId: string = ''; // User ID
 
   ngOnInit(): void {
     // Fetch role from localStorage or the authentication service
     this.role = localStorage.getItem('role') || '';  // You can also fetch this from a service
+    this.userId = localStorage.getItem('userid') || ''; // Fetch user ID from localStorage
     // console.log('User role:', this.role);
   }
   newDoctor: Doctor = {
@@ -84,6 +86,7 @@ export class OverviewComponent implements OnInit {
     //   return;
     // }
     if (this.activeComponent === 'form' && !this.isEditMode) {
+      doctor.createdBy = this.userId; // Set createdBy to the current user ID
       // Logic to add the new doctor
       this.doctorService.createDoctor(doctor).subscribe(
         () => {
@@ -100,6 +103,7 @@ export class OverviewComponent implements OnInit {
       );
       
     } else if (this.isEditMode) {
+      doctor.updatedBy = this.userId; // Set updatedBy to the current user ID
       // Logic to update the existing doctor
       this.doctorService.updateDoctor(doctor).subscribe(
         () => {

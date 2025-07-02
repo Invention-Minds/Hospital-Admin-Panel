@@ -77,8 +77,8 @@
   <span>Report</span> 
   </div> 
 </a>
-<a [routerLink]="['Manager','Management','Senior Manager'].includes(adminType) || role === 'super_admin' ? '/estimation': null" routerLinkActive="active" class="icon-wrapper" *ngIf="['Manager','Management','Senior Manager'].includes(adminType) ||  role === 'super_admin'"  >
-  <div class="icon-content" *ngIf="(['Manager','Management','Senior Manager' ].includes(adminType) ||  role === 'super_admin')  && !isMukund()">
+<a [routerLink]="['Manager','Management','Senior Manager','IT Manager'].includes(adminType) || role === 'super_admin' ? '/estimation': null" routerLinkActive="active" class="icon-wrapper" *ngIf="['Manager','Management','Senior Manager','IT Manager'].includes(adminType) ||  role === 'super_admin'"  >
+  <div class="icon-content" *ngIf="(['Manager','Management','Senior Manager','IT Manager' ].includes(adminType) ||  role === 'super_admin')  && !isMukund()">
     <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 24 24" class="icon">
       <rect width="24" height="24" fill="none" />
       <g fill="#000" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" color="#000">

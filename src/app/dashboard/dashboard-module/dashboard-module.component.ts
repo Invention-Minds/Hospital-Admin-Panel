@@ -345,7 +345,7 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
     window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
   }
   openSupport(): void {
-    window.open('http://3.111.40.120', '_blank');
+    window.open('http://support.inventionminds.com', '_blank');
   }
   
 }

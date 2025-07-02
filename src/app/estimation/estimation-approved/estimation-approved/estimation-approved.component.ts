@@ -153,7 +153,7 @@ export class EstimationApprovedComponent {
       return;
     }
 
-    const newFollowUp = { date: this.followUpDate, remarks: this.feedback };
+    const newFollowUp = { date: this.followUpDate, remarks: this.feedback, createdBy: this.userId };
     // console.log(newFollowUp)
     this.estimationService.updateFollowUps(this.selectedEstimation.estimationId, newFollowUp)
       .subscribe(

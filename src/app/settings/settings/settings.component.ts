@@ -2,10 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { AuthServiceService } from '../../services/auth/auth-service.service';
+import { EstimationService } from '../../services/estimation/estimation.service';
 import { Router } from '@angular/router';
 import { HttpHeaders } from '@angular/common/http';
 import { MessageService } from 'primeng/api';
 import moment from 'moment-timezone';
+import { forkJoin } from 'rxjs';
 
 // export enum UserRole {
 //   admin = 'admin',
@@ -68,12 +70,16 @@ export class SettingsComponent implements OnInit {
   adminType ='';
   loggedInName: string = '';
   showSettings: boolean = false;
-  employeeIdErrorMessage: string = ''
+  employeeIdErrorMessage: string = '';
+  createdBy: string = '';
+  lockedEstimations: any[] = [];
+selectAll: boolean = false;
+loggedInAdminType: string = ''; // To store the admin type of the logged-in user
 
-  constructor(private authService: AuthServiceService, private router: Router, private messageService: MessageService, private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService) {}
+  constructor(private authService: AuthServiceService, private router: Router, private messageService: MessageService, private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private estimationService: EstimationService) {}
  // Define the role-based access
  rolePermissions: Record<UserRole, string[]> = {
-  sub_admin: ['profile', 'reset'],
+  sub_admin: ['profile', 'reset','est_locked'],
   doctor: ['profile', 'reset'],
   admin: ['profile', 'reset', 'login','delete'],
   super_admin: ['profile', 'reset', 'login','delete','login_details'],
@@ -88,6 +94,8 @@ export class SettingsComponent implements OnInit {
       // Fetch role from localStorage or the authentication service
       const storedRole = localStorage.getItem('role');
       const storedUsername = localStorage.getItem('username'); 
+      this.createdBy = localStorage.getItem('userid') || '';
+      this.loggedInAdminType = localStorage.getItem('adminType') || ''; // Fetch admin type from localStorage
       const validRoles: UserRole[] = ['admin', 'doctor', 'sub_admin', 'super_admin'];
       this.role = storedRole;
       this.loggedInName = storedUsername || '';
@@ -101,7 +109,7 @@ export class SettingsComponent implements OnInit {
       if (validRoles.includes(this.role as UserRole)) {
         this.currentUserRole = this.role as UserRole;
         // console.log("current user role in settings",this.currentUserRole)
-        if (this.currentUserRole === 'super_admin' || this.currentUserRole === 'admin') {
+        if (this.currentUserRole === 'super_admin' || this.currentUserRole === 'admin' || this.currentUserRole === 'sub_admin') {
           this.loadUsers(); // Load users if the role is super admin
         }
       } else {
@@ -117,6 +125,7 @@ export class SettingsComponent implements OnInit {
     }
     this.loadDepartments();
     this.loadDoctors();
+    this.loadLockedEstimations();
 
   }
 
@@ -186,7 +195,7 @@ export class SettingsComponent implements OnInit {
 
     this.buttonClicked = true;
     if (this.employeeId) {
-      this.authService.resetPassword(this.employeeId, this.newPassword).subscribe(
+      this.authService.resetPassword(this.employeeId, this.newPassword, this.createdBy).subscribe(
         () => {
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Password reset successfully' });
           this.newPassword = '';
@@ -253,7 +262,7 @@ createAccount() {
   } 
   console.log(this.subAdminType,"subadmin")
   console.log(this.adminType,"adminType")
-  this.authService.register(this.username, this.password,this.isReceptionist, this.employeeId, this.role!, this.subAdminType,this.adminType).subscribe(response => {
+  this.authService.register(this.username, this.password,this.isReceptionist, this.employeeId, this.role!, this.subAdminType,this.adminType, this.createdBy).subscribe(response => {
     // console.log('Account created successfully', response);
     this.username = '';  // Clear the username
     this.password = '';  // Clear the password
@@ -397,7 +406,7 @@ resetPassword() {
     return;
   }
   this.buttonClicked = true;
-  this.authService.resetPassword(this.employeeId, this.newPassword).subscribe(response => {
+  this.authService.resetPassword(this.employeeId, this.newPassword,this.createdBy).subscribe(response => {
     // console.log('Password reset successfully', response);
     this.employeeId = '';  // Clear the username
     this.newPassword = '';  // Clear the new password
@@ -589,6 +598,61 @@ onAccountTypeChange(type: string) {
   this.selectedDepartment = '';
   this.selectedDoctor = [];
   this.name = '';
+}
+loadLockedEstimations(): void {
+  this.authService.getLockedEstimations().subscribe(
+    (data) => {
+      this.lockedEstimations = data.map((item:any) => { 
+        console.log(item.lockedBy, this.users)
+        const user = this.users.find(u => u.id === item.lockedBy);
+
+        return {
+          ...item,
+          selected: false,
+          empId: user?.employeeId || 'Unknown',
+          username:this.extractFirstName(user?.username) || 'Unknown',
+          isUnlocking: false,
+        };
+       });
+    },
+    (error) => console.error('Error loading locked estimations:', error)
+  );
+}
+
+toggleAll(): void {
+  this.lockedEstimations.forEach(est => est.selected = this.selectAll);
+}
+
+unlockEstimation(estimation: any): void {
+  estimation.isUnlocking = true;
+  this.estimationService.unlockService(estimation.id).subscribe(
+    () => this.loadLockedEstimations(),
+    (error) => console.error('Error unlocking estimation:', error)
+  );
+}
+
+bulkUnlock(): void {
+  const selectedIds = this.lockedEstimations.filter(e => e.selected).map(e => e.id);
+  if (selectedIds.length === 0) {
+    this.messageService.add({ severity: 'warn', summary: 'Warning', detail: 'No estimations selected for unlocking' });
+    return;
+  };
+
+  // const unlockRequests = selectedIds.map(id => this.estimationService.unlockService(id));
+  // forkJoin(unlockRequests).subscribe(
+  //   () => this.loadLockedEstimations(),
+  //   (error) => console.error('Error unlocking estimations:', error)
+  // );
+  this.estimationService.bulkUnlock(selectedIds).subscribe(
+    () => {
+      this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Selected estimations unlocked successfully' });
+      this.loadLockedEstimations();
+    },
+    (error) => {
+      console.error('Error unlocking estimations:', error);
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to unlock selected estimations' });
+    }
+  );
 }
 }
 

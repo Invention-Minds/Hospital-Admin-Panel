@@ -106,6 +106,7 @@ export class AppointmentFormComponent implements OnInit {
   showSuggestions = false; // Control visibility of suggestion dropdown
   appointmentStatus: string = 'pending';
   oldDoctorId: number = 0;
+  userId: string = ''; // User ID to track who created the appointment
 
   private subscription!: Subscription;
 
@@ -124,6 +125,8 @@ export class AppointmentFormComponent implements OnInit {
     const year = today.getFullYear();
     const month = (today.getMonth() + 1).toString().padStart(2, '0');
     const day = today.getDate().toString().padStart(2, '0');
+
+    this.userId = localStorage.getItem('userid') || ''; // Get user ID from auth service
     // this.minDate = `${year}-${month}-${day}`;
     // this.minDate = today.toISOString().split('T')[0]
     // console.log(this.minDate)
@@ -1359,7 +1362,7 @@ export class AppointmentFormComponent implements OnInit {
   completeAppointment(appointment: Appointment) {
     const appointmentId = appointment.id;
     if (appointmentId !== undefined) {
-      this.doctorService.markSlotAsComplete(appointment!.doctorId, appointment.date, appointment.time)
+      this.doctorService.markSlotAsComplete(appointment!.doctorId, appointment.date, appointment.time,this.userId.toString())
         .subscribe(
           response => {
             // console.log('Slot marked as complete:', response);
@@ -1953,7 +1956,7 @@ export class AppointmentFormComponent implements OnInit {
             }
           });
           // console.log("appointment", this.appointment)
-          this.addBookedSlot(this.appointment.doctorId, this.appointment.date, this.appointment.time);
+          this.addBookedSlot(this.appointment.doctorId, this.appointment.date, this.appointment.time, this.userId);
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'The appointment is rescheduled.' });
         }
 
@@ -2332,8 +2335,8 @@ export class AppointmentFormComponent implements OnInit {
 
 
 
-  private addBookedSlot(doctorId: number, date: string, time: string) {
-    this.appointmentService.addBookedSlot(doctorId, date, time).subscribe(
+  private addBookedSlot(doctorId: number, date: string, time: string, userId: string) {
+    this.appointmentService.addBookedSlot(doctorId, date, time, userId).subscribe(
       (response) => {
         // console.log('Slot booked:', response);
       },

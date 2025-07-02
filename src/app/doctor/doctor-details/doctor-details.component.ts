@@ -29,6 +29,7 @@ export class DoctorDetailsComponent implements OnInit {
   unavailabilityForm: FormGroup;
   isLoading: boolean = false;
   role: string = '';
+  userId: string = ''; // User ID for the logged-in user
   isButtonLoading: boolean = false; // Flag to control button loading state
 
   constructor(
@@ -45,6 +46,7 @@ export class DoctorDetailsComponent implements OnInit {
 
   ngOnInit(): void {
     this.fetchDepartmentsAndDoctors(); // Fetch all departments and doctors
+    this.userId = localStorage.getItem('userid') || ''; // Get user ID from localStorage
   }
   ngAfterViewInit() {
     const buttons = document.querySelectorAll('button[id^="doctor-btn-"]');
@@ -332,7 +334,9 @@ export class DoctorDetailsComponent implements OnInit {
     if (this.isEditMode && this.selectedEditDoctor) {
       console.log(updatedDoctor)
       this.isButtonLoading = true; // Start loading state
+      updatedDoctor.updatedBy = this.userId; // Set updatedBy to the current user ID
       const {bookedSlots,unavailableDates, ...rest} = updatedDoctor;
+      console.log('Updated doctor:', rest);
       this.doctorService.updateDoctor(rest).subscribe(
         () => {
           updatedDoctor.slotDuration = Number(updatedDoctor.slotDuration);
@@ -352,6 +356,7 @@ export class DoctorDetailsComponent implements OnInit {
       const department = this.departments.find(dep => dep.name === updatedDoctor.departmentName);
       if (department) {
         updatedDoctor.departmentId = department.id;
+        updatedDoctor.createdBy = this.userId;
 
         this.doctorService.createDoctor(updatedDoctor).subscribe(
           () => {
@@ -390,6 +395,7 @@ export class DoctorDetailsComponent implements OnInit {
   closeUnavailableModal(): void {
     this.showUnavailableModal = false;
     this.selectedEditDoctor = null;
+    this.unavailabilityForm.reset(); // Reset the form when closing the modal
   }
 
   // Handle updating the unavailable dates
@@ -422,7 +428,7 @@ export class DoctorDetailsComponent implements OnInit {
       const unavailableDates = this.generateDatesBetween(startDate, endDate);
 
       if (this.selectedEditDoctor) {
-        this.doctorService.addUnavailableDates(this.selectedEditDoctor.id, startDate.toISOString().split('T')[0], endDate.toISOString().split('T')[0], unavailableDates).subscribe(
+        this.doctorService.addUnavailableDates(this.selectedEditDoctor.id, startDate.toISOString().split('T')[0], endDate.toISOString().split('T')[0], unavailableDates, this.userId).subscribe(
           () => {
             this.fetchDoctors(); // Refresh the list of doctors
             this.closeUnavailableModal();

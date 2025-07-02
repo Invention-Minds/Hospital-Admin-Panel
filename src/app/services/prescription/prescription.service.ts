@@ -32,6 +32,7 @@ export class PrescriptionService {
     brandName: string;
     type: string;
     description?: string;
+    doctorId?: string;
   }) {
     return this.http.post(`${this.baseUrl}/tablets`, data);
   }

@@ -38,7 +38,7 @@
       </div>
       <div class="card" 
       [ngClass]="{'active-card': activeComponent === 'form'}"
-      (click)="showDoctorForm()"  *ngIf="role === 'admin' || role === 'super_admin' ">
+      (click)="showDoctorForm()"  *ngIf="adminType === 'IT Manager' || role === 'super_admin' ">
         <div class="card-icon">
           <img src="/add-doctor.svg" alt="Doctor Available Icon" />
         </div>

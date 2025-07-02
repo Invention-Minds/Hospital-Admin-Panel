@@ -59,6 +59,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
   isSlotDurationChanged: boolean = false;
   previousAvailability: any[] = [];
   needsSlotCheck: boolean = false;
+  userId: string = ''; // User ID for the logged-in user
 
 
   constructor(private doctorService: DoctorServiceService, private changeDetector: ChangeDetectorRef, private datePipe: DatePipe, private messageService: MessageService, private cdr: ChangeDetectorRef) { }
@@ -100,6 +101,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
     return this.selectedDate ? this.datePipe.transform(this.selectedDate, 'yyyy-MM-dd') : '';
   }
   ngOnInit(): void {
+    this.userId = localStorage.getItem('userid') || ''; // Fetch user ID from localStorage
     const today = new Date();
     this.minDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1); // Next day
     this.maxDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1); // Next day (same as minDate)
@@ -309,7 +311,8 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
       // );
       this.previousAvailability = this.doctor.availability.map((a: any) => ({
         day: a.day,
-        availableFrom: a.availableFrom
+        availableFrom: a.availableFrom,
+        createdBy: a.createdBy,
       }));
       const allUpdatedAtNull = this.doctor.availability?.every(avail => !avail.updatedAt);
 
@@ -624,12 +627,10 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
     }
     else {
       this.doctor!.availability = [];
-      //   this.doctor!.slotDuration = this.generalSlotDuration; // Set the general slot duration
-      //  this.generalAvailableFrom = this.availableFrom + '-' + this.availableTo;
-      //  console.log(this.generalAvailableFrom)
-
       if (this.useSameTimeForAllDays) {
         this.availabilityDaysList.forEach(day => {
+          const existing = this.previousAvailability?.find((a: any) => a.day === day);
+          console.log('Existing availability for day:', day, existing);
           if (this.doctor?.availabilityDays?.[day]) {
             // console.log(this.generalAvailableFrom)
             this.doctor.availability.push({
@@ -637,6 +638,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
               day: day as string,
               availableFrom: this.generalAvailableFrom,
               slotDuration: this.generalSlotDuration,
+              createdBy: this.userId, // Use userId from localStorage
             });
           }
         });
@@ -644,13 +646,14 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
         this.availabilityDaysList.forEach(day => {
           if (this.doctor?.availabilityDays?.[day]) {
             const availability = this.individualAvailability[day];
-            // console.log('Availability:', availability);
+            console.log('Availability:', availability);
             if (availability.availableFrom && availability.slotDuration !== undefined) {
               this.doctor.availability.push({
                 id: 0,
                 day: day as string,
                 availableFrom: availability.availableFrom,
                 slotDuration: this.generalSlotDuration,
+                createdBy: this.userId,
               });
             }
           }

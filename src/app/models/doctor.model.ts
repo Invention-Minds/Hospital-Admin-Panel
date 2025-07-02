@@ -27,6 +27,7 @@ export interface Doctor {
     updatedAt?: string;
     doctorId?: number;
     availableFromArray?: [''],
+    createdBy?: string; // Optional property to track who created the availability
   }[];
   unavailableDates?: any[];
   isUnavailable?: boolean; // Optional property to mark the doctor as unavailable
@@ -38,6 +39,8 @@ export interface Doctor {
   ExtraSlotCount?: any;
   extraHoursBefore?:any;
   extraHoursAfter?:any;
-  roomNo?:any
+  roomNo?:any;
+  createdBy?:string;
+  updatedBy?: string;
   
 }

@@ -1632,7 +1632,8 @@ export class TodayConsultationsComponent {
       brandName,
       genericName: genericName || brandName, // fallback if no generic selected
       type,
-      description
+      description,
+      doctorId: this.doctor.id.toString() // Pass the doctor ID if needed
     }).subscribe((newTablet: any) => {
       // Save the new tablet ID
       array.at(index).patchValue({
@@ -1674,7 +1675,8 @@ export class TodayConsultationsComponent {
       brandName,
       genericName: genericName || brandName, // fallback if no generic selected
       type,
-      description
+      description,
+      doctorId: this.doctor.id.toString() // Pass the doctor ID if needed
     }).subscribe((newTablet: any) => {
       // Save the new tablet ID
       array.at(index).patchValue({
@@ -2561,11 +2563,13 @@ export class TodayConsultationsComponent {
     const payload = {
       prn: Number(this.selectedService.prnNumber),
       date: this.selectedService.date,
+      createdBy: this.historyData.createdBy? this.historyData.createdBy: this.doctor.id.toString(),
+      updatedBy: this.doctor.id.toString(),
       ...this.doctorNoteData
     };
 
     if (this.doctorNoteData?.id) {
-      this.appointmentService.saveDoctorNote(payload.prn, payload.date, this.doctorNoteData).subscribe({
+      this.appointmentService.saveDoctorNote(payload.prn, payload.date,payload.updatedBy, this.doctorNoteData).subscribe({
         next: () => {
           this.showNotesPopup = false;
           this.messageService.add({ severity: 'success', summary: 'Updated', detail: 'Doctor note updated successfully' });
@@ -2667,11 +2671,13 @@ export class TodayConsultationsComponent {
     const payload = {
       prn: Number(this.selectedService.prnNumber),
       date: this.selectedService.date,
+      createdBy: this.historyData.createdBy? this.historyData.createdBy: this.doctor.id.toString(),
+      updatedBy: this.doctor.id.toString(),
       ...this.historyData
     };
 
     if (this.historyData?.id) {
-      this.appointmentService.saveHistoryNote(payload.prn, payload.date, this.historyData).subscribe({
+      this.appointmentService.saveHistoryNote(payload.prn, payload.date, payload.updatedBy, this.historyData).subscribe({
         next: () => {
           this.showNotesPopup = false;
           this.messageService.add({ severity: 'success', summary: 'Updated', detail: 'History updated successfully' });

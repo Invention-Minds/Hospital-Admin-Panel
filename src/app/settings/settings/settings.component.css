@@ -424,6 +424,17 @@ button[disabled] {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   font-family: Kanit;
 }
+.table-container-1 {
+  width: 100%;
+  max-height: 500px;
+  max-width: 550px;
+  /* margin: auto; */
+  margin-top: 20px;
+  overflow-y: auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-family: Kanit;
+}
 .radio-container {
   margin: 10px 0;
   text-align: left;
@@ -696,6 +707,63 @@ tbody tr:hover {
   border: 2px solid #007bff;
   box-shadow: 0px 4px 12px rgba(0, 123, 255, 0.2); /* Slight blue glow */
   outline: none;
+}
+.locked-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+}
+.locked-table thead{
+  border-radius: 8px;
+}
+.locked-table th {
+  background-color: #0e2970; /* Dark blue background for headers */
+  color: #fff; /* White text for headers */
+  font-weight: 600;
+  font-size: 13px;
+  position: sticky;
+  top: 0; /* Keep headers sticky while scrolling */
+  z-index: 2; /* Keep it above other elements */
+  box-shadow: 0px 4px 15px 0px rgba(216, 210, 252, 0.64);
+  height: 48px;
+}
+.locked-table th, .locked-table td {
+  padding: 8px;
+  /* border-bottom: 1px solid #ccc; */
+}
+.text-green {
+  color: green;
+}
+.unlock-button {
+  margin-top: 10px;
+  background-color: transparent;
+  border: none;
+}
+.bulk-actions{
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  align-items: center;
+  padding: 10px;
+}
+.bulk-button{
+  display: flex;
+width: 88px;
+height: 30px;
+padding: 8px 20px;
+justify-content: center;
+align-items: center;
+gap: 10px;
+flex-shrink: 0;
+border-radius: 6px;
+border: 1px solid #169458;
+background: #FFF;
+color: #169458;
+font-family: Kanit;
+font-size: 12px;
+font-style: normal;
+font-weight: 500;
+line-height: normal;
 }
 @media screen and (max-width: 768px) {
   .settings-container{

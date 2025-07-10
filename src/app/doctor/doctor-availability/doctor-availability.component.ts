@@ -1001,6 +1001,7 @@ export class DoctorAvailabilityComponent {
     const timeRanges = availableFrom.split(',').map(range => range.trim());
     const slots: Slot[] = [];
     const currentTimeInMinutes = new Date().getHours() * 60 + new Date().getMinutes();
+    console.log(availableFrom, slotDuration,doctorAvailableUntil, 'log')
     const doctorAvailableUntilInMinutes = this.stringToMinutes(doctorAvailableUntil);
 
     const today = new Date();

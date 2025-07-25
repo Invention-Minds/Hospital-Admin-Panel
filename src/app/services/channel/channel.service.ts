@@ -53,13 +53,25 @@ export class ChannelService {
   }
 
   // Upload Media Advertisement (Image/Video)
-  uploadMediaAd(type: string, file: File): Observable<any> {
+  uploadMediaAd(type: string, files: File[]): Observable<any> {
     const formData = new FormData();
     formData.append('type', type);
-    formData.append('file', file);
+    for (const file of files) {
+      formData.append('file', file); // Append multiple files with same key
+    }
+  
 
     return this.http.post(`${this.apiUrl}/upload-media`, formData);
   }
+
+  deleteMedia(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/media/${id}`);
+  }
+  
+  updateMediaStatus(mediaId: number, isActive: boolean): Observable<any> {
+    return this.http.put(`${this.apiUrl}/media/${mediaId}/status`, { isActive });
+  }
+  
 
   // Fetch Latest Text & Media Ads
   getLatestAds(): Observable<any> {

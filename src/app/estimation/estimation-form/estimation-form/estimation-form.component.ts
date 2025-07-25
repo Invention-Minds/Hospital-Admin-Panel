@@ -50,6 +50,7 @@ export class EstimationFormComponent {
   employeeId: string = '';
   selectedDoctorName: string = '';
   filteredDoctors: any[] = [];
+  inactiveDoctors: any[] = []; // Stores inactive doctors fetched from backend
   doctors: any[] = [];
   @Output() closeForm = new EventEmitter<void>();
   @ViewChild('estimationForm') estimationForm!: NgForm; // Get form reference
@@ -533,7 +534,7 @@ export class EstimationFormComponent {
   }
 
   public loadDoctors(): void {
-    this.doctorService.getDoctors().subscribe(
+    this.doctorService.getActiveDoctors().subscribe(
       (doctors) => {
         this.doctors = doctors;
         this.filteredDoctors = this.doctors.slice().sort((a, b) => {
@@ -584,11 +585,32 @@ export class EstimationFormComponent {
 
   // If consultantId is already set, retrieve and display the doctor's name
   setSelectedDoctorName(): void {
-    if (this.formData.consultantId) {
-      const selectedDoctor = this.filteredDoctors.find(doc => doc.id === this.formData.consultantId);
-      if (selectedDoctor) {
-        this.selectedDoctorName = selectedDoctor.name;
-      }
+    if (!this.formData.consultantId) return;
+
+    // First: Check in active doctors
+    let selectedDoctor = this.filteredDoctors.find(doc => doc.id === this.formData.consultantId);
+
+    if (selectedDoctor) {
+      this.selectedDoctorName = selectedDoctor.name;
+    } 
+    else {
+      this.doctorService.getInactiveDoctors().subscribe(
+        (inactiveDoctors) => {
+          this.inactiveDoctors = inactiveDoctors;
+          // Now try to find the doctor again
+          selectedDoctor = this.inactiveDoctors.find(doc => doc.id === this.formData.consultantId);
+          if (selectedDoctor) {
+            this.selectedDoctorName = selectedDoctor.name;
+            // Add to filteredDoctors so it appears in dropdown
+            this.filteredDoctors.push(selectedDoctor);
+          } else {
+            this.selectedDoctorName = 'Unknown Doctor';
+          }
+        },
+        (error) => {
+          console.error('Error fetching inactive doctors:', error);
+        }
+      );
     }
   }
   ngOnInit(): void {
@@ -1932,13 +1954,13 @@ export class EstimationFormComponent {
   setEstimationTypeLogic() {
     if (this.selectedEstimationType !== 'Maternity') {
       this.formData.includedItems.cSection = false;
-  
+
       // Optional: If you’re managing exclusions too
       const index = this.formData.exclusions.indexOf('cSection');
       if (index > -1) {
         this.formData.exclusions.splice(index, 1);
       }
-  
+
       const incIndex = this.formData.inclusions.indexOf('cSection');
       if (incIndex > -1) {
         this.formData.inclusions.splice(incIndex, 1);
@@ -1946,8 +1968,8 @@ export class EstimationFormComponent {
     }
   }
 
-  
-  
+
+
 }
 
 

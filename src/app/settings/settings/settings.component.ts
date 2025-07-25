@@ -575,7 +575,7 @@ onDepartmentChange(): void {
   console.log('Filtered doctors:', this.filteredDoctors);
 }
 loadDoctors(): void {
-  this.doctorService.getDoctors().subscribe(
+  this.doctorService.getActiveDoctors().subscribe(
     (doctors) => {
       this.doctors = doctors; // Now this.doctors will hold the array of doctors
     },

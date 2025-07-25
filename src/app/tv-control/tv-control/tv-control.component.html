@@ -138,27 +138,84 @@
 
 
       </div>
-      <div class="uploaded-files" *ngIf="uploadedFile">
-        <div class="file-item">
+      <div class="uploaded-files" *ngIf="uploadedFiles.length > 0">
+        <!-- <div class="file-item">
           <img src="file-upload.svg" alt="File Icon" class="file-icon" />
           <span class="file-name">{{ uploadedFile.name ? uploadedFile.name : uploadedFile }}</span>
+        </div> -->
+        <div class="file-item" *ngFor="let file of uploadedFiles; let i = index">
+          <div class="file-div">
+            <img src="file-upload.svg" alt="File Icon" class="file-icon" />
+            <span class="file-name">{{ file.name }}</span>
+          </div>
+          <div class="file-actions">
+
+            <button class="active-btn" (click)="!file.disable && toggleMediaActive(file)" *ngIf="file.id">
+              <ng-container *ngIf="file.disable; else statusIcon">
+                <!-- Loading spinner -->
+                <span class="spinner" pTooltip="Processing..." tooltipPosition="top">
+                  <svg width="24" height="24" viewBox="0 0 50 50">
+                    <circle cx="25" cy="25" r="20" fill="none" stroke="#888" stroke-width="4"
+                      stroke-dasharray="31.4 31.4" stroke-linecap="round">
+                      <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="1s"
+                        repeatCount="indefinite" />
+                    </circle>
+                  </svg>
+                </span>
+              </ng-container>
+              <ng-template #statusIcon>
+                <ng-container *ngIf="file.isActive; else inactiveIcon">
+                  <!-- 🔴 ACTIVE STATE - SVG A -->
+
+                  <span pTooltip="Click to Activate" tooltipPosition="top">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                      <path fill="none" stroke="#ff4e54" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M11 7h8a2 2 0 0 1 2 2v8m-1.178 2.824c-.25.113-.529.176-.822.176H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h2m9-4l-4 4l-4-4M3 3l18 18" />
+                    </svg>
+                  </span>
+
+                </ng-container>
+
+                <ng-template #inactiveIcon>
+                  <!-- 🟢 INACTIVE STATE - SVG B -->
+                  <span pTooltip="Click to Deactivate" tooltipPosition="top">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                      <path fill="none" stroke="#169458" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zm13-6l-4 4l-4-4" />
+                    </svg>
+                  </span>
+                </ng-template>
+              </ng-template>
+            </button>
+
+            <button class="remove-btn" pTooltip="Remove" tooltipPosition="top" (click)="removeFile(i)">❌</button>
+          </div>
+        </div>
+        <div class="toggle-buttons">
+          <button (click)="submitAd()" [disabled]="!isAdReady()" class="upload-btn">Upload</button>
+          <div *ngIf="selectedAdType === 'text'" class="toggle-group">
+            <button (click)="activateAd('text')" [disabled]="adStatuses['text']" class="activate-btn">Activate</button>
+            <button (click)="deactivateAd('text')" [disabled]="!adStatuses['text']" class="deactivate-btn">Deactivate
+            </button>
+          </div>
+
+          <div *ngIf="selectedAdType === 'image'" class="toggle-group">
+            <button (click)="activateAd('image')" [disabled]="adStatuses['image']" class="activate-btn">Activate
+            </button>
+            <button (click)="deactivateAd('image')" [disabled]="!adStatuses['image']" class="deactivate-btn">Deactivate
+            </button>
+          </div>
         </div>
       </div>
 
 
     </div>
 
-    <div class="toggle-buttons">
+    <div class="toggle-buttons" *ngIf="selectedAdType==='text'">
       <button (click)="submitAd()" [disabled]="!isAdReady()" class="upload-btn">Upload</button>
       <div *ngIf="selectedAdType === 'text'" class="toggle-group">
         <button (click)="activateAd('text')" [disabled]="adStatuses['text']" class="activate-btn">Activate</button>
         <button (click)="deactivateAd('text')" [disabled]="!adStatuses['text']" class="deactivate-btn">Deactivate
-        </button>
-      </div>
-
-      <div *ngIf="selectedAdType === 'image'" class="toggle-group">
-        <button (click)="activateAd('image')" [disabled]="adStatuses['image']" class="activate-btn">Activate </button>
-        <button (click)="deactivateAd('image')" [disabled]="!adStatuses['image']" class="deactivate-btn">Deactivate
         </button>
       </div>
     </div>

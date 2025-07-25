@@ -1118,7 +1118,7 @@ export class TodayConsultationsComponent {
     );
   }
   loadDoctors(): void {
-    this.doctorService.getDoctors().subscribe(
+    this.doctorService.getActiveDoctors().subscribe(
       (doctors) => {
         this.allDoctors = doctors;
       },

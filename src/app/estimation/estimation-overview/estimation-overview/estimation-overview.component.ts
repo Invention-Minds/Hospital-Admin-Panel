@@ -716,6 +716,82 @@ downloadEstimationSummary() {
 }
 
 exportToExcel(data: any[], fileName: string = 'Estimation-Summary') {
+
+  const headerMap: Record<string, string> = {
+    id: "ID",
+    estimationId: "Estimation ID",
+    patientName: "Patient Name",
+    patientPhoneNumber: "Phone Number",
+    patientUHID: "UHID",
+    ageOfPatient: "Age",
+    genderOfPatient: "Gender",
+    consultantId: "Consultant ID",
+    consultantName: "Consultant Name",
+    estimationName: "Estimation Name",
+    estimationPreferredDate: "Preferred Date",
+    remarks: "Remarks",
+    totalDaysStay: "Total Days Stay",
+    icuStay: "ICU Stay",
+    wardStay: "Ward Stay",
+    roomType: "Room Type",
+    estimatedDate: "Procedure Date",
+    estimationCost: "Estimation Cost",
+    discountPercentage: "Discount %",
+    totalEstimationAmount: "Total Amount",
+    advanceAmountPaid: "Advance Paid",
+    receiptNumber: "Receipt No",
+    employeeId: "Employee ID",
+    approverId: "Approver ID",
+    patientSign: "Patient Sign",
+    employeeSign: "Employee Sign",
+    approverSign: "Approver Sign",
+    approvedDateAndTime: "Approved Date",
+    estimationCreatedTime: "Estimation Created Date",
+    messageSentDateAndTime: "Message Sent Date",
+    pdfLink: "PDF Link",
+    pacDone: "PAC Done",
+    statusOfEstimation: "Estimation Status",
+    ageBucketOfSurgery: "Age Bucket Of Surgery",
+    estimationType: "Estimation Type",
+    messageSent: "Message Sent",
+    signatureOf: "Signature Of",
+    employeeName: "Employee Name",
+    approverName: "Approver Name",
+    cancellerName: "Canceller Name",
+    cancellerId: "Canceller ID",
+    feedback: "Feedback",
+    attenderName: "Attender Name",
+    lockedBy: "Locked By",
+    userId: "User ID",
+    surgeryTime: "Surgery Time",
+    cancellationDateAndTime: "Cancellation Date",
+    confirmedDateAndTime: "Confirmed Date",
+    completedDateAndTime: "Completed Date",
+    overDueDateAndTIme: "Overdue Date",
+    estimationStatus: "Estimation Status",
+    pacAmountPaid: "PAC Amount Paid",
+    pacReceiptNumber: "PAC Receipt No",
+    submittedDateAndTime: "Submitted Date",
+    staffRemarks: "Staff Remarks",
+    patientRemarks: "Patient Remarks",
+    surgeryPackage: "Surgery Package",
+    implants: "Implants",
+    instrumentals: "Instrumentals",
+    procedures: "Procedures",
+    multipleSurgeries: "Multiple Surgeries",
+    multipleEstimationCost: "Multiple Estimation Cost",
+    costForGeneral: "Cost For General",
+    costForPrivate: "Cost For Private",
+    costForSemiPrivate: "Cost For Semi-Private",
+    costForVip: "Cost For VIP",
+    costForDeluxe: "Cost For Deluxe",
+    costForPresidential: "Cost For Presidential",
+    selectedRoomCost: "Selected Room Cost",
+    patientEmail: "Patient Email",
+    rejectReason: "Rejection Reason",
+    pacNotDoneReason: "PAC Not Done Reason"
+  };
+  
   const dateFieldsToConvert = [
     'estimationCreatedTime',
     'approvedDateAndTime',
@@ -723,7 +799,8 @@ exportToExcel(data: any[], fileName: string = 'Estimation-Summary') {
     'cancellationDateAndTime',
     'completedDateAndTime',
     'overDueDateAndTIme',
-    'submittedDateAndTime'
+    'submittedDateAndTime',
+    'messageSentDateAndTime',
   ];
 
   const filteredData = data.map(item => {
@@ -738,14 +815,8 @@ exportToExcel(data: any[], fileName: string = 'Estimation-Summary') {
     // Convert date fields from UTC to IST
     for (const field of dateFieldsToConvert) {
       if (rest[field]) {
-        rest[field] = new Date(rest[field]).toLocaleString('en-IN', {
+        rest[field] = new Date(rest[field]).toLocaleDateString('en-IN', {
           timeZone: 'Asia/Kolkata',
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
         });
       }
     }
@@ -753,7 +824,14 @@ exportToExcel(data: any[], fileName: string = 'Estimation-Summary') {
       rest['Procedure Date'] = rest.estimatedDate;
       delete rest.estimatedDate;
     }
-    return rest;
+    // return rest;
+    const renamed: Record<string, any> = {};
+    for (const key in rest) {
+      const newKey = headerMap[key] || key; // fallback if not mapped
+      renamed[newKey] = rest[key];
+    }
+
+    return renamed;
   });
 
   const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(filteredData);

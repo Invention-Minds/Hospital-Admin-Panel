@@ -42,6 +42,20 @@ export class DoctorServiceService {
     }
     return this.http.get<Doctor[]>(url);
   }
+
+  getActiveDoctors(date?: string): Observable<Doctor[]> {
+    let url = `${this.apiUrl}/doctors/active-doctors`;
+    if (date) {
+      url += `?date=${date}`;
+    }
+    return this.http.get<Doctor[]>(url);
+  }
+
+  getInactiveDoctors(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/doctors/inactive-doctors`);
+  }
+
+
   getAllDoctors(date?: string): Observable<Doctor[]> {
     let url = `${this.apiUrl}/doctors/get-doctor-details`;
     if (date) {

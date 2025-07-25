@@ -42,5 +42,6 @@ export interface Doctor {
   roomNo?:any;
   createdBy?:string;
   updatedBy?: string;
+  isActive?: boolean; 
   
 }

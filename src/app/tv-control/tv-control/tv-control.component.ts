@@ -48,8 +48,11 @@ export class TvControlComponent {
   textAd = '';
   ads: any[] = []
   adStatuses: { [key: string]: boolean } = {};
-  existingAds: any = {}; 
+  existingAds: any = {};
   private eventSource: EventSource | null = null;
+  existingImageMedia: any[] = [];
+  // uploadedFiles: File[] = [];
+  uploadedFiles: Array<File & { id?: number; url?: string; isActive?: boolean; disable?:false }> = [];
 
 
 
@@ -89,7 +92,7 @@ export class TvControlComponent {
   }
 
   loadDoctors(): void {
-    this.doctorService.getDoctors().subscribe(
+    this.doctorService.getActiveDoctors().subscribe(
       (doctors) => {
         this.allDoctors = doctors;
       },
@@ -349,20 +352,32 @@ export class TvControlComponent {
     this.selectedAdType = type;
     this.uploadedFile = null;
     this.textAd = '';
-    if(this.existingAds.text){
+    if (this.existingAds.text) {
       this.textAd = this.existingAds.text.content;
     }
-    if(this.existingAds.image){
+    if (this.existingAds.image) {
       this.uploadedFile = this.existingAds.image.content.substring(this.existingAds.image.content.lastIndexOf('/') + 1);
 
-      console.log(this.uploadedFile)}
+      console.log(this.uploadedFile)
+    }
   }
 
   onFileUpload(event: any) {
+    // if (event.target.files.length > 0) {
+    //   this.uploadedFile = event.target.files[0];
+    //   console.log(this.uploadedFile)
+    // }
     if (event.target.files.length > 0) {
-      this.uploadedFile = event.target.files[0];
-      console.log(this.uploadedFile)
+      const selected = Array.from(event.target.files) as File[];
+      this.uploadedFiles.push(...selected);
     }
+  }
+
+  deleteExistingFile(mediaId: number) {
+    this.channelService.deleteMedia(mediaId).subscribe(() => {
+      this.uploadedFiles = this.uploadedFiles.filter(m => m.id !== mediaId);
+      this.messageService.add({ severity: 'info', summary: 'Deleted', detail: 'Image deleted.' });
+    });
   }
 
   isAdReady(): boolean {
@@ -379,7 +394,7 @@ export class TvControlComponent {
         });
       });
     } else {
-      this.channelService.uploadMediaAd(this.selectedAdType, this.uploadedFile!).subscribe(() => {
+      this.channelService.uploadMediaAd(this.selectedAdType, this.uploadedFiles!).subscribe(() => {
         this.fetchLatestAds();
         this.messageService.add({
           severity: 'success',
@@ -389,6 +404,35 @@ export class TvControlComponent {
       });
     }
   }
+  removeFile(index: number) {
+    const file = this.uploadedFiles[index];
+
+    if (file.id) {
+      // Existing file from DB – call delete API
+      this.channelService.deleteMedia(file.id).subscribe(() => {
+        this.uploadedFiles.splice(index, 1);
+        this.messageService.add({ severity: 'info', summary: 'Deleted', detail: 'Image deleted.' });
+      });
+    } else {
+      // New file from input – just remove locally
+      this.uploadedFiles.splice(index, 1);
+    }
+  }
+  toggleMediaActive(media: any) {
+    const newStatus = !media.isActive;
+    media.disable = true; // ✅ Disable the button to prevent multiple clicks
+
+    this.channelService.updateMediaStatus(media.id, newStatus).subscribe(() => {
+      media.disable = false; 
+      media.isActive = newStatus; // ✅ Update locally
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Updated',
+        detail: `Image ${newStatus ? 'activated' : 'deactivated'}`
+      });
+    });
+  }
+
   fetchLatestAds() {
 
     this.channelService.getAllAds().subscribe(response => {
@@ -396,13 +440,13 @@ export class TvControlComponent {
         acc[ad.type] = ad;
         return acc;
       }, {});
-    
+
       this.ads = response.ads;
       this.adStatuses = response.ads.reduce((acc: any, ad: any) => {
         acc[ad.type] = ad.isActive ?? false;
         return acc;
       }, {});
-    
+
       // ✅ Ensure UI updates after data is set
       setTimeout(() => {
         console.log("Existing Text Ad:", this.existingAds.text);
@@ -410,9 +454,22 @@ export class TvControlComponent {
           this.textAd = this.existingAds.text.content;
           this.uploadedFile = this.existingAds.image?.content || this.existingAds.video?.content || null;
         }
+        if (this.existingAds.image?.AdvertisementMedia) {
+          this.existingImageMedia = this.existingAds.image.AdvertisementMedia;
+          this.uploadedFiles = this.existingAds.image.AdvertisementMedia.map((media: any) => {
+            return {
+              name: media.url.substring(media.url.lastIndexOf('/') + 1),
+              url: media.url,
+              isActive: media.isActive,
+              id: media.id // Needed for activation/deactivation or removal
+            };
+          });
+        } else {
+          this.uploadedFiles = [];
+        }
       }, 0);
     });
-    
+
 
   }
   onDragOver(event: DragEvent) {
@@ -434,8 +491,11 @@ export class TvControlComponent {
     event.stopPropagation();
     (event.currentTarget as HTMLElement).classList.remove("drag-over");
     if (event.dataTransfer && event.dataTransfer.files.length > 0) {
-      this.uploadedFile = event.dataTransfer.files[0]; // Store the first dropped file
-      console.log("Stored Dragged File:", this.uploadedFile);
+      // this.uploadedFile = event.dataTransfer.files[0]; // Store the first dropped file
+      // console.log("Stored Dragged File:", this.uploadedFile);
+      const droppedFiles = Array.from(event.dataTransfer.files) as File[];
+      this.uploadedFiles.push(...droppedFiles);
+      console.log("Dropped files:", droppedFiles);
     } else {
       console.warn("No files were dropped.");
     }
@@ -477,39 +537,39 @@ export class TvControlComponent {
     });
   }
   // Declare per-channel sliding index
-doctorSlideIndices: number[] = [];
+  doctorSlideIndices: number[] = [];
 
-// Returns only 3 doctors from current sliding index
-getVisibleDoctors(channelIndex: number) {
-  const start = this.doctorSlideIndices[channelIndex];
-  const end = start + 3;
-  const channel = this.channels[channelIndex];
+  // Returns only 3 doctors from current sliding index
+  getVisibleDoctors(channelIndex: number) {
+    const start = this.doctorSlideIndices[channelIndex];
+    const end = start + 3;
+    const channel = this.channels[channelIndex];
 
-  const visible = channel.doctors.slice(start, end);
+    const visible = channel.doctors.slice(start, end);
 
-  // Pad with nulls if fewer than 3, but only if total doctors < 6
-  const remaining = Math.max(0, 3 - visible.length);
-  const canAdd = channel.doctors.length < 6 ? Array(remaining).fill(null) : [];
+    // Pad with nulls if fewer than 3, but only if total doctors < 6
+    const remaining = Math.max(0, 3 - visible.length);
+    const canAdd = channel.doctors.length < 6 ? Array(remaining).fill(null) : [];
 
-  return [...visible, ...canAdd];
-}
+    return [...visible, ...canAdd];
+  }
 
 
-prevDoctorSlide(channelIndex: number) {
-  this.doctorSlideIndices[channelIndex] = Math.max(0, this.doctorSlideIndices[channelIndex] - 3);
-}
+  prevDoctorSlide(channelIndex: number) {
+    this.doctorSlideIndices[channelIndex] = Math.max(0, this.doctorSlideIndices[channelIndex] - 3);
+  }
 
-nextDoctorSlide(channelIndex: number) {
-  const channel = this.channels[channelIndex];
-  const totalDoctors = channel.doctors.length;
+  nextDoctorSlide(channelIndex: number) {
+    const channel = this.channels[channelIndex];
+    const totalDoctors = channel.doctors.length;
 
-  // Round down the maximum valid start index to nearest multiple of 3
-  const maxStartIndex = Math.floor((totalDoctors - 1) / 3) * 3;
+    // Round down the maximum valid start index to nearest multiple of 3
+    const maxStartIndex = Math.floor((totalDoctors - 1) / 3) * 3;
 
-  this.doctorSlideIndices[channelIndex] = Math.min(
-    this.doctorSlideIndices[channelIndex] + 3,
-    maxStartIndex
-  );
-}
+    this.doctorSlideIndices[channelIndex] = Math.min(
+      this.doctorSlideIndices[channelIndex] + 3,
+      maxStartIndex
+    );
+  }
 
 }

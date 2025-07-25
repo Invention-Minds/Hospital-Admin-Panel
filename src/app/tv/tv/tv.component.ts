@@ -750,6 +750,10 @@ doctorSlides: any[][] = [];
   //   }, 30000); // Show popup every 30 seconds
   // }
   startPopupRotation() {
+    if (this.popupInterval) {
+      clearInterval(this.popupInterval);
+    }
+  
     this.popupInterval = setInterval(() => {
       // this.fetchLatestAds()
       if (this.mediaFiles.length === 0) return;
@@ -779,8 +783,8 @@ doctorSlides: any[][] = [];
       }
 
       // ✅ Move to the next media
-      // this.currentMediaIndex = (this.currentMediaIndex + 1) % this.mediaFiles.length;
-    }, 300000);
+      this.currentMediaIndex = (this.currentMediaIndex + 1) % this.mediaFiles.length;
+    }, 60000);
 }
 
 // ✅ Handle Video Playback When It Becomes Ready
@@ -790,29 +794,6 @@ onVideoCanPlay() {
   }
 }
 
-
-  // fetchLatestAds() {
-  //   this.channelService.getLatestAds().subscribe(response => {
-  //     this.mediaFiles = []; // Clear existing ads
-
-  //     // ✅ Add text ad (if available)
-  //     if (response.textAd) {
-  //       this.scrollingText = response.textAd.content;
-  //     }
-
-  //     // ✅ Add media ads (image/video)
-  //     if (response.mediaAd) {
-  //       this.mediaFiles.push({
-  //         type: response.mediaAd.type,
-  //         src: response.mediaAd.content
-  //       });
-  //     }
-  //     console.log(this.mediaFiles)
-
-  //     // ✅ Restart the popup rotation with new ads
-  //     this.currentMediaIndex = 0;
-  //   });
-  // }
   fetchLatestAds() {
     this.channelService.getAllAds().subscribe(response => {
         this.mediaFiles = []; // ✅ Clear previous ads
@@ -843,11 +824,27 @@ onVideoCanPlay() {
 
         // ✅ Display only active image/video ads
         response.ads.forEach((ad:any) => {
-            if ((ad.type === 'image' || ad.type === 'video') && ad.isActive) {
+            // if ((ad.type === 'image' || ad.type === 'video') && ad.isActive) {
+            //     this.mediaFiles.push({
+            //         type: ad.type,
+            //         src: ad.content
+            //     });
+            // }
+            if (ad.type === 'image' && ad.AdvertisementMedia?.length > 0) {
+              const activeMedia = ad.AdvertisementMedia.filter((media: any) => media.isActive);
+              activeMedia.forEach((media: any) => {
                 this.mediaFiles.push({
-                    type: ad.type,
-                    src: ad.content
+                  type: 'image',
+                  src: media.url
                 });
+              });
+            }
+          
+            if (ad.type === 'video' && ad.isActive && ad.content) {
+              this.mediaFiles.push({
+                type: 'video',
+                src: ad.content
+              });
             }
         });
 

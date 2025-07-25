@@ -1,4 +1,4 @@
-import { Component,Input, OnChanges } from '@angular/core';
+import { Component, Input, OnChanges } from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import * as FileSaver from 'file-saver';
 import * as XLSX from 'xlsx';
@@ -8,20 +8,20 @@ interface Appointment {
   patientName: string;
   phoneNumber: string;
   doctorName: string;
-  doctorId:number;
+  doctorId: number;
   department: string;
   date: string;
   time: string;
   status: string;
   email: string;
-  smsSent?:boolean;
-  emailSent?:boolean;
-  messageSent?:boolean;
+  smsSent?: boolean;
+  emailSent?: boolean;
+  messageSent?: boolean;
   requestVia?: string; // Optional property
   created_at?: string;
   user?: any;
-  prnNumber?:any;
-  patientType?:string;
+  prnNumber?: any;
+  patientType?: string;
 }
 @Component({
   selector: 'app-appointment-complete',
@@ -29,38 +29,38 @@ interface Appointment {
   styleUrl: './appointment-complete.component.css'
 })
 export class AppointmentCompleteComponent {
+
+
   completedAppointments: Appointment[] = [];
-
-  constructor(private appointmentService: AppointmentConfirmService) {}
-  appointments: Appointment[] = [
-    // { id: '0001', patientName: 'Search Sundar', phoneNumber: '+91 7708590100', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Booked', smsSent: true },
-  ];
-
+  appointments: Appointment[] = [];
   currentPage = 1;
   itemsPerPage = 10;
   sortColumn: keyof Appointment | undefined = undefined;  // No sorting initially
   sortDirection: string = 'asc';  // Default sorting direction
-
   selectedValue: string = '';
-
   selectedDate: Date | null = null;
-  filteredServices:any[] = []
-
+  filteredServices: any[] = []
   selectedDateRange: Date[] = [];
   filteredList: any;
   isLoading: boolean = false;
   searchValue: string = '';
   activeComponent: string = 'completed'
-  today:string = ''
-
+  today: string = ''
   searchOptions = [
     { label: 'Patient Name', value: 'patientName' },
-    {label: 'PRN', value: 'prnNumber'},
+    { label: 'PRN', value: 'prnNumber' },
     { label: 'Doctor Name', value: 'doctorName' },
     { label: 'Department', value: 'department' },
   ];
   selectedSearchOption: any = this.searchOptions[0];
-  // Method to handle sorting by a specific column
+
+
+
+  constructor(private appointmentService: AppointmentConfirmService) { }
+
+
+
+
   ngOnInit() {
     const today = new Date();
     const year = today.getFullYear();
@@ -85,21 +85,19 @@ export class AppointmentCompleteComponent {
         // If the appointment date is today or in the future
         return appointmentDate >= today;
       });
-      // this.filterAppointmentsByDate(new Date());
       setTimeout(() => {
-        // console.log('Setting isLoading to false after delay');
         this.isLoading = false; // Stop loading indicator
       }, 2000); // 2-second delay
     },
-    (error) => {
-      console.error('Error fetching completed appointments:', error);
-      this.isLoading = false; // Stop loading indicator
-    }
+      (error) => {
+        console.error('Error fetching completed appointments:', error);
+        this.isLoading = false; // Stop loading indicator
+      }
     );
 
   }
-   // Method to filter appointments by a specific date
-   filterAppointmentsByDate(selectedDate: Date) {
+  // Method to filter appointments by a specific date
+  filterAppointmentsByDate(selectedDate: Date) {
     const formattedSelectedDate = this.formatDate(selectedDate);
 
     this.filteredAppointments = this.completedAppointments.filter((appointment) => {
@@ -116,7 +114,6 @@ export class AppointmentCompleteComponent {
   // Method to handle date change (e.g., when the user selects a date from a date picker)
   onDateChange(newDate: Date) {
     this.filterAppointmentsByDate(newDate);
-    // console.log('Selected date:', this.selectedDateRange);
   }
 
   sortBy(column: keyof Appointment) {
@@ -145,7 +142,7 @@ export class AppointmentCompleteComponent {
 
     return [...this.filteredAppointments].sort((a, b) => {
       const valueA = a[this.sortColumn!]; // Use the non-null assertion operator (!) to tell TypeScript sortColumn is defined
-      const valueB = b[this.sortColumn!]; 
+      const valueB = b[this.sortColumn!];
 
       if (typeof valueA === 'string' && typeof valueB === 'string') {
         const comparison = valueA.localeCompare(valueB);
@@ -194,19 +191,14 @@ export class AppointmentCompleteComponent {
   onSearch(): void {
     this.filteredList = [...this.completedAppointments];
     this.filteredAppointments = [...this.completedAppointments];
-  
-    console.log("🔎 Search Value:", this.searchValue);
-    console.log("📆 Selected Date Range:", this.selectedDateRange);
-  
-    // ✅ If selectedDateRange is provided, filter by date range
+
+    //  If selectedDateRange is provided, filter by date range
     if (this.selectedDateRange && this.selectedDateRange.length) {
       const startDate = this.selectedDateRange[0];
       const endDate = this.selectedDateRange[1] ? this.selectedDateRange[1] : startDate; // Use endDate if provided, otherwise use startDate
 
       if (startDate && endDate) {
         if (startDate.getTime() !== endDate.getTime()) {
-          // Filtering appointments by the selected date range
-          // console.log('Start date:', startDate, 'End date:', endDate);
           const normalizedEndDate = new Date(endDate);
           normalizedEndDate.setHours(23, 59, 59, 999);  // Set to the last millisecond of the day
 
@@ -215,10 +207,8 @@ export class AppointmentCompleteComponent {
             return appointmentDate >= startDate && appointmentDate <= normalizedEndDate;
           });
           this.filteredAppointments = this.filteredList
-          console.log('Filtered list:', this.filteredList);
         }
         else if (startDate.getTime() === endDate.getTime()) {
-          // console.log('Single date selected:');
           const startDate = this.selectedDateRange[0];
 
           this.filteredList = this.filteredList.filter((appointment: Appointment) => {
@@ -226,21 +216,18 @@ export class AppointmentCompleteComponent {
             return appointmentDate.toDateString() === startDate.toDateString();  // Compare the date portion only
           });
           this.filteredAppointments = this.filteredList
-          console.log('Filtered list:', this.filteredList);
         }
       }
       else {
         this.filteredAppointments = [...this.completedAppointments]
       }
 
-  
-      console.log("✅ Filtered Appointments based on selectedDateRange:", this.filteredAppointments);
     }
-  
-    // ✅ Apply search filters on top of the date range filtering
+
+    //  Apply search filters on top of the date range filtering
     this.filteredServices = this.filteredAppointments.filter((service) => {
       let matches = true;
-  
+
       if (this.selectedSearchOption && this.searchValue && service) {
         switch (this.selectedSearchOption) {
           case 'patientName':
@@ -255,20 +242,18 @@ export class AppointmentCompleteComponent {
           case 'prnNumber':
             const prnNumber = Number(service.prnNumber); // Convert to Number
             const searchNumber = Number(this.searchValue); // Convert to Number
-            console.log(prnNumber, searchNumber);
-  
+
             matches = !isNaN(searchNumber) && prnNumber === searchNumber;
             break;
         }
       }
-  
+
       return matches;
     });
-  
+
     this.filteredAppointments = this.filteredServices;
-    console.log("✅ Final Filtered Appointments:", this.filteredAppointments);
   }
-  
+
 
 
   refresh() {
@@ -316,61 +301,51 @@ export class AppointmentCompleteComponent {
     this.searchValue = '';
     this.selectedSearchOption = 'firstName';
     this.selectedDateRange = [];
-    this.filteredAppointments = this.filteredAppointments.filter((appointment:any)=>{
+    this.filteredAppointments = this.filteredAppointments.filter((appointment: any) => {
       appointment.date > new Date()
     })
   }
-  
+
   // Method to filter appointments by the selected date
   filterAppointment() {
     // If there's no date range or value to filter, return the unfiltered appointments
     this.filteredList = [...this.completedAppointments];
-  
+
     // Handle filtering by date range if selected
     if (this.selectedDateRange && this.selectedDateRange.length === 2) {
       const startDate = this.selectedDateRange[0];
       const endDate = this.selectedDateRange[1] ? this.selectedDateRange[1] : startDate; // Use endDate if provided, otherwise use startDate
-  
-      if (startDate && endDate) {
-        if(startDate.getTime() !== endDate.getTime()) {
-        // Filtering appointments by the selected date range
-        // console.log('Start date:', startDate, 'End date:', endDate);
-        const normalizedEndDate = new Date(endDate);
-    normalizedEndDate.setHours(23, 59, 59, 999);  // Set to the last millisecond of the day
 
-        this.filteredList = this.filteredList.filter((appointment: Appointment) => {
-          const appointmentDate = new Date(appointment.date);  // Assuming 'date' is in string format like 'YYYY-MM-DD'
-          return appointmentDate >= startDate && appointmentDate <= normalizedEndDate;
-        });
-        // console.log('Filtered list:', this.filteredList);
+      if (startDate && endDate) {
+        if (startDate.getTime() !== endDate.getTime()) {
+          const normalizedEndDate = new Date(endDate);
+          normalizedEndDate.setHours(23, 59, 59, 999);  // Set to the last millisecond of the day
+
+          this.filteredList = this.filteredList.filter((appointment: Appointment) => {
+            const appointmentDate = new Date(appointment.date);  // Assuming 'date' is in string format like 'YYYY-MM-DD'
+            return appointmentDate >= startDate && appointmentDate <= normalizedEndDate;
+          });
+        }
+        else if (startDate.getTime() === endDate.getTime()) {
+          const startDate = this.selectedDateRange[0];
+
+          this.filteredList = this.filteredList.filter((appointment: Appointment) => {
+            const appointmentDate = new Date(appointment.date);
+            return appointmentDate.toDateString() === startDate.toDateString();  // Compare the date portion only
+          });
+        }
       }
-      else if (startDate.getTime() === endDate.getTime()) {
-        // console.log('Single date selected:');
-        const startDate = this.selectedDateRange[0];
-    
-        this.filteredList = this.filteredList.filter((appointment: Appointment) => {
-          const appointmentDate = new Date(appointment.date);
-          return appointmentDate.toDateString() === startDate.toDateString();  // Compare the date portion only
-        });
-        // console.log('Filtered list:', this.filteredList);
+      else {
+        this.filteredAppointments = []
       }
-    }
-    else{
-      this.filteredAppointments = []
-    }
     }
 
     else {
-          // If no valid range is selected, show all appointments
-          this.filteredAppointments = [...this.completedAppointments];
-        }
-  
-    // Handle filtering by a single date if the start and end dates are the same
-   
-  
-    // Handle filtering by the search value (patient name, phone number, or doctor name)
+      // If no valid range is selected, show all appointments
+      this.filteredAppointments = [...this.completedAppointments];
+    }
+
     if (this.selectedValue.trim() !== '') {
-      // console.log('Selected search option:', this.selectedSearchOption);
       const searchLower = this.selectedValue.toLowerCase();
       this.filteredList = this.filteredList.filter((appointment: Appointment) => {
         let match = false;
@@ -393,53 +368,35 @@ export class AppointmentCompleteComponent {
         return match;
       });
     }
-    else{
+    else {
       this.filteredAppointments = [...this.completedAppointments];
     }
-  
+
     // Update the filtered appointments with the final result
     this.filteredAppointments = this.filteredList;
     this.currentPage = 1; // Reset to first page whenever new filters are applied
   }
-  ngOnChanges(){
+  ngOnChanges() {
     this.filterAppointment();
-    if(this.selectedDateRange && this.selectedDateRange.length === 0){
+    if (this.selectedDateRange && this.selectedDateRange.length === 0) {
       this.filterAppointmentsByDate(new Date());
     }
   }
   downloadFilteredData(): void {
-    // console.log('Downloading completed appointments data...');
     if (this.filteredServices && this.filteredServices.length > 0) {
-      // console.log('Downloading filtered data...');
-
-      // const selectedFields = this.filteredList.map((appointment: Appointment) => ({
-      //   'Patient Name': appointment.patientName,
-      //   'Patient Phone Number': appointment.phoneNumber,
-      //   'Patient Email': appointment.email,
-      //   'Doctor Name': appointment.doctorName,
-      //   'Department': appointment.department,
-      //   'Appointment Date': appointment.date,
-      //   'Appointment Time': appointment.time,
-      //   'Appointment Created Time': appointment.created_at,
-      //   'Request Via': appointment.requestVia,
-      //   'SMS Sent': appointment.smsSent ? 'Yes' : 'No',
-      //   'Email Sent': appointment.emailSent ? 'Yes' : 'No',
-      //   'Status': appointment.status,
-      //   'Appointment Handled By': appointment.user!.username
-      // }));
       // Step 1: Convert the filtered data to a worksheet
       const selectedFields = this.filteredServices.map((appointment: Appointment) => {
-        if(appointment.created_at){
-        const createdAt = new Date(appointment?.created_at);
-        const indianTime = moment.tz(createdAt, "America/New_York").tz("Asia/Kolkata");
+        if (appointment.created_at) {
+          const createdAt = new Date(appointment?.created_at);
+          const indianTime = moment.tz(createdAt, "America/New_York").tz("Asia/Kolkata");
 
-        // Store the date and time in two separate variables
-        const indianDate = indianTime.format('YYYY-MM-DD');
-        const indianTimeOnly = indianTime.format('HH:mm:ss');
-        const createdDate = createdAt.toISOString().split('T')[0]; // Extract the date part in YYYY-MM-DD format
-        const createdTime = createdAt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); // Extract time in HH:mm (24-hour format)
-        
-        appointment.created_at = indianDate + ' ' + indianTimeOnly;
+          // Store the date and time in two separate variables
+          const indianDate = indianTime.format('YYYY-MM-DD');
+          const indianTimeOnly = indianTime.format('HH:mm:ss');
+          const createdDate = createdAt.toISOString().split('T')[0]; // Extract the date part in YYYY-MM-DD format
+          const createdTime = createdAt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); // Extract time in HH:mm (24-hour format)
+
+          appointment.created_at = indianDate + ' ' + indianTimeOnly;
         }
         return {
           'Patient Name': appointment.patientName,
@@ -453,14 +410,14 @@ export class AppointmentCompleteComponent {
           'Request Via': appointment.requestVia,
           'Whatsapp Sent': appointment.smsSent ? 'Yes' : 'No',
           'Email Sent': appointment.emailSent ? 'Yes' : 'No',
-          'SMS Sent':appointment.messageSent ? 'Yes': 'No',
+          'SMS Sent': appointment.messageSent ? 'Yes' : 'No',
           'Status': appointment.status,
           'Appointment Handled By': appointment.user!.username,
         };
-      
+
       });
       const worksheet = XLSX.utils.json_to_sheet(selectedFields);
-      
+
       // Step 2: Create a new workbook and add the worksheet
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, `Completed Appointments`);
@@ -489,20 +446,16 @@ export class AppointmentCompleteComponent {
   }
   printAppointmentDetails(): void {
     const selectedFields = this.filteredServices.map((appointment: Appointment) => {
-      // console.log('Appointment:', appointment.created_at);
-      if(appointment.created_at){
-      const createdAt = new Date(appointment?.created_at);
-      const indianTime = moment.tz(createdAt, "America/New_York").tz("Asia/Kolkata");
+      if (appointment.created_at) {
+        const createdAt = new Date(appointment?.created_at);
+        const indianTime = moment.tz(createdAt, "America/New_York").tz("Asia/Kolkata");
 
-    // Store the date and time in two separate variables
-    const indianDate = indianTime.format('YYYY-MM-DD');
-    const indianTimeOnly = indianTime.format('HH:mm:ss');
-      // const createdDate = createdAt.toISOString().split('T')[0]; // Extract the date part in YYYY-MM-DD format
-      // const createdTime = createdAt.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); // Extract time in HH:mm (24-hour format)
-      
-      
-    appointment.created_at = indianDate + ' ' + indianTimeOnly;
-    // console.log('Appointment:', appointment.created_at);
+        // Store the date and time in two separate variables
+        const indianDate = indianTime.format('YYYY-MM-DD');
+        const indianTimeOnly = indianTime.format('HH:mm:ss');
+
+
+        appointment.created_at = indianDate + ' ' + indianTimeOnly;
       }
       return {
         'Patient Name': appointment.patientName,
@@ -520,10 +473,10 @@ export class AppointmentCompleteComponent {
         'Status': appointment.status,
         'Appointment Handled By': appointment.user!.username,
       };
-    
+
     });
     let printWindow = window.open('', '', 'width=800,height=600');
-  
+
     let tableHTML = `
       <html>
       <head>
@@ -554,13 +507,13 @@ export class AppointmentCompleteComponent {
             </tr>
           </thead>
           <tbody>
-            ${selectedFields.map((row:any) => `<tr>${Object.values(row).map(value => `<td>${value}</td>`).join('')}</tr>`).join('')}
+            ${selectedFields.map((row: any) => `<tr>${Object.values(row).map(value => `<td>${value}</td>`).join('')}</tr>`).join('')}
           </tbody>
         </table>
       </body>
       </html>
     `;
-  
+
     printWindow!.document.write(tableHTML);
     printWindow!.document.close();
     printWindow!.print();
@@ -574,21 +527,17 @@ export class AppointmentCompleteComponent {
     return `${year}-${month}-${day}`;
   }
   completeAppointment(appointment: Appointment) {
-    const completed : Appointment = {
+    const completed: Appointment = {
       ...appointment,
       status: 'completed',
       smsSent: true,
       emailSent: true,
-      messageSent:true,
+      messageSent: true,
       requestVia: appointment.requestVia
     };
     this.appointmentService.addCompletedAppointment(completed);
     this.filterAppointment();
   }
-  // Method to return the filtered appointments for display
-  // getFilteredAppointments() {
-  //   return this.filteredAppointments;
-  // }
 }
 
 

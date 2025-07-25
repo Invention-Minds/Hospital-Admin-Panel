@@ -589,7 +589,7 @@ export class AppointmentFormComponent implements OnInit {
   }
 
   public loadDoctors(): void {
-    this.doctorService.getDoctors().subscribe(
+    this.doctorService.getActiveDoctors().subscribe(
       (doctors) => {
         this.doctors = doctors;
         this.filteredDoctors = this.doctors.slice().sort((a, b) => {

@@ -114,11 +114,11 @@ export class ArrivedConsultationComponent {
     );
   }
   fetchAppointments(doctorId?: number) {
-    this.appointmentService.getAppointmentsByDoctor(doctorId!).subscribe(
+    this.appointmentService.getAppointmentsByDoctorToday(doctorId!).subscribe(
       (appointments) => {
         console.log(appointments)
         this.confirmedAppointments = appointments
-        this.filteredAppointments = this.confirmedAppointments;
+        this.filteredAppointments = this.confirmedAppointments
         this.futureAppointments = this.filteredAppointments.filter(appointment => !appointment.checkedOut || (!appointment.checkedOut && !appointment.isCloseOPD))
         this.filteredAppointments.sort((a, b) => {
           // 1. Move finished consultations to the bottom
@@ -289,7 +289,7 @@ export class ArrivedConsultationComponent {
       this.currentPage = this.totalPages;
     }
   }
-  filteredAppointments: Appointment[] = [...this.futureAppointments];
+  filteredAppointments: Appointment[] = [...this.confirmedAppointments];
   // filteredAppointments: Appointment[] = this.confirmedAppointments.filter(appointment => !appointment!.completed);
 
   // ngOnChanges(changes: SimpleChanges) {

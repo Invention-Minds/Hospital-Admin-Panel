@@ -3,10 +3,12 @@
   <div *ngIf="!isChannelRoute(); else channelTemplate">
     <div *ngIf="!isHelpDesk(); else helpdeskTemplate">
     <div *ngIf="!isLoginRoute(); else loginTemplate">
+      <div *ngIf="!otChannelRoute(); else otChannelTemplate">
       <app-sidebar></app-sidebar>
       <div class="content">
         <app-dashboard-module></app-dashboard-module>
       </div>
+    </div>
     </div>
     <ng-template #loginTemplate>
       <app-login></app-login>
@@ -22,6 +24,9 @@
 
 <!-- Channel Template -->
 <ng-template #channelTemplate>
+  <router-outlet></router-outlet>
+</ng-template>
+<ng-template #otChannelTemplate>
   <router-outlet></router-outlet>
 </ng-template>
 

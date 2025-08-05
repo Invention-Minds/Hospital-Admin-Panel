@@ -1,0 +1,86 @@
+<div class="tv-container">
+    <header class="header">
+      <img src="sidebar/IM-logo.png" alt="Logo" class="logo" />
+      <h1>Rashtrotthana Hospital - Bangalore</h1>
+      <div class="datetime-container">
+        <div class="datetime">
+          <span class="date">{{ currentDate }}</span>
+          <span>{{ currentTime }}</span>
+        </div>
+      </div>
+    </header>
+    <div class="content">
+        <div class="table-container">
+            <div class="table-wrapper">
+                <table class="appointment-table">
+                    <thead>
+                        <tr>
+                            <th style="padding-left: 20px;">No</th>
+                            <th>Patient Name
+                            </th>
+                            <th>Surgery Name</th>
+                            <th>Primary Surgeon</th>
+                            <th style="text-align: center;">Room No</th>
+                            <th style="text-align:center">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngIf="confirmedEstimations.length === 0">
+                            <td colspan="11" class="no-records-message">
+                                No records to display
+                            </td>
+                        </tr>
+                        <tr *ngFor="let estimation of confirmedEstimations; let i = index">
+                            <td style="padding-left: 20px;">{{ i + 1 }}</td>
+                            <td>{{ estimation.patientName }}</td>
+                                <td class="patient-name">
+                                    <span *ngIf="(estimation.estimationName || estimation.surgeryName)?.length > 10" class="scrolling-name">
+                                      {{ estimation.estimationName || estimation.surgeryName }}
+                                    </span>
+                                    <span *ngIf="(estimation.estimationName || estimation.surgeryName)?.length <= 10">
+                                      {{ estimation.estimationName || estimation.surgeryName }}
+                                    </span>
+                                  </td>
+                              <td>{{ estimation.OTDetails?.[0]?.handledBy || estimation.handledBy || '-' }}</td>
+                            <td style="text-align: center;">{{ estimation.OTDetails?.[0]?.roomNo || estimation.roomNo || '-' }}</td>
+
+                            <td class="button" style="text-align: center;">
+                                <span class="status"
+                                [ngClass]="{
+                                  'waiting': !estimation.OTDetails?.[0]?.isStarted && !estimation.isStarted,
+                                  'in-operation': (estimation.OTDetails?.[0]?.isStarted || estimation.isStarted) && (!estimation.OTDetails?.[0]?.isEnded || !estimation.isEnded),
+                                  'completed': (estimation.OTDetails?.[0]?.isEnded  || estimation.isEnded),
+                                  'admitted': !estimation.OTDetails?.[0]?.roomNo && !estimation.roomNo 
+                                }">
+                              
+                                {{
+                                  estimation.OTDetails?.[0]?.isEnded
+                                    ? 'Completed'
+                                    : (estimation.OTDetails?.[0]?.isStarted || estimation.isStarted)
+                                      ? 'In Operation'
+                                      : estimation.OTDetails?.[0]?.roomNo || estimation.roomNo ? 'Waiting for Surgery' : 'Admitted'
+                                }}
+                              </span>
+                              </td>
+                              
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        
+        
+        </div>
+    </div>
+
+    <footer class="footer">
+      <marquee>
+
+      </marquee>
+      <div class="copy-right-container">
+        <p>
+          Copyright ⓒ 2025<br> Doc Minds
+        </p>
+      </div>
+    </footer>
+  </div>

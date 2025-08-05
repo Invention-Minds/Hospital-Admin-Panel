@@ -1,5 +1,5 @@
 // tv.component.ts
-import { Component, OnInit, OnDestroy,ElementRef,ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { ChannelService } from '../../services/channel/channel.service';
@@ -76,17 +76,17 @@ export class TvComponent implements OnInit, OnDestroy {
   popupImage = '/popup.jpeg'; // Set a different popup image
   popupInterval: any;
   popupMedia = '';
-  isImage = true; 
+  isImage = true;
   currentMediaIndex = 0;
   scrollingText = '';  // Scrolling text for marquee
   mediaFiles: { type: string, src: string }[] = [];
   ads: any[] = []
   adStatuses: { [key: string]: boolean } = {};
-  existingAds: any = {}; 
+  existingAds: any = {};
   doctorSlideInterval: any;
-currentSlideIndex: number = 0;
-visibleDoctors: any[] = [];
-doctorSlides: any[][] = [];
+  currentSlideIndex: number = 0;
+  visibleDoctors: any[] = [];
+  doctorSlides: any[][] = [];
 
   @ViewChild('popupVideo') popupVideo!: ElementRef; // Reference for video tag
   constructor(
@@ -620,7 +620,7 @@ doctorSlides: any[][] = [];
     };
     let nextAppointmentFound = false;
 
-  
+
 
 
     appointments.forEach((appointment: any) => {
@@ -753,7 +753,7 @@ doctorSlides: any[][] = [];
     if (this.popupInterval) {
       clearInterval(this.popupInterval);
     }
-  
+
     this.popupInterval = setInterval(() => {
       // this.fetchLatestAds()
       if (this.mediaFiles.length === 0) return;
@@ -773,7 +773,7 @@ doctorSlides: any[][] = [];
         setTimeout(() => {
           if (this.popupVideo) {
             const videoElement = this.popupVideo.nativeElement;
-            
+
             videoElement.muted = false; // ✅ Ensure the video starts muted
             videoElement.play().catch((error: any) => {
               console.error("Autoplay blocked. Waiting for user interaction:", error);
@@ -785,104 +785,104 @@ doctorSlides: any[][] = [];
       // ✅ Move to the next media
       this.currentMediaIndex = (this.currentMediaIndex + 1) % this.mediaFiles.length;
     }, 60000);
-}
-
-// ✅ Handle Video Playback When It Becomes Ready
-onVideoCanPlay() {
-  if (this.popupVideo) {
-    this.popupVideo.nativeElement.muted = false; // Unmute after autoplay
   }
-}
+
+  // ✅ Handle Video Playback When It Becomes Ready
+  onVideoCanPlay() {
+    if (this.popupVideo) {
+      this.popupVideo.nativeElement.muted = false; // Unmute after autoplay
+    }
+  }
 
   fetchLatestAds() {
     this.channelService.getAllAds().subscribe(response => {
-        this.mediaFiles = []; // ✅ Clear previous ads
-        this.scrollingText = ''; // ✅ Reset scrolling text
+      this.mediaFiles = []; // ✅ Clear previous ads
+      this.scrollingText = ''; // ✅ Reset scrolling text
 
-        console.log("Fetched All Ads:", response);
+      console.log("Fetched All Ads:", response);
 
-        // ✅ Store all ads for reference
-        this.ads = response.ads;
-        
-        // ✅ Convert ads array into an object by type
-        this.existingAds = response.ads.reduce((acc: any, ad: any) => {
-            acc[ad.type] = ad;
-            return acc;
-        }, {});
+      // ✅ Store all ads for reference
+      this.ads = response.ads;
 
-        // ✅ Store active status of each ad type
-        this.adStatuses = response.ads.reduce((acc: any, ad: any) => {
-            acc[ad.type] = ad.isActive ?? false; // Default to false if null
-            return acc;
-        }, {});
+      // ✅ Convert ads array into an object by type
+      this.existingAds = response.ads.reduce((acc: any, ad: any) => {
+        acc[ad.type] = ad;
+        return acc;
+      }, {});
 
-        // ✅ Display only active text ad
-        if (this.existingAds.text && this.existingAds.text.isActive) {
-            this.scrollingText = this.existingAds.text.content;
-            console.log(this.scrollingText)
+      // ✅ Store active status of each ad type
+      this.adStatuses = response.ads.reduce((acc: any, ad: any) => {
+        acc[ad.type] = ad.isActive ?? false; // Default to false if null
+        return acc;
+      }, {});
+
+      // ✅ Display only active text ad
+      if (this.existingAds.text && this.existingAds.text.isActive) {
+        this.scrollingText = this.existingAds.text.content;
+        console.log(this.scrollingText)
+      }
+
+      // ✅ Display only active image/video ads
+      response.ads.forEach((ad: any) => {
+        // if ((ad.type === 'image' || ad.type === 'video') && ad.isActive) {
+        //     this.mediaFiles.push({
+        //         type: ad.type,
+        //         src: ad.content
+        //     });
+        // }
+        if (ad.type === 'image' && ad.AdvertisementMedia?.length > 0) {
+          const activeMedia = ad.AdvertisementMedia.filter((media: any) => media.isActive);
+          activeMedia.forEach((media: any) => {
+            this.mediaFiles.push({
+              type: 'image',
+              src: media.url
+            });
+          });
         }
 
-        // ✅ Display only active image/video ads
-        response.ads.forEach((ad:any) => {
-            // if ((ad.type === 'image' || ad.type === 'video') && ad.isActive) {
-            //     this.mediaFiles.push({
-            //         type: ad.type,
-            //         src: ad.content
-            //     });
-            // }
-            if (ad.type === 'image' && ad.AdvertisementMedia?.length > 0) {
-              const activeMedia = ad.AdvertisementMedia.filter((media: any) => media.isActive);
-              activeMedia.forEach((media: any) => {
-                this.mediaFiles.push({
-                  type: 'image',
-                  src: media.url
-                });
-              });
-            }
-          
-            if (ad.type === 'video' && ad.isActive && ad.content) {
-              this.mediaFiles.push({
-                type: 'video',
-                src: ad.content
-              });
-            }
-        });
-
-        console.log("Updated Media Files:", this.mediaFiles);
-
-        // ✅ Restart popup rotation if media ads exist
-        if (this.mediaFiles.length > 0) {
-            this.currentMediaIndex = 0;
-            this.startPopupRotation();
+        if (ad.type === 'video' && ad.isActive && ad.content) {
+          this.mediaFiles.push({
+            type: 'video',
+            src: ad.content
+          });
         }
+      });
+
+      console.log("Updated Media Files:", this.mediaFiles);
+
+      // ✅ Restart popup rotation if media ads exist
+      if (this.mediaFiles.length > 0) {
+        this.currentMediaIndex = 0;
+        this.startPopupRotation();
+      }
 
 
     });
-}
-
-slideIndex = 0;
-doctorsPages: any[][] = [];
-
-
-
-groupDoctorsForSlides() {
-  const chunkSize = 3;
-  const doctorsCount = this.doctors.length;
-
-  this.doctorsPages = [];
-
-  for (let i = 0; i < doctorsCount; i += chunkSize) {
-    this.doctorsPages.push(this.doctors.slice(i, i + chunkSize));
   }
-}
 
-nextSlide() {
-  this.slideIndex = (this.slideIndex + 1) % this.doctorsPages.length;
-}
-handleImageError(event: Event) {
-  const target = event.target as HTMLImageElement;
-  target.src = '/doctor-image.jpg'; // Fallback image
-}
+  slideIndex = 0;
+  doctorsPages: any[][] = [];
+
+
+
+  groupDoctorsForSlides() {
+    const chunkSize = 3;
+    const doctorsCount = this.doctors.length;
+
+    this.doctorsPages = [];
+
+    for (let i = 0; i < doctorsCount; i += chunkSize) {
+      this.doctorsPages.push(this.doctors.slice(i, i + chunkSize));
+    }
+  }
+
+  nextSlide() {
+    this.slideIndex = (this.slideIndex + 1) % this.doctorsPages.length;
+  }
+  handleImageError(event: Event) {
+    const target = event.target as HTMLImageElement;
+    target.src = '/doctor-image.jpg'; // Fallback image
+  }
 
 
 }

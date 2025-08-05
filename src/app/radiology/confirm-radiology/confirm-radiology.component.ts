@@ -699,5 +699,32 @@ onClear() {
       this.unlockService();
     }
   }
+  unlock(){
+    this.healthCheckupService.unlock().subscribe({
+      next: (response) => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Unlocked',
+          detail: 'Queue has been successfully cleared.',
+        });
+      },
+      error: (error) => {
+        if (error.status === 406) {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Queue is already unlocked.',
+          });
+        }
+        else {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'An error occurred while unlocking the queue.',
+          });
+        }
+      }
+    });
+  }
 
 }

@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { BrowserModule, provideClientHydration } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { PhoneMaskPipe } from './services/phone-mask.pipe';
+import { ChartModule } from 'primeng/chart';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -12,7 +13,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
 import { CalendarModule } from 'primeng/calendar';
 import { TableModule } from 'primeng/table';
-import { DialogModule } from '@angular/cdk/dialog';
+import { DialogModule } from 'primeng/dialog';
 import { PaginatorModule } from 'primeng/paginator';
 import { MatDialogModule } from '@angular/material/dialog';
 import {MatTooltipModule} from '@angular/material/tooltip';
@@ -153,6 +154,10 @@ import { PatientNewComponent } from './patient/patient-new/patient-new.component
 import { PatientOverviewComponent } from './patient/patient-overview/patient-overview.component';
 import { NursingOverviewComponent } from './nursing/nursing-overview/nursing-overview.component';
 import { NursingVitalsComponent } from './nursing/nursing-vitals/nursing-vitals.component';
+import { OtOverviewComponent } from './ot/ot-overview/ot-overview.component';
+import { TodayOtComponent } from './ot/today-ot/today-ot.component';
+import { OtTvDisplayComponent } from './ot-tv-display/ot-tv-display.component';
+import { EstimationAnalyticsComponent } from './estimation-analytics/estimation-analytics.component';
 
 
 @NgModule({
@@ -265,6 +270,10 @@ import { NursingVitalsComponent } from './nursing/nursing-vitals/nursing-vitals.
     PatientOverviewComponent,
     NursingOverviewComponent,
     NursingVitalsComponent,
+    OtOverviewComponent,
+    TodayOtComponent,
+    OtTvDisplayComponent,
+    EstimationAnalyticsComponent,
   ],
   imports: [
     BrowserModule,
@@ -296,6 +305,7 @@ import { NursingVitalsComponent } from './nursing/nursing-vitals/nursing-vitals.
     DialogModule,
     NgxLoadingButtonsModule,
     CommonModule,
+    ChartModule,
    ],
   exports: [PhoneMaskPipe],
   providers: [

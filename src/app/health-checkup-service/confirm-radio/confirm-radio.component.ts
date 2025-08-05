@@ -350,32 +350,55 @@ onClear() {
       this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Cannot check-in for past appointments!' });
       return;
     }
-    const { id,RadioService, ...restOfAppointment } = appointment;
-    const payload ={
-      ...restOfAppointment,
-      checkedIn: true,
-      checkedInTime: new Date()
-    }
-    if (!serviceId) return;
+    // const { id,RadioService, ...restOfAppointment } = appointment;
+    // const payload ={
+    //   ...restOfAppointment,
+    //   checkedIn: true,
+    //   checkedInTime: new Date()
+    // }
+    // if (!serviceId) return;
 
-    this.healthCheckupService.updateService(serviceId,payload).subscribe({
-      next: (response) => {
-        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Checked In Successfully!' });
-        console.log('Service marked as completed:', response);
+    // this.healthCheckupService.updateService(serviceId,payload).subscribe({
+    //   next: (response) => {
+    //     this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Checked In Successfully!' });
+    //     console.log('Service marked as completed:', response);
 
-        this.fetchConfirmedAppointments()
+    //     this.fetchConfirmedAppointments()
 
-      }
-    })
+    //   }
+    // })
+    this.healthCheckupService.checkIn(serviceId!).subscribe({
+      next: (res: any) => {
+        this.messageService.add({
+          severity: "success",
+          summary: "Checked In",
+          detail: res.message,
+        });
+        appointment.checkedIn = true;
+
+      },
+      error: (err) => {
+        if (err.status === 406) {
+          this.messageService.add({
+            severity: "warn",
+            summary: "Queue Locked",
+            detail: "Check-in temporarily disabled. Queue limit exceeded.",
+          });
+        } else {
+          this.messageService.add({
+            severity: "error",
+            summary: "Error",
+            detail: err.error.message,
+          });
+        }
+      },
+    });
 
   // Update UI
 
   }
 
   openAppointmentForm(service: Service): void {
-    // this.router.navigate(['/reschedule', service.id], {
-    //   state: { data: service }, // Passing full service object using state
-    // });
     this.lockService(service);
   }
   openAppointmentFormAfterLocked(service: Service): void {

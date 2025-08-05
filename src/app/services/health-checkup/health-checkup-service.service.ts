@@ -31,8 +31,8 @@ export interface Service {
 export class HealthCheckupServiceService {
   private baseUrl = `${environment.apiUrl}/services`; // Update this with your actual backend endpoint
   constructor(private http: HttpClient) { }
-   // Create a new service
-   createService(service: any): Observable<any> {
+  // Create a new service
+  createService(service: any): Observable<any> {
     return this.http.post(`${this.baseUrl}`, service);
   }
 
@@ -80,42 +80,53 @@ export class HealthCheckupServiceService {
     return this.http.post(`${this.baseUrl}/schedule-completion`, {}, { params });
   }
   // Lock a service
-lockService(serviceId: number, userId: number): Observable<any> {
-  return this.http.put(`${this.baseUrl}/${serviceId}/lock`, { userId });
-}
+  lockService(serviceId: number, userId: number): Observable<any> {
+    return this.http.put(`${this.baseUrl}/${serviceId}/lock`, { userId });
+  }
 
-// Unlock a service
-unlockService(serviceId: number): Observable<any> {
-  return this.http.put(`${this.baseUrl}/${serviceId}/unlock`, {});
-}
-sendWhatsappMessageForService(data: any): Observable<any> {
-  return this.http.post<any>(`${environment.apiUrl}/whatsapp/send-service-message`, data);
-}
-sendSmsMessage(data: any): Observable<any> {
-  return this.http.post<any>(`${environment.apiUrl}/sms/send-sms-package`, data);
-}
-individualComplete(data: any): Observable<any> {
-  return this.http.post<any>(`${this.baseUrl}/mark-complete`, data);
-}
-getConfirmedAppointments():Observable<any[]> {
-  return this.http.get<any[]>(`${this.baseUrl}/confirmed-appts`)
-}
-getCancelledAppointments():Observable<any[]> {
-  return this.http.get<any[]>(`${this.baseUrl}/cancelled-appts`)
-}
-getCompletedAppointments():Observable<any[]> {
-  return this.http.get<any[]>(`${this.baseUrl}/completed-appts`)
-}
-getPendingAppointments():Observable<any[]> {
-  return this.http.get<any[]>(`${this.baseUrl}/pending-appts`)
-}
-getTodayCheckinServices():Observable<any[]> {
-  return this.http.get<any[]>(`${this.baseUrl}/today-services`)
-}
-getTodayConfirmedServices():Observable<any[]> {
-  return this.http.get<any[]>(`${this.baseUrl}/today-confirmed`)
-}
-getMhcOverview():Observable<any[]> {
-  return this.http.get<any[]>(`${this.baseUrl}/get-mhc-overview`)
-}
+  // Unlock a service
+  unlockService(serviceId: number): Observable<any> {
+    return this.http.put(`${this.baseUrl}/${serviceId}/unlock`, {});
+  }
+  sendWhatsappMessageForService(data: any): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/whatsapp/send-service-message`, data);
+  }
+  sendSmsMessage(data: any): Observable<any> {
+    return this.http.post<any>(`${environment.apiUrl}/sms/send-sms-package`, data);
+  }
+  individualComplete(data: any): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/mark-complete`, data);
+  }
+  getConfirmedAppointments(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/confirmed-appts`)
+  }
+  getCancelledAppointments(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/cancelled-appts`)
+  }
+  getCompletedAppointments(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/completed-appts`)
+  }
+  getPendingAppointments(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/pending-appts`)
+  }
+  getTodayCheckinServices(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/today-services`)
+  }
+  getTodayConfirmedServices(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/today-confirmed`)
+  }
+  getMhcOverview(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/get-mhc-overview`)
+  }
+  getLockStatus() {
+    return this.http.get<{ isActive: boolean }>(`${environment.apiUrl}/queue/system-lock/check-in`);
+  }
+
+  unlock() {
+    return this.http.post(`${environment.apiUrl}/queue/unlock-checkins`, {});
+  }
+
+  checkIn(serviceId: number) {
+    return this.http.post(`${environment.apiUrl}/queue/${serviceId}/checkin`, {});
+  }
 }

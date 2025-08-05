@@ -94,6 +94,12 @@ export class LoginComponent implements OnInit {
             console.log(`🔀 Redirecting to /nursing/${blockNumber}`);
             this.router.navigate([`/nursing/${blockNumber}`]); // Navigate to the appropriate channel
           }
+          else if(response.user.subAdminType === 'OT Channel'){
+            this.router.navigate(['/ot-channel']);
+          }
+          else if( response.user.subAdminType === 'OT Coordinator'){
+            this.router.navigate(['/surgery']);
+          }
           else if (response.user.subAdminType === 'Estimator'){
             console.log(this.subAdminType)
             this.router.navigate(['/estimation'])
@@ -119,6 +125,12 @@ export class LoginComponent implements OnInit {
           else if(response.user.role === 'doctor'){
             console.log('doctor',response.user.role)
             this.router.navigate(['/doctor-appointments']);
+          }
+          else if(response.user.role === ''){
+            this.router.navigate(['/login']);
+          }
+          else{
+            this.router.navigate(['/login']);
           }
         }
        

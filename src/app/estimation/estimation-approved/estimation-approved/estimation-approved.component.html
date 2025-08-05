@@ -141,27 +141,7 @@
           </td> -->
 
           
-          <!-- <td>
-            <ng-container *ngIf="estimation.statusOfEstimation === 'approved' || estimation.statusOfEstimation === 'confirmed' else statusText">
-              <select class="status-dropdown" (change)="onStatusChange($event, estimation)">
-                <option [value]="'approved'" [selected]="estimation.statusOfEstimation === 'approved'">Approved</option>
-                <option [value]="'confirmed'" [selected]="estimation.statusOfEstimation === 'confirmed'">Confirmed</option>
-              </select>
-              
-            </ng-container>
-            <ng-template #statusText>
-              <span class="status-badge">{{ estimation.statusOfEstimation }}</span>
-            </ng-template>
-            <ng-container *ngIf="estimation.statusOfEstimation === 'confirmed'">
-              <select class="status-dropdown" (change)="onConfirmedAction($event, estimation)">
-                <option disabled selected>Confirmed</option>
-                <option value="completed">Complete</option>
-                <option value="cancelled">Cancel</option>
-              </select>
-              
-            </ng-container>
-            
-          </td> -->
+
           <td>
             <!-- Show dropdown for 'approved' only -->
             <ng-container class="dropdown-container-in-table" *ngIf="estimation.statusOfEstimation === 'approved'; else otherStatus">
@@ -192,16 +172,7 @@
           
           
           <td class="button">
-            <!-- <button class="btn-action" *ngIf="estimation.statusOfEstimation === 'confirmed'"  (click)="completeAppointment(estimation)"  pTooltip="Complete" tooltipPosition="top">
-              <img src="check-in.svg" alt="Confirm">
-            </button>
-            <button class="btn-action" *ngIf="estimation.statusOfEstimation === 'confirmed'" [disabled]="adminType !== 'Senior Manager'" (click)="openCancelFeedback(estimation)"  pTooltip="Cancel" tooltipPosition="top">
-              <img src="/cancel-est.svg" alt="Confirm">
-            </button> -->
-            <!-- <button class="btn-action" *ngIf="estimation.statusOfEstimation === 'confirmed'  " (click)="openAdvancePopup(estimation)" pTooltip="Advance Amount"
-            tooltipPosition="top">
-            <img src="/paid.svg" alt="Confirm">
-          </button> -->
+
             <button class="btn-action" *ngIf="estimation.statusOfEstimation !== 'completed'" (click)="openFollowUpPopup(estimation)" pTooltip="Follow-Ups"
               tooltipPosition="top">
               <img src="/follow-up.svg" alt="Confirm">
@@ -209,12 +180,6 @@
             <button class="btn-action" (click)="openAppointmentForm(estimation)" pTooltip="View" tooltipPosition="top">
               <img src="/view.svg" alt="Confirm">
             </button>
-            <!-- <button class="btn-action" *ngIf="estimation.estimationType === 'SM'  && estimation.statusOfEstimation === 'approved'" (click)="openPacPopup(estimation)"  pTooltip="PAC" tooltipPosition="top">
-              <img src="/pac.svg" alt="Confirm">
-            </button>
-            <button class="btn-action" *ngIf="(estimation.estimationType === 'MM' || estimation.estimationType === 'Maternity') && estimation.statusOfEstimation === 'approved' " (click)="confirm(estimation)" pTooltip="Confirm" tooltipPosition="top">
-              <img src="/mm-confirm.svg" alt="Confirm">
-            </button> -->
             <button class="btn-action" *ngIf="estimation.statusOfEstimation !== 'completed'" (click)="resend(estimation)" pTooltip="Resend" tooltipPosition="top">
               <img src="/resend.svg" alt="Confirm">
             </button>

@@ -9,12 +9,13 @@ import { DateTime } from 'luxon';
 import * as XLSX from 'xlsx';
 import * as FileSaver from 'file-saver';
 import { MessageService } from 'primeng/api';
+import { EstimationAnalyticsComponent } from "../../../estimation-analytics/estimation-analytics.component";
 
 @Component({
   selector: 'app-estimation-overview',
   templateUrl: './estimation-overview.component.html',
   styleUrl: './estimation-overview.component.css',
-  providers: [MessageService],
+  providers: [MessageService]
 })
 export class EstimationOverviewComponent {
   activeComponent: string = 'form';
@@ -70,6 +71,7 @@ export class EstimationOverviewComponent {
   totalMaternity:number = 0;
 
 
+
   
 
 
@@ -83,10 +85,10 @@ export class EstimationOverviewComponent {
     this.currentMonth = date.toLocaleString('en-US', { month: 'long' }); // "May"
     this.role = localStorage.getItem('role')!;
     if (this.role === 'sub_admin') {
-      this.activeComponent = 'request'
+      this.activeComponent = 'analytics'
     }
     else {
-      this.activeComponent = 'submitted'
+      this.activeComponent = 'analytics'
     }
     this.estimationService.getAllEstimation().subscribe({
       next: (estimations: any[]) => {
@@ -244,6 +246,10 @@ export class EstimationOverviewComponent {
   }
   showCancelEstimation() {
     this.activeComponent = 'cancelled'
+  }
+
+  showAnalytics() {
+    this.activeComponent = 'analytics'
   }
 
   processTodayEstimations(estimations: any[]) {

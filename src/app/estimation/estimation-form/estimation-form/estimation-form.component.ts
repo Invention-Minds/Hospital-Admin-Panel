@@ -415,6 +415,8 @@ export class EstimationFormComponent {
     submittedDateAndTime: new Date(),
     estimationCreatedTime: new Date(),
     rejectReason: '',
+    multipleSurgeryDoctor: '',
+    consultants: [] as string[],
     includedItems: {
       wardICUStay: false,
       primaryConsultant: false,
@@ -458,36 +460,7 @@ export class EstimationFormComponent {
     });
 
   }
-  // onUHIDChange(): void {
-  //   console.log(this.formData.patientUHID)
-  //   if (!this.formData.patientUHID) {
-  //     // Reset fields if UHID is empty
-  //     this.formData.patientName = '';
-  //     this.formData.ageOfPatient = null;
-  //     this.formData.genderOfPatient = '';
-  //     this.formData.patientPhoneNumber = ''
-  //     return;
-  //   }
-  //   console.log(this.allEstimations)
-  //   const matchingEstimation = this.patients.find(
-  //     (estimation) => String(estimation.prn) === String(this.formData.patientUHID)
-  //   );
-  //   console.log("🔍 Matching Estimation:", matchingEstimation);
 
-  //   console.log(matchingEstimation)
-  //   if (matchingEstimation) {
-  //     this.formData.patientName = matchingEstimation.name;
-  //     this.formData.ageOfPatient = matchingEstimation.age;
-  //     this.formData.genderOfPatient = matchingEstimation.gender;
-  //     this.formData.patientPhoneNumber = matchingEstimation.mobileNumber;
-  //   } else {
-  //     // Reset if no match found
-  //     this.formData.patientName = '';
-  //     this.formData.ageOfPatient = null;
-  //     this.formData.genderOfPatient = '';
-  //     this.formData.patientPhoneNumber = ''
-  //   }
-  // }
   uhidSuggestions: boolean = false;
   filteredUHIDPatients: any[] = []; // Filtered UHID/MRD suggestions
 
@@ -531,6 +504,31 @@ export class EstimationFormComponent {
 
     // Hide suggestions after selection
     this.uhidSuggestions = false;
+  }
+
+  handleSurgeryNamesChange() {
+    // Split surgery names by comma and clean spaces
+    this.surgeries = this.formData.estimationName
+      .split(',')
+      .map(name => name.trim())
+      .filter(name => name.length > 0);
+
+    this.formData.consultants = this.surgeries.map((_, index) => this.formData.consultants[index] || '');
+    if (this.formData.consultantId) {
+      this.formData.consultants[0] = this.formData.consultantId.toString();
+    }
+    this.updateDoctorIdsString();
+  }
+  updateMultipleDoctor(event: any, index: number) {
+    this.formData.consultants[index] = event.target.value;
+    this.updateDoctorIdsString();
+  }
+
+  updateDoctorIdsString() {
+    this.formData.multipleSurgeryDoctor = this.formData.consultants
+      .filter(id => id)
+      .join(',');
+    console.log(this.formData.multipleSurgeryDoctor);
   }
 
   public loadDoctors(): void {
@@ -592,7 +590,7 @@ export class EstimationFormComponent {
 
     if (selectedDoctor) {
       this.selectedDoctorName = selectedDoctor.name;
-    } 
+    }
     else {
       this.doctorService.getInactiveDoctors().subscribe(
         (inactiveDoctors) => {
@@ -654,6 +652,19 @@ export class EstimationFormComponent {
       };
       this.formData.rejectReason = this.estimationData.rejectReason
       console.log(this.formData.rejectReason)
+      if (this.estimationData?.multipleSurgeryDoctor) {
+        // Split doctor IDs into array
+        const doctorIds = this.estimationData.multipleSurgeryDoctor
+          .split(',')
+          .map((id:any) => id.trim());
+      
+        // Ensure formData.consultants exists and map IDs
+        this.formData.consultants = doctorIds.map((id:any) => Number(id));
+      } else {
+        // Initialize empty consultants array matching surgeries count
+        this.formData.consultants = this.surgeries.map(() => '');
+      }
+      
       this.initializeEstimationInputs()
       if (this.formData.patientPhoneNumber.startsWith('91') && this.formData.patientPhoneNumber.length === 12) {
         this.formData.patientPhoneNumber = this.formData.patientPhoneNumber.slice(2); // Remove '91' prefix
@@ -959,6 +970,7 @@ export class EstimationFormComponent {
         patientPhoneNumber: this.formData.patientPhoneNumber.toString(),
         submittedDateAndTime: this.formData.submittedDateAndTime,
         estimationCreatedTime: this.formData.estimationCreatedTime,
+        multipleSurgeryDoctor: this.formData.multipleSurgeryDoctor,
       },
       inclusions: this.formData.inclusions,
       exclusions: this.formData.exclusions,
@@ -1256,7 +1268,8 @@ export class EstimationFormComponent {
             patientEmail: this.formData.patientEmail,
             patientPhoneNumber: this.formData.patientPhoneNumber.toString(),
             surgeryTime: this.formData.surgeryTime,
-            overDueDateAndTIme: null
+            overDueDateAndTIme: null,
+            multipleSurgeryDoctor: this.formData.multipleSurgeryDoctor,
           },
           inclusions: this.formData.inclusions,
           exclusions: this.formData.exclusions,
@@ -1324,7 +1337,8 @@ export class EstimationFormComponent {
             selectedRoomCost: this.selectedRoomCost,
             patientEmail: this.formData.patientEmail,
             submittedDateAndTime: new Date(),
-            overDueDateAndTIme: null
+            overDueDateAndTIme: null,
+            multipleSurgeryDoctor: this.formData.multipleSurgeryDoctor,
           },
           inclusions: this.formData.inclusions,
           exclusions: this.formData.exclusions,
@@ -1479,7 +1493,12 @@ export class EstimationFormComponent {
       const newEstimationCosts = new Array(surgeries.length).fill(0);
 
       if (newEstimationCosts.length > 1) {
-        this.selectedSurgeryPackage = 'multiple surgeries'
+        this.selectedSurgeryPackage = 'multiple surgeries';
+        this.handleSurgeryNamesChange()
+      }
+      else{
+        this.selectedSurgeryPackage = 'single surgery';
+        this.handleSurgeryNamesChange()
       }
 
       // Preserve existing costs
@@ -1508,20 +1527,6 @@ export class EstimationFormComponent {
     this.formData.multipleEstimationCost = this.estimationCosts.join(', ');
     console.log("Updated multipleEstimationCost:", this.formData.multipleEstimationCost);
   }
-  // loadSurgeryNames(): void {
-  //   // if (!this.selectedDepartmentId || !this.selectedEstimationType) return;
-  //  console.log( this.selectedEstimationType)
-
-  //   this.estimationService.getEstimationsByType(this.selectedEstimationType).subscribe(
-  //     (surgeryNames) => {
-  //       this.estimationSuggestions = surgeryNames;
-  //       console.log(this.estimationSuggestions)
-  //     },
-  //     (error) => {
-  //       console.error('Error fetching surgery names:', error);
-  //     }
-  //   );
-  // }
 
   onEstimationInput(): void {
     // Filter suggestions based on the input text
@@ -1889,6 +1894,7 @@ export class EstimationFormComponent {
         patientEmail: this.formData.patientEmail,
         patientPhoneNumber: this.formData.patientPhoneNumber.toString(),
         rejectReason: this.rejectionReason,
+        multipleSurgeryDoctor: this.formData.multipleSurgeryDoctor,
       },
       inclusions: this.formData.inclusions,
       exclusions: this.formData.exclusions,

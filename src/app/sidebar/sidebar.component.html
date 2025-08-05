@@ -20,7 +20,7 @@
   <a [routerLink]="role === 'admin' ? '/analytics' : '/dashboard'" 
    routerLinkActive="active" 
    class="icon-wrapper" 
-   *ngIf="['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotMHC() && isNotIpBillingManager() && isNotRadiology() && isNotLab() && isNotNursing()">
+   *ngIf="['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotMHC() && isNotIpBillingManager() && isNotRadiology() && isNotLab() && isNotNursing() && isNotOT()">
 
   <div class="icon-content">
     <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
@@ -39,8 +39,8 @@
     <span>Analytics</span>
   </div>
   </a> -->
-  <a [routerLink]="role !== 'doctor'  ? '/appointments' : null" routerLinkActive="active" class="icon-wrapper" *ngIf="['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator()  && isNotMHC() && isNotIpBillingManager() && isNotRadiology() && !isMukund() && isNotLab() && isNotNursing()" >
-    <div class="icon-content" *ngIf="['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotIpBillingManager() && isNotRadiology() &&!isMukund() && isNotLab() && isNotNursing()" >
+  <a [routerLink]="role !== 'doctor'  ? '/appointments' : null" routerLinkActive="active" class="icon-wrapper" *ngIf="['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator()  && isNotMHC() && isNotIpBillingManager() && isNotRadiology() && !isMukund() && isNotLab() && isNotNursing() && isNotOT()" >
+    <div class="icon-content" *ngIf="['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotIpBillingManager() && isNotRadiology() &&!isMukund() && isNotLab() && isNotNursing() && isNotOT()" >
     <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24"><g fill="currentColor" fill-rule="evenodd"><path fill="currentColor" d="m12.594 23.258l-.012.002l-.071.035l-.02.004l-.014-.004l-.071-.036q-.016-.004-.024.006l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.016-.018m.264-.113l-.014.002l-.184.093l-.01.01l-.003.011l.018.43l.005.012l.008.008l.201.092q.019.005.029-.008l.004-.014l-.034-.614q-.005-.019-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.003-.011l.018-.43l-.003-.012l-.01-.01z"/><path fill="currentColor" d="M16 3a1 1 0 0 1 1 1v1h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2V4a1 1 0 0 1 2 0v1h6V4a1 1 0 0 1 1-1M8 7H5v2h14V7h-3zm-3 4v8h14v-8zm2 2a1 1 0 0 1 1-1h.01a1 1 0 1 1 0 2H8a1 1 0 0 1-1-1m1 2a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2zm3-2a1 1 0 0 1 1-1h.01a1 1 0 1 1 0 2H12a1 1 0 0 1-1-1m1 2a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2zm3-2a1 1 0 0 1 1-1h.01a1 1 0 1 1 0 2H16a1 1 0 0 1-1-1m1 2a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2z"/></g></svg>
     <span>Appointments</span>
     </div>
@@ -51,27 +51,27 @@
     <span>Appointments</span>
     </div>
   </a>
-  <a [routerLink]="role !== 'doctor' ? '/doctor': null" routerLinkActive="active" class="icon-wrapper" *ngIf="['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator()  && isNotMHC() && isNotIpBillingManager() && isNotRadiology() && !isMukund() && isNotLab() && isNotNursing()" >
-    <div class="icon-content" *ngIf="['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotIpBillingManager() && isNotRadiology()  && !isMukund() && isNotLab() && isNotNursing()" >
+  <a [routerLink]="role !== 'doctor' ? '/doctor': null" routerLinkActive="active" class="icon-wrapper" *ngIf="['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator()  && isNotMHC() && isNotIpBillingManager() && isNotRadiology() && !isMukund() && isNotLab() && isNotNursing() && isNotOT()" >
+    <div class="icon-content" *ngIf="['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotIpBillingManager() && isNotRadiology()  && !isMukund() && isNotLab() && isNotNursing() && isNotOT()" >
     <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 48 48"><g fill="currentColor"><path fill-rule="evenodd" d="M33.834 13.81c0 3.461-.86 7.975-2.183 7.29a8.001 8.001 0 0 1-15.611-1.54c-1.313-2.297-3.035-6.9 1.392-10.488c.08-.026.128-.242.2-.56c.274-1.203.881-3.877 4.71-3.366c2.953.393 11.492 1.918 11.492 8.665m-3.806 2.182s-.452 1.322-.028 2.795a6 6 0 0 1-11.996.197c.145-.55.145-1.481.144-2.516c-.001-1.867-.003-4.07.852-4.968c5.989 3.989 11.028 4.492 11.028 4.492" clip-rule="evenodd"/><path d="M13 36c0-1.082.573-2.03 1.433-2.558a12 12 0 0 1-.092-.375a22 22 0 0 1-.355-2.068a20 20 0 0 1-.155-2.006C9.61 30.65 6 33.538 6 36.57V42h36v-5.43c0-2.904-3.31-5.675-7.298-7.36v.028c.018.61-.016 1.31-.082 1.983c-.06.624-.149 1.246-.256 1.779H35a1 1 0 0 1 .894.553l1 2c.07.139.106.292.106.447v2a1 1 0 0 1-1 1h-2v-2h1v-.764L34.382 35h-2.764L31 36.236V37h1v2h-2a1 1 0 0 1-1-1v-2c0-.155.036-.308.106-.447l1-2A1 1 0 0 1 31 33h1.315q.033-.129.066-.286c.1-.471.189-1.068.249-1.685c.06-.618.088-1.231.073-1.735a5 5 0 0 0-.049-.624c-.022-.142-.044-.207-.048-.221q-.002-.005 0-.002l.003-.001A22 22 0 0 0 31 28.013c-.503-.115-1.023.577-1.25 1.01H18l-.086-.168c-.212-.422-.473-.943-.914-.842q-.578.131-1.155.297a7 7 0 0 0-.016.527c.004.553.057 1.23.142 1.914c.085.682.2 1.346.32 1.87q.052.227.1.404A3 3 0 1 1 13 36"/><path d="M17 36c0 .574-.462 1.015-1 1.015s-1-.44-1-1.015c0-.574.462-1.015 1-1.015s1 .44 1 1.015"/></g></svg>
     <span>Doctors</span>
     </div>
 </a>
-<a routerLink="/health-checkup" routerLinkActive="active" class="icon-wrapper" *ngIf=" isMHC() || (['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotIpBillingManager() && isNotRadiology() && isNotLab() && isNotNursing())" >
-  <div class="icon-content" *ngIf=" isMHC() || (['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotIpBillingManager() && isNotRadiology()  && !isMukund() && isNotLab() && isNotNursing())" >
+<a routerLink="/health-checkup" routerLinkActive="active" class="icon-wrapper" *ngIf=" isMHC() || (['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotIpBillingManager() && isNotRadiology() && isNotLab() && isNotNursing()&& isNotOT())" >
+  <div class="icon-content" *ngIf=" isMHC() || (['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotIpBillingManager() && isNotRadiology()  && !isMukund() && isNotLab() && isNotNursing()&& isNotOT())" >
   <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24"><g fill="currentColor"></g>
     <path fill="currentColor" fill-rule="evenodd" d="M7 18h2v-2h2v-2H9v-2H7v2H5v2h2zm6-3.5h6V13h-6zm0 3h4V16h-4zM4 22q-.825 0-1.412-.587T2 20V9q0-.825.588-1.412T4 7h5V4q0-.825.588-1.412T11 2h2q.825 0 1.413.588T15 4v3h5q.825 0 1.413.588T22 9v11q0 .825-.587 1.413T20 22zm0-2h16V9h-5q0 .825-.587 1.413T13 11h-2q-.825 0-1.412-.587T9 9H4zm7-11h2V4h-2zm1 5.5" />
   </svg>
   <span>MHC</span>
   </div>
 </a>
-<a routerLink="/services" routerLinkActive="active" class="icon-wrapper" *ngIf="(['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotIpBillingManager() && isNotRadiology() && isNotMHC()  && !isMukund() && isNotLab() && isNotNursing())" >
-  <div class="icon-content" *ngIf="(['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotIpBillingManager() && isNotRadiology() && isNotMHC()  && !isMukund() && isNotLab() && isNotNursing())" >
+<a routerLink="/services" routerLinkActive="active" class="icon-wrapper" *ngIf="(['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotIpBillingManager() && isNotRadiology() && isNotMHC()  && !isMukund() && isNotLab() && isNotNursing()&& isNotOT())" >
+  <div class="icon-content" *ngIf="(['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotIpBillingManager() && isNotRadiology() && isNotMHC()  && !isMukund() && isNotLab() && isNotNursing()&& isNotOT())" >
     <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24"><path fill="currentColor" d="M19 5v14H5V5zm0-2H5c-1.11 0-2 .89-2 2v14c0 1.11.89 2 2 2h14c1.11 0 2-.89 2-2V5c0-1.11-.89-2-2-2m-7 3c.55 0 1 .45 1 1v1h3.17c.18.31.33.65.49 1H13v1h4c.1.33.17.67.19 1H13v1h4.2c-.04.35-.05.69-.1 1H13v1h4s-.06 3-1.5 3c-1.35 0-1-1.53-2.5-2v2c0 .55-.45 1-1 1s-1-.45-1-1v-2c-1.5.47-1.15 2-2.5 2C7.06 17 7 14 7 14h4v-1H6.9c-.05-.31-.06-.65-.1-1H11v-1H6.81c.02-.33.1-.67.19-1h4V9H7.34c.16-.35.31-.69.49-1H11V7c0-.55.45-1 1-1"/></svg>
   <span>Services</span>
   </div>
 </a>
-<a [routerLink]="['super_admin', 'admin'].includes(role) ? '/report' : null" routerLinkActive="active" class="icon-wrapper" *ngIf="['super_admin', 'admin'].includes(role) && isNotIpBillingManager() && isNotIpBillingManager() && isNotRadiology() && !isMukund() && isNotLab()" >
+<a [routerLink]="['super_admin', 'admin'].includes(role) ? '/report' : null" routerLinkActive="active" class="icon-wrapper" *ngIf="['super_admin', 'admin'].includes(role) && isNotIpBillingManager() && isNotIpBillingManager() && isNotRadiology() && !isMukund() && isNotLab()&& isNotOT()" >
   <div *ngIf="['super_admin', 'admin'].includes(role)  && !isMukund()" class="icon-content">
   <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24"><path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2M9 17H7v-7h2zm4 0h-2V7h2zm4 0h-2v-4h2z"/></svg>
   <span>Report</span> 
@@ -146,6 +146,21 @@
 </div>
 </a>
 
+<a [routerLink]="subAdminType == 'OT Coordinator' ? '/surgery': null" routerLinkActive="active" class="icon-wrapper" *ngIf="['OT Coordinator'].includes(subAdminType)">
+  <div class="icon-content " *ngIf="['OT Coordinator'].includes(subAdminType)">
+    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 48 48">
+      <g fill="#000">
+        <path fill-rule="evenodd" d="M40 8H8v32h32zM8 6a2 2 0 0 0-2 2v32a2 2 0 0 0 2 2h32a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2z" clip-rule="evenodd" />
+        <path fill-rule="evenodd" d="M16.828 28h4.724a4 4 0 0 0 2.798-1.142L28 23.284v-.456A4 4 0 0 1 29.172 20l1.689-1.69l-2.606-1.736zM12 30l16-16l6 4l-3.414 3.414A2 2 0 0 0 30 22.828v.456a2 2 0 0 1-.6 1.43l-3.65 3.573A6 6 0 0 1 21.551 30z" clip-rule="evenodd" />
+        <path fill-rule="evenodd" d="M26.707 21.293a1 1 0 0 1 0 1.414l-3 3a1 1 0 0 1-1.414-1.414l3-3a1 1 0 0 1 1.414 0m10-13.185l-7.6 7.6l-1.414-1.415l7.6-7.6zm1.5 4.285a1 1 0 0 1 0 1.414l-5.5 5.5l-1.414-1.415l5.5-5.5a1 1 0 0 1 1.414 0" clip-rule="evenodd" />
+        <path d="M30.15 35.234a1 1 0 1 0-1.055 1.7a1 1 0 0 0 1.056-1.7m-7.001-1a1 1 0 1 0-1.055 1.7a1 1 0 0 0 1.056-1.7m-9.001 1a1 1 0 1 0-1.055 1.7a1 1 0 0 0 1.055-1.7" />
+        <path d="M10 37h28v2H10zm0-5h28v2H10z" />
+        <path d="m26.556 32.243l7.53-7.531l1.415 1.414l-7.531 7.531z" />
+      </g>
+    </svg>
+<span>Surgeries</span>
+</div>
+</a>
   <a  routerLinkActive="active" class="icon-wrapper" >
     <div class="icon-content" (click)="openSettings()">
     <svg xmlns="http://www.w3.org/2000/svg" class="icon settings" width="2em" height="2em" viewBox="0 0 24 24"><path fill="currentColor" d="M19.5 12c0-.23-.01-.45-.03-.68l1.86-1.41c.4-.3.51-.86.26-1.3l-1.87-3.23a.987.987 0 0 0-1.25-.42l-2.15.91c-.37-.26-.76-.49-1.17-.68l-.29-2.31c-.06-.5-.49-.88-.99-.88h-3.73c-.51 0-.94.38-1 .88l-.29 2.31c-.41.19-.8.42-1.17.68l-2.15-.91c-.46-.2-1-.02-1.25.42L2.41 8.62c-.25.44-.14.99.26 1.3l1.86 1.41a7.3 7.3 0 0 0 0 1.35l-1.86 1.41c-.4.3-.51.86-.26 1.3l1.87 3.23c.25.44.79.62 1.25.42l2.15-.91c.37.26.76.49 1.17.68l.29 2.31c.06.5.49.88.99.88h3.73c.5 0 .93-.38.99-.88l.29-2.31c.41-.19.8-.42 1.17-.68l2.15.91c.46.2 1 .02 1.25-.42l1.87-3.23c.25-.44.14-.99-.26-1.3l-1.86-1.41c.03-.23.04-.45.04-.68m-7.46 3.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5s3.5 1.57 3.5 3.5s-1.57 3.5-3.5 3.5"/></svg>

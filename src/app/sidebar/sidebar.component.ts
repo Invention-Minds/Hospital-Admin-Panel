@@ -97,5 +97,8 @@ export class SidebarComponent implements OnInit {
   isNotNursing():boolean{
     return !(this.role === 'sub_admin' && this.subAdminType === 'Nursing')
   }
+  isNotOT():boolean{
+    return !(this.role === 'sub_admin' && this.subAdminType === 'OT Coordinator')
+  }
 
 }

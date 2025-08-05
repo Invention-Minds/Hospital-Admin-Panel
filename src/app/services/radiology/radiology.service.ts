@@ -114,5 +114,16 @@ getAppointmentsByServiceId(serviceId: any, date?: string): Observable<any> {
 getTodayCheckinServices():Observable<any[]> {
   return this.http.get<any[]>(`${this.baseUrl}/today-services`)
 }
+getLockStatus() {
+  return this.http.get<{ isActive: boolean }>(`${environment.apiUrl}/radiology-queue/system-lock/check-in`);
+}
+
+unlock() {
+  return this.http.post(`${environment.apiUrl}/radiology-queue/unlock-checkins`, {});
+}
+
+checkIn(serviceId: number) {
+  return this.http.post(`${environment.apiUrl}/radiology-queue/${serviceId}/checkin`, {});
+}
 
 }

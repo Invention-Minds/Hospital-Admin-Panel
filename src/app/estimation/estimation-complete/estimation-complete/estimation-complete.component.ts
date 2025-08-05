@@ -13,7 +13,7 @@ import * as FileSaver from 'file-saver';
 export class EstimationCompleteComponent {
 
 
-  constructor(private estimationService: EstimationService, private messageService: MessageService,private router: Router) { }
+  constructor(private estimationService: EstimationService, private messageService: MessageService, private router: Router) { }
   pendingEstimations: any[] = [];
   filteredEstimations: any[] = [];
   currentPage = 1;
@@ -24,7 +24,7 @@ export class EstimationCompleteComponent {
     { label: 'Patient Name', value: 'patientName' },
     { label: 'Estimation ID', value: 'estimationId' },
     { label: 'Doctor Name', value: 'consultantName' },
-    { label: 'PRN', value: 'patientUHID'}
+    { label: 'PRN', value: 'patientUHID' }
   ];
   isLoading = false;
   selectedSearchOption: any = this.searchOptions[0];
@@ -34,6 +34,10 @@ export class EstimationCompleteComponent {
   userId: any = 0;
   activeComponent: string = 'cancelled'; // Default to the cancelled appointments view
   messageSent: boolean = false;
+  receiptNumber: string = '';
+  advanceAmount: string = '';
+  showAdvancePopup: boolean = false;
+  selectedEstimation: any = null; // To hold the selected estimation for advance payment
 
   @Output() reschedule = new EventEmitter<any>();
   // Value entered by the user (could be Patient ID or Phone Number based on selection)
@@ -43,16 +47,15 @@ export class EstimationCompleteComponent {
   selectedDate: Date | null = null;
   ngOnInit(): void {
     this.userId = localStorage.getItem('userid')
-  this.activeComponent = 'request';
+    this.activeComponent = 'request';
 
-this.fetchPendingEstimations();
+    this.fetchPendingEstimations();
   }
   fetchPendingEstimations(): void {
     this.isLoading = true
     this.estimationService.getAllEstimation().subscribe({
       next: (estimation: any[]) => {
         console.log(estimation)
-        
         // Process the services when the API call is successful
         this.pendingEstimations = estimation.filter(
           (estimation) => estimation.statusOfEstimation === 'completed'
@@ -71,12 +74,12 @@ this.fetchPendingEstimations();
         console.error('Error fetching services:', err);
       },
       complete: () => {
-        this.isLoading=false
+        this.isLoading = false
         // Optional: Actions to perform once the API call completes
         console.log('Service fetching process completed.');
       }
     });
-    
+
   }
   print(estimation: any): void {
     if (estimation.pdfLink) {
@@ -113,15 +116,15 @@ this.fetchPendingEstimations();
               ?.toLowerCase()
               .includes(this.searchValue.toLowerCase());
             break;
-            case 'patientUHID':
-              const prnNumber = Number(service.patientUHID); // Convert to Number
-              const searchNumber = Number(this.searchValue); // Convert to Number
-              console.log(prnNumber, searchNumber);
-    
-              matches = !isNaN(searchNumber) && prnNumber === searchNumber;
-              break;
+          case 'patientUHID':
+            const prnNumber = Number(service.patientUHID); // Convert to Number
+            const searchNumber = Number(this.searchValue); // Convert to Number
+            console.log(prnNumber, searchNumber);
+
+            matches = !isNaN(searchNumber) && prnNumber === searchNumber;
+            break;
         }
-        
+
       }
 
       // Filter by date range
@@ -131,11 +134,11 @@ this.fetchPendingEstimations();
         const endDate = this.selectedDateRange[1]
           ? new Date(this.selectedDateRange[1])
           : startDate; // Use the same date for both start and end if it's a single date
-      
+
         // Normalize endDate to include the full day
         const normalizedEndDate = new Date(endDate);
         normalizedEndDate.setHours(23, 59, 59, 999);
-      
+
         if (startDate.getTime() === normalizedEndDate.getTime()) {
           // Single date selected
           matches =
@@ -149,7 +152,7 @@ this.fetchPendingEstimations();
             serviceDate <= normalizedEndDate; // Match within the range
         }
       }
-      
+
       // Filter by specific date
       if (this.selectedDate) {
         const singleDate = new Date(this.selectedDate);
@@ -157,17 +160,17 @@ this.fetchPendingEstimations();
           matches &&
           new Date(service.estimationDate).toDateString() === singleDate.toDateString();
       }
-      
+
       console.log(matches);
       return matches;
-      
+
     });
   }
   refresh() {
     this.selectedDateRange = []
     this.filteredEstimations = [...this.pendingEstimations]
   }
-  downloadData(data:any): void {
+  downloadData(data: any): void {
     this.exportToExcel(data, 'Estimation-Completed-Summary');
   }
 
@@ -315,7 +318,7 @@ this.fetchPendingEstimations();
     //   },
     // });
   }
-  handleLockedDialogClose(){
+  handleLockedDialogClose() {
     this.isLockedDialogVisible = false;
   }
   // Unlock a service
@@ -347,11 +350,11 @@ this.fetchPendingEstimations();
   ngOnDestroy(): void {
     // Unlock the service on component destroy if locked
     console.log('Destroying confirmed component...', this.activeComponent);
-    if(this.activeServiceId && this.activeComponent !== 'form'){ 
+    if (this.activeServiceId && this.activeComponent !== 'form') {
       this.unlockService();
     }
   }
-   cancelAppointment(service: any): void {
+  cancelAppointment(service: any): void {
     if (!service.id) return;
 
     this.isLoading = true;
@@ -524,7 +527,7 @@ this.fetchPendingEstimations();
       'overDueDateAndTIme',
       'submittedDateAndTime'
     ];
-  
+
     const filteredData = data.map(item => {
       const {
         patientSign,
@@ -533,7 +536,7 @@ this.fetchPendingEstimations();
         pdfLink,
         ...rest
       } = item;
-  
+
       // Convert date fields from UTC to IST
       for (const field of dateFieldsToConvert) {
         if (rest[field]) {
@@ -548,10 +551,10 @@ this.fetchPendingEstimations();
           });
         }
       }
-  
+
       return rest;
     });
-  
+
     const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(filteredData);
     const workbook: XLSX.WorkBook = {
       Sheets: { 'data': worksheet },
@@ -561,12 +564,50 @@ this.fetchPendingEstimations();
       bookType: 'xlsx',
       type: 'array'
     });
-  
+
     const blob: Blob = new Blob([excelBuffer], {
       type:
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8'
     });
-  
+
     FileSaver.saveAs(blob, `${fileName}_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  }
+  saveEstimation(): void {
+    const estimationData = {
+      estimationId: this.selectedEstimation.estimationId,
+      advanceAmountPaid: Number(this.advanceAmount),
+      receiptNumber: this.receiptNumber,
+
+
+
+    }
+    this.estimationService.updateAdvanceDetails(estimationData.estimationId, estimationData).subscribe(
+      (response) => {
+        // console.log('Estimation updated successfully:', response);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Advance amount updated successfully.',
+        });
+        this.closeAdvancePopup();
+        // this.fetchPendingEstimations()
+        this.completeAppointment(this.selectedEstimation)
+      },
+      (error) => {
+        console.error('Error updating estimation:', error);
+      }
+    );
+
+  }
+  openAdvancePopup(estimation: any): void {
+    this.selectedEstimation = estimation
+    this.showAdvancePopup = true;
+  }
+
+  closeAdvancePopup(): void {
+    this.showAdvancePopup = false;
+    this.advanceAmount = '',
+      this.receiptNumber = ''
+
   }
 }

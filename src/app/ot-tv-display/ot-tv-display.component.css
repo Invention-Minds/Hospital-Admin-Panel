@@ -1,0 +1,314 @@
+/* Overall container styling */
+.tv-container {
+  font-family: Poppins;
+  color: #fff;
+  /* background-color: #F8F8F8; */
+
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Header styling */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px;
+  background-color: #001345;
+  height: 70px;
+  position: fixed;
+  top: 0px;
+  width: 100%;
+  z-index: 10000000;
+}
+.header h1 {
+  color: #fff;
+  font-family: Poppins;
+  font-size: 28px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  padding-top: 20px;
+  position: relative;
+}
+
+.logo {
+  height: 50px;
+  padding-left: 10px;
+}
+.datetime-container {
+  background: #f0f3ff;
+  clip-path: polygon(30% 0, 100% 0, 100% 100%, 0% 100%);
+  padding: 36px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: right;
+  color: #001345; /* Text color */
+  height: 58px;
+}
+
+.datetime {
+  text-align: center;
+  color: #001345;
+  font-family: Poppins;
+  font-size: 26px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+  background: #f0f3ff;
+  padding: 0 0px;
+  padding-left: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.date {
+  color: #001345;
+  font-family: Poppins;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: normal;
+}
+.footer {
+  margin-top: 15px;
+  display: flex;
+  background-color: #fff;
+  padding: 0;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+}
+.footer p {
+  color: #fff;
+  text-align: center;
+  font-family: Poppins;
+  font-size: 15px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+
+  margin: 0;
+}
+.no-patients-message {
+  text-align: center;
+  font-size: 16px;
+  font-weight: bold;
+  color: #777;
+  padding: 10px 0;
+}
+
+.footer marquee {
+  color: #001345;
+  text-align: center;
+  font-family: Poppins;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+}
+.copy-right-container {
+  clip-path: polygon(18% 0, 100% 0, 100% 100%, 0% 100%);
+  width: 260px;
+  height: 65px;
+  flex-shrink: 0;
+  background-color: #001345;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-left: 20px;
+}
+
+.content {
+  width: 100%;
+  height: calc(100vh - 150px); /* Adjust height to fit header and footer */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  overflow: hidden; /* Prevents overflow */
+  margin-top: 100px;
+}
+
+.table-container {
+  border-radius: 10px;
+  background-color: #f0f3ff;
+  /* padding: 20px; */
+}
+.table-container {
+  position: relative; /* Ensures the loader is centered in this container */
+  min-height: 200px; /* Ensure there’s enough space for the loader */
+  width: 100%;
+}
+
+.table-container.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px; /* Ensure the loader has enough space */
+}
+.table-wrapper {
+  overflow-x: auto; /* Adds horizontal scrolling */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+}
+.appointment-table {
+  width: 100%;
+  min-width: 1000px;
+  border-collapse: collapse;
+}
+/* Top-left corner */
+.appointment-table thead th:first-child {
+  border-top-left-radius: 16px;
+}
+
+/* Top-right corner */
+.appointment-table thead th:last-child {
+  border-top-right-radius: 16px;
+}
+
+/* Ensure no bottom rounding for header */
+.appointment-table thead th {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+/* Remove corner rounding from tbody */
+.appointment-table tbody td:first-child,
+.appointment-table tbody td:last-child {
+  border-radius: 0;
+}
+
+thead {
+  border-radius: 16px 16px 0 0 !important;
+  background: #001345;
+  color: white;
+  font-size: 12px;
+  font-family: Kanit;
+  font-weight: 400;
+  height: 80px;
+}
+thead th {
+  padding: 12px;
+  text-align: left;
+  color: #fff;
+  font-family: Kanit;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  text-wrap: nowrap;
+}
+/* Table body styling */
+tbody tr {
+  border-top: 5px solid #f0f3ff;
+  /* box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64); */
+  border-radius: 16px;
+  height: 60px;
+  border-radius: 16px;
+  background-color: #fff;
+}
+
+tbody tr:first-child {
+  border-top: 10px solid #f0f3ff;
+}
+
+tbody td {
+  padding: 0px 8px;
+  text-align: left;
+  color: #222;
+  font-family: Kanit;
+  font-size: 22px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  padding-bottom: 0px;
+}
+
+tbody tr:hover {
+  background-color: #f0f8ff;
+}
+.patient-name {
+  width: 160px; /* Adjust width based on your requirement */
+  overflow: hidden; /* Hide overflow text */
+  white-space: nowrap; /* Prevent the text from wrapping */
+  display: inline-block;
+  margin-top: 8px;
+}
+
+/* Create the marquee effect */
+.scrolling-name {
+  display: inline-block;
+  animation: scroll-left 20s linear infinite; /* Adjust the scroll speed */
+}
+
+@keyframes scroll-left {
+  0% {
+    transform: translateX(100%); /* Start from the right */
+  }
+  100% {
+    transform: translateX(-100%); /* Move to the left */
+  }
+}
+.button{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.status.waiting {
+  border-radius: 4px;
+  background: #909090;
+  color: #fff;
+  font-family: Kanit;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  height: 38px;
+  width: 200px;
+  padding: 4px 10px;
+  display: flex;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+}
+
+.status.in-operation {
+  border-radius: 4px;
+  background: #fb9c2a;
+  color: #fff;
+  font-family: Kanit;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  padding: 4px 10px;
+  height: 38px;
+  width: 200px;
+  display: flex;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+}
+
+.status.admitted {
+  border-radius: 4px;
+  background: #6F46C1;
+  color: #fff;
+  font-family: Kanit;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  padding: 4px 10px;
+  height: 38px;
+  width: 200px;
+  display: flex;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+}

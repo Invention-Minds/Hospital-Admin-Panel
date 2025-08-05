@@ -4,6 +4,7 @@
       <div class="p-field p-col-2">
         <p-dropdown [options]="searchOptions" [(ngModel)]="selectedSearchOption" placeholder="Search By" (ngModelChange)="onSearch()" class="custom-dropdown"></p-dropdown>
       </div>
+
       
       <div class="p-field p-col-3">
         <input pInputText [(ngModel)]="searchValue" placeholder="Search / 123456" class="custom-input-text"  (ngModelChange)="onSearch()" />

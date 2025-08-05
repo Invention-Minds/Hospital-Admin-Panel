@@ -66,4 +66,8 @@ export class AppComponent {
     return this.router.url === '/help-center';
   }
 
+  otChannelRoute(): boolean {
+    return this.router.url === '/ot-channel';
+  }
+
 }

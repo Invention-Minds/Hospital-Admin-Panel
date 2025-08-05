@@ -29,18 +29,18 @@ export interface Service {
   repeatedDate?: string; // Array of repeated date strings
   createdAt?: string;
   patientType?: string;
-  prefix?:string
+  prefix?: string
 }
 @Component({
   selector: 'app-health-checkup-confirmed',
   templateUrl: './health-checkup-confirmed.component.html',
   styleUrl: './health-checkup-confirmed.component.css',
-  providers: [ MessageService],
+  providers: [MessageService],
 })
 export class HealthCheckupConfirmedComponent {
 
   constructor(private healthCheckupService: HealthCheckupServiceService, private messageService: MessageService, private router: Router, private appointmentService: AppointmentConfirmService) {
-  
+
   }
   confirmedAppointments: Service[] = [];
   filteredServices: Service[] = [];
@@ -62,7 +62,8 @@ export class HealthCheckupConfirmedComponent {
   @Output() reschedule = new EventEmitter<any>();
   activeComponent: string = 'confirmed';
   confirmedServices: Service[] = [];
-  today:string = ''
+  today: string = '';
+  isCheckInLocked: boolean = false; // Flag to check if check-in is locked
 
 
   // Value entered by the user (could be Patient ID or Phone Number based on selection)
@@ -70,76 +71,76 @@ export class HealthCheckupConfirmedComponent {
 
   // Selected date from calendar
   selectedDate: Date | null = null;
-ngOnInit(): void {
-this.fetchConfirmedAppointments();
-this.userId = localStorage.getItem('userid')
-  this.activeComponent = 'confirmed';
-}
+  ngOnInit(): void {
+    this.fetchConfirmedAppointments();
+    this.userId = localStorage.getItem('userid')
+    this.activeComponent = 'confirmed';
+  }
 
-fetchConfirmedAppointments(): void {
-  this.isLoading = true
-  // const today = new Date();
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = (today.getMonth() + 1).toString().padStart(2, '0');
-  const day = today.getDate().toString().padStart(2, '0');
-  this.today = `${year}-${month}-${day}`;
-  this.healthCheckupService.getConfirmedAppointments().subscribe({
-    next: (services: Service[]) => {
-      
-      // Process the services when the API call is successful
-      this.confirmedAppointments = services
+  fetchConfirmedAppointments(): void {
+    this.isLoading = true
+    // const today = new Date();
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = (today.getMonth() + 1).toString().padStart(2, '0');
+    const day = today.getDate().toString().padStart(2, '0');
+    this.today = `${year}-${month}-${day}`;
+    this.healthCheckupService.getConfirmedAppointments().subscribe({
+      next: (services: Service[]) => {
 
-      this.confirmedAppointments.sort((a, b) => {
-        const dateA = new Date(a.createdAt!);
-        const dateB = new Date(b.createdAt!);
-        return dateB.getTime() - dateA.getTime();
+        // Process the services when the API call is successful
+        this.confirmedAppointments = services
+
+        this.confirmedAppointments.sort((a, b) => {
+          const dateA = new Date(a.createdAt!);
+          const dateB = new Date(b.createdAt!);
+          return dateB.getTime() - dateA.getTime();
+        });
+        this.filteredServices = [...this.confirmedAppointments];
+        console.log('Services processed successfully.');
+      },
+      error: (err) => {
+        // Handle the error if the API call fails
+        console.error('Error fetching services:', err);
+      },
+      complete: () => {
+        this.isLoading = false
+        // Optional: Actions to perform once the API call completes
+        console.log('Service fetching process completed.');
+      }
+    });
+
+  }
+  stopRepeatedAppointments(service: Service): void {
+    const today = new Date();
+    const stopDate = today.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+    const { id: serviceId } = service;
+    this.isLoading = true;
+    if (serviceId) {
+      this.healthCheckupService.stopRepeat(serviceId, stopDate).subscribe({
+        next: (response) => {
+          console.log('Repeated dates stopped successfully:', response);
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Repeat Stopped',
+            detail: response.message,
+          });
+        },
+        error: (err) => {
+          console.error('Error stopping repeated dates:', err);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Failed to stop repeated dates. Please try again.',
+          });
+        },
+        complete: () => {
+          this.isLoading = false;
+        },
       });
-      this.filteredServices = [...this.confirmedAppointments];
-      console.log('Services processed successfully.');
-    },
-    error: (err) => {
-      // Handle the error if the API call fails
-      console.error('Error fetching services:', err);
-    },
-    complete: () => {
-      this.isLoading=false
-      // Optional: Actions to perform once the API call completes
-      console.log('Service fetching process completed.');
     }
-  });
-  
-}
-stopRepeatedAppointments(service: Service): void {
-  const today = new Date();
-  const stopDate = today.toISOString().split('T')[0]; // Format: YYYY-MM-DD
-  const { id: serviceId  } = service;
-  this.isLoading = true;
-if(serviceId){
-  this.healthCheckupService.stopRepeat(serviceId, stopDate).subscribe({
-    next: (response) => {
-      console.log('Repeated dates stopped successfully:', response);
-      this.messageService.add({
-        severity: 'success',
-        summary: 'Repeat Stopped',
-        detail: response.message,
-      });
-    },
-    error: (err) => {
-      console.error('Error stopping repeated dates:', err);
-      this.messageService.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to stop repeated dates. Please try again.',
-      });
-    },
-    complete: () => {
-      this.isLoading = false;
-    },
-  });
-}
-}
-onSearch(): void {
+  }
+  onSearch(): void {
 
     this.filteredServices = this.confirmedAppointments.filter((service) => {
       let matches = true;
@@ -161,7 +162,7 @@ onSearch(): void {
               .includes(this.searchValue.toLowerCase());
             break;
         }
-        
+
       }
 
       // Filter by date range
@@ -171,11 +172,11 @@ onSearch(): void {
         const endDate = this.selectedDateRange[1]
           ? new Date(this.selectedDateRange[1])
           : startDate; // Use the same date for both start and end if it's a single date
-      
+
         // Normalize endDate to include the full day
         const normalizedEndDate = new Date(endDate);
         normalizedEndDate.setHours(23, 59, 59, 999);
-      
+
         if (startDate.getTime() === normalizedEndDate.getTime()) {
           // Single date selected
           matches =
@@ -189,7 +190,7 @@ onSearch(): void {
             serviceDate <= normalizedEndDate; // Match within the range
         }
       }
-      
+
       // Filter by specific date
       if (this.selectedDate) {
         const singleDate = new Date(this.selectedDate);
@@ -197,68 +198,68 @@ onSearch(): void {
           matches &&
           new Date(service.appointmentDate).toDateString() === singleDate.toDateString();
       }
-      
+
       console.log(matches);
       return matches;
-      
+
     });
   }
 
 
-refresh() {
-  this.selectedDateRange = [];
-  this.filteredServices = [...this.confirmedAppointments];
-}
-downloadData(): void {
-  if (this.filteredServices.length === 0) {
-    console.warn('No data to download');
-    return;
+  refresh() {
+    this.selectedDateRange = [];
+    this.filteredServices = [...this.confirmedAppointments];
   }
-  this.filteredServices.forEach((service) => {
-    // Check if repeatedDates exists and is an array
-    if (Array.isArray(service.repeatedDates)) {
-      // Map to extract only the date property and join with commas
-      const repeatedDates = service.repeatedDates
-        .map((rd: any) => rd.date)
-        .join(', ');
-      service.repeatedDate = repeatedDates;
-    } else {
-       service.repeatedDate= ''; // Handle cases where repeatedDates is not available
+  downloadData(): void {
+    if (this.filteredServices.length === 0) {
+      console.warn('No data to download');
+      return;
     }
-  });
-  const csvContent = this.convertToCSV(this.filteredServices);
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  FileSaver.saveAs(blob, 'confirmed_appointments.csv');
-}
+    this.filteredServices.forEach((service) => {
+      // Check if repeatedDates exists and is an array
+      if (Array.isArray(service.repeatedDates)) {
+        // Map to extract only the date property and join with commas
+        const repeatedDates = service.repeatedDates
+          .map((rd: any) => rd.date)
+          .join(', ');
+        service.repeatedDate = repeatedDates;
+      } else {
+        service.repeatedDate = ''; // Handle cases where repeatedDates is not available
+      }
+    });
+    const csvContent = this.convertToCSV(this.filteredServices);
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    FileSaver.saveAs(blob, 'confirmed_appointments.csv');
+  }
 
-// Utility to Convert JSON to CSV
-private convertToCSV(data: Service[]): string {
-  const headers = Object.keys(data[0]).join(',');
-  const rows = data
-    .map((row) =>
-      Object.values(row)
-        .map((value) => `"${value}"`)
-        .join(',')
-    )
-    .join('\n');
+  // Utility to Convert JSON to CSV
+  private convertToCSV(data: Service[]): string {
+    const headers = Object.keys(data[0]).join(',');
+    const rows = data
+      .map((row) =>
+        Object.values(row)
+          .map((value) => `"${value}"`)
+          .join(',')
+      )
+      .join('\n');
 
-  return `${headers}\n${rows}`;
-}
-// downloadLastWeekData(): void {
-//   // Implement logic to download last week's data
-//   console.log('Downloading last week\'s data...');
-// }
+    return `${headers}\n${rows}`;
+  }
+  // downloadLastWeekData(): void {
+  //   // Implement logic to download last week's data
+  //   console.log('Downloading last week\'s data...');
+  // }
 
-// Method to clear input fields
-onClear() {
-  this.searchValue = '';
-  this.selectedSearchOption = 'firstName';
-  this.selectedDateRange = [];
-  this.filteredServices = [...this.confirmedAppointments];
-}
+  // Method to clear input fields
+  onClear() {
+    this.searchValue = '';
+    this.selectedSearchOption = 'firstName';
+    this.selectedDateRange = [];
+    this.filteredServices = [...this.confirmedAppointments];
+  }
 
   sortedAppointments() {
-    
+
     if (!this.sortColumn) {
       // If no sorting column is selected, return the appointments as is (unsorted)
       return [...this.filteredServices];
@@ -319,38 +320,38 @@ onClear() {
       this.sortColumn = column;
       this.sortDirection = 'asc';
     }
-    
+
     this.filteredServices.sort((a, b) => {
       const valueA = a[column];
       const valueB = b[column];
-    
+
       // Handle appointmentDate separately
       if (column === 'appointmentDate') {
         const dateA = new Date(valueA as string); // Convert string to Date
         const dateB = new Date(valueB as string);
-    
+
         return this.sortDirection === 'asc'
           ? dateA.getTime() - dateB.getTime()
           : dateB.getTime() - dateA.getTime();
       }
-    
+
       // Sort strings
       if (typeof valueA === 'string' && typeof valueB === 'string') {
         return this.sortDirection === 'asc'
           ? valueA.localeCompare(valueB)
           : valueB.localeCompare(valueA);
       }
-    
+
       // Sort numbers
       if (typeof valueA === 'number' && typeof valueB === 'number') {
         return this.sortDirection === 'asc' ? valueA - valueB : valueB - valueA;
       }
-    
+
       return 0; // Default case
     });
-    
+
     this.currentPage = 1; // Reset to the first page after sorting
-  }    
+  }
   completeAppointment(appointment: Service): void {
     const { id: serviceId } = appointment;
     if (appointment.appointmentDate > this.today) {
@@ -361,23 +362,51 @@ onClear() {
       this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Cannot check-in for past appointments!' });
       return;
     }
-    const payload ={
-      ...appointment,
-      checkedIn: true,
-    }
-    if (!serviceId) return;
+    // const payload ={
+    //   ...appointment,
+    //   checkedIn: true,
+    // }
+    // if (!serviceId) return;
 
-    this.healthCheckupService.updateService(serviceId,payload).subscribe({
-      next: (response) => {
-        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Checked In Successfully!' });
-        console.log('Service marked as completed:', response);
+    // this.healthCheckupService.updateService(serviceId,payload).subscribe({
+    //   next: (response) => {
+    //     this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Checked In Successfully!' });
+    //     console.log('Service marked as completed:', response);
 
-        this.fetchConfirmedAppointments()
+    //     this.fetchConfirmedAppointments()
 
-      }
-    })
+    //   }
+    // })
 
-  // Update UI
+
+    this.healthCheckupService.checkIn(serviceId!).subscribe({
+      next: (res: any) => {
+        this.messageService.add({
+          severity: "success",
+          summary: "Checked In",
+          detail: res.message,
+        });
+        appointment.checkedIn = true;
+
+      },
+      error: (err) => {
+        if (err.status === 406) {
+          this.messageService.add({
+            severity: "warn",
+            summary: "Queue Locked",
+            detail: "Check-in temporarily disabled. Queue limit exceeded.",
+          });
+        } else {
+          this.messageService.add({
+            severity: "error",
+            summary: "Error",
+            detail: err.error.message,
+          });
+        }
+      },
+    });
+
+    // Update UI
 
   }
   openAppointmentForm(service: Service): void {
@@ -393,7 +422,7 @@ onClear() {
     if (!service.id) return;
 
     this.isLoading = true;
-    
+
 
     this.healthCheckupService.updateServiceStatus(service.id, 'Cancel').subscribe({
       next: (response) => {
@@ -415,7 +444,7 @@ onClear() {
           requestVia: service.requestVia,
           prefix: service.prefix
         }
-        const updateService = {...service}
+        const updateService = { ...service }
         this.healthCheckupService.sendWhatsappMessageForService(messagePayload).subscribe({
           next: (response) => {
             console.log('Whatsapp message sent successfully:', response);
@@ -424,7 +453,7 @@ onClear() {
             //   messageSent: true
             // }
             updateService.messageSent = true;
-            this.healthCheckupService.updateServiceMessageStatus(service.id!, {messageSent: true}).subscribe({
+            this.healthCheckupService.updateServiceMessageStatus(service.id!, { messageSent: true }).subscribe({
               next: (updateResponse) => {
                 console.log('Service updated with messageSent status:', updateResponse);
               },
@@ -438,7 +467,7 @@ onClear() {
           },
           error: (error) => {
             console.error('Error sending whatsapp message:', error);
-            this.healthCheckupService.updateServiceMessageStatus(service.id!, {messageSent: false}).subscribe({
+            this.healthCheckupService.updateServiceMessageStatus(service.id!, { messageSent: false }).subscribe({
               next: (updateResponse) => {
                 console.log('Service updated with messageSent status:', updateResponse);
               },
@@ -468,7 +497,7 @@ onClear() {
             //   smsSent: true
             // }
             updateService.smsSent = true;
-            this.healthCheckupService.updateServiceMessageStatus(service.id!, {smsSent: true}).subscribe({
+            this.healthCheckupService.updateServiceMessageStatus(service.id!, { smsSent: true }).subscribe({
               next: (updateResponse) => {
                 console.log('Service updated with smsSent status:', updateResponse);
               },
@@ -482,7 +511,7 @@ onClear() {
           },
           error: (error) => {
             console.error('Error sending SMS:', error);
-            this.healthCheckupService.updateServiceMessageStatus(service.id!, {smsSent: false}).subscribe({
+            this.healthCheckupService.updateServiceMessageStatus(service.id!, { smsSent: false }).subscribe({
               next: (updateResponse) => {
                 console.log('Service updated with smsSent status:', updateResponse);
               },
@@ -503,7 +532,7 @@ onClear() {
         };
         const status = 'Cancelled';
         const patientEmail = service.email;
-        this.appointmentService.sendEmailHealthCheckup(patientEmail!,status,appointmentDetails).subscribe({
+        this.appointmentService.sendEmailHealthCheckup(patientEmail!, status, appointmentDetails).subscribe({
           next: (response) => {
             console.log('Email sent successfully:', response);
             // const emailPayload ={
@@ -511,7 +540,7 @@ onClear() {
             //   emailSent: true
             // }
             updateService.emailSent = true;
-            this.healthCheckupService.updateServiceMessageStatus(service.id!, {emailSent: true}).subscribe({
+            this.healthCheckupService.updateServiceMessageStatus(service.id!, { emailSent: true }).subscribe({
               next: (updateResponse) => {
                 console.log('Service updated with emailSent status:', updateResponse);
               },
@@ -525,7 +554,7 @@ onClear() {
           },
           error: (error) => {
             console.error('Error sending email:', error);
-            this.healthCheckupService.updateServiceMessageStatus(service.id!, {emailSent: false}).subscribe({
+            this.healthCheckupService.updateServiceMessageStatus(service.id!, { emailSent: false }).subscribe({
               next: (updateResponse) => {
                 console.log('Service updated with emailSent status:', updateResponse);
               },
@@ -585,7 +614,7 @@ onClear() {
       },
     });
   }
-  handleLockedDialogClose(){
+  handleLockedDialogClose() {
     this.isLockedDialogVisible = false;
   }
   // Unlock a service
@@ -621,9 +650,33 @@ onClear() {
   ngOnDestroy(): void {
     // Unlock the service on component destroy if locked
     console.log('Destroying confirmed component...', this.activeComponent);
-    if(this.activeServiceId && this.activeComponent !== 'form'){ 
+    if (this.activeServiceId && this.activeComponent !== 'form') {
       this.unlockService();
     }
   }
-
+  checkLockStatus() {
+    this.healthCheckupService.getLockStatus().subscribe((res) => {
+      this.isCheckInLocked = res.isActive;
+    });
+  }
+  unlock(){
+    this.healthCheckupService.unlock().subscribe({
+      next: (response) => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Unlocked',
+          detail: 'Check-in has been unlocked successfully.',
+        });
+        this.isCheckInLocked = false;
+      },
+      error: (error) => {
+        console.error('Error unlocking check-in:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to unlock check-in.',
+        });
+      }
+    });
+  }
 }

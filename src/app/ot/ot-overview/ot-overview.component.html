@@ -1,0 +1,15 @@
+<div class="dashboard-section">
+    <div class="card" [ngClass]="{'active-card': activeComponent === 'today'}" (click)="showConfirmedAppointments()">
+        <div class="card-icon">
+            <img src="/OT.svg" alt="Appointment Icon" />
+        </div>
+        <div class="card-content">
+            <p>Today Surgeries</p>
+        </div>
+    </div>
+
+</div>
+<div class="component-section">
+    <app-today-ot *ngIf="activeComponent === 'today' "></app-today-ot>
+
+</div>

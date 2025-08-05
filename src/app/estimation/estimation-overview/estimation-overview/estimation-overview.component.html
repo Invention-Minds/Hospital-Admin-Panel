@@ -1,161 +1,4 @@
 <div class="dashboard-section">
-  <!-- <h1>Appointments</h1> -->
-  <div class="wrapper" *ngIf="false">
-    <div class="card-today pointer" style="background-color: #b0c3c155;" (click)="showOverall()">
-      <div class="flex space-top">
-        <div class="count">{{ totalOverallEstimations }}</div>
-        <div class="text text-center">Overall EST</div>
-      </div>
-
-    </div>
-    <div class="card-today pointer" style="background-color: #D3FFF8;">
-      <div class="flex space-top">
-        <div class="count">{{ totalMonthWiseRaisedEST }}</div>
-        <div class="icon icon-bg">
-          <img src="/est-icon-10.svg" alt="Overdue EST" pTooltip="Total EST Raised this Month" tooltipPosition="top">
-        </div>
-        <div class="text text-center">Raised in {{currentMonth}}</div>
-      </div>
-    </div>
-    <!-- Total EST -->
-    <div class="card-today pointer" style="background-color: #F7FCDC;">
-      <div class="flex space-top">
-        <div class="count">{{ totalEstimations }}</div>
-        <!-- <div class="icon icon-bg">
-          <img src="est-icon-1.svg" alt="Leave Icon" pTooltip="New EST Created Today" tooltipPosition="top">
-        </div> -->
-        <div class="text text-center">New EST Created</div>
-      </div>
-
-    </div>
-
-    <!-- Pending EST -->
-    <div class="card-today pointer bg-pending"
-      [ngClass]="{ 'active-card': activeComponent === 'submitted' || activeComponent === 'request' }"
-      (click)="role === 'sub_admin' ? showAppointmentRequests() : showSubmittedRequest()">
-      <div class="flex space-top">
-        <div class="count">{{ pendingEstimations }}</div>
-        <div class="text text-center">Pending EST</div>
-      </div>
-    </div>
-
-
-    <!-- Approved EST -->
-    <div class="card-today pointer bg-approved" [ngClass]="{'active-card': activeComponent === 'approved'}"
-      (click)="showApprovedAppointments()">
-      <div class="flex space-top">
-        <div class="count">{{ approvedEstimations }}</div>
-        <!-- <div class="icon icon-bg">
-          <img src="/est-icon-3.svg" alt="Absent Doctors" pTooltip="EST Approved Today" tooltipPosition="top">
-        </div> -->
-        <div class="text text-center">Approved EST</div>
-      </div>
-    </div>
-
-    <!-- Confirmed EST -->
-    <div class="card-today pointer bg-confirmed" [ngClass]="{'active-card': activeComponent === 'confirmed'}"
-      (click)="showConfirmedAppointments()">
-      <div class="flex space-top">
-        <div class="count">{{ confirmedEstimations }}</div>
-        <!-- <div class="icon icon-bg">
-          <img src="/est-icon-4.svg" alt="MHC Confirmed" pTooltip="EST Confirmed Today" tooltipPosition="top">
-        </div> -->
-        <div class="text text-center">Confirmed EST</div>
-      </div>
-
-    </div>
-
-    <!-- Completed EST -->
-    <div class="card-today pointer bg-completed" [ngClass]="{'active-card': activeComponent === 'completed'}"
-      (click)="showCompletedAppointments()">
-      <div class="flex space-top">
-        <div class="count">{{ completedEstimations }}</div>
-        <!-- <div class="icon icon-bg">
-          <img src="/est-icon-5.svg" alt="MHC Completed" pTooltip="EST Completed Today" tooltipPosition="top">
-        </div> -->
-        <div class="text text-center">Completed EST</div>
-      </div>
-
-    </div>
-
-    <!-- Cancelled EST -->
-    <div class="card-today pointer bg-cancelled" [ngClass]="{'active-card': activeComponent === 'cancelled'}"
-      (click)="showCancelEstimation()">
-      <div class="flex space-top">
-        <div class="count">{{ cancelledEstimations }}</div>
-        <!-- <div class="icon icon-bg">
-          <img src="/est-icon-6.svg" alt="EST Cancelled" pTooltip="EST Cancelled Today" tooltipPosition="top">
-        </div> -->
-        <div class="text text-center">Cancelled EST</div>
-      </div>
-
-    </div>
-
-    <!-- OverDue EST -->
-    <div class="card-today pointer bg-overdue" [ngClass]="{'active-card': activeComponent === 'overDue'}"
-      (click)="showOverDueAppointment()">
-      <div class="flex space-top">
-        <div class="count">{{ overDueEstimations }}</div>
-        <!-- <div class="icon icon-bg">
-          <img src="/est-icon-7.svg" alt="Overdue EST" pTooltip="EST Overdue Today" tooltipPosition="top">
-        </div> -->
-        <div class="text text-center">OverDue EST</div>
-      </div>
-
-    </div>
-    <div class="card-today pointer" style="background-color: #B3B4FF;" (click)="showDoctorSummary = true">
-      <div class="flex space-top">
-        <div class="count">{{ completedEstimationsList }}</div>
-        <!-- <div class="icon icon-bg">
-          <img src="/est-icon-8.svg" alt="Overdue EST" pTooltip="Total EST Completed with DWS" tooltipPosition="top">
-        </div> -->
-        <div class="text text-center">DWS - Compl.</div>
-      </div>
-
-    </div>
-    <div class="card-today pointer" style="background-color: #FFC1C3;" (click)="showDWSummary = true">
-      <div class="flex space-top">
-        <div class="count">{{ nonCompletedEstimationsList }}</div>
-        <!-- <div class="icon icon-bg">
-          <img src="/est-icon-9.svg" alt="Overdue EST" pTooltip="Total EST Non Completed with DWS"
-            tooltipPosition="top">
-        </div> -->
-        <div class="text text-center">DWS - Non Compl.</div>
-      </div>
-    </div>
-  </div>
-  <!--   
-  <div>
-    <label for="deptFilter">Filter by Department:</label>
-    <select id="deptFilter" [(ngModel)]="selectedDept" (change)="applyDeptFilter()">
-      <option value="">All</option>
-      <option *ngFor="let dept of departmentList" [value]="dept">{{ dept }}</option>
-    </select>
-  </div>
-  
-  <table border="1" cellpadding="5" cellspacing="0">
-    <thead>
-      <tr>
-        <th>Doctor Name</th>
-        <th>Department</th>
-        <th>Total Completed</th>
-        <th>MM</th>
-        <th>SM</th>
-        <th>Maternity</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let doc of doctorSummaryList">
-        <td>{{ doc.consultantName }}</td>
-        <td>{{ doc.department }}</td>
-        <td>{{ doc.totalCompleted }}</td>
-        <td>{{ doc.MM }}</td>
-        <td>{{ doc.SM }}</td>
-        <td>{{ doc.Maternity }}</td>
-      </tr>
-    </tbody>
-  </table> -->
-
 
   <div class="stats-cards">
     <div class="card-1" [ngClass]="{'active-card': activeComponent === 'form'}" (click)="showNewAppointmentForm()">
@@ -165,25 +8,16 @@
       <div class="card-content">
       </div>
     </div>
-    <!-- <div class="card" [ngClass]="{'active-card': activeComponent === 'overAll'}" (click)="showOverall()">
+    <div class="card-1" [ngClass]="{'active-card': activeComponent === 'analytics'}" (click)="showAnalytics()">
       <div class="card-icon">
-        <div class="count">{{ totalOverallEstimations }}</div>
+        <img src="/est-analytics.svg" alt="OPD Icon" />
       </div>
       <div class="card-content">
-        <p>
-          Overall EST
-          <span class="info-icon" title="This shows the total number of estimation created overall."><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
-	<g fill="#fff" stroke-width="0.5" stroke="#fff">
-		<path d="M13.895 15.553a1 1 0 0 1-.448 1.341l-1 .5A1 1 0 0 1 11 16.5V13a1 1 0 0 1-.447-1.894l1-.5A1 1 0 0 1 13 11.5V15a1 1 0 0 1 .895.553M12 9.5a1.5 1.5 0 1 0 0-3a1.5 1.5 0 0 0 0 3" />
-		<path fill-rule="evenodd" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2S2 6.477 2 12s4.477 10 10 10m0-2a8 8 0 1 0 0-16a8 8 0 0 0 0 16" clip-rule="evenodd" />
-	</g>
-</svg></span>
-        </p>
       </div>
-    </div> -->
+    </div>
     <div class="card" [ngClass]="{'active-card': activeComponent === 'overAll'}" (click)="showOverall()"
       style="position: relative;">
-      <div class="info-icon" title="This shows the total number of estimation requests submitted overall."><svg
+      <!-- <div class="info-icon" title="This shows the total number of estimation requests submitted overall."><svg
           xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
           <g [attr.fill]="activeComponent === 'overAll' ? '#fff' : '#000'" stroke-width="0.5"
             [attr.stroke]="activeComponent === 'overAll' ? '#fff' : '#000'">
@@ -193,7 +27,7 @@
               d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2S2 6.477 2 12s4.477 10 10 10m0-2a8 8 0 1 0 0-16a8 8 0 0 0 0 16"
               clip-rule="evenodd" />
           </g>
-        </svg></div>
+        </svg></div> -->
 
       <div class="card-icon">
         <div class="count">{{ totalOverallEstimations }}</div>
@@ -204,7 +38,7 @@
     </div>
 
 
-    <div class="card" [ngClass]="{'active-card': activeComponent === 'month'}" (click)="showOverall()"
+    <!-- <div class="card" [ngClass]="{'active-card': activeComponent === 'month'}" (click)="showOverall()"
       style="position: relative;">
       <div class="info-icon" title="This shows the total number of estimation raised in current month."><svg
           xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
@@ -218,15 +52,14 @@
           </g>
         </svg></div>
       <div class="card-icon">
-        <!-- <img src="/est-req.svg" alt="Doctor Available Icon" /> -->
         <div class="count">{{ totalMonthWiseRaisedEST }}</div>
       </div>
       <div class="card-content">
         <p>Raised in {{currentMonth}}
         </p>
       </div>
-    </div>
-    <div class="card" [ngClass]="{'active-card': activeComponent === 'today'}" (click)="showOverall()"
+    </div> -->
+    <!-- <div class="card" [ngClass]="{'active-card': activeComponent === 'today'}" (click)="showOverall()"
       style="position: relative;">
       <div class="info-icon" title="This shows the total number of estimation created today."><svg
           xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
@@ -240,7 +73,6 @@
           </g>
         </svg></div>
       <div class="card-icon">
-        <!-- <img src="/est-req.svg" alt="Doctor Available Icon" /> -->
         <div class="count">{{ totalEstimations }}
         </div>
       </div>
@@ -248,10 +80,10 @@
         <p>New EST Created
         </p>
       </div>
-    </div>
+    </div> -->
     <div class="card" *ngIf="role === 'sub_admin'" [ngClass]="{'active-card': activeComponent === 'request'}"
       (click)="showAppointmentRequests()" style="position: relative;">
-      <div class="info-icon" title="This shows the total number of estimation in pending today."><svg
+      <!-- <div class="info-icon" title="This shows the total number of estimation in pending today."><svg
           xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
           <g [attr.fill]="activeComponent === 'request' ? '#fff' : '#000'" stroke-width="0.5"
             [attr.stroke]="activeComponent === 'request' ? '#fff' : '#000'">
@@ -261,10 +93,10 @@
               d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2S2 6.477 2 12s4.477 10 10 10m0-2a8 8 0 1 0 0-16a8 8 0 0 0 0 16"
               clip-rule="evenodd" />
           </g>
-        </svg></div>
+        </svg></div> -->
       <div class="card-icon">
-        <!-- <img src="/est-req.svg" alt="Doctor Available Icon" /> -->
-        <div class="count">{{ pendingEstimations }}</div>
+        <img src="/est-req.svg" alt="Doctor Available Icon" />
+        <!-- <div class="count">{{ pendingEstimations }}</div> -->
       </div>
       <div class="card-content">
         <p>EST Request
@@ -274,7 +106,7 @@
     <div class="card" *ngIf="role === 'admin' || role === 'super_admin' "
       [ngClass]="{'active-card': activeComponent === 'submitted'}" (click)="showSubmittedRequest()"
       style="position: relative;">
-      <div class="info-icon" title="This shows the total number of estimation in pending today."><svg
+      <!-- <div class="info-icon" title="This shows the total number of estimation in pending today."><svg
           xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
           <g [attr.fill]="activeComponent === 'submitted' ? '#fff' : '#000'" stroke-width="0.5"
             [attr.stroke]="activeComponent === 'submitted' ? '#fff' : '#000'">
@@ -284,10 +116,10 @@
               d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2S2 6.477 2 12s4.477 10 10 10m0-2a8 8 0 1 0 0-16a8 8 0 0 0 0 16"
               clip-rule="evenodd" />
           </g>
-        </svg></div>
+        </svg></div> -->
       <div class="card-icon">
-        <!-- <img src="/est-req.svg" alt="Doctor Available Icon" /> -->
-        <div class="count">{{ pendingEstimations }}</div>
+        <img src="/est-req.svg" alt="Doctor Available Icon" />
+        <!-- <div class="count">{{ pendingEstimations }}</div> -->
       </div>
       <div class="card-content">
         <p>EST Request
@@ -296,7 +128,7 @@
     </div>
     <div class="card" [ngClass]="{'active-card': activeComponent === 'approved'}" (click)="showApprovedAppointments()"
       style="position: relative;">
-      <div class="info-icon" title="This shows the total number of estimation approved today."><svg
+      <!-- <div class="info-icon" title="This shows the total number of estimation approved today."><svg
           xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
           <g [attr.fill]="activeComponent === 'approved' ? '#fff' : '#000'" stroke-width="0.5"
             [attr.stroke]="activeComponent === 'approved' ? '#fff' : '#000'">
@@ -306,10 +138,10 @@
               d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2S2 6.477 2 12s4.477 10 10 10m0-2a8 8 0 1 0 0-16a8 8 0 0 0 0 16"
               clip-rule="evenodd" />
           </g>
-        </svg></div>
+        </svg></div> -->
       <div class="card-icon">
-        <!-- <img src="/est-appr.svg" alt="Appointment Icon" /> -->
-        <div class="count">{{ approvedEstimations }}</div>
+        <img src="/est-appr.svg" alt="Appointment Icon" />
+        <!-- <div class="count">{{ approvedEstimations }}</div> -->
       </div>
       <div class="card-content">
         <p>Apprv./Acc.</p>
@@ -317,7 +149,7 @@
     </div>
     <div class="card" [ngClass]="{'active-card': activeComponent === 'follow-up'}" (click)="showFollowUpEstimation()"
       style="position: relative;">
-      <div class="info-icon" title="This shows the total number of follow-up done."><svg
+      <!-- <div class="info-icon" title="This shows the total number of follow-up done."><svg
           xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
           <g [attr.fill]="activeComponent === 'follow-up' ? '#fff' : '#000'" stroke-width="0.5"
             [attr.stroke]="activeComponent === 'follow-up' ? '#fff' : '#000'">
@@ -327,10 +159,10 @@
               d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2S2 6.477 2 12s4.477 10 10 10m0-2a8 8 0 1 0 0-16a8 8 0 0 0 0 16"
               clip-rule="evenodd" />
           </g>
-        </svg></div>
+        </svg></div> -->
       <div class="card-icon">
-        <!-- <img src="/followup-EST.svg" alt="OPD Icon" /> -->
-        <div class="count">{{ totalFollowUp}}</div>
+        <img src="/followup-EST.svg" alt="OPD Icon" />
+        <!-- <div class="count">{{ totalFollowUp}}</div> -->
       </div>
       <div class="card-content">
         <p>Follow-Up
@@ -339,7 +171,7 @@
     </div>
     <div class="card" [ngClass]="{'active-card': activeComponent === 'maternity'}" (click)="showMaternityEstimation()"
       style="position: relative;">
-      <div class="info-icon" title="This shows the total number of maternity estimation created overall."><svg
+      <!-- <div class="info-icon" title="This shows the total number of maternity estimation created overall."><svg
           xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
           <g [attr.fill]="activeComponent === 'maternity' ? '#fff' : '#000'" stroke-width="0.5"
             [attr.stroke]="activeComponent === 'maternity' ? '#fff' : '#000'">
@@ -349,10 +181,10 @@
               d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2S2 6.477 2 12s4.477 10 10 10m0-2a8 8 0 1 0 0-16a8 8 0 0 0 0 16"
               clip-rule="evenodd" />
           </g>
-        </svg></div>
+        </svg></div> -->
       <div class="card-icon">
-        <!-- <img src="/MM-EST.svg" alt="OPD Icon" /> -->
-        <div class="count">{{totalMaternity}}</div>
+        <img src="/MM-EST.svg" alt="OPD Icon" />
+        <!-- <div class="count">{{totalMaternity}}</div> -->
       </div>
       <div class="card-content">
         <p>Maternity
@@ -361,7 +193,7 @@
     </div>
     <div class="card" [ngClass]="{'active-card': activeComponent === 'confirmed'}" (click)="showConfirmedAppointments()"
       style="position: relative;">
-      <div class="info-icon" title="This shows the total number of estimation confirmed today."><svg
+      <!-- <div class="info-icon" title="This shows the total number of estimation confirmed today."><svg
           xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
           <g [attr.fill]="activeComponent === 'confirmed' ? '#fff' : '#000'" stroke-width="0.5"
             [attr.stroke]="activeComponent === 'confirmed' ? '#fff' : '#000'">
@@ -371,10 +203,10 @@
               d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2S2 6.477 2 12s4.477 10 10 10m0-2a8 8 0 1 0 0-16a8 8 0 0 0 0 16"
               clip-rule="evenodd" />
           </g>
-        </svg></div>
+        </svg></div> -->
       <div class="card-icon">
-        <!-- <img src="/est-confirm.svg" alt="Doctor Available Icon" /> -->
-        <div class="count">{{ confirmedEstimations }}</div>
+        <img src="/est-confirm.svg" alt="Doctor Available Icon" />
+        <!-- <div class="count">{{ confirmedEstimations }}</div> -->
       </div>
       <div class="card-content">
         <p>Confirmed
@@ -383,7 +215,7 @@
     </div>
     <div class="card" [ngClass]="{'active-card': activeComponent === 'completed'}" (click)="showCompletedAppointments()"
       style="position: relative;">
-      <div class="info-icon" title="This shows the total number of estimation completed today."><svg
+      <!-- <div class="info-icon" title="This shows the total number of estimation completed today."><svg
           xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
           <g [attr.fill]="activeComponent === 'completed' ? '#fff' : '#000'" stroke-width="0.5"
             [attr.stroke]="activeComponent === 'completed' ? '#fff' : '#000'">
@@ -393,10 +225,10 @@
               d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2S2 6.477 2 12s4.477 10 10 10m0-2a8 8 0 1 0 0-16a8 8 0 0 0 0 16"
               clip-rule="evenodd" />
           </g>
-        </svg></div>
+        </svg></div> -->
       <div class="card-icon">
-        <!-- <img src="/est-cancel.svg" alt="OPD Icon" /> -->
-        <div class="count">{{ completedEstimations }}</div>
+        <img src="/est-cancel.svg" alt="OPD Icon" />
+        <!-- <div class="count">{{ completedEstimations }}</div> -->
       </div>
       <div class="card-content">
         <p>Completed
@@ -405,7 +237,7 @@
     </div>
     <div class="card" [ngClass]="{'active-card': activeComponent === 'cancelled'}" (click)="showCancelEstimation()"
       style="position: relative;">
-      <div class="info-icon" title="This shows the total number of estimation cancelled today."><svg
+      <!-- <div class="info-icon" title="This shows the total number of estimation cancelled today."><svg
           xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
           <g [attr.fill]="activeComponent === 'cancelled' ? '#fff' : '#000'" stroke-width="0.5"
             [attr.stroke]="activeComponent === 'cancelled' ? '#fff' : '#000'">
@@ -415,10 +247,10 @@
               d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2S2 6.477 2 12s4.477 10 10 10m0-2a8 8 0 1 0 0-16a8 8 0 0 0 0 16"
               clip-rule="evenodd" />
           </g>
-        </svg></div>
+        </svg></div> -->
       <div class="card-icon">
-        <!-- <img src="/Cancel_EST.svg" alt="OPD Icon" /> -->
-        <div class="count">{{ cancelledEstimations }}</div>
+        <img src="/Cancel_EST.svg" alt="OPD Icon" />
+        <!-- <div class="count">{{ cancelledEstimations }}</div> -->
       </div>
       <div class="card-content">
         <p>Cancelled
@@ -427,7 +259,7 @@
     </div>
     <div class="card" [ngClass]="{'active-card': activeComponent === 'overdue'}" (click)="showOverDueAppointment()"
       style="position: relative;">
-      <div class="info-icon" title="This shows the total number of estimation overDue today."><svg
+      <!-- <div class="info-icon" title="This shows the total number of estimation overDue today."><svg
           xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24">
           <g [attr.fill]="activeComponent === 'overdue' ? '#fff' : '#000'" stroke-width="0.5"
             [attr.stroke]="activeComponent === 'overdue' ? '#fff' : '#000'">
@@ -437,10 +269,10 @@
               d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2S2 6.477 2 12s4.477 10 10 10m0-2a8 8 0 1 0 0-16a8 8 0 0 0 0 16"
               clip-rule="evenodd" />
           </g>
-        </svg></div>
+        </svg></div> -->
       <div class="card-icon">
-        <!-- <img src="/est-overdue.svg" alt="OPD Icon" /> -->
-        <div class="count">{{ overDueEstimations }}</div>
+        <img src="/est-overdue.svg" alt="OPD Icon" />
+        <!-- <div class="count">{{ overDueEstimations }}</div> -->
       </div>
       <div class="card-content">
         <p>OverDue
@@ -473,6 +305,7 @@
   <app-maternity-estimation *ngIf="activeComponent === 'maternity'"></app-maternity-estimation>
   <app-followup-estimation *ngIf="activeComponent === 'follow-up'"></app-followup-estimation>
   <app-estimation-cancel *ngIf="activeComponent === 'cancelled'"></app-estimation-cancel>
+  <app-estimation-analytics *ngIf="activeComponent === 'analytics'"></app-estimation-analytics>
   <div class="container" *ngIf="showMonthWiseDate && activeComponent ==='overAll'">
     <div class="filters">
       <div>

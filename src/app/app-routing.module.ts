@@ -29,6 +29,8 @@ import { RedirectorComponent } from './redirector/redirector.component';
 import { LabOverviewComponent } from './lab/lab-overview/lab-overview.component';
 import { PatientOverviewComponent } from './patient/patient-overview/patient-overview.component';
 import { NursingOverviewComponent } from './nursing/nursing-overview/nursing-overview.component';
+import { OtOverviewComponent } from './ot/ot-overview/ot-overview.component';
+import { OtTvDisplayComponent } from './ot-tv-display/ot-tv-display.component';
 
 const routes: Routes = [
   { path: 'dashboard', component: DashboardOverviewComponent, canActivate:[authGuard] },
@@ -57,6 +59,8 @@ const routes: Routes = [
   {path: 'lab', component: LabOverviewComponent, canActivate:[authGuard]},
   {path:'patient', component: PatientOverviewComponent, canActivate:[authGuard]},
   { path: 'redirector', component: RedirectorComponent },
+  {path:'surgery', component: OtOverviewComponent, canActivate:[authGuard]},
+  { path: 'ot-channel', component: OtTvDisplayComponent, canActivate:[authGuard] },
 
   {
     path: 'form',

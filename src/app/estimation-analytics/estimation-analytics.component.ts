@@ -199,7 +199,7 @@ export class EstimationAnalyticsComponent {
           const dateB = new Date(b.submittedDateAndTime).getTime() || 0;
           return dateB - dateA;
         });
-
+        this.processTodayEstimations(this.estimations)
         this.filteredEstimations = this.filterByDays(7); // Default 7 days
         this.updateCharts();
       },

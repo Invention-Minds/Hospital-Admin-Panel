@@ -1,7 +1,8 @@
 <div class="form-container">
   <h2 class="form-title">Estimation Form</h2>
   <hr class="line">
-  <form #estimationForm="ngForm" [class.submitted]="estimationForm.submitted" (ngSubmit)="onSubmit(estimationForm)" novalidate>
+  <form #estimationForm="ngForm" [class.submitted]="estimationForm.submitted" (ngSubmit)="onSubmit(estimationForm)"
+    novalidate>
     <div class="section">
       <h3>Patient Information:</h3>
       <div class="form-row">
@@ -106,7 +107,7 @@
           <div *ngIf="estimationForm.submitted && estimationForm.controls['patientPhoneNumber']?.invalid"
             class="error-message">
             <!-- <span *ngIf="estimationForm.controls['patientPhoneNumber']?.errors?.['required']">Phone Number is -->
-              <!-- required.</span> -->
+            <!-- required.</span> -->
             <span *ngIf="estimationForm.controls['patientPhoneNumber']?.errors?.['pattern']">Invalid Phone Number
               format.</span>
           </div>
@@ -169,20 +170,19 @@
           <div class="radio-group">
             <label>
               <input type="radio" name="estimationType" [(ngModel)]="selectedEstimationType" value="MM"
-                [disabled]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'"
-                 />
+                [disabled]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'" />
               MM
             </label>
             <label>
               <input type="radio" name="estimationType" [(ngModel)]="selectedEstimationType" value="SM"
                 [disabled]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'"
-                (change)="loadSurgeryNames()"  />
+                (change)="loadSurgeryNames()" />
               SM
             </label>
             <label>
               <input type="radio" name="estimationType" [(ngModel)]="selectedEstimationType" value="Maternity"
                 [disabled]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'"
-                (change)="loadSurgeryNames()"  />
+                (change)="loadSurgeryNames()" />
               Maternity
             </label>
           </div>
@@ -236,7 +236,7 @@
           <div *ngIf="estimationForm.submitted && estimationForm.controls['surgeryTime']?.invalid"
             class="error-message">
             <!-- <span *ngIf="estimationForm.controls['surgeryTime']?.errors?.['required']">Surgery Level is -->
-              <!-- required.</span> -->
+            <!-- required.</span> -->
           </div>
         </div>
       </div>
@@ -260,7 +260,7 @@
           <div *ngIf="estimationForm.submitted && estimationForm.controls['estimationPreferredDate']?.invalid"
             class="error-message">
             <!-- <span *ngIf="estimationForm.controls['estimationPreferredDate']?.errors?.['required']">Preferred Date by -->
-              <!-- Doctor is required.</span> -->
+            <!-- Doctor is required.</span> -->
             <span *ngIf="estimationForm.controls['estimationPreferredDate']?.errors?.['pattern']">Invalid Date
               format.</span>
           </div>
@@ -319,14 +319,10 @@
             Surgeon Name for Surgery {{ i + 1 }}*
           </label>
           <div class="dropdown-container">
-            <select name="consultantId{{i}}"
-                    class="custom-input custom-select"
-                    [(ngModel)]="formData.consultants[i]"
-                    (change)="updateMultipleDoctor($event, i)"
-                    [disabled]="formData.statusOfEstimation === 'accepted' || 
+            <select name="consultantId{{i}}" class="custom-input custom-select" [(ngModel)]="formData.consultants[i]"
+              (change)="updateMultipleDoctor($event, i)" [disabled]="formData.statusOfEstimation === 'accepted' || 
                                 formData.statusOfEstimation === 'confirmed' || 
-                                formData.statusOfEstimation === 'approved'"
-                    required>
+                                formData.statusOfEstimation === 'approved'" required>
               <option value="" disabled selected>Select Surgeon</option>
               <option *ngFor="let doctor of filteredDoctors" [value]="doctor.id">
                 {{ doctor.name }}
@@ -379,11 +375,8 @@
             <div class="input-container input-container-1">
               <div class="surgery-radio">
                 <label>
-                  <input type="radio"
-                    name="selectedSurgeryCost_{{ room.name }}"
-                    [value]="i"
-                    [disabled]="selectedRoom?.name !== room.name"
-                    [checked]="selectedSurgeryCostIndex[room.name] === i"
+                  <input type="radio" name="selectedSurgeryCost_{{ room.name }}" [value]="i"
+                    [disabled]="selectedRoom?.name !== room.name" [checked]="selectedSurgeryCostIndex[room.name] === i"
                     (change)="onSurgeryCostSelect(room.name, i)">
                 </label>
               </div>
@@ -482,7 +475,7 @@
             [disabled]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'  " />
           Drugs and Consumables
         </label>
-        <label  *ngIf="selectedEstimationType === 'Maternity'">
+        <label *ngIf="selectedEstimationType === 'Maternity'">
           <input type="checkbox" name="cSection" [(ngModel)]="formData.includedItems['cSection']"
             [disabled]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'  " />
           C-Section
@@ -620,7 +613,7 @@
       </div>
       <div class="form-row">
         <div class="input-container">
-          <input type="text" id="staffRemarks" name="staffRemarks"  class="custom-input" ngModel
+          <input type="text" id="staffRemarks" name="staffRemarks" class="custom-input" ngModel
             [(ngModel)]="formData.staffRemarks" placeholder=" " class="custom-input"
             [readonly]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'" />
           <label for="staffRemarks" class="custom-remarks">Internal Remarks</label>
@@ -632,8 +625,8 @@
           </div>
         </div>
         <div class="input-container">
-          <input type="text" id="patientRemarks" name="patientRemarks"  class="custom-input"
-            ngModel [(ngModel)]="formData.patientRemarks" placeholder=" " class="custom-input"
+          <input type="text" id="patientRemarks" name="patientRemarks" class="custom-input" ngModel
+            [(ngModel)]="formData.patientRemarks" placeholder=" " class="custom-input"
             [readonly]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'" />
           <label for="patientRemarks" class="custom-remarks">External Remarks</label>
           <div *ngIf="estimationForm.submitted && estimationForm.controls['patientRemarks']?.invalid"
@@ -650,11 +643,14 @@
       <div class="note">
         <p>
           <strong>Note:</strong><br>
-          This estimation is prepared based on the details available at the time of the request. Actual charges may vary
-          depending on unforeseen circumstances or changes in the patient’s condition. The estimate is valid for 20 days
-          from the date of issuance. Kindly contact our estimation team for a revised quote once the validity period has
-          expired. Please note that the cost will increase if the duration of the patient's stay exceeds the expected
-          number of days.
+          This estimation is prepared based on the details available at the time of the request. Please note that the
+          tentative cost does not include exclusions.
+          Actual charges may vary depending on unforeseen circumstances or changes in the patient’s condition.
+          The estimate is valid for 20 days from the date of issuance. Kindly contact our estimation team for a revised
+          quote once the validity period has expired.
+          Please note that the cost will increase if the duration of the patient’s stay exceeds the expected number of
+          days.
+          Additional treatments may be suggested by the doctor, depending on the patient’s condition.
         </p>
       </div>
 
@@ -714,9 +710,9 @@
           <!-- <button (click)="saveSignature()">Save</button>
             <button (click)="clearSignature()">Clear</button> -->
           <button class="clear-button sign-clear" style="margin-bottom:10px ;"
-            *ngIf="formData.statusOfEstimation === 'pending' || estimationData === null" (click)="clearPatientSign()">Clear</button>
-          <div class="input-container"
-            *ngIf="formData.signatureOf === 'attender'">
+            *ngIf="formData.statusOfEstimation === 'pending' || estimationData === null"
+            (click)="clearPatientSign()">Clear</button>
+          <div class="input-container" *ngIf="formData.signatureOf === 'attender'">
             <input type="text" id="attenderName" name="attenderName" pattern="^[a-zA-Z . ]*$" class="custom-input"
               ngModel [(ngModel)]="formData.attenderName" placeholder=" " class="custom-input"
               [readonly]="formData.statusOfEstimation === 'approved'" [required]="formData.signatureOf ==='attender'" />
@@ -773,12 +769,12 @@
       <!-- For Subadmin -->
       <button
         *ngIf="role === 'sub_admin' && (formData.statusOfEstimation === 'pending' || estimationData === null || formData.statusOfEstimation === 'submitted')"
-        type="submit" class="submit-button" [disabled]="isButtonClicked"
-        >
+        type="submit" class="submit-button" [disabled]="isButtonClicked">
         Submit
       </button>
-      <button *ngIf="role === 'sub_admin' && (formData.statusOfEstimation === 'rejected' || formData.statusOfEstimation === 'overDue')" type="submit"
-        class="submit-button" [disabled]="!estimationForm.valid">
+      <button
+        *ngIf="role === 'sub_admin' && (formData.statusOfEstimation === 'rejected' || formData.statusOfEstimation === 'overDue')"
+        type="submit" class="submit-button" [disabled]="!estimationForm.valid">
         Re-Submit
       </button>
       <button *ngIf="role === 'sub_admin'" type="button" class="clear-button" (click)="clearForm()">

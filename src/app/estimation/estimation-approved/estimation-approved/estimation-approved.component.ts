@@ -651,7 +651,7 @@ export class EstimationApprovedComponent {
     const selectElement = event.target as HTMLSelectElement;
     const action = selectElement.value;
   
-    if (action === 'completed' && estimation.estimationType === 'MM') {
+    if (action === 'completed') {
       this.openAdvancePopup(estimation);
     } else if (action === 'cancelled') {
       this.openCancelFeedback(estimation);

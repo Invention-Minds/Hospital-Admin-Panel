@@ -515,7 +515,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
         if (dayOfWeek !== undefined) {
           // Send the modified day to the backend for checking
           console.log(dayOfWeek, this.individualAvailability['fri'])
-          const shortDayNames = ['Sun', 'Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat'];
+          const shortDayNames = ['Sun', 'Mon', 'Tues', 'Wed', 'Thu', 'Fri', 'Sat'];
           const dayName = shortDayNames[dayOfWeek].toLowerCase();
 
           console.log(dayOfWeek, dayName, this.individualAvailability[dayName]);

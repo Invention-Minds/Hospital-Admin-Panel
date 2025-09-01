@@ -3,9 +3,19 @@ import { DoctorServiceService } from '../../services/doctor-details/doctor-servi
 import { ChannelService } from '../../services/channel/channel.service';
 import { MessageService } from 'primeng/api';
 import { EventService } from '../../services/event.service';
-import { Subscription, interval } from 'rxjs';
+import { Subscription, interval, forkJoin } from 'rxjs';
 import { environment } from '../../../environment/environment';
 import { Router } from '@angular/router';
+interface UploadedFile {
+  id?: number;                // from DB
+  file?: File;                // for new uploads
+  name: string;
+  url?: string;               // DB file URL
+  isActive?: boolean;
+  disable?: boolean;
+  selectedChannelIds: number[];
+}
+
 
 @Component({
   selector: 'app-tv-control',
@@ -52,7 +62,11 @@ export class TvControlComponent {
   private eventSource: EventSource | null = null;
   existingImageMedia: any[] = [];
   // uploadedFiles: File[] = [];
-  uploadedFiles: Array<File & { id?: number; url?: string; isActive?: boolean; disable?:false }> = [];
+  uploadedFiles: UploadedFile[] = [];
+  selectedChannelIds: number[] = [];
+  applyGlobally: boolean = false;
+  upload:boolean = false;
+
 
 
 
@@ -363,13 +377,15 @@ export class TvControlComponent {
   }
 
   onFileUpload(event: any) {
-    // if (event.target.files.length > 0) {
-    //   this.uploadedFile = event.target.files[0];
-    //   console.log(this.uploadedFile)
-    // }
     if (event.target.files.length > 0) {
       const selected = Array.from(event.target.files) as File[];
-      this.uploadedFiles.push(...selected);
+      const prepared: UploadedFile[] = selected.map(f => ({
+        file: f,
+        name: f.name,
+        selectedChannelIds: []
+      }));
+      this.uploadedFiles.push(...prepared);
+      
     }
   }
 
@@ -381,10 +397,50 @@ export class TvControlComponent {
   }
 
   isAdReady(): boolean {
-    return this.selectedAdType === 'text' ? !!this.textAd : !!this.uploadedFile;
+    return this.selectedAdType === 'text' ? !!this.textAd : !!this.uploadedFiles;
   }
+  // submitAd() {
+  //   const channelIds = this.applyGlobally ? [] : this.selectedChannelIds;
+  //   if (this.selectedAdType === 'text') {
+  //     this.channelService.uploadTextAd(this.textAd, channelIds).subscribe(() => {
+  //       this.fetchLatestAds();
+  //       this.messageService.add({
+  //         severity: 'success',
+  //         summary: 'Success',
+  //         detail: 'Text is updated successfully',
+  //       });
+  //     });
+  //   } else {
+  //     // this.channelService.uploadMediaAd(this.selectedAdType, this.uploadedFiles!,channelIds).subscribe(() => {
+  //     //   this.fetchLatestAds();
+  //     //   this.messageService.add({
+  //     //     severity: 'success',
+  //     //     summary: 'Success',
+  //     //     detail: 'Media is uploaded successfully',
+  //     //   });
+  //     // });
+
+  //     const uploads = this.uploadedFiles
+  //     .filter(item => item.file)   // ✅ only new files have .file
+  //     .map(item => {
+  //       const channelIds = this.applyGlobally ? [] : (item.selectedChannelIds || []);
+  //       return this.channelService.uploadMediaAd(this.selectedAdType, item.file!, channelIds);
+  //     });
+
+  //   if (uploads.length > 0) {
+  //     forkJoin(uploads).subscribe(() => {
+  //       this.fetchLatestAds();
+  //       this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Media uploaded successfully' });
+  //     });
+  //   }
+
+  //   }
+  // }
   submitAd() {
+    const channelIds = this.applyGlobally ? [] : this.selectedChannelIds;
+  
     if (this.selectedAdType === 'text') {
+      // 📌 Handle text ad
       this.channelService.uploadTextAd(this.textAd).subscribe(() => {
         this.fetchLatestAds();
         this.messageService.add({
@@ -394,16 +450,40 @@ export class TvControlComponent {
         });
       });
     } else {
-      this.channelService.uploadMediaAd(this.selectedAdType, this.uploadedFiles!).subscribe(() => {
-        this.fetchLatestAds();
-        this.messageService.add({
-          severity: 'success',
-          summary: 'Success',
-          detail: 'Media is uploaded successfully',
+      this.upload = true;
+      // 📌 Split into new uploads vs existing ads
+      const newUploads = this.uploadedFiles
+        .filter(item => item.file) // new files
+        .map(item => {
+          const ids = this.applyGlobally ? [] : (item.selectedChannelIds || []);
+          return this.channelService.uploadMediaAd(this.selectedAdType, item.file!, ids);
         });
-      });
+  
+      const channelUpdates = this.uploadedFiles
+        .filter(item => !item.file && item.id) // already uploaded, just update channels
+        .map(item => {
+          return this.channelService.updateAdChannels({
+            advertisementId: item.id,
+            channelIds: item.selectedChannelIds || []
+          });
+        });
+  
+      const requests = [...newUploads, ...channelUpdates];
+  
+      if (requests.length > 0) {
+        forkJoin(requests).subscribe(() => {
+          this.upload = false;
+          this.fetchLatestAds();
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Success',
+            detail: 'Advertisement(s) processed successfully',
+          });
+        });
+      }
     }
   }
+  
   removeFile(index: number) {
     const file = this.uploadedFiles[index];
 
@@ -423,7 +503,7 @@ export class TvControlComponent {
     media.disable = true; // ✅ Disable the button to prevent multiple clicks
 
     this.channelService.updateMediaStatus(media.id, newStatus).subscribe(() => {
-      media.disable = false; 
+      media.disable = false;
       media.isActive = newStatus; // ✅ Update locally
       this.messageService.add({
         severity: 'success',
@@ -441,6 +521,8 @@ export class TvControlComponent {
         return acc;
       }, {});
 
+      console.log(this.existingAds)
+
       this.ads = response.ads;
       this.adStatuses = response.ads.reduce((acc: any, ad: any) => {
         acc[ad.type] = ad.isActive ?? false;
@@ -454,19 +536,36 @@ export class TvControlComponent {
           this.textAd = this.existingAds.text.content;
           this.uploadedFile = this.existingAds.image?.content || this.existingAds.video?.content || null;
         }
-        if (this.existingAds.image?.AdvertisementMedia) {
-          this.existingImageMedia = this.existingAds.image.AdvertisementMedia;
-          this.uploadedFiles = this.existingAds.image.AdvertisementMedia.map((media: any) => {
-            return {
-              name: media.url.substring(media.url.lastIndexOf('/') + 1),
-              url: media.url,
-              isActive: media.isActive,
-              id: media.id // Needed for activation/deactivation or removal
-            };
-          });
+        // if (this.existingAds.image?.AdvertisementMedia) {
+        //   this.existingImageMedia = this.existingAds.image.AdvertisementMedia;
+        //   this.uploadedFiles = this.existingAds.image.AdvertisementMedia.map((media: any) => {
+        //     return {
+        //       name: media.url.substring(media.url.lastIndexOf('/') + 1),
+        //       url: media.url,
+        //       isActive: media.isActive,
+        //       id: media.id, // Needed for activation/deactivation or removal
+        //       selectedChannelIds: media.Advertisement?.channels?.map((ch: any) => ch.id) || []
+        //     } as UploadedFile;
+        //   });
+        // } else {
+        //   this.uploadedFiles = [];
+        // }
+        if (this.ads.length > 0) {
+          this.uploadedFiles = this.ads
+            .filter((ad: any) => ad.type === 'image') // only images
+            .flatMap((ad: any) =>
+              ad.AdvertisementMedia.map((media: any) => ({
+                id: media.id,
+                name: media.url.substring(media.url.lastIndexOf('/') + 1),
+                url: media.url,
+                isActive: media.isActive,
+                selectedChannelIds: ad.channels?.map((ch: any) => ch.id) || []
+              }))
+            );
         } else {
           this.uploadedFiles = [];
         }
+        
       }, 0);
     });
 
@@ -494,8 +593,12 @@ export class TvControlComponent {
       // this.uploadedFile = event.dataTransfer.files[0]; // Store the first dropped file
       // console.log("Stored Dragged File:", this.uploadedFile);
       const droppedFiles = Array.from(event.dataTransfer.files) as File[];
-      this.uploadedFiles.push(...droppedFiles);
-      console.log("Dropped files:", droppedFiles);
+      const prepared: UploadedFile[] = droppedFiles.map(f => ({
+        file: f,
+        name: f.name,
+        selectedChannelIds: []
+      }));
+      this.uploadedFiles.push(...prepared);
     } else {
       console.warn("No files were dropped.");
     }

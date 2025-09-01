@@ -146,10 +146,19 @@
         <div class="file-item" *ngFor="let file of uploadedFiles; let i = index">
           <div class="file-div">
             <img src="file-upload.svg" alt="File Icon" class="file-icon" />
-            <span class="file-name">{{ file.name }}</span>
+            <span class="file-name">{{ file.file?.name || file.name }}</span>
           </div>
           <div class="file-actions">
 
+            <div class="channel-drop-down">
+              <p-multiSelect 
+              [options]="channels"
+              [(ngModel)]="file.selectedChannelIds"
+              optionLabel="name"
+              optionValue="id"
+              placeholder="Assign Channels">
+            </p-multiSelect>
+            </div>
             <button class="active-btn" (click)="!file.disable && toggleMediaActive(file)" *ngIf="file.id">
               <ng-container *ngIf="file.disable; else statusIcon">
                 <!-- Loading spinner -->
@@ -192,7 +201,7 @@
           </div>
         </div>
         <div class="toggle-buttons">
-          <button (click)="submitAd()" [disabled]="!isAdReady()" class="upload-btn">Upload</button>
+          <button (click)="submitAd()" [disabled]="!isAdReady() || upload" class="upload-btn">  {{ upload ? 'Uploading...' : 'Upload' }}</button>
           <div *ngIf="selectedAdType === 'text'" class="toggle-group">
             <button (click)="activateAd('text')" [disabled]="adStatuses['text']" class="activate-btn">Activate</button>
             <button (click)="deactivateAd('text')" [disabled]="!adStatuses['text']" class="deactivate-btn">Deactivate
@@ -210,6 +219,9 @@
 
 
     </div>
+
+
+
 
     <div class="toggle-buttons" *ngIf="selectedAdType==='text'">
       <button (click)="submitAd()" [disabled]="!isAdReady()" class="upload-btn">Upload</button>

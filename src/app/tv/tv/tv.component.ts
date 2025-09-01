@@ -795,7 +795,8 @@ export class TvComponent implements OnInit, OnDestroy {
   }
 
   fetchLatestAds() {
-    this.channelService.getAllAds().subscribe(response => {
+    const channelId = this.route.snapshot.paramMap.get('channelId');
+    this.channelService.getAllAdsForChannel(channelId!).subscribe(response => {
       this.mediaFiles = []; // ✅ Clear previous ads
       this.scrollingText = ''; // ✅ Reset scrolling text
 

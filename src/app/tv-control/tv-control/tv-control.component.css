@@ -528,6 +528,7 @@ h3 {
   width: 100%;
   margin: 0 10px;
   padding: 5px;
+  text-overflow: ellipsis;
 }
 
 .upload-btn {
@@ -607,6 +608,8 @@ h3 {
   justify-content: center;
   gap: 20px;
   padding: 0 15px;
+  /* max-height: 300px;
+  overflow-y: auto; */
 }
 
 .file-icon {
@@ -651,4 +654,7 @@ h3 {
 .heading {
   display: flex;
   gap: 10px;
+}
+::ng-deep .p-multiselect {
+  width: 180px !important; /* or whatever size you prefer */
 }

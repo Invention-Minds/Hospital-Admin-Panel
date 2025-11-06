@@ -194,5 +194,10 @@ export class DoctorServiceService {
       userId,
     });
   }
+  uploadDoctorSignature(doctorId: number, file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post(`${this.apiUrl}/doctors/${doctorId}/signature`, formData);
+  }
   
 }

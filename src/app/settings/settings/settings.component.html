@@ -257,29 +257,58 @@
             <option value="OT Coordinator">OT Coordinator</option>
             <option value="Nursing">Nursing</option>
             <option value="OT Channel">OT Channel</option>
+            <option value="Therapist">Therapist</option>
           </select>
           <label for="subAdminType">Sub Admin Type*</label>
         </div>
-        <div class="floating-label">
-          <input type="text" id="name" name="name" placeholder=" " [(ngModel)]="name" required />
-          <label for="name">Name*</label>
+        <div *ngIf="isSubAdmin && subAdminType === 'Therapist'">
+          <div class="floating-label">
+            <select id="therapist" [(ngModel)]="selectedTherapist" class="styled-select">
+              <option *ngFor="let therapist of therapists" [ngValue]="therapist">{{ therapist.name }}</option>
+            </select>
+            <label for="therapist">Select Therapist*</label>
+          </div>
+        
+          <div class="floating-label">
+            <input type="text" id="employeeId" name="employeeId" placeholder=" "
+              [(ngModel)]="employeeId" required (ngModelChange)="validateEmployeeID()" />
+            <label for="employeeId">Employee ID*</label>
+            <div *ngIf="employeeIdErrorMessage" class="error-message">{{ employeeIdErrorMessage }}</div>
+          </div>
+        
+          <div class="password-container floating-label">
+            <input [type]="isCreatePasswordVisible ? 'text' : 'password'"
+              id="password" name="password" placeholder=" "
+              [(ngModel)]="password" required minlength="6"
+              (ngModelChange)="validateInputs()" />
+            <label for="password">Password*</label>
+            <img [src]="isCreatePasswordVisible ? '/not-show.svg' : '/show-password.svg'" alt="Show Password"
+              class="eye-icon" (click)="toggleCreatePasswordVisibility()" />
+          </div>
         </div>
-        <div class="floating-label">
-          <input type="text" id="employeeId" name="employeeId" placeholder=" " [(ngModel)]="employeeId" required
-            (ngModelChange)="validateEmployeeID()" />
-          <label for="employeeId">Employee ID*</label>
-          <div *ngIf="employeeIdErrorMessage" class="error-message">{{ employeeIdErrorMessage }}</div>
+        
+        <div *ngIf="!(subAdminType === 'Therapist')">
+          <div class="floating-label">
+            <input type="text" id="name" name="name" placeholder=" " [(ngModel)]="name" required />
+            <label for="name">Name*</label>
+          </div>
+          <div class="floating-label">
+            <input type="text" id="employeeId" name="employeeId" placeholder=" " [(ngModel)]="employeeId" required
+              (ngModelChange)="validateEmployeeID()" />
+            <label for="employeeId">Employee ID*</label>
+            <div *ngIf="employeeIdErrorMessage" class="error-message">{{ employeeIdErrorMessage }}</div>
+          </div>
+  
+          <div class="password-container floating-label">
+            <input [type]="isCreatePasswordVisible ? 'text' : 'password'" id="password" name="password" placeholder=" "
+              [(ngModel)]="password" required minlength="6" (ngModelChange)="validateInputs()" />
+            <label for="password">Password*</label>
+            <img [src]="isCreatePasswordVisible ? '/not-show.svg' : '/show-password.svg'" alt="Show Password"
+              class="eye-icon" (click)="toggleCreatePasswordVisibility()" />
+          </div>
+          <div *ngIf="passwordErrorMessage" class="error-message">{{ passwordErrorMessage }}</div>
         </div>
-
-        <div class="password-container floating-label">
-          <input [type]="isCreatePasswordVisible ? 'text' : 'password'" id="password" name="password" placeholder=" "
-            [(ngModel)]="password" required minlength="6" (ngModelChange)="validateInputs()" />
-          <label for="password">Password*</label>
-          <img [src]="isCreatePasswordVisible ? '/not-show.svg' : '/show-password.svg'" alt="Show Password"
-            class="eye-icon" (click)="toggleCreatePasswordVisibility()" />
         </div>
-        <div *ngIf="passwordErrorMessage" class="error-message">{{ passwordErrorMessage }}</div>
-      </div>
     </div>
 
     <!-- Doctor Inputs -->

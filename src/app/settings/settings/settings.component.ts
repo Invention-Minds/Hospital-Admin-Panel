@@ -3,6 +3,7 @@ import { DoctorServiceService } from '../../services/doctor-details/doctor-servi
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { AuthServiceService } from '../../services/auth/auth-service.service';
 import { EstimationService } from '../../services/estimation/estimation.service';
+import { TherapyService } from '../../services/therapy/therapy.service';
 import { Router } from '@angular/router';
 import { HttpHeaders } from '@angular/common/http';
 import { MessageService } from 'primeng/api';
@@ -75,8 +76,13 @@ export class SettingsComponent implements OnInit {
   lockedEstimations: any[] = [];
 selectAll: boolean = false;
 loggedInAdminType: string = ''; // To store the admin type of the logged-in user
+selectedTherapist: any;
+therapists: any[] = [];
 
-  constructor(private authService: AuthServiceService, private router: Router, private messageService: MessageService, private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private estimationService: EstimationService) {}
+  constructor(private authService: AuthServiceService, private router: Router,
+     private messageService: MessageService, private appointmentService: AppointmentConfirmService,
+      private doctorService: DoctorServiceService, private estimationService: EstimationService,
+    private therapyService: TherapyService) {}
  // Define the role-based access
  rolePermissions: Record<UserRole, string[]> = {
   sub_admin: ['profile', 'reset','est_locked'],
@@ -126,6 +132,7 @@ loggedInAdminType: string = ''; // To store the admin type of the logged-in user
     this.loadDepartments();
     this.loadDoctors();
     this.loadLockedEstimations();
+    this.loadTherapist();
 
   }
 
@@ -143,6 +150,17 @@ loggedInAdminType: string = ''; // To store the admin type of the logged-in user
 
   closeDeleteDialog(): void {
     this.showDeleteConfirmDialog = false;
+  }
+  loadTherapist():void{
+    this.therapyService.getAllTherapists().subscribe(
+      (therapists) => {
+        this.therapists = therapists;
+        console.log('Therapists loaded:', therapists);
+      },
+      (error) => {
+        console.error('Error loading therapists:', error);
+      }
+    );
   }
   loadUsers(): void {
     this.authService.getAllUsers().subscribe(
@@ -259,10 +277,28 @@ createAccount() {
       this.isReceptionist = false;
       
     }
+      // ✅ Therapist subadmin branch
+  if (this.isSubAdmin && this.subAdminType === 'Therapist') {
+    const therapistName = this.selectedTherapist.name.replace(/\s+/g, '').toLowerCase();
+    this.username = therapistName + '_subadmin@rashtrotthana';
+    this.role = 'sub_admin';
+    this.isReceptionist = false;
+  }
   } 
+
   console.log(this.subAdminType,"subadmin")
   console.log(this.adminType,"adminType")
   this.authService.register(this.username, this.password,this.isReceptionist, this.employeeId, this.role!, this.subAdminType,this.adminType, this.createdBy).subscribe(response => {
+    if (this.isSubAdmin && this.subAdminType === 'Therapist') {
+      this.selectedTherapist.userId = response.id;
+      this.therapyService.updateTherapist(this.selectedTherapist.id, this.selectedTherapist).subscribe(
+        () => {
+          console.log('Therapist linked to user successfully');
+          this.selectedTherapist = [];
+        },
+        (error) => console.error('Error updating therapist:', error)
+      );
+    }
     // console.log('Account created successfully', response);
     this.username = '';  // Clear the username
     this.password = '';  // Clear the password

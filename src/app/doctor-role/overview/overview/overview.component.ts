@@ -130,4 +130,6 @@ export class OverviewComponent implements OnInit {
     this.selectedPatient = patient;
     this.activeComponent = 'info';
   }
+
+
 }

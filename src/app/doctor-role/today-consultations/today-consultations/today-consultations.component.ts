@@ -266,6 +266,20 @@ export class TodayConsultationsComponent {
     { key: 'prescription', label: 'Prescription' },
     { key: 'investigation', label: 'Investigation' },
   ];
+  showOpdModal = false;
+  showSignatureModel = false;
+
+openOpdForm(appointment: any) {
+  this.selectedAppointment = appointment;
+  this.showOpdModal = true;
+}
+
+onAssessmentSaved(savedData: any) {
+  console.log('✅ OPD assessment saved/updated:', savedData);
+  this.showOpdModal = false;
+  // Optionally refresh appointment list
+  this.fetchAppointments(this.doctorId);
+}
   
 
 
@@ -1340,8 +1354,8 @@ export class TodayConsultationsComponent {
       startDate: this.startDate,
       endDate: this.endDate,
     };
-    const adminPhoneNumber = ["919880544866","919341227264","918904943673","918951243004","919633943037"]
-    // const adminPhoneNumber = ["919342287945", "919342287945"]
+    // const adminPhoneNumber = ["919880544866","919341227264","918904943673","918951243004","919633943037"]
+    const adminPhoneNumber = ["919342287945", "919342287945"]
     this.appointmentService.sendAdminMessage(this.currentDoctorName, this.currentDepartmentName, this.startDate, this.endDate, adminPhoneNumber).subscribe({
       next: (response) => {
         // console.log('Leave request submitted:', response);
@@ -3159,6 +3173,47 @@ scrollBrandItemIntoView(rowIndex: number) {
     element.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }
 }
+selectedFile: File | null = null;
+previewUrl: string | ArrayBuffer | null = null;
+
+onFileSelected(event: any): void {
+  const file = event.target.files[0];
+  if (file) {
+    this.selectedFile = file;
+
+    const reader = new FileReader();
+    reader.onload = (e: ProgressEvent<FileReader>) => {
+      this.previewUrl = e.target?.result ?? null; // 👈 Safe null fallback
+    };
+    reader.readAsDataURL(file);
+  }
+}
 
 
+uploadSignature(): void {
+  if (!this.selectedFile) {
+    this.messageService.add({ severity: 'warn', summary: 'No File', detail: 'Please select an image to upload.' });
+    return;
+  }
+
+  const doctorId = this.doctor.id; // or from selectedDoctor if editing
+
+  this.doctorService.uploadDoctorSignature(doctorId, this.selectedFile).subscribe({
+    next: (response) => {
+      this.messageService.add({ severity: 'success', summary: 'Uploaded', detail: 'Signature uploaded successfully!' });
+      console.log('✅ Upload response:', response);
+      this.doctor.signUrl = response.fileUrl; // Update model if needed
+      this.previewUrl = response.fileUrl;
+      this.showSignatureModel = false;
+    },
+    error: (err) => {
+      console.error('❌ Upload failed:', err);
+      this.messageService.add({ severity: 'error', summary: 'Upload Failed', detail: 'Something went wrong during upload.' });
+    }
+  });
+}
+
+openSignatureModal(){
+  this.showSignatureModel = true;
+}
 }

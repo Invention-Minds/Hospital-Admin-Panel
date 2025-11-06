@@ -1,0 +1,175 @@
+.form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 8px;
+    padding-left: 90px;
+    padding-right: 90px;
+    font-family: Kanit, sans-serif;
+  }
+  
+  h3 {
+    color: #0E2970;
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-family: Kanit;
+  }
+  
+  .form-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 25px;
+  }
+  
+  /* Each field container */
+  .input-container {
+    flex: 1 1 calc(50% - 15px); /* two per row on desktop/tablet */
+    min-width: 250px;
+    position: relative;
+  }
+  
+  .custom-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    background-color: #f6f8ff; /* Background color like the first image */
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    font-family: Kanit;
+  }
+  
+  .custom-input:focus {
+    border-color: #007bff;
+  }
+  
+  .custom-label {
+   position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: #aaa;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  text-wrap: nowrap;
+  }
+  .custom-input:focus + .custom-label,
+.custom-input:not(:placeholder-shown) + .custom-label {
+  top: -3px;
+  left: 10px;
+  font-size: 12px;
+  color: #007bff; /* Label color on focus */
+  background-color: #F0F3FF;  ;
+}
+  
+  
+  .signature-section {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  
+  .btn.save {
+    background: #4CAF50;
+    color: #fff;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 15px;
+  }
+  .buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    justify-content: center;
+  }
+  .save-button {
+    background-color: #169458;
+    color: #fff;
+    font-family: Kanit;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    width: 150px;
+    padding: 7px 14px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+  }
+  .print-button {
+    background-color: #0e2970;
+    color: #fff;
+    font-family: Kanit;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    width: 150px;
+    padding: 7px 14px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+  }
+  .add-btn {
+    background-color: #0e2970;
+    color: #fff;
+    font-family: Kanit;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    width: 100px;
+    padding: 7px 14px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+  }
+  .highlight-section {
+    outline: 2px solid #42a5f5;
+    box-shadow: 0 0 8px rgba(66, 165, 245, 0.5);
+    transition: outline 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+    /* For tablets and smaller screens (<1024px) */
+@media (max-width: 1024px) {
+  .input-container {
+    flex: 1 1 calc(50% - 10px); /* still 2 per row, slightly smaller */
+  }
+}
+
+  @media (max-width: 768px) {
+    .signature-section {
+      flex-direction: column;
+    }
+  }
+  /* For mobile (<768px) → stack 1 per row */
+@media (max-width: 668px) {
+  .input-container {
+    flex: 1 1 100%; /* one per row on mobile */
+    min-width: 100%;
+  }
+}
+  
+  @media screen and (max-width: 500px) {
+    .form-container{
+      padding-left: 10px;
+    }
+  }

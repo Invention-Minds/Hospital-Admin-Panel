@@ -21,7 +21,8 @@
     display: flex;
     justify-content: flex-start;
     gap: 20px;
-    width: 100%;;
+    width: 100%;
+    margin-bottom: 20px;
   }
   /* Active card styling */
   .card.active-card {
@@ -80,7 +81,9 @@
     margin: 0;
   }
 
-  @media screen and (max-width: 500px) {
+  
+
+  @media screen and (max-width: 800px) {
     .dashboard-section{
       padding-left: 10px;
     }

@@ -1,0 +1,160 @@
+<div class="form-container">
+  <h2 class="form-title">Ayurveda Therapy Appointment</h2>
+
+  <form #form="ngForm" class="health-form" (ngSubmit)="onSubmit(form)" novalidate>
+
+    <!-- Row 1 - PRN -->
+    <div class="form-row">
+      <div class="form-group full-width">
+        <input
+          type="text"
+          class="form-input"
+          id="pnr"
+          name="pnr"
+          pattern="^[0-9]*$"
+          ngModel
+          [(ngModel)]="formData.prn"
+          placeholder=" "
+          (input)="onHealthCheckupPRNChange()" 
+          (focus)="prnSuggestions = true"
+        />
+        <label for="pnr" class="form-label">PRN Number</label>
+        <ul class="prn-suggestions" *ngIf="prnSuggestions && filteredHealthCheckupPRNs.length > 0">
+          <li *ngFor="let prn of filteredHealthCheckupPRNs" (click)="selectHealthCheckupPRN(prn)">
+            {{ prn.prn }} - {{ prn.name }}
+          </li>
+        </ul>
+        <div *ngIf="form.submitted && form.controls['pnr']?.invalid" class="error-message">
+          <span *ngIf="form.controls['pnr']?.errors?.['pattern']">Enter a valid number.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2 - Prefix / Name -->
+    <div class="form-row">
+      <div class="form-group prefix-width">
+        <select class="form-input" id="prefix" name="prefix" [(ngModel)]="formData.prefix" (change)="onPrefixChange()"
+          required>
+          <option value="" disabled selected>Select Prefix</option>
+          <option value="Mr.">Mr.</option>
+          <option value="Mrs.">Mrs.</option>
+          <option value="Ms.">Ms.</option>
+          <option value="Dr.">Dr.</option>
+          <option value="Baby Of.">Baby of</option>
+          <option value="Master">Master</option>
+          <option value="Miss">Miss</option>
+        </select>
+        <label for="prefix" class="form-label">Prefix*</label>
+      </div>
+
+      <div class="form-group name-width">
+        <input type="text" class="form-input" id="name" name="name" [(ngModel)]="formData.name" required
+          placeholder=" " />
+        <label for="name" class="form-label">Patient Name*</label>
+      </div>
+
+      <div class="form-group name-width">
+        <input type="number" class="form-input" id="age" name="age" [(ngModel)]="formData.age" placeholder=" " />
+        <label for="age" class="form-label">Age</label>
+      </div>
+    </div>
+
+    <!-- Row 3 - Phone / Email -->
+    <div class="form-row">
+      <div class="form-group half-width">
+        <input type="tel" class="form-input" id="phone" name="phone" [(ngModel)]="formData.phone" required
+          pattern="^[0-9]{10}$" placeholder=" " />
+        <label for="phone" class="form-label">Phone Number*</label>
+      </div>
+
+      <div class="form-group half-width">
+        <input type="email" class="form-input" id="email" name="email" [(ngModel)]="formData.email" placeholder=" " />
+        <label for="email" class="form-label">Email</label>
+      </div>
+    </div>
+
+    <!-- Row 4 - Gender -->
+    <div class="form-row">
+      <div class="form-group half-width">
+        <select class="form-input" name="gender" [(ngModel)]="formData.gender" required>
+          <option value="" disabled>Select Gender</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+          <option value="Other">Other</option>
+        </select>
+        <label class="form-label">Gender*</label>
+      </div>
+
+
+
+      <div class="form-group half-width">
+        <select class="form-input" name="doctorId" [(ngModel)]="formData.doctorId" required>
+          <option value="" disabled selected>Select Ayurveda Doctor</option>
+          <option *ngFor="let doc of ayurvedaDoctors" [value]="doc.id">
+            {{ doc.name }}
+          </option>
+        </select>
+        <label class="form-label">Ayurveda Doctor*</label>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group full-width">
+        <select class="form-input" name="therapyId" [(ngModel)]="formData.therapyId" required>
+          <option value="" disabled>Select Therapy</option>
+          <option *ngFor="let therapy of therapies" [value]="therapy.id">
+            {{ therapy.name }}
+          </option>
+        </select>
+        <label class="form-label">Therapy*</label>
+      </div>
+    </div>
+
+    <!-- Row 6 - Date / Time -->
+    <div class="form-row">
+      <div class="form-group half-width">
+        <select class="form-input" name="therapistId" [(ngModel)]="formData.therapistId" required   (change)="onTherapistChange()" >
+          <option value="" disabled>Select Therapist</option>
+          <option *ngFor="let th of getAvailableTherapists()" [value]="th.id">{{ th.name }}</option>
+        </select>
+        <label class="form-label">Therapist*</label>
+      </div>
+      <div class="form-group half-width">
+        <input type="date" class="form-input" id="date" name="date" [(ngModel)]="formData.date" (ngModelChange)="onDateChange()" required />
+        <label for="date" class="form-label">Date*</label>
+      </div>
+
+
+    </div>
+
+    <!-- Row 5 - Therapist / Room -->
+    <div class="form-row">
+      <div class="form-group half-width">
+        <select class="form-input" name="time" [(ngModel)]="formData.time" required   (change)="onTimeChange()">
+          <option value="" disabled>Select Time</option>
+          <option *ngFor="let t of getAvailableTimeSlots()" [value]="t">{{ t }}</option>
+        </select>
+        <label class="form-label">Time*</label>
+      </div>
+
+      <div class="form-group half-width">
+        <select class="form-input" name="roomNumber" [(ngModel)]="formData.roomNumber" required>
+          <option value="" disabled selected>Select Room</option>
+          <option *ngFor="let r of getAvailableRooms()" [value]="r">{{ r }}</option>
+        </select>
+        <label class="form-label">Room Number*</label>
+      </div>
+
+    </div>
+
+
+
+    <!-- Buttons -->
+    <div class="form-buttons">
+      <button type="submit" class="btn btn-submit" [disabled]="form.invalid || isLoading">
+        <span *ngIf="!isLoading">Book Therapy</span>
+      </button>
+      <button type="button" class="btn btn-cancel" (click)="resetForm(form)">Cancel</button>
+    </div>
+  </form>
+</div>

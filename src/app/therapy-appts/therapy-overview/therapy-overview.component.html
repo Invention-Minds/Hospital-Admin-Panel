@@ -1,0 +1,65 @@
+<div class="dashboard-section">
+
+    <div class="stats-cards" >
+      <div class="card-1" 
+      [ngClass]="{'active-card': activeComponent === 'form'}"
+      (click)="showNewAppointmentForm()">
+        <div class="card-icon">
+          <img src="/form-health.svg" alt="OPD Icon" />
+        </div>
+        <div class="card-content">
+        </div>
+      </div>
+      <div class="card-1" 
+      [ngClass]="{'active-card': activeComponent === 'analytics'}"
+      (click)="showAnalytics()">
+        <div class="card-icon">
+          <img src="/est-analytics.svg" alt="OPD Icon" />
+        </div>
+        <div class="card-content">
+        </div>
+      </div>
+      <div class="card" 
+      [ngClass]="{'active-card': activeComponent === 'confirmed'}"
+      (click)="showConfirmedAppointments()">
+        <div class="card-icon">
+          <img src="/confirm-health.svg" alt="Appointment Icon" />
+        </div>
+        <div class="card-content">
+          <p>Confirmed Therapies</p>
+        </div>
+      </div>
+      <div class="card" 
+      [ngClass]="{'active-card': activeComponent === 'cancelled'}"
+      (click)="showCancelledAppointments()">
+        <div class="card-icon">
+          <img src="/cancel-health.svg" alt="Doctor Available Icon" />
+        </div>
+        <div class="card-content">
+          <p>Cancelled Therapies</p>
+        </div>
+      </div>
+
+      <div class="card" 
+      [ngClass]="{'active-card': activeComponent === 'completed'}"
+      (click)="showCompletedAppointments()">
+        <div class="card-icon">
+          <img src="/complete-health.svg" alt="OPD Icon" />
+        </div>
+        <div class="card-content">
+
+          <p>Completed Therapies</p>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+  <div class="component-section">
+    <app-therapy-form *ngIf="activeComponent === 'form'" [serviceData]="selectedService"></app-therapy-form>
+    <app-therapy-analytics *ngIf="activeComponent === 'analytics'"></app-therapy-analytics>
+    <app-therapy-confirmed *ngIf="activeComponent === 'confirmed'" (reschedule)="openAppointmentForm($event)"></app-therapy-confirmed>
+    <app-therapy-cancelled *ngIf="activeComponent === 'cancelled'" (reschedule)="openAppointmentForm($event)"></app-therapy-cancelled>
+    <app-therapy-completed *ngIf="activeComponent === 'completed'"></app-therapy-completed>
+
+  </div>

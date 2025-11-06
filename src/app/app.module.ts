@@ -20,7 +20,8 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import { TooltipModule } from 'primeng/tooltip';
 import { ToastModule } from 'primeng/toast';
-import {  MatFormFieldModule, MatLabel } from '@angular/material/form-field';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatOptionModule } from '@angular/material/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
 import { NgxLoadingButtonsModule } from 'ngx-loading-buttons';
 
@@ -51,7 +52,6 @@ import { AppointmentFormComponent } from './appointment/appointment-form/appoint
 import { DoctorDetailsComponent } from './doctor/doctor-details/doctor-details.component';
 import { DoctorOverviewComponent } from './doctor/doctor-overview/doctor-overview.component';
 import { DoctorAvailabilityComponent } from './doctor/doctor-availability/doctor-availability.component';
-import { MatOption, MatOptionModule } from '@angular/material/core';
 import { DoctorFormComponent } from './doctor/doctor-form/doctor-form.component';
 import { LoginComponent } from './login/login/login.component';
 import { SettingsComponent } from './settings/settings/settings.component';
@@ -158,6 +158,21 @@ import { OtOverviewComponent } from './ot/ot-overview/ot-overview.component';
 import { TodayOtComponent } from './ot/today-ot/today-ot.component';
 import { OtTvDisplayComponent } from './ot-tv-display/ot-tv-display.component';
 import { EstimationAnalyticsComponent } from './estimation-analytics/estimation-analytics.component';
+import { HandWrittenComponent } from './assessment/hand-written/hand-written.component';
+import { OpdAssessmentComponent } from './assessment/opd-assessment/opd-assessment.component';
+import { OpdPrintComponent } from './assessment/opd-print/opd-print.component';
+import { ErAssessmentComponent } from './assessment/er-assessment/er-assessment.component';
+import { ErListComponent } from './assessment/er-list/er-list.component';
+import { ErOverviewComponent } from './assessment/er-overview/er-overview.component';
+import { TherapyOverviewComponent } from './therapy-appts/therapy-overview/therapy-overview.component';
+import { TherapyConfirmedComponent } from './therapy-appts/therapy-confirmed/therapy-confirmed.component';
+import { TherapyCancelledComponent } from './therapy-appts/therapy-cancelled/therapy-cancelled.component';
+import { TherapyCompletedComponent } from './therapy-appts/therapy-completed/therapy-completed.component';
+import { TherapyFormComponent } from './therapy-appts/therapy-form/therapy-form.component';
+import { TherapistOverviewComponent } from './therapist/therapist-overview/therapist-overview.component';
+import { TherapistApptsComponent } from './therapist/therapist-appts/therapist-appts.component';
+import { TherapyChannelComponent } from './therapy-channel/therapy-channel/therapy-channel.component';
+import { TherapyAnalyticsComponent } from './therapy-analytics/therapy-analytics/therapy-analytics.component';
 
 
 @NgModule({
@@ -274,6 +289,21 @@ import { EstimationAnalyticsComponent } from './estimation-analytics/estimation-
     TodayOtComponent,
     OtTvDisplayComponent,
     EstimationAnalyticsComponent,
+    HandWrittenComponent,
+    OpdAssessmentComponent,
+    OpdPrintComponent,
+    ErAssessmentComponent,
+    ErListComponent,
+    ErOverviewComponent,
+    TherapyOverviewComponent,
+    TherapyConfirmedComponent,
+    TherapyCancelledComponent,
+    TherapyCompletedComponent,
+    TherapyFormComponent,
+    TherapistOverviewComponent,
+    TherapistApptsComponent,
+    TherapyChannelComponent,
+    TherapyAnalyticsComponent,
   ],
   imports: [
     BrowserModule,
@@ -291,7 +321,6 @@ import { EstimationAnalyticsComponent } from './estimation-analytics/estimation-
     MatTooltipModule,
     MatDatepickerModule,
     TooltipModule,
-    MatLabel,
     MatOptionModule,
     MatSelectModule,
     FloatLabelModule,

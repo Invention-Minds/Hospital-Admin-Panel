@@ -1,0 +1,9 @@
+<div class="handwriting-container">
+    <label class="input-label">{{ label }}</label>
+    <canvas #canvasRef></canvas>
+    <div class="button-row" *ngIf="!readOnly">
+      <button type="button" class="clear-button sign-clear" (click)="clear()">Clear</button>
+      <button type="button" class=" save-button" (click)="save()">Save</button>
+    </div>
+  </div>
+  

@@ -1,0 +1,314 @@
+.form-container {
+  max-width: 100%;
+  padding: 20px;
+  padding-left: 90px;
+  font-family: Kanit;
+}
+
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+/* Each field container */
+.input-container {
+  flex: 1 1 calc(50% - 15px); /* two per row on desktop/tablet */
+  min-width: 250px;
+  position: relative;
+}
+.custom-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  background-color: #f6f8ff; /* Background color like the first image */
+  outline: none;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  font-family: Kanit;
+}
+
+.custom-input:focus {
+  border-color: #007bff;
+}
+
+.custom-label {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: #aaa;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  text-wrap: nowrap;
+}
+.custom-input:focus + .custom-label,
+.custom-input:not(:placeholder-shown) + .custom-label {
+  top: -3px;
+  left: 10px;
+  font-size: 12px;
+  color: #007bff; /* Label color on focus */
+  background-color: #f0f3ff;
+}
+
+h3 {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  font-size: 16px;
+  font-weight: bold;
+  /* border-bottom: 1px solid #ddd; */
+  padding-bottom: 10px;
+}
+
+.btn {
+  margin-top: 20px;
+  padding: 8px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn.save {
+  background: #28a745;
+  color: white;
+}
+
+.btn.print {
+  background: #007bff;
+  color: white;
+  margin-left: 10px;
+}
+
+.signature-section {
+  margin: 15px 0;
+}
+.table-container {
+  border-radius: 10px;
+  background-color: #f0f3ff;
+  padding: 20px;
+  /* padding-left: 90px; */
+}
+.table-wrapper {
+  overflow-x: auto; /* Adds horizontal scrolling */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+}
+.appointment-table {
+  width: 100%;
+  min-width: 1000px;
+  border-collapse: collapse;
+}
+thead {
+  background: #0e2970;
+  box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64);
+  border-radius: 16px;
+  color: white;
+  font-size: 14px;
+  font-family: Kanit;
+  font-weight: 400;
+  /* height: 65px; */
+}
+thead th {
+  padding: 12px;
+  text-align: center;
+  color: white;
+  font-size: 14px;
+  font-family: Kanit;
+  font-weight: 400;
+  text-wrap: nowrap;
+  height: 54px;
+}
+/* Table body styling */
+tbody tr {
+  /* border-bottom: 1px solid #ddd; */
+  box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64);
+  border-radius: 16px;
+  height: 60px;
+  border-radius: 16px;
+}
+
+tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64);
+  border-radius: 16px;
+}
+
+tbody td {
+  padding: 0px 8px;
+  text-align: center;
+  color: black;
+  font-size: 14px;
+  font-family: Kanit;
+  font-weight: 400;
+  padding-bottom: 0px;
+}
+
+tbody tr:hover {
+  background-color: #f0f8ff;
+}
+
+.appointment-table tbody td:first-child {
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+}
+
+.appointment-table tbody td:last-child {
+  border-top-right-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+.appointment-table thead th:first-child {
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+}
+
+.appointment-table thead th:last-child {
+  border-top-right-radius: 12px;
+  border-bottom-right-radius: 12px;
+}
+.prescription-table td canvas {
+  width: 100% !important;
+  height: auto !important; /* no fixed height */
+  min-height: 80px; /* start height */
+  border: 1px solid #ddd;
+  background: #fff;
+}
+
+.prescription-table td .handwriting-container {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+button {
+  margin-top: 10px;
+  padding: 6px 12px;
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+button:hover {
+  background: #145ca4;
+}
+.error small {
+  color: red;
+  font-size: 12px;
+}
+
+input.ng-invalid.ng-touched,
+select.ng-invalid.ng-touched {
+  border: 1px solid red;
+}
+.uhid-suggestions {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #ccc;
+  background-color: #ffffff;
+  max-height: 200px;
+  overflow-y: auto;
+  position: absolute;
+  width: 100%;
+  z-index: 10;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  top: 100%;
+  border-radius: 4px;
+  left: 0;
+  font-family: Kanit;
+}
+
+.uhid-suggestions li {
+  padding: 10px;
+  cursor: pointer;
+  font-size: 16px; /* Adjust font size for readability */
+  color: #333; /* Text color */
+}
+
+.uhid-suggestions li:hover {
+  background-color: #f0f0f0; /* Light grey background on hover for better visibility */
+  color: #005d8c; /* Optional: Highlight text color on hover */
+}
+
+.buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  justify-content: center;
+}
+.save-button {
+  background-color: #169458;
+  color: #fff;
+  font-family: Kanit;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  width: 150px;
+  padding: 7px 14px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+.print-button {
+  background-color: #0e2970;
+  color: #fff;
+  font-family: Kanit;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  width: 150px;
+  padding: 7px 14px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+.add-btn {
+  background-color: #0e2970;
+  color: #fff;
+  font-family: Kanit;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: normal;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  width: 100px;
+  padding: 7px 14px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+.highlight-section {
+  outline: 2px solid #42a5f5;
+  box-shadow: 0 0 10px rgba(66, 165, 245, 0.5);
+  transition: outline 0.3s ease, box-shadow 0.3s ease;
+}
+/* For tablets and smaller screens (<1024px) */
+@media (max-width: 1024px) {
+  .input-container {
+    flex: 1 1 calc(50% - 10px); /* still 2 per row, slightly smaller */
+  }
+}
+
+/* For mobile (<768px) → stack 1 per row */
+@media (max-width: 668px) {
+  .input-container {
+    flex: 1 1 100%; /* one per row on mobile */
+    min-width: 100%;
+  }
+}

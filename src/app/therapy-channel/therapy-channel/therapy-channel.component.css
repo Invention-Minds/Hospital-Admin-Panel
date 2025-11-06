@@ -1,0 +1,873 @@
+/* Overall container styling */
+.tv-container {
+    font-family: Poppins;
+    color: #fff;
+    /* background-color: #F8F8F8; */
+  
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  
+  /* Header styling */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    background-color: #001345;
+    height: 70px;
+    position: fixed;
+    top: 0px;
+    width: 100%;
+    z-index: 10000000;
+  }
+  .header h1 {
+    color: #fff;
+    font-family: Poppins;
+    font-size: 28px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+    padding-top: 20px;
+    position: relative;
+  }
+  
+  .logo {
+    height: 50px;
+    padding-left: 10px;
+  }
+  .datetime-container {
+    background: #f0f3ff;
+    clip-path: polygon(30% 0, 100% 0, 100% 100%, 0% 100%);
+    padding: 36px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: right;
+    color: #001345; /* Text color */
+    height: 58px;
+  }
+  
+  .datetime {
+    text-align: center;
+    color: #001345;
+    font-family: Poppins;
+    font-size: 26px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    background: #f0f3ff;
+    padding: 0 0px;
+    padding-left: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .date {
+    color: #001345;
+    font-family: Poppins;
+    font-size: 18px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+  }
+  
+  /* Doctor cards container */
+  /* Overall Doctor Cards Layout */
+  .doctor-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: center;
+    background: #f0f3ff;
+    margin: 0;
+    height: 100vh;
+    position: relative;
+    top: 85px;
+    /* margin: 20px; */
+  }
+  
+  /* Individual Doctor Card */
+  .doctor-card {
+    /* background: #F0F3FF; */
+    /* border: 1px solid #0077b6; */
+    border-radius: 8px;
+    /* width: 474px; Fixed width for uniform alignment */
+  
+    /* padding: 15px; */
+    /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); */
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+  }
+  
+  /* Doctor Header Styling */
+  .doctor-header {
+    display: flex;
+    gap: 0px;
+    margin-bottom: 10px;
+    border-radius: 16px;
+    background: #003566;
+    height: 155px;
+    justify-content: flex-start;
+    padding-left: 30px;
+    align-items: center;
+  }
+  
+  .doctor-header img {
+    /* width: 80px;
+      height: 80px; */
+    /* border-radius: 8px;
+      border: 2px solid #0077b6; */
+  }
+  .doctor-image {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-right: 20px;
+    /* padding: 0 10px; */
+  }
+  
+  .doctor-details h3 {
+    color: #fff;
+    font-family: Poppins;
+    font-size: 17px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 30px;
+    margin: 0;
+  }
+  
+  .doctor-details p {
+    color: #fff;
+    font-family: Poppins;
+    font-size: 17px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 30px;
+    margin: 0;
+  }
+  
+  /* Queue Table Styling */
+  /* General Table Styling */
+  .queue-table {
+    width: 100%;
+    border-collapse: separate; /* Allows spacing between rows */
+    border-spacing: 0 5px; /* Adds vertical spacing between rows */
+    text-align: left; /* Aligns text to the left */
+    max-height: 300px;
+    overflow-y: scroll;
+  }
+  .image {
+    border-radius: 8px;
+    width: 120px;
+    height: 130px;
+  }
+  
+  /* Table Header Styling */
+  .queue-table thead tr {
+    background-color: #003566; /* Dark blue for header */
+    color: white;
+    font-size: 14px;
+    width: 100%;
+  }
+  .queue-table thead {
+    box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64); /* Add shadow for card-like appearance */
+    border-radius: 8px; /* Rounds corners for each row */
+    overflow: hidden;
+  }
+  
+  .queue-table th {
+    padding: 10px 6px 10px 6px;
+    color: #fff;
+    font-family: Poppins;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+    text-align: left;
+    /* Removes borders for a clean look */
+    height: 66px;
+  }
+  
+  /* Table Body Rows Styling */
+  .queue-table tbody tr {
+    box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64); /* Add shadow for card-like appearance */
+    border-radius: 8px; /* Rounds corners for each row */
+    overflow: hidden;
+    background-color: white;
+  }
+  
+  .queue-table tbody td:first-child {
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+  }
+  
+  .queue-table tbody td:last-child {
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+  }
+  .queue-table thead th:first-child {
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+  }
+  
+  .queue-table thead th:last-child {
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+  }
+  
+  /* Row transition for removal */
+  .removed {
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: all 0.3s ease-out;
+  }
+  
+  /* Default row styles */
+  .queue-table tbody tr {
+    transition: all 0.3s ease-in;
+  }
+  
+  /* For a smoother fade-out, you can tweak transition timing */
+  .queue-table tbody tr.removed {
+    display: none;
+    transition: opacity 0.3s ease-out, transform 0.3s ease-in;
+  }
+  
+  /* Table Cells Styling */
+  .queue-table td {
+    padding: 10px 6px 10px 6px;
+    font-family: Poppins, sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: #222;
+    text-align: left;
+    border: none; /* Removes default borders */
+    margin-bottom: 5px;
+    text-wrap: nowrap;
+  }
+  /* Table Body Container */
+  .scrollable-body {
+    max-height: 300px; /* Maximum height for the table body */
+    overflow-y: auto; /* Adds vertical scroll if content exceeds height */
+    width: 100%; /* Ensure it matches the table width */
+    display: block; /* Required for scrollable div */
+  }
+  
+  /* Status Styling */
+  .status {
+    display: inline-block;
+    padding: 4px 6px;
+    border-radius: 4px;
+    text-align: center;
+    font-family: Poppins;
+    font-size: 22px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    width: 120px;
+    height: 40px;
+  }
+  /* Set a fixed width for the patient name column */
+  .patient-name {
+    width: 130px;  /* Adjust width based on your requirement */
+    overflow: hidden;  /* Hide overflow text */
+    white-space: nowrap;  /* Prevent the text from wrapping */
+    display: inline-block;
+    margin-top: 8px;
+    
+  }
+  
+  /* Create the marquee effect */
+  .scrolling-name {
+    display: inline-block;
+    animation: scroll-left 10s linear infinite;  /* Adjust the scroll speed */
+  }
+  
+  /* Define the scroll animation */
+  @keyframes scroll-left {
+    0% {
+      transform: translateX(100%);  /* Start from the right */
+    }
+    100% {
+      transform: translateX(-100%);  /* Move to the left */
+    }
+  }
+  
+  
+  .status.PatientIn {
+    border-radius: 4px;
+    background: #169458; /* Green for Patient In */
+    color: #fff;
+    font-family: Poppins;
+    font-size: 21px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    width: 120px;
+    height: 40px;
+    /* width: 150px; */
+  }
+  
+  .status.Next {
+    /* Yellow for Next */
+    color: #fff;
+    font-family: Poppins;
+    font-size: 21px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    border-radius: 4px;
+    background: #fb9c2a;
+    width: 120px;
+    height: 40px;
+  }
+  
+  /* .status.Default {
+      color: #000;
+      font-family: Poppins;
+      font-size: 22px;
+      font-style: normal;
+      font-weight: 400;
+      line-height: normal;
+      border-radius: 4px;
+  border: 1px solid #000;
+    } */
+  .status.Pending {
+    border-radius: 4px;
+    background: #fce35f;
+    color: #000;
+    font-family: Poppins;
+    font-size: 22px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: normal;
+    width: 120px;
+    height: 40px;
+  }
+  
+  .no-doctor-message {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Horizontal center */
+    align-items: center;     /* Vertical center */
+    height: 100%;            /* Take full height of parent container */
+    width: 100%;             /* Full width */
+    font-size: 1.5rem;        /* Adjust font size */
+    font-weight: bold;        /* Bold text */
+    color: #555;              /* Neutral text color */
+    text-align: center;       /* Center align text in case of multiple lines */
+  }
+  .animation{
+    width: 50%;
+    height: 60%;
+  }
+  .st0{fill:#ECB63C;}
+  .st1{fill:#42680B;}
+  .st2{fill:#7ABF26;}
+  .st3{fill:#DADADA;}
+  .st4{fill:#004651;}
+  .st5{fill:#27B7C5;}
+  .st6{fill:#A3E4E1;}
+  .st7{fill:#F6F6F6;}
+  .st8{fill:#BE1622;}
+  .st9{fill:#EDEDED;}
+  .st10{fill:#B2B2B2;}
+  .st11{fill:#005E26;}
+  .st12{fill:#3D0103;}
+  .st13{fill:#009254;}
+  .st14{fill:#00A9B8;}
+  .st15{fill:#037477;}
+  .st16{fill:#193B53;}
+  .st17{fill:#50777F;}
+  .st18{fill:#C6C6C6;}
+  .st19{fill:#273438;}
+  .st20{fill:#DE2D32;}
+  .st21{fill:#FF9409;}
+  .st22{fill:#1D15B7;}
+  .st23{fill:#E50E28;}
+  .st24{fill:#9D9D9C;}
+  
+  svg {
+    width: 600px;
+    max-width: 90%;
+    animation-name: trees;
+    animation-duration: .5s;
+  }
+  svg,
+  .sun,
+  .hospital,
+  .hospital1,
+  .hospital2,
+  .cruz,
+  .trees,
+  .tree1,
+  .tree2,
+  .tree3,
+  .ambulance,
+  .cloud,
+  .ground {
+    animation-timing-function: linear;
+      animation-fill-mode: backwards;
+    transform-origin: 50%;
+  }
+  .sun {
+    animation-name: sun;
+      animation-delay: .1s;
+    animation-duration: 2s;
+    animation-iteration-count: infinite;
+  }
+  @keyframes sun {
+    0% {
+      transform: scale(.9);
+    }
+    50% {
+      transform: scale(1);
+    }
+    100% {
+      transform: scale(.9);
+    }
+  }
+  
+  .cloud1 {
+    animation-name: cloud1;
+      animation-delay: .1s;
+    animation-duration: 10s;
+    animation-iteration-count: infinite;
+    transform: translateX(-610px)
+  }
+  @keyframes cloud1 {
+    0% {
+      transform: translateX(1200px);
+      opacity: 0
+    }
+    50% {
+      opacity: 1
+    }
+    80% {
+      opacity: 0
+    }
+    100% {
+    }
+  }
+  .cloud1,
+  .cloud2,
+  .cloud3 {
+    fill: #f2f2f2
+  }
+  .cloud2 {
+    animation-name: cloud1;
+      animation-delay: 1s;
+    animation-duration: 3s;
+    animation-iteration-count: infinite;
+    transform: translateX(-600px);
+  }
+  .cloud3 {
+    animation-name: cloud3;
+      animation-delay: 2s;
+    animation-duration: 3s;
+    animation-iteration-count: infinite;
+    transform: translateX(-1100px);
+  }
+  @keyframes cloud3 {
+    0% {
+      transform: translateX(420px);
+      opacity: 0
+    }
+    50% {
+      opacity: 1
+    }
+    80% {
+      opacity: 0
+    }
+    100% {
+    }
+  }
+  .ground {
+    animation-name: trees;
+      animation-delay: 1s;
+    animation-duration: .5s;
+  }
+  .trees {
+    animation-name: trees;
+      animation-delay: 2s;
+    animation-duration: .5s;
+  }
+  @keyframes trees {
+    0% {
+      transform: scale(0);
+      opacity: 0
+    }
+    50% {
+      opacity: 1
+    }
+    100% {}
+  }
+  
+  .hospital,
+  .hospital1,
+  .hospital2,
+  .cruz,
+  .ambulance {
+    animation-name: trees;
+      animation-delay: 3s;
+    animation-duration: .5s;
+  }
+  .hospital1 {
+      animation-delay: 4s;
+  }
+  .hospital2 {
+      animation-delay: 5s;
+  }
+  .cruz {
+      animation-delay: 5.5s;
+  }
+  .ambulance {
+    animation-delay: 6s;
+  }
+  .tree1,
+  .tree2,
+  .tree3 {
+    animation-name: treesAnima;
+    animation-duration: 3s;
+    animation-iteration-count: infinite;
+    transform-origin: 50%;
+  }
+  
+  @keyframes treesAnima {
+    0% {
+      transform: scale(.9) ;
+    }
+    50% {
+      transform: scale(1) rotate(-5deg);
+    }
+    100% {
+      transform: scale(.9);
+    }
+  }
+  .vral-ambulance {
+    animation-name: vral;
+    animation-duration: 3s;
+    animation-delay: 10s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+      animation-fill-mode: forwards;
+    transform-origin: 50%;
+  }
+  @keyframes vral {
+    from {}
+      to {
+        transform: translateX(-600px);
+        opacity: 0
+    }
+  }
+  /* Footer styling */
+  .footer {
+    margin-top: 15px;
+    display: flex;
+    background-color: #fff;
+    padding: 0;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+  }
+  .footer p {
+    color: #fff;
+    text-align: center;
+    font-family: Poppins;
+    font-size: 15px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+  
+    margin: 0;
+  }
+  .no-patients-message {
+    text-align: center;
+    font-size: 16px;
+    font-weight: bold;
+    color: #777;
+    padding: 10px 0;
+  }
+  
+  .footer marquee {
+    color: #001345;
+    text-align: center;
+    font-family: Poppins;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+  }
+  .copy-right-container {
+    clip-path: polygon(18% 0, 100% 0, 100% 100%, 0% 100%);
+    width: 260px;
+    height: 65px;
+    flex-shrink: 0;
+    background-color: #001345;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-left: 20px;
+  }
+  .four-doctors-layout {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 equally spaced columns */
+    margin-left: 15px;
+    height: 100vh;
+    /* Spacing between columns */
+  }
+  .four-doctors-layout .doctor-card {
+    width: 344px;
+  }
+  
+  .two-doctors-layout {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    height: 100vh;
+    /* margin-left: 50px; */
+  }
+  .two-doctors-layout .doctor-card {
+    width: 680px;
+  }
+  
+  .two-doctors-layout .doctor-details h3 {
+    color: #fff;
+    font-family: Poppins;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 30px;
+    margin: 0;
+  }
+  
+  .two-doctors-layout .doctor-details p {
+    color: #fff;
+    font-family: Poppins;
+    font-size: 24px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 30px;
+    margin: 0;
+  }
+  
+  /* Hide doctor image when there are 4 doctors */
+  .hide-image {
+    display: none;
+  }
+  
+  .hide-image .queue-table {
+    margin-top: 0;
+  }
+  .popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000000000000000000;
+  }
+  
+  .popup-content {
+    background: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    position: relative;
+  }
+  
+  .popup-image {
+    /* max-width: 80vw;
+    max-height: 80vh; */
+    width: auto;
+    height: 80vh;
+    display: block;
+  }
+  .doctor-cards-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    transition: all 1s ease;
+  }
+  
+  .doctor-card {
+    flex: 1 1 30%;
+    margin: 10px;
+  }
+  
+  .two-doctors-layout .doctor-card {
+    flex: 1 1 45%;
+  }
+  /* .one-doctor-layout {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  } */
+  .one-doctor-layout .doctor-card {
+    /* width: 474px; */
+    margin: 10px;
+    flex: none;
+  
+  }
+  
+  .carousel-container {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .carousel-slide {
+    display: flex;
+    height: 100%;
+  }
+  
+  .doctor-slide {
+    min-width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 100px;
+    transition: all 0.5s ease;
+  }
+  .rooms-container {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    padding: 20px;
+    flex-wrap: wrap;
+  }
+  
+  .room-card {
+    background: white;
+    border-radius: 10px;
+    padding: 15px;
+    width: 45%;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    transition: transform 0.5s ease;
+  }
+  
+  .patient-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+  
+  .patient-table th, .patient-table td {
+    border: 1px solid #ccc;
+    padding: 6px;
+    text-align: center;
+  }
+  
+  .patient-table th {
+    background-color: #e0f2f1;
+  }
+  .status-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 600;
+    text-align: center;
+    min-width: 90px;
+    font-size: 14px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  }
+  
+/* 🟢 Patient In */
+.status-badge.green {
+    background-color: #2e7d32;
+  }
+  
+  /* 🟠 Next */
+  .status-badge.orange {
+    background-color: #f57c00;
+  }
+  
+  /* 🟡 Pending */
+  .status-badge.yellow {
+    background-color: #ffeb3b;
+    color: #000;
+  }
+  
+  /* 🔵 Cleaning */
+  .status-badge.blue {
+    background-color: #1565c0;
+  }
+  
+  /* 🟣 Started */
+  .status-badge.purple {
+    background-color: #8e24aa;
+  }
+  
+  /* ⚫ Waiting (default) */
+  .status-badge.gray {
+    background-color: #9e9e9e;
+    color: #fff;
+  }
+  .status-badge.navy-blue {
+    background-color: #1b2969;
+    color: #fff;
+  }
+  
+  /* ✨ Optional: blinking animation for “Next” */
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  
+  .status-badge.orange {
+    animation: blink 1.5s infinite;
+  }
+  /* 🟢 Patient In */
+.green {
+    background-color: #28a745;
+  }
+  
+  /* 🟠 Next */
+  .orange {
+    background-color: #ff9800;
+  }
+  
+  /* 🟡 Pending */
+  .yellow {
+    background-color: #f1c40f;
+    color: #000;
+  }
+  
+  /* 🔵 Checked-In */
+  .navy {
+    background-color: #2c3e50;
+  }
+  
+  /* 🟣 Started */
+  .purple {
+    background-color: #6f42c1;
+  }
+  
+  /* 🔵 Cleaning Initiated */
+  .blue {
+    background-color: #007bff;
+  }
+  
+  /* ⚪ Finished */
+  .gray {
+    background-color: #6c757d;
+    color: #fff;
+  }
+
+  /* Already existing layout classes should remain as is */
+  

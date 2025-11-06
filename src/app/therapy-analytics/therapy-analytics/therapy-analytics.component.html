@@ -1,0 +1,111 @@
+<div class="chart-row">
+    <div class="chart-container-1">
+      <div class="chart-header">
+        <div class="chart-title">Therapy Type Popularity</div>
+      </div>
+      <p-chart type="bar" [data]="therapyChart"></p-chart>
+    </div>
+  
+    <div class="chart-container">
+      <div class="chart-header">
+        <div class="chart-title">Top Therapists</div>
+      </div>
+      <p-chart type="pie" [data]="therapistChart"></p-chart>
+    </div>
+    </div>
+    <div class="chart-row">
+          
+    <div class="chart-container">
+        <div class="chart-header">
+          <div class="chart-title">Room Utilization</div>
+        </div>
+        <p-chart type="doughnut" [data]="roomChart"></p-chart>
+      </div>
+  
+
+                <!-- Appointment Trend -->
+                <div class="chart-container-1">
+                    <div class="chart-header">
+                      <div class="chart-title">Appointments Over Time</div>
+                    </div>
+                    <p-chart
+                      *ngIf="trendChart"
+                      type="line"
+                      [data]="trendChart"
+                      [options]="{ responsive: true, maintainAspectRatio: false }"
+                    ></p-chart>
+                  </div>
+    </div>
+          <!-- Third Row -->
+    <div class="chart-row">
+        <!-- Average Duration -->
+        <div class="chart-container-1">
+          <div class="chart-header">
+            <div class="chart-title">Average Therapy Duration (Minutes)</div>
+          </div>
+          <p-chart
+            *ngIf="avgDurationChart"
+            type="bar"
+            [data]="avgDurationChart"
+            [options]="{ responsive: true, maintainAspectRatio: false }"
+          ></p-chart>
+        </div>
+        <div class="chart-container">
+            <div class="chart-header">
+              <div class="chart-title">Completion vs Cancellation</div>
+            </div>
+            <p-chart
+              *ngIf="completionChart"
+              type="pie"
+              [data]="completionChart"
+              [options]="{ responsive: true, plugins: { legend: { position: 'bottom' } } }"
+            ></p-chart>
+          </div>
+      </div>
+    
+      <!-- Fourth Row -->
+      <div class="chart-row">
+        <!-- Gender Distribution -->
+        <div class="chart-container-2">
+          <div class="chart-header">
+            <div class="chart-title">Patient Gender Distribution</div>
+          </div>
+          <p-chart
+            *ngIf="genderChart"
+            type="pie"
+            [data]="genderChart"
+            [options]="{ responsive: true, plugins: { legend: { position: 'bottom' } } }"
+          ></p-chart>
+        </div>
+    
+        <!-- Room Cleaning Efficiency -->
+        <div class="chart-container-2">
+          <div class="chart-header">
+            <div class="chart-title">Room Cleaning Efficiency</div>
+          </div>
+          <p-chart
+            *ngIf="cleaningChart"
+            type="doughnut"
+            [data]="cleaningChart"
+            [options]="{ responsive: true, plugins: { legend: { position: 'bottom' } } }"
+          ></p-chart>
+        </div>
+        <div class="chart-container-2">
+            <div class="chart-header">
+              <div class="chart-title">Check-in Analysis</div>
+            </div>
+            <p-chart
+              *ngIf="checkinChart"
+              type="doughnut"
+              [data]="checkinChart"
+              [options]="{ responsive: true, plugins: { legend: { position: 'bottom' } } }"
+            ></p-chart>
+          </div>
+      </div>
+    
+
+
+  
+
+
+  

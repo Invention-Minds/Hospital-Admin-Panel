@@ -1,0 +1,38 @@
+<div class="container">
+    <p-toast></p-toast>
+    <div class="dashboard-section">
+      <!-- <h1>Appointments</h1> -->
+      <div class="stats-cards">
+        <div class="card" 
+        [ngClass]="{'active-card': activeComponent === 'new'}"
+        (click)="showDoctorAvailability()">
+          <div class="card-icon">
+            <img src="/er-form.svg" alt="OPD Icon" />
+          </div>
+          <div class="card-content">
+            <!-- <h2>40</h2> -->
+            <p>New ER Assessment</p>
+          </div>
+        </div>
+        <div class="card" 
+        [ngClass]="{'active-card': activeComponent === 'list'}"
+        (click)="showDoctorArrived()">
+          <div class="card-icon">
+            <img src="/er-list.svg" alt="OPD Icon" />
+          </div>
+          <div class="card-content">
+            <!-- <h2>40</h2> -->
+            <p>All ER Assessment</p>
+          </div>
+        </div>
+
+
+
+        </div>
+  </div>
+  <div>
+    <app-er-assessment *ngIf="activeComponent === 'new'"></app-er-assessment>
+    <app-er-list *ngIf="activeComponent === 'list'"></app-er-list>
+  </div>
+  </div>
+  

@@ -70,4 +70,8 @@ export class AppComponent {
     return this.router.url === '/ot-channel';
   }
 
+  therapyChannelRoute(): boolean {
+    return this.router.url === '/therapy-channel';
+  }
+
 }

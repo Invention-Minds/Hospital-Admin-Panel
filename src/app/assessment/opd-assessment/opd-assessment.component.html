@@ -1,0 +1,247 @@
+<form (ngSubmit)="submitForm()" class="form-container">
+
+    <!-- Patient Info -->
+    <h3>Patient Info</h3>
+    <div class="form-row">
+      <div class="input-container">
+        <input type="text" id="patientName" [(ngModel)]="formData.patientName" name="patientName"
+               required placeholder=" " class="custom-input">
+        <label for="patientName" class="custom-label">Patient Name</label>
+      </div>
+  
+      <div class="input-container">
+        <input type="number" id="age" [(ngModel)]="formData.age" name="age"
+               required placeholder=" " class="custom-input">
+        <label for="age" class="custom-label">Age</label>
+      </div>
+  
+      <div class="input-container">
+        <select id="gender" [(ngModel)]="formData.gender" name="gender"
+                required class="custom-input">
+          <option value="" disabled selected hidden></option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+        </select>
+        <label for="gender" class="custom-label">Gender</label>
+      </div>
+  
+      <div class="input-container">
+        <input type="text" id="uhid" [(ngModel)]="formData.uhid" name="uhid"
+               placeholder=" " class="custom-input">
+        <label for="uhid" class="custom-label">UHID</label>
+      </div>
+    </div>
+  
+    <div class="form-row">
+      <div class="input-container">
+        <input type="text" id="height" [(ngModel)]="formData.height" name="height"
+               placeholder=" " class="custom-input">
+        <label for="height" class="custom-label">Height</label>
+      </div>
+  
+      <div class="input-container">
+        <input type="text" id="weight" [(ngModel)]="formData.weight" name="weight"
+               placeholder=" " class="custom-input">
+        <label for="weight" class="custom-label">Weight</label>
+      </div>
+    </div>
+  
+    <div class="form-row">
+      <div class="input-container">
+        <input type="text" id="consultant" [(ngModel)]="formData.consultant" name="consultant"
+               placeholder=" " class="custom-input">
+        <label for="consultant" class="custom-label">Consultant</label>
+      </div>
+  
+      <div class="input-container">
+        <input type="text" id="department" [(ngModel)]="formData.department" name="department"
+               placeholder=" " class="custom-input">
+        <label for="department" class="custom-label">Department</label>
+      </div>
+  
+      <div class="input-container">
+        <input type="date" id="date" [(ngModel)]="formData.date" name="date"
+               class="custom-input">
+        <label for="date" class="custom-label">Date</label>
+      </div>
+  
+      <div class="input-container">
+        <input type="time" id="assessmentTime" [(ngModel)]="formData.assessmentTime" name="assessmentTime"
+               class="custom-input">
+        <label for="assessmentTime" class="custom-label">Assessment Time</label>
+      </div>
+    </div>
+  
+    <!-- Vitals -->
+    <h3>Vitals</h3>
+    <div class="form-row">
+      <div class="input-container">
+        <input type="text" id="hr" [(ngModel)]="formData.hr" name="hr" placeholder=" " class="custom-input">
+        <label for="hr" class="custom-label">HR</label>
+      </div>
+      <div class="input-container">
+        <input type="text" id="rr" [(ngModel)]="formData.rr" name="rr" placeholder=" " class="custom-input">
+        <label for="rr" class="custom-label">RR</label>
+      </div>
+      <div class="input-container">
+        <input type="text" id="pulse" [(ngModel)]="formData.pulse" name="pulse" placeholder=" " class="custom-input">
+        <label for="pulse" class="custom-label">Pulse</label>
+      </div>
+      <div class="input-container">
+        <input type="text" id="bp" [(ngModel)]="formData.bp" name="bp" placeholder=" " class="custom-input">
+        <label for="bp" class="custom-label">BP</label>
+      </div>
+      <div class="input-container">
+        <input type="text" id="temp" [(ngModel)]="formData.temp" name="temp" placeholder=" " class="custom-input">
+        <label for="temp" class="custom-label">Temp</label>
+      </div>
+      <div class="input-container">
+        <input type="text" id="spo2" [(ngModel)]="formData.spo2" name="spo2" placeholder=" " class="custom-input">
+        <label for="spo2" class="custom-label">SPO2</label>
+      </div>
+    </div>
+  
+    <!-- Nutrition -->
+    <h3>Nutritional Assessment</h3>
+    <div class="form-row">
+      <div class="input-container">
+        <select id="dietType" [(ngModel)]="formData.dietType" name="dietType" class="custom-input">
+          <option value="" disabled selected hidden></option>
+          <option>Liquid diet</option>
+          <option>Normal Soft diet</option>
+          <option>Diabetic Diet</option>
+          <option>Low salt</option>
+          <option>Salt free</option>
+          <option>Renal diet</option>
+          <option>Low fat cholesterol</option>
+        </select>
+        <label for="dietType" class="custom-label">Diet Type</label>
+      </div>
+  
+      <div class="input-container">
+        <input type="text" id="enteralFeed" [(ngModel)]="formData.enteralFeed" name="enteralFeed"
+               placeholder=" " class="custom-input">
+        <label for="enteralFeed" class="custom-label">Enteral Feed (RT/PEG/JJ)</label>
+      </div>
+      <div class="input-container">
+        <input type="text" id="allergies" [(ngModel)]="formData.allergies" name="allergies"
+               placeholder=" " class="custom-input">
+        <label for="allergies" class="custom-label">Allergies</label>
+      </div>
+      <label>
+        <input type="checkbox" [(ngModel)]="formData.npo" name="npo"> NPO
+      </label>
+    </div>
+  
+    <!-- <div class="form-row">
+      <label>
+        <input type="checkbox" [(ngModel)]="formData.npo" name="npo"> NPO
+      </label>
+      <div class="input-container">
+        <input type="text" id="allergies" [(ngModel)]="formData.allergies" name="allergies"
+               placeholder=" " class="custom-input">
+        <label for="allergies" class="custom-label">Allergies</label>
+      </div>
+    </div> -->
+  
+    <!-- Pain Score -->
+    <h3>Pain Score</h3>
+    <div class="form-row">
+      <label><input type="radio" [(ngModel)]="formData.painScore" value="0" name="painScore"> 0 - No hurt</label>
+      <label><input type="radio" [(ngModel)]="formData.painScore" value="1-3" name="painScore"> 1-3 Mild</label>
+      <label><input type="radio" [(ngModel)]="formData.painScore" value="4-7" name="painScore"> 4-7 Moderate</label>
+      <label><input type="radio" [(ngModel)]="formData.painScore" value="8-10" name="painScore"> 8-10 Severe</label>
+    </div>
+  
+    <!-- Handwritten Sections -->
+    <!-- <app-hand-written label="History" (valueChange)="formData.history = $event" [initialValue]="formData.history"></app-hand-written>
+    <app-hand-written label="Examination" (valueChange)="formData.examination = $event" [initialValue]="formData.examination"></app-hand-written>
+    <app-hand-written label="Investigation" (valueChange)="formData.investigation = $event" [initialValue]="formData.investigation"></app-hand-written>
+    <app-hand-written label="Treatment Plan" (valueChange)="formData.treatmentPlan = $event" [initialValue]="formData.treatmentPlan"></app-hand-written> -->
+
+    <app-hand-written
+    label="History"
+    #historyComp
+    (focusEvent)="setActivePad('history')"
+    (saveEvent)="onHandWrittenSaved($event, 'history')"
+    [initialValue]="formData.history">
+  </app-hand-written>
+  
+  <app-hand-written
+    label="Examination"
+    #examinationComp
+    (focusEvent)="setActivePad('examination')"
+    (saveEvent)="onHandWrittenSaved($event, 'examination')"
+    [initialValue]="formData.examination">
+  </app-hand-written>
+  
+  <app-hand-written
+    label="Investigation"
+    #investigationComp
+    (focusEvent)="setActivePad('investigation')"
+    (saveEvent)="onHandWrittenSaved($event, 'investigation')"
+    [initialValue]="formData.investigation">
+  </app-hand-written>
+  
+  <app-hand-written
+    label="Treatment Plan"
+    #treatmentPlanComp
+    (focusEvent)="setActivePad('treatmentPlan')"
+    (saveEvent)="onHandWrittenSaved($event, 'treatmentPlan')"
+    [initialValue]="formData.treatmentPlan">
+  </app-hand-written>
+  
+  
+    <!-- Screening -->
+    <h3>Screening</h3>
+    <div class="form-row">
+      <label><input type="checkbox" [(ngModel)]="formData.otherScreening" name="otherScreening"> Other Screening Required</label>
+      <label><input type="checkbox" [(ngModel)]="formData.counsellingImplants" name="counsellingImplants"> Counselling on Implants</label>
+    </div>
+  
+    <!-- Staff Details -->
+    <h3>Staff Details</h3>
+    <div class="form-row">
+      <div class="input-container">
+        <input type="text" id="staffName" [(ngModel)]="formData.staffName" name="staffName"
+               required placeholder=" " class="custom-input">
+        <label for="staffName" class="custom-label">Staff Name</label>
+      </div>
+      <div class="input-container">
+        <input type="text" id="staffEmpId" [(ngModel)]="formData.staffEmpId" name="staffEmpId"
+               required placeholder=" " class="custom-input">
+        <label for="staffEmpId" class="custom-label">Emp ID</label>
+      </div>
+    </div>
+  
+    <!-- Doctor’s Signature -->
+    <h3>Doctor</h3>
+    <!-- <div class="signature-section">
+      <app-hand-written
+        label="Doctor's Signature"
+        (valueChange)="formData.doctorSign = $event"
+        [initialValue]="formData.doctorSign">
+      </app-hand-written>
+    </div> -->
+  
+    <div class="form-row">
+      <div class="input-container">
+        <input type="text" id="doctorName" [(ngModel)]="formData.doctorName" name="doctorName"
+               required placeholder=" " class="custom-input">
+        <label for="doctorName" class="custom-label">Doctor Name</label>
+      </div>
+      <div class="input-container">
+        <input type="text" id="kmcNo" [(ngModel)]="formData.kmcNo" name="kmcNo"
+               required placeholder=" " class="custom-input">
+        <label for="kmcNo" class="custom-label">KMC No</label>
+      </div>
+    </div>
+  
+    <div class="buttons">
+      <button type="submit" [disabled]="isSubmitting" class="save-button">Submit</button>
+      <button type="button" class="print-button" (click)="printAssessment()">Print</button>
+    </div>
+<!-- <app-opd-print [data]="formData" #printSection></app-opd-print> -->
+
+  </form>
+  

@@ -63,6 +63,7 @@ export class AuthServiceService {
           localStorage.setItem('employeeId', user.employeeId);
           localStorage.setItem('subAdminType',user.subAdminType);
           localStorage.setItem('adminType',user.adminType);
+          localStorage.setItem('id', user.id);
         }
       })
     );

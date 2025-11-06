@@ -43,5 +43,5 @@ export interface Doctor {
   createdBy?:string;
   updatedBy?: string;
   isActive?: boolean; 
-  
+  signUrl?:string;
 }

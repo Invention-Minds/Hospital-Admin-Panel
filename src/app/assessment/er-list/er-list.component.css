@@ -1,0 +1,197 @@
+.table-container {
+    border-radius: 10px;
+    background-color: #f0f3ff;
+    padding: 20px;
+    padding-left: 90px;
+  }
+  .table-wrapper {
+    overflow-x: auto; /* Adds horizontal scrolling */
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  }
+  .appointment-table {
+    width: 100%;
+    min-width: 1000px;
+    border-collapse: collapse;
+  }
+  thead {
+    background: #0e2970;
+    box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64);
+    border-radius: 16px;
+    color: white;
+    font-size: 14px;
+    font-family: Kanit;
+    font-weight: 400;
+    /* height: 65px; */
+  }
+  thead th {
+    padding: 12px;
+    text-align: center;
+    color: white;
+    font-size: 14px;
+    font-family: Kanit;
+    font-weight: 400;
+    text-wrap: nowrap;
+    height: 54px;
+  }
+  /* Table body styling */
+  tbody tr {
+    /* border-bottom: 1px solid #ddd; */
+    box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64);
+    border-radius: 16px;
+    height: 60px;
+    border-radius: 16px;
+  }
+  
+  tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64);
+    border-radius: 16px;
+  }
+  
+  tbody td {
+    padding: 0px 8px;
+    text-align: center;
+    color: black;
+    font-size: 14px;
+    font-family: Kanit;
+    font-weight: 400;
+    padding-bottom: 0px;
+  }
+  
+  tbody tr:hover {
+    background-color: #f0f8ff;
+  }
+  
+  .sms-status img {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .sms-sent img {
+    /* background-color: green; */
+    /* border-radius: 50%;
+      padding: 5px; */
+  }
+  
+  .sms-not-sent img {
+    /* background-color: red; */
+    /* border-radius: 50%; */
+    /* padding: 5px; */
+  }
+  .btn-action {
+    background-color: transparent;
+    cursor: pointer;
+    outline: none;
+    border: none;
+    display: flex;
+    gap: 10px;
+  }
+  .btn-action img{
+    width: 30px;
+    height: 30px;
+  }
+  .btn-action-reschedule {
+    background-color: transparent;
+    cursor: pointer;
+    outline: none;
+    border: none;
+  }
+  .button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 10px !important;
+  }
+  .status-badge {
+    display: inline-block;
+    color: white;
+    padding: 5px 10px;
+    text-transform: capitalize;
+    font-size: 14px;
+    font-family: Kanit;
+    font-weight: 400;
+    background: #79cfa6;
+    border-radius: 4px;
+  }
+  .checkin-badge {
+    display: inline-block;
+    color: white;
+    padding: 5px 10px;
+  
+    font-size: 16px;
+    font-family: Kanit;
+    font-weight: 400;
+    background: #79cfa6;
+    border-radius: 4px;
+  }
+  
+  /* Pagination styling */
+  .pagination {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 20px;
+    font-size: 16px;
+  }
+  
+  /* Pagination button styling */
+  .pagination-btn {
+    background-color: white;
+    color: #333;
+    border: 2px solid #e0e0e0;
+    padding: 8px 15px;
+    margin: 0 5px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .pagination-btn.next {
+    background-color: #8cc152; /* Green background for next */
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .pagination-btn.prev {
+    background-color: white; /* White background for previous */
+    color: #333;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .pagination-btn:hover:not(:disabled) {
+    background-color: #6baf40; /* Darker green hover for next */
+  }
+  
+  .pagination-btn:disabled {
+    background-color: #f0f0f0;
+    color: #ccc;
+    cursor: not-allowed;
+  }
+  
+  /* Page info styling */
+  .page-info {
+    display: flex;
+    align-items: center;
+    color: #7b7b7b;
+    font-size: 16px;
+    font-family: Kanit;
+    font-weight: 400;
+    margin-left: 20px;
+  }
+  
+  .page-input {
+    width: 40px;
+    height: 30px;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    text-align: center;
+    margin: 0 10px;
+    font-size: 16px;
+    padding: 5px;
+  }
+  

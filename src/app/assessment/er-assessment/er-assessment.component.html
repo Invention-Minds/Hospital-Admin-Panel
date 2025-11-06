@@ -1,0 +1,361 @@
+<form class="form-container" #erForm="ngForm" novalidate>
+
+  <!-- Patient Info -->
+  <h3>Patient Info</h3>
+  <div class="form-row">
+    <div class="input-container">
+      <div class="sections" (click)="$event.stopPropagation()">
+        <div class="input_field">
+          <input 
+            type="text" 
+            placeholder=""
+            [(ngModel)]="formData.uhId"
+            name="uhid"
+            class="custom-input"
+            id="uhid"
+            (input)="onUHIDChange()" 
+            (focus)="showUhidSuggestions = true"
+            required
+            #uhid="ngModel" />
+            <label  class="custom-label"><span>UHID:</span></label>
+          <div class="errors" *ngIf="uhid.invalid && (uhid.dirty || uhid.touched)">
+            <small *ngIf="uhid.errors?.['required']">UHID is required</small>
+          </div>
+        </div>
+      </div>
+    
+      <!-- UHID Suggestions -->
+      <ul class="uhid-suggestions" *ngIf="showUhidSuggestions && filteredUHIDs.length > 0">
+        <li *ngFor="let patient of filteredUHIDs" (mousedown)="selectUHID(patient)">
+          {{ patient.prn }} - {{ patient.name }}
+        </li>
+      </ul>
+    </div>
+    
+    <div class="input-container">
+      <input type="text" id="name" [(ngModel)]="formData.name" name="name" placeholder=" "
+        class="custom-input" #name="ngModel" required minlength="2">
+      <label for="name" class="custom-label">Name</label>
+      <div *ngIf="name.invalid && (name.dirty || name.touched)" class="error">
+        <small *ngIf="name.errors?.['required']">Name is required.</small>
+        <small *ngIf="name.errors?.['minlength']">Name must be at least 2 characters.</small>
+      </div>
+    </div>
+    <div class="input-container">
+      <input type="number" id="age" [(ngModel)]="formData.age" name="age" min="0" max="120"  required placeholder=" " class="custom-input" #age="ngModel">
+      <label for="age" class="custom-label">Age</label>
+      <div *ngIf="age.invalid && (age.dirty || age.touched)" class="error">
+        <small *ngIf="age.errors?.['required']">Age is required.</small>
+        <small *ngIf="age.errors?.['min']">Age must be positive.</small>
+        <small *ngIf="age.errors?.['max']">Age must be below 120.</small>
+      </div>
+    </div>
+    <div class="input-container">
+      <select id="sex" [(ngModel)]="formData.sex" name="sex" required class="custom-input"  #sex="ngModel">
+        <option value="" disabled selected hidden></option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+      </select>
+      <label for="sex" class="custom-label">Sex</label>
+      <div *ngIf="sex.invalid && (sex.dirty || sex.touched)" class="error">
+        <small>Sex is required.</small>
+      </div>
+    </div>
+
+    
+  </div>
+
+  <div class="form-row">
+    <div class="input-container">
+      <input type="date" id="date" disabled [(ngModel)]="formData.date" name="date" class="custom-input">
+      <label for="date" class="custom-label">Date</label>
+      
+    </div>
+    <div class="input-container">
+      <input type="time" id="time" disabled [(ngModel)]="formData.time" name="time" class="custom-input">
+      <label for="time" class="custom-label">Time</label>
+    </div>
+  </div>
+
+  <!-- Vitals -->
+  <h3>Vitals</h3>
+  <div class="form-row">
+    <div class="input-container">
+      <input type="text" id="pr" [(ngModel)]="formData.pr" name="pr" placeholder=" " class="custom-input">
+      <label for="pr" class="custom-label">PR</label>
+    </div>
+    <div class="input-container">
+      <input type="text" id="bp" [(ngModel)]="formData.bp" name="bp" placeholder=" " class="custom-input">
+      <label for="bp" class="custom-label">BP</label>
+    </div>
+    <div class="input-container">
+      <input type="text" id="rr" [(ngModel)]="formData.rr" name="rr" placeholder=" " class="custom-input">
+      <label for="rr" class="custom-label">RR</label>
+    </div>
+    <div class="input-container">
+      <input type="text" id="spo2" [(ngModel)]="formData.spo2" name="spo2" placeholder=" " class="custom-input">
+      <label for="spo2" class="custom-label">SPO2</label>
+    </div>
+    <div class="input-container">
+      <input type="text" id="temp" [(ngModel)]="formData.temp" name="temp" placeholder=" " class="custom-input">
+      <label for="temp" class="custom-label">Temp</label>
+    </div>
+    <div class="input-container">
+      <input type="text" id="grbs" [(ngModel)]="formData.grbs" name="grbs" placeholder=" " class="custom-input">
+      <label for="grbs" class="custom-label">GRBS</label>
+    </div>
+    <div class="input-container">
+      <input type="text" id="mlcNo" [(ngModel)]="formData.mlcNo" required="" name="mlcNo" placeholder=" "  #mlcNo="ngModel" class="custom-input">
+      <label for="mlcNo" class="custom-label">MLC No</label>
+      <div *ngIf="mlcNo.invalid && (mlcNo.dirty || mlcNo.touched)" class="error">
+        <small>MlcNo is required.</small>
+      </div>
+    </div>
+  </div>
+
+  <app-hand-written
+  label="Presenting Complaints"
+  #presentingComplaintsComp
+  (focusEvent)="setActivePad('presentingComplaints')"
+  (saveEvent)="onHandWrittenSaved($event, 'presentingComplaints')"
+  [initialValue]="formData.presentingComplaints">
+</app-hand-written>
+
+<app-hand-written
+  label="Past History"
+  #pastHistoryComp
+  (focusEvent)="setActivePad('pastHistory')"
+  (saveEvent)="onHandWrittenSaved($event, 'pastHistory')"
+  [initialValue]="formData.pastHistory">
+</app-hand-written>
+
+<app-hand-written
+  label="Regular Medications"
+  #regularMedicationsComp
+  (focusEvent)="setActivePad('regularMedications')"
+  (saveEvent)="onHandWrittenSaved($event, 'regularMedications')"
+  [initialValue]="formData.regularMedications">
+</app-hand-written>
+
+<app-hand-written
+  label="ABCDE Assessment"
+  #abcdeAssessmentComp
+  (focusEvent)="setActivePad('abcdeAssessment')"
+  (saveEvent)="onHandWrittenSaved($event, 'abcdeAssessment')"
+  [initialValue]="formData.abcdeAssessment">
+</app-hand-written>
+
+<app-hand-written
+  label="Examination"
+  #examinationComp
+  (focusEvent)="setActivePad('examination')"
+  (saveEvent)="onHandWrittenSaved($event, 'examination')"
+  [initialValue]="formData.examination">
+</app-hand-written>
+
+<app-hand-written
+  label="Investigation"
+  #investigationComp
+  (focusEvent)="setActivePad('investigation')"
+  (saveEvent)="onHandWrittenSaved($event, 'investigation')"
+  [initialValue]="formData.investigation">
+</app-hand-written>
+
+<app-hand-written
+  label="Procedure Done"
+  #procedureDoneComp
+  (focusEvent)="setActivePad('procedureDone')"
+  (saveEvent)="onHandWrittenSaved($event, 'procedureDone')"
+  [initialValue]="formData.procedureDone">
+</app-hand-written>
+
+<app-hand-written
+  label="Provisional Diagnosis"
+  #provisionalDiagnosisComp
+  (focusEvent)="setActivePad('provisionalDiagnosis')"
+  (saveEvent)="onHandWrittenSaved($event, 'provisionalDiagnosis')"
+  [initialValue]="formData.provisionalDiagnosis">
+</app-hand-written>
+
+<app-hand-written
+  label="Treatment Administered"
+  #treatmentAdministeredComp
+  (focusEvent)="setActivePad('treatmentAdministered')"
+  (saveEvent)="onHandWrittenSaved($event, 'treatmentAdministered')"
+  [initialValue]="formData.treatmentAdministered">
+</app-hand-written>
+
+
+
+  <!-- Referral & Disposition -->
+  <h3>Referral & Disposition</h3>
+  <div class="form-row">
+    <div class="input-container">
+      <select id="referralDepartment"
+              [(ngModel)]="formData.referralDepartment"
+              name="referralDepartment"
+              required
+              class="custom-input"
+              #referralDepartment="ngModel">
+        <option value="" disabled selected hidden>Select Department</option>
+        <option *ngFor="let dept of departments" [value]="dept.name">
+          {{ dept.name }}
+        </option>
+      </select>
+      <label for="referralDepartment" class="custom-label">Referral Department</label>
+      <div *ngIf="referralDepartment.invalid && (referralDepartment.dirty || referralDepartment.touched)" class="error">
+        <small>Referral Department is required.</small>
+      </div>
+    </div>
+    
+    <div class="input-container">
+      <input type="text" id="disposition" [(ngModel)]="formData.disposition" name="disposition" placeholder=" "
+        class="custom-input" #disposition="ngModel">
+      <label for="disposition" class="custom-label">Disposition</label>
+      <div *ngIf="disposition.invalid && (disposition.dirty || disposition.touched)" class="error">
+        <small>Disposition is required.</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- Discharge Vitals -->
+  <h3>Vitals on Discharge</h3>
+  <div class="form-row">
+    <div class="input-container"><input type="text" id="dischargePR" [(ngModel)]="formData.dischargePR"
+        name="dischargePR" placeholder=" " class="custom-input"><label for="dischargePR" class="custom-label">PR</label>
+    </div>
+    <div class="input-container"><input type="text" id="dischargeBP" [(ngModel)]="formData.dischargeBP"
+        name="dischargeBP" placeholder=" " class="custom-input"><label for="dischargeBP" class="custom-label">BP</label>
+    </div>
+    <div class="input-container"><input type="text" id="dischargeRR" [(ngModel)]="formData.dischargeRR"
+        name="dischargeRR" placeholder=" " class="custom-input"><label for="dischargeRR" class="custom-label">RR</label>
+    </div>
+    <div class="input-container"><input type="text" id="dischargeSpo2" [(ngModel)]="formData.dischargeSpo2"
+        name="dischargeSpo2" placeholder=" " class="custom-input"><label for="dischargeSpo2"
+        class="custom-label">SPO2</label></div>
+    <div class="input-container"><input type="text" id="dischargeTemp" [(ngModel)]="formData.dischargeTemp"
+        name="dischargeTemp" placeholder=" " class="custom-input"><label for="dischargeTemp"
+        class="custom-label">Temp</label></div>
+  </div>
+
+  <h3>Prescription</h3>
+  <div class="table-container">
+    <div class="table-wrapper">
+      <table class="appointment-table prescription-table">
+        <thead>
+          <tr>
+            <th>Sl.No</th>
+            <th>Drug</th>
+            <th>Dosage</th>
+            <th>Route</th>
+            <th>Frequency</th>
+            <th>Duration</th>
+            <th>Instruction</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of formData.prescribedDrugs; let i = index">
+            <td>{{ i + 1 }}</td>
+  
+            <!-- Drug -->
+            <td>
+              <app-hand-written (valueChange)="row.drug = $event" [initialValue]="row.drug"></app-hand-written>
+            </td>
+  
+            <!-- Dosage -->
+            <td>
+              <div class="input-container">
+                <select class="custom-input" [(ngModel)]="row.dosage" name="dosage{{i}}">
+                  <option value="">Select Dosage</option>
+                  <option *ngFor="let dose of dosageOptions" [value]="dose">{{ dose }}</option>
+                </select>
+                <label class="custom-label">Dosage</label>
+              </div>
+            </td>
+  
+            <!-- Route -->
+            <td>
+              <div class="input-container">
+                <select class="custom-input" [(ngModel)]="row.route" name="route{{i}}">
+                  <option value="">Select Route</option>
+                  <option *ngFor="let route of routeOptions" [value]="route">{{ route }}</option>
+                </select>
+                <label class="custom-label">Route</label>
+              </div>
+            </td>
+  
+            <!-- Frequency -->
+            <td>
+              <div class="input-container">
+                <select class="custom-input" [(ngModel)]="row.frequency" name="frequency{{i}}">
+                  <option value="">Select Frequency</option>
+                  <option *ngFor="let freq of frequencyOptions" [value]="freq">{{ freq }}</option>
+                </select>
+                <label class="custom-label">Frequency</label>
+              </div>
+            </td>
+  
+            <!-- Duration -->
+            <td>
+              <div class="input-container">
+                <select class="custom-input" [(ngModel)]="row.duration" name="duration{{i}}">
+                  <option value="">Select Duration</option>
+                  <option *ngFor="let dur of durationOptions" [value]="dur">{{ dur }}</option>
+                </select>
+                <label class="custom-label">Duration</label>
+              </div>
+            </td>
+  
+            <!-- Instruction -->
+            <td>
+              <div class="input-container">
+                <input type="text" class="custom-input" [(ngModel)]="row.instruction" name="instruction{{i}}" />
+                <label class="custom-label">Instruction</label>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+
+  <button type="button" class="add-btn" (click)="addPrescriptionRow()">+ Add Row</button>
+
+
+
+  <!-- Doctor -->
+  <h3>Doctor</h3>
+  <!-- <div class="signature-section">
+    <app-hand-written label="Doctor's Signature" (valueChange)="formData.doctorSign = $event"
+      [initialValue]="formData.doctorSign"></app-hand-written>
+  </div> -->
+  <div class="form-row">
+    <div class="input-container">
+      <select [(ngModel)]="formData.doctorId" name="doctorId" (ngModelChange)="onDoctorSelect($event)" class="custom-input">
+        <option value="" disabled>Select a Doctor</option>
+        <option *ngFor="let doc of doctorDropdownOptions" [value]="doc.value">
+          {{ doc.label }}
+        </option>
+      </select>
+      <label for="doctorId" class="custom-label">Doctor Name</label>
+    </div>
+    <div class="input-container">
+      <input type="text" id="kmcNo" [(ngModel)]="formData.kmcNo" name="kmcNo" required placeholder=" "
+        class="custom-input">
+      <label for="kmcNo" class="custom-label">KMC No</label>
+    </div>
+    <div class="input-container">
+      <input type="text" id="doctorSpecialty" [(ngModel)]="formData.doctorSpecialty" name="doctorSpecialty"
+        placeholder=" " class="custom-input">
+      <label for="doctorSpecialty" class="custom-label">Specialty</label>
+    </div>
+  </div>
+
+  <div class="buttons">
+    <button type="submit" (click)="validateAndSubmit()"class="save-button">Submit</button>
+    <button type="button" (click)="printAssessment()" class="print-button">Print</button>
+  </div>
+</form>
+
+<p-toast></p-toast>

@@ -1,0 +1,80 @@
+
+
+<div class="table-container" *ngIf="!isLoading">
+    <div class="table-wrapper" *ngIf="!selectedAssessment; else assessmentForm">
+      <table class="appointment-table" *ngIf="!isLoading">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th (click)="sortBy('name')" style="cursor: pointer; width: 200px">
+              Patient Name
+              <span *ngIf="sortColumn === 'name' && sortDirection === 'asc'">&#9650;</span>
+              <span *ngIf="sortColumn === 'name' && sortDirection === 'desc'">&#9660;</span>
+            </th>
+            <th>UHID</th>
+            <th (click)="sortBy('date')" style="cursor: pointer;">
+              Date
+              <span *ngIf="sortColumn === 'date' && sortDirection === 'asc'">&#9650;</span>
+              <span *ngIf="sortColumn === 'date' && sortDirection === 'desc'">&#9660;</span>
+            </th>
+            <th>Time</th>
+            <th>Doctor</th>
+            <th>Ref Department</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="filteredAssignments.length === 0">
+            <td colspan="14" class="no-records-message">
+              No records to display
+            </td>
+          </tr>
+          <tr *ngFor="let item of getPaginatedAppointments(); let i = index">
+            <td>{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
+            <td>{{ item.name }}</td>
+            <td>{{ item.uhId || '-' }}</td>
+            <td>{{ item.date | date: 'dd-MM-yyyy' }}</td>
+            <td>{{ item.time }}</td>
+            <td>{{ item.doctorName || '-' }}</td>
+            <td>{{ item.referralDepartment || '-' }}</td>
+            <td class="button">
+  
+              <button class="btn-action" (click)="edit(item)">
+                <img src="follow-up.svg" alt="check" class="action-icon"
+                  pTooltip="Edit"
+                  tooltipPosition="top">
+              </button>
+              <!-- Cancel Button -->
+              <button class="btn-action" (click)="printAssessment(item)">
+                <img src="print.svg" alt="delete" class="action-icon" pTooltip="Print"
+                  tooltipPosition="top">
+              </button>
+            </td>
+  
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  
+  
+    <!-- Pagination Controls -->
+    <div class="pagination">
+      <button class="pagination-btn prev" (click)="prevPage()" [disabled]="currentPage === 1">←</button>
+      <button class="pagination-btn next" (click)="nextPage()" [disabled]="currentPage === totalPages">→</button>
+      <div class="page-info">
+        Page
+        <input type="number" [(ngModel)]="currentPage" min="1" [max]="totalPages" class="page-input"
+          (change)="onPageChange()">
+        of {{ totalPages }}
+      </div>
+    </div>
+  </div>
+
+  <ng-template #assessmentForm>
+    <app-er-assessment
+      [appointmentId]="selectedAssessment.id"
+      (close)="closeForm()"
+      (saved)="handleSaved($event)">
+    </app-er-assessment>
+  </ng-template>
+  <p-toast></p-toast>

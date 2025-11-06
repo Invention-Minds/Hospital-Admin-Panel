@@ -4,10 +4,12 @@
     <div *ngIf="!isHelpDesk(); else helpdeskTemplate">
     <div *ngIf="!isLoginRoute(); else loginTemplate">
       <div *ngIf="!otChannelRoute(); else otChannelTemplate">
+        <div *ngIf="!therapyChannelRoute(); else therapyChannelTemplate"> 
       <app-sidebar></app-sidebar>
       <div class="content">
         <app-dashboard-module></app-dashboard-module>
       </div>
+    </div>
     </div>
     </div>
     <ng-template #loginTemplate>
@@ -29,6 +31,10 @@
 <ng-template #otChannelTemplate>
   <router-outlet></router-outlet>
 </ng-template>
+
+<ng-template #therapyChannelTemplate>
+  <router-outlet></router-outlet>
+  </ng-template>
 
 <ng-template #helpdeskTemplate>
   <app-help-center></app-help-center>

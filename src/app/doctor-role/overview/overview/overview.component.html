@@ -49,13 +49,13 @@
         </div>
 
         </div>
-  </div>
   <div>
     <app-today-consultations  *ngIf="activeComponent === 'availability'" (viewPatient)="showPatientInfo($event)"></app-today-consultations>
     <app-future-consultations *ngIf="activeComponent === 'details'"></app-future-consultations>
     <app-arrived-consultation *ngIf="activeComponent === 'arrived'"></app-arrived-consultation>
     <app-past-consultations *ngIf="activeComponent === 'past'"></app-past-consultations>
     <app-patient-info *ngIf="activeComponent === 'info'" [patient]="selectedPatient"></app-patient-info>
+  </div>
   </div>
   </div>
   

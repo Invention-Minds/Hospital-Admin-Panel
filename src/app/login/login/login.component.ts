@@ -50,6 +50,9 @@ export class LoginComponent implements OnInit {
       else if(this.subAdminType === 'MHC Coordinator'){
         this.router.navigate(['/health-checkup'])
       }
+      else if(this.subAdminType === 'Therapist'){
+        this.router.navigate(['/therapy-list'])
+      }
       else if(this.role === 'sub_admin'){
         this.router.navigate(['/dashboard'])
       }
@@ -111,6 +114,9 @@ export class LoginComponent implements OnInit {
           }
           else if(response.user.subAdminType === 'Lab Coordinator'){
             this.router.navigate(['/lab'])
+          }
+          else if(this.subAdminType === 'Therapist'){
+            this.router.navigate(['/therapy-list'])
           }
           else if(response.user.adminType === 'IP Billing Manager'){
             this.router.navigate(['/estimation'])

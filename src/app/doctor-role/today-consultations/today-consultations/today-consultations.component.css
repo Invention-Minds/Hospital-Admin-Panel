@@ -2,7 +2,7 @@
   border-radius: 10px;
   /* background-color: #f0f3ff; */
   padding: 20px;
-  padding-left: 90px;
+  /* padding-left: 90px; */
 }
 .table-wrapper {
   overflow-x: auto; /* Adds horizontal scrolling */
@@ -505,6 +505,26 @@ tbody tr:hover {
   line-height: normal;
   cursor: pointer;
 }
+.signature {
+  display: flex;
+  width: 150px;
+  height: 44px;
+  padding: 8px 20px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  border: 1px solid #10bd38;
+  background: #fff;
+  color: #10bd38;
+  font-family: Kanit;
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  cursor: pointer;
+}
 .container {
   display: flex;
   justify-content: flex-end;
@@ -633,6 +653,24 @@ tbody tr:hover {
 }
 
 .modal-body p {
+  color: rgba(39, 30, 74, 0.8);
+  font-family: Kanit;
+  font-size: 18px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  margin: 10px 0;
+}
+.modal-opd-body {
+  /* margin-bottom: 20px; */
+  padding-left: 0px;
+  gap: 10px;
+  display: flex;
+  flex-direction: column;
+  /* padding: 0 40px; */
+}
+
+.modal-opd-body p {
   color: rgba(39, 30, 74, 0.8);
   font-family: Kanit;
   font-size: 18px;
@@ -2090,7 +2128,29 @@ line-height: normal;
 .suggestions li:hover {
   background-color: #f0f0f0;
 }
+.upload-section {
+  margin-top: 20px;
+  padding: 10px;
+  border: 1px dashed #ccc;
+  text-align: center;
+  border-radius: 8px;
+  background-color: white;
+  font-family: Kanit;
+  font-size: 14px;
+}
 
+.upload-section h3{
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.signature-preview {
+  max-width: 250px;
+  margin-top: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
 @media (max-width: 1030px) {
   ::ng-deep .custom-dropdown .p-dropdown {
     width: 235px !important;

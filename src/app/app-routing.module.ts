@@ -31,6 +31,14 @@ import { PatientOverviewComponent } from './patient/patient-overview/patient-ove
 import { NursingOverviewComponent } from './nursing/nursing-overview/nursing-overview.component';
 import { OtOverviewComponent } from './ot/ot-overview/ot-overview.component';
 import { OtTvDisplayComponent } from './ot-tv-display/ot-tv-display.component';
+import { OpdAssessmentComponent } from './assessment/opd-assessment/opd-assessment.component';
+import { ErAssessmentComponent } from './assessment/er-assessment/er-assessment.component';
+import { ErListComponent } from './assessment/er-list/er-list.component';
+import { ErOverviewComponent } from './assessment/er-overview/er-overview.component';
+import { TherapyOverviewComponent } from './therapy-appts/therapy-overview/therapy-overview.component';
+import { TherapistOverviewComponent } from './therapist/therapist-overview/therapist-overview.component';
+import { TherapyChannelComponent } from './therapy-channel/therapy-channel/therapy-channel.component';
+import { TherapyAnalyticsComponent } from './therapy-analytics/therapy-analytics/therapy-analytics.component';
 
 const routes: Routes = [
   { path: 'dashboard', component: DashboardOverviewComponent, canActivate:[authGuard] },
@@ -48,7 +56,7 @@ const routes: Routes = [
   {path: 'services', component: ServiceOverviewComponent,canActivate:[authGuard]},
   {path: 'radiology-services', component: OverviewRadiologyComponent,canActivate:[authGuard]},
   { path: 'reschedule/:id', component: HealthCheckupFormComponent,canActivate:[authGuard] },
-  {path:'doctor-appointments', component: OverviewComponent, canActivate:[authGuard]},
+  {path:'doctor-appointments', component: ErAssessmentComponent, canActivate:[authGuard]},
   {path: 'tv-control', component: TvControlComponent, canActivate:[authGuard]},
   { path: 'channel/:channelId', component: TvComponent },
   {path:'nursing/:blockId', component: NursingOverviewComponent},
@@ -61,6 +69,12 @@ const routes: Routes = [
   { path: 'redirector', component: RedirectorComponent },
   {path:'surgery', component: OtOverviewComponent, canActivate:[authGuard]},
   { path: 'ot-channel', component: OtTvDisplayComponent, canActivate:[authGuard] },
+  { path: 'opd', component: OpdAssessmentComponent, canActivate:[authGuard] },
+  { path:'er',component: ErOverviewComponent, canActivate:[authGuard]},
+  { path:'therapy', component: TherapyOverviewComponent , canActivate:[authGuard]},
+  { path:'therapy-list', component: TherapistOverviewComponent , canActivate:[authGuard]},
+  { path:'therapy-channel', component: TherapyChannelComponent, canActivate:[authGuard]},
+  { path:'therapy-analytics', component: TherapyAnalyticsComponent, canActivate:[authGuard]},
 
   {
     path: 'form',

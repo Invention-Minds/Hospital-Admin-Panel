@@ -17,6 +17,7 @@ export class SidebarComponent implements OnInit {
   constructor(private appointmentService: AppointmentConfirmService) {}
   isDesktopView: boolean = true;
   username: string = ''; // Initialize username
+  deptId: number = 0; // Initialize deptId
 
   
 
@@ -37,6 +38,7 @@ export class SidebarComponent implements OnInit {
       this.adminType = localStorage.getItem('adminType') || '';
       this.type = [this.adminType].filter(value => value !== '');
       this.username = localStorage.getItem('username') || '';
+      this.deptId = Number(localStorage.getItem('deptId')) || 0;
 
     console.log("User types:", this.type);
 
@@ -100,5 +102,10 @@ export class SidebarComponent implements OnInit {
   isNotOT():boolean{
     return !(this.role === 'sub_admin' && this.subAdminType === 'OT Coordinator')
   }
-
+  isAyurveda():boolean{
+    return(this.deptId == 2)
+  }
+  isNotTherapist():boolean{
+    return !(this.role === 'sub_admin' && this.subAdminType === 'Therapist')
+  }
 }

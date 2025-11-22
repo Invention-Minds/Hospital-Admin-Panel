@@ -56,7 +56,7 @@ const routes: Routes = [
   {path: 'services', component: ServiceOverviewComponent,canActivate:[authGuard]},
   {path: 'radiology-services', component: OverviewRadiologyComponent,canActivate:[authGuard]},
   { path: 'reschedule/:id', component: HealthCheckupFormComponent,canActivate:[authGuard] },
-  {path:'doctor-appointments', component: ErAssessmentComponent, canActivate:[authGuard]},
+  {path:'doctor-appointments', component: OverviewComponent, canActivate:[authGuard]},
   {path: 'tv-control', component: TvControlComponent, canActivate:[authGuard]},
   { path: 'channel/:channelId', component: TvComponent },
   {path:'nursing/:blockId', component: NursingOverviewComponent},

@@ -201,9 +201,8 @@
               </div>
               </div>
             </ng-container>
-            <ng-template #regularTime>
-              <!-- Dropdown for Regular Doctors -->
-              <div class="input_field">
+            <!-- <ng-template #regularTime>
+                            <div class="input_field">
                 <select class="email" formControlName="appointmentTime">
                   <option value="" disabled selected>Select a time</option>
                   <option value="" selected *ngIf="availableSlots.length === 0">No available slots</option>
@@ -216,7 +215,32 @@
                   <small>Appointment Time is required</small>
                 </div>
               </div>
+            </ng-template> -->
+            <ng-template #regularTime>
+              <div class="input_field">
+                <select class="email" formControlName="appointmentTime">
+            
+                  <!-- EMPTY OPTION (shown when no slot selected) -->
+                  <option value="">Select a time</option>
+            
+                  <!-- NO SLOTS AVAILABLE -->
+                  <option *ngIf="availableSlots.length === 0" [ngValue]="null" disabled>
+                    No available slots
+                  </option>
+            
+                  <!-- GENERATED SLOTS -->
+                  <option *ngFor="let slot of availableSlots" [ngValue]="slot">
+                    {{ slot }}
+                  </option>
+                </select>
+            
+                <div class="errors"
+                  *ngIf="appointmentForm.get('appointmentTime')?.invalid && appointmentForm.get('appointmentTime')?.touched">
+                  <small>Appointment Time is required</small>
+                </div>
+              </div>
             </ng-template>
+            
           </div>
          </div>
 

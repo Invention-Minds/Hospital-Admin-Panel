@@ -956,6 +956,22 @@ export class AppointmentFormComponent implements OnInit {
                 // Check if the currently selected time in the form is still available
                 const selectedTime = this.appointmentForm.get('appointmentTime')?.value;
                 console.log(selectedTime, "selectedTime",)
+                // ---------------------
+                // FIX: Handle previously selected time
+                // ---------------------
+                const previousTime = this.appointmentForm.get('appointmentTime')?.value;
+
+                const existsInNewSlots = this.availableSlots.includes(previousTime);
+
+                // If old time is NOT present → clear select box
+                if (!existsInNewSlots) {
+                  setTimeout(() => {
+                    this.appointmentForm.get('appointmentTime')?.setValue('', { emitEvent: false });
+                  }, 0);
+                }
+
+                // else → keep old time selected automatically (Angular will not change it)
+
 
                 if (selectedTime && !this.availableSlots.includes(selectedTime)) {
                   this.showAvailabilityMessage = true;

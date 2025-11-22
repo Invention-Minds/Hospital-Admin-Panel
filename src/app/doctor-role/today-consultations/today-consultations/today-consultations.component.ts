@@ -269,6 +269,8 @@ export class TodayConsultationsComponent {
   showOpdModal = false;
   showSignatureModel = false;
 
+  deptId: number = 0;
+
 openOpdForm(appointment: any) {
   this.selectedAppointment = appointment;
   this.showOpdModal = true;
@@ -382,6 +384,8 @@ onAssessmentSaved(savedData: any) {
         this.doctor = response;
         console.log(this.doctor)
         this.doctorId = response.id;
+        this.deptId = response.departmentId;
+        localStorage.setItem('deptId', this.deptId.toString());
         this.fetchAppointments(this.doctorId); // Fetch only this doctor's appointments
       }
     );

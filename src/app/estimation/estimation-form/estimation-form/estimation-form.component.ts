@@ -1010,9 +1010,9 @@ export class EstimationFormComponent {
           (pdfResponse) => {
             console.log("✅ PDF Generated & Sent via WhatsApp:", pdfResponse);
             this.messageService.add({ severity: 'success', summary: 'Success', detail: 'PDF Generated & Sent PDF via WhatsApp:!' });
-            // const to = "ipbilling@rashtrotthanahospital.com"
-            const to = "keerthanasaminathan0805@gmail.com"
-            this.appointmentService.sendMailtoApprover(to, estimationData.estimationId, pdfResponse.filePath).subscribe(
+            const to = "ipbilling@rashtrotthanahospital.com"
+            // const to = "keerthanasaminathan0805@gmail.com"
+            this.appointmentService.sendMailtoApprover(to, estimationData.updateFields.patientName, pdfResponse.filePath).subscribe(
               (response) => {
                 console.log('Email sent successfully:', response);
               }, (error) => {

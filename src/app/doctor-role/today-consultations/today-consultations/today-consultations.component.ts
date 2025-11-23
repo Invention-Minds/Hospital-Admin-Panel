@@ -1358,8 +1358,8 @@ onAssessmentSaved(savedData: any) {
       startDate: this.startDate,
       endDate: this.endDate,
     };
-    // const adminPhoneNumber = ["919880544866","919341227264","918904943673","918951243004","919633943037"]
-    const adminPhoneNumber = ["919342287945", "919342287945"]
+    const adminPhoneNumber = ["919880544866","919341227264","918904943673","918951243004","919633943037"]
+    // const adminPhoneNumber = ["919342287945", "919342287945"]
     this.appointmentService.sendAdminMessage(this.currentDoctorName, this.currentDepartmentName, this.startDate, this.endDate, adminPhoneNumber).subscribe({
       next: (response) => {
         // console.log('Leave request submitted:', response);

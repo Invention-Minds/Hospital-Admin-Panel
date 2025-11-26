@@ -6,18 +6,8 @@
     <!-- Row 1 - PRN -->
     <div class="form-row">
       <div class="form-group full-width">
-        <input
-          type="text"
-          class="form-input"
-          id="pnr"
-          name="pnr"
-          pattern="^[0-9]*$"
-          ngModel
-          [(ngModel)]="formData.prn"
-          placeholder=" "
-          (input)="onHealthCheckupPRNChange()" 
-          (focus)="prnSuggestions = true"
-        />
+        <input type="text" class="form-input" id="pnr" name="pnr" pattern="^[0-9]*$" ngModel [(ngModel)]="formData.prn"
+          placeholder=" " (input)="onHealthCheckupPRNChange()" (focus)="prnSuggestions = true" />
         <label for="pnr" class="form-label">PRN Number</label>
         <ul class="prn-suggestions" *ngIf="prnSuggestions && filteredHealthCheckupPRNs.length > 0">
           <li *ngFor="let prn of filteredHealthCheckupPRNs" (click)="selectHealthCheckupPRN(prn)">
@@ -100,7 +90,8 @@
 
     <div class="form-row">
       <div class="form-group full-width">
-        <select class="form-input" name="therapyId" [(ngModel)]="formData.therapyId" required>
+        <select class="form-input" name="therapyId" [(ngModel)]="formData.therapyId" (change)="onTherapyChange()"
+          required>
           <option value="" disabled>Select Therapy</option>
           <option *ngFor="let therapy of therapies" [value]="therapy.id">
             {{ therapy.name }}
@@ -110,8 +101,60 @@
       </div>
     </div>
 
-    <!-- Row 6 - Date / Time -->
+    <!-- User enters total duration manually -->
     <div class="form-row">
+
+      <div class="form-group half-width">
+        <input type="number" class="form-input" name="totalDurationInput" [(ngModel)]="formData.totalDurationMinutes"
+        (blur)="calculateDurations()"
+        placeholder=" " required min="1" />
+        <label class="form-label">Total Duration (mins)*</label>
+      </div>
+
+      <div class="form-group half-width checkbox-group">
+        <label class="checkbox-container">
+          <input type="checkbox"
+                 name="hasBathing"
+                 [(ngModel)]="formData.hasBathing"
+                 (change)="calculateDurations()" />
+          <span class="checkmark"></span>
+          Include Bathing?
+        </label>
+      </div>
+
+    </div>
+
+    <!-- Show calculated split durations -->
+    <div class="form-row" *ngIf="durationSplitVisible">
+
+      <div class="form-group third-width">
+        <input type="number" class="form-input" [value]="calculatedDurations.therapy" disabled />
+        <label class="form-label">Therapy Duration</label>
+      </div>
+
+      <div class="form-group third-width" *ngIf="formData.hasBathing">
+        <input type="number" class="form-input" [value]="calculatedDurations.bath" disabled />
+        <label class="form-label">Bath Duration</label>
+      </div>
+
+      <div class="form-group third-width">
+        <input type="number" class="form-input" [value]="calculatedDurations.cleaning" disabled />
+        <label class="form-label">Cleaning Duration</label>
+      </div>
+
+    </div>
+
+    <!-- <div class="form-row" *ngIf="durationSplitVisible">
+      <div class="form-group full-width">
+        <input type="number" class="form-input" [value]="calculatedDurations.total" disabled />
+        <label class="form-label">Total Duration</label>
+      </div>
+    </div> -->
+
+
+
+    <!-- Row 6 - Date / Time -->
+    <!-- <div class="form-row">
       <div class="form-group half-width">
         <select class="form-input" name="therapistId" [(ngModel)]="formData.therapistId" required   (change)="onTherapistChange()" >
           <option value="" disabled>Select Therapist</option>
@@ -125,12 +168,43 @@
       </div>
 
 
+    </div> -->
+    <div class="form-row">
+      <div class="half-width">
+        <!-- <select class="form-input"
+                name="therapistIds"
+                multiple
+                required
+                [(ngModel)]="formData.therapistIds"
+                (change)="onTherapistChange()">
+    
+          <option *ngFor="let th of getAvailableTherapists()" [value]="th.id">
+            {{ th.name }}
+          </option>
+    
+        </select> -->
+        <p-multiSelect [options]="availableTherapists" class="custom-dropdown" [(ngModel)]="formData.therapistIds"
+          name="therapistIds" optionLabel="name" optionValue="id" [maxSelectedLabels]="2"
+          placeholder="Select Therapists" [filter]="true" (onChange)="onTherapistChange()" [selectionLimit]="2"
+          selectedItemsLabel="Therapists Selected">
+        </p-multiSelect>
+        <!-- <label class="form-label">Therapists* (Select 1 or 2)</label> -->
+
+
+        <!-- <small class="note">Hold CTRL (Windows) or CMD (Mac) to select 2 therapists.</small> -->
+      </div>
+      <div class="form-group half-width">
+        <input type="date" class="form-input" id="date" name="date" [min]="minDate" [(ngModel)]="formData.date"
+          (ngModelChange)="onDateChange()" required />
+        <label for="date" class="form-label">Date*</label>
+      </div>
     </div>
+
 
     <!-- Row 5 - Therapist / Room -->
     <div class="form-row">
       <div class="form-group half-width">
-        <select class="form-input" name="time" [(ngModel)]="formData.time" required   (change)="onTimeChange()">
+        <select class="form-input" name="time" [(ngModel)]="formData.time" required (change)="onTimeChange()">
           <option value="" disabled>Select Time</option>
           <option *ngFor="let t of getAvailableTimeSlots()" [value]="t">{{ t }}</option>
         </select>

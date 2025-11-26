@@ -117,6 +117,8 @@ export class AppointmentConfirmService {
   }
   // Method to add a new appointment
   addNewAppointment(appointment: Appointment): void {
+
+    console.log('appointment',appointment)
     const userId = this.authService.getUserId();
 
     const appointmentData = userId ? { ...appointment, userId } : appointment;

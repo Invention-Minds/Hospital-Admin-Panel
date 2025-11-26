@@ -21,11 +21,12 @@ export class TherapyFormComponent {
     gender: '',
     age: null,
     doctorId: '',
-    therapistId: '',
+    therapistIds: [],
     therapyId: '',
     roomNumber: '',
     date: '',
-    time: ''
+    time: '',
+    hasBathing: false
   };
 
   therapies: any[] = [];
@@ -38,6 +39,18 @@ export class TherapyFormComponent {
   prnSuggestions: boolean = false;
   patients: any[] = []; // List of all patients
   filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
+  availableTherapists: any[] = [];
+  minDate: any;
+
+  selectedTherapy: any = null;
+  durationSplitVisible = false;
+
+  calculatedDurations = {
+    therapy: 0,
+    bath: 0,
+    cleaning: 0,
+    total: 0
+  };
 
 
   roomNumbers: string[] = [
@@ -69,6 +82,13 @@ export class TherapyFormComponent {
     if (this.serviceData) {
       setTimeout(() => this.populateForm(this.serviceData), 300); // small delay ensures lists are loaded
     }
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+
+    this.minDate = `${yyyy}-${mm}-${dd}`;
+
   }
 
   populateForm(service: any): void {
@@ -81,16 +101,38 @@ export class TherapyFormComponent {
       gender: service.gender || '',
       age: service.age || '',
       doctorId: service.doctorId || service.doctor?.id || '',
-      therapistId: service.therapistId || service.therapist?.id || '',
+      // therapistId: service.therapistId || service.therapist?.id || '',
       therapyId: service.therapyId || service.therapy?.id || '',
       roomNumber: service.roomNumber || '',
       date: service.date || '',
       time: service.time || '',
+      therapistIds: service.therapists?.map((t: any) => t.id) || [],
+      hasBathing: service.hasBathing || false,
+      therapyDurationMinutes: service.therapyDurationMinutes || 0,
+      bathingDurationMinutes: service.bathingDurationMinutes || 0,
+      cleaningDurationMinutes: service.cleaningDurationMinutes || 0,
+      totalDurationMinutes: service.totalDurationMinutes || 0
     };
+    
+    console.log('📝 Populating form with data:', service.totalDurationMinutes);
+    // Show previously split durations
+    if (service.totalDurationMinutes > 0) {
+      this.durationSplitVisible = true;
+      this.calculatedDurations = {
+        therapy: service.therapyDurationMinutes,
+        bath: service.bathingDurationMinutes,
+        cleaning: service.cleaningDurationMinutes,
+        total: service.totalDurationMinutes
+      };
+      console.log('✅ Loaded split durations:', this.calculatedDurations);
+    }
+
+    this.selectedTherapy = this.therapies.find(t => t.id == this.formData.therapyId);
 
     // this.fetchScheduleForSelectedDate();
     this.getAvailableRooms();
-    this.getAvailableTherapists();
+    // this.getAvailableTherapists();
+    this.updateAvailableTherapists()
     this.getAvailableTimeSlots();
     this.onDateChange();
     // this.formData.time = service.time || '';
@@ -109,7 +151,10 @@ export class TherapyFormComponent {
 
   loadTherapists() {
     this.therapyService.getAllTherapists().subscribe({
-      next: (res) => (this.therapists = res),
+      next: (res) => (this.therapists = res,
+        this.updateAvailableTherapists()
+      ),
+
       error: (err) => console.error('Error fetching therapists', err),
     });
   }
@@ -165,7 +210,7 @@ export class TherapyFormComponent {
     this.isLoading = true;
     this.formData.prn = Number(this.formData.prn);
     this.formData.doctorId = Number(this.formData.doctorId);
-    this.formData.therapistId = Number(this.formData.therapistId);
+    this.formData.therapistIds = this.formData.therapistIds.map((id: any) => Number(id));
     this.formData.therapyId = Number(this.formData.therapyId);
     this.formData.status = 'confirmed'
     this.formData.id = this.serviceData?.id || null;
@@ -199,7 +244,38 @@ export class TherapyFormComponent {
   }
 
   resetForm(form: NgForm) {
-    form.resetForm({ prefix: 'Mr.' });
+    this.formData = {
+      prn: '',
+      prefix: 'Mr.',
+      name: '',
+      phone: '',
+      email: '',
+      gender: '',
+      age: null,
+      doctorId: '',
+      therapistIds: [],   // ✔ reset multi-select
+      therapyId: '',
+      roomNumber: '',
+      date: '',
+      time: '',
+      hasBathing: false
+    };
+
+    this.availableRooms = [];
+    this.availableTimeSlots = [];
+    this.bookedSchedule = [];
+
+    this.durationSplitVisible = false;
+    this.calculatedDurations = {
+      therapy: 0,
+      bath: 0,
+      cleaning: 0,
+      total: 0
+    };
+
+    form.resetForm(this.formData);
+
+
   }
 
   bookedSchedule: any[] = [];
@@ -227,24 +303,76 @@ export class TherapyFormComponent {
   // }
 
   // Filter available therapists for selected time
+  // getAvailableTherapists(): any[] {
+  //   if (!this.formData.time) return this.therapists;
+
+  //   const bookedTherapists = this.bookedSchedule
+  //     .filter(a => a.time === this.formData.time)
+  //     .map(a => a.therapistId);
+
+  //   let available = this.therapists.filter(t => !bookedTherapists.includes(t.id));
+
+  //   // ✅ If editing, ensure the current therapist is included
+  //   if (this.serviceData?.therapistId &&
+  //     !available.some(t => t.id === this.formData.therapistId)) {
+  //     const currentTherapist = this.therapists.find(t => t.id === this.formData.therapistId);
+  //     if (currentTherapist) available = [currentTherapist, ...available];
+  //   }
+
+  //   return available;
+  // }
   getAvailableTherapists(): any[] {
     if (!this.formData.time) return this.therapists;
 
-    const bookedTherapists = this.bookedSchedule
-      .filter(a => a.time === this.formData.time)
-      .map(a => a.therapistId);
-
+    const bookedTherapists = this.bookedSchedule.flatMap(a =>
+      a.therapists?.map((t: any) => t.therapistId) || []
+    );
     let available = this.therapists.filter(t => !bookedTherapists.includes(t.id));
 
-    // ✅ If editing, ensure the current therapist is included
-    if (this.serviceData?.therapistId &&
-      !available.some(t => t.id === this.formData.therapistId)) {
-      const currentTherapist = this.therapists.find(t => t.id === this.formData.therapistId);
-      if (currentTherapist) available = [currentTherapist, ...available];
+    // EDIT MODE: keep selected therapists visible
+    if (this.serviceData?.therapists) {
+      const editTherapists = this.formData.therapistIds;
+      editTherapists.forEach((id: number) => {
+        const th = this.therapists.find(x => x.id === id);
+        if (th && !available.some(a => a.id === id)) {
+          available.unshift(th);
+        }
+      });
     }
 
     return available;
   }
+  updateAvailableTherapists() {
+
+    // 1️⃣ If time not selected → show all therapists (same as old logic)
+    if (!this.formData.time) {
+      this.availableTherapists = this.therapists;
+      return;
+    }
+    // 2️⃣ Get booked therapist IDs for THIS time only (same as old logic)
+    const bookedTherapists = this.bookedSchedule
+      .filter(a => a.time === this.formData.time)     // ⬅ THIS WAS MISSING
+      .flatMap(a => a.therapists?.map((t: any) => t.therapistId) || []);
+
+    // 3️⃣ Filter out booked therapists
+    let available = this.therapists.filter(t => !bookedTherapists.includes(t.id));
+
+    // 4️⃣ EDIT MODE → keep already selected therapists visible
+    if (this.serviceData?.therapists) {
+      this.formData.therapistIds.forEach((id: number) => {
+        const th = this.therapists.find(t => t.id === id);
+
+        if (th && !available.some(a => a.id === id)) {
+          available.unshift(th);
+        }
+      });
+    }
+
+    this.availableTherapists = available;
+  }
+
+
+
 
 
   // Filter available rooms for selected time
@@ -265,28 +393,71 @@ export class TherapyFormComponent {
     return available;
   }
 
+  // getAvailableTimeSlots(): string[] {
+  //   if (!this.formData.therapistIds.length || !this.formData.date) return [];
 
+  //   const therapistIds = this.formData.therapistIds.map((id: any) => Number(id));
+
+  //   const bookedTimes = this.bookedSchedule
+  //     .filter(a =>
+  //       a.therapists?.some((t: any) => therapistIds.includes(t.therapistId))
+  //     )
+  //     .map(a => a.time);
+
+  //   let available = this.timeSlots.filter(t => !bookedTimes.includes(t));
+
+  //   // EDIT MODE: keep selected time
+  //   if (this.serviceData?.time && !available.includes(this.formData.time)) {
+  //     available = [this.formData.time, ...available];
+  //   }
+
+  //   return available;
+  // }
 
   getAvailableTimeSlots(): string[] {
-    if (!this.formData.therapistId || !this.formData.date) return [];
+    if (!this.formData.therapistIds.length || !this.formData.date) return [];
 
-    const therapistId = Number(this.formData.therapistId);
+    const therapistIds = this.formData.therapistIds.map((id: any) => Number(id));
 
-    // Get all times already booked for this therapist on that date
     const bookedTimes = this.bookedSchedule
-      .filter(a => a.therapistId === therapistId)
+      .filter(a =>
+        a.therapists?.some((t: any) => therapistIds.includes(t.therapistId))
+      )
       .map(a => a.time);
 
-    // Filter out booked times normally
-    let available = this.timeSlots.filter(slot => !bookedTimes.includes(slot));
+    let available = this.timeSlots.filter(t => !bookedTimes.includes(t));
 
-    // ✅ If we’re editing (serviceData exists), include the current time in dropdown
+    // ----------------------------------------------------
+    // ⏳ FILTER OUT PAST TIMES IF DATE IS TODAY
+    // ----------------------------------------------------
+    const today = new Date();
+    const selected = new Date(this.formData.date);
+
+    const isToday =
+      today.getFullYear() === selected.getFullYear() &&
+      today.getMonth() === selected.getMonth() &&
+      today.getDate() === selected.getDate();
+
+    if (isToday) {
+      const nowMinutes = today.getHours() * 60 + today.getMinutes();
+
+      available = available.filter(timeStr => {
+        const [hh, mm] = timeStr.split(":").map(Number);
+        const slotMinutes = hh * 60 + mm;
+
+        return slotMinutes > nowMinutes; // Only future time slots
+      });
+    }
+
+    // KEEP CURRENT TIME IN EDIT MODE
     if (this.serviceData?.time && !available.includes(this.formData.time)) {
       available = [this.formData.time, ...available];
     }
 
     return available;
   }
+
+
 
 
   onTherapistChange() {
@@ -304,7 +475,7 @@ export class TherapyFormComponent {
       this.availableRooms = [];
       this.availableTimeSlots = [];
     }
-    if (this.formData.therapistId) this.fetchScheduleForSelectedDate();
+    if (this.formData.therapistIds.length > 0) this.fetchScheduleForSelectedDate();
   }
 
   onTimeChange() {
@@ -319,6 +490,7 @@ export class TherapyFormComponent {
     this.therapyService.getTherapyScheduleByDate(date).subscribe({
       next: (res) => {
         this.bookedSchedule = res;
+        console.log('Fetched booked schedule:', this.bookedSchedule);
         // After fetching schedule, re-evaluate available time slots & rooms
         this.availableTimeSlots = this.getAvailableTimeSlots();
         this.availableRooms = this.getAvailableRooms();
@@ -382,5 +554,57 @@ export class TherapyFormComponent {
     this.formData.prefix = prefix || ''
     this.prnSuggestions = false;
   }
+  onTherapyChange() {
+    const therapy = this.therapies.find(t => t.id == this.formData.therapyId);
+    this.selectedTherapy = therapy || null;
+
+    if (therapy) {
+      this.formData.hasBathing = false;   // reset bathing selection
+      this.calculateDurations();
+    }
+  }
+  calculateDurations(isEdit: boolean = false) {
+    const total = Number(this.formData.totalDurationMinutes);
+    if (!total || total <= 0) {
+      this.durationSplitVisible = false;
+      return;
+    }    
+  
+    let therapy = 0, bath = 0, cleaning = 0;
+  
+    if (this.formData.hasBathing) {
+      therapy = Math.round(total * 0.70);
+      bath = Math.round(total * 0.15);
+      cleaning = Math.round(total * 0.15);
+    } else {
+      therapy = Math.round(total * 0.85);
+      cleaning = Math.round(total * 0.15);
+      bath = 0;
+    }
+  
+    // If editing → use saved DB values
+    if (isEdit) {
+      therapy = this.formData.therapyDurationMinutes || therapy;
+      bath = this.formData.bathingDurationMinutes || bath;
+      cleaning = this.formData.cleaningDurationMinutes || cleaning;
+    }
+  
+    this.calculatedDurations = {
+      therapy,
+      bath,
+      cleaning,
+      total: therapy + bath + cleaning
+    };
+  
+    this.durationSplitVisible = true;
+  
+    // Save values into formData for backend
+    this.formData.therapyDurationMinutes = therapy;
+    this.formData.bathingDurationMinutes = bath;
+    this.formData.cleaningDurationMinutes = cleaning;
+    // this.formData.totalDurationMinutes = therapy + bath + cleaning;
+  }
+  
+  
 
 }

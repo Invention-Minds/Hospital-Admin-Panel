@@ -5,6 +5,9 @@ import * as FileSaver from 'file-saver';
 import { MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
 import { TherapyAppointment } from '../../services/therapy/therapy.service';
+import { EventService } from '../../services/event.service';
+import { Subscription, interval } from 'rxjs';
+import { environment } from '../../../environment/environment.prod';
 
 @Component({
   selector: 'app-therapist-appts',
@@ -12,8 +15,9 @@ import { TherapyAppointment } from '../../services/therapy/therapy.service';
   styleUrl: './therapist-appts.component.css'
 })
 export class TherapistApptsComponent {
-  constructor(private therapyService: TherapyService, private messageService: MessageService, private router: Router, private appointmentService: AppointmentConfirmService) {
-  
+  constructor(private therapyService: TherapyService, private messageService: MessageService,
+     private router: Router, private appointmentService: AppointmentConfirmService, private eventService: EventService) {
+
   }
   confirmedAppointments: any[] = [];
   filteredServices: any[] = [];
@@ -35,8 +39,11 @@ export class TherapistApptsComponent {
   @Output() reschedule = new EventEmitter<any>();
   activeComponent: string = 'confirmed';
   confirmedServices: any[] = [];
-  today:string = '';
+  today: string = '';
   username: string = localStorage.getItem('username') || 'Unknown User';
+  therapistId: any = localStorage.getItem('therapistId') || null;
+  private eventSource: EventSource | null = null;
+  private eventSubscription: Subscription | null = null;
 
 
   // Value entered by the user (could be Patient ID or Phone Number based on selection)
@@ -44,47 +51,64 @@ export class TherapistApptsComponent {
 
   // Selected date from calendar
   selectedDate: Date | null = null;
-ngOnInit(): void {
-this.fetchConfirmedAppointments();
-this.userId = localStorage.getItem('userid')
-  this.activeComponent = 'confirmed';
-}
+  ngOnInit(): void {
+    this.fetchConfirmedAppointments();
+    this.userId = localStorage.getItem('userid')
+    this.activeComponent = 'confirmed';
+    this.eventSubscription = this.eventService.consultationEvent$.subscribe((event) => {
+    });
+    this.eventSource = new EventSource(`${environment.apiUrl}/appointments/updates`);
 
-fetchConfirmedAppointments(): void {
-  this.isLoading = true
-  // const today = new Date();
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = (today.getMonth() + 1).toString().padStart(2, '0');
-  const day = today.getDate().toString().padStart(2, '0');
-  this.today = `${year}-${month}-${day}`;
-  this.userId = localStorage.getItem('userid')
-  this.therapyService.todayCheckedInTherapies(this.userId).subscribe({
-    next: (services: TherapyAppointment[]) => {
-      this.confirmedAppointments = services
-      this.confirmedAppointments.sort((a, b) => {
-        const dateA = new Date(a.createdAt!);
-        const dateB = new Date(b.createdAt!);
-        return dateB.getTime() - dateA.getTime();
-      });
-      this.filteredServices = [...this.confirmedAppointments];
-      console.log('Services processed successfully.');
-    },
-    error: (err) => {
-      // Handle the error if the API call fails
-      console.error('Error fetching services:', err);
-    },
-    complete: () => {
-      this.isLoading=false
-      // Optional: Actions to perform once the API call completes
-      console.log('TherapyAppointment fetching process completed.');
-    }
-  });
-  
-}
+    this.eventSource.addEventListener('load', (event: MessageEvent) => {
+      const type = JSON.parse(event.data);
+      // this.fetchLatestAds()
+
+    });
+    this.eventSource.addEventListener('therapistUpdate', (event: MessageEvent) => {
+      const type = JSON.parse(event.data);
+      if(type == this.therapistId){
+        this.fetchConfirmedAppointments()
+      }
+
+    });
+  }
+
+  fetchConfirmedAppointments(): void {
+    this.isLoading = true
+    // const today = new Date();
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = (today.getMonth() + 1).toString().padStart(2, '0');
+    const day = today.getDate().toString().padStart(2, '0');
+    this.today = `${year}-${month}-${day}`;
+    this.userId = localStorage.getItem('userid')
+
+    this.therapyService.todayCheckedInTherapies(this.userId).subscribe({
+      next: (services: TherapyAppointment[]) => {
+        this.confirmedAppointments = services
+        this.confirmedAppointments.sort((a, b) => {
+          const dateA = new Date(a.createdAt!);
+          const dateB = new Date(b.createdAt!);
+          return dateB.getTime() - dateA.getTime();
+        });
+        this.filteredServices = [...this.confirmedAppointments];
+        console.log('Services processed successfully.');
+      },
+      error: (err) => {
+        // Handle the error if the API call fails
+        console.error('Error fetching services:', err);
+      },
+      complete: () => {
+        this.isLoading = false
+        // Optional: Actions to perform once the API call completes
+        console.log('TherapyAppointment fetching process completed.');
+      }
+    });
+
+  }
 
 
-onSearch(): void {
+  onSearch(): void {
 
     this.filteredServices = this.confirmedAppointments.filter((service) => {
       let matches = true;
@@ -106,7 +130,7 @@ onSearch(): void {
               .includes(this.searchValue.toLowerCase());
             break;
         }
-        
+
       }
 
       // Filter by date range
@@ -116,11 +140,11 @@ onSearch(): void {
         const endDate = this.selectedDateRange[1]
           ? new Date(this.selectedDateRange[1])
           : startDate; // Use the same date for both start and end if it's a single date
-      
+
         // Normalize endDate to include the full day
         const normalizedEndDate = new Date(endDate);
         normalizedEndDate.setHours(23, 59, 59, 999);
-      
+
         if (startDate.getTime() === normalizedEndDate.getTime()) {
           // Single date selected
           matches =
@@ -134,7 +158,7 @@ onSearch(): void {
             serviceDate <= normalizedEndDate; // Match within the range
         }
       }
-      
+
       // Filter by specific date
       if (this.selectedDate) {
         const singleDate = new Date(this.selectedDate);
@@ -142,56 +166,56 @@ onSearch(): void {
           matches &&
           new Date(service.appointmentDate).toDateString() === singleDate.toDateString();
       }
-      
+
       console.log(matches);
       return matches;
-      
+
     });
   }
 
 
-refresh() {
-  this.selectedDateRange = [];
-  this.filteredServices = [...this.confirmedAppointments];
-}
-downloadData(): void {
-  if (this.filteredServices.length === 0) {
-    console.warn('No data to download');
-    return;
+  refresh() {
+    this.selectedDateRange = [];
+    this.filteredServices = [...this.confirmedAppointments];
   }
-  const csvContent = this.convertToCSV(this.filteredServices);
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  FileSaver.saveAs(blob, 'confirmed_appointments.csv');
-}
+  downloadData(): void {
+    if (this.filteredServices.length === 0) {
+      console.warn('No data to download');
+      return;
+    }
+    const csvContent = this.convertToCSV(this.filteredServices);
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    FileSaver.saveAs(blob, 'confirmed_appointments.csv');
+  }
 
-// Utility to Convert JSON to CSV
-private convertToCSV(data: TherapyAppointment[]): string {
-  const headers = Object.keys(data[0]).join(',');
-  const rows = data
-    .map((row) =>
-      Object.values(row)
-        .map((value) => `"${value}"`)
-        .join(',')
-    )
-    .join('\n');
+  // Utility to Convert JSON to CSV
+  private convertToCSV(data: TherapyAppointment[]): string {
+    const headers = Object.keys(data[0]).join(',');
+    const rows = data
+      .map((row) =>
+        Object.values(row)
+          .map((value) => `"${value}"`)
+          .join(',')
+      )
+      .join('\n');
 
-  return `${headers}\n${rows}`;
-}
-// downloadLastWeekData(): void {
-//   // Implement logic to download last week's data
-//   console.log('Downloading last week\'s data...');
-// }
+    return `${headers}\n${rows}`;
+  }
+  // downloadLastWeekData(): void {
+  //   // Implement logic to download last week's data
+  //   console.log('Downloading last week\'s data...');
+  // }
 
-// Method to clear input fields
-onClear() {
-  this.searchValue = '';
-  this.selectedSearchOption = 'firstName';
-  this.selectedDateRange = [];
-  this.filteredServices = [...this.confirmedAppointments];
-}
+  // Method to clear input fields
+  onClear() {
+    this.searchValue = '';
+    this.selectedSearchOption = 'firstName';
+    this.selectedDateRange = [];
+    this.filteredServices = [...this.confirmedAppointments];
+  }
 
   sortedAppointments() {
-    
+
     if (!this.sortColumn) {
       // If no sorting column is selected, return the appointments as is (unsorted)
       return [...this.filteredServices];
@@ -252,38 +276,38 @@ onClear() {
       this.sortColumn = column;
       this.sortDirection = 'asc';
     }
-    
+
     this.filteredServices.sort((a, b) => {
       const valueA = a[column];
       const valueB = b[column];
-    
+
       // Handle appointmentDate separately
       if (column === 'date') {
         const dateA = new Date(valueA as string); // Convert string to Date
         const dateB = new Date(valueB as string);
-    
+
         return this.sortDirection === 'asc'
           ? dateA.getTime() - dateB.getTime()
           : dateB.getTime() - dateA.getTime();
       }
-    
+
       // Sort strings
       if (typeof valueA === 'string' && typeof valueB === 'string') {
         return this.sortDirection === 'asc'
           ? valueA.localeCompare(valueB)
           : valueB.localeCompare(valueA);
       }
-    
+
       // Sort numbers
       if (typeof valueA === 'number' && typeof valueB === 'number') {
         return this.sortDirection === 'asc' ? valueA - valueB : valueB - valueA;
       }
-    
+
       return 0; // Default case
     });
-    
+
     this.currentPage = 1; // Reset to the first page after sorting
-  }    
+  }
   completeAppointment(service: any): void {
     const payload = {
       entryDone: true,
@@ -297,7 +321,7 @@ onClear() {
       }
     });
 
-  // Update UI
+    // Update UI
 
   }
   startTherapy(service: any): void {
@@ -305,7 +329,7 @@ onClear() {
       therapyStarted: true,
       startedBy: this.userId
     };
-  
+
     this.therapyService.updateTherapyProgress(service.id, payload).subscribe({
       next: () => {
         this.messageService.add({ severity: 'info', summary: 'Started', detail: 'Therapy started!' });
@@ -318,7 +342,7 @@ onClear() {
       therapyFinished: true,
       finishedBy: this.userId
     };
-  
+
     this.therapyService.updateTherapyProgress(service.id, payload).subscribe({
       next: () => {
         this.messageService.add({ severity: 'success', summary: 'Completed', detail: 'Therapy finished!' });
@@ -329,9 +353,10 @@ onClear() {
   cleanRoom(service: any): void {
     const payload = {
       cleanedAfterUse: true,
-      cleanedAfterUseAt: new Date()
+      cleanedAfterUseAt: new Date(),
+      cleanedAfterUseBy: this.userId
     };
-  
+
     this.therapyService.updateTherapyProgress(service.id, payload).subscribe({
       next: () => {
         this.messageService.add({ severity: 'info', summary: 'Cleaned', detail: 'Room cleaned successfully!' });
@@ -339,10 +364,51 @@ onClear() {
       }
     });
   }
+  // THERAPY END BUTTON
+endTherapy(service: any): void {
+  const payload = {
+    therapyEnded: true,
+    therapyEndedAt: new Date(),
+    therapyEndedBy: this.userId
+  };
+
+  this.therapyService.updateTherapyProgress(service.id, payload).subscribe({
+    next: () => {
+      this.messageService.add({
+        severity: 'info',
+        summary: 'Therapy Ended',
+        detail: 'Therapy work has been completed!'
+      });
+      this.fetchConfirmedAppointments();
+    }
+  });
+}
+
+
+// CLEANING START BUTTON
+startCleaning(service: any): void {
+  const payload = {
+    cleaningEnded: true,
+    cleaningEndedAt: new Date(),
+    cleaningEndedBy: this.userId
+  };
+
+  this.therapyService.updateTherapyProgress(service.id, payload).subscribe({
+    next: () => {
+      this.messageService.add({
+        severity: 'info',
+        summary: 'Cleaning Started',
+        detail: 'Cleaning process has started!'
+      });
+      this.fetchConfirmedAppointments();
+    }
+  });
+}
+
   postponeTherapy(appointment: any): void {
     const serviceId = appointment.id;
     if (!serviceId || appointment.checkedOut) return;
-  
+
     const payload = {
       postponed: true,
       postponedBy: this.userId,
@@ -350,7 +416,7 @@ onClear() {
       therapyStarted: false,
       therapyFinished: false
     };
-  
+
     this.therapyService.updateTherapyProgress(serviceId, payload).subscribe({
       next: (response) => {
         this.messageService.add({
@@ -371,17 +437,17 @@ onClear() {
       }
     });
   }
-  
-      
+
+
   cancelAppointment(service: any): void {
     if (!service.id) return;
-    if(service.checkedOut){
+    if (service.checkedOut) {
       this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Cannot cancel entry done appointments!' });
       return;
     }
 
     this.isLoading = true;
-    
+
 
     this.therapyService.cancelTherapyAppointment(service.id, this.username).subscribe({
       next: (response) => {
@@ -402,7 +468,7 @@ onClear() {
           appointmentStatus: 'Cancelled',
           requestVia: service.requestVia
         }
-        const updateService = {...service}
+        const updateService = { ...service }
 
         // const smsPayload = {
         //   patientName: service.firstName + ' ' + service.lastName,
@@ -508,10 +574,10 @@ onClear() {
   ngOnDestroy(): void {
     // Unlock the service on component destroy if locked
     console.log('Destroying confirmed component...', this.activeComponent);
-    if(this.activeServiceId && this.activeComponent !== 'form'){ 
+    if (this.activeServiceId && this.activeComponent !== 'form') {
       // this.unlockService();
     }
   }
- 
+
 
 }

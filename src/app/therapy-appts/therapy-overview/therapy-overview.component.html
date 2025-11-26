@@ -12,7 +12,8 @@
       </div>
       <div class="card-1" 
       [ngClass]="{'active-card': activeComponent === 'analytics'}"
-      (click)="showAnalytics()">
+      (click)="showAnalytics()" 
+      *ngIf="role === 'admin' || role === 'doctor'">
         <div class="card-icon">
           <img src="/est-analytics.svg" alt="OPD Icon" />
         </div>

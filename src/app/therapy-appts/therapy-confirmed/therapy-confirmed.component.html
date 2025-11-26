@@ -94,7 +94,7 @@
                     <td>{{ service.date | date:'dd-MM-yyyy' }}</td>
                     <td>{{ service.time }}</td>
                     <td>{{service.doctorName}}</td>
-                    <td>{{service.therapistName}}</td>
+                    <td>{{ getTherapistNames(service) }}</td>                                       
                     <td>{{service.roomNumber}}</td>
                     <td>
                         <span class="sms-status" [ngClass]="{'sms-sent': service.smsSent, 'sms-not-sent': !service.smsSent}">
@@ -110,9 +110,9 @@
                         </span>
                       </td>
                       <td>
-                        <span class="sms-status" [ngClass]="{'sms-sent': service.messageSent, 'sms-not-sent': !service.messageSent}">
-                          <img *ngIf="service.messageSent" src="icons/sent.svg" alt="Sent">
-                          <img *ngIf="!service.messageSent" src="icons/not-sent.svg" alt="Not Sent">
+                        <span class="sms-status" [ngClass]="{'sms-sent': service.whatsappSent, 'sms-not-sent': !service.whatsappSent}">
+                          <img *ngIf="service.whatsappSent" src="icons/sent.svg" alt="Sent">
+                          <img *ngIf="!service.whatsappSent" src="icons/not-sent.svg" alt="Not Sent">
                         </span>
                       </td>
                       <!-- <td>

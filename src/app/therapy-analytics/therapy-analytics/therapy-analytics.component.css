@@ -700,3 +700,12 @@
     display: block;
   }
   
+  .dashboard-filter{
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    /* margin-bottom: 20px; */
+    padding-right: 60px;
+  }

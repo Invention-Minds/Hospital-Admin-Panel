@@ -74,7 +74,7 @@ export class TherapyChannelComponent {
 
   ngOnInit() {
     this.updateDateTime();
-    this.fetchLatestAds()
+    // this.fetchLatestAds()
     this.startPopupRotation();
     this.fetchCheckedInAppointments();
 
@@ -94,16 +94,19 @@ export class TherapyChannelComponent {
     this.today = `${year}-${month}-${day}`;
 
     // Fetch channel ID from the URL and fetch doctors for that channel
-    const channelId = this.route.snapshot.paramMap.get('channelId');
-    if (channelId) {
-    }
+
     this.eventSubscription = this.eventService.consultationEvent$.subscribe((event) => {
     });
     this.eventSource = new EventSource(`${environment.apiUrl}/appointments/updates`);
 
-    this.eventSource.addEventListener('loadTv', (event: MessageEvent) => {
+    this.eventSource.addEventListener('load', (event: MessageEvent) => {
       const type = JSON.parse(event.data);
-      this.fetchLatestAds()
+      // this.fetchLatestAds()
+
+    });
+    this.eventSource.addEventListener('loadTherapyTv', (event: MessageEvent) => {
+      const type = JSON.parse(event.data);
+      this.fetchCheckedInAppointments()
 
     });
 
@@ -114,7 +117,8 @@ export class TherapyChannelComponent {
     this.therapyService.todayCheckedInTherapiesChannel().subscribe({
       next: (data) => {
         this.loading = false;
-        this.therapyAppointments = data;
+        this.therapyAppointments = data.filter((appt: any) => !appt.therapyFinished);
+        console.log('Fetched therapy appointments:', this.therapyAppointments);
         this.groupByRoom();
       },
       error: (err) => {
@@ -127,7 +131,8 @@ export class TherapyChannelComponent {
   groupByRoom() {
     const grouped: { [key: string]: any } = {};
   
-    // 🧩 Step 1: Group appointments by room number
+    this.therapyAppointments = this.therapyAppointments.filter(a => !a.therapyFinished);
+  
     this.therapyAppointments.forEach(appt => {
       const room = appt.roomNumber || 'Unknown';
   
@@ -142,19 +147,20 @@ export class TherapyChannelComponent {
       grouped[room].patients.push(appt);
     });
   
-    // 🧠 Step 2: For each room, sort and mark statuses
     Object.keys(grouped).forEach(room => {
       const roomData = grouped[room];
   
-      // Sort appointments by time ascending (e.g., 09:00 → 17:00)
+      // Sort by time ascending
       roomData.patients.sort((a:any, b:any) => a.time.localeCompare(b.time));
   
-      // Find the index of the currently entered patient (entryDone)
-      const currentIndex = roomData.patients.findIndex((p:any) => p.entryDone);
+      // ACTIVE INDEX: therapyStarted > entryDone > cleanedAfterUse
+      let activeIndex = roomData.patients.findIndex((p:any) => p.therapyStarted);
+      if (activeIndex === -1) activeIndex = roomData.patients.findIndex((p:any) => p.entryDone);
+      if (activeIndex === -1) activeIndex = roomData.patients.findIndex((p:any) => p.cleanedAfterUse);
   
-      // Map statuses for each appointment
-      roomData.patients.forEach((appt:any, index:any) => {
-        const { displayStatus, color } = this.mapTherapyStatus(appt, index, currentIndex, roomData.patients);
+      // Map statuses
+      roomData.patients.forEach((appt:any, i:any) => {
+        const { displayStatus, color } = this.mapTherapyStatus(appt, i, activeIndex, roomData.patients);
         appt.displayStatus = displayStatus;
         appt.statusColor = color;
       });
@@ -162,7 +168,6 @@ export class TherapyChannelComponent {
       grouped[room] = roomData;
     });
   
-    // 🧩 Step 3: Convert into array of pairs for carousel display
     const roomsArray = Object.values(grouped);
     this.therapyRoomGroups = [];
   
@@ -170,6 +175,7 @@ export class TherapyChannelComponent {
       this.therapyRoomGroups.push(roomsArray.slice(i, i + 2));
     }
   }
+  
   
   
 
@@ -331,30 +337,61 @@ export class TherapyChannelComponent {
     const target = event.target as HTMLImageElement;
     target.src = '/doctor-image.jpg'; // Fallback image
   }
-  mapTherapyStatus(appt: any, index: number, currentIndex: number, appointments: any[]) {
-    if (appt.cleanedAfterUse) {
-      return { displayStatus: 'Cleaning Initiated', color: 'blue' };
+  mapTherapyStatus(appt: any, index: number, activeIndex: number, appointments: any[]) {
+    // 5️⃣ Remove finished appointments from display (you already filter outside)
+    if (appt.therapyFinished) {
+      return { displayStatus: '', color: '' };
     }
   
+    // 4️⃣ Cleaning after use
+    if (appt.cleanedAfterUse) {
+      return { displayStatus: 'Cleaning Completed', color: 'blue' };
+    }
+
+    if (appt.cleaningEnded) {
+      return { displayStatus: 'Cleaning Started', color: 'teal' };
+    }
+  
+    // 4️⃣ NEW: Therapy Ended
+    if (appt.therapyEnded) {
+      return { displayStatus: 'Therapy Ended', color: 'pink' };
+    }
+  
+  
+    // 3️⃣ Therapy Started
     if (appt.therapyStarted) {
       return { displayStatus: 'Started', color: 'purple' };
     }
   
+    // 2️⃣ Patient already entered
     if (appt.entryDone) {
       return { displayStatus: 'Patient In', color: 'green' };
     }
   
-    if (appt.postPond || appt.status?.toLowerCase() === 'postponed') {
+    // 6️⃣ Postponed
+    if (appt.postponed || appt.status?.toLowerCase() === 'postponed') {
       return { displayStatus: 'Pending', color: 'yellow' };
     }
   
-    // ✅ Identify the next patient after entryDone
-    if (currentIndex !== -1 && index === currentIndex + 1) {
+    // 1️⃣ Identify FIRST NEXT appointment
+    // activeIndex = entryDoneIndex or therapyStartedIndex or cleanedIndex or -1 if none
+    const nextIndex = activeIndex !== -1 ? activeIndex + 1 : 0;
+  
+    if (index === nextIndex) {
       return { displayStatus: 'Next', color: 'orange' };
     }
   
+    // Default: Checked-In
     return { displayStatus: 'Checked-In', color: 'navy-blue' };
   }
   
+  getTherapistNames(patient: any): string {
+    if (!patient.therapists || patient.therapists.length === 0) return '-';
+
+    return patient.therapists
+        .map((t: any) => t.therapist?.name || '')
+        .join(', ');
+}
+
   
 }

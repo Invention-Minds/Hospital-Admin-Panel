@@ -1,111 +1,200 @@
+<div class="dashboard-filter">
+  <p-calendar [(ngModel)]="dashboardDateRange" selectionMode="range" dateFormat="dd/mm/yy"
+    placeholder="Select Date Range" (ngModelChange)="filterDashboard()">
+  </p-calendar>
+
+  <svg pTooltip="Refresh" (click)="filterLastDays(7)" class="reverse" xmlns="http://www.w3.org/2000/svg" width="2.5em"
+    height="2.5em" viewBox="-1.5 -2.5 24 24">
+    <path fill="currentColor"
+      d="m4.859 5.308l1.594-.488a1 1 0 0 1 .585 1.913l-3.825 1.17a1 1 0 0 1-1.249-.665L.794 3.413a1 1 0 1 1 1.913-.585l.44 1.441C5.555.56 10.332-1.035 14.573.703a9.38 9.38 0 0 1 5.38 5.831a1 1 0 1 1-1.905.608A7.381 7.381 0 0 0 4.86 5.308zm12.327 8.195l-1.775.443a1 1 0 1 1-.484-1.94l3.643-.909a1 1 0 0 1 .61-.08a1 1 0 0 1 .84.75l.968 3.88a1 1 0 0 1-1.94.484l-.33-1.322a9.381 9.381 0 0 1-16.384-1.796l-.26-.634a1 1 0 1 1 1.851-.758l.26.633a7.381 7.381 0 0 0 13.001 1.25z" />
+  </svg>
+
+</div>
+
 <div class="chart-row">
+  <div class="chart-container-1">
+    <div class="chart-header">
+      <div class="chart-title">Therapy Type</div>
+
+      <div class="chart-buttons">
+        <button class="button" (click)="openTherapyDetails('therapyType')">View Details</button>
+        <button class="button" (click)="showTherapyMore('therapyType')">View More</button>
+      </div>
+    </div>
+
+    <p-chart type="bar" [data]="therapyChart"></p-chart>
+  </div>
+
+  <div class="chart-container">
+    <div class="chart-header">
+      <div class="chart-title">Top Therapists</div>
+
+      <div class="chart-buttons">
+        <button class="button" (click)="openTherapyDetails('therapistWise')">View Details</button>
+        <button class="button" (click)="showTherapyMore('therapistWise')">View More</button>
+      </div>
+    </div>
+    <p-chart type="pie" [data]="therapistChart"></p-chart>
+  </div>
+</div>
+<div class="chart-row">
+
+  <div class="chart-container">
+    <div class="chart-header">
+      <div class="chart-title">Room Utilization</div>
+
+      <div class="chart-buttons">
+        <button class="button" (click)="openTherapyDetails('roomWise')">View Details</button>
+        <button class="button" (click)="showTherapyMore('roomWise')">View More</button>
+      </div>
+    </div>
+    <p-chart type="doughnut" [data]="roomChart"></p-chart>
+  </div>
+
+
+  <!-- Appointment Trend -->
+  <div class="chart-container-1">
+    <div class="chart-header">
+      <div class="chart-title">Appointments Over Time</div>
+
+      <div class="chart-buttons">
+        <button class="button" (click)="openTherapyDetails('dailyTrend')">View Details</button>
+        <button class="button" (click)="showTherapyMore('dailyTrend')">View More</button>
+      </div>
+      </div>
+      <p-chart *ngIf="trendChart" type="line" [data]="trendChart"
+        [options]="{ responsive: true, maintainAspectRatio: false }"></p-chart>
+    </div>
+  </div>
+  <!-- Third Row -->
+  <div class="chart-row">
+    <!-- Average Duration -->
     <div class="chart-container-1">
       <div class="chart-header">
-        <div class="chart-title">Therapy Type Popularity</div>
+        <div class="chart-title">Average Therapy Duration</div>
+
+        <div class="chart-buttons">
+          <button class="button" (click)="openTherapyDetails('avgDuration')">View Details</button>
+          <button class="button" (click)="showTherapyMore('avgDuration')">View More</button>
+        </div>
       </div>
-      <p-chart type="bar" [data]="therapyChart"></p-chart>
+      <p-chart *ngIf="avgDurationChart" type="bar" [data]="avgDurationChart"
+        [options]="{ responsive: true, maintainAspectRatio: false }"></p-chart>
     </div>
-  
     <div class="chart-container">
       <div class="chart-header">
-        <div class="chart-title">Top Therapists</div>
+        <div class="chart-title">Completion vs Cancellation</div>
+
+        <div class="chart-buttons">
+          <button class="button" (click)="openTherapyDetails('completion')">View Details</button>
+          <button class="button" (click)="showTherapyMore('completion')">View More</button>
+        </div>
       </div>
-      <p-chart type="pie" [data]="therapistChart"></p-chart>
+      <p-chart *ngIf="completionChart" type="pie" [data]="completionChart"
+        [options]="{ responsive: true, plugins: { legend: { position: 'bottom' } } }"></p-chart>
     </div>
+  </div>
+
+  <!-- Fourth Row -->
+  <div class="chart-row">
+    <!-- Gender Distribution -->
+    <div class="chart-container-2">
+      <div class="chart-header">
+        <div class="chart-title">Gender Distribution</div>
+
+        <div class="chart-buttons">
+          <button class="button" (click)="openTherapyDetails('genderWise')">View Details</button>
+          <button class="button" (click)="showTherapyMore('genderWise')">View More</button>
+        </div>
+      </div>
+      <p-chart *ngIf="genderChart" type="pie" [data]="genderChart"
+        [options]="{ responsive: true, plugins: { legend: { position: 'bottom' } } }"></p-chart>
     </div>
-    <div class="chart-row">
-          
-    <div class="chart-container">
-        <div class="chart-header">
-          <div class="chart-title">Room Utilization</div>
-        </div>
-        <p-chart type="doughnut" [data]="roomChart"></p-chart>
-      </div>
-  
 
-                <!-- Appointment Trend -->
-                <div class="chart-container-1">
-                    <div class="chart-header">
-                      <div class="chart-title">Appointments Over Time</div>
-                    </div>
-                    <p-chart
-                      *ngIf="trendChart"
-                      type="line"
-                      [data]="trendChart"
-                      [options]="{ responsive: true, maintainAspectRatio: false }"
-                    ></p-chart>
-                  </div>
+    <!-- Room Cleaning Efficiency -->
+    <div class="chart-container-2">
+      <div class="chart-header">
+        <div class="chart-title">Room Cleaning Efficiency</div>
+
+        <div class="chart-buttons">
+          <button class="button" (click)="openTherapyDetails('cleaning')">View Details</button>
+          <button class="button" (click)="showTherapyMore('cleaning')">View More</button>
+        </div>
+      </div>
+      <p-chart *ngIf="cleaningChart" type="doughnut" [data]="cleaningChart"
+        [options]="{ responsive: true, plugins: { legend: { position: 'bottom' } } }"></p-chart>
     </div>
-          <!-- Third Row -->
-    <div class="chart-row">
-        <!-- Average Duration -->
-        <div class="chart-container-1">
-          <div class="chart-header">
-            <div class="chart-title">Average Therapy Duration (Minutes)</div>
-          </div>
-          <p-chart
-            *ngIf="avgDurationChart"
-            type="bar"
-            [data]="avgDurationChart"
-            [options]="{ responsive: true, maintainAspectRatio: false }"
-          ></p-chart>
+    <div class="chart-container-2">
+      <div class="chart-header">
+        <div class="chart-title">Check-in Analysis</div>
+
+        <div class="chart-buttons">
+          <button class="button" (click)="openTherapyDetails('checkin')">View Details</button>
+          <button class="button" (click)="showTherapyMore('checkin')">View More</button>
         </div>
-        <div class="chart-container">
-            <div class="chart-header">
-              <div class="chart-title">Completion vs Cancellation</div>
-            </div>
-            <p-chart
-              *ngIf="completionChart"
-              type="pie"
-              [data]="completionChart"
-              [options]="{ responsive: true, plugins: { legend: { position: 'bottom' } } }"
-            ></p-chart>
-          </div>
       </div>
-    
-      <!-- Fourth Row -->
-      <div class="chart-row">
-        <!-- Gender Distribution -->
-        <div class="chart-container-2">
-          <div class="chart-header">
-            <div class="chart-title">Patient Gender Distribution</div>
-          </div>
-          <p-chart
-            *ngIf="genderChart"
-            type="pie"
-            [data]="genderChart"
-            [options]="{ responsive: true, plugins: { legend: { position: 'bottom' } } }"
-          ></p-chart>
-        </div>
-    
-        <!-- Room Cleaning Efficiency -->
-        <div class="chart-container-2">
-          <div class="chart-header">
-            <div class="chart-title">Room Cleaning Efficiency</div>
-          </div>
-          <p-chart
-            *ngIf="cleaningChart"
-            type="doughnut"
-            [data]="cleaningChart"
-            [options]="{ responsive: true, plugins: { legend: { position: 'bottom' } } }"
-          ></p-chart>
-        </div>
-        <div class="chart-container-2">
-            <div class="chart-header">
-              <div class="chart-title">Check-in Analysis</div>
-            </div>
-            <p-chart
-              *ngIf="checkinChart"
-              type="doughnut"
-              [data]="checkinChart"
-              [options]="{ responsive: true, plugins: { legend: { position: 'bottom' } } }"
-            ></p-chart>
-          </div>
+      <p-chart *ngIf="checkinChart" type="doughnut" [data]="checkinChart"
+        [options]="{ responsive: true, plugins: { legend: { position: 'bottom' } } }"></p-chart>
+    </div>
+  </div>
+
+
+
+
+
+
+  <div class="popup-overlay" [class.show]="showPopup">
+    <div class="popup-content">
+      <div class="popup-header">
+        <h3 class="chart-title">{{ popupTitle }}</h3>
+        <button class="popup-close" (click)="showPopup=false; resetPopupFilters()">×</button>
       </div>
-    
 
+      <div class="popup-filters">
+        <p-calendar [(ngModel)]="popupDateRange" class="custom-calendar" selectionMode="range" dateFormat="dd/mm/yy"
+          (ngModelChange)="applyPopupFilters()" placeholder="Select Date Range"></p-calendar>
 
-  
+        <svg pTooltip="Refresh" (click)="resetPopupFilters()" class="reverse" xmlns="http://www.w3.org/2000/svg"
+          width="2.5em" height="2.5em" viewBox="-1.5 -2.5 24 24">
+          <path fill="currentColor"
+            d="m4.859 5.308l1.594-.488a1 1 0 0 1 .585 1.913l-3.825 1.17a1 1 0 0 1-1.249-.665L.794 3.413a1 1 0 1 1 1.913-.585l.44 1.441C5.555.56 10.332-1.035 14.573.703a9.38 9.38 0 0 1 5.38 5.831a1 1 0 1 1-1.905.608A7.381 7.381 0 0 0 4.86 5.308zm12.327 8.195l-1.775.443a1 1 0 1 1-.484-1.94l3.643-.909a1 1 0 0 1 .61-.08a1 1 0 0 1 .84.75l.968 3.88a1 1 0 0 1-1.94.484l-.33-1.322a9.381 9.381 0 0 1-16.384-1.796l-.26-.634a1 1 0 1 1 1.851-.758l.26.633a7.381 7.381 0 0 0 13.001 1.25z" />
+        </svg>
+      </div>
 
+      <table class="popup-table">
+        <thead>
+          <tr>
+            <th *ngFor="let col of popupTableColumns">{{ col.header }}</th>
+          </tr>
+        </thead>
 
-  
+        <tbody>
+          <tr *ngFor="let row of popupTableData">
+            <td *ngFor="let col of popupTableColumns">{{ row[col.field] }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="popup-overlay" [class.show]="showChartPopup">
+    <div class="popup-content">
+      <div class="popup-header">
+        <h3 class="chart-title">{{ chartPopupTitle }}</h3>
+        <button class="popup-close" (click)="showChartPopup=false">×</button>
+      </div>
+
+      <div class="popup-filters">
+        <!-- <p-calendar [(ngModel)]="chartPopupDateRange" selectionMode="range" class="custom-calendar"
+                dateFormat="dd/mm/yy" (ngModelChange)="applyChartPopupFilters()"
+                placeholder="Select Date Range"></p-calendar> -->
+
+        <!-- <svg pTooltip="Refresh" (click)="resetChartPopupFilters()" class="reverse"
+                xmlns="http://www.w3.org/2000/svg" width="2.5em" height="2.5em" viewBox="-1.5 -2.5 24 24">
+                <path fill="currentColor"
+                    d="m4.859 5.308l1.594-.488a1 1 0 0 1 .585 1.913l-3.825 1.17a1 1 0 0 1-1.249-.665L.794 3.413a1 1 0 1 1 1.913-.585l.44 1.441C5.555.56 10.332-1.035 14.573.703a9.38 9.38 0 0 1 5.38 5.831a1 1 0 1 1-1.905.608A7.381 7.381 0 0 0 4.86 5.308zm12.327 8.195l-1.775.443a1 1 0 1 1-.484-1.94l3.643-.909a1 1 0 0 1 .61-.08a1 1 0 0 1 .84.75l.968 3.88a1 1 0 0 1-1.94.484l-.33-1.322a9.381 9.381 0 0 1-16.384-1.796l-.26-.634a1 1 0 1 1 1.851-.758l.26.633a7.381 7.381 0 0 0 13.001 1.25z" />
+            </svg> -->
+      </div>
+
+      <p-chart [type]="chartPopupDisplayType" [data]="chartPopupData"></p-chart>
+    </div>
+  </div>

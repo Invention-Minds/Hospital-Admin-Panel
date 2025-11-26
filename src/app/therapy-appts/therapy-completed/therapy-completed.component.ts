@@ -296,5 +296,10 @@ export class TherapyCompletedComponent {
       // this.unlockService();
     }
   }
-
+  getTherapistNames(service: any): string {
+    if (!service.therapists || service.therapists.length === 0) {
+      return "—";
+    }
+    return service.therapists.map((t: any) => t.name).join(", ");
+  }
 }

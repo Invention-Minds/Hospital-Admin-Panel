@@ -23,7 +23,7 @@
         </div>
     </div>
 
-    <div *ngIf="!loading; else loaderTemplate" class="carousel-container">
+    <div class="carousel-container">
         <div *ngIf="therapyRoomGroups && therapyRoomGroups.length > 0; else noRoomsTemplate" class="carousel-slide"
             [style.transform]="'translateX(-' + slideIndex * 100 + '%)'"
             [style.transition]="'transform 1s ease-in-out'">
@@ -66,7 +66,19 @@
                                     </span>
                                 </td>
                                 <td style="text-align: center;">{{ patient.therapy?.name || '-' }}</td>
-                                <td style="text-align: center;">{{ patient.therapist?.name || '-' }}</td>
+                                <td class="therapist-name-cell">
+                                    <span 
+                                        *ngIf="getTherapistNames(patient).length > 12" 
+                                        class="scrolling-name">
+                                        {{ getTherapistNames(patient) }}
+                                    </span>
+                                
+                                    <span 
+                                        *ngIf="getTherapistNames(patient).length <= 12">
+                                        {{ getTherapistNames(patient) || '-' }}
+                                    </span>
+                                </td>
+                                
                                 <!-- 🕒 Display Time -->
                                 <td style="text-align: center;">{{ patient.time }}</td>
                                 <td style="text-align: center;">
@@ -82,7 +94,7 @@
         </div>
         <ng-template #noRoomsTemplate>
             <div class="no-doctor-message">
-                Currently No Doctor in Queue
+                Currently No Therapies in Queue
                 <div class="animation">
                     <svg version="1.1" id="Hospital_1_" xmlns="http://www.w3.org/2000/svg"
                         xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 1200 1200"

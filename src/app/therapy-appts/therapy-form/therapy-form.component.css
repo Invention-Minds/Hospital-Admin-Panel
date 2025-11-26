@@ -77,6 +77,22 @@
   .full-width {
     width: 696px;
   }
+
+  ::ng-deep .custom-dropdown .p-multiselect{
+    width: 100% !important;
+    background-color: transparent !important;
+    /* padding: 10px !important; */
+    color: #000 !important;
+    font-family: Kanit;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 300;
+    line-height: normal;
+    border: 1px solid #b4b6ba !important;
+    border-radius: 4px !important;
+    background: #f0f3ff !important;
+
+  }
   
   .form-input.ng-invalid.ng-touched {
     border: 1px solid #ff4d4d; /* Red border for invalid inputs */
@@ -425,6 +441,28 @@
       bottom: 100%;
       animation: l8-1 3s infinite linear;
     }
+    .checkbox-group {
+      display: flex;
+      align-items: flex-start;
+      padding-top: 14px; /* aligns vertically with input */
+    }
+    
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      font-size: 14px;
+      color: #444;
+      user-select: none;
+    }
+    
+    .checkbox-container input {
+      margin-right: 8px;
+      width: 18px;
+      height: 18px;
+      accent-color: #007bff; /* blue color */
+    }
+    
     @keyframes l8-0{
        0%,
        12.5% {background-position: calc(0*100%/6) 0   ,calc(1*100%/6)    0,calc(2*100%/6)    0,calc(3*100%/6)    0,calc(4*100%/6)    0,calc(5*100%/6)    0,calc(6*100%/6) 0}

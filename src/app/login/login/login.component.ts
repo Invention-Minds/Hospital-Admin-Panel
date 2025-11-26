@@ -115,8 +115,11 @@ export class LoginComponent implements OnInit {
           else if(response.user.subAdminType === 'Lab Coordinator'){
             this.router.navigate(['/lab'])
           }
-          else if(this.subAdminType === 'Therapist'){
+          else if(response.user.subAdminType === 'Therapist'){
             this.router.navigate(['/therapy-list'])
+          }
+          else if(response.user.subAdminType === 'Therapy Channel'){
+            this.router.navigate(['/therapy-channel'])
           }
           else if(response.user.adminType === 'IP Billing Manager'){
             this.router.navigate(['/estimation'])

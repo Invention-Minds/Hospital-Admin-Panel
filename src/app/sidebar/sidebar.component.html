@@ -71,12 +71,12 @@
   <span>Services</span>
   </div>
 </a>
-<!-- <a routerLink="/therapy" routerLinkActive="active" class="icon-wrapper" *ngIf="(['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotIpBillingManager() && isNotRadiology() && isNotMHC()  && !isMukund() && isNotLab() && isNotNursing()&& isNotOT()  && isNotTherapist())" >
+<a routerLink="/therapy" routerLinkActive="active" class="icon-wrapper" *ngIf="(['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotIpBillingManager() && isNotRadiology() && isNotMHC()  && !isMukund() && isNotLab() && isNotNursing()&& isNotOT()  && isNotTherapist())" >
   <div class="icon-content" *ngIf="(['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotIpBillingManager() && isNotRadiology() && isNotMHC()  && !isMukund() && isNotLab() && isNotNursing()&& isNotOT()  && isNotTherapist())" >
     <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="38" viewBox="0 0 64 56"><path fill="currentColor" d="M30.827 19.223a5.887 5.887 0 0 0 5.892-5.881a5.884 5.884 0 0 0-5.892-5.879c-3.255 0-5.893 2.632-5.893 5.879a5.89 5.89 0 0 0 5.893 5.881M48.78 58.98H1.806c-1.323 0-1.187 1.04-1.187 1.04v1.731S.499 64 2.809 64h58.817c2.325 0 2.199-2.197 2.199-2.197v-4.794s-.197-1.516-1.98-1.516h-5.732c-1.965 0-3.589 3.486-7.332 3.486zm4.568-10.622c0 2.922 2.378 5.295 5.308 5.295s5.313-2.374 5.313-5.295c0-2.933-2.384-5.297-5.313-5.297a5.3 5.3 0 0 0-5.308 5.297M35.997 38.255a3.77 3.77 0 0 1-2.269 2.36l-4.727 1.753l1.744 1.731h7.98l-.005-12.215l-2.671 6.297c-.013.03-.037.047-.053.074z"/><path fill="currentColor" d="M47.458 47.001h-16.5l-3.978-3.884l-2.769 1.02c-2.054.735-4.555-.387-5.326-2.428c-.454-1.267-.391-2.682.367-3.713c-.339-.015-10.007 0-10.007 0a2.906 2.906 0 0 0-2.915 2.898c0 1.607 1.307 2.863 2.915 2.863h9.843l3.903 5.909L2.84 51.285a2.909 2.909 0 0 0 .651 5.745l22.609.003a4.13 4.13 0 0 1-.629-2.177a4.176 4.176 0 0 1 4.173-4.173h9.046l7.331-1.531l.407 1.947l-7.533 1.573h-9.252a2.18 2.18 0 0 0-.044 4.361l17.898.002a5.014 5.014 0 0 0 4.992-5.013A5.023 5.023 0 0 0 47.458 47z"/><path fill="currentColor" d="M23.862 42.315a2.31 2.31 0 0 1-3.038-1.185a2.303 2.303 0 0 1 1.187-3.04l8.401-3.154l2.596-6.192l-1.692-.625l-2.207 5.302l-6.395 2.355v-6.482l-6.251 6.827l-7.074-.007s12.379-13.57 12.766-13.976c.513-.509 1.686-1.353 3.898-1.353h7.949c4.516 0 5.385 4.502 4.461 6.832l-4.157 10.082a2.34 2.34 0 0 1-1.338 1.261l-9.106 3.353z"/></svg>
     <span>Therapies</span>
   </div>
-</a> -->
+</a>
 <a [routerLink]="['super_admin', 'admin'].includes(role) ? '/report' : null" routerLinkActive="active" class="icon-wrapper" *ngIf="['super_admin', 'admin'].includes(role) && isNotIpBillingManager() && isNotIpBillingManager() && isNotRadiology() && !isMukund() && isNotLab()&& isNotOT()  && isNotTherapist()" >
   <div *ngIf="['super_admin', 'admin'].includes(role)  && !isMukund()" class="icon-content">
   <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24"><path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2M9 17H7v-7h2zm4 0h-2V7h2zm4 0h-2v-4h2z"/></svg>
@@ -151,12 +151,12 @@
 <span>Doctor Appts</span>
 </div>
 </a>
-<!-- <a routerLink="/therapy" routerLinkActive="active" class="icon-wrapper" *ngIf="(['doctor'].includes(role) && isAyurveda())" >
+<a routerLink="/therapy" routerLinkActive="active" class="icon-wrapper" *ngIf="(['doctor'].includes(role) && isAyurveda())" >
   <div class="icon-content" *ngIf="([ 'doctor'].includes(role) && isAyurveda())" >
     <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="38" viewBox="0 0 64 56"><path fill="currentColor" d="M30.827 19.223a5.887 5.887 0 0 0 5.892-5.881a5.884 5.884 0 0 0-5.892-5.879c-3.255 0-5.893 2.632-5.893 5.879a5.89 5.89 0 0 0 5.893 5.881M48.78 58.98H1.806c-1.323 0-1.187 1.04-1.187 1.04v1.731S.499 64 2.809 64h58.817c2.325 0 2.199-2.197 2.199-2.197v-4.794s-.197-1.516-1.98-1.516h-5.732c-1.965 0-3.589 3.486-7.332 3.486zm4.568-10.622c0 2.922 2.378 5.295 5.308 5.295s5.313-2.374 5.313-5.295c0-2.933-2.384-5.297-5.313-5.297a5.3 5.3 0 0 0-5.308 5.297M35.997 38.255a3.77 3.77 0 0 1-2.269 2.36l-4.727 1.753l1.744 1.731h7.98l-.005-12.215l-2.671 6.297c-.013.03-.037.047-.053.074z"/><path fill="currentColor" d="M47.458 47.001h-16.5l-3.978-3.884l-2.769 1.02c-2.054.735-4.555-.387-5.326-2.428c-.454-1.267-.391-2.682.367-3.713c-.339-.015-10.007 0-10.007 0a2.906 2.906 0 0 0-2.915 2.898c0 1.607 1.307 2.863 2.915 2.863h9.843l3.903 5.909L2.84 51.285a2.909 2.909 0 0 0 .651 5.745l22.609.003a4.13 4.13 0 0 1-.629-2.177a4.176 4.176 0 0 1 4.173-4.173h9.046l7.331-1.531l.407 1.947l-7.533 1.573h-9.252a2.18 2.18 0 0 0-.044 4.361l17.898.002a5.014 5.014 0 0 0 4.992-5.013A5.023 5.023 0 0 0 47.458 47z"/><path fill="currentColor" d="M23.862 42.315a2.31 2.31 0 0 1-3.038-1.185a2.303 2.303 0 0 1 1.187-3.04l8.401-3.154l2.596-6.192l-1.692-.625l-2.207 5.302l-6.395 2.355v-6.482l-6.251 6.827l-7.074-.007s12.379-13.57 12.766-13.976c.513-.509 1.686-1.353 3.898-1.353h7.949c4.516 0 5.385 4.502 4.461 6.832l-4.157 10.082a2.34 2.34 0 0 1-1.338 1.261l-9.106 3.353z"/></svg>
     <span>Therapies</span>
   </div>
-</a> -->
+</a>
 <!-- <a [routerLink]="role == 'doctor' ? '/er': null" routerLinkActive="active" class="icon-wrapper" *ngIf="['doctor'].includes(role)">
   <div class="icon-content " *ngIf="['doctor'].includes(role)">
     <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" class="icon" viewBox="0 0 24 24"><path fill="currentColor" d="M5 20v-2h1.6L9 10h6l2.4 8H19v2zm3.7-2h6.6l-1.8-6h-3zM11 8V3h2v5zm5.95 2.475L15.525 9.05l3.55-3.525l1.4 1.4zM18 15v-2h5v2zM7.05 10.475l-3.525-3.55l1.4-1.4l3.55 3.525zM1 15v-2h5v2zm11 3"/></svg>
@@ -179,12 +179,12 @@
 <span>Surgeries</span>
 </div>
 </a>
-<!-- <a [routerLink]="subAdminType == 'Therapist' ? '/therapy-list': null" routerLinkActive="active" class="icon-wrapper" *ngIf="['Therapist'].includes(subAdminType)">
+<a [routerLink]="subAdminType == 'Therapist' ? '/therapy-list': null" routerLinkActive="active" class="icon-wrapper" *ngIf="['Therapist'].includes(subAdminType)">
   <div class="icon-content " *ngIf="['Therapist'].includes(subAdminType)">
     <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="38" viewBox="0 0 64 56"><path fill="currentColor" d="M30.827 19.223a5.887 5.887 0 0 0 5.892-5.881a5.884 5.884 0 0 0-5.892-5.879c-3.255 0-5.893 2.632-5.893 5.879a5.89 5.89 0 0 0 5.893 5.881M48.78 58.98H1.806c-1.323 0-1.187 1.04-1.187 1.04v1.731S.499 64 2.809 64h58.817c2.325 0 2.199-2.197 2.199-2.197v-4.794s-.197-1.516-1.98-1.516h-5.732c-1.965 0-3.589 3.486-7.332 3.486zm4.568-10.622c0 2.922 2.378 5.295 5.308 5.295s5.313-2.374 5.313-5.295c0-2.933-2.384-5.297-5.313-5.297a5.3 5.3 0 0 0-5.308 5.297M35.997 38.255a3.77 3.77 0 0 1-2.269 2.36l-4.727 1.753l1.744 1.731h7.98l-.005-12.215l-2.671 6.297c-.013.03-.037.047-.053.074z"/><path fill="currentColor" d="M47.458 47.001h-16.5l-3.978-3.884l-2.769 1.02c-2.054.735-4.555-.387-5.326-2.428c-.454-1.267-.391-2.682.367-3.713c-.339-.015-10.007 0-10.007 0a2.906 2.906 0 0 0-2.915 2.898c0 1.607 1.307 2.863 2.915 2.863h9.843l3.903 5.909L2.84 51.285a2.909 2.909 0 0 0 .651 5.745l22.609.003a4.13 4.13 0 0 1-.629-2.177a4.176 4.176 0 0 1 4.173-4.173h9.046l7.331-1.531l.407 1.947l-7.533 1.573h-9.252a2.18 2.18 0 0 0-.044 4.361l17.898.002a5.014 5.014 0 0 0 4.992-5.013A5.023 5.023 0 0 0 47.458 47z"/><path fill="currentColor" d="M23.862 42.315a2.31 2.31 0 0 1-3.038-1.185a2.303 2.303 0 0 1 1.187-3.04l8.401-3.154l2.596-6.192l-1.692-.625l-2.207 5.302l-6.395 2.355v-6.482l-6.251 6.827l-7.074-.007s12.379-13.57 12.766-13.976c.513-.509 1.686-1.353 3.898-1.353h7.949c4.516 0 5.385 4.502 4.461 6.832l-4.157 10.082a2.34 2.34 0 0 1-1.338 1.261l-9.106 3.353z"/></svg>
 <span>Therapies</span>
 </div>
-</a> -->
+</a>
   <a  routerLinkActive="active" class="icon-wrapper" >
     <div class="icon-content" (click)="openSettings()">
     <svg xmlns="http://www.w3.org/2000/svg" class="icon settings" width="2em" height="2em" viewBox="0 0 24 24"><path fill="currentColor" d="M19.5 12c0-.23-.01-.45-.03-.68l1.86-1.41c.4-.3.51-.86.26-1.3l-1.87-3.23a.987.987 0 0 0-1.25-.42l-2.15.91c-.37-.26-.76-.49-1.17-.68l-.29-2.31c-.06-.5-.49-.88-.99-.88h-3.73c-.51 0-.94.38-1 .88l-.29 2.31c-.41.19-.8.42-1.17.68l-2.15-.91c-.46-.2-1-.02-1.25.42L2.41 8.62c-.25.44-.14.99.26 1.3l1.86 1.41a7.3 7.3 0 0 0 0 1.35l-1.86 1.41c-.4.3-.51.86-.26 1.3l1.87 3.23c.25.44.79.62 1.25.42l2.15-.91c.37.26.76.49 1.17.68l.29 2.31c.06.5.49.88.99.88h3.73c.5 0 .93-.38.99-.88l.29-2.31c.41-.19.8-.42 1.17-.68l2.15.91c.46.2 1 .02 1.25-.42l1.87-3.23c.25-.44.14-.99-.26-1.3l-1.86-1.41c.03-.23.04-.45.04-.68m-7.46 3.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5s3.5 1.57 3.5 3.5s-1.57 3.5-3.5 3.5"/></svg>

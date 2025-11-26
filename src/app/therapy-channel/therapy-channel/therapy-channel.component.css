@@ -296,6 +296,12 @@
       transform: translateX(-100%);  /* Move to the left */
     }
   }
+  .therapist-name-cell {
+    max-width: 120px;    /* Adjust width */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
   
   
   .status.PatientIn {
@@ -820,6 +826,16 @@
   }
   .status-badge.navy-blue {
     background-color: #1b2969;
+    color: #fff;
+  }
+  .status-badge.pink {
+    background-color: #d63384;
+    color: #fff;
+  }
+  
+  /* 🟦 NEW — Cleaning Started */
+  .status-badge.teal {
+    background-color: #00897b;
     color: #fff;
   }
   

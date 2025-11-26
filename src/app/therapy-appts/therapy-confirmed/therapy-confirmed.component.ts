@@ -298,7 +298,11 @@ export class TherapyConfirmedComponent {
       this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Cannot check-in for past appointments!' });
       return;
     }
-
+     
+    if (!this.handleCheckin(appointment)) {
+      return;
+    }
+    
 
     this.therapyService.checkInTherapyAppointment(serviceId!, this.username).subscribe({
       next: (res: any) => {
@@ -322,13 +326,13 @@ export class TherapyConfirmedComponent {
     // Update UI
 
   }
-  openAppointmentForm(service: TherapyAppointment): void {
+  openAppointmentForm(service: any): void {
     // this.router.navigate(['/reschedule', service.id], {
     //   state: { data: service }, // Passing full service object using state
     // });
     this.lockService(service);
   }
-  openAppointmentFormAfterLocked(service: TherapyAppointment): void {
+  openAppointmentFormAfterLocked(service: any): void {
     this.reschedule.emit(service);
   }
   cancelAppointment(service: any): void {
@@ -436,6 +440,43 @@ export class TherapyConfirmedComponent {
   //     this.isCheckInLocked = res.isActive;
   //   });
   // }
+  getTherapistNames(service: any): string {
+    if (!service.therapists || service.therapists.length === 0) {
+      return "—";
+    }
+    return service.therapists.map((t: any) => t.name).join(", ");
+  }
   
+  isCheckInEnabled(appointment: any): boolean {
+    const currentTime = new Date();
 
+    // Parse the appointment time (e.g., "12:40 PM")
+    const [time, period] = appointment.time.split(' ');
+    const [hours, minutes] = time.split(':').map(Number);
+
+    // Convert to 24-hour format
+    const appointmentDate = new Date();
+    appointmentDate.setHours(period === 'PM' && hours !== 12 ? hours + 12 : (period === 'AM' && hours === 12 ? 0 : hours));
+    appointmentDate.setMinutes(minutes);
+    appointmentDate.setSeconds(0);
+
+    // Define the time window (30 mins before and after)
+    const startWindow = new Date(appointmentDate.getTime() - 90 * 60000); // 30 mins before
+    const endWindow = new Date(appointmentDate.getTime() + 90 * 60000);   // 30 mins after
+
+    // Enable if the current time is within the window
+    return currentTime >= startWindow && currentTime <= endWindow;
+  }
+  handleCheckin(appointment: any): boolean {
+    if (appointment.checkedIn) {
+      this.messageService.add({ severity: 'warn', summary: 'Already Checked In', detail: 'You have already checked in for this appointment.' });
+      return false;
+    }
+
+    if (!this.isCheckInEnabled(appointment)) {
+      this.messageService.add({ severity: 'warn', summary: 'Check-in Not Allowed', detail: 'You can check-in only 90 minutes before or 90 minutes after the slot time.' });
+      return false;
+    }
+    return true;
+  }
 }

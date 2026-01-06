@@ -54,11 +54,10 @@ export class TherapyFormComponent {
 
 
   roomNumbers: string[] = [
-    'Room 101',
-    'Room 102',
-    'Room 103',
-    'Room 104',
-    'Room 105',
+    'Room 1',
+    'Room 2',
+    'Room 3',
+    'Room 4',
   ];
 
   constructor(

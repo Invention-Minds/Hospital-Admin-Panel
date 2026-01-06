@@ -66,7 +66,7 @@
     <!-- Row 4 - Gender -->
     <div class="form-row">
       <div class="form-group half-width">
-        <select class="form-input" name="gender" [(ngModel)]="formData.gender" required>
+        <select class="form-input" name="gender" [(ngModel)]="formData.gender" required (change)="onGenderChange()">
           <option value="" disabled>Select Gender</option>
           <option value="Male">Male</option>
           <option value="Female">Female</option>

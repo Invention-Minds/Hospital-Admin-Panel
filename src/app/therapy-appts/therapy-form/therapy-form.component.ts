@@ -112,7 +112,7 @@ export class TherapyFormComponent {
       cleaningDurationMinutes: service.cleaningDurationMinutes || 0,
       totalDurationMinutes: service.totalDurationMinutes || 0
     };
-    
+
     console.log('📝 Populating form with data:', service.totalDurationMinutes);
     // Show previously split durations
     if (service.totalDurationMinutes > 0) {
@@ -342,10 +342,15 @@ export class TherapyFormComponent {
     return available;
   }
   updateAvailableTherapists() {
-
+    let filtered = [...this.therapists];
     // 1️⃣ If time not selected → show all therapists (same as old logic)
+    if (this.formData.gender) {
+      filtered = filtered.filter(t =>
+        t.gender?.toLowerCase() === this.formData.gender.toLowerCase()
+      );
+    }
     if (!this.formData.time) {
-      this.availableTherapists = this.therapists;
+      this.availableTherapists = filtered;
       return;
     }
     // 2️⃣ Get booked therapist IDs for THIS time only (same as old logic)
@@ -354,22 +359,26 @@ export class TherapyFormComponent {
       .flatMap(a => a.therapists?.map((t: any) => t.therapistId) || []);
 
     // 3️⃣ Filter out booked therapists
-    let available = this.therapists.filter(t => !bookedTherapists.includes(t.id));
+    filtered = filtered.filter(t => !bookedTherapists.includes(t.id));
 
     // 4️⃣ EDIT MODE → keep already selected therapists visible
     if (this.serviceData?.therapists) {
       this.formData.therapistIds.forEach((id: number) => {
         const th = this.therapists.find(t => t.id === id);
 
-        if (th && !available.some(a => a.id === id)) {
-          available.unshift(th);
+        if (th && !filtered.some(a => a.id === id)) {
+          filtered.unshift(th);
         }
       });
     }
 
-    this.availableTherapists = available;
+    this.availableTherapists = filtered;
   }
-
+  onGenderChange() {
+    this.formData.therapistIds = [];   // reset selection
+    this.updateAvailableTherapists();
+  }
+  
 
 
 
@@ -567,10 +576,10 @@ export class TherapyFormComponent {
     if (!total || total <= 0) {
       this.durationSplitVisible = false;
       return;
-    }    
-  
+    }
+
     let therapy = 0, bath = 0, cleaning = 0;
-  
+
     if (this.formData.hasBathing) {
       therapy = Math.round(total * 0.70);
       bath = Math.round(total * 0.15);
@@ -580,30 +589,30 @@ export class TherapyFormComponent {
       cleaning = Math.round(total * 0.15);
       bath = 0;
     }
-  
+
     // If editing → use saved DB values
     if (isEdit) {
       therapy = this.formData.therapyDurationMinutes || therapy;
       bath = this.formData.bathingDurationMinutes || bath;
       cleaning = this.formData.cleaningDurationMinutes || cleaning;
     }
-  
+
     this.calculatedDurations = {
       therapy,
       bath,
       cleaning,
       total: therapy + bath + cleaning
     };
-  
+
     this.durationSplitVisible = true;
-  
+
     // Save values into formData for backend
     this.formData.therapyDurationMinutes = therapy;
     this.formData.bathingDurationMinutes = bath;
     this.formData.cleaningDurationMinutes = cleaning;
     // this.formData.totalDurationMinutes = therapy + bath + cleaning;
   }
-  
-  
+
+
 
 }

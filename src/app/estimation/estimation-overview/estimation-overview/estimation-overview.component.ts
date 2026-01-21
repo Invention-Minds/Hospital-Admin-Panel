@@ -69,6 +69,7 @@ export class EstimationOverviewComponent {
   filteredEstimations:any[]=[];
   totalFollowUp:number = 0;
   totalMaternity:number = 0;
+  prefillEstimationData: any = null;
 
 
 
@@ -85,7 +86,7 @@ export class EstimationOverviewComponent {
     this.currentMonth = date.toLocaleString('en-US', { month: 'long' }); // "May"
     this.role = localStorage.getItem('role')!;
     if (this.role === 'sub_admin') {
-      this.activeComponent = 'analytics'
+      this.activeComponent = 'callback'
     }
     else {
       this.activeComponent = 'analytics'
@@ -228,6 +229,9 @@ export class EstimationOverviewComponent {
     // this.router.navigate(['/new-appointment']);
 
 
+  }
+  showCallBackForm(){
+    this.activeComponent = 'callback';
   }
   showCompletedAppointments() {
     this.activeComponent = 'completed';
@@ -870,7 +874,16 @@ applyGlobalSearch() {
 }
 
 
+openEstimationFromCallback(prefill: any) {
+  // Clear existing estimation edit
+  this.selectedEstimation = null;
 
+  // Store prefill data
+  this.prefillEstimationData = prefill;
+
+  // Open estimation form
+  this.activeComponent = 'form';
+}
 
 }
 

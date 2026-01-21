@@ -8,6 +8,7 @@
       <div class="card-content">
       </div>
     </div>
+
     <div class="card-1" [ngClass]="{'active-card': activeComponent === 'analytics'}" (click)="showAnalytics()">
       <div class="card-icon">
         <img src="/est-analytics.svg" alt="OPD Icon" />
@@ -98,6 +99,7 @@
         <img src="/est-req.svg" alt="Doctor Available Icon" />
         <!-- <div class="count">{{ pendingEstimations }}</div> -->
       </div>
+      
       <div class="card-content">
         <p>EST Request
         </p>
@@ -124,6 +126,14 @@
       <div class="card-content">
         <p>EST Request
         </p>
+      </div>
+    </div>
+        <div class="card" [ngClass]="{'active-card': activeComponent === 'callback'}" (click)="showCallBackForm()">
+      <div class="card-icon">
+        <img src="/est-form.svg" alt="OPD Icon" />
+      </div>
+      <div class="card-content">
+        <p>Website Requests</p>
       </div>
     </div>
     <div class="card" [ngClass]="{'active-card': activeComponent === 'approved'}" (click)="showApprovedAppointments()"
@@ -288,7 +298,7 @@
     <app-appointment-complete *ngIf="activeComponent === 'completed'"  [selectedSearchOption]="selectedSearchOption" [selectedDateRange]="selectedDateRange" [selectedValue]="searchValue" #appointmentCompleteComponent></app-appointment-complete> -->
   <!-- <app-estimation-form *ngIf="activeComponent === 'form'"  [serviceData]="selectedService"
     (closeForm)="closeForm()"></app-estimation-form> -->
-  <app-estimation-form *ngIf="activeComponent === 'form'" [estimationData]="selectedEstimation"
+  <app-estimation-form *ngIf="activeComponent === 'form'" [estimationData]="selectedEstimation"   [prefillData]="prefillEstimationData"
     (closeForm)="closeForm()"></app-estimation-form>
   <!-- <app-health-checkup-confirmed *ngIf="activeComponent === 'confirmed'" #healthCheckupConfirmed (reschedule)="openAppointmentForm($event)"  ></app-health-checkup-confirmed> -->
   <app-estimation-approved #estimationApproved *ngIf="activeComponent === 'approved'"
@@ -306,6 +316,7 @@
   <app-followup-estimation *ngIf="activeComponent === 'follow-up'"></app-followup-estimation>
   <app-estimation-cancel *ngIf="activeComponent === 'cancelled'"></app-estimation-cancel>
   <app-estimation-analytics *ngIf="activeComponent === 'analytics'"></app-estimation-analytics>
+  <app-call-back *ngIf="activeComponent === 'callback'"   (openEstimationForm)="openEstimationFromCallback($event)"></app-call-back>
   <div class="container" *ngIf="showMonthWiseDate && activeComponent ==='overAll'">
     <div class="filters">
       <div>

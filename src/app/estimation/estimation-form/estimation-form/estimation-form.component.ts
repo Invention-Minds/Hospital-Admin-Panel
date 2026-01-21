@@ -40,6 +40,12 @@ export class EstimationFormComponent {
 
 
   @Input() estimationData: any = null;
+  @Input() prefillData: {
+    name?: string;
+    phone?: string;
+    surgeryName?: string;
+  } | null = null;
+
 
   public patientSignaturePad!: SignaturePad;
   public staffSignaturePad!: SignaturePad;
@@ -630,7 +636,29 @@ export class EstimationFormComponent {
         this.patients = patients;
         // console.log(this.patients)
       })
+
     )
+    if (this.prefillData) {
+      //  Autofill patient name
+      if (this.prefillData.name) {
+        this.formData.patientName = this.prefillData.name;
+      }
+
+      //  Autofill phone number
+      if (this.prefillData.phone) {
+        this.formData.patientPhoneNumber = this.prefillData.phone;
+      }
+
+      //  Autofill surgery / procedure
+      if (this.prefillData.surgeryName) {
+        this.formData.estimationName = this.prefillData.surgeryName;
+
+        // Important: trigger surgery-based logic
+        this.updateEstimationCosts();
+        this.handleSurgeryNamesChange();
+      }
+    }
+
 
 
     console.log(this.estimationData)
@@ -656,15 +684,15 @@ export class EstimationFormComponent {
         // Split doctor IDs into array
         const doctorIds = this.estimationData.multipleSurgeryDoctor
           .split(',')
-          .map((id:any) => id.trim());
-      
+          .map((id: any) => id.trim());
+
         // Ensure formData.consultants exists and map IDs
-        this.formData.consultants = doctorIds.map((id:any) => Number(id));
+        this.formData.consultants = doctorIds.map((id: any) => Number(id));
       } else {
         // Initialize empty consultants array matching surgeries count
         this.formData.consultants = this.surgeries.map(() => '');
       }
-      
+
       this.initializeEstimationInputs()
       if (this.formData.patientPhoneNumber.startsWith('91') && this.formData.patientPhoneNumber.length === 12) {
         this.formData.patientPhoneNumber = this.formData.patientPhoneNumber.slice(2); // Remove '91' prefix
@@ -1496,7 +1524,7 @@ export class EstimationFormComponent {
         this.selectedSurgeryPackage = 'multiple surgeries';
         this.handleSurgeryNamesChange()
       }
-      else{
+      else {
         this.selectedSurgeryPackage = 'single surgery';
         this.handleSurgeryNamesChange()
       }

@@ -104,11 +104,17 @@ export class TherapyConfirmedComponent {
           case 'phone':
             matches = service.phone?.includes(this.searchValue);
             break;
+          // case 'therapyName':
+          //   matches = !!service.therapyName
+          //     ?.toLowerCase()
+          //     .includes(this.searchValue.toLowerCase());
+          //   break;
           case 'therapyName':
-            matches = !!service.therapyName
-              ?.toLowerCase()
-              .includes(this.searchValue.toLowerCase());
-            break;
+  matches = service.therapyNames
+    ?.toLowerCase()
+    .includes(this.searchValue.toLowerCase());
+  break;
+
         }
 
       }
@@ -479,4 +485,19 @@ export class TherapyConfirmedComponent {
     }
     return true;
   }
+  getTimeRange(service: any): string {
+  if (!service.time || !service.totalDurationMinutes) {
+    return service.time || '—';
+  }
+
+  const [h, m] = service.time.split(':').map(Number);
+  const startMinutes = h * 60 + m;
+  const endMinutes = startMinutes + service.totalDurationMinutes;
+
+  const endH = Math.floor(endMinutes / 60).toString().padStart(2, '0');
+  const endM = (endMinutes % 60).toString().padStart(2, '0');
+
+  return `${service.time} – ${endH}:${endM}`;
+}
+
 }

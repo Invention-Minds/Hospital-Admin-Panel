@@ -30,6 +30,7 @@ export interface TherapyAppointment {
   email?: string;
   doctorId?: number;
   therapistId?: number;
+  therapyIds: number[]; 
   therapyId: number;
   roomNumber: string;
   date: string; // YYYY-MM-DD

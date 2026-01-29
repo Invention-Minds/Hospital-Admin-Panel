@@ -4,6 +4,20 @@ import { TherapyService } from '../../services/therapy/therapy.service';
 import { MessageService } from 'primeng/api';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 
+interface ConflictResult {
+  roomConflicts: {
+    room: string;
+    start: string;
+    end: string;
+  }[];
+  therapistConflicts: {
+    therapistName: string;
+    start: string;
+    end: string;
+  }[];
+}
+
+
 @Component({
   selector: 'app-therapy-form',
   templateUrl: './therapy-form.component.html',
@@ -22,6 +36,7 @@ export class TherapyFormComponent {
     age: null,
     doctorId: '',
     therapistIds: [],
+    therapyIds: [],
     therapyId: '',
     roomNumber: '',
     date: '',
@@ -106,6 +121,7 @@ export class TherapyFormComponent {
       date: service.date || '',
       time: service.time || '',
       therapistIds: service.therapists?.map((t: any) => t.id) || [],
+      therapyIds: service.therapies?.map((t: any) => t.id) || [],
       hasBathing: service.hasBathing || false,
       therapyDurationMinutes: service.therapyDurationMinutes || 0,
       bathingDurationMinutes: service.bathingDurationMinutes || 0,
@@ -205,15 +221,55 @@ export class TherapyFormComponent {
       form.form.markAllAsTouched();
       return;
     }
+    // time window check
+    const start = this.toMinutes(this.formData.time);
+    const end = start + Number(this.formData.totalDurationMinutes) + 10;
+
+    if (start < 360 || end > 1080) {
+      this.messageService.add({ severity: 'error', summary: 'Invalid Time', detail: 'Allowed only 06:00 to 18:00 (buffer included).' });
+      return;
+    }
+
+    // if (this.hasConflictRange()) {
+    //   this.messageService.add({ severity: 'error', summary: 'Conflict', detail: 'Room or therapist already booked in this duration.' });
+    //   return;
+    // }
+    const conflict = this.checkConflictRange();
+
+    if (conflict.roomConflicts.length || conflict.therapistConflicts.length) {
+
+      conflict.roomConflicts.forEach(c => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Room Conflict',
+          detail: `Room ${c.room} is already booked from ${c.start} to ${c.end}`
+        });
+      });
+
+      conflict.therapistConflicts.forEach(c => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Therapist Conflict',
+          detail: `${c.therapistName} is already booked from ${c.start} to ${c.end}`
+        });
+      });
+
+      return;
+    }
+
 
     this.isLoading = true;
     this.formData.prn = Number(this.formData.prn);
     this.formData.doctorId = Number(this.formData.doctorId);
     this.formData.therapistIds = this.formData.therapistIds.map((id: any) => Number(id));
-    this.formData.therapyId = Number(this.formData.therapyId);
+    // this.formData.therapyId = Number(this.formData.therapyId);
+    // therapyIds: this.formData.therapyIds.map((id:any)=>Number(id)),
     this.formData.status = 'confirmed'
     this.formData.id = this.serviceData?.id || null;
-    const payload = { ...this.formData };
+    const payload = {
+      ...this.formData,
+      therapyIds: this.formData.therapyIds.map((id: any) => Number(id)),
+    };
 
     // Decide based on presence of ID
     const request$ = this.serviceData?.id
@@ -253,6 +309,7 @@ export class TherapyFormComponent {
       age: null,
       doctorId: '',
       therapistIds: [],   // ✔ reset multi-select
+      therapyIds: [],
       therapyId: '',
       roomNumber: '',
       date: '',
@@ -378,28 +435,66 @@ export class TherapyFormComponent {
     this.formData.therapistIds = [];   // reset selection
     this.updateAvailableTherapists();
   }
-  
+
 
 
 
 
   // Filter available rooms for selected time
+  // getAvailableRooms(): string[] {
+  //   if (!this.formData.date || !this.formData.time) return [];
+
+  //   const bookedRooms = this.bookedSchedule
+  //     .filter(a => a.time === this.formData.time)
+  //     .map(a => a.roomNumber);
+
+  //   let available = this.roomNumbers.filter(r => !bookedRooms.includes(r));
+
+  //   // ✅ If editing, ensure current room is included
+  //   if (this.serviceData?.roomNumber && !available.includes(this.formData.roomNumber)) {
+  //     available = [this.formData.roomNumber, ...available];
+  //   }
+
+  //   return available;
+  // }
   getAvailableRooms(): string[] {
     if (!this.formData.date || !this.formData.time) return [];
 
-    const bookedRooms = this.bookedSchedule
-      .filter(a => a.time === this.formData.time)
-      .map(a => a.roomNumber);
+    const newStart = this.toMinutes(this.formData.time);
+    const newEnd =
+      newStart + Number(this.formData.totalDurationMinutes || 0);
 
-    let available = this.roomNumbers.filter(r => !bookedRooms.includes(r));
+    const blockedRooms = new Set<string>();
 
-    // ✅ If editing, ensure current room is included
-    if (this.serviceData?.roomNumber && !available.includes(this.formData.roomNumber)) {
+    this.bookedSchedule.forEach(a => {
+      if (!a.roomNumber || !a.totalDurationMinutes) return;
+
+      const existingStart = this.toMinutes(a.time);
+      const existingEnd = this.getEndTime(
+        a.time,
+        a.totalDurationMinutes
+      );
+
+      if (this.isOverlap(newStart, newEnd, existingStart, existingEnd)) {
+        blockedRooms.add(a.roomNumber);
+      }
+    });
+
+    let available = this.roomNumbers.filter(
+      r => !blockedRooms.has(r)
+    );
+
+    // ✅ EDIT MODE: allow current room
+    if (
+      this.serviceData?.roomNumber &&
+      !available.includes(this.formData.roomNumber)
+    ) {
       available = [this.formData.roomNumber, ...available];
     }
 
     return available;
   }
+
 
   // getAvailableTimeSlots(): string[] {
   //   if (!this.formData.therapistIds.length || !this.formData.date) return [];
@@ -613,6 +708,144 @@ export class TherapyFormComponent {
     // this.formData.totalDurationMinutes = therapy + bath + cleaning;
   }
 
+  private toMinutes(time: string): number {
+    const [h, m] = time.split(':').map(Number);
+    return h * 60 + m;
+  }
+  private minutesToTime(minutes: number): string {
+    const h = Math.floor(minutes / 60).toString().padStart(2, '0');
+    const m = (minutes % 60).toString().padStart(2, '0');
+    return `${h}:${m}`;
+  }
+  private getEndTime(start: string, duration: number): number {
+    return this.toMinutes(start) + duration;
+  }
+
+  private isOverlap(
+    startA: number,
+    endA: number,
+    startB: number,
+    endB: number
+  ): boolean {
+    return startA < endB && endA > startB;
+  }
+
+  // private hasConflictRange(): boolean {
+  //   if (!this.formData.time || !this.formData.totalDurationMinutes) return false;
+
+  //   const start = this.toMinutes(this.formData.time);
+  //   const end = start + Number(this.formData.totalDurationMinutes) + 10;
+
+  //   const selectedTherapists = (this.formData.therapistIds || []).map((x: any) => Number(x));
+
+  //   return (this.bookedSchedule || []).some((appt: any) => {
+  //     // ignore self while editing
+  //     if (this.serviceData?.id && Number(appt.id) === Number(this.serviceData.id)) return false;
+
+  //     const aStart = this.toMinutes(appt.time);
+  //     const aDur = Number(appt.totalDurationMinutes || 0);
+  //     const aEnd = aStart + aDur + 10;
+
+  //     const overlaps = start < aEnd && end > aStart;
+  //     if (!overlaps) return false;
+
+  //     // same room conflict
+  //     if (appt.roomNumber === this.formData.roomNumber) return true;
+
+  //     // therapist conflict
+  //     const bookedTherapists = (appt.therapists || []).map((t: any) => Number(t.therapistId));
+  //     return bookedTherapists.some((id: number) => selectedTherapists.includes(id));
+  //   });
+  // }
+  checkConflictRange(): ConflictResult {
+    const result: ConflictResult = {
+      roomConflicts: [],
+      therapistConflicts: []
+    };
+
+    if (!this.formData.time || !this.formData.totalDurationMinutes) {
+      return result;
+    }
+
+    const newStart = this.toMinutes(this.formData.time);
+    const newEnd = newStart + Number(this.formData.totalDurationMinutes);
+
+    this.bookedSchedule.forEach(a => {
+      if (!a.time || !a.totalDurationMinutes) return;
+
+      const existingStart = this.toMinutes(a.time);
+      const existingEnd = existingStart + a.totalDurationMinutes;
+
+      if (!this.isOverlap(newStart, newEnd, existingStart, existingEnd)) {
+        return;
+      }
+
+      // -------- ROOM CONFLICT --------
+      if (a.roomNumber === this.formData.roomNumber) {
+        result.roomConflicts.push({
+          room: a.roomNumber,
+          start: a.time,
+          end: this.minutesToTime(existingEnd)
+        });
+      }
+
+      // -------- THERAPIST CONFLICT --------
+      const selectedTherapists = this.formData.therapistIds || [];
+
+      a.therapists?.forEach((t: any) => {
+        if (selectedTherapists.includes(t.therapistId)) {
+          const therapist = this.therapists.find(th => th.id === t.therapistId);
+
+          result.therapistConflicts.push({
+            therapistName: therapist?.name || 'Therapist',
+            start: a.time,
+            end: this.minutesToTime(existingEnd)
+          });
+        }
+      });
+    });
+
+    return result;
+  }
+getSelectedTherapistBusySlots(): {
+  therapistName: string;
+  slots: string[];
+}[] {
+  if (!this.formData.date || !this.formData.therapistIds?.length) return [];
+
+  const result: any[] = [];
+
+  this.formData.therapistIds.forEach((id: number) => {
+    const therapist = this.therapists.find(t => t.id === id);
+    if (!therapist) return;
+
+    const slots: string[] = [];
+
+    this.bookedSchedule.forEach(appt => {
+      const isAssigned = appt.therapists?.some(
+        (t: any) => t.therapistId === id
+      );
+
+      if (!isAssigned) return;
+
+      const start = appt.time;
+      const endMinutes =
+        this.toMinutes(appt.time) + Number(appt.totalDurationMinutes || 0);
+
+      const end = this.minutesToTime(endMinutes);
+      slots.push(`${start} – ${end}`);
+    });
+
+    if (slots.length > 0) {
+      result.push({
+        therapistName: therapist.name,
+        slots
+      });
+    }
+  });
+
+  return result;
+}
 
 
 }

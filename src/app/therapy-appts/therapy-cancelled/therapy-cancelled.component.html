@@ -90,9 +90,12 @@
                     <td>{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
                     <td>{{ service.name }} </td>
                     <td>{{ service.prn }}</td>
-                    <td>{{ service.therapyName }}</td>
+                    <!-- <td>{{ service.therapyName }}</td> -->
+                     <td>{{ service.therapyNames || '—' }}</td>
                     <td>{{ service.date | date:'dd-MM-yyyy' }}</td>
-                    <td>{{ service.time }}</td>
+                    <!-- <td>{{ service.time }}</td> -->
+                     <td>{{ getTimeRange(service) }}</td>
+
                     <td>{{service.doctorName}}</td>
                     <td>{{getTherapistNames(service)}}</td>
                     <td>{{service.roomNumber}}</td>

@@ -486,4 +486,26 @@
       width: 100%;
     }
   }
-  
+  .therapist-note {
+  margin-top: 8px;
+  background: #fff7e6;
+  border-left: 4px solid #f4b400;
+  padding: 8px 12px;
+  font-size: 13px;
+  border-radius: 4px;
+  font-family: 'Kanit';
+}
+
+.note-title {
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.note-list {
+  margin: 0;
+  padding-left: 16px;
+}
+
+.note-list li {
+  margin-bottom: 2px;
+}

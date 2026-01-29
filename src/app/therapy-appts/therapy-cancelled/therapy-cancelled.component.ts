@@ -102,11 +102,17 @@ export class TherapyCancelledComponent {
           case 'phone':
             matches = service.phone?.includes(this.searchValue);
             break;
+          // case 'therapyName':
+          //   matches = !!service.therapyName
+          //     ?.toLowerCase()
+          //     .includes(this.searchValue.toLowerCase());
+          //   break;
           case 'therapyName':
-            matches = !!service.therapyName
+            matches = service.therapyNames
               ?.toLowerCase()
               .includes(this.searchValue.toLowerCase());
             break;
+
         }
 
       }
@@ -309,11 +315,11 @@ export class TherapyCancelledComponent {
 
       },
       error: (err) => {
-          this.messageService.add({
-            severity: "error",
-            summary: "Error",
-            detail: err.error.message,
-          });
+        this.messageService.add({
+          severity: "error",
+          summary: "Error",
+          detail: err.error.message,
+        });
       },
     });
 
@@ -332,9 +338,9 @@ export class TherapyCancelledComponent {
   }
   cancelAppointment(service: any): void {
     if (!service.id) return;
-  
+
     this.isLoading = true;
-  
+
     this.therapyService.cancelTherapyAppointment(service.id, this.username).subscribe({
       next: (res) => {
         this.messageService.add({
@@ -354,7 +360,7 @@ export class TherapyCancelledComponent {
       }
     });
   }
-  
+
   // Lock a service
   lockService(service: TherapyAppointment): void {
     if (!service.id) return;
@@ -461,5 +467,19 @@ export class TherapyCancelledComponent {
     }
     return service.therapists.map((t: any) => t.name).join(", ");
   }
+getTimeRange(service: any): string {
+  if (!service.time || !service.totalDurationMinutes) {
+    return service.time || '—';
+  }
+
+  const [h, m] = service.time.split(':').map(Number);
+  const startMinutes = h * 60 + m;
+  const endMinutes = startMinutes + service.totalDurationMinutes;
+
+  const endH = Math.floor(endMinutes / 60).toString().padStart(2, '0');
+  const endM = (endMinutes % 60).toString().padStart(2, '0');
+
+  return `${service.time} – ${endH}:${endM}`;
+}
 
 }

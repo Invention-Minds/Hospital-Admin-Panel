@@ -244,6 +244,20 @@
 
     </div>
 
+    <div class="form-row">
+  <div class="form-group full-width">
+    <textarea
+      class="form-input"
+      name="remarks"
+      rows="3"
+      [(ngModel)]="formData.remarks"
+      placeholder=" ">
+    </textarea>
+    <label class="form-label">Remarks (optional)</label>
+  </div>
+</div>
+
+
 <div class="therapist-note" *ngIf="getSelectedTherapistBusySlots().length">
 
   <p class="note-title">

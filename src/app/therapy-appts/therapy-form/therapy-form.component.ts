@@ -41,7 +41,8 @@ export class TherapyFormComponent {
     roomNumber: '',
     date: '',
     time: '',
-    hasBathing: false
+    hasBathing: false,
+    remarks:''
   };
 
   therapies: any[] = [];
@@ -126,7 +127,9 @@ export class TherapyFormComponent {
       therapyDurationMinutes: service.therapyDurationMinutes || 0,
       bathingDurationMinutes: service.bathingDurationMinutes || 0,
       cleaningDurationMinutes: service.cleaningDurationMinutes || 0,
-      totalDurationMinutes: service.totalDurationMinutes || 0
+      totalDurationMinutes: service.totalDurationMinutes || 0,
+      remarks: service.remarks || '',
+
     };
 
     console.log('📝 Populating form with data:', service.totalDurationMinutes);

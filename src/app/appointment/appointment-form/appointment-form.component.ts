@@ -197,18 +197,18 @@ export class AppointmentFormComponent implements OnInit {
       // console.log(this.currentAppointment)
 
       this.patchFormWithAppointment(this.currentAppointment, new Date(this.currentAppointment.date));
-      setTimeout(() => {
-  this.setMinTime();
-});
+      // setTimeout(() => {
+      //   this.setMinTime();
+      // });
 
     }
     if (this.followUp) {
       console.log(this.followUp)
       this.followUp.time = ''
       this.patchFormWithAppointment(this.followUp, new Date());
-      setTimeout(() => {
-  this.setMinTime();
-});
+      // setTimeout(() => {
+      //   this.setMinTime();
+      // });
 
       this.doctorId = this.followUp.doctorId;
       this.department = this.followUp.department;
@@ -269,9 +269,9 @@ export class AppointmentFormComponent implements OnInit {
       // console.log("appointmentpatch"  ,this.appointment)
 
       this.patchFormWithAppointment(this.appointment!, appointmentDate);
-      setTimeout(() => {
-  this.setMinTime();
-});
+      // setTimeout(() => {
+      //   this.setMinTime();
+      // });
 
       this.checkSlotAvailability(this.appointment.doctorId, this.formatDate(appointmentDate), this.appointment.time)
         .then(isAvailable => {
@@ -321,7 +321,7 @@ export class AppointmentFormComponent implements OnInit {
       });
       this.appointmentForm.get('appointmentDate')?.valueChanges.subscribe(date => {
         const doctorName = this.appointmentForm.get('doctorName')?.value;
-        this.setMinTime();
+        // this.setMinTime();
         // const doctorId = this.getDoctorIdByName(doctorName);
         console.log(this.doctorId)
         const doctorId = this.doctorId;
@@ -395,8 +395,8 @@ export class AppointmentFormComponent implements OnInit {
           patientType: this.currentAppointment?.patientType,
           prefix: this.currentAppointment?.prefix,
         });
-          this.setMinTime();
-          console.log(this.minTime, 'minTime');
+        this.setMinTime();
+        console.log(this.minTime, 'minTime');
 
         // Show message or handle slot selection using p-calendar for manual time selection
         // console.log('Please select an appointment time from the available slots.');
@@ -427,20 +427,75 @@ export class AppointmentFormComponent implements OnInit {
     }
 
   }
+
+  // setMinTime(): void {
+  //   const today = new Date();
+  //   const selectedValue = this.appointmentForm?.get('appointmentDate')?.value;
+
+  //   if (!selectedValue) {
+  //     this.minTime = undefined;
+  //     return;
+  //   }
+
+  //   // 🔥 Normalize to Date
+  //   const selectedDate =
+  //     selectedValue instanceof Date
+  //       ? selectedValue
+  //       : new Date(selectedValue);
+
+  //   if (isNaN(selectedDate.getTime())) {
+  //     this.minTime = undefined;
+  //     return;
+  //   }
+
+  //   if (selectedDate.toDateString() === today.toDateString()) {
+  //     this.minTime = today;
+  //   } else {
+  //     this.minTime = undefined;
+  //   }
+  // }
+
   setMinTime(): void {
-    console.log("Setting min time")
-    const today = new Date();
-    const selectedDate = this.appointmentForm?.get('appointmentDate')?.value;
+  const now = new Date();
+  const selectedValue = this.appointmentForm?.get('appointmentDate')?.value;
 
-    console.log(selectedDate, today)
-
-    if (selectedDate.toDateString() === today.toDateString()) {
-      // If today is selected, limit the time to future times
-      this.minTime = today;
-    } else {
-      this.minTime = undefined; // No restriction for other dates
-    }
+  if (!selectedValue) {
+    this.minTime = undefined;
+    return;
   }
+
+  // Normalize to Date
+  const selectedDate =
+    selectedValue instanceof Date
+      ? selectedValue
+      : new Date(selectedValue);
+
+  if (isNaN(selectedDate.getTime())) {
+    this.minTime = undefined;
+    return;
+  }
+
+  // Compare ONLY date (ignore time)
+  const isToday =
+    selectedDate.getFullYear() === now.getFullYear() &&
+    selectedDate.getMonth() === now.getMonth() &&
+    selectedDate.getDate() === now.getDate();
+
+  if (isToday) {
+    // 🔥 Block past times
+    this.minTime = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      now.getHours(),
+      now.getMinutes()
+    );
+  } else {
+    // Other dates → allow all times
+    this.minTime = undefined;
+  }
+}
+
 
   // onPRNChange(){
   //   // console.log(this.appointmentForm.value.prnNumber)
@@ -717,7 +772,7 @@ export class AppointmentFormComponent implements OnInit {
 
     this.appointmentForm.get('appointmentDate')?.valueChanges.subscribe(date => {
       const doctorName = this.appointmentForm.get('doctorName')?.value;
-      this.setMinTime();
+      // this.setMinTime();
       // const doctorId = this.getDoctorIdByName(doctorName);
       console.log(this.doctorId)
       const doctorId = this.doctorId;
@@ -1232,7 +1287,7 @@ export class AppointmentFormComponent implements OnInit {
 
   private patchFormWithAppointment(appointment: Appointment, appointmentDate: any) {
 
-    this.setMinTime()
+    // this.setMinTime()
     // console.log(appointment)
     this.appointment?.doctor?.doctorType === 'Visiting Consultant' ? this.isVisitingConsultant = true : this.isVisitingConsultant = false;
     // console.log(this.appointment?.doctor?.doctorType, this.isVisitingConsultant)

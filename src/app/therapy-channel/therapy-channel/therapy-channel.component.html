@@ -65,26 +65,35 @@
                                         {{ patient.name }}
                                     </span>
                                 </td>
-                                <td style="text-align: center;">{{ patient.therapy?.name || '-' }}</td>
+                                <!-- <td style="text-align: center;">{{ patient.therapy?.name || '-' }}</td> -->
                                 <td class="therapist-name-cell">
-                                    <span 
-                                        *ngIf="getTherapistNames(patient).length > 12" 
-                                        class="scrolling-name">
+
+                                    <span *ngIf="patient.therapyNames?.length > 12" class="scrolling-name">
+                                        {{ patient.therapyNames }}
+                                    </span>
+
+                                    <span *ngIf="patient.therapyNames?.length <= 12">
+                                        {{ patient.therapyNames || '-' }}
+                                    </span>
+
+                                </td>
+
+                                <td class="therapist-name-cell">
+                                    <span *ngIf="getTherapistNames(patient).length > 12" class="scrolling-name">
                                         {{ getTherapistNames(patient) }}
                                     </span>
-                                
-                                    <span 
-                                        *ngIf="getTherapistNames(patient).length <= 12">
+
+                                    <span *ngIf="getTherapistNames(patient).length <= 12">
                                         {{ getTherapistNames(patient) || '-' }}
                                     </span>
                                 </td>
-                                
+
                                 <!-- 🕒 Display Time -->
                                 <td style="text-align: center;">{{ patient.time }}</td>
                                 <td style="text-align: center;">
                                     <span class="status-badge" [ngClass]="patient.statusColor">
                                         {{ patient.displayStatus }}
-                                      </span>                                      
+                                    </span>
                                 </td>
                             </tr>
                         </tbody>

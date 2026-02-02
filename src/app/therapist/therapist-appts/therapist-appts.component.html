@@ -84,15 +84,15 @@
           <td>{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
           <td>{{ service.name }}</td>
           <td>{{ service.prn || '-'}}</td>
-          <td>{{ service.therapy.name }}</td>
+          <td>{{ service.therapyNames }}</td>
           <td>{{ service.time }}</td>
           <td>{{ service.roomNumber }}</td>
           <td class="button">
-            <button class="start" [disabled]="service.entryDone" (click)="completeAppointment(service)">
+            <!-- <button class="start" [disabled]="service.entryDone" (click)="completeAppointment(service)">
               <img class="image" src="/start.svg">Entry
-            </button>
+            </button> -->
             <button class="finish" [disabled]="service.therapyStarted"
-              (click)="service.entryDone && startTherapy(service)">
+              (click)="startTherapy(service)">
               <img class="image" src="/finish.svg"> Start
             </button>
             <button class="postPond" [disabled]="service.postponed"

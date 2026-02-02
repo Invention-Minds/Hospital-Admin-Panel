@@ -113,7 +113,7 @@ export class AppointmentFormComponent implements OnInit {
 
 
   constructor(private fb: FormBuilder, private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private messageService: MessageService, private cdr: ChangeDetectorRef, private authService: AuthServiceService, private router: Router) {
-    this.setMinTime();
+    // this.setMinTime();
   }
 
   @Output() close = new EventEmitter<void>();
@@ -197,11 +197,19 @@ export class AppointmentFormComponent implements OnInit {
       // console.log(this.currentAppointment)
 
       this.patchFormWithAppointment(this.currentAppointment, new Date(this.currentAppointment.date));
+      setTimeout(() => {
+  this.setMinTime();
+});
+
     }
     if (this.followUp) {
       console.log(this.followUp)
       this.followUp.time = ''
       this.patchFormWithAppointment(this.followUp, new Date());
+      setTimeout(() => {
+  this.setMinTime();
+});
+
       this.doctorId = this.followUp.doctorId;
       this.department = this.followUp.department;
       this.followUp.type = 'followUp'
@@ -261,6 +269,10 @@ export class AppointmentFormComponent implements OnInit {
       // console.log("appointmentpatch"  ,this.appointment)
 
       this.patchFormWithAppointment(this.appointment!, appointmentDate);
+      setTimeout(() => {
+  this.setMinTime();
+});
+
       this.checkSlotAvailability(this.appointment.doctorId, this.formatDate(appointmentDate), this.appointment.time)
         .then(isAvailable => {
           if (isAvailable) {
@@ -309,6 +321,7 @@ export class AppointmentFormComponent implements OnInit {
       });
       this.appointmentForm.get('appointmentDate')?.valueChanges.subscribe(date => {
         const doctorName = this.appointmentForm.get('doctorName')?.value;
+        this.setMinTime();
         // const doctorId = this.getDoctorIdByName(doctorName);
         console.log(this.doctorId)
         const doctorId = this.doctorId;
@@ -372,6 +385,7 @@ export class AppointmentFormComponent implements OnInit {
         this.doctorId = this.doctorAvailability.id;
         // console.log(this.doctorId)
         // Handle Visiting Consultant doctor slots by prompting the user to select manually
+
         this.appointmentForm.patchValue({
           doctorName: this.doctorAvailability!.name,
           appointmentDate: this.date,
@@ -381,6 +395,8 @@ export class AppointmentFormComponent implements OnInit {
           patientType: this.currentAppointment?.patientType,
           prefix: this.currentAppointment?.prefix,
         });
+          this.setMinTime();
+          console.log(this.minTime, 'minTime');
 
         // Show message or handle slot selection using p-calendar for manual time selection
         // console.log('Please select an appointment time from the available slots.');
@@ -412,8 +428,11 @@ export class AppointmentFormComponent implements OnInit {
 
   }
   setMinTime(): void {
+    console.log("Setting min time")
     const today = new Date();
-    const selectedDate = new Date(); // You can replace this with your date picker control value
+    const selectedDate = this.appointmentForm?.get('appointmentDate')?.value;
+
+    console.log(selectedDate, today)
 
     if (selectedDate.toDateString() === today.toDateString()) {
       // If today is selected, limit the time to future times
@@ -698,6 +717,7 @@ export class AppointmentFormComponent implements OnInit {
 
     this.appointmentForm.get('appointmentDate')?.valueChanges.subscribe(date => {
       const doctorName = this.appointmentForm.get('doctorName')?.value;
+      this.setMinTime();
       // const doctorId = this.getDoctorIdByName(doctorName);
       console.log(this.doctorId)
       const doctorId = this.doctorId;
@@ -1211,6 +1231,8 @@ export class AppointmentFormComponent implements OnInit {
   // }
 
   private patchFormWithAppointment(appointment: Appointment, appointmentDate: any) {
+
+    this.setMinTime()
     // console.log(appointment)
     this.appointment?.doctor?.doctorType === 'Visiting Consultant' ? this.isVisitingConsultant = true : this.isVisitingConsultant = false;
     // console.log(this.appointment?.doctor?.doctorType, this.isVisitingConsultant)
@@ -1378,7 +1400,7 @@ export class AppointmentFormComponent implements OnInit {
   completeAppointment(appointment: Appointment) {
     const appointmentId = appointment.id;
     if (appointmentId !== undefined) {
-      this.doctorService.markSlotAsComplete(appointment!.doctorId, appointment.date, appointment.time,this.userId.toString())
+      this.doctorService.markSlotAsComplete(appointment!.doctorId, appointment.date, appointment.time, this.userId.toString())
         .subscribe(
           response => {
             // console.log('Slot marked as complete:', response);
@@ -2377,6 +2399,8 @@ export class AppointmentFormComponent implements OnInit {
 
     // Convert available days to indices
     const availableDays = availability.map((avail) => dayNameToIndex[avail.day]);
+
+    console.log('Available Days (by index):', availableDays);
 
     // Determine disabled days by excluding available days
     this.disabledDays = Object.values(dayNameToIndex).filter(

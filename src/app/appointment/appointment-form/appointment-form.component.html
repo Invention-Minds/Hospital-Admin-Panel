@@ -177,7 +177,7 @@
             <div class="input_field">
               <p-calendar class="email" formControlName="appointmentDate" [minDate]="minDate"
               [disabledDays]="disabledDays" [showButtonBar]="true" placeholder="Select appointment date"
-              dateFormat="dd-mm-yy" (click)="preventClose($event)"></p-calendar>
+              dateFormat="dd-mm-yy" (click)="preventClose($event)"   (onSelect)="setMinTime()"></p-calendar>
             <div class="errors"
               *ngIf="appointmentForm.get('appointmentDate')?.invalid && appointmentForm.get('appointmentDate')?.touched">
               <small>Appointment Date is required</small>

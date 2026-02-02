@@ -327,7 +327,9 @@ export class TherapistApptsComponent {
   startTherapy(service: any): void {
     const payload = {
       therapyStarted: true,
-      startedBy: this.userId
+      startedBy: this.userId,
+      entryDone: true,
+      entryDoneBy: this.userId
     };
 
     this.therapyService.updateTherapyProgress(service.id, payload).subscribe({

@@ -363,9 +363,9 @@ export class TherapyChannelComponent {
       return { displayStatus: 'Started', color: 'purple' };
     }
   
-    // 2️⃣ Patient already entered
-    if (appt.entryDone) {
-      return { displayStatus: 'Patient In', color: 'green' };
+    // // 2️⃣ Patient already entered
+    if (appt.checkedIn) {
+      return { displayStatus: 'Checked-In', color: 'navy-blue' };
     }
   
     // 6️⃣ Postponed

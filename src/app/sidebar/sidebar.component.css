@@ -47,7 +47,7 @@
   align-items: flex-start; /* Align items to the left when expanded */
   justify-content: space-around;
   /* margin-top: 40px; */
-  gap: 15px;
+  gap: 12px;
   padding-left: 10px; /* Add padding for text alignment */
   flex-grow: 1;
 }

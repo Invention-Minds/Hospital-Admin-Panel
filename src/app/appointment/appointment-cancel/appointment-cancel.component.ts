@@ -655,13 +655,13 @@ export class AppointmentCancelComponent {
             status: 'cancelled',
             prefix: appointment.prefix
           }
-          this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
-            next: (response) => {
-            },
-            error: (error) => {
-              console.error('Error sending SMS message:', error);
-            }
-          });
+          // this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
+          //   next: (response) => {
+          //   },
+          //   error: (error) => {
+          //     console.error('Error sending SMS message:', error);
+          //   }
+          // });
           this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
             next: (response) => {
             },

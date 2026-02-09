@@ -626,4 +626,11 @@ const appointmentData = appointment
   getCheckedOut():Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/get-checkedOut`)
   }
+getCheckedInAppointments(fromDate: string, toDate: string) {
+  return this.http.get<any[]>(
+    `${this.apiUrl}/checkin-reports?fromDate=${fromDate}&toDate=${toDate}`
+  );
+}
+
+
 }

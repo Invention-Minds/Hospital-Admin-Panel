@@ -24,10 +24,21 @@
           <p>Health Checkup Report</p>
         </div>
       </div>
-
+      <div class="card" 
+      [ngClass]="{'active-card': activeComponent === 'checkin'}"
+      (click)="showCheckinReport()">
+        <div class="card-icon">
+          <img src="/receptionist.svg" alt="Appointment Icon" />
+        </div>
+        <div class="card-content">
+  
+          <p>Checkin Report</p>
+        </div>
+      </div>
     </div>
   </div>
   <div class="component-section">
     <app-admin-report *ngIf="activeComponent === 'sub_admin'"></app-admin-report>
     <app-doctor-report *ngIf="activeComponent === 'doctor'"></app-doctor-report>
+    <app-checkin-report *ngIf="activeComponent === 'checkin'"></app-checkin-report>
   </div>

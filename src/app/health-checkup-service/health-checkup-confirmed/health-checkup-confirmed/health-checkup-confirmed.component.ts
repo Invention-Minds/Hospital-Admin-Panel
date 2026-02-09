@@ -489,41 +489,41 @@ export class HealthCheckupConfirmedComponent {
           packageName: service.packageName,
           prefix: service.prefix
         }
-        this.healthCheckupService.sendSmsMessage(smsPayload).subscribe({
-          next: (response) => {
-            console.log('SMS sent successfully:', response);
-            // const smsPayload ={
-            //   ...service,
-            //   smsSent: true
-            // }
-            updateService.smsSent = true;
-            this.healthCheckupService.updateServiceMessageStatus(service.id!, { smsSent: true }).subscribe({
-              next: (updateResponse) => {
-                console.log('Service updated with smsSent status:', updateResponse);
-              },
-              error: (updateError) => {
-                console.error('Error updating smsSent status in service:', updateError);
-              },
-              complete: () => {
-                this.isLoading = false;
-              },
-            });
-          },
-          error: (error) => {
-            console.error('Error sending SMS:', error);
-            this.healthCheckupService.updateServiceMessageStatus(service.id!, { smsSent: false }).subscribe({
-              next: (updateResponse) => {
-                console.log('Service updated with smsSent status:', updateResponse);
-              },
-              error: (updateError) => {
-                console.error('Error updating smsSent status in service:', updateError);
-              },
-              complete: () => {
-                this.isLoading = false;
-              },
-            });
-          },
-        });
+        // this.healthCheckupService.sendSmsMessage(smsPayload).subscribe({
+        //   next: (response) => {
+        //     console.log('SMS sent successfully:', response);
+        //     // const smsPayload ={
+        //     //   ...service,
+        //     //   smsSent: true
+        //     // }
+        //     updateService.smsSent = true;
+        //     this.healthCheckupService.updateServiceMessageStatus(service.id!, { smsSent: true }).subscribe({
+        //       next: (updateResponse) => {
+        //         console.log('Service updated with smsSent status:', updateResponse);
+        //       },
+        //       error: (updateError) => {
+        //         console.error('Error updating smsSent status in service:', updateError);
+        //       },
+        //       complete: () => {
+        //         this.isLoading = false;
+        //       },
+        //     });
+        //   },
+        //   error: (error) => {
+        //     console.error('Error sending SMS:', error);
+        //     this.healthCheckupService.updateServiceMessageStatus(service.id!, { smsSent: false }).subscribe({
+        //       next: (updateResponse) => {
+        //         console.log('Service updated with smsSent status:', updateResponse);
+        //       },
+        //       error: (updateError) => {
+        //         console.error('Error updating smsSent status in service:', updateError);
+        //       },
+        //       complete: () => {
+        //         this.isLoading = false;
+        //       },
+        //     });
+        //   },
+        // });
         const appointmentDetails = {
           patientName: service.firstName + ' ' + service.lastName,
           packageName: service.packageName ? service.packageName : null,

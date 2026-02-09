@@ -174,6 +174,7 @@ import { TherapistApptsComponent } from './therapist/therapist-appts/therapist-a
 import { TherapyChannelComponent } from './therapy-channel/therapy-channel/therapy-channel.component';
 import { TherapyAnalyticsComponent } from './therapy-analytics/therapy-analytics/therapy-analytics.component';
 import { CallBackComponent } from './estimation/call-back/call-back.component';
+import { CheckinReportComponent } from './report/checkin-report/checkin-report.component';
 
 
 @NgModule({
@@ -306,6 +307,7 @@ import { CallBackComponent } from './estimation/call-back/call-back.component';
     TherapyChannelComponent,
     TherapyAnalyticsComponent,
     CallBackComponent,
+    CheckinReportComponent,
   ],
   imports: [
     BrowserModule,

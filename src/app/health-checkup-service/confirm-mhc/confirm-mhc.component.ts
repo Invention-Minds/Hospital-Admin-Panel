@@ -1078,15 +1078,15 @@ export class ConfirmMhcComponent {
           status: 'cancelled',
           prefix: appointment.prefix
         }
-        this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
-          next: (response) => {
-            // console.log('SMS message sent successfully:', response);
-            this.messageService.add({ severity: 'success', summary: 'Success', detail: 'SMS message sent successfully!' });
-          },
-          error: (error) => {
-            console.error('Error sending SMS message:', error);
-          }
-        });
+        // this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
+        //   next: (response) => {
+        //     // console.log('SMS message sent successfully:', response);
+        //     this.messageService.add({ severity: 'success', summary: 'Success', detail: 'SMS message sent successfully!' });
+        //   },
+        //   error: (error) => {
+        //     console.error('Error sending SMS message:', error);
+        //   }
+        // });
         this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
           next: (response) => {
             // console.log('WhatsApp message sent successfully:', response);
@@ -1209,15 +1209,15 @@ export class ConfirmMhcComponent {
             status: 'cancelled',
             prefix: appointment?.prefix
           }
-          this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
-            next: (response) => {
-              // console.log('SMS message sent successfully:', response);
-              this.messageService.add({ severity: 'success', summary: 'Success', detail: 'SMS message sent successfully!' });
-            },
-            error: (error) => {
-              console.error('Error sending SMS message:', error);
-            }
-          });
+          // this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
+          //   next: (response) => {
+          //     // console.log('SMS message sent successfully:', response);
+          //     this.messageService.add({ severity: 'success', summary: 'Success', detail: 'SMS message sent successfully!' });
+          //   },
+          //   error: (error) => {
+          //     console.error('Error sending SMS message:', error);
+          //   }
+          // });
           this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
             next: (response) => {
               // console.log('WhatsApp message sent successfully:', response);

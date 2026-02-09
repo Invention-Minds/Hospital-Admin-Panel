@@ -18,6 +18,10 @@ export class ReportOverviewComponent {
     showDoctorReport() {
         this.activeComponent = 'doctor';
     }
+    // Show the Check-in Report component when the "No. of Check-ins" card is clicked
+    showCheckinReport() {
+        this.activeComponent = 'checkin';
+    }
     ngOnInit(): void {
       if (typeof window !== 'undefined' && window.localStorage) {
         // Fetch role from localStorage or the authentication service

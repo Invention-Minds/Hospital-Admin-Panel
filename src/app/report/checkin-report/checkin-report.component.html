@@ -1,0 +1,103 @@
+<!-- <div class="filter-container">
+  <p-calendar
+    [(ngModel)]="selectedDateRange"
+    selectionMode="range"
+    dateFormat="dd-mm-yy"
+    placeholder="Select date range"
+    (ngModelChange)="loadCheckedInAppointments()"
+    styleClass="custom-calendar">
+  </p-calendar>
+
+  <button class="refresh-btn" (click)="refresh()">Refresh</button>
+</div> -->
+<div class="filter-container">
+
+  <div class="p-field p-col-3 calendar">
+    <!-- <p-calendar [(ngModel)]="selectedDate" placeholder="Calendar" class="custom-calendar"></p-calendar> -->
+    <!-- <img src="report-download.svg" alt="check" (click)="download()"
+    pTooltip="Download" class="download" tooltipPosition="top"> -->
+    <p-calendar 
+    styleClass="custom-calendar" 
+    [(ngModel)]="selectedDateRange"
+    (ngModelChange)="loadCheckedInAppointments()"
+    selectionMode="range"
+    
+    placeholder="Calendar"
+    dateFormat="dd-mm-yy">
+      <ng-template pTemplate="date" let-date>
+          <span>
+              {{ date.day }}
+          </span>
+      </ng-template>
+  </p-calendar>
+  <i class="fa-solid fa-angle-down calendar-icon"></i>
+  <svg pTooltip="Refresh" (click)="refresh()" class="reverse" xmlns="http://www.w3.org/2000/svg" width="2.5em" height="2.5em" viewBox="-1.5 -2.5 24 24"><path fill="currentColor" d="m4.859 5.308l1.594-.488a1 1 0 0 1 .585 1.913l-3.825 1.17a1 1 0 0 1-1.249-.665L.794 3.413a1 1 0 1 1 1.913-.585l.44 1.441C5.555.56 10.332-1.035 14.573.703a9.38 9.38 0 0 1 5.38 5.831a1 1 0 1 1-1.905.608A7.381 7.381 0 0 0 4.86 5.308zm12.327 8.195l-1.775.443a1 1 0 1 1-.484-1.94l3.643-.909a1 1 0 0 1 .61-.08a1 1 0 0 1 .84.75l.968 3.88a1 1 0 0 1-1.94.484l-.33-1.322a9.381 9.381 0 0 1-16.384-1.796l-.26-.634a1 1 0 1 1 1.851-.758l.26.633a7.381 7.381 0 0 0 13.001 1.25z"/></svg>
+
+  <svg class="p-field p-col-3 download" src="download.png"  (click)="download()" pTooltip="Download" xmlns="http://www.w3.org/2000/svg" width="3em" height="3em" viewBox="0 0 20 20">
+    <path fill="#fff" fill-rule="evenodd" d="M3 17a1 1 0 0 1 1-1h12a1 1 0 1 1 0 2H4a1 1 0 0 1-1-1m3.293-7.707a1 1 0 0 1 1.414 0L9 10.586V3a1 1 0 1 1 2 0v7.586l1.293-1.293a1 1 0 1 1 1.414 1.414l-3 3a1 1 0 0 1-1.414 0l-3-3a1 1 0 0 1 0-1.414" clip-rule="evenodd" />
+  </svg> 
+  </div>
+</div>
+
+<div class="table-container" *ngIf="!isLoading">
+  <table class="appointment-table">
+    <thead>
+      <tr>
+        <th>No</th>
+        <th>Patient</th>
+        <th>Doctor</th>
+        <th>Date</th>
+        <th>Time</th>
+        <th>Request Via</th>
+        <th>Created Date</th>
+        <th>Created By</th>
+        <th>Checked-in Time</th>
+        <th>Checked-in By</th>
+        <th>Type</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngIf="appointments.length === 0">
+        <td colspan="11" class="no-records-message">
+          No checked-in appointments
+        </td>
+      </tr>
+
+      <tr *ngFor="let appt of paginatedAppointments; let i = index">
+        <td>{{ i + 1 }}</td>
+        <td>{{ appt.patientName }}</td>
+        <td>{{ appt.doctor?.name }}</td>
+        <td>{{ appt.date }}</td>
+        <td>{{ appt.time }}</td>
+        <td>{{ appt.requestVia }}</td>
+        <td>{{ appt.created_at | date:'dd-MM-yyyy HH:mm' }}</td>
+        <!-- <td>{{ appt.user?.username }}</td> -->
+        <td>{{ formatUsername(appt.user?.username) }}</td>
+        <td>{{ appt.checkedInTime | date:'dd-MM-yyyy HH:mm' }}</td>
+        <td>{{ formatUsername(appt.checkedInBy) }}</td>
+        <td>{{ appt.type }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Pagination -->
+  <!-- <div class="pagination">
+    <button (click)="prevPage()" [disabled]="currentPage === 1">←</button>
+    <span>Page {{ currentPage }} / {{ totalPages }}</span>
+    <button (click)="nextPage()" [disabled]="currentPage === totalPages">→</button>
+  </div> -->
+      <div class="pagination">
+      <button class="pagination-btn prev" (click)="prevPage()" [disabled]="currentPage === 1">←</button>
+      <button class="pagination-btn next" (click)="nextPage()" [disabled]="currentPage === totalPages">→</button>
+      <div class="page-info">
+        Page 
+        <input type="number" [(ngModel)]="currentPage" min="1" [max]="totalPages" class="page-input" (change)="onPageChange()">
+        of {{ totalPages }}
+      </div>
+    </div>
+</div>
+
+<p-toast></p-toast>
+
+<div class="loader" *ngIf="isLoading"></div>

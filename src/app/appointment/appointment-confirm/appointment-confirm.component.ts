@@ -838,14 +838,14 @@ export class AppointmentConfirmComponent {
           status: 'cancelled',
           prefix: appointment?.prefix
         }
-        this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
-          next: (response) => {
-            this.messageService.add({ severity: 'success', summary: 'Success', detail: 'SMS message sent successfully!' });
-          },
-          error: (error) => {
-            console.error('Error sending SMS message:', error);
-          }
-        });
+        // this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
+        //   next: (response) => {
+        //     this.messageService.add({ severity: 'success', summary: 'Success', detail: 'SMS message sent successfully!' });
+        //   },
+        //   error: (error) => {
+        //     console.error('Error sending SMS message:', error);
+        //   }
+        // });
         this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
           next: (response) => {
             this.messageService.add({ severity: 'success', summary: 'Success', detail: 'WhatsApp message sent successfully!' });
@@ -915,14 +915,14 @@ export class AppointmentConfirmComponent {
             status: 'cancelled',
             prefix: appointment?.prefix
           }
-          this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
-            next: (response) => {
-              this.messageService.add({ severity: 'success', summary: 'Success', detail: 'SMS message sent successfully!' });
-            },
-            error: (error) => {
-              console.error('Error sending SMS message:', error);
-            }
-          });
+          // this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
+          //   next: (response) => {
+          //     this.messageService.add({ severity: 'success', summary: 'Success', detail: 'SMS message sent successfully!' });
+          //   },
+          //   error: (error) => {
+          //     console.error('Error sending SMS message:', error);
+          //   }
+          // });
           this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
             next: (response) => {
               this.messageService.add({ severity: 'success', summary: 'Success', detail: 'WhatsApp message sent successfully!' });

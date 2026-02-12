@@ -6,6 +6,7 @@ import { MessageService } from 'primeng/api';
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
+import { VoiceOpdService } from '../../services/voice-opd/voice-opd.service';
 
 @Component({
   selector: 'app-opd-assessment',
@@ -86,10 +87,14 @@ export class OpdAssessmentComponent {
     kmcNo: '',
     doctorSign: ''
   };
+  mediaRecorder!: MediaRecorder;
+  audioChunks: Blob[] = [];
+  isRecording = false;
+
   isSubmitting = false;
   isEditMode = false;
 
-  constructor(private opdService: OpdAssessmentsService, private messageService: MessageService, private appointmentService: AppointmentConfirmService) { }
+  constructor(private opdService: OpdAssessmentsService, private messageService: MessageService, private appointmentService: AppointmentConfirmService, private voiceOPDService: VoiceOpdService) { }
 
   ngOnInit(): void {
     if (this.appointmentId) {
@@ -140,8 +145,8 @@ export class OpdAssessmentComponent {
     console.log('Saved handwriting for:', current);
     this.formData[current] = value;
 
-      // 🟢 Re-enable all handwriting sections after save
-  this.setActivePad(''); // empty disables none (enables all)
+    // 🟢 Re-enable all handwriting sections after save
+    this.setActivePad(''); // empty disables none (enables all)
 
     const order = ['history', 'examination', 'investigation', 'treatmentPlan'];
     const nextIndex = order.indexOf(current) + 1;
@@ -404,8 +409,8 @@ export class OpdAssessmentComponent {
           { text: "Doctor:", style: "sectionHeader" },
           { text: `Name: ${d.doctorName || "-"}, KMC No: ${d.kmcNo || "-"}` },
           d.doctorSign ? { image: d.doctorSign, width: 200, margin: [0, 10, 0, 0] } : {}
-                  // ✅ Doctor Signature Section
-  
+          // ✅ Doctor Signature Section
+
         ],
         styles: {
           header: { fontSize: 16, bold: true },
@@ -421,13 +426,13 @@ export class OpdAssessmentComponent {
   //   const d = this.formData;
   //   const now = new Date();
   //   const logoUrl = "/rash-logo.png";
-  
+
   //   // ✅ Prepare promises for both images
   //   const logoPromise = this.getBase64ImageFromURL(logoUrl);
   //   const doctorSignPromise = d.doctorSign
   //     ? this.getBase64ImageFromURL(d.doctorSign)
   //     : Promise.resolve(null);
-  
+
   //   // ✅ Wait for both images
   //   Promise.all([logoPromise, doctorSignPromise])
   //     .then(([logoBase64, doctorSignBase64]) => {
@@ -466,7 +471,7 @@ export class OpdAssessmentComponent {
   //             alignment: "center",
   //             margin: [0, 10, 0, 20],
   //           },
-  
+
   //           // ✅ Patient Info
   //           {
   //             table: {
@@ -491,7 +496,7 @@ export class OpdAssessmentComponent {
   //             },
   //             margin: [0, 0, 0, 20],
   //           },
-  
+
   //           // ✅ Vitals
   //           { text: "Vitals:", style: "sectionHeader" },
   //           {
@@ -505,7 +510,7 @@ export class OpdAssessmentComponent {
   //             ],
   //             margin: [0, 0, 0, 20],
   //           },
-  
+
   //           // ✅ Nutrition
   //           { text: "Nutritional Assessment:", style: "sectionHeader" },
   //           {
@@ -522,7 +527,7 @@ export class OpdAssessmentComponent {
   //             },
   //             margin: [0, 0, 0, 20],
   //           },
-  
+
   //           // ✅ Pain Score
   //           { text: "Pain Score:", style: "sectionHeader" },
   //           {
@@ -537,7 +542,7 @@ export class OpdAssessmentComponent {
   //             },
   //             margin: [0, 0, 0, 20],
   //           },
-  
+
   //           // ✅ Screening
   //           { text: "Screening:", style: "sectionHeader" },
   //           {
@@ -552,27 +557,27 @@ export class OpdAssessmentComponent {
   //             },
   //             margin: [0, 0, 0, 20],
   //           },
-  
+
   //           // ✅ Handwritten sections
   //           { text: "History:", style: "sectionHeader" },
   //           d.history ? { image: d.history, width: 400, margin: [0, 5, 0, 15] } : { text: "-" },
-  
+
   //           { text: "Examination:", style: "sectionHeader" },
   //           d.examination ? { image: d.examination, width: 400, margin: [0, 5, 0, 15] } : { text: "-" },
-  
+
   //           { text: "Investigation:", style: "sectionHeader" },
   //           d.investigation ? { image: d.investigation, width: 400, margin: [0, 5, 0, 15] } : { text: "-" },
-  
+
   //           { text: "Treatment Plan:", style: "sectionHeader" },
   //           d.treatmentPlan ? { image: d.treatmentPlan, width: 400, margin: [0, 5, 0, 15] } : { text: "-" },
-  
+
   //           // ✅ Staff
   //           { text: "Staff:", style: "sectionHeader" },
   //           {
   //             text: `Name: ${d.staffName || "-"}, Emp ID: ${d.staffEmpId || "-"}`,
   //             margin: [0, 0, 0, 20],
   //           },
-  
+
   //           // ✅ Doctor Signature Section
   //           { text: "Doctor:", style: "sectionHeader" },
   //           {
@@ -604,7 +609,7 @@ export class OpdAssessmentComponent {
   //           sectionHeader: { fontSize: 12, bold: true, margin: [0, 10, 0, 5] },
   //         },
   //       };
-  
+
   //       pdfMake.createPdf(docDefinition).open();
   //     })
   //     .catch((err) => {
@@ -688,12 +693,72 @@ export class OpdAssessmentComponent {
       investigation: this.investigationComp,
       treatmentPlan: this.treatmentPlanComp,
     };
-  
+
     Object.keys(pads).forEach(key => {
       pads[key as keyof typeof pads]?.setReadOnly(!!activeKey && key !== activeKey);
     });
   }
-  
-  
+
+  uploadVoice(file: File) {
+    const formData = new FormData();
+    formData.append('audio', file);
+    this.voiceOPDService.uploadVoice(file).subscribe({
+      next: (res) => {
+        console.log('Voice response:', res);
+
+        // Fill text data
+        this.formData.history = res.history || '';
+        this.formData.examination = res.examination || '';
+        this.formData.investigation = res.investigation || '';
+        this.formData.treatmentPlan = res.treatmentPlan || '';
+
+        // Update handwriting pads
+        // this.updateHandwrittenSections();
+      },
+      error: (err) => {
+        console.error('Voice upload failed', err);
+      }
+    });
+  }
+  async startRecording() {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+      this.mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'audio/webm'
+      });
+
+      this.audioChunks = [];
+
+      this.mediaRecorder.ondataavailable = (event) => {
+        this.audioChunks.push(event.data);
+      };
+
+      this.mediaRecorder.start();
+      this.isRecording = true;
+
+      console.log('Recording started...');
+    } catch (err) {
+      console.error('Microphone access denied', err);
+    }
+  }
+  stopRecording() {
+    if (!this.mediaRecorder) return;
+
+    this.mediaRecorder.stop();
+    this.isRecording = false;
+
+    this.mediaRecorder.onstop = () => {
+      // const audioBlob = new Blob(this.audioChunks, { type: 'audio/wav' });
+      // const audioFile = new File([audioBlob], 'voice.wav', { type: 'audio/wav' });
+      const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+      const audioFile = new File([audioBlob], 'voice.webm', { type: 'audio/webm' });
+
+      this.uploadVoice(audioFile);
+    };
+
+    console.log('Recording stopped...');
+  }
+
 
 }

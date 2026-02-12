@@ -159,7 +159,7 @@
     <app-hand-written label="Investigation" (valueChange)="formData.investigation = $event" [initialValue]="formData.investigation"></app-hand-written>
     <app-hand-written label="Treatment Plan" (valueChange)="formData.treatmentPlan = $event" [initialValue]="formData.treatmentPlan"></app-hand-written> -->
 
-    <app-hand-written
+    <!-- <app-hand-written
     label="History"
     #historyComp
     (focusEvent)="setActivePad('history')"
@@ -189,8 +189,74 @@
     (focusEvent)="setActivePad('treatmentPlan')"
     (saveEvent)="onHandWrittenSaved($event, 'treatmentPlan')"
     [initialValue]="formData.treatmentPlan">
-  </app-hand-written>
-  
+  </app-hand-written> -->
+  <h3>Voice Assessment</h3>
+
+<div class="voice-controls">
+  <button type="button" (click)="startRecording()" [disabled]="isRecording"  [class.recording]="isRecording">
+    🎤 Start Recording
+  </button>
+
+  <button type="button" (click)="stopRecording()" [disabled]="!isRecording">
+    ⏹ Stop Recording
+  </button>
+</div>
+
+<h3>Voice Assessment Result</h3>
+
+<div class="form-row">
+  <div class="textarea-container">
+    <label>History</label>
+    <textarea
+      [(ngModel)]="formData.history"
+      name="history"
+      rows="4"
+      class="custom-textarea"
+      placeholder="History will appear here after voice recording">
+    </textarea>
+  </div>
+</div>
+
+<div class="form-row">
+  <div class="textarea-container">
+    <label>Examination</label>
+    <textarea
+      [(ngModel)]="formData.examination"
+      name="examination"
+      rows="4"
+      class="custom-textarea"
+      placeholder="Examination will appear here">
+    </textarea>
+  </div>
+</div>
+
+<div class="form-row">
+  <div class="textarea-container">
+    <label>Investigation</label>
+    <textarea
+      [(ngModel)]="formData.investigation"
+      name="investigation"
+      rows="4"
+      class="custom-textarea"
+      placeholder="Investigation will appear here">
+    </textarea>
+  </div>
+</div>
+
+<div class="form-row">
+  <div class="textarea-container">
+    <label>Treatment Plan</label>
+    <textarea
+      [(ngModel)]="formData.treatmentPlan"
+      name="treatmentPlan"
+      rows="4"
+      class="custom-textarea"
+      placeholder="Treatment plan will appear here">
+    </textarea>
+  </div>
+</div>
+
+
   
     <!-- Screening -->
     <h3>Screening</h3>

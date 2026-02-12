@@ -147,7 +147,122 @@
     box-shadow: 0 0 8px rgba(66, 165, 245, 0.5);
     transition: outline 0.3s ease, box-shadow 0.3s ease;
   }
-  
+  .voice-controls {
+  display: flex;
+  gap: 12px;
+  margin: 15px 0 25px 0;
+}
+
+.voice-controls button {
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+/* Start Button */
+.voice-controls button:first-child {
+  background: #01AFB8;
+  color: white;
+  box-shadow: 0 4px 10px rgba(1, 175, 184, 0.2);
+}
+
+.voice-controls button:first-child:hover {
+  background: #01939a;
+  transform: translateY(-1px);
+}
+
+/* Stop Button */
+.voice-controls button:last-child {
+  background: #e74c3c;
+  color: white;
+  box-shadow: 0 4px 10px rgba(231, 76, 60, 0.2);
+}
+
+.voice-controls button:last-child:hover {
+  background: #c0392b;
+  transform: translateY(-1px);
+}
+
+/* Disabled State */
+.voice-controls button:disabled {
+  background: #cfd8dc;
+  color: #6c757d;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+.recording {
+  background: #e74c3c !important;
+  animation: pulse 1.2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(231, 76, 60, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(231, 76, 60, 0);
+  }
+}
+.textarea-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.custom-textarea {
+  width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    background-color: #f6f8ff; /* Background color like the first image */
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    font-family: Kanit;
+    resize: vertical;
+}
+
+.custom-textarea:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 4px rgba(0, 123, 255, 0.3);
+}
+.textarea-wrapper {
+  border-radius: 10px;
+  background: rgba(217, 217, 217, 0.30);
+  padding: 0; /* Remove padding from wrapper */
+  overflow: hidden; /* Ensure child elements don’t leak borders */
+}
+
+.textarea-label {
+  font-weight: 600;
+  font-size: 15px;
+  color: #003366;
+  padding: 12px 14px 0 14px;
+}
+
+.textarea-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  resize: vertical;
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.4;
+  background: transparent; /* Important */
+  padding: 8px 14px 14px 14px;
+  box-sizing: border-box;
+}
+
     /* For tablets and smaller screens (<1024px) */
 @media (max-width: 1024px) {
   .input-container {

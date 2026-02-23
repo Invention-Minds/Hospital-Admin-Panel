@@ -97,14 +97,28 @@ export class OpdAssessmentComponent {
   constructor(private opdService: OpdAssessmentsService, private messageService: MessageService, private appointmentService: AppointmentConfirmService, private voiceOPDService: VoiceOpdService) { }
 
   ngOnInit(): void {
+    // if (this.appointmentId) {
+    //   this.isEditMode = true;
+    //   this.loadAssessment(this.appointmentId);
+    //   // fetch appointment details
+    //   this.loadAppointmentDetails(this.appointmentId);
+    // } else {
+    //   this.resetForm();
+    // }
+  //     if (this.appointmentId) {
+  //   this.loadAssessment(this.appointmentId);
+  // } else {
+  //   this.resetForm();
+  //   if (this.appointmentId) {
+  //     this.loadAppointmentDetails(this.appointmentId);
+  //   }
+  // }
     if (this.appointmentId) {
-      this.isEditMode = true;
-      this.loadAssessment(this.appointmentId);
-      // fetch appointment details
-      this.loadAppointmentDetails(this.appointmentId);
-    } else {
-      this.resetForm();
-    }
+    this.loadAssessment(this.appointmentId);
+  } else {
+    this.resetForm();
+  }
+
   }
   resetForm() {
     this.formData = {
@@ -173,68 +187,133 @@ export class OpdAssessmentComponent {
 
 
 
-  loadAssessment(appointmentId: number) {
-    this.opdService.getAssessmentByAppointmentId(appointmentId).subscribe({
-      next: (data) => {
-        if (data) {
+  // loadAssessment(appointmentId: number) {
+  //   this.opdService.getAssessmentByAppointmentId(appointmentId).subscribe({
+  //     next: (data) => {
+  //       if (data) {
 
-          this.formData = {
-            // Patient Info
-            patientName: data.name || '',
-            age: data.age || '',
-            gender: data.gender || '',
-            uhid: data.uhId || '',
-            consultant: data.consultant || '',
-            department: data.department || '',
-            date: data.date || '',
-            assessmentTime: data.assessmentTime || '',
-            height: data.height || '',
-            weight: data.weight || '',
+  //         this.formData = {
+  //           // Patient Info
+  //           patientName: data.name || '',
+  //           age: data.age || '',
+  //           gender: data.gender || '',
+  //           uhid: data.uhId || '',
+  //           consultant: data.consultant || '',
+  //           department: data.department || '',
+  //           date: data.date || '',
+  //           assessmentTime: data.assessmentTime || '',
+  //           height: data.height || '',
+  //           weight: data.weight || '',
 
-            // Vitals
-            hr: data.hr || '',
-            rr: data.rr || '',
-            pulse: data.pulse || '',
-            bp: data.bp || '',
-            temp: data.temp || '',
-            spo2: data.spo2 || '',
+  //           // Vitals
+  //           hr: data.hr || '',
+  //           rr: data.rr || '',
+  //           pulse: data.pulse || '',
+  //           bp: data.bp || '',
+  //           temp: data.temp || '',
+  //           spo2: data.spo2 || '',
 
-            // Nutrition
-            dietType: data.oralDiet || '',
-            enteralFeed: data.enteralFeed || '',
-            npo: data.npo || false,
-            allergies: data.allergies || '',
+  //           // Nutrition
+  //           dietType: data.oralDiet || '',
+  //           enteralFeed: data.enteralFeed || '',
+  //           npo: data.npo || false,
+  //           allergies: data.allergies || '',
 
-            // Pain Score
-            painScore: data.painScore || '',
+  //           // Pain Score
+  //           painScore: data.painScore || '',
 
-            // Screening
-            otherScreening: data.screeningReq || false,
-            counsellingImplants: data.implantCounsel || false,
+  //           // Screening
+  //           otherScreening: data.screeningReq || false,
+  //           counsellingImplants: data.implantCounsel || false,
 
-            // Handwritten
-            history: data.history || '',
-            examination: data.examination || '',
-            investigation: data.investigation || '',
-            treatmentPlan: data.treatmentPlan || '',
+  //           // Handwritten
+  //           history: data.history || '',
+  //           examination: data.examination || '',
+  //           investigation: data.investigation || '',
+  //           treatmentPlan: data.treatmentPlan || '',
 
-            // Staff
-            staffName: data.staffName || '',
-            staffEmpId: data.staffEmpId || '',
+  //           // Staff
+  //           staffName: data.staffName || '',
+  //           staffEmpId: data.staffEmpId || '',
 
-            // Doctor
-            doctorName: data.doctorName || '',
-            kmcNo: data.kmcNo || '',
-          };
+  //           // Doctor
+  //           doctorName: data.doctorName || '',
+  //           kmcNo: data.kmcNo || '',
+  //         };
 
-          this.isEditMode = true;
-        }
-      },
-      error: (err) => {
-        console.error('Error loading OPD assessment', err);
+  //         this.isEditMode = true;
+  //       }
+  //     },
+  //     error: (err) => {
+  //       console.error('Error loading OPD assessment', err);
+  //     }
+  //   });
+  // }
+loadAssessment(appointmentId: number) {
+  this.opdService.getAssessmentByAppointmentId(appointmentId).subscribe({
+    next: (data) => {
+      if (data) {
+        // ✅ Assessment exists → edit mode
+        this.isEditMode = true;
+
+        this.formData = {
+          patientName: data.name || '',
+          age: data.age || '',
+          gender: data.gender || '',
+          uhid: data.uhId || '',
+          consultant: data.consultant || '',
+          department: data.department || '',
+          date: data.date || '',
+          assessmentTime: this.convertTo24Hour(data.assessmentTime) || '',
+          height: data.height || '',
+          weight: data.weight || '',
+
+          hr: data.hr || '',
+          rr: data.rr || '',
+          pulse: data.pulse || '',
+          bp: data.bp || '',
+          temp: data.temp || '',
+          spo2: data.spo2 || '',
+
+          dietType: data.oralDiet || '',
+          enteralFeed: data.enteralFeed || '',
+          npo: data.npo || false,
+          allergies: data.allergies || '',
+
+          painScore: data.painScore || '',
+          otherScreening: data.screeningReq || false,
+          counsellingImplants: data.implantCounsel || false,
+
+          history: data.history || '',
+          examination: data.examination || '',
+          investigation: data.investigation || '',
+          treatmentPlan: data.treatmentPlan || '',
+
+          staffName: data.staffName || '',
+          staffEmpId: data.staffEmpId || '',
+
+          doctorName: data.doctorName || '',
+          kmcNo: data.kmcNo || '',
+        };
+
+        console.log(this.formData)
+
+      } else {
+        // ❗ No assessment exists → new mode
+        this.isEditMode = false;
+        this.resetForm();
+        this.loadAppointmentDetails(appointmentId);
       }
-    });
-  }
+    },
+    error: (err) => {
+      console.error('Error loading OPD assessment', err);
+
+      // fallback → load appointment
+      this.resetForm();
+      this.loadAppointmentDetails(appointmentId);
+    }
+  });
+}
 
 
   submitForm() {
@@ -662,7 +741,7 @@ export class OpdAssessmentComponent {
           consultant: appt.doctorName || '',
           department: appt.department || '',
           date: appt.date || '',
-          assessmentTime: appt.time || '',
+          assessmentTime: this.convertTo24Hour(appt.time) || '',
 
           // Vitals (from appointment table itself)
           bp: appt.BPs && appt.BPd ? `${appt.BPs}/${appt.BPd}` : '',
@@ -699,27 +778,58 @@ export class OpdAssessmentComponent {
     });
   }
 
+  // uploadVoice(file: File) {
+  //   const formData = new FormData();
+  //   formData.append('audio', file);
+  //   this.voiceOPDService.uploadVoice(file).subscribe({
+  //     next: (res) => {
+  //       console.log('Voice response:', res);
+
+  //       // Fill text data
+  //       this.formData.history = res.history || '';
+  //       this.formData.examination = res.examination || '';
+  //       this.formData.investigation = res.investigation || '';
+  //       this.formData.treatmentPlan = res.treatmentPlan || '';
+
+  //       // Update handwriting pads
+  //       // this.updateHandwrittenSections();
+  //     },
+  //     error: (err) => {
+  //       console.error('Voice upload failed', err);
+  //     }
+  //   });
+  // }
   uploadVoice(file: File) {
-    const formData = new FormData();
-    formData.append('audio', file);
-    this.voiceOPDService.uploadVoice(file).subscribe({
-      next: (res) => {
-        console.log('Voice response:', res);
+  this.voiceOPDService.uploadVoice(file).subscribe({
+    next: (res) => {
+      console.log('Voice response:', res);
 
-        // Fill text data
-        this.formData.history = res.history || '';
-        this.formData.examination = res.examination || '';
-        this.formData.investigation = res.investigation || '';
-        this.formData.treatmentPlan = res.treatmentPlan || '';
+      // Only update section if new content exists
+      this.updateSection('history', res.history);
+      this.updateSection('examination', res.examination);
+      this.updateSection('investigation', res.investigation);
+      this.updateSection('treatmentPlan', res.treatmentPlan);
+    },
+    error: (err) => {
+      console.error('Voice upload failed', err);
+    }
+  });
+}
+updateSection(key: string, newText: string) {
+  if (!newText) return;
 
-        // Update handwriting pads
-        // this.updateHandwrittenSections();
-      },
-      error: (err) => {
-        console.error('Voice upload failed', err);
-      }
-    });
+  const existingText = this.formData[key];
+
+  // If empty → fill
+  if (!existingText || existingText.trim() === '') {
+    this.formData[key] = newText;
+  } 
+  // If already exists → append with line break
+  else {
+    this.formData[key] = existingText + '\n' + newText;
   }
+}
+
   async startRecording() {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -760,5 +870,22 @@ export class OpdAssessmentComponent {
     console.log('Recording stopped...');
   }
 
+convertTo24Hour(time: string): string {
+  if (!time) return '';
+
+  const [timePart, modifier] = time.split(' ');
+  let [hours, minutes] = timePart.split(':');
+
+  let h = parseInt(hours, 10);
+
+  if (modifier === 'PM' && h < 12) {
+    h += 12;
+  }
+  if (modifier === 'AM' && h === 12) {
+    h = 0;
+  }
+
+  return `${h.toString().padStart(2, '0')}:${minutes}`;
+}
 
 }

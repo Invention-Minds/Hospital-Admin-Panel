@@ -631,6 +631,13 @@ getCheckedInAppointments(fromDate: string, toDate: string) {
     `${this.apiUrl}/checkin-reports?fromDate=${fromDate}&toDate=${toDate}`
   );
 }
-
+  sendFollowUpMessage(data: {
+    patientName: string;
+    prefix: string;
+    phoneNumber: string;
+    doctorName: string;
+  }): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/whatsapp/send-followup-message`, data);
+  }
 
 }

@@ -271,18 +271,18 @@ export class TodayConsultationsComponent {
 
   deptId: number = 0;
 
-openOpdForm(appointment: any) {
-  this.selectedAppointment = appointment;
-  this.showOpdModal = true;
-}
+  openOpdForm(appointment: any) {
+    this.selectedAppointment = appointment;
+    this.showOpdModal = true;
+  }
 
-onAssessmentSaved(savedData: any) {
-  console.log('✅ OPD assessment saved/updated:', savedData);
-  this.showOpdModal = false;
-  // Optionally refresh appointment list
-  this.fetchAppointments(this.doctorId);
-}
-  
+  onAssessmentSaved(savedData: any) {
+    console.log('✅ OPD assessment saved/updated:', savedData);
+    this.showOpdModal = false;
+    // Optionally refresh appointment list
+    this.fetchAppointments(this.doctorId);
+  }
+
 
 
   get tablets(): FormArray {
@@ -972,8 +972,16 @@ onAssessmentSaved(savedData: any) {
     if (appointment.postPond === true) {
       appointment.postPond = false
     }
+    if (
+      appointment.patientType === 'New' &&
+      !(appointment.type === 'followUp') &&
+      !appointment.isfollowup
+    ) {
+      this.followUp(appointment)
+    }
     const { expanded, ...updatedAppointment } = appointment;
-    this.appointmentService.updateAppointment(updatedAppointment)
+    this.appointmentService.updateAppointment(updatedAppointment);
+
     this.startCounter(appointment);
 
 
@@ -1123,6 +1131,15 @@ onAssessmentSaved(savedData: any) {
       severity: 'success',
       summary: 'Success',
       detail: 'Followup added successfully.',
+    });
+    this.appointmentService.sendFollowUpMessage({
+      patientName: appointment.patientName,
+      prefix: appointment.prefix,
+      phoneNumber: appointment.phoneNumber,
+      doctorName: appointment.doctorName
+    }).subscribe({
+      next: () => console.log('Follow-up WhatsApp sent'),
+      error: (err) => console.error('WhatsApp failed', err)
     });
   }
   loadDepartments(): void {
@@ -1358,7 +1375,7 @@ onAssessmentSaved(savedData: any) {
       startDate: this.startDate,
       endDate: this.endDate,
     };
-    const adminPhoneNumber = ["919880544866","919341227264","918904943673","918951243004","919633943037"]
+    const adminPhoneNumber = ["919880544866", "919341227264", "918904943673", "918951243004", "919633943037"]
     // const adminPhoneNumber = ["919342287945", "919342287945"]
     this.appointmentService.sendAdminMessage(this.currentDoctorName, this.currentDepartmentName, this.startDate, this.endDate, adminPhoneNumber).subscribe({
       next: (response) => {
@@ -1835,7 +1852,7 @@ onAssessmentSaved(savedData: any) {
             this.favorites.removeAt(index);
             // this.filteredBrandOptions.splice(index, 1); // keep it in sync
             this.filteredBrandOptionsFavorites.splice(index, 1); // keep it in sync
-            this.filteredFavBrandNames.splice(index,1)
+            this.filteredFavBrandNames.splice(index, 1)
             this.messageService.add({ severity: 'info', summary: 'Deleted', detail: 'Favorite removed from DB' });
           },
           error: () => {
@@ -1845,7 +1862,7 @@ onAssessmentSaved(savedData: any) {
       } else {
         this.favorites.removeAt(index); // fallback
         this.filteredBrandOptionsFavorites.splice(index, 1); // keep it in sync
-        this.filteredFavBrandNames.splice(index,1)
+        this.filteredFavBrandNames.splice(index, 1)
         // this.filteredBrandOptions.splice(index, 1); // keep it in sync
       }
 
@@ -1853,7 +1870,7 @@ onAssessmentSaved(savedData: any) {
       // New entry not saved yet, just remove from the form
       this.favorites.removeAt(index);
       this.filteredBrandOptionsFavorites.splice(index, 1); // keep it in sync
-      this.filteredFavBrandNames.splice(index,1);
+      this.filteredFavBrandNames.splice(index, 1);
       // this.filteredBrandOptions.splice(index, 1); // keep it in sync
     }
   }
@@ -2581,13 +2598,13 @@ onAssessmentSaved(savedData: any) {
     const payload = {
       prn: Number(this.selectedService.prnNumber),
       date: this.selectedService.date,
-      createdBy: this.historyData.createdBy? this.historyData.createdBy: this.doctor.id.toString(),
+      createdBy: this.historyData.createdBy ? this.historyData.createdBy : this.doctor.id.toString(),
       updatedBy: this.doctor.id.toString(),
       ...this.doctorNoteData
     };
 
     if (this.doctorNoteData?.id) {
-      this.appointmentService.saveDoctorNote(payload.prn, payload.date,payload.updatedBy, this.doctorNoteData).subscribe({
+      this.appointmentService.saveDoctorNote(payload.prn, payload.date, payload.updatedBy, this.doctorNoteData).subscribe({
         next: () => {
           this.showNotesPopup = false;
           this.messageService.add({ severity: 'success', summary: 'Updated', detail: 'Doctor note updated successfully' });
@@ -2689,7 +2706,7 @@ onAssessmentSaved(savedData: any) {
     const payload = {
       prn: Number(this.selectedService.prnNumber),
       date: this.selectedService.date,
-      createdBy: this.historyData.createdBy? this.historyData.createdBy: this.doctor.id.toString(),
+      createdBy: this.historyData.createdBy ? this.historyData.createdBy : this.doctor.id.toString(),
       updatedBy: this.doctor.id.toString(),
       ...this.historyData
     };
@@ -2922,302 +2939,302 @@ onAssessmentSaved(savedData: any) {
     this.onFavBrandBlur(index);
   }
   // Lab
-labSearchText = '';
-showLabSuggestions = false;
-filteredLabTests: any[] = [];
+  labSearchText = '';
+  showLabSuggestions = false;
+  filteredLabTests: any[] = [];
 
-onLabSearchChange() {
-  this.filteredLabTests = this.allLabTests.filter(t =>
-    t.description.toLowerCase().includes(this.labSearchText.toLowerCase())
-  );
-}
+  onLabSearchChange() {
+    this.filteredLabTests = this.allLabTests.filter(t =>
+      t.description.toLowerCase().includes(this.labSearchText.toLowerCase())
+    );
+  }
 
-hideLabSuggestionsWithDelay() {
-  setTimeout(() => this.showLabSuggestions = false, 200);
-}
+  hideLabSuggestionsWithDelay() {
+    setTimeout(() => this.showLabSuggestions = false, 200);
+  }
 
-selectLabTest(test: any) {
-  this.selectedLabId = test.id;
-  this.labSearchText = test.description;
-  // this.selectedLabDepartment = test.department || '';
-  this.showLabSuggestions = false;
-}
-
-
-// Radiology
-radiologySearchText = '';
-showRadiologySuggestions = false;
-filteredRadiologyTests: any[] = [];
-// selectedRadiologyId: number | null = null;
-// selectedRadiologyDepartment = '';
-
-onRadiologySearchChange() {
-  this.filteredRadiologyTests = this.allRadiologyTests.filter(t =>
-    t.description.toLowerCase().includes(this.radiologySearchText.toLowerCase())
-  );
-}
-
-hideRadiologySuggestionsWithDelay() {
-  setTimeout(() => this.showRadiologySuggestions = false, 200);
-}
-
-selectRadiologyTest(test: any) {
-  this.selectedRadiologyId = test.id;
-  this.radiologySearchText = test.description;
-  // this.selectedRadiologyDepartment = test.department || '';
-  this.showRadiologySuggestions = false;
-}
-
-
-handleLabBlur(): void {
-  setTimeout(() => {
+  selectLabTest(test: any) {
+    this.selectedLabId = test.id;
+    this.labSearchText = test.description;
+    // this.selectedLabDepartment = test.department || '';
     this.showLabSuggestions = false;
+  }
 
-    const existing = this.allLabTests.find(t =>
-      t.description.toLowerCase() === this.labSearchText.toLowerCase()
+
+  // Radiology
+  radiologySearchText = '';
+  showRadiologySuggestions = false;
+  filteredRadiologyTests: any[] = [];
+  // selectedRadiologyId: number | null = null;
+  // selectedRadiologyDepartment = '';
+
+  onRadiologySearchChange() {
+    this.filteredRadiologyTests = this.allRadiologyTests.filter(t =>
+      t.description.toLowerCase().includes(this.radiologySearchText.toLowerCase())
     );
+  }
 
-    if (existing) {
-      this.selectLabTest(existing);
-    } else if (this.labSearchText.trim()) {
-      const payload = {
-        description: this.labSearchText.trim(),
-        department: this.selectedLabDepartment,
-        type: this.activeInvestigationTab as 'lab' | 'radiology'
-      };
-      this.appointmentService.addLabTest(payload).subscribe(newTest => {
-        this.allLabTests.push(newTest);
-        this.selectLabTest(newTest);
-      });
-    }
-  }, 200);
-}
-handleRadiologyBlur(): void {
-  setTimeout(() => {
+  hideRadiologySuggestionsWithDelay() {
+    setTimeout(() => this.showRadiologySuggestions = false, 200);
+  }
+
+  selectRadiologyTest(test: any) {
+    this.selectedRadiologyId = test.id;
+    this.radiologySearchText = test.description;
+    // this.selectedRadiologyDepartment = test.department || '';
     this.showRadiologySuggestions = false;
+  }
 
-    const existing = this.allRadiologyTests.find(t =>
-      t.description.toLowerCase() === this.radiologySearchText.toLowerCase()
-    );
 
-    if (existing) {
-      this.selectRadiologyTest(existing);
-    } else if (this.radiologySearchText.trim()) {
-      const payload = {
-        description: this.radiologySearchText.trim(),
-        department: this.selectedRadiologyDepartment,
-        type: this.activeInvestigationTab as 'lab' | 'radiology'
-      };
-      this.appointmentService.addRadiologyTest(payload).subscribe(newTest => {
-        this.allRadiologyTests.push(newTest);
-        this.selectRadiologyTest(newTest);
+  handleLabBlur(): void {
+    setTimeout(() => {
+      this.showLabSuggestions = false;
+
+      const existing = this.allLabTests.find(t =>
+        t.description.toLowerCase() === this.labSearchText.toLowerCase()
+      );
+
+      if (existing) {
+        this.selectLabTest(existing);
+      } else if (this.labSearchText.trim()) {
+        const payload = {
+          description: this.labSearchText.trim(),
+          department: this.selectedLabDepartment,
+          type: this.activeInvestigationTab as 'lab' | 'radiology'
+        };
+        this.appointmentService.addLabTest(payload).subscribe(newTest => {
+          this.allLabTests.push(newTest);
+          this.selectLabTest(newTest);
+        });
+      }
+    }, 200);
+  }
+  handleRadiologyBlur(): void {
+    setTimeout(() => {
+      this.showRadiologySuggestions = false;
+
+      const existing = this.allRadiologyTests.find(t =>
+        t.description.toLowerCase() === this.radiologySearchText.toLowerCase()
+      );
+
+      if (existing) {
+        this.selectRadiologyTest(existing);
+      } else if (this.radiologySearchText.trim()) {
+        const payload = {
+          description: this.radiologySearchText.trim(),
+          department: this.selectedRadiologyDepartment,
+          type: this.activeInvestigationTab as 'lab' | 'radiology'
+        };
+        this.appointmentService.addRadiologyTest(payload).subscribe(newTest => {
+          this.allRadiologyTests.push(newTest);
+          this.selectRadiologyTest(newTest);
+        });
+      }
+    }, 200);
+  }
+  highlightedLabIndex = -1;
+
+  handleLabKeydown(event: KeyboardEvent) {
+    const length = this.filteredLabTests.length;
+
+    if (!length) return;
+
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault();
+        this.highlightedLabIndex = (this.highlightedLabIndex + 1) % length;
+        break;
+
+      case 'ArrowUp':
+        event.preventDefault();
+        this.highlightedLabIndex =
+          (this.highlightedLabIndex - 1 + length) % length;
+        break;
+
+      case 'Enter':
+        event.preventDefault();
+        if (this.highlightedLabIndex >= 0 && this.highlightedLabIndex < length) {
+          const selected = this.filteredLabTests[this.highlightedLabIndex];
+          this.selectLabTest(selected);
+          this.highlightedLabIndex = -1;
+          this.showLabSuggestions = false;
+        }
+        break;
+
+      case 'Escape':
+        this.showLabSuggestions = false;
+        this.highlightedLabIndex = -1;
+        break;
+    }
+  }
+  ngAfterViewChecked() {
+    this.scrollHighlightedIntoView();
+  }
+
+  scrollHighlightedIntoView() {
+    if (this.labOptions && this.highlightedLabIndex >= 0) {
+      const el = this.labOptions.toArray()[this.highlightedLabIndex];
+      if (el) {
+        el.nativeElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    }
+  }
+  highlightedRadiologyIndex = -1;
+
+  handleRadiologyKeydown(event: KeyboardEvent) {
+    const length = this.filteredRadiologyTests.length;
+
+    if (!length) return;
+
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault();
+        this.highlightedRadiologyIndex = (this.highlightedRadiologyIndex + 1) % length;
+        break;
+
+      case 'ArrowUp':
+        event.preventDefault();
+        this.highlightedRadiologyIndex =
+          (this.highlightedRadiologyIndex - 1 + length) % length;
+        break;
+
+      case 'Enter':
+        event.preventDefault();
+        if (this.highlightedRadiologyIndex >= 0 && this.highlightedRadiologyIndex < length) {
+          const selected = this.filteredRadiologyTests[this.highlightedRadiologyIndex];
+          this.selectRadiologyTest(selected);
+          this.highlightedRadiologyIndex = -1;
+          this.showRadiologySuggestions = false;
+        }
+        break;
+
+      case 'Escape':
+        this.showRadiologySuggestions = false;
+        this.highlightedRadiologyIndex = -1;
+        break;
+    }
+
+    // Scroll the item into view
+    setTimeout(() => this.scrollRadiologyHighlightedIntoView(), 0);
+  }
+
+  scrollRadiologyHighlightedIntoView() {
+    if (this.radiologyOptions && this.highlightedRadiologyIndex >= 0) {
+      const el = this.radiologyOptions.toArray()[this.highlightedRadiologyIndex];
+      if (el) {
+        el.nativeElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }
+    }
+  }
+  onQuantityKeydown(event: KeyboardEvent, index: number) {
+    if (event.key === 'Tab' && index === this.tablets.length - 1) {
+      // Prevent default tab to manually handle focus
+      event.preventDefault();
+      this.addTablet();
+
+      // Wait a tick for the form array to render the new row
+      setTimeout(() => {
+        const nextGenericInput = document.querySelector(`#generic-${this.tablets.length - 1}`) as HTMLElement;
+        if (nextGenericInput) {
+          nextGenericInput.focus();
+        }
       });
     }
-  }, 200);
-}
-highlightedLabIndex = -1;
-
-handleLabKeydown(event: KeyboardEvent) {
-  const length = this.filteredLabTests.length;
-
-  if (!length) return;
-
-  switch (event.key) {
-    case 'ArrowDown':
-      event.preventDefault();
-      this.highlightedLabIndex = (this.highlightedLabIndex + 1) % length;
-      break;
-
-    case 'ArrowUp':
-      event.preventDefault();
-      this.highlightedLabIndex =
-        (this.highlightedLabIndex - 1 + length) % length;
-      break;
-
-    case 'Enter':
-      event.preventDefault();
-      if (this.highlightedLabIndex >= 0 && this.highlightedLabIndex < length) {
-        const selected = this.filteredLabTests[this.highlightedLabIndex];
-        this.selectLabTest(selected);
-        this.highlightedLabIndex = -1;
-        this.showLabSuggestions = false;
-      }
-      break;
-
-    case 'Escape':
-      this.showLabSuggestions = false;
-      this.highlightedLabIndex = -1;
-      break;
   }
-}
-ngAfterViewChecked() {
-  this.scrollHighlightedIntoView();
-}
+  highlightedBrandIndex: number[] = [];
 
-scrollHighlightedIntoView() {
-  if (this.labOptions && this.highlightedLabIndex >= 0) {
-    const el = this.labOptions.toArray()[this.highlightedLabIndex];
-    if (el) {
-      el.nativeElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  onBrandKeydown(event: KeyboardEvent, rowIndex: number) {
+    const list = this.filteredBrandNames[rowIndex] || [];
+    const length = list.length;
+
+    if (!length) return;
+
+    // Initialize if undefined
+    if (this.highlightedBrandIndex[rowIndex] === undefined) {
+      this.highlightedBrandIndex[rowIndex] = -1;
+    }
+
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault();
+        this.highlightedBrandIndex[rowIndex] = (this.highlightedBrandIndex[rowIndex] + 1) % length;
+        break;
+
+      case 'ArrowUp':
+        event.preventDefault();
+        this.highlightedBrandIndex[rowIndex] = (this.highlightedBrandIndex[rowIndex] - 1 + length) % length;
+        break;
+
+      case 'Enter':
+        event.preventDefault();
+        const index = this.highlightedBrandIndex[rowIndex];
+        if (index >= 0 && index < list.length) {
+          this.onBrandSelect(rowIndex, list[index]);
+          this.highlightedBrandIndex[rowIndex] = -1;
+          this.showBrandSuggestions[rowIndex] = false;
+        }
+        break;
+
+      case 'Escape':
+        this.showBrandSuggestions[rowIndex] = false;
+        this.highlightedBrandIndex[rowIndex] = -1;
+        break;
+    }
+
+    // Optional: Scroll the selected item into view
+    setTimeout(() => this.scrollBrandItemIntoView(rowIndex), 0);
+  }
+  @ViewChildren('brandOption', { read: ElementRef }) brandOptionElements!: QueryList<ElementRef>;
+
+
+  scrollBrandItemIntoView(rowIndex: number) {
+    const index = this.highlightedBrandIndex[rowIndex];
+    const element = document.getElementById(`brand-option-${rowIndex}-${index}`);
+    if (element) {
+      element.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
   }
-}
-highlightedRadiologyIndex = -1;
+  selectedFile: File | null = null;
+  previewUrl: string | ArrayBuffer | null = null;
 
-handleRadiologyKeydown(event: KeyboardEvent) {
-  const length = this.filteredRadiologyTests.length;
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
 
-  if (!length) return;
-
-  switch (event.key) {
-    case 'ArrowDown':
-      event.preventDefault();
-      this.highlightedRadiologyIndex = (this.highlightedRadiologyIndex + 1) % length;
-      break;
-
-    case 'ArrowUp':
-      event.preventDefault();
-      this.highlightedRadiologyIndex =
-        (this.highlightedRadiologyIndex - 1 + length) % length;
-      break;
-
-    case 'Enter':
-      event.preventDefault();
-      if (this.highlightedRadiologyIndex >= 0 && this.highlightedRadiologyIndex < length) {
-        const selected = this.filteredRadiologyTests[this.highlightedRadiologyIndex];
-        this.selectRadiologyTest(selected);
-        this.highlightedRadiologyIndex = -1;
-        this.showRadiologySuggestions = false;
-      }
-      break;
-
-    case 'Escape':
-      this.showRadiologySuggestions = false;
-      this.highlightedRadiologyIndex = -1;
-      break;
-  }
-
-  // Scroll the item into view
-  setTimeout(() => this.scrollRadiologyHighlightedIntoView(), 0);
-}
-
-scrollRadiologyHighlightedIntoView() {
-  if (this.radiologyOptions && this.highlightedRadiologyIndex >= 0) {
-    const el = this.radiologyOptions.toArray()[this.highlightedRadiologyIndex];
-    if (el) {
-      el.nativeElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      const reader = new FileReader();
+      reader.onload = (e: ProgressEvent<FileReader>) => {
+        this.previewUrl = e.target?.result ?? null; // 👈 Safe null fallback
+      };
+      reader.readAsDataURL(file);
     }
   }
-}
-onQuantityKeydown(event: KeyboardEvent, index: number) {
-  if (event.key === 'Tab' && index === this.tablets.length - 1) {
-    // Prevent default tab to manually handle focus
-    event.preventDefault();
-    this.addTablet();
 
-    // Wait a tick for the form array to render the new row
-    setTimeout(() => {
-      const nextGenericInput = document.querySelector(`#generic-${this.tablets.length - 1}`) as HTMLElement;
-      if (nextGenericInput) {
-        nextGenericInput.focus();
+
+  uploadSignature(): void {
+    if (!this.selectedFile) {
+      this.messageService.add({ severity: 'warn', summary: 'No File', detail: 'Please select an image to upload.' });
+      return;
+    }
+
+    const doctorId = this.doctor.id; // or from selectedDoctor if editing
+
+    this.doctorService.uploadDoctorSignature(doctorId, this.selectedFile).subscribe({
+      next: (response) => {
+        this.messageService.add({ severity: 'success', summary: 'Uploaded', detail: 'Signature uploaded successfully!' });
+        console.log('✅ Upload response:', response);
+        this.doctor.signUrl = response.fileUrl; // Update model if needed
+        this.previewUrl = response.fileUrl;
+        this.showSignatureModel = false;
+      },
+      error: (err) => {
+        console.error('❌ Upload failed:', err);
+        this.messageService.add({ severity: 'error', summary: 'Upload Failed', detail: 'Something went wrong during upload.' });
       }
     });
   }
-}
-highlightedBrandIndex: number[] = [];
 
-onBrandKeydown(event: KeyboardEvent, rowIndex: number) {
-  const list = this.filteredBrandNames[rowIndex] || [];
-  const length = list.length;
-
-  if (!length) return;
-
-  // Initialize if undefined
-  if (this.highlightedBrandIndex[rowIndex] === undefined) {
-    this.highlightedBrandIndex[rowIndex] = -1;
+  openSignatureModal() {
+    this.showSignatureModel = true;
   }
-
-  switch (event.key) {
-    case 'ArrowDown':
-      event.preventDefault();
-      this.highlightedBrandIndex[rowIndex] = (this.highlightedBrandIndex[rowIndex] + 1) % length;
-      break;
-
-    case 'ArrowUp':
-      event.preventDefault();
-      this.highlightedBrandIndex[rowIndex] = (this.highlightedBrandIndex[rowIndex] - 1 + length) % length;
-      break;
-
-    case 'Enter':
-      event.preventDefault();
-      const index = this.highlightedBrandIndex[rowIndex];
-      if (index >= 0 && index < list.length) {
-        this.onBrandSelect(rowIndex, list[index]);
-        this.highlightedBrandIndex[rowIndex] = -1;
-        this.showBrandSuggestions[rowIndex] = false;
-      }
-      break;
-
-    case 'Escape':
-      this.showBrandSuggestions[rowIndex] = false;
-      this.highlightedBrandIndex[rowIndex] = -1;
-      break;
-  }
-
-  // Optional: Scroll the selected item into view
-  setTimeout(() => this.scrollBrandItemIntoView(rowIndex), 0);
-}
-@ViewChildren('brandOption', { read: ElementRef }) brandOptionElements!: QueryList<ElementRef>;
-
-
-scrollBrandItemIntoView(rowIndex: number) {
-  const index = this.highlightedBrandIndex[rowIndex];
-  const element = document.getElementById(`brand-option-${rowIndex}-${index}`);
-  if (element) {
-    element.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-  }
-}
-selectedFile: File | null = null;
-previewUrl: string | ArrayBuffer | null = null;
-
-onFileSelected(event: any): void {
-  const file = event.target.files[0];
-  if (file) {
-    this.selectedFile = file;
-
-    const reader = new FileReader();
-    reader.onload = (e: ProgressEvent<FileReader>) => {
-      this.previewUrl = e.target?.result ?? null; // 👈 Safe null fallback
-    };
-    reader.readAsDataURL(file);
-  }
-}
-
-
-uploadSignature(): void {
-  if (!this.selectedFile) {
-    this.messageService.add({ severity: 'warn', summary: 'No File', detail: 'Please select an image to upload.' });
-    return;
-  }
-
-  const doctorId = this.doctor.id; // or from selectedDoctor if editing
-
-  this.doctorService.uploadDoctorSignature(doctorId, this.selectedFile).subscribe({
-    next: (response) => {
-      this.messageService.add({ severity: 'success', summary: 'Uploaded', detail: 'Signature uploaded successfully!' });
-      console.log('✅ Upload response:', response);
-      this.doctor.signUrl = response.fileUrl; // Update model if needed
-      this.previewUrl = response.fileUrl;
-      this.showSignatureModel = false;
-    },
-    error: (err) => {
-      console.error('❌ Upload failed:', err);
-      this.messageService.add({ severity: 'error', summary: 'Upload Failed', detail: 'Something went wrong during upload.' });
-    }
-  });
-}
-
-openSignatureModal(){
-  this.showSignatureModel = true;
-}
 }

@@ -127,7 +127,17 @@ export class AppointmentOverviewComponent implements AfterViewInit {
     return searchValue ? `Enter the ${searchValue}...` : 'Enter your search query';
   }
 
+handleFormSuccess(type: string) {
+  this.showForm = false;
 
+  if (type === 'confirmed') {
+    this.activeComponent = 'confirmed';
+  }
+}
+handleFormClose() {
+  this.showForm = false;
+  this.activeComponent = 'request';
+}
 
   refresh() {
     this.selectedDateRange = [];

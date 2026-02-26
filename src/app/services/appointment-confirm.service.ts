@@ -47,8 +47,8 @@ export interface Appointment {
   updated_at?: string;
   lockedBy?: string;
   lockExpiresAt?: Date | null;
-  type?:string;
-  serviceId?:number;
+  type?: string;
+  serviceId?: number;
 
 
 
@@ -71,7 +71,7 @@ export class AppointmentConfirmService {
   private url = `${environment.apiUrl}/doctors`; // Update this with your actual backend endpoint
   private baseUrl = `${environment.apiUrl}/doctor-notes`;
   private historyUrl = `${environment.apiUrl}/history-notes`;
-    private investigationUrl = `${environment.apiUrl}/investigation`
+  private investigationUrl = `${environment.apiUrl}/investigation`
 
   constructor(private http: HttpClient, private authService: AuthServiceService) { }
 
@@ -116,21 +116,24 @@ export class AppointmentConfirmService {
     );
   }
   // Method to add a new appointment
-  addNewAppointment(appointment: Appointment): void {
+  // addNewAppointment(appointment: Appointment): void {
+  //   console.log('appointment',appointment)
+  //   const userId = this.authService.getUserId();
+  //   const appointmentData = userId ? { ...appointment, userId } : appointment;
+  //   this.http.post<Appointment>(`${this.apiUrl}`, appointmentData).subscribe((newAppointment) => {
+  //     this.fetchAppointments();
+  //   });
+  // }
+  addNewAppointment(appointment: Appointment): Observable<Appointment> {
+    console.log('appointment', appointment);
 
-    console.log('appointment',appointment)
     const userId = this.authService.getUserId();
-
     const appointmentData = userId ? { ...appointment, userId } : appointment;
 
-    // console.log('Adding new appointment:', appointmentData);
-    // Send the appointment details to the backend without an ID
-    this.http.post<Appointment>(`${this.apiUrl}`, appointmentData).subscribe((newAppointment) => {
-      this.fetchAppointments(); // Fetch appointments to update the list
-    });
+    return this.http.post<Appointment>(`${this.apiUrl}`, appointmentData);
   }
   createAppointment(appointment: Appointment): void {
-const appointmentData = appointment
+    const appointmentData = appointment
 
     // console.log('Adding new appointment:', appointmentData);
     // Send the appointment details to the backend without an ID
@@ -430,8 +433,8 @@ const appointmentData = appointment
   // createEstimation(doctorId:number, departmentId:number, estimation:string): Observable<any>{
   //   return this.http.post(`${environment.apiUrl}/estimation`, {doctorId, departmentId, estimation});
   // }
-  sendAdminMessage(doctorName: string, departmentName:string, startDate: string, endDate: string, adminPhoneNumber: string[]): Observable<any> {
-    return this.http.post(`${environment.apiUrl}/whatsapp/send-admin-message`, { doctorName,departmentName, startDate, endDate, adminPhoneNumber });
+  sendAdminMessage(doctorName: string, departmentName: string, startDate: string, endDate: string, adminPhoneNumber: string[]): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/whatsapp/send-admin-message`, { doctorName, departmentName, startDate, endDate, adminPhoneNumber });
   }
   updateExtraWaitingTime(appointmentId: number, waitingTime: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/${appointmentId}/waitingTime`, { waitingTime });
@@ -491,11 +494,11 @@ const appointmentData = appointment
   }
   getAppointmentsByServiceId(serviceId: any, date?: string): Observable<any> {
     let apiUrl = `${this.apiUrl}/appts-by-serviceId?serviceId=${serviceId}`;
-    
+
     if (date) {
       apiUrl += `&date=${date}`; // Append date parameter if provided
     }
-  
+
     return this.http.get<any>(apiUrl);
   }
   createNote(noteData: any): Observable<any> {
@@ -516,7 +519,7 @@ const appointmentData = appointment
     return this.http.get(`${this.baseUrl}/${prn}`, { params });
   }
 
-  saveDoctorNote(prn: number, date: string, updatedBy:string, data: any): Observable<any> {
+  saveDoctorNote(prn: number, date: string, updatedBy: string, data: any): Observable<any> {
     const params = new HttpParams().set('date', date);
     const payload = {
       ...data,
@@ -545,7 +548,7 @@ const appointmentData = appointment
     return this.http.get(`${this.historyUrl}/${prn}`, { params });
   }
 
-  saveHistoryNote(prn: number, date: string,updatedBy:string, data: any): Observable<any> {
+  saveHistoryNote(prn: number, date: string, updatedBy: string, data: any): Observable<any> {
     const params = new HttpParams().set('date', date);
     const payload = {
       ...data,
@@ -566,71 +569,71 @@ const appointmentData = appointment
   addLabTest(payload: { description: string; department: string }) {
     return this.http.post<any>(`${this.investigationUrl}/lab-tests`, payload);
   }
-  
+
   addRadiologyTest(payload: { description: string; department: string }) {
     return this.http.post<any>(`${this.investigationUrl}/radiology-tests`, payload);
   }
-  
-  getConfirmedAppointments():Observable<any[]> {
+
+  getConfirmedAppointments(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/confirmed-appts`)
   }
-  getCancelledAppointments():Observable<any[]> {
+  getCancelledAppointments(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/cancelled-appts`)
   }
-  getCompletedAppointments():Observable<any[]> {
+  getCompletedAppointments(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/completed-appts`)
   }
-  getPendingAppointments():Observable<any[]> {
+  getPendingAppointments(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/pending-appts`)
   }
-  getTransferAppointments():Observable<any[]> {
+  getTransferAppointments(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/transfer-appts`)
   }
-  getReferredAppointments():Observable<any[]> {
+  getReferredAppointments(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/referred-appts`)
   }
-  getFollowUpAppointments():Observable<any[]> {
+  getFollowUpAppointments(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/followup-appts`)
   }
-  getPastAppointments():Observable<any[]> {
+  getPastAppointments(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/past-consultations`)
   }
-  getFutureAppointments():Observable<any[]> {
+  getFutureAppointments(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/future-consultations`)
   }
-  getMHCAppointments():Observable<any[]>{
+  getMHCAppointments(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/mhc-appts`)
   }
-  getMHCReportAppointments():Observable<any[]>{
+  getMHCReportAppointments(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/mhc-report-appts`)
   }
 
-  getopdRequestvia():Observable<any[]> {
+  getopdRequestvia(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/opd-requestVia`)
   }
-  getopdTimeWise():Observable<any[]> {
+  getopdTimeWise(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/opd-time`)
   }
-  getopdTypeWise():Observable<any[]> {
+  getopdTypeWise(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/opd-type`)
   }
-  getopdStatusWise():Observable<any[]> {
+  getopdStatusWise(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/opd-status`)
   }
-  getprnWise():Observable<any[]> {
+  getprnWise(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/prn-wise`)
   }
-  getopdGenderWise():Observable<any[]> {
+  getopdGenderWise(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/opd-gender`)
   }
-  getCheckedOut():Observable<any[]> {
+  getCheckedOut(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/get-checkedOut`)
   }
-getCheckedInAppointments(fromDate: string, toDate: string) {
-  return this.http.get<any[]>(
-    `${this.apiUrl}/checkin-reports?fromDate=${fromDate}&toDate=${toDate}`
-  );
-}
+  getCheckedInAppointments(fromDate: string, toDate: string) {
+    return this.http.get<any[]>(
+      `${this.apiUrl}/checkin-reports?fromDate=${fromDate}&toDate=${toDate}`
+    );
+  }
   sendFollowUpMessage(data: {
     patientName: string;
     prefix: string;

@@ -107,6 +107,10 @@ export class AppointmentFormComponent implements OnInit {
   appointmentStatus: string = 'pending';
   oldDoctorId: number = 0;
   userId: string = ''; // User ID to track who created the appointment
+  originalTime: string = '';
+  @Output() formSuccess = new EventEmitter<string>();
+@Output() formClosed = new EventEmitter<void>();
+isLoading: boolean = false;
 
   private subscription!: Subscription;
 
@@ -221,6 +225,7 @@ export class AppointmentFormComponent implements OnInit {
       this.doctorId = this.appointment.doctorId;
       this.onDoctorChange(this.doctorId)
       console.log(this.appointment.status)
+      this.originalTime = this.appointment.time;
       this.appointmentStatus = this.appointment.status
       setTimeout(() => {
 
@@ -456,45 +461,45 @@ export class AppointmentFormComponent implements OnInit {
   // }
 
   setMinTime(): void {
-  const now = new Date();
-  const selectedValue = this.appointmentForm?.get('appointmentDate')?.value;
+    const now = new Date();
+    const selectedValue = this.appointmentForm?.get('appointmentDate')?.value;
 
-  if (!selectedValue) {
-    this.minTime = undefined;
-    return;
+    if (!selectedValue) {
+      this.minTime = undefined;
+      return;
+    }
+
+    // Normalize to Date
+    const selectedDate =
+      selectedValue instanceof Date
+        ? selectedValue
+        : new Date(selectedValue);
+
+    if (isNaN(selectedDate.getTime())) {
+      this.minTime = undefined;
+      return;
+    }
+
+    // Compare ONLY date (ignore time)
+    const isToday =
+      selectedDate.getFullYear() === now.getFullYear() &&
+      selectedDate.getMonth() === now.getMonth() &&
+      selectedDate.getDate() === now.getDate();
+
+    if (isToday) {
+      // 🔥 Block past times
+      this.minTime = new Date(
+        now.getFullYear(),
+        now.getMonth(),
+        now.getDate(),
+        now.getHours(),
+        now.getMinutes()
+      );
+    } else {
+      // Other dates → allow all times
+      this.minTime = undefined;
+    }
   }
-
-  // Normalize to Date
-  const selectedDate =
-    selectedValue instanceof Date
-      ? selectedValue
-      : new Date(selectedValue);
-
-  if (isNaN(selectedDate.getTime())) {
-    this.minTime = undefined;
-    return;
-  }
-
-  // Compare ONLY date (ignore time)
-  const isToday =
-    selectedDate.getFullYear() === now.getFullYear() &&
-    selectedDate.getMonth() === now.getMonth() &&
-    selectedDate.getDate() === now.getDate();
-
-  if (isToday) {
-    // 🔥 Block past times
-    this.minTime = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-      now.getHours(),
-      now.getMinutes()
-    );
-  } else {
-    // Other dates → allow all times
-    this.minTime = undefined;
-  }
-}
 
 
   // onPRNChange(){
@@ -978,7 +983,7 @@ export class AppointmentFormComponent implements OnInit {
                         // Determine if the slot is in 12-hour format
                         return slot.includes('AM') || slot.includes('PM') ? slot : this.convertTo12HourFormat(slot);
                       };
-                      const currentSelectedTime = this.appointment.time;
+                      // const currentSelectedTime = this.appointment.time;
                       // if(this.isBookedSlot){
                       //   console.log("if")
                       //   this.availableSlots = [...this.availableSlots], this.slot.time;
@@ -989,9 +994,33 @@ export class AppointmentFormComponent implements OnInit {
                       // console.log(formattedBookedSlots, "booked", formattedUnavailableSlots)
 
                       // console.log("else")
-                      this.availableSlots = this.availableSlots.filter((slot) => {
-                        return slot === currentSelectedTime || (!formattedBookedSlots.includes(slot) && !formattedUnavailableSlots.includes(slot));
-                      });
+                      // this.availableSlots = this.availableSlots.filter((slot) => {
+                      //   return slot === currentSelectedTime || (!formattedBookedSlots.includes(slot) && !formattedUnavailableSlots.includes(slot));
+                      // });
+                      const isSameSlotContext =
+                        this.oldDoctorId === doctorId &&
+                        this.oldDate === date;
+
+                      const currentSelectedTime = this.originalTime;
+
+                      if (isSameSlotContext && currentSelectedTime) {
+                        // const currentSelectedTime = this.appointment.time;
+
+                        const isStillValid =
+                          !formattedBookedSlots.includes(currentSelectedTime) &&
+                          !formattedUnavailableSlots.includes(currentSelectedTime);
+
+
+                        this.availableSlots = this.availableSlots.filter(slot =>
+                          (isStillValid && slot === currentSelectedTime) ||
+                          (!formattedBookedSlots.includes(slot) && !formattedUnavailableSlots.includes(slot))
+                        );
+                      } else {
+                        this.availableSlots = this.availableSlots.filter(slot =>
+                          !formattedBookedSlots.includes(slot) &&
+                          !formattedUnavailableSlots.includes(slot)
+                        );
+                      }
 
 
 
@@ -1381,6 +1410,7 @@ export class AppointmentFormComponent implements OnInit {
   closeForm(event: Event) {
     console.log('close')
     this.close.emit();
+    this.formClosed.emit();
     this.showForm = false;
     // console.log(this.showForm)
     event.stopPropagation();
@@ -1672,8 +1702,9 @@ export class AppointmentFormComponent implements OnInit {
         this.appointment.emailSent = true;
         this.appointment.smsSent = true;
         this.appointment.messageSent = true;
+        const formattedNewDate = this.formatDate(newDate)
         if (
-          this.appointment.date !== newDate ||
+          this.appointment.date !== formattedNewDate ||
           this.appointment.time !== newTime
         ) {
           this.appointment.status = 'rescheduled';
@@ -1733,9 +1764,12 @@ export class AppointmentFormComponent implements OnInit {
         this.appointment = appointmentDetails;
         this.appointment.date = this.appointmentForm.get('appointmentDate')?.value;
         this.appointment.time = this.appointmentForm.get('appointmentTime')?.value;
+
+        console.log(newStatus, currentStatus)
         // console.log('appointment', this.appointment);
         if (newStatus === 'Confirm' && (currentStatus === 'Cancelled' || currentStatus === 'confirmed')) {
           // This is a reschedule
+          console.log('when it is coming')
           this.appointment.status = 'rescheduled';
           if (selectedDoctor!.doctorType === 'Visiting Consultant') {
             // console.log("visiting")
@@ -1878,6 +1912,8 @@ export class AppointmentFormComponent implements OnInit {
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'The appointment is rescheduled.' });
           this.appointmentService.removeCancelledAppointment(this.appointment.id!);
         } else {
+
+          console.log('making changes')
           // Store old date and time before making changes
           const oldDate = this.oldDate
           const oldTime = this.oldTime;
@@ -1941,116 +1977,178 @@ export class AppointmentFormComponent implements OnInit {
           this.appointment.status = 'rescheduled';
           if (this.appointment.status === "rescheduled") {
             // this.appointmentService.addConfirmedAppointment(this.appointment)
-            this.doctorService.getDoctorDetails(this.appointment.doctorId).subscribe({
-              next: (response) => {
-                const doctorPhoneNumber = response?.phone_number;
-                let phoneNumber = this.appointment!.phoneNumber;
-                if (phoneNumber.startsWith('91') && phoneNumber.length > 10) {
-                  phoneNumber = phoneNumber.substring(2);
-                }
-                if (!phoneNumber.startsWith('91')) {
-                  phoneNumber = '91' + phoneNumber;
-                }
-                const appointmentDetails = {
-                  patientName: this.appointment?.patientName,
-                  doctorName: this.appointment?.doctorName,
-                  date: this.appointment?.date,
-                  time: this.appointment?.time,
-                  doctorPhoneNumber: doctorPhoneNumber,
-                  patientPhoneNumber: phoneNumber,
-                  status: 'rescheduled',
-                  requestVia: this.appointment!.requestVia,
-                  prefix: this.appointment!.prefix
-                }
-                // this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
-                //   next: (response) => {
-                //     // console.log('SMS message sent successfully:', response);
-                //     this.messageService.add({ severity: 'success', summary: 'Success', detail: 'SMS message sent successfully!' });
-                //   },
-                //   error: (error) => {
-                //     console.error('Error sending SMS message:', error);
-                //   }
-                // });
-                // console.log('appointment details', appointmentDetails)
-                this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
-                  next: (response) => {
-                    // console.log('WhatsApp message sent successfully:', response);
-                    this.messageService.add({ severity: 'success', summary: 'Success', detail: 'WhatsApp Message Sent Successfully' });
-                  },
-                  error: (error) => {
-                    console.error('Error sending WhatsApp message:', error);
-                    this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending WhatsApp message' });
-                  }
-                });
-              }
+            // this.doctorService.getDoctorDetails(this.appointment.doctorId).subscribe({
+            //   next: (response) => {
+            //     const doctorPhoneNumber = response?.phone_number;
+            //     let phoneNumber = this.appointment!.phoneNumber;
+            //     if (phoneNumber.startsWith('91') && phoneNumber.length > 10) {
+            //       phoneNumber = phoneNumber.substring(2);
+            //     }
+            //     if (!phoneNumber.startsWith('91')) {
+            //       phoneNumber = '91' + phoneNumber;
+            //     }
+            //     const appointmentDetails = {
+            //       patientName: this.appointment?.patientName,
+            //       doctorName: this.appointment?.doctorName,
+            //       date: this.appointment?.date,
+            //       time: this.appointment?.time,
+            //       doctorPhoneNumber: doctorPhoneNumber,
+            //       patientPhoneNumber: phoneNumber,
+            //       status: 'rescheduled',
+            //       requestVia: this.appointment!.requestVia,
+            //       prefix: this.appointment!.prefix
+            //     }
+            //     // this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
+            //     //   next: (response) => {
+            //     //     // console.log('SMS message sent successfully:', response);
+            //     //     this.messageService.add({ severity: 'success', summary: 'Success', detail: 'SMS message sent successfully!' });
+            //     //   },
+            //     //   error: (error) => {
+            //     //     console.error('Error sending SMS message:', error);
+            //     //   }
+            //     // });
+            //     // console.log('appointment details', appointmentDetails)
+            //     this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
+            //       next: (response) => {
+            //         // console.log('WhatsApp message sent successfully:', response);
+            //         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'WhatsApp Message Sent Successfully' });
+            //       },
+            //       error: (error) => {
+            //         console.error('Error sending WhatsApp message:', error);
+            //         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending WhatsApp message' });
+            //       }
+            //     });
+            //   }
 
-            });
+            // });
 
 
-            this.doctorService.getDoctorDetails(this.appointment.doctorId).subscribe({
-              next: (response) => {
-                const doctorEmail = response?.email;
-                const patientEmail = this.appointment?.email;
+            // this.doctorService.getDoctorDetails(this.appointment.doctorId).subscribe({
+            //   next: (response) => {
+            //     const doctorEmail = response?.email;
+            //     const patientEmail = this.appointment?.email;
 
-                // Ensure both emails are valid
-                if (!doctorEmail || !patientEmail) {
-                  console.error('Doctor or patient email is missing.');
-                  return;
-                }
+            //     // Ensure both emails are valid
+            //     if (!doctorEmail || !patientEmail) {
+            //       console.error('Doctor or patient email is missing.');
+            //       return;
+            //     }
 
-                // Prepare appointment details for email
-                const appointmentDetails = {
-                  patientName: this.appointment?.patientName,
-                  doctorName: this.appointment?.doctorName,
-                  date: this.appointment?.date,
-                  time: this.appointment?.time,
-                };
+            //     // Prepare appointment details for email
+            //     const appointmentDetails = {
+            //       patientName: this.appointment?.patientName,
+            //       doctorName: this.appointment?.doctorName,
+            //       date: this.appointment?.date,
+            //       time: this.appointment?.time,
+            //     };
 
-                const status = 'rescheduled';
+            //     const status = 'rescheduled';
 
-                // Send email to the doctor
-                // this.appointmentService.sendEmail(doctorEmail, status, appointmentDetails, 'doctor').subscribe({
-                //   next: (response) => {
-                //     console.log('Email sent to doctor successfully:', response);
-                //     this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to doctor successfully' });
-                //   },
-                //   error: (error) => {
-                //     console.error('Error sending email to doctor:', error);
-                //     this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending email to doctor' });
-                //   },
-                // });
+            //     // Send email to the doctor
+            //     // this.appointmentService.sendEmail(doctorEmail, status, appointmentDetails, 'doctor').subscribe({
+            //     //   next: (response) => {
+            //     //     console.log('Email sent to doctor successfully:', response);
+            //     //     this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to doctor successfully' });
+            //     //   },
+            //     //   error: (error) => {
+            //     //     console.error('Error sending email to doctor:', error);
+            //     //     this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending email to doctor' });
+            //     //   },
+            //     // });
 
-                // Send email to the patient
-                this.appointmentService.sendEmail(patientEmail, status, appointmentDetails, 'patient').subscribe({
-                  next: (response) => {
-                    // console.log('Email sent to patient successfully:', response);
-                    this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to patient successfully' });
-                  },
-                  error: (error) => {
-                    console.error('Error sending email to patient:', error);
-                    this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending email to patient' });
-                  },
-                });
-              },
-              error: (error) => {
-                console.error('Error in getting doctor details:', error);
-              },
-            });
+            //     // Send email to the patient
+            //     this.appointmentService.sendEmail(patientEmail, status, appointmentDetails, 'patient').subscribe({
+            //       next: (response) => {
+            //         // console.log('Email sent to patient successfully:', response);
+            //         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to patient successfully' });
+            //       },
+            //       error: (error) => {
+            //         console.error('Error sending email to patient:', error);
+            //         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending email to patient' });
+            //       },
+            //     });
+            //   },
+            //   error: (error) => {
+            //     console.error('Error in getting doctor details:', error);
+            //   },
+            // });
           }
-          this.appointmentService.addConfirmedAppointment(this.appointment);
-          this.doctorService.getCancelledSlots(this.oldDoctorId, oldDate, oldTime).subscribe({
+          // this.appointmentService.addConfirmedAppointment(this.appointment);
+          // this.doctorService.getCancelledSlots(this.oldDoctorId, oldDate, oldTime).subscribe({
+          //   next: (response) => {
+          //     // console.log('Cancelled slots:', response);
+          //     const cancelledSlots = response;
+          //     // console.log(cancelledSlots)
+          //   },
+          //   error: (error) => {
+          //     console.error('Error fetching cancelled slots:', error);
+          //   }
+          // });
+          this.isLoading = true
+          this.appointmentService.addBookedSlot(this.appointment.doctorId, this.appointment.date, this.appointment.time, this.userId).subscribe({
             next: (response) => {
-              // console.log('Cancelled slots:', response);
-              const cancelledSlots = response;
-              // console.log(cancelledSlots)
+              console.log(this.oldDoctorId, this.oldDate, this.oldTime)
+              this.doctorService.getCancelledSlots(this.oldDoctorId, this.oldDate, this.oldTime).subscribe({
+                next: (response) => {
+                  // console.log('Cancelled slots:', response);
+                  // const cancelledSlots = response;
+                  // console.log(cancelledSlots);
+                  if (this.appointment) {
+                    this.appointmentService.addConfirmedAppointment(this.appointment);
+                    this.showForm = false;
+                    this.isLoading = false;
+                      this.formSuccess.emit('confirmed');
+                    this.messageService.add({ severity: 'success', summary: 'Success', detail: 'The appointment is rescheduled.' });
+                    this.sendNotifications('rescheduled')
+                  }
+                },
+                error: (error) => {
+                  console.error('Error fetching cancelled slots:', error);
+                  this.messageService.add({
+                    severity: 'error',
+                    summary: 'Error',
+                    detail: 'Failed to get cancelled slots',
+                  });
+                  this.isLoading = false;
+                }
+              });
             },
             error: (error) => {
-              console.error('Error fetching cancelled slots:', error);
+              console.error('Error booking slots', error);
+              let errorMessage = 'Failed to book slot'
+              if (error?.error?.error) {
+                errorMessage = error.error.error;
+              }
+
+              this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: errorMessage,
+              });
+
+              this.isLoading = false
+
+              this.appointmentForm.get('appointmentTime')?.setValue('');
+              this.appointmentForm.get('appointmentStatus')?.setValue('rescheduled')
+              // this.appointment = null;
+
+              // Optional: reset local time variable
+              this.time = '';
+              // this.oldTime = '';
+              // this.oldDate = '';
+
+              // Optional: reload slots to ensure consistency
+              const doctorId = this.doctorId;
+              const date = this.appointmentForm.get('appointmentDate')?.value;
+
+              if (doctorId && date) {
+                this.checkDoctorAvailabilityAndLoadSlots(doctorId, this.formatDate(date));
+              }
             }
-          });
+          })
           // console.log("appointment", this.appointment)
-          this.addBookedSlot(this.appointment.doctorId, this.appointment.date, this.appointment.time, this.userId);
-          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'The appointment is rescheduled.' });
+          // this.addBookedSlot(this.appointment.doctorId, this.appointment.date, this.appointment.time, this.userId);
+          // this.messageService.add({ severity: 'success', summary: 'Success', detail: 'The appointment is rescheduled.' });
         }
 
         // const status = this.appointmentForm.get('appointmentStatus')?.value;
@@ -2064,7 +2162,7 @@ export class AppointmentFormComponent implements OnInit {
         // console.log('time',this.appointmentForm.get('appointmentTime')?.value)
         this.syncFormToModel();
         this.submit.emit({ appointment: this.appointment, status: this.appointment.status, requestVia }); // Emit the data to the parent component
-        this.showForm = false; // Close the form after submission
+        // this.showForm = false; // Close the form after submission
         // this.router.navigate(['/appointments']);
         // console.log("status of appointment", this.appointment.status)
 
@@ -2286,96 +2384,96 @@ export class AppointmentFormComponent implements OnInit {
               slotTime: this.time, // Assuming the slot time is available here
               status: 'booked'
             });
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Success',
-              detail: 'The appointment is confirmed.',
-            });
-            this.doctorService.getDoctorDetails(this.appointment.doctorId).subscribe({
-              next: (response) => {
-                const doctorPhoneNumber = response?.phone_number;
-                const appointmentDetails = {
-                  patientName: this.appointment?.patientName,
-                  doctorName: this.appointment?.doctorName,
-                  date: this.appointment?.date,
-                  time: this.appointment?.time,
-                  doctorPhoneNumber: doctorPhoneNumber,
-                  patientPhoneNumber: this.appointment?.phoneNumber,
-                  status: this.appointment?.status,
-                  requestVia: this.appointment!.requestVia,
-                  prefix: this.appointment!.prefix
-                }
-                // this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
-                //   next: (response) => {
-                //     // console.log('SMS message sent successfully:', response);
-                //     this.messageService.add({ severity: 'success', summary: 'Success', detail: 'SMS message sent successfully!' });
-                //   },
-                //   error: (error) => {
-                //     console.error('Error sending SMS message:', error);
-                //   }
-                // });
-                this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
-                  next: (response) => {
-                    // console.log('WhatsApp message sent successfully:', response);
-                    this.messageService.add({ severity: 'success', summary: 'Success', detail: 'WhatsApp Message Sent Successfully' });
-                  },
-                  error: (error) => {
-                    console.error('Error sending WhatsApp message:', error);
-                    this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending WhatsApp message' });
-                  }
-                });
-              }
+            // this.messageService.add({
+            //   severity: 'success',
+            //   summary: 'Success',
+            //   detail: 'The appointment is confirmed.',
+            // });
+            // this.doctorService.getDoctorDetails(this.appointment.doctorId).subscribe({
+            //   next: (response) => {
+            //     const doctorPhoneNumber = response?.phone_number;
+            //     const appointmentDetails = {
+            //       patientName: this.appointment?.patientName,
+            //       doctorName: this.appointment?.doctorName,
+            //       date: this.appointment?.date,
+            //       time: this.appointment?.time,
+            //       doctorPhoneNumber: doctorPhoneNumber,
+            //       patientPhoneNumber: this.appointment?.phoneNumber,
+            //       status: this.appointment?.status,
+            //       requestVia: this.appointment!.requestVia,
+            //       prefix: this.appointment!.prefix
+            //     }
+            //     // this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
+            //     //   next: (response) => {
+            //     //     // console.log('SMS message sent successfully:', response);
+            //     //     this.messageService.add({ severity: 'success', summary: 'Success', detail: 'SMS message sent successfully!' });
+            //     //   },
+            //     //   error: (error) => {
+            //     //     console.error('Error sending SMS message:', error);
+            //     //   }
+            //     // });
+            //     this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
+            //       next: (response) => {
+            //         // console.log('WhatsApp message sent successfully:', response);
+            //         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'WhatsApp Message Sent Successfully' });
+            //       },
+            //       error: (error) => {
+            //         console.error('Error sending WhatsApp message:', error);
+            //         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending WhatsApp message' });
+            //       }
+            //     });
+            //   }
 
-            });
-            this.doctorService.getDoctorDetails(this.appointment.doctorId).subscribe({
-              next: (response) => {
-                const doctorEmail = response?.email;
-                const patientEmail = this.appointment?.email;
+            // });
+            // this.doctorService.getDoctorDetails(this.appointment.doctorId).subscribe({
+            //   next: (response) => {
+            //     const doctorEmail = response?.email;
+            //     const patientEmail = this.appointment?.email;
 
-                // Ensure both emails are valid
-                if (!doctorEmail || !patientEmail) {
-                  console.error('Doctor or patient email is missing.');
-                  return;
-                }
+            //     // Ensure both emails are valid
+            //     if (!doctorEmail || !patientEmail) {
+            //       console.error('Doctor or patient email is missing.');
+            //       return;
+            //     }
 
-                // Prepare appointment details for email
-                const appointmentDetails = {
-                  patientName: this.appointment?.patientName,
-                  doctorName: this.appointment?.doctorName,
-                  date: this.appointment?.date,
-                  time: this.appointment?.time,
-                };
+            //     // Prepare appointment details for email
+            //     const appointmentDetails = {
+            //       patientName: this.appointment?.patientName,
+            //       doctorName: this.appointment?.doctorName,
+            //       date: this.appointment?.date,
+            //       time: this.appointment?.time,
+            //     };
 
-                const status = 'confirmed';
+            //     const status = 'confirmed';
 
-                // Send email to the doctor
-                // this.appointmentService.sendEmail(doctorEmail, status, appointmentDetails, 'doctor').subscribe({
-                //   next: (response) => {
-                //     console.log('Email sent to doctor successfully:', response);
-                //     this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to doctor successfully' });
-                //   },
-                //   error: (error) => {
-                //     console.error('Error sending email to doctor:', error);
-                //     this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending email to doctor' });
-                //   },
-                // });
+            //     // Send email to the doctor
+            //     // this.appointmentService.sendEmail(doctorEmail, status, appointmentDetails, 'doctor').subscribe({
+            //     //   next: (response) => {
+            //     //     console.log('Email sent to doctor successfully:', response);
+            //     //     this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to doctor successfully' });
+            //     //   },
+            //     //   error: (error) => {
+            //     //     console.error('Error sending email to doctor:', error);
+            //     //     this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending email to doctor' });
+            //     //   },
+            //     // });
 
-                // Send email to the patient
-                this.appointmentService.sendEmail(patientEmail, status, appointmentDetails, 'patient').subscribe({
-                  next: (response) => {
-                    // console.log('Email sent to patient successfully:', response);
-                    this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to patient successfully' });
-                  },
-                  error: (error) => {
-                    console.error('Error sending email to patient:', error);
-                    this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending email to patient' });
-                  },
-                });
-              },
-              error: (error) => {
-                console.error('Error in getting doctor details:', error);
-              },
-            });
+            //     // Send email to the patient
+            //     this.appointmentService.sendEmail(patientEmail, status, appointmentDetails, 'patient').subscribe({
+            //       next: (response) => {
+            //         // console.log('Email sent to patient successfully:', response);
+            //         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Email sent to patient successfully' });
+            //       },
+            //       error: (error) => {
+            //         console.error('Error sending email to patient:', error);
+            //         this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Error sending email to patient' });
+            //       },
+            //     });
+            //   },
+            //   error: (error) => {
+            //     console.error('Error in getting doctor details:', error);
+            //   },
+            // });
 
 
             // this.addBookedSlot(this.appointment.doctorId, this.appointment.date, this.appointment.time);
@@ -2387,10 +2485,52 @@ export class AppointmentFormComponent implements OnInit {
 
           // If creating a new appointment, add it (no id needed)
           // console.log("appointment", this.appointment)
-          this.appointmentService.addNewAppointment(appointmentDetails);
+            this.isLoading = true;
+          this.appointmentService.addNewAppointment(appointmentDetails).subscribe({
+            next: (res) => {
+              this.messageService.add({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Appointment created successfully',
+              });
+              this.isLoading = false
+              this.showForm = false;
+                this.formSuccess.emit('confirmed');
+            },
+            error: (error) => {
+              console.error('Error:', error);
 
+              let errorMessage = 'Failed to create appointment';
 
-          this.showForm = false; // Close the form after submission
+              if (error?.error?.error) {
+                errorMessage = error.error.error;
+              }
+
+              this.messageService.add({
+                severity: 'error',
+                summary: 'Error',
+                detail: errorMessage,
+              });
+
+              this.isLoading = false
+              this.appointmentForm.get('appointmentTime')?.setValue('');
+              this.appointment = null;
+
+              // Optional: reset local time variable
+              this.time = '';
+              this.oldTime = '';
+              this.oldDate = '';
+
+              // Optional: reload slots to ensure consistency
+              const doctorId = this.doctorId;
+              const date = this.appointmentForm.get('appointmentDate')?.value;
+
+              if (doctorId && date) {
+                this.checkDoctorAvailabilityAndLoadSlots(doctorId, this.formatDate(date));
+              }
+            }
+          });
+          // this.showForm = false
         }
 
         // if (this.appointment?.requestVia === "Call" || this.appointment?.requestVia === "Walk-In") {
@@ -2529,5 +2669,101 @@ export class AppointmentFormComponent implements OnInit {
   }
 
 
+  sendNotifications(type: 'confirmed' | 'rescheduled' | 'cancelled') {
+
+    this.doctorService.getDoctorDetails(this.appointment!.doctorId).subscribe({
+      next: (response) => {
+
+        const doctorPhoneNumber = response?.phone_number;
+        const doctorEmail = response?.email;
+
+        let phoneNumber = this.appointment!.phoneNumber;
+
+        if (phoneNumber.startsWith('91') && phoneNumber.length > 10) {
+          phoneNumber = phoneNumber.substring(2);
+        }
+        if (!phoneNumber.startsWith('91')) {
+          phoneNumber = '91' + phoneNumber;
+        }
+
+        const whatsappPayload = {
+          patientName: this.appointment?.patientName,
+          doctorName: this.appointment?.doctorName,
+          date: this.appointment?.date,
+          time: this.appointment?.time,
+          doctorPhoneNumber: doctorPhoneNumber,
+          patientPhoneNumber: phoneNumber,
+          status: type,
+          requestVia: this.appointment!.requestVia,
+          prefix: this.appointment!.prefix
+        };
+
+        const emailPayload = {
+          patientName: this.appointment?.patientName,
+          doctorName: this.appointment?.doctorName,
+          date: this.appointment?.date,
+          time: this.appointment?.time,
+        };
+
+        // 🔥 CALL BOTH
+        this.sendWhatsApp(whatsappPayload);
+        this.sendEmail(emailPayload, type);
+
+      },
+      error: (err) => {
+        console.error('Error fetching doctor details:', err);
+      }
+    });
+  }
+
+  sendWhatsApp(payload: any) {
+    this.appointmentService.sendWhatsAppMessage(payload).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'WhatsApp message sent successfully',
+        });
+      },
+      error: (error) => {
+        console.error('WhatsApp error:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to send WhatsApp message',
+        });
+      }
+    });
+  }
+  sendEmail(payload: any, status: string) {
+    const patientEmail = this.appointment?.email;
+
+    if (!patientEmail) return;
+
+    this.appointmentService.sendEmail(
+      patientEmail,
+      status,
+      payload,
+      'patient'
+    ).subscribe({
+      next: () => {
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Success',
+          detail: 'Email sent successfully',
+        });
+      },
+      error: (error) => {
+        console.error('Email error:', error);
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to send email',
+        });
+      }
+    });
+  }
+
 
 }
+

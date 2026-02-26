@@ -954,7 +954,7 @@ export class AppointmentConfirmComponent {
     }
 
     // Additional filtering and updates
-    this.closeAppointmentForm();
+    // this.closeAppointmentForm();
     this.filterAppointment(); // Refresh the filtered appointments
   }
   closeAppointmentForm() {

@@ -100,7 +100,8 @@
         <app-appointment-confirm *ngIf="activeComponent === 'confirmed'" #appointmentConfirmComponent></app-appointment-confirm>
         <app-appointment-cancel *ngIf="activeComponent === 'cancelled'" #appointmentCancelComponent></app-appointment-cancel>
         <app-appointment-complete *ngIf="activeComponent === 'completed'"  #appointmentCompleteComponent></app-appointment-complete>
-        <app-appointment-form *ngIf="activeComponent === 'appointment' && showForm" (submit)="showConfirmedAppointments()" (close)="closeForm()"></app-appointment-form>
+        <app-appointment-form *ngIf="activeComponent === 'appointment' && showForm"   (formSuccess)="handleFormSuccess($event)"
+  (formClosed)="handleFormClose()"></app-appointment-form>
         <!-- <app-new-form *ngIf="activeComponent === 'appointment' && showForm" (submit)="showConfirmedAppointments()" (close)="closeForm()"></app-new-form> -->
         <app-appointment-transfer *ngIf="activeComponent === 'transfer' "></app-appointment-transfer>
         <app-referred *ngIf="activeComponent === 'cc'"></app-referred>

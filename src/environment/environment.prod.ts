@@ -13,5 +13,6 @@ export const environment = {
         apiUrl: isLan
     ? 'http://192.168.9.139:3000/api'
     : '/api'
+      // apiUrl: 'https://docmindsjmrh.imapps.in/api'
 
 };

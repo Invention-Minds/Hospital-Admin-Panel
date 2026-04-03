@@ -724,7 +724,7 @@ export class DoctorAvailabilityComponent {
         status: bookedSlot.complete ? 'complete' : 'booked'
       }));
     }
-    if (!doctor.availableFrom || !doctor.slotDuration) {
+    if (!doctor.availableFrom) {
       console.error('Doctor availability or slot duration is not set.');
       return []; // Return an empty array if unavailable
     }
@@ -743,7 +743,7 @@ export class DoctorAvailabilityComponent {
     const latestAvailability = allUpdatedAtNull
       ? doctor.availability // If all are null, consider the entire availability as "latest"
       : doctor.availability?.filter((avail: any) => avail.updatedAt === latestTimestamp);
-    // console.log('Doctors available days', doctor.availabilityDays);
+    console.log('Doctors available days', doctor.availabilityDays);
     const dayOfWeek = this.selectedDate.toLocaleString('en-us', { weekday: 'short' }).toLowerCase();
     // console.log(dayOfWeek)
     // const availableDay = latestAvailability?.find(avail => avail.day.toLowerCase() === dayOfWeek);

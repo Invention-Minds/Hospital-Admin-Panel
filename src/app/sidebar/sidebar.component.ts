@@ -108,4 +108,10 @@ export class SidebarComponent implements OnInit {
   isNotTherapist():boolean{
     return !(this.role === 'sub_admin' && this.subAdminType === 'Therapist')
   }
+  isTVController(): boolean {
+  return this.role === 'sub_admin' && this.subAdminType === 'TV Coordinator';
+}
+isNotTVController(): boolean {
+  return !(this.role === 'sub_admin' && this.subAdminType === 'TV Coordinator');
+}
 }

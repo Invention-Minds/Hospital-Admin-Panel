@@ -97,6 +97,9 @@ export class LoginComponent implements OnInit {
             console.log(`🔀 Redirecting to /nursing/${blockNumber}`);
             this.router.navigate([`/nursing/${blockNumber}`]); // Navigate to the appropriate channel
           }
+          else if(response.user.subAdminType === 'TV Coordinator'){
+            this.router.navigate(['/tv-control']);
+          }
           else if(response.user.subAdminType === 'OT Channel'){
             this.router.navigate(['/ot-channel']);
           }

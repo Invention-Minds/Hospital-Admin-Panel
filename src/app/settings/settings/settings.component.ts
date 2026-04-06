@@ -88,7 +88,7 @@ therapists: any[] = [];
   sub_admin: ['profile', 'reset','est_locked'],
   doctor: ['profile', 'reset'],
   admin: ['profile', 'reset', 'login','delete'],
-  super_admin: ['profile', 'reset', 'login','delete','login_details'],
+  super_admin: ['profile', 'reset', 'login','delete','login_details','user_status'],
 };
 
   ngOnInit(): void {
@@ -594,6 +594,18 @@ deleteUser() {
         this.buttonClicked = false;
     }
 );
+}
+toggleUserActive(user: any): void {
+  this.authService.toggleUserActive(user.id).subscribe({
+    next: (res) => {
+      user.isActive = res.isActive;
+      const status = res.isActive ? 'activated' : 'deactivated';
+      this.messageService.add({ severity: 'success', summary: 'Success', detail: `User ${status} successfully` });
+    },
+    error: () => {
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update user status' });
+    }
+  });
 }
 loadDepartments(): void {
   this.doctorService.getDepartments().subscribe((departments) => {

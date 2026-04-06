@@ -150,10 +150,11 @@ export class LoginComponent implements OnInit {
       },
       (error) => {
         console.error('Login failed:', error);
-        let message = error.error;
         this.isLoading = false;
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Invalid username and password' });
-        // Handle the error, e.g., show a message to the user
+        const detail = error.status === 403
+          ? (error.error?.error || 'Your account is inactive. Please contact the administrator.')
+          : 'Invalid username and password';
+        this.messageService.add({ severity: 'error', summary: 'Error', detail });
       }
     );
   }

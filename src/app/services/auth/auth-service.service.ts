@@ -128,6 +128,9 @@ initializeUserFromStorage(): void {
   getAllUsers(): Observable<any> {
     return this.http.get(`${this.apiUrl}/get-all-users`);
   }
+  toggleUserActive(userId: number): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/toggle-active/${userId}`, {});
+  }
   getUserDetails(userId: number): Observable<any> {
     const params = new HttpParams().set('userId', userId); // Pass userId as a query param
 

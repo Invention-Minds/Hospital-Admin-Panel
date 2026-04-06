@@ -22,6 +22,10 @@
       (click)="switchTab('login_details')" *ngIf="canAccessTab('login_details')">
       Logged In Details
     </div>
+    <div class="settings-tab" [ngClass]="{'active-tab': selectedTab === 'user_status'}"
+      (click)="switchTab('user_status')" *ngIf="canAccessTab('user_status')">
+      User Status
+    </div>
     <div class="settings-tab" [ngClass]="{'active-tab': selectedTab === 'est_locked'}" (click)="switchTab('est_locked')"
       *ngIf="loggedInAdminType === 'IT Manager' || role === 'super_admin'">
       Locked Ids
@@ -410,6 +414,44 @@
     </div>
 
   </div>
+  <div class="settings-content" *ngIf="selectedTab === 'user_status'">
+    <div class="table-container">
+      <table class="styled-table">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Staff Name</th>
+            <th>Role</th>
+            <th>Employee ID</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let staff of users; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ firstNames[i] }}</td>
+            <td>{{ staff.role }}</td>
+            <td>{{ staff.employeeId }}</td>
+            <td>
+              <span [ngClass]="staff.isActive !== false ? 'status-active' : 'status-inactive'">
+                {{ staff.isActive !== false ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+            <td>
+              <button
+                class="toggle-btn"
+                [ngClass]="staff.isActive !== false ? 'btn-deactivate' : 'btn-activate'"
+                (click)="toggleUserActive(staff)">
+                {{ staff.isActive !== false ? 'Deactivate' : 'Activate' }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
   <div class="settings-content" *ngIf="selectedTab === 'est_locked'">
     <div class="table-container-1">
       <div class="bulk-actions">

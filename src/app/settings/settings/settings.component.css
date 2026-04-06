@@ -5,7 +5,8 @@
 
 }
 .profile-wrapper {
-  width: 1104px;
+  width: 100%;
+  max-width: 1104px;
   flex-shrink: 0;
   margin: auto;
   padding: 20px;
@@ -808,4 +809,56 @@ line-height: normal;
   line-height: normal;
   margin-bottom: 10px;
 }
+.profile-wrapper {
+  width: 95vw;
+  max-width: 100%;
+}
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .profile-wrapper {
+    width: 95vw;
+    max-width: 100%;
+  }
+}
+
+/* ===== User Status Tab ===== */
+.status-active {
+  color: #27ae60;
+  font-weight: 600;
+  background: #eafaf1;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+.status-inactive {
+  color: #e74c3c;
+  font-weight: 600;
+  background: #fdf0ef;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+.toggle-btn {
+  border: none;
+  padding: 5px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: Kanit;
+}
+.btn-deactivate {
+  background-color: #e74c3c;
+  color: white;
+}
+.btn-deactivate:hover {
+  background-color: #c0392b;
+}
+.btn-activate {
+  background-color: #27ae60;
+  color: white;
+}
+.btn-activate:hover {
+  background-color: #1e8449;
 }

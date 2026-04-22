@@ -739,8 +739,8 @@ export class AppointmentConfirmComponent {
     appointmentDate.setSeconds(0);
 
     // Define the time window (30 mins before and after)
-    const startWindow = new Date(appointmentDate.getTime() - 90 * 60000); // 30 mins before
-    const endWindow = new Date(appointmentDate.getTime() + 90 * 60000);   // 30 mins after
+    const startWindow = new Date(appointmentDate.getTime() - 300 * 60000); // 30 mins before
+    const endWindow = new Date(appointmentDate.getTime() + 300 * 60000);   // 30 mins after
 
     // Enable if the current time is within the window
     return currentTime >= startWindow && currentTime <= endWindow;

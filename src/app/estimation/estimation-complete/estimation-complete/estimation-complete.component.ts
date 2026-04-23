@@ -4,6 +4,7 @@ import { MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
 import * as XLSX from 'xlsx';
 import * as FileSaver from 'file-saver';
+import { environment } from '../../../../environment/environment';
 
 @Component({
   selector: 'app-estimation-complete',
@@ -83,10 +84,13 @@ export class EstimationCompleteComponent {
   }
   print(estimation: any): void {
     if (estimation.pdfLink) {
-      const pdfWindow = window.open(estimation.pdfLink, '_blank'); // Open the PDF in a new tab
+      const href = estimation.pdfLink.startsWith('http')
+        ? estimation.pdfLink
+        : `${environment.filesUrl}${estimation.pdfLink}`;
+      const pdfWindow = window.open(href, '_blank');
       if (pdfWindow) {
         pdfWindow.onload = () => {
-          pdfWindow.print(); // Automatically triggers the print dialog
+          pdfWindow.print();
         };
       }
     } else {

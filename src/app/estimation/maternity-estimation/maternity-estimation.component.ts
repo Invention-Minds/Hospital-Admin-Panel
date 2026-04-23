@@ -2,6 +2,7 @@ import { Component, Output, EventEmitter } from '@angular/core';
 import { EstimationService } from '../../services/estimation/estimation.service';
 import { MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
+import { environment } from '../../../environment/environment';
 
 @Component({
   selector: 'app-maternity-estimation',
@@ -78,10 +79,13 @@ this.fetchPendingEstimations();
   }
   print(estimation: any): void {
     if (estimation.pdfLink) {
-      const pdfWindow = window.open(estimation.pdfLink, '_blank'); // Open the PDF in a new tab
+      const href = estimation.pdfLink.startsWith('http')
+        ? estimation.pdfLink
+        : `${environment.filesUrl}${estimation.pdfLink}`;
+      const pdfWindow = window.open(href, '_blank');
       if (pdfWindow) {
         pdfWindow.onload = () => {
-          pdfWindow.print(); // Automatically triggers the print dialog
+          pdfWindow.print();
         };
       }
     } else {

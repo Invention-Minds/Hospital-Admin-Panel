@@ -998,6 +998,10 @@ export class DoctorAvailabilityComponent {
     extraHoursBefore: Record<string, number>,
     extraHoursAfter: Record<string, number>
   ): Slot[] {
+    // Skip doctors with missing/malformed schedule — availableFrom must contain a "HH:mm-HH:mm" range
+    if (!availableFrom || !availableFrom.includes('-') || !doctorAvailableUntil) {
+      return [];
+    }
     const timeRanges = availableFrom.split(',').map(range => range.trim());
     const slots: Slot[] = [];
     const currentTimeInMinutes = new Date().getHours() * 60 + new Date().getMinutes();

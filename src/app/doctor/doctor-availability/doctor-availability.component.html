@@ -64,7 +64,7 @@
             <button type="button" class="button-after" (click)="addExtraSlotsBefore(doctor)"><img src="/before.svg"></button>
             <button type="button" class="button-after" (click)="addExtraSlotsAfter(doctor)"><img src="/after.svg"></button>
           </div> -->
-        <div *ngFor="let range of doctor.availableFrom.split(',')">
+        <div *ngFor="let range of (doctor.availableFrom || '').split(',')">
           <div class="extra-slots-buttons"
             *ngIf="((role === 'admin' || role === 'super_admin' || subAdminType === 'Tele Caller' || employeeId === 'JMRH124' || employeeId === 'JMRH178') && doctor.doctorType !== 'Visiting Consultant')">
             <span class="doctor-name">{{ range }}</span>

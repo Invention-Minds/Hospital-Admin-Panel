@@ -535,6 +535,35 @@ export class AppointmentConfirmService {
   updateAppointmentVitals(appointmentId: number, vitals: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/${appointmentId}/vitals`, vitals);
   }
+
+  // Priority feature — in-memory + SSE on backend, no DB schema change required
+  setAppointmentPriority(payload: {
+    appointmentId: number;
+    priority: 'normal' | 'critical' | 'emergency' | 'staff' | 'vip' | 'senior' | 'disabled';
+    reason?: string;
+    setBy?: string;
+  }): Observable<any> {
+    return this.http.post(`${environment.apiUrl}/priority`, payload);
+  }
+
+  getTodayPriorities(): Observable<any> {
+    return this.http.get(`${environment.apiUrl}/priority/today`);
+  }
+
+  clearAppointmentPriority(appointmentId: number): Observable<any> {
+    return this.http.patch(`${environment.apiUrl}/priority/${appointmentId}/clear`, {});
+  }
+
+  // Cross-browser consultation-start broadcast — triggers TV announcement on separate devices
+  notifyConsultationStart(payload: {
+    doctorId: number;
+    appointmentId: number;
+    channelId?: number;
+    patientName?: string;
+    doctorName?: string;
+  }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/notify-consultation-start`, payload);
+  }
   createHistoryNote(noteData: any): Observable<any> {
     return this.http.post(`${this.historyUrl}`, noteData);
   }
@@ -574,17 +603,29 @@ export class AppointmentConfirmService {
     return this.http.post<any>(`${this.investigationUrl}/radiology-tests`, payload);
   }
 
-  getConfirmedAppointments(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/confirmed-appts`)
+  getConfirmedAppointments(fromDate?: string, toDate?: string): Observable<any[]> {
+    let params = new HttpParams();
+    if (fromDate) params = params.set('fromDate', fromDate);
+    if (toDate)   params = params.set('toDate', toDate);
+    return this.http.get<any[]>(`${this.apiUrl}/confirmed-appts`, { params });
   }
-  getCancelledAppointments(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/cancelled-appts`)
+  getCancelledAppointments(fromDate?: string, toDate?: string): Observable<any[]> {
+    let params = new HttpParams();
+    if (fromDate) params = params.set('fromDate', fromDate);
+    if (toDate)   params = params.set('toDate', toDate);
+    return this.http.get<any[]>(`${this.apiUrl}/cancelled-appts`, { params });
   }
-  getCompletedAppointments(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/completed-appts`)
+  getCompletedAppointments(fromDate?: string, toDate?: string): Observable<any[]> {
+    let params = new HttpParams();
+    if (fromDate) params = params.set('fromDate', fromDate);
+    if (toDate)   params = params.set('toDate', toDate);
+    return this.http.get<any[]>(`${this.apiUrl}/completed-appts`, { params });
   }
-  getPendingAppointments(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/pending-appts`)
+  getPendingAppointments(fromDate?: string, toDate?: string): Observable<any[]> {
+    let params = new HttpParams();
+    if (fromDate) params = params.set('fromDate', fromDate);
+    if (toDate)   params = params.set('toDate', toDate);
+    return this.http.get<any[]>(`${this.apiUrl}/pending-appts`, { params });
   }
   getTransferAppointments(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/transfer-appts`)

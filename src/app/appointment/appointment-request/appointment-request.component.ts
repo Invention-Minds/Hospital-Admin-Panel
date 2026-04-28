@@ -86,9 +86,9 @@ export class AppointmentRequestComponent implements OnInit {
 
   }
 
-  fetchPendingAppointments(): void {
+  fetchPendingAppointments(fromDate?: string, toDate?: string): void {
     this.isLoading = true;
-    this.appointmentService.getPendingAppointments().subscribe((appointments) => {
+    this.appointmentService.getPendingAppointments(fromDate, toDate).subscribe((appointments) => {
       this.isLoading = false;
       this.pendingAppointments = appointments;
       this.pendingAppointments.sort((a, b) => {
@@ -97,6 +97,7 @@ export class AppointmentRequestComponent implements OnInit {
         return dateB.getTime() - dateA.getTime();
       });
       this.filteredAppointments = [...this.pendingAppointments];
+      this.currentPage = 1;
     });
   }
 
@@ -213,68 +214,60 @@ export class AppointmentRequestComponent implements OnInit {
     this.filteredServices = [...this.pendingAppointments];
   }
   onSearch(): void {
-    this.filteredAppointments = [...this.pendingAppointments]
+    // If user picked date range, fetch fresh data from backend
+    if (this.selectedDateRange && this.selectedDateRange.length) {
+      const startDate = this.selectedDateRange[0];
+      const endDate = this.selectedDateRange[1] ? this.selectedDateRange[1] : startDate;
+      if (startDate) {
+        const fromDate = this.formatDate(new Date(startDate));
+        const toDate = endDate ? this.formatDate(new Date(endDate)) : undefined;
+        this.appointmentService.getPendingAppointments(fromDate, toDate).subscribe({
+          next: (appts) => {
+            this.pendingAppointments = appts;
+            this.applyTextSearch();
+          },
+          error: (err) => console.error('Date range fetch failed', err)
+        });
+        return;
+      }
+    }
+    this.applyTextSearch();
+  }
 
+  private applyTextSearch(): void {
     this.filteredServices = this.pendingAppointments.filter((service) => {
       let matches = true;
-
-      // Filter by search option
       if (this.selectedSearchOption && this.searchValue && service) {
         switch (this.selectedSearchOption) {
           case 'patientName':
-            matches = service.patientName
-              ?.toLowerCase()
-              .includes(this.searchValue.toLowerCase());
+            matches = !!service.patientName?.toLowerCase().includes(this.searchValue.toLowerCase());
             break;
           case 'doctorName':
-            matches = !!service.doctorName
-              ?.toLowerCase()
-              .includes(this.searchValue.toLowerCase());
+            matches = !!service.doctorName?.toLowerCase().includes(this.searchValue.toLowerCase());
             break;
           case 'departmentName':
-            matches = !!service.department
-              ?.toLowerCase()
-              .includes(this.searchValue.toLowerCase());
+            matches = !!service.department?.toLowerCase().includes(this.searchValue.toLowerCase());
             break;
           case 'prnNumber':
-            const prnNumber = Number(service.prnNumber); // Convert to Number
-            const searchNumber = Number(this.searchValue); // Convert to Number
+            const prnNumber = Number(service.prnNumber);
+            const searchNumber = Number(this.searchValue);
             matches = !isNaN(searchNumber) && prnNumber === searchNumber;
             break;
         }
-
       }
-      if (this.selectedDateRange && this.selectedDateRange.length) {
-
-        const serviceDate = new Date(service.date);
-        let startDate = new Date(this.selectedDateRange[0]);
-        startDate.setHours(0, 0, 0, 0);
-        let endDate = this.selectedDateRange[1] ? new Date(this.selectedDateRange[1]) : startDate;
-        endDate.setHours(23, 59, 59, 999); // Ensure full-day range
-        if (startDate === endDate) {
-          matches = serviceDate.toISOString().split('T')[0] === startDate.toISOString().split('T')[0];
-        } else {
-          matches = matches && serviceDate.getTime() >= startDate.getTime() && serviceDate.getTime() <= endDate.getTime();
-        }
-      }
-
-      if (this.selectedDate) {
-        const singleDate = new Date(this.selectedDate).toISOString().split('T')[0]; // ✅ Extract YYYY-MM-DD only    
-        matches = matches && new Date(service.date).toDateString() === singleDate;
-      }
-
       return matches;
     });
-
-    this.filteredAppointments = this.filteredServices;
-
-
+    this.filteredAppointments = this.filteredServices.length || this.searchValue
+      ? this.filteredServices
+      : [...this.pendingAppointments];
+    this.currentPage = 1;
   }
 
 
   refresh() {
     this.selectedDateRange = [];
-    this.filteredAppointments = this.pendingAppointments
+    this.searchValue = '';
+    this.fetchPendingAppointments();   // Default = today + future
   }
 
   filterAppointment() {

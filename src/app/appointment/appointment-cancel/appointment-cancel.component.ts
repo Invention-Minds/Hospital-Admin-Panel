@@ -80,77 +80,55 @@ export class AppointmentCancelComponent {
     this.fetchCancelledAppointments();
   }
 
-  fetchCancelledAppointments() {
-
+  fetchCancelledAppointments(fromDate?: string, toDate?: string) {
     this.isLoading = true;
-    this.appointmentService.getCancelledAppointments().subscribe(
+    this.appointmentService.getCancelledAppointments(fromDate, toDate).subscribe(
       (appointments) => {
         this.cancelledAppointments = appointments;
-
-        // Sort the appointments
         this.cancelledAppointments.sort((a, b) => {
           const dateA = new Date(a.created_at!);
           const dateB = new Date(b.created_at!);
           return dateB.getTime() - dateA.getTime();
         });
-
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        this.filterAppointmentsByDate(new Date());
-        setTimeout(() => {
-          this.isLoading = false;
-        }, 2000);
+        this.filteredAppointments = [...this.cancelledAppointments];
+        this.currentPage = 1;
+        this.isLoading = false;
       },
       (error) => {
         console.error('Error fetching cancelled appointments:', error);
-      },
-      () => {
         this.isLoading = false;
       }
     );
   }
+
   onSearch(): void {
-    this.filteredList = [...this.cancelledAppointments];
-    this.filteredAppointments = [...this.cancelledAppointments];
-
-
+    // If user picked a date range — fetch from backend (server-side filter)
     if (this.selectedDateRange && this.selectedDateRange.length) {
       const startDate = this.selectedDateRange[0];
       const endDate = this.selectedDateRange[1] ? this.selectedDateRange[1] : startDate;
-
-      if (startDate && endDate) {
-        if (startDate.getTime() !== endDate.getTime()) {
-          const normalizedEndDate = new Date(endDate);
-          normalizedEndDate.setHours(23, 59, 59, 999);
-
-          this.filteredList = this.filteredList.filter((appointment: Appointment) => {
-            const appointmentDate = new Date(appointment.date);
-            return appointmentDate >= startDate && appointmentDate <= normalizedEndDate;
-          });
-          this.filteredAppointments = this.filteredList
-        }
-        else if (startDate.getTime() === endDate.getTime()) {
-          const startDate = this.selectedDateRange[0];
-
-          this.filteredList = this.filteredList.filter((appointment: Appointment) => {
-            const appointmentDate = new Date(appointment.date);
-            return appointmentDate.toDateString() === startDate.toDateString();
-          });
-          this.filteredAppointments = this.filteredList
-        }
-      }
-      else {
-        this.filteredAppointments = [...this.cancelledAppointments]
+      if (startDate) {
+        const fromDate = this.formatDate(startDate);
+        const toDate = endDate ? this.formatDate(endDate) : undefined;
+        this.appointmentService.getCancelledAppointments(fromDate, toDate).subscribe({
+          next: (appts) => {
+            this.cancelledAppointments = appts;
+            this.applyTextSearch();
+          },
+          error: (err) => console.error('Date range fetch failed', err)
+        });
+        return;
       }
     }
-    this.filteredServices = this.filteredAppointments.filter((service) => {
-      let matches = true;
+    this.applyTextSearch();
+  }
 
+  private applyTextSearch(): void {
+    this.filteredServices = this.cancelledAppointments.filter((service) => {
+      let matches = true;
       if (this.selectedSearchOption && this.searchValue && service) {
         switch (this.selectedSearchOption) {
           case 'patientName':
-            matches = service.patientName?.toLowerCase().includes(this.searchValue.toLowerCase());
+            matches = !!service.patientName?.toLowerCase().includes(this.searchValue.toLowerCase());
             break;
           case 'doctorName':
             matches = !!service.doctorName?.toLowerCase().includes(this.searchValue.toLowerCase());
@@ -159,25 +137,24 @@ export class AppointmentCancelComponent {
             matches = !!service.department?.toLowerCase().includes(this.searchValue.toLowerCase());
             break;
           case 'prnNumber':
-            const prnNumber = Number(service.prnNumber); // Convert to Number
-            const searchNumber = Number(this.searchValue); // Convert to Number
-
+            const prnNumber = Number(service.prnNumber);
+            const searchNumber = Number(this.searchValue);
             matches = !isNaN(searchNumber) && prnNumber === searchNumber;
             break;
         }
       }
-
       return matches;
     });
-
-    this.filteredAppointments = this.filteredServices;
+    this.filteredAppointments = this.filteredServices.length || this.searchValue
+      ? this.filteredServices
+      : [...this.cancelledAppointments];
+    this.currentPage = 1;
   }
-
-
 
   refresh() {
     this.selectedDateRange = [];
-    this.filterAppointmentsByDate(new Date());
+    this.searchValue = '';
+    this.fetchCancelledAppointments();   // Default = last 7 days
   }
   downloadData(): void {
     if (this.filteredServices.length === 0) {

@@ -68,7 +68,12 @@ export class AppointmentCompleteComponent {
     const day = today.getDate().toString().padStart(2, '0');
     this.today = `${year}-${month}-${day}`;
     this.isLoading = true; // Start loading indicator
-    this.appointmentService.getCompletedAppointments().subscribe(appointments => {
+    this.loadCompletedAppointments();
+  }
+
+  loadCompletedAppointments(fromDate?: string, toDate?: string): void {
+    this.isLoading = true;
+    this.appointmentService.getCompletedAppointments(fromDate, toDate).subscribe(appointments => {
       this.completedAppointments = appointments;
       this.completedAppointments.sort((a, b) => {
         const dateA = new Date(a.created_at!);
@@ -76,22 +81,12 @@ export class AppointmentCompleteComponent {
         return dateB.getTime() - dateA.getTime();
       });
       this.filteredAppointments = [...this.completedAppointments];
-      const today = new Date();
-      today.setHours(0, 0, 0, 0); // Normalize to midnight (00:00:00)
-
-      // Filter out appointments that are in the past
-      this.filteredAppointments = this.filteredAppointments.filter((appointment: any) => {
-        const appointmentDate = new Date(appointment.date); // Convert appointment date to Date object
-        // If the appointment date is today or in the future
-        return appointmentDate >= today;
-      });
-      setTimeout(() => {
-        this.isLoading = false; // Stop loading indicator
-      }, 2000); // 2-second delay
+      this.currentPage = 1;
+      this.isLoading = false;
     },
       (error) => {
         console.error('Error fetching completed appointments:', error);
-        this.isLoading = false; // Stop loading indicator
+        this.isLoading = false;
       }
     );
 
@@ -189,49 +184,32 @@ export class AppointmentCompleteComponent {
   }
   filteredAppointments: Appointment[] = [...this.completedAppointments];
   onSearch(): void {
-    this.filteredList = [...this.completedAppointments];
-    this.filteredAppointments = [...this.completedAppointments];
-
-    //  If selectedDateRange is provided, filter by date range
     if (this.selectedDateRange && this.selectedDateRange.length) {
       const startDate = this.selectedDateRange[0];
-      const endDate = this.selectedDateRange[1] ? this.selectedDateRange[1] : startDate; // Use endDate if provided, otherwise use startDate
-
-      if (startDate && endDate) {
-        if (startDate.getTime() !== endDate.getTime()) {
-          const normalizedEndDate = new Date(endDate);
-          normalizedEndDate.setHours(23, 59, 59, 999);  // Set to the last millisecond of the day
-
-          this.filteredList = this.filteredList.filter((appointment: Appointment) => {
-            const appointmentDate = new Date(appointment.date);  // Assuming 'date' is in string format like 'YYYY-MM-DD'
-            return appointmentDate >= startDate && appointmentDate <= normalizedEndDate;
-          });
-          this.filteredAppointments = this.filteredList
-        }
-        else if (startDate.getTime() === endDate.getTime()) {
-          const startDate = this.selectedDateRange[0];
-
-          this.filteredList = this.filteredList.filter((appointment: Appointment) => {
-            const appointmentDate = new Date(appointment.date);
-            return appointmentDate.toDateString() === startDate.toDateString();  // Compare the date portion only
-          });
-          this.filteredAppointments = this.filteredList
-        }
+      const endDate = this.selectedDateRange[1] ? this.selectedDateRange[1] : startDate;
+      if (startDate) {
+        const fromDate = this.formatDate(startDate);
+        const toDate = endDate ? this.formatDate(endDate) : undefined;
+        this.appointmentService.getCompletedAppointments(fromDate, toDate).subscribe({
+          next: (appts) => {
+            this.completedAppointments = appts;
+            this.applyTextSearch();
+          },
+          error: (err) => console.error('Date range fetch failed', err)
+        });
+        return;
       }
-      else {
-        this.filteredAppointments = [...this.completedAppointments]
-      }
-
     }
+    this.applyTextSearch();
+  }
 
-    //  Apply search filters on top of the date range filtering
-    this.filteredServices = this.filteredAppointments.filter((service) => {
+  private applyTextSearch(): void {
+    this.filteredServices = this.completedAppointments.filter((service) => {
       let matches = true;
-
       if (this.selectedSearchOption && this.searchValue && service) {
         switch (this.selectedSearchOption) {
           case 'patientName':
-            matches = service.patientName?.toLowerCase().includes(this.searchValue.toLowerCase());
+            matches = !!service.patientName?.toLowerCase().includes(this.searchValue.toLowerCase());
             break;
           case 'doctorName':
             matches = !!service.doctorName?.toLowerCase().includes(this.searchValue.toLowerCase());
@@ -240,25 +218,24 @@ export class AppointmentCompleteComponent {
             matches = !!service.department?.toLowerCase().includes(this.searchValue.toLowerCase());
             break;
           case 'prnNumber':
-            const prnNumber = Number(service.prnNumber); // Convert to Number
-            const searchNumber = Number(this.searchValue); // Convert to Number
-
+            const prnNumber = Number(service.prnNumber);
+            const searchNumber = Number(this.searchValue);
             matches = !isNaN(searchNumber) && prnNumber === searchNumber;
             break;
         }
       }
-
       return matches;
     });
-
-    this.filteredAppointments = this.filteredServices;
+    this.filteredAppointments = this.filteredServices.length || this.searchValue
+      ? this.filteredServices
+      : [...this.completedAppointments];
+    this.currentPage = 1;
   }
-
-
 
   refresh() {
     this.selectedDateRange = [];
-    this.filterAppointmentsByDate(new Date());
+    this.searchValue = '';
+    this.loadCompletedAppointments();   // Default = today only
   }
   downloadData(): void {
     if (this.filteredServices.length === 0) {

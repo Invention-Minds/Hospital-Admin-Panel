@@ -98,29 +98,37 @@ export class AppointmentConfirmComponent {
     const month = (today.getMonth() + 1).toString().padStart(2, '0');
     const day = today.getDate().toString().padStart(2, '0');
     this.today = `${year}-${month}-${day}`;
-    this.isLoading = true; // Start loading indicator
     this.userId = localStorage.getItem('userid')
     this.username = localStorage.getItem('username')
 
-    this.appointmentService.getConfirmedAppointments().subscribe({
+    // Default load: today + future only (avoids loading 80k+ historical records)
+    this.loadConfirmedAppointments(this.today);
+  }
+
+  /**
+   * Fetch confirmed appointments from backend, optionally filtered by date range.
+   * - No params  → defaults to today + future (handled by backend)
+   * - fromDate   → from that date onwards
+   * - fromDate + toDate → exact range
+   */
+  loadConfirmedAppointments(fromDate?: string, toDate?: string): void {
+    this.isLoading = true;
+    this.appointmentService.getConfirmedAppointments(fromDate, toDate).subscribe({
       next: (appointments) => {
         this.confirmedAppointments = appointments;
-        this.appointments = appointments
+        this.appointments = appointments;
         this.confirmedAppointments.sort((a, b) => {
           const dateA = new Date(a.created_at!);
           const dateB = new Date(b.created_at!);
           return dateB.getTime() - dateA.getTime();
         });
         this.filteredAppointments = [...this.confirmedAppointments];
-
-        this.filterAppointmentsByDate(new Date());
-        this.isLoading = false
-
+        this.currentPage = 1;
+        this.isLoading = false;
       },
       error: (error) => {
         console.error('Error fetching appointments:', error);
-
-        this.isLoading = false; // Stop loading indicator even on error
+        this.isLoading = false;
       }
     });
   }
@@ -213,48 +221,36 @@ export class AppointmentConfirmComponent {
   }
 
   onSearch(): void {
-    this.filteredList = [...this.confirmedAppointments];
-    this.filteredAppointments = [...this.confirmedAppointments];
-
-    // ✅ If selectedDateRange is provided, filter by date range
+    // If user picked a date range, fetch fresh data from backend (server-side filter — fast for large data sets)
     if (this.selectedDateRange && this.selectedDateRange.length) {
       const startDate = this.selectedDateRange[0];
-      const endDate = this.selectedDateRange[1] ? this.selectedDateRange[1] : startDate; // Use endDate if provided, otherwise use startDate
-
-      if (startDate && endDate) {
-        if (startDate.getTime() !== endDate.getTime()) {
-          const normalizedEndDate = new Date(endDate);
-          normalizedEndDate.setHours(23, 59, 59, 999);  // Set to the last millisecond of the day
-
-          this.filteredList = this.filteredList.filter((appointment: Appointment) => {
-            const appointmentDate = new Date(appointment.date);  // Assuming 'date' is in string format like 'YYYY-MM-DD'
-            return appointmentDate >= startDate && appointmentDate <= normalizedEndDate;
-          });
-          this.filteredAppointments = this.filteredList
-        }
-        else if (startDate.getTime() === endDate.getTime()) {
-          const startDate = this.selectedDateRange[0];
-
-          this.filteredList = this.filteredList.filter((appointment: Appointment) => {
-            const appointmentDate = new Date(appointment.date);
-            return appointmentDate.toDateString() === startDate.toDateString();  // Compare the date portion only
-          });
-          this.filteredAppointments = this.filteredList
-        }
-      }
-      else {
-        this.filteredAppointments = [...this.confirmedAppointments]
+      const endDate = this.selectedDateRange[1] ? this.selectedDateRange[1] : startDate;
+      if (startDate) {
+        const fromDate = this.formatDate(startDate);
+        const toDate = endDate ? this.formatDate(endDate) : undefined;
+        this.appointmentService.getConfirmedAppointments(fromDate, toDate).subscribe({
+          next: (appts) => {
+            this.confirmedAppointments = appts;
+            this.applyTextSearch();
+          },
+          error: (err) => console.error('Date range fetch failed', err)
+        });
+        return;
       }
     }
 
-    // ✅ Apply search filters on top of the date range filtering
-    this.filteredServices = this.filteredAppointments.filter((service) => {
-      let matches = true;
+    // No date range — just text search on current dataset
+    this.applyTextSearch();
+  }
 
+  /** Apply text/dropdown search filter on the currently loaded confirmedAppointments */
+  private applyTextSearch(): void {
+    this.filteredServices = this.confirmedAppointments.filter((service) => {
+      let matches = true;
       if (this.selectedSearchOption && this.searchValue && service) {
         switch (this.selectedSearchOption) {
           case 'patientName':
-            matches = service.patientName?.toLowerCase().includes(this.searchValue.toLowerCase());
+            matches = !!service.patientName?.toLowerCase().includes(this.searchValue.toLowerCase());
             break;
           case 'doctorName':
             matches = !!service.doctorName?.toLowerCase().includes(this.searchValue.toLowerCase());
@@ -263,25 +259,25 @@ export class AppointmentConfirmComponent {
             matches = !!service.department?.toLowerCase().includes(this.searchValue.toLowerCase());
             break;
           case 'prnNumber':
-            const prnNumber = Number(service.prnNumber); // Convert to Number
-            const searchNumber = Number(this.searchValue); // Convert to Number
-
+            const prnNumber = Number(service.prnNumber);
+            const searchNumber = Number(this.searchValue);
             matches = !isNaN(searchNumber) && prnNumber === searchNumber;
             break;
         }
       }
-
       return matches;
     });
-
-    this.filteredAppointments = this.filteredServices;
+    this.filteredAppointments = this.filteredServices.length || this.searchValue
+      ? this.filteredServices
+      : [...this.confirmedAppointments];
+    this.currentPage = 1;
   }
-
 
 
   refresh() {
     this.selectedDateRange = [];
-    this.filterAppointmentsByDate(new Date());
+    this.searchValue = '';
+    this.loadConfirmedAppointments(this.today);  // Back to today + future
   }
   downloadData(): void {
     if (this.filteredServices.length === 0) {

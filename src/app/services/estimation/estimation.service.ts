@@ -26,8 +26,11 @@ export class EstimationService {
   createEstimationDetails(estimationDetails: any): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/estimation-details`, estimationDetails);
   }
-  getAllEstimation(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}`)
+  getAllEstimation(fromDate?: string, toDate?: string): Observable<any> {
+    let params = new HttpParams();
+    if (fromDate) params = params.set('fromDate', fromDate);
+    if (toDate)   params = params.set('toDate', toDate);
+    return this.http.get<any>(`${this.apiUrl}`, { params });
   }
   getFollowUpEstimation(): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/estimation-details/followups`)

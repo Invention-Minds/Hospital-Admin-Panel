@@ -91,45 +91,44 @@ export class EstimationOverviewComponent {
     else {
       this.activeComponent = 'analytics'
     }
-    this.estimationService.getAllEstimation().subscribe({
+    this.loadEstimations();
+  }
+
+  /**
+   * Load estimations from backend.
+   * - No params → default last 30 days (server-side filter)
+   * - With params → exact date range
+   */
+  loadEstimations(fromDate?: string, toDate?: string): void {
+    this.estimationService.getAllEstimation(fromDate, toDate).subscribe({
       next: (estimations: any[]) => {
-        console.log(estimations);
         this.estimations = estimations;
         this.totalEstimationsOverall = estimations.sort((a, b) => {
           const dateA = new Date(a.submittedDateAndTime).getTime() || 0;
           const dateB = new Date(b.submittedDateAndTime).getTime() || 0;
           return dateB - dateA;
         });
-        
+
         this.totalOverallEstimations = this.totalEstimationsOverall.length;
         this.totalMaternity = this.estimations.filter(e => e.estimationType === 'Maternity').length;
         this.totalFollowUp = this.estimations.filter(e =>
           Array.isArray(e.followUpDates) && e.followUpDates.length > 0
-        ).length;        
+        ).length;
         this.processTodayEstimations(estimations);
-        this.processMonthlyRaised(this.estimations)
+        this.processMonthlyRaised(this.estimations);
         this.doctorService.getDepartments().subscribe((departments: any[]) => {
           this.departmentList = departments.map(d => d.name);
         });
         this.nonCompletedEstimationsList = this.estimations.filter(e => e.statusOfEstimation !== 'completed').length;
         this.doctorService.getDoctorWithDepartment().subscribe((data: any[]) => {
           this.consultants = data;
-          this.filteredDoctorNames = [...new Set(data.map(c => c.name).filter(Boolean))]
-
-          // Now that consultants are ready, call the summary function
+          this.filteredDoctorNames = [...new Set(data.map(c => c.name).filter(Boolean))];
           this.doctorWiseCompletedSummary(this.estimations, this.selectedDept, this.selectedDoctorName);
           this.doctorWiseNonCompletedSummary(this.estimations, this.selectedDept, this.selectedDoctorName);
         });
-
-        console.log(this.departmentList);
       },
       error: (err) => {
-        // Handle the error if the API call fails
-        console.error('Error fetching services:', err);
-      },
-      complete: () => {
-        // Optional: Actions to perform once the API call completes
-        console.log('Service fetching process completed.');
+        console.error('Error fetching estimations:', err);
       }
     });
   }

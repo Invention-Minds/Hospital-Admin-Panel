@@ -94,6 +94,9 @@ export class DoctorServiceService {
   updateDoctor(doctor: Doctor): Observable<void> {
     return this.http.put<void>(`${this.apiUrl}/doctors/${doctor.id}`, doctor);
   }
+  updateDoctorUserId(doctorId: number, userId: string): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/doctors/${doctorId}/user-id`, { userId });
+  }
   updateDoctorRoom(doctorId: number, roomNo: string): Observable<any> {
     return this.http.put(`${this.apiUrl}/doctors/${doctorId}/room`, { roomNo });
   }

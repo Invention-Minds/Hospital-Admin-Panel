@@ -311,15 +311,13 @@ createAccount() {
     this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Account Created Successfully' });
     this.buttonClicked = false;
     if(this.isDoctor){
-      this.selectedDoctor.userId = response.id;
-      console.log(this.selectedDoctor);
-      this.doctorService.updateDoctor(this.selectedDoctor).subscribe(
+      this.doctorService.updateDoctorUserId(this.selectedDoctor.id, response.id).subscribe(
         () => {
-          console.log('Doctor updated successfully');
-          this.selectedDoctor=[]
+          console.log('Doctor userId linked successfully');
+          this.selectedDoctor = [];
         },
         (error) => {
-          console.error('Error updating doctor:', error);
+          console.error('Error updating doctor userId:', error);
         }
       );
     }

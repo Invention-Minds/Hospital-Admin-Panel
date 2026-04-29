@@ -389,7 +389,7 @@ export class AppointmentCompleteComponent {
           'Email Sent': appointment.emailSent ? 'Yes' : 'No',
           'SMS Sent': appointment.messageSent ? 'Yes' : 'No',
           'Status': appointment.status,
-          'Appointment Handled By': appointment.user!.username,
+          'Appointment Handled By': appointment.user?.username || '-',
         };
 
       });
@@ -422,7 +422,14 @@ export class AppointmentCompleteComponent {
     }
   }
   printAppointmentDetails(): void {
-    const selectedFields = this.filteredServices.map((appointment: Appointment) => {
+    const sourceList = (this.filteredServices && this.filteredServices.length)
+      ? this.filteredServices
+      : this.filteredAppointments;
+    if (!sourceList || sourceList.length === 0) {
+      alert('No appointments in the current view. Adjust filters and try again.');
+      return;
+    }
+    const selectedFields = sourceList.map((appointment: Appointment) => {
       if (appointment.created_at) {
         const createdAt = new Date(appointment?.created_at);
         const indianTime = moment.tz(createdAt, "America/New_York").tz("Asia/Kolkata");
@@ -448,7 +455,7 @@ export class AppointmentCompleteComponent {
         'Email Sent': appointment.emailSent ? 'Yes' : 'No',
         'SMS Sent': appointment.messageSent ? 'Yes' : 'No',
         'Status': appointment.status,
-        'Appointment Handled By': appointment.user!.username,
+        'Appointment Handled By': appointment.user?.username || '-',
       };
 
     });

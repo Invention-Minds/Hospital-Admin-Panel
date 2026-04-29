@@ -584,7 +584,7 @@ export class ConfirmMhcComponent {
         'Email Sent': appointment.emailSent ? 'Yes' : 'No',
         'SMS Sent': appointment.messageSent ? 'Yes' : 'No',
         'Status': appointment.status,
-        'Appointment Handled By': appointment.user!.username
+        'Appointment Handled By': appointment.user?.username || '-'
       }));
       // Step 1: Convert the filtered data to a worksheet
       const worksheet = XLSX.utils.json_to_sheet(selectedFields);
@@ -649,7 +649,7 @@ export class ConfirmMhcComponent {
           'Email Sent': appointment.emailSent ? 'Yes' : 'No',
           'SMS Sent': appointment.messageSent ? 'Yes' : 'No',
           'Status': appointment.status,
-          'Appointment Handled By': appointment.user!.username,
+          'Appointment Handled By': appointment.user?.username || '-',
         };
 
       });
@@ -715,7 +715,7 @@ export class ConfirmMhcComponent {
         'Email Sent': appointment.emailSent ? 'Yes' : 'No',
         'SMS Sent': appointment.messageSent ? 'Yes' : 'No',
         'Status': appointment.status,
-        'Appointment Handled By': appointment.user!.username,
+        'Appointment Handled By': appointment.user?.username || '-',
       };
 
     });

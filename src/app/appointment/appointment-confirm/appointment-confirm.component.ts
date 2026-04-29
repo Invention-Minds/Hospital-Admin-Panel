@@ -424,7 +424,7 @@ export class AppointmentConfirmComponent {
         'Email Sent': appointment.emailSent ? 'Yes' : 'No',
         'SMS Sent': appointment.messageSent ? 'Yes' : 'No',
         'Status': appointment.status,
-        'Appointment Handled By': appointment.user!.username
+        'Appointment Handled By': appointment.user?.username || '-'
       }));
       // Step 1: Convert the filtered data to a worksheet
       const worksheet = XLSX.utils.json_to_sheet(selectedFields);
@@ -481,7 +481,7 @@ export class AppointmentConfirmComponent {
           'Email Sent': appointment.emailSent ? 'Yes' : 'No',
           'SMS Sent': appointment.messageSent ? 'Yes' : 'No',
           'Status': appointment.status,
-          'Appointment Handled By': appointment.user!.username,
+          'Appointment Handled By': appointment.user?.username || '-',
         };
 
       });
@@ -516,7 +516,22 @@ export class AppointmentConfirmComponent {
     }
   }
   printAppointmentDetails(): void {
-    const selectedFields = this.filteredServices.map((appointment: Appointment) => {
+    // Use whichever list has data — filteredServices populates on search, otherwise use filteredAppointments
+    const sourceList = (this.filteredServices && this.filteredServices.length)
+      ? this.filteredServices
+      : this.filteredAppointments;
+
+    if (!sourceList || sourceList.length === 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Nothing to print',
+        detail: 'No appointments in the current view. Adjust filters and try again.',
+        life: 4000
+      });
+      return;
+    }
+
+    const selectedFields = sourceList.map((appointment: Appointment) => {
       if (appointment.created_at) {
         const createdAt = new Date(appointment?.created_at);
         const indianTime = moment.tz(createdAt, "America/New_York").tz("Asia/Kolkata");
@@ -538,7 +553,7 @@ export class AppointmentConfirmComponent {
         'Email Sent': appointment.emailSent ? 'Yes' : 'No',
         'SMS Sent': appointment.messageSent ? 'Yes' : 'No',
         'Status': appointment.status,
-        'Appointment Handled By': appointment.user!.username,
+        'Appointment Handled By': appointment.user?.username || '-',
       };
 
     });

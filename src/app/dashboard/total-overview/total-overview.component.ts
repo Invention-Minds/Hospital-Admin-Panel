@@ -185,7 +185,7 @@ export class TotalOverviewComponent implements OnInit {
           'Email Sent': appointment.emailSent ? 'Yes' : 'No',
           'SMS Sent': appointment.messageSent ? 'Yes' : 'No',
           'Status': appointment.checkedIn ? 'Checked-In' : appointment.status,
-          'Appointment Handled By': appointment.user!.username,
+          'Appointment Handled By': appointment.user?.username || '-',
           'CheckedIn By': appointment.checkedInBy
         };
 

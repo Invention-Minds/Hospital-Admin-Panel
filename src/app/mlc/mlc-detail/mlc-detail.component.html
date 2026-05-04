@@ -1,0 +1,160 @@
+<div class="page">
+  <app-page-header
+    title="MLC Case Detail"
+    [subtitle]="mlc?.mlcNo ? 'MRD.2 · ' + mlc?.mlcNo : 'MRD.2'"
+    [patientName]="patient?.name ?? mlc?.emergency?.patientName ?? null"
+    [patientPrn]="patient?.prn ?? mlc?.emergency?.prn ?? null">
+  </app-page-header>
+
+  <div *ngIf="loading" class="loading" data-testid="mlc-detail-loading">
+    Loading MLC case…
+  </div>
+
+  <ng-container *ngIf="!loading && mlc as mlcCase">
+    <!-- ========== Case summary + HMIS sync indicator ========== -->
+    <section class="section" data-testid="mlc-summary-section">
+      <div class="section__head">
+        <h2 class="section__title">Case summary</h2>
+        <app-hmis-sync-indicator
+          [hmisId]="mlcCase.hmisMlcId ?? null"
+          prefix="HMIS-MLC"
+          data-testid="sync-indicator">
+        </app-hmis-sync-indicator>
+      </div>
+      <dl class="summary">
+        <dt>MLC Number</dt><dd>{{ mlcCase.mlcNo || '—' }}</dd>
+        <dt>Case Type</dt><dd>{{ mlcCase.caseType }}</dd>
+        <dt>Status</dt><dd>{{ mlcCase.status }}</dd>
+        <dt *ngIf="mlcCase.policeStationName">Police Station</dt>
+        <dd *ngIf="mlcCase.policeStationName">{{ mlcCase.policeStationName }}</dd>
+        <dt *ngIf="mlcCase.fir_No">FIR</dt>
+        <dd *ngIf="mlcCase.fir_No">
+          {{ mlcCase.fir_No }}<span *ngIf="mlcCase.fir_Date"> · {{ mlcCase.fir_Date | date: 'mediumDate' }}</span>
+        </dd>
+        <dt *ngIf="mlcCase.emergency?.presentingComplaint">Presenting complaint</dt>
+        <dd *ngIf="mlcCase.emergency?.presentingComplaint">
+          {{ mlcCase.emergency?.presentingComplaint }}
+        </dd>
+      </dl>
+    </section>
+
+    <!-- ========== Examination ========== -->
+    <section class="section" data-testid="mlc-examination-section">
+      <div class="section__head">
+        <h2 class="section__title">Examination findings</h2>
+        <p class="section__subtitle" *ngIf="mlcCase.firstExaminationDone">
+          Recorded at {{ mlcCase.firstExaminationTime | date: 'medium' }}
+        </p>
+      </div>
+      <form class="form" [formGroup]="examinationForm" (ngSubmit)="submitExamination()">
+        <div class="form__field">
+          <label for="examinerName" class="form__label">Examiner name *</label>
+          <input pInputText id="examinerName"
+                 type="text"
+                 class="form__input"
+                 formControlName="examinerName" />
+        </div>
+        <div class="form__field">
+          <label for="injuries" class="form__label">Injuries / findings *</label>
+          <textarea pInputText id="injuries"
+                    rows="4"
+                    class="form__textarea"
+                    formControlName="injuries"></textarea>
+        </div>
+        <div class="form__footer">
+          <button type="submit"
+                  class="btn btn--primary"
+                  [disabled]="examinationForm.invalid || submitting.examination"
+                  data-testid="btn-examination">
+            {{ submitting.examination ? 'Saving…' : 'Save examination' }}
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ========== Sample collection ========== -->
+    <section class="section" data-testid="mlc-samples-section">
+      <div class="section__head">
+        <h2 class="section__title">Sample collection</h2>
+        <p class="section__subtitle" *ngIf="mlcCase.samplesCollected">
+          On record
+        </p>
+      </div>
+      <form class="form" [formGroup]="sampleForm" (ngSubmit)="submitSamples()">
+        <div class="form__field">
+          <label for="samplesCollected" class="form__label">Samples collected *</label>
+          <input pInputText id="samplesCollected"
+                 type="text"
+                 class="form__input"
+                 formControlName="samplesCollected"
+                 placeholder="e.g. Blood · Saliva" />
+        </div>
+        <div class="form__field">
+          <label for="sampleStorageInfo" class="form__label">Storage details</label>
+          <textarea pInputText id="sampleStorageInfo"
+                    rows="3"
+                    class="form__textarea"
+                    formControlName="sampleStorageInfo"
+                    placeholder="Optional — e.g. Fridge 4°C bin 7"></textarea>
+        </div>
+        <div class="form__footer">
+          <button type="submit"
+                  class="btn btn--primary"
+                  [disabled]="sampleForm.invalid || submitting.samples"
+                  data-testid="btn-samples">
+            {{ submitting.samples ? 'Saving…' : 'Save sample collection' }}
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ========== Final report ========== -->
+    <section class="section" data-testid="mlc-report-section">
+      <div class="section__head">
+        <h2 class="section__title">Final report</h2>
+        <p *ngIf="isReportSubmitted()" class="section__subtitle section__subtitle--muted" data-testid="report-locked-note">
+          Submitted {{ mlcCase.submissionDate | date: 'medium' }} — report is locked
+        </p>
+      </div>
+      <form class="form" [formGroup]="reportForm" (ngSubmit)="attemptSubmitReport()">
+        <div class="form__field">
+          <label for="finalReport" class="form__label">Final report *</label>
+          <textarea pInputText id="finalReport"
+                    rows="6"
+                    class="form__textarea"
+                    formControlName="finalReport"
+                    [readonly]="isReportSubmitted()"></textarea>
+        </div>
+        <div class="form__field">
+          <label for="reportSubmittedTo" class="form__label">Submitted to</label>
+          <input pInputText id="reportSubmittedTo"
+                 type="text"
+                 class="form__input"
+                 formControlName="reportSubmittedTo"
+                 placeholder="e.g. Koramangala PS · City Court"
+                 [readonly]="isReportSubmitted()" />
+        </div>
+        <div class="form__footer" *ngIf="!isReportSubmitted()">
+          <button type="submit"
+                  class="btn btn--primary"
+                  [disabled]="reportForm.invalid || submitting.report"
+                  data-testid="btn-report">
+            {{ submitting.report ? 'Submitting…' : 'Submit final report' }}
+          </button>
+        </div>
+      </form>
+    </section>
+  </ng-container>
+
+  <!-- Final-report confirmation dialog -->
+  <app-confirm-dialog
+    [(visible)]="reportConfirmVisible"
+    title="Submit final MLC report?"
+    message="Submitting the final report will lock this MLC case. You can still add supplementary notes but the report itself cannot be edited after submission. Continue?"
+    confirmLabel="Submit report"
+    cancelLabel="Go back"
+    severity="warning"
+    (confirm)="onReportConfirm()"
+    (cancel)="onReportCancel()">
+  </app-confirm-dialog>
+</div>

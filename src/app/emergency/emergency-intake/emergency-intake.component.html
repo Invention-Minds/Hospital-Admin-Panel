@@ -1,0 +1,206 @@
+<div class="emergency-intake-container">
+  <div class="card">
+    <h2 class="section-title">Emergency Case Intake</h2>
+
+    <form [formGroup]="emergencyForm" (ngSubmit)="onSubmit()">
+      <div class="grid">
+        <!-- Patient Information -->
+        <div class="col-12">
+          <h4 class="form-section-title">Patient Information</h4>
+        </div>
+
+        <div class="col-12 md:col-6">
+          <div class="form-group">
+            <label for="prn" class="form-label">PRN / UHID *</label>
+            <input
+              pInputText
+              id="prn"
+              formControlName="prn"
+              class="w-full"
+              placeholder="Enter PRN or new patient"
+            />
+            <small class="text-red-500" *ngIf="emergencyForm.get('prn')?.invalid && emergencyForm.get('prn')?.touched">
+              PRN is required
+            </small>
+          </div>
+        </div>
+
+        <div class="col-12 md:col-6">
+          <div class="form-group">
+            <label for="triageCategory" class="form-label">Triage Category *</label>
+            <p-dropdown
+              [options]="triageCategories"
+              formControlName="triageCategory"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Select triage category"
+              [style]="{'width': '100%'}"
+            ></p-dropdown>
+          </div>
+        </div>
+
+        <!-- Chief Complaint & Assessment -->
+        <div class="col-12">
+          <h4 class="form-section-title">Assessment</h4>
+        </div>
+
+        <div class="col-12">
+          <div class="form-group">
+            <label for="presentingComplaint" class="form-label">Presenting Complaint *</label>
+            <textarea
+              pInputTextarea
+              id="presentingComplaint"
+              formControlName="presentingComplaint"
+              rows="3"
+              class="w-full"
+              placeholder="Enter presenting complaint"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <div class="form-group">
+            <label for="abcdeAssessment" class="form-label">ABCDE Assessment *</label>
+            <textarea
+              pInputTextarea
+              id="abcdeAssessment"
+              formControlName="abcdeAssessment"
+              rows="4"
+              class="w-full"
+              placeholder="A: Airway | B: Breathing | C: Circulation | D: Disability | E: Exposure"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="col-12 md:col-6">
+          <div class="form-group">
+            <label for="traumaScore" class="form-label">Trauma Score (ISS/GCS)</label>
+            <input
+              pInputText
+              id="traumaScore"
+              formControlName="traumaScore"
+              type="number"
+              class="w-full"
+              placeholder="e.g., 15 for GCS"
+            />
+          </div>
+        </div>
+
+        <!-- Vitals -->
+        <div class="col-12">
+          <h4 class="form-section-title">Vital Signs</h4>
+        </div>
+
+        <div class="col-12 md:col-6">
+          <div class="form-group">
+            <label for="vitalsBP" class="form-label">Blood Pressure *</label>
+            <input
+              pInputText
+              id="vitalsBP"
+              formControlName="vitalsBP"
+              class="w-full"
+              placeholder="e.g., 120/80"
+            />
+          </div>
+        </div>
+
+        <div class="col-12 md:col-6">
+          <div class="form-group">
+            <label for="vitalsHR" class="form-label">Heart Rate (bpm) *</label>
+            <input
+              pInputText
+              id="vitalsHR"
+              formControlName="vitalsHR"
+              type="number"
+              class="w-full"
+              placeholder="e.g., 80"
+            />
+          </div>
+        </div>
+
+        <div class="col-12 md:col-6">
+          <div class="form-group">
+            <label for="vitalsRR" class="form-label">Respiratory Rate (breaths/min) *</label>
+            <input
+              pInputText
+              id="vitalsRR"
+              formControlName="vitalsRR"
+              type="number"
+              class="w-full"
+              placeholder="e.g., 16"
+            />
+          </div>
+        </div>
+
+        <div class="col-12 md:col-6">
+          <div class="form-group">
+            <label for="vitalsSpO2" class="form-label">SpO2 (%) *</label>
+            <input
+              pInputText
+              id="vitalsSpO2"
+              formControlName="vitalsSpO2"
+              type="number"
+              class="w-full"
+              placeholder="e.g., 98"
+            />
+          </div>
+        </div>
+
+        <div class="col-12 md:col-6">
+          <div class="form-group">
+            <label for="vitalsTemp" class="form-label">Temperature (°C) *</label>
+            <input
+              pInputText
+              id="vitalsTemp"
+              formControlName="vitalsTemp"
+              type="number"
+              step="0.1"
+              class="w-full"
+              placeholder="e.g., 37.5"
+            />
+          </div>
+        </div>
+
+        <!-- Procedures -->
+        <div class="col-12">
+          <h4 class="form-section-title">Procedures & Interventions</h4>
+        </div>
+
+        <div class="col-12">
+          <div class="form-group">
+            <label for="proceduresDone" class="form-label">Procedures Done</label>
+            <textarea
+              pInputTextarea
+              id="proceduresDone"
+              formControlName="proceduresDone"
+              rows="3"
+              class="w-full"
+              placeholder="List any procedures performed"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="col-12">
+          <div class="button-group">
+            <button
+              pButton
+              type="submit"
+              label="Register Emergency Case"
+              class="p-button-primary"
+              [loading]="loading"
+            ></button>
+            <button
+              pButton
+              type="button"
+              label="Reset"
+              class="p-button-outlined"
+              (click)="resetForm()"
+              [disabled]="loading"
+            ></button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

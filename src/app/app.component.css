@@ -34,6 +34,10 @@
   }
   
   
+  .content {
+    min-height: 100vh;
+  }
+
   /* Webkit-based browsers (Chrome, Safari) */
   .content::-webkit-scrollbar {
     width: 4px; /* Make scrollbar thin */
@@ -71,7 +75,8 @@
       scrollbar-width: thin; /* Firefox: Make scrollbar thin */
       scrollbar-color: transparent transparent; /* Hide scrollbar */
     }
-    
+    .settings-modal { margin-left: 0; width: 95vw; max-width: 95vw; }
+
   }
   
 

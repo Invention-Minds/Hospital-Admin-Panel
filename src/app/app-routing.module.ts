@@ -39,6 +39,23 @@ import { TherapyOverviewComponent } from './therapy-appts/therapy-overview/thera
 import { TherapistOverviewComponent } from './therapist/therapist-overview/therapist-overview.component';
 import { TherapyChannelComponent } from './therapy-channel/therapy-channel/therapy-channel.component';
 import { TherapyAnalyticsComponent } from './therapy-analytics/therapy-analytics/therapy-analytics.component';
+import { EmergencyOverviewComponent } from './emergency/emergency-overview.component';
+import { EmergencyIntakeComponent } from './emergency/emergency-intake/emergency-intake.component';
+import { EmergencyListComponent } from './emergency/emergency-list/emergency-list.component';
+import { IpdOverviewComponent } from './ipd/ipd-overview.component';
+import { IpdAdmissionComponent } from './ipd/ipd-admission/ipd-admission.component';
+import { IpdProgressNoteComponent } from './ipd/ipd-progress-note/ipd-progress-note.component';
+import { IpdDischargeComponent } from './ipd/ipd-discharge/ipd-discharge.component';
+import { IpdPharmacyComponent } from './ipd/ipd-pharmacy/ipd-pharmacy.component';
+import { IpdMarComponent } from './ipd/ipd-mar/ipd-mar.component';
+import { WardCensusComponent } from './ward-management/ward-census.component';
+import { MlcCasesComponent } from './mlc/mlc-cases.component';
+import { MlcRegisterComponent } from './mlc/mlc-register/mlc-register.component';
+import { MlcDetailComponent } from './mlc/mlc-detail/mlc-detail.component';
+import { LamaDamaComponent } from './discharge/lama-dama.component';
+import { LamaDamaRegisterComponent } from './lama-dama/lama-dama-register/lama-dama-register.component';
+import { LamaDamaDetailComponent } from './lama-dama/lama-dama-detail/lama-dama-detail.component';
+import { SyncStatusComponent } from './hmis-sync/sync-status.component';
 
 const routes: Routes = [
   { path: 'dashboard', component: DashboardOverviewComponent, canActivate:[authGuard] },
@@ -75,6 +92,43 @@ const routes: Routes = [
   { path:'therapy-list', component: TherapistOverviewComponent , canActivate:[authGuard]},
   { path:'therapy-channel', component: TherapyChannelComponent, canActivate:[authGuard]},
   { path:'therapy-analytics', component: TherapyAnalyticsComponent, canActivate:[authGuard]},
+
+  // HMIS Modules
+  { path: 'emergency', component: EmergencyOverviewComponent, canActivate:[authGuard] },
+  { path: 'emergency/intake', component: EmergencyIntakeComponent, canActivate:[authGuard] },
+  { path: 'emergency/list', component: EmergencyListComponent, canActivate:[authGuard] },
+  { path: 'ipd', component: IpdOverviewComponent, canActivate:[authGuard] },
+  { path: 'ipd/admission', component: IpdAdmissionComponent, canActivate:[authGuard] },
+  {
+    path: 'ipd/admission/:admissionId/progress-note',
+    component: IpdProgressNoteComponent,
+    canActivate: [authGuard],
+    canDeactivate: [UnsavedChangesGuard],
+  },
+  {
+    path: 'ipd/admission/:admissionId/discharge',
+    component: IpdDischargeComponent,
+    canActivate: [authGuard],
+    canDeactivate: [UnsavedChangesGuard],
+  },
+  {
+    path: 'ipd/admission/:admissionId/pharmacy',
+    component: IpdPharmacyComponent,
+    canActivate: [authGuard],
+  },
+  {
+    path: 'ipd/admission/:admissionId/mar',
+    component: IpdMarComponent,
+    canActivate: [authGuard],
+  },
+  { path: 'ward-census', component: WardCensusComponent, canActivate:[authGuard] },
+  { path: 'mlc', component: MlcCasesComponent, canActivate:[authGuard] },
+  { path: 'mlc/new', component: MlcRegisterComponent, canActivate:[authGuard] },
+  { path: 'mlc/:id', component: MlcDetailComponent, canActivate:[authGuard] },
+  { path: 'lama-dama', component: LamaDamaComponent, canActivate:[authGuard] },
+  { path: 'lama-dama/new', component: LamaDamaRegisterComponent, canActivate:[authGuard] },
+  { path: 'lama-dama/:type/:id', component: LamaDamaDetailComponent, canActivate:[authGuard] },
+  { path: 'hmis-sync', component: SyncStatusComponent, canActivate:[authGuard] },
 
   {
     path: 'form',

@@ -1,0 +1,243 @@
+<div class="page">
+  <app-page-header
+    [title]="type === 'lama' ? 'Record LAMA' : 'Record DAMA'"
+    subtitle="ACC.6 — regulatory discharge documentation"
+    [patientName]="emergency?.patientName ?? null"
+    [patientPrn]="emergency?.prn ?? null">
+  </app-page-header>
+
+  <div class="type-switch">
+    <label for="lamaDamaType" class="type-switch__label">Record type *</label>
+    <p-dropdown
+      inputId="lamaDamaType"
+      [options]="typeOptions"
+      optionLabel="label"
+      optionValue="value"
+      [(ngModel)]="type"
+      (onChange)="onTypeChange($event.value)"
+      placeholder="Select record type"
+      styleClass="form__dropdown"
+      data-testid="type-switch">
+    </p-dropdown>
+  </div>
+
+  <form
+    class="form"
+    [formGroup]="sharedForm"
+    (ngSubmit)="attemptSubmit()"
+    novalidate
+    data-testid="register-form">
+    <!-- Shared section -->
+    <section class="form__section">
+      <h2 class="form__section-heading">Case identifier</h2>
+
+      <div class="form__field">
+        <label for="emergencyId" class="form__label">Emergency case ID *</label>
+        <input
+          pInputText
+          id="emergencyId"
+          type="text"
+          formControlName="emergencyId"
+          class="form__input"
+          [class.form__input--error]="shouldShowError('shared', 'emergencyId')"
+          [readonly]="emergency !== null"
+          [attr.aria-readonly]="emergency !== null" />
+        <small
+          *ngIf="emergency"
+          class="form__hint"
+          data-testid="emergency-context">
+          Linked to {{ emergency.patientName }} · PRN {{ emergency.prn }}<span *ngIf="emergency.age != null"> · {{ emergency.age }}y</span>
+        </small>
+        <small
+          *ngIf="shouldShowError('shared', 'emergencyId')"
+          class="form__error"
+          data-testid="err-emergencyId">
+          Emergency case ID is required.
+        </small>
+      </div>
+
+      <div class="form__field">
+        <label for="timestamp" class="form__label">
+          {{ type === 'lama' ? 'LAMA timestamp *' : 'Discharge timestamp *' }}
+        </label>
+        <p-calendar
+          inputId="timestamp"
+          formControlName="timestamp"
+          [showTime]="true"
+          dateFormat="yy-mm-dd"
+          [showIcon]="true"
+          styleClass="form__calendar">
+        </p-calendar>
+      </div>
+    </section>
+
+    <!-- Type-specific section -->
+    <section *ngIf="type === 'lama'"
+             class="form__section"
+             [formGroup]="lamaForm"
+             data-testid="lama-specific-section">
+      <h2 class="form__section-heading">LAMA details</h2>
+
+      <div class="form__field">
+        <label for="doctorAdvice" class="form__label">Doctor's advice *</label>
+        <textarea
+          pInputText
+          id="doctorAdvice"
+          rows="4"
+          formControlName="doctorAdvice"
+          class="form__textarea"
+          [class.form__input--error]="shouldShowError('lama', 'doctorAdvice')"
+          placeholder="What did the treating doctor recommend?"></textarea>
+        <small
+          *ngIf="shouldShowError('lama', 'doctorAdvice')"
+          class="form__error"
+          data-testid="err-doctorAdvice">
+          Doctor's advice is required.
+        </small>
+      </div>
+
+      <div class="form__field form__field--inline">
+        <p-checkbox
+          formControlName="riskExplained"
+          [binary]="true"
+          inputId="riskExplained"></p-checkbox>
+        <label for="riskExplained" class="form__label">Risks explained to the patient</label>
+      </div>
+
+      <div class="form__field">
+        <label for="reasonForLama" class="form__label">Reason for LAMA *</label>
+        <textarea
+          pInputText
+          id="reasonForLama"
+          rows="3"
+          formControlName="reasonForLama"
+          class="form__textarea"
+          [class.form__input--error]="shouldShowError('lama', 'reasonForLama')"
+          placeholder="Why is the patient declining care?"></textarea>
+        <small
+          *ngIf="shouldShowError('lama', 'reasonForLama')"
+          class="form__error"
+          data-testid="err-reasonForLama">
+          Reason for LAMA is required.
+        </small>
+      </div>
+    </section>
+
+    <section *ngIf="type === 'dama'"
+             class="form__section"
+             [formGroup]="damaForm"
+             data-testid="dama-specific-section">
+      <h2 class="form__section-heading">DAMA details</h2>
+
+      <div class="form__field">
+        <label for="doctorRecommendation" class="form__label">Doctor's recommendation *</label>
+        <textarea
+          pInputText
+          id="doctorRecommendation"
+          rows="4"
+          formControlName="doctorRecommendation"
+          class="form__textarea"
+          [class.form__input--error]="shouldShowError('dama', 'doctorRecommendation')"
+          placeholder="What course of treatment was recommended?"></textarea>
+        <small
+          *ngIf="shouldShowError('dama', 'doctorRecommendation')"
+          class="form__error"
+          data-testid="err-doctorRecommendation">
+          Doctor's recommendation is required.
+        </small>
+      </div>
+
+      <div class="form__field form__field--inline">
+        <p-checkbox
+          formControlName="patientDeclinesAdvice"
+          [binary]="true"
+          inputId="patientDeclinesAdvice"></p-checkbox>
+        <label for="patientDeclinesAdvice" class="form__label">Patient explicitly declines the recommendation</label>
+      </div>
+
+      <div class="form__field">
+        <label for="followUpAdvice" class="form__label">Follow-up advice</label>
+        <textarea
+          pInputText
+          id="followUpAdvice"
+          rows="3"
+          formControlName="followUpAdvice"
+          class="form__textarea"
+          placeholder="Optional — outpatient follow-up instructions"></textarea>
+      </div>
+    </section>
+
+    <!-- Signatures + witness (shared) -->
+    <section class="form__section">
+      <h2 class="form__section-heading">Signatures &amp; witness</h2>
+
+      <div class="form__field">
+        <label for="witnessName" class="form__label">Witness name *</label>
+        <input
+          pInputText
+          id="witnessName"
+          type="text"
+          formControlName="witnessName"
+          class="form__input"
+          [class.form__input--error]="shouldShowError('shared', 'witnessName')" />
+        <small
+          *ngIf="shouldShowError('shared', 'witnessName')"
+          class="form__error"
+          data-testid="err-witnessName">
+          Witness name is required.
+        </small>
+      </div>
+
+      <div class="form__grid">
+        <div class="form__field">
+          <label for="patientSignature" class="form__label">Patient signature reference</label>
+          <input
+            pInputText
+            id="patientSignature"
+            type="text"
+            formControlName="patientSignature"
+            class="form__input"
+            placeholder="URL or GCS reference" />
+        </div>
+        <div class="form__field">
+          <label for="witnessSignature" class="form__label">Witness signature reference</label>
+          <input
+            pInputText
+            id="witnessSignature"
+            type="text"
+            formControlName="witnessSignature"
+            class="form__input"
+            placeholder="URL or GCS reference" />
+        </div>
+      </div>
+    </section>
+
+    <div class="form__footer">
+      <button
+        type="button"
+        class="btn btn--cancel"
+        (click)="cancel()"
+        data-testid="btn-cancel">
+        Cancel
+      </button>
+      <button
+        type="submit"
+        class="btn btn--primary"
+        [disabled]="overallInvalid || submitting"
+        data-testid="btn-submit">
+        {{ submitting ? 'Recording…' : (type === 'lama' ? 'Record LAMA' : 'Record DAMA') }}
+      </button>
+    </div>
+  </form>
+
+  <app-confirm-dialog
+    [(visible)]="confirmVisible"
+    [title]="type === 'lama' ? 'Record LAMA?' : 'Record DAMA?'"
+    [message]="confirmMessage"
+    [confirmLabel]="type === 'lama' ? 'Record LAMA' : 'Record DAMA'"
+    cancelLabel="Go back"
+    severity="danger"
+    (confirm)="onConfirm()"
+    (cancel)="onCancel()">
+  </app-confirm-dialog>
+</div>

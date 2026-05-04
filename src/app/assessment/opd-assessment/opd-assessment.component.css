@@ -124,6 +124,33 @@
     align-items: center;
     gap: 10px;
   }
+  /* Sprint 3f — Admit to IPD. Token-only; sibling of save/print but a new CTA color. */
+  .admit-button {
+    background-color: var(--color-brand-primary);
+    color: var(--color-text-on-dark);
+    font-family: var(--font-family-primary);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    line-height: normal;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    display: flex;
+    width: 150px;
+    padding: var(--space-8) var(--space-16);
+    justify-content: center;
+    align-items: center;
+    gap: var(--space-10);
+  }
+  .admit-button:disabled {
+    background-color: var(--color-surface-alt);
+    color: var(--color-text-muted);
+    cursor: not-allowed;
+  }
+  .admit-button:focus-visible {
+    outline: 2px solid var(--color-brand-navy-900);
+    outline-offset: 2px;
+  }
   .add-btn {
     background-color: #0e2970;
     color: #fff;
@@ -268,11 +295,19 @@
   .input-container {
     flex: 1 1 calc(50% - 10px); /* still 2 per row, slightly smaller */
   }
+  .form-container {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
 }
 
   @media (max-width: 768px) {
     .signature-section {
       flex-direction: column;
+    }
+    .form-container {
+      padding-left: 10px;
+      padding-right: 10px;
     }
   }
   /* For mobile (<768px) → stack 1 per row */

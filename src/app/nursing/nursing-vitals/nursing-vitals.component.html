@@ -209,8 +209,30 @@
             <div class="vitals-grid">
                 <div class="form-group name-width" *ngFor="let field of vitalsFields">
                     <input type="text" class="form-input" id="firstName" [name]="vitalsData[field.key]" ngModel
-                        [(ngModel)]="vitalsData[field.key]" required placeholder=" " pattern="^[a-zA-Z]*$" />
+                        [(ngModel)]="vitalsData[field.key]" required placeholder=" " pattern="^[a-zA-Z]*$"
+                        (blur)="suggestPriorityFromVitals()" />
                     <label [for]="field.label" class="form-label">{{ field.label }}</label>
+                </div>
+            </div>
+
+            <!-- Priority Section -->
+            <div class="priority-section" [ngClass]="'priority-' + selectedPriority">
+                <div class="priority-header">
+                    <span class="priority-title">Priority</span>
+                    <span class="priority-hint" *ngIf="selectedPriority !== 'normal'">
+                        ⚠️ Doctor will see this patient with priority indication
+                    </span>
+                </div>
+                <div class="priority-controls">
+                    <select [(ngModel)]="selectedPriority" name="priority" class="priority-dropdown">
+                        <option *ngFor="let opt of priorityOptions" [value]="opt.value">{{ opt.label }}</option>
+                    </select>
+                    <input *ngIf="selectedPriority !== 'normal'"
+                           type="text"
+                           [(ngModel)]="priorityReason"
+                           name="priorityReason"
+                           class="priority-reason"
+                           [placeholder]="needsReason() ? 'Reason (required)' : 'Reason (optional)'" />
                 </div>
             </div>
         </div>

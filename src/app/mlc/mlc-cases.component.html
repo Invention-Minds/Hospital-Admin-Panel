@@ -1,0 +1,131 @@
+<div class="mlc-container">
+  <div class="page-header">
+    <div>
+      <h1>
+        Medico-Legal Cases
+        <span *ngIf="pendingReportsCount > 0"
+              class="pending-badge"
+              data-testid="pending-badge"
+              [attr.aria-label]="'Pending reports: ' + pendingReportsCount">
+          {{ pendingReportsCount }} pending
+        </span>
+      </h1>
+      <p class="subtitle">NABH MRD.2 compliant documentation for MLC cases</p>
+    </div>
+    <div class="page-header__actions">
+      <button class="btn-secondary"
+              (click)="refresh()"
+              data-testid="btn-refresh">
+        <i class="pi pi-refresh"></i> Refresh
+      </button>
+      <button class="btn-primary"
+              (click)="goToRegister()"
+              data-testid="btn-new-mlc">
+        <i class="pi pi-plus"></i> New MLC Case
+      </button>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Total Cases</div>
+      <div class="stat-value">{{ stats?.total || 0 }}</div>
+    </div>
+    <div class="stat-card stat-warning">
+      <div class="stat-label">Pending Submission</div>
+      <div class="stat-value">{{ (stats?.byStatus?.documented || 0) + (stats?.byStatus?.examined || 0) + (stats?.byStatus?.samplesCollected || 0) }}</div>
+    </div>
+    <div class="stat-card stat-success">
+      <div class="stat-label">Report Submitted</div>
+      <div class="stat-value">{{ stats?.byStatus?.submitted || 0 }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Closed</div>
+      <div class="stat-value">{{ stats?.byStatus?.closed || 0 }}</div>
+    </div>
+    <div class="stat-card stat-danger">
+      <div class="stat-label">Accidents</div>
+      <div class="stat-value">{{ stats?.byCaseType?.accident || 0 }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Assault</div>
+      <div class="stat-value">{{ stats?.byCaseType?.assault || 0 }}</div>
+    </div>
+  </div>
+
+  <div class="filters">
+    <input
+      type="text"
+      placeholder="Search MLC No, FIR No, Police Station…"
+      [(ngModel)]="searchTerm"
+      (input)="applyFilters()"
+      class="search-input"
+    />
+    <select [(ngModel)]="selectedStatus" (change)="applyFilters()" class="filter-select">
+      <option *ngFor="let o of statusOptions" [value]="o.value">{{ o.label }}</option>
+    </select>
+    <select [(ngModel)]="selectedCaseType" (change)="applyFilters()" class="filter-select">
+      <option *ngFor="let o of caseTypeOptions" [value]="o.value">{{ o.label }}</option>
+    </select>
+  </div>
+
+  <div *ngIf="loading" class="loading">Loading MLC cases…</div>
+
+  <table *ngIf="!loading && filteredCases.length > 0" class="data-table">
+    <thead>
+      <tr>
+        <th>MLC No</th>
+        <th>Type</th>
+        <th>Police Station</th>
+        <th>FIR</th>
+        <th>Status</th>
+        <th>Created</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let c of filteredCases"
+          class="row-clickable"
+          (click)="openDetail(c.id)"
+          [attr.data-testid]="'mlc-row-' + c.id">
+        <td><strong>{{ c.mlcNo || '—' }}</strong></td>
+        <td><span class="type-badge">{{ c.caseType }}</span></td>
+        <td>{{ c.policeStationName || '—' }}</td>
+        <td>{{ c.fir_No || '—' }}</td>
+        <td><span class="status-badge" [class]="getStatusClass(c.status)">{{ c.status }}</span></td>
+        <td>{{ c.createdAt | date:'short' }}</td>
+        <td class="actions-cell">
+          <button class="action-btn"
+                  (click)="$event.stopPropagation(); downloadReport(c.id)"
+                  title="Download PDF">
+            <i class="pi pi-download"></i>
+          </button>
+          <button *ngIf="c.status !== 'closed'"
+                  class="action-btn"
+                  (click)="$event.stopPropagation(); closeCase(c.id)"
+                  title="Close Case">
+            <i class="pi pi-check-square"></i>
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <app-empty-state
+    *ngIf="!loading && filteredCases.length === 0"
+    text="No MLC cases match the current filters"
+    secondaryText="Try clearing filters or register a new MLC case above.">
+  </app-empty-state>
+
+  <!-- Sprint 3d: replace prompt() with P1 ConfirmDialog + notes textarea -->
+  <app-confirm-dialog
+    [(visible)]="closeConfirmVisible"
+    title="Close MLC case?"
+    message="Closure is reversible via backend edit but intended as the final lifecycle step. Add any closure notes below (optional)."
+    confirmLabel="Close case"
+    cancelLabel="Go back"
+    severity="warning"
+    (confirm)="confirmClose()"
+    (cancel)="cancelClose()">
+  </app-confirm-dialog>
+</div>

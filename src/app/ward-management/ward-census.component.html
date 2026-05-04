@@ -1,0 +1,115 @@
+<div class="ward-container">
+  <div class="page-header">
+    <div>
+      <h1>Ward Management — Bed Census</h1>
+      <p class="subtitle" *ngIf="mode === 'live'">Live occupancy across all wards · auto-refresh every 60 seconds</p>
+      <p class="subtitle" *ngIf="mode === 'snapshot' && snapshotTime">
+        Historical snapshot as of {{ snapshotTime | date:'dd MMM yyyy, HH:mm' }}
+        <span *ngIf="snapshotReason"> · reason: {{ snapshotReason }}</span>
+      </p>
+      <p class="subtitle" *ngIf="mode === 'snapshot' && snapshotMissing">
+        No snapshot available for the selected date.
+      </p>
+    </div>
+    <div class="header-actions">
+      <p-calendar
+        [(ngModel)]="selectedDate"
+        [maxDate]="maxDate"
+        [showIcon]="true"
+        dateFormat="dd-mm-yy"
+        (onSelect)="onDateChange()"
+      ></p-calendar>
+      <button class="btn-secondary" (click)="toggleAutoRefresh()" *ngIf="mode === 'live'">
+        <i class="pi" [class.pi-pause]="autoRefresh" [class.pi-play]="!autoRefresh"></i>
+        {{ autoRefresh ? 'Pause' : 'Resume' }} Auto-Refresh
+      </button>
+      <button class="btn-secondary" (click)="refresh()"><i class="pi pi-refresh"></i> Refresh</button>
+      <button class="btn-primary" (click)="downloadReport()" *ngIf="mode === 'live'"><i class="pi pi-download"></i> Export CSV</button>
+    </div>
+  </div>
+
+  <!-- Overall stats -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Total Wards</div>
+      <div class="stat-value">{{ stats?.totalWards || 0 }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Total Beds</div>
+      <div class="stat-value">{{ stats?.totalBeds || 0 }}</div>
+    </div>
+    <div class="stat-card stat-danger">
+      <div class="stat-label">Occupied</div>
+      <div class="stat-value">{{ stats?.occupiedBeds || 0 }}</div>
+    </div>
+    <div class="stat-card stat-success">
+      <div class="stat-label">Available</div>
+      <div class="stat-value">{{ stats?.availableBeds || 0 }}</div>
+    </div>
+    <div class="stat-card stat-warning">
+      <div class="stat-label">Maintenance</div>
+      <div class="stat-value">{{ stats?.maintenanceBeds || 0 }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Occupancy Rate</div>
+      <div class="stat-value">{{ stats?.occupancyRate || 0 }}<span class="unit">%</span></div>
+    </div>
+  </div>
+
+  <!-- Ward cards -->
+  <div *ngIf="loading" class="loading">Loading ward census…</div>
+
+  <div class="wards-grid" *ngIf="!loading && census.length > 0">
+    <div *ngFor="let ward of census" class="ward-card">
+      <div class="ward-header">
+        <h2>{{ ward.wardName }}</h2>
+        <span class="ward-code">{{ ward.wardCode || '' }}</span>
+      </div>
+
+      <div class="occupancy-visual">
+        <div class="occupancy-bar">
+          <div class="occupancy-fill" [class]="getOccupancyClass(ward.occupancyRate)" [style.width.%]="ward.occupancyRate"></div>
+        </div>
+        <span class="occupancy-label">{{ ward.occupancyRate }}% Occupied</span>
+      </div>
+
+      <div class="bed-stats">
+        <div class="bed-stat">
+          <span class="dot dot-grey"></span>
+          <span class="stat-num">{{ ward.totalBeds }}</span>
+          <span class="stat-lbl">Total</span>
+        </div>
+        <div class="bed-stat">
+          <span class="dot dot-red"></span>
+          <span class="stat-num">{{ ward.occupiedBeds }}</span>
+          <span class="stat-lbl">Occupied</span>
+        </div>
+        <div class="bed-stat">
+          <span class="dot dot-green"></span>
+          <span class="stat-num">{{ ward.availableBeds }}</span>
+          <span class="stat-lbl">Available</span>
+        </div>
+      </div>
+
+      <!-- Bed grid visual -->
+      <div class="bed-grid" *ngIf="ward.beds && ward.beds.length > 0">
+        <div
+          *ngFor="let bed of ward.beds"
+          class="bed-cell"
+          [class.available]="bed.status === 'available'"
+          [class.occupied]="bed.status === 'occupied'"
+          [class.maintenance]="bed.status === 'maintenance'"
+          [class.reserved]="bed.status === 'reserved'"
+          [title]="bed.bedNumber + ' — ' + bed.status"
+        >
+          {{ bed.bedNumber }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="!loading && census.length === 0 && !snapshotMissing" class="empty-state">No wards configured.</div>
+  <div *ngIf="!loading && snapshotMissing" class="empty-state">
+    No bed census snapshot was recorded for this date.
+  </div>
+</div>

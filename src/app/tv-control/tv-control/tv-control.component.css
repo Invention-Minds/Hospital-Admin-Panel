@@ -658,3 +658,101 @@ h3 {
 ::ng-deep .p-multiselect {
   width: 180px !important; /* or whatever size you prefer */
 }
+
+/* ===== RESPONSIVE: Tablet (769px - 1024px) ===== */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .queue-management-container {
+    grid-template-columns: repeat(2, 1fr);
+    padding-left: var(--sidebar-width, 16px);
+    padding-right: 16px;
+  }
+
+  .doctor-card,
+  .doctor-header,
+  .delete-btn-container {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .custom-dropdown select,
+  .input-container {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* ===== RESPONSIVE: Mobile (max 768px) ===== */
+@media (max-width: 768px) {
+  .queue-management-container {
+    grid-template-columns: 1fr;
+    padding-left: var(--sidebar-width, 16px);
+    padding-right: 16px;
+    padding-top: 16px;
+  }
+
+  .doctor-card,
+  .doctor-header,
+  .delete-btn-container {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .modal-content,
+  .popup {
+    width: 95vw;
+    max-width: 95vw;
+    height: auto;
+    padding: 16px;
+    overflow-y: auto;
+  }
+
+  .custom-dropdown select,
+  .input-container {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .ad-container {
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-bottom: 40px;
+  }
+}
+
+/* Per-channel announcement window settings */
+.announcement-settings {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  margin: 8px 0 12px;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #075985;
+  flex-wrap: wrap;
+}
+.announcement-label {
+  font-weight: 600;
+  margin-right: 4px;
+}
+.time-input {
+  width: 50px;
+  padding: 4px 6px;
+  border: 1px solid #bae6fd;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 13px;
+  background: #fff;
+}
+.time-input:focus {
+  outline: 2px solid #0284c7;
+  outline-offset: 1px;
+}
+.announcement-hint {
+  font-style: italic;
+  color: #64748b;
+  font-size: 12px;
+  margin-left: 8px;
+}

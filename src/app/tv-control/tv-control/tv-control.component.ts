@@ -48,6 +48,10 @@ export class TvControlComponent {
   isPopupOpen = false;
   roomNumber: string = '';
   isButtonClicked: boolean = true;
+
+  // Per-channel announcement time window (saved to localStorage; consumed by TvComponent)
+  channelAnnouncementStart: number[] = [];
+  channelAnnouncementEnd: number[] = [];
   latestTextAd = '';
   latestMediaAd = '';
   isImage = false;
@@ -159,6 +163,15 @@ export class TvControlComponent {
           };
         });
         this.doctorSlideIndices = this.channels.map(() => 0);
+        // Load announcement window prefs from localStorage (default 06:00–22:00)
+        this.channelAnnouncementStart = this.channels.map((c: any) => {
+          const v = localStorage.getItem(`tv-announce-start-${c.channelId}`);
+          return v !== null ? +v : 6;
+        });
+        this.channelAnnouncementEnd = this.channels.map((c: any) => {
+          const v = localStorage.getItem(`tv-announce-end-${c.channelId}`);
+          return v !== null ? +v : 22;
+        });
 
         console.log('Processed Channels:', this.channels);
       },
@@ -673,6 +686,31 @@ export class TvControlComponent {
       this.doctorSlideIndices[channelIndex] + 3,
       maxStartIndex
     );
+  }
+
+  /**
+   * Save announcement time window for a given channel.
+   * Persisted to localStorage; TvComponent reads the same key on load.
+   * @param channelId — the channel's channelId (1-based or as set in DB)
+   */
+  saveAnnouncementWindow(channelId: number): void {
+    const idx = this.channels.findIndex((c: any) => c.channelId === channelId);
+    if (idx === -1) return;
+    const start = this.channelAnnouncementStart[idx];
+    const end = this.channelAnnouncementEnd[idx];
+    // Validate 0–23
+    if (start < 0 || start > 23 || end < 0 || end > 23) {
+      this.messageService.add({ severity: 'warn', summary: 'Invalid hours', detail: 'Use 0–23 for hours' });
+      return;
+    }
+    localStorage.setItem(`tv-announce-start-${channelId}`, String(start));
+    localStorage.setItem(`tv-announce-end-${channelId}`, String(end));
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Saved',
+      detail: `Channel ${channelId}: announcements ${start}:00–${end}:00`,
+      life: 3000
+    });
   }
 
 }

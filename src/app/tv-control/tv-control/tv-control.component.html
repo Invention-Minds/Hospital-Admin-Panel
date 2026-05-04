@@ -8,6 +8,21 @@
       </div>
     </div>
 
+    <!-- Announcement window settings (per channel) -->
+    <div class="announcement-settings">
+      <span class="announcement-label">🔊 Announcement Window:</span>
+      <input type="number" min="0" max="23"
+             [(ngModel)]="channelAnnouncementStart[channelIndex]"
+             (change)="saveAnnouncementWindow(channel.channelId)"
+             class="time-input" /> :00
+      <span> to </span>
+      <input type="number" min="0" max="23"
+             [(ngModel)]="channelAnnouncementEnd[channelIndex]"
+             (change)="saveAnnouncementWindow(channel.channelId)"
+             class="time-input" /> :00
+      <span class="announcement-hint">(no audio outside this window)</span>
+    </div>
+
     <div style="position: relative;" *ngFor="let doctor of getVisibleDoctors(channelIndex) let i = index">
       <div class="doctor-card" [class.filled]="doctor">
         <div class="doctor-header">

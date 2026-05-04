@@ -543,3 +543,32 @@
     width: 210px !important;
   }
   }
+
+/* ===== RESPONSIVE: Tablet ===== */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .form-row {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+}
+
+/* ===== RESPONSIVE: Mobile ===== */
+@media (max-width: 768px) {
+  .table-container,
+  .form-row {
+    padding-left: var(--sidebar-width, 16px);
+    padding-right: 16px;
+    margin-left: 0;
+  }
+
+  .form-row {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  ::ng-deep .custom-dropdown .p-dropdown,
+  ::ng-deep .custom-input-text {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}

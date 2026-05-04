@@ -1073,6 +1073,26 @@
     display: flex;
     justify-content: center;
   }
-  
+
   }
+
+/* ===== RESPONSIVE: Tablet ===== */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .slots-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ===== RESPONSIVE: Mobile (additional) ===== */
+@media (max-width: 768px) {
+  .table-container {
+    padding-left: var(--sidebar-width, 16px);
+    padding-right: 16px;
+    margin-left: 0;
+  }
+
+  .slots-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
   

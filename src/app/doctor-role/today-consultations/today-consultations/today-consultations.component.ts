@@ -59,6 +59,11 @@ interface Appointment {
   isReferred?: boolean;
   patientType?: string;
   isfollowup?: boolean;
+  // Priority feature (in-memory + SSE — not persisted in appointments table)
+  priority?: 'normal' | 'critical' | 'emergency' | 'staff' | 'vip' | 'senior' | 'disabled';
+  priorityReason?: string;
+  prioritySetBy?: string;
+  prioritySetAt?: string;
 }
 
 interface DoctorNote {
@@ -345,7 +350,7 @@ export class TodayConsultationsComponent {
 
     // console.log('Setting isLoading to true');
     this.isLoading = true; // Start loading indicator
-    this.userId = localStorage.getItem('userid')
+    this.userId = localStorage.getItem('userid') || '0'
     this.appointmentService.leaveRequest$.subscribe(() => {
       this.showLeaveRequestPopup = true; // Open the leave request popup
     });
@@ -373,8 +378,16 @@ export class TodayConsultationsComponent {
         console.log('🔄 Reloading appointments for Doctor ID:', data);
         this.fetchAppointments(this.doctorId);
       }
-      // this.checkWaitingTimes()
-      // this.monitorWaitingTimes()
+    });
+
+    // Priority push from nurses — instant in-place update without refetch
+    this.eventSource.addEventListener('priorityUpdate', (event: any) => {
+      try {
+        const payload = JSON.parse(event.data);
+        this.applyPriorityUpdate(payload);
+      } catch (e) {
+        console.error('priorityUpdate parse failed', e);
+      }
     });
 
   }
@@ -452,32 +465,95 @@ export class TodayConsultationsComponent {
   fetchAppointments(doctorId?: number) {
     this.appointmentService.getAppointmentsByDoctor(doctorId!).subscribe(
       (appointments) => {
-        console.log(appointments)
         this.confirmedAppointments = appointments
         this.filteredAppointments = this.confirmedAppointments;
         this.startTimers();
         this.completedAppointments = this.filteredAppointments.filter(appointment => !appointment.checkedOut || (!appointment.checkedOut && !appointment.isCloseOPD))
-        this.filteredAppointments.sort((a, b) => {
-          // 1. Move finished consultations to the bottom
-          if (a.endConsultation && !b.endConsultation) return 1;
-          if (!a.endConsultation && b.endConsultation) return -1;
-
-          // 2. Sort by appointment time (earliest first)
-          const timeA = this.parseTimeToMinutes(a.time);
-          const timeB = this.parseTimeToMinutes(b.time);
-          return timeA - timeB;
-        });
+        this.applySortWithPriority();
         this.filterAppointmentsByDate(new Date());
+        this.mergeTodayPriorities();   // overlay any in-memory priorities
         this.isLoading = false;
-        // console.log(`Loaded ${doctor.patients.length} patients for doctor ${doctor.name}`);
       },
       (error) => {
         console.error(`Error fetching appointments for doctor ${doctorId!}:`, error);
         this.isLoading = false
-        // Handle error gracefully by assigning an empty array
       }
-
     );
+  }
+
+  // Priority order — lower number means higher priority (sorts first)
+  private readonly priorityRank: { [k: string]: number } = {
+    critical: 1, emergency: 2, vip: 3, staff: 4, senior: 5, disabled: 6, normal: 9
+  };
+
+  private applySortWithPriority(): void {
+    this.filteredAppointments.sort((a, b) => {
+      // 1. Finished consultations → bottom
+      if (a.endConsultation && !b.endConsultation) return 1;
+      if (!a.endConsultation && b.endConsultation) return -1;
+
+      // 2. Priority patients rise to top (critical first)
+      const rA = this.priorityRank[a.priority || 'normal'] ?? 9;
+      const rB = this.priorityRank[b.priority || 'normal'] ?? 9;
+      if (rA !== rB) return rA - rB;
+
+      // 3. Sort by appointment time
+      return this.parseTimeToMinutes(a.time) - this.parseTimeToMinutes(b.time);
+    });
+  }
+
+  private mergeTodayPriorities(): void {
+    this.appointmentService.getTodayPriorities().subscribe({
+      next: (res: any) => {
+        const list = res?.data || res || [];
+        const map = new Map<number, any>();
+        list.forEach((p: any) => map.set(p.appointmentId, p));
+        this.confirmedAppointments.forEach(a => {
+          const p = map.get(a.id!);
+          if (p) {
+            a.priority = p.priority;
+            a.priorityReason = p.reason;
+            a.prioritySetBy = p.setBy;
+            a.prioritySetAt = p.setAt;
+          }
+        });
+        this.applySortWithPriority();
+      },
+      error: () => { /* priorities are optional — silent fail is fine */ }
+    });
+  }
+
+  // Called when a priority SSE event arrives
+  applyPriorityUpdate(payload: { appointmentId: number; priority: string; reason?: string; setBy?: string; setAt?: string }): void {
+    const appt = this.confirmedAppointments.find(a => a.id === payload.appointmentId);
+    if (!appt) return;
+    const wasNormal = !appt.priority || appt.priority === 'normal';
+    appt.priority = payload.priority as any;
+    appt.priorityReason = payload.reason;
+    appt.prioritySetBy = payload.setBy;
+    appt.prioritySetAt = payload.setAt;
+    this.applySortWithPriority();
+    if (wasNormal && payload.priority !== 'normal') {
+      this.playPriorityAlert(payload.priority);
+      this.messageService.add({
+        severity: payload.priority === 'critical' ? 'error' : 'warn',
+        summary: `${payload.priority.toUpperCase()} — ${appt.patientName}`,
+        detail: payload.reason || 'New priority patient — please review',
+        life: 8000
+      });
+    }
+  }
+
+  private priorityAudio: HTMLAudioElement | null = null;
+  private playPriorityAlert(priority: string): void {
+    try {
+      if (!this.priorityAudio) {
+        this.priorityAudio = new Audio('/assets/sounds/priority-alert.mp3');
+        this.priorityAudio.volume = 0.6;
+      }
+      this.priorityAudio.currentTime = 0;
+      this.priorityAudio.play().catch(() => { /* autoplay blocked — fine */ });
+    } catch { /* ignore audio errors */ }
   }
 
   sortBy(column: keyof Appointment) {
@@ -969,6 +1045,36 @@ export class TodayConsultationsComponent {
       const differenceInMinutes = Math.floor((checkedOut - checkedIn) / 60000); // Difference in minutes
       appointment.waitingTime = differenceInMinutes.toString();
     }
+
+    // Clear priority badge once doctor starts consultation
+    if (appointment.priority && appointment.priority !== 'normal' && appointment.id) {
+      this.appointmentService.clearAppointmentPriority(appointment.id).subscribe({
+        next: () => {
+          appointment.priority = 'normal';
+          appointment.priorityReason = undefined;
+          appointment.prioritySetBy = undefined;
+          appointment.prioritySetAt = undefined;
+          this.applySortWithPriority();
+        },
+        error: (err) => console.error('Failed to clear priority', err)
+      });
+    }
+
+    // Broadcast cross-browser so TVs on separate devices announce next patient.
+    // No channelId passed — each TV checks its own doctor list to decide if it should announce.
+    // (A doctor can be assigned to multiple channels via DoctorAssignment table.)
+    if (appointment.id && this.doctorId) {
+      this.appointmentService.notifyConsultationStart({
+        doctorId: this.doctorId,
+        appointmentId: appointment.id,
+        patientName: appointment.patientName,
+        doctorName: this.doctor?.name
+      }).subscribe({
+        next: () => console.log('📡 Consultation start broadcast sent'),
+        error: (err: any) => console.error('Broadcast failed', err)
+      });
+    }
+
     if (appointment.postPond === true) {
       appointment.postPond = false
     }

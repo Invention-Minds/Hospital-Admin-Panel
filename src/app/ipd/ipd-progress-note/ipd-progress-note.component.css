@@ -1,0 +1,215 @@
+/* ============================================================================
+ * IpdProgressNoteComponent
+ *
+ * Composes FORM + LIST patterns (docs/ui-patterns.md §1, §2).
+ * Design-gap decisions #1, #2, #5, #9, #17 applied.
+ * ============================================================================ */
+
+.page {
+  margin-left: 70px;
+  padding: var(--space-40) var(--space-30);
+  font-family: var(--font-family-primary);
+  color: var(--color-text-heading);
+  background: var(--color-surface-page);
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+.page > app-page-header,
+.page > .form,
+.page > .list-card {
+  max-width: 1080px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 768px) {
+  .page {
+    margin-left: 0;
+    padding: var(--space-20);
+  }
+}
+/* Page header styles migrated to shared P2 PageHeader (Sprint 3.5) */
+
+/* ---------- FORM (pattern §1) ---------- */
+.form {
+  background: var(--color-surface-card);
+  border-radius: var(--radius-4xl);
+  box-shadow: var(--shadow-elevation-1);
+  padding: var(--space-30);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-30);
+  margin-bottom: var(--space-30);
+}
+.form__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-20);
+}
+.form__section-heading {
+  margin: 0 0 var(--space-8) 0;
+  padding-bottom: var(--space-10);
+  border-bottom: 1px solid var(--color-border-input);
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-xl);
+  color: var(--color-text-heading);
+}
+.form__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+.form__label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-heading);
+}
+
+/* Input + textarea styling via :host selectors so PrimeNG p-inputText wins */
+:host ::ng-deep .form__input,
+:host ::ng-deep .form__textarea {
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-border-input);
+  border-radius: var(--radius-md);
+  padding: var(--space-16);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-heading);
+  width: 100%;
+  box-sizing: border-box;
+}
+/* Gap #1 — focus state: 2px navy border, no outer glow */
+:host ::ng-deep .form__input:focus,
+:host ::ng-deep .form__textarea:focus {
+  outline: none;
+  border: 2px solid var(--color-brand-navy-900);
+}
+/* Gap #2 — error state: 1px danger-strong border */
+:host ::ng-deep .form__input--error {
+  border: 1px solid var(--color-danger-strong);
+}
+:host ::ng-deep .form__textarea {
+  resize: vertical;
+  min-height: 72px;
+}
+
+/* Gap #5 — inline error caption below input */
+.form__error {
+  color: var(--color-danger-strong);
+  font-size: var(--font-size-xs);
+  margin-top: 4px;
+}
+
+.form__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-20);
+}
+
+/* Footer */
+.form__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-10);
+}
+
+/* Buttons (local, feature-scoped — shared button reusable deferred per §4) */
+.btn {
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-md);
+  border-radius: var(--radius-md);
+  padding: var(--space-8) var(--space-20);
+  height: 40px;
+  cursor: pointer;
+  border: none;
+}
+.btn:focus-visible {
+  outline: 2px solid var(--color-brand-navy-900);
+  outline-offset: 2px;
+}
+/* Gap #17 — disabled state */
+.btn:disabled {
+  background: var(--color-surface-alt);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  border: none;
+}
+.btn--cancel {
+  background: transparent;
+  color: var(--color-text-heading);
+  border: 1px solid var(--color-border-input);
+}
+.btn--primary {
+  background: var(--color-brand-primary);
+  color: var(--color-text-on-dark);
+}
+
+/* ---------- LIST (stacked-card variant of pattern §2) ---------- */
+.list-card {
+  background: var(--color-surface-card);
+  border-radius: var(--radius-4xl);
+  box-shadow: var(--shadow-elevation-1);
+  padding: var(--space-30);
+}
+.list-card__head {
+  margin-bottom: var(--space-20);
+}
+.list-card__title {
+  margin: 0;
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-xl);
+  color: var(--color-text-heading);
+}
+.list-card__loading {
+  padding: var(--space-30);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+.list-card__items {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+}
+
+.list-item {
+  border: 1px solid var(--color-border-input);
+  border-radius: var(--radius-xl);
+  padding: var(--space-16);
+}
+.list-item__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: var(--space-10);
+}
+.list-item__doctor {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-accent);
+  font-size: var(--font-size-sm);
+}
+.list-item__date {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+.list-item__soap {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  row-gap: var(--space-8);
+  column-gap: var(--space-16);
+  margin: 0;
+  font-size: var(--font-size-sm);
+}
+.list-item__soap dt {
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-light);
+}
+.list-item__soap dd {
+  margin: 0;
+  color: var(--color-text-heading);
+  white-space: pre-wrap;
+}

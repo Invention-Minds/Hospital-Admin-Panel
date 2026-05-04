@@ -1,0 +1,159 @@
+/* ============================================================================
+ * MlcRegisterComponent (Sprint 3d Screen A)
+ * Composes FORM pattern + P2 PageHeader + PrimeNG dropdown/calendar.
+ * Token-only styling.
+ * ============================================================================ */
+
+.page {
+  padding: var(--space-40) var(--space-20);
+  font-family: var(--font-family-primary);
+  color: var(--color-text-heading);
+  background: var(--color-surface-page);
+  min-height: 100vh;
+}
+
+.form {
+  background: var(--color-surface-card);
+  border-radius: var(--radius-4xl);
+  box-shadow: var(--shadow-elevation-1);
+  padding: var(--space-20);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-30);
+}
+.form__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-20);
+}
+.form__section-heading {
+  margin: 0;
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-xl);
+  color: var(--color-text-heading);
+}
+.form__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+.form__label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-heading);
+}
+.form__hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-accent);
+}
+.form__error {
+  color: var(--color-danger-strong);
+  font-size: var(--font-size-xs);
+  margin-top: 4px;
+}
+.form__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-20);
+}
+
+:host ::ng-deep .form__input {
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-border-input);
+  border-radius: var(--radius-md);
+  padding: var(--space-16);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-heading);
+  width: 100%;
+  box-sizing: border-box;
+}
+:host ::ng-deep .form__input:focus {
+  outline: none;
+  border: 2px solid var(--color-brand-navy-900);
+}
+:host ::ng-deep .form__input--error {
+  border: 1px solid var(--color-danger-strong);
+}
+:host ::ng-deep .form__input[readonly] {
+  background: var(--color-surface-alt);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+/* Dropdown + calendar — same treatment as Sprint 3b discharge. */
+:host ::ng-deep .p-dropdown.form__dropdown {
+  width: 100%;
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-border-input);
+  border-radius: var(--radius-md);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-heading);
+}
+:host ::ng-deep .p-dropdown.form__dropdown .p-dropdown-label {
+  padding: var(--space-16);
+  color: var(--color-text-heading);
+}
+:host ::ng-deep .p-dropdown.form__dropdown.form__input--error {
+  border: 1px solid var(--color-danger-strong);
+}
+:host ::ng-deep .p-dropdown-panel .p-dropdown-item:not(.p-highlight):not(.p-disabled):hover {
+  background: var(--color-surface-table-head);
+  color: var(--color-text-heading);
+}
+:host ::ng-deep .p-dropdown-panel .p-dropdown-item.p-highlight {
+  background: var(--color-brand-primary);
+  color: var(--color-text-on-dark);
+}
+:host ::ng-deep .p-calendar.form__calendar input {
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-border-input);
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+  padding: var(--space-16);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-heading);
+}
+:host ::ng-deep .p-calendar.form__calendar .p-button {
+  background: var(--color-brand-navy-700);
+  border: 1px solid var(--color-brand-navy-700);
+  color: var(--color-text-on-dark);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+/* Footer + buttons */
+.form__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-10);
+}
+.btn {
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-md);
+  border-radius: var(--radius-md);
+  padding: var(--space-8) var(--space-20);
+  height: 40px;
+  cursor: pointer;
+  border: none;
+}
+.btn:focus-visible {
+  outline: 2px solid var(--color-brand-navy-900);
+  outline-offset: 2px;
+}
+.btn:disabled {
+  background: var(--color-surface-alt);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  border: none;
+}
+.btn--cancel {
+  background: transparent;
+  color: var(--color-text-heading);
+  border: 1px solid var(--color-border-input);
+}
+.btn--primary {
+  background: var(--color-brand-primary);
+  color: var(--color-text-on-dark);
+}

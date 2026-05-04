@@ -1,0 +1,230 @@
+// ============================================================================
+// PROVISIONAL TOKEN SET
+//
+// Extracted from rendered Figma frames (get_design_context) because the
+// source Figma file has NO Figma Variables defined and NO design-system
+// library is subscribed (verified via get_variable_defs + get_libraries).
+//
+// When the designer ships Figma Variables, this file should be regenerated
+// via get_variable_defs and names reconciled.
+//
+// Source frames (all on Invention-Minds-LLP / S2gYoiH41ihtLjxcAUoYHq):
+//   9142:371   Dashboard
+//   9475:449   DocMinds LogIn (form surface)
+//   9475:471   DocMinds LogIn (image variant; no extractable code)
+//   9149:1813  Profile Drop Down (modal/dropdown surface)
+//   10329:621  Notification (toast surface)
+//   9149:1991  Doctors Available (list surface)
+//   9149:2208  Doctors Unavailable (list + warning modal)
+//   9149:2349  Doctors Absent (list + error/danger modal)
+//   9142:866   Setting — Profile (sub-nav + logout CTA)
+//   14467:1031 Setting — Locked IDs (modal + secondary button)
+//
+// Names are role-based (no scale positions extrapolated). See
+// docs/design-tokens.md for full mapping and designer follow-ups.
+// ============================================================================
+
+// ---------- Color: Brand ----------
+$color-brand-primary:       #fb9c2a;  // Login "Sign in" CTA
+$color-brand-navy-900:      #001345;  // Sidebar bg, Login page bg, notification title text
+$color-brand-navy-700:      #0e2970;  // Settings sub-nav bg, Locked-IDs header bar
+$color-brand-purple-900:    #271e4a;  // Primary heading text
+
+// ---------- Color: Surface ----------
+$color-surface-page:        #f0f3ff;  // App page background
+$color-surface-card:        #ffffff;  // Card / dropdown background
+$color-surface-table-head:  #edf4fc;  // Table header strip
+$color-surface-alt:         #f4f4f4;  // Alternate light surface
+$color-surface-overlay:     rgba(0, 0, 0, 0.3);            // Modal scrim
+$color-surface-glass-fill:  rgba(88, 130, 193, 0.28);      // Login glass card fill
+$color-surface-glass-border:rgba(88, 130, 193, 0.49);      // Login glass card border
+$color-surface-row-alt:     rgba(255, 255, 255, 0.1);      // Translucent row inside list modals
+
+// ---------- Color: Text ----------
+$color-text-heading:        #271e4a;  // Heading text
+$color-text-body:           #000000;  // Body text
+$color-text-muted:          #7b7b7b;  // Secondary / caption
+$color-text-accent:         #3f779b;  // Link / accent / "See all"
+$color-text-on-dark:        #ffffff;  // Text on dark brand bg
+$color-text-placeholder:    #bcbec0;  // Form field placeholder
+
+// ---------- Color: Feedback ----------
+$color-success-bg:          #79cfa6;  // "Available" badge fill
+$color-success-strong:      #169458;  // "Unlock" button border + text (stronger green)
+$color-warning-bg:           #fce35f; // Slot time pill, warning surface
+$color-warning-strong:      #e9c400;  // "Doctors Unavailable" modal header + status text
+$color-danger-bg:           #ff706f;  // "Absend" badge fill
+$color-danger-strong:       #d20006;  // Log out, delete icon, "Doctors Absent" modal header
+
+// Added in Sprint 3g — flagged for designer review.
+// Info tones kept in the navy family (no new color family introduced).
+$color-info-strong:         $color-brand-navy-700; // "low" criticality indicator — reuses navy-700 (#0e2970)
+$color-info-bg:             #e8f0fe;  // Light navy tint for info surfaces
+$color-success-bg-subtle:   #ecfaf2;  // Subtle success strip (vs the saturated $color-success-bg)
+$color-danger-bg-subtle:    #ffeeee;  // Subtle danger strip (vs the saturated $color-danger-bg)
+
+// ---------- Color: Border ----------
+$color-border-input:        #bcbec0;  // Login form field border
+$color-border-checkbox:     #000000;  // Locked-IDs checkbox border
+
+// ---------- Typography: Family ----------
+$font-family-primary:       'Kanit', sans-serif;
+
+// ---------- Typography: Weights ----------
+$font-weight-light:         300;      // Kanit:Light (badges, table headers)
+$font-weight-regular:       400;      // Kanit:Regular (body)
+$font-weight-medium:        500;      // Kanit:Medium (titles, labels)
+$font-weight-semibold:      600;      // Kanit:SemiBold (CTA, emphasised)
+
+// ---------- Typography: Sizes ----------
+$font-size-xs:              12px;
+$font-size-sm:              13px;     // Login form labels/inputs
+$font-size-base:            14px;
+$font-size-md:              16px;
+$font-size-lg:              18px;
+$font-size-xl:              20px;
+$font-size-2xl:             24px;
+
+// ---------- Radius ----------
+$radius-xs:                 4px;      // Checkbox
+$radius-sm:                 5px;      // Login input (may be scale artifact; see docs)
+$radius-md:                 8px;      // Search bar, badge, small avatar
+$radius-lg:                 10px;     // Sidebar active tab, header icons
+$radius-xl:                 12px;     // Settings modal shell
+$radius-2xl:                14px;     // Stat card
+$radius-3xl:                16px;     // Row card
+$radius-4xl:                18px;     // Large content card
+$radius-5xl:                20px;     // Notification panel
+$radius-login-glass:        28.458px; // Login glass card (likely scale artifact; see docs)
+$radius-login-button:       7.115px;  // Login "Sign in" button (likely scale artifact; see docs)
+
+// ---------- Shadow ----------
+$shadow-elevation-1:        0 4px 15px 0 rgba(216, 210, 252, 0.64);  // Primary card elevation
+$shadow-elevation-2:        0 4px 15px 0 rgba(185, 178, 226, 0.64);  // Thumbnail / small avatar
+$shadow-glow-success:       0 4px 15px 0 #79cfa6;                     // Glow on "Available" pill
+$shadow-glow-danger:        0 4px 15px 0 #ff706f;                     // Glow on "Absend" pill
+
+// ---------- Spacing (observed literal values only) ----------
+$space-8:                   8px;      // Form group gap (label <-> input)
+$space-10:                  10px;     // Button inner gap (icon <-> text)
+$space-12:                  12px;     // Compact card padding
+$space-13:                  13px;     // Search bar vertical padding
+$space-16:                  16px;     // Input padding, large button vertical padding
+$space-20:                  20px;     // Card/header horizontal padding
+$space-30:                  30px;     // Form block gap
+$space-35:                  35px;     // Sidebar nav item gap
+$space-40:                  40px;     // Login card outer gap
+
+// ---------- Sizes (observed literal dimensions) ----------
+$size-sidebar-width:        80px;     // Dashboard sidebar
+$size-sidebar-item:         44px;     // Active sidebar nav tile
+$size-icon-sm:              14px;     // Delete icon glyph
+$size-icon-md:              18px;     // Small CTA icon
+$size-icon-lg:              24px;     // Nav icon
+$size-stat-icon:            36px;     // Stat card icon
+$size-avatar-row:           28px;     // Row avatar thumb
+$size-avatar-header:        42px;     // Header avatar / icon tile
+$size-avatar-logo:          60px;     // Sidebar logo
+$size-avatar-login:         100px;    // Login logo
+
+// ============================================================================
+// CSS Custom Properties (exposed on :root so components can consume via var())
+// ============================================================================
+:root {
+  // Color: Brand
+  --color-brand-primary:        #{$color-brand-primary};
+  --color-brand-navy-900:       #{$color-brand-navy-900};
+  --color-brand-navy-700:       #{$color-brand-navy-700};
+  --color-brand-purple-900:     #{$color-brand-purple-900};
+
+  // Color: Surface
+  --color-surface-page:         #{$color-surface-page};
+  --color-surface-card:         #{$color-surface-card};
+  --color-surface-table-head:   #{$color-surface-table-head};
+  --color-surface-alt:          #{$color-surface-alt};
+  --color-surface-overlay:      #{$color-surface-overlay};
+  --color-surface-glass-fill:   #{$color-surface-glass-fill};
+  --color-surface-glass-border: #{$color-surface-glass-border};
+  --color-surface-row-alt:      #{$color-surface-row-alt};
+
+  // Color: Text
+  --color-text-heading:         #{$color-text-heading};
+  --color-text-body:            #{$color-text-body};
+  --color-text-muted:           #{$color-text-muted};
+  --color-text-accent:          #{$color-text-accent};
+  --color-text-on-dark:         #{$color-text-on-dark};
+  --color-text-placeholder:     #{$color-text-placeholder};
+
+  // Color: Feedback
+  --color-success-bg:           #{$color-success-bg};
+  --color-success-strong:       #{$color-success-strong};
+  --color-warning-bg:           #{$color-warning-bg};
+  --color-warning-strong:       #{$color-warning-strong};
+  --color-danger-bg:            #{$color-danger-bg};
+  --color-danger-strong:        #{$color-danger-strong};
+  // Sprint 3g additions — documented in docs/design-tokens.md §4
+  --color-info-strong:          #{$color-info-strong};
+  --color-info-bg:              #{$color-info-bg};
+  --color-success-bg-subtle:    #{$color-success-bg-subtle};
+  --color-danger-bg-subtle:     #{$color-danger-bg-subtle};
+
+  // Color: Border
+  --color-border-input:         #{$color-border-input};
+  --color-border-checkbox:      #{$color-border-checkbox};
+
+  // Typography
+  --font-family-primary:        #{$font-family-primary};
+  --font-weight-light:          #{$font-weight-light};
+  --font-weight-regular:        #{$font-weight-regular};
+  --font-weight-medium:         #{$font-weight-medium};
+  --font-weight-semibold:       #{$font-weight-semibold};
+  --font-size-xs:               #{$font-size-xs};
+  --font-size-sm:               #{$font-size-sm};
+  --font-size-base:             #{$font-size-base};
+  --font-size-md:               #{$font-size-md};
+  --font-size-lg:               #{$font-size-lg};
+  --font-size-xl:               #{$font-size-xl};
+  --font-size-2xl:              #{$font-size-2xl};
+
+  // Radius
+  --radius-xs:                  #{$radius-xs};
+  --radius-sm:                  #{$radius-sm};
+  --radius-md:                  #{$radius-md};
+  --radius-lg:                  #{$radius-lg};
+  --radius-xl:                  #{$radius-xl};
+  --radius-2xl:                 #{$radius-2xl};
+  --radius-3xl:                 #{$radius-3xl};
+  --radius-4xl:                 #{$radius-4xl};
+  --radius-5xl:                 #{$radius-5xl};
+  --radius-login-glass:         #{$radius-login-glass};
+  --radius-login-button:        #{$radius-login-button};
+
+  // Shadow
+  --shadow-elevation-1:         #{$shadow-elevation-1};
+  --shadow-elevation-2:         #{$shadow-elevation-2};
+  --shadow-glow-success:        #{$shadow-glow-success};
+  --shadow-glow-danger:         #{$shadow-glow-danger};
+
+  // Spacing
+  --space-8:                    #{$space-8};
+  --space-10:                   #{$space-10};
+  --space-12:                   #{$space-12};
+  --space-13:                   #{$space-13};
+  --space-16:                   #{$space-16};
+  --space-20:                   #{$space-20};
+  --space-30:                   #{$space-30};
+  --space-35:                   #{$space-35};
+  --space-40:                   #{$space-40};
+
+  // Sizes
+  --size-sidebar-width:         #{$size-sidebar-width};
+  --size-sidebar-item:          #{$size-sidebar-item};
+  --size-icon-sm:               #{$size-icon-sm};
+  --size-icon-md:               #{$size-icon-md};
+  --size-icon-lg:               #{$size-icon-lg};
+  --size-stat-icon:             #{$size-stat-icon};
+  --size-avatar-row:            #{$size-avatar-row};
+  --size-avatar-header:         #{$size-avatar-header};
+  --size-avatar-logo:           #{$size-avatar-logo};
+  --size-avatar-login:          #{$size-avatar-login};
+}

@@ -108,3 +108,24 @@
     font-weight: 400;
     margin: 0;
   }
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .dashboard-section {
+  }
+  .stats-cards {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-section {
+    padding-left: 10px;
+  }
+  .stats-cards {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .card, .card-1 {
+    width: 100%;
+  }
+}

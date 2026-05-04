@@ -1,0 +1,188 @@
+<div class="page">
+  <app-page-header
+    title="Pharmacy Review"
+    subtitle="MOM.1 — active + carryover"
+    [patientName]="patient?.name ?? null"
+    [patientPrn]="patient?.prn ?? null"
+    [admissionId]="admissionId || null">
+  </app-page-header>
+
+  <app-admission-tabs [admissionId]="admissionId"></app-admission-tabs>
+
+  <!-- ========== Section 1: Carryover ========== -->
+  <section class="section" data-testid="pharmacy-carryover-section">
+    <div class="section__head">
+      <h2 class="section__title">Carryover prescriptions</h2>
+      <p class="section__subtitle">From OPD / Emergency, last 7 days</p>
+    </div>
+
+    <div *ngIf="loadingCarryover" class="section__loading" data-testid="carryover-loading">
+      Loading…
+    </div>
+
+    <app-empty-state
+      *ngIf="!loadingCarryover && carryoverRows.length === 0"
+      text="No carryover prescriptions to review"
+      secondaryText="Recent OPD/Emergency prescriptions for this patient will appear here."
+      data-testid="carryover-empty">
+    </app-empty-state>
+
+    <ul *ngIf="!loadingCarryover && carryoverRows.length > 0"
+        class="rows"
+        data-testid="carryover-rows">
+      <li *ngFor="let row of carryoverRows"
+          class="row"
+          [attr.data-testid]="'carryover-row-' + displayRowKey(row)">
+        <div class="row__meta">
+          <span class="row__drug">{{ displayDrugName(row) }}</span>
+          <span class="row__brand" *ngIf="row.tablet.brandName">{{ row.tablet.brandName }}</span>
+        </div>
+        <dl class="row__fields">
+          <dt>Frequency</dt><dd>{{ row.tablet.frequency }}</dd>
+          <dt>Route</dt><dd>{{ row.tablet.route || 'oral' }}</dd>
+          <dt>Qty · Instructions</dt>
+          <dd>
+            {{ row.tablet.quantity }}
+            <span *ngIf="row.tablet.instructions"> · {{ row.tablet.instructions }}</span>
+          </dd>
+          <dt>Source</dt><dd>{{ row.prescribedBy }} · OPD</dd>
+        </dl>
+        <div class="row__actions">
+          <button type="button"
+                  class="btn btn--primary"
+                  [disabled]="continuingKey === displayRowKey(row)"
+                  (click)="continueCarryover(row)"
+                  [attr.data-testid]="'btn-continue-' + displayRowKey(row)">
+            {{ continuingKey === displayRowKey(row) ? 'Continuing…' : 'Continue' }}
+          </button>
+        </div>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ========== Section 2: Active IPD ========== -->
+  <section class="section" data-testid="pharmacy-active-section">
+    <div class="section__head">
+      <h2 class="section__title">Active IPD prescriptions</h2>
+      <p class="section__subtitle">Currently administered under this admission</p>
+    </div>
+
+    <div *ngIf="loadingActive" class="section__loading" data-testid="active-loading">
+      Loading…
+    </div>
+
+    <app-empty-state
+      *ngIf="!loadingActive && activePrescriptions.length === 0"
+      text="No active IPD prescriptions"
+      secondaryText="Continue a carryover above or create a new IPD prescription."
+      data-testid="active-empty">
+    </app-empty-state>
+
+    <ul *ngIf="!loadingActive && activePrescriptions.length > 0"
+        class="rows"
+        data-testid="active-rows">
+      <li *ngFor="let rx of activePrescriptions; trackBy: trackActiveById"
+          class="row"
+          [attr.data-testid]="'active-row-' + rx.id">
+        <div class="row__meta">
+          <span class="row__drug">{{ displayDrugName(rx) }}</span>
+          <span class="row__brand" *ngIf="rx.brandName">{{ rx.brandName }}</span>
+          <span [ngClass]="statusPillClass(rx.status)">{{ rx.status }}</span>
+        </div>
+        <dl class="row__fields">
+          <dt>Dose</dt><dd>{{ rx.dose }}</dd>
+          <dt>Frequency</dt><dd>{{ rx.frequency }}</dd>
+          <dt>Route</dt><dd>{{ rx.route }}</dd>
+          <dt>Started</dt>
+          <dd>{{ rx.prescribedDate ? (rx.prescribedDate | date: 'mediumDate') : '—' }}</dd>
+        </dl>
+        <div class="row__actions">
+          <button type="button"
+                  class="btn btn--secondary"
+                  (click)="openModify(rx)"
+                  [attr.data-testid]="'btn-modify-' + rx.id">
+            Modify
+          </button>
+          <button type="button"
+                  class="icon-btn icon-btn--danger"
+                  aria-label="Discontinue prescription"
+                  (click)="attemptDiscontinue(rx)"
+                  [attr.data-testid]="'btn-discontinue-' + rx.id">
+            <i class="pi pi-trash"></i>
+          </button>
+        </div>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ========== Modify modal ========== -->
+  <p-dialog
+    [(visible)]="modifyModalVisible"
+    modal="true"
+    [closable]="false"
+    [style]="{ width: '560px' }"
+    [showHeader]="false">
+    <div class="dialog" *ngIf="modifyModalVisible && modifyingRx as rx">
+      <div class="dialog__header dialog__header--primary">
+        <h2 class="dialog__title">Modify {{ displayDrugName(rx) }}</h2>
+        <button type="button" class="dialog__close" aria-label="Close"
+                (click)="cancelModify()"
+                data-testid="modify-close">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+      <form class="dialog__body" [formGroup]="modifyForm" (ngSubmit)="submitModify()">
+        <div class="form__field">
+          <label for="modify-dose" class="form__label">Dose *</label>
+          <input pInputText id="modify-dose" class="form__input" formControlName="dose" />
+        </div>
+        <div class="form__field">
+          <label for="modify-frequency" class="form__label">Frequency *</label>
+          <input pInputText id="modify-frequency" class="form__input" formControlName="frequency" />
+        </div>
+        <div class="form__field">
+          <label for="modify-duration" class="form__label">Duration *</label>
+          <input pInputText id="modify-duration" class="form__input" formControlName="duration" />
+        </div>
+        <div class="form__field">
+          <label for="modify-route" class="form__label">Route *</label>
+          <input pInputText id="modify-route" class="form__input" formControlName="route" />
+        </div>
+        <div class="form__field">
+          <label for="modify-instructions" class="form__label">Instructions</label>
+          <textarea pInputText
+                    id="modify-instructions"
+                    rows="2"
+                    class="form__textarea"
+                    formControlName="instructions"></textarea>
+        </div>
+        <div class="dialog__footer">
+          <button type="button"
+                  class="btn btn--cancel"
+                  (click)="cancelModify()"
+                  data-testid="modify-cancel">
+            Cancel
+          </button>
+          <button type="submit"
+                  class="btn btn--primary"
+                  [disabled]="modifyForm.invalid || modifySubmitting"
+                  data-testid="modify-submit">
+            {{ modifySubmitting ? 'Saving…' : 'Save changes' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </p-dialog>
+
+  <!-- ========== Discontinue confirm ========== -->
+  <app-confirm-dialog
+    [(visible)]="discontinueConfirmVisible"
+    [title]="'Discontinue ' + (pendingDiscontinueRx ? displayDrugName(pendingDiscontinueRx) : 'medication') + '?'"
+    message="This will stop further administration under this admission. The action is reversible later but may affect patient care. Continue?"
+    confirmLabel="Discontinue"
+    cancelLabel="Go back"
+    severity="danger"
+    (confirm)="confirmDiscontinue()"
+    (cancel)="cancelDiscontinue()">
+  </app-confirm-dialog>
+</div>

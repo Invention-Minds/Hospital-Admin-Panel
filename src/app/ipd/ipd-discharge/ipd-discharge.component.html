@@ -1,0 +1,244 @@
+<div class="page">
+  <app-page-header
+    title="Discharge Summary"
+    subtitle="ACC.5 discharge"
+    [admissionId]="admissionId || null">
+  </app-page-header>
+
+  <app-admission-tabs [admissionId]="admissionId"></app-admission-tabs>
+
+  <form
+    class="form"
+    [formGroup]="form"
+    (ngSubmit)="attemptDischarge()"
+    novalidate
+    data-testid="discharge-form"
+  >
+    <section class="form__section">
+      <h2 class="form__section-heading">Discharge classification</h2>
+
+      <div class="form__field">
+        <label for="dischargeType" class="form__label">Discharge type *</label>
+        <p-dropdown
+          inputId="dischargeType"
+          formControlName="dischargeType"
+          [options]="dischargeTypes"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Select a discharge type"
+          styleClass="form__dropdown"
+          [class.form__input--error]="shouldShowError('dischargeType')"
+          data-testid="discharge-type">
+        </p-dropdown>
+        <small
+          *ngIf="shouldShowError('dischargeType')"
+          class="form__error"
+          data-testid="err-dischargeType">
+          Discharge type is required.
+        </small>
+      </div>
+
+      <div class="form__field">
+        <label for="conditionAtDischarge" class="form__label">Condition at discharge *</label>
+        <input
+          pInputText
+          id="conditionAtDischarge"
+          type="text"
+          formControlName="conditionAtDischarge"
+          class="form__input"
+          [class.form__input--error]="shouldShowError('conditionAtDischarge')"
+          placeholder="e.g. Stable, Improved, Unchanged"
+        />
+        <small
+          *ngIf="shouldShowError('conditionAtDischarge')"
+          class="form__error"
+          data-testid="err-conditionAtDischarge">
+          Condition at discharge is required.
+        </small>
+      </div>
+    </section>
+
+    <section class="form__section">
+      <h2 class="form__section-heading">Clinical summary</h2>
+
+      <div class="form__field">
+        <label for="finalDiagnosis" class="form__label">Final diagnosis *</label>
+        <textarea
+          pInputText
+          id="finalDiagnosis"
+          rows="3"
+          formControlName="finalDiagnosis"
+          class="form__textarea"
+          [class.form__input--error]="shouldShowError('finalDiagnosis')"
+        ></textarea>
+        <small
+          *ngIf="shouldShowError('finalDiagnosis')"
+          class="form__error"
+          data-testid="err-finalDiagnosis">
+          Final diagnosis is required.
+        </small>
+      </div>
+
+      <div class="form__field">
+        <label for="proceduresDone" class="form__label">Procedures performed during admission</label>
+        <textarea
+          pInputText
+          id="proceduresDone"
+          rows="3"
+          formControlName="proceduresDone"
+          class="form__textarea"
+          placeholder="Optional"
+        ></textarea>
+      </div>
+
+      <div class="form__field">
+        <label for="dischargeSummary" class="form__label">Discharge summary *</label>
+        <textarea
+          pInputText
+          id="dischargeSummary"
+          rows="5"
+          formControlName="dischargeSummary"
+          class="form__textarea"
+          [class.form__input--error]="shouldShowError('dischargeSummary')"
+        ></textarea>
+        <small
+          *ngIf="shouldShowError('dischargeSummary')"
+          class="form__error"
+          data-testid="err-dischargeSummary">
+          Discharge summary is required.
+        </small>
+      </div>
+    </section>
+
+    <section class="form__section" formArrayName="medications">
+      <div class="form__section-head">
+        <h2 class="form__section-heading">Medications on discharge</h2>
+        <button
+          type="button"
+          class="btn btn--secondary"
+          (click)="addMedicationRow()"
+          data-testid="btn-add-medication">
+          + Add medication
+        </button>
+      </div>
+
+      <p *ngIf="medications.length === 0" class="form__hint" data-testid="no-meds">
+        No medications added. Use the button above if the patient is going home with prescriptions.
+      </p>
+
+      <div
+        *ngFor="let row of medications.controls; let i = index"
+        [formGroupName]="i"
+        class="med-row"
+        [attr.data-testid]="'med-row-' + i">
+        <div class="med-row__grid">
+          <div class="form__field">
+            <label [attr.for]="'med-name-' + i" class="form__label">Medication name</label>
+            <input pInputText [id]="'med-name-' + i" type="text" formControlName="name" class="form__input" />
+          </div>
+          <div class="form__field">
+            <label [attr.for]="'med-dose-' + i" class="form__label">Dose</label>
+            <input pInputText [id]="'med-dose-' + i" type="text" formControlName="dose" class="form__input" placeholder="500 mg" />
+          </div>
+          <div class="form__field">
+            <label [attr.for]="'med-freq-' + i" class="form__label">Frequency</label>
+            <input pInputText [id]="'med-freq-' + i" type="text" formControlName="frequency" class="form__input" placeholder="q8h" />
+          </div>
+          <div class="form__field">
+            <label [attr.for]="'med-dur-' + i" class="form__label">Duration</label>
+            <input pInputText [id]="'med-dur-' + i" type="text" formControlName="duration" class="form__input" placeholder="5 days" />
+          </div>
+        </div>
+        <button
+          type="button"
+          class="btn btn--remove"
+          (click)="removeMedicationRow(i)"
+          [attr.aria-label]="'Remove medication ' + (i + 1)"
+          [attr.data-testid]="'btn-remove-med-' + i">
+          <i class="pi pi-trash"></i>
+        </button>
+      </div>
+    </section>
+
+    <section class="form__section">
+      <h2 class="form__section-heading">Follow-up</h2>
+
+      <div class="form__grid">
+        <div class="form__field">
+          <label for="followUpDate" class="form__label">Follow-up date</label>
+          <p-calendar
+            inputId="followUpDate"
+            formControlName="followUpDate"
+            dateFormat="yy-mm-dd"
+            [showIcon]="true"
+            styleClass="form__calendar">
+          </p-calendar>
+        </div>
+        <div class="form__field">
+          <label for="followUpDoctor" class="form__label">Follow-up doctor</label>
+          <input
+            pInputText
+            id="followUpDoctor"
+            type="text"
+            formControlName="followUpDoctor"
+            class="form__input"
+            placeholder="Optional"
+          />
+        </div>
+      </div>
+
+      <div class="form__field">
+        <label for="advice" class="form__label">Advice / instructions</label>
+        <textarea
+          pInputText
+          id="advice"
+          rows="3"
+          formControlName="advice"
+          class="form__textarea"
+          placeholder="Optional"
+        ></textarea>
+      </div>
+    </section>
+
+    <div class="form__footer">
+      <button
+        type="button"
+        class="btn btn--cancel"
+        (click)="cancel()"
+        data-testid="btn-cancel">
+        Cancel
+      </button>
+      <button
+        type="submit"
+        class="btn btn--primary"
+        [disabled]="form.invalid || submitting"
+        data-testid="btn-discharge">
+        {{ submitting ? 'Discharging…' : 'Discharge patient' }}
+      </button>
+    </div>
+  </form>
+
+  <!-- Irreversible-action confirmation -->
+  <app-confirm-dialog
+    [(visible)]="confirmDischargeVisible"
+    title="Discharge this patient?"
+    message="This will free the bed, mark the admission as discharged, and push the summary to HMIS. This action cannot be undone."
+    confirmLabel="Discharge patient"
+    cancelLabel="Go back"
+    severity="danger"
+    (confirm)="onDischargeConfirm()"
+    (cancel)="onDischargeCancel()"
+  ></app-confirm-dialog>
+
+  <!-- Unsaved-changes guard -->
+  <app-confirm-dialog
+    [(visible)]="confirmDiscardVisible"
+    title="Discard unsaved changes?"
+    message="You have unsaved discharge edits. Leave without saving?"
+    confirmLabel="Discard"
+    cancelLabel="Keep editing"
+    severity="danger"
+    (confirm)="onDiscardConfirm()"
+    (cancel)="onDiscardCancel()"
+  ></app-confirm-dialog>
+</div>

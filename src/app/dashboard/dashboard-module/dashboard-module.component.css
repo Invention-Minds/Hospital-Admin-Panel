@@ -481,6 +481,22 @@ line-height: normal;
 }
 
 
+/* ===== RESPONSIVE: Tablet ===== */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .header-container {
+    margin-left: 0;
+  }
+}
+
+/* ===== RESPONSIVE: Mobile ===== */
+@media (max-width: 768px) {
+  .header-container {
+    margin-left: 0;
+    padding-left: var(--sidebar-width, 16px);
+    padding-right: 16px;
+  }
+}
+
 @media screen and (max-width: 500px) {
   .header-container{
    margin-left: 0;

@@ -185,6 +185,69 @@
 <span>Therapies</span>
 </div>
 </a>
+
+<!-- HMIS Modules -->
+
+<!-- Emergency Module -->
+<a [routerLink]="(role === 'doctor' || role === 'super_admin') ? '/emergency': null" routerLinkActive="active" class="icon-wrapper" *ngIf="(role === 'doctor' || role === 'super_admin')">
+  <div class="icon-content" *ngIf="(role === 'doctor' || role === 'super_admin')">
+    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+      <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m1 15h-2v-2h2v2m0-4h-2V7h2v6"/>
+    </svg>
+    <span>Emergency</span>
+  </div>
+</a>
+
+<!-- IPD Module -->
+<a [routerLink]="(role === 'doctor' || role === 'super_admin' || subAdminType === 'IPD Nurse' || subAdminType === 'ICU Nurse' || subAdminType === 'Ward Coordinator') ? '/ipd': null" routerLinkActive="active" class="icon-wrapper" *ngIf="(role === 'doctor' || role === 'super_admin' || subAdminType === 'IPD Nurse' || subAdminType === 'ICU Nurse' || subAdminType === 'Ward Coordinator')">
+  <div class="icon-content" *ngIf="(role === 'doctor' || role === 'super_admin' || subAdminType === 'IPD Nurse' || subAdminType === 'ICU Nurse' || subAdminType === 'Ward Coordinator')">
+    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+      <path fill="currentColor" d="M4 4h16v2H4V4m0 7h16v2H4v-2m0 7h16v2H4v-2m2-4h12v2H6v-2"/>
+    </svg>
+    <span>IPD</span>
+  </div>
+</a>
+
+<!-- Ward Management -->
+<a [routerLink]="(role === 'super_admin' || subAdminType === 'Ward Coordinator') ? '/ward-census': null" routerLinkActive="active" class="icon-wrapper" *ngIf="(role === 'super_admin' || subAdminType === 'Ward Coordinator')">
+  <div class="icon-content" *ngIf="(role === 'super_admin' || subAdminType === 'Ward Coordinator')">
+    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+      <path fill="currentColor" d="M3 13h2v8H3zm4-8h2v16H7zm4-2h2v18h-2zm4 4h2v14h-2zm4-4h2v18h-2z"/>
+    </svg>
+    <span>Ward Mgmt</span>
+  </div>
+</a>
+
+<!-- MLC Cases -->
+<a [routerLink]="(role === 'super_admin' || role === 'admin' || role === 'doctor') ? '/mlc': null" routerLinkActive="active" class="icon-wrapper" *ngIf="(role === 'super_admin' || role === 'admin' || role === 'doctor')">
+  <div class="icon-content" *ngIf="(role === 'super_admin' || role === 'admin' || role === 'doctor')">
+    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+      <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m-2 15h4v2h-4zm0-5h4v4h-4zm0-5h4v4h-4z"/>
+    </svg>
+    <span>MLC Cases</span>
+  </div>
+</a>
+
+<!-- LAMA/DAMA Records -->
+<a [routerLink]="(role === 'super_admin' || role === 'doctor' || subAdminType === 'Discharge Coordinator') ? '/lama-dama': null" routerLinkActive="active" class="icon-wrapper" *ngIf="(role === 'super_admin' || role === 'doctor' || subAdminType === 'Discharge Coordinator')">
+  <div class="icon-content" *ngIf="(role === 'super_admin' || role === 'doctor' || subAdminType === 'Discharge Coordinator')">
+    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+      <path fill="currentColor" d="M19 6h-2V4c0-1.1-.9-2-2-2h-2c-1.1 0-2 .9-2 2v2h-2V4c0-1.1-.9-2-2-2H7c-1.1 0-2 .9-2 2v2H3c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-2h2v2h-2V4zm-5 2h2v2H7V6z"/>
+    </svg>
+    <span>LAMA/DAMA</span>
+  </div>
+</a>
+
+<!-- HMIS Sync Status -->
+<a [routerLink]="(role === 'super_admin' || role === 'admin') ? '/hmis-sync': null" routerLinkActive="active" class="icon-wrapper" *ngIf="(role === 'super_admin' || role === 'admin')">
+  <div class="icon-content" *ngIf="(role === 'super_admin' || role === 'admin')">
+    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+      <path fill="currentColor" d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6c0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6c0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4l-4-4v3z"/>
+    </svg>
+    <span>HMIS Sync</span>
+  </div>
+</a>
+
   <a  routerLinkActive="active" class="icon-wrapper" >
     <div class="icon-content" (click)="openSettings()">
     <svg xmlns="http://www.w3.org/2000/svg" class="icon settings" width="2em" height="2em" viewBox="0 0 24 24"><path fill="currentColor" d="M19.5 12c0-.23-.01-.45-.03-.68l1.86-1.41c.4-.3.51-.86.26-1.3l-1.87-3.23a.987.987 0 0 0-1.25-.42l-2.15.91c-.37-.26-.76-.49-1.17-.68l-.29-2.31c-.06-.5-.49-.88-.99-.88h-3.73c-.51 0-.94.38-1 .88l-.29 2.31c-.41.19-.8.42-1.17.68l-2.15-.91c-.46-.2-1-.02-1.25.42L2.41 8.62c-.25.44-.14.99.26 1.3l1.86 1.41a7.3 7.3 0 0 0 0 1.35l-1.86 1.41c-.4.3-.51.86-.26 1.3l1.87 3.23c.25.44.79.62 1.25.42l2.15-.91c.37.26.76.49 1.17.68l.29 2.31c.06.5.49.88.99.88h3.73c.5 0 .93-.38.99-.88l.29-2.31c.41-.19.8-.42 1.17-.68l2.15.91c.46.2 1 .02 1.25-.42l1.87-3.23c.25-.44.14-.99-.26-1.3l-1.86-1.41c.03-.23.04-.45.04-.68m-7.46 3.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5s3.5 1.57 3.5 3.5s-1.57 3.5-3.5 3.5"/></svg>

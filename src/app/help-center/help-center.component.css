@@ -94,7 +94,8 @@
 }
 .part2-1{
     background-color: #FFFFFF;
-    width: 900px;
+    width: 90%;
+    max-width: 900px;
     height: auto;
     transition: 0.5s;
     flex-shrink: 0;
@@ -200,8 +201,9 @@ a{
     font-style: normal;
     font-weight: 400;
     line-height: normal;
-    width: 1110px;
-    margin:50px 270px 0px;
+    width: 90%;
+    max-width: 1110px;
+    margin: 50px auto 0px;
 }
 
 .txt{
@@ -225,11 +227,12 @@ a{
     cursor: pointer;
 }
 .form3{
-    width: 1050px;
-    height: 500px;
+    width: 90%;
+    max-width: 1050px;
+    height: auto;
     flex-shrink: 0;
     aspect-ratio: 350/249;
-    margin:40px 250px ;
+    margin: 40px auto;
 }
 .height{
     height: auto;
@@ -246,9 +249,10 @@ a{
     height: auto;
 }
 .form1{
-    width: 1000px;
+    width: 90%;
+    max-width: 1000px;
     height: 360px;
-    margin:40px 250px ;
+    margin: 40px auto;
 }
 
 .flex1{
@@ -256,11 +260,12 @@ a{
     flex-direction: row;
 }
 .img1{
-    width: 1000px;
-    height: 498px;
+    width: 90%;
+    max-width: 1000px;
+    height: auto;
     flex-shrink: 0;
     aspect-ratio: 350/249;
-    margin:0px 250px ;
+    margin: 0 auto;
 }
 
 .lis svg {

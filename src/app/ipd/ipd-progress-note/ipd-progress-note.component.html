@@ -1,0 +1,253 @@
+<div class="page">
+  <app-page-header
+    title="Progress Note"
+    subtitle="SOAP entry"
+    [admissionId]="admissionId || null">
+  </app-page-header>
+
+  <app-admission-tabs [admissionId]="admissionId"></app-admission-tabs>
+
+  <form
+    class="form"
+    [formGroup]="form"
+    (ngSubmit)="submit()"
+    novalidate
+    data-testid="progress-note-form"
+  >
+    <!-- SOAP required section -->
+    <section class="form__section">
+      <h2 class="form__section-heading">Clinical assessment</h2>
+
+      <div class="form__field">
+        <label for="doctorName" class="form__label">Doctor name *</label>
+        <input
+          pInputText
+          id="doctorName"
+          type="text"
+          formControlName="doctorName"
+          class="form__input"
+          [class.form__input--error]="shouldShowError('doctorName')"
+          autocomplete="off"
+        />
+        <small
+          *ngIf="shouldShowError('doctorName')"
+          class="form__error"
+          data-testid="err-doctorName"
+          >Doctor name is required.</small
+        >
+      </div>
+
+      <div class="form__field">
+        <label for="subjective" class="form__label">Subjective *</label>
+        <textarea
+          pInputText
+          id="subjective"
+          rows="3"
+          formControlName="subjective"
+          class="form__textarea"
+          [class.form__input--error]="shouldShowError('subjective')"
+        ></textarea>
+        <small
+          *ngIf="shouldShowError('subjective')"
+          class="form__error"
+          data-testid="err-subjective"
+          >Subjective findings are required.</small
+        >
+      </div>
+
+      <div class="form__field">
+        <label for="objective" class="form__label">Objective *</label>
+        <textarea
+          pInputText
+          id="objective"
+          rows="3"
+          formControlName="objective"
+          class="form__textarea"
+          [class.form__input--error]="shouldShowError('objective')"
+        ></textarea>
+        <small
+          *ngIf="shouldShowError('objective')"
+          class="form__error"
+          data-testid="err-objective"
+          >Objective findings are required.</small
+        >
+      </div>
+
+      <div class="form__field">
+        <label for="assessment" class="form__label">Assessment *</label>
+        <textarea
+          pInputText
+          id="assessment"
+          rows="3"
+          formControlName="assessment"
+          class="form__textarea"
+          [class.form__input--error]="shouldShowError('assessment')"
+        ></textarea>
+        <small
+          *ngIf="shouldShowError('assessment')"
+          class="form__error"
+          data-testid="err-assessment"
+          >Assessment is required.</small
+        >
+      </div>
+
+      <div class="form__field">
+        <label for="plan" class="form__label">Plan *</label>
+        <textarea
+          pInputText
+          id="plan"
+          rows="3"
+          formControlName="plan"
+          class="form__textarea"
+          [class.form__input--error]="shouldShowError('plan')"
+        ></textarea>
+        <small
+          *ngIf="shouldShowError('plan')"
+          class="form__error"
+          data-testid="err-plan"
+          >Plan is required.</small
+        >
+      </div>
+    </section>
+
+    <!-- Optional vitals + nursing -->
+    <section class="form__section">
+      <h2 class="form__section-heading">Vitals snapshot (optional)</h2>
+
+      <div class="form__grid">
+        <div class="form__field">
+          <label for="vitalsBP" class="form__label">Blood pressure</label>
+          <input
+            pInputText
+            id="vitalsBP"
+            type="text"
+            formControlName="vitalsBP"
+            class="form__input"
+            placeholder="120/80"
+          />
+        </div>
+        <div class="form__field">
+          <label for="vitalsHR" class="form__label">Heart rate</label>
+          <input
+            pInputText
+            id="vitalsHR"
+            type="text"
+            formControlName="vitalsHR"
+            class="form__input"
+            placeholder="72"
+          />
+        </div>
+        <div class="form__field">
+          <label for="vitalsTemp" class="form__label">Temperature</label>
+          <input
+            pInputText
+            id="vitalsTemp"
+            type="text"
+            formControlName="vitalsTemp"
+            class="form__input"
+            placeholder="36.9°C"
+          />
+        </div>
+        <div class="form__field">
+          <label for="vitalsSpO2" class="form__label">SpO2</label>
+          <input
+            pInputText
+            id="vitalsSpO2"
+            type="text"
+            formControlName="vitalsSpO2"
+            class="form__input"
+            placeholder="98%"
+          />
+        </div>
+        <div class="form__field">
+          <label for="vitalsRR" class="form__label">Respiratory rate</label>
+          <input
+            pInputText
+            id="vitalsRR"
+            type="text"
+            formControlName="vitalsRR"
+            class="form__input"
+            placeholder="16"
+          />
+        </div>
+      </div>
+
+      <div class="form__field">
+        <label for="nursingNotes" class="form__label">Nursing notes</label>
+        <textarea
+          pInputText
+          id="nursingNotes"
+          rows="2"
+          formControlName="nursingNotes"
+          class="form__textarea"
+        ></textarea>
+      </div>
+    </section>
+
+    <div class="form__footer">
+      <button
+        type="button"
+        class="btn btn--cancel"
+        (click)="cancel()"
+        data-testid="btn-cancel"
+      >
+        Cancel
+      </button>
+      <button
+        type="submit"
+        class="btn btn--primary"
+        [disabled]="form.invalid || submitting"
+        data-testid="btn-save"
+      >
+        {{ submitting ? 'Saving…' : 'Save note' }}
+      </button>
+    </div>
+  </form>
+
+  <!-- Prior notes list -->
+  <section class="list-card" data-testid="notes-list">
+    <div class="list-card__head">
+      <h2 class="list-card__title">Prior progress notes</h2>
+    </div>
+
+    <div *ngIf="loadingList" class="list-card__loading" data-testid="list-loading">
+      Loading…
+    </div>
+
+    <app-empty-state
+      *ngIf="!loadingList && notes.length === 0"
+      text="No progress notes yet"
+      secondaryText="SOAP notes you save will appear here, most recent first."
+      data-testid="notes-empty"
+    ></app-empty-state>
+
+    <ul *ngIf="!loadingList && notes.length > 0" class="list-card__items">
+      <li *ngFor="let n of notes" class="list-item" data-testid="note-item">
+        <header class="list-item__head">
+          <span class="list-item__doctor">{{ n.doctorName }}</span>
+          <span class="list-item__date">{{ n.date | date: 'medium' }}</span>
+        </header>
+        <dl class="list-item__soap">
+          <dt>Subjective</dt><dd>{{ n.subjective }}</dd>
+          <dt>Objective</dt><dd>{{ n.objective }}</dd>
+          <dt>Assessment</dt><dd>{{ n.assessment }}</dd>
+          <dt>Plan</dt><dd>{{ n.plan }}</dd>
+          <ng-container *ngIf="n.nursingNotes">
+            <dt>Nursing notes</dt><dd>{{ n.nursingNotes }}</dd>
+          </ng-container>
+        </dl>
+      </li>
+    </ul>
+  </section>
+
+  <app-confirm-dialog
+    [(visible)]="confirmDiscardVisible"
+    title="Discard unsaved changes?"
+    message="You have unsaved progress-note edits. Leave without saving?"
+    confirmLabel="Discard"
+    cancelLabel="Keep editing"
+    severity="danger"
+    (confirm)="onDiscardConfirm()"
+    (cancel)="onDiscardCancel()"
+  ></app-confirm-dialog>
+</div>

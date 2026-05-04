@@ -14,11 +14,12 @@
 
 .appointment-modal {
   width: 65%;
+  max-width: 980px;
   background-color: white;
   border-radius: 30px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   position: relative;
-  max-height: 700px;
+  max-height: 90vh;
   overflow-y: auto;
 }
 
@@ -60,7 +61,7 @@
 }
 
 .formContainer {
-  width: 963px;
+  width: 100%;
   border-radius: 15px;
   background: #FFF;
 }

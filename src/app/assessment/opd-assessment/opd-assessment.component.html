@@ -286,7 +286,23 @@
   <div class="buttons">
     <button type="submit" [disabled]="isSubmitting" class="save-button">Submit</button>
     <button type="button" class="print-button" (click)="printAssessment()">Print</button>
+    <button type="button"
+            class="admit-button"
+            [disabled]="!admitEligible"
+            [pTooltip]="admitEligible ? 'Admit this patient to IPD' : 'Save assessment first'"
+            tooltipPosition="top"
+            (click)="openAdmitToIpd()"
+            data-testid="btn-admit-to-ipd">
+      Admit to IPD
+    </button>
   </div>
   <!-- <app-opd-print [data]="formData" #printSection></app-opd-print> -->
 
 </form>
+
+<app-admit-to-ipd-modal
+  [(visible)]="admitModalVisible"
+  source="opd"
+  [context]="admitContext"
+  (admitted)="onAdmittedToIpd($event)">
+</app-admit-to-ipd-modal>

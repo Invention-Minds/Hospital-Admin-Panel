@@ -75,6 +75,21 @@ export class AuthServiceService {
     return userId ? parseInt(userId, 10) : null;
 
   }
+
+  /**
+   * Sprint 4a Phase 1d — display-only username for UI audit strings
+   * (e.g., the critical-values ack toast). Prefers the initialized user
+   * object, falls back to localStorage. Server-side attribution on
+   * audit-relevant write paths is derived from req.user.username via
+   * authenticateToken; never trust this client-side value there.
+   */
+  getUsername(): string | null {
+    if (this.user?.username) return this.user.username;
+    if (typeof window !== 'undefined' && window.localStorage) {
+      return localStorage.getItem('username');
+    }
+    return null;
+  }
 // Method to initialize the user from localStorage
 initializeUserFromStorage(): void {
   if (typeof window !== 'undefined' && window.localStorage) {

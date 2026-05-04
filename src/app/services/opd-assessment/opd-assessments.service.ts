@@ -26,5 +26,19 @@ export class OpdAssessmentsService {
   getAssessmentByAppointmentId(appointmentId: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/by-appointment/${appointmentId}`);
   }
-  
+
+  /**
+   * Sprint 3f — admit OPD patient to IPD via convertOpdToIpd helper.
+   * POST /api/opd/admit-to-ipd returns { ipdAdmission, pendingPrescriptions, pendingInvestigations }.
+   */
+  admitToIpd(payload: {
+    appointmentId: number;
+    wardId: string;
+    bedId: string;
+    admittingDoctorId: number | null;
+    admittingDoctorName: string;
+    admissionType: 'elective' | 'emergency' | 'transfer' | 'routine';
+  }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/admit-to-ipd`, payload);
+  }
 }

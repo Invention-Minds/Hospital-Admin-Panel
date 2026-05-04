@@ -1,15 +1,17 @@
 .sidebar {
   width: 70px;
-  height: 100vh;
   background-color: #001345;
   position: fixed;
   top: 0;
+  bottom: 0;
   left: 0;
   padding-top: 20px;
   color: white;
   z-index: 3;
-  transition: all 0.3s ease-in-out; /* Smooth transition for expanding */
+  transition: width 0.3s ease-in-out;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .sidebar:hover {
@@ -17,7 +19,10 @@
 }
 
 .icon-container_2{
-  margin-top: 40px;
+  margin-top: 10px;
+  flex: 1;
+  overflow: hidden;
+  padding-bottom: 60px;
 }
 .logo-container {
   /* width: 100%; */
@@ -44,12 +49,9 @@
 .icon-container {
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* Align items to the left when expanded */
-  justify-content: space-around;
-  /* margin-top: 40px; */
+  align-items: flex-start;
   gap: 12px;
-  padding-left: 10px; /* Add padding for text alignment */
-  flex-grow: 1;
+  padding-left: 10px;
 }
 
 .icon-wrapper {
@@ -126,13 +128,24 @@ a{
   justify-content: flex-start;
 }
 .icon-container .icon-wrapper:nth-last-child(1) {
-  position: absolute;/* Push to the bottom */
+  position: absolute;
   bottom: 15px;
 }
+.sidebar:hover .icon-container .icon-wrapper:nth-last-child(1) {
+  width: auto;
+  padding-right: 15px;
+}
+
 .sidebar:hover .settings{
 transform:rotate(90deg);
 transition-duration: 1.5s;
 }
 .appt{
   margin-top: -143px;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
 }

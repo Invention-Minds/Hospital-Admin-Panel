@@ -1101,6 +1101,13 @@ input[type="radio"] {
   .custom-calendar .p-inputtext {
     width: 210px !important;
   }
+  .table-container {
+    padding-left: 20px;
+  }
+  .form-row {
+    padding-left: 20px;
+    flex-wrap: wrap;
+  }
 }
 
 /* Mobile View (Optional if needed) */
@@ -1117,5 +1124,12 @@ input[type="radio"] {
   }
   ::ng-deep .custom-calendar .p-inputtext {
     width: 210px !important;
+  }
+  .table-container {
+    padding-left: 10px;
+  }
+  .form-row {
+    padding-left: 10px;
+    flex-direction: column;
   }
 }

@@ -993,10 +993,33 @@ line-height: normal;
     grid-template-columns: repeat(9, minmax(105px, 1fr));
   }
 }
+
+/* ===== RESPONSIVE: Tablet ===== */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .navigation-header {
+    padding-left: 16px;
+  }
+
+  .doctor-slot-container {
+    padding-left: 16px;
+  }
+
+  .slots-wrapper {
+    grid-template-columns: repeat(6, minmax(80px, 1fr));
+  }
+}
+
 /* Responsive Styling */
 @media (max-width: 768px) {
   .doctor-slot-container {
     flex-direction: column;
+    padding-left: var(--sidebar-width, 16px);
+    padding-right: 16px;
+    margin-left: 0;
+  }
+
+  .navigation-header {
+    padding-left: 16px;
   }
 
   .slots-wrapper {

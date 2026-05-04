@@ -1,0 +1,47 @@
+/* PageHeader — docs/ui-patterns.md §5c */
+
+.page-header {
+  margin-bottom: var(--space-30);
+  font-family: var(--font-family-primary);
+}
+
+.page-header__title {
+  margin: 0;
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-2xl);
+  color: var(--color-text-heading);
+}
+
+.page-header__subtitle {
+  margin: 4px 0 0 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-10);
+  align-items: baseline;
+}
+
+.page-header__subtitle-lead {
+  color: var(--color-text-muted);
+}
+
+.page-header__patient-name {
+  color: var(--color-text-accent);
+  font-weight: var(--font-weight-medium);
+}
+
+.page-header__patient-prn {
+  color: var(--color-text-heading);
+}
+
+.page-header__admission-id {
+  color: var(--color-text-muted);
+}
+
+/* Visual separator between chips */
+.page-header__subtitle > *:not(:first-child)::before {
+  content: '· ';
+  color: var(--color-text-muted);
+  margin-right: var(--space-8);
+}

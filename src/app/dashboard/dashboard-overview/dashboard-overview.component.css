@@ -131,4 +131,21 @@
       left: 115%;
     }
   }
-  
+
+/* ===== RESPONSIVE: Tablet ===== */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .container {
+    padding-left: 16px;
+    flex-wrap: wrap;
+  }
+}
+
+/* ===== RESPONSIVE: Mobile ===== */
+@media (max-width: 768px) {
+  .container {
+    padding-left: var(--sidebar-width, 16px);
+    padding-right: 16px;
+    margin-left: 0;
+    flex-wrap: wrap;
+  }
+}

@@ -1,0 +1,11 @@
+<span class="hmis-sync"
+      [class.hmis-sync--synced]="isSynced"
+      [class.hmis-sync--pending]="!isSynced"
+      [class.hmis-sync--small]="size === 'small'"
+      role="status"
+      data-testid="hmis-sync-indicator">
+  <i [ngClass]="isSynced ? 'pi pi-check-circle' : 'pi pi-circle'"
+     aria-hidden="true"
+     data-testid="hmis-sync-icon"></i>
+  <span class="hmis-sync__label" data-testid="hmis-sync-label">{{ label }}</span>
+</span>

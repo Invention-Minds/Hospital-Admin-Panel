@@ -1,0 +1,79 @@
+.emergency-list-container {
+  padding: 20px;
+}
+
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.list-header h2 {
+  margin: 0;
+  color: #333;
+  font-size: 24px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.action-buttons button {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+}
+
+.status-red {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.status-yellow {
+  color: #ffc107;
+  font-weight: bold;
+}
+
+.status-green {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.status-black {
+  color: #6c757d;
+  font-weight: bold;
+}
+
+::ng-deep .p-datatable .p-datatable-tbody > tr > td {
+  padding: 12px 8px;
+}
+
+::ng-deep .p-paginator {
+  padding: 10px 15px;
+}
+
+@media (max-width: 768px) {
+  .list-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
+
+  .list-header h2 {
+    width: 100%;
+  }
+
+  .action-buttons {
+    gap: 5px;
+  }
+
+  .action-buttons button {
+    width: 32px;
+    height: 32px;
+  }
+}

@@ -1,0 +1,118 @@
+<div class="emergency-list-container">
+  <div class="list-header">
+    <h2>Emergency Cases Queue</h2>
+    <button pButton type="button" icon="pi pi-plus" label="New Emergency Case"
+      class="p-button-primary" routerLink="/emergency/intake"></button>
+  </div>
+
+  <p-table
+    #dt
+    [value]="emergencyCases"
+    [rows]="10"
+    [paginator]="true"
+    [globalFilterFields]="['prn', 'status', 'triageCategory']"
+    [loading]="loading"
+    responsiveLayout="scroll"
+    [(selection)]="selectedCases"
+    [rowsPerPageOptions]="[10, 20, 50]"
+    styleClass="p-datatable-striped"
+    [tableStyle]="{'min-width': '50rem'}"
+  >
+    <ng-template pTemplate="caption">
+      <div class="flex align-items-center justify-content-between">
+        <span class="p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input
+            pInputText
+            type="text"
+            (input)="dt.filterGlobal($any($event.target).value, 'contains')"
+            placeholder="Search cases..."
+          />
+        </span>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="header">
+      <tr>
+        <th style="width: 3rem">
+          <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+        </th>
+        <th style="width: 10%">PRN</th>
+        <th style="width: 10%">Triage</th>
+        <th style="width: 25%">Complaint</th>
+        <th style="width: 10%">BP</th>
+        <th style="width: 8%">HR</th>
+        <th style="width: 12%">Status</th>
+        <th style="width: 15%">Time</th>
+        <th style="width: 10%">Actions</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-row>
+      <tr>
+        <td>
+          <p-tableCheckbox [value]="row"></p-tableCheckbox>
+        </td>
+        <td><strong>{{ row.prn }}</strong></td>
+        <td>
+          <p-tag
+            [value]="getTriageLabel(row.triageCategory)"
+            [severity]="triageSeverity[row.triageCategory]"
+          ></p-tag>
+        </td>
+        <td>
+          {{ row.presentingComplaint | slice:0:50 }}{{ row.presentingComplaint?.length > 50 ? '...' : '' }}
+        </td>
+        <td>{{ row.vitalsBP }}</td>
+        <td>{{ row.vitalsHR }} bpm</td>
+        <td>
+          <p-dropdown
+            [options]="statusOptions"
+            [ngModel]="row.status"
+            (onChange)="updateStatus(row, $event.value)"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="false"
+          ></p-dropdown>
+        </td>
+        <td>{{ formatDate(row.createdAt) }}</td>
+        <td>
+          <div class="action-buttons">
+            <button
+              pButton
+              type="button"
+              pTooltip="View details"
+              icon="pi pi-eye"
+              class="p-button-rounded p-button-info p-button-sm"
+              (click)="viewCase(row.id)"
+            ></button>
+            <button
+              pButton
+              type="button"
+              pTooltip="Convert to IPD"
+              icon="pi pi-arrow-right"
+              class="p-button-rounded p-button-success p-button-sm"
+              (click)="convertToIPD(row.id)"
+              [disabled]="row.status === 'admitted-ipd'"
+            ></button>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="9" style="text-align: center; padding: 2rem;">
+          No emergency cases found.
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+  <app-admit-to-ipd-modal
+    [(visible)]="admitModalVisible"
+    source="emergency"
+    [context]="admitContext"
+    (admitted)="onAdmittedToIpd($event)">
+  </app-admit-to-ipd-modal>
+</div>

@@ -514,4 +514,20 @@ font-family: 900;
   ::ng-deep .custom-calendar .p-inputtext{
     width: 210px !important;
   }
+  .table-container {
+    padding-left: 10px;
+  }
+  .form-row {
+    padding-left: 10px;
+    flex-direction: column;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .table-container {
+  }
+  .form-row {
+    padding-left: 20px;
+    flex-wrap: wrap;
+  }
 }

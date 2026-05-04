@@ -1,0 +1,7 @@
+<div class="empty-state" role="status" aria-live="polite">
+  <i class="empty-state__icon" [ngClass]="icon" aria-hidden="true" data-testid="empty-state-icon"></i>
+  <p class="empty-state__text" data-testid="empty-state-text">{{ text }}</p>
+  <p *ngIf="secondaryText" class="empty-state__secondary" data-testid="empty-state-secondary">
+    {{ secondaryText }}
+  </p>
+</div>

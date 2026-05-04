@@ -1,0 +1,228 @@
+<div class="ipd-admission-container">
+  <div class="card">
+    <h2 class="section-title">IPD Admission Form</h2>
+
+    <form [formGroup]="admissionForm" (ngSubmit)="onSubmit()">
+      <div class="grid">
+        <!-- Patient & Admission Info -->
+        <div class="col-12">
+          <h4 class="form-section-title">Patient & Admission Information</h4>
+        </div>
+
+        <div class="col-12 md:col-6">
+          <div class="form-group">
+            <label for="prn" class="form-label">Patient *</label>
+            <p-autoComplete
+              [(ngModel)]="selectedPatient"
+              [ngModelOptions]="{ standalone: true }"
+              [suggestions]="filteredPatients"
+              (completeMethod)="searchPatients($event)"
+              (onSelect)="onPatientSelect($event.value || $event)"
+              (onClear)="onPatientClear()"
+              field="name"
+              [forceSelection]="true"
+              placeholder="Type name or PRN…"
+              [style]="{'width':'100%'}"
+              [inputStyle]="{'width':'100%'}"
+              appendTo="body"
+              data-testid="ipd-admission-patient-picker">
+              <ng-template let-p pTemplate="item">
+                <div class="flex flex-column">
+                  <span><strong>{{ p.name }}</strong></span>
+                  <span class="text-sm text-color-secondary">PRN {{ p.prn }}<span *ngIf="p.mobileNo"> · {{ p.mobileNo }}</span></span>
+                </div>
+              </ng-template>
+            </p-autoComplete>
+            <small *ngIf="admissionForm.get('prn')?.invalid && admissionForm.get('prn')?.touched" class="text-red-500">
+              Patient is required
+            </small>
+          </div>
+        </div>
+
+        <div class="col-12 md:col-6">
+          <div class="form-group">
+            <label for="admissionType" class="form-label">Admission Type *</label>
+            <p-dropdown
+              [options]="admissionTypes"
+              formControlName="admissionType"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Select admission type"
+              [style]="{'width': '100%'}"
+            ></p-dropdown>
+          </div>
+        </div>
+
+        <div class="col-12 md:col-6">
+          <div class="form-group">
+            <label for="admissionDate" class="form-label">Admission Date *</label>
+            <p-calendar
+              id="admissionDate"
+              formControlName="admissionDate"
+              [showIcon]="true"
+              dateFormat="dd/mm/yy"
+              [style]="{'width': '100%'}"
+            ></p-calendar>
+          </div>
+        </div>
+
+        <div class="col-12 md:col-6">
+          <div class="form-group">
+            <label for="admissionTime" class="form-label">Admission Time *</label>
+            <input
+              pInputText
+              id="admissionTime"
+              formControlName="admissionTime"
+              type="time"
+              class="w-full"
+            />
+          </div>
+        </div>
+
+        <!-- Doctor & Department -->
+        <div class="col-12">
+          <h4 class="form-section-title">Doctor & Department</h4>
+        </div>
+
+        <div class="col-12 md:col-6">
+          <div class="form-group">
+            <label for="admittingDoctor" class="form-label">Admitting Doctor *</label>
+            <p-dropdown
+              [options]="doctors"
+              formControlName="admittingDoctorId"
+              optionLabel="name"
+              optionValue="id"
+              placeholder="Select admitting doctor"
+              [filter]="true"
+              filterBy="name,departmentName"
+              [showClear]="false"
+              (onChange)="onAdmittingDoctorChange($event.value)"
+              [style]="{'width': '100%'}"
+              data-testid="ipd-admission-admitting-doctor"
+            ></p-dropdown>
+          </div>
+        </div>
+
+        <div class="col-12 md:col-6">
+          <div class="form-group">
+            <label for="referringDoctor" class="form-label">Referring Doctor</label>
+            <p-dropdown
+              [options]="doctors"
+              formControlName="referringDoctorId"
+              optionLabel="name"
+              optionValue="id"
+              placeholder="Select referring doctor (optional)"
+              [filter]="true"
+              filterBy="name,departmentName"
+              [showClear]="true"
+              (onChange)="onReferringDoctorChange($event.value)"
+              [style]="{'width': '100%'}"
+            ></p-dropdown>
+          </div>
+        </div>
+
+        <div class="col-12 md:col-6">
+          <div class="form-group">
+            <label for="department" class="form-label">Department *</label>
+            <input
+              pInputText
+              id="department"
+              formControlName="department"
+              class="w-full"
+              placeholder="Auto-filled from admitting doctor"
+              readonly
+            />
+          </div>
+        </div>
+
+        <!-- Ward & Bed Selection -->
+        <div class="col-12">
+          <h4 class="form-section-title">Ward & Bed Assignment</h4>
+        </div>
+
+        <div class="col-12 md:col-6">
+          <div class="form-group">
+            <label for="wardId" class="form-label">Ward *</label>
+            <p-dropdown
+              [options]="wards"
+              formControlName="wardId"
+              optionLabel="wardName"
+              optionValue="id"
+              (onChange)="onWardChange($event.value)"
+              placeholder="Select ward"
+              [style]="{'width': '100%'}"
+            ></p-dropdown>
+          </div>
+        </div>
+
+        <div class="col-12 md:col-6">
+          <div class="form-group">
+            <label for="bedId" class="form-label">Bed *</label>
+            <p-dropdown
+              [options]="availableBeds"
+              formControlName="bedId"
+              optionLabel="bedNumber"
+              optionValue="id"
+              placeholder="Select available bed"
+              [style]="{'width': '100%'}"
+            ></p-dropdown>
+          </div>
+        </div>
+
+        <div class="col-12 md:col-6">
+          <div class="form-group">
+            <label for="roomType" class="form-label">Room Type *</label>
+            <p-dropdown
+              [options]="roomTypes"
+              formControlName="roomType"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Select room type"
+              [style]="{'width': '100%'}"
+            ></p-dropdown>
+          </div>
+        </div>
+
+        <!-- Diagnosis -->
+        <div class="col-12">
+          <h4 class="form-section-title">Clinical Details</h4>
+        </div>
+
+        <div class="col-12">
+          <div class="form-group">
+            <label for="diagnosis" class="form-label">Diagnosis *</label>
+            <textarea
+              pInputTextarea
+              id="diagnosis"
+              formControlName="diagnosis"
+              rows="4"
+              class="w-full"
+              placeholder="Enter primary diagnosis"
+            ></textarea>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="col-12">
+          <div class="button-group">
+            <button
+              pButton
+              type="submit"
+              label="Create Admission"
+              class="p-button-primary"
+              [loading]="loading"
+            ></button>
+            <button
+              pButton
+              type="button"
+              label="Reset"
+              class="p-button-outlined"
+              (click)="resetForm()"
+              [disabled]="loading"
+            ></button>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>

@@ -872,7 +872,7 @@
     display: none;
   }
    @media (max-width: 1030px) {
-  
+
     ::ng-deep .custom-dropdown .p-dropdown{
       width: 235px !important;
     }
@@ -882,8 +882,15 @@
     ::ng-deep .custom-calendar .p-inputtext{
       width: 210px !important;
     }
+    .table-container {
+      padding-left: 20px;
+    }
+    .form-row {
+      padding-left: 20px;
+      flex-wrap: wrap;
+    }
   }
-  
+
   /* Mobile View (Optional if needed) */
   @media (max-width: 768px) {
     .card, .card-1 {
@@ -904,6 +911,13 @@
     /* .p-field{
       margin:0;
     } */
+    .table-container {
+      padding-left: 10px;
+    }
+    .form-row {
+      padding-left: 10px;
+      flex-direction: column;
+    }
   }
   /* Show the mobile cards on smaller screens */
 @media screen and (max-width: 500px) {
@@ -1093,3 +1107,69 @@
     grid-template-columns: 1fr;
   }
   }
+/* Priority section in vitals popup */
+.priority-section {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #fafafa;
+  border-left: 4px solid #9ca3af;
+  transition: all 0.25s ease;
+}
+.priority-section.priority-critical { border-left-color: #dc2626; background: #fef2f2; }
+.priority-section.priority-emergency { border-left-color: #f97316; background: #fff7ed; }
+.priority-section.priority-staff { border-left-color: #2563eb; background: #eff6ff; }
+.priority-section.priority-senior { border-left-color: #9333ea; background: #faf5ff; }
+.priority-section.priority-disabled { border-left-color: #16a34a; background: #f0fdf4; }
+
+.priority-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.priority-title {
+  font-weight: 600;
+  font-size: 14px;
+  color: #111;
+}
+.priority-hint {
+  font-size: 11px;
+  color: #92400e;
+  font-style: italic;
+}
+
+.priority-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.priority-dropdown {
+  flex: 0 0 220px;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  background: #fff;
+}
+.priority-reason {
+  flex: 1;
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 13px;
+}
+.priority-reason:focus { outline: 2px solid #2563eb; outline-offset: 1px; }
+
+@media (max-width: 600px) {
+  .priority-controls { flex-direction: column; align-items: stretch; }
+  .priority-dropdown { flex: 1; }
+}
+
+/* VIP priority — gold tint */
+.priority-section.priority-vip {
+  border-left-color: #d4a017;
+  background: #fffbeb;
+}

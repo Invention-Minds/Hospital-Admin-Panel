@@ -709,3 +709,39 @@
     /* margin-bottom: 20px; */
     padding-right: 60px;
   }
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .container {
+  }
+  .chart-row {
+    padding-left: 20px;
+  }
+  .chart-container {
+    width: 100%;
+  }
+  .chart-container-1 {
+    width: 100%;
+  }
+  .chart-container-2 {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding-left: 10px;
+  }
+  .chart-row {
+    padding-left: 10px;
+    flex-direction: column;
+  }
+  .chart-container {
+    width: 100%;
+  }
+  .chart-container-1 {
+    width: 100%;
+  }
+  .chart-container-2 {
+    width: 100%;
+  }
+}

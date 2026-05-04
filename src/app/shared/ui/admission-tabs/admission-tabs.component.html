@@ -1,0 +1,26 @@
+<nav class="admission-tabs" *ngIf="admissionId" aria-label="Admission sub-pages">
+  <a class="admission-tab"
+     [routerLink]="['/ipd/admission', admissionId, 'progress-note']"
+     routerLinkActive="is-active">
+    <i class="pi pi-file-edit"></i>
+    <span>Progress Notes</span>
+  </a>
+  <a class="admission-tab"
+     [routerLink]="['/ipd/admission', admissionId, 'pharmacy']"
+     routerLinkActive="is-active">
+    <i class="pi pi-shopping-cart"></i>
+    <span>Pharmacy</span>
+  </a>
+  <a class="admission-tab"
+     [routerLink]="['/ipd/admission', admissionId, 'mar']"
+     routerLinkActive="is-active">
+    <i class="pi pi-list"></i>
+    <span>MAR</span>
+  </a>
+  <a class="admission-tab"
+     [routerLink]="['/ipd/admission', admissionId, 'discharge']"
+     routerLinkActive="is-active">
+    <i class="pi pi-sign-out"></i>
+    <span>Discharge</span>
+  </a>
+</nav>

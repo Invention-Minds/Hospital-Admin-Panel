@@ -1,0 +1,25 @@
+<div class="e-sign-shell" [class.disabled]="disabled">
+  <div class="e-sign-header">
+    <span class="e-sign-prompt">{{ prompt }}</span>
+    <span class="e-sign-signer" *ngIf="signerName">
+      &mdash; {{ signerName }}
+      <ng-container *ngIf="signerRelation"> ({{ signerRelation }})</ng-container>
+    </span>
+  </div>
+
+  <div class="e-sign-pad-wrap">
+    <canvas #pad class="e-sign-pad" [class.has-ink]="hasInk"></canvas>
+    <div class="e-sign-empty-hint" *ngIf="!hasInk">Sign here</div>
+  </div>
+
+  <div class="e-sign-actions">
+    <button type="button" class="btn btn-ghost" (click)="clear()" [disabled]="saving || disabled">Clear</button>
+    <button type="button" class="btn btn-ghost btn-cancel" (click)="cancel()" [disabled]="saving || disabled">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="save()" [disabled]="saving || disabled || !hasInk">
+      <span *ngIf="!saving">Save signature</span>
+      <span *ngIf="saving">Saving&hellip;</span>
+    </button>
+  </div>
+
+  <div class="e-sign-error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+</div>

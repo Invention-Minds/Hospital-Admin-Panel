@@ -1,0 +1,41 @@
+.admission-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid #e5e7eb;
+  margin: 0 0 1.25rem 0;
+  padding: 0;
+  overflow-x: auto;
+}
+
+.admission-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  color: #4b5563;
+  text-decoration: none;
+  font-size: 0.92rem;
+  font-weight: 500;
+  border-bottom: 2px solid transparent;
+  transition: color 120ms ease, border-color 120ms ease, background-color 120ms ease;
+  white-space: nowrap;
+}
+
+.admission-tab:hover {
+  color: #1f3a5f;
+  background-color: #f3f4f6;
+}
+
+.admission-tab .pi {
+  font-size: 0.95rem;
+}
+
+.admission-tab.is-active {
+  color: #1f3a5f;
+  border-bottom-color: #1f3a5f;
+  font-weight: 600;
+}
+
+.admission-tab.is-active .pi {
+  color: #1f3a5f;
+}

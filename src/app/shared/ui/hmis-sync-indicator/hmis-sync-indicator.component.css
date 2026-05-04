@@ -1,0 +1,37 @@
+/* HmisSyncIndicator — docs/ui-patterns.md § HmisSyncIndicator.
+ * First use: MLC Detail (Sprint 3d) — inline feature-local version.
+ * Extracted to reusable in Sprint 3e for LAMA + DAMA.
+ * MLC Detail migrates to this reusable in Sprint 3.5.
+ */
+
+.hmis-sync {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-sm);
+}
+
+.hmis-sync i {
+  font-size: var(--font-size-md);
+}
+
+.hmis-sync--synced {
+  color: var(--color-success-strong);
+}
+
+.hmis-sync--pending {
+  color: var(--color-text-muted);
+}
+
+/* Small variant — for list-row badges in narrow columns. Copy stays
+ * identical; only typography shrinks so the indicator reads like
+ * metadata rather than a headline. */
+.hmis-sync--small {
+  font-size: var(--font-size-xs);
+  gap: 4px;
+}
+
+.hmis-sync--small i {
+  font-size: var(--font-size-sm);
+}

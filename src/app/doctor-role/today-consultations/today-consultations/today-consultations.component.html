@@ -10,12 +10,24 @@
   </button>
 </div>
 <div class="table-container" *ngIf="(!isLoading || !isDesktopView) && !showOpdModal">
+  <!-- Priority legend — helps doctor learn icon meanings -->
+  <div class="priority-legend">
+    <span class="legend-label">Priority:</span>
+    <span class="legend-item"><span class="priority-icon-chip chip-critical">⚠️</span>Critical</span>
+    <span class="legend-item"><span class="priority-icon-chip chip-emergency">🚨</span>Emergency</span>
+    <span class="legend-item"><span class="priority-icon-chip chip-vip">⭐</span>VIP</span>
+    <span class="legend-item"><span class="priority-icon-chip chip-staff">👤</span>Staff</span>
+    <span class="legend-item"><span class="priority-icon-chip chip-senior">👴</span>Senior</span>
+    <span class="legend-item"><span class="priority-icon-chip chip-disabled">♿</span>Assist</span>
+    <span class="legend-item legend-normal"><span class="priority-dash">—</span>Normal</span>
+  </div>
   <div class="table-wrapper">
     <table class="appointment-table" *ngIf="!isLoading">
       <thead>
         <tr>
           <th>No</th>
           <th>PRN</th>
+          <th class="priority-col" title="Patient priority flag">Pri</th>
           <th (click)="sortBy('patientName')" style="cursor: pointer;">
             Patient Name
             <span *ngIf="sortColumn === 'patientName' && sortDirection === 'asc'">&#9650;</span>
@@ -44,9 +56,32 @@
             'pending': appointment.postPond === true,
             'finished': appointment.checkedOut === true && appointment.endConsultation === true,
             'blinking-row': appointment.overTime,
+            'priority-critical': appointment.priority === 'critical',
+            'priority-emergency': appointment.priority === 'emergency',
+            'priority-staff': appointment.priority === 'staff',
+            'priority-vip': appointment.priority === 'vip',
+            'priority-senior': appointment.priority === 'senior',
+            'priority-disabled': appointment.priority === 'disabled'
           }" [style.transform]="rowTransforms[appointment.id]" [style.transition]="rowTransitions[appointment.id]">
           <td>{{ i + 1 }}</td>
           <td>{{appointment.prnNumber? appointment.prnNumber: '-'}}</td>
+          <td class="priority-col">
+            <span *ngIf="appointment.priority && appointment.priority !== 'normal'; else noPriority"
+                  class="priority-icon-chip"
+                  [ngClass]="'chip-' + appointment.priority"
+                  [pTooltip]="(appointment.priorityReason || appointment.priority | titlecase) + (appointment.prioritySetBy ? ' — set by ' + appointment.prioritySetBy : '')"
+                  tooltipPosition="top">
+              <ng-container [ngSwitch]="appointment.priority">
+                <span *ngSwitchCase="'critical'">⚠️</span>
+                <span *ngSwitchCase="'emergency'">🚨</span>
+                <span *ngSwitchCase="'staff'">👤</span>
+                <span *ngSwitchCase="'vip'">⭐</span>
+                <span *ngSwitchCase="'senior'">👴</span>
+                <span *ngSwitchCase="'disabled'">♿</span>
+              </ng-container>
+            </span>
+            <ng-template #noPriority><span class="priority-dash">—</span></ng-template>
+          </td>
           <td>{{ appointment.patientName }}</td>
           <td>{{ appointment.date | date:'dd-MM-yyyy' }}</td>
           <td>
@@ -121,6 +156,12 @@
             'pending': appointment.postPond === true,
             'finished': appointment.checkedOut === true && appointment.endConsultation === true,
             'blinking-row': appointment.overTime,
+            'priority-critical': appointment.priority === 'critical',
+            'priority-emergency': appointment.priority === 'emergency',
+            'priority-staff': appointment.priority === 'staff',
+            'priority-vip': appointment.priority === 'vip',
+            'priority-senior': appointment.priority === 'senior',
+            'priority-disabled': appointment.priority === 'disabled'
           }"> <!-- ✅ Clicking toggles the full view -->
 
       <!-- Compact View -->
@@ -131,8 +172,24 @@
           </div>
           <div class="patient-details">
             <div>
-              <h3>{{ appointment.patientName }}</h3>
-              <p class="patient">Patient</p>
+              <h3>{{ appointment.patientName }}
+                <span *ngIf="appointment.priority && appointment.priority !== 'normal'"
+                      class="priority-badge"
+                      [ngClass]="'badge-' + appointment.priority">
+                  <ng-container [ngSwitch]="appointment.priority">
+                    <span *ngSwitchCase="'critical'">⚠️</span>
+                    <span *ngSwitchCase="'emergency'">🚨</span>
+                    <span *ngSwitchCase="'staff'">👤</span>
+                    <span *ngSwitchCase="'vip'">⭐</span>
+                    <span *ngSwitchCase="'senior'">👴</span>
+                    <span *ngSwitchCase="'disabled'">♿</span>
+                  </ng-container>
+                </span>
+              </h3>
+              <p class="patient" *ngIf="appointment.priority && appointment.priority !== 'normal'; else regularLabel">
+                {{ appointment.priorityReason || ('Priority: ' + appointment.priority) }}
+              </p>
+              <ng-template #regularLabel><p class="patient">Patient</p></ng-template>
             </div>
             <div>
               <p class="patient">PRN:{{appointment.prnNumber}}</p>

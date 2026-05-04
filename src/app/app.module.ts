@@ -20,6 +20,8 @@ import {MatTooltipModule} from '@angular/material/tooltip';
 import {MatDatepickerModule} from '@angular/material/datepicker';
 import { TooltipModule } from 'primeng/tooltip';
 import { ToastModule } from 'primeng/toast';
+import { TagModule } from 'primeng/tag';
+import { AutoCompleteModule } from 'primeng/autocomplete';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatOptionModule } from '@angular/material/core';
 import { ConfirmationService, MessageService } from 'primeng/api';
@@ -35,6 +37,8 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import {FormsModule} from '@angular/forms';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { CheckboxModule } from 'primeng/checkbox';
+import { BadgeModule } from 'primeng/badge';
 
 
 import { DashboardModuleComponent } from './dashboard/dashboard-module/dashboard-module.component';
@@ -176,6 +180,38 @@ import { TherapyAnalyticsComponent } from './therapy-analytics/therapy-analytics
 import { CallBackComponent } from './estimation/call-back/call-back.component';
 import { CheckinReportComponent } from './report/checkin-report/checkin-report.component';
 
+// HMIS Modules
+import { EmergencyOverviewComponent } from './emergency/emergency-overview.component';
+import { EmergencyIntakeComponent } from './emergency/emergency-intake/emergency-intake.component';
+import { EmergencyListComponent } from './emergency/emergency-list/emergency-list.component';
+import { IpdOverviewComponent } from './ipd/ipd-overview.component';
+import { IpdAdmissionComponent } from './ipd/ipd-admission/ipd-admission.component';
+import { IpdProgressNoteComponent } from './ipd/ipd-progress-note/ipd-progress-note.component';
+import { IpdDischargeComponent } from './ipd/ipd-discharge/ipd-discharge.component';
+import { IpdPharmacyComponent } from './ipd/ipd-pharmacy/ipd-pharmacy.component';
+import { IpdMarComponent } from './ipd/ipd-mar/ipd-mar.component';
+import { WardCensusComponent } from './ward-management/ward-census.component';
+import { MlcCasesComponent } from './mlc/mlc-cases.component';
+import { MlcRegisterComponent } from './mlc/mlc-register/mlc-register.component';
+import { MlcDetailComponent } from './mlc/mlc-detail/mlc-detail.component';
+import { LamaDamaComponent } from './discharge/lama-dama.component';
+import { SyncStatusComponent } from './hmis-sync/sync-status.component';
+
+// Shared reusables (Sprint 3a-2 onward)
+import { ConfirmDialogComponent } from './shared/ui/confirm-dialog/confirm-dialog.component';
+import { EmptyStateComponent } from './shared/ui/empty-state/empty-state.component';
+import { PageHeaderComponent } from './shared/ui/page-header/page-header.component';
+import { AdmissionTabsComponent } from './shared/ui/admission-tabs/admission-tabs.component';
+import { HmisSyncIndicatorComponent } from './shared/ui/hmis-sync-indicator/hmis-sync-indicator.component';
+// Phase 0 — NABH foundation reusables
+import { ESignComponent } from './shared/ui/e-sign/e-sign.component';
+
+// Sprint 3e — LAMA/DAMA Register + Detail
+import { LamaDamaRegisterComponent } from './lama-dama/lama-dama-register/lama-dama-register.component';
+import { LamaDamaDetailComponent } from './lama-dama/lama-dama-detail/lama-dama-detail.component';
+import { AdmitToIpdModalComponent } from './shared/ui/admit-to-ipd-modal/admit-to-ipd-modal.component';
+import { CriticalValuesAlertComponent } from './services/critical-values-alert/critical-values-alert.component';
+
 
 @NgModule({
   declarations: [
@@ -308,6 +344,37 @@ import { CheckinReportComponent } from './report/checkin-report/checkin-report.c
     TherapyAnalyticsComponent,
     CallBackComponent,
     CheckinReportComponent,
+    // HMIS Modules
+    EmergencyOverviewComponent,
+    EmergencyIntakeComponent,
+    EmergencyListComponent,
+    IpdOverviewComponent,
+    IpdAdmissionComponent,
+    IpdProgressNoteComponent,
+    IpdDischargeComponent,
+    IpdPharmacyComponent,
+    IpdMarComponent,
+    WardCensusComponent,
+    MlcCasesComponent,
+    MlcRegisterComponent,
+    MlcDetailComponent,
+    LamaDamaComponent,
+    SyncStatusComponent,
+    // Shared reusables
+    ConfirmDialogComponent,
+    EmptyStateComponent,
+    PageHeaderComponent,
+    AdmissionTabsComponent,
+    HmisSyncIndicatorComponent,
+    // Phase 0 — NABH foundation reusables
+    ESignComponent,
+    // Sprint 3e — LAMA/DAMA
+    LamaDamaRegisterComponent,
+    LamaDamaDetailComponent,
+    // Sprint 3f — Admit-to-IPD shared modal
+    AdmitToIpdModalComponent,
+    // Sprint 3g — Critical-values widget (mounted globally in auth shell)
+    CriticalValuesAlertComponent,
   ],
   imports: [
     BrowserModule,
@@ -331,6 +398,8 @@ import { CheckinReportComponent } from './report/checkin-report/checkin-report.c
     MatFormFieldModule,
     BrowserAnimationsModule,
     ToastModule,
+    TagModule,
+    AutoCompleteModule,
     MultiSelectModule,
     ProgressSpinnerModule,
     MatBadgeModule,
@@ -339,6 +408,8 @@ import { CheckinReportComponent } from './report/checkin-report/checkin-report.c
     NgxLoadingButtonsModule,
     CommonModule,
     ChartModule,
+    CheckboxModule,
+    BadgeModule,
    ],
   exports: [PhoneMaskPipe],
   providers: [

@@ -7,6 +7,10 @@ import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { VoiceOpdService } from '../../services/voice-opd/voice-opd.service';
+import {
+  AdmitContext,
+  AdmittedEvent,
+} from '../../shared/ui/admit-to-ipd-modal/admit-to-ipd-modal.component';
 
 @Component({
   selector: 'app-opd-assessment',
@@ -94,7 +98,17 @@ export class OpdAssessmentComponent {
   isSubmitting = false;
   isEditMode = false;
 
+  // Sprint 3f — Admit-to-IPD wiring.
+  admitModalVisible = false;
+  admitContext: AdmitContext | null = null;
+
   constructor(private opdService: OpdAssessmentsService, private messageService: MessageService, private appointmentService: AppointmentConfirmService, private voiceOPDService: VoiceOpdService) { }
+
+  /** Admit button enables only after the assessment has been persisted (has an id). */
+  get admitEligible(): boolean {
+    console.log(this.isEditMode, this.formData?.id, this.appointmentId);
+    return !!(this.isEditMode && this.formData?.id && this.appointmentId);
+  }
 
   ngOnInit(): void {
     // if (this.appointmentId) {
@@ -257,6 +271,7 @@ loadAssessment(appointmentId: number) {
         this.isEditMode = true;
 
         this.formData = {
+          id: data.id, // capture id for updates
           patientName: data.name || '',
           age: data.age || '',
           gender: data.gender || '',
@@ -335,8 +350,14 @@ loadAssessment(appointmentId: number) {
       });
     } else {
       this.opdService.saveAssessment(this.formData).subscribe({
-        next: (res) => {
+        next: (res: any) => {
           this.isSubmitting = false;
+          // Sprint 3f — capture id so the Admit-to-IPD button can enable without a reload.
+          const createdId = res?.id ?? res?.data?.id;
+          if (createdId != null) {
+            this.formData.id = createdId;
+            this.isEditMode = true;
+          }
           this.messageService.add({ severity: 'success', summary: 'Created', detail: 'Assessment saved successfully' });
           this.saved.emit(res);  // 🟢 Emit new record
           this.close.emit();
@@ -347,6 +368,29 @@ loadAssessment(appointmentId: number) {
         }
       });
     }
+  }
+
+  // Sprint 3f — Admit-to-IPD handlers.
+  openAdmitToIpd(): void {
+    if (!this.admitEligible) return;
+    this.admitContext = {
+      sourceId: this.appointmentId as number,
+      prn: this.formData?.uhid ?? null,
+      patientName: this.formData?.patientName ?? null,
+      referringDoctor: this.formData?.doctorName || this.formData?.consultant || null,
+      summary: [this.formData?.treatmentPlan, this.formData?.investigation]
+        .filter((s: string | undefined) => !!s)
+        .join('\n\n') || null,
+      suggestedAdmissionType: 'elective',
+    };
+    this.admitModalVisible = true;
+  }
+
+  onAdmittedToIpd(_event: AdmittedEvent): void {
+    this.admitModalVisible = false;
+    // Parent (TodayConsultations) receives the underlying `close` event via
+    // the existing saved→close emission pattern when appropriate. Here we
+    // simply close the admit modal; the OPD modal's own lifecycle continues.
   }
   async printAssessment() {
     const d = this.formData;

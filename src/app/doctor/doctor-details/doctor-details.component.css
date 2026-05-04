@@ -563,7 +563,7 @@ background: #FFF;
     justify-content: center;
     align-items: flex-end;
     color: #ffffff;
-  
+
 }
 .dialog-container{
   width: 390px;
@@ -594,4 +594,36 @@ background: #FFF;
   line-height: normal;
   margin-bottom: 10px;
 }
+}
+
+/* ===== RESPONSIVE: Tablet ===== */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .doctor-cards-container {
+    flex-wrap: wrap;
+    padding-left: 16px;
+  }
+
+  .doctor-card {
+    width: calc(50% - 10px);
+    min-width: unset;
+  }
+}
+
+/* ===== RESPONSIVE: Mobile ===== */
+@media (max-width: 768px) {
+  .doctor-cards-container {
+    flex-wrap: wrap;
+    padding-left: var(--sidebar-width, 16px);
+    padding-right: 16px;
+    margin-left: 0;
+  }
+
+  .department {
+    padding-left: var(--sidebar-width, 16px);
+  }
+
+  .doctor-card {
+    width: 100%;
+    min-width: unset;
+  }
 }

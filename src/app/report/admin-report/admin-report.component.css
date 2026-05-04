@@ -397,3 +397,22 @@ tbody tr:hover {
   padding: 20px;
   font-family: Kanit;
 }
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .table-container {
+  }
+  .form-row {
+    padding-left: 20px;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 768px) {
+  .table-container {
+    padding-left: 10px;
+  }
+  .form-row {
+    padding-left: 10px;
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,138 @@
+<div class="ipd-overview">
+  <div class="page-header">
+    <div>
+      <h1>In-Patient Department</h1>
+      <p class="subtitle">Admissions, bed management and IPD analytics</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-secondary" (click)="refresh()"><i class="pi pi-refresh"></i> Refresh</button>
+      <button class="btn-primary" (click)="newAdmission()"><i class="pi pi-plus"></i> New Admission</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button (click)="showDashboard()" [class.active]="activeComponent === 'dashboard'" class="tab-btn">
+      <i class="pi pi-th-large"></i> Dashboard
+    </button>
+    <button (click)="showAdmissions()" [class.active]="activeComponent === 'admissions'" class="tab-btn">
+      <i class="pi pi-users"></i> Active Admissions
+    </button>
+    <button (click)="showBedManagement()" [class.active]="activeComponent === 'beds'" class="tab-btn">
+      <i class="pi pi-home"></i> Bed Census
+    </button>
+    <button (click)="showAnalytics()" [class.active]="activeComponent === 'analytics'" class="tab-btn">
+      <i class="pi pi-chart-bar"></i> Analytics
+    </button>
+  </div>
+
+  <!-- Dashboard -->
+  <div *ngIf="activeComponent === 'dashboard'" class="tab-content">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Admissions</div>
+        <div class="stat-value">{{ stats?.total || 0 }}</div>
+      </div>
+      <div class="stat-card stat-primary">
+        <div class="stat-label">Currently Admitted</div>
+        <div class="stat-value">{{ stats?.byStatus?.admitted || 0 }}</div>
+      </div>
+      <div class="stat-card stat-success">
+        <div class="stat-label">Discharged</div>
+        <div class="stat-value">{{ stats?.byStatus?.discharged || 0 }}</div>
+      </div>
+      <div class="stat-card stat-warning">
+        <div class="stat-label">LAMA / DAMA</div>
+        <div class="stat-value">{{ (stats?.byStatus?.lama || 0) + (stats?.byStatus?.dama || 0) }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Avg Length of Stay</div>
+        <div class="stat-value">{{ stats?.averageLengthOfStay || 0 }} <span class="unit">days</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Emergency Admissions</div>
+        <div class="stat-value">{{ stats?.byType?.emergency || 0 }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Active Admissions -->
+  <div *ngIf="activeComponent === 'admissions'" class="tab-content">
+    <h2>Active Admissions ({{ admissions.length }})</h2>
+    <div *ngIf="loading" class="loading">Loading admissions…</div>
+    <table *ngIf="!loading && admissions.length > 0" class="data-table">
+      <thead>
+        <tr>
+          <th>Adm No</th><th>PRN</th><th>Department</th><th>Doctor</th><th>Ward / Bed</th><th>Admitted</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let a of admissions" (click)="viewAdmission(a.id)" class="clickable">
+          <td>{{ a.admissionNo }}</td>
+          <td>{{ a.prn }}</td>
+          <td>{{ a.department }}</td>
+          <td>{{ a.admittingDoctor }}</td>
+          <td>{{ a.ward?.wardName || a.wardId }} / {{ a.bed?.bedNumber || a.bedId }}</td>
+          <td>{{ a.admissionDate | date:'short' }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <div *ngIf="!loading && admissions.length === 0" class="empty-state">No active admissions.</div>
+  </div>
+
+  <!-- Bed Management -->
+  <div *ngIf="activeComponent === 'beds'" class="tab-content">
+    <h2>Bed Census by Ward</h2>
+    <div class="ward-grid" *ngIf="bedCensus.length > 0; else emptyBeds">
+      <div class="ward-card" *ngFor="let w of bedCensus">
+        <div class="ward-header">
+          <h3>{{ w.wardName }}</h3>
+          <span class="ward-type">{{ w.wardCode }}</span>
+        </div>
+        <div class="bed-stats">
+          <div class="bed-stat">
+            <span class="dot dot-green"></span>
+            <span>{{ w.availableBeds }} Available</span>
+          </div>
+          <div class="bed-stat">
+            <span class="dot dot-red"></span>
+            <span>{{ w.occupiedBeds }} Occupied</span>
+          </div>
+          <div class="bed-stat">
+            <span class="dot dot-grey"></span>
+            <span>{{ w.totalBeds }} Total</span>
+          </div>
+        </div>
+        <div class="occupancy-bar">
+          <div class="occupancy-fill" [class]="getOccupancyClass(w.occupancyRate)" [style.width.%]="w.occupancyRate"></div>
+        </div>
+        <div class="occupancy-label">{{ w.occupancyRate }}% Occupancy</div>
+      </div>
+    </div>
+    <ng-template #emptyBeds>
+      <div class="empty-state">No wards configured.</div>
+    </ng-template>
+  </div>
+
+  <!-- Analytics -->
+  <div *ngIf="activeComponent === 'analytics'" class="tab-content">
+    <h2>IPD Analytics</h2>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">ALOS (Avg Length of Stay)</div>
+        <div class="stat-value">{{ stats?.averageLengthOfStay || 0 }} <span class="unit">days</span></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Elective</div>
+        <div class="stat-value">{{ stats?.byType?.elective || 0 }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Emergency</div>
+        <div class="stat-value">{{ stats?.byType?.emergency || 0 }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Direct Admission</div>
+        <div class="stat-value">{{ stats?.byType?.direct || 0 }}</div>
+      </div>
+    </div>
+  </div>
+</div>

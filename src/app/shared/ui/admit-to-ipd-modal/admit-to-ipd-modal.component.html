@@ -1,0 +1,162 @@
+<div class="admit-scrim"
+     *ngIf="visible"
+     (click)="onCancel()"
+     data-testid="admit-scrim">
+  <div class="admit-shell"
+       role="dialog"
+       aria-modal="true"
+       aria-labelledby="admit-title"
+       (click)="$event.stopPropagation()">
+
+    <div class="admit-header">
+      <h2 id="admit-title" class="admit-header__title">
+        {{ source === 'opd' ? 'Admit to IPD — from OPD' : 'Admit to IPD — from Emergency' }}
+      </h2>
+      <button type="button"
+              class="admit-header__close"
+              aria-label="Close dialog"
+              (click)="onCancel()"
+              data-testid="admit-close">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+
+    <div class="admit-body">
+      <!-- Patient context (read-only) -->
+      <section class="admit-context"
+               *ngIf="context"
+               data-testid="admit-context">
+        <dl class="admit-context__grid">
+          <dt>Patient</dt>
+          <dd>
+            {{ context.patientName || 'Unknown' }}
+            <span *ngIf="context.prn" class="admit-context__prn">· PRN {{ context.prn }}</span>
+          </dd>
+          <dt *ngIf="context.referringDoctor">Referring doctor</dt>
+          <dd *ngIf="context.referringDoctor">{{ context.referringDoctor }}</dd>
+          <dt *ngIf="context.summary">{{ source === 'emergency' ? 'Complaint' : 'Summary' }}</dt>
+          <dd *ngIf="context.summary" class="admit-context__summary">{{ context.summary }}</dd>
+        </dl>
+      </section>
+
+      <!-- Ward / bed / doctor / type form -->
+      <form class="admit-form"
+            [formGroup]="admitForm"
+            (ngSubmit)="attemptSubmit()"
+            novalidate
+            data-testid="admit-form">
+
+        <div class="admit-form__grid">
+          <div class="admit-form__field">
+            <label for="admit-ward" class="admit-form__label">Ward *</label>
+            <select id="admit-ward"
+                    class="admit-form__input"
+                    [class.admit-form__input--error]="shouldShowError('wardId')"
+                    formControlName="wardId"
+                    (change)="onWardChange(selectedWardId)"
+                    data-testid="admit-ward">
+              <option value="">Select ward</option>
+              <option *ngFor="let w of wards" [value]="w.id">{{ w.wardName }}</option>
+            </select>
+            <app-empty-state
+              *ngIf="!wardsLoading && !hasWardOptions"
+              text="No wards configured"
+              secondaryText="Add a ward in Ward Management to proceed."
+              data-testid="admit-wards-empty">
+            </app-empty-state>
+            <small *ngIf="shouldShowError('wardId')"
+                   class="admit-form__error"
+                   data-testid="err-wardId">Ward is required.</small>
+          </div>
+
+          <div class="admit-form__field">
+            <label for="admit-bed" class="admit-form__label">Bed *</label>
+            <select id="admit-bed"
+                    class="admit-form__input"
+                    [class.admit-form__input--error]="shouldShowError('bedId')"
+                    formControlName="bedId"
+                    [disabled]="!selectedWardId || bedsLoading"
+                    data-testid="admit-bed">
+              <option value="">{{ selectedWardId ? 'Select available bed' : 'Select a ward first' }}</option>
+              <option *ngFor="let b of availableBeds" [value]="b.id">
+                {{ b.bedNumber }} — {{ b.bedType }}
+              </option>
+            </select>
+            <app-empty-state
+              *ngIf="selectedWardId && !bedsLoading && !hasBedOptions"
+              text="No available beds in this ward"
+              secondaryText="Choose a different ward or free a bed."
+              data-testid="admit-beds-empty">
+            </app-empty-state>
+            <small *ngIf="shouldShowError('bedId')"
+                   class="admit-form__error"
+                   data-testid="err-bedId">Bed is required.</small>
+          </div>
+        </div>
+
+        <div class="admit-form__grid">
+          <div class="admit-form__field">
+            <label for="admit-doctor" class="admit-form__label">Admitting doctor *</label>
+            <select id="admit-doctor"
+                    class="admit-form__input"
+                    formControlName="admittingDoctorId"
+                    (change)="onDoctorChange(admitForm.get('admittingDoctorId')?.value)"
+                    data-testid="admit-doctor-select">
+              <option [ngValue]="null">-- Select or type below --</option>
+              <option *ngFor="let d of doctors" [ngValue]="d.id">
+                {{ d.name }}<span *ngIf="d.departmentName"> · {{ d.departmentName }}</span>
+              </option>
+            </select>
+            <input id="admit-doctor-name"
+                   type="text"
+                   class="admit-form__input admit-form__input--compact"
+                   [class.admit-form__input--error]="shouldShowError('admittingDoctorName')"
+                   formControlName="admittingDoctorName"
+                   placeholder="Admitting doctor name"
+                   data-testid="admit-doctor-name" />
+            <small *ngIf="shouldShowError('admittingDoctorName')"
+                   class="admit-form__error"
+                   data-testid="err-admittingDoctorName">Admitting doctor name is required.</small>
+          </div>
+
+          <div class="admit-form__field">
+            <label for="admit-type" class="admit-form__label">Admission type *</label>
+            <select id="admit-type"
+                    class="admit-form__input"
+                    formControlName="admissionType"
+                    data-testid="admit-type">
+              <option *ngFor="let t of admissionTypeOptions" [value]="t.value">{{ t.label }}</option>
+            </select>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="admit-footer">
+      <button type="button"
+              class="admit-btn admit-btn--cancel"
+              (click)="onCancel()"
+              data-testid="admit-btn-cancel">
+        Cancel
+      </button>
+      <button type="button"
+              class="admit-btn admit-btn--primary"
+              [disabled]="admitForm.invalid || submitting"
+              (click)="attemptSubmit()"
+              data-testid="admit-btn-submit">
+        {{ submitting ? 'Creating admission…' : 'Admit patient' }}
+      </button>
+    </div>
+  </div>
+
+  <app-confirm-dialog
+    [(visible)]="confirmVisible"
+    title="Confirm admission"
+    [message]="confirmMessage"
+    confirmLabel="Admit patient"
+    cancelLabel="Go back"
+    severity="warning"
+    (confirm)="onConfirm()"
+    (cancel)="onConfirmCancel()">
+  </app-confirm-dialog>
+</div>

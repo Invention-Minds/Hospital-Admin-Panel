@@ -38,3 +38,36 @@ body { margin: 0; font-family: Kanit; background-color: #F0F3FF; }
     font-size: 20px;
     color: #0096f0;
 }
+
+/* ===== RESPONSIVE SYSTEM ===== */
+:root {
+  --sidebar-width: 90px;
+}
+
+/* Equal card sizing globally */
+/* .stats-cards {
+  align-items: stretch;
+} */
+/* .stats-cards .card,
+.stats-cards .card-1 {
+  flex: 1 1 auto;
+  min-width: 0;
+} */
+
+@media (max-width: 768px) {
+  :root {
+    --sidebar-width: 0px;
+  }
+
+  .modal-content,
+  .modal-content-transfer,
+  .popup {
+    width: 95vw !important;
+    max-width: 95vw !important;
+    height: auto !important;
+  }
+
+  .stats-cards {
+    flex-wrap: wrap;
+  }
+}

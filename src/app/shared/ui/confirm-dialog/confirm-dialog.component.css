@@ -1,0 +1,119 @@
+/* ============================================================================
+ * ConfirmDialog — shared/ui/confirm-dialog
+ *
+ * Tokens: see docs/design-tokens.md. No hardcoded hex.
+ * Pattern: docs/ui-patterns.md §3a (alert/list modal, coloured header bar).
+ *
+ * Design-gap decisions applied:
+ *   - Cancel button visual: transparent bg + heading-text colour + input-border
+ *     border. Narrow extrapolation; gap #19 (neutral-secondary button) still
+ *     open for designer.
+ *   - Disabled state (#17): surface-alt bg + text-muted, no opacity hack.
+ * ============================================================================ */
+
+.confirm-scrim {
+  position: fixed;
+  inset: 0;
+  background: var(--color-surface-overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.confirm-shell {
+  background: var(--color-surface-card);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: var(--shadow-elevation-1);
+  font-family: var(--font-family-primary);
+}
+
+/* Header bar — coloured strip */
+.confirm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 60px;
+  padding: 0 var(--space-20);
+  color: var(--color-text-on-dark);
+}
+.confirm-header--default { background: var(--color-brand-navy-700); }
+.confirm-header--warning { background: var(--color-warning-strong); }
+.confirm-header--danger  { background: var(--color-danger-strong); }
+
+.confirm-header__title {
+  margin: 0;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-xl);
+}
+.confirm-header__close {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  width: var(--size-icon-lg);
+  height: var(--size-icon-lg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-md);
+}
+.confirm-header__close:focus-visible {
+  outline: 2px solid var(--color-brand-navy-900);
+  outline-offset: 2px;
+}
+
+/* Body */
+.confirm-body {
+  padding: var(--space-20);
+}
+.confirm-body__message {
+  margin: 0;
+  color: var(--color-text-heading);
+  font-size: var(--font-size-md);
+  line-height: 1.4;
+}
+
+/* Footer: cancel left, confirm right */
+.confirm-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-10);
+  padding: 0 var(--space-20) var(--space-20) var(--space-20);
+}
+
+.confirm-btn {
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-md);
+  border-radius: var(--radius-md);
+  padding: var(--space-8) var(--space-20);
+  height: 40px;
+  cursor: pointer;
+  border: none;
+}
+.confirm-btn:focus-visible {
+  outline: 2px solid var(--color-brand-navy-900);
+  outline-offset: 2px;
+}
+.confirm-btn:disabled {
+  background: var(--color-surface-alt);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+}
+
+.confirm-btn--cancel {
+  background: transparent;
+  color: var(--color-text-heading);
+  border: 1px solid var(--color-border-input);
+}
+
+.confirm-btn--confirm {
+  color: var(--color-text-on-dark);
+}
+.confirm-btn--confirm-default { background: var(--color-brand-primary); }
+.confirm-btn--confirm-warning { background: var(--color-warning-strong); }
+.confirm-btn--confirm-danger  { background: var(--color-danger-strong); }

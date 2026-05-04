@@ -5,6 +5,7 @@
   padding-top: 0px;
 }
 
+
 h1 {
   color: #271E4A;
   font-size: 24px;
@@ -22,12 +23,12 @@ h1 {
 }
 
 .card {
-  width: 220px;
+  flex: 1 1 180px;
+  max-width: 220px;
   height: 72px;
   display: flex;
   align-items: center;
   justify-content: left;
-  /* padding: 15px; */
   padding-bottom: 0px;
   background-color: white;
   border-radius: 12px;
@@ -233,4 +234,34 @@ font-style: normal;
 font-weight: 400;
 line-height: normal;
   }
-  
+
+/* ===== RESPONSIVE: Tablet ===== */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .stats-cards {
+    flex-wrap: wrap;
+  }
+
+  .card {
+    width: calc(50% - 10px);
+    min-width: unset;
+  }
+}
+
+/* ===== RESPONSIVE: Mobile ===== */
+@media (max-width: 768px) {
+  .dashboard-section {
+    padding-left: var(--sidebar-width, 16px);
+    padding-right: 16px;
+    margin-left: 0;
+  }
+
+  .stats-cards {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .card {
+    width: 100%;
+    min-width: unset;
+  }
+}

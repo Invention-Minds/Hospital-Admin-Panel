@@ -1,0 +1,158 @@
+<div class="page">
+  <app-page-header
+    [title]="typeLabel + ' Record'"
+    subtitle="ACC.6 — regulatory discharge documentation"
+    [patientName]="patient?.name ?? null"
+    [patientPrn]="patient?.prn ?? null">
+  </app-page-header>
+
+  <div *ngIf="loading" class="loading" data-testid="ld-detail-loading">
+    Loading {{ typeLabel }} record…
+  </div>
+
+  <ng-container *ngIf="!loading && record as r">
+    <!-- Summary + sync indicator -->
+    <section class="section" data-testid="ld-summary-section">
+      <div class="section__head">
+        <h2 class="section__title">{{ typeLabel }} summary</h2>
+        <app-hmis-sync-indicator
+          [hmisId]="hmisId"
+          [prefix]="hmisPrefix"
+          data-testid="ld-sync-indicator">
+        </app-hmis-sync-indicator>
+      </div>
+
+      <dl class="summary">
+        <dt>Record ID</dt><dd>{{ typeLabel }}-{{ r.id || '—' }}</dd>
+        <dt>Emergency ID</dt><dd>{{ r.emergencyId }}</dd>
+        <dt>Timestamp</dt><dd>{{ timestamp | date: 'medium' }}</dd>
+        <dt>Witness</dt><dd>{{ r.witnessName || '—' }}</dd>
+        <dt>Patient signature</dt>
+        <dd>
+          <span *ngIf="r.patientSignature; else noPatSig">{{ r.patientSignature }}</span>
+          <ng-template #noPatSig><em class="muted">Not captured</em></ng-template>
+        </dd>
+        <dt>Witness signature</dt>
+        <dd>
+          <span *ngIf="r.witnessSignature; else noWitSig">{{ r.witnessSignature }}</span>
+          <ng-template #noWitSig><em class="muted">Not captured</em></ng-template>
+        </dd>
+
+        <ng-container *ngIf="asLama(r) as l">
+          <dt>Doctor's advice</dt><dd class="long">{{ l.doctorAdvice }}</dd>
+          <dt>Risks explained</dt>
+          <dd>
+            <span *ngIf="l.riskExplained">Yes</span>
+            <span *ngIf="!l.riskExplained" class="muted">No</span>
+          </dd>
+          <dt>Reason for LAMA</dt><dd class="long">{{ l.reasonForLama }}</dd>
+        </ng-container>
+
+        <ng-container *ngIf="asDama(r) as d">
+          <dt>Doctor's recommendation</dt><dd class="long">{{ d.doctorRecommendation }}</dd>
+          <dt>Patient declines advice</dt>
+          <dd>
+            <span *ngIf="d.patientDeclinesAdvice">Yes</span>
+            <span *ngIf="!d.patientDeclinesAdvice" class="muted">No</span>
+          </dd>
+          <dt>Follow-up advice</dt>
+          <dd class="long">
+            <span *ngIf="d.followUpAdvice; else noFollow">{{ d.followUpAdvice }}</span>
+            <ng-template #noFollow><em class="muted">Not provided</em></ng-template>
+          </dd>
+        </ng-container>
+      </dl>
+
+      <div class="section__actions" *ngIf="!editing">
+        <button type="button"
+                class="btn btn--secondary"
+                (click)="enterEdit()"
+                data-testid="btn-edit">
+          Edit record
+        </button>
+      </div>
+    </section>
+
+    <!-- Edit form (revealed by Edit button) -->
+    <section *ngIf="editing" class="section" data-testid="ld-edit-section">
+      <div class="section__head">
+        <h2 class="section__title">Edit {{ typeLabel }}</h2>
+      </div>
+
+      <form class="form" [formGroup]="editForm" (ngSubmit)="saveEdit()">
+        <ng-container *ngIf="type === 'lama'">
+          <div class="form__field">
+            <label for="editDoctorAdvice" class="form__label">Doctor's advice</label>
+            <textarea pInputText id="editDoctorAdvice"
+                      rows="3"
+                      class="form__textarea"
+                      formControlName="doctorAdvice"></textarea>
+          </div>
+          <div class="form__field">
+            <label for="editReasonForLama" class="form__label">Reason for LAMA</label>
+            <textarea pInputText id="editReasonForLama"
+                      rows="3"
+                      class="form__textarea"
+                      formControlName="reasonForLama"></textarea>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="type === 'dama'">
+          <div class="form__field">
+            <label for="editDoctorRecommendation" class="form__label">Doctor's recommendation</label>
+            <textarea pInputText id="editDoctorRecommendation"
+                      rows="3"
+                      class="form__textarea"
+                      formControlName="doctorRecommendation"></textarea>
+          </div>
+          <div class="form__field">
+            <label for="editFollowUpAdvice" class="form__label">Follow-up advice</label>
+            <textarea pInputText id="editFollowUpAdvice"
+                      rows="3"
+                      class="form__textarea"
+                      formControlName="followUpAdvice"></textarea>
+          </div>
+        </ng-container>
+
+        <div class="form__field">
+          <label for="editWitnessName" class="form__label">Witness name *</label>
+          <input pInputText id="editWitnessName"
+                 type="text"
+                 class="form__input"
+                 formControlName="witnessName" />
+        </div>
+        <div class="form__grid">
+          <div class="form__field">
+            <label for="editPatientSignature" class="form__label">Patient signature reference</label>
+            <input pInputText id="editPatientSignature"
+                   type="text"
+                   class="form__input"
+                   formControlName="patientSignature" />
+          </div>
+          <div class="form__field">
+            <label for="editWitnessSignature" class="form__label">Witness signature reference</label>
+            <input pInputText id="editWitnessSignature"
+                   type="text"
+                   class="form__input"
+                   formControlName="witnessSignature" />
+          </div>
+        </div>
+
+        <div class="form__footer">
+          <button type="button"
+                  class="btn btn--cancel"
+                  (click)="cancelEdit()"
+                  data-testid="btn-edit-cancel">
+            Cancel
+          </button>
+          <button type="submit"
+                  class="btn btn--primary"
+                  [disabled]="editForm.invalid || submitting"
+                  data-testid="btn-edit-save">
+            {{ submitting ? 'Saving…' : 'Save changes' }}
+          </button>
+        </div>
+      </form>
+    </section>
+  </ng-container>
+</div>

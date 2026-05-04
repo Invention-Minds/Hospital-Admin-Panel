@@ -682,4 +682,28 @@ width:39px
   /* .p-field{
     margin:0;
   } */
+
+  .table-container,
+  .form-row {
+    padding-left: var(--sidebar-width, 16px);
+    padding-right: 16px;
+  }
+
+  .form-row {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .modal-content-transfer {
+    width: 95vw;
+    max-width: 95vw;
+    height: auto;
+    padding: 16px;
+  }
+
+  ::ng-deep .custom-dropdown .p-dropdown,
+  ::ng-deep .custom-input-text {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
 }

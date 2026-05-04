@@ -819,3 +819,30 @@ button {
     padding-left: 12px;
   }
 }
+
+/* ===== RESPONSIVE: Tablet ===== */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .stats-cards { flex-wrap: wrap; }
+  .card { width: calc(50% - 10px); min-width: unset; }
+}
+
+/* ===== RESPONSIVE: Mobile ===== */
+@media (max-width: 768px) {
+  .dashboard-section,
+  .container {
+    padding-left: var(--sidebar-width, 16px);
+    padding-right: 16px;
+  }
+  .stats-cards { flex-wrap: wrap; }
+  .card { width: 100%; min-width: unset; }
+  .modal-content,
+  .modal-content-follow-up {
+    width: 95vw; max-width: 95vw; height: auto; padding: 16px;
+  }
+  ::ng-deep .custom-dropdown .p-dropdown,
+  ::ng-deep .custom-input-text,
+  .custom-dropdown,
+  .input-container {
+    width: 100% !important; max-width: 100% !important;
+  }
+}

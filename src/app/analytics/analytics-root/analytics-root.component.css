@@ -312,6 +312,18 @@ input {
   line-height: normal;
 }
 
+@media (min-width: 769px) and (max-width: 1024px) {
+  .rootcontainer {
+    margin-left: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .rootcontainer {
+    margin-left: 0;
+  }
+}
+
 .hide{
   display: none;
 }

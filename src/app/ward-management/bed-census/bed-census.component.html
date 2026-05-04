@@ -1,0 +1,199 @@
+<div class="bed-census-container">
+  <div class="page-header">
+    <h2>Bed Census Dashboard</h2>
+    <div class="header-actions">
+      <button
+        pButton
+        type="button"
+        icon="pi pi-refresh"
+        label="Refresh"
+        class="p-button-outlined"
+        (click)="refreshCensus()"
+        [loading]="loading"
+      ></button>
+      <button
+        pButton
+        type="button"
+        icon="pi pi-download"
+        label="Download Report"
+        class="p-button-success"
+        (click)="downloadReport()"
+      ></button>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="grid summary-cards">
+    <div class="col-12 md:col-3">
+      <div class="stat-card">
+        <div class="stat-icon danger">
+          <i class="pi pi-bed"></i>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value">{{ totalStats.totalBeds }}</div>
+          <div class="stat-label">Total Beds</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 md:col-3">
+      <div class="stat-card">
+        <div class="stat-icon warning">
+          <i class="pi pi-users"></i>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value">{{ totalStats.occupiedBeds }}</div>
+          <div class="stat-label">Occupied</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 md:col-3">
+      <div class="stat-card">
+        <div class="stat-icon success">
+          <i class="pi pi-check"></i>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value">{{ totalStats.availableBeds }}</div>
+          <div class="stat-label">Available</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 md:col-3">
+      <div class="stat-card">
+        <div class="stat-icon info">
+          <i class="pi pi-chart-pie"></i>
+        </div>
+        <div class="stat-content">
+          <div class="stat-value">{{ totalStats.occupancyRate }}%</div>
+          <div class="stat-label">Occupancy Rate</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ward Details Table -->
+  <div class="table-container">
+    <p-table
+      [value]="censusData"
+      [loading]="loading"
+      responsiveLayout="scroll"
+      [rows]="10"
+      [paginator]="true"
+      [rowsPerPageOptions]="[10, 20, 50]"
+      styleClass="p-datatable-striped"
+    >
+      <ng-template pTemplate="header">
+        <tr>
+          <th style="width: 15%">Ward Name</th>
+          <th style="width: 10%">Department</th>
+          <th style="width: 10%">Total Beds</th>
+          <th style="width: 10%">Occupied</th>
+          <th style="width: 10%">Available</th>
+          <th style="width: 15%">Occupancy %</th>
+          <th style="width: 20%">Status</th>
+          <th style="width: 10%">Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-ward>
+        <tr>
+          <td>{{ ward.wardName }}</td>
+          <td>{{ ward.department }}</td>
+          <td><strong>{{ ward.totalBeds }}</strong></td>
+          <td>{{ ward.occupiedBeds }}</td>
+          <td><strong class="text-success">{{ ward.availableBeds }}</strong></td>
+          <td>
+            <div class="occupancy-bar">
+              <div
+                class="occupancy-fill"
+                [style.width.%]="ward.occupancyRate"
+                [ngClass]="'fill-' + getOccupancyColor(ward.occupancyRate)"
+              ></div>
+              <span class="occupancy-label">{{ ward.occupancyRate }}%</span>
+            </div>
+          </td>
+          <td>
+            <p-tag
+              [value]="getOccupancyColor(ward.occupancyRate) | uppercase"
+              [severity]="getOccupancyColor(ward.occupancyRate)"
+              [icon]="getOccupancyIcon(ward.occupancyRate)"
+            ></p-tag>
+          </td>
+          <td>
+            <button
+              pButton
+              type="button"
+              icon="pi pi-eye"
+              class="p-button-rounded p-button-info p-button-sm"
+              pTooltip="View Details"
+              (click)="viewWardDetails(ward)"
+            ></button>
+          </td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="8">
+            <div class="empty-message">
+              <i class="pi pi-inbox"></i>
+              <p>No ward data available</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+
+  <!-- Ward Details Modal -->
+  <p-dialog
+    [visible]="!!selectedWard"
+    [header]="selectedWard?.wardName"
+    [modal]="true"
+    [style]="{width: '50vw'}"
+    (onHide)="selectedWard = null"
+  >
+    <ng-container *ngIf="selectedWard">
+      <div class="ward-details">
+        <div class="detail-row">
+          <label>Ward Code:</label>
+          <span>{{ selectedWard.wardCode }}</span>
+        </div>
+        <div class="detail-row">
+          <label>Department:</label>
+          <span>{{ selectedWard.department }}</span>
+        </div>
+        <div class="detail-row">
+          <label>Floor:</label>
+          <span>{{ selectedWard.floor }}</span>
+        </div>
+        <div class="detail-row">
+          <label>Occupancy Rate:</label>
+          <span>{{ selectedWard.occupancyRate }}%</span>
+        </div>
+
+        <h4 style="margin-top: 20px">Bed Details</h4>
+        <p-table [value]="selectedWard.beds" responsiveLayout="scroll">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Bed Number</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Patient</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-bed>
+            <tr>
+              <td>{{ bed.bedNumber }}</td>
+              <td>{{ bed.bedType }}</td>
+              <td>
+                <p-tag [value]="bed.status | uppercase" [severity]="bed.status === 'available' ? 'success' : 'warning'"></p-tag>
+              </td>
+              <td>{{ bed.currentPatient?.name || 'Vacant' }}</td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
+    </ng-container>
+  </p-dialog>
+</div>

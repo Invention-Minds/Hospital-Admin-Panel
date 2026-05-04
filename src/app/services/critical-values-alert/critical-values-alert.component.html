@@ -1,0 +1,155 @@
+<div class="critical-values-widget"
+     role="region"
+     aria-label="Critical value alerts"
+     data-testid="critical-values-widget">
+
+  <!-- Bell button + connection label -->
+  <div class="alert-button-group">
+    <button #bellBtn
+            pButton
+            pRipple
+            type="button"
+            icon="pi pi-bell"
+            class="p-button-rounded p-button-lg alert-button"
+            [ngClass]="isConnected ? 'connected' : 'disconnected'"
+            [attr.aria-label]="'Critical value alerts, ' + unreadCount + ' unread'"
+            [attr.aria-expanded]="showPanel"
+            aria-controls="critical-value-panel"
+            (click)="togglePanel()"
+            [attr.badge]="unreadCount > 0 ? unreadCount : null"
+            badgeClass="p-badge-danger"
+            pTooltip="Critical Value Alerts"
+            tooltipPosition="top"
+            data-testid="bell-btn"></button>
+    <span class="connection-indicator"
+          [ngClass]="isConnected ? 'connected' : 'disconnected'">
+      {{ isConnected ? 'Connected' : 'Disconnected' }}
+    </span>
+  </div>
+
+  <!-- Alert Panel -->
+  <div id="critical-value-panel"
+       class="alert-panel"
+       *ngIf="showPanel"
+       role="dialog"
+       aria-modal="false"
+       aria-label="Critical value alerts"
+       data-testid="alert-panel">
+    <div class="panel-header">
+      <h3 class="panel-header__title">Critical Value Alerts</h3>
+      <div class="panel-header__actions">
+        <button type="button"
+                class="panel-icon-btn"
+                (click)="toggleMute()"
+                [attr.aria-pressed]="muted"
+                [attr.aria-label]="muted ? 'Unmute critical value alert sound' : 'Mute critical value alert sound'"
+                pTooltip="{{ muted ? 'Unmute alert sound' : 'Mute alert sound' }}"
+                tooltipPosition="bottom"
+                data-testid="mute-toggle">
+          <i class="pi" [ngClass]="muted ? 'pi-volume-off' : 'pi-volume-up'"></i>
+        </button>
+        <button type="button"
+                class="panel-icon-btn"
+                (click)="closePanel()"
+                aria-label="Close alerts panel"
+                data-testid="panel-close">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Connection Status -->
+    <div class="connection-status"
+         [ngClass]="isConnected ? 'success' : 'error'">
+      <i [class]="isConnected ? 'pi pi-check-circle' : 'pi pi-times-circle'"></i>
+      <span>{{ isConnected ? 'Connected to alert stream' : 'Disconnected from alert stream' }}</span>
+      <button *ngIf="!isConnected"
+              pButton
+              type="button"
+              label="Reconnect"
+              class="p-button-sm p-button-text"
+              (click)="reconnect()"
+              [loading]="loading"
+              data-testid="reconnect-btn"></button>
+    </div>
+
+    <!-- Alerts List -->
+    <div class="alerts-list"
+         *ngIf="alerts.length > 0"
+         role="log"
+         aria-live="assertive"
+         aria-relevant="additions">
+      <div *ngFor="let alert of alerts"
+           class="alert-item"
+           role="alert"
+           [ngClass]="getCriticalityClass(alert.criticalLevel)"
+           [attr.data-testid]="'alert-item-' + alert.id">
+        <div class="alert-header">
+          <i [class]="getCriticalityIcon(alert.criticalLevel)" class="alert-icon"></i>
+          <div class="alert-title">
+            <strong>{{ alert.testName }}</strong>
+            <span class="alert-level"
+                  [ngClass]="getCriticalityClass(alert.criticalLevel)">
+              {{ alert.criticalLevel | uppercase }}
+            </span>
+          </div>
+          <span class="alert-time">{{ formatTime(alert.timestamp) }}</span>
+          <button pButton
+                  type="button"
+                  icon="pi pi-trash"
+                  class="p-button-rounded p-button-text p-button-sm"
+                  [attr.aria-label]="'Dismiss alert for ' + alert.testName"
+                  [disabled]="ackInFlight.has(alert.id)"
+                  (click)="clearAlert(alert.id)"
+                  [attr.data-testid]="'dismiss-' + alert.id"></button>
+        </div>
+        <div class="alert-details">
+          <div class="detail-row">
+            <label>PRN:</label>
+            <span>{{ alert.prn }}</span>
+          </div>
+          <div class="detail-row">
+            <label>Patient:</label>
+            <span>{{ alert.patientName || 'N/A' }}</span>
+          </div>
+          <div class="detail-row">
+            <label>Result:</label>
+            <span class="result-value">{{ alert.result }} {{ alert.unit }}</span>
+          </div>
+          <div class="detail-row" *ngIf="alert.referenceRange">
+            <label>Reference Range:</label>
+            <span>{{ alert.referenceRange }}</span>
+          </div>
+          <div class="detail-row" *ngIf="alert.department">
+            <label>Department:</label>
+            <span>{{ alert.department }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state"
+         *ngIf="alerts.length === 0"
+         data-testid="empty-state">
+      <i class="pi pi-check-circle"></i>
+      <p>No critical values detected</p>
+    </div>
+
+    <!-- Panel Footer -->
+    <div class="panel-footer" *ngIf="alerts.length > 0">
+      <button pButton
+              type="button"
+              label="Clear All"
+              class="p-button-outlined p-button-danger"
+              (click)="clearAllAlerts()"
+              data-testid="clear-all-btn"></button>
+    </div>
+  </div>
+
+  <!-- Click-outside overlay -->
+  <div class="overlay"
+       *ngIf="showPanel"
+       (click)="closePanel()"
+       aria-hidden="true"></div>
+</div>

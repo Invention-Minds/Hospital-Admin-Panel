@@ -120,6 +120,60 @@ export class NursingVitalsComponent {
     // bloodGroup: '',
   };
 
+  // Priority feature
+  selectedPriority: 'normal' | 'critical' | 'emergency' | 'staff' | 'vip' | 'senior' | 'disabled' = 'normal';
+  priorityReason: string = '';
+  priorityOptions = [
+    { label: 'Normal', value: 'normal' },
+    { label: '🔴 Critical', value: 'critical' },
+    { label: '🟠 Emergency', value: 'emergency' },
+    { label: '🔵 Staff', value: 'staff' },
+    { label: '🟡 VIP', value: 'vip' },
+    { label: '🟣 Senior Citizen', value: 'senior' },
+    { label: '🟢 Differently-Abled', value: 'disabled' },
+  ];
+
+  // Auto-suggest priority based on abnormal vitals
+  suggestPriorityFromVitals(): void {
+    const bps = +this.vitalsData.BPs || 0;
+    const bpd = +this.vitalsData.BPd || 0;
+    const spo2 = +this.vitalsData.spo2 || 0;
+    const pulse = +this.vitalsData.pulse || 0;
+    const temp = +this.vitalsData.temp || 0;
+
+    // Critical thresholds
+    if ((spo2 > 0 && spo2 < 92) ||
+        bps >= 180 || bpd >= 120 ||
+        (bps > 0 && bps < 90) ||
+        pulse > 130 || (pulse > 0 && pulse < 50) ||
+        temp >= 103) {
+      this.selectedPriority = 'critical';
+      this.priorityReason = this.buildAutoReason();
+      return;
+    }
+    // Emergency thresholds
+    if ((spo2 > 0 && spo2 < 95) ||
+        bps >= 160 || bpd >= 100 ||
+        pulse > 110 || (pulse > 0 && pulse < 60)) {
+      this.selectedPriority = 'emergency';
+      this.priorityReason = this.buildAutoReason();
+    }
+  }
+
+  private buildAutoReason(): string {
+    const v = this.vitalsData;
+    const flags: string[] = [];
+    if (v.BPs && v.BPd) flags.push(`BP ${v.BPs}/${v.BPd}`);
+    if (v.spo2) flags.push(`SpO2 ${v.spo2}%`);
+    if (v.pulse) flags.push(`Pulse ${v.pulse}`);
+    if (v.temp) flags.push(`Temp ${v.temp}F`);
+    return `Auto-flagged: ${flags.join(', ')}`;
+  }
+
+  needsReason(): boolean {
+    return this.selectedPriority === 'critical' || this.selectedPriority === 'emergency';
+  }
+
   vitalsFields = [
     { key: 'height', label: 'Height (cm)' },
     { key: 'weight', label: 'Weight (kg)' },
@@ -574,6 +628,10 @@ export class NursingVitalsComponent {
 
   submitVitals(): void {
     if (!this.allVitalsFilled()) return;
+    if (this.needsReason() && !this.priorityReason.trim()) {
+      this.messageService.add({ severity: 'warn', summary: 'Reason required', detail: 'Please enter a reason for Critical/Emergency priority.' });
+      return;
+    }
 
     this.isButtonLoading = true;
     const updatedVitals = {
@@ -582,26 +640,39 @@ export class NursingVitalsComponent {
       arrived: true,
       arrivedBy: this.employeeId,
       arrivedTime: new Date(),
-      blockId: this.blockId 
+      blockId: this.blockId
     };
-    console.log('Updated Vitals:', updatedVitals);
     const prn = this.selectedAppointment?.prnNumber;
-    this.appointmentService.updateAppointment(updatedVitals)
-        this.appointmentService.updatePatientByPRN(prn, this.vitalsData).subscribe({
-          next: () => {
-            this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Vitals updated and patient checked in.' });
-            this.showVitalsPopup = false;
-            this.isButtonLoading = false;
-            this.vitalsFields = []
-            this.filterAppointment();
-          },
-          error: (err) => {
-            console.error('Error updating patient vitals:', err);
-            this.isButtonLoading = false;
-            this.messageService.add({ severity: 'warn', summary: 'Warning', detail: 'Checked-in but patient data not updated.' });
-          }
-        });
-      
+    this.appointmentService.updateAppointment(updatedVitals);
+
+    // Set priority via in-memory + SSE endpoint (no DB schema change)
+    if (this.selectedPriority !== 'normal' && this.selectedAppointment?.id) {
+      this.appointmentService.setAppointmentPriority({
+        appointmentId: this.selectedAppointment.id,
+        priority: this.selectedPriority,
+        reason: this.priorityReason,
+        setBy: `${this.name || 'Nurse'} (${this.employeeId})`
+      }).subscribe({
+        next: () => console.log('✅ Priority set:', this.selectedPriority),
+        error: (err) => console.error('Priority set failed', err)
+      });
+    }
+
+    this.appointmentService.updatePatientByPRN(prn, this.vitalsData).subscribe({
+      next: () => {
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Vitals updated and patient checked in.' });
+        this.showVitalsPopup = false;
+        this.isButtonLoading = false;
+        this.selectedPriority = 'normal';
+        this.priorityReason = '';
+        this.filterAppointment();
+      },
+      error: (err) => {
+        console.error('Error updating patient vitals:', err);
+        this.isButtonLoading = false;
+        this.messageService.add({ severity: 'warn', summary: 'Warning', detail: 'Checked-in but patient data not updated.' });
+      }
+    });
   }
   updateDetails(){
     this.isButtonLoading = true;

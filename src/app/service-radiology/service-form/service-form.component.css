@@ -443,9 +443,17 @@
     .form-row {
       flex-direction: column;
     }
-  
+
     .half-width {
       width: 100%;
+    }
+    .form-container {
+      padding-left: 10px;
+    }
+  }
+
+  @media (min-width: 769px) and (max-width: 1024px) {
+    .form-container {
     }
   }
   

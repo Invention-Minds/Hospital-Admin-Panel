@@ -1,4 +1,37 @@
 <div class="tv-container">
+    <!-- Subtle hint — auto-dismisses on any user interaction (click/key/touch) -->
+    <div *ngIf="!audioUnlocked" class="audio-unlock-hint" (click)="unlockAudio()">
+      <span class="audio-unlock-icon">🔊</span>
+      <span class="audio-unlock-text">Press any key or click anywhere to enable announcements</span>
+    </div>
+
+    <!-- Mute toggle (bottom-right floating button) -->
+    <button class="mute-toggle"
+            [class.is-muted]="isMuted"
+            (click)="toggleMute()"
+            [title]="isMuted ? 'Unmute announcements' : 'Mute announcements'">
+      <span *ngIf="!isMuted">🔊</span>
+      <span *ngIf="isMuted">🔇</span>
+    </button>
+
+    <!-- Patient announcement banner -->
+    <div *ngIf="currentBanner" class="announcement-banner">
+      <div class="announcement-card">
+        <button class="announcement-close" (click)="closeBanner()">×</button>
+        <div class="announcement-label">🔔 NOW CALLING</div>
+        <div class="announcement-name">{{ currentBanner.patient }}</div>
+        <div class="announcement-room" *ngIf="currentBanner.room">
+          <span class="room-label">ROOM</span>
+          <span class="room-number">{{ currentBanner.room }}</span>
+        </div>
+        <div class="announcement-doctor">
+          <span *ngIf="currentBanner.room">{{ currentBanner.doctor }}</span>
+          <span *ngIf="!currentBanner.room">Please proceed to {{ currentBanner.doctor }}'s room</span>
+        </div>
+        <div class="announcement-trilingual">English · हिंदी · ಕನ್ನಡ</div>
+      </div>
+    </div>
+
     <header class="header">
       <img src="sidebar/IM-logo.png" alt="Logo" class="logo" />
       <h1>Rashtrotthana Hospital - Bangalore</h1>

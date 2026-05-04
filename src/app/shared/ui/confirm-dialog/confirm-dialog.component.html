@@ -1,0 +1,32 @@
+<div class="confirm-scrim" *ngIf="visible" (click)="onClose()" data-testid="confirm-scrim">
+  <div class="confirm-shell" role="dialog" aria-modal="true"
+       [attr.aria-labelledby]="'confirm-title'"
+       (click)="$event.stopPropagation()">
+    <div class="confirm-header"
+         [class.confirm-header--default]="severity === 'default'"
+         [class.confirm-header--warning]="severity === 'warning'"
+         [class.confirm-header--danger]="severity === 'danger'">
+      <h2 id="confirm-title" class="confirm-header__title">{{ title }}</h2>
+      <button type="button" class="confirm-header__close" aria-label="Close dialog"
+              (click)="onClose()" data-testid="confirm-close">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+    <div class="confirm-body">
+      <p class="confirm-body__message">{{ message }}</p>
+    </div>
+    <div class="confirm-footer">
+      <button type="button" class="confirm-btn confirm-btn--cancel"
+              (click)="onCancel()" data-testid="confirm-cancel">
+        {{ cancelLabel }}
+      </button>
+      <button type="button" class="confirm-btn confirm-btn--confirm"
+              [class.confirm-btn--confirm-default]="severity === 'default'"
+              [class.confirm-btn--confirm-warning]="severity === 'warning'"
+              [class.confirm-btn--confirm-danger]="severity === 'danger'"
+              (click)="onConfirm()" data-testid="confirm-confirm">
+        {{ confirmLabel }}
+      </button>
+    </div>
+  </div>
+</div>

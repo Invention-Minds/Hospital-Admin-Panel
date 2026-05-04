@@ -1,0 +1,86 @@
+<div class="er-overview">
+  <div class="page-header">
+    <div>
+      <h1>Emergency Department</h1>
+      <p class="subtitle">Real-time triage, queue and case management</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-secondary" (click)="refresh()"><i class="pi pi-refresh"></i> Refresh</button>
+      <button class="btn-primary" (click)="createNewCase()"><i class="pi pi-plus"></i> New Case</button>
+    </div>
+  </div>
+
+  <!-- Stats grid -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Total Cases</div>
+      <div class="stat-value">{{ stats?.total || 0 }}</div>
+    </div>
+    <div class="stat-card stat-danger">
+      <div class="stat-label">Critical (Red)</div>
+      <div class="stat-value">{{ stats?.byTriage?.red || 0 }}</div>
+    </div>
+    <div class="stat-card stat-warning">
+      <div class="stat-label">Urgent (Yellow)</div>
+      <div class="stat-value">{{ stats?.byTriage?.yellow || 0 }}</div>
+    </div>
+    <div class="stat-card stat-success">
+      <div class="stat-label">Stable (Green)</div>
+      <div class="stat-value">{{ stats?.byTriage?.green || 0 }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Admitted to IPD</div>
+      <div class="stat-value">{{ stats?.byStatus?.admittedIpd || 0 }}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">LAMA / DAMA</div>
+      <div class="stat-value">{{ (stats?.byStatus?.lama || 0) + (stats?.byStatus?.dama || 0) }}</div>
+    </div>
+  </div>
+
+  <!-- Priority Queue -->
+  <div class="section">
+    <div class="section-header">
+      <h2>Priority Queue ({{ queue.length }})</h2>
+      <button class="link-btn" (click)="openQueue()">View full list →</button>
+    </div>
+    <div class="queue-list" *ngIf="queue.length > 0; else emptyQueue">
+      <div class="queue-item" *ngFor="let c of queue.slice(0, 5)" (click)="viewCase(c.id)">
+        <span class="triage-dot" [class]="'triage-' + c.triageCategory"></span>
+        <div class="queue-info">
+          <div class="patient-line"><strong>{{ c.prn }}</strong> — {{ c.presentingComplaint }}</div>
+          <div class="vitals-line">BP {{ c.vitalsBP || '—' }} · HR {{ c.vitalsHR || '—' }} · SpO2 {{ c.vitalsSpO2 || '—' }}%</div>
+        </div>
+        <span class="status-badge">{{ c.status }}</span>
+      </div>
+    </div>
+    <ng-template #emptyQueue>
+      <div class="empty-state">No pending cases in the queue.</div>
+    </ng-template>
+  </div>
+
+  <!-- Recent -->
+  <div class="section">
+    <div class="section-header">
+      <h2>Recent Cases</h2>
+    </div>
+    <div *ngIf="loading" class="loading">Loading recent cases…</div>
+    <table *ngIf="!loading && recentCases.length > 0" class="data-table">
+      <thead>
+        <tr>
+          <th>PRN</th><th>Triage</th><th>Complaint</th><th>Status</th><th>Time</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of recentCases" (click)="viewCase(c.id)" class="clickable">
+          <td>{{ c.prn }}</td>
+          <td><span class="triage-dot" [class]="'triage-' + c.triageCategory"></span> {{ c.triageCategory }}</td>
+          <td class="truncate">{{ c.presentingComplaint }}</td>
+          <td>{{ c.status }}</td>
+          <td>{{ c.createdAt | date:'short' }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <div *ngIf="!loading && recentCases.length === 0" class="empty-state">No recent cases.</div>
+  </div>
+</div>

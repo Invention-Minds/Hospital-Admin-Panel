@@ -1,0 +1,123 @@
+<div class="page">
+  <app-page-header
+    title="Register MLC Case"
+    subtitle="MRD.2 — medico-legal case registration"
+    [patientName]="emergency?.patientName ?? null"
+    [patientPrn]="emergency?.prn ?? null">
+  </app-page-header>
+
+  <form
+    class="form"
+    [formGroup]="form"
+    (ngSubmit)="submit()"
+    novalidate
+    data-testid="mlc-register-form">
+    <section class="form__section">
+      <h2 class="form__section-heading">Case identifier</h2>
+
+      <div class="form__field">
+        <label for="emergencyId" class="form__label">Emergency case ID *</label>
+        <input
+          pInputText
+          id="emergencyId"
+          type="text"
+          formControlName="emergencyId"
+          class="form__input"
+          [class.form__input--error]="shouldShowError('emergencyId')"
+          [readonly]="emergency !== null"
+          [attr.aria-readonly]="emergency !== null"
+        />
+        <small
+          *ngIf="emergency"
+          class="form__hint"
+          data-testid="emergency-context">
+          Linked to {{ emergency.patientName }} · PRN {{ emergency.prn }}<span *ngIf="emergency.age != null"> · {{ emergency.age }}y</span>
+        </small>
+        <small
+          *ngIf="shouldShowError('emergencyId')"
+          class="form__error"
+          data-testid="err-emergencyId">
+          Emergency case ID is required.
+        </small>
+      </div>
+
+      <div class="form__field">
+        <label for="caseType" class="form__label">Case type *</label>
+        <p-dropdown
+          inputId="caseType"
+          formControlName="caseType"
+          [options]="caseTypes"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Select a case type"
+          styleClass="form__dropdown"
+          [class.form__input--error]="shouldShowError('caseType')"
+          data-testid="case-type">
+        </p-dropdown>
+        <small
+          *ngIf="shouldShowError('caseType')"
+          class="form__error"
+          data-testid="err-caseType">
+          Case type is required.
+        </small>
+      </div>
+    </section>
+
+    <section class="form__section">
+      <h2 class="form__section-heading">Police coordination (optional)</h2>
+
+      <div class="form__field">
+        <label for="policeStationName" class="form__label">Police station</label>
+        <input
+          pInputText
+          id="policeStationName"
+          type="text"
+          formControlName="policeStationName"
+          class="form__input"
+          placeholder="e.g. Koramangala PS"
+        />
+      </div>
+
+      <div class="form__grid">
+        <div class="form__field">
+          <label for="fir_No" class="form__label">FIR number</label>
+          <input
+            pInputText
+            id="fir_No"
+            type="text"
+            formControlName="fir_No"
+            class="form__input"
+            placeholder="FIR-2026-…"
+          />
+        </div>
+        <div class="form__field">
+          <label for="fir_Date" class="form__label">FIR date</label>
+          <p-calendar
+            inputId="fir_Date"
+            formControlName="fir_Date"
+            dateFormat="yy-mm-dd"
+            [showIcon]="true"
+            styleClass="form__calendar">
+          </p-calendar>
+        </div>
+      </div>
+    </section>
+
+    <div class="form__footer">
+      <button
+        type="button"
+        class="btn btn--cancel"
+        (click)="cancel()"
+        data-testid="btn-cancel">
+        Cancel
+      </button>
+      <button
+        type="submit"
+        class="btn btn--primary"
+        [disabled]="form.invalid || submitting"
+        data-testid="btn-register">
+        {{ submitting ? 'Registering…' : 'Register MLC' }}
+      </button>
+    </div>
+  </form>
+</div>

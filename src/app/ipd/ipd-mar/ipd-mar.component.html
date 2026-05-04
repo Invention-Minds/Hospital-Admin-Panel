@@ -1,0 +1,156 @@
+<div class="page">
+  <app-page-header
+    title="Medication Administration Record"
+    subtitle="MOM.4 — ward-round administration log"
+    [patientName]="patient?.name ?? null"
+    [patientPrn]="patient?.prn ?? null"
+    [admissionId]="admissionId || null">
+  </app-page-header>
+
+  <app-admission-tabs [admissionId]="admissionId"></app-admission-tabs>
+
+  <!-- ========== Section 1: Pending ========== -->
+  <section class="section" data-testid="mar-pending-section">
+    <div class="section__head">
+      <h2 class="section__title">Pending medications</h2>
+      <p class="section__subtitle">Due now — most overdue first</p>
+    </div>
+
+    <div *ngIf="loadingPending" class="section__loading" data-testid="pending-loading">
+      Loading…
+    </div>
+
+    <app-empty-state
+      *ngIf="!loadingPending && pendingRx.length === 0"
+      text="No medications pending administration"
+      secondaryText="Active IPD prescriptions waiting for this admission will appear here."
+      data-testid="pending-empty">
+    </app-empty-state>
+
+    <ul *ngIf="!loadingPending && pendingRx.length > 0"
+        class="rows"
+        data-testid="pending-rows">
+      <li *ngFor="let rx of pendingRx; trackBy: trackRxById"
+          class="row"
+          [attr.data-testid]="'pending-row-' + rx.id">
+        <div class="row__meta">
+          <span class="row__drug">{{ displayDrugName(rx) }}</span>
+          <span class="row__brand" *ngIf="rx.brandName">{{ rx.brandName }}</span>
+        </div>
+        <dl class="row__fields">
+          <dt>Next due</dt>
+          <dd>{{ rx.nextAdminTime ? (rx.nextAdminTime | date: 'shortTime') : '—' }}</dd>
+          <dt>Route</dt><dd>{{ rx.route }}</dd>
+          <dt>Frequency</dt><dd>{{ rx.frequency }}</dd>
+          <dt>Qty</dt><dd>{{ rx.quantity }}</dd>
+        </dl>
+        <div class="row__actions">
+          <button type="button"
+                  class="btn btn--primary"
+                  (click)="openAdminister(rx)"
+                  [attr.data-testid]="'btn-administer-' + rx.id">
+            Administer
+          </button>
+        </div>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ========== Section 2: Administered log ========== -->
+  <section class="section" data-testid="mar-administered-section">
+    <div class="section__head">
+      <h2 class="section__title">Administered log</h2>
+      <p class="section__subtitle">Most recent first</p>
+    </div>
+
+    <div *ngIf="loadingAdministered" class="section__loading" data-testid="administered-loading">
+      Loading…
+    </div>
+
+    <app-empty-state
+      *ngIf="!loadingAdministered && administeredLogs.length === 0"
+      text="No administrations recorded today"
+      secondaryText="Successfully administered medications will appear here."
+      data-testid="administered-empty">
+    </app-empty-state>
+
+    <ul *ngIf="!loadingAdministered && administeredLogs.length > 0"
+        class="rows"
+        data-testid="administered-rows">
+      <li *ngFor="let log of administeredLogs; trackBy: trackLogById"
+          class="row"
+          [attr.data-testid]="'administered-row-' + log.id">
+        <div class="row__meta">
+          <span class="row__drug">{{ displayLogDrugName(log) }}</span>
+          <span class="row__brand" *ngIf="log.prescription?.brandName">
+            {{ log.prescription?.brandName }}
+          </span>
+        </div>
+        <dl class="row__fields">
+          <dt>Given at</dt><dd>{{ log.administeredAt | date: 'medium' }}</dd>
+          <dt>By</dt><dd>{{ log.administeredBy || '—' }}</dd>
+          <dt>Qty</dt><dd>{{ log.quantity }}</dd>
+          <dt>Route</dt><dd>{{ log.route }}</dd>
+          <dt *ngIf="log.remarks">Remarks</dt>
+          <dd *ngIf="log.remarks">{{ log.remarks }}</dd>
+        </dl>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ========== Administer modal ========== -->
+  <p-dialog
+    [(visible)]="administerModalVisible"
+    modal="true"
+    [closable]="false"
+    [style]="{ width: '520px' }"
+    [showHeader]="false">
+    <div class="dialog" *ngIf="administerModalVisible && administeringRx as rx">
+      <div class="dialog__header dialog__header--primary">
+        <h2 class="dialog__title">Administer {{ displayDrugName(rx) }}</h2>
+        <button type="button" class="dialog__close" aria-label="Close"
+                (click)="cancelAdminister()"
+                data-testid="administer-close">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+      <form class="dialog__body" [formGroup]="administerForm" (ngSubmit)="submitAdminister()">
+        <div class="form__field">
+          <label for="administer-quantity" class="form__label">Quantity *</label>
+          <input pInputText id="administer-quantity"
+                 class="form__input"
+                 type="number"
+                 min="1"
+                 formControlName="quantity" />
+        </div>
+        <div class="form__field">
+          <label for="administer-route" class="form__label">Route *</label>
+          <input pInputText id="administer-route" class="form__input" formControlName="route" />
+        </div>
+        <div class="form__field">
+          <label for="administer-remarks" class="form__label">Remarks</label>
+          <textarea pInputText
+                    id="administer-remarks"
+                    rows="3"
+                    class="form__textarea"
+                    formControlName="remarks"
+                    placeholder="Optional"></textarea>
+        </div>
+        <div class="dialog__footer">
+          <button type="button"
+                  class="btn btn--cancel"
+                  (click)="cancelAdminister()"
+                  data-testid="administer-cancel">
+            Cancel
+          </button>
+          <button type="submit"
+                  class="btn btn--primary"
+                  [disabled]="administerForm.invalid || administerSubmitting"
+                  data-testid="administer-submit">
+            {{ administerSubmitting ? 'Recording…' : 'Record administration' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </p-dialog>
+</div>

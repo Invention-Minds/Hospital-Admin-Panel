@@ -1,0 +1,193 @@
+<div class="lama-dama-container">
+  <div class="page-header">
+    <div>
+      <h1>LAMA / DAMA Records</h1>
+      <p class="subtitle">Left / Discharged Against Medical Advice — NABH ACC.6 compliant</p>
+    </div>
+    <div class="page-header__actions">
+      <button class="btn-secondary"
+              (click)="refresh()"
+              data-testid="btn-refresh">
+        <i class="pi pi-refresh"></i> Refresh
+      </button>
+      <button class="btn-primary"
+              (click)="createRecord('lama')"
+              data-testid="btn-new-lama">
+        <i class="pi pi-plus"></i> New LAMA
+      </button>
+      <button class="btn-primary"
+              (click)="createRecord('dama')"
+              data-testid="btn-new-dama">
+        <i class="pi pi-plus"></i> New DAMA
+      </button>
+    </div>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Total Records</div>
+      <div class="stat-value">{{ stats?.total || 0 }}</div>
+    </div>
+    <div class="stat-card stat-warning">
+      <div class="stat-label">LAMA Cases</div>
+      <div class="stat-value">{{ stats?.lamaTotal || 0 }}</div>
+    </div>
+    <div class="stat-card stat-info">
+      <div class="stat-label">DAMA Cases</div>
+      <div class="stat-value">{{ stats?.damaTotal || 0 }}</div>
+    </div>
+    <div class="stat-card stat-success" *ngIf="compliance">
+      <div class="stat-label">Compliance Rate</div>
+      <div class="stat-value">
+        {{ compliance?.lama?.complianceRate || 0 }}% / {{ compliance?.dama?.complianceRate || 0 }}%
+      </div>
+      <div class="stat-sublabel">LAMA / DAMA</div>
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button (click)="switchTab('lama')" [class.active]="activeTab === 'lama'" class="tab-btn">
+      LAMA Records ({{ lamaRecords.length }})
+    </button>
+    <button (click)="switchTab('dama')" [class.active]="activeTab === 'dama'" class="tab-btn">
+      DAMA Records ({{ damaRecords.length }})
+    </button>
+  </div>
+
+  <!-- LAMA Tab -->
+  <div *ngIf="activeTab === 'lama'" class="tab-content">
+    <div *ngIf="loading" class="loading">Loading…</div>
+    <table *ngIf="!loading && hasLama()" class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Emergency ID</th>
+          <th>LAMA Time</th>
+          <th>Risk Explained</th>
+          <th>Reason</th>
+          <th>Witness</th>
+          <th>Signatures</th>
+          <th>HMIS sync</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of lamaRecords"
+            class="row-clickable"
+            (click)="openDetail('lama', r.id)"
+            [attr.data-testid]="'lama-row-' + r.id">
+          <td><strong>LAMA-{{ r.id }}</strong></td>
+          <td>{{ r.emergencyId }}</td>
+          <td>{{ r.lamaTime | date:'short' }}</td>
+          <td>
+            <span *ngIf="r.riskExplained" class="badge badge-success">Yes</span>
+            <span *ngIf="!r.riskExplained" class="badge badge-danger">No</span>
+          </td>
+          <td class="truncate">{{ r.reasonForLama }}</td>
+          <td>{{ r.witnessName || '—' }}</td>
+          <td>
+            <span *ngIf="r.patientSignature" class="sig-dot sig-done" title="Patient signed"></span>
+            <span *ngIf="!r.patientSignature" class="sig-dot sig-missing" title="Patient signature missing"></span>
+            <span *ngIf="r.witnessSignature" class="sig-dot sig-done" title="Witness signed"></span>
+            <span *ngIf="!r.witnessSignature" class="sig-dot sig-missing" title="Witness signature missing"></span>
+          </td>
+          <td>
+            <app-hmis-sync-indicator
+              [hmisId]="lamaHmisId(r)"
+              prefix="HMIS-LAMA"
+              size="small"
+              [attr.data-testid]="'lama-sync-' + r.id">
+            </app-hmis-sync-indicator>
+          </td>
+          <td class="actions-cell">
+            <button class="action-btn"
+                    (click)="$event.stopPropagation(); verifyRecord('lama', r.id)"
+                    title="Verify documentation">
+              <i class="pi pi-check-circle"></i>
+            </button>
+            <button class="action-btn"
+                    (click)="$event.stopPropagation(); downloadReport('lama', r.id)"
+                    title="Download PDF">
+              <i class="pi pi-download"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <app-empty-state
+      *ngIf="!loading && !hasLama()"
+      text="No LAMA records"
+      secondaryText="Click New LAMA above to record a Left-Against-Medical-Advice case."
+      data-testid="lama-empty">
+    </app-empty-state>
+  </div>
+
+  <!-- DAMA Tab -->
+  <div *ngIf="activeTab === 'dama'" class="tab-content">
+    <table *ngIf="hasDama()" class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Emergency ID</th>
+          <th>Discharge Time</th>
+          <th>Patient Declined</th>
+          <th>Recommendation</th>
+          <th>Witness</th>
+          <th>Signatures</th>
+          <th>HMIS sync</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of damaRecords"
+            class="row-clickable"
+            (click)="openDetail('dama', r.id)"
+            [attr.data-testid]="'dama-row-' + r.id">
+          <td><strong>DAMA-{{ r.id }}</strong></td>
+          <td>{{ r.emergencyId }}</td>
+          <td>{{ r.dischargeTime | date:'short' }}</td>
+          <td>
+            <span *ngIf="r.patientDeclinesAdvice" class="badge badge-warning">Yes</span>
+            <span *ngIf="!r.patientDeclinesAdvice" class="badge badge-success">No</span>
+          </td>
+          <td class="truncate">{{ r.doctorRecommendation }}</td>
+          <td>{{ r.witnessName || '—' }}</td>
+          <td>
+            <span *ngIf="r.patientSignature" class="sig-dot sig-done"></span>
+            <span *ngIf="!r.patientSignature" class="sig-dot sig-missing"></span>
+            <span *ngIf="r.witnessSignature" class="sig-dot sig-done"></span>
+            <span *ngIf="!r.witnessSignature" class="sig-dot sig-missing"></span>
+          </td>
+          <td>
+            <app-hmis-sync-indicator
+              [hmisId]="damaHmisId(r)"
+              prefix="HMIS-DAMA"
+              size="small"
+              [attr.data-testid]="'dama-sync-' + r.id">
+            </app-hmis-sync-indicator>
+          </td>
+          <td class="actions-cell">
+            <button class="action-btn"
+                    (click)="$event.stopPropagation(); verifyRecord('dama', r.id)"
+                    title="Verify documentation">
+              <i class="pi pi-check-circle"></i>
+            </button>
+            <button class="action-btn"
+                    (click)="$event.stopPropagation(); downloadReport('dama', r.id)"
+                    title="Download PDF">
+              <i class="pi pi-download"></i>
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <app-empty-state
+      *ngIf="!hasDama()"
+      text="No DAMA records"
+      secondaryText="Click New DAMA above to record a Discharged-Against-Medical-Advice case."
+      data-testid="dama-empty">
+    </app-empty-state>
+  </div>
+</div>

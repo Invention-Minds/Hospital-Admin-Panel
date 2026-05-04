@@ -88,6 +88,16 @@ export class TvComponent implements OnInit, OnDestroy {
   visibleDoctors: any[] = [];
   doctorSlides: any[][] = [];
 
+  // ── Patient announcement (TTS) ──
+  audioUnlocked: boolean = false;
+  isMuted: boolean = false;
+  currentBanner: { patient: string; doctor: string; room?: string | number; status: 'speaking' | 'done' } | null = null;
+  private bannerTimer: any = null;
+  private voicesCache: SpeechSynthesisVoice[] = [];
+  // Default announcement window 06:00 → 22:00; configurable per channel via TV Control
+  announcementStartHour: number = 6;
+  announcementEndHour: number = 22;
+
   @ViewChild('popupVideo') popupVideo!: ElementRef; // Reference for video tag
   constructor(
     private route: ActivatedRoute,
@@ -103,6 +113,9 @@ export class TvComponent implements OnInit, OnDestroy {
     this.updateDateTime();
     this.fetchLatestAds()
     this.startPopupRotation();
+    this.loadAnnouncementPrefs();
+    this.preloadVoices();
+    this.attachAutoUnlockListeners();
 
     this.intervalId = setInterval(() => {
       this.updateDateTime();
@@ -170,6 +183,20 @@ export class TvComponent implements OnInit, OnDestroy {
       const type = JSON.parse(event.data);
       this.fetchLatestAds()
 
+    });
+
+    // Cross-browser consultation-start — fires on every connected TV regardless of device.
+    // updateAppointment() filters internally: if the doctor isn't in this TV's doctors[],
+    // it silently does nothing — so a doctor can be assigned to multiple channels and only
+    // those TVs will actually announce.
+    this.eventSource.addEventListener('consultationStarted', (event: MessageEvent) => {
+      try {
+        const payload = JSON.parse(event.data);
+        console.log('[TV-SSE] consultationStarted received:', payload);
+        this.updateAppointment(payload.doctorId, payload.appointmentId);
+      } catch (e) {
+        console.error('[TV-SSE] consultationStarted parse failed', e);
+      }
     });
 
   }
@@ -480,7 +507,6 @@ export class TvComponent implements OnInit, OnDestroy {
 
 
   updateAppointment(doctorId: number, appointmentId: number): void {
-    // console.log("update")
     const doctor = this.doctors.find((doc) => doc.doctorId === doctorId);
     if (doctor) {
       const appointmentIndex = doctor.patients.findIndex((appt: any) => appt.id === appointmentId);
@@ -490,7 +516,6 @@ export class TvComponent implements OnInit, OnDestroy {
 
         // Filter out checked-out appointments
         doctor.patients = doctor.patients.filter((appt: any) => !appt.checkedOut);
-        // console.log(doctor.patients)
 
         // Update the status of remaining patients
         if (doctor.patients.length > 0) {
@@ -498,6 +523,9 @@ export class TvComponent implements OnInit, OnDestroy {
           if (doctor.patients.length > 1) {
             doctor.patients[1].status = 'Next';
           }
+
+          // 🔊 Trilingual audio + visual banner announcement
+          this.announceNextPatient(doctor.patients[0], doctor.doctorName || doctor.name, doctor.roomNo);
         }
       }
     }
@@ -541,6 +569,7 @@ export class TvComponent implements OnInit, OnDestroy {
     if (this.doctorSlideInterval) {
       clearInterval(this.doctorSlideInterval);
     }
+    this.detachAutoUnlockListeners();
   }
   isFourDoctors(): boolean {
     return this.doctors.length >= 4;
@@ -885,5 +914,212 @@ export class TvComponent implements OnInit, OnDestroy {
     target.src = '/doctor-image.jpg'; // Fallback image
   }
 
+  // ============================================================
+  // Patient Announcement (Trilingual: English + Hindi + Kannada)
+  // Browser SpeechSynthesis API — zero-cost, on-device TTS
+  // ============================================================
+
+  /** Load mute + time window preferences from localStorage (per channel) */
+  private loadAnnouncementPrefs(): void {
+    const channelId = this.route.snapshot.paramMap.get('channelId') || 'default';
+    this.isMuted = localStorage.getItem(`tv-mute-${channelId}`) === '1';
+    const start = localStorage.getItem(`tv-announce-start-${channelId}`);
+    const end = localStorage.getItem(`tv-announce-end-${channelId}`);
+    if (start !== null) this.announcementStartHour = +start;
+    if (end !== null) this.announcementEndHour = +end;
+  }
+
+  /** Preload available voices (some browsers load them async) */
+  private preloadVoices(): void {
+    if (!('speechSynthesis' in window)) return;
+    this.voicesCache = window.speechSynthesis.getVoices();
+    if (this.voicesCache.length === 0) {
+      window.speechSynthesis.onvoiceschanged = () => {
+        this.voicesCache = window.speechSynthesis.getVoices();
+      };
+    }
+  }
+
+  /** First-tap audio unlock — required by browser autoplay policy */
+  unlockAudio(): void {
+    if (this.audioUnlocked) return;
+    this.audioUnlocked = true;
+    console.log('[TV-ANNOUNCE] ✅ Audio unlocked');
+    if ('speechSynthesis' in window) {
+      // Dummy speak to unlock the audio engine
+      const u = new SpeechSynthesisUtterance(' ');
+      u.volume = 0;
+      window.speechSynthesis.speak(u);
+      console.log('[TV-ANNOUNCE] Speech engine warmed up. Available voices:',
+        window.speechSynthesis.getVoices().map(v => `${v.lang}:${v.name}`).join(', '));
+    } else {
+      console.error('[TV-ANNOUNCE] ❌ Browser does not support speechSynthesis');
+    }
+  }
+
+  private autoUnlockHandler = () => this.unlockAudio();
+
+  /** Auto-unlock audio on ANY user interaction — better UX than forcing overlay tap */
+  private attachAutoUnlockListeners(): void {
+    // Capture-phase, once-only listeners on common interaction events
+    const events: (keyof DocumentEventMap)[] = ['click', 'keydown', 'touchstart', 'pointerdown'];
+    events.forEach(evt => {
+      document.addEventListener(evt, this.autoUnlockHandler, { once: false, capture: true });
+    });
+  }
+
+  private detachAutoUnlockListeners(): void {
+    const events: (keyof DocumentEventMap)[] = ['click', 'keydown', 'touchstart', 'pointerdown'];
+    events.forEach(evt => {
+      document.removeEventListener(evt, this.autoUnlockHandler, { capture: true });
+    });
+  }
+
+  /** Toggle mute (saved per channel) */
+  toggleMute(): void {
+    this.isMuted = !this.isMuted;
+    const channelId = this.route.snapshot.paramMap.get('channelId') || 'default';
+    localStorage.setItem(`tv-mute-${channelId}`, this.isMuted ? '1' : '0');
+    if (this.isMuted) {
+      window.speechSynthesis?.cancel();
+    }
+  }
+
+  /** Check if current time is within announcement window */
+  private isWithinAnnouncementWindow(): boolean {
+    const hour = new Date().getHours();
+    const start = this.announcementStartHour;
+    const end = this.announcementEndHour;
+    if (start <= end) return hour >= start && hour < end;
+    return hour >= start || hour < end; // handles overnight windows
+  }
+
+  /** Pick the best voice for a given language */
+  private pickVoice(langPrefix: string): SpeechSynthesisVoice | null {
+    const voices = this.voicesCache.length ? this.voicesCache : window.speechSynthesis.getVoices();
+    return voices.find(v => v.lang.toLowerCase().startsWith(langPrefix.toLowerCase())) || null;
+  }
+
+  /** Speak a single phrase, returns Promise that resolves on end */
+  private speakOnce(text: string, langCode: string, rate = 0.9): Promise<void> {
+    return new Promise(resolve => {
+      if (!('speechSynthesis' in window)) return resolve();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = langCode;
+      u.rate = rate;
+      u.volume = 0.95;
+      u.pitch = 1.0;
+      const voice = this.pickVoice(langCode.split('-')[0]);
+      if (voice) {
+        u.voice = voice;
+        console.log(`[TV-SPEAK] ${langCode}: voice=${voice.name}, text="${text.substring(0, 60)}..."`);
+      } else {
+        console.warn(`[TV-SPEAK] ⚠️ No voice found for ${langCode} — falling back to default`);
+      }
+      u.onstart = () => console.log(`[TV-SPEAK] ▶️ ${langCode} started`);
+      u.onend = () => { console.log(`[TV-SPEAK] ✅ ${langCode} ended`); resolve(); };
+      u.onerror = (e) => { console.error(`[TV-SPEAK] ❌ ${langCode} error:`, e); resolve(); };
+      window.speechSynthesis.speak(u);
+    });
+  }
+
+  /** Sleep helper */
+  private sleep(ms: number): Promise<void> {
+    return new Promise(r => setTimeout(r, ms));
+  }
+
+  /**
+   * Announce next patient — trilingual (English + Hindi + Kannada), repeated twice.
+   * Also shows the visual banner regardless of mute/window so deaf-friendly.
+   */
+  async announceNextPatient(patient: any, doctorName: string, roomNo?: string | number): Promise<void> {
+    console.log('[TV-ANNOUNCE] Triggered for patient:', patient, 'doctor:', doctorName, 'room:', roomNo);
+    if (!patient || !patient.patientName) {
+      console.warn('[TV-ANNOUNCE] ⚠️ No patient or patientName — aborting');
+      return;
+    }
+
+    // Always show the visual banner (even if muted)
+    this.showBanner(patient.patientName, doctorName, roomNo);
+
+    // De-dupe — don't re-announce the same patient on page reload
+    const key = `tv-last-announced-${patient.id || patient.patientName}`;
+    if (sessionStorage.getItem(key) === '1') {
+      console.log('[TV-ANNOUNCE] ⚠️ Already announced this patient (dedupe). Key:', key);
+      return;
+    }
+    sessionStorage.setItem(key, '1');
+
+    // Skip audio if muted, outside time window, or audio not unlocked
+    if (this.isMuted) {
+      console.log('[TV-ANNOUNCE] ⚠️ Audio is MUTED — skipping speech');
+      return;
+    }
+    if (!this.isWithinAnnouncementWindow()) {
+      console.log('[TV-ANNOUNCE] ⚠️ Outside announcement window:', this.announcementStartHour, '-', this.announcementEndHour);
+      return;
+    }
+    if (!this.audioUnlocked) {
+      console.warn('[TV-ANNOUNCE] ❌ Audio NOT UNLOCKED — user must tap the overlay first!');
+      return;
+    }
+    if (!('speechSynthesis' in window)) {
+      console.error('[TV-ANNOUNCE] ❌ Browser does not support speechSynthesis');
+      return;
+    }
+
+    console.log('[TV-ANNOUNCE] ✅ All checks passed — speaking now');
+
+    // Cancel any pending speech to avoid overlap
+    window.speechSynthesis.cancel();
+
+    const name = patient.patientName;
+    const doc = doctorName || 'the doctor';
+    const room = roomNo ? String(roomNo) : '';
+
+    // Build phrases for each language — include room number when available
+    const englishText = room
+      ? `Patient ${name}, please proceed to room number ${room} for ${doc}.`
+      : `Patient ${name}, please proceed to ${doc}'s room.`;
+    const hindiText = room
+      ? `मरीज़ ${name}, कृपया कमरा नंबर ${room} में डॉक्टर ${doc} के पास जाएं।`
+      : `मरीज़ ${name}, कृपया डॉक्टर ${doc} के कमरे में जाएं।`;
+    const kannadaText = room
+      ? `ರೋಗಿ ${name}, ದಯವಿಟ್ಟು ಕೋಣೆ ಸಂಖ್ಯೆ ${room} ರಲ್ಲಿರುವ ವೈದ್ಯ ${doc} ಅವರ ಬಳಿಗೆ ತೆರಳಿ.`
+      : `ರೋಗಿ ${name}, ದಯವಿಟ್ಟು ವೈದ್ಯ ${doc} ಅವರ ಕೋಣೆಗೆ ತೆರಳಿ.`;
+
+    // Two full rounds — each round speaks all 3 languages
+    for (let round = 0; round < 2; round++) {
+      await this.speakOnce(englishText, 'en-IN', 0.9);
+      await this.sleep(400);
+      await this.speakOnce(hindiText, 'hi-IN', 0.85);
+      await this.sleep(400);
+      await this.speakOnce(kannadaText, 'kn-IN', 0.85);
+      if (round === 0) await this.sleep(1500);
+    }
+  }
+
+  /** Show the visual banner overlay — auto-dismisses after 35 seconds */
+  private showBanner(patientName: string, doctorName: string, roomNo?: string | number): void {
+    if (this.bannerTimer) clearTimeout(this.bannerTimer);
+    this.currentBanner = { patient: patientName, doctor: doctorName, room: roomNo, status: 'speaking' };
+    this.bannerTimer = setTimeout(() => {
+      this.currentBanner = null;
+    }, 35000);
+  }
+
+  closeBanner(): void {
+    this.currentBanner = null;
+    if (this.bannerTimer) clearTimeout(this.bannerTimer);
+  }
+
+  /** Update announcement time window from TV Control setting */
+  setAnnouncementWindow(startHour: number, endHour: number): void {
+    this.announcementStartHour = startHour;
+    this.announcementEndHour = endHour;
+    const channelId = this.route.snapshot.paramMap.get('channelId') || 'default';
+    localStorage.setItem(`tv-announce-start-${channelId}`, String(startHour));
+    localStorage.setItem(`tv-announce-end-${channelId}`, String(endHour));
+  }
 
 }

@@ -1,0 +1,147 @@
+/* ============================================================================
+ * MlcDetailComponent (Sprint 3d Screen B)
+ * Multi-section detail view with inline-edit forms + HMIS sync indicator.
+ * Token-only.
+ * ============================================================================ */
+
+.page {
+  padding: var(--space-40) var(--space-20);
+  font-family: var(--font-family-primary);
+  color: var(--color-text-heading);
+  background: var(--color-surface-page);
+  min-height: 100vh;
+}
+
+.loading {
+  padding: var(--space-30);
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+  background: var(--color-surface-card);
+  border-radius: var(--radius-4xl);
+  box-shadow: var(--shadow-elevation-1);
+}
+
+/* ---------- Section cards ---------- */
+.section {
+  background: var(--color-surface-card);
+  border-radius: var(--radius-4xl);
+  box-shadow: var(--shadow-elevation-1);
+  padding: var(--space-20);
+  margin-bottom: var(--space-30);
+}
+.section__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-16);
+  margin-bottom: var(--space-20);
+  flex-wrap: wrap;
+}
+.section__title {
+  margin: 0;
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-xl);
+  color: var(--color-text-heading);
+}
+.section__subtitle {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
+.section__subtitle--muted {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+/* HMIS sync indicator migrated to shared P6 <app-hmis-sync-indicator> (Sprint 3.5) */
+
+/* ---------- Summary dl ---------- */
+.summary {
+  display: grid;
+  grid-template-columns: minmax(160px, max-content) 1fr;
+  column-gap: var(--space-20);
+  row-gap: var(--space-10);
+  margin: 0;
+  font-size: var(--font-size-sm);
+}
+.summary dt {
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-light);
+}
+.summary dd {
+  margin: 0;
+  color: var(--color-text-heading);
+  word-break: break-word;
+}
+
+/* ---------- Forms inside sections ---------- */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-20);
+}
+.form__field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+.form__label {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-heading);
+}
+:host ::ng-deep .form__input,
+:host ::ng-deep .form__textarea {
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-border-input);
+  border-radius: var(--radius-md);
+  padding: var(--space-16);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-heading);
+  width: 100%;
+  box-sizing: border-box;
+}
+:host ::ng-deep .form__input:focus,
+:host ::ng-deep .form__textarea:focus {
+  outline: none;
+  border: 2px solid var(--color-brand-navy-900);
+}
+:host ::ng-deep .form__input[readonly],
+:host ::ng-deep .form__textarea[readonly] {
+  background: var(--color-surface-alt);
+  color: var(--color-text-muted);
+}
+:host ::ng-deep .form__textarea {
+  resize: vertical;
+  min-height: 72px;
+}
+
+.form__footer {
+  display: flex;
+  justify-content: flex-end;
+}
+.btn {
+  font-family: var(--font-family-primary);
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-md);
+  border-radius: var(--radius-md);
+  padding: var(--space-8) var(--space-20);
+  height: 40px;
+  cursor: pointer;
+  border: none;
+}
+.btn:focus-visible {
+  outline: 2px solid var(--color-brand-navy-900);
+  outline-offset: 2px;
+}
+.btn:disabled {
+  background: var(--color-surface-alt);
+  color: var(--color-text-muted);
+  cursor: not-allowed;
+  border: none;
+}
+.btn--primary {
+  background: var(--color-brand-primary);
+  color: var(--color-text-on-dark);
+}

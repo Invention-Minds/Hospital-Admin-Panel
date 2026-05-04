@@ -1,0 +1,59 @@
+<div class="inactive-doctors-container">
+  <div class="header-row">
+    <h2 class="page-title">Inactive Doctors</h2>
+    <span class="count-badge" *ngIf="!isLoading">{{ inactiveDoctors.length }}</span>
+  </div>
+
+  <div class="table-wrapper" *ngIf="!isLoading">
+    <table class="inactive-table" *ngIf="inactiveDoctors.length > 0">
+      <thead>
+        <tr>
+          <th>Doctor Name</th>
+          <th>Department</th>
+          <th>Phone</th>
+          <th>Email</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let doctor of inactiveDoctors">
+          <td>{{ doctor.name }}</td>
+          <td>{{ doctor.departmentName || '-' }}</td>
+          <td>{{ doctor.phone_number || '-' }}</td>
+          <td>{{ doctor.email || '-' }}</td>
+          <td>
+            <button class="activate-button" (click)="openActivateDialog(doctor)">
+              Activate
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="empty-state" *ngIf="inactiveDoctors.length === 0">
+      <p>No inactive doctors.</p>
+    </div>
+  </div>
+
+  <div class="loader" *ngIf="isLoading"></div>
+
+  <div class="overlay" *ngIf="showActivateConfirmDialog">
+    <div class="dialog-container">
+      <div class="dialog-header">
+        <img src="/danger.png" alt="Warning Icon" class="warning-icon">
+      </div>
+      <div class="dialog-body">
+        <div class="dialog-title">Activate Doctor?</div>
+        <div class="dialog-message">
+          Do you want to activate {{ doctorToActivate?.name }}? They will appear again in booking and schedule screens.
+        </div>
+        <div class="dialog-actions">
+          <button class="confirm-button" (click)="confirmActivate()">Yes, Activate</button>
+          <button class="cancel-button" (click)="closeActivateDialog()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p-toast></p-toast>
+</div>

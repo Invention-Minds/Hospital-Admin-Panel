@@ -31,6 +31,14 @@ export class DoctorServiceService {
   deleteDoctor(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/doctors/${id}`);
   }
+
+  deactivateDoctor(id: number): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/doctors/${id}/deactivate`, {});
+  }
+
+  activateDoctor(id: number): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/doctors/${id}/activate`, {});
+  }
   // Get all doctors
   // getDoctors(): Observable<Doctor[]> {
   //   return this.http.get<Doctor[]>(`${this.apiUrl}/doctors`);

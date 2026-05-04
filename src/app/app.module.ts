@@ -52,6 +52,7 @@ import { AppointmentFormComponent } from './appointment/appointment-form/appoint
 import { DoctorDetailsComponent } from './doctor/doctor-details/doctor-details.component';
 import { DoctorOverviewComponent } from './doctor/doctor-overview/doctor-overview.component';
 import { DoctorAvailabilityComponent } from './doctor/doctor-availability/doctor-availability.component';
+import { InactiveDoctorsComponent } from './doctor/inactive-doctors/inactive-doctors.component';
 import { DoctorFormComponent } from './doctor/doctor-form/doctor-form.component';
 import { LoginComponent } from './login/login/login.component';
 import { SettingsComponent } from './settings/settings/settings.component';
@@ -194,6 +195,7 @@ import { CheckinReportComponent } from './report/checkin-report/checkin-report.c
     DoctorDetailsComponent,
     DoctorOverviewComponent,
     DoctorAvailabilityComponent,
+    InactiveDoctorsComponent,
     DoctorFormComponent,
     LoginComponent,
     SettingsComponent,

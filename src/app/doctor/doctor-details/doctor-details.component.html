@@ -42,8 +42,8 @@
           <!-- <button id="doctor-btn-{{ doctor.name }}" (click)="click()">Click Me</button> -->
           <button class="unavailable-button" (click)="openUnavailableModal(doctor)">Unavailable</button>
         </div>
-           <!-- Delete Icon with click event to delete the doctor -->
-      <img src="doc-delete.svg" class="doc-delete" (click)="deleteDoctor(doctor)" alt="Delete Icon">
+           <!-- Deactivate Icon with click event to deactivate the doctor -->
+      <img src="doc-delete.svg" class="doc-delete" (click)="deactivateDoctor(doctor)" alt="Deactivate Icon" title="Deactivate Doctor">
       </div>
     </div>
   </div>
@@ -79,8 +79,8 @@
       </div>
     </div>
   </div>
-  <!-- Delete Confirmation Dialog -->
-<div class="overlay" *ngIf="showDeleteConfirmDialog">
+  <!-- Deactivate Confirmation Dialog -->
+<div class="overlay" *ngIf="showDeactivateConfirmDialog">
   <div class="dialog-container">
       <div class="dialog-header">
           <img src="/danger.png" alt="Warning Icon" class="warning-icon">
@@ -88,11 +88,11 @@
       <div class="dialog-body">
           <div class="dialog-title">Are You Sure!</div>
           <div class="dialog-message">
-              Do you want to delete {{ doctorToDelete?.name }}? This action cannot be undone.
+              Do you want to deactivate {{ doctorToDeactivate?.name }}? They will be hidden from booking and schedule screens. Past records remain intact and you can reactivate them later from "Inactive Doctors".
           </div>
           <div class="dialog-actions">
-              <button class="delete-button" (click)="confirmDelete()">Yes, Delete it!</button>
-              <button class="cancel-button" (click)="closeDeleteDialog()">Cancel</button>
+              <button class="delete-button" (click)="confirmDeactivate()">Yes, Deactivate</button>
+              <button class="cancel-button" (click)="closeDeactivateDialog()">Cancel</button>
           </div>
       </div>
   </div>

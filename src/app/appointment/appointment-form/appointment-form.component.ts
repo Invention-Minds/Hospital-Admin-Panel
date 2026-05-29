@@ -9,7 +9,7 @@ import { ChangeDetectorRef } from '@angular/core';
 import { AuthServiceService } from '../../services/auth/auth-service.service';
 import { response } from 'express';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { app } from '../../../../server';
@@ -1552,13 +1552,47 @@ isLoading: boolean = false;
     }
     return invalidControls;
   }
-  confirm() {
+  async confirm() {
 
     this.getInvalidControls(this.appointmentForm);
     if (!this.appointmentForm.valid) {
       this.messageService.add({ severity: 'warn', summary: 'Warn', detail: 'Some fields are not filled' });
       return;
     }
+
+    // Re-validate the chosen slot at submit time. Closes the stale-cache window where
+    // two staff open the form, both see the slot as free, and one submits after the
+    // other has already booked it. Skipped for Cancel — cancellation doesn't claim a slot.
+    if (this.appointmentForm.value.appointmentStatus !== 'Cancel') {
+      try {
+        const doctorId = this.doctorId;
+        const chosenTime = this.doctorType === 'Visiting Consultant'
+          ? this.formatTimeTo12Hour(this.appointmentForm.value.appointmentTime)
+          : this.appointmentForm.value.appointmentTime;
+        if (doctorId && chosenTime) {
+          const formattedDate = this.formatDate(this.appointmentForm.value.appointmentDate);
+          const slots = await firstValueFrom(this.appointmentService.getBookedSlots(doctorId, formattedDate));
+          const taken = (slots ?? []).some((s: any) => !s.complete && s.time === chosenTime);
+          const currentAppt = this.currentAppointment || this.appointment;
+          const isOwnSlot = !!(currentAppt
+            && currentAppt.doctorId === doctorId
+            && currentAppt.date === formattedDate
+            && currentAppt.time === chosenTime);
+          if (taken && !isOwnSlot) {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Slot Unavailable',
+              detail: 'This slot was just booked. Please pick another time.'
+            });
+            return;
+          }
+        }
+      } catch (revalErr) {
+        // Fail open: backend transaction guard will still reject duplicates with 409.
+        console.error('Slot re-validation failed; letting backend decide:', revalErr);
+      }
+    }
+
     // console.log(this.appointmentForm.value)
     if (this.appointmentForm.value.appointmentStatus === 'Cancel') {
 

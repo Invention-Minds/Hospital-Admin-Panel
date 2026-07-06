@@ -247,7 +247,7 @@ export class EstimationApprovedComponent {
     this.estimationService.generateAndSendPdf(estimationData.estimationId, estimationData).subscribe(
       (pdfResponse) => {
         // console.log("✅ PDF Generated & Sent via WhatsApp:", pdfResponse);
-        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'PDF Generated & Sent PDF via WhatsApp:!' });
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'PDF Generated & Sent via WhatsApp!' });
       },
       (pdfError) => {
         console.error("❌ Error generating PDF:", pdfError);

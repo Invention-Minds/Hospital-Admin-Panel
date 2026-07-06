@@ -7,6 +7,7 @@ import { DoctorServiceService } from '../../services/doctor-details/doctor-servi
 import { MessageService } from 'primeng/api';
 import { ChangeDetectorRef } from '@angular/core';
 import { AuthServiceService } from '../../services/auth/auth-service.service';
+import { AlertService } from '../../services/alert.service';
 import { response } from 'express';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -116,7 +117,7 @@ isLoading: boolean = false;
 
 
 
-  constructor(private fb: FormBuilder, private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private messageService: MessageService, private cdr: ChangeDetectorRef, private authService: AuthServiceService, private router: Router) {
+  constructor(private fb: FormBuilder, private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private messageService: MessageService, private cdr: ChangeDetectorRef, private authService: AuthServiceService, private router: Router, private alertSvc: AlertService) {
     // this.setMinTime();
   }
 
@@ -1489,7 +1490,7 @@ isLoading: boolean = false;
         .subscribe(
           response => {
             // console.log('Slot marked as complete:', response);
-            alert('Slot successfully marked as complete!');
+            this.alertSvc.show('Slot successfully marked as complete!', { title: 'Success' });
             const username = localStorage.getItem('username')
             this.appointmentService.checkedinAppointment(appointmentId, username).subscribe({
               next: (response) => {
@@ -1506,7 +1507,7 @@ isLoading: boolean = false;
 
           error => {
             console.error('Error marking slot as complete:', error);
-            alert('Failed to mark the slot as complete.');
+            this.alertSvc.show('Failed to mark the slot as complete.', { severity: 'danger', title: 'Error' });
           }
         );
 

@@ -1,0 +1,245 @@
+<div class="mgmt-dashboard" *ngIf="!isLoading; else loadingTpl">
+  <ng-container *ngIf="summary as s">
+    <header class="dash-header">
+      <div>
+        <div class="greeting">{{ greeting }},</div>
+        <h1 class="page-title">
+          Hospital Overview
+          <span class="role-chip">Management</span>
+        </h1>
+        <div class="today-label">{{ todayLabel }}</div>
+      </div>
+      <div>
+        <button class="refresh-btn" (click)="refresh()" title="Refresh">
+          <i class="pi pi-refresh"></i>
+          <span>Refresh</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="error-banner" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+    <!-- ─── KPI strip ──────────────────────────────────────────────── -->
+    <section class="kpi-strip">
+      <app-kpi-tile
+        icon="pi pi-users"
+        label="Footfall today"
+        [value]="s.footfallToday.total"
+        subLabel="OPD"
+        [subValue]="s.footfallToday.opd"
+        accent="blue"
+        tooltip="OPD + IPD + ER + Day Care">
+      </app-kpi-tile>
+      <app-kpi-tile
+        icon="pi pi-home"
+        label="Bed occupancy"
+        [value]="s.bedOccupancy.percent !== null ? (s.bedOccupancy.percent + '%') : '—'"
+        subLabel="Beds"
+        [subValue]="s.bedOccupancy.occupied + ' / ' + s.bedOccupancy.total"
+        [accent]="(s.bedOccupancy.percent || 0) > 90 ? 'red' : 'violet'">
+      </app-kpi-tile>
+      <app-kpi-tile
+        icon="pi pi-wallet"
+        label="Revenue today"
+        [value]="formatINR(s.revenue.today)"
+        subLabel="MTD"
+        [subValue]="formatINR(s.revenue.mtd)"
+        accent="green">
+      </app-kpi-tile>
+      <app-kpi-tile
+        icon="pi pi-sign-out"
+        label="Discharges today"
+        [value]="s.discharges.completed"
+        subLabel="Pending"
+        [subValue]="s.discharges.pending"
+        [accent]="s.discharges.pending > 0 ? 'amber' : 'slate'">
+      </app-kpi-tile>
+      <app-kpi-tile
+        icon="pi pi-heart"
+        label="OT utilization"
+        [value]="s.otUtilization.utilizationPercent !== null ? (s.otUtilization.utilizationPercent + '%') : '—'"
+        subLabel="Cases"
+        [subValue]="s.otUtilization.scheduledCases"
+        accent="slate">
+      </app-kpi-tile>
+      <app-kpi-tile
+        icon="pi pi-exclamation-circle"
+        label="Active emergencies"
+        [value]="s.activeEmergencies.total"
+        subLabel="Red triage"
+        [subValue]="s.activeEmergencies.red"
+        [accent]="s.activeEmergencies.red > 0 ? 'red' : 'amber'">
+      </app-kpi-tile>
+    </section>
+
+    <!-- ─── Main row: trend chart | flow funnel | alerts ──────────── -->
+    <div class="main-row">
+      <section class="card">
+        <header class="card-header">
+          <div>
+            <h2>Footfall trend — last 30 days</h2>
+            <p class="card-sub">OPD · IPD · ER stacked daily</p>
+          </div>
+        </header>
+        <div #trendChart class="chart-tall"></div>
+      </section>
+
+      <section class="card">
+        <header class="card-header">
+          <div>
+            <h2>Hospital flow funnel (30d)</h2>
+            <p class="card-sub">Walk-in → Discharged</p>
+          </div>
+        </header>
+        <div #funnelChart class="chart-tall"></div>
+      </section>
+
+      <aside class="card alerts-card">
+        <header class="card-header">
+          <div>
+            <h2>Governance alerts</h2>
+            <p class="card-sub">{{ s.alerts.length }} item{{ s.alerts.length === 1 ? '' : 's' }} needing attention</p>
+          </div>
+        </header>
+        <div class="alerts-body" *ngIf="s.alerts.length; else noAlerts">
+          <div
+            class="mgmt-alert"
+            *ngFor="let a of s.alerts"
+            [attr.data-severity]="a.severity"
+            (click)="openAlert(a.link)">
+            <div class="mgmt-alert-icon"><i class="pi pi-exclamation-triangle"></i></div>
+            <div class="mgmt-alert-body">
+              <div class="mgmt-alert-title">{{ a.title }}</div>
+              <div class="mgmt-alert-message">{{ a.message }}</div>
+            </div>
+            <div class="mgmt-alert-count">{{ a.count }}</div>
+          </div>
+        </div>
+        <ng-template #noAlerts>
+          <div class="empty-state empty-state-sm">
+            <i class="pi pi-check-circle"></i>
+            <p>No governance items today.</p>
+          </div>
+        </ng-template>
+      </aside>
+    </div>
+
+    <!-- ─── Admissions vs Discharges + Revenue trend ──────────────── -->
+    <div class="extra-row">
+      <section class="card">
+        <header class="card-header">
+          <div>
+            <h2>Admissions vs Discharges (30d)</h2>
+            <p class="card-sub">Daily ward inflow vs outflow</p>
+          </div>
+        </header>
+        <div #admDisChart class="chart-mid"></div>
+      </section>
+
+      <section class="card">
+        <header class="card-header">
+          <div>
+            <h2>Revenue trend (30d)</h2>
+            <p class="card-sub">Daily total revenue across departments</p>
+          </div>
+        </header>
+        <div #revTrendChart class="chart-mid"></div>
+      </section>
+    </div>
+
+    <!-- ─── Demographics + LOS + ER triage ─────────────────────────── -->
+    <div class="extra-row-3">
+      <section class="card">
+        <header class="card-header">
+          <div>
+            <h2>Hospital demographics (30d)</h2>
+            <p class="card-sub">Patients seen across the hospital</p>
+          </div>
+        </header>
+        <div class="demo-body">
+          <div class="demo-donut" *ngIf="hospitalGenderSlices.length">
+            <app-donut-chart [slices]="hospitalGenderSlices" [showLegend]="true"></app-donut-chart>
+          </div>
+          <div class="age-bars-wrap">
+            <div class="demo-sub-label">Age bands</div>
+            <ul class="age-bars">
+              <li *ngFor="let b of ageBandsForRender()">
+                <span class="age-label">{{ b.band }}</span>
+                <div class="age-bar-track">
+                  <div class="age-bar-fill" [style.width.%]="ageBandMax > 0 ? (b.count / ageBandMax) * 100 : 0"></div>
+                </div>
+                <span class="age-count">{{ b.count }}</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <app-bar-list-card
+        title="LOS distribution (30d)"
+        subTitle="How long discharged patients stayed"
+        accentIcon="pi pi-clock"
+        [items]="losBarItems"
+        emptyText="No discharges in the last 30 days."
+        emptyIcon="pi pi-clock"
+        unitLabel="patients">
+      </app-bar-list-card>
+
+      <section class="card">
+        <header class="card-header">
+          <div>
+            <h2>ER triage — today</h2>
+            <p class="card-sub">Live triage distribution</p>
+          </div>
+        </header>
+        <div class="donut-wrap" *ngIf="erTriageSlices.length; else noEr">
+          <app-donut-chart [slices]="erTriageSlices" [showLegend]="true"></app-donut-chart>
+        </div>
+        <ng-template #noEr>
+          <div class="empty-state empty-state-sm">
+            <i class="pi pi-check-circle"></i>
+            <p>No ER cases today.</p>
+          </div>
+        </ng-template>
+      </section>
+    </div>
+
+    <!-- ─── Lower row: revenue donut | leaderboard ─────────────────── -->
+    <div class="lower-row">
+      <section class="card">
+        <header class="card-header">
+          <div>
+            <h2>Department revenue mix (today)</h2>
+            <p class="card-sub">Where today's revenue came from</p>
+          </div>
+        </header>
+        <div class="donut-wrap" *ngIf="revenueDonutSlices.length; else noRev">
+          <app-donut-chart [slices]="revenueDonutSlices" [showLegend]="true"></app-donut-chart>
+        </div>
+        <ng-template #noRev>
+          <div class="empty-state empty-state-sm">
+            <i class="pi pi-chart-pie"></i>
+            <p>No revenue rollup data for today yet.</p>
+          </div>
+        </ng-template>
+      </section>
+
+      <app-bar-list-card
+        title="Doctor leaderboard — today"
+        subTitle="Most patients consulted today"
+        accentIcon="pi pi-star"
+        [items]="doctorLeaderboardItems"
+        emptyText="No consultations completed yet today."
+        emptyIcon="pi pi-star"
+        unitLabel="patients">
+      </app-bar-list-card>
+    </div>
+  </ng-container>
+</div>
+
+<ng-template #loadingTpl>
+  <div class="loading-state">
+    <i class="pi pi-spin pi-spinner"></i>
+    <span>Loading the management dashboard…</span>
+  </div>
+</ng-template>

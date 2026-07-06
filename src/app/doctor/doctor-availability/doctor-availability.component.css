@@ -1026,3 +1026,56 @@ line-height: normal;
     grid-template-columns: repeat(3, 1fr);
   }
 }
+
+/* Daily doctor-arrival control (drives TV display) */
+.arrived-control {
+  margin-top: 10px;
+}
+.arrived-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 16px;
+  border: 1px solid #1a8f3c;
+  background: transparent;
+  color: #1a8f3c;
+  cursor: pointer;
+  font-family: Kanit;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.arrived-toggle .status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #1a8f3c;
+}
+.arrived-toggle:hover:not(:disabled) {
+  background: rgba(26, 143, 60, 0.08);
+}
+/* Arrived = filled green, the dot becomes a white check */
+.arrived-toggle.is-arrived {
+  background: #1a8f3c;
+  border-color: #1a8f3c;
+  color: #fff;
+}
+.arrived-toggle.is-arrived .status-dot {
+  background: transparent;
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  display: inline-flex;
+}
+.arrived-toggle.is-arrived .status-dot::before {
+  content: '\2713'; /* check mark */
+  font-size: 13px;
+  line-height: 1;
+  color: #fff;
+}
+.arrived-toggle:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}

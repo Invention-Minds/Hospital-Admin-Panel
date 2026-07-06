@@ -2,6 +2,7 @@ import { Component, Input } from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { app } from '../../../../server';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
+import { AlertService } from '../../services/alert.service';
 import * as FileSaver from 'file-saver';
 import { stat } from 'node:fs';
 import * as XLSX from 'xlsx';
@@ -67,7 +68,7 @@ export class AppointmentCancelComponent {
   sortDirection: string = 'asc';
 
 
-  constructor(private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService) {
+  constructor(private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private alertSvc: AlertService) {
     this.userId = localStorage.getItem('userid')
   }
 
@@ -441,7 +442,7 @@ export class AppointmentCancelComponent {
       ? this.filteredServices
       : this.filteredAppointments;
     if (!sourceList || sourceList.length === 0) {
-      alert('No appointments in the current view. Adjust filters and try again.');
+      this.alertSvc.show('No appointments in the current view. Adjust filters and try again.');
       return;
     }
     const selectedFields = sourceList.map((appointment: Appointment) => {
@@ -553,7 +554,7 @@ export class AppointmentCancelComponent {
         } else if (error.status === 401) {
           // If unauthorized, do NOT redirect automatically, show a custom message instead
           console.error('Unauthorized access - maybe the session expired.');
-          alert('You are not authorized to access this resource. Please re-authenticate.');
+          this.alertSvc.show('You are not authorized to access this resource. Please re-authenticate.', { severity: 'danger', title: 'Unauthorized' });
         } else {
           console.error('Error locking the appointment:', error);
         }

@@ -1,0 +1,88 @@
+<div class="opl-shell">
+  <div class="opl-head">
+    <h2 class="opl-title">OP Procedures</h2>
+    <button class="opl-btn opl-btn-primary" (click)="openNew()">+ New Procedure</button>
+  </div>
+  <p class="opl-sub">Outpatient minor procedures — sutures, dressings, plasters, I&amp;D, bedside endoscopy, etc.</p>
+
+  <div class="opl-banner opl-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <div class="opl-toolbar">
+    <label>Status
+      <select [(ngModel)]="filterStatus" (change)="load()">
+        <option *ngFor="let s of statuses" [ngValue]="s.value">{{ s.label }}</option>
+      </select>
+    </label>
+    <label>From <input type="date" [(ngModel)]="filterFrom" (change)="load()" /></label>
+    <label>To <input type="date" [(ngModel)]="filterTo" (change)="load()" /></label>
+  </div>
+
+  <div class="opl-loading" *ngIf="loading">Loading…</div>
+
+  <div class="opl-grid-wrap" *ngIf="!loading">
+    <table class="opl-grid">
+      <thead>
+        <tr>
+          <th>No.</th><th>Patient</th><th>PRN</th><th>Procedure</th>
+          <th>Doctor</th><th>Dept</th><th>Scheduled</th><th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngIf="!rows.length"><td colspan="8" class="opl-muted">No procedures found.</td></tr>
+        <tr *ngFor="let r of rows" (click)="open(r)" class="opl-row">
+          <td><code>{{ r.procedureNo }}</code></td>
+          <td>{{ r.patientName }}</td>
+          <td>{{ r.prn }}</td>
+          <td>{{ r.procedureName }}</td>
+          <td>{{ r.performingDoctor }}</td>
+          <td>{{ r.departmentName || '—' }}</td>
+          <td>{{ r.scheduledAt ? (r.scheduledAt | date:'dd-MMM HH:mm') : '—' }}</td>
+          <td><span [class]="statusClass(r.status)">{{ r.status }}</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- New procedure modal -->
+  <div class="opl-modal-bg" *ngIf="newModalOpen" (click)="closeNew()">
+    <div class="opl-modal" (click)="$event.stopPropagation()">
+      <h3>New OP Procedure</h3>
+      <div class="opl-form-grid">
+        <label>PRN * <input type="text" [(ngModel)]="draft.prn" (change)="onPrnChange()" /></label>
+        <label>Patient Name * <input type="text" [(ngModel)]="draft.patientName" /></label>
+        <label>Age <input type="number" [(ngModel)]="draft.age" /></label>
+        <label>Gender
+          <select [(ngModel)]="draft.gender">
+            <option value="">—</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
+        </label>
+        <label>Phone <input type="text" [(ngModel)]="draft.phoneNumber" /></label>
+        <label>Department <input type="text" [(ngModel)]="draft.departmentName" /></label>
+        <label class="opl-wide">Procedure name * <input type="text" [(ngModel)]="draft.procedureName" placeholder="e.g. Wound suturing" /></label>
+        <label>Procedure code <input type="text" [(ngModel)]="draft.procedureCode" /></label>
+        <label>Performing doctor * <app-doctor-select [source]="'doctors'" [(ngModel)]="draft.performingDoctor" name="performingDoctor"></app-doctor-select></label>
+        <label>Assistant <app-doctor-select [source]="'assistants'" [(ngModel)]="draft.assistantName" name="assistantName"></app-doctor-select></label>
+        <label>Room <input type="text" [(ngModel)]="draft.roomName" /></label>
+        <label>Anaesthesia type
+          <select [(ngModel)]="draft.anaesthesiaType">
+            <option *ngFor="let t of anaesthesiaTypes" [ngValue]="t">{{ t }}</option>
+          </select>
+        </label>
+        <label>Anaesthesia agent <input type="text" [(ngModel)]="draft.anaesthesiaAgent" placeholder="e.g. 2% Lignocaine" /></label>
+        <label>Scheduled at <input type="datetime-local" [(ngModel)]="draft.scheduledAt" /></label>
+        <label class="opl-wide">Pre-procedure notes
+          <textarea rows="2" [(ngModel)]="draft.preProcedureNotes"></textarea>
+        </label>
+      </div>
+      <div class="opl-modal-actions">
+        <button class="opl-btn" (click)="closeNew()" [disabled]="creating">Cancel</button>
+        <button class="opl-btn opl-btn-primary" (click)="submitNew()" [disabled]="creating">
+          {{ creating ? 'Saving…' : 'Save & open' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

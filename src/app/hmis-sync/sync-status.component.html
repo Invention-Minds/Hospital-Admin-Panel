@@ -13,8 +13,32 @@
     </div>
   </div>
 
+  <!-- Phase 9 — Tab strip -->
+  <div class="sync-tabs">
+    <button type="button"
+            class="sync-tab"
+            [class.sync-tab-active]="activeTab === 'overview'"
+            (click)="selectTab('overview')">
+      Overview
+    </button>
+    <button type="button"
+            class="sync-tab"
+            [class.sync-tab-active]="activeTab === 'dead-letter'"
+            (click)="selectTab('dead-letter')">
+      Dead Letter
+      <span class="sync-badge" *ngIf="deadLetters.length > 0">{{ deadLetters.length }}</span>
+    </button>
+    <button type="button"
+            class="sync-tab"
+            [class.sync-tab-active]="activeTab === 'conflicts'"
+            (click)="selectTab('conflicts')">
+      Conflicts
+      <span class="sync-badge" *ngIf="conflicts.length > 0">{{ conflicts.length }}</span>
+    </button>
+  </div>
+
   <!-- Health banner -->
-  <div class="health-banner" [class.healthy]="health?.healthy" [class.degraded]="!health?.healthy">
+  <div *ngIf="activeTab === 'overview'" class="health-banner" [class.healthy]="health?.healthy" [class.degraded]="!health?.healthy">
     <div class="health-dot" [class.healthy]="health?.healthy" [class.degraded]="!health?.healthy"></div>
     <div class="health-info">
       <strong>HMIS {{ health?.status || 'unknown' | uppercase }}</strong>
@@ -23,7 +47,7 @@
   </div>
 
   <!-- Overall stats -->
-  <div class="stats-grid">
+  <div *ngIf="activeTab === 'overview'" class="stats-grid">
     <div class="stat-card">
       <div class="stat-label">Total Syncs</div>
       <div class="stat-value">{{ stats?.total || 0 }}</div>
@@ -47,7 +71,7 @@
   </div>
 
   <!-- Module statuses -->
-  <div class="section">
+  <div *ngIf="activeTab === 'overview'" class="section">
     <h2>Per-Module Sync Status</h2>
     <div *ngIf="loading" class="loading">Loading…</div>
     <div class="module-grid" *ngIf="!loading">
@@ -75,7 +99,7 @@
   </div>
 
   <!-- Recent audit logs -->
-  <div class="section">
+  <div *ngIf="activeTab === 'overview'" class="section">
     <h2>Recent Activity</h2>
     <table *ngIf="auditLogs.length > 0" class="data-table">
       <thead>
@@ -106,5 +130,136 @@
       </tbody>
     </table>
     <div *ngIf="auditLogs.length === 0" class="empty-state">No recent audit entries.</div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- Phase 9 — Dead-letter tab                                       -->
+  <!-- ============================================================== -->
+  <div *ngIf="activeTab === 'dead-letter'" class="section">
+    <div class="dl-toolbar">
+      <p class="dl-hint">
+        Dead-letter rows are HMIS sync attempts that failed 3+ times. They no
+        longer auto-retry — you must Replay, Resolve (fixed in HMIS), or Ignore (won't fix).
+      </p>
+      <button class="btn-secondary" (click)="runDeadLetterMover()">
+        <i class="pi pi-cog"></i> Run mover now
+      </button>
+    </div>
+
+    <table *ngIf="deadLetters.length > 0" class="data-table">
+      <thead>
+        <tr>
+          <th>Module</th>
+          <th>Action</th>
+          <th>Direction</th>
+          <th>Retries</th>
+          <th>Quarantined</th>
+          <th>Error</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of deadLetters">
+          <td>{{ row.module }}</td>
+          <td>{{ row.action }}</td>
+          <td>{{ row.direction }}</td>
+          <td>{{ row.retryCount }}</td>
+          <td>{{ row.movedAt | date:'short' }}</td>
+          <td class="dl-error">{{ row.errorDetail | slice:0:120 }}{{ row.errorDetail.length > 120 ? '…' : '' }}</td>
+          <td>
+            <button class="btn-secondary" (click)="openResolve('dead-letter', row.id)">
+              Resolve
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div *ngIf="deadLetters.length === 0" class="empty-state">No dead-letter rows. The integration is healthy.</div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- Phase 9 — Conflicts tab                                         -->
+  <!-- ============================================================== -->
+  <div *ngIf="activeTab === 'conflicts'" class="section">
+    <p class="dl-hint">
+      Conflicts surface when HMIS returns a value that disagrees with what we have locally
+      (name mismatch, diagnosis drift, etc.). Pick which side wins, or mark as ignored.
+    </p>
+
+    <table *ngIf="conflicts.length > 0" class="data-table">
+      <thead>
+        <tr>
+          <th>Module</th>
+          <th>Entity</th>
+          <th>Field</th>
+          <th>Local value</th>
+          <th>HMIS value</th>
+          <th>Detected</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of conflicts">
+          <td>{{ row.module }}</td>
+          <td>{{ row.entityType }} · {{ row.entityId }}</td>
+          <td><strong>{{ row.fieldName }}</strong></td>
+          <td class="dl-cell">{{ row.localValue || '—' }}</td>
+          <td class="dl-cell">{{ row.hmisValue || '—' }}</td>
+          <td>{{ row.detectedAt | date:'short' }}</td>
+          <td>
+            <button class="btn-secondary" (click)="openResolve('conflict', row.id)">
+              Resolve
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div *ngIf="conflicts.length === 0" class="empty-state">No open conflicts.</div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- Resolve dialog (shared by dead-letter + conflict)                -->
+  <!-- ============================================================== -->
+  <div class="dl-overlay" *ngIf="resolveDialog.visible" (click)="closeResolve()">
+    <div class="dl-modal" (click)="$event.stopPropagation()">
+      <h3>{{ resolveDialog.kind === 'dead-letter' ? 'Resolve dead-letter row' : 'Resolve conflict' }}</h3>
+
+      <label class="dl-field">
+        Outcome
+        <select [(ngModel)]="resolveDialog.outcome" name="dlOutcome">
+          <ng-container *ngIf="resolveDialog.kind === 'dead-letter'">
+            <option value="RESOLVED">Resolved (fixed in HMIS)</option>
+            <option value="REPLAYED">Replay (push back to retry queue)</option>
+            <option value="IGNORED">Ignore (won't fix)</option>
+          </ng-container>
+          <ng-container *ngIf="resolveDialog.kind === 'conflict'">
+            <option value="RESOLVED_LOCAL">Local wins</option>
+            <option value="RESOLVED_HMIS">HMIS wins</option>
+            <option value="IGNORED">Ignore</option>
+          </ng-container>
+        </select>
+      </label>
+
+      <label class="dl-field">
+        Resolution note <span class="req">*</span>
+        <textarea rows="3"
+                  [(ngModel)]="resolveDialog.resolution"
+                  name="dlResolution"
+                  placeholder="Why this outcome? (Audited.)"></textarea>
+      </label>
+
+      <div class="dl-buttons">
+        <button class="btn-secondary"
+                [disabled]="resolveDialog.submitting"
+                (click)="closeResolve()">
+          Cancel
+        </button>
+        <button class="btn-warning"
+                [disabled]="resolveDialog.submitting"
+                (click)="submitResolve()">
+          {{ resolveDialog.submitting ? 'Submitting…' : 'Submit' }}
+        </button>
+      </div>
+    </div>
   </div>
 </div>

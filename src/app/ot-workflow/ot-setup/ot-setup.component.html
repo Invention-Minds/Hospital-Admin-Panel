@@ -1,0 +1,228 @@
+<div class="su-shell">
+  <div class="su-head">
+    <h2 class="su-title">OT Setup</h2>
+    <p class="su-sub">Curate equipment master, consumable sets and fixed surgical notes used across the OT module.</p>
+  </div>
+
+  <div class="su-banner su-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="su-banner su-good" *ngIf="successMessage">{{ successMessage }}</div>
+
+  <div class="su-tabs">
+    <button [class.su-tab-active]="tab === 'equipments'" (click)="setTab('equipments')">Equipments</button>
+    <button [class.su-tab-active]="tab === 'consumable-sets'" (click)="setTab('consumable-sets')">Consumable Sets</button>
+    <button [class.su-tab-active]="tab === 'fixed-notes'" (click)="setTab('fixed-notes')">Fix Surgical Notes</button>
+    <button [class.su-tab-active]="tab === 'staff'" (click)="setTab('staff')">Staff</button>
+    <button [class.su-tab-active]="tab === 'surgeries'" (click)="setTab('surgeries')">Surgeries</button>
+  </div>
+
+  <div class="su-toolbar" *ngIf="tab !== 'consumable-sets'">
+    <label class="su-inline"><input type="checkbox" [checked]="showInactive" (change)="toggleInactive()" /> Show inactive</label>
+  </div>
+
+  <div class="su-loading" *ngIf="loading">Loading…</div>
+
+  <!-- Equipments tab -->
+  <div class="su-layout" *ngIf="!loading && tab === 'equipments'">
+    <table class="su-table">
+      <thead><tr><th>Name</th><th>Code</th><th>Category</th><th>Active</th><th></th></tr></thead>
+      <tbody>
+        <tr *ngIf="!equipments.length"><td colspan="5" class="su-muted">No equipment defined.</td></tr>
+        <tr *ngFor="let e of equipments" [class.su-inactive]="!e.isActive">
+          <td>{{ e.name }}</td>
+          <td>{{ e.code || '—' }}</td>
+          <td>{{ e.category || '—' }}</td>
+          <td>{{ e.isActive ? 'Yes' : 'No' }}</td>
+          <td>
+            <button class="su-btn-link" (click)="editEq(e)">Edit</button>
+            <button class="su-btn-link su-bad-link" *ngIf="e.isActive" (click)="removeEq(e)">Deactivate</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="su-editor">
+      <h3>{{ eqEditing ? 'Edit Equipment' : 'New Equipment' }}</h3>
+      <label class="su-field"><span>Name *</span><input type="text" [(ngModel)]="eqDraft.name" /></label>
+      <label class="su-field"><span>Code</span><input type="text" [(ngModel)]="eqDraft.code" placeholder="optional asset/inventory ref" /></label>
+      <label class="su-field"><span>Category</span>
+        <select [(ngModel)]="eqDraft.category">
+          <option value="">— select —</option>
+          <option value="imaging">Imaging</option>
+          <option value="monitoring">Monitoring</option>
+          <option value="surgical">Surgical</option>
+          <option value="anaesthesia">Anaesthesia</option>
+          <option value="other">Other</option>
+        </select>
+      </label>
+      <label class="su-field"><span>Description</span><textarea rows="3" [(ngModel)]="eqDraft.description"></textarea></label>
+      <label class="su-inline"><input type="checkbox" [(ngModel)]="eqDraft.isActive" /> Active</label>
+      <div class="su-actions">
+        <button class="su-btn" (click)="cancelAll()" [disabled]="saving">Cancel</button>
+        <button class="su-btn su-btn-primary" (click)="saveEq()" [disabled]="saving">{{ saving ? 'Saving…' : 'Save' }}</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Consumable Sets tab -->
+  <div class="su-layout" *ngIf="!loading && tab === 'consumable-sets'">
+    <table class="su-table">
+      <thead><tr><th>Name</th><th>Department</th><th>Items</th><th>Active</th><th></th></tr></thead>
+      <tbody>
+        <tr *ngIf="!sets.length"><td colspan="5" class="su-muted">No consumable sets defined.</td></tr>
+        <tr *ngFor="let s of sets" [class.su-inactive]="!s.isActive">
+          <td>{{ s.name }}</td>
+          <td>{{ s.departmentId || '—' }}</td>
+          <td>{{ s.items?.length || 0 }}</td>
+          <td>{{ s.isActive ? 'Yes' : 'No' }}</td>
+          <td><button class="su-btn-link" (click)="editSet(s)">Edit</button></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="su-editor">
+      <h3>{{ setEditing ? 'Edit Consumable Set' : 'New Consumable Set' }}</h3>
+      <label class="su-field"><span>Name *</span><input type="text" [(ngModel)]="setDraft.name" placeholder="e.g. General Surgery" /></label>
+      <label class="su-field"><span>Department</span>
+        <select [(ngModel)]="setDraft.departmentId">
+          <option [ngValue]="null">— all departments —</option>
+          <option *ngFor="let d of departments" [ngValue]="d.id">{{ d.name }}</option>
+        </select>
+      </label>
+      <label class="su-field"><span>Description</span><textarea rows="3" [(ngModel)]="setDraft.description"></textarea></label>
+      <label class="su-inline"><input type="checkbox" [(ngModel)]="setDraft.isActive" /> Active</label>
+      <p class="su-hint" *ngIf="setEditing">Edit items from the OT workbench Drugs & Consumables panel for now.</p>
+      <div class="su-actions">
+        <button class="su-btn" (click)="cancelAll()" [disabled]="saving">Cancel</button>
+        <button class="su-btn su-btn-primary" (click)="saveSet()" [disabled]="saving">{{ saving ? 'Saving…' : 'Save' }}</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fixed Notes tab -->
+  <div class="su-layout" *ngIf="!loading && tab === 'fixed-notes'">
+    <table class="su-table">
+      <thead><tr><th>Code</th><th>Name</th><th>Dept</th><th>Active</th><th></th></tr></thead>
+      <tbody>
+        <tr *ngIf="!notes.length"><td colspan="5" class="su-muted">No fixed surgical notes defined.</td></tr>
+        <tr *ngFor="let n of notes" [class.su-inactive]="!n.isActive">
+          <td>{{ n.code }}</td>
+          <td>{{ n.name }}</td>
+          <td>{{ n.departmentId || '—' }}</td>
+          <td>{{ n.isActive ? 'Yes' : 'No' }}</td>
+          <td>
+            <button class="su-btn-link" (click)="editNote(n)">Edit</button>
+            <button class="su-btn-link su-bad-link" *ngIf="n.isActive" (click)="removeNote(n)">Deactivate</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="su-editor">
+      <h3>{{ noteEditing ? 'Edit Fixed Surgical Note' : 'New Fixed Surgical Note' }}</h3>
+      <label class="su-field"><span>Code *</span><input type="text" [(ngModel)]="noteDraft.code" placeholder="e.g. APP-STD" /></label>
+      <label class="su-field"><span>Name *</span><input type="text" [(ngModel)]="noteDraft.name" placeholder="e.g. Standard Appendectomy Closure" /></label>
+      <label class="su-field"><span>Department</span>
+        <select [(ngModel)]="noteDraft.departmentId">
+          <option [ngValue]="null">— all departments —</option>
+          <option *ngFor="let d of departments" [ngValue]="d.id">{{ d.name }}</option>
+        </select>
+      </label>
+      <label class="su-field"><span>Body *</span><textarea rows="10" [(ngModel)]="noteDraft.body" placeholder="Default operative note text…"></textarea></label>
+      <label class="su-inline"><input type="checkbox" [(ngModel)]="noteDraft.isActive" /> Active</label>
+      <div class="su-actions">
+        <button class="su-btn" (click)="cancelAll()" [disabled]="saving">Cancel</button>
+        <button class="su-btn su-btn-primary" (click)="saveNote()" [disabled]="saving">{{ saving ? 'Saving…' : 'Save' }}</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Staff tab (Phase 9.5j) -->
+  <div class="su-layout" *ngIf="!loading && tab === 'staff'">
+    <table class="su-table">
+      <thead><tr><th>Name</th><th>Role</th><th>Employee Code</th><th>Designation</th><th>Active</th><th></th></tr></thead>
+      <tbody>
+        <tr *ngIf="!staff.length"><td colspan="6" class="su-muted">No staff defined.</td></tr>
+        <tr *ngFor="let s of staff" [class.su-inactive]="!s.isActive">
+          <td>{{ s.name }}</td>
+          <td>{{ s.role }}</td>
+          <td>{{ s.employeeCode || '—' }}</td>
+          <td>{{ s.designation || '—' }}</td>
+          <td>{{ s.isActive ? 'Yes' : 'No' }}</td>
+          <td>
+            <button class="su-btn-link" (click)="editStaff(s)">Edit</button>
+            <button class="su-btn-link su-bad-link" *ngIf="s.isActive" (click)="removeStaff(s)">Deactivate</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="su-editor">
+      <h3>{{ staffEditing ? 'Edit Staff' : 'New Staff' }}</h3>
+      <label class="su-field"><span>Name *</span><input type="text" [(ngModel)]="staffDraft.name" placeholder="e.g. Lakshmi Devi" /></label>
+      <label class="su-field"><span>Role *</span>
+        <select [(ngModel)]="staffDraft.role">
+          <option *ngFor="let r of staffRoles" [ngValue]="r.value">{{ r.label }}</option>
+        </select>
+      </label>
+      <label class="su-field"><span>Employee Code</span><input type="text" [(ngModel)]="staffDraft.employeeCode" placeholder="optional HR ref" /></label>
+      <label class="su-field"><span>Designation</span><input type="text" [(ngModel)]="staffDraft.designation" placeholder="job title" /></label>
+      <label class="su-field"><span>Department</span>
+        <select [(ngModel)]="staffDraft.departmentId">
+          <option [ngValue]="null">— all departments —</option>
+          <option *ngFor="let d of departments" [ngValue]="d.id">{{ d.name }}</option>
+        </select>
+      </label>
+      <label class="su-inline"><input type="checkbox" [(ngModel)]="staffDraft.isActive" /> Active</label>
+      <div class="su-actions">
+        <button class="su-btn" (click)="cancelAll()" [disabled]="saving">Cancel</button>
+        <button class="su-btn su-btn-primary" (click)="saveStaff()" [disabled]="saving">{{ saving ? 'Saving…' : 'Save' }}</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Surgeries tab (Phase 9.5j) -->
+  <div class="su-layout" *ngIf="!loading && tab === 'surgeries'">
+    <table class="su-table">
+      <thead><tr><th>Name</th><th>Code</th><th>Department</th><th>Category</th><th>Type</th><th>Active</th><th></th></tr></thead>
+      <tbody>
+        <tr *ngIf="!surgeries.length"><td colspan="7" class="su-muted">No surgeries defined.</td></tr>
+        <tr *ngFor="let s of surgeries" [class.su-inactive]="!s.isActive">
+          <td>{{ s.name }}</td>
+          <td>{{ s.code || '—' }}</td>
+          <td>{{ s.departmentId || '—' }}</td>
+          <td>{{ s.categoryCode || '—' }}</td>
+          <td>{{ s.surgeryType || '—' }}</td>
+          <td>{{ s.isActive ? 'Yes' : 'No' }}</td>
+          <td>
+            <button class="su-btn-link" (click)="editSurgery(s)">Edit</button>
+            <button class="su-btn-link su-bad-link" *ngIf="s.isActive" (click)="removeSurgery(s)">Deactivate</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="su-editor">
+      <h3>{{ surgeryEditing ? 'Edit Surgery' : 'New Surgery' }}</h3>
+      <label class="su-field"><span>Name *</span><input type="text" [(ngModel)]="surgeryDraft.name" placeholder="e.g. (RT) TKR" /></label>
+      <label class="su-field"><span>Code</span><input type="text" [(ngModel)]="surgeryDraft.code" placeholder="optional" /></label>
+      <label class="su-field"><span>Department</span>
+        <select [(ngModel)]="surgeryDraft.departmentId">
+          <option [ngValue]="null">— all departments —</option>
+          <option *ngFor="let d of departments" [ngValue]="d.id">{{ d.name }}</option>
+        </select>
+      </label>
+      <label class="su-field"><span>Category</span><input type="text" [(ngModel)]="surgeryDraft.categoryCode" placeholder="e.g. Level 4A" /></label>
+      <label class="su-field"><span>Surgery Type</span>
+        <select [(ngModel)]="surgeryDraft.surgeryType">
+          <option *ngFor="let t of surgeryTypes" [ngValue]="t">{{ t }}</option>
+        </select>
+      </label>
+      <label class="su-field"><span>Description</span><textarea rows="3" [(ngModel)]="surgeryDraft.description"></textarea></label>
+      <label class="su-inline"><input type="checkbox" [(ngModel)]="surgeryDraft.isActive" /> Active</label>
+      <div class="su-actions">
+        <button class="su-btn" (click)="cancelAll()" [disabled]="saving">Cancel</button>
+        <button class="su-btn su-btn-primary" (click)="saveSurgery()" [disabled]="saving">{{ saving ? 'Saving…' : 'Save' }}</button>
+      </div>
+    </div>
+  </div>
+</div>

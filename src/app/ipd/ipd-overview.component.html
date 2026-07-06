@@ -11,8 +11,8 @@
   </div>
 
   <div class="tabs">
-    <button (click)="showDashboard()" [class.active]="activeComponent === 'dashboard'" class="tab-btn">
-      <i class="pi pi-th-large"></i> Dashboard
+    <button (click)="showTreatment()" [class.active]="activeComponent === 'treatment'" class="tab-btn">
+      <i class="pi pi-heart-fill"></i> Treatment Dashboard
     </button>
     <button (click)="showAdmissions()" [class.active]="activeComponent === 'admissions'" class="tab-btn">
       <i class="pi pi-users"></i> Active Admissions
@@ -20,53 +20,50 @@
     <button (click)="showBedManagement()" [class.active]="activeComponent === 'beds'" class="tab-btn">
       <i class="pi pi-home"></i> Bed Census
     </button>
-    <button (click)="showAnalytics()" [class.active]="activeComponent === 'analytics'" class="tab-btn">
-      <i class="pi pi-chart-bar"></i> Analytics
+    <button (click)="showDischarges()" [class.active]="activeComponent === 'discharges'" class="tab-btn">
+      <i class="pi pi-sign-out"></i> Discharges
     </button>
-  </div>
-
-  <!-- Dashboard -->
-  <div *ngIf="activeComponent === 'dashboard'" class="tab-content">
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-label">Total Admissions</div>
-        <div class="stat-value">{{ stats?.total || 0 }}</div>
-      </div>
-      <div class="stat-card stat-primary">
-        <div class="stat-label">Currently Admitted</div>
-        <div class="stat-value">{{ stats?.byStatus?.admitted || 0 }}</div>
-      </div>
-      <div class="stat-card stat-success">
-        <div class="stat-label">Discharged</div>
-        <div class="stat-value">{{ stats?.byStatus?.discharged || 0 }}</div>
-      </div>
-      <div class="stat-card stat-warning">
-        <div class="stat-label">LAMA / DAMA</div>
-        <div class="stat-value">{{ (stats?.byStatus?.lama || 0) + (stats?.byStatus?.dama || 0) }}</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Avg Length of Stay</div>
-        <div class="stat-value">{{ stats?.averageLengthOfStay || 0 }} <span class="unit">days</span></div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Emergency Admissions</div>
-        <div class="stat-value">{{ stats?.byType?.emergency || 0 }}</div>
-      </div>
-    </div>
   </div>
 
   <!-- Active Admissions -->
   <div *ngIf="activeComponent === 'admissions'" class="tab-content">
     <h2>Active Admissions ({{ admissions.length }})</h2>
+
+    <!-- NS — filter admissions by nursing station + ward -->
+    <div class="admission-filters" *ngIf="stations.length > 0">
+      <label>
+        Nursing Station
+        <select [(ngModel)]="selectedStationId" (ngModelChange)="onStationChange()">
+          <option value="">All stations</option>
+          <option *ngFor="let s of stations" [value]="s.id">{{ s.name }} ({{ s.code }})</option>
+        </select>
+      </label>
+      <label>
+        Ward
+        <select [(ngModel)]="selectedWardId" (ngModelChange)="onWardChange()" [disabled]="!selectedStationId">
+          <option value="">{{ selectedStationId ? 'All wards in station' : 'Select a station first' }}</option>
+          <option *ngFor="let w of selectedStationWards" [value]="w.id">{{ w.wardName }} ({{ w.wardCode }})</option>
+        </select>
+      </label>
+      <button class="btn-clear" *ngIf="selectedStationId || selectedWardId"
+              (click)="selectedStationId=''; selectedWardId=''; onStationChange()">Clear</button>
+    </div>
+
     <div *ngIf="loading" class="loading">Loading admissions…</div>
     <table *ngIf="!loading && admissions.length > 0" class="data-table">
       <thead>
         <tr>
-          <th>Adm No</th><th>PRN</th><th>Department</th><th>Doctor</th><th>Ward / Bed</th><th>Admitted</th>
+          <th>Severity</th><th>Adm No</th><th>PRN</th><th>Department</th><th>Doctor</th><th>Ward / Bed</th><th>Admitted</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let a of admissions" (click)="viewAdmission(a.id)" class="clickable">
+        <tr *ngFor="let a of admissions" (click)="viewAdmission(a.id)" class="clickable"
+            [ngClass]="'sev-row-' + severityOf(a)">
+          <td>
+            <span class="severity-pill" [ngClass]="'severity-' + severityOf(a)">
+              <span class="severity-dot"></span>{{ severityLabel(a) }}
+            </span>
+          </td>
           <td>{{ a.admissionNo }}</td>
           <td>{{ a.prn }}</td>
           <td>{{ a.department }}</td>
@@ -79,11 +76,63 @@
     <div *ngIf="!loading && admissions.length === 0" class="empty-state">No active admissions.</div>
   </div>
 
+  <!-- Phase 9.15 — Discharges -->
+  <div *ngIf="activeComponent === 'discharges'" class="tab-content">
+    <div class="discharge-toolbar">
+      <h2>Discharges ({{ filteredDischarges.length }})</h2>
+      <div class="discharge-filters">
+        <label>From <input type="date" [(ngModel)]="dischargeFrom" /></label>
+        <label>To <input type="date" [(ngModel)]="dischargeTo" /></label>
+        <input type="text" class="discharge-search" placeholder="Search admission no / PRN / doctor"
+               [(ngModel)]="dischargeSearch" />
+        <button class="btn-secondary" (click)="loadDischarges()"><i class="pi pi-refresh"></i> Refresh</button>
+        <button class="btn-primary" (click)="exportDischarges()" [disabled]="!filteredDischarges.length">
+          <i class="pi pi-download"></i> Export CSV
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="loading" class="loading">Loading discharges…</div>
+
+    <table *ngIf="!loading && filteredDischarges.length > 0" class="data-table">
+      <thead>
+        <tr>
+          <th>Admission No</th><th>PRN</th><th>Discharge date</th><th>Type</th>
+          <th>Condition</th><th>Consultant</th><th>Ward</th><th>Summary</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let a of filteredDischarges">
+          <td>{{ a.admissionNo }}</td>
+          <td>{{ a.prn }}</td>
+          <td>{{ a.discharge?.dischargeDate | date:'dd/MM/yy h:mm a' }}</td>
+          <td>{{ a.discharge?.dischargeType || '—' }}</td>
+          <td>{{ a.discharge?.conditionAtDischarge || '—' }}</td>
+          <td>{{ a.admittingDoctor }}</td>
+          <td>{{ a.ward?.wardName || '—' }}</td>
+          <td>
+            <span class="discharge-summary-pill"
+                  [class.is-final]="a.discharge?.summaryStatus === 'SIGNED' || a.discharge?.summaryStatus === 'FINAL'">
+              {{ a.discharge?.summaryStatus || '—' }}
+            </span>
+          </td>
+          <td>
+            <button class="btn-link" (click)="printDischarge(a.id)">View / Print</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div *ngIf="!loading && filteredDischarges.length === 0" class="empty-state">
+      No discharges{{ dischargeSearch || dischargeFrom || dischargeTo ? ' match these filters' : ' recorded' }}.
+    </div>
+  </div>
+
   <!-- Bed Management -->
   <div *ngIf="activeComponent === 'beds'" class="tab-content">
     <h2>Bed Census by Ward</h2>
-    <div class="ward-grid" *ngIf="bedCensus.length > 0; else emptyBeds">
-      <div class="ward-card" *ngFor="let w of bedCensus">
+    <div class="ward-grid" *ngIf="visibleBedCensus.length > 0; else emptyBeds">
+      <div class="ward-card" *ngFor="let w of visibleBedCensus">
         <div class="ward-header">
           <h3>{{ w.wardName }}</h3>
           <span class="ward-type">{{ w.wardCode }}</span>
@@ -109,30 +158,12 @@
       </div>
     </div>
     <ng-template #emptyBeds>
-      <div class="empty-state">No wards configured.</div>
+      <div class="empty-state">{{ isDoctor ? 'No wards with your patients right now.' : 'No wards configured.' }}</div>
     </ng-template>
   </div>
 
-  <!-- Analytics -->
-  <div *ngIf="activeComponent === 'analytics'" class="tab-content">
-    <h2>IPD Analytics</h2>
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-label">ALOS (Avg Length of Stay)</div>
-        <div class="stat-value">{{ stats?.averageLengthOfStay || 0 }} <span class="unit">days</span></div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Elective</div>
-        <div class="stat-value">{{ stats?.byType?.elective || 0 }}</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Emergency</div>
-        <div class="stat-value">{{ stats?.byType?.emergency || 0 }}</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">Direct Admission</div>
-        <div class="stat-value">{{ stats?.byType?.direct || 0 }}</div>
-      </div>
-    </div>
+  <!-- Treatment Dashboard (NEWS2 deterioration watchboard) -->
+  <div *ngIf="activeComponent === 'treatment'" class="tab-content tab-content--flush">
+    <app-treatment-dashboard [doctorScope]="isDoctor ? doctorName : null"></app-treatment-dashboard>
   </div>
 </div>

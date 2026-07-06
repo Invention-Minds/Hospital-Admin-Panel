@@ -1,0 +1,52 @@
+.ds-shell { padding: 24px; max-width: 1400px; margin: 24px auto 24px 96px; }
+.ds-title { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+.ds-sub { font-size: 13px; color: #6b7280; margin-bottom: 16px; }
+
+.ds-banner { padding: 10px 14px; border-radius: 6px; margin-bottom: 12px; font-size: 14px; }
+.ds-banner-bad { background: #fee2e2; color: #b91c1c; }
+.ds-banner-good { background: #dcfce7; color: #166534; }
+
+.ds-tabs { display: flex; gap: 4px; border-bottom: 1px solid #e5e7eb; margin-bottom: 18px; flex-wrap: wrap; }
+.ds-tabs button {
+  padding: 8px 14px; background: transparent; border: 0; cursor: pointer;
+  font-size: 14px; color: #4b5563; border-bottom: 2px solid transparent;
+}
+.ds-tabs button.active { color: #1d4ed8; border-bottom-color: #1d4ed8; font-weight: 600; }
+
+.ds-panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; }
+.ds-grid-2 { display: grid; grid-template-columns: 1.6fr 1fr; gap: 24px; }
+@media (max-width: 1100px) { .ds-grid-2 { grid-template-columns: 1fr; } }
+
+.ds-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ds-table th, .ds-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #f3f4f6; }
+.ds-table th { background: #f9fafb; font-weight: 600; color: #374151; }
+.ds-empty { color: #9ca3af; font-style: italic; text-align: center; padding: 18px; }
+
+.ds-form { display: flex; flex-direction: column; gap: 10px; background: #f9fafb; padding: 14px; border-radius: 8px; }
+.ds-form h3 { margin: 0 0 6px; font-size: 15px; }
+.ds-form label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #4b5563; }
+.ds-form input[type="text"], .ds-form input[type="number"], .ds-form select, .ds-form textarea {
+  border: 1px solid #d1d5db; border-radius: 6px; padding: 6px 8px; font-size: 13px;
+}
+.ds-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.ds-row label { font-size: 12px; }
+.ds-checks { display: flex; gap: 12px; flex-wrap: wrap; }
+.ds-checks label, .ds-check, .ds-check-inline { flex-direction: row; align-items: center; gap: 6px; font-size: 13px; }
+.ds-fs { border: 1px solid #e5e7eb; padding: 8px 10px; border-radius: 6px; }
+.ds-fs legend { font-size: 12px; color: #374151; padding: 0 6px; }
+
+.ds-actions { display: flex; gap: 8px; margin-top: 6px; }
+.ds-btn { background: #fff; border: 1px solid #d1d5db; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+.ds-btn:hover { background: #f3f4f6; }
+.ds-btn-primary { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
+.ds-btn-primary:hover { background: #1e40af; }
+.ds-btn-sm { padding: 3px 8px; font-size: 12px; }
+
+.ds-field { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; font-size: 13px; }
+.ds-field select { border: 1px solid #d1d5db; border-radius: 6px; padding: 4px 8px; }
+
+.ds-menu { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ds-menu th, .ds-menu td { border: 1px solid #e5e7eb; padding: 6px; text-align: left; }
+.ds-menu th { background: #f9fafb; }
+.ds-menu select { width: 100%; border: 0; background: transparent; font-size: 12px; }
+.ds-slot-time { color: #9ca3af; font-weight: 400; font-size: 11px; display: block; }

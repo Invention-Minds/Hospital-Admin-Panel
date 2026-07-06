@@ -131,5 +131,27 @@ export class OverviewComponent implements OnInit {
     this.activeComponent = 'info';
   }
 
+  // ─── Two-level tabs ───────────────────────────────────────────────────
+  // Top-level group: OPD / IPD / Emergency render their sub-tabs' content
+  // inline; WhatsApp routes directly to its page.
+  selectedGroup: 'opd' | 'ipd' | 'emergency' = 'opd';
+  ipdSub: 'ipd' | 'icu' | 'ot' | 'ward' = 'ipd';
+  emgSub: 'emergency' | 'mlc' = 'emergency';
+
+  selectGroup(group: 'opd' | 'ipd' | 'emergency' | 'whatsapp'): void {
+    if (group === 'whatsapp') { this.router.navigate(['/whatsapp-queries']); return; }
+    this.selectedGroup = group;
+    // Re-anchor each group to its first sub-tab so something is always active.
+    if (group === 'opd' &&
+        !['availability', 'arrived', 'past', 'details', 'info'].includes(this.activeComponent)) {
+      this.activeComponent = 'availability';
+    }
+    if (group === 'ipd') this.ipdSub = 'ipd';
+    if (group === 'emergency') this.emgSub = 'emergency';
+  }
+
+  setIpdSub(sub: 'ipd' | 'icu' | 'ot' | 'ward'): void { this.ipdSub = sub; }
+  setEmgSub(sub: 'emergency' | 'mlc'): void { this.emgSub = sub; }
+
 
 }

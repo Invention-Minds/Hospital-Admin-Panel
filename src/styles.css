@@ -1,5 +1,8 @@
 /* You can add global styles to this file, and also import other style files */
 @use '@angular/material' as mat;
+/* Phase 9.9 — shared form design module (dm-* utility classes) is loaded
+ * directly via angular.json `styles[]` so it's available globally, even
+ * though this file is SCSS-processed (which makes raw @import unreliable). */
 html, body { height: 100%; }
 body { margin: 0; font-family: Kanit; background-color: #F0F3FF; }
 :root {
@@ -37,6 +40,21 @@ body { margin: 0; font-family: Kanit; background-color: #F0F3FF; }
 .downloadButtonViewMore{
     font-size: 20px;
     color: #0096f0;
+}
+
+.p-dialog .p-dialog-content {
+    padding: 0 !important;
+}
+
+/* Estimation Refer-for-Admission / OT-Requisition dialogs need real padding —
+   override the global zero-padding reset above (higher specificity + !important). */
+.p-dialog.eaa-dialog .p-dialog-header { padding: 22px 28px 12px !important; }
+.p-dialog.eaa-dialog .p-dialog-content { padding: 10px 28px 18px !important; }
+.p-dialog.eaa-dialog .p-dialog-footer { padding: 10px 28px 22px !important; }
+
+.page-header__actions{
+  display: flex;
+  gap: 10px;
 }
 
 /* ===== RESPONSIVE SYSTEM ===== */

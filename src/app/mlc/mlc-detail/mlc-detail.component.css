@@ -145,3 +145,78 @@
   background: var(--color-brand-primary);
   color: var(--color-text-on-dark);
 }
+.btn--secondary {
+  background: var(--color-surface-alt);
+  color: var(--color-text-heading);
+  border: 1px solid var(--color-border-input);
+}
+.btn--icon {
+  height: 28px;
+  width: 28px;
+  padding: 0;
+  line-height: 1;
+  font-size: var(--font-size-lg);
+}
+.btn--danger {
+  background: var(--color-danger, #c0392b);
+  color: var(--color-text-on-dark);
+}
+
+/* ---------- Multi-column add-row grid ---------- */
+.form__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-16);
+}
+
+/* ---------- Checkbox fields ---------- */
+.form__field--check {
+  flex-direction: row;
+  align-items: center;
+}
+.form__check {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-heading);
+  cursor: pointer;
+}
+
+/* ---------- Injuries table ---------- */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-20);
+}
+.table th,
+.table td {
+  text-align: left;
+  padding: var(--space-8) var(--space-10);
+  border-bottom: 1px solid var(--color-border-input);
+  color: var(--color-text-heading);
+  word-break: break-word;
+}
+.table th {
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-light);
+}
+
+/* Signature capture affordances (mirrors lama-dama) */
+.sig-capture-btn {
+  align-self: flex-start;
+  height: auto;
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+}
+.sig-link {
+  background: transparent;
+  border: none;
+  color: var(--color-brand-primary);
+  cursor: pointer;
+  font-size: var(--font-size-xs);
+  text-decoration: underline;
+  padding: 0;
+  margin-left: var(--space-8);
+}

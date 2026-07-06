@@ -1,0 +1,84 @@
+<div class="wq-wrap">
+  <!-- Left: query list -->
+  <aside class="wq-list">
+    <div class="wq-list-head">
+      <h2>WhatsApp Queries</h2>
+      <select [(ngModel)]="statusFilter" (change)="load()">
+        <option value="open">Open</option>
+        <option value="answered">Answered</option>
+        <option value="closed">Closed</option>
+        <option value="">All</option>
+      </select>
+    </div>
+
+    <div *ngIf="errorMessage" class="wq-error">{{ errorMessage }}</div>
+    <div *ngIf="loading" class="wq-muted">Loading…</div>
+    <div *ngIf="!loading && rows.length === 0" class="wq-muted">No queries.</div>
+
+    <ul>
+      <li *ngFor="let q of rows"
+          [class.active]="selected?.id === q.id"
+          (click)="open(q)">
+        <div class="wq-li-top">
+          <span class="wq-name">{{ q.patientName || q.patientPhone }}</span>
+          <span class="wq-pill" [ngClass]="q.status">{{ q.status }}</span>
+        </div>
+        <div class="wq-li-sub">
+          <span>PRN {{ q.prn }} · {{ q.doctorName }}</span>
+          <span class="wq-ref">{{ q.refNo }}</span>
+        </div>
+        <div class="wq-li-time">{{ q.lastPatientMsgAt | date: 'dd MMM, h:mm a' }}</div>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Right: thread -->
+  <section class="wq-thread">
+    <div *ngIf="!selected" class="wq-empty">Select a query to view the conversation.</div>
+
+    <ng-container *ngIf="selected">
+      <header class="wq-thread-head">
+        <div>
+          <strong>{{ selected.patientName || selected.patientPhone }}</strong>
+          <span class="wq-muted"> · PRN {{ selected.prn }} · {{ selected.refNo }}</span>
+        </div>
+        <div class="wq-head-actions">
+          <span class="wq-pill" [ngClass]="selected.status">{{ selected.status }}</span>
+          <button *ngIf="selected.status !== 'closed'"
+                  class="wq-btn-ghost" (click)="closeThread()" [disabled]="closing">
+            {{ closing ? 'Closing…' : 'Close' }}
+          </button>
+        </div>
+      </header>
+
+      <div class="wq-messages">
+        <div *ngIf="threadLoading" class="wq-muted">Loading thread…</div>
+        <div *ngFor="let m of selected.messages"
+             class="wq-msg" [class.out]="m.direction === 'OUT'">
+          <div class="wq-bubble">
+            <div *ngIf="m.mediaUrl" class="wq-media">
+              <img *ngIf="isImage(m)" [src]="mediaSrc(m)" alt="attachment" (click)="$any($event.target).requestFullscreen?.()" />
+              <a *ngIf="!isImage(m)" [href]="mediaSrc(m)" target="_blank" rel="noopener" class="wq-file">
+                📄 {{ m.fileName || 'attachment' }}
+              </a>
+            </div>
+            <div *ngIf="m.body" class="wq-text">{{ m.body }}</div>
+            <div class="wq-meta">{{ m.sender }} · {{ m.created_at | date: 'dd MMM, h:mm a' }}</div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="wq-reply" *ngIf="selected.status !== 'closed'">
+        <textarea [(ngModel)]="replyText" rows="2"
+                  placeholder="Type your reply to the patient…"
+                  (keydown.enter)="$event.preventDefault(); send()"></textarea>
+        <button (click)="send()" [disabled]="sending || !replyText.trim()">
+          {{ sending ? 'Sending…' : 'Send' }}
+        </button>
+      </footer>
+      <div *ngIf="selected.status === 'closed'" class="wq-muted wq-closed-note">
+        This conversation is closed.
+      </div>
+    </ng-container>
+  </section>
+</div>

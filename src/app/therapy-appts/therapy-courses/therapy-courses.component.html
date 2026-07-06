@@ -1,0 +1,185 @@
+<div class="courses-container">
+
+  <!-- ===================== LIST VIEW ===================== -->
+  <ng-container *ngIf="!selectedCourse">
+    <div class="courses-header">
+      <h2 class="courses-title">Therapy Courses</h2>
+      <div class="courses-filters">
+        <input type="text" class="c-input" placeholder="Search name / PRN"
+          [(ngModel)]="search" (input)="applySearch()" />
+        <select class="c-input" [(ngModel)]="statusFilter" (change)="loadCourses()">
+          <option value="">All statuses</option>
+          <option value="active">Active</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+        <button class="c-btn" (click)="loadCourses()">Refresh</button>
+      </div>
+    </div>
+
+    <div class="c-loading" *ngIf="isLoading">Loading…</div>
+
+    <div class="c-table-wrap" *ngIf="!isLoading">
+      <table class="c-table">
+        <thead>
+          <tr>
+            <th>Patient</th>
+            <th>PRN</th>
+            <th>Start</th>
+            <th>Days</th>
+            <th>Progress</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of filtered">
+            <td>{{ c.prefix }} {{ c.name }}</td>
+            <td>{{ c.prn }}</td>
+            <td>{{ c.startDate }}</td>
+            <td>{{ c.totalDays }}</td>
+            <td>{{ progressLabel(c) }}</td>
+            <td><span class="badge" [ngClass]="'st-' + c.status">{{ c.status }}</span></td>
+            <td><button class="c-btn sm" (click)="openCourse(c.id)">View</button></td>
+          </tr>
+          <tr *ngIf="!filtered.length">
+            <td colspan="7" class="c-empty">No courses found.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </ng-container>
+
+  <!-- ===================== DETAIL VIEW ===================== -->
+  <ng-container *ngIf="selectedCourse">
+    <div class="courses-header">
+      <button class="c-btn ghost" (click)="backToList()">← Back</button>
+      <h2 class="courses-title">
+        {{ selectedCourse.prefix }} {{ selectedCourse.name }}
+        <span class="badge" [ngClass]="'st-' + selectedCourse.status">{{ selectedCourse.status }}</span>
+      </h2>
+      <button class="c-btn danger" *ngIf="selectedCourse.status === 'active'"
+        [disabled]="isLoading" (click)="cancelCourse()">Cancel Course</button>
+    </div>
+
+    <div class="c-meta">
+      <span><strong>PRN:</strong> {{ selectedCourse.prn }}</span>
+      <span><strong>Phone:</strong> {{ selectedCourse.phone }}</span>
+      <span><strong>Doctor:</strong> {{ selectedCourse.doctor?.name || '—' }}</span>
+      <span><strong>Start:</strong> {{ selectedCourse.startDate }}</span>
+      <span><strong>Total days:</strong> {{ selectedCourse.totalDays }}</span>
+    </div>
+
+    <div class="c-table-wrap">
+      <table class="c-table">
+        <thead>
+          <tr>
+            <th>Day</th>
+            <th>Planned date</th>
+            <th>Time</th>
+            <th>Room</th>
+            <th>Plan status</th>
+            <th>Appointment</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let d of selectedCourse.planDays">
+            <td>{{ d.dayNumber }}</td>
+            <td>{{ d.plannedDate }}</td>
+            <td>{{ d.time }}</td>
+            <td>{{ d.roomNumber }}</td>
+            <td><span class="badge" [ngClass]="'st-' + d.status">{{ d.status }}</span></td>
+            <td>
+              <span *ngIf="d.appointment">{{ d.appointment.status }}<span *ngIf="d.appointment.checkedIn"> · checked-in</span></span>
+              <span *ngIf="!d.appointment" class="muted">not booked yet</span>
+            </td>
+            <td>
+              <button class="c-btn sm" *ngIf="canReschedule(d)" (click)="startReschedule(d)">Reschedule</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Reschedule panel -->
+    <div class="reschedule-panel" *ngIf="reschedulingDay">
+      <h3>Reschedule Day {{ reschedulingDay.dayNumber }} <span class="muted">(currently {{ reschedulingDay.plannedDate }})</span></h3>
+
+      <div class="rs-row">
+        <input type="date" class="c-input" [min]="minDate" [(ngModel)]="newDate" />
+        <button class="c-btn" [disabled]="previewLoading" (click)="runPreview()">Preview</button>
+        <button class="c-btn ghost" (click)="cancelReschedule()">Close</button>
+      </div>
+
+      <div class="c-loading" *ngIf="previewLoading">Computing shifted plan…</div>
+
+      <ng-container *ngIf="preview">
+        <p class="rs-note">
+          Shifting by <strong>{{ preview.offset }}</strong> day(s). Day {{ reschedulingDay.dayNumber }} and every later
+          day move together. Clashing days are flagged below.
+        </p>
+
+        <table class="c-table compact">
+          <thead>
+            <tr><th>Day</th><th>From</th><th>To</th><th>Time</th><th>Room</th><th>Therapist(s)</th><th>Status</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let a of preview.affected">
+              <td>{{ a.dayNumber }}</td>
+              <td>{{ a.oldDate }}</td>
+              <td>{{ a.newDate }}</td>
+              <td>{{ a.time }}</td>
+              <td>{{ a.roomNumber }}</td>
+              <td>{{ a.therapistNames?.join(', ') }}</td>
+              <td>
+                <span *ngIf="a.realConflict" class="flag bad">booked</span>
+                <span *ngIf="a.outsideHours" class="flag bad">outside hours</span>
+                <span *ngIf="a.plannedConflict && !a.realConflict" class="flag warn">tentative</span>
+                <span *ngIf="!a.realConflict && !a.outsideHours && !a.plannedConflict" class="flag ok">ok</span>
+                <ul *ngIf="a.conflicts?.length" style="margin:4px 0 0; padding-left:16px; font-size:0.74rem;"
+                  [style.color]="a.realConflict ? '#c0392b' : '#b9760a'">
+                  <li *ngFor="let c of a.conflicts">{{ c.what }} — {{ c.when }} ({{ c.type }})</li>
+                </ul>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <p class="rs-block" *ngIf="targetBlocked()">
+          ⚠ A day clashes with an existing booking ("booked"/"outside hours") — pick another date. Days marked
+          "tentative" can be proceeded with on confirm.
+        </p>
+
+        <div class="rs-row">
+          <button class="c-btn primary" [disabled]="applyLoading || targetBlocked()" (click)="confirmReschedule()">
+            Confirm reschedule
+          </button>
+          <button class="c-btn ghost" (click)="cancelReschedule()">Cancel</button>
+        </div>
+      </ng-container>
+    </div>
+  </ng-container>
+
+</div>
+
+<p-toast></p-toast>
+
+<!-- Conflict popup (matches MHC design) -->
+<div class="custom-dialog-overlay" *ngIf="displayConflictDialog">
+  <div class="custom-dialog">
+    <div class="dialog-content">
+      <div class="icon-container">
+        <img src="warning.png" alt="Warning Icon" class="dialog-icon" />
+      </div>
+      <div class="dialog-text">
+        <h3>Conflict Detected</h3>
+        <p>{{ conflictMessage }}</p>
+      </div>
+    </div>
+    <div class="dialog-buttons">
+      <button type="button" class="cancel" (click)="onConflictReject()">No</button>
+      <button type="button" class="btn-primary" (click)="onConflictAccept()">Yes</button>
+    </div>
+  </div>
+</div>

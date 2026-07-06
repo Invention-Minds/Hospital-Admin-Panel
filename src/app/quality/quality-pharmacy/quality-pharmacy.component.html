@@ -1,0 +1,109 @@
+<div class="page q-shell">
+  <div class="q-head">
+    <div>
+      <h2 class="q-title">Pharmacy — stock + expired</h2>
+      <p class="q-sub">Critical drug watch-list + stock-out / expired event log. Powers OPS-003 + OPS-004.</p>
+    </div>
+    <div class="q-range">
+      <button class="qi-back" (click)="goBack()">← Indicators</button>
+    </div>
+  </div>
+
+  <div class="q-tabs">
+    <button class="q-tab" [class.q-tab-on]="tab === 'drugs'" (click)="switchTab('drugs')">Critical drugs</button>
+    <button class="q-tab" [class.q-tab-on]="tab === 'events'" (click)="switchTab('events')">Stock events</button>
+  </div>
+
+  <div class="q-banner q-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
+  <div class="q-banner ph-banner-ok" *ngIf="successMessage">{{ successMessage }}</div>
+
+  <!-- ── Critical drugs tab ── -->
+  <ng-container *ngIf="tab === 'drugs'">
+    <div class="ph-card">
+      <h3 class="ph-card-title">Add drug</h3>
+      <div class="ph-row">
+        <label>Code <input type="text" [(ngModel)]="drugDraft.code" placeholder="DRUG-001" /></label>
+        <label>Name <input type="text" [(ngModel)]="drugDraft.name" placeholder="Adrenaline 1mg/ml" /></label>
+        <label>Category <input type="text" [(ngModel)]="drugDraft.category" placeholder="emergency / antibiotic" /></label>
+        <label class="ph-check"><input type="checkbox" [(ngModel)]="drugDraft.isCritical" /> Critical</label>
+      </div>
+      <div class="ph-foot">
+        <button class="ph-save" (click)="submitDrug()" [disabled]="saving">{{ saving ? 'Saving…' : 'Add drug' }}</button>
+      </div>
+    </div>
+
+    <div class="ph-card">
+      <h3 class="ph-card-title">Critical drugs ({{ drugs.length }})</h3>
+      <div class="q-loading" *ngIf="loading">Loading…</div>
+      <div class="q-empty" *ngIf="!loading && drugs.length === 0">No drugs yet. Add the first one above.</div>
+      <table class="ph-table" *ngIf="drugs.length > 0">
+        <thead><tr><th>Code</th><th>Name</th><th>Category</th><th>Critical</th><th></th></tr></thead>
+        <tbody>
+          <tr *ngFor="let d of drugs">
+            <td class="ph-code">{{ d.code }}</td>
+            <td>{{ d.name }}</td>
+            <td>{{ d.category || '—' }}</td>
+            <td>
+              <button class="ph-pill-btn" [class.q-bad]="d.isCritical" (click)="toggleCritical(d)">
+                {{ d.isCritical ? '★ critical' : 'normal' }}
+              </button>
+            </td>
+            <td><button class="ph-delete" (click)="removeDrug(d)">×</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </ng-container>
+
+  <!-- ── Stock events tab ── -->
+  <ng-container *ngIf="tab === 'events'">
+    <div class="ph-card">
+      <h3 class="ph-card-title">Record stock event</h3>
+      <div class="ph-row">
+        <label>Drug
+          <select [(ngModel)]="eventDraft.drugId">
+            <option [value]="null">— unspecified —</option>
+            <option *ngFor="let d of drugs" [value]="d.id">{{ d.code }} · {{ d.name }}{{ d.isCritical ? ' ★' : '' }}</option>
+          </select>
+        </label>
+        <label>Event
+          <select [(ngModel)]="eventDraft.eventType">
+            <option *ngFor="let t of EVENT_TYPES" [value]="t">{{ t.replace('_', ' ') }}</option>
+          </select>
+        </label>
+        <label>Occurred at <input type="datetime-local" [(ngModel)]="eventDraft.occurredAt" /></label>
+      </div>
+      <div class="ph-row">
+        <label>Batch <input type="text" [(ngModel)]="eventDraft.batchCode" placeholder="B-…" /></label>
+        <label *ngIf="eventDraft.eventType === 'expired'">Expiry <input type="date" [(ngModel)]="eventDraft.expiryDate" /></label>
+        <label>Quantity <input type="number" min="0" [(ngModel)]="eventDraft.quantity" /></label>
+      </div>
+      <label class="ph-fullrow">Notes
+        <textarea rows="2" [(ngModel)]="eventDraft.notes" placeholder="Cause / corrective action"></textarea>
+      </label>
+      <div class="ph-foot">
+        <button class="ph-save" (click)="submitEvent()" [disabled]="saving">{{ saving ? 'Saving…' : 'Record event' }}</button>
+      </div>
+    </div>
+
+    <div class="ph-card">
+      <h3 class="ph-card-title">This month — events ({{ events.length }})</h3>
+      <div class="q-loading" *ngIf="loading">Loading…</div>
+      <div class="q-empty" *ngIf="!loading && events.length === 0">No events this month.</div>
+      <table class="ph-table" *ngIf="events.length > 0">
+        <thead><tr><th>When</th><th>Drug</th><th>Event</th><th>Batch</th><th>Qty</th><th>By</th><th></th></tr></thead>
+        <tbody>
+          <tr *ngFor="let ev of events">
+            <td>{{ ev.occurredAt | date:'yyyy-MM-dd HH:mm' }}</td>
+            <td class="ph-code">{{ ev.drugCodeSnapshot || '—' }} {{ ev.drugNameSnapshot ? ('· ' + ev.drugNameSnapshot) : '' }}</td>
+            <td><span class="qi-pill q-bad">{{ ev.eventType.replace('_', ' ') }}</span></td>
+            <td>{{ ev.batchCode || '—' }}</td>
+            <td>{{ ev.quantity ?? '—' }}</td>
+            <td>{{ ev.reporter || '—' }}</td>
+            <td><button class="ph-delete" (click)="removeEvent(ev)">×</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </ng-container>
+</div>

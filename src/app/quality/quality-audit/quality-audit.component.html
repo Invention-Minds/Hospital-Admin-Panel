@@ -1,0 +1,122 @@
+<div class="page q-shell">
+  <div class="q-head">
+    <div>
+      <h2 class="q-title">Audit observations</h2>
+      <p class="q-sub">Capture compliance audits (hand hygiene, BMW, MRD, HR training, fire drill…). The monthly auto-source rolls these into NABH indicator records.</p>
+    </div>
+    <div class="q-range">
+      <button class="qi-back" (click)="goBack()">← Indicators</button>
+    </div>
+  </div>
+
+  <div class="q-banner q-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
+  <div class="q-banner audit-banner-ok" *ngIf="successMessage">{{ successMessage }}</div>
+
+  <!-- ── Chapter filter ── -->
+  <div class="audit-chapter-row">
+    <button class="qi-chip" *ngFor="let ch of CHAPTERS"
+            [class.qi-chip-on]="filterChapter === ch"
+            (click)="selectChapter(ch)">{{ ch }}</button>
+  </div>
+
+  <!-- ── Capture form ── -->
+  <div class="audit-card">
+    <h3 class="audit-card-title">Record observation</h3>
+
+    <div class="audit-row">
+      <label>Indicator
+        <select [(ngModel)]="draft.qiCode">
+          <option value="">— select —</option>
+          <option *ngFor="let i of filteredIndicators" [value]="i.qiCode">
+            {{ i.qiCode }} · {{ i.name }}
+          </option>
+        </select>
+      </label>
+      <label>Observed at
+        <input type="date" [(ngModel)]="draft.observedAt" />
+      </label>
+      <label>Location
+        <input type="text" [(ngModel)]="draft.location" placeholder="Ward / OT / dept" />
+      </label>
+    </div>
+
+    <div class="audit-row" *ngIf="selectedIndicator() as ind">
+      <div class="audit-context">
+        <div><strong>Chapter:</strong> {{ ind.chapter }} · {{ ind.department }}</div>
+        <div><strong>Direction:</strong> {{ ind.direction }} · <strong>Benchmark:</strong> {{ ind.defaultBenchmark ?? 'hospital-defined' }}</div>
+        <div class="audit-context-meta">
+          <em>Numerator:</em> {{ ind.numeratorDef }}<br/>
+          <em>Denominator:</em> {{ ind.denominatorDef }}
+        </div>
+      </div>
+    </div>
+
+    <div class="audit-row">
+      <label>Checkpoint (optional)
+        <input type="text" [(ngModel)]="draft.checkpointLabel" placeholder="e.g. WHO five moments #3" />
+      </label>
+      <label>Compliant?
+        <select [(ngModel)]="draft.compliant">
+          <option [ngValue]="true">Yes — meets requirement</option>
+          <option [ngValue]="false">No — deviation / non-compliant</option>
+        </select>
+      </label>
+    </div>
+
+    <label class="audit-fullrow">Notes
+      <textarea rows="2" [(ngModel)]="draft.notes" placeholder="Anything the QI committee should know"></textarea>
+    </label>
+
+    <div class="audit-foot">
+      <button class="audit-save" (click)="submit()" [disabled]="saving">{{ saving ? 'Saving…' : 'Record observation' }}</button>
+    </div>
+  </div>
+
+  <!-- ── This-month summary ── -->
+  <div class="audit-card" *ngIf="summary && (objectKeys(summary.data).length > 0)">
+    <h3 class="audit-card-title">This month ({{ summary.period }})</h3>
+    <table class="audit-summary">
+      <thead>
+        <tr><th>QI</th><th>Total</th><th>Compliant</th><th>Rate</th></tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let kv of summaryEntries">
+          <td class="audit-code">{{ kv.qiCode }}</td>
+          <td>{{ kv.total }}</td>
+          <td>{{ kv.compliant }}</td>
+          <td>{{ rate(kv.qiCode) !== null ? (rate(kv.qiCode) + '%') : '—' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── Recent observations ── -->
+  <div class="audit-card">
+    <h3 class="audit-card-title">Recent observations</h3>
+    <div class="q-loading" *ngIf="loading">Loading…</div>
+    <div class="q-empty" *ngIf="!loading && recent.length === 0">No observations yet this month.</div>
+    <table class="audit-table" *ngIf="recent.length > 0">
+      <thead>
+        <tr>
+          <th>When</th><th>QI</th><th>Location</th><th>Checkpoint</th>
+          <th>Compliant</th><th>Auditor</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of recent">
+          <td>{{ r.observedAt | date:'yyyy-MM-dd' }}</td>
+          <td class="audit-code">{{ r.qiCode }}</td>
+          <td>{{ r.location || '—' }}</td>
+          <td>{{ r.checkpointLabel || '—' }}</td>
+          <td>
+            <span class="qi-pill" [class.q-good]="r.compliant" [class.q-bad]="!r.compliant">
+              {{ r.compliant ? 'Yes' : 'No' }}
+            </span>
+          </td>
+          <td>{{ r.auditor || '—' }}</td>
+          <td><button class="audit-delete" (click)="remove(r)">×</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

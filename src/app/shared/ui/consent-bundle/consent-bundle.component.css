@@ -1,0 +1,238 @@
+/* Phase 2 — consent-bundle styles. Falls back gracefully if design tokens
+   aren't loaded. Same colour palette as <app-e-sign>. */
+
+.consent-bundle-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px 20px;
+  background: var(--color-surface-card, #ffffff);
+  border: 1px solid var(--color-border, #d7d7d7);
+  border-radius: 8px;
+  font-family: var(--font-family-primary, -apple-system, Segoe UI, Roboto, sans-serif);
+  color: var(--color-text-primary, #1a1a1a);
+}
+
+.cb-loading {
+  text-align: center;
+  padding: 28px 0;
+  color: var(--color-text-muted, #5a5a5a);
+  font-size: 14px;
+}
+
+/* ─── Progress strip ──────────────────────────────────────────────────── */
+.cb-progress-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.cb-step {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #f0f3ff;
+  color: #5a5a5a;
+  border: 1px solid #d7d7d7;
+  text-transform: capitalize;
+}
+
+.cb-step.active {
+  background: var(--color-brand-primary, #0b5ed7);
+  color: #fff;
+  border-color: transparent;
+  font-weight: 600;
+}
+
+.cb-step.done {
+  background: #e6f4ea;
+  color: #14562a;
+  border-color: #b8e0c4;
+}
+
+.cb-progress-label {
+  margin: 0 0 6px;
+  font-size: 12.5px;
+  color: var(--color-text-muted, #5a5a5a);
+}
+
+/* ─── The form card ───────────────────────────────────────────────────── */
+.cb-card {
+  background: #f6faff;
+  border: 1px solid #b8d4ff;
+  border-radius: 8px;
+  padding: 16px 20px;
+}
+
+.cb-title {
+  margin: 0 0 6px;
+  font-size: 18px;
+  color: #271e4a;
+  font-weight: 600;
+}
+
+.cb-meta {
+  font-size: 12.5px;
+  color: var(--color-text-muted, #5a5a5a);
+  margin: 4px 0 12px;
+}
+
+.cb-body {
+  background: #ffffff;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 14px 16px;
+  margin: 8px 0 12px;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  max-height: 320px;
+  overflow-y: auto;
+  color: var(--color-text-primary, #1a1a1a);
+}
+
+.cb-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+.cb-badge-warn {
+  background: #fff4e0;
+  color: #b06a00;
+  border: 1px solid #f3d9a8;
+}
+
+/* ─── Signature sections ──────────────────────────────────────────────── */
+.cb-section {
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cb-section-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #271e4a;
+}
+
+.cb-hint {
+  margin: 0 0 6px;
+  font-size: 12px;
+  color: var(--color-text-muted, #5a5a5a);
+}
+
+/* ─── Refuse / defer expander ────────────────────────────────────────── */
+.cb-exception {
+  border-top: 1px dashed #d7d7d7;
+  padding-top: 10px;
+  margin-top: 6px;
+}
+
+.cb-exception summary {
+  cursor: pointer;
+  color: var(--color-text-muted, #5a5a5a);
+  font-size: 13px;
+}
+
+.cb-exception summary:hover {
+  color: var(--color-text-primary, #1a1a1a);
+}
+
+.cb-exception-body {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cb-input {
+  padding: 8px 10px;
+  border: 1px solid #b4b6ba;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 14px;
+  background: #ffffff;
+}
+
+.cb-input:focus {
+  outline: none;
+  border-color: var(--color-brand-primary, #0b5ed7);
+  box-shadow: 0 0 3px rgba(11, 94, 215, 0.3);
+}
+
+.cb-exception-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* ─── Banners + toolbar ──────────────────────────────────────────────── */
+.cb-banner {
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  border-left: 3px solid;
+}
+
+.cb-banner-bad {
+  background: #fdecee;
+  color: #7a1c25;
+  border-left-color: #b02a37;
+}
+
+.cb-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+  padding-top: 10px;
+  border-top: 1px solid #eeeeee;
+}
+
+.cb-spacer {
+  flex: 1;
+}
+
+.cb-saving-hint {
+  font-size: 13px;
+  color: var(--color-text-muted, #5a5a5a);
+  font-style: italic;
+}
+
+/* ─── Buttons ────────────────────────────────────────────────────────── */
+.cb-btn {
+  border: 1px solid var(--color-border, #d7d7d7);
+  background: #ffffff;
+  color: var(--color-text-primary, #1a1a1a);
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background-color 0.15s ease;
+}
+
+.cb-btn:hover:not(:disabled) {
+  background: #f3f3f3;
+}
+
+.cb-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cb-btn-ghost {
+  color: var(--color-text-muted, #5a5a5a);
+}
+
+.cb-btn-cancel {
+  color: var(--color-text-muted, #5a5a5a);
+}

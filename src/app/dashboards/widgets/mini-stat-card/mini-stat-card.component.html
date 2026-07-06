@@ -1,0 +1,14 @@
+<div class="mini-stat" [attr.data-accent]="accent" [title]="tooltip || ''">
+  <div class="ms-top">
+    <span class="ms-label">
+      <i *ngIf="icon" [class]="icon + ' ms-icon'"></i>
+      {{ label }}
+    </span>
+    <span class="ms-trend" *ngIf="trend" [attr.data-trend]="trend">
+      <i [class]="trendArrow()"></i>
+    </span>
+  </div>
+  <div class="ms-value">{{ value }}</div>
+  <div class="ms-sub" *ngIf="subText">{{ subText }}</div>
+  <div #spark class="ms-spark" *ngIf="sparkData?.length"></div>
+</div>

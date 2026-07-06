@@ -21,12 +21,17 @@
   border-radius: var(--radius-xl);
   overflow: hidden;
   width: 100%;
-  max-width: 640px;
+  max-width: 600px;
   max-height: 92vh;
   box-shadow: var(--shadow-elevation-1);
   font-family: var(--font-family-primary);
   display: flex;
   flex-direction: column;
+  /* Neutralize the global `:where(.shell, [class$=-shell])` rule (forms.css)
+     that matches any `*-shell` class and injects page-layout padding/min-height. */
+  padding: 0;
+  margin: 0;
+  min-height: 0;
 }
 
 /* ---- Header ---- */
@@ -42,22 +47,27 @@
 .admit-header__title {
   margin: 0;
   font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-lg);
 }
 .admit-header__close {
-  background: none;
+  background: rgba(255, 255, 255, 0.12);
   border: none;
   color: inherit;
   cursor: pointer;
-  width: var(--size-icon-lg);
-  height: var(--size-icon-lg);
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-size: var(--font-size-md);
+  transition: background-color 0.15s ease;
+}
+.admit-header__close:hover {
+  background: rgba(255, 255, 255, 0.24);
 }
 .admit-header__close:focus-visible {
-  outline: 2px solid var(--color-brand-navy-900);
+  outline: 2px solid var(--color-text-on-dark);
   outline-offset: 2px;
 }
 
@@ -73,25 +83,27 @@
 
 /* Patient-context strip */
 .admit-context {
-  background: var(--color-surface-alt);
+  background: var(--color-surface-page);
+  border-left: 3px solid var(--color-brand-navy-700);
   border-radius: var(--radius-md);
   padding: var(--space-16);
 }
 .admit-context__grid {
   display: grid;
-  grid-template-columns: minmax(140px, max-content) 1fr;
+  grid-template-columns: minmax(120px, max-content) 1fr;
   column-gap: var(--space-20);
-  row-gap: var(--space-8);
+  row-gap: var(--space-10);
   margin: 0;
   font-size: var(--font-size-sm);
 }
 .admit-context__grid dt {
   color: var(--color-text-muted);
-  font-weight: var(--font-weight-light);
+  font-weight: var(--font-weight-regular);
 }
 .admit-context__grid dd {
   margin: 0;
   color: var(--color-text-heading);
+  font-weight: var(--font-weight-medium);
   word-break: break-word;
 }
 .admit-context__prn {
@@ -100,6 +112,7 @@
 }
 .admit-context__summary {
   white-space: pre-wrap;
+  font-weight: var(--font-weight-regular);
 }
 
 /* Form layout */
@@ -111,7 +124,10 @@
 .admit-form__grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: var(--space-20);
+  gap: var(--space-16) var(--space-20);
+  /* Don't stretch a short cell (e.g. Admission type) to match a taller
+     sibling (Doctor select + name) — that created the empty gap. */
+  align-items: start;
 }
 .admit-form__field {
   display: flex;
@@ -120,25 +136,46 @@
 }
 .admit-form__label {
   font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
   color: var(--color-text-heading);
 }
 .admit-form__input {
   background: var(--color-surface-card);
   border: 1px solid var(--color-border-input);
-  border-radius: var(--radius-md);
-  padding: var(--space-16);
+  border-radius: var(--radius-lg);
+  padding: var(--space-10) var(--space-12);
+  min-height: 42px;
   font-family: var(--font-family-primary);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
   color: var(--color-text-heading);
   width: 100%;
   box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.admit-form__input::placeholder {
+  color: var(--color-text-placeholder);
+}
+/* Native selects: replace the default chevron for a consistent look */
+select.admit-form__input {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237b7b7b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M6 9l6 6 6-6'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right var(--space-12) center;
+  background-size: 12px;
+  padding-right: var(--space-30);
+  cursor: pointer;
 }
 .admit-form__input:focus {
   outline: none;
-  border: 2px solid var(--color-brand-navy-900);
+  border-color: var(--color-brand-navy-700);
+  box-shadow: 0 0 0 3px rgba(14, 41, 112, 0.12);
 }
 .admit-form__input--error {
-  border: 1px solid var(--color-danger-strong);
+  border-color: var(--color-danger-strong);
+}
+.admit-form__input--error:focus {
+  box-shadow: 0 0 0 3px rgba(210, 0, 6, 0.12);
 }
 .admit-form__input--compact {
   margin-top: var(--space-8);
@@ -147,6 +184,11 @@
   background: var(--color-surface-alt);
   color: var(--color-text-muted);
   cursor: not-allowed;
+}
+.admit-form__hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-top: var(--space-8);
 }
 .admit-form__error {
   color: var(--color-danger-strong);
@@ -158,35 +200,59 @@
 .admit-footer {
   display: flex;
   justify-content: flex-end;
-  gap: var(--space-10);
-  padding: 0 var(--space-20) var(--space-20) var(--space-20);
+  gap: var(--space-12);
+  padding: var(--space-16) var(--space-20) var(--space-20) var(--space-20);
+  border-top: 1px solid var(--color-surface-alt);
   flex-shrink: 0;
 }
 .admit-btn {
   font-family: var(--font-family-primary);
   font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-md);
-  border-radius: var(--radius-md);
-  padding: var(--space-8) var(--space-20);
-  height: 40px;
+  font-size: var(--font-size-base);
+  border-radius: var(--radius-lg);
+  padding: var(--space-10) var(--space-30);
+  min-height: 42px;
   cursor: pointer;
   border: none;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
 }
 .admit-btn:focus-visible {
-  outline: 2px solid var(--color-brand-navy-900);
+  outline: 2px solid var(--color-brand-navy-700);
   outline-offset: 2px;
 }
 .admit-btn:disabled {
   background: var(--color-surface-alt);
   color: var(--color-text-muted);
   cursor: not-allowed;
+  box-shadow: none;
 }
 .admit-btn--cancel {
   background: transparent;
   color: var(--color-text-heading);
   border: 1px solid var(--color-border-input);
 }
+.admit-btn--cancel:hover {
+  background: var(--color-surface-alt);
+}
 .admit-btn--primary {
-  background: var(--color-brand-primary);
+  background: var(--color-success-strong);
   color: var(--color-text-on-dark);
+}
+.admit-btn--primary:hover:not(:disabled) {
+  box-shadow: var(--shadow-glow-success);
+}
+
+@media (max-width: 560px) {
+  .admit-scrim {
+    padding: var(--space-12);
+  }
+  .admit-form__grid {
+    grid-template-columns: 1fr;
+  }
+  .admit-footer {
+    flex-direction: column-reverse;
+  }
+  .admit-btn {
+    width: 100%;
+  }
 }

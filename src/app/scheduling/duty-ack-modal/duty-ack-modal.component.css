@@ -1,0 +1,29 @@
+.dam-bg {
+  position: fixed; inset: 0; z-index: 1500;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex; align-items: center; justify-content: center;
+}
+.dam-modal {
+  background: #fff;
+  border-radius: 10px;
+  padding: 22px 24px;
+  width: 560px; max-width: 92vw;
+  max-height: 92vh; overflow: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+}
+.dam-modal h3 { margin: 0 0 8px; font-size: 17px; color: #111827; }
+.dam-sub { color: #374151; font-size: 13px; margin: 0 0 10px; }
+.dam-warn {
+  color: #92400e; background: #fef3c7; padding: 10px 12px; border-radius: 6px;
+  font-size: 12px; margin: 0 0 14px;
+}
+.dam-banner-bad {
+  color: #b91c1c; background: #fee2e2; padding: 8px 12px; border-radius: 6px;
+  font-size: 13px; margin: 0 0 10px;
+}
+.dam-actions { display: flex; justify-content: flex-end; margin-top: 8px; }
+.dam-btn {
+  background: transparent; border: 0; color: #6b7280;
+  font-size: 12px; cursor: pointer; padding: 6px 10px;
+}
+.dam-btn:hover { color: #374151; text-decoration: underline; }

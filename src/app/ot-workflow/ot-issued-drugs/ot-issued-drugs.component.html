@@ -1,0 +1,71 @@
+<div class="id-shell">
+  <div class="id-head">
+    <div>
+      <h2 class="id-title">View Issued Drugs</h2>
+      <p class="id-sub">Schedule: <code>{{ scheduleId }}</code></p>
+    </div>
+    <div class="id-actions">
+      <button class="id-btn" (click)="load()" [disabled]="loading">Refresh</button>
+      <button class="id-btn id-btn-primary" (click)="print()" [disabled]="!payload">Print</button>
+      <button class="id-btn" (click)="close()">Close</button>
+    </div>
+  </div>
+
+  <div class="id-banner id-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="id-loading" *ngIf="loading">Loading…</div>
+
+  <ng-container *ngIf="!loading && payload">
+    <div class="id-stats">
+      <div><span>Distinct Items</span><strong>{{ payload.meta.distinctItems }}</strong></div>
+      <div><span>Total Lines</span><strong>{{ payload.meta.totalLines }}</strong></div>
+      <div><span>Issued Units</span><strong>{{ payload.meta.totalIssuedUnits }}</strong></div>
+      <div><span>Returned Units</span><strong>{{ payload.meta.totalReturnedUnits }}</strong></div>
+    </div>
+
+    <div class="id-tabs">
+      <button [class.id-tab-active]="tab === 'summary'" (click)="tab = 'summary'">Summary (net per item)</button>
+      <button [class.id-tab-active]="tab === 'ledger'" (click)="tab = 'ledger'">Ledger (every row)</button>
+    </div>
+
+    <!-- Summary -->
+    <table class="id-table" *ngIf="tab === 'summary'">
+      <thead>
+        <tr><th>Item</th><th>UOM</th><th class="id-r">Issued</th><th class="id-r">Returned</th><th class="id-r">Net</th></tr>
+      </thead>
+      <tbody>
+        <tr *ngIf="!payload.data.summary.length">
+          <td colspan="5" class="id-muted">No drugs issued yet.</td>
+        </tr>
+        <tr *ngFor="let s of payload.data.summary">
+          <td>{{ s.itemName }}</td>
+          <td>{{ s.uom || '—' }}</td>
+          <td class="id-r">{{ s.issued }}</td>
+          <td class="id-r">{{ s.returned }}</td>
+          <td class="id-r"><strong>{{ s.net }}</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Ledger -->
+    <table class="id-table" *ngIf="tab === 'ledger'">
+      <thead>
+        <tr><th>Time</th><th>Item</th><th class="id-r">Qty</th><th>UOM</th><th>Direction</th><th>Store</th><th>Prescribed By</th><th>Remarks</th></tr>
+      </thead>
+      <tbody>
+        <tr *ngIf="!payload.data.rows.length">
+          <td colspan="8" class="id-muted">No issuance rows.</td>
+        </tr>
+        <tr *ngFor="let r of payload.data.rows">
+          <td>{{ r.issuedAt | date:'dd/MM/yyyy HH:mm' }}</td>
+          <td>{{ r.itemName }}</td>
+          <td class="id-r">{{ r.quantity }}</td>
+          <td>{{ r.uom || '—' }}</td>
+          <td><span class="id-pill" [class.id-pill-ret]="r.direction === 'returned'">{{ r.direction }}</span></td>
+          <td>{{ r.pharmacyStore || '—' }}</td>
+          <td>{{ r.prescribedBy || '—' }}</td>
+          <td>{{ r.itemRemarks || '—' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </ng-container>
+</div>

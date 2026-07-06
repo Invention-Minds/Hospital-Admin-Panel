@@ -1,0 +1,92 @@
+<div class="page q-shell">
+  <div class="q-head">
+    <div>
+      <h2 class="q-title">RCA · {{ rca?.record?.qiCode }}</h2>
+      <p class="q-sub" *ngIf="rca?.record?.indicator as ind">{{ ind.name }} — {{ ind.chapter }} / {{ ind.department }}</p>
+    </div>
+    <div class="q-range">
+      <button class="qi-back" (click)="goBack()">← RCA inbox</button>
+    </div>
+  </div>
+
+  <div class="q-banner q-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
+  <div class="q-banner rca-banner-ok" *ngIf="successMessage">{{ successMessage }}</div>
+  <div class="q-loading" *ngIf="loading">Loading…</div>
+
+  <ng-container *ngIf="!loading && rca as r">
+    <!-- ── Indicator + record context ── -->
+    <div class="rca-card">
+      <h3 class="rca-card-title">Context</h3>
+      <div class="rca-context-grid">
+        <div><span class="rca-label">Period</span><span class="rca-value">{{ r.record?.period }}</span></div>
+        <div><span class="rca-label">Value</span><span class="rca-value">
+          <span class="qi-pill" [ngClass]="recordStatusClass(r.record?.status || '')">
+            {{ r.record?.calculatedValue }} {{ r.record?.indicator?.unit }}
+          </span>
+        </span></div>
+        <div><span class="rca-label">Benchmark</span><span class="rca-value">{{ r.record?.benchmarkUsed ?? '—' }}</span></div>
+        <div><span class="rca-label">Direction</span><span class="rca-value">{{ r.record?.indicator?.direction }}</span></div>
+        <div><span class="rca-label">Escalation owner</span><span class="rca-value">{{ r.record?.indicator?.escalationOwner }}</span></div>
+        <div><span class="rca-label">Opened</span><span class="rca-value">{{ r.createdAt | date:'yyyy-MM-dd HH:mm' }}</span></div>
+      </div>
+      <div class="rca-formula">
+        <div><strong>Numerator:</strong> {{ r.record?.indicator?.numeratorDef }}</div>
+        <div><strong>Denominator:</strong> {{ r.record?.indicator?.denominatorDef }}</div>
+        <div *ngIf="r.record?.indicator?.criticalRule" class="rca-formula-meta">
+          ⚠ Critical trigger: {{ r.record?.indicator?.criticalRule }}
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Editor ── -->
+    <div class="rca-card">
+      <h3 class="rca-card-title">Root cause analysis</h3>
+
+      <label class="rca-fullrow">Immediate actions
+        <textarea rows="2" [(ngModel)]="draft.immediateActions" placeholder="What was done right away to contain the harm?"></textarea>
+      </label>
+
+      <div class="rca-whys">
+        <label class="rca-fullrow">Why 1
+          <input type="text" [(ngModel)]="draft.why1" placeholder="Why did this happen?" />
+        </label>
+        <label class="rca-fullrow">Why 2 <input type="text" [(ngModel)]="draft.why2" /></label>
+        <label class="rca-fullrow">Why 3 <input type="text" [(ngModel)]="draft.why3" /></label>
+        <label class="rca-fullrow">Why 4 <input type="text" [(ngModel)]="draft.why4" /></label>
+        <label class="rca-fullrow">Why 5 <input type="text" [(ngModel)]="draft.why5" /></label>
+      </div>
+
+      <label class="rca-fullrow">Root cause
+        <textarea rows="2" [(ngModel)]="draft.rootCause"></textarea>
+      </label>
+      <label class="rca-fullrow">Corrective actions
+        <textarea rows="3" [(ngModel)]="draft.correctiveActions" placeholder="What's being done to resolve THIS event?"></textarea>
+      </label>
+      <label class="rca-fullrow">Preventive actions
+        <textarea rows="3" [(ngModel)]="draft.preventiveActions" placeholder="What's changing so it doesn't happen again?"></textarea>
+      </label>
+
+      <div class="rca-row">
+        <label>Owner <input type="text" [(ngModel)]="draft.owner" placeholder="Investigator / dept head" /></label>
+        <label>Due date <input type="date" [(ngModel)]="draft.dueDate" /></label>
+        <label>Completed at <input type="date" [(ngModel)]="draft.completedAt" /></label>
+        <label>Status
+          <select [(ngModel)]="draft.status">
+            <option *ngFor="let s of STATUSES" [value]="s">{{ s.replace('_', ' ') }}</option>
+          </select>
+        </label>
+      </div>
+
+      <label class="rca-fullrow">Effectiveness review
+        <textarea rows="2" [(ngModel)]="draft.effectivenessReview" placeholder="Did the corrective + preventive actions work? Audit findings, follow-up data."></textarea>
+      </label>
+      <div class="rca-row">
+        <label>Effectiveness reviewed at <input type="date" [(ngModel)]="draft.effectivenessReviewAt" /></label>
+      </div>
+
+      <div class="rca-foot">
+        <button class="rca-save" (click)="save()" [disabled]="saving">{{ saving ? 'Saving…' : 'Save RCA' }}</button>
+      </div>
+    </div>
+  </ng-container>
+</div>

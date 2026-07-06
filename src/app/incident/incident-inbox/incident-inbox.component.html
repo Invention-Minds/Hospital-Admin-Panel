@@ -1,0 +1,104 @@
+<div class="page inc-shell">
+  <div class="inc-head">
+    <div>
+      <h2 class="inc-title">Incidents</h2>
+      <p class="inc-sub">Patient-safety incidents — manual raises now; auto-capture rules ship in Phase 2.</p>
+    </div>
+    <button class="inc-btn inc-btn-primary" (click)="showRaise = true">+ Raise incident</button>
+  </div>
+
+  <!-- KPI tiles -->
+  <div class="inc-tiles" *ngIf="stats">
+    <div class="inc-tile">
+      <span class="inc-tile-label">Open</span>
+      <span class="inc-tile-val">{{ stats.byStatus['open'] || 0 }}</span>
+    </div>
+    <div class="inc-tile">
+      <span class="inc-tile-label">In progress</span>
+      <span class="inc-tile-val">{{ (stats.byStatus['triaged']||0) + (stats.byStatus['investigated']||0) + (stats.byStatus['capa_in_progress']||0) }}</span>
+    </div>
+    <div class="inc-tile">
+      <span class="inc-tile-label">Closed</span>
+      <span class="inc-tile-val">{{ stats.byStatus['closed'] || 0 }}</span>
+    </div>
+    <div class="inc-tile inc-tile-warn">
+      <span class="inc-tile-label">Active critical</span>
+      <span class="inc-tile-val">{{ (stats.activeBySeverity['major']||0) + (stats.activeBySeverity['sentinel']||0) }}</span>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="inc-filters">
+    <label>Status
+      <select [(ngModel)]="filters.status" (change)="load()">
+        <option value="">All</option>
+        <option *ngFor="let s of STATUSES" [value]="s">{{ statusLabel(s) }}</option>
+      </select>
+    </label>
+    <label>Severity
+      <select [(ngModel)]="filters.severity" (change)="load()">
+        <option value="">All</option>
+        <option *ngFor="let s of SEVERITIES" [value]="s">{{ statusLabel(s) }}</option>
+      </select>
+    </label>
+    <label>Category
+      <select [(ngModel)]="filters.category" (change)="load()">
+        <option value="">All</option>
+        <option *ngFor="let c of CATEGORIES" [value]="c">{{ c }}</option>
+      </select>
+    </label>
+    <label>Source
+      <select [(ngModel)]="filters.source" (change)="load()">
+        <option value="">All</option>
+        <option value="manual">Manual</option>
+        <option value="auto-rule">Auto-rule</option>
+      </select>
+    </label>
+    <label>NABH clause
+      <input type="text" [(ngModel)]="filters.nabhClause" (keyup.enter)="load()" (change)="load()" placeholder="e.g. PSQ.4" />
+    </label>
+    <label>QI code
+      <input type="text" [(ngModel)]="filters.qiCode" (keyup.enter)="load()" (change)="load()" placeholder="e.g. PSQ-017" />
+    </label>
+    <button class="inc-btn" [class.inc-btn-on]="mineOnly" (click)="toggleMine()">{{ mineOnly ? '✓ Mine only' : 'Mine only' }}</button>
+    <button class="inc-btn" (click)="clearFilters()">Clear</button>
+    <button class="inc-btn" (click)="load()">↻ Refresh</button>
+  </div>
+
+  <div class="inc-banner inc-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
+
+  <div class="inc-loading" *ngIf="loading">Loading…</div>
+
+  <div class="inc-empty" *ngIf="!loading && !rows.length">No incidents match the current filters.</div>
+
+  <table class="inc-table" *ngIf="!loading && rows.length">
+    <thead>
+      <tr>
+        <th>Code</th><th>When</th><th>Severity</th><th>Category</th><th>Title</th><th>Patient</th><th>Status</th><th>Source</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let r of rows" (click)="openDetail(r)" class="inc-row" [class.inc-row-critical]="r.severity === 'sentinel' || r.severity === 'major'">
+        <td>{{ r.code }}</td>
+        <td>{{ r.reportedAt | date:'dd/MM/yy h:mm a' }}</td>
+        <td><span class="inc-pill inc-sev-{{ r.severity }}">{{ statusLabel(r.severity) }}</span></td>
+        <td>{{ r.category }}</td>
+        <td>{{ r.title }}</td>
+        <td>
+          <span *ngIf="r.patientName">{{ r.patientName }}</span>
+          <span *ngIf="r.patientPrn"> · PRN {{ r.patientPrn }}</span>
+          <span *ngIf="!r.patientName && !r.patientPrn" class="inc-muted">—</span>
+        </td>
+        <td><span class="inc-pill inc-status-{{ r.status }}">{{ statusLabel(r.status) }}</span></td>
+        <td>{{ r.source === 'auto-rule' ? 'Auto' : 'Manual' }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Raise modal -->
+<app-incident-raise
+  *ngIf="showRaise"
+  (closed)="showRaise = false"
+  (raised)="onRaised()">
+</app-incident-raise>

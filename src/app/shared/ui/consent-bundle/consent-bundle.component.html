@@ -1,0 +1,104 @@
+<div class="consent-bundle-shell">
+
+  <!-- Loading state -->
+  <div class="cb-loading" *ngIf="loading">Loading consent forms&hellip;</div>
+
+  <!-- Error banner -->
+  <div class="cb-banner cb-banner-bad" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+
+  <!-- Active consent form -->
+  <ng-container *ngIf="!loading && currentForm">
+
+    <!-- Progress strip -->
+    <div class="cb-progress-strip">
+      <span class="cb-step" *ngFor="let f of forms; let i = index"
+            [class.done]="i < currentIndex"
+            [class.active]="i === currentIndex">
+        {{ i + 1 }}. {{ f.consentType }}
+      </span>
+    </div>
+    <p class="cb-progress-label">{{ progressLabel }}</p>
+
+    <!-- The form -->
+    <div class="cb-card">
+      <h3 class="cb-title">{{ currentForm.title }}</h3>
+      <p class="cb-meta">
+        Version {{ currentForm.version }} &middot; Language {{ currentForm.language }}
+        <span *ngIf="currentForm.requiresWitness" class="cb-badge cb-badge-warn">Witness required</span>
+      </p>
+
+      <pre class="cb-body">{{ currentForm.bodyText }}</pre>
+
+      <p class="cb-meta">
+        Patient: <strong>{{ patientName }}</strong>
+        <span *ngIf="patientPrn"> &middot; PRN {{ patientPrn }}</span>
+      </p>
+    </div>
+
+    <!-- Patient signature pad (only when signerMode = patient) -->
+    <div class="cb-section" *ngIf="signerMode === 'patient'">
+      <h4 class="cb-section-title">Patient signature</h4>
+      <app-e-sign
+        [signerType]="'patient'"
+        [signerName]="patientName"
+        [contextType]="'consent'"
+        [prompt]="'Patient sign here'"
+        [disabled]="saving"
+        (signed)="onPatientSigned($event)">
+      </app-e-sign>
+    </div>
+
+    <!-- Attender signature pad (only when signerMode = attender) -->
+    <div class="cb-section" *ngIf="signerMode === 'attender'">
+      <h4 class="cb-section-title">Attender signature</h4>
+      <app-e-sign
+        [signerType]="'attender'"
+        [signerName]="attenderName"
+        [signerRelation]="attenderRelation"
+        [contextType]="'consent'"
+        [prompt]="'Attender sign here on behalf of patient'"
+        [disabled]="saving"
+        (signed)="onAttenderSigned($event)">
+      </app-e-sign>
+    </div>
+
+    <!-- Witness signature pad (when the form requires it) -->
+    <div class="cb-section" *ngIf="currentForm.requiresWitness">
+      <h4 class="cb-section-title">Witness signature</h4>
+      <p class="cb-hint">Required for high-risk procedures &mdash; an unrelated adult who heard the explanation.</p>
+      <app-e-sign
+        [signerType]="'witness'"
+        [signerName]="witnessName"
+        [contextType]="'consent'"
+        [prompt]="'Witness sign here'"
+        [disabled]="saving">
+      </app-e-sign>
+    </div>
+
+    <!-- Refuse / defer paths -->
+    <details class="cb-exception">
+      <summary>Cannot sign right now? (refuse / defer)</summary>
+      <div class="cb-exception-body">
+        <p class="cb-hint">Use this only when the patient declines this specific consent (refuse) or when consent must be deferred under emergency exception (NABH PRE.4.d).</p>
+        <input #reason type="text" class="cb-input" placeholder="Reason (required)" />
+        <div class="cb-exception-actions">
+          <button type="button" class="cb-btn cb-btn-ghost" (click)="refuseCurrent(reason.value); reason.value=''">
+            Patient refuses this consent
+          </button>
+          <button type="button" class="cb-btn cb-btn-ghost" (click)="deferCurrent(reason.value); reason.value=''">
+            Defer (emergency exception)
+          </button>
+        </div>
+      </div>
+    </details>
+
+    <!-- Bottom toolbar -->
+    <div class="cb-toolbar">
+      <button type="button" class="cb-btn cb-btn-cancel" (click)="cancelBundle()" [disabled]="saving">
+        Cancel
+      </button>
+      <span class="cb-spacer"></span>
+      <span class="cb-saving-hint" *ngIf="saving">Saving&hellip;</span>
+    </div>
+  </ng-container>
+</div>

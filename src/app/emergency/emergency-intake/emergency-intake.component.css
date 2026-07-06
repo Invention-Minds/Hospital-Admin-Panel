@@ -1,83 +1,13 @@
-.emergency-intake-container {
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
+/* Phase 9.9 — emergency-intake now uses the global dm-* design module
+ * (src/styles/forms.css), so this component-scoped file only carries
+ * tweaks that aren't expressible via dm-* utilities.
+ *
+ * Anything visual (page wrapper, card, field, input, button) is defined
+ * globally now. Dead-code rules removed so they can't accidentally override
+ * the design system on a future class rename. */
 
-.card {
-  background: white;
-  border-radius: 8px;
-  padding: 30px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.section-title {
-  color: #333;
-  font-size: 24px;
-  font-weight: 600;
-  margin-bottom: 30px;
-  border-bottom: 3px solid #007bff;
-  padding-bottom: 10px;
-}
-
-.form-section-title {
-  color: #495057;
-  font-size: 16px;
-  font-weight: 600;
-  margin-top: 20px;
-  margin-bottom: 15px;
-  padding-bottom: 10px;
-  border-bottom: 2px solid #dee2e6;
-}
-
-.form-group {
-  margin-bottom: 20px;
-}
-
-.form-label {
-  display: block;
-  margin-bottom: 8px;
-  color: #333;
-  font-weight: 500;
-  font-size: 14px;
-}
-
-.w-full {
-  width: 100%;
-}
-
-textarea {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-.button-group {
-  display: flex;
-  gap: 10px;
-  margin-top: 30px;
-  padding-top: 20px;
-  border-top: 1px solid #dee2e6;
-}
-
-.text-red-500 {
-  color: #dc3545;
-  font-size: 12px;
-  margin-top: 5px;
-}
-
-@media (max-width: 768px) {
-  .card {
-    padding: 20px;
-  }
-
-  .section-title {
-    font-size: 20px;
-  }
-
-  .button-group {
-    flex-direction: column;
-  }
-
-  .button-group button {
-    width: 100%;
-  }
+/* Form-level textarea inherits Kanit from dm-textarea, but PrimeNG's reset
+ * occasionally drops it for pInputTextarea — pin the family here defensively. */
+textarea[pInputTextarea] {
+  font-family: Kanit, sans-serif !important;
 }

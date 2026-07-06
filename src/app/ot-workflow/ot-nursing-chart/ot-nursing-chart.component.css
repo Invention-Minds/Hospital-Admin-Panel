@@ -1,0 +1,75 @@
+.nc-shell { padding: 24px; max-width: 1500px; margin: 24px auto 24px 96px; }
+
+.nc-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 12px; }
+.nc-title { font-size: 22px; font-weight: 600; margin: 0; }
+.nc-meta { display: flex; align-items: center; gap: 10px; }
+.nc-pill { font-size: 11px; padding: 3px 10px; border-radius: 12px; background: #e5e7eb; color: #374151; font-weight: 600; }
+.nc-pill-warn { background: #fef3c7; color: #92400e; }
+.nc-pill-ok { background: #dcfce7; color: #166534; }
+.nc-readonly { font-size: 12px; color: #92400e; font-style: italic; }
+
+.nc-banner { padding: 10px 14px; border-radius: 6px; margin-bottom: 12px; font-size: 14px; }
+.nc-bad { background: #fee2e2; color: #b91c1c; }
+.nc-good { background: #dcfce7; color: #166534; }
+.nc-loading { padding: 60px; text-align: center; color: #6b7280; font-style: italic; }
+
+.nc-body { display: grid; grid-template-columns: 240px 1fr; gap: 18px; }
+@media (max-width: 1000px) { .nc-body { grid-template-columns: 1fr; } }
+
+.nc-tabs {
+  display: flex; flex-direction: column; gap: 2px;
+  background: #fff; border: 1px solid #e5e7eb; border-radius: 8px;
+  padding: 8px; position: sticky; top: 16px; align-self: flex-start;
+}
+.nc-tabs button {
+  text-align: left; padding: 8px 12px; border: 0; background: transparent;
+  cursor: pointer; border-radius: 6px; font-size: 13px; color: #374151;
+}
+.nc-tabs button:hover { background: #f3f4f6; }
+.nc-tabs button.active { background: #eff6ff; color: #1d4ed8; font-weight: 600; }
+.nc-tabs-actions { margin-top: 10px; padding-top: 10px; border-top: 1px solid #f3f4f6; }
+
+.nc-section {
+  background: #fff; border: 1px solid #e5e7eb; border-radius: 8px;
+  padding: 20px 24px;
+}
+.nc-section h3 { font-size: 15px; font-weight: 600; margin: 18px 0 8px; color: #111827; border-bottom: 1px solid #f3f4f6; padding-bottom: 4px; }
+.nc-section h3:first-child { margin-top: 0; }
+.nc-section h4 { font-size: 14px; font-weight: 600; margin: 12px 0 6px; }
+.nc-section p.nc-sub { color: #6b7280; font-size: 12px; margin: 4px 0 10px; }
+.nc-hint { color: #92400e; background: #fef3c7; padding: 8px 12px; border-radius: 6px; font-size: 12px; }
+
+.nc-section textarea,
+.nc-section input[type="text"],
+.nc-section input[type="number"],
+.nc-section input[type="datetime-local"],
+.nc-section select {
+  border: 1px solid #d1d5db; border-radius: 6px; padding: 7px 9px; font-size: 13px; width: 100%; background: #fff;
+}
+.nc-section textarea[disabled], .nc-section input[disabled], .nc-section select[disabled] {
+  background: #f9fafb; color: #6b7280;
+}
+
+.nc-field { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #4b5563; margin-bottom: 12px; }
+.nc-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 8px 0; }
+@media (max-width: 700px) { .nc-grid-2 { grid-template-columns: 1fr; } }
+
+.nc-check-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 8px 0; }
+@media (max-width: 700px) { .nc-check-grid { grid-template-columns: 1fr 1fr; } }
+.nc-check-row, .nc-check-inline { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #374151; padding: 3px 6px; border-radius: 4px; }
+.nc-check-row:hover { background: #f9fafb; }
+
+.nc-counts-table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 6px 0; }
+.nc-counts-table th, .nc-counts-table td { padding: 6px 8px; border-bottom: 1px solid #f3f4f6; text-align: left; }
+.nc-counts-table th { background: #f9fafb; font-weight: 600; color: #374151; font-size: 12px; }
+.nc-counts-table input { width: 80px; }
+.nc-match { color: #166534; font-weight: 700; text-align: center; }
+
+.nc-sig-block { border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px 18px; margin: 12px 0; background: #fafafa; }
+.nc-sig-stamp { color: #166534; background: #dcfce7; padding: 8px 12px; border-radius: 6px; font-size: 13px; }
+
+.nc-btn { background: #fff; border: 1px solid #d1d5db; padding: 7px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; width: 100%; }
+.nc-btn:hover:not([disabled]) { background: #f3f4f6; }
+.nc-btn-primary { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
+.nc-btn-primary:hover:not([disabled]) { background: #1e40af; }
+.nc-btn[disabled] { opacity: 0.5; cursor: not-allowed; }

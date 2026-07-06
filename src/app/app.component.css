@@ -51,6 +51,68 @@
   .content::-webkit-scrollbar-track {
     background: transparent; /* Hide scrollbar track */
   }
+  /* ============================================================================
+     Phase 9.8 — Global Back button.
+     Positioned top-left, clear of the 72px sidebar. Pill-shaped, white on a
+     subtle shadow so it floats above page content without clashing with any
+     page-level header. Hides under 768px (sidebar collapses) to free top-left.
+  ============================================================================ */
+  .app-back-btn {
+    position: fixed;
+    /* top:30px vertically centres the pill against the dashboard-module
+     * header card (which starts ~20px down and is ~48px tall). */
+    top: 30px;
+    left: 86px;
+    /* z-index: 2 sits ABOVE page content but BELOW the sidebar (z:3) so the
+     * sidebar's hover-expand cleanly covers the button. Prevents the button
+     * from floating awkwardly on top of the expanded sidebar drawer. */
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #fff;
+    color: #1d4ed8;
+    border: 1px solid #d1d5db;
+    border-radius: 18px;
+    padding: 5px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    transition: background 0.15s, color 0.15s, transform 0.1s;
+  }
+  .app-back-btn:hover {
+    background: #1d4ed8;
+    color: #fff;
+    border-color: #1d4ed8;
+  }
+  .app-back-btn:active {
+    transform: translateY(1px);
+  }
+  .app-back-arrow {
+    font-size: 16px;
+    line-height: 1;
+  }
+  .app-back-label {
+    font-size: 13px;
+  }
+  @media (max-width: 768px) {
+    .app-back-btn { left: 12px; top: 14px; }
+  }
+
+  /* When the global Back button is visible, indent the dashboard-module
+     header so its hospital-name card clears the fixed button instead of
+     sitting underneath it. ::ng-deep pierces into the child component;
+     scoped under .content.has-back-button so it never leaks elsewhere. */
+  .content.has-back-button ::ng-deep .header-container {
+    padding-left: 124px;
+  }
+  @media (max-width: 768px) {
+    .content.has-back-button ::ng-deep .header-container {
+      padding-left: 20px;
+    }
+  }
+
   .whatsapp-button {
     position: fixed;
     bottom: 20px;

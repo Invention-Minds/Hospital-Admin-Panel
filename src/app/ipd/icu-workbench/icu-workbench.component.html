@@ -1,0 +1,548 @@
+<div class="icu-shell">
+  <div class="icu-head">
+    <div>
+      <h2 class="icu-title">ICU Workbench</h2>
+      <p class="icu-sub" *ngIf="payload?.admission as a">
+        {{ a.admissionNo }} · PRN {{ a.prn }} · {{ a.admittingDoctor }} · {{ a.department }}
+      </p>
+    </div>
+    <button class="icu-btn" (click)="goBack()">← Back to admission</button>
+  </div>
+
+  <div class="icu-banner icu-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="icu-banner icu-good" *ngIf="successMessage">{{ successMessage }}</div>
+  <div class="icu-loading" *ngIf="loading">Loading…</div>
+
+  <ng-container *ngIf="!loading && payload as p">
+    <!-- Status strip -->
+    <div class="icu-status">
+      <div class="icu-status-pill" [class.icu-status-pill-icu]="isInIcu" [class.icu-status-pill-out]="!isInIcu">
+        {{ isInIcu ? 'IN ICU' : 'Not currently in ICU' }}
+      </div>
+      <div *ngIf="isInIcu" class="icu-day">
+        <span>ICU Day</span><strong>{{ p.icuDayNumber }}</strong>
+      </div>
+      <div *ngIf="isInIcu" class="icu-admitted">
+        Admitted to ICU at {{ p.admission.icuAdmittedAt | date:'dd/MM/yyyy HH:mm' }}
+      </div>
+      <div *ngIf="p.readmittedWithin30Days" class="icu-readmit-flag">
+        ⚠ 30-day readmission — prior ICU discharge {{ p.admission.priorIcuDischargeAt | date:'dd/MM/yyyy' }}
+      </div>
+    </div>
+
+    <div class="icu-tabs">
+      <button [class.icu-tab-active]="tab === 'overview'" (click)="setTab('overview')">Overview</button>
+      <button [class.icu-tab-active]="tab === 'vitals'" (click)="setTab('vitals')">Vitals & Vent ({{ p.vitals.length }})</button>
+      <button [class.icu-tab-active]="tab === 'progress'" (click)="setTab('progress')">Progress Notes ({{ p.progressNotes.length }})</button>
+      <button [class.icu-tab-active]="tab === 'sedation'" (click)="setTab('sedation')">Sedation ({{ p.sedations.length }})</button>
+      <button [class.icu-tab-active]="tab === 'restraints'" (click)="setTab('restraints')">Restraints ({{ activeRestraints.length }}<span *ngIf="activeRestraints.length"> active</span>)</button>
+      <button [class.icu-tab-active]="tab === 'bundles'" (click)="setTab('bundles')">Bundles ({{ p.bundles.length }})</button>
+      <button [class.icu-tab-active]="tab === 'family'" (click)="setTab('family')">Family ({{ p.familyComms.length }})</button>
+      <button [class.icu-tab-active]="tab === 'stepdown'" (click)="setTab('stepdown')">Step-Down ({{ p.stepDowns.length }})</button>
+      <button [class.icu-tab-active]="tab === 'lines'" (click)="setTab('lines')">Invasive Lines</button>
+      <button [class.icu-tab-active]="tab === 'careplan'" (click)="setTab('careplan')">Care Plan</button>
+      <button [class.icu-tab-active]="tab === 'notes'" (click)="setTab('notes')">Nurse Notes</button>
+    </div>
+
+    <!-- ════════════════════════ OVERVIEW ════════════════════════ -->
+    <section *ngIf="tab === 'overview'" class="icu-panel">
+      <div class="icu-grid">
+        <div><span>Admission</span><strong>{{ p.admission.admissionNo }}</strong></div>
+        <div><span>PRN</span><strong>{{ p.admission.prn }}</strong></div>
+        <div><span>Doctor</span><strong>{{ p.admission.admittingDoctor }}</strong></div>
+        <div><span>Department</span><strong>{{ p.admission.department }}</strong></div>
+        <div><span>Room Type</span><strong>{{ p.admission.roomType }}</strong></div>
+        <div><span>Status</span><strong>{{ p.admission.status }}</strong></div>
+      </div>
+      <h4>Diagnosis</h4>
+      <p class="icu-text">{{ p.admission.diagnosis || '—' }}</p>
+
+      <h4>Latest snapshot</h4>
+      <div class="icu-snap">
+        <div *ngIf="p.vitals[0] as v">
+          <strong>Last vitals &#64; {{ v.recordedAt | date:'HH:mm' }}</strong>
+          HR {{ v.hr ?? '—' }} · BP {{ v.sbp ?? '—' }}/{{ v.dbp ?? '—' }} · SpO₂ {{ v.spo2 ?? '—' }} ·
+          GCS {{ v.gcs ?? '—' }}<span *ngIf="v.ventilatorMode"> · Vent {{ v.ventilatorMode }} FiO₂ {{ v.fiO2 }}%</span>
+        </div>
+        <div *ngIf="latestProgress as n">
+          <strong>Latest note</strong> · {{ n.noteDate | date:'dd/MM' }} by {{ n.doctorName }}
+          · trajectory: <em>{{ n.trajectory || '—' }}</em> · SOFA {{ n.sofaScore ?? '—' }}
+        </div>
+        <div *ngIf="p.sedations[0] as s">
+          <strong>Sedation</strong> · RASS {{ s.rassScore ?? '—' }} · CPOT {{ s.cpotScore ?? '—' }}
+          <span *ngIf="s.sedativeAgent"> · on {{ s.sedativeAgent }} {{ s.sedativeRate || '' }}</span>
+        </div>
+        <div *ngIf="activeRestraints.length">
+          <strong>{{ activeRestraints.length }} active restraint(s)</strong>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════ VITALS ════════════════════════ -->
+    <section *ngIf="tab === 'vitals'" class="icu-panel">
+      <div class="icu-card">
+        <h4>Record vitals</h4>
+        <div class="icu-form-grid">
+          <label>Interval (min)<input type="number" min="15" max="240" [(ngModel)]="vitalsDraft.intervalMinutes" /></label>
+          <label>HR<input type="number" [(ngModel)]="vitalsDraft.hr" /></label>
+          <label>SBP<input type="number" [(ngModel)]="vitalsDraft.sbp" /></label>
+          <label>DBP<input type="number" [(ngModel)]="vitalsDraft.dbp" /></label>
+          <label>RR<input type="number" [(ngModel)]="vitalsDraft.rr" /></label>
+          <label>SpO₂<input type="number" [(ngModel)]="vitalsDraft.spo2" /></label>
+          <label>Temp (°C)<input type="number" step="0.1" [(ngModel)]="vitalsDraft.temp" /></label>
+          <label>GCS<input type="number" min="3" max="15" [(ngModel)]="vitalsDraft.gcs" /></label>
+        </div>
+        <h5>Ventilator (optional)</h5>
+        <div class="icu-form-grid">
+          <label>Mode
+            <select [(ngModel)]="vitalsDraft.ventilatorMode">
+              <option [ngValue]="null">— none —</option>
+              <option *ngFor="let m of ventModes" [ngValue]="m">{{ m }}</option>
+            </select>
+          </label>
+          <label>FiO₂ %<input type="number" [(ngModel)]="vitalsDraft.fiO2" /></label>
+          <label>PEEP<input type="number" [(ngModel)]="vitalsDraft.peep" /></label>
+          <label>PS<input type="number" [(ngModel)]="vitalsDraft.pressureSupport" /></label>
+          <label>Vt (mL)<input type="number" [(ngModel)]="vitalsDraft.tidalVolume" /></label>
+          <label>RR (set)<input type="number" [(ngModel)]="vitalsDraft.respRateSet" /></label>
+        </div>
+        <h5>ABG (optional)</h5>
+        <div class="icu-form-grid">
+          <label>pH<input type="number" step="0.01" [(ngModel)]="vitalsDraft.abgPh" /></label>
+          <label>pCO₂<input type="number" step="0.1" [(ngModel)]="vitalsDraft.abgPco2" /></label>
+          <label>pO₂<input type="number" step="0.1" [(ngModel)]="vitalsDraft.abgPo2" /></label>
+          <label>HCO₃<input type="number" step="0.1" [(ngModel)]="vitalsDraft.abgHco3" /></label>
+          <label>Lactate<input type="number" step="0.1" [(ngModel)]="vitalsDraft.abgLactate" /></label>
+        </div>
+        <label class="icu-wide">Inotropes / vasopressors<input type="text" [(ngModel)]="vitalsDraft.inotropes" placeholder="e.g. Noradrenaline 0.1 µg/kg/min" /></label>
+        <label class="icu-wide">Notes<input type="text" [(ngModel)]="vitalsDraft.notes" /></label>
+        <div class="icu-actions"><button class="icu-btn icu-btn-primary" (click)="saveVitals()" [disabled]="saving">{{ saving ? 'Saving…' : '+ Record' }}</button></div>
+      </div>
+
+      <h4>Recent</h4>
+      <table class="icu-table">
+        <thead><tr>
+          <th>Time</th><th>HR</th><th>BP</th><th>SpO₂</th><th>RR</th><th>Temp</th><th>GCS</th>
+          <th>Vent</th><th>FiO₂</th><th>ABG</th><th>Inotropes</th>
+        </tr></thead>
+        <tbody>
+          <tr *ngIf="!p.vitals.length"><td colspan="11" class="icu-muted">No vitals recorded yet.</td></tr>
+          <tr *ngFor="let v of p.vitals">
+            <td>{{ v.recordedAt | date:'dd/MM HH:mm' }}</td>
+            <td>{{ v.hr ?? '—' }}</td>
+            <td>{{ v.sbp ?? '—' }}/{{ v.dbp ?? '—' }}</td>
+            <td>{{ v.spo2 ?? '—' }}</td>
+            <td>{{ v.rr ?? '—' }}</td>
+            <td>{{ v.temp ?? '—' }}</td>
+            <td>{{ v.gcs ?? '—' }}</td>
+            <td>{{ v.ventilatorMode ?? '—' }}</td>
+            <td>{{ v.fiO2 ?? '—' }}</td>
+            <td>
+              <span *ngIf="v.abgPh">pH {{ v.abgPh }}</span>
+              <span *ngIf="!v.abgPh">—</span>
+            </td>
+            <td>{{ v.inotropes ?? '—' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ════════════════════════ PROGRESS NOTES ════════════════════════ -->
+    <section *ngIf="tab === 'progress'" class="icu-panel">
+      <div class="icu-card">
+        <h4>New intensivist note</h4>
+        <label class="icu-wide">Doctor name *<app-doctor-select [source]="'doctors'" [(ngModel)]="progressDraft.doctorName" name="doctorName"></app-doctor-select></label>
+        <label class="icu-wide">Subjective *<textarea rows="2" [(ngModel)]="progressDraft.subjective"></textarea></label>
+        <label class="icu-wide">Objective *<textarea rows="2" [(ngModel)]="progressDraft.objective"></textarea></label>
+        <label class="icu-wide">Assessment *<textarea rows="2" [(ngModel)]="progressDraft.assessment"></textarea></label>
+        <label class="icu-wide">Plan *<textarea rows="2" [(ngModel)]="progressDraft.plan"></textarea></label>
+        <div class="icu-form-grid">
+          <label>SOFA (0-24)<input type="number" min="0" max="24" [(ngModel)]="progressDraft.sofaScore" /></label>
+          <label>APACHE (0-71)<input type="number" min="0" max="71" [(ngModel)]="progressDraft.apacheScore" /></label>
+          <label>GCS (3-15)<input type="number" min="3" max="15" [(ngModel)]="progressDraft.gcsScore" /></label>
+          <label>Trajectory
+            <select [(ngModel)]="progressDraft.trajectory">
+              <option value="improving">Improving</option>
+              <option value="stable">Stable</option>
+              <option value="deteriorating">Deteriorating</option>
+              <option value="critical">Critical</option>
+            </select>
+          </label>
+        </div>
+        <div class="icu-actions"><button class="icu-btn icu-btn-primary" (click)="saveProgressNote()" [disabled]="saving">{{ saving ? 'Saving…' : '+ Save note' }}</button></div>
+      </div>
+
+      <h4>History</h4>
+      <div *ngIf="!p.progressNotes.length" class="icu-muted">No progress notes yet.</div>
+      <div *ngFor="let n of p.progressNotes" class="icu-soap">
+        <div class="icu-soap-h">
+          <strong>Day {{ n.icuDayNumber }} · {{ n.noteDate | date:'dd/MM/yyyy HH:mm' }}</strong>
+          <span>{{ n.doctorName }}</span>
+          <span class="icu-traj icu-traj-{{ n.trajectory }}" *ngIf="n.trajectory">{{ n.trajectory }}</span>
+        </div>
+        <div class="icu-soap-scores">
+          <span>SOFA <strong>{{ n.sofaScore ?? '—' }}</strong></span>
+          <span>APACHE <strong>{{ n.apacheScore ?? '—' }}</strong></span>
+          <span>GCS <strong>{{ n.gcsScore ?? '—' }}</strong></span>
+        </div>
+        <div class="icu-soap-b">
+          <div><em>S:</em> {{ n.subjective }}</div>
+          <div><em>O:</em> {{ n.objective }}</div>
+          <div><em>A:</em> {{ n.assessment }}</div>
+          <div><em>P:</em> {{ n.plan }}</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════ SEDATION ════════════════════════ -->
+    <section *ngIf="tab === 'sedation'" class="icu-panel">
+      <div class="icu-card">
+        <h4>Log sedation scoring</h4>
+        <div class="icu-form-grid">
+          <label>Shift
+            <select [(ngModel)]="sedationDraft.shift">
+              <option value="morning">Morning</option>
+              <option value="evening">Evening</option>
+              <option value="night">Night</option>
+            </select>
+          </label>
+          <label>RASS
+            <select [(ngModel)]="sedationDraft.rassScore">
+              <option [ngValue]="null">— not scored —</option>
+              <option *ngFor="let r of rassScale" [ngValue]="r.value">{{ r.label }}</option>
+            </select>
+          </label>
+          <label>RASS goal
+            <select [(ngModel)]="sedationDraft.rassGoal">
+              <option [ngValue]="null">—</option>
+              <option *ngFor="let r of rassScale" [ngValue]="r.value">{{ r.label }}</option>
+            </select>
+          </label>
+          <label>CPOT (0-8)<input type="number" min="0" max="8" [(ngModel)]="sedationDraft.cpotScore" /></label>
+        </div>
+        <label class="icu-wide">RASS behaviour<input type="text" [(ngModel)]="sedationDraft.rassBehavior" /></label>
+        <label class="icu-wide">CPOT behaviour<input type="text" [(ngModel)]="sedationDraft.cpotBehavior" /></label>
+        <div class="icu-form-grid">
+          <label>Sedative agent<input type="text" [(ngModel)]="sedationDraft.sedativeAgent" placeholder="propofol / midazolam / dex / …" /></label>
+          <label>Sedative dose<input type="text" [(ngModel)]="sedationDraft.sedativeRate" /></label>
+          <label>Analgesic agent<input type="text" [(ngModel)]="sedationDraft.analgesicAgent" placeholder="fentanyl / morphine / paracetamol" /></label>
+          <label>Analgesic dose<input type="text" [(ngModel)]="sedationDraft.analgesicRate" /></label>
+        </div>
+        <label class="icu-wide">Notes<input type="text" [(ngModel)]="sedationDraft.notes" /></label>
+        <div class="icu-actions"><button class="icu-btn icu-btn-primary" (click)="saveSedation()" [disabled]="saving">{{ saving ? 'Saving…' : '+ Log' }}</button></div>
+      </div>
+
+      <h4>Recent</h4>
+      <table class="icu-table">
+        <thead><tr><th>Time</th><th>Shift</th><th>RASS</th><th>Goal</th><th>CPOT</th><th>Sedative</th><th>Analgesic</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr *ngIf="!p.sedations.length"><td colspan="8" class="icu-muted">No sedation logs.</td></tr>
+          <tr *ngFor="let s of p.sedations">
+            <td>{{ s.recordedAt | date:'dd/MM HH:mm' }}</td>
+            <td>{{ s.shift ?? '—' }}</td>
+            <td>{{ s.rassScore ?? '—' }}</td>
+            <td>{{ s.rassGoal ?? '—' }}</td>
+            <td>{{ s.cpotScore ?? '—' }}</td>
+            <td>{{ s.sedativeAgent ?? '—' }}{{ s.sedativeRate ? ' · ' + s.sedativeRate : '' }}</td>
+            <td>{{ s.analgesicAgent ?? '—' }}{{ s.analgesicRate ? ' · ' + s.analgesicRate : '' }}</td>
+            <td>{{ s.notes ?? '—' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ════════════════════════ RESTRAINTS ════════════════════════ -->
+    <section *ngIf="tab === 'restraints'" class="icu-panel">
+      <div class="icu-card">
+        <h4>New restraint order</h4>
+        <div class="icu-form-grid">
+          <label>Ordered by *<input type="text" [(ngModel)]="restraintDraft.orderedBy" /></label>
+          <label>Type
+            <select [(ngModel)]="restraintDraft.restraintType">
+              <option value="physical-soft">Physical — soft</option>
+              <option value="physical-hard">Physical — hard</option>
+              <option value="chemical">Chemical</option>
+              <option value="mitten">Mittens</option>
+            </select>
+          </label>
+          <label>Body part<input type="text" [(ngModel)]="restraintDraft.bodyPart" placeholder="both wrists / left ankle …" /></label>
+        </div>
+        <label class="icu-wide">Reason *<input type="text" [(ngModel)]="restraintDraft.reason" placeholder="self-extubation risk / agitation / …" /></label>
+        <div class="icu-actions"><button class="icu-btn icu-btn-primary" (click)="saveRestraint()" [disabled]="saving">{{ saving ? 'Saving…' : '+ Order' }}</button></div>
+      </div>
+
+      <h4>Active + history</h4>
+      <div *ngIf="!p.restraints.length" class="icu-muted">No restraint orders.</div>
+      <div *ngFor="let r of p.restraints" class="icu-restraint-card" [class.icu-restraint-active]="!r.discontinuedAt">
+        <div class="icu-restraint-h">
+          <strong>{{ r.restraintType }}</strong>
+          <span>{{ r.bodyPart || '—' }}</span>
+          <span class="icu-pill" [class.icu-pill-good]="r.discontinuedAt">{{ r.discontinuedAt ? 'Discontinued' : 'ACTIVE' }}</span>
+        </div>
+        <div class="icu-restraint-meta">
+          Ordered {{ r.orderedAt | date:'dd/MM HH:mm' }} by {{ r.orderedBy }} · Reason: {{ r.reason }}
+          <span *ngIf="r.discontinuedAt"> · Discontinued {{ r.discontinuedAt | date:'dd/MM HH:mm' }}{{ r.discontinuedBy ? ' by ' + r.discontinuedBy : '' }}</span>
+        </div>
+        <details *ngIf="parseReviewLog(r.reviewLog).length">
+          <summary>{{ parseReviewLog(r.reviewLog).length }} review entries</summary>
+          <ul class="icu-review-list">
+            <li *ngFor="let rev of parseReviewLog(r.reviewLog)">
+              {{ rev.reviewedAt | date:'dd/MM HH:mm' }} · {{ rev.reviewedBy }} · <em>{{ rev.status }}</em>
+              <span *ngIf="rev.notes"> — {{ rev.notes }}</span>
+            </li>
+          </ul>
+        </details>
+        <div *ngIf="!r.discontinuedAt" class="icu-review-form">
+          <select [(ngModel)]="reviewDrafts[r.id]!.status">
+            <option value="continue">Continue restraint</option>
+            <option value="discontinue">Discontinue</option>
+          </select>
+          <input type="text" [(ngModel)]="reviewDrafts[r.id]!.notes" placeholder="review note" />
+          <button class="icu-btn" (click)="appendRestraintReview(r)">+ 4h review</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════ BUNDLES ════════════════════════ -->
+    <section *ngIf="tab === 'bundles'" class="icu-panel">
+      <div class="icu-card">
+        <h4>Daily bundle checklist</h4>
+        <label>Chart date<input type="date" [(ngModel)]="bundleDraft.chartDate" /></label>
+        <div *ngFor="let item of bundleItems" class="icu-bundle-row">
+          <div class="icu-bundle-label">{{ item.label }}</div>
+          <select [(ngModel)]="bundleDraft[item.key]">
+            <option value="">—</option>
+            <option *ngFor="let s of bundleStatuses" [ngValue]="s">{{ s }}</option>
+          </select>
+        </div>
+        <div class="icu-actions"><button class="icu-btn icu-btn-primary" (click)="saveBundle()" [disabled]="saving">{{ saving ? 'Saving…' : 'Save day' }}</button></div>
+      </div>
+
+      <h4>Compliance history</h4>
+      <table class="icu-table">
+        <thead><tr><th>Date</th><th>VAP</th><th>CLABSI</th><th>CAUTI</th><th>PU</th><th>DVT</th><th>Glycemic</th></tr></thead>
+        <tbody>
+          <tr *ngIf="!p.bundles.length"><td colspan="7" class="icu-muted">No bundle logs.</td></tr>
+          <tr *ngFor="let b of p.bundles">
+            <td>{{ b.chartDate | date:'dd/MM' }}</td>
+            <td>{{ b.vapStatus ?? '—' }}</td>
+            <td>{{ b.clabsiStatus ?? '—' }}</td>
+            <td>{{ b.cautiStatus ?? '—' }}</td>
+            <td>{{ b.pressureUlcerStatus ?? '—' }}</td>
+            <td>{{ b.dvtStatus ?? '—' }}</td>
+            <td>{{ b.glycemicControlStatus ?? '—' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ════════════════════════ FAMILY ════════════════════════ -->
+    <section *ngIf="tab === 'family'" class="icu-panel">
+      <div class="icu-card">
+        <h4>Log family communication</h4>
+        <div class="icu-form-grid">
+          <label>Category
+            <select [(ngModel)]="familyDraft.category">
+              <option *ngFor="let c of familyCategories" [ngValue]="c.value">{{ c.label }}</option>
+            </select>
+          </label>
+          <label>Participant name *<input type="text" [(ngModel)]="familyDraft.participantName" /></label>
+          <label>Relation *<input type="text" [(ngModel)]="familyDraft.participantRelation" placeholder="spouse / son / …" /></label>
+          <label>Phone<input type="text" [(ngModel)]="familyDraft.participantPhone" /></label>
+        </div>
+        <label class="icu-wide">Topics discussed *<textarea rows="2" [(ngModel)]="familyDraft.topicsDiscussed"></textarea></label>
+        <label class="icu-wide">Decisions reached<textarea rows="2" [(ngModel)]="familyDraft.decisionsReached"></textarea></label>
+        <label class="icu-inline"><input type="checkbox" [(ngModel)]="familyDraft.multiPartyMeeting" /> Multi-party meeting (intensivist + family)</label>
+        <label class="icu-inline"><input type="checkbox" [(ngModel)]="familyDraft.secondOpinionRequested" /> Second opinion requested</label>
+        <div class="icu-actions"><button class="icu-btn icu-btn-primary" (click)="saveFamilyComm()" [disabled]="saving">{{ saving ? 'Saving…' : '+ Log' }}</button></div>
+      </div>
+
+      <h4>History</h4>
+      <div *ngIf="!p.familyComms.length" class="icu-muted">No communications yet.</div>
+      <div *ngFor="let c of p.familyComms" class="icu-fc-card">
+        <div class="icu-fc-h">
+          <strong>{{ c.communicationAt | date:'dd/MM/yyyy HH:mm' }}</strong>
+          <span class="icu-pill">{{ c.category }}</span>
+          <span>{{ c.participantName }} ({{ c.participantRelation }})</span>
+        </div>
+        <div class="icu-text">{{ c.topicsDiscussed }}</div>
+        <div class="icu-text" *ngIf="c.decisionsReached"><em>Decisions:</em> {{ c.decisionsReached }}</div>
+        <div class="icu-fc-foot">Documented by {{ c.documentedBy }}<span *ngIf="c.multiPartyMeeting"> · multi-party</span><span *ngIf="c.secondOpinionRequested"> · 2nd opinion requested</span></div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════ STEP-DOWN ════════════════════════ -->
+    <section *ngIf="tab === 'stepdown'" class="icu-panel">
+      <div class="icu-card" *ngIf="isInIcu">
+        <h4>Propose step-down to ward</h4>
+        <label class="icu-wide">Rationale *<textarea rows="2" [(ngModel)]="stepDownDraft.rationale" placeholder="haemodynamically stable, off pressors 12h, GCS 14, extubated 24h, …"></textarea></label>
+        <label class="icu-inline"><input type="checkbox" [(ngModel)]="stepDownDraft.stepDownCriteriaMet" /> Step-down criteria met (off-pressors + stable RR/HR + GCS≥10 + extubated)</label>
+        <label class="icu-wide">Code status
+          <select [(ngModel)]="stepDownDraft.codeStatus">
+            <option value="full-code">Full code</option>
+            <option value="DNR">DNR</option>
+            <option value="DNI">DNI</option>
+            <option value="comfort-care">Comfort care</option>
+          </select>
+        </label>
+        <label class="icu-wide">Ongoing meds to carry forward<textarea rows="2" [(ngModel)]="stepDownDraft.ongoingMeds"></textarea></label>
+        <label class="icu-wide">Other orders to carry forward<textarea rows="2" [(ngModel)]="stepDownDraft.carryForwardOrders"></textarea></label>
+        <div class="icu-actions"><button class="icu-btn icu-btn-primary" (click)="proposeStepDown()" [disabled]="saving">{{ saving ? 'Saving…' : 'Propose step-down' }}</button></div>
+      </div>
+      <div class="icu-banner icu-info" *ngIf="!isInIcu">Patient is not currently in ICU — no step-down needed.</div>
+
+      <h4>Step-down requests</h4>
+      <table class="icu-table">
+        <thead><tr><th>Proposed</th><th>By</th><th>Status</th><th>Criteria met</th><th>Code</th><th>Actions</th></tr></thead>
+        <tbody>
+          <tr *ngIf="!p.stepDowns.length"><td colspan="6" class="icu-muted">No step-down requests yet.</td></tr>
+          <tr *ngFor="let r of p.stepDowns">
+            <td>{{ r.proposedAt | date:'dd/MM HH:mm' }}</td>
+            <td>{{ r.proposedBy }}</td>
+            <td><span class="icu-pill" [ngClass]="'icu-pill-' + r.status">{{ r.status }}</span></td>
+            <td>{{ r.stepDownCriteriaMet ? 'Yes' : 'No' }}</td>
+            <td>{{ r.codeStatus ?? '—' }}</td>
+            <td>
+              <button class="icu-btn icu-btn-sm" *ngIf="r.status === 'PROPOSED'" (click)="acknowledgeStepDown(r, true)">Approve</button>
+              <button class="icu-btn icu-btn-sm icu-btn-danger" *ngIf="r.status === 'PROPOSED'" (click)="acknowledgeStepDown(r, false)">Decline</button>
+              <em *ngIf="r.status === 'ACKNOWLEDGED'" class="icu-muted">Awaiting ward bed</em>
+              <em *ngIf="r.status === 'COMPLETED'" class="icu-muted">Completed {{ r.completedAt | date:'dd/MM HH:mm' }}</em>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ════════════════════════ INVASIVE LINES ════════════════════════ -->
+    <section *ngIf="tab === 'lines'" class="icu-panel">
+      <h3 class="icu-panel-title">Invasive lines register</h3>
+      <div class="icu-form-grid">
+        <label>Line type
+          <select [(ngModel)]="lineDraft.lineType">
+            <option *ngFor="let t of lineTypes" [value]="t.value">{{ t.label }}</option>
+          </select>
+        </label>
+        <label>Site <input type="text" [(ngModel)]="lineDraft.site" placeholder="e.g. Rt IJV" /></label>
+        <label>Inserted at <input type="datetime-local" [(ngModel)]="lineDraft.insertedAt" /></label>
+        <label>Inserted by <input type="text" [(ngModel)]="lineDraft.insertedBy" /></label>
+        <label class="icu-wide">Notes <input type="text" [(ngModel)]="lineDraft.notes" /></label>
+      </div>
+      <div class="icu-actions">
+        <button class="icu-btn icu-btn-primary" (click)="addLine()" [disabled]="saving">+ Add line</button>
+      </div>
+      <table class="icu-table">
+        <thead><tr><th>Line</th><th>Site</th><th>Inserted</th><th>Days</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>
+          <tr *ngIf="!invasiveLines.length"><td colspan="6" class="icu-muted">No lines recorded.</td></tr>
+          <tr *ngFor="let l of invasiveLines" [class.icu-row-removed]="l.removedAt">
+            <td>{{ lineTypeLabel(l.lineType) }}</td>
+            <td>{{ l.site || '—' }}</td>
+            <td>{{ l.insertedAt | date:'dd/MM HH:mm' }}</td>
+            <td><strong>{{ lineDays(l) }}</strong></td>
+            <td>
+              <span class="icu-pill" [ngClass]="l.removedAt ? 'icu-pill-CLOSED' : 'icu-pill-IN_PROGRESS'">
+                {{ l.removedAt ? 'Removed ' + (l.removedAt | date:'dd/MM') : 'In situ' }}
+              </span>
+            </td>
+            <td>
+              <button class="icu-btn icu-btn-sm" *ngIf="!l.removedAt" (click)="removeLineRow(l, 'remove')">Mark removed</button>
+              <button class="icu-btn icu-btn-sm icu-btn-danger" (click)="removeLineRow(l, 'delete')">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- ════════════════════════ CARE PLAN ════════════════════════ -->
+    <section *ngIf="tab === 'careplan'" class="icu-panel">
+      <div class="icu-panel-head">
+        <h3 class="icu-panel-title">Nursing care plan</h3>
+        <button class="icu-btn icu-btn-primary" (click)="openCarePlan()">+ New care plan</button>
+      </div>
+      <div class="icu-muted" *ngIf="!carePlans.length">No care plans recorded.</div>
+      <div class="icu-careplan-card" *ngFor="let p of carePlans">
+        <div class="icu-careplan-head">
+          <strong>{{ p.planDate | date:'dd MMM y' }}<span *ngIf="p.shift"> · {{ p.shift }} shift</span></strong>
+          <span class="icu-muted">{{ p.nurseName }}<span *ngIf="p.nurseEmpNo"> ({{ p.nurseEmpNo }})</span></span>
+          <button class="icu-btn icu-btn-sm icu-btn-danger" (click)="removeCarePlanEntry(p)">Delete</button>
+        </div>
+        <div class="icu-goal-tags">
+          <span class="icu-goal-tag" *ngFor="let g of activeGoals(p)">{{ g }}</span>
+        </div>
+        <table class="icu-table" *ngIf="parseCarePlanRows(p.carePlanRows).length">
+          <thead><tr><th>Goal</th><th>Planning</th><th>Implementation</th><th>Outcome</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let r of parseCarePlanRows(p.carePlanRows)">
+              <td>{{ r.goal }}</td><td>{{ r.planning }}</td><td>{{ r.implementation }}</td><td>{{ r.outcome }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ════════════════════════ NURSE NOTES ════════════════════════ -->
+    <section *ngIf="tab === 'notes'" class="icu-panel">
+      <h3 class="icu-panel-title">Special notes</h3>
+      <div class="icu-form-grid">
+        <label>Date &amp; time <input type="datetime-local" [(ngModel)]="noteDraft.recordedAt" /></label>
+        <label>Nurse name <input type="text" [(ngModel)]="noteDraft.nurseName" /></label>
+        <label>Emp no <input type="text" [(ngModel)]="noteDraft.nurseEmpNo" /></label>
+        <label class="icu-wide">Note <textarea rows="2" [(ngModel)]="noteDraft.note"></textarea></label>
+      </div>
+      <div class="icu-actions">
+        <button class="icu-btn icu-btn-primary" (click)="addNurseNote()" [disabled]="saving">+ Add note</button>
+      </div>
+      <table class="icu-table">
+        <thead><tr><th>Date / time</th><th>Note</th><th>Nurse</th><th></th></tr></thead>
+        <tbody>
+          <tr *ngIf="!nurseNotes.length"><td colspan="4" class="icu-muted">No notes recorded.</td></tr>
+          <tr *ngFor="let n of nurseNotes">
+            <td>{{ n.recordedAt | date:'dd/MM HH:mm' }}</td>
+            <td class="icu-note-cell">{{ n.note }}</td>
+            <td>{{ n.nurseName || '—' }}<span *ngIf="n.nurseEmpNo"> ({{ n.nurseEmpNo }})</span></td>
+            <td><button class="icu-btn icu-btn-sm icu-btn-danger" (click)="removeNurseNoteRow(n)">Delete</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </ng-container>
+
+  <!-- Care plan modal -->
+  <div class="icu-modal-bg" *ngIf="carePlanModalOpen" (click)="carePlanModalOpen = false">
+    <div class="icu-modal" (click)="$event.stopPropagation()">
+      <h3 class="icu-panel-title">New nursing care plan</h3>
+      <div class="icu-form-grid">
+        <label>Plan date <input type="date" [(ngModel)]="carePlanDraft['planDate']" /></label>
+        <label>Shift
+          <select [(ngModel)]="carePlanDraft['shift']">
+            <option value="M">Morning</option><option value="E">Evening</option><option value="N">Night</option>
+          </select>
+        </label>
+        <label>Nurse name <input type="text" [(ngModel)]="carePlanDraft['nurseName']" /></label>
+        <label>Emp no <input type="text" [(ngModel)]="carePlanDraft['nurseEmpNo']" /></label>
+      </div>
+
+      <h4 class="icu-sub">Nursing intervention / goals</h4>
+      <div class="icu-goal-grid">
+        <label class="icu-inline" *ngFor="let g of goalDefs">
+          <input type="checkbox" [(ngModel)]="carePlanDraft[g.key]" /> {{ g.label }}
+        </label>
+      </div>
+
+      <h4 class="icu-sub">Goal · Planning · Implementation · Outcome</h4>
+      <div class="icu-cp-row" *ngFor="let row of carePlanRowDraft; let i = index">
+        <input type="text" placeholder="Goal" [(ngModel)]="row.goal" />
+        <input type="text" placeholder="Planning" [(ngModel)]="row.planning" />
+        <input type="text" placeholder="Implementation" [(ngModel)]="row.implementation" />
+        <input type="text" placeholder="Outcome" [(ngModel)]="row.outcome" />
+        <button class="icu-btn icu-btn-sm icu-btn-danger" (click)="removeCarePlanRow(i)">✕</button>
+      </div>
+      <button class="icu-btn icu-btn-sm" (click)="addCarePlanRow()">+ Add row</button>
+
+      <div class="icu-actions">
+        <button class="icu-btn" (click)="carePlanModalOpen = false" [disabled]="saving">Cancel</button>
+        <button class="icu-btn icu-btn-primary" (click)="saveCarePlan()" [disabled]="saving">{{ saving ? 'Saving…' : 'Save care plan' }}</button>
+      </div>
+    </div>
+  </div>
+</div>

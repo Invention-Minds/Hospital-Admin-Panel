@@ -1,0 +1,159 @@
+<div class="page q-shell">
+  <div class="q-head">
+    <div>
+      <h2 class="q-title">Quality &amp; NABH</h2>
+      <p class="q-sub">KPIs across safety, clinical, process timeliness, patient experience, OT and NABH compliance.</p>
+    </div>
+    <div class="q-range">
+      <button class="q-link" (click)="openIndicators()">NABH 108 indicators →</button>
+      <label>From <input type="date" [(ngModel)]="from" (change)="loadCurrent()" /></label>
+      <label>To <input type="date" [(ngModel)]="to" (change)="loadCurrent()" /></label>
+    </div>
+  </div>
+
+  <div class="q-tabs">
+    <button class="q-tab" [class.q-tab-on]="tab === 'safety'" (click)="switchTab('safety')">Patient safety</button>
+    <button class="q-tab" [class.q-tab-on]="tab === 'clinical'" (click)="switchTab('clinical')">Clinical</button>
+    <button class="q-tab" [class.q-tab-on]="tab === 'timeliness'" (click)="switchTab('timeliness')">Process timeliness</button>
+    <button class="q-tab" [class.q-tab-on]="tab === 'experience'" (click)="switchTab('experience')">Patient experience</button>
+    <button class="q-tab" [class.q-tab-on]="tab === 'ot'" (click)="switchTab('ot')">OT efficiency</button>
+    <button class="q-tab" [class.q-tab-on]="tab === 'nabh'" (click)="switchTab('nabh')">NABH scorecard</button>
+  </div>
+
+  <div class="q-banner q-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
+  <div class="q-loading" *ngIf="loading">Loading…</div>
+
+  <!-- ── Safety ── -->
+  <ng-container *ngIf="!loading && tab === 'safety' && safety as s">
+    <div class="q-cards">
+      <div class="q-card"><span class="q-card-label">Total incidents</span><span class="q-card-val">{{ s.total }}</span></div>
+      <div class="q-card"><span class="q-card-label">Open</span><span class="q-card-val">{{ s.open }}</span></div>
+      <div class="q-card" [ngClass]="s.sentinel ? 'q-bad' : ''"><span class="q-card-label">Sentinel events</span><span class="q-card-val">{{ s.sentinel }}</span></div>
+      <div class="q-card"><span class="q-card-label">Near-miss rate</span><span class="q-card-val">{{ s.nearMissRate }}%</span></div>
+    </div>
+    <div class="q-grid">
+      <div class="q-block">
+        <h3 class="q-block-title">By severity</h3>
+        <ul class="q-bars">
+          <li *ngFor="let kv of entries(s.bySeverity)"><span class="q-bar-label">{{ kv.key.replace('_', ' ') }}</span><span class="q-bar-val">{{ kv.value }}</span></li>
+        </ul>
+      </div>
+      <div class="q-block">
+        <h3 class="q-block-title">By category</h3>
+        <ul class="q-bars">
+          <li *ngFor="let kv of entries(s.byCategory)"><span class="q-bar-label">{{ kv.key }}</span><span class="q-bar-val">{{ kv.value }}</span></li>
+        </ul>
+      </div>
+      <div class="q-block">
+        <h3 class="q-block-title">Source</h3>
+        <ul class="q-bars">
+          <li *ngFor="let kv of entries(s.bySource)"><span class="q-bar-label">{{ kv.key === 'auto-rule' ? 'Auto-rule' : 'Manual' }}</span><span class="q-bar-val">{{ kv.value }}</span></li>
+        </ul>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ── Clinical ── -->
+  <ng-container *ngIf="!loading && tab === 'clinical' && clinical as c">
+    <div class="q-cards">
+      <div class="q-card"><span class="q-card-label">Admissions</span><span class="q-card-val">{{ c.admissions }}</span></div>
+      <div class="q-card"><span class="q-card-label">Discharges</span><span class="q-card-val">{{ c.discharges }}</span></div>
+      <div class="q-card" [ngClass]="c.mortalityRate > 5 ? 'q-bad' : ''">
+        <span class="q-card-label">Mortality</span>
+        <span class="q-card-val">{{ c.mortalityRate }}%</span>
+        <span class="q-card-meta">{{ c.expired }} expired</span>
+      </div>
+      <div class="q-card" [ngClass]="c.lamaRate > 5 ? 'q-warn' : ''">
+        <span class="q-card-label">LAMA rate</span><span class="q-card-val">{{ c.lamaRate }}%</span>
+        <span class="q-card-meta">{{ c.lama }} cases</span>
+      </div>
+      <div class="q-card">
+        <span class="q-card-label">DAMA rate</span><span class="q-card-val">{{ c.damaRate }}%</span>
+        <span class="q-card-meta">{{ c.dama }} cases</span>
+      </div>
+      <div class="q-card"><span class="q-card-label">Avg LoS</span><span class="q-card-val">{{ c.avgLosDays }}d</span></div>
+    </div>
+  </ng-container>
+
+  <!-- ── Timeliness ── -->
+  <ng-container *ngIf="!loading && tab === 'timeliness' && timeliness as t">
+    <div class="q-cards">
+      <div class="q-card" [ngClass]="pctClass(t.initialAssessmentWithin24h.pct)">
+        <span class="q-card-label">Initial assessment ≤ 24h</span>
+        <span class="q-card-val">{{ t.initialAssessmentWithin24h.pct }}%</span>
+        <span class="q-card-meta">{{ t.initialAssessmentWithin24h.within }} / {{ t.initialAssessmentWithin24h.total }}</span>
+      </div>
+      <div class="q-card" [ngClass]="pctClass(t.dischargeSummarySignedWithin24h.pct)">
+        <span class="q-card-label">Discharge summary signed ≤ 24h</span>
+        <span class="q-card-val">{{ t.dischargeSummarySignedWithin24h.pct }}%</span>
+        <span class="q-card-meta">{{ t.dischargeSummarySignedWithin24h.within }} / {{ t.dischargeSummarySignedWithin24h.total }}</span>
+      </div>
+      <div class="q-card" [ngClass]="pctClass(t.criticalLabAckWithin30m.pct)">
+        <span class="q-card-label">Critical lab ack ≤ 30 min</span>
+        <span class="q-card-val">{{ t.criticalLabAckWithin30m.pct }}%</span>
+        <span class="q-card-meta">{{ t.criticalLabAckWithin30m.within }} / {{ t.criticalLabAckWithin30m.total }}</span>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ── Experience ── -->
+  <ng-container *ngIf="!loading && tab === 'experience' && experience as e">
+    <div class="q-cards">
+      <div class="q-card q-card-hero" [ngClass]="npsClass(e.nps.score)">
+        <span class="q-card-label">NPS</span>
+        <span class="q-card-val">{{ e.nps.score }}</span>
+        <span class="q-card-meta">{{ e.nps.total }} responses</span>
+      </div>
+      <div class="q-card"><span class="q-card-label">Promoters</span><span class="q-card-val">{{ e.nps.promoters }}</span></div>
+      <div class="q-card"><span class="q-card-label">Passives</span><span class="q-card-val">{{ e.nps.passives }}</span></div>
+      <div class="q-card"><span class="q-card-label">Detractors</span><span class="q-card-val">{{ e.nps.detractors }}</span></div>
+      <div class="q-card"><span class="q-card-label">Complaints</span><span class="q-card-val">{{ e.complaints.total }}</span><span class="q-card-meta">{{ e.complaints.active }} active</span></div>
+      <div class="q-card" [ngClass]="pctClass(e.complaints.slaCompliancePct)">
+        <span class="q-card-label">SLA compliance</span>
+        <span class="q-card-val">{{ e.complaints.slaCompliancePct }}%</span>
+        <span class="q-card-meta">{{ e.complaints.slaBreached }} breached</span>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ── OT ── -->
+  <ng-container *ngIf="!loading && tab === 'ot' && ot as o">
+    <div class="q-cards">
+      <div class="q-card"><span class="q-card-label">OT cases scheduled</span><span class="q-card-val">{{ o.total }}</span></div>
+      <div class="q-card" [ngClass]="o.cancelRate > 10 ? 'q-warn' : ''">
+        <span class="q-card-label">Cancellation rate</span>
+        <span class="q-card-val">{{ o.cancelRate }}%</span>
+        <span class="q-card-meta">{{ o.cancelled }} cancelled</span>
+      </div>
+      <div class="q-card" [ngClass]="pctClass(o.onTimePct)">
+        <span class="q-card-label">On-time start (≤ 15 min)</span>
+        <span class="q-card-val">{{ o.onTimePct }}%</span>
+        <span class="q-card-meta">{{ o.started }} cases started</span>
+      </div>
+      <div class="q-card" [ngClass]="o.avgDelayMin > 30 ? 'q-warn' : ''">
+        <span class="q-card-label">Avg start delay</span>
+        <span class="q-card-val">{{ o.avgDelayMin }} min</span>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ── NABH scorecard ── -->
+  <ng-container *ngIf="!loading && tab === 'nabh' && nabh as n">
+    <div class="q-empty" *ngIf="!n.data.length">
+      No incidents with a NABH clause tagged in this window.
+    </div>
+    <table class="q-nabh-table" *ngIf="n.data.length">
+      <thead><tr><th>Clause</th><th>Chapter</th><th>Open</th><th>Closed</th><th>Total</th><th></th></tr></thead>
+      <tbody>
+        <tr *ngFor="let r of n.data">
+          <td><strong>{{ r.clause }}</strong></td>
+          <td>{{ r.chapter }}</td>
+          <td><span class="q-pill q-bad" *ngIf="r.open">{{ r.open }}</span><span *ngIf="!r.open">—</span></td>
+          <td><span class="q-pill q-good" *ngIf="r.closed">{{ r.closed }}</span><span *ngIf="!r.closed">—</span></td>
+          <td>{{ r.total }}</td>
+          <td><button class="q-btn" (click)="openIncidentsByNabh(r.clause)">Open list →</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </ng-container>
+</div>

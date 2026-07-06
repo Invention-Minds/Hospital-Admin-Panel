@@ -1,0 +1,244 @@
+<div class="page q-shell">
+  <div class="q-head">
+    <div>
+      <h2 class="q-title">Facility / equipment</h2>
+      <p class="q-sub">Equipment master, PM / calibration / breakdown log, utility failures, ambulance dispatch, maintenance tickets. Powers FMS-001/002/003/004/008/009.</p>
+    </div>
+    <div class="q-range">
+      <button class="qi-back" (click)="goBack()">← Indicators</button>
+    </div>
+  </div>
+
+  <div class="q-tabs">
+    <button class="q-tab" [class.q-tab-on]="tab === 'equipment'" (click)="switchTab('equipment')">Equipment</button>
+    <button class="q-tab" [class.q-tab-on]="tab === 'utility'" (click)="switchTab('utility')">Utility failures</button>
+    <button class="q-tab" [class.q-tab-on]="tab === 'ambulance'" (click)="switchTab('ambulance')">Ambulance</button>
+    <button class="q-tab" [class.q-tab-on]="tab === 'maintenance'" (click)="switchTab('maintenance')">Maintenance</button>
+  </div>
+
+  <div class="q-banner q-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
+  <div class="q-banner fc-banner-ok" *ngIf="successMessage">{{ successMessage }}</div>
+
+  <!-- ── EQUIPMENT TAB ── -->
+  <ng-container *ngIf="tab === 'equipment'">
+    <div class="fc-card">
+      <h3 class="fc-card-title">Add equipment</h3>
+      <div class="fc-row">
+        <label>Code <input type="text" [(ngModel)]="equipDraft.code" placeholder="EQ-…" /></label>
+        <label>Name <input type="text" [(ngModel)]="equipDraft.name" placeholder="Ventilator-A1" /></label>
+        <label>Type <input type="text" [(ngModel)]="equipDraft.type" placeholder="ventilator / monitor / pump" /></label>
+        <label>Location <input type="text" [(ngModel)]="equipDraft.location" placeholder="ICU-A bed 3" /></label>
+        <label>Department <input type="text" [(ngModel)]="equipDraft.department" placeholder="ICU" /></label>
+        <label class="fc-check">
+          <input type="checkbox" [(ngModel)]="equipDraft.isCritical" />
+          Critical (life-supporting)
+        </label>
+      </div>
+      <div class="fc-foot">
+        <button class="fc-save" (click)="submitEquipment()" [disabled]="saving">{{ saving ? 'Saving…' : 'Add equipment' }}</button>
+      </div>
+    </div>
+
+    <div class="fc-card">
+      <h3 class="fc-card-title">Log PM / calibration / breakdown</h3>
+      <div class="fc-row">
+        <label>Equipment
+          <select [(ngModel)]="eventDraft.equipmentId">
+            <option *ngFor="let e of equipment" [value]="e.id">{{ e.code }} · {{ e.name }}{{ e.isCritical ? ' ★' : '' }}</option>
+          </select>
+        </label>
+        <label>Event type
+          <select [(ngModel)]="eventDraft.eventType">
+            <option *ngFor="let t of EVENT_TYPES" [value]="t">{{ t }}</option>
+          </select>
+        </label>
+        <label *ngIf="eventDraft.eventType !== 'breakdown'">Due at
+          <input type="date" [(ngModel)]="eventDraft.dueAt" />
+        </label>
+        <label>{{ eventDraft.eventType === 'breakdown' ? 'Reported at' : 'Completed at' }}
+          <input type="datetime-local" [(ngModel)]="eventDraft.occurredAt" />
+        </label>
+      </div>
+      <label class="fc-fullrow">Notes
+        <textarea rows="2" [(ngModel)]="eventDraft.notes" placeholder="Failure mode / parts replaced / vendor"></textarea>
+      </label>
+      <div class="fc-foot">
+        <button class="fc-save" (click)="submitEvent()" [disabled]="saving">{{ saving ? 'Saving…' : 'Log event' }}</button>
+      </div>
+    </div>
+
+    <div class="fc-card">
+      <h3 class="fc-card-title">Equipment master ({{ equipment.length }})</h3>
+      <div class="q-loading" *ngIf="loading">Loading…</div>
+      <div class="q-empty" *ngIf="!loading && equipment.length === 0">No equipment yet. Add the first one above.</div>
+      <table class="fc-table" *ngIf="equipment.length > 0">
+        <thead><tr><th>Code</th><th>Name</th><th>Type</th><th>Location</th><th>Critical</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let e of equipment">
+            <td class="fc-code">{{ e.code }}</td>
+            <td>{{ e.name }}</td>
+            <td>{{ e.type || '—' }}</td>
+            <td>{{ e.location || '—' }}</td>
+            <td>
+              <button class="fc-pill-btn" [class.q-bad]="e.isCritical" (click)="toggleCritical(e)">
+                {{ e.isCritical ? '★ critical' : 'normal' }}
+              </button>
+            </td>
+            <td><span class="qi-pill" [class.q-bad]="e.status === 'breakdown'">{{ e.status }}</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="fc-card">
+      <h3 class="fc-card-title">This month — events ({{ equipmentEvents.length }})</h3>
+      <div class="q-empty" *ngIf="!loading && equipmentEvents.length === 0">No events logged this month.</div>
+      <table class="fc-table" *ngIf="equipmentEvents.length > 0">
+        <thead><tr><th>When</th><th>Equipment</th><th>Type</th><th>Due</th><th>On time?</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let ev of equipmentEvents">
+            <td>{{ ev.occurredAt | date:'yyyy-MM-dd HH:mm' }}</td>
+            <td class="fc-code">{{ ev.equipment?.code }}</td>
+            <td>{{ ev.eventType }}</td>
+            <td>{{ ev.dueAt ? (ev.dueAt | date:'yyyy-MM-dd') : '—' }}</td>
+            <td>
+              <span class="qi-pill" *ngIf="ev.eventType !== 'breakdown' && ev.dueAt"
+                    [class.q-good]="ev.occurredAt <= ev.dueAt"
+                    [class.q-bad]="ev.occurredAt > ev.dueAt">
+                {{ ev.occurredAt <= ev.dueAt ? 'on time' : 'late' }}
+              </span>
+            </td>
+            <td>{{ ev.notes || '—' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </ng-container>
+
+  <!-- ── UTILITY TAB ── -->
+  <ng-container *ngIf="tab === 'utility'">
+    <div class="fc-card">
+      <h3 class="fc-card-title">Record utility failure</h3>
+      <div class="fc-row">
+        <label>Type
+          <select [(ngModel)]="utilityDraft.utilityType">
+            <option *ngFor="let t of UTILITY_TYPES" [value]="t">{{ t.replace('_', ' ') }}</option>
+          </select>
+        </label>
+        <label>Occurred at <input type="datetime-local" [(ngModel)]="utilityDraft.occurredAt" /></label>
+        <label>Duration (min) <input type="number" min="0" [(ngModel)]="utilityDraft.durationMinutes" /></label>
+        <label>Affected areas <input type="text" [(ngModel)]="utilityDraft.affectedAreas" placeholder="OT-1, OT-2, ICU-A" /></label>
+      </div>
+      <label class="fc-fullrow">Notes
+        <textarea rows="2" [(ngModel)]="utilityDraft.notes" placeholder="Root cause / vendor action / corrective"></textarea>
+      </label>
+      <div class="fc-foot">
+        <button class="fc-save" (click)="submitUtility()" [disabled]="saving">{{ saving ? 'Saving…' : 'Record failure' }}</button>
+      </div>
+    </div>
+
+    <div class="fc-card">
+      <h3 class="fc-card-title">This month — failures ({{ utilities.length }})</h3>
+      <div class="q-empty" *ngIf="!loading && utilities.length === 0">No failures recorded this month.</div>
+      <table class="fc-table" *ngIf="utilities.length > 0">
+        <thead><tr><th>When</th><th>Type</th><th>Duration</th><th>Affected</th><th>Reporter</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let u of utilities">
+            <td>{{ u.occurredAt | date:'yyyy-MM-dd HH:mm' }}</td>
+            <td><span class="qi-pill q-bad">{{ u.utilityType.replace('_', ' ') }}</span></td>
+            <td>{{ u.durationMinutes !== null ? u.durationMinutes + ' min' : '—' }}</td>
+            <td>{{ u.affectedAreas || '—' }}</td>
+            <td>{{ u.reporter || '—' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </ng-container>
+
+  <!-- ── AMBULANCE TAB ── -->
+  <ng-container *ngIf="tab === 'ambulance'">
+    <div class="fc-card">
+      <h3 class="fc-card-title">Log ambulance call</h3>
+      <p class="fc-sub-hint">Within-target threshold: <strong>{{ ambulanceTarget }} min</strong> (called → arrived).</p>
+      <div class="fc-row">
+        <label>Called at <input type="datetime-local" [(ngModel)]="ambDraft.calledAt" /></label>
+        <label>Dispatched at <input type="datetime-local" [(ngModel)]="ambDraft.dispatchedAt" /></label>
+        <label>Arrived at <input type="datetime-local" [(ngModel)]="ambDraft.arrivedAt" /></label>
+      </div>
+      <label class="fc-fullrow">Notes
+        <textarea rows="2" [(ngModel)]="ambDraft.notes" placeholder="Patient condition / traffic / vehicle"></textarea>
+      </label>
+      <div class="fc-foot">
+        <button class="fc-save" (click)="submitAmbulance()" [disabled]="saving">{{ saving ? 'Saving…' : 'Log call' }}</button>
+      </div>
+    </div>
+
+    <div class="fc-card">
+      <h3 class="fc-card-title">This month — calls ({{ ambulanceCalls.length }})</h3>
+      <div class="q-empty" *ngIf="!loading && ambulanceCalls.length === 0">No calls this month.</div>
+      <table class="fc-table" *ngIf="ambulanceCalls.length > 0">
+        <thead><tr><th>Called</th><th>Arrived</th><th>Response (min)</th><th>On time?</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let c of ambulanceCalls">
+            <td>{{ c.calledAt | date:'yyyy-MM-dd HH:mm' }}</td>
+            <td>{{ c.arrivedAt ? (c.arrivedAt | date:'HH:mm') : '—' }}</td>
+            <td>{{ c.responseTimeMinutes ?? '—' }}</td>
+            <td>
+              <span class="qi-pill" [class.q-good]="c.withinTarget" [class.q-bad]="!c.withinTarget">
+                {{ c.withinTarget ? 'within' : 'over' }}
+              </span>
+            </td>
+            <td>{{ c.notes || '—' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </ng-container>
+
+  <!-- ── MAINTENANCE TAB ── -->
+  <ng-container *ngIf="tab === 'maintenance'">
+    <div class="fc-card">
+      <h3 class="fc-card-title">Raise maintenance ticket</h3>
+      <div class="fc-row">
+        <label>Type
+          <select [(ngModel)]="maintDraft.type">
+            <option *ngFor="let t of MAINT_TYPES" [value]="t">{{ t }}</option>
+          </select>
+        </label>
+        <label>Location <input type="text" [(ngModel)]="maintDraft.location" placeholder="OT-2 lighting / ward 4 plumbing" /></label>
+        <label>SLA due by <input type="datetime-local" [(ngModel)]="maintDraft.slaDueAt" /></label>
+      </div>
+      <label class="fc-fullrow">Notes
+        <textarea rows="2" [(ngModel)]="maintDraft.notes" placeholder="Reported by / impact"></textarea>
+      </label>
+      <div class="fc-foot">
+        <button class="fc-save" (click)="submitMaintenance()" [disabled]="saving">{{ saving ? 'Saving…' : 'Raise ticket' }}</button>
+      </div>
+    </div>
+
+    <div class="fc-card">
+      <h3 class="fc-card-title">This month — tickets ({{ maintenance.length }})</h3>
+      <div class="q-empty" *ngIf="!loading && maintenance.length === 0">No tickets this month.</div>
+      <table class="fc-table" *ngIf="maintenance.length > 0">
+        <thead><tr><th>Raised</th><th>Type</th><th>Location</th><th>SLA due</th><th>Status</th><th>Closed</th><th>Actions</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let m of maintenance">
+            <td>{{ m.raisedAt | date:'yyyy-MM-dd HH:mm' }}</td>
+            <td>{{ m.type }}</td>
+            <td>{{ m.location || '—' }}</td>
+            <td>
+              <span class="qi-pill" [ngClass]="maintenanceSlaPill(m)">{{ m.slaDueAt | date:'yyyy-MM-dd HH:mm' }}</span>
+            </td>
+            <td>{{ m.status.replace('_', ' ') }}</td>
+            <td>{{ m.closedAt ? (m.closedAt | date:'yyyy-MM-dd HH:mm') : '—' }}</td>
+            <td class="fc-actions">
+              <button class="fc-tiny" *ngIf="m.status !== 'in_progress'" (click)="changeMaintenanceStatus(m, 'in_progress')">In progress</button>
+              <button class="fc-tiny" *ngIf="m.status !== 'closed'" (click)="changeMaintenanceStatus(m, 'closed')">Close</button>
+              <button class="fc-tiny" *ngIf="m.status === 'closed'" (click)="changeMaintenanceStatus(m, 'open')">Re-open</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </ng-container>
+</div>

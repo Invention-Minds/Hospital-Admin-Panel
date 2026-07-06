@@ -16,6 +16,7 @@ import { environment } from '../../environment/environment.prod';
 export type SignerType =
   | 'doctor'
   | 'nurse'
+  | 'staff'
   | 'patient'
   | 'attender'
   | 'supervisor'

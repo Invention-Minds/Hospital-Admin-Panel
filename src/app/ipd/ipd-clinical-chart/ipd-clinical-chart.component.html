@@ -1,0 +1,307 @@
+<div class="cc-shell">
+  <div class="cc-head">
+    <h2 class="cc-title">Clinical Chart</h2>
+    <div class="cc-toolbar">
+      <button type="button" class="cc-btn" (click)="shiftToday(-1)">‹ Previous week</button>
+      <label>From <input type="date" [(ngModel)]="from" (change)="load()" /></label>
+      <label>To <input type="date" [(ngModel)]="to" (change)="load()" /></label>
+      <button type="button" class="cc-btn" (click)="shiftToday(1)">Next week ›</button>
+      <button type="button" class="cc-btn" (click)="load()">Refresh</button>
+    </div>
+  </div>
+
+  <div class="cc-banner cc-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="cc-banner cc-good" *ngIf="successMessage">{{ successMessage }}</div>
+
+  <!-- Phase 9.13 — doctor-ordered vitals monitoring frequency -->
+  <div class="cc-order cc-order-{{ monitoringStatus }}" *ngIf="chart && !loading">
+    <i class="pi" [ngClass]="{
+      'pi-clock': monitoringStatus !== 'overdue' && monitoringFrequency,
+      'pi-exclamation-triangle': monitoringStatus === 'overdue',
+      'pi-info-circle': !monitoringFrequency
+    }"></i>
+    <ng-container *ngIf="monitoringFrequency; else noOrder">
+      <span class="cc-order-main">
+        <strong>Doctor's order: vitals {{ monitoringLabel }}</strong>
+        <span class="cc-order-by" *ngIf="monitoringSetBy"> · ordered by {{ monitoringSetBy }}</span>
+      </span>
+      <span class="cc-order-status">
+        {{ monitoringStatusText }}
+        <span *ngIf="nextVitalsDue && monitoringStatus !== 'overdue'"> ({{ nextVitalsDue | date:'HH:mm' }})</span>
+      </span>
+    </ng-container>
+    <ng-template #noOrder>
+      <span class="cc-order-main">No vitals monitoring frequency ordered yet — the doctor sets
+        this in the initial assessment or a progress note.</span>
+    </ng-template>
+  </div>
+
+  <div *ngIf="loading" class="cc-loading">Loading chart…</div>
+
+  <div class="cc-grid-wrap" *ngIf="chart && !loading">
+    <table class="cc-grid">
+      <thead>
+        <tr>
+          <th class="cc-rowhead">&nbsp;</th>
+          <th *ngFor="let day of chart.days" class="cc-dayhead">
+            <div class="cc-date">{{ day.date | date:'EEE, dd MMM' }}</div>
+            <div class="cc-actions">
+              <button type="button" class="cc-btn cc-btn-sm" (click)="openVitals(day.date)">+ Vitals</button>
+              <button type="button" class="cc-btn cc-btn-sm" (click)="openIO(day.date)">+ I/O</button>
+              <button type="button" class="cc-btn cc-btn-sm" (click)="openDaily(day.date, day.daily)">
+                {{ day.daily ? 'Edit day' : '+ Day fields' }}
+              </button>
+            </div>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Post-op / Post-partum day -->
+        <tr>
+          <th class="cc-rowhead">P.O. / P.P. day</th>
+          <td *ngFor="let day of chart.days">
+            <ng-container *ngIf="day.daily?.postOpDay as p">P.O.: {{ p }}</ng-container>
+            <ng-container *ngIf="day.daily?.postPartumDay as p">P.P.: {{ p }}</ng-container>
+            <span *ngIf="!day.daily?.postOpDay && !day.daily?.postPartumDay" class="cc-muted">—</span>
+          </td>
+        </tr>
+
+        <!-- Vitals readings -->
+        <tr>
+          <th class="cc-rowhead">Vitals</th>
+          <td *ngFor="let day of chart.days" class="cc-vitals-cell">
+            <div class="cc-vitals-row" *ngFor="let v of day.vitals" (click)="deleteVitalsRow(v)" title="Click to delete">
+              <span class="cc-vitals-time">{{ v.recordedAt | date:'shortTime' }}</span>
+              <span class="cc-vitals-shift" *ngIf="v.shift">{{ v.shift }}</span>
+              <span class="cc-vitals-row-data">
+                <strong>T</strong> {{ formatTemp(v) }} ·
+                <strong>P</strong> {{ v.pulse ?? '—' }} ·
+                <strong>R</strong> {{ v.respiration ?? '—' }} ·
+                <strong>BP</strong> {{ formatBP(v) }} ·
+                <strong>SpO₂</strong> {{ v.spo2 ?? '—' }} ·
+                <strong>Pain</strong> {{ v.painScore ?? '—' }}
+              </span>
+            </div>
+            <div *ngIf="day.vitals.length === 0" class="cc-muted">No readings</div>
+          </td>
+        </tr>
+
+        <!-- Intake -->
+        <tr>
+          <th class="cc-rowhead">Total Intake (mL)</th>
+          <td *ngFor="let day of chart.days">
+            <strong>{{ day.intakeTotalMl }} mL</strong>
+            <div class="cc-breakdown" *ngIf="day.intakeTotalMl > 0">
+              <span *ngFor="let kv of day.intakeBreakdown | keyvalue">{{ kv.key }}: {{ kv.value }}</span>
+            </div>
+          </td>
+        </tr>
+
+        <!-- Output -->
+        <tr>
+          <th class="cc-rowhead">Total Output (mL)</th>
+          <td *ngFor="let day of chart.days">
+            <strong>{{ day.outputTotalMl }} mL</strong>
+            <div class="cc-breakdown" *ngIf="day.outputTotalMl > 0">
+              <span *ngFor="let kv of day.outputBreakdown | keyvalue">{{ kv.key }}: {{ kv.value }}</span>
+            </div>
+          </td>
+        </tr>
+
+        <!-- I/O entries list -->
+        <tr>
+          <th class="cc-rowhead">I/O entries</th>
+          <td *ngFor="let day of chart.days" class="cc-io-cell">
+            <div *ngFor="let e of day.ioEntries" class="cc-io-row" (click)="deleteIORow(e)" title="Click to delete">
+              <span class="cc-vitals-time">{{ e.recordedAt | date:'shortTime' }}</span>
+              <span [class.cc-io-in]="e.entryType === 'INTAKE'" [class.cc-io-out]="e.entryType === 'OUTPUT'">
+                {{ e.entryType === 'INTAKE' ? '↓' : '↑' }} {{ e.category }} {{ e.amountMl }}mL
+              </span>
+            </div>
+            <div *ngIf="day.ioEntries.length === 0" class="cc-muted">—</div>
+          </td>
+        </tr>
+
+        <!-- Per-day text fields -->
+        <tr>
+          <th class="cc-rowhead">Diet</th>
+          <td *ngFor="let day of chart.days">{{ day.daily?.diet || '—' }}</td>
+        </tr>
+        <tr>
+          <th class="cc-rowhead">Bowels</th>
+          <td *ngFor="let day of chart.days">{{ day.daily?.bowels || '—' }}</td>
+        </tr>
+        <tr>
+          <th class="cc-rowhead">Urine (qualifier)</th>
+          <td *ngFor="let day of chart.days">{{ day.daily?.urine || '—' }}</td>
+        </tr>
+        <tr>
+          <th class="cc-rowhead">Antibiotics</th>
+          <td *ngFor="let day of chart.days">{{ day.daily?.antibiotics || '—' }}</td>
+        </tr>
+        <tr>
+          <th class="cc-rowhead">Blood transfusion</th>
+          <td *ngFor="let day of chart.days">{{ day.daily?.bloodTransfusion || '—' }}</td>
+        </tr>
+        <tr>
+          <th class="cc-rowhead">Weight / Height</th>
+          <td *ngFor="let day of chart.days">
+            <ng-container *ngIf="day.daily?.weightKg as w">{{ w }} kg</ng-container>
+            <ng-container *ngIf="day.daily?.heightCm as h"> / {{ h }} cm</ng-container>
+            <span *ngIf="!day.daily?.weightKg && !day.daily?.heightCm" class="cc-muted">—</span>
+          </td>
+        </tr>
+        <tr>
+          <th class="cc-rowhead">Allergy</th>
+          <td *ngFor="let day of chart.days">{{ day.daily?.allergy || '—' }}</td>
+        </tr>
+
+        <!-- Nurse shift signs -->
+        <tr>
+          <th class="cc-rowhead">Nurse signs (M/E/N)</th>
+          <td *ngFor="let day of chart.days" class="cc-sign-cell">
+            <div *ngFor="let shift of ['M', 'E', 'N']" class="cc-shift">
+              <span class="cc-shift-label">{{ shift }}</span>
+              <ng-container *ngIf="shiftSigned(day, $any(shift)) as s">
+                <span class="cc-sign-ok" [title]="s.name + ' · ' + (s.at | date:'short')">✓ {{ s.name | slice:0:10 }}</span>
+              </ng-container>
+              <ng-container *ngIf="!shiftSigned(day, $any(shift))">
+                <button type="button" class="cc-btn cc-btn-xs" (click)="openSignShift(day.date, $any(shift))">Sign</button>
+              </ng-container>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ─── Vitals modal ─── -->
+  <div class="cc-modal-bg" *ngIf="modal?.kind === 'vitals'" (click)="closeModal()">
+    <div class="cc-modal" (click)="$event.stopPropagation()">
+      <h3>Record vitals</h3>
+      <p class="cc-sub" *ngIf="modal?.kind === 'vitals'">Day: <strong>{{ modal!.date }}</strong></p>
+      <!-- Phase 9.13 — doctor's monitoring order reminder -->
+      <div class="cc-modal-order cc-order-{{ monitoringStatus }}" *ngIf="monitoringFrequency">
+        <i class="pi pi-clock"></i>
+        Order: vitals {{ monitoringLabel }} — {{ monitoringStatusText }}
+      </div>
+      <label class="cc-field">Time
+        <input type="datetime-local" [(ngModel)]="vitalsBuf.recordedAt" />
+      </label>
+      <div class="cc-grid-3">
+        <label class="cc-field">Temp °F <input type="number" step="0.1" [(ngModel)]="vitalsBuf.temperatureF" /></label>
+        <label class="cc-field">Temp °C <input type="number" step="0.1" [(ngModel)]="vitalsBuf.temperatureC" /></label>
+        <label class="cc-field">Pulse (bpm) <input type="number" [(ngModel)]="vitalsBuf.pulse" /></label>
+        <label class="cc-field">Respiration (/min) <input type="number" [(ngModel)]="vitalsBuf.respiration" /></label>
+        <label class="cc-field">BP systolic <input type="number" [(ngModel)]="vitalsBuf.bpSystolic" /></label>
+        <label class="cc-field">BP diastolic <input type="number" [(ngModel)]="vitalsBuf.bpDiastolic" /></label>
+        <label class="cc-field">SpO₂ (%) <input type="number" [(ngModel)]="vitalsBuf.spo2" /></label>
+        <label class="cc-field">Pain (0-10) <input type="number" min="0" max="10" [(ngModel)]="vitalsBuf.painScore" /></label>
+        <!-- Phase 9.13 — NEWS2 inputs -->
+        <label class="cc-field">Consciousness (ACVPU)
+          <select [(ngModel)]="vitalsBuf.consciousnessAcvpu">
+            <option value="A">A — Alert</option>
+            <option value="C">C — New confusion</option>
+            <option value="V">V — Voice</option>
+            <option value="P">P — Pain</option>
+            <option value="U">U — Unresponsive</option>
+          </select>
+        </label>
+        <label class="cc-field cc-field-check">
+          <input type="checkbox" [(ngModel)]="vitalsBuf.onSupplementalOxygen" />
+          On supplemental O₂
+        </label>
+      </div>
+      <label class="cc-field">Sputum <input type="text" [(ngModel)]="vitalsBuf.sputum" placeholder="e.g. mucoid scanty" /></label>
+      <label class="cc-field">Notes <textarea rows="2" [(ngModel)]="vitalsBuf.notes"></textarea></label>
+      <div class="cc-modal-actions">
+        <button type="button" class="cc-btn cc-btn-primary" (click)="saveVitals()">Save</button>
+        <button type="button" class="cc-btn" (click)="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── I/O modal ─── -->
+  <div class="cc-modal-bg" *ngIf="modal?.kind === 'io'" (click)="closeModal()">
+    <div class="cc-modal" (click)="$event.stopPropagation()">
+      <h3>Record intake / output</h3>
+      <label class="cc-field">Type
+        <select [(ngModel)]="ioBuf.entryType" (ngModelChange)="ioBuf.category = ioBuf.entryType === 'INTAKE' ? 'oral' : 'urine'">
+          <option value="INTAKE">Intake</option>
+          <option value="OUTPUT">Output</option>
+        </select>
+      </label>
+      <label class="cc-field">Category
+        <select [(ngModel)]="ioBuf.category">
+          <ng-container *ngIf="ioBuf.entryType === 'INTAKE'">
+            <option *ngFor="let c of intakeCategories" [value]="c">{{ c }}</option>
+          </ng-container>
+          <ng-container *ngIf="ioBuf.entryType === 'OUTPUT'">
+            <option *ngFor="let c of outputCategories" [value]="c">{{ c }}</option>
+          </ng-container>
+        </select>
+      </label>
+      <label class="cc-field">Time
+        <input type="datetime-local" [(ngModel)]="ioBuf.recordedAt" />
+      </label>
+      <label class="cc-field">Amount (mL)
+        <input type="number" min="0" [(ngModel)]="ioBuf.amountMl" />
+      </label>
+      <label class="cc-field">Description (optional)
+        <input type="text" [(ngModel)]="ioBuf.description" placeholder="e.g. NS 500mL bolus" />
+      </label>
+      <div class="cc-modal-actions">
+        <button type="button" class="cc-btn cc-btn-primary" (click)="saveIO()">Save</button>
+        <button type="button" class="cc-btn" (click)="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Daily fields modal ─── -->
+  <div class="cc-modal-bg" *ngIf="modal?.kind === 'daily'" (click)="closeModal()">
+    <div class="cc-modal cc-modal-wide" (click)="$event.stopPropagation()">
+      <h3>Day fields — {{ dailyBuf.chartDate }}</h3>
+      <div class="cc-grid-2">
+        <label class="cc-field">Post-op day <input type="number" [(ngModel)]="dailyBuf.postOpDay" /></label>
+        <label class="cc-field">Post-partum day <input type="number" [(ngModel)]="dailyBuf.postPartumDay" /></label>
+        <label class="cc-field">Weight (kg) <input type="number" step="0.1" [(ngModel)]="dailyBuf.weightKg" /></label>
+        <label class="cc-field">Height (cm) <input type="number" step="0.1" [(ngModel)]="dailyBuf.heightCm" /></label>
+        <label class="cc-field">Blood group <input type="text" [(ngModel)]="dailyBuf.bloodGroup" /></label>
+        <label class="cc-field">No. of transfusions <input type="number" [(ngModel)]="dailyBuf.noOfTransfusions" /></label>
+      </div>
+      <label class="cc-field">Diet <input type="text" [(ngModel)]="dailyBuf.diet" /></label>
+      <label class="cc-field">Bowels <input type="text" [(ngModel)]="dailyBuf.bowels" placeholder="e.g. passed × 2" /></label>
+      <label class="cc-field">Urine qualifier <input type="text" [(ngModel)]="dailyBuf.urine" placeholder="clear / cloudy / oliguria" /></label>
+      <label class="cc-field">Blood transfusion <textarea rows="2" [(ngModel)]="dailyBuf.bloodTransfusion"></textarea></label>
+      <label class="cc-field">Antibiotics <textarea rows="2" [(ngModel)]="dailyBuf.antibiotics"></textarea></label>
+      <label class="cc-field">Bath <input type="text" [(ngModel)]="dailyBuf.bath" /></label>
+      <label class="cc-field">Allergy <textarea rows="2" [(ngModel)]="dailyBuf.allergy"></textarea></label>
+      <div class="cc-modal-actions">
+        <button type="button" class="cc-btn cc-btn-primary" (click)="saveDaily()">Save</button>
+        <button type="button" class="cc-btn" (click)="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Sign shift modal ─── -->
+  <div class="cc-modal-bg" *ngIf="modal?.kind === 'sign'" (click)="closeModal()">
+    <div class="cc-modal" (click)="$event.stopPropagation()">
+      <h3>Sign shift — {{ modal && modal.kind === 'sign' ? modal.shift : '' }} on {{ modal && modal.kind === 'sign' ? modal.date : '' }}</h3>
+      <p class="cc-sub">
+        Sign below to confirm you handed over the shift's clinical chart. Signature is recorded as audit evidence.
+      </p>
+      <label class="cc-field">Nurse name
+        <input type="text" [(ngModel)]="signerName" placeholder="Signing nurse's name" />
+      </label>
+      <app-e-sign
+        [signerType]="'nurse'"
+        [signerName]="signerName"
+        [signerRole]="'nurse'"
+        [contextType]="'clinical-chart-shift'"
+        [contextId]="admissionId"
+        (signed)="onShiftSigned($event)"
+        (cancelled)="closeModal()">
+      </app-e-sign>
+    </div>
+  </div>
+</div>

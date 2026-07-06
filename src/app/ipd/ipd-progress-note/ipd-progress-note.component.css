@@ -213,3 +213,17 @@
   color: var(--color-text-heading);
   white-space: pre-wrap;
 }
+
+/* Phase 9.9 — visual alignment moved to global forms.css (Phase 9.9.4 block).
+ * Component-scoped tweaks below are kept minimal — SOAP grid spacing only. */
+.list-item__soap dt {
+  color: #7b7b7b !important;
+  font-weight: 500 !important;
+  font-size: 12px !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.list-item__soap dd {
+  color: #271e4a !important;
+  font-size: 14px !important;
+}

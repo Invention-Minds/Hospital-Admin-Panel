@@ -1,149 +1,256 @@
+/* ============================================================================
+   Sidebar — collapsed icon rail (72px) that hover-expands to a labelled drawer
+   (240px). Re-tuned post-NABH-phase rollout to:
+     • scroll vertically once the icon list outgrows the viewport
+     • tighten icon density without losing the touch target
+     • pin the settings cog to the bottom via flex (no absolute positioning)
+     • give the active item a clear pill indicator
+============================================================================ */
+
 .sidebar {
-  width: 70px;
-  background-color: #001345;
+  width: 72px;
+  background: linear-gradient(180deg, #001345 0%, #000d31 100%);
   position: fixed;
   top: 0;
   bottom: 0;
   left: 0;
-  padding-top: 20px;
-  color: white;
+  padding-top: 16px;
+  color: #fff;
   z-index: 3;
-  transition: width 0.3s ease-in-out;
+  transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.18);
 }
 
 .sidebar:hover {
-  width: 220px; /* Expanded width */
+  width: 240px;
 }
 
-.icon-container_2{
-  margin-top: 10px;
-  flex: 1;
-  overflow: hidden;
-  padding-bottom: 60px;
-}
-.logo-container {
-  /* width: 100%; */
+/* ------------------------------------------------------------------ Logo */
+.icon-container:first-child {
+  flex: 0 0 auto;
+  padding: 0 14px 12px;
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
-  margin-bottom: 10px;
-  margin-left: 40px;
+  align-items: center;
+  justify-content: flex-start;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 8px;
+}
+.icon-container:first-child .icon-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  flex: 0 0 auto;
 }
 .logo-text {
+  font-family: Kanit, sans-serif;
   font-size: 18px;
-  font-weight: 500;
-  color: white;
-  opacity: 0; /* Hide the text initially */
-  white-space: nowrap; /* Prevent the text from wrapping */
-  margin-left: -20px; /* Hide the text visually when sidebar is collapsed */
-  font-family: Kanit;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  margin-left: 0;
+}
+.sidebar:hover .logo-text {
+  opacity: 1;
 }
 
-.logo {
-  width: 55px;
-}
-
-.icon-container {
+/* ------------------------------------------------------- Scrollable nav list */
+.icon-container_2 {
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 12px;
-  padding-left: 10px;
+  align-items: stretch;
+  gap: 4px;
+  padding: 8px 10px 16px;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  /* Custom thin scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+.icon-container_2::-webkit-scrollbar {
+  width: 6px;
+}
+.icon-container_2::-webkit-scrollbar-track {
+  background: transparent;
+}
+.icon-container_2::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+}
+.icon-container_2::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(255, 255, 255, 0.32);
 }
 
+/* ----------------------------------------------------------- Icon wrapper */
 .icon-wrapper {
   display: flex;
   align-items: center;
-  width: 45px;
-  height: 45px;
-  border-radius: 12px;
+  height: 42px;
+  min-height: 42px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: all 0.3s ease-in-out;
-  overflow: hidden; /* Prevent text overflow */
+  position: relative;
+  transition: background-color 0.18s ease, color 0.18s ease;
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.78);
+  text-decoration: none;
 }
+
+/* Make every icon line up cleanly at the same x-offset whether collapsed
+   or hovered — the icon-content is what positions things. */
 .icon-content {
   display: flex;
   align-items: center;
-  gap: 15px;
-}
-.sidebar:hover .icon-wrapper {
-  width: auto; /* Allow the wrapper to adjust to content */
-  padding-right: 15px; /* Add spacing for text */
-}
-
-.icon-wrapper:hover {
-  background-color: white;
-  color: black;
+  gap: 12px;
+  padding: 0 12px;
+  width: 100%;
+  height: 100%;
 }
 
 .icon {
-  fill: white;
-  transition: all 0.3s ease;
-  margin-right: 10px; /* Add spacing between icon and text */
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  fill: currentColor;
+  transition: transform 0.2s ease;
+}
+.icon-wrapper svg {
+  width: 22px;
+  height: 22px;
+  position: static;       /* override the legacy `left: 6px` */
+  flex: 0 0 22px;
 }
 
+/* Hover state — subtle highlight, never the screaming-white from before. */
+.icon-wrapper:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+/* Active state — left-edge pill + pale fill so the user always knows
+   which page they're on, with or without expanded labels. */
 .icon-wrapper.active {
-  background-color: white;
-  color: black;
-  box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64);
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  box-shadow: none;
 }
-
-.icon-wrapper.active .icon {
-  fill: black;
-}
-
-.icon-wrapper span {
-  opacity: 0; /* Hide text when collapsed */
-  white-space: nowrap;
-  transition: opacity 0.3s ease; /* Smooth fade-in for text */
-  font-family: Kanit;
-}
-.icon-wrapper svg{
-  opacity: 1;
-  position: relative;
-  left: 6px;
-
-}
-a{
-  text-decoration: none;
-  color: white;
-}
-
-.sidebar:hover .icon-wrapper span {
-  opacity: 1; /* Show text when expanded */
-  width: 120px;
-  
-}
-
-.sidebar:hover .logo-text {
-  opacity: 1; /* Show text on hover */
-  margin-left: 0; /* Adjust margin to align properly */
-}
-.sidebar:hover .logo-container{
-  margin-left: 10px;
-  font-family: Kanit;
-  justify-content: flex-start;
-}
-.icon-container .icon-wrapper:nth-last-child(1) {
+.icon-wrapper.active::before {
+  content: '';
   position: absolute;
-  bottom: 15px;
-}
-.sidebar:hover .icon-container .icon-wrapper:nth-last-child(1) {
-  width: auto;
-  padding-right: 15px;
-}
-
-.sidebar:hover .settings{
-transform:rotate(90deg);
-transition-duration: 1.5s;
-}
-.appt{
-  margin-top: -143px;
+  left: 0;
+  top: 8px;
+  bottom: 8px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: #4f8edc;
 }
 
+.icon-wrapper.active .icon,
+.icon-wrapper.active svg {
+  fill: #fff;
+}
+
+/* -------------------------------------------------------- Label visibility */
+.icon-wrapper span {
+  font-family: Kanit, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.sidebar:hover .icon-wrapper span {
+  opacity: 1;
+}
+
+/* --------------------------------------------------------- Section labels */
+/* Each workflow group (OPD / Investigations / Emergency / IPD / Reporting /
+   Admin) is introduced by a label div. In the collapsed 72px rail the text
+   is hidden (matches how the icon-wrapper <span> labels are hidden when
+   collapsed); on hover the rail expands and the label text fades in.
+   Uppercase + tight letter-spacing keeps the label visually distinct from
+   the menu items below it. */
+.sidebar-section-label {
+  font-family: Kanit, sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.75);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  margin-top: 8px;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  /* Collapsed (72px rail): max-height 0 + zero vertical padding collapses the
+     div to just its border-top — so the user sees a thin divider line, not a
+     ~40px empty stripe per section. overflow:hidden is safe HERE because the
+     div has 0 height anyway. On hover-expand to 240px the max-height +
+     padding + opacity animate to natural values, revealing the heading. */
+  max-height: 0;
+  padding: 0 14px;
+  opacity: 0;
+  overflow: hidden;
+  transition:
+    max-height 0.25s ease,
+    padding-top 0.25s ease,
+    padding-bottom 0.25s ease,
+    opacity 0.2s ease;
+}
+.sidebar:hover .sidebar-section-label {
+  max-height: 40px;
+  padding: 12px 14px 6px;
+  opacity: 1;
+  overflow: visible;
+}
+
+/* Kept for backward compatibility — items inside a section that aren't the
+   first don't need a top border, but anything still tagged with this class
+   gets a tiny gap so the rail doesn't feel cramped. */
+.icon-wrapper.sidebar-section-start {
+  margin-top: 2px;
+}
+
+/* ----------------------------------------------------------------- Settings */
+/* Settings is the last anchor in icon-container_2; flex auto-margin pins it
+   to the bottom no matter how many items are above it. The previous
+   `position: absolute` trick broke as soon as the list scrolled. */
+.icon-container_2 > a:last-of-type {
+  margin-top: auto;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 8px;
+}
+
+.sidebar:hover .settings {
+  transform: rotate(90deg);
+  transition: transform 0.6s ease;
+}
+.settings {
+  transition: transform 0.6s ease;
+}
+
+/* ---------------------------------------------------------------- Anchor reset */
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Legacy class still referenced in markup — keep neutral. */
+.appt { margin-top: 0; }
+
+/* -------------------------------------------------------------- Mobile hide */
 @media (max-width: 768px) {
   .sidebar {
     display: none;

@@ -1,0 +1,41 @@
+/* Phase 9.19 — referral inbox. .page is allow-listed in forms.css. */
+.rin-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; }
+.rin-title { font-size: 22px; font-weight: 600; margin: 0 0 4px; }
+.rin-sub { color: #6b7280; font-size: 13px; margin: 0 0 16px; }
+
+.rin-banner { padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; font-size: 14px; cursor: pointer; }
+.rin-good { background: #dcfce7; color: #166534; }
+.rin-bad { background: #fee2e2; color: #b91c1c; }
+
+.rin-loading { padding: 30px; text-align: center; color: #6b7280; font-style: italic; }
+.rin-empty { padding: 44px; text-align: center; color: #6b7280; background: #f9fafb; border: 1px dashed #e5e7eb; border-radius: 10px; }
+
+.rin-list { display: flex; flex-direction: column; gap: 12px; }
+.rin-card {
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  background: #fff; border: 1px solid #e5e7eb; border-left: 4px solid #cbd5e1;
+  border-radius: 10px; padding: 14px 18px;
+}
+.rin-card.rin-overdue { border-left-color: #dc2626; background: #fef2f2; }
+
+.rin-card-main { flex: 1; min-width: 0; }
+.rin-patient { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.rin-name { font-size: 16px; font-weight: 600; color: #271e4a; }
+.rin-er { font-size: 12px; color: #6b7280; }
+.rin-meta { font-size: 12px; color: #6b7280; margin-top: 4px; }
+.rin-reason { font-size: 13px; color: #374151; margin-top: 6px; }
+.rin-flags { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+
+.rin-pill { display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 11px; font-weight: 600; text-transform: capitalize; }
+.rin-triage-red { background: #fee2e2; color: #b91c1c; }
+.rin-triage-yellow { background: #fef3c7; color: #92400e; }
+.rin-triage-green { background: #dcfce7; color: #166534; }
+.rin-triage-black { background: #e5e7eb; color: #374151; }
+.rin-warn { background: #fee2e2; color: #b91c1c; }
+.rin-esc { background: #ffedd5; color: #9a3412; }
+
+.rin-actions { display: flex; flex-direction: column; gap: 8px; }
+.rin-btn { height: 38px; padding: 0 16px; border-radius: 6px; border: 1px solid #d1d5db; background: #fff; color: #271e4a; cursor: pointer; font-family: Kanit, sans-serif; font-size: 13px; white-space: nowrap; }
+.rin-btn:hover { background: #f3f4f6; }
+.rin-btn-primary { background: #169458; color: #fff; border-color: #169458; }
+.rin-btn-primary:hover { background: #117849; }

@@ -1,16 +1,35 @@
 <!-- Main app layout -->
 <div *ngIf="!isMaintenanceRoute(); else maintenanceTemplate">
   <div *ngIf="!isChannelRoute(); else channelTemplate">
+    <div *ngIf="!isFeedbackKioskRoute(); else kioskTemplate">
     <div *ngIf="!isHelpDesk(); else helpdeskTemplate">
     <div *ngIf="!isLoginRoute(); else loginTemplate">
       <div *ngIf="!otChannelRoute(); else otChannelTemplate">
         <div *ngIf="!therapyChannelRoute(); else therapyChannelTemplate"> 
       <app-sidebar></app-sidebar>
-      <div class="content">
+      <!-- Phase 9.8 — global Back button. Browser-history-based, so it works
+           on every authenticated route without per-component wiring. Hidden
+           on roots (login/dashboard/analytics) and on full-screen kiosk/
+           channel pages where back has no useful target. -->
+      <button
+        type="button"
+        class="app-back-btn"
+        *ngIf="showBackButton()"
+        (click)="goBack()"
+        title="Back to previous page"
+        aria-label="Back to previous page">
+        <span class="app-back-arrow">←</span>
+        <span class="app-back-label">Back</span>
+      </button>
+      <div class="content" [class.has-back-button]="showBackButton()">
         <app-dashboard-module></app-dashboard-module>
       </div>
       <!-- Sprint 3g — Critical-values widget, authenticated shell only. -->
       <app-critical-values-alert></app-critical-values-alert>
+      <!-- Part B — duty-acknowledgement modal pops on login if the user has
+           an assignment in their ack window (30 min before → 60 min after). -->
+      <app-duty-ack-modal></app-duty-ack-modal>
+    </div>
     </div>
     </div>
     </div>
@@ -20,6 +39,11 @@
   </div>
   </div>
 </div>
+
+<!-- Phase 6 — Patient-facing kiosk template renders bare (no admin shell). -->
+<ng-template #kioskTemplate>
+  <router-outlet></router-outlet>
+</ng-template>
 
 <!-- Maintenance Template -->
 <ng-template #maintenanceTemplate>
@@ -50,6 +74,25 @@
 </div>
 
 <p-toast></p-toast>
+
+<!-- App-wide alert / confirm dialog. Driven by AlertService — every
+     replacement of native alert()/confirm() routes through here. -->
+<app-confirm-dialog
+  [visible]="alertState.visible"
+  [title]="alertState.title"
+  [message]="alertState.message"
+  [confirmLabel]="alertState.confirmLabel"
+  [cancelLabel]="alertState.cancelLabel"
+  [severity]="alertState.severity"
+  [alertOnly]="alertState.alertOnly"
+  [promptMode]="alertState.promptMode"
+  [inputType]="alertState.inputType"
+  [inputPlaceholder]="alertState.inputPlaceholder"
+  [inputValue]="alertState.inputValue"
+  (confirm)="onAlertConfirm()"
+  (promptConfirm)="onAlertPromptConfirm($event)"
+  (cancel)="onAlertCancel()">
+</app-confirm-dialog>
 
 <!-- WhatsApp Button -->
 <!-- <button 

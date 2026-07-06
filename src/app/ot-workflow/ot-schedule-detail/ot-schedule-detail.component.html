@@ -1,0 +1,905 @@
+<div class="otd-shell">
+  <button type="button" class="otd-back" (click)="goBack()">← Back to OT board</button>
+  <h2 class="otd-title">OT Schedule</h2>
+  <!-- Phase 9.2 — Track Sheet link -->
+  <a class="otd-back" [routerLink]="['/surgery-ot', scheduleId, 'track-sheet']" style="margin-left:12px;">📋 Print Track Sheet</a>
+  <!-- Phase 9.12 — Ward → OT Pre-Operative Surgical Safety Checklist -->
+  <a class="otd-back" [routerLink]="['/surgery-ot', scheduleId, 'ward-transfer']" style="margin-left:12px;">✅ Ward → OT Checklist</a>
+
+  <div class="otd-banner otd-banner-bad" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+  <div class="otd-banner otd-banner-good" *ngIf="successMessage" role="status">{{ successMessage }}</div>
+
+  <div class="otd-empty" *ngIf="loading">Loading…</div>
+
+  <ng-container *ngIf="!loading && schedule as s">
+
+    <!-- Summary header -->
+    <div class="otd-card otd-summary">
+      <div class="otd-summary-row">
+        <strong>{{ s.procedureName }}</strong>
+        <span class="otd-pill otd-pill-status">{{ s.status }}</span>
+        <span class="otd-pill otd-pill-urgency" [ngClass]="'urgency-' + s.urgency">{{ s.urgency }}</span>
+      </div>
+      <p class="otd-meta">
+        <strong>{{ s.otRoom?.code }}</strong> · {{ s.patientName || '—' }}
+        <span *ngIf="s.prn">· PRN {{ s.prn }}</span>
+      </p>
+      <p class="otd-meta">
+        Planned: {{ s.plannedStart | date:'short' }} → {{ s.plannedEnd | date:'short' }}
+        <span *ngIf="s.actualStart"> · Started {{ s.actualStart | date:'short' }}</span>
+        <span *ngIf="s.actualEnd"> · Ended {{ s.actualEnd | date:'short' }}</span>
+      </p>
+      <p class="otd-team">
+        <span *ngIf="s.surgeonName"><strong>Surgeon:</strong> {{ s.surgeonName }}</span>
+        <span *ngIf="s.anaesthesiologistName"><strong>Anaesth:</strong> {{ s.anaesthesiologistName }}</span>
+        <span *ngIf="s.scrubNurseName"><strong>Scrub:</strong> {{ s.scrubNurseName }}</span>
+        <span *ngIf="s.runnerName"><strong>Runner:</strong> {{ s.runnerName }}</span>
+      </p>
+    </div>
+
+    <!-- Phase 9.1c — OT Clearance card (UHJ/IPS/F-32) -->
+    <app-ot-clearance-card [scheduleId]="scheduleId"></app-ot-clearance-card>
+
+    <!-- Phase 9.2 — Surgeries / Staff / Equipment / Consumables -->
+    <app-ot-schedule-extras [scheduleId]="scheduleId"></app-ot-schedule-extras>
+
+    <!-- Step navigator -->
+    <div class="otd-steps">
+      <button class="otd-step" [class.otd-step-active]="activeSection === 'pre-op'" [class.otd-step-done]="hasPreOp" (click)="selectSection('pre-op')">
+        1. Pre-op
+      </button>
+      <button class="otd-step" [class.otd-step-active]="activeSection === 'sign-in'" [class.otd-step-done]="hasSignIn" (click)="selectSection('sign-in')">
+        2. Sign-in
+      </button>
+      <button class="otd-step" [class.otd-step-active]="activeSection === 'time-out'" [class.otd-step-done]="hasTimeOut" (click)="selectSection('time-out')">
+        3. Time-out
+      </button>
+      <button class="otd-step" [class.otd-step-active]="activeSection === 'intra-op'" [class.otd-step-done]="hasIntraOp" (click)="selectSection('intra-op')">
+        4. Intra-op
+      </button>
+      <button class="otd-step" [class.otd-step-active]="activeSection === 'sign-out'" [class.otd-step-done]="hasSignOut" (click)="selectSection('sign-out')">
+        5. Sign-out
+      </button>
+      <button class="otd-step" [class.otd-step-active]="activeSection === 'pacu'" [class.otd-step-done]="hasPacuDischarge" (click)="selectSection('pacu')">
+        6. PACU
+      </button>
+      <button class="otd-step" [class.otd-step-active]="activeSection === 'outcome'" [class.otd-step-done]="hasOutcome" (click)="selectSection('outcome')">
+        7. Outcome
+      </button>
+      <!-- Phase 4b — Intra-Op Nursing Chart lives on its own route. -->
+      <a class="otd-step" [routerLink]="['/surgery-ot', s.id, 'nursing-chart']">
+        Nursing chart ↗
+      </a>
+    </div>
+
+    <!-- Pre-op (COP.13.b) -->
+    <div class="otd-card" *ngIf="activeSection === 'pre-op'">
+      <h3 class="otd-section-title">Pre-anaesthesia / pre-op checklist (COP.13.b)</h3>
+      <div class="otd-form-grid">
+        <label><input type="checkbox" [(ngModel)]="preOp.fasting" name="fasting" /> Patient fasting</label>
+        <label class="otd-inline">
+          Hours fasted
+          <input type="number" min="0" max="24" [(ngModel)]="preOp.fastingHours" name="fastingHours" />
+        </label>
+        <label class="otd-inline">
+          Surgery classification
+          <select [(ngModel)]="preOp.surgeryClass" name="surgeryClass">
+            <option value="">Select…</option>
+            <option value="minor">Minor</option>
+            <option value="intermediate">Intermediate</option>
+            <option value="major">Major</option>
+          </select>
+        </label>
+        <label class="otd-inline">
+          Pre-op hemoglobin (g/dL)
+          <input type="number" min="0" step="0.1" [(ngModel)]="preOp.preOpHemoglobin" name="preOpHemoglobin" />
+        </label>
+        <label><input type="checkbox" [(ngModel)]="preOp.groupTyped" name="groupTyped" /> Blood typed</label>
+        <label><input type="checkbox" [(ngModel)]="preOp.crossMatched" name="crossMatched" /> Cross-matched</label>
+        <label class="otd-inline">
+          Units reserved — internal
+          <input type="number" min="0" [(ngModel)]="preOp.internalUnitsReserved" name="internalUnitsReserved" />
+        </label>
+        <label class="otd-inline">
+          Units reserved — external
+          <input type="number" min="0" [(ngModel)]="preOp.externalUnitsReserved" name="externalUnitsReserved" />
+        </label>
+        <label class="otd-inline">
+          Anticipated blood loss (ml)
+          <input type="number" min="0" [(ngModel)]="preOp.anticipatedBloodLossMl" name="anticipatedBloodLossMl" />
+        </label>
+        <label><input type="checkbox" [(ngModel)]="preOp.antibioticPlanned" name="antibioticPlanned" /> Antibiotic prophylaxis planned</label>
+        <label class="otd-inline otd-full">
+          Antibiotic name
+          <input type="text" [(ngModel)]="preOp.antibioticName" name="antibioticName" />
+        </label>
+        <label><input type="checkbox" [(ngModel)]="preOp.prophylaxisGiven" name="prophylaxisGiven" /> Prophylaxis given</label>
+        <label><input type="checkbox" [(ngModel)]="preOp.surgicalSiteMarked" name="surgicalSiteMarked" /> Surgical site marked</label>
+        <label><input type="checkbox" [(ngModel)]="preOp.allergiesReviewed" name="allergiesReviewed" /> Allergies reviewed</label>
+        <label class="otd-inline otd-full">
+          Allergy notes
+          <input type="text" [(ngModel)]="preOp.allergiesNote" name="allergiesNote" />
+        </label>
+        <label><input type="checkbox" [(ngModel)]="preOp.fitnessCleared" name="fitnessCleared" /> Fitness cleared</label>
+        <label class="otd-inline otd-full">
+          Cleared by
+          <input type="text" [(ngModel)]="preOp.fitnessClearedBy" name="fitnessClearedBy" />
+        </label>
+        <label class="otd-inline otd-full">
+          Pre-anaesthesia notes
+          <textarea rows="2" [(ngModel)]="preOp.preAnaesthesiaNotes" name="preAnaesthesiaNotes"></textarea>
+        </label>
+      </div>
+
+      <div class="otd-form-row">
+        <label class="otd-full">
+          Anaesthesiologist name
+          <input type="text" [(ngModel)]="preOp.signerName" name="preOpSignerName" placeholder="Your full name" />
+        </label>
+      </div>
+
+      <app-e-sign *ngIf="preOp.signerName?.trim() && !hasPreOp"
+                  [signerType]="'staff'"
+                  [signerName]="preOp.signerName"
+                  [contextType]="'ot-pre-op'"
+                  [contextId]="scheduleId"
+                  [prompt]="'Anaesthesiologist — pre-op sign-off'"
+                  [disabled]="saving"
+                  (signed)="onPreOpSigned($event)">
+      </app-e-sign>
+
+      <p class="otd-locked" *ngIf="hasPreOp">
+        ✓ Signed {{ s.preOpChecklist?.signedAt | date:'medium' }} by {{ s.preOpChecklist?.signedBy }}
+      </p>
+    </div>
+
+    <!-- WHO Sign-in -->
+    <div class="otd-card" *ngIf="activeSection === 'sign-in'">
+      <h3 class="otd-section-title">WHO Sign-in (before induction of anaesthesia)</h3>
+      <div class="otd-form-grid">
+        <label><input type="checkbox" [(ngModel)]="signIn.patientIdentityConfirmed" name="patientIdentityConfirmed" /> Patient identity confirmed (2 IDs)</label>
+        <label><input type="checkbox" [(ngModel)]="signIn.siteMarked" name="siSiteMarked" /> Surgical site marked</label>
+        <label><input type="checkbox" [(ngModel)]="signIn.anaesthesiaSafetyChecked" name="anaesthesiaSafetyChecked" /> Anaesthesia safety checks complete</label>
+        <label><input type="checkbox" [(ngModel)]="signIn.pulseOximeterFunctional" name="pulseOximeterFunctional" /> Pulse oximeter functional</label>
+        <label><input type="checkbox" [(ngModel)]="signIn.knownAllergies" name="siKnownAllergies" /> Known allergies reviewed</label>
+        <label><input type="checkbox" [(ngModel)]="signIn.difficultAirwayRisk" name="difficultAirwayRisk" /> Difficult airway risk addressed</label>
+        <label><input type="checkbox" [(ngModel)]="signIn.bloodLossRisk" name="bloodLossRisk" /> Blood loss risk &gt;500ml addressed</label>
+        <!-- Phase 9.2 — F-01 sign-in additions -->
+        <label><input type="checkbox" [(ngModel)]="signIn.consentConfirmed" name="consentConfirmed" /> Surgical consent confirmed</label>
+        <label><input type="checkbox" [(ngModel)]="signIn.preopMedicationTaken" name="preopMedicationTaken" /> Preop medication taken</label>
+        <label><input type="checkbox" [(ngModel)]="signIn.hypothermiaRisk" name="hypothermiaRisk" /> Hypothermia risk (op &gt; 1 hr)</label>
+        <label><input type="checkbox" [(ngModel)]="signIn.warmerInPlace" name="warmerInPlace" /> Warmer in place</label>
+        <label><input type="checkbox" [(ngModel)]="signIn.equipmentImplantsAvailable" name="equipmentImplantsAvailable" /> Equipment + implants available</label>
+        <!-- Phase 9.12 — UHJ Nursing Safety Checklist sign-in additions -->
+        <label><input type="checkbox" [(ngModel)]="signIn.fastingStatusConfirmed" name="fastingStatusConfirmed" /> Fasting status confirmed</label>
+        <label><input type="checkbox" [(ngModel)]="signIn.ivLineSecured" name="signInIvLineSecured" /> IV line secured</label>
+        <label><input type="checkbox" [(ngModel)]="signIn.bloodAvailabilityChecked" name="bloodAvailabilityChecked" /> Blood availability checked</label>
+      </div>
+      <h4 class="otd-section-title-sm">Anaesthesia equipment check</h4>
+      <div class="otd-form-grid">
+        <label><input type="checkbox" [(ngModel)]="signIn.anaesthEquipSpo2" name="aSpo2" /> SpO₂</label>
+        <label><input type="checkbox" [(ngModel)]="signIn.anaesthEquipNibp" name="aNibp" /> NIBP</label>
+        <label><input type="checkbox" [(ngModel)]="signIn.anaesthEquipEcg" name="aEcg" /> ECG</label>
+        <label><input type="checkbox" [(ngModel)]="signIn.anaesthEquipBis" name="aBis" /> BIS</label>
+      </div>
+      <div class="otd-form-row">
+        <label class="otd-full">
+          Allergy description (if known allergies)
+          <input type="text" [(ngModel)]="signIn.allergyDescription" name="allergyDescription" />
+        </label>
+      </div>
+      <div class="otd-form-row">
+        <label class="otd-full">
+          Airway-risk arrangement
+          <input type="text" [(ngModel)]="signIn.airwayRiskArrangement" name="airwayRiskArrangement" placeholder="Equipment + assistance available" />
+        </label>
+      </div>
+      <div class="otd-form-row">
+        <label class="otd-full">
+          Blood-loss arrangement
+          <input type="text" [(ngModel)]="signIn.bloodLossArrangement" name="bloodLossArrangement" placeholder="Adequate IV access, blood reserved" />
+        </label>
+      </div>
+      <div class="otd-form-row">
+        <label class="otd-full">
+          Sign-in performed by
+          <input type="text" [(ngModel)]="signIn.signInBy" name="signInBy" placeholder="Anaesthesiologist / nurse name" />
+        </label>
+      </div>
+
+      <app-e-sign *ngIf="signInReady && !hasSignIn"
+                  [signerType]="'staff'"
+                  [signerName]="signIn.signInBy"
+                  [contextType]="'ot-sign-in'"
+                  [contextId]="scheduleId"
+                  [prompt]="'WHO sign-in — surgeon (pre-induction)'"
+                  [disabled]="saving"
+                  (signed)="onSignInSigned($event)">
+      </app-e-sign>
+
+      <p class="otd-locked" *ngIf="hasSignIn">
+        ✓ Surgeon signed {{ s.safetyChecklist?.signInAt | date:'medium' }} by {{ s.safetyChecklist?.signInBy }}
+      </p>
+
+      <!-- Phase 9.4b — Anaesthetist / Nurse / Technician role signatures -->
+      <h4 class="otd-section-title-sm">Additional role signatures</h4>
+      <div class="otd-form-row">
+        <label class="otd-full">
+          Anaesthetist name
+          <input type="text" [(ngModel)]="roleSignerName.signIn.anaesthetist" name="signInAnaesthetistName" [disabled]="isRoleSigned('signIn','anaesthetist')" />
+        </label>
+      </div>
+      <app-e-sign *ngIf="roleSignerName.signIn.anaesthetist?.trim() && !isRoleSigned('signIn','anaesthetist')"
+                  [signerType]="'staff'"
+                  [signerName]="roleSignerName.signIn.anaesthetist"
+                  [contextType]="'ot-sign-in'"
+                  [contextId]="scheduleId"
+                  [prompt]="'Anaesthetist — sign-in'"
+                  [disabled]="saving"
+                  (signed)="onRoleSigned('signIn', 'anaesthetist', $event)">
+      </app-e-sign>
+      <p class="otd-locked" *ngIf="isRoleSigned('signIn','anaesthetist')">
+        ✓ Anaesthetist signed {{ roleSignedAt('signIn','anaesthetist') | date:'medium' }} by {{ roleSignedBy('signIn','anaesthetist') }}
+      </p>
+
+      <div class="otd-form-row">
+        <label class="otd-full">
+          Nurse name
+          <input type="text" [(ngModel)]="roleSignerName.signIn.nurse" name="signInNurseName" [disabled]="isRoleSigned('signIn','nurse')" />
+        </label>
+      </div>
+      <app-e-sign *ngIf="roleSignerName.signIn.nurse?.trim() && !isRoleSigned('signIn','nurse')"
+                  [signerType]="'staff'"
+                  [signerName]="roleSignerName.signIn.nurse"
+                  [contextType]="'ot-sign-in'"
+                  [contextId]="scheduleId"
+                  [prompt]="'Nurse — sign-in'"
+                  [disabled]="saving"
+                  (signed)="onRoleSigned('signIn', 'nurse', $event)">
+      </app-e-sign>
+      <p class="otd-locked" *ngIf="isRoleSigned('signIn','nurse')">
+        ✓ Nurse signed {{ roleSignedAt('signIn','nurse') | date:'medium' }} by {{ roleSignedBy('signIn','nurse') }}
+      </p>
+
+      <div class="otd-form-row">
+        <label class="otd-full">
+          Technician name
+          <input type="text" [(ngModel)]="roleSignerName.signIn.technician" name="signInTechnicianName" [disabled]="isRoleSigned('signIn','technician')" />
+        </label>
+      </div>
+      <app-e-sign *ngIf="roleSignerName.signIn.technician?.trim() && !isRoleSigned('signIn','technician')"
+                  [signerType]="'staff'"
+                  [signerName]="roleSignerName.signIn.technician"
+                  [contextType]="'ot-sign-in'"
+                  [contextId]="scheduleId"
+                  [prompt]="'Technician — sign-in'"
+                  [disabled]="saving"
+                  (signed)="onRoleSigned('signIn', 'technician', $event)">
+      </app-e-sign>
+      <p class="otd-locked" *ngIf="isRoleSigned('signIn','technician')">
+        ✓ Technician signed {{ roleSignedAt('signIn','technician') | date:'medium' }} by {{ roleSignedBy('signIn','technician') }}
+      </p>
+    </div>
+
+    <!-- WHO Time-out -->
+    <div class="otd-card" *ngIf="activeSection === 'time-out'">
+      <h3 class="otd-section-title">WHO Time-out (before skin incision)</h3>
+      <div class="otd-form-grid">
+        <label><input type="checkbox" [(ngModel)]="timeOut.teamIntroduced" name="teamIntroduced" /> Team members introduced by name + role</label>
+        <label><input type="checkbox" [(ngModel)]="timeOut.procedureConfirmed" name="procedureConfirmed" /> Patient + procedure + site confirmed</label>
+        <label><input type="checkbox" [(ngModel)]="timeOut.antibioticAdministered" name="antibioticAdministered" /> Antibiotic prophylaxis administered &lt;60 min ago</label>
+        <label><input type="checkbox" [(ngModel)]="timeOut.imagingDisplayed" name="imagingDisplayed" /> Essential imaging displayed</label>
+        <label><input type="checkbox" [(ngModel)]="timeOut.criticalEventsAnticipated" name="criticalEventsAnticipated" /> Critical/unexpected events anticipated</label>
+        <!-- Phase 9.2 — F-01 time-out additions -->
+        <label><input type="checkbox" [(ngModel)]="timeOut.vteProphylaxisProvided" name="vteProphylaxisProvided" /> VTE prophylaxis provided</label>
+        <label><input type="checkbox" [(ngModel)]="timeOut.bloodAvailable" name="bloodAvailable" /> Blood available (if blood-loss &gt;500ml anticipated)</label>
+        <!-- Phase 9.12 — UHJ Nursing Safety Checklist time-out additions -->
+        <label><input type="checkbox" [(ngModel)]="timeOut.correctPatientConfirmed" name="correctPatientConfirmed" /> Correct patient confirmed</label>
+        <label><input type="checkbox" [(ngModel)]="timeOut.correctSiteConfirmed" name="correctSiteConfirmed" /> Correct surgical site confirmed</label>
+        <label><input type="checkbox" [(ngModel)]="timeOut.sterilityConfirmed" name="sterilityConfirmed" /> Sterility confirmed</label>
+        <label><input type="checkbox" [(ngModel)]="timeOut.instrumentsAvailable" name="instrumentsAvailable" /> Instruments available</label>
+        <label><input type="checkbox" [(ngModel)]="timeOut.spongeNeedleCountDone" name="spongeNeedleCountDone" /> Sponge &amp; needle count done</label>
+      </div>
+      <div class="otd-form-row">
+        <label>
+          Antibiotic given (name)
+          <input type="text" [(ngModel)]="timeOut.antibioticName" name="antibioticName" />
+        </label>
+        <label>
+          Anticipated duration (min)
+          <input type="number" min="0" [(ngModel)]="timeOut.anticipatedDurationMins" name="anticipatedDurationMins" />
+        </label>
+        <label>
+          Anticipated blood loss (ml)
+          <input type="number" min="0" [(ngModel)]="timeOut.anticipatedBloodLossMl" name="anticipatedBloodLossMl" />
+        </label>
+      </div>
+      <div class="otd-form-row">
+        <label class="otd-full">
+          Glycemic control plan
+          <input type="text" [(ngModel)]="timeOut.glycemicControl" name="glycemicControl" placeholder="e.g., HGT q1h, sliding scale" />
+        </label>
+      </div>
+      <div class="otd-form-row">
+        <label class="otd-full">
+          Anaesthetist's patient-specific concerns
+          <textarea rows="2" [(ngModel)]="timeOut.anaesthetistConcerns" name="anaesthetistConcerns"></textarea>
+        </label>
+      </div>
+      <div class="otd-form-row">
+        <label class="otd-full">
+          Nursing — sterility or other concerns
+          <textarea rows="2" [(ngModel)]="timeOut.sterilityConcerns" name="sterilityConcerns"></textarea>
+        </label>
+      </div>
+      <div class="otd-form-row">
+        <label class="otd-full">
+          Time-out called by
+          <input type="text" [(ngModel)]="timeOut.timeOutBy" name="timeOutBy" placeholder="Lead surgeon / nurse name" />
+        </label>
+      </div>
+
+      <app-e-sign *ngIf="timeOutReady && !hasTimeOut"
+                  [signerType]="'staff'"
+                  [signerName]="timeOut.timeOutBy"
+                  [contextType]="'ot-time-out'"
+                  [contextId]="scheduleId"
+                  [prompt]="'WHO time-out — surgeon (pre-incision)'"
+                  [disabled]="saving"
+                  (signed)="onTimeOutSigned($event)">
+      </app-e-sign>
+
+      <p class="otd-locked" *ngIf="hasTimeOut">
+        ✓ Surgeon signed {{ s.safetyChecklist?.timeOutAt | date:'medium' }} by {{ s.safetyChecklist?.timeOutBy }}
+      </p>
+
+      <!-- Phase 9.4b — Anaesthetist / Nurse / Technician role signatures -->
+      <h4 class="otd-section-title-sm">Additional role signatures</h4>
+      <div class="otd-form-row">
+        <label class="otd-full">
+          Anaesthetist name
+          <input type="text" [(ngModel)]="roleSignerName.timeOut.anaesthetist" name="timeOutAnaesthetistName" [disabled]="isRoleSigned('timeOut','anaesthetist')" />
+        </label>
+      </div>
+      <app-e-sign *ngIf="roleSignerName.timeOut.anaesthetist?.trim() && !isRoleSigned('timeOut','anaesthetist')"
+                  [signerType]="'staff'"
+                  [signerName]="roleSignerName.timeOut.anaesthetist"
+                  [contextType]="'ot-time-out'"
+                  [contextId]="scheduleId"
+                  [prompt]="'Anaesthetist — time-out'"
+                  [disabled]="saving"
+                  (signed)="onRoleSigned('timeOut', 'anaesthetist', $event)">
+      </app-e-sign>
+      <p class="otd-locked" *ngIf="isRoleSigned('timeOut','anaesthetist')">
+        ✓ Anaesthetist signed {{ roleSignedAt('timeOut','anaesthetist') | date:'medium' }} by {{ roleSignedBy('timeOut','anaesthetist') }}
+      </p>
+
+      <div class="otd-form-row">
+        <label class="otd-full">
+          Nurse name
+          <input type="text" [(ngModel)]="roleSignerName.timeOut.nurse" name="timeOutNurseName" [disabled]="isRoleSigned('timeOut','nurse')" />
+        </label>
+      </div>
+      <app-e-sign *ngIf="roleSignerName.timeOut.nurse?.trim() && !isRoleSigned('timeOut','nurse')"
+                  [signerType]="'staff'"
+                  [signerName]="roleSignerName.timeOut.nurse"
+                  [contextType]="'ot-time-out'"
+                  [contextId]="scheduleId"
+                  [prompt]="'Nurse — time-out'"
+                  [disabled]="saving"
+                  (signed)="onRoleSigned('timeOut', 'nurse', $event)">
+      </app-e-sign>
+      <p class="otd-locked" *ngIf="isRoleSigned('timeOut','nurse')">
+        ✓ Nurse signed {{ roleSignedAt('timeOut','nurse') | date:'medium' }} by {{ roleSignedBy('timeOut','nurse') }}
+      </p>
+
+      <div class="otd-form-row">
+        <label class="otd-full">
+          Technician name
+          <input type="text" [(ngModel)]="roleSignerName.timeOut.technician" name="timeOutTechnicianName" [disabled]="isRoleSigned('timeOut','technician')" />
+        </label>
+      </div>
+      <app-e-sign *ngIf="roleSignerName.timeOut.technician?.trim() && !isRoleSigned('timeOut','technician')"
+                  [signerType]="'staff'"
+                  [signerName]="roleSignerName.timeOut.technician"
+                  [contextType]="'ot-time-out'"
+                  [contextId]="scheduleId"
+                  [prompt]="'Technician — time-out'"
+                  [disabled]="saving"
+                  (signed)="onRoleSigned('timeOut', 'technician', $event)">
+      </app-e-sign>
+      <p class="otd-locked" *ngIf="isRoleSigned('timeOut','technician')">
+        ✓ Technician signed {{ roleSignedAt('timeOut','technician') | date:'medium' }} by {{ roleSignedBy('timeOut','technician') }}
+      </p>
+    </div>
+
+    <!-- Intra-op note -->
+    <div class="otd-card" *ngIf="activeSection === 'intra-op'">
+      <h3 class="otd-section-title">Operative note (COP.14.e — UHJ/OTS/F-03)</h3>
+
+      <!-- Phase 9.2 — F-03 case classification -->
+      <div class="otd-form-row">
+        <label>
+          Case type
+          <select [(ngModel)]="intraOp.caseType" name="caseType">
+            <option value="">—</option>
+            <option value="routine">Routine</option>
+            <option value="emergency">Emergency</option>
+            <option value="unplanned-return">Unplanned return to OT</option>
+          </select>
+        </label>
+        <label>
+          Note number
+          <input type="number" min="1" [(ngModel)]="intraOp.noteNumber" name="noteNumber" />
+          <small style="color:#9ca3af;font-size:11px;">Use 2/3 for additional surgeries in a multi-surgery session</small>
+        </label>
+      </div>
+
+      <div class="otd-form-row">
+        <label>
+          Start time
+          <input type="datetime-local" [(ngModel)]="intraOp.startAt" name="ioStartAt" />
+        </label>
+        <label>
+          End time
+          <input type="datetime-local" [(ngModel)]="intraOp.endAt" name="ioEndAt" />
+        </label>
+        <label>
+          Incision at
+          <input type="datetime-local" [(ngModel)]="intraOp.incisionAt" name="ioIncisionAt" />
+        </label>
+        <label>
+          Wound closure at
+          <input type="datetime-local" [(ngModel)]="intraOp.woundClosureAt" name="ioWoundClosureAt" />
+        </label>
+      </div>
+      <div class="otd-form-row">
+        <label>
+          Anaesthesia type
+          <select [(ngModel)]="intraOp.anaesthesiaType" name="anaesthesiaType">
+            <option value="GA">GA — General</option>
+            <option value="regional">Regional</option>
+            <option value="local">Local</option>
+            <option value="sedation">Sedation</option>
+          </select>
+        </label>
+        <label>
+          Surgeons (comma-sep)
+          <app-doctor-select
+            [source]="'surgeons'"
+            placeholder="Add surgeon..."
+            [ngModel]="''"
+            #surgeonPicker="ngModel"
+            name="surgeonPicker"
+            (ngModelChange)="appendName('surgeons', $event); surgeonPicker.control.reset('')"
+          ></app-doctor-select>
+          <input type="text" [(ngModel)]="intraOp.surgeons" name="surgeons" />
+        </label>
+        <label class="otd-full">
+          Assistants (e.g. "Dr X (asst), Dr Y (asst)")
+          <app-doctor-select
+            [source]="'assistants'"
+            placeholder="Add assistant..."
+            [ngModel]="''"
+            #assistantPicker="ngModel"
+            name="assistantPicker"
+            (ngModelChange)="appendName('assistantsText', $event); assistantPicker.control.reset('')"
+          ></app-doctor-select>
+          <input type="text" [(ngModel)]="intraOp.assistantsText" name="assistantsText" />
+        </label>
+      </div>
+
+      <!-- Phase 9.2 — F-03 diagnoses -->
+      <div class="otd-form-row">
+        <label class="otd-full">
+          Pre-operative diagnosis
+          <textarea rows="2" [(ngModel)]="intraOp.preOpDiagnosis" name="preOpDiagnosis"></textarea>
+        </label>
+      </div>
+      <div class="otd-form-row">
+        <label class="otd-inline"><input type="checkbox" [(ngModel)]="intraOp.postOpDiagnosisSame" name="postOpDiagnosisSame" /> Post-op diagnosis is same as pre-op</label>
+      </div>
+      <div class="otd-form-row" *ngIf="!intraOp.postOpDiagnosisSame">
+        <label class="otd-full">
+          Post-operative diagnosis
+          <textarea rows="2" [(ngModel)]="intraOp.postOpDiagnosis" name="postOpDiagnosis"></textarea>
+        </label>
+      </div>
+      <div class="otd-form-row">
+        <label class="otd-full">
+          Findings
+          <textarea rows="2" [(ngModel)]="intraOp.findings" name="findings"></textarea>
+        </label>
+      </div>
+      <div class="otd-form-row">
+        <label class="otd-full">
+          Procedure done
+          <textarea rows="2" [(ngModel)]="intraOp.procedureDone" name="procedureDone"></textarea>
+        </label>
+      </div>
+      <div class="otd-form-row">
+        <label>
+          Blood loss (ml)
+          <input type="number" min="0" [(ngModel)]="intraOp.bloodLossMl" name="bloodLossMl" />
+        </label>
+        <label>
+          Fluids in (ml)
+          <input type="number" min="0" [(ngModel)]="intraOp.fluidsMl" name="fluidsMl" />
+        </label>
+      </div>
+      <div class="otd-form-row">
+        <label class="otd-full">
+          Complications
+          <textarea rows="2" [(ngModel)]="intraOp.complications" name="complications"></textarea>
+        </label>
+      </div>
+
+      <!-- Phase 9.2 — F-03 description of procedure -->
+      <h4 class="otd-section-title-sm">Description of Procedure</h4>
+      <div class="otd-form-row">
+        <label class="otd-full">
+          Position
+          <input type="text" [(ngModel)]="intraOp.position" name="position" placeholder="Supine, prone, lithotomy…" />
+        </label>
+      </div>
+      <div class="otd-form-row">
+        <label class="otd-full">
+          Incision
+          <textarea rows="2" [(ngModel)]="intraOp.incision" name="incision"></textarea>
+        </label>
+      </div>
+      <div class="otd-form-row">
+        <label class="otd-full">
+          Procedure steps
+          <textarea rows="4" [(ngModel)]="intraOp.procedureSteps" name="procedureSteps"></textarea>
+        </label>
+      </div>
+      <div class="otd-form-row">
+        <label class="otd-inline"><input type="checkbox" [(ngModel)]="intraOp.spongeInstrumentCountVerified" name="spongeInstrumentCountVerified" /> Sponge / Instrument count verified</label>
+        <label class="otd-inline"><input type="checkbox" [(ngModel)]="intraOp.woundClosureDone" name="woundClosureDone" /> Wound closure done</label>
+        <label class="otd-inline"><input type="checkbox" [(ngModel)]="intraOp.skinClosureDone" name="skinClosureDone" /> Skin closure done</label>
+      </div>
+
+      <!-- Phase 9.2 — F-03 materials forwarded -->
+      <h4 class="otd-section-title-sm">Material Forwarded</h4>
+      <div class="otd-form-row">
+        <label>HPE (Histopathology) <input type="text" [(ngModel)]="intraOp.materialToLabHpe" name="materialToLabHpe" /></label>
+        <label>CIS (Culture &amp; Sensitivity) <input type="text" [(ngModel)]="intraOp.materialToLabCis" name="materialToLabCis" /></label>
+      </div>
+      <div class="otd-form-row">
+        <label class="otd-full">
+          Other lab samples
+          <input type="text" [(ngModel)]="intraOp.materialToLabOthers" name="materialToLabOthers" />
+        </label>
+      </div>
+      <div class="otd-form-row">
+        <label class="otd-full">
+          Material forwarded to Security (MLC cases only)
+          <input type="text" [(ngModel)]="intraOp.materialToSecurityMlc" name="materialToSecurityMlc" />
+        </label>
+      </div>
+
+      <!-- Phase 9.2 — F-03 drains, prosthesis, significant event -->
+      <div class="otd-form-row">
+        <label>
+          Drain(s)
+          <input type="text" [(ngModel)]="intraOp.drains" name="drains" placeholder="Type / site / number" />
+        </label>
+        <label>
+          Prosthesis / Implant label
+          <input type="text" [(ngModel)]="intraOp.prosthesisLabel" name="prosthesisLabel" />
+        </label>
+      </div>
+      <div class="otd-form-row">
+        <label class="otd-full">
+          Significant intra-operative event
+          <textarea rows="2" [(ngModel)]="intraOp.significantIntraOpEvent" name="significantIntraOpEvent"></textarea>
+        </label>
+      </div>
+
+      <!-- Phase 9.2 — F-03 disposition -->
+      <div class="otd-form-row">
+        <label>
+          Disposition (surgeon's view)
+          <select [(ngModel)]="intraOp.disposition" name="disposition">
+            <option value="">—</option>
+            <option value="icu">ICU</option>
+            <option value="patient-room">Patient room</option>
+            <option value="home">Home</option>
+          </select>
+        </label>
+      </div>
+
+      <!-- Implants (MOM.10.d) -->
+      <h4 class="otd-section-title-sm">Implants (MOM.10.d traceability)</h4>
+      <div class="otd-form-row">
+        <label>Name <input type="text" [(ngModel)]="intraOp.pendingImplantName" name="iName" /></label>
+        <label>Batch <input type="text" [(ngModel)]="intraOp.pendingImplantBatch" name="iBatch" /></label>
+        <label>Serial <input type="text" [(ngModel)]="intraOp.pendingImplantSerial" name="iSerial" /></label>
+        <label>Manufacturer <input type="text" [(ngModel)]="intraOp.pendingImplantManufacturer" name="iMfr" /></label>
+      </div>
+      <div class="otd-form-buttons">
+        <button type="button" class="otd-btn" (click)="addImplant()">+ Add implant</button>
+      </div>
+      <ul class="otd-implant-list" *ngIf="intraOp.implants.length">
+        <li *ngFor="let imp of intraOp.implants; let i = index">
+          <strong>{{ imp.name }}</strong> · batch {{ imp.batch }}
+          <span *ngIf="imp.serial"> · serial {{ imp.serial }}</span>
+          <span *ngIf="imp.manufacturer"> · {{ imp.manufacturer }}</span>
+          <button type="button" class="otd-btn-remove" (click)="removeImplant(i)">×</button>
+        </li>
+      </ul>
+
+      <app-e-sign *ngIf="intraOpReady && !hasIntraOp"
+                  [signerType]="'staff'"
+                  [signerName]="intraOp.surgeons"
+                  [contextType]="'ot-intra-op'"
+                  [contextId]="scheduleId"
+                  [prompt]="'Primary surgeon — operative note sign-off'"
+                  [disabled]="saving"
+                  (signed)="onIntraOpSigned($event)">
+      </app-e-sign>
+
+      <p class="otd-locked" *ngIf="hasIntraOp">
+        ✓ Signed {{ primaryIntraOpNote?.signedAt | date:'medium' }} by {{ primaryIntraOpNote?.signedBy }}
+      </p>
+    </div>
+
+    <!-- WHO Sign-out -->
+    <div class="otd-card" *ngIf="activeSection === 'sign-out'">
+      <h3 class="otd-section-title">WHO Sign-out (before patient leaves OT)</h3>
+      <div class="otd-form-row">
+        <label class="otd-full">
+          Procedure recorded as
+          <input type="text" [(ngModel)]="signOut.procedureRecordedName" name="procedureRecordedName" />
+        </label>
+      </div>
+
+      <h4 class="otd-section-title-sm">Counts must match before sign-out</h4>
+      <div class="otd-form-row">
+        <label>Swab initial <input type="number" min="0" [(ngModel)]="signOut.swabCountInitial" name="swabInit" /></label>
+        <label>Swab final <input type="number" min="0" [(ngModel)]="signOut.swabCountFinal" name="swabFinal" /></label>
+        <label class="otd-inline"><input type="checkbox" [(ngModel)]="signOut.swabCount" name="swabCount" /> Swab counts match</label>
+      </div>
+      <div class="otd-form-row">
+        <label>Instrument initial <input type="number" min="0" [(ngModel)]="signOut.instrumentCountInitial" name="instrInit" /></label>
+        <label>Instrument final <input type="number" min="0" [(ngModel)]="signOut.instrumentCountFinal" name="instrFinal" /></label>
+        <label class="otd-inline"><input type="checkbox" [(ngModel)]="signOut.instrumentCount" name="instrumentCount" /> Instrument counts match</label>
+      </div>
+      <div class="otd-form-row">
+        <label class="otd-inline"><input type="checkbox" [(ngModel)]="signOut.specimenLabelled" name="specimenLabelled" /> Specimens labelled</label>
+      </div>
+      <!-- Phase 9.12 — UHJ Nursing Safety Checklist sign-out additions -->
+      <div class="otd-form-grid">
+        <label><input type="checkbox" [(ngModel)]="signOut.procedureCompletedConfirmed" name="procedureCompletedConfirmed" /> Procedure completion confirmed</label>
+        <label><input type="checkbox" [(ngModel)]="signOut.postOpInstructionsGiven" name="postOpInstructionsGiven" /> Post-op instructions given</label>
+        <label><input type="checkbox" [(ngModel)]="signOut.patientShiftedSafely" name="patientShiftedSafely" /> Patient shifted safely</label>
+      </div>
+      <div class="otd-form-row">
+        <label class="otd-full">
+          Equipment issues (if any)
+          <textarea rows="2" [(ngModel)]="signOut.equipmentIssues" name="equipmentIssues"></textarea>
+        </label>
+      </div>
+      <div class="otd-form-row">
+        <label class="otd-full">
+          Recovery concerns
+          <textarea rows="2" [(ngModel)]="signOut.recoveryConcerns" name="recoveryConcerns"></textarea>
+        </label>
+      </div>
+      <!-- Phase 9.2 — F-01 sign-out addition -->
+      <div class="otd-form-row">
+        <label class="otd-full">
+          Corrective action by Nursing Supervisor / OT Manager (if equipment issues)
+          <textarea rows="2" [(ngModel)]="signOut.correctiveAction" name="correctiveAction"></textarea>
+        </label>
+      </div>
+      <div class="otd-form-row">
+        <label class="otd-full">
+          Sign-out called by
+          <input type="text" [(ngModel)]="signOut.signOutBy" name="signOutBy" />
+        </label>
+      </div>
+
+      <p class="otd-hint" *ngIf="!signOutReady">
+        Tick swab + instrument count match (and fill name + sign-out by) to enable signing.
+      </p>
+
+      <app-e-sign *ngIf="signOutReady && !hasSignOut"
+                  [signerType]="'staff'"
+                  [signerName]="signOut.signOutBy"
+                  [contextType]="'ot-sign-out'"
+                  [contextId]="scheduleId"
+                  [prompt]="'WHO sign-out — surgeon (patient safe to leave OT)'"
+                  [disabled]="saving"
+                  (signed)="onSignOutSigned($event)">
+      </app-e-sign>
+
+      <p class="otd-locked" *ngIf="hasSignOut">
+        ✓ Surgeon signed {{ s.safetyChecklist?.signOutAt | date:'medium' }} by {{ s.safetyChecklist?.signOutBy }}
+      </p>
+
+      <!-- Phase 9.4b — Anaesthetist / Nurse / Technician role signatures -->
+      <h4 class="otd-section-title-sm">Additional role signatures</h4>
+      <div class="otd-form-row">
+        <label class="otd-full">
+          Anaesthetist name
+          <input type="text" [(ngModel)]="roleSignerName.signOut.anaesthetist" name="signOutAnaesthetistName" [disabled]="isRoleSigned('signOut','anaesthetist')" />
+        </label>
+      </div>
+      <app-e-sign *ngIf="roleSignerName.signOut.anaesthetist?.trim() && !isRoleSigned('signOut','anaesthetist')"
+                  [signerType]="'staff'"
+                  [signerName]="roleSignerName.signOut.anaesthetist"
+                  [contextType]="'ot-sign-out'"
+                  [contextId]="scheduleId"
+                  [prompt]="'Anaesthetist — sign-out'"
+                  [disabled]="saving"
+                  (signed)="onRoleSigned('signOut', 'anaesthetist', $event)">
+      </app-e-sign>
+      <p class="otd-locked" *ngIf="isRoleSigned('signOut','anaesthetist')">
+        ✓ Anaesthetist signed {{ roleSignedAt('signOut','anaesthetist') | date:'medium' }} by {{ roleSignedBy('signOut','anaesthetist') }}
+      </p>
+
+      <div class="otd-form-row">
+        <label class="otd-full">
+          Nurse name
+          <input type="text" [(ngModel)]="roleSignerName.signOut.nurse" name="signOutNurseName" [disabled]="isRoleSigned('signOut','nurse')" />
+        </label>
+      </div>
+      <app-e-sign *ngIf="roleSignerName.signOut.nurse?.trim() && !isRoleSigned('signOut','nurse')"
+                  [signerType]="'staff'"
+                  [signerName]="roleSignerName.signOut.nurse"
+                  [contextType]="'ot-sign-out'"
+                  [contextId]="scheduleId"
+                  [prompt]="'Nurse — sign-out'"
+                  [disabled]="saving"
+                  (signed)="onRoleSigned('signOut', 'nurse', $event)">
+      </app-e-sign>
+      <p class="otd-locked" *ngIf="isRoleSigned('signOut','nurse')">
+        ✓ Nurse signed {{ roleSignedAt('signOut','nurse') | date:'medium' }} by {{ roleSignedBy('signOut','nurse') }}
+      </p>
+
+      <div class="otd-form-row">
+        <label class="otd-full">
+          Technician name
+          <input type="text" [(ngModel)]="roleSignerName.signOut.technician" name="signOutTechnicianName" [disabled]="isRoleSigned('signOut','technician')" />
+        </label>
+      </div>
+      <app-e-sign *ngIf="roleSignerName.signOut.technician?.trim() && !isRoleSigned('signOut','technician')"
+                  [signerType]="'staff'"
+                  [signerName]="roleSignerName.signOut.technician"
+                  [contextType]="'ot-sign-out'"
+                  [contextId]="scheduleId"
+                  [prompt]="'Technician — sign-out'"
+                  [disabled]="saving"
+                  (signed)="onRoleSigned('signOut', 'technician', $event)">
+      </app-e-sign>
+      <p class="otd-locked" *ngIf="isRoleSigned('signOut','technician')">
+        ✓ Technician signed {{ roleSignedAt('signOut','technician') | date:'medium' }} by {{ roleSignedBy('signOut','technician') }}
+      </p>
+    </div>
+
+    <!-- PACU -->
+    <div class="otd-card" *ngIf="activeSection === 'pacu'">
+      <h3 class="otd-section-title">PACU (recovery)</h3>
+
+      <h4 class="otd-section-title-sm">Arrival</h4>
+      <div class="otd-form-row">
+        <label>
+          Arrival time
+          <input type="datetime-local" [(ngModel)]="pacu.arrivalAt" name="pacuArrivalAt" />
+        </label>
+        <label>HR <input type="number" min="0" [(ngModel)]="pacu.arrivalHr" name="pacuHr" /></label>
+        <label>SBP <input type="number" min="0" [(ngModel)]="pacu.arrivalSbp" name="pacuSbp" /></label>
+        <label>DBP <input type="number" min="0" [(ngModel)]="pacu.arrivalDbp" name="pacuDbp" /></label>
+        <label>SpO2 % <input type="number" min="0" max="100" [(ngModel)]="pacu.arrivalSpo2" name="pacuSpo2" /></label>
+        <label>RR <input type="number" min="0" [(ngModel)]="pacu.arrivalRr" name="pacuRr" /></label>
+        <label>Temp °C <input type="number" step="0.1" [(ngModel)]="pacu.arrivalTemp" name="pacuTemp" /></label>
+        <label>GCS <input type="number" min="3" max="15" [(ngModel)]="pacu.arrivalGcs" name="pacuGcs" /></label>
+        <label>Pain (0-10) <input type="number" min="0" max="10" [(ngModel)]="pacu.painScore" name="pacuPain" /></label>
+      </div>
+      <div class="otd-form-buttons">
+        <button type="button" class="otd-btn" [disabled]="saving" (click)="savePacuArrival()">Save arrival</button>
+      </div>
+
+      <h4 class="otd-section-title-sm">Discharge from PACU</h4>
+      <div class="otd-form-row">
+        <label>
+          Discharge to
+          <select [(ngModel)]="pacu.dischargedTo" name="pacuDischargedTo">
+            <option value="ward">Ward</option>
+            <option value="icu">ICU</option>
+            <option value="home">Home</option>
+            <option value="expired">Expired</option>
+          </select>
+        </label>
+      </div>
+
+      <p class="otd-hint" *ngIf="!hasPacuArrival">Save arrival first.</p>
+
+      <app-e-sign *ngIf="hasPacuArrival && !hasPacuDischarge"
+                  [signerType]="'staff'"
+                  [contextType]="'ot-pacu-discharge'"
+                  [contextId]="scheduleId"
+                  [prompt]="'PACU nurse — patient meets discharge criteria'"
+                  [disabled]="saving"
+                  (signed)="onPacuDischargeSigned($event)">
+      </app-e-sign>
+
+      <p class="otd-locked" *ngIf="hasPacuDischarge">
+        ✓ Discharged {{ s.pacuRecord?.dischargedAt | date:'medium' }} to {{ s.pacuRecord?.dischargedTo }} by {{ s.pacuRecord?.signedBy }}
+      </p>
+    </div>
+
+    <!-- Outcome -->
+    <div class="otd-card" *ngIf="activeSection === 'outcome'">
+      <h3 class="otd-section-title">Outcome (PSQ.3 KPI feed)</h3>
+      <div class="otd-form-row">
+        <label class="otd-inline">
+          <input type="checkbox" [(ngModel)]="outcome.unplannedReturn" name="unplannedReturn" />
+          Unplanned return to OT
+        </label>
+        <label *ngIf="outcome.unplannedReturn">
+          Linked schedule
+          <select [(ngModel)]="outcome.linkedScheduleId" name="linkedScheduleId">
+            <option value="">
+              {{ priorSchedules.length ? '— pick a prior schedule —' : 'no prior schedules for this patient' }}
+            </option>
+            <option *ngFor="let s of priorSchedules" [ngValue]="s.id">
+              {{ s.date | date:'dd/MM/yyyy' }} · {{ s.procedureName }} · {{ s.status }}
+            </option>
+          </select>
+        </label>
+      </div>
+      <div class="otd-form-row">
+        <label class="otd-inline">
+          <input type="checkbox" [(ngModel)]="outcome.surgicalSiteInfection" name="ssi" />
+          Surgical site infection (SSI)
+        </label>
+      </div>
+      <div class="otd-form-row" *ngIf="outcome.surgicalSiteInfection">
+        <label>
+          Organism
+          <input type="text" [(ngModel)]="outcome.ssiOrganism" name="ssiOrganism" />
+        </label>
+        <label>
+          Classification
+          <select [(ngModel)]="outcome.ssiClassification" name="ssiClassification">
+            <option value="">—</option>
+            <option value="superficial">Superficial</option>
+            <option value="deep">Deep</option>
+            <option value="organ-space">Organ/space</option>
+          </select>
+        </label>
+      </div>
+      <div class="otd-form-row">
+        <label class="otd-inline">
+          <input type="checkbox" [(ngModel)]="outcome.mortality" name="mortality" />
+          Mortality
+        </label>
+        <label *ngIf="outcome.mortality">
+          Cause
+          <input type="text" [(ngModel)]="outcome.mortalityCause" name="mortalityCause" />
+        </label>
+      </div>
+      <div class="otd-form-row">
+        <label>
+          Length of stay (days)
+          <input type="number" min="0" [(ngModel)]="outcome.lengthOfStayDays" name="lengthOfStayDays" />
+        </label>
+      </div>
+      <div class="otd-form-row">
+        <label class="otd-full">
+          Follow-up notes
+          <textarea rows="2" [(ngModel)]="outcome.followUpNotes" name="followUpNotes"></textarea>
+        </label>
+      </div>
+      <div class="otd-form-buttons">
+        <button type="button" class="otd-btn otd-btn-primary" [disabled]="saving" (click)="saveOutcome()">
+          {{ saving ? 'Saving…' : 'Save outcome' }}
+        </button>
+      </div>
+    </div>
+
+  </ng-container>
+</div>

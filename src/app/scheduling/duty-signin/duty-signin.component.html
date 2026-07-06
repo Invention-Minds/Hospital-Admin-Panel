@@ -1,0 +1,72 @@
+<div class="ds-shell">
+  <div class="ds-head">
+    <h2 class="ds-title">Duty sign-in</h2>
+    <div class="ds-toolbar">
+      <label>Ward
+        <select [(ngModel)]="wardId" (change)="refresh()">
+          <option value="">All wards</option>
+          <option *ngFor="let w of wards" [value]="w.id">{{ w.wardCode }} · {{ w.wardName }}</option>
+        </select>
+      </label>
+      <label>Date <input type="date" [(ngModel)]="date" (change)="refresh()" /></label>
+      <button type="button" class="ds-btn" (click)="refresh()">Refresh</button>
+    </div>
+  </div>
+
+  <div class="ds-banner ds-banner-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="ds-banner ds-banner-good" *ngIf="successMessage">{{ successMessage }}</div>
+
+  <table class="ds-table">
+    <thead><tr><th>Shift</th><th>Staff</th><th>Role</th><th>Ward</th><th>Status</th><th>Signed at</th><th></th></tr></thead>
+    <tbody>
+      <tr *ngFor="let r of rows" [class.ds-row-acked]="isAcked(r)">
+        <td>
+          <strong>{{ r.shift?.name }}</strong>
+          <div class="ds-time">{{ r.shift?.startTime }} – {{ r.shift?.endTime }}</div>
+        </td>
+        <td>
+          <strong>{{ r.user?.username }}</strong>
+          <div class="ds-muted">{{ r.user?.employeeId }}</div>
+        </td>
+        <td>{{ r.user?.subAdminType ?? r.user?.role }}</td>
+        <td>{{ r.ward?.wardName ?? '—' }}</td>
+        <td><span class="ds-pill" [class.ds-ok]="isAcked(r)">{{ r.status }}</span></td>
+        <td>
+          <span *ngIf="ackedAt(r) as t">{{ t | date:'short' }}</span>
+          <span *ngIf="!ackedAt(r)" class="ds-muted">—</span>
+        </td>
+        <td>
+          <button type="button" class="ds-btn ds-btn-primary ds-btn-sm"
+                  *ngIf="!isAcked(r) && r.status !== 'CANCELLED'"
+                  (click)="openSignin(r)">Sign in</button>
+        </td>
+      </tr>
+      <tr *ngIf="rows.length === 0"><td colspan="7" class="ds-empty">No rostered staff for this ward/date.</td></tr>
+    </tbody>
+  </table>
+
+  <!-- Sign-in modal -->
+  <div class="ds-modal-bg" *ngIf="active" (click)="closeSignin()">
+    <div class="ds-modal" (click)="$event.stopPropagation()">
+      <h3>Sign in — {{ active.user?.username }}</h3>
+      <p class="ds-sub">
+        {{ active.shift?.name }} ({{ active.shift?.startTime }} – {{ active.shift?.endTime }})
+        <span *ngIf="active.ward"> · {{ active.ward.wardName }}</span>
+      </p>
+      <p class="ds-warn">
+        By signing below you confirm you are present and accepting duty for this shift.
+        Your signature is recorded as audit evidence.
+      </p>
+      <app-e-sign
+        [signerType]="'staff'"
+        [signerName]="active.user?.username ?? ''"
+        [signerRole]="active.user?.subAdminType ?? active.user?.role ?? ''"
+        [contextType]="'duty-acknowledgement'"
+        [contextId]="active.id"
+        [disabled]="saving"
+        (signed)="onSigned($event)"
+        (cancelled)="closeSignin()">
+      </app-e-sign>
+    </div>
+  </div>
+</div>

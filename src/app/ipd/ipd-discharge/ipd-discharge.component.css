@@ -8,12 +8,14 @@
  * ============================================================================ */
 
 .page {
+  margin-left: 70px;
   padding: var(--space-40) var(--space-20);
   font-family: var(--font-family-primary);
   color: var(--color-text-heading);
   background: var(--color-surface-page);
   min-height: 100vh;
 }
+@media (max-width: 768px) { .page { margin-left: 0; } }
 /* Page header styles migrated to shared P2 PageHeader (Sprint 3.5) */
 
 /* ---------- FORM (pattern §1) ---------- */
@@ -225,3 +227,293 @@
   border-radius: var(--radius-md);
   align-self: flex-start;
 }
+
+/* ─── Phase 6 (WF-5) — AI banner + sign cards ────────────────────────── */
+.ai-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: #f3f6ff;
+  border: 1px solid #b8d4ff;
+  margin: 16px 0;
+}
+.ai-banner__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  font-size: 13px;
+  color: #271e4a;
+}
+.ai-banner__body strong { font-size: 14px; color: #0E2970; }
+.ai-banner--info { color: #0b5ed7; }
+.ai-banner--warn { color: #b06a00; }
+.ai-banner--good {
+  /* delivered/signed — paint the whole banner green */
+}
+.ai-banner:has(.ai-banner--good) {
+  background: #e6f4ea;
+  border-color: #b8e0c4;
+}
+.ai-banner:has(.ai-banner--warn) {
+  background: #fff7e6;
+  border-color: #f3d9a8;
+}
+
+/* Phase D — doctor's ready-for-discharge banner. Mirrors .ai-banner but with
+   distinct colours so it doesn't collide with summary lifecycle states. */
+.dcd-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: #fff8eb;
+  border: 1px solid #f3d9a8;
+  margin: 16px 0;
+}
+.dcd-banner__body { display: flex; flex-direction: column; gap: 2px; flex: 1; font-size: 13px; color: #271e4a; }
+.dcd-banner__body strong { font-size: 14px; color: #0E2970; }
+.dcd-banner__actions { display: flex; gap: 8px; flex-shrink: 0; }
+
+.btn--ai {
+  background: linear-gradient(135deg, #6a3ea1 0%, #4f8edc 100%);
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.15s ease;
+}
+.btn--ai:hover:not(:disabled) { opacity: 0.92; }
+.btn--ai:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn--ai-secondary {
+  background: #fff;
+  color: #6a3ea1;
+  border: 1px solid #6a3ea1;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn--ai-secondary:hover:not(:disabled) { background: #f5efff; }
+
+.sign-card {
+  background: #ffffff;
+  border: 1px solid #d7d7d7;
+  border-radius: 8px;
+  padding: 18px 20px;
+  margin-top: 18px;
+}
+.sign-card--ack {
+  background: #f6faff;
+  border-color: #b8d4ff;
+}
+
+/* Medication grid — accommodate the wider 7-field layout. */
+.med-row__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px 12px;
+}
+.med-row__notes { grid-column: 1 / -1; }
+
+/* Template picker (note templates) */
+.template-picker {
+  background: #f6faff;
+  border: 1px solid #b8d4ff;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+}
+.template-hint {
+  font-weight: normal;
+  color: #5a5a5a;
+  font-size: 12.5px;
+  margin-left: 6px;
+}
+
+/* ============================================================================
+ * Phase 9.9 — Align ipd-discharge to the shared design module (dm-*).
+ *
+ * The HTML stays untouched. These rules override the existing
+ * .page / .form / .form__section / .form__label / .form__input classes so the
+ * page picks up the Health Checkup Form visual style (Kanit / lavender field
+ * backgrounds / green primary button / consistent spacing) WITHOUT touching
+ * functional bindings (formControlName, ngModel, validators).
+ * ============================================================================ */
+
+.page {
+  /* Match the dm-page wrapper used by ot-clearance-card / emergency-intake.
+   * 56px top clears the global floating Back button. */
+  max-width: 1280px;
+  margin: 0 auto 24px 0 !important;
+  padding: 56px 32px 40px 100px;
+  font-family: Kanit, sans-serif;
+  color: #271e4a;
+  background: transparent;
+}
+@media (max-width: 768px) { .page { padding: 56px 16px 32px !important; } }
+
+/* Page header from <app-page-header> is unchanged — we just tighten spacing. */
+
+/* AI banner restyle — softer card, consistent with dm-banner */
+.ai-banner {
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+  border-left: 3px solid #2563eb;
+  border-radius: 6px;
+  padding: 12px 16px;
+}
+.ai-banner__body strong { color: #271e4a; font-family: Kanit, sans-serif; }
+
+/* Form card — flat white card with subtle border, matches dm-card */
+.form {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(39, 30, 74, 0.04);
+  padding: 20px 24px;
+  gap: 20px;
+}
+
+/* Section header */
+.form__section-heading {
+  color: #271e4a;
+  font-family: Kanit, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+/* Field labels + spacing */
+.form__label {
+  color: #271e4a;
+  font-family: Kanit, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+}
+.form__hint { color: #7b7b7b; font-size: 11px; }
+
+/* Inputs — match dm-input (lavender bg, blue focus). 40px height. */
+:host ::ng-deep .form__input,
+:host ::ng-deep .form__textarea {
+  background: #f0f3ff;
+  border: 1px solid #b4b6ba;
+  border-radius: 6px;
+  height: 40px;
+  padding: 8px 12px;
+  font-family: Kanit, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: #271e4a;
+  box-sizing: border-box;
+}
+:host ::ng-deep .form__textarea { height: auto; min-height: 76px; padding: 10px 12px; line-height: 1.45; }
+:host ::ng-deep .form__input::placeholder,
+:host ::ng-deep .form__textarea::placeholder {
+  color: rgba(123, 123, 123, 0.45);
+  font-weight: 400;
+}
+:host ::ng-deep .form__input:focus,
+:host ::ng-deep .form__textarea:focus {
+  border: 1px solid #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.18);
+  outline: none;
+}
+:host ::ng-deep .form__input:hover:not(:disabled):not(:focus),
+:host ::ng-deep .form__textarea:hover:not(:disabled):not(:focus) {
+  border-color: #9aa0a6;
+}
+:host ::ng-deep .form__input--error {
+  border-color: #ff4d4d;
+  box-shadow: 0 0 0 3px rgba(255, 77, 77, 0.18);
+}
+.form__error { color: #ff4d4d; font-size: 12px; }
+
+/* Two-column grid for paired fields — wider gap so it breathes */
+.form__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px 24px;
+}
+@media (max-width: 768px) { .form__grid { grid-template-columns: 1fr; } }
+
+/* Sticky save bar */
+.form__footer {
+  position: sticky;
+  bottom: 0;
+  background: #fff;
+  padding: 14px 0;
+  border-top: 1px solid #e5e7eb;
+  margin-top: 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  z-index: 5;
+}
+
+/* Buttons — green primary, outline secondary, danger red. 44px touch target. */
+.btn {
+  min-width: 140px;
+  height: 40px;
+  padding: 0 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: Kanit, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid transparent;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  letter-spacing: 0.2px;
+}
+.btn--primary {
+  background: #169458;
+  color: #fff;
+  border-color: #169458;
+}
+.btn--primary:hover:not(:disabled) { background: #117849; border-color: #117849; }
+.btn--secondary {
+  background: transparent;
+  color: #271e4a;
+  border-color: #271e4a;
+}
+.btn--secondary:hover:not(:disabled) { background: #f0f3ff; }
+.btn--cancel {
+  background: transparent;
+  color: #7b7b7b;
+  border-color: #7b7b7b;
+}
+.btn--cancel:hover:not(:disabled) { background: #f3f4f6; }
+.btn--remove {
+  background: #ff4d4d;
+  color: #fff;
+  border-color: #ff4d4d;
+}
+.btn--remove:hover:not(:disabled) { background: #e63d3d; border-color: #e63d3d; }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* Medication FormArray rows */
+.med-row {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+

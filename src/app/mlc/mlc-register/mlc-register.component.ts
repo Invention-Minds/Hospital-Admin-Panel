@@ -7,6 +7,7 @@ import { of, Subject } from 'rxjs';
 import { catchError, takeUntil } from 'rxjs/operators';
 
 import { MlcCase, MlcService } from '../../services/mlc.service';
+import { EmergencyService, MlcPickerEmergency } from '../../services/emergency.service';
 import { environment } from '../../../environment/environment.prod';
 
 /**
@@ -33,7 +34,24 @@ interface EmergencyContext {
 
 type MlcRegisterPayload = Pick<
   MlcCase,
-  'emergencyId' | 'caseType' | 'policeStationName' | 'fir_No' | 'fir_Date'
+  | 'emergencyId'
+  | 'caseType'
+  | 'policeStationName'
+  | 'fir_No'
+  | 'fir_Date'
+  | 'incidentDateTime'
+  | 'incidentPlace'
+  | 'allegedCause'
+  | 'weaponType'
+  | 'broughtBy'
+  | 'broughtByDetail'
+  | 'informantName'
+  | 'informantRelation'
+  | 'identificationMark1'
+  | 'identificationMark2'
+  | 'investigatingOfficer'
+  | 'examiningDoctorRegNo'
+  | 'consentForExamination'
 >;
 
 interface MlcRegisterFormValue {
@@ -42,6 +60,19 @@ interface MlcRegisterFormValue {
   policeStationName: string;
   fir_No: string;
   fir_Date: Date | null;
+  incidentDateTime: Date | null;
+  incidentPlace: string;
+  allegedCause: string;
+  weaponType: string;
+  broughtBy: string;
+  broughtByDetail: string;
+  informantName: string;
+  informantRelation: string;
+  identificationMark1: string;
+  identificationMark2: string;
+  investigatingOfficer: string;
+  examiningDoctorRegNo: string;
+  consentForExamination: boolean;
 }
 
 @Component({
@@ -54,12 +85,24 @@ export class MlcRegisterComponent implements OnInit, OnDestroy {
   submitting = false;
   emergency: EmergencyContext | null = null;
 
+  /** Eligible emergencies (no existing MLC) for the dropdown picker. */
+  emergencyOptions: Array<MlcPickerEmergency & { _label: string }> = [];
+  loadingEmergencies = false;
+
   caseTypes: { value: MlcCase['caseType']; label: string }[] = [
     { value: 'accident', label: 'Accident' },
     { value: 'assault', label: 'Assault' },
     { value: 'poison', label: 'Poison' },
     { value: 'burn', label: 'Burn' },
     { value: 'other', label: 'Other' },
+  ];
+
+  broughtByOptions: { value: string; label: string }[] = [
+    { value: 'Police', label: 'Police' },
+    { value: 'Relative', label: 'Relative' },
+    { value: 'Self', label: 'Self' },
+    { value: 'Bystander', label: 'Bystander' },
+    { value: 'Other', label: 'Other' },
   ];
 
   private destroy$ = new Subject<void>();
@@ -70,6 +113,7 @@ export class MlcRegisterComponent implements OnInit, OnDestroy {
     private router: Router,
     private http: HttpClient,
     private mlcService: MlcService,
+    private emergencyService: EmergencyService,
     private messageService: MessageService
   ) {
     this.form = this.fb.group({
@@ -78,15 +122,74 @@ export class MlcRegisterComponent implements OnInit, OnDestroy {
       policeStationName: [''],
       fir_No: [''],
       fir_Date: [null as Date | null],
+      // --- Incident details ---
+      incidentDateTime: [null as Date | null],
+      incidentPlace: [''],
+      allegedCause: [''],
+      weaponType: [''],
+      // --- Brought by / informant ---
+      broughtBy: [''],
+      broughtByDetail: [''],
+      informantName: [''],
+      informantRelation: [''],
+      // --- Identification ---
+      identificationMark1: [''],
+      identificationMark2: [''],
+      // --- Examining doctor ---
+      investigatingOfficer: [''],
+      examiningDoctorRegNo: [''],
+      consentForExamination: [false],
     });
   }
 
   ngOnInit(): void {
     const fromQuery = this.route.snapshot.queryParamMap.get('emergencyId');
     if (fromQuery) {
+      // Deep-link path (from Emergency intake). Pre-fill and lock the picker.
       this.form.patchValue({ emergencyId: fromQuery });
       this.loadEmergencyContext(fromQuery);
+    } else {
+      // Direct nav (/mlc/new). Populate the picker with eligible emergencies.
+      this.loadEmergencyOptions();
     }
+  }
+
+  /** Auto-fill the patient-context strip when the user picks an emergency. */
+  onEmergencyChange(emergencyId: string): void {
+    const numeric = Number.parseInt(emergencyId, 10);
+    if (Number.isNaN(numeric)) {
+      this.emergency = null;
+      return;
+    }
+    const picked = this.emergencyOptions.find((e) => e.id === numeric);
+    if (picked) {
+      this.emergency = {
+        id: picked.id,
+        prn: picked.prn,
+        patientName: picked.patientName,
+        age: picked.age ?? null,
+      };
+    }
+  }
+
+  private loadEmergencyOptions(): void {
+    this.loadingEmergencies = true;
+    this.emergencyService
+      .getEmergenciesForMlcPicker()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (rows) => {
+          this.emergencyOptions = (rows ?? []).map((e) => ({
+            ...e,
+            _label: buildPickerLabel(e),
+          }));
+          this.loadingEmergencies = false;
+        },
+        error: () => {
+          this.emergencyOptions = [];
+          this.loadingEmergencies = false;
+        },
+      });
   }
 
   ngOnDestroy(): void {
@@ -161,6 +264,23 @@ export class MlcRegisterComponent implements OnInit, OnDestroy {
 
 // ---- Typed helpers --------------------------------------------------------
 
+function buildPickerLabel(e: MlcPickerEmergency): string {
+  const ts = e.createdAt
+    ? new Date(e.createdAt).toLocaleString(undefined, {
+        month: 'short', day: '2-digit', hour: '2-digit', minute: '2-digit',
+      })
+    : '';
+  const age = e.age != null ? `${e.age}y` : '';
+  const bits = [
+    e.prn,
+    e.patientName,
+    age,
+    `[${e.triageCategory}]`,
+    ts,
+  ].filter(Boolean);
+  return bits.join(' · ');
+}
+
 function buildRegisterPayload(raw: MlcRegisterFormValue): MlcRegisterPayload {
   return {
     emergencyId: raw.emergencyId,
@@ -168,6 +288,23 @@ function buildRegisterPayload(raw: MlcRegisterFormValue): MlcRegisterPayload {
     policeStationName: raw.policeStationName.trim() || undefined,
     fir_No: raw.fir_No.trim() || undefined,
     fir_Date: raw.fir_Date ?? undefined,
+    // --- Incident details ---
+    incidentDateTime: raw.incidentDateTime ?? undefined,
+    incidentPlace: raw.incidentPlace.trim() || undefined,
+    allegedCause: raw.allegedCause.trim() || undefined,
+    weaponType: raw.weaponType.trim() || undefined,
+    // --- Brought by / informant ---
+    broughtBy: raw.broughtBy.trim() || undefined,
+    broughtByDetail: raw.broughtByDetail.trim() || undefined,
+    informantName: raw.informantName.trim() || undefined,
+    informantRelation: raw.informantRelation.trim() || undefined,
+    // --- Identification ---
+    identificationMark1: raw.identificationMark1.trim() || undefined,
+    identificationMark2: raw.identificationMark2.trim() || undefined,
+    // --- Examining doctor ---
+    investigatingOfficer: raw.investigatingOfficer.trim() || undefined,
+    examiningDoctorRegNo: raw.examiningDoctorRegNo.trim() || undefined,
+    consentForExamination: raw.consentForExamination || undefined,
   };
 }
 

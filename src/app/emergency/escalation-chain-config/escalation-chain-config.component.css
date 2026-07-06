@@ -1,0 +1,36 @@
+/* Phase 9.19 — escalation chain + SLA config. .page is allow-listed in
+ * forms.css so inputs/selects inherit the shared form styling. */
+.ecc-title { font-size: 22px; font-weight: 600; margin: 0 0 4px; }
+.ecc-sub { color: #6b7280; font-size: 13px; margin: 0 0 16px; }
+
+.ecc-banner { padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; font-size: 14px; cursor: pointer; font-family: Kanit, sans-serif; }
+.ecc-good { background: #dcfce7; color: #166534; }
+.ecc-bad { background: #fee2e2; color: #b91c1c; }
+
+.ecc-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 18px 20px; margin-bottom: 18px; }
+.ecc-section { font-size: 15px; font-weight: 600; color: #0e2970; margin: 0 0 12px; }
+.ecc-sub-h { font-size: 13px; font-weight: 600; color: #374151; margin: 14px 0 8px; }
+.ecc-muted { color: #9ca3af; font-style: italic; font-size: 13px; }
+
+.ecc-grid { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 8px; }
+.ecc-grid th { background: #f9fafb; text-align: left; padding: 8px 10px; color: #374151; font-weight: 600; }
+.ecc-grid td { padding: 8px 10px; border-top: 1px solid #f3f4f6; }
+
+.ecc-row { display: flex; gap: 14px; align-items: flex-end; }
+.ecc-row.ecc-wrap { flex-wrap: wrap; }
+.ecc-row label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #4b5563; }
+
+.ecc-pill { display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 11px; font-weight: 600; text-transform: capitalize; }
+.ecc-level { background: #e0e7ff; color: #3730a3; }
+.ecc-red { background: #fee2e2; color: #b91c1c; }
+.ecc-yellow { background: #fef3c7; color: #92400e; }
+.ecc-green { background: #dcfce7; color: #166534; }
+.ecc-black { background: #e5e7eb; color: #374151; }
+
+.ecc-btn { height: 36px; padding: 0 14px; border-radius: 6px; border: 1px solid #d1d5db; background: #fff; color: #271e4a; cursor: pointer; font-family: Kanit, sans-serif; font-size: 13px; }
+.ecc-btn:hover { background: #f3f4f6; }
+.ecc-btn-primary { background: #169458; color: #fff; border-color: #169458; }
+.ecc-btn-primary:hover { background: #117849; }
+.ecc-btn-danger { color: #b91c1c; border-color: #fecaca; }
+
+.ecc-add { border-top: 1px dashed #e5e7eb; padding-top: 8px; margin-top: 8px; }

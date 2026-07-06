@@ -16,6 +16,8 @@ export interface IpdPrescription {
   frequency: string;
   duration: string;
   route: string;
+  // Form 3 (Phase 8) — injection / patch site for IM/SC/transdermal routes.
+  site?: string | null;
   instructions?: string;
   quantity: number;
   isCarryOver: boolean;
@@ -26,17 +28,41 @@ export interface IpdPrescription {
   hmisRxId?: string;
   createdAt?: Date;
   updatedAt?: Date;
+  // Phase 7 — prescriber acknowledgement of pregnancy / lactation alert.
+  // Backend returns 409 with `pregnancyAlerts` when the patient is flagged
+  // and this is missing; the editor re-submits with this flag = true.
+  pregnancyAcknowledged?: boolean;
 }
 
-export interface MedicationAdminLog {
-  id?: string;
-  prescriptionId: string;
-  adminTime: Date;
-  administeredBy: string;
-  dose: string;
+/** Phase 7 — single alert returned from a 409 on prescription create/continue. */
+export interface PregnancyAlert {
+  drug: string;
+  source: 'pregnancy' | 'lactation';
+  category: string;
+  reason: string;
+  from: 'master' | 'fallback';
+}
+
+/**
+ * Phase 4 (WF-3) — payload for `POST /api/ipd-prescription/prescription/:id/administer`.
+ *
+ * Field names mirror the backend `IpdMedicationLog` columns one-for-one
+ * (`quantity`, `route`, `remarks`, `verifiedTwoIdentifiers`, `fiveRightsChecked`).
+ * The two boolean flags are NABH MOM.4 / IPC.6 gates: server returns 400 if
+ * either is missing or false.
+ */
+export interface AdministerMedicationPayload {
+  quantity: number;
   route: string;
-  notes?: string;
-  signatureUrl?: string;
+  remarks?: string;
+  verifiedTwoIdentifiers: boolean;
+  fiveRightsChecked: boolean;
+}
+
+/** Witness / co-signature payload for high-risk meds (insulin, opioids, anticoagulants). */
+export interface AcknowledgeMedicationLogPayload {
+  acknowledgedBySignatureId: string;
+  acknowledgedBy?: string;
 }
 
 /**
@@ -88,6 +114,13 @@ export interface MarLogEntry {
   remarks: string | null;
   createdAt: string | Date;
   prescription: MarLogPrescriptionInfo | null;
+  // Phase 4 (WF-3) — gating + co-signature snapshot.
+  verifiedTwoIdentifiers?: boolean;
+  fiveRightsChecked?: boolean;
+  acknowledgedBy?: string | null;
+  acknowledgedById?: number | null;
+  acknowledgedAt?: string | null;
+  acknowledgedBySignatureId?: string | null;
 }
 
 /** Paginated MAR response envelope. */
@@ -151,14 +184,25 @@ export class IpdPrescriptionService {
     return this.http.get<IpdPrescription[]>(`${this.apiUrl}/admission/${admissionId}/pending`);
   }
 
-  // Mark medication as administered
-  administerMedication(prescriptionId: string, adminLog: MedicationAdminLog): Observable<any> {
-    return this.http.post(`${this.apiUrl}/prescription/${prescriptionId}/administer`, adminLog);
+  // Mark medication as administered (Phase 4 WF-3 — requires two-ID + 5-rights flags).
+  administerMedication(prescriptionId: string, payload: AdministerMedicationPayload): Observable<any> {
+    return this.http.post(`${this.apiUrl}/prescription/${prescriptionId}/administer`, payload);
   }
 
   // Get medication administration record (MAR)
-  getMedicationAdministrationRecord(admissionId: string): Observable<MedicationAdminLog[]> {
-    return this.http.get<MedicationAdminLog[]>(`${this.apiUrl}/admission/${admissionId}/mar`);
+  getMedicationAdministrationRecord(admissionId: string): Observable<MarLogEntry[]> {
+    return this.http.get<MarLogEntry[]>(`${this.apiUrl}/admission/${admissionId}/mar`);
+  }
+
+  /**
+   * Phase 4 (WF-3) — witness / co-signature on a MAR log row.
+   * Returns 409 if the log is already witness-acknowledged.
+   */
+  acknowledgeMedicationLog(
+    logId: string,
+    payload: AcknowledgeMedicationLogPayload,
+  ): Observable<any> {
+    return this.http.post(`${this.apiUrl}/medication-log/${logId}/acknowledge`, payload);
   }
 
   // Skip medication administration

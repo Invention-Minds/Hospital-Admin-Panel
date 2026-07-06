@@ -1,7 +1,7 @@
 /* Phase 0 — e-sign component styles. */
 /* Falls back gracefully if the host project's design tokens aren't loaded. */
 
-.e-sign-shell {
+.e-sign-box {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -12,7 +12,7 @@
   font-family: var(--font-family-primary, -apple-system, Segoe UI, Roboto, sans-serif);
 }
 
-.e-sign-shell.disabled {
+.e-sign-box.disabled {
   opacity: 0.6;
   pointer-events: none;
 }

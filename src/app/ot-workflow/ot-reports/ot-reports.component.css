@@ -1,0 +1,49 @@
+.rpt-shell { padding: 20px; max-width: 1600px; margin: 24px auto 24px 96px; }
+
+.rpt-head { display: flex; justify-content: space-between; align-items: end; flex-wrap: wrap; gap: 12px; }
+.rpt-title { font-size: 22px; font-weight: 600; margin: 0; }
+.rpt-toolbar { display: flex; gap: 12px; align-items: end; }
+.rpt-toolbar label { display: flex; flex-direction: column; font-size: 12px; color: #4b5563; gap: 3px; }
+.rpt-toolbar input { border: 1px solid #d1d5db; border-radius: 6px; padding: 5px 8px; font-size: 13px; }
+
+.rpt-tabs { display: flex; gap: 4px; border-bottom: 1px solid #e5e7eb; margin: 14px 0; }
+.rpt-tabs button {
+  background: transparent; border: none; padding: 8px 14px; font-size: 13px; cursor: pointer; color: #6b7280;
+  border-bottom: 2px solid transparent;
+}
+.rpt-tabs button:hover { color: #1d4ed8; }
+.rpt-tab-active { color: #1d4ed8 !important; border-bottom-color: #1d4ed8 !important; font-weight: 600; }
+
+.rpt-banner { padding: 10px 14px; border-radius: 6px; margin-bottom: 10px; font-size: 14px; }
+.rpt-bad { background: #fee2e2; color: #b91c1c; }
+.rpt-loading { padding: 30px; text-align: center; color: #6b7280; font-style: italic; }
+.rpt-sub { color: #6b7280; font-size: 13px; margin: 4px 0 10px; }
+.rpt-muted { color: #9ca3af; font-style: italic; }
+
+.rpt-grid-wrap { overflow-x: auto; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; }
+.rpt-grid { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+.rpt-grid th, .rpt-grid td {
+  border-bottom: 1px solid #f3f4f6; padding: 7px 10px;
+  vertical-align: top; text-align: left;
+}
+.rpt-grid th { background: #f9fafb; font-weight: 600; color: #374151; font-size: 12px; position: sticky; top: 0; }
+
+.rpt-pill { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+.rpt-status-BOOKED      { background: #fef3c7; color: #92400e; }
+.rpt-status-CONFIRMED   { background: #dbeafe; color: #1e40af; }
+.rpt-status-IN_PROGRESS { background: #fed7aa; color: #c2410c; }
+.rpt-status-CLOSED      { background: #dcfce7; color: #166534; }
+.rpt-status-CANCELLED   { background: #fee2e2; color: #b91c1c; }
+.rpt-status-RESCHEDULED { background: #e5e7eb; color: #4b5563; }
+
+.rpt-delta-good { color: #166534; font-weight: 600; }
+.rpt-delta-ok   { color: #4b5563; }
+.rpt-delta-bad  { color: #b91c1c; font-weight: 600; }
+
+.rpt-summary { display: flex; gap: 18px; margin-bottom: 10px; flex-wrap: wrap; }
+.rpt-summary div { background: #f9fafb; padding: 8px 14px; border-radius: 6px; min-width: 140px; }
+.rpt-summary span { display: block; color: #6b7280; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+.rpt-summary strong { font-size: 16px; color: #111827; }
+
+.rpt-btn { background: #fff; border: 1px solid #d1d5db; padding: 6px 14px; border-radius: 5px; cursor: pointer; font-size: 13px; }
+.rpt-btn:hover { background: #f3f4f6; }

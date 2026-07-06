@@ -1,0 +1,82 @@
+<div class="page ecc-shell">
+  <h2 class="ecc-title">Emergency referral — escalation config</h2>
+  <p class="ecc-sub">Define who gets notified when a referral isn't acknowledged in time, and how long to wait per triage.</p>
+
+  <div class="ecc-banner ecc-good" *ngIf="message" (click)="message=''">{{ message }}</div>
+  <div class="ecc-banner ecc-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
+
+  <!-- SLA by triage -->
+  <div class="ecc-card">
+    <h3 class="ecc-section">Stipulated time before escalation (per triage)</h3>
+    <table class="ecc-grid">
+      <thead><tr><th>Triage</th><th>Minutes</th><th></th></tr></thead>
+      <tbody>
+        <tr *ngFor="let row of sla">
+          <td><span class="ecc-pill ecc-{{ row.triageCategory }}">{{ row.triageCategory }}</span></td>
+          <td><input type="number" min="1" [(ngModel)]="row.minutes" style="width:90px" /></td>
+          <td><button class="ecc-btn" (click)="saveSla(row)">Save</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Escalation chain -->
+  <div class="ecc-card">
+    <h3 class="ecc-section">Escalation chain (per department)</h3>
+    <div class="ecc-row">
+      <label>Department
+        <select [(ngModel)]="selectedDeptId" (ngModelChange)="onDeptChange()">
+          <option [ngValue]="null">Select department…</option>
+          <option *ngFor="let d of departments" [ngValue]="d.id">{{ d.name }}</option>
+        </select>
+      </label>
+    </div>
+
+    <p class="ecc-muted" *ngIf="selectedDeptId == null">Pick a department to view and edit its escalation chain.</p>
+
+    <table class="ecc-grid" *ngIf="selectedDeptId != null && steps.length">
+      <thead><tr><th>Level</th><th>Notify</th><th>Label</th><th></th></tr></thead>
+      <tbody>
+        <tr *ngFor="let s of steps">
+          <td><span class="ecc-pill ecc-level">L{{ s.level }}</span></td>
+          <td>{{ stepTargetLabel(s) }}</td>
+          <td>{{ s.label || '—' }}</td>
+          <td><button class="ecc-btn ecc-btn-danger" (click)="deleteStep(s)">Delete</button></td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="ecc-muted" *ngIf="selectedDeptId != null && !steps.length">No steps yet for this department. Add the first tier below.</p>
+
+    <!-- Add step -->
+    <div class="ecc-add" *ngIf="selectedDeptId != null">
+      <h4 class="ecc-sub-h">Add a step</h4>
+      <div class="ecc-row ecc-wrap">
+        <label>Level
+          <input type="number" min="1" [(ngModel)]="draft.level" style="width:70px" />
+        </label>
+        <label>Notify
+          <select [(ngModel)]="draft.targetType">
+            <option value="doctor">A specific doctor</option>
+            <option value="role">A role</option>
+          </select>
+        </label>
+        <label *ngIf="draft.targetType === 'doctor'">Doctor
+          <select [(ngModel)]="draft.targetDoctorId">
+            <option [ngValue]="null">Select doctor…</option>
+            <option *ngFor="let d of doctors" [ngValue]="d.id">{{ d.name }}<span *ngIf="d.departmentName"> — {{ d.departmentName }}</span></option>
+          </select>
+        </label>
+        <label *ngIf="draft.targetType === 'role'">Role
+          <select [(ngModel)]="draft.targetRole">
+            <option [ngValue]="null">Select role…</option>
+            <option *ngFor="let r of roleOptions" [value]="r">{{ r }}</option>
+          </select>
+        </label>
+        <label>Label (optional)
+          <input type="text" [(ngModel)]="draft.label" placeholder="e.g. Surgery HOD" />
+        </label>
+        <button class="ecc-btn ecc-btn-primary" (click)="addStep()">Add step</button>
+      </div>
+    </div>
+  </div>
+</div>

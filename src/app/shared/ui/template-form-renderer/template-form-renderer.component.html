@@ -1,0 +1,118 @@
+<div class="tf-shell">
+  <ng-container *ngFor="let block of groupedFields">
+
+    <h3 class="tf-group" *ngIf="block.group">{{ block.group }}</h3>
+
+    <div class="tf-field" *ngFor="let f of block.fields">
+
+      <label class="tf-label" *ngIf="f.type !== 'checkbox'">
+        {{ f.label }}<span class="tf-req" *ngIf="f.required">*</span>
+      </label>
+
+      <!-- text -->
+      <input *ngIf="f.type === 'text'"
+             class="tf-input"
+             type="text"
+             [placeholder]="f.placeholder || ''"
+             [value]="asString(values[f.key])"
+             [disabled]="readOnly"
+             (input)="setValue(f.key, $any($event.target).value)" />
+
+      <!-- textarea -->
+      <textarea *ngIf="f.type === 'textarea'"
+                class="tf-textarea"
+                rows="3"
+                [placeholder]="f.placeholder || ''"
+                [value]="asString(values[f.key])"
+                [disabled]="readOnly"
+                (input)="setValue(f.key, $any($event.target).value)"></textarea>
+
+      <!-- number -->
+      <input *ngIf="f.type === 'number'"
+             class="tf-input"
+             type="number"
+             [placeholder]="f.placeholder || ''"
+             [value]="asString(values[f.key])"
+             [disabled]="readOnly"
+             (input)="setValue(f.key, $any($event.target).valueAsNumber)" />
+
+      <!-- date -->
+      <input *ngIf="f.type === 'date'"
+             class="tf-input"
+             type="date"
+             [value]="asString(values[f.key])"
+             [disabled]="readOnly"
+             (input)="setValue(f.key, $any($event.target).value)" />
+
+      <!-- datetime -->
+      <input *ngIf="f.type === 'datetime'"
+             class="tf-input"
+             type="datetime-local"
+             [value]="asString(values[f.key])"
+             [disabled]="readOnly"
+             (input)="setValue(f.key, $any($event.target).value)" />
+
+      <!-- select (single) -->
+      <select *ngIf="f.type === 'select'"
+              class="tf-input"
+              [value]="asString(values[f.key])"
+              [disabled]="readOnly"
+              (change)="setValue(f.key, $any($event.target).value)">
+        <option value="" disabled>{{ f.placeholder || 'Select…' }}</option>
+        <option *ngFor="let opt of f.options" [value]="opt">{{ opt }}</option>
+      </select>
+
+      <!-- multiselect — render as a column of checkboxes -->
+      <div *ngIf="f.type === 'multiselect'" class="tf-multi">
+        <label *ngFor="let opt of f.options" class="tf-multi-row">
+          <input type="checkbox"
+                 [checked]="isMultiSelected(f.key, opt)"
+                 [disabled]="readOnly"
+                 (change)="toggleMulti(f.key, opt, $any($event.target).checked)" />
+          {{ opt }}
+        </label>
+      </div>
+
+      <!-- radio -->
+      <div *ngIf="f.type === 'radio'" class="tf-radio">
+        <label *ngFor="let opt of f.options" class="tf-radio-row">
+          <input type="radio"
+                 [name]="'tf-' + f.key"
+                 [value]="opt"
+                 [checked]="asString(values[f.key]) === opt"
+                 [disabled]="readOnly"
+                 (change)="setValue(f.key, opt)" />
+          {{ opt }}
+        </label>
+      </div>
+
+      <!-- single checkbox (boolean) -->
+      <label *ngIf="f.type === 'checkbox'" class="tf-checkbox">
+        <input type="checkbox"
+               [checked]="asBoolean(values[f.key])"
+               [disabled]="readOnly"
+               (change)="setValue(f.key, $any($event.target).checked)" />
+        {{ f.label }}<span class="tf-req" *ngIf="f.required">*</span>
+      </label>
+
+      <!--
+        handwritten — option C from the design discussion. The OPD assessment
+        already has a hand-written canvas component (app-hand-written) used on
+        today-consultations. We render it here so templates that include
+        handwritten fields work alongside structured fields. The canvas value
+        is a base64 data URL stored as a string in the value map.
+      -->
+      <app-hand-written *ngIf="f.type === 'handwritten'"
+                        [label]="f.label"
+                        [initialValue]="asDataUrl(values[f.key])"
+                        (valueChange)="setValue(f.key, $event)">
+      </app-hand-written>
+
+      <small class="tf-help" *ngIf="f.helpText">{{ f.helpText }}</small>
+    </div>
+  </ng-container>
+
+  <div class="tf-empty" *ngIf="groupedFields.length === 0">
+    This template has no fields yet.
+  </div>
+</div>

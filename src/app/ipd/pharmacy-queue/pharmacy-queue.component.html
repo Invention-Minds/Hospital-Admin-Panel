@@ -1,0 +1,60 @@
+<div class="page pq-shell">
+  <div class="pq-head">
+    <h2 class="pq-title">Pharmacy queue</h2>
+    <p class="pq-sub">Acknowledge → dispense → notify nurse. STAT items pinned to the top. Auto-refresh every 30 s.</p>
+  </div>
+
+  <div class="pq-banner pq-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
+  <div class="pq-banner pq-good" *ngIf="successMessage">{{ successMessage }}</div>
+  <div class="pq-empty" *ngIf="!loading && !rows.length">Inbox empty.</div>
+
+  <div class="pq-grid" *ngIf="rows.length">
+    <div class="pq-card" *ngFor="let r of rows" [class.pq-card-stat]="r.isStatBypass">
+      <div class="pq-card-head">
+        <div>
+          <span class="pq-pill pq-pill-type" *ngIf="r.prescriptionType">{{ r.prescriptionType }}</span>
+          <span class="pq-pill pq-pill-stat" *ngIf="r.isStatBypass">STAT</span>
+          <strong class="pq-generic">{{ r.genericName }}</strong>
+          <span class="pq-brand" *ngIf="r.brandName">· {{ r.brandName }}</span>
+        </div>
+        <div class="pq-meta">
+          <div>{{ r.admission.admissionNo }} · {{ r.admission.ward?.wardName }} · {{ r.admission.bed?.bedNumber }}</div>
+          <div>{{ r.admission.admittingDoctor || '—' }} · PRN {{ r.admission.prn }}</div>
+        </div>
+      </div>
+
+      <div class="pq-rx-line">{{ r.dose }} · {{ r.frequency }} · {{ r.duration }} · qty {{ r.quantity }}
+        <span class="pq-route">{{ r.route }}</span>
+      </div>
+
+      <p class="pq-warn" *ngIf="stockWarning(r)">⚠ {{ stockWarning(r) }}</p>
+
+      <div class="pq-state">
+        <span [class.pq-state-on]="r.pharmacyAckAt">Ack</span>
+        <span class="pq-arrow">→</span>
+        <span [class.pq-state-on]="r.dispensedAt">Dispense ({{ r.dispensedQty ?? 0 }}/{{ r.quantity }})</span>
+      </div>
+
+      <ng-container *ngIf="!r.pharmacyAckAt && !r.pharmacyRejectedAt">
+        <div class="pq-actions">
+          <button class="pq-btn pq-btn-primary" (click)="ack(r)">Acknowledge</button>
+        </div>
+        <textarea rows="2" placeholder="Reject reason (out of stock, dose unsafe, etc.)" [(ngModel)]="rejectDraft[r.id]"></textarea>
+        <button class="pq-btn pq-btn-warn" (click)="reject(r)">Reject</button>
+      </ng-container>
+
+      <ng-container *ngIf="r.pharmacyAckAt && !r.dispensedAt">
+        <div class="pq-dispense-row">
+          <label>Qty
+            <input type="number" min="1" placeholder="all" [(ngModel)]="draftFor(r).qty" />
+          </label>
+          <label>Brand (sub)
+            <input type="text" placeholder="if different" [(ngModel)]="draftFor(r).brand" />
+          </label>
+        </div>
+        <textarea rows="2" placeholder="Substitution reason (if any)" [(ngModel)]="draftFor(r).reason"></textarea>
+        <button class="pq-btn pq-btn-primary" (click)="dispense(r)">Mark dispensed</button>
+      </ng-container>
+    </div>
+  </div>
+</div>

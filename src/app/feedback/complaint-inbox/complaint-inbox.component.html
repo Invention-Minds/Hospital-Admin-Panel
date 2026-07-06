@@ -1,0 +1,112 @@
+<div class="page cp-shell">
+  <div class="cp-head">
+    <div>
+      <h2 class="cp-title">Complaints</h2>
+      <p class="cp-sub">Patient complaints — auto-raised from low-NPS surveys, or raised manually.</p>
+    </div>
+    <button class="cp-btn cp-btn-primary" (click)="showRaise = true">+ Raise complaint</button>
+  </div>
+
+  <div class="cp-tiles" *ngIf="stats">
+    <div class="cp-tile"><span class="cp-tile-label">Open</span><span class="cp-tile-val">{{ stats.byStatus['open'] || 0 }}</span></div>
+    <div class="cp-tile"><span class="cp-tile-label">Acknowledged</span><span class="cp-tile-val">{{ stats.byStatus['acknowledged'] || 0 }}</span></div>
+    <div class="cp-tile"><span class="cp-tile-label">Resolved</span><span class="cp-tile-val">{{ stats.byStatus['resolved'] || 0 }}</span></div>
+    <div class="cp-tile cp-tile-warn" *ngIf="stats.slaBreached"><span class="cp-tile-label">SLA breached</span><span class="cp-tile-val">{{ stats.slaBreached }}</span></div>
+  </div>
+
+  <div class="cp-filters">
+    <label>Status
+      <select [(ngModel)]="filters.status" (change)="load()">
+        <option value="">All</option>
+        <option *ngFor="let s of STATUSES" [value]="s">{{ s }}</option>
+      </select>
+    </label>
+    <label>Severity
+      <select [(ngModel)]="filters.severity" (change)="load()">
+        <option value="">All</option>
+        <option *ngFor="let s of SEVERITIES" [value]="s">{{ s }}</option>
+      </select>
+    </label>
+    <label>Source
+      <select [(ngModel)]="filters.source" (change)="load()">
+        <option value="">All</option>
+        <option *ngFor="let s of SOURCES" [value]="s">{{ s }}</option>
+      </select>
+    </label>
+    <button class="cp-btn" (click)="load()">↻ Refresh</button>
+  </div>
+
+  <div class="cp-banner cp-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
+  <div class="cp-loading" *ngIf="loading">Loading…</div>
+  <div class="cp-empty" *ngIf="!loading && !rows.length">No complaints with the current filters.</div>
+
+  <!-- Phase 6h — bulk action bar (shows only when at least one row selected). -->
+  <div class="cp-bulk-bar" *ngIf="selected.size > 0">
+    <span class="cp-bulk-count">{{ selected.size }} selected</span>
+    <label>Set status
+      <select [(ngModel)]="bulkStatus">
+        <option *ngFor="let s of STATUSES" [value]="s">{{ s }}</option>
+      </select>
+    </label>
+    <button class="cp-bulk-apply" (click)="applyBulk()" [disabled]="bulkSaving">
+      {{ bulkSaving ? 'Applying…' : 'Apply' }}
+    </button>
+    <button class="cp-bulk-clear" (click)="selected.clear()" [disabled]="bulkSaving">Clear</button>
+  </div>
+  <div class="cp-bulk-banner" *ngIf="bulkBanner">{{ bulkBanner }}</div>
+
+  <table class="cp-table" *ngIf="!loading && rows.length">
+    <thead><tr>
+      <th class="cp-th-check"><input type="checkbox" [checked]="allSelected()" (change)="toggleAll()" /></th>
+      <th>Code</th><th>When</th><th>Severity</th><th>Patient</th><th>Source</th><th>Status</th><th>SLA</th>
+    </tr></thead>
+    <tbody>
+      <tr *ngFor="let c of rows" (click)="openDetail(c)" class="cp-row" [class.cp-row-breach]="slaState(c) === 'breach'" [class.cp-row-selected]="isSelected(c.id)">
+        <td class="cp-td-check" (click)="toggle(c.id, $event)">
+          <input type="checkbox" [checked]="isSelected(c.id)" (click)="$event.stopPropagation()" (change)="toggle(c.id)" />
+        </td>
+        <td>{{ c.code }}</td>
+        <td>{{ c.raisedAt | date:'dd/MM/yy h:mm a' }}</td>
+        <td><span class="cp-pill cp-sev-{{ c.severity }}">{{ c.severity }}</span></td>
+        <td><span *ngIf="c.patientName">{{ c.patientName }}</span><span *ngIf="c.patientPrn"> · {{ c.patientPrn }}</span></td>
+        <td>{{ c.source === 'survey' ? 'Survey (auto)' : 'Manual' }}</td>
+        <td><span class="cp-pill cp-status-{{ c.status }}">{{ c.status }}</span></td>
+        <td><span class="cp-sla cp-sla-{{ slaState(c) }}">{{ slaText(c) }}</span></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Raise complaint modal -->
+<div class="cp-bg" *ngIf="showRaise" (click)="showRaise = false">
+  <div class="cp-modal" (click)="$event.stopPropagation()">
+    <h3 class="cp-modal-title">Raise complaint</h3>
+    <label class="cp-field">Patient name
+      <input type="text" [(ngModel)]="draftCreate.patientName" />
+    </label>
+    <label class="cp-field">Patient PRN
+      <input type="text" [(ngModel)]="draftCreate.patientPrn" />
+    </label>
+    <div class="cp-grid">
+      <label class="cp-field">Channel
+        <select [(ngModel)]="draftCreate.channel">
+          <option *ngFor="let c of CHANNELS" [value]="c">{{ c }}</option>
+        </select>
+      </label>
+      <label class="cp-field">Severity *
+        <select [(ngModel)]="draftCreate.severity">
+          <option *ngFor="let s of SEVERITIES" [value]="s">{{ s }}</option>
+        </select>
+      </label>
+    </div>
+    <label class="cp-field">Description *
+      <textarea rows="4" [(ngModel)]="draftCreate.description" placeholder="What is the patient unhappy about?"></textarea>
+    </label>
+    <div class="cp-modal-actions">
+      <button class="cp-btn" (click)="showRaise = false" [disabled]="saving">Cancel</button>
+      <button class="cp-btn cp-btn-primary" (click)="raise()" [disabled]="saving || !draftCreate.description.trim()">
+        {{ saving ? 'Raising…' : 'Raise' }}
+      </button>
+    </div>
+  </div>
+</div>

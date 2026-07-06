@@ -1,0 +1,189 @@
+<div class="page incd-shell">
+  <div class="incd-head">
+    <button class="incd-btn" (click)="back()">← Back</button>
+    <span *ngIf="incident" class="incd-code">{{ incident.code }}</span>
+  </div>
+
+  <div class="incd-banner incd-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
+  <div class="incd-banner incd-good" *ngIf="successMessage">{{ successMessage }}</div>
+  <div class="incd-loading" *ngIf="loading">Loading…</div>
+
+  <div *ngIf="incident as inc" class="incd-grid">
+    <!-- Left: details -->
+    <div class="incd-card">
+      <div class="incd-head-row">
+        <h2 class="incd-title">{{ inc.title }}</h2>
+        <span class="incd-pill incd-sev-{{ inc.severity }}">{{ statusLabel(inc.severity) }}</span>
+        <span class="incd-pill incd-status-{{ inc.status }}">{{ statusLabel(inc.status) }}</span>
+        <span class="incd-pill incd-encounter-{{ encounterType(inc) | lowercase }}" *ngIf="encounterType(inc)">
+          {{ encounterType(inc) }}
+        </span>
+      </div>
+
+      <div class="incd-meta">
+        <div><span>Reported</span> {{ inc.reportedAt | date:'dd/MM/yy h:mm a' }}<span *ngIf="inc.reportedBy"> by {{ inc.reportedBy }}</span></div>
+        <div *ngIf="inc.occurredAt"><span>Occurred</span> {{ inc.occurredAt | date:'dd/MM/yy h:mm a' }}</div>
+        <div><span>Source</span> {{ inc.source === 'auto-rule' ? 'Auto-rule (' + (inc.ruleKey || '?') + ')' : 'Manual' }}</div>
+        <div *ngIf="inc.nabhClause"><span>NABH</span> {{ inc.nabhClause }}</div>
+        <div><span>Category</span> {{ inc.category }}</div>
+      </div>
+
+      <h3 class="incd-section">Description</h3>
+      <p class="incd-desc">{{ inc.description }}</p>
+
+      <h3 class="incd-section" *ngIf="inc.patientName || inc.patientPrn || inc.admissionId || inc.emergencyId">Patient context</h3>
+      <div class="incd-context" *ngIf="inc.patientName || inc.patientPrn || inc.admissionId || inc.emergencyId">
+        <div *ngIf="inc.patientName"><span>Patient</span> {{ inc.patientName }}</div>
+        <div *ngIf="inc.patientPrn"><span>PRN</span> {{ inc.patientPrn }}</div>
+        <div *ngIf="inc.ward"><span>Ward</span> {{ inc.ward }}</div>
+        <div *ngIf="inc.department"><span>Dept</span> {{ inc.department }}</div>
+        <div *ngIf="inc.admissionId"><span>Admission</span> {{ inc.admissionNo || inc.admissionId }}</div>
+        <div *ngIf="inc.appointmentId"><span>Appointment</span> #{{ inc.appointmentId }}</div>
+        <div *ngIf="inc.emergencyId"><span>ER #</span> {{ inc.emergencyId }}</div>
+      </div>
+    </div>
+
+    <!-- Right: status workflow -->
+    <div class="incd-card">
+      <h3 class="incd-section">Status &amp; assignment</h3>
+
+      <label class="incd-field">Status
+        <select [(ngModel)]="draft.status">
+          <option *ngFor="let s of STATUSES" [value]="s">{{ statusLabel(s) }}</option>
+        </select>
+      </label>
+
+      <label class="incd-field">Severity (revised)
+        <select [(ngModel)]="draft.severityFinal">
+          <option value="">— unchanged —</option>
+          <option *ngFor="let s of SEVERITIES" [value]="s">{{ statusLabel(s) }}</option>
+        </select>
+      </label>
+
+      <label class="incd-field">Assigned to
+        <input type="text" [(ngModel)]="draft.assignedTo" placeholder="Investigator name" />
+      </label>
+
+      <label class="incd-field" *ngIf="draft.status === 'closed' || draft.status === 'cancelled'">
+        Closure notes
+        <textarea rows="3" [(ngModel)]="draft.closureNotes"></textarea>
+      </label>
+
+      <div class="incd-actions">
+        <button class="incd-btn incd-btn-primary" (click)="saveStatus()">Save</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Phase 6 / Option A — Cross-module links (feedback survey, complaint, related incidents). -->
+  <div *ngIf="incident && hasLinks()" class="incd-card incd-links">
+    <h3 class="incd-section">Linked records</h3>
+
+    <div class="incd-link-row" *ngIf="incident.feedbackSurvey as fs">
+      <span class="incd-chip incd-chip-survey">📝 Survey · {{ fs.template }}<span *ngIf="fs.npsScore !== null"> · NPS {{ fs.npsScore }}</span></span>
+    </div>
+
+    <div class="incd-link-row" *ngIf="incident.complaint as c">
+      <a class="incd-chip incd-chip-complaint" [routerLink]="['/complaints', c.id]">
+        💬 {{ c.code }} · {{ c.severity }} · {{ c.status }}
+      </a>
+    </div>
+
+    <div class="incd-link-row" *ngIf="incident.relatedIncidents && incident.relatedIncidents.length > 0">
+      <span class="incd-link-label">Related incidents:</span>
+      <a class="incd-chip incd-chip-related" *ngFor="let r of incident.relatedIncidents"
+         [routerLink]="['/incidents', r.id]">
+        🔗 {{ r.code }} · {{ r.severity }} · {{ r.status }}
+      </a>
+    </div>
+  </div>
+
+  <!-- Phase 6f — Evidence upload + list. -->
+  <div *ngIf="incident" class="incd-card incd-evidence">
+    <h3 class="incd-section">Evidence</h3>
+
+    <div class="incd-ev-list" *ngIf="evidenceList().length > 0">
+      <a class="incd-ev-link" *ngFor="let ev of evidenceList()" [href]="ev.url" target="_blank" rel="noopener">
+        📎 {{ ev.label }}
+        <span class="incd-ev-meta" *ngIf="ev.uploadedBy">· {{ ev.uploadedBy }}</span>
+      </a>
+    </div>
+    <div class="incd-ev-empty" *ngIf="evidenceList().length === 0">No files attached yet.</div>
+
+    <div class="incd-ev-uploader">
+      <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*,application/pdf" />
+      <input type="text" [(ngModel)]="evidenceLabel" placeholder="Label (optional)" class="incd-ev-label" />
+      <button class="incd-btn" (click)="uploadEvidence(fileInput)" [disabled]="!pendingFile || evidenceUploading">
+        {{ evidenceUploading ? 'Uploading…' : 'Upload' }}
+      </button>
+      <span class="incd-ev-error" *ngIf="evidenceError">{{ evidenceError }}</span>
+    </div>
+  </div>
+
+  <!-- Phase 3 — CAPA chain: root cause + corrective + preventive actions. -->
+  <div *ngIf="incident" class="incd-card incd-capa">
+    <h3 class="incd-section">CAPA — Root cause &amp; actions</h3>
+
+    <label class="incd-field">Immediate actions taken
+      <textarea rows="2" [(ngModel)]="capaDraft.immediateActions" placeholder="What was done right away to contain the harm?"></textarea>
+    </label>
+
+    <h4 class="incd-subhead">5-Whys root cause analysis</h4>
+    <label class="incd-field">Why 1
+      <input type="text" [(ngModel)]="capaDraft.why1" placeholder="Why did this happen?" />
+    </label>
+    <label class="incd-field">Why 2
+      <input type="text" [(ngModel)]="capaDraft.why2" />
+    </label>
+    <label class="incd-field">Why 3
+      <input type="text" [(ngModel)]="capaDraft.why3" />
+    </label>
+    <label class="incd-field">Why 4
+      <input type="text" [(ngModel)]="capaDraft.why4" />
+    </label>
+    <label class="incd-field">Why 5
+      <input type="text" [(ngModel)]="capaDraft.why5" />
+    </label>
+
+    <label class="incd-field">Root cause (summary)
+      <textarea rows="2" [(ngModel)]="capaDraft.rootCause"></textarea>
+    </label>
+
+    <label class="incd-field">Corrective actions
+      <textarea rows="3" [(ngModel)]="capaDraft.correctiveActions" placeholder="What's being done to resolve THIS event?"></textarea>
+    </label>
+
+    <label class="incd-field">Preventive actions
+      <textarea rows="3" [(ngModel)]="capaDraft.preventiveActions" placeholder="What's changing so it doesn't happen again?"></textarea>
+    </label>
+
+    <div class="incd-capa-row">
+      <label class="incd-field">Owner
+        <input type="text" [(ngModel)]="capaDraft.owner" placeholder="Investigator / department head" />
+      </label>
+      <label class="incd-field">Due date
+        <input type="date" [(ngModel)]="capaDraft.dueDate" />
+      </label>
+      <label class="incd-field">Completed on
+        <input type="date" [(ngModel)]="capaDraft.completedAt" />
+      </label>
+    </div>
+
+    <div class="incd-capa-row">
+      <label class="incd-field">Effectiveness review
+        <textarea rows="2" [(ngModel)]="capaDraft.effectivenessReview" placeholder="After how long, what evidence shows the fix worked?"></textarea>
+      </label>
+      <label class="incd-field">Reviewed on
+        <input type="date" [(ngModel)]="capaDraft.effectivenessReviewAt" />
+      </label>
+    </div>
+
+    <div class="incd-actions">
+      <span class="incd-capa-saved" *ngIf="capaSavedAt">Saved at {{ capaSavedAt | date:'h:mm a' }}</span>
+      <button class="incd-btn incd-btn-primary" (click)="saveCapa()" [disabled]="capaSaving">
+        {{ capaSaving ? 'Saving…' : 'Save CAPA' }}
+      </button>
+    </div>
+  </div>
+</div>

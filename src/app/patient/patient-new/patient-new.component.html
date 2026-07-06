@@ -1,1 +1,337 @@
-<p>patient-new works!</p>
+<div class="form-wrapper">
+
+  <!-- ═════════════════════════════════════════════════════════════════════
+       STEP 1 — Demographics + clinical baselines + next-of-kin
+       ═════════════════════════════════════════════════════════════════════ -->
+  <ng-container *ngIf="step === 1">
+    <h2 class="form-title">New Patient Registration</h2>
+
+    <!-- Inline duplicate banner (shown after debounced phone lookup). -->
+    <div class="banner banner-warn" *ngIf="duplicateFound">
+      A patient with this phone number is already registered &mdash;
+      <strong>{{ duplicateFound.name }}</strong> (PRN {{ duplicateFound.prn }}).
+      Please open the existing record instead of creating a new one.
+    </div>
+
+    <form #form="ngForm" class="health-form" novalidate>
+
+      <!-- ─── Identity ──────────────────────────────────────────────── -->
+      <h3 class="section-title">Identity</h3>
+      <div class="form-row">
+        <div class="form-group-1">
+          <div class="form-group">
+            <select class="form-input" id="prefix" name="prefix"
+                    [(ngModel)]="formData.prefix" (change)="onPrefixChange()" required>
+              <option value="" disabled>Select Prefix</option>
+              <option value="Mr.">Mr.</option>
+              <option value="Mrs.">Mrs.</option>
+              <option value="Ms.">Ms.</option>
+              <option value="Baby Of.">Baby of</option>
+              <option value="Master">Master</option>
+              <option value="Miss">Miss</option>
+              <option value="Dr.">Dr.</option>
+            </select>
+            <label class="form-label">Prefix*</label>
+          </div>
+          <div class="form-group">
+            <select class="form-input" name="gender" [(ngModel)]="formData.gender" required>
+              <option value="" disabled>Select Gender</option>
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+              <option value="other">Other</option>
+              <option value="prefer-not-to-say">Prefer not to say</option>
+            </select>
+            <label class="form-label">Gender*</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <input id="name" name="name" class="form-input" type="text"
+                 [(ngModel)]="formData.name" pattern="^[a-zA-Z. ]*$" required />
+          <label for="name" class="form-label">Full Name*</label>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group calendar-group">
+          <label class="floating-label" [class.active]="formData.dob">Date of Birth*</label>
+          <p-calendar [(ngModel)]="formData.dob" name="dob"
+                      [monthNavigator]="true" [yearNavigator]="true"
+                      [yearRange]="'1900:' + currentYear" [maxDate]="maxDate"
+                      styleClass="p-calendar-custom" (ngModelChange)="onDOBChange()">
+          </p-calendar>
+        </div>
+        <div class="form-group">
+          <input class="form-input" type="text" [(ngModel)]="formData.age" name="age" required />
+          <label class="form-label">Age*</label>
+        </div>
+        <div class="form-group">
+          <input type="text" class="form-input" name="fatherOrSpouse" [(ngModel)]="formData.fatherOrSpouse" />
+          <label class="form-label">Father / Spouse</label>
+        </div>
+        <div class="form-group">
+          <input type="text" class="form-input" name="motherName" [(ngModel)]="formData.motherName" />
+          <label class="form-label">Mother</label>
+        </div>
+      </div>
+
+      <!-- ─── Contact ──────────────────────────────────────────────── -->
+      <h3 class="section-title">Contact</h3>
+      <div class="form-row">
+        <div class="form-group-1">
+          <div class="form-group">
+            <input id="mobileNo" name="mobileNo" class="form-input" type="tel"
+                   [(ngModel)]="formData.mobileNo"
+                   (ngModelChange)="onMobileChange($event)" required />
+            <label for="mobileNo" class="form-label">Mobile No*</label>
+            <small class="hint" *ngIf="duplicateChecking">Checking for existing patient&hellip;</small>
+          </div>
+          <div class="form-group">
+            <input id="contactNo" name="contactNo" class="form-input" type="tel" [(ngModel)]="formData.contactNo" />
+            <label for="contactNo" class="form-label">Alternative No</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <input class="form-input" id="email" name="email" type="email" [(ngModel)]="formData.email" />
+          <label for="email" class="form-label">Email</label>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <input class="form-input" type="text" name="address" [(ngModel)]="formData.address" required />
+          <label class="form-label">Address*</label>
+        </div>
+        <div class="form-group">
+          <input class="form-input" type="text" id="pin" name="pin" maxlength="6"
+                 [(ngModel)]="formData.pin" (change)="onPincodeChange()" required />
+          <label for="pin" class="form-label">Pincode*</label>
+          <small class="hint">Auto-fills city / district / state</small>
+        </div>
+        <div class="form-group">
+          <input class="form-input" type="text" name="area" [(ngModel)]="formData.area" />
+          <label class="form-label">Area</label>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <input class="form-input" type="text" name="city" [(ngModel)]="formData.city" required />
+          <label class="form-label">City*</label>
+        </div>
+        <div class="form-group">
+          <input class="form-input" type="text" name="district" [(ngModel)]="formData.district" />
+          <label class="form-label">District</label>
+        </div>
+        <div class="form-group">
+          <input class="form-input" type="text" name="state" [(ngModel)]="formData.state" required />
+          <label class="form-label">State*</label>
+        </div>
+        <div class="form-group">
+          <input class="form-input" type="text" name="country" [(ngModel)]="formData.country" required />
+          <label class="form-label">Country*</label>
+        </div>
+      </div>
+
+      <!-- ─── Identifiers ──────────────────────────────────────────── -->
+      <h3 class="section-title">Identifiers</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <input type="text" class="form-input" name="aadharNo" [(ngModel)]="formData.aadharNo" maxlength="12" />
+          <label class="form-label">Aadhar No</label>
+        </div>
+        <div class="form-group">
+          <input class="form-input" type="text" name="pan" [(ngModel)]="formData.pan" maxlength="10" />
+          <label class="form-label">PAN</label>
+        </div>
+        <div class="form-group checkbox-group">
+          <label>
+            <input type="checkbox" name="foreignNational" [(ngModel)]="formData.foreignNational" />
+            Foreign National
+          </label>
+        </div>
+        <div class="form-group" *ngIf="formData.foreignNational">
+          <input class="form-input" type="text" name="passportNo" [(ngModel)]="formData.passportNo" />
+          <label class="form-label">Passport No</label>
+        </div>
+        <div class="form-group checkbox-group">
+          <label>
+            <input type="checkbox" name="vipPatient" [(ngModel)]="formData.vipPatient" />
+            VIP
+          </label>
+        </div>
+      </div>
+
+      <!-- ─── Clinical baselines ──────────────────────────────────── -->
+      <h3 class="section-title">Clinical Baselines <span class="hint hint-inline">— captured for prescription &amp; care safety (NABH AAC.4)</span></h3>
+      <div class="form-row">
+        <div class="form-group">
+          <select class="form-input" name="bloodGroup" [(ngModel)]="formData.bloodGroup" required>
+            <option value="" disabled>Select Blood Group</option>
+            <option value="A+">A+</option><option value="A-">A&minus;</option>
+            <option value="B+">B+</option><option value="B-">B&minus;</option>
+            <option value="AB+">AB+</option><option value="AB-">AB&minus;</option>
+            <option value="O+">O+</option><option value="O-">O&minus;</option>
+          </select>
+          <label class="form-label">Blood Group*</label>
+        </div>
+        <div class="form-group">
+          <input class="form-input" type="text" name="knownAllergies" [(ngModel)]="formData.knownAllergies"
+                 placeholder="e.g. penicillin, peanuts" />
+          <label class="form-label">Known Allergies</label>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group full-width">
+          <input class="form-input" type="text" name="chronicConditions" [(ngModel)]="formData.chronicConditions"
+                 placeholder="e.g. diabetes, hypertension" />
+          <label class="form-label">Chronic Conditions</label>
+        </div>
+        <div class="form-group full-width">
+          <input class="form-input" type="text" name="currentMedications" [(ngModel)]="formData.currentMedications"
+                 placeholder="medicines patient is currently taking at home" />
+          <label class="form-label">Current Medications</label>
+        </div>
+      </div>
+
+      <!-- ─── Next of Kin (required for WF-2 attender consent) ────── -->
+      <h3 class="section-title">Next of Kin <span class="hint hint-inline">— attender contact for consent &amp; emergencies</span></h3>
+      <div class="form-row">
+        <div class="form-group">
+          <input class="form-input" type="text" name="nextOfKinName" [(ngModel)]="formData.nextOfKinName" required />
+          <label class="form-label">Name*</label>
+        </div>
+        <div class="form-group">
+          <select class="form-input" name="nextOfKinRelation" [(ngModel)]="formData.nextOfKinRelation" required>
+            <option value="" disabled>Select Relation</option>
+            <option value="father">Father</option>
+            <option value="mother">Mother</option>
+            <option value="spouse">Spouse</option>
+            <option value="son">Son</option>
+            <option value="daughter">Daughter</option>
+            <option value="sibling">Sibling</option>
+            <option value="guardian">Guardian</option>
+            <option value="friend">Friend</option>
+            <option value="other">Other</option>
+          </select>
+          <label class="form-label">Relation*</label>
+        </div>
+        <div class="form-group">
+          <input class="form-input" type="tel" name="nextOfKinPhone" [(ngModel)]="formData.nextOfKinPhone" required />
+          <label class="form-label">Phone*</label>
+        </div>
+      </div>
+
+      <!-- ─── Communication preferences ──────────────────────────── -->
+      <h3 class="section-title">Communication Preference <span class="hint hint-inline">— drives reminders &amp; consent rendering (NABH PRE.5)</span></h3>
+      <div class="form-row">
+        <div class="form-group">
+          <select class="form-input" name="preferredLanguage" [(ngModel)]="formData.preferredLanguage" required>
+            <option value="en">English</option>
+            <option value="hi">Hindi</option>
+            <option value="kn">Kannada</option>
+            <option value="ta">Tamil</option>
+            <option value="te">Telugu</option>
+            <option value="ml">Malayalam</option>
+          </select>
+          <label class="form-label">Language*</label>
+        </div>
+        <div class="form-group">
+          <select class="form-input" name="preferredCommChannel" [(ngModel)]="formData.preferredCommChannel" required>
+            <option value="sms">SMS</option>
+            <option value="whatsapp">WhatsApp</option>
+            <option value="call">Phone call</option>
+            <option value="email">Email</option>
+          </select>
+          <label class="form-label">Channel*</label>
+        </div>
+      </div>
+
+      <!-- ─── Other / source ──────────────────────────────────────── -->
+      <h3 class="section-title">Other</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <select class="form-input" [(ngModel)]="formData.patientType" name="patientType" required>
+            <option value="" disabled>Select Source</option>
+            <option value="Walk-in">Walk-in</option>
+            <option value="Website">Website</option>
+            <option value="Social Media">Social Media</option>
+            <option value="Referral">Referral</option>
+            <option value="Doctor Referral">Doctor Referral</option>
+            <option value="Hospital Referral">Hospital Referral</option>
+            <option value="NGO Referral">NGO Referral</option>
+            <option value="Health Camp">Health Camp</option>
+            <option value="Phone Inquiry">Phone Inquiry</option>
+            <option value="Email Inquiry">Email Inquiry</option>
+            <option value="Advertisement">Advertisement</option>
+            <option value="Existing Patient">Existing Patient</option>
+            <option value="Other">Other</option>
+          </select>
+          <label class="form-label">Source*</label>
+        </div>
+        <div class="form-group">
+          <select class="form-input" name="religion" [(ngModel)]="formData.religion">
+            <option value="">Select Religion</option>
+            <option value="Hindu">Hindu</option>
+            <option value="Muslim">Muslim</option>
+            <option value="Christian">Christian</option>
+            <option value="Sikh">Sikh</option>
+            <option value="Buddhist">Buddhist</option>
+            <option value="Jain">Jain</option>
+            <option value="Other">Other</option>
+          </select>
+          <label class="form-label">Religion</label>
+        </div>
+        <div class="form-group">
+          <input class="form-input" type="text" name="occupation" [(ngModel)]="formData.occupation" />
+          <label class="form-label">Occupation</label>
+        </div>
+      </div>
+
+      <!-- Banners + buttons -->
+      <div class="banner banner-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+      <div class="form-buttons">
+        <button type="button" class="btn btn-cancel" (click)="resetForm()" [disabled]="isLoading">Clear</button>
+        <button type="button" class="btn btn-submit"
+                [disabled]="!isStep1Complete() || duplicateFound || isLoading"
+                (click)="proceedToConsent()">
+          Continue to Patient Rights &amp; Consent &rarr;
+        </button>
+      </div>
+    </form>
+  </ng-container>
+
+  <!-- ═════════════════════════════════════════════════════════════════════
+       STEP 2 — Patient Rights & Responsibilities consent (NABH PRE.1)
+       ═════════════════════════════════════════════════════════════════════ -->
+  <ng-container *ngIf="step === 2">
+    <h2 class="form-title">Patient Rights &amp; Responsibilities</h2>
+
+    <div class="rights-card">
+      <p>{{ consentText }}</p>
+      <p class="rights-note">
+        By signing below, <strong>{{ formData.prefix }} {{ formData.name }}</strong>
+        (or attender on behalf, if applicable) confirms understanding and agreement.
+      </p>
+    </div>
+
+    <div class="banner banner-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+    <div class="banner banner-good" *ngIf="successMessage">{{ successMessage }}</div>
+
+    <app-e-sign
+      [signerType]="'patient'"
+      [signerName]="formData.prefix + ' ' + formData.name"
+      [contextType]="'patient-rights'"
+      [prompt]="'Sign to acknowledge patient rights & responsibilities'"
+      [disabled]="isLoading"
+      (signed)="onConsentSigned($event)"
+      (cancelled)="backToForm()">
+    </app-e-sign>
+
+    <div class="form-buttons">
+      <button type="button" class="btn btn-cancel" (click)="backToForm()" [disabled]="isLoading">
+        &larr; Back to form
+      </button>
+    </div>
+  </ng-container>
+</div>

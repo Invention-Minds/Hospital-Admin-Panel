@@ -1,0 +1,316 @@
+<div class="sh-shell">
+  <h2 class="sh-title">Staff Handover</h2>
+
+  <div class="sh-banner sh-banner-bad" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+  <div class="sh-banner sh-banner-good" *ngIf="successMessage" role="status">{{ successMessage }}</div>
+
+  <div class="sh-tabs">
+    <button type="button"
+            class="sh-tab"
+            [class.sh-tab-active]="activeTab === 'queue'"
+            (click)="selectTab('queue')">
+      Queue
+      <span class="sh-badge">{{ open.length + acknowledged.length }}</span>
+    </button>
+    <button type="button"
+            class="sh-tab"
+            [class.sh-tab-active]="activeTab === 'raise'"
+            (click)="selectTab('raise')">
+      Raise handover
+    </button>
+  </div>
+
+  <!-- ============================ QUEUE ============================ -->
+  <ng-container *ngIf="activeTab === 'queue'">
+
+    <h3 class="sh-section-title">Awaiting acknowledgement ({{ open.length }})</h3>
+    <div class="sh-empty" *ngIf="!loading && open.length === 0">No pending handovers.</div>
+
+    <div class="sh-card" *ngFor="let row of open">
+      <div class="sh-card-head" (click)="toggleRow(row)">
+        <div>
+          <span [class]="pillClass(row.eventType)">{{ eventLabel(row.eventType) }}</span>
+          <strong class="sh-card-title">{{ row.shift | titlecase }} shift</strong>
+          <span class="sh-meta">by {{ row.originatorName }} ({{ row.originatorRole }})</span>
+        </div>
+        <span class="sh-time">{{ row.raisedAt | date:'short' }}</span>
+      </div>
+      <p class="sh-rationale"><strong>Rationale:</strong> {{ row.rationale }}</p>
+      <p class="sh-rationale" *ngIf="row.pendingTasks">
+        <strong>Pending tasks:</strong> {{ row.pendingTasks }}
+      </p>
+
+      <div class="sh-patients" *ngIf="patientsOf(row).length">
+        <strong>Patients affected ({{ patientsOf(row).length }}):</strong>
+        <ul>
+          <li *ngFor="let p of patientsOf(row)">
+            {{ p.prn ? 'PRN ' + p.prn : p.admissionId }} — {{ p.summary || '—' }}
+          </li>
+        </ul>
+      </div>
+
+      <div class="sh-panel" *ngIf="isExpanded(row)">
+        <div class="sh-form-row">
+          <label>
+            <input type="radio"
+                   name="ack-{{row.id}}"
+                   [value]="'ACKNOWLEDGED'"
+                   [(ngModel)]="ackOutcome" />
+            Acknowledge (sign)
+          </label>
+          <label>
+            <input type="radio"
+                   name="ack-{{row.id}}"
+                   [value]="'DECLINED'"
+                   [(ngModel)]="ackOutcome" />
+            Decline
+          </label>
+        </div>
+
+        <div class="sh-form-row">
+          <label>
+            Receiver name
+            <input type="text" [(ngModel)]="receiverName" name="receiverName-{{row.id}}" placeholder="Your full name" />
+          </label>
+          <label>
+            Receiver role
+            <select [(ngModel)]="receiverRole" name="receiverRole-{{row.id}}">
+              <option value="" disabled>Role</option>
+              <option *ngFor="let r of roleOptions" [value]="r">{{ r | titlecase }}</option>
+            </select>
+          </label>
+        </div>
+
+        <ng-container *ngIf="ackOutcome === 'ACKNOWLEDGED'">
+          <app-e-sign *ngIf="receiverName?.trim()"
+                      [signerType]="'staff'"
+                      [signerName]="receiverName"
+                      [contextType]="'staff-handover-ack'"
+                      [contextId]="row.id"
+                      [prompt]="'Receiver — acknowledging handover'"
+                      [disabled]="ackSubmitting"
+                      (signed)="onReceiverSigned(row, $event)">
+          </app-e-sign>
+        </ng-container>
+
+        <ng-container *ngIf="ackOutcome === 'DECLINED'">
+          <div class="sh-form-row">
+            <label class="sh-full">
+              Decline reason
+              <textarea rows="2"
+                        [(ngModel)]="declineReason"
+                        name="declineReason-{{row.id}}"
+                        placeholder="Why are you declining? (Sent back to originator.)"></textarea>
+            </label>
+          </div>
+          <div class="sh-form-buttons">
+            <button type="button" class="sh-btn sh-btn-danger"
+                    [disabled]="ackSubmitting"
+                    (click)="submitDecline(row)">
+              {{ ackSubmitting ? 'Submitting…' : 'Decline handover' }}
+            </button>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+
+    <h3 class="sh-section-title">Acknowledged · awaiting close ({{ acknowledged.length }})</h3>
+    <div class="sh-empty" *ngIf="!loading && acknowledged.length === 0">Nothing awaiting closure.</div>
+
+    <div class="sh-card" *ngFor="let row of acknowledged">
+      <div class="sh-card-head" (click)="toggleRow(row)">
+        <div>
+          <span [class]="pillClass(row.eventType)">{{ eventLabel(row.eventType) }}</span>
+          <strong class="sh-card-title">{{ row.shift | titlecase }} shift</strong>
+          <span class="sh-meta">
+            {{ row.originatorName }} → {{ row.receiverName }}
+          </span>
+        </div>
+        <span class="sh-time">Ack {{ row.acknowledgedAt | date:'short' }}</span>
+      </div>
+      <p class="sh-rationale">{{ row.rationale }}</p>
+
+      <div class="sh-panel" *ngIf="isExpanded(row)">
+
+        <!-- Supervisor sign block — only for RATIO_BREACH rows that haven't been signed yet. -->
+        <ng-container *ngIf="needsSupervisor(row)">
+          <h4 class="sh-section-title sh-section-title-sm">Supervisor sign-off (required for ratio breach)</h4>
+          <div class="sh-form-row">
+            <label class="sh-full">
+              Supervisor name
+              <input type="text"
+                     [(ngModel)]="supervisorName"
+                     name="supervisorName-{{row.id}}"
+                     placeholder="Charge nurse / unit supervisor name" />
+            </label>
+          </div>
+          <app-e-sign *ngIf="supervisorName?.trim()"
+                      [signerType]="'staff'"
+                      [signerName]="supervisorName"
+                      [contextType]="'staff-handover-supervisor'"
+                      [contextId]="row.id"
+                      [prompt]="'Supervisor — ratio breach acknowledgement'"
+                      [disabled]="supervisorSubmitting"
+                      (signed)="onSupervisorSigned(row, $event)">
+          </app-e-sign>
+        </ng-container>
+
+        <!-- Close block — supervisor sign requirement enforced server-side. -->
+        <p class="sh-hint" *ngIf="row.eventType === 'RATIO_BREACH' && !row.supervisorSignatureId">
+          Supervisor must sign before this can be closed.
+        </p>
+        <div class="sh-form-buttons">
+          <button type="button" class="sh-btn sh-btn-primary"
+                  [disabled]="closeSubmitting || (row.eventType === 'RATIO_BREACH' && !row.supervisorSignatureId)"
+                  (click)="closeRow(row)">
+            {{ closeSubmitting ? 'Closing…' : 'Close handover' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ============================ RAISE ============================ -->
+  <ng-container *ngIf="activeTab === 'raise'">
+
+    <div class="sh-card" *ngIf="!raisedRow">
+      <h3 class="sh-section-title">Raise a handover</h3>
+
+      <div class="sh-form-row">
+        <label>
+          Event type
+          <select [(ngModel)]="raiseForm.eventType" name="eventType">
+            <option *ngFor="let opt of eventTypeOptions" [value]="opt.value">{{ opt.label }}</option>
+          </select>
+        </label>
+        <label>
+          Shift
+          <select [(ngModel)]="raiseForm.shift" name="shift">
+            <option *ngFor="let opt of shiftOptions" [value]="opt.value">{{ opt.label }}</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="sh-form-row">
+        <label>
+          Department
+          <select [(ngModel)]="raiseForm.department" name="department">
+            <option value="">Select department</option>
+            <option *ngFor="let d of departmentOptions" [value]="d.name">{{ d.name }}</option>
+          </select>
+        </label>
+        <label>
+          Ward
+          <select [(ngModel)]="raiseForm.wardId" name="wardId">
+            <option value="">Select ward (optional)</option>
+            <option *ngFor="let w of wardOptions" [value]="w.id">
+              {{ w.wardName }}<span *ngIf="w.wardCode"> ({{ w.wardCode }})</span>
+            </option>
+          </select>
+        </label>
+      </div>
+
+      <div class="sh-form-row">
+        <label>
+          Your name (originator)
+          <input type="text" [(ngModel)]="raiseForm.originatorName" name="originatorName" placeholder="Full name" />
+        </label>
+        <label>
+          Role
+          <select [(ngModel)]="raiseForm.originatorRole" name="originatorRole">
+            <option *ngFor="let r of roleOptions" [value]="r">{{ r | titlecase }}</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="sh-form-row">
+        <label class="sh-full">
+          Rationale <span class="req">*</span>
+          <textarea rows="3"
+                    [(ngModel)]="raiseForm.rationale"
+                    name="rationale"
+                    placeholder="Why this handover is being raised — context, urgency, anything the receiver must know."></textarea>
+        </label>
+      </div>
+
+      <div class="sh-form-row">
+        <label class="sh-full">
+          Pending tasks
+          <textarea rows="2"
+                    [(ngModel)]="raiseForm.pendingTasks"
+                    name="pendingTasks"
+                    placeholder="Checklist of must-dos (medications due, results pending, etc.)"></textarea>
+        </label>
+      </div>
+
+      <h4 class="sh-section-title sh-section-title-sm">Patients affected (optional)</h4>
+      <div class="sh-form-row sh-form-row-3">
+        <label>
+          Admission
+          <select
+            [ngModel]="pendingPatientId"
+            (ngModelChange)="onPendingAdmissionChange($event)"
+            name="pId">
+            <option value="">Select admission</option>
+            <option *ngFor="let a of admissionOptions" [value]="a.admissionNo ?? a.id">
+              {{ a.admissionNo ?? a.id }} — PRN {{ a.prn }}
+            </option>
+          </select>
+        </label>
+        <label>
+          PRN
+          <select
+            [ngModel]="pendingPatientPrn"
+            (ngModelChange)="onPendingPrnChange($event)"
+            name="pPrn">
+            <option value="">Select PRN</option>
+            <option *ngFor="let a of admissionOptions" [value]="a.prn">
+              {{ a.prn }}
+            </option>
+          </select>
+        </label>
+        <label>
+          Summary
+          <input type="text" [(ngModel)]="pendingPatientSummary" name="pSum" placeholder="Short note" />
+        </label>
+      </div>
+      <div class="sh-form-buttons">
+        <button type="button" class="sh-btn sh-btn-secondary" (click)="addPatient()">+ Add patient</button>
+      </div>
+      <ul class="sh-patient-list" *ngIf="patientsAffected.length">
+        <li *ngFor="let p of patientsAffected; let i = index">
+          {{ p.prn ? 'PRN ' + p.prn : p.admissionId }} — {{ p.summary || '—' }}
+          <button type="button" class="sh-btn-remove" (click)="removePatient(i)">×</button>
+        </li>
+      </ul>
+
+      <p class="sh-hint" *ngIf="!canRaiseSign">
+        Fill in your name and a rationale (≥10 chars) to enable signing.
+      </p>
+
+      <app-e-sign *ngIf="canRaiseSign"
+                  [signerType]="'staff'"
+                  [signerName]="raiseForm.originatorName"
+                  [contextType]="'staff-handover-raise'"
+                  [contextId]="'new'"
+                  [prompt]="'Outgoing staff — handover sign'"
+                  [disabled]="raiseSubmitting"
+                  (signed)="onOriginatorSigned($event)">
+      </app-e-sign>
+    </div>
+
+    <div class="sh-card sh-card-success" *ngIf="raisedRow">
+      <h3 class="sh-section-title">Handover raised</h3>
+      <p>Reference: <strong>{{ raisedRow.id }}</strong></p>
+      <p>The incoming staff will see this in the queue. Ask them to acknowledge before you leave.</p>
+      <div class="sh-form-buttons">
+        <button type="button" class="sh-btn sh-btn-secondary" (click)="resetRaiseForm()">
+          Raise another
+        </button>
+        <button type="button" class="sh-btn sh-btn-primary" (click)="selectTab('queue')">
+          Go to queue
+        </button>
+      </div>
+    </div>
+  </ng-container>
+</div>

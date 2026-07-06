@@ -1,0 +1,182 @@
+<div class="ds-shell">
+  <div class="ds-head">
+    <div>
+      <h2 class="ds-title">Discharge Summary</h2>
+      <p class="ds-sub" *ngIf="payload?.admission as a">
+        {{ a.admissionNo }} · PRN {{ a.prn }} · admitted {{ a.admissionDate | date:'dd/MM/yyyy' }} {{ a.admissionTime }}
+      </p>
+    </div>
+    <div class="ds-actions">
+      <button class="ds-btn" (click)="load()" [disabled]="loading">Refresh</button>
+      <button class="ds-btn ds-btn-primary" (click)="print()" [disabled]="!payload">Print</button>
+    </div>
+  </div>
+
+  <div class="ds-banner ds-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="ds-loading" *ngIf="loading">Loading…</div>
+
+  <ng-container *ngIf="!loading && payload">
+    <div class="ds-tabs">
+      <button [class.ds-tab-active]="activeTab === 'admission'" (click)="setTab('admission')">Admission</button>
+      <button *ngIf="note1" [class.ds-tab-active]="activeTab === 'op1'" (click)="setTab('op1')">Operative Notes 1</button>
+      <button *ngIf="note2" [class.ds-tab-active]="activeTab === 'op2'" (click)="setTab('op2')">Operative Notes 2</button>
+      <button *ngIf="note3" [class.ds-tab-active]="activeTab === 'op3'" (click)="setTab('op3')">Operative Notes 3</button>
+      <button [class.ds-tab-active]="activeTab === 'course'" (click)="setTab('course')">Course in Hospital</button>
+      <button [class.ds-tab-active]="activeTab === 'advice'" (click)="setTab('advice')">Advice On Discharge</button>
+      <button [class.ds-tab-active]="activeTab === 'other'" (click)="setTab('other')">Other Information</button>
+    </div>
+
+    <!-- Admission -->
+    <section *ngIf="activeTab === 'admission' && payload.admission as a" class="ds-panel">
+      <div class="ds-grid">
+        <div><span>Admission No.</span><strong>{{ a.admissionNo }}</strong></div>
+        <div><span>PRN</span><strong>{{ a.prn }}</strong></div>
+        <div><span>Date / Time</span><strong>{{ a.admissionDate | date:'dd/MM/yyyy' }} {{ a.admissionTime }}</strong></div>
+        <div><span>Type</span><strong>{{ a.admissionType }}</strong></div>
+        <div><span>Admitting Doctor</span><strong>{{ a.admittingDoctor }}</strong></div>
+        <div><span>Department</span><strong>{{ a.department }}</strong></div>
+        <div><span>Room Type</span><strong>{{ a.roomType }}</strong></div>
+        <div><span>Status</span><strong>{{ a.status }}</strong></div>
+      </div>
+      <h4 class="ds-h4">Diagnosis on Admission</h4>
+      <p class="ds-textblock">{{ a.diagnosis || '—' }}</p>
+
+      <h4 class="ds-h4">OT Schedules linked to this admission</h4>
+      <table class="ds-table" *ngIf="payload.schedules.length">
+        <thead>
+          <tr><th>Date</th><th>Procedure</th><th>Surgeon</th><th>Anaesthetist</th><th>OT Room</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of payload.schedules">
+            <td>{{ s.date | date:'dd/MM/yyyy' }}</td>
+            <td>{{ s.procedureName }}</td>
+            <td>{{ s.surgeonName || '—' }}</td>
+            <td>{{ s.anaesthesiologistName || '—' }}</td>
+            <td>{{ s.otRoom || '—' }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <em class="ds-muted" *ngIf="!payload.schedules.length">No OT schedules linked.</em>
+    </section>
+
+    <!-- Operative Note panels (1, 2, 3) -->
+    <ng-template #opPanel let-n="note" let-idx="idx">
+      <div class="ds-grid">
+        <div><span>Surgery Date</span><strong>{{ n.scheduleDate | date:'dd/MM/yyyy HH:mm' }}</strong></div>
+        <div><span>Procedure</span><strong>{{ n.procedureName }}</strong></div>
+        <div><span>OT Room</span><strong>{{ n.otRoom || '—' }}</strong></div>
+        <div><span>Anaesthesia</span><strong>{{ n.anaesthesiaType || '—' }}</strong></div>
+        <div><span>Case Type</span><strong>{{ n.caseType || 'routine' }}</strong></div>
+        <div><span>Position</span><strong>{{ n.position || '—' }}</strong></div>
+      </div>
+      <h4 class="ds-h4">Pre-Op Diagnosis</h4>
+      <p class="ds-textblock">{{ n.preOpDiagnosis || '—' }}</p>
+      <h4 class="ds-h4">Post-Op Diagnosis <span class="ds-pill" *ngIf="n.postOpDiagnosisSame">same as pre-op</span></h4>
+      <p class="ds-textblock">{{ n.postOpDiagnosis || (n.postOpDiagnosisSame ? n.preOpDiagnosis : '—') }}</p>
+      <h4 class="ds-h4">Findings</h4>
+      <p class="ds-textblock">{{ n.findings || '—' }}</p>
+      <h4 class="ds-h4">Procedure / Steps</h4>
+      <p class="ds-textblock">{{ n.procedureSteps || n.procedureDone || '—' }}</p>
+      <div class="ds-grid">
+        <div><span>Incision</span><strong>{{ n.incision || '—' }}</strong></div>
+        <div><span>Drains</span><strong>{{ n.drains || '—' }}</strong></div>
+        <div><span>Blood Loss (ml)</span><strong>{{ n.bloodLossMl ?? '—' }}</strong></div>
+        <div><span>Fluids (ml)</span><strong>{{ n.fluidsMl ?? '—' }}</strong></div>
+        <div><span>Disposition</span><strong>{{ n.disposition || '—' }}</strong></div>
+      </div>
+      <h4 class="ds-h4" *ngIf="n.significantIntraOpEvent">Significant Intra-Op Event</h4>
+      <p class="ds-textblock" *ngIf="n.significantIntraOpEvent">{{ n.significantIntraOpEvent }}</p>
+      <p class="ds-sig" *ngIf="n.signedAt">
+        Signed by <strong>{{ n.signedBy }}</strong> at {{ n.signedAt | date:'dd/MM/yyyy HH:mm' }}
+      </p>
+    </ng-template>
+
+    <section *ngIf="activeTab === 'op1' && note1" class="ds-panel">
+      <ng-container *ngTemplateOutlet="opPanel; context: { note: note1, idx: 1 }"></ng-container>
+    </section>
+    <section *ngIf="activeTab === 'op2' && note2" class="ds-panel">
+      <ng-container *ngTemplateOutlet="opPanel; context: { note: note2, idx: 2 }"></ng-container>
+    </section>
+    <section *ngIf="activeTab === 'op3' && note3" class="ds-panel">
+      <ng-container *ngTemplateOutlet="opPanel; context: { note: note3, idx: 3 }"></ng-container>
+    </section>
+
+    <!-- Course -->
+    <section *ngIf="activeTab === 'course'" class="ds-panel">
+      <h4 class="ds-h4">Progress Notes (SOAP)</h4>
+      <em class="ds-muted" *ngIf="!payload.progressNotes.length">No progress notes captured.</em>
+      <div *ngFor="let p of payload.progressNotes" class="ds-progress">
+        <div class="ds-progress-h">
+          <strong>{{ p.date | date:'dd/MM/yyyy HH:mm' }}</strong>
+          <span>{{ p.doctorName }}</span>
+        </div>
+        <div class="ds-progress-b">
+          <div><em>S:</em> {{ p.subjective }}</div>
+          <div><em>O:</em> {{ p.objective }}</div>
+          <div><em>A:</em> {{ p.assessment }}</div>
+          <div><em>P:</em> {{ p.plan }}</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Advice -->
+    <section *ngIf="activeTab === 'advice'" class="ds-panel">
+      <h4 class="ds-h4">Advice on Discharge</h4>
+      <p class="ds-textblock">{{ payload.discharge?.advice || '—' }}</p>
+      <h4 class="ds-h4">Medications</h4>
+      <em class="ds-muted" *ngIf="!parseMedications(payload.discharge?.medications ?? null).length">No medications listed.</em>
+      <table class="ds-table" *ngIf="parseMedications(payload.discharge?.medications ?? null).length">
+        <thead><tr><th>Medication</th><th>Dose</th><th>Route</th><th>Frequency</th><th>Duration</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let m of parseMedications(payload.discharge?.medications ?? null)">
+            <td>{{ m['name'] || m['medication'] || '—' }}</td>
+            <td>{{ m['dose'] || '—' }}</td>
+            <td>{{ m['route'] || '—' }}</td>
+            <td>{{ m['frequency'] || '—' }}</td>
+            <td>{{ m['duration'] || '—' }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="ds-grid">
+        <div><span>Follow-up Date</span><strong>{{ payload.discharge?.followUpDate ? (payload.discharge?.followUpDate | date:'dd/MM/yyyy') : '—' }}</strong></div>
+        <div><span>Follow-up Doctor</span><strong>{{ payload.discharge?.followUpDoctor || '—' }}</strong></div>
+      </div>
+    </section>
+
+    <!-- Other -->
+    <section *ngIf="activeTab === 'other'" class="ds-panel">
+      <div class="ds-grid">
+        <div><span>Discharge Date</span><strong>{{ payload.discharge?.dischargeDate ? (payload.discharge?.dischargeDate | date:'dd/MM/yyyy') : '—' }}</strong></div>
+        <div><span>Discharge Time</span><strong>{{ payload.discharge?.dischargeTime || '—' }}</strong></div>
+        <div><span>Discharge Type</span><strong>{{ payload.discharge?.dischargeType || '—' }}</strong></div>
+        <div><span>Condition</span><strong>{{ payload.discharge?.conditionAtDischarge || '—' }}</strong></div>
+        <div><span>Summary Status</span><strong>{{ payload.discharge?.summaryStatus || 'NONE' }}</strong></div>
+      </div>
+      <h4 class="ds-h4">Final Diagnosis</h4>
+      <p class="ds-textblock">{{ payload.discharge?.finalDiagnosis || '—' }}</p>
+      <h4 class="ds-h4">Procedures Done</h4>
+      <p class="ds-textblock">{{ payload.discharge?.proceduresDone || '—' }}</p>
+      <h4 class="ds-h4">Discharge Summary</h4>
+      <p class="ds-textblock">{{ payload.discharge?.dischargeSummary || '—' }}</p>
+
+      <h4 class="ds-h4">Diagnosis Codes</h4>
+      <div class="ds-codes">
+        <div>
+          <strong>ICD Provisional</strong>
+          <em class="ds-muted" *ngIf="!codesByCategory('icd-provisional').length">none</em>
+          <div *ngFor="let c of codesByCategory('icd-provisional')">{{ c.code }} — {{ c.description }}</div>
+        </div>
+        <div>
+          <strong>ICD Final</strong>
+          <em class="ds-muted" *ngIf="!codesByCategory('icd-final').length">none</em>
+          <div *ngFor="let c of codesByCategory('icd-final')">{{ c.code }} — {{ c.description }}</div>
+        </div>
+        <div>
+          <strong>CPT</strong>
+          <em class="ds-muted" *ngIf="!codesByCategory('cpt').length">none</em>
+          <div *ngFor="let c of codesByCategory('cpt')">{{ c.code }} — {{ c.description }}</div>
+        </div>
+      </div>
+    </section>
+  </ng-container>
+</div>

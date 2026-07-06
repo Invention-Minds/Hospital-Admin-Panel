@@ -1,0 +1,81 @@
+<div class="page q-shell">
+  <div class="q-head">
+    <div>
+      <h2 class="q-title">Monthly denominators</h2>
+      <p class="q-sub">"Total medication administrations / surgeries / transfusions / encounters" per month. Without these, the Phase&nbsp;5c indicators stay unpublished — auto-source skips them.</p>
+    </div>
+    <div class="q-range">
+      <button class="qi-back" (click)="goBack()">← Indicators</button>
+    </div>
+  </div>
+
+  <div class="q-banner q-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
+  <div class="q-banner den-banner-ok" *ngIf="successMessage">{{ successMessage }}</div>
+
+  <!-- ── Upsert form ── -->
+  <div class="den-card">
+    <h3 class="den-card-title">Record denominator</h3>
+
+    <div class="den-row">
+      <label>Indicator
+        <select [(ngModel)]="draft.qiCode" (change)="loadValueFromExisting()">
+          <option value="">— select —</option>
+          <option *ngFor="let i of indicators" [value]="i.qiCode">
+            {{ i.qiCode }} · {{ i.name }}
+          </option>
+        </select>
+      </label>
+      <label>Period
+        <input type="text" [(ngModel)]="draft.period" (change)="loadValueFromExisting()" placeholder="YYYY-MM" />
+      </label>
+      <label>Value
+        <input type="number" [(ngModel)]="draft.value" min="0" />
+      </label>
+    </div>
+
+    <div class="den-row" *ngIf="selectedIndicator() as ind">
+      <div class="den-context">
+        <div><strong>Denominator definition:</strong> {{ ind.denominatorDef }}</div>
+        <div class="den-context-meta"><em>Numerator (auto-counted from Incident):</em> {{ ind.numeratorDef }}</div>
+        <div *ngIf="existingFor(draft.qiCode) as ex" class="den-existing">
+          Already recorded: <strong>{{ ex.value }}</strong> by {{ ex.capturedBy || '?' }} on {{ ex.updatedAt | date:'yyyy-MM-dd HH:mm' }}. Saving overwrites.
+        </div>
+      </div>
+    </div>
+
+    <label class="den-fullrow">Notes (optional)
+      <textarea rows="2" [(ngModel)]="draft.notes" placeholder="Data source, caveat, etc."></textarea>
+    </label>
+
+    <div class="den-foot">
+      <button class="den-save" (click)="submit()" [disabled]="saving">{{ saving ? 'Saving…' : 'Save' }}</button>
+    </div>
+  </div>
+
+  <!-- ── Reporter tagging hint (only when PSQ-016 etc.) ── -->
+  <div class="den-card den-hint" *ngIf="hints['medication-untagged'] as un">
+    <strong>{{ un }}</strong> medication incidents this period haven't been tagged to PSQ-017 / PSQ-018 / PSQ-019 / etc. PSQ-016 (overall rate) counts all of them, but the sub-types only count tagged incidents.
+  </div>
+
+  <!-- ── Recent denominators ── -->
+  <div class="den-card">
+    <h3 class="den-card-title">Recent denominators</h3>
+    <div class="q-loading" *ngIf="loading">Loading…</div>
+    <div class="q-empty" *ngIf="!loading && rows.length === 0">No denominators recorded yet.</div>
+    <table class="den-table" *ngIf="rows.length > 0">
+      <thead>
+        <tr><th>QI</th><th>Period</th><th>Value</th><th>Captured by</th><th>Updated</th><th></th></tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of rows">
+          <td class="den-code">{{ r.qiCode }}</td>
+          <td>{{ r.period }}</td>
+          <td>{{ r.value }}</td>
+          <td>{{ r.capturedBy || '—' }}</td>
+          <td>{{ r.updatedAt | date:'yyyy-MM-dd' }}</td>
+          <td><button class="den-delete" (click)="remove(r)">×</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

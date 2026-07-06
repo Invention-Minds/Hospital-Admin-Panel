@@ -11,8 +11,23 @@ import {
   CarryoverTablet,
   IpdPrescription,
   IpdPrescriptionService,
+  PregnancyAlert,
 } from '../../services/ipd-prescription.service';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
+import { PrescriptionService } from '../../services/prescription/prescription.service';
+
+/**
+ * Master tablet record returned by /api/prescription/tablets — same source the
+ * OPD doctor manual-notes screen reads. Only the fields we actually use here
+ * are typed (the API returns more).
+ */
+interface TabletMasterRecord {
+  id: number;
+  genericName: string;
+  brandName: string;
+  type?: string | null;
+  description?: string | null;
+}
 
 /**
  * Sprint 3c — Screen A — IPD Pharmacy Review.
@@ -83,6 +98,56 @@ export class IpdPharmacyComponent implements OnInit, OnDestroy {
   pendingDiscontinueRx: IpdPrescription | null = null;
   discontinueSubmitting = false;
 
+  // ---- New prescription modal ----
+  newRxModalVisible = false;
+  newRxForm!: FormGroup;
+  newRxSubmitting = false;
+
+  // Phase 9.5i — standardised route + injection-site enums so the user picks
+  // from a fixed list instead of typing free text.
+  readonly routeOptions: ReadonlyArray<{ value: string; label: string }> = [
+    { value: 'oral', label: 'Oral (PO)' },
+    { value: 'iv', label: 'Intravenous (IV)' },
+    { value: 'im', label: 'Intramuscular (IM)' },
+    { value: 'sc', label: 'Subcutaneous (SC)' },
+    { value: 'topical', label: 'Topical' },
+    { value: 'inhaled', label: 'Inhaled' },
+    { value: 'pr', label: 'Per Rectum (PR)' },
+    { value: 'sl', label: 'Sublingual (SL)' },
+    { value: 'nasal', label: 'Nasal' },
+    { value: 'ophthalmic', label: 'Ophthalmic (eye)' },
+    { value: 'otic', label: 'Otic (ear)' },
+  ];
+  readonly siteOptions: ReadonlyArray<string> = [
+    'Left deltoid', 'Right deltoid',
+    'Left gluteal', 'Right gluteal',
+    'Left upper thigh', 'Right upper thigh',
+    'Abdomen — peri-umbilical', 'Abdomen — flank',
+    'Left forearm', 'Right forearm',
+    'Other',
+  ];
+
+  // ---- Pregnancy / lactation alert modal (Phase 7) ----
+  // Backend returns 409 with `pregnancyAlerts` when the patient is flagged
+  // pregnant / lactating and the drug being prescribed has a teratogenic
+  // category. We trap that here, surface the alerts in a blocking modal,
+  // and re-submit with `pregnancyAcknowledged: true` once the prescriber
+  // ticks the explicit-ack box.
+  pregnancyAlertModalVisible = false;
+  pendingPregnancyAlerts: PregnancyAlert[] = [];
+  pendingPregnancyOp: 'new' | 'continue' | null = null;
+  pendingPregnancyPayload: IpdPrescription | null = null;
+  pendingPregnancyContinueRow: CarryoverRow | null = null;
+  pregnancyAckChecked = false;
+  pregnancyResubmitting = false;
+
+  // Tablet master list — same source as the OPD doctor screen (/api/prescription/tablets).
+  // Used to drive the genericName + brandName dropdowns inside the New Rx modal.
+  allTablets: TabletMasterRecord[] = [];
+  genericOptions: { label: string; value: string }[] = [];
+  brandOptions: { label: string; value: string }[] = [];
+  loadingTablets = false;
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -91,13 +156,28 @@ export class IpdPharmacyComponent implements OnInit, OnDestroy {
     private ipdService: IpdService,
     private prescriptionService: IpdPrescriptionService,
     private patientLookup: AppointmentConfirmService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    // Master tablet list (same source as the OPD doctor module).
+    private tabletService: PrescriptionService,
   ) {
     this.modifyForm = this.fb.group({
       dose: ['', [Validators.required]],
       frequency: ['', [Validators.required]],
       duration: ['', [Validators.required]],
       route: ['oral', [Validators.required]],
+      instructions: [''],
+    });
+
+    this.newRxForm = this.fb.group({
+      genericName: ['', [Validators.required]],
+      brandName: [''],
+      dose: ['', [Validators.required]],
+      frequency: ['', [Validators.required]],
+      duration: ['', [Validators.required]],
+      route: ['oral', [Validators.required]],
+      // Form 3 (Phase 8) — required when route is im/sc/topical, ignored otherwise.
+      site: [''],
+      quantity: [1, [Validators.required, Validators.min(1)]],
       instructions: [''],
     });
   }
@@ -233,6 +313,10 @@ export class IpdPharmacyComponent implements OnInit, OnDestroy {
         },
         error: (err: unknown) => {
           this.continuingKey = null;
+          if (isPregnancyAlertError(err)) {
+            this.openPregnancyAlertModal('continue', payload, getPregnancyAlerts(err), row);
+            return;
+          }
           this.messageService.add({
             severity: 'error',
             summary: 'Could not continue prescription',
@@ -241,6 +325,86 @@ export class IpdPharmacyComponent implements OnInit, OnDestroy {
           });
         },
       });
+  }
+
+  // ---- Pregnancy alert modal (Phase 7) -------------------------------------
+
+  /** Open the blocking alert modal — caller has already detected the 409. */
+  openPregnancyAlertModal(
+    op: 'new' | 'continue',
+    payload: IpdPrescription,
+    alerts: PregnancyAlert[],
+    continueRow: CarryoverRow | null = null,
+  ): void {
+    this.pendingPregnancyOp = op;
+    this.pendingPregnancyPayload = payload;
+    this.pendingPregnancyContinueRow = continueRow;
+    this.pendingPregnancyAlerts = alerts;
+    this.pregnancyAckChecked = false;
+    this.pregnancyResubmitting = false;
+    this.pregnancyAlertModalVisible = true;
+  }
+
+  cancelPregnancyAck(): void {
+    this.pregnancyAlertModalVisible = false;
+    this.pendingPregnancyOp = null;
+    this.pendingPregnancyPayload = null;
+    this.pendingPregnancyContinueRow = null;
+    this.pendingPregnancyAlerts = [];
+    this.pregnancyAckChecked = false;
+  }
+
+  /** Re-submit the rejected prescription with the explicit acknowledgement. */
+  confirmPregnancyAck(): void {
+    if (!this.pregnancyAckChecked || !this.pendingPregnancyPayload || !this.pendingPregnancyOp) return;
+    const payload: IpdPrescription = { ...this.pendingPregnancyPayload, pregnancyAcknowledged: true };
+    const op = this.pendingPregnancyOp;
+    const continueRow = this.pendingPregnancyContinueRow;
+    const drugName = payload.genericName;
+    this.pregnancyResubmitting = true;
+
+    const obs = op === 'new'
+      ? this.prescriptionService.createNewPrescription(this.admissionId, payload)
+      : this.prescriptionService.continuePrescription(this.admissionId, payload);
+
+    obs.pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        this.pregnancyResubmitting = false;
+        this.cancelPregnancyAck();
+        if (op === 'new') {
+          this.newRxModalVisible = false;
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Prescription added (override logged)',
+            detail: `${drugName} — pregnancy/lactation override audit-logged.`,
+            life: 4000,
+          });
+          this.loadActive();
+        } else {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Continued (override logged)',
+            detail: `${drugName} — pregnancy/lactation override audit-logged.`,
+            life: 4000,
+          });
+          if (continueRow) {
+            this.carryoverRows = this.carryoverRows.filter(
+              (r) => !(r.prescriptionId === continueRow.prescriptionId && r.tablet.id === continueRow.tablet.id)
+            );
+          }
+          this.loadActive();
+        }
+      },
+      error: (err: unknown) => {
+        this.pregnancyResubmitting = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Resubmit failed',
+          detail: toErrorMessage(err),
+          life: 5000,
+        });
+      },
+    });
   }
 
   // ---- Modify action -------------------------------------------------------
@@ -303,6 +467,150 @@ export class IpdPharmacyComponent implements OnInit, OnDestroy {
   cancelModify(): void {
     this.modifyModalVisible = false;
     this.modifyingRx = null;
+  }
+
+  // ---- New prescription action (Phase 11 follow-up) ----------------------
+  // Lets the doctor write a fresh IPD prescription without first carrying
+  // something over from OPD. Hits POST /admission/:id/prescription which
+  // creates an IpdPrescription with adminStatus='pending', so it appears in
+  // the MAR Pending list automatically.
+
+  openNewRx(): void {
+    this.newRxForm.reset({
+      genericName: '',
+      brandName: '',
+      dose: '',
+      frequency: '',
+      duration: '',
+      route: 'oral',
+      quantity: 1,
+      instructions: '',
+    });
+    this.newRxModalVisible = true;
+    // Lazy-load tablet master only the first time the modal opens.
+    if (this.allTablets.length === 0) this.loadTabletOptions();
+  }
+
+  /**
+   * Pull the tablet master list from /api/prescription/tablets and build
+   * unique-sorted dropdown options for genericName + brandName. Same source
+   * the OPD manual-notes screen uses.
+   */
+  private loadTabletOptions(): void {
+    this.loadingTablets = true;
+    this.tabletService
+      .getAllTablets()
+      .pipe(takeUntil(this.destroy$), catchError(() => of([] as TabletMasterRecord[])))
+      .subscribe((tablets) => {
+        this.allTablets = tablets ?? [];
+        const generics = uniqSorted(this.allTablets.map((t) => t.genericName).filter(Boolean));
+        const brands = uniqSorted(this.allTablets.map((t) => t.brandName).filter(Boolean));
+        this.genericOptions = generics.map((g) => ({ label: g, value: g }));
+        this.brandOptions = brands.map((b) => ({ label: b, value: b }));
+        this.loadingTablets = false;
+      });
+  }
+
+  /** When user picks a generic, auto-fill brand if there's exactly one match. */
+  onNewRxGenericChange(generic: string | null): void {
+    if (!generic) return;
+    const matches = this.allTablets.filter((t) => t.genericName === generic);
+    if (matches.length === 1) {
+      this.newRxForm.patchValue({ brandName: matches[0].brandName });
+    }
+  }
+
+  /** Mirror handler — picking a brand auto-fills the corresponding generic. */
+  onNewRxBrandChange(brand: string | null): void {
+    if (!brand) return;
+    const match = this.allTablets.find((t) => t.brandName === brand);
+    if (match) {
+      this.newRxForm.patchValue({ genericName: match.genericName });
+    }
+  }
+
+  cancelNewRx(): void {
+    this.newRxModalVisible = false;
+  }
+
+  submitNewRx(): void {
+    if (this.newRxForm.invalid || !this.admissionId) {
+      this.newRxForm.markAllAsTouched();
+      return;
+    }
+    this.newRxSubmitting = true;
+    const v = this.newRxForm.value as {
+      genericName: string;
+      brandName: string;
+      dose: string;
+      frequency: string;
+      duration: string;
+      route: string;
+      site: string;
+      quantity: number;
+      instructions: string;
+    };
+
+    const route = v.route.trim();
+    const siteRequired = ['im', 'sc', 'topical'].includes(route);
+    const siteValue = v.site?.trim() || '';
+    if (siteRequired && !siteValue) {
+      this.newRxSubmitting = false;
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Site required',
+        detail: 'For IM / SC / transdermal routes you must record the injection / patch site.',
+        life: 4500,
+      });
+      return;
+    }
+
+    const payload: IpdPrescription = {
+      admissionId: this.admissionId,
+      prescribedBy: '', // backend stamps from req.user
+      genericName: v.genericName.trim(),
+      brandName: v.brandName?.trim() || undefined,
+      dose: v.dose.trim(),
+      frequency: v.frequency.trim(),
+      duration: v.duration.trim(),
+      route,
+      site: siteValue || undefined,
+      quantity: v.quantity,
+      instructions: v.instructions?.trim() || undefined,
+      isCarryOver: false,
+      adminStatus: 'pending',
+      status: 'active',
+    };
+
+    this.prescriptionService
+      .createNewPrescription(this.admissionId, payload)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.newRxSubmitting = false;
+          this.newRxModalVisible = false;
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Prescription added',
+            detail: `${v.genericName} created — visible in MAR pending list.`,
+            life: 3500,
+          });
+          this.loadActive();
+        },
+        error: (err: unknown) => {
+          this.newRxSubmitting = false;
+          if (isPregnancyAlertError(err)) {
+            this.openPregnancyAlertModal('new', payload, getPregnancyAlerts(err));
+            return;
+          }
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Could not add prescription',
+            detail: toErrorMessage(err),
+            life: 5000,
+          });
+        },
+      });
   }
 
   // ---- Discontinue action --------------------------------------------------
@@ -451,4 +759,28 @@ function toErrorMessage(err: unknown): string {
     return maybe.error?.message ?? maybe.message ?? 'Unknown error';
   }
   return 'Unknown error';
+}
+
+/** De-dupe + sort case-insensitively. */
+function uniqSorted(values: string[]): string[] {
+  const seen = new Set<string>();
+  for (const v of values) {
+    if (typeof v === 'string' && v.trim().length > 0) seen.add(v.trim());
+  }
+  return Array.from(seen).sort((a, b) =>
+    a.toLowerCase().localeCompare(b.toLowerCase()),
+  );
+}
+
+/** Backend returns 409 + { pregnancyAlerts: [...] } when the drug is flagged. */
+function isPregnancyAlertError(err: unknown): boolean {
+  if (!err || typeof err !== 'object') return false;
+  const e = err as { status?: number; error?: { pregnancyAlerts?: unknown } };
+  return e.status === 409 && Array.isArray(e.error?.pregnancyAlerts);
+}
+
+function getPregnancyAlerts(err: unknown): PregnancyAlert[] {
+  if (!err || typeof err !== 'object') return [];
+  const e = err as { error?: { pregnancyAlerts?: PregnancyAlert[] } };
+  return e.error?.pregnancyAlerts ?? [];
 }

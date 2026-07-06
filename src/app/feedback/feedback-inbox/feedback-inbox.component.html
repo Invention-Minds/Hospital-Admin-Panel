@@ -1,0 +1,118 @@
+<div class="page fb-shell">
+  <div class="fb-head">
+    <div>
+      <h2 class="fb-title">Patient Feedback</h2>
+      <p class="fb-sub">Surveys auto-created after each encounter — low scores raise complaints automatically.</p>
+    </div>
+    <button class="fb-btn" (click)="openWalkUpPoster()" title="Print a QR poster patients can scan in the waiting area">
+      🖼 Kiosk poster
+    </button>
+  </div>
+
+  <!-- NPS tiles -->
+  <div class="fb-tiles" *ngIf="stats">
+    <div class="fb-tile fb-tile-hero">
+      <span class="fb-tile-label">NPS</span>
+      <span class="fb-tile-val">{{ stats.nps.score }}</span>
+      <span class="fb-tile-meta">{{ stats.nps.total }} responses</span>
+    </div>
+    <div class="fb-tile fb-promoter">
+      <span class="fb-tile-label">Promoters</span>
+      <span class="fb-tile-val">{{ stats.nps.promoters }}</span>
+    </div>
+    <div class="fb-tile fb-passive">
+      <span class="fb-tile-label">Passives</span>
+      <span class="fb-tile-val">{{ stats.nps.passives }}</span>
+    </div>
+    <div class="fb-tile fb-detractor">
+      <span class="fb-tile-label">Detractors</span>
+      <span class="fb-tile-val">{{ stats.nps.detractors }}</span>
+    </div>
+    <div class="fb-tile">
+      <span class="fb-tile-label">Pending</span>
+      <span class="fb-tile-val">{{ stats.byStatus['pending'] || 0 }}</span>
+    </div>
+  </div>
+
+  <div class="fb-filters">
+    <label>Status
+      <select [(ngModel)]="filters.status" (change)="load()">
+        <option value="">All</option>
+        <option *ngFor="let s of STATUSES" [value]="s">{{ s }}</option>
+      </select>
+    </label>
+    <label>Template
+      <select [(ngModel)]="filters.template" (change)="load()">
+        <option value="">All</option>
+        <option *ngFor="let t of TEMPLATES" [value]="t">{{ t }}</option>
+      </select>
+    </label>
+    <button class="fb-btn" (click)="load()">↻ Refresh</button>
+  </div>
+
+  <div class="fb-banner fb-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
+  <div class="fb-loading" *ngIf="loading">Loading…</div>
+  <div class="fb-empty" *ngIf="!loading && !rows.length">No surveys yet.</div>
+
+  <table class="fb-table" *ngIf="!loading && rows.length">
+    <thead>
+      <tr><th>Template</th><th>Patient</th><th>Encounter</th><th>Status</th><th>NPS</th><th>Comment</th><th>Kiosk link</th></tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let r of rows">
+        <td>{{ r.template }}</td>
+        <td><span *ngIf="r.patientName">{{ r.patientName }}</span><span *ngIf="r.patientPrn"> · PRN {{ r.patientPrn }}</span></td>
+        <td>{{ r.encounterDate | date:'dd/MM/yy' }}</td>
+        <td><span class="fb-pill fb-status-{{ r.status }}">{{ r.status }}</span></td>
+        <td>
+          <span *ngIf="r.npsScore != null" class="fb-pill" [ngClass]="npsClass(r.npsScore)">{{ r.npsScore }}</span>
+          <span *ngIf="r.npsScore == null" class="fb-muted">—</span>
+        </td>
+        <td class="fb-comment">{{ r.comments || '—' }}</td>
+        <td>
+          <ng-container *ngIf="canCollect(r); else doneCell">
+            <button class="fb-btn fb-btn-sm" (click)="copyLink(r)" title="Copy link">📋 Copy</button>
+            <a class="fb-btn fb-btn-sm" [href]="kioskUrl(r)" target="_blank">Open</a>
+            <button class="fb-btn fb-btn-sm" (click)="openQr(r)" title="Show QR poster">📱 QR</button>
+          </ng-container>
+          <ng-template #doneCell>
+            <span class="fb-muted">{{ r.status === 'completed' ? '✓ Submitted' : r.status === 'expired' ? 'Link expired' : '—' }}</span>
+          </ng-template>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Phase 6 — Walk-up kiosk poster (permanent QR pointing at /feedback/new). -->
+  <div class="fb-qr-overlay" *ngIf="walkUpPosterOpen" (click)="closeWalkUpPoster()">
+    <div class="fb-qr-card fb-qr-poster" (click)="$event.stopPropagation()">
+      <h3 class="fb-qr-title">Scan to share feedback</h3>
+      <p class="fb-qr-sub">Place this poster in the waiting area, ward, or discharge desk.</p>
+      <div class="fb-qr-code">
+        <qrcode [qrdata]="walkUpUrl()" [width]="320" [margin]="2" [errorCorrectionLevel]="'M'"></qrcode>
+      </div>
+      <p class="fb-qr-url">{{ walkUpUrl() }}</p>
+      <div class="fb-qr-actions">
+        <button class="fb-btn" (click)="printQr()">🖨 Print</button>
+        <button class="fb-btn fb-btn-primary" (click)="closeWalkUpPoster()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 6 — QR overlay. Click anywhere outside the card to close. -->
+  <div class="fb-qr-overlay" *ngIf="qrSurvey" (click)="closeQr()">
+    <div class="fb-qr-card" (click)="$event.stopPropagation()">
+      <h3 class="fb-qr-title">Scan to give feedback</h3>
+      <p class="fb-qr-sub" *ngIf="qrSurvey.patientName">{{ qrSurvey.patientName }}<span *ngIf="qrSurvey.patientPrn"> · PRN {{ qrSurvey.patientPrn }}</span></p>
+      <p class="fb-qr-sub">{{ qrSurvey.template }}</p>
+      <div class="fb-qr-code">
+        <qrcode [qrdata]="kioskUrl(qrSurvey)" [width]="280" [margin]="2" [errorCorrectionLevel]="'M'"></qrcode>
+      </div>
+      <p class="fb-qr-url">{{ kioskUrl(qrSurvey) }}</p>
+      <div class="fb-qr-actions">
+        <button class="fb-btn" (click)="printQr()">🖨 Print</button>
+        <button class="fb-btn fb-btn-primary" (click)="closeQr()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>

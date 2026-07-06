@@ -1,0 +1,49 @@
+<div class="ta-container">
+  <h2 class="ta-title">Therapist Availability</h2>
+
+  <div class="ta-controls">
+    <select class="ta-input" [(ngModel)]="therapistId" (change)="load()">
+      <option [ngValue]="null" disabled>Select therapist</option>
+      <option *ngFor="let t of therapists" [ngValue]="t.id">{{ t.name }}</option>
+    </select>
+    <input type="date" class="ta-input" [(ngModel)]="date" (change)="load()" />
+    <button class="ta-btn" (click)="load()" [disabled]="!therapistId || !date">Show</button>
+  </div>
+
+  <div class="ta-loading" *ngIf="loading">Loading…</div>
+
+  <div class="ta-hint" *ngIf="!loading && !result">Pick a therapist and date to see their booked and free times.</div>
+
+  <ng-container *ngIf="!loading && result">
+    <div class="ta-head">
+      <strong>{{ result.therapistName }}</strong>
+      <span class="ta-muted">· {{ result.date }}</span>
+      <span class="ta-muted">· Clinic {{ result.workingWindow?.start }}–{{ result.workingWindow?.end }}</span>
+    </div>
+    <p class="ta-muted" style="margin:0 0 12px; font-size:0.82rem;">
+      Booked times include a 5-minute buffer after each session — free windows start once the buffer is over.
+    </p>
+
+    <div class="ta-dayoff" *ngIf="result.isDayOff">● Day off / on leave — fully unavailable.</div>
+
+    <div class="ta-grid" *ngIf="!result.isDayOff">
+      <!-- Booked -->
+      <div class="ta-col">
+        <div class="ta-col-title booked">Booked ({{ result.busy?.length || 0 }})</div>
+        <div class="ta-empty" *ngIf="!result.busy?.length">No sessions booked.</div>
+        <div class="ta-slot booked" *ngFor="let b of result.busy">{{ b.startTime }} – {{ b.endTime }}</div>
+      </div>
+
+      <!-- Free -->
+      <div class="ta-col">
+        <div class="ta-col-title free">Available ({{ result.free?.length || 0 }})</div>
+        <div class="ta-empty" *ngIf="!result.free?.length">No free windows.</div>
+        <div class="ta-slot free" *ngFor="let f of result.free">{{ f.startTime }} – {{ f.endTime }}</div>
+      </div>
+    </div>
+
+    <div class="ta-blocked" *ngIf="result.blockedSlots?.length">
+      Blocked slots: <span *ngFor="let s of result.blockedSlots; let last = last">{{ s }}<span *ngIf="!last">, </span></span>
+    </div>
+  </ng-container>
+</div>

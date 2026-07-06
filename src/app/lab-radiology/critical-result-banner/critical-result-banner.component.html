@@ -1,0 +1,27 @@
+<div class="crb-wrap" *ngIf="rows.length">
+  <div class="crb-banner" (click)="toggle()">
+    <i class="pi pi-exclamation-triangle"></i>
+    <span class="crb-text">
+      <strong>{{ rows.length }} unacknowledged critical result{{ rows.length === 1 ? '' : 's' }}</strong>
+      <span class="crb-sub">in the last 7 days — review immediately</span>
+    </span>
+    <i class="pi" [ngClass]="expanded ? 'pi-chevron-up' : 'pi-chevron-down'"></i>
+  </div>
+
+  <ul class="crb-list" *ngIf="expanded">
+    <li *ngFor="let r of rows">
+      <button class="crb-link" (click)="open(r); $event.stopPropagation()">
+        <span class="crb-dot"></span>
+        <span class="crb-name">{{ r.testName }}</span>
+        <span class="crb-meta">{{ r.department }} · {{ r.reportedAt || r.createdAt | date:'medium' }}</span>
+      </button>
+    </li>
+  </ul>
+</div>
+
+<app-report-viewer
+  [open]="viewerOpen"
+  [result]="viewerResult"
+  (closed)="onViewerClosed()"
+  (acknowledged)="onAcknowledged($event)">
+</app-report-viewer>

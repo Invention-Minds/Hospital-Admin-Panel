@@ -217,6 +217,20 @@ tbody tr:hover {
   justify-content: center;
   align-items: center;
 }
+
+/* Action column — one uniform, single-line row of icon buttons (the 4 table
+   icons plus the admission/OT icon actions). The table already scrolls
+   horizontally, so we keep them on one line instead of wrapping. */
+.action-cell { padding: 10px 12px !important; white-space: nowrap; min-width: 240px; }
+.est-action-icons {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.est-action-icons app-estimation-admission-actions { display: inline-flex; }
+
 .form-row {
   display: flex;
   align-items: center;

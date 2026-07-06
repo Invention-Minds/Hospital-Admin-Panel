@@ -6,6 +6,7 @@ import { EventService } from '../../services/event.service';
 import { Subscription, interval, forkJoin } from 'rxjs';
 import { environment } from '../../../environment/environment';
 import { Router } from '@angular/router';
+import { AlertService } from '../../services/alert.service';
 interface UploadedFile {
   id?: number;                // from DB
   file?: File;                // for new uploads
@@ -27,7 +28,8 @@ export class TvControlComponent {
     private doctorService: DoctorServiceService,
     private channelService: ChannelService,
     private messageService: MessageService,
-    private router: Router
+    private router: Router,
+    private alertSvc: AlertService,
   ) {
     this.loadDepartments();
     this.loadDoctors();
@@ -624,31 +626,31 @@ export class TvControlComponent {
       const mediaExists = this.ads.some(ad => ad.type === type && ad.content);
 
       if (!mediaExists) {
-        alert(`No ${type} found. Please upload one first.`);
+        this.alertSvc.show(`No ${type} found. Please upload one first.`, { severity: 'warning' });
         return;
       }
     }
 
     this.channelService.updateAdStatus(type, isActive).subscribe(() => {
-      alert(`Ad ${isActive ? "enabled" : "disabled"} successfully.`);
+      this.alertSvc.show(`Ad ${isActive ? "enabled" : "disabled"} successfully.`, { title: 'Success' });
       this.fetchLatestAds();
     });
   }
   activateAd(type: string): void {
     if ((type === 'image' || type === 'video') && !this.ads.some(ad => ad.type === type && ad.content)) {
-      alert(`No ${type} found. Please upload one first.`);
+      this.alertSvc.show(`No ${type} found. Please upload one first.`, { severity: 'warning' });
       return;
     }
 
     this.channelService.updateAdStatus(type, true).subscribe(() => {
-      alert(`${type.charAt(0).toUpperCase() + type.slice(1)} ad activated successfully.`);
+      this.alertSvc.show(`${type.charAt(0).toUpperCase() + type.slice(1)} ad activated successfully.`, { title: 'Success' });
       this.fetchLatestAds();
     });
   }
 
   deactivateAd(type: string): void {
     this.channelService.updateAdStatus(type, false).subscribe(() => {
-      alert(`${type.charAt(0).toUpperCase() + type.slice(1)} ad deactivated successfully.`);
+      this.alertSvc.show(`${type.charAt(0).toUpperCase() + type.slice(1)} ad deactivated successfully.`, { title: 'Success' });
       this.fetchLatestAds();
     });
   }

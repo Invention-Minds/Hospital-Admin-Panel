@@ -644,12 +644,32 @@ tbody tr:hover {
 }
 
 .modal-body {
-  /* margin-bottom: 20px; */
-  padding-left: 19px;
+  padding: 4px 24px;
   gap: 10px;
   display: flex;
   flex-direction: column;
-  /* padding: 0 40px; */
+}
+
+/* Patient / Date summary — grid keeps the colons and values aligned without
+   the old magic-margin spacers. */
+.est-info {
+  display: grid;
+  grid-template-columns: max-content 14px 1fr;
+  align-items: center;
+  row-gap: 8px;
+  margin: 4px 0 14px;
+}
+.est-info-label {
+  color: rgba(39, 30, 74, 0.8);
+  font-family: Kanit;
+  font-size: 16px;
+  font-weight: 500;
+}
+.est-info-sep { color: rgba(39, 30, 74, 0.8); }
+.est-info-value {
+  color: #271e4a;
+  font-family: Kanit;
+  font-size: 16px;
 }
 
 .modal-body p {
@@ -955,8 +975,7 @@ input {
 .estimation-type-container {
   display: flex;
   align-items: center;
-  margin: 15px 0;
-  margin-bottom: 30px;
+  margin: 0;
 }
 .stay-container {
   display: flex;
@@ -965,8 +984,6 @@ input {
 }
 
 .estimation-type-label {
-  /* font-size: 14px;
-    font-weight: bold; */
   margin-right: 10px;
   color: rgba(39, 30, 74, 0.8);
   font-family: Kanit;
@@ -975,19 +992,34 @@ input {
   font-weight: 500;
   line-height: normal;
   width: 30%;
+  flex-shrink: 0;
 }
 .estimation-type {
-  /* display: flex; */
+  display: flex;
   align-items: center;
-  margin: 15px 0;
-  margin-bottom: 30px;
+  margin: 0;
 }
+
+/* Spacing inside the Estimation Form popup is driven by the modal-body flex
+   `gap` — zero the per-row margins so the gaps don't compound. */
+.estimation-modal .modal-body { gap: 16px; }
+.estimation-modal .modal-body .input-container { margin: 0; }
+.estimation-modal .est-info { margin: 0; }
 
 .radio-buttons {
   display: flex;
   align-items: center;
   gap: 15px; /* Space between radio buttons */
-  /* width: 70%; */
+  flex-wrap: wrap;
+}
+
+/* The bare `input { width:100% }` rule below leaks onto radios — keep them
+   their natural size so the radio rows align cleanly. */
+.estimation-modal input[type="radio"] {
+  width: auto;
+  padding: 0;
+  margin: 0 5px 0 0;
+  flex: none;
 }
 
 .radio-buttons label {
@@ -2638,3 +2670,75 @@ th.priority-col,td.priority-col{width:50px;text-align:center;padding:6px 4px}
 .priority-legend .priority-icon-chip{width:24px;height:24px;font-size:13px;animation:none!important;cursor:default}
 .priority-legend .priority-icon-chip:hover{transform:none}
 .priority-legend .legend-normal{color:#94a3b8}
+
+/* Quick-access modals (Investigation / Prescription) opened from the row */
+.qa-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  z-index: 1200;
+  padding: 32px 16px;
+  overflow-y: auto;
+}
+.qa-modal-card {
+  background: #fff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 1100px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+}
+.qa-modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid #e5e7eb;
+  font-weight: 600;
+  color: #173a5e;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  border-radius: 12px 12px 0 0;
+}
+.qa-modal-close {
+  border: none;
+  background: transparent;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  color: #6b7280;
+  padding: 0 4px;
+}
+.qa-modal-close:hover { color: #111827; }
+
+/* Quick-access action buttons — distinct colours from the pink OPD-notes ones */
+.investigation, .rx-btn {
+  display: inline-flex;
+  height: 36px;
+  padding: 8px 10px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  background: #fff;
+  font-family: Kanit;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: normal;
+  cursor: pointer;
+}
+.investigation { border: 1px solid #0E2970; color: #0E2970; }   /* clinical blue */
+.rx-btn        { border: 1px solid #BA2C7C; color: #BA2C7C; }   /* prescription violet */
+
+/* Breathing room inside the quick-access popups (component was edge-to-edge) */
+.qa-modal-card > app-investigation-order,
+.qa-modal-card > app-prescription-capture {
+  display: block;
+  padding: 18px 20px 22px;
+}

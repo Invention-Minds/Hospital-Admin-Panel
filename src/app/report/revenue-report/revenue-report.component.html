@@ -1,0 +1,111 @@
+<div class="rev-shell">
+  <h2 class="rev-title">Revenue</h2>
+
+  <div class="rev-banner rev-banner-bad" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+  <div class="rev-banner rev-banner-good" *ngIf="recomputeMessage" role="status">{{ recomputeMessage }}</div>
+
+  <!-- Filter bar -->
+  <div class="rev-toolbar">
+    <div class="rev-toolbar-group">
+      <label class="rev-field">
+        From
+        <input type="date" [(ngModel)]="from" (change)="runReport()" />
+      </label>
+      <label class="rev-field">
+        To
+        <input type="date" [(ngModel)]="to" (change)="runReport()" />
+      </label>
+    </div>
+
+    <div class="rev-toolbar-group">
+      <button type="button" class="rev-quick-btn" (click)="setRangeToday()">Today</button>
+      <button type="button" class="rev-quick-btn" (click)="setRangeLast7()">Last 7 days</button>
+      <button type="button" class="rev-quick-btn" (click)="setRangeMonthToDate()">Month to date</button>
+    </div>
+
+    <div class="rev-toolbar-group rev-group">
+      <span class="rev-group-label">Group by</span>
+      <button type="button"
+              class="rev-toggle"
+              [class.rev-toggle-active]="by === 'department'"
+              (click)="setBy('department')">
+        Department
+      </button>
+      <button type="button"
+              class="rev-toggle"
+              [class.rev-toggle-active]="by === 'doctor'"
+              (click)="setBy('doctor')">
+        Doctor
+      </button>
+    </div>
+  </div>
+
+  <!-- Totals -->
+  <div class="rev-totals" *ngIf="report">
+    <div class="rev-stat">
+      <span class="rev-stat-label">Appointments paid</span>
+      <span class="rev-stat-value">{{ report.totals.count }}</span>
+    </div>
+    <div class="rev-stat rev-stat-amount">
+      <span class="rev-stat-label">Gross revenue</span>
+      <span class="rev-stat-value">{{ inr(report.totals.amount) }}</span>
+    </div>
+    <div class="rev-stat">
+      <span class="rev-stat-label">Range</span>
+      <span class="rev-stat-value">{{ report.from }} → {{ report.to }}</span>
+    </div>
+  </div>
+
+  <!-- Loader / empty / table -->
+  <div class="rev-empty" *ngIf="loading">Loading…</div>
+  <div class="rev-empty" *ngIf="!loading && report && report.rows.length === 0">
+    No paid appointments in this range.
+  </div>
+
+  <table class="rev-table" *ngIf="!loading && report && report.rows.length > 0">
+    <thead>
+      <tr>
+        <th>{{ by === 'department' ? 'Department' : 'Doctor' }}</th>
+        <th class="rev-col-num">Appointments</th>
+        <th class="rev-col-num">Amount</th>
+        <th class="rev-col-num">Avg / appt</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let row of report.rows">
+        <td>{{ row.label }}</td>
+        <td class="rev-col-num">{{ row.count }}</td>
+        <td class="rev-col-num">{{ inr(row.amount) }}</td>
+        <td class="rev-col-num">{{ inr(row.count ? row.amount / row.count : 0) }}</td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <th>Total</th>
+        <th class="rev-col-num">{{ report.totals.count }}</th>
+        <th class="rev-col-num">{{ inr(report.totals.amount) }}</th>
+        <th class="rev-col-num">
+          {{ inr(report.totals.count ? report.totals.amount / report.totals.count : 0) }}
+        </th>
+      </tr>
+    </tfoot>
+  </table>
+
+  <!-- Admin: manual rollup recompute -->
+  <div class="rev-card rev-admin" *ngIf="isAdmin">
+    <h3 class="rev-section-title">Recompute rollup (admin)</h3>
+    <p class="rev-hint">
+      The nightly cron rebuilds the rollup automatically. Use this only when a payment
+      was back-dated or the nightly run failed for a specific day.
+    </p>
+    <div class="rev-toolbar">
+      <label class="rev-field">
+        Date
+        <input type="date" [(ngModel)]="recomputeDate" />
+      </label>
+      <button type="button" class="rev-btn rev-btn-primary" (click)="recompute()">
+        Recompute
+      </button>
+    </div>
+  </div>
+</div>

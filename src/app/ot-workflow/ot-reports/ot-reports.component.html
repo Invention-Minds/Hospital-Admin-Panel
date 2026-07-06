@@ -1,0 +1,121 @@
+<div class="rpt-shell">
+  <div class="rpt-head">
+    <h2 class="rpt-title">OT Reports</h2>
+    <div class="rpt-toolbar">
+      <label>From <input type="date" [(ngModel)]="fromDate" (change)="load()" /></label>
+      <label>To <input type="date" [(ngModel)]="toDate" (change)="load()" /></label>
+      <button class="rpt-btn" (click)="exportCsv()">⬇ Export CSV</button>
+    </div>
+  </div>
+
+  <div class="rpt-tabs">
+    <button [class.rpt-tab-active]="activeTab === 'register'" (click)="setTab('register')">Surgery Register</button>
+    <button [class.rpt-tab-active]="activeTab === 'equipment'" (click)="setTab('equipment')">Equipment Utilization</button>
+    <button [class.rpt-tab-active]="activeTab === 'time'" (click)="setTab('time')">Time Booked vs Actual</button>
+  </div>
+
+  <div class="rpt-banner rpt-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="rpt-loading" *ngIf="loading">Loading…</div>
+
+  <!-- ─── Surgery Register ─── -->
+  <div *ngIf="activeTab === 'register' && !loading">
+    <p class="rpt-sub">{{ register.length }} schedules</p>
+    <div class="rpt-grid-wrap">
+      <table class="rpt-grid">
+        <thead>
+          <tr>
+            <th>Date</th><th>OT Room</th><th>PRN</th><th>Patient</th>
+            <th>Surgery</th><th>Dept</th><th>Surgeon</th>
+            <th>Urgency</th><th>Status</th>
+            <th>Planned start</th><th>Actual start</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="!register.length"><td colspan="11" class="rpt-muted">No surgeries in this range.</td></tr>
+          <tr *ngFor="let r of register">
+            <td>{{ r.date | date:'dd-MMM' }}</td>
+            <td>{{ r.otRoom || '—' }}</td>
+            <td>{{ r.prn || '—' }}</td>
+            <td>{{ r.patientName || '—' }}</td>
+            <td>{{ r.procedureName }}</td>
+            <td>{{ r.department || '—' }}</td>
+            <td>{{ r.surgeonName || '—' }}</td>
+            <td>{{ r.urgency }}</td>
+            <td><span class="rpt-pill" [class]="'rpt-status-' + r.status">{{ r.status }}</span></td>
+            <td>{{ r.plannedStart | date:'HH:mm' }}</td>
+            <td>{{ r.actualStart ? (r.actualStart | date:'HH:mm') : '—' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ─── Equipment Utilization ─── -->
+  <div *ngIf="activeTab === 'equipment' && !loading">
+    <p class="rpt-sub">{{ equipment.length }} distinct equipment items</p>
+    <div class="rpt-grid-wrap">
+      <table class="rpt-grid">
+        <thead>
+          <tr>
+            <th>Equipment</th>
+            <th>Total used (min)</th>
+            <th>Uses</th>
+            <th>Distinct schedules</th>
+            <th>Avg per use (min)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="!equipment.length"><td colspan="5" class="rpt-muted">No equipment usage recorded.</td></tr>
+          <tr *ngFor="let r of equipment">
+            <td>{{ r.equipmentName }}</td>
+            <td><strong>{{ r.totalMinutes }}</strong></td>
+            <td>{{ r.uses }}</td>
+            <td>{{ r.distinctSchedules }}</td>
+            <td>{{ r.avgMinutesPerUse }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ─── Time Booked vs Actual ─── -->
+  <div *ngIf="activeTab === 'time' && !loading">
+    <div class="rpt-summary" *ngIf="timeMeta">
+      <div><span>Schedules</span><strong>{{ timeMeta.schedules }}</strong></div>
+      <div><span>Avg planned</span><strong>{{ timeMeta.avgPlannedMins }} min</strong></div>
+      <div><span>Avg actual</span><strong>{{ timeMeta.avgActualMins }} min</strong></div>
+      <div><span>Avg start delay</span><strong>{{ timeMeta.avgStartDelayMins }} min</strong></div>
+    </div>
+    <div class="rpt-grid-wrap">
+      <table class="rpt-grid">
+        <thead>
+          <tr>
+            <th>Date</th><th>Patient</th><th>Surgery</th><th>Surgeon</th>
+            <th>Planned</th><th>Actual</th>
+            <th>Start delay</th>
+            <th>Duration Δ</th>
+            <th>OT occupancy</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="!time.length"><td colspan="9" class="rpt-muted">No completed schedules in this range.</td></tr>
+          <tr *ngFor="let r of time">
+            <td>{{ r.date | date:'dd-MMM' }}</td>
+            <td>{{ r.patientName || '—' }}</td>
+            <td>{{ r.procedureName }}</td>
+            <td>{{ r.surgeonName || '—' }}</td>
+            <td>{{ r.plannedMinutes }} min</td>
+            <td>{{ r.actualMinutes !== null ? r.actualMinutes + ' min' : '—' }}</td>
+            <td [class]="deltaClass(r.startDeltaMinutes)">
+              {{ r.startDeltaMinutes !== null ? r.startDeltaMinutes + ' min' : '—' }}
+            </td>
+            <td [class]="deltaClass(r.durationDeltaMinutes)">
+              {{ r.durationDeltaMinutes !== null ? r.durationDeltaMinutes + ' min' : '—' }}
+            </td>
+            <td>{{ r.otOccupancyMinutes !== null ? r.otOccupancyMinutes + ' min' : '—' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

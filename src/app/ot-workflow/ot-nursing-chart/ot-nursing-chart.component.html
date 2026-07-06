@@ -1,0 +1,289 @@
+<div class="nc-shell">
+  <div class="nc-head">
+    <h2 class="nc-title">Intra-Op Nursing Chart</h2>
+    <div class="nc-meta">
+      <span class="nc-pill" *ngIf="serverRow"
+            [class.nc-pill-warn]="serverRow.status === 'SIGNED_SCRUB' || serverRow.status === 'SIGNED_FLOOR'"
+            [class.nc-pill-ok]="serverRow.status === 'SIGNED_INCHARGE'">
+        {{ serverRow.status }}
+      </span>
+      <span *ngIf="!serverRow" class="nc-pill">NEW</span>
+      <span *ngIf="readOnly" class="nc-readonly">Read-only — OT in-charge has signed</span>
+    </div>
+  </div>
+
+  <div class="nc-banner nc-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="nc-banner nc-good" *ngIf="successMessage">{{ successMessage }}</div>
+
+  <div *ngIf="loading" class="nc-loading">Loading…</div>
+
+  <div class="nc-body" *ngIf="!loading">
+    <nav class="nc-tabs">
+      <button type="button" [class.active]="section==='header'" (click)="setSection('header')">1. Header</button>
+      <button type="button" [class.active]="section==='positioning'" (click)="setSection('positioning')">2. Positioning</button>
+      <button type="button" [class.active]="section==='lines-tourniquet'" (click)="setSection('lines-tourniquet')">3. Lines + tourniquet</button>
+      <button type="button" [class.active]="section==='counts'" (click)="setSection('counts')">4. Counts</button>
+      <button type="button" [class.active]="section==='specimens'" (click)="setSection('specimens')">5. Specimens</button>
+      <button type="button" [class.active]="section==='end'" (click)="setSection('end')">6. End-of-procedure</button>
+      <button type="button" [class.active]="section==='sign'" (click)="setSection('sign')">7. Sign chain</button>
+      <div class="nc-tabs-actions">
+        <button type="button" class="nc-btn nc-btn-primary" [disabled]="saving || readOnly" (click)="saveDraft()">
+          {{ saving ? 'Saving…' : 'Save' }}
+        </button>
+      </div>
+    </nav>
+
+    <main class="nc-section">
+
+      <!-- 1. Header -->
+      <section *ngIf="section==='header'">
+        <h3>Transfer + anaesthesia</h3>
+        <div class="nc-grid-2">
+          <label class="nc-field">Wheel in time<input type="datetime-local" [(ngModel)]="form.wheelInAt" [disabled]="readOnly" /></label>
+          <label class="nc-field">Wheel out time<input type="datetime-local" [(ngModel)]="form.wheelOutAt" [disabled]="readOnly" /></label>
+          <label class="nc-field">Mode of transfer
+            <select [(ngModel)]="form.modeOfTransfer" [disabled]="readOnly">
+              <option [ngValue]="null">—</option>
+              <option *ngFor="let m of transferModes" [value]="m">{{ m }}</option>
+            </select>
+          </label>
+          <label class="nc-field">Anaesthesia
+            <select [(ngModel)]="form.anaesthesia" [disabled]="readOnly">
+              <option [ngValue]="null">—</option>
+              <option *ngFor="let a of anaesthesiaTypes" [value]="a">{{ a }}</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <!-- 2. Positioning -->
+      <section *ngIf="section==='positioning'">
+        <h3>Position</h3>
+        <label class="nc-field">Position
+          <select [(ngModel)]="form.position" [disabled]="readOnly">
+            <option [ngValue]="null">—</option>
+            <option *ngFor="let p of positions" [value]="p">{{ p }}</option>
+          </select>
+        </label>
+        <label class="nc-field">Position notes<textarea rows="2" [(ngModel)]="form.positionNotes" [disabled]="readOnly"></textarea></label>
+
+        <h3>Pressure protections</h3>
+        <div class="nc-check-grid">
+          <label *ngFor="let opt of pressureOptions" class="nc-check-row">
+            <input type="checkbox"
+                   [checked]="hasPressureKey(opt.key)"
+                   (change)="togglePressureKey(opt.key)"
+                   [disabled]="readOnly" />
+            {{ opt.label }}
+          </label>
+        </div>
+
+        <h3>Equipment</h3>
+        <div class="nc-grid-2">
+          <label class="nc-field">Warmer placed
+            <select [(ngModel)]="form.warmerPlaced" [disabled]="readOnly">
+              <option [ngValue]="null">—</option>
+              <option value="YES">Yes</option>
+              <option value="NO">No</option>
+              <option value="NA">NA</option>
+            </select>
+          </label>
+          <label class="nc-field">DVT pump applied
+            <select [(ngModel)]="form.dvtPumpApplied" [disabled]="readOnly">
+              <option [ngValue]="null">—</option>
+              <option value="YES">Yes</option>
+              <option value="NO">No</option>
+              <option value="NA">NA</option>
+            </select>
+          </label>
+          <label class="nc-field">Electric cautery plate
+            <select [(ngModel)]="form.electricCautery" [disabled]="readOnly">
+              <option [ngValue]="null">—</option>
+              <option value="YES">Yes</option>
+              <option value="NA">NA</option>
+            </select>
+          </label>
+          <label class="nc-field">Pad location<input type="text" [(ngModel)]="form.cauteryPadLocation" [disabled]="readOnly" placeholder="e.g. R thigh" /></label>
+        </div>
+      </section>
+
+      <!-- 3. Lines + tourniquet -->
+      <section *ngIf="section==='lines-tourniquet'">
+        <h3>Tourniquet</h3>
+        <p class="nc-sub">Record per limb in free-text JSON or descriptive notes — e.g. "RT arm applied 10:15 / released 10:55".</p>
+        <textarea rows="3" [(ngModel)]="form.tourniquet" [disabled]="readOnly"
+                  placeholder="RT arm — applied … released …&#10;LT leg — applied … released …"></textarea>
+
+        <h3>Catheters / lines</h3>
+        <p class="nc-sub">IV / Arterial / CVP / Foley — record size, site, sign, remarks per line.</p>
+        <textarea rows="4" [(ngModel)]="form.catheters" [disabled]="readOnly"
+                  placeholder="IV line — 18G, L forearm, NS, scrub nurse&#10;Arterial line — 20G, R radial&#10;Foley — 16Fr"></textarea>
+      </section>
+
+      <!-- 4. Counts -->
+      <section *ngIf="section==='counts'">
+        <h3>Instruments count</h3>
+        <p class="nc-sub">Record per-instrument counts (name, initial, additional, final, scrub initials, floor initials). Free-text for now — JSON UI lands in a later phase.</p>
+        <textarea rows="4" [(ngModel)]="form.instrumentsCount" [disabled]="readOnly"
+                  placeholder="e.g.&#10;Mosquito forceps — initial 10 / add 2 / final 12 / SN-A.K. / FN-R.S."></textarea>
+
+        <h3>Swabs count by type</h3>
+        <table class="nc-counts-table">
+          <thead><tr><th>Swab</th><th>Initial</th><th>Additional</th><th>Final</th><th>Match?</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let s of swabTypes">
+              <td>{{ s.label }}</td>
+              <td><input type="number" min="0"
+                         [ngModel]="getSwab(s.key, 'Initial')"
+                         (ngModelChange)="setSwab(s.key, 'Initial', $event)"
+                         [disabled]="readOnly" /></td>
+              <td><input type="number" min="0"
+                         [ngModel]="getSwab(s.key, 'Additional')"
+                         (ngModelChange)="setSwab(s.key, 'Additional', $event)"
+                         [disabled]="readOnly" /></td>
+              <td><input type="number" min="0"
+                         [ngModel]="getSwab(s.key, 'Final')"
+                         (ngModelChange)="setSwab(s.key, 'Final', $event)"
+                         [disabled]="readOnly" /></td>
+              <td class="nc-match">
+                {{ (getSwab(s.key, 'Initial') ?? 0) + (getSwab(s.key, 'Additional') ?? 0) === (getSwab(s.key, 'Final') ?? 0)
+                   && ((getSwab(s.key, 'Initial') ?? 0) + (getSwab(s.key, 'Additional') ?? 0)) > 0
+                   ? '✓' : '' }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="nc-banner nc-bad" *ngIf="countsMismatch">
+          ⚠ Counts do not match — initial + additional ≠ final. Resolve before signing.
+        </div>
+        <label class="nc-check-inline">
+          <input type="checkbox" [(ngModel)]="form.swabsCountTallied" [disabled]="readOnly" />
+          All counts match — verified by scrub &amp; floor nurses
+        </label>
+      </section>
+
+      <!-- 5. Specimens -->
+      <section *ngIf="section==='specimens'">
+        <h3>Specimens to laboratory</h3>
+        <label class="nc-field">Culture &amp; sensitivity<textarea rows="2" [(ngModel)]="form.specimensCulture" [disabled]="readOnly"></textarea></label>
+        <label class="nc-field">Histopathology<textarea rows="2" [(ngModel)]="form.specimensHistopathology" [disabled]="readOnly"></textarea></label>
+        <label class="nc-field">Others<textarea rows="2" [(ngModel)]="form.specimensOther" [disabled]="readOnly"></textarea></label>
+
+        <h3>Specimen handover</h3>
+        <div class="nc-grid-2">
+          <label class="nc-field">Handed over by<input type="text" [(ngModel)]="form.specimenHandedOverBy" [disabled]="readOnly" /></label>
+          <label class="nc-field">Handed at<input type="datetime-local" [(ngModel)]="form.specimenHandedOverAt" [disabled]="readOnly" /></label>
+          <label class="nc-field">Received by<input type="text" [(ngModel)]="form.specimenReceivedBy" [disabled]="readOnly" /></label>
+          <label class="nc-field">Received at<input type="datetime-local" [(ngModel)]="form.specimenReceivedAt" [disabled]="readOnly" /></label>
+        </div>
+      </section>
+
+      <!-- 6. End-of-procedure -->
+      <section *ngIf="section==='end'">
+        <h3>Condition + dressing + destination</h3>
+        <div class="nc-grid-2">
+          <label class="nc-field">Condition at end
+            <select [(ngModel)]="form.conditionAtEnd" [disabled]="readOnly">
+              <option [ngValue]="null">—</option>
+              <option *ngFor="let c of endConditions" [value]="c">{{ c }}</option>
+            </select>
+          </label>
+          <label class="nc-field">Dressing type
+            <select [(ngModel)]="form.dressingType" [disabled]="readOnly">
+              <option [ngValue]="null">—</option>
+              <option *ngFor="let d of dressingTypes" [value]="d">{{ d }}</option>
+            </select>
+          </label>
+        </div>
+        <label class="nc-field">Dressing notes<textarea rows="2" [(ngModel)]="form.dressingNotes" [disabled]="readOnly"></textarea></label>
+
+        <div class="nc-grid-2">
+          <label class="nc-field">Patient shifted to
+            <select [(ngModel)]="form.patientShiftedTo" [disabled]="readOnly">
+              <option [ngValue]="null">—</option>
+              <option *ngFor="let s of shiftedTo" [value]="s">{{ s }}</option>
+            </select>
+          </label>
+          <label class="nc-field">If other, specify<input type="text" [(ngModel)]="form.patientShiftedToOther" [disabled]="readOnly" /></label>
+        </div>
+      </section>
+
+      <!-- 7. Sign chain -->
+      <section *ngIf="section==='sign'">
+        <h3>Sign chain</h3>
+        <p class="nc-sub">Save the form first; then sign in order: scrub nurse → floor nurse → OT in-charge. Once OT in-charge signs the chart is read-only.</p>
+
+        <div class="nc-banner nc-bad" *ngIf="countsMismatch">
+          ⚠ Counts do not match — initial + additional ≠ final. Resolve the swab counts (section 4) before signing.
+        </div>
+
+        <div class="nc-sig-block">
+          <h4>Scrub nurse</h4>
+          <div *ngIf="serverRow?.scrubNurseSignedAt" class="nc-sig-stamp">
+            ✓ Signed by <strong>{{ serverRow?.scrubNurseName }}</strong> on {{ serverRow?.scrubNurseSignedAt | date:'medium' }}
+          </div>
+          <p *ngIf="!serverRow" class="nc-hint">Save the form first to enable signing.</p>
+          <ng-container *ngIf="serverRow && !serverRow.scrubNurseSignedAt">
+            <label class="nc-field">Scrub nurse name
+              <input type="text" [(ngModel)]="scrubNurseName" placeholder="Enter full name" />
+            </label>
+            <p *ngIf="!scrubNurseName.trim()" class="nc-hint">Enter the scrub nurse name to enable signing.</p>
+            <app-e-sign
+              *ngIf="scrubNurseName.trim() && !countsMismatch"
+              [signerType]="'nurse'"
+              [signerName]="scrubNurseName.trim()"
+              [signerRole]="'scrub'"
+              [contextType]="'ot-nursing-chart-scrub'"
+              [contextId]="serverRow.id"
+              (signed)="onSigned('scrub', $event)">
+            </app-e-sign>
+          </ng-container>
+        </div>
+
+        <div class="nc-sig-block" *ngIf="serverRow?.scrubNurseSignedAt">
+          <h4>Floor nurse</h4>
+          <div *ngIf="serverRow?.floorNurseSignedAt" class="nc-sig-stamp">
+            ✓ Signed by <strong>{{ serverRow?.floorNurseName }}</strong> on {{ serverRow?.floorNurseSignedAt | date:'medium' }}
+          </div>
+          <ng-container *ngIf="serverRow?.scrubNurseSignedAt && !serverRow?.floorNurseSignedAt && serverRow">
+            <label class="nc-field">Floor nurse name
+              <input type="text" [(ngModel)]="floorNurseName" placeholder="Enter full name" />
+            </label>
+            <p *ngIf="!floorNurseName.trim()" class="nc-hint">Enter the floor nurse name to enable signing.</p>
+            <app-e-sign
+              *ngIf="floorNurseName.trim() && !countsMismatch"
+              [signerType]="'nurse'"
+              [signerName]="floorNurseName.trim()"
+              [signerRole]="'floor'"
+              [contextType]="'ot-nursing-chart-floor'"
+              [contextId]="serverRow.id"
+              (signed)="onSigned('floor', $event)">
+            </app-e-sign>
+          </ng-container>
+        </div>
+
+        <div class="nc-sig-block" *ngIf="serverRow?.floorNurseSignedAt">
+          <h4>OT in-charge</h4>
+          <div *ngIf="serverRow?.otInchargeSignedAt" class="nc-sig-stamp">
+            ✓ Signed by <strong>{{ serverRow?.otInchargeName }}</strong> on {{ serverRow?.otInchargeSignedAt | date:'medium' }}
+          </div>
+          <ng-container *ngIf="serverRow?.floorNurseSignedAt && !serverRow?.otInchargeSignedAt && serverRow">
+            <label class="nc-field">OT in-charge name
+              <input type="text" [(ngModel)]="inchargeNurseName" placeholder="Enter full name" />
+            </label>
+            <p *ngIf="!inchargeNurseName.trim()" class="nc-hint">Enter the OT in-charge name to enable signing.</p>
+            <app-e-sign
+              *ngIf="inchargeNurseName.trim() && !countsMismatch"
+              [signerType]="'nurse'"
+              [signerName]="inchargeNurseName.trim()"
+              [signerRole]="'ot-incharge'"
+              [contextType]="'ot-nursing-chart-incharge'"
+              [contextId]="serverRow.id"
+              (signed)="onSigned('incharge', $event)">
+            </app-e-sign>
+          </ng-container>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>

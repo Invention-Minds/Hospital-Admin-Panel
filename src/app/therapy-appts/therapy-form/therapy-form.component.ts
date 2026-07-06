@@ -42,7 +42,9 @@ export class TherapyFormComponent {
     date: '',
     time: '',
     hasBathing: false,
-    remarks:''
+    remarks:'',
+    totalDays: 1,
+    intervalDays: 1
   };
 
   therapies: any[] = [];
@@ -60,6 +62,14 @@ export class TherapyFormComponent {
 
   selectedTherapy: any = null;
   durationSplitVisible = false;
+
+  // Per-day editable rows for a multi-day course (date/time/therapist/room).
+  dayRows: any[] = [];
+
+  // Conflict popup (MHC-style) for tentative/planned clashes.
+  displayConflictDialog = false;
+  conflictMessage = '';
+  private pendingProceed: (() => void) | null = null;
 
   calculatedDurations = {
     therapy: 0,
@@ -224,9 +234,9 @@ export class TherapyFormComponent {
       form.form.markAllAsTouched();
       return;
     }
-    // time window check
+    // time window check (5-min buffer matches the backend's BUFFER_MIN)
     const start = this.toMinutes(this.formData.time);
-    const end = start + Number(this.formData.totalDurationMinutes) + 10;
+    const end = start + Number(this.formData.totalDurationMinutes) + 5;
 
     if (start < 360 || end > 1080) {
       this.messageService.add({ severity: 'error', summary: 'Invalid Time', detail: 'Allowed only 06:00 to 18:00 (buffer included).' });
@@ -265,40 +275,133 @@ export class TherapyFormComponent {
     this.formData.prn = Number(this.formData.prn);
     this.formData.doctorId = Number(this.formData.doctorId);
     this.formData.therapistIds = this.formData.therapistIds.map((id: any) => Number(id));
-    // this.formData.therapyId = Number(this.formData.therapyId);
-    // therapyIds: this.formData.therapyIds.map((id:any)=>Number(id)),
     this.formData.status = 'confirmed'
     this.formData.id = this.serviceData?.id || null;
-    const payload = {
-      ...this.formData,
-      therapyIds: this.formData.therapyIds.map((id: any) => Number(id)),
+
+    const therapyIds = this.formData.therapyIds.map((id: any) => Number(id));
+    const totalDays = Number(this.formData.totalDays) || 1;
+    // Multi-day course (create only) → POST /courses. Otherwise a single appointment.
+    const isCourse = !this.serviceData?.id && totalDays > 1;
+
+    let coursePayload: any = null;
+    let singlePayload: any = null;
+
+    if (isCourse) {
+      if (!this.dayRows.length) this.buildDayRows();
+
+      // Days 2..N (the cards) each need date/time/therapist/room. Day 1 is the
+      // top fields, already enforced by the form's `required` validation.
+      for (const r of this.dayRows) {
+        if (!r.date || !r.time || !r.roomNumber || !r.therapistIds?.length) {
+          this.messageService.add({
+            severity: 'error',
+            summary: `Day ${r.dayNumber} incomplete`,
+            detail: 'Date, time, therapist and room are required for every day.',
+          });
+          this.isLoading = false;
+          return;
+        }
+      }
+
+      // Real (confirmed) clash on any day → cannot book; operator must fix the red days.
+      if (this.hasBlockingConflict()) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Schedule clash',
+          detail: 'One or more days clash with a real booking (red). Change their date/time/therapist/room before booking.',
+        });
+        this.isLoading = false;
+        return;
+      }
+
+      const dur = Number(this.formData.totalDurationMinutes);
+      const hasBathing = !!this.formData.hasBathing;
+      // Day 1 = top fields; Days 2..N = the cards.
+      const day1 = {
+        plannedDate: this.formData.date,
+        time: this.formData.time,
+        roomNumber: this.formData.roomNumber,
+        totalDurationMinutes: dur,
+        hasBathing,
+        therapistIds: this.formData.therapistIds.map((id: any) => Number(id)),
+        therapyIds,
+      };
+      const extraDays = this.dayRows.map((r: any) => ({
+        plannedDate: r.date,
+        time: r.time,
+        roomNumber: r.roomNumber,
+        totalDurationMinutes: dur,
+        hasBathing,
+        therapistIds: r.therapistIds.map((id: any) => Number(id)),
+        therapyIds,
+      }));
+      const days = [day1, ...extraDays];
+
+      coursePayload = {
+        prn: this.formData.prn,
+        prefix: this.formData.prefix,
+        name: this.formData.name,
+        phone: this.formData.phone,
+        email: this.formData.email,
+        gender: this.formData.gender,
+        age: this.formData.age ? Number(this.formData.age) : null,
+        doctorId: this.formData.doctorId,
+        remarks: this.formData.remarks || null,
+        totalDays: days.length,
+        intervalDays: Number(this.formData.intervalDays) || 1,
+        startDate: this.formData.date,
+        days,
+      };
+    } else {
+      singlePayload = { ...this.formData, therapyIds };
+    }
+
+    // `force` is added per attempt: a 409 warning (tentative/planned clash) prompts
+    // the operator to proceed, which re-fires with force=true.
+    const fire = (force: boolean) => {
+      let request$: any;
+      if (isCourse) {
+        request$ = this.therapyService.createTherapyCourse({ ...coursePayload, force });
+      } else if (this.serviceData?.id) {
+        request$ = this.therapyService.updateTherapyAppointment(singlePayload.id, singlePayload);
+      } else {
+        request$ = this.therapyService.createTherapyAppointment({ ...singlePayload, force });
+      }
+
+      request$.subscribe({
+        next: (res: any) => {
+          this.messageService.add({
+            severity: "success",
+            summary: this.serviceData?.id ? "Updated" : (isCourse ? "Course Created" : "Created"),
+            detail: res.message,
+          });
+          this.isLoading = false;
+          this.resetForm(form);
+        },
+        error: (err: any) => {
+          // Soft clash with a tentative (planned) course day → show conflict popup; retry with force on Yes.
+          if (err.status === 409 && err.error?.warning && !force) {
+            this.isLoading = false;
+            this.conflictMessage = err.error.message || 'This slot has a tentative booking. Do you want to proceed?';
+            this.pendingProceed = () => {
+              this.isLoading = true;
+              fire(true);
+            };
+            this.displayConflictDialog = true;
+            return;
+          }
+          console.error(err);
+          this.messageService.add({
+            severity: "error",
+            summary: "Error",
+            detail: err.error?.message || "Operation failed",
+          });
+          this.isLoading = false;
+        },
+      });
     };
 
-    // Decide based on presence of ID
-    const request$ = this.serviceData?.id
-      ? this.therapyService.updateTherapyAppointment(payload.id, payload)
-      : this.therapyService.createTherapyAppointment(payload);
-
-    request$.subscribe({
-      next: (res) => {
-        this.messageService.add({
-          severity: "success",
-          summary: payload.id ? "Updated" : "Created",
-          detail: res.message,
-        });
-        this.isLoading = false;
-        this.resetForm(form);
-      },
-      error: (err) => {
-        console.error(err);
-        this.messageService.add({
-          severity: "error",
-          summary: "Error",
-          detail: err.error?.message || "Operation failed",
-        });
-        this.isLoading = false;
-      },
-    });
+    fire(false);
   }
 
   resetForm(form: NgForm) {
@@ -317,12 +420,15 @@ export class TherapyFormComponent {
       roomNumber: '',
       date: '',
       time: '',
-      hasBathing: false
+      hasBathing: false,
+      totalDays: 1,
+      intervalDays: 1
     };
 
     this.availableRooms = [];
     this.availableTimeSlots = [];
     this.bookedSchedule = [];
+    this.dayRows = [];
 
     this.durationSplitVisible = false;
     this.calculatedDurations = {
@@ -572,6 +678,11 @@ export class TherapyFormComponent {
     this.availableRooms = [];
     this.availableTimeSlots = [];
     if (this.formData.date) this.fetchScheduleForSelectedDate();
+    // Day 1's therapists cascade to the additional-day cards.
+    if (Number(this.formData.totalDays) > 1 && this.dayRows.length) {
+      this.dayRows.forEach((r) => (r.therapistIds = [...(this.formData.therapistIds || [])]));
+      this.refreshDayAvailability();
+    }
   }
 
   onDateChange() {
@@ -582,11 +693,245 @@ export class TherapyFormComponent {
       this.availableTimeSlots = [];
     }
     if (this.formData.therapistIds.length > 0) this.fetchScheduleForSelectedDate();
+    if (Number(this.formData.totalDays) > 1) this.buildDayRows();
   }
 
   onTimeChange() {
     this.formData.roomNumber = '';
     this.availableRooms = this.getAvailableRooms();
+    this.seedEmptyDayFields();
+  }
+
+  // ---- Multi-day per-day editable rows ----
+  scheduleByDate: { [date: string]: any[] } = {};
+  plannedByDate: { [date: string]: any[] } = {};
+
+  onCourseConfigChange() {
+    this.buildDayRows();
+  }
+
+  /** Build the ADDITIONAL day cards (Day 2..N). Day 1 is the top form fields.
+   *  Dates spaced from the start date by the interval; time/room/therapist seeded
+   *  from the top (Day 1). Recomputes dates on rebuild; keeps edited values. */
+  buildDayRows() {
+    const n = Number(this.formData.totalDays) || 1;
+    if (n <= 1) {
+      this.dayRows = [];
+      return;
+    }
+    const interval = Number(this.formData.intervalDays) || 1;
+    const extra = n - 1; // days 2..N
+    const rows: any[] = [];
+    for (let i = 0; i < extra; i++) {
+      const ex = this.dayRows[i];
+      rows.push({
+        dayNumber: i + 2,
+        date: this.formData.date ? this.addDays(this.formData.date, (i + 1) * interval) : (ex?.date || ''),
+        time: ex?.time || this.formData.time || '',
+        roomNumber: ex?.roomNumber || this.formData.roomNumber || '',
+        therapistIds: ex?.therapistIds?.length ? ex.therapistIds : [...(this.formData.therapistIds || [])],
+      });
+    }
+    this.dayRows = rows;
+    this.refreshDayAvailability();
+  }
+
+  /** Fill only empty row fields from the top selections (when the operator picks
+   *  therapist/time/room AFTER setting the day count). */
+  seedEmptyDayFields() {
+    if (Number(this.formData.totalDays) <= 1 || !this.dayRows.length) return;
+    this.dayRows.forEach((r) => {
+      if (!r.time) r.time = this.formData.time || '';
+      if (!r.roomNumber) r.roomNumber = this.formData.roomNumber || '';
+      if (!r.therapistIds?.length) r.therapistIds = [...(this.formData.therapistIds || [])];
+    });
+    this.refreshDayAvailability();
+  }
+
+  resetDayRows() {
+    this.dayRows = [];
+    this.buildDayRows();
+  }
+
+  onDayRowChange() {
+    this.refreshDayAvailability();
+  }
+
+  onConflictAccept() {
+    this.displayConflictDialog = false;
+    const proceed = this.pendingProceed;
+    this.pendingProceed = null;
+    if (proceed) proceed();
+  }
+
+  onConflictReject() {
+    this.displayConflictDialog = false;
+    this.pendingProceed = null;
+  }
+
+  /** Fetch each distinct day's confirmed bookings AND tentative planned days, then flag rows. */
+  refreshDayAvailability() {
+    const dates = Array.from(new Set(this.dayRows.map((r) => r.date).filter(Boolean)));
+    if (!dates.length) {
+      this.computeDayFlags();
+      return;
+    }
+    let pending = dates.length * 2;
+    const done = () => {
+      if (--pending === 0) this.computeDayFlags();
+    };
+    dates.forEach((d) => {
+      this.therapyService.getTherapyScheduleByDate(d).subscribe({
+        next: (res) => (this.scheduleByDate[d] = res || []),
+        error: () => (this.scheduleByDate[d] = []),
+        complete: done,
+      });
+      this.therapyService.getPlannedDaysByDate(d).subscribe({
+        next: (res) => (this.plannedByDate[d] = res || []),
+        error: () => (this.plannedByDate[d] = []),
+        complete: done,
+      });
+    });
+  }
+
+  /** Detailed overlaps for a slot — returns which therapist/room clashes, when, and the source label. */
+  private overlapDetails(
+    list: any[], start: number, end: number, roomNumber: string, tIds: number[], type: string
+  ): { what: string; when: string; type: string }[] {
+    const out: { what: string; when: string; type: string }[] = [];
+    (list || []).forEach((a: any) => {
+      const aStart = this.toMinutes(a.time);
+      const adur = Number(a.totalDurationMinutes || 0);
+      const aEnd = aStart + adur + 5;
+      if (!this.isOverlap(start, end, aStart, aEnd)) return;
+      const when = adur > 0 ? `${a.time}–${this.minutesToTime(aStart + adur)}` : a.time;
+      if (a.roomNumber === roomNumber) {
+        out.push({ what: roomNumber, when, type });
+      }
+      const ids = (a.therapists || []).map((t: any) => Number(t.therapistId));
+      ids.filter((id: number) => tIds.includes(id)).forEach((id: number) => {
+        const name = this.therapists.find((t) => t.id === id)?.name || `Therapist #${id}`;
+        out.push({ what: name, when, type });
+      });
+    });
+    return out;
+  }
+
+  private dedupeConflicts(list: any[]): any[] {
+    const seen = new Set<string>();
+    return list.filter((c) => {
+      const k = `${c.what}|${c.when}|${c.type}`;
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
+  }
+
+  /** Flag each card: red "busy" for a real booking clash, amber "tentative" for
+   *  another course's planned-day clash, else available — with who/when details. */
+  private computeDayFlags() {
+    const dur = Number(this.formData.totalDurationMinutes) || 0;
+    this.dayRows.forEach((row, idx) => {
+      row.unavailable = false;
+      row.tentative = false;
+      row.reason = '';
+      row.conflicts = [];
+      if (!row.date || !row.time) return;
+
+      const start = this.toMinutes(row.time);
+      const end = start + dur + 5; // 5-min post-session buffer (matches backend)
+      const tIds = (row.therapistIds || []).map((x: any) => Number(x));
+
+      // Other cards in THIS form on the same date.
+      const sameForm = this.dayRows
+        .filter((other, j) => j !== idx && other.date === row.date)
+        .map((other) => ({
+          time: other.time,
+          roomNumber: other.roomNumber,
+          totalDurationMinutes: dur,
+          therapists: (other.therapistIds || []).map((id: any) => ({ therapistId: Number(id) })),
+        }));
+
+      const real = [
+        ...this.overlapDetails(this.scheduleByDate[row.date] || [], start, end, row.roomNumber, tIds, 'Confirmed'),
+        ...this.overlapDetails(sameForm, start, end, row.roomNumber, tIds, 'This course'),
+      ];
+      if (real.length) {
+        row.unavailable = true;
+        row.reason = 'Booked';
+        row.conflicts = this.dedupeConflicts(real);
+        return; // real clash wins
+      }
+
+      const planned = this.overlapDetails(this.plannedByDate[row.date] || [], start, end, row.roomNumber, tIds, 'Tentative');
+      if (planned.length) {
+        row.tentative = true;
+        row.reason = 'Tentatively planned';
+        row.conflicts = this.dedupeConflicts(planned);
+      }
+    });
+  }
+
+  /** True when any day card has a REAL (confirmed) clash — submit must be blocked.
+   *  Tentative (planned) clashes are allowed (handled by the proceed popup). */
+  hasBlockingConflict(): boolean {
+    return Number(this.formData.totalDays) > 1 && this.dayRows.some((r) => r.unavailable);
+  }
+
+  private addDays(dateStr: string, n: number): string {
+    const [y, m, d] = dateStr.split('-').map(Number);
+    const dt = new Date(Date.UTC(y, m - 1, d));
+    dt.setUTCDate(dt.getUTCDate() + n);
+    return `${dt.getUTCFullYear()}-${String(dt.getUTCMonth() + 1).padStart(2, '0')}-${String(dt.getUTCDate()).padStart(2, '0')}`;
+  }
+
+  /** Rooms still free at this card's date+time (booked rooms hidden). Keeps the
+   *  current selection visible so it isn't lost. */
+  availableRoomsForRow(row: any): string[] {
+    if (!row.date || !row.time) return this.roomNumbers;
+    const dur = Number(this.formData.totalDurationMinutes) || 0;
+    const start = this.toMinutes(row.time);
+    const end = start + dur + 5;
+    const blocked = new Set<string>();
+
+    (this.scheduleByDate[row.date] || []).forEach((a: any) => {
+      if (!a.roomNumber) return;
+      const aStart = this.toMinutes(a.time);
+      const aEnd = aStart + Number(a.totalDurationMinutes || 0) + 5;
+      if (this.isOverlap(start, end, aStart, aEnd)) blocked.add(a.roomNumber);
+    });
+    // Other cards in this same form on the same date.
+    this.dayRows.forEach((o) => {
+      if (o === row || o.date !== row.date || !o.roomNumber) return;
+      const oStart = this.toMinutes(o.time);
+      const oEnd = oStart + dur + 5;
+      if (this.isOverlap(start, end, oStart, oEnd)) blocked.add(o.roomNumber);
+    });
+
+    let avail = this.roomNumbers.filter((r) => !blocked.has(r));
+    if (row.roomNumber && !avail.includes(row.roomNumber)) avail = [row.roomNumber, ...avail];
+    return avail;
+  }
+
+  /** The card's selected therapists' booked timings on that date (so the operator can avoid them). */
+  therapistBusyForRow(row: any): { name: string; slots: string[] }[] {
+    if (!row.date || !row.therapistIds?.length) return [];
+    const result: { name: string; slots: string[] }[] = [];
+    row.therapistIds.forEach((id: any) => {
+      const tid = Number(id);
+      const therapist = this.therapists.find((t) => t.id === tid);
+      if (!therapist) return;
+      const slots: string[] = [];
+      (this.scheduleByDate[row.date] || []).forEach((a: any) => {
+        const ids = (a.therapists || []).map((t: any) => Number(t.therapistId));
+        if (!ids.includes(tid)) return;
+        const aStart = this.toMinutes(a.time);
+        const adur = Number(a.totalDurationMinutes || 0);
+        slots.push(adur > 0 ? `${a.time}–${this.minutesToTime(aStart + adur)}` : a.time);
+      });
+      if (slots.length) result.push({ name: therapist.name, slots });
+    });
+    return result;
   }
 
   fetchScheduleForSelectedDate() {

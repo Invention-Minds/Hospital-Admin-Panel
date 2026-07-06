@@ -1,0 +1,90 @@
+<div class="dt-shell">
+  <div class="dt-banner dt-banner-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <!-- Drug-food interactions -->
+  <section class="dt-card dt-warn-card" *ngIf="interactions.length > 0">
+    <h3>⚠ Drug-food interactions</h3>
+    <ul>
+      <li *ngFor="let hit of interactions">
+        <strong>{{ hit.drug.genericName || hit.drug.brandName }}</strong>
+        — <span class="dt-pill" [class.dt-pill-critical]="hit.interaction.severity === 'critical'">{{ hit.interaction.severity }}</span>
+        <div class="dt-guidance">{{ hit.interaction.foodGuidance }}</div>
+      </li>
+    </ul>
+  </section>
+
+  <!-- Current plan -->
+  <section class="dt-card">
+    <h3>Current diet plan</h3>
+    <div *ngIf="!current" class="dt-empty">No active diet plan. Ask the dietician to assign one.</div>
+    <div *ngIf="current" class="dt-plan">
+      <div class="dt-plan-head">
+        <span class="dt-plan-code">{{ current.diet?.code }}</span>
+        <span class="dt-plan-name">{{ current.diet?.name }}</span>
+        <span class="dt-pill">ACTIVE</span>
+      </div>
+      <div class="dt-macros" *ngIf="current.diet">
+        <span *ngIf="current.diet.caloriesKcal">{{ current.diet.caloriesKcal }} kcal</span>
+        <span *ngIf="current.diet.proteinG">protein {{ current.diet.proteinG }}g</span>
+        <span *ngIf="current.diet.carbsG">carbs {{ current.diet.carbsG }}g</span>
+        <span *ngIf="current.diet.fatG">fat {{ current.diet.fatG }}g</span>
+        <span *ngIf="current.diet.sodiumMg">sodium {{ current.diet.sodiumMg }}mg</span>
+        <span *ngIf="current.diet.fluidMl">fluid {{ current.diet.fluidMl }}ml</span>
+      </div>
+      <div class="dt-row" *ngIf="allergens.length">
+        <strong>Allergens:</strong> {{ allergens.join(', ') }}
+      </div>
+      <div class="dt-row" *ngIf="restrictions.length">
+        <strong>Restrictions:</strong> {{ restrictions.join(', ') }}
+      </div>
+      <div class="dt-row" *ngIf="current.notesForKitchen">
+        <strong>Kitchen note:</strong> {{ current.notesForKitchen }}
+      </div>
+      <div class="dt-row" *ngIf="current.npoUntil">
+        <strong>NPO until:</strong> {{ current.npoUntil | date:'medium' }}
+      </div>
+      <div class="dt-row dt-sig">
+        Signed {{ current.signedAt | date:'medium' }} by {{ current.signedBy }}
+      </div>
+    </div>
+  </section>
+
+  <!-- Today's orders -->
+  <section class="dt-card">
+    <h3>Today's meals</h3>
+    <table class="dt-table" *ngIf="todayOrders.length > 0">
+      <thead><tr><th>Slot</th><th>Meal</th><th>Scheduled</th><th>Status</th><th>Intake</th></tr></thead>
+      <tbody>
+        <tr *ngFor="let o of todayOrders">
+          <td>{{ o.mealTimeSlot?.name }}</td>
+          <td>{{ o.meal?.name ?? '—' }}</td>
+          <td>{{ o.scheduledFor | date:'shortTime' }}</td>
+          <td><span class="dt-pill" [ngClass]="statusColor(o.status)">{{ o.status }}</span></td>
+          <td>
+            <span *ngIf="o.intake">{{ o.intake.percentConsumed }}%</span>
+            <span *ngIf="!o.intake" class="dt-muted">—</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <div *ngIf="todayOrders.length === 0" class="dt-empty">No meal orders for today yet.</div>
+  </section>
+
+  <!-- History -->
+  <section class="dt-card">
+    <h3>Plan history</h3>
+    <table class="dt-table" *ngIf="history.length > 1">
+      <thead><tr><th>Diet</th><th>Status</th><th>Signed</th><th>By</th><th>Reason</th></tr></thead>
+      <tbody>
+        <tr *ngFor="let p of history">
+          <td>{{ p.diet?.code }} · {{ p.diet?.name }}</td>
+          <td><span class="dt-pill">{{ p.status }}</span></td>
+          <td>{{ p.signedAt | date:'short' }}</td>
+          <td>{{ p.signedBy ?? '—' }}</td>
+          <td>{{ p.reassessmentReason ?? '—' }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <div *ngIf="history.length <= 1" class="dt-empty">No prior plans.</div>
+  </section>
+</div>

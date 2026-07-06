@@ -1,0 +1,170 @@
+<div class="apd-overlay" (click)="close()">
+  <aside class="apd-drawer" (click)="$event.stopPropagation()">
+
+    <div class="apd-loading" *ngIf="loading">Loading patient detail…</div>
+    <div class="apd-banner apd-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+    <ng-container *ngIf="!loading && detail as d">
+      <!-- Header -->
+      <header class="apd-header apd-band-{{ d.latestSnapshot?.ewsBand || 'low' }}">
+        <div class="apd-header-main">
+          <div class="apd-ews-big">
+            <span class="apd-ews-num">{{ d.latestSnapshot?.ewsScore ?? '–' }}</span>
+            <span class="apd-ews-cap">NEWS2</span>
+          </div>
+          <div>
+            <h3 class="apd-name">
+              {{ d.admission.patientName || 'PRN ' + (d.admission.prn || '—') }}
+              <span class="apd-src apd-src-{{ d.admission.source }}">{{ d.admission.source }}</span>
+            </h3>
+            <div class="apd-sub">
+              {{ d.admission.age || '—' }}{{ d.admission.gender ? ' / ' + d.admission.gender : '' }}
+              <span *ngIf="d.admission.bloodGroup">· {{ d.admission.bloodGroup }}</span>
+              <span *ngIf="d.admission.bed?.bedNumber">· Bed {{ d.admission.bed?.bedNumber }}</span>
+              <span *ngIf="d.admission.ward as w">· {{ w.wardName }}</span>
+            </div>
+            <div class="apd-band-text">{{ bandLabel(d.latestSnapshot?.ewsBand) }}</div>
+          </div>
+        </div>
+        <button class="apd-icon-btn" (click)="close()" title="Close"><i class="pi pi-times"></i></button>
+      </header>
+
+      <div class="apd-body">
+        <div class="apd-banner apd-good" *ngIf="successMessage">{{ successMessage }}</div>
+
+        <!-- Jump to the full IPD admission record (progress notes, orders,
+             MAR, discharge etc.) — the established admission entry point. -->
+        <a class="apd-open-ipd"
+           [routerLink]="['/ipd/admission', admissionId, 'progress-note']"
+           (click)="close()">
+          <i class="pi pi-external-link"></i>
+          <span>Open full IPD record</span>
+          <i class="pi pi-angle-right apd-open-ipd-arrow"></i>
+        </a>
+
+        <!-- EWS trend -->
+        <section class="apd-section">
+          <h4 class="apd-section-title">NEWS2 trend</h4>
+          <div class="apd-trend-box">
+            <app-ews-sparkline [points]="ewsSeries" [band]="d.latestSnapshot?.ewsBand || 'low'"
+                               [w]="440" [h]="120"></app-ews-sparkline>
+            <p class="apd-muted" *ngIf="ewsSeries.length <= 1">
+              Not enough readings yet to draw a trend.
+            </p>
+          </div>
+        </section>
+
+        <!-- NEWS2 component breakdown -->
+        <section class="apd-section" *ngIf="breakdown.length">
+          <h4 class="apd-section-title">Score breakdown</h4>
+          <div class="apd-breakdown">
+            <div class="apd-bd-item" *ngFor="let b of breakdown"
+                 [class.apd-bd-red]="b.score === 3"
+                 [class.apd-bd-amber]="b.score === 1 || b.score === 2">
+              <span class="apd-bd-label">{{ b.label }}</span>
+              <span class="apd-bd-score">{{ b.score === null ? '—' : '+' + b.score }}</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Vitals table -->
+        <section class="apd-section">
+          <h4 class="apd-section-title">Recent vitals</h4>
+          <div class="apd-table-wrap" *ngIf="vitalsRows.length; else noVitals">
+            <table class="apd-table">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th *ngFor="let c of vitalsColumns">{{ c }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of vitalsRows">
+                  <td>{{ row.recordedAt | date:'d MMM HH:mm' }}</td>
+                  <td *ngFor="let cell of row.cells">{{ cell }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <ng-template #noVitals><p class="apd-muted">No vitals recorded.</p></ng-template>
+        </section>
+
+        <!-- Critical results -->
+        <section class="apd-section" *ngIf="d.criticalResults.length">
+          <h4 class="apd-section-title">
+            Critical results <span class="apd-count">{{ d.criticalResults.length }}</span>
+          </h4>
+          <ul class="apd-crit-list">
+            <li *ngFor="let r of d.criticalResults">
+              <span class="apd-crit-dot"></span>
+              <span class="apd-crit-name">{{ $any(r).testName }}</span>
+              <span class="apd-crit-meta">
+                {{ $any(r).department }} ·
+                {{ $any(r).result || $any(r).impression || 'see report' }}
+              </span>
+            </li>
+          </ul>
+        </section>
+
+        <!-- Latest progress note -->
+        <section class="apd-section" *ngIf="d.latestProgressNote as note">
+          <h4 class="apd-section-title">Latest progress note</h4>
+          <div class="apd-note">
+            <div class="apd-note-head">
+              {{ $any(note).doctorName }} · {{ $any(note).date | date:'d MMM y' }}
+            </div>
+            <p class="apd-note-line"><strong>A:</strong> {{ $any(note).assessment }}</p>
+            <p class="apd-note-line"><strong>P:</strong> {{ $any(note).plan }}</p>
+          </div>
+        </section>
+
+        <!-- Quick links -->
+        <section class="apd-section">
+          <h4 class="apd-section-title">Open patient record</h4>
+          <div class="apd-links">
+            <a class="apd-link" [routerLink]="['/ipd/admission', d.admission.id, 'handover']" (click)="close()">
+              <i class="pi pi-users"></i> SBAR hand-off
+            </a>
+            <a class="apd-link" [routerLink]="['/ipd/admission', d.admission.id, 'clinical-chart']" (click)="close()">
+              <i class="pi pi-chart-line"></i> Clinical chart
+            </a>
+            <a class="apd-link" [routerLink]="['/ipd/admission', d.admission.id, 'reports']" (click)="close()">
+              <i class="pi pi-file-pdf"></i> Lab &amp; radiology
+            </a>
+          </div>
+        </section>
+
+        <!-- Escalation history -->
+        <section class="apd-section" *ngIf="d.escalations.length">
+          <h4 class="apd-section-title">Action history</h4>
+          <ul class="apd-esc-list">
+            <li *ngFor="let e of d.escalations">
+              <span class="apd-esc-action apd-esc-{{ $any(e).action }}">{{ $any(e).action }}</span>
+              <span class="apd-esc-meta">
+                {{ $any(e).byName || 'staff' }} · {{ $any(e).createdAt | date:'d MMM HH:mm' }}
+                <span *ngIf="$any(e).note">— {{ $any(e).note }}</span>
+              </span>
+            </li>
+          </ul>
+        </section>
+      </div>
+
+      <!-- Action footer -->
+      <footer class="apd-footer">
+        <input class="apd-note-input" type="text" placeholder="Optional note for this action…"
+               [(ngModel)]="escalateNote" />
+        <div class="apd-actions">
+          <button class="apd-btn apd-btn-ack" (click)="act('ACKNOWLEDGE')" [disabled]="acting">
+            Acknowledge
+          </button>
+          <button class="apd-btn apd-btn-review" (click)="act('REVIEW')" [disabled]="acting">
+            Mark reviewed
+          </button>
+          <button class="apd-btn apd-btn-escalate" (click)="act('ESCALATE')" [disabled]="acting">
+            <i class="pi pi-exclamation-triangle"></i> Escalate
+          </button>
+        </div>
+      </footer>
+    </ng-container>
+  </aside>
+</div>

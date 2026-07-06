@@ -1,0 +1,55 @@
+<div class="page q-shell">
+  <div class="q-head">
+    <div>
+      <h2 class="q-title">Lab / Radiology events</h2>
+      <p class="q-sub">Amended reports, rejected samples, repeat imaging. Powers PSQ-002 (lab amendments), PSQ-003 (radiology amendments), LAB-001 (sample rejection), RAD-003 (repeat imaging).</p>
+    </div>
+    <div class="q-range">
+      <button class="qi-back" (click)="goBack()">← Indicators</button>
+    </div>
+  </div>
+
+  <div class="q-banner q-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
+  <div class="q-banner lr-banner-ok" *ngIf="successMessage">{{ successMessage }}</div>
+
+  <div class="lr-card">
+    <h3 class="lr-card-title">Record event</h3>
+    <div class="lr-row">
+      <label>Event
+        <select [(ngModel)]="draft.eventType">
+          <option *ngFor="let e of EVENT_TYPES" [value]="e.value">{{ e.label }} · {{ e.qi }}</option>
+        </select>
+      </label>
+      <label>Observed at <input type="datetime-local" [(ngModel)]="draft.observedAt" /></label>
+      <label>Patient PRN <input type="text" [(ngModel)]="draft.prn" placeholder="Optional" /></label>
+      <label>Test name <input type="text" [(ngModel)]="draft.testName" placeholder="CBC / CT chest / …" /></label>
+    </div>
+    <label class="lr-fullrow">Reason / notes
+      <textarea rows="2" [(ngModel)]="draft.reason" placeholder="Why the report was amended / sample rejected / scan repeated"></textarea>
+    </label>
+    <div class="lr-foot">
+      <button class="lr-save" (click)="submit()" [disabled]="saving">{{ saving ? 'Saving…' : 'Record event' }}</button>
+    </div>
+  </div>
+
+  <div class="lr-card">
+    <h3 class="lr-card-title">This month — events ({{ rows.length }})</h3>
+    <div class="q-loading" *ngIf="loading">Loading…</div>
+    <div class="q-empty" *ngIf="!loading && rows.length === 0">No events this month.</div>
+    <table class="lr-table" *ngIf="rows.length > 0">
+      <thead><tr><th>When</th><th>Event</th><th>QI</th><th>Test</th><th>PRN</th><th>Reason</th><th>By</th><th></th></tr></thead>
+      <tbody>
+        <tr *ngFor="let r of rows">
+          <td>{{ r.observedAt | date:'yyyy-MM-dd HH:mm' }}</td>
+          <td>{{ labelFor(r.eventType) }}</td>
+          <td class="lr-code">{{ qiFor(r.eventType) }}</td>
+          <td>{{ r.testName || '—' }}</td>
+          <td>{{ r.prn || '—' }}</td>
+          <td>{{ r.reason || '—' }}</td>
+          <td>{{ r.reporter || '—' }}</td>
+          <td><button class="lr-delete" (click)="remove(r)">×</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

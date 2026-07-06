@@ -9,7 +9,11 @@ import {
   IpdProgressNote,
   IpdService,
 } from '../../services/ipd.service';
+import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
+import { AuthServiceService } from '../../services/auth/auth-service.service';
 import { CanComponentDeactivate } from '../../guards/unsaved-changes.guard';
+
+interface DoctorLite { id: number; name: string; userId?: number | null; departmentName?: string | null; }
 
 /**
  * Sprint 3a-2 — IPD Progress Notes
@@ -19,6 +23,7 @@ import { CanComponentDeactivate } from '../../guards/unsaved-changes.guard';
  * (unsaved-changes) from docs/ui-patterns.md.
  */
 interface ProgressNoteFormValue {
+  doctorId: number | null;
   doctorName: string;
   subjective: string;
   objective: string;
@@ -30,6 +35,7 @@ interface ProgressNoteFormValue {
   vitalsTemp: string;
   vitalsSpO2: string;
   vitalsRR: string;
+  vitalsMonitoringFrequency: string | null;
 }
 
 @Component({
@@ -46,6 +52,9 @@ export class IpdProgressNoteComponent
   loadingList = false;
   submitting = false;
 
+  /** Doctor picker — loaded once per visit; default-selects the logged-in user's doctor row when one matches. */
+  doctors: DoctorLite[] = [];
+
   // ConfirmDialog state for unsaved-changes deactivation.
   confirmDiscardVisible = false;
   private discardDecision$ = new Subject<boolean>();
@@ -57,9 +66,12 @@ export class IpdProgressNoteComponent
     private route: ActivatedRoute,
     private router: Router,
     private ipdService: IpdService,
+    private doctorService: DoctorServiceService,
+    private authService: AuthServiceService,
     private messageService: MessageService
   ) {
     this.form = this.fb.group({
+      doctorId: [null as number | null, [Validators.required]],
       doctorName: ['', [Validators.required]],
       subjective: ['', [Validators.required]],
       objective: ['', [Validators.required]],
@@ -71,6 +83,8 @@ export class IpdProgressNoteComponent
       vitalsTemp: [''],
       vitalsSpO2: [''],
       vitalsRR: [''],
+      // Phase 9.13 — optional re-order of the vitals monitoring frequency.
+      vitalsMonitoringFrequency: [null as string | null],
     });
   }
 
@@ -78,6 +92,55 @@ export class IpdProgressNoteComponent
     this.admissionId = this.route.snapshot.paramMap.get('admissionId') ?? '';
     if (this.admissionId) {
       this.loadNotes();
+    }
+    this.loadDoctors();
+  }
+
+  /** Loads the doctor list and default-selects the logged-in user's doctor row, if any. */
+  loadDoctors(): void {
+    this.doctorService
+      .getAllDoctors()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (rows: any[]) => {
+          this.doctors = (rows ?? []).map((d: any) => ({
+            id: d.id,
+            name: d.name,
+            userId: d.userId ?? null,
+            departmentName: d.departmentName ?? null,
+          }));
+          // Default-select the logged-in doctor (if their User row is linked to a Doctor).
+          const myUserId = this.authService.getUserId();
+          if (myUserId != null && this.form.get('doctorId')?.value == null) {
+            const me = this.doctors.find((d) => d.userId === myUserId);
+            if (me) this.applyDoctorSelection(me.id);
+          }
+        },
+        error: () => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Doctors',
+            detail: 'Failed to load doctor list',
+            life: 5000,
+          });
+        },
+      });
+  }
+
+  onDoctorChange(doctorId: number | null): void {
+    this.applyDoctorSelection(doctorId);
+  }
+
+  /** Single source of truth for keeping doctorId + doctorName aligned. */
+  private applyDoctorSelection(doctorId: number | null): void {
+    if (doctorId == null) {
+      this.form.patchValue({ doctorId: null, doctorName: '' });
+      return;
+    }
+    const d = this.doctors.find((x) => x.id === doctorId);
+    if (d) {
+      // patchValue with { emitEvent: false } would skip onValueChange; default is fine here.
+      this.form.patchValue({ doctorId, doctorName: d.name });
     }
   }
 
@@ -150,6 +213,7 @@ export class IpdProgressNoteComponent
       vitalsTemp: value.vitalsTemp || undefined,
       vitalsSpO2: value.vitalsSpO2 || undefined,
       vitalsRR: value.vitalsRR || undefined,
+      vitalsMonitoringFrequency: value.vitalsMonitoringFrequency || undefined,
     };
 
     this.ipdService
@@ -163,7 +227,11 @@ export class IpdProgressNoteComponent
             summary: 'Progress note saved',
             life: 3000,
           });
+          // Preserve the doctor selection across resets — the same clinician
+          // typically writes multiple notes per round.
+          const keepDoctorId = this.form.get('doctorId')?.value as number | null;
           this.form.reset();
+          if (keepDoctorId != null) this.applyDoctorSelection(keepDoctorId);
           this.loadNotes();
         },
         error: (err: unknown) => {

@@ -1,0 +1,279 @@
+.courses-container {
+  /* left 90px clears the fixed sidebar, matching .dashboard-section */
+  padding: 16px 16px 90px 90px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Wide tables scroll inside their own box instead of widening the page. */
+.c-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.courses-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.courses-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 0;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.courses-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.c-input {
+  padding: 8px 10px;
+  border: 1px solid #d0d5dd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.c-btn {
+  padding: 8px 14px;
+  border: 1px solid #2e6fb7;
+  background: #fff;
+  color: #2e6fb7;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.c-btn.sm {
+  padding: 5px 10px;
+  font-size: 0.8rem;
+}
+
+.c-btn.primary {
+  background: #2e6fb7;
+  color: #fff;
+}
+
+.c-btn.danger {
+  border-color: #c0392b;
+  color: #c0392b;
+}
+
+.c-btn.ghost {
+  border-color: #cbd2d9;
+  color: #5a6470;
+}
+
+.c-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.c-table {
+  width: 100%;
+  min-width: 680px;
+  border-collapse: collapse;
+  background: #fff;
+  font-size: 0.88rem;
+}
+
+.c-table th,
+.c-table td {
+  text-align: left;
+  padding: 10px 12px;
+  border-bottom: 1px solid #eceff3;
+}
+
+.c-table th {
+  background: #f7f9fb;
+  font-weight: 600;
+  color: #41505f;
+}
+
+.c-empty,
+.muted {
+  color: #98a2b3;
+}
+
+.c-loading {
+  padding: 16px;
+  color: #5a6470;
+}
+
+.c-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-bottom: 14px;
+  font-size: 0.88rem;
+  color: #41505f;
+}
+
+.badge {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  background: #eceff3;
+  color: #41505f;
+}
+
+.st-active,
+.st-confirmed {
+  background: #e3f1ff;
+  color: #1c6dd0;
+}
+
+.st-completed {
+  background: #e3f7ec;
+  color: #1e8e54;
+}
+
+.st-cancelled {
+  background: #fdecea;
+  color: #c0392b;
+}
+
+.st-planned {
+  background: #fff4e0;
+  color: #b9760a;
+}
+
+.reschedule-panel {
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid #d8e2ec;
+  border-radius: 8px;
+  background: #fafcff;
+}
+
+.reschedule-panel h3 {
+  margin: 0 0 12px;
+  font-size: 1rem;
+}
+
+.rs-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: 10px 0;
+}
+
+.rs-note {
+  font-size: 0.85rem;
+  color: #41505f;
+  margin: 10px 0;
+}
+
+.rs-block {
+  font-size: 0.85rem;
+  color: #c0392b;
+  font-weight: 500;
+}
+
+.flag {
+  font-size: 0.74rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+
+.flag.ok {
+  background: #e3f7ec;
+  color: #1e8e54;
+}
+
+.flag.bad {
+  background: #fdecea;
+  color: #c0392b;
+}
+
+.flag.warn {
+  background: #fff4e0;
+  color: #b9760a;
+}
+
+/* Conflict popup — mirrors the MHC health-checkup-form dialog */
+.custom-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.custom-dialog {
+  border-radius: 8px;
+  background: linear-gradient(108deg, #dc3a35 0%, #a10500 100%);
+  padding: 20px 20px 20px 5px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  text-align: right;
+  max-width: 600px;
+  width: 90%;
+  color: #fff;
+}
+.dialog-content {
+  display: flex;
+  align-items: flex-end;
+  justify-content: right;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+.dialog-icon {
+  width: 167px;
+  flex-shrink: 0;
+}
+.custom-dialog h3 {
+  color: #fff;
+  font-size: 24px;
+  font-weight: 400;
+  margin-top: 10px;
+}
+.dialog-text p {
+  margin: 10px 0 0;
+  color: #fff;
+  text-align: right;
+  font-size: 13px;
+  font-weight: 300;
+}
+.dialog-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 20px;
+  margin-top: 20px;
+}
+.btn-primary {
+  border-radius: 8px;
+  background: #0e2970;
+  color: #fff;
+  border: none;
+  padding: 10px 30px;
+  cursor: pointer;
+  font-size: 14px;
+  max-width: 100px;
+  flex: 1;
+}
+.cancel {
+  border-radius: 8px;
+  background: #fff;
+  color: #000;
+  border: 2px solid #ccc;
+  padding: 10px 30px;
+  cursor: pointer;
+  font-size: 14px;
+  max-width: 100px;
+  flex: 1;
+}

@@ -1,0 +1,59 @@
+/* Phase 9.17 — Discharge Summary print view. */
+.ds-screen {
+  font-family: Kanit, sans-serif;
+  color: #271e4a;
+  padding: 56px 32px 40px 100px;
+  max-width: 900px;
+  margin: 0 auto 24px 0;
+  box-sizing: border-box;
+}
+.ds-toolbar { display: flex; gap: 10px; justify-content: flex-end; margin-bottom: 14px; }
+.ds-btn {
+  height: 38px; padding: 0 16px; border-radius: 6px; border: 1px solid #d1d5db;
+  background: #fff; color: #271e4a; cursor: pointer; font-family: Kanit, sans-serif; font-size: 13px;
+}
+.ds-btn-primary { background: #169458; color: #fff; border-color: #169458; }
+.ds-btn[disabled] { opacity: 0.55; cursor: not-allowed; }
+.ds-loading { padding: 30px; text-align: center; color: #7b7b7b; font-style: italic; }
+.ds-banner { padding: 10px 14px; background: #fee2e2; color: #b91c1c; border-radius: 8px; }
+
+.ds-sheet {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 28px 32px;
+}
+.ds-title { text-align: center; font-size: 20px; font-weight: 700; margin: 0 0 16px; letter-spacing: 0.3px; }
+
+.ds-head { width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 13px; }
+.ds-head td { padding: 4px 8px; border: 1px solid #e5e7eb; vertical-align: top; }
+.ds-head td:nth-child(odd) { background: #f9fafd; width: 140px; color: #4b5563; }
+
+.ds-sec { margin-bottom: 14px; }
+.ds-sec h2 {
+  font-size: 14px; font-weight: 600; color: #0e2970;
+  margin: 0 0 6px; padding-bottom: 3px; border-bottom: 1px solid #e5e7eb;
+}
+.ds-sec p { margin: 3px 0; font-size: 13px; line-height: 1.45; }
+.ds-pre { white-space: pre-wrap; }
+.ds-sys { margin: 2px 0; }
+
+.ds-vitals { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 6px; }
+.ds-vitals td { padding: 4px 8px; border: 1px solid #eef0f6; }
+
+.ds-op { border-left: 3px solid #e5e7eb; padding-left: 10px; margin-bottom: 10px; }
+
+.ds-labs { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.ds-labs th { background: #0e2970; color: #fff; padding: 6px 8px; text-align: left; font-weight: 500; }
+.ds-labs td { padding: 5px 8px; border-bottom: 1px solid #f3f4f6; }
+.ds-labs tr.ds-crit td { color: #b91c1c; font-weight: 600; }
+
+.ds-foot { margin-top: 18px; font-size: 12px; color: #6b7280; font-style: italic; }
+
+/* ── Print ── */
+@media print {
+  .no-print { display: none !important; }
+  .ds-screen { padding: 0; max-width: none; margin: 0; }
+  .ds-sheet { border: none; border-radius: 0; padding: 0; }
+  .ds-labs th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+}

@@ -43,8 +43,7 @@
 
   <div class="form-row">
     <div class="input-container">
-      <input type="text" id="consultant" [(ngModel)]="formData.consultant" name="consultant" placeholder=" "
-        class="custom-input">
+      <app-doctor-select [source]="'doctors'" [(ngModel)]="formData.consultant" name="consultant"></app-doctor-select>
       <label for="consultant" class="custom-label">Consultant</label>
     </div>
 
@@ -147,6 +146,26 @@
     <label><input type="radio" [(ngModel)]="formData.painScore" value="8-10" name="painScore"> 8-10 Severe</label>
   </div>
 
+  <!--
+    Assessment template picker. Selecting a doctor/department template makes the
+    Voice Assessment below dynamic — recording (or typing) fills THIS template's
+    fields instead of the fixed History/Examination/Investigation/Plan boxes.
+  -->
+  <h3>Assessment</h3>
+  <div class="form-row template-picker-row" *ngIf="availableTemplates.length > 0 || isTemplated">
+    <div class="input-container">
+      <select class="custom-input"
+              [value]="selectedTemplateId"
+              (change)="onTemplateSelected($any($event.target).value)">
+        <option value="">— No template (legacy form only) —</option>
+        <option *ngFor="let t of availableTemplates" [value]="t.id">
+          {{ t.name }}{{ t.isDefault ? ' (default)' : '' }}
+        </option>
+      </select>
+      <label class="custom-label">Department template</label>
+    </div>
+  </div>
+
   <!-- Handwritten Sections -->
   <!-- <app-hand-written label="History" (valueChange)="formData.history = $event" [initialValue]="formData.history"></app-hand-written>
     <app-hand-written label="Examination" (valueChange)="formData.examination = $event" [initialValue]="formData.examination"></app-hand-written>
@@ -185,6 +204,10 @@
     [initialValue]="formData.treatmentPlan">
   </app-hand-written> -->
   <h3>Voice Assessment</h3>
+  <p class="voice-hint" *ngIf="isTemplated">
+    Recording structures your speech into <strong>{{ selectedTemplateName }}</strong>'s fields below.
+    You can also type rough notes and use “Auto-fill”.
+  </p>
 
   <div class="voice-controls">
     <button type="button" (click)="startRecording()" [disabled]="isRecording" [class.recording]="isRecording">
@@ -194,47 +217,109 @@
     <button type="button" (click)="stopRecording()" [disabled]="!isRecording">
       ⏹ Stop Recording
     </button>
+    <span class="voice-busy" *ngIf="voiceProcessing">Transcribing &amp; structuring…</span>
+  </div>
+
+  <!-- Typed dictation alternate (works with or without a mic) -->
+  <div class="ai-fill-box" *ngIf="isTemplated">
+    <label class="ai-fill-label">✨ …or type / paste your notes</label>
+    <textarea class="ai-fill-text" rows="3" [(ngModel)]="aiDictation" name="aiDictation"
+              placeholder="e.g. '32M c/o fever 3 days, throat pain. O/E throat congested, chest clear. Imp viral pharyngitis. Plan: Dolo 650 TDS x5d, warm saline gargle, review SOS.'"></textarea>
+    <div class="ai-fill-actions">
+      <button type="button" class="ai-fill-btn" (click)="autoFillFromAi()" [disabled]="aiDrafting">
+        {{ aiDrafting ? 'Structuring…' : '✨ Auto-fill with AI' }}
+      </button>
+      <span class="ai-fill-hint">Fills the template fields below — review &amp; edit before saving.</span>
+    </div>
+    <div class="ai-fill-error" *ngIf="aiError">{{ aiError }}</div>
   </div>
 
   <h3>Voice Assessment Result</h3>
 
-  <div class="form-row">
-    <div class="textarea-container">
-      <label>History</label>
-      <textarea [(ngModel)]="formData.history" name="history" rows="4" class="custom-textarea"
-        placeholder="History will appear here after voice recording">
-    </textarea>
+  <!-- Templated → render the doctor's dynamic template fields (filled by voice / AI) -->
+  <ng-container *ngIf="isTemplated; else legacyVoiceResult">
+    <app-template-form-renderer
+      [fields]="activeTemplateFields"
+      [values]="templateValues"
+      (valuesChange)="onTemplateValuesChange($event)">
+    </app-template-form-renderer>
+  </ng-container>
+
+  <!-- No template → the original fixed sections -->
+  <ng-template #legacyVoiceResult>
+    <div class="form-row">
+      <div class="textarea-container">
+        <label>History</label>
+        <textarea [(ngModel)]="formData.history" name="history" rows="4" class="custom-textarea"
+          placeholder="History will appear here after voice recording">
+      </textarea>
+      </div>
     </div>
-  </div>
 
-  <div class="form-row">
-    <div class="textarea-container">
-      <label>Examination</label>
-      <textarea [(ngModel)]="formData.examination" name="examination" rows="4" class="custom-textarea"
-        placeholder="Examination will appear here">
-    </textarea>
+    <div class="form-row">
+      <div class="textarea-container">
+        <label>Examination</label>
+        <textarea [(ngModel)]="formData.examination" name="examination" rows="4" class="custom-textarea"
+          placeholder="Examination will appear here">
+      </textarea>
+      </div>
     </div>
-  </div>
 
-  <div class="form-row">
-    <div class="textarea-container">
-      <label>Investigation</label>
-      <textarea [(ngModel)]="formData.investigation" name="investigation" rows="4" class="custom-textarea"
-        placeholder="Investigation will appear here">
-    </textarea>
+    <div class="form-row">
+      <div class="textarea-container">
+        <label>Diagnosis</label>
+        <textarea [(ngModel)]="formData.diagnosis" name="diagnosis" rows="4" class="custom-textarea"
+          placeholder="Diagnosis will appear here">
+      </textarea>
+      </div>
     </div>
-  </div>
 
-  <div class="form-row">
-    <div class="textarea-container">
-      <label>Treatment Plan</label>
-      <textarea [(ngModel)]="formData.treatmentPlan" name="treatmentPlan" rows="4" class="custom-textarea"
-        placeholder="Treatment plan will appear here">
-    </textarea>
+    <div class="form-row">
+      <div class="textarea-container">
+        <label>Investigation</label>
+        <textarea [(ngModel)]="formData.investigation" name="investigation" rows="4" class="custom-textarea"
+          placeholder="Investigation will appear here">
+      </textarea>
+      </div>
     </div>
-  </div>
+
+    <div class="form-row">
+      <div class="textarea-container">
+        <label>Treatment Plan</label>
+        <textarea [(ngModel)]="formData.treatmentPlan" name="treatmentPlan" rows="4" class="custom-textarea"
+          placeholder="Treatment plan will appear here">
+      </textarea>
+      </div>
+    </div>
+  </ng-template>
 
 
+
+  <!-- Phase 9.22 — Prescription capture (full parity with consulting notes) -->
+  <h3>Prescription</h3>
+  <app-prescription-capture
+    #prescriptionComp
+    [prn]="formData.uhid"
+    [patientName]="formData.patientName"
+    [doctorName]="formData.doctorName"
+    [doctorKmc]="formData.kmcNo">
+  </app-prescription-capture>
+
+  <!-- Lab / Radiology order — faithful paper-form grid; dispatched on note save -->
+  <h3>Investigation Orders</h3>
+  <app-investigation-order
+    #investigationOrderComp
+    [prn]="formData.uhid"
+    [doctorId]="doctorId"
+    [doctorName]="formData.doctorName || formData.consultant"
+    [date]="formData.date"
+    [patientName]="formData.patientName"
+    [age]="formData.age"
+    [gender]="formData.gender"
+    [department]="formData.department"
+    [doctorKmc]="formData.kmcNo"
+    [showActions]="false">
+  </app-investigation-order>
 
   <!-- Screening -->
   <h3>Screening</h3>
@@ -272,8 +357,7 @@
 
   <div class="form-row">
     <div class="input-container">
-      <input type="text" id="doctorName" [(ngModel)]="formData.doctorName" name="doctorName" required placeholder=" "
-        class="custom-input">
+      <app-doctor-select [source]="'doctors'" [(ngModel)]="formData.doctorName" name="doctorName" required></app-doctor-select>
       <label for="doctorName" class="custom-label">Doctor Name</label>
     </div>
     <div class="input-container">
@@ -286,23 +370,11 @@
   <div class="buttons">
     <button type="submit" [disabled]="isSubmitting" class="save-button">Submit</button>
     <button type="button" class="print-button" (click)="printAssessment()">Print</button>
-    <button type="button"
-            class="admit-button"
-            [disabled]="!admitEligible"
-            [pTooltip]="admitEligible ? 'Admit this patient to IPD' : 'Save assessment first'"
-            tooltipPosition="top"
-            (click)="openAdmitToIpd()"
-            data-testid="btn-admit-to-ipd">
-      Admit to IPD
-    </button>
+    <!-- Admission actions removed: the doctor only counsels/assesses here.
+         Admission (Refer for Admission) and OT requisitions are raised from the
+         Estimation screens, where ward/bed are assigned by NS downstream. -->
   </div>
+
   <!-- <app-opd-print [data]="formData" #printSection></app-opd-print> -->
 
 </form>
-
-<app-admit-to-ipd-modal
-  [(visible)]="admitModalVisible"
-  source="opd"
-  [context]="admitContext"
-  (admitted)="onAdmittedToIpd($event)">
-</app-admit-to-ipd-modal>

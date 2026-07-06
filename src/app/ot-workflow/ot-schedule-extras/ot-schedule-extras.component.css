@@ -1,0 +1,52 @@
+.ext-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px 18px; margin-bottom: 16px; }
+
+.ext-tabs { display: flex; gap: 4px; border-bottom: 1px solid #e5e7eb; margin-bottom: 14px; }
+.ext-tabs button {
+  background: transparent; border: none; padding: 8px 14px; font-size: 13px; cursor: pointer; color: #6b7280;
+  border-bottom: 2px solid transparent;
+}
+.ext-tabs button:hover { color: #1d4ed8; }
+.ext-tab-active { color: #1d4ed8 !important; border-bottom-color: #1d4ed8 !important; font-weight: 600; }
+
+.ext-banner { padding: 8px 12px; border-radius: 6px; font-size: 13px; margin-bottom: 10px; }
+.ext-bad { background: #fee2e2; color: #b91c1c; }
+
+.ext-form-row { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+.ext-form-row input, .ext-form-row select {
+  border: 1px solid #d1d5db; border-radius: 6px; padding: 5px 8px; font-size: 13px;
+}
+.ext-form-row label { display: flex; flex-direction: column; font-size: 12px; color: #4b5563; gap: 3px; }
+.ext-inline { display: flex !important; flex-direction: row !important; align-items: center; gap: 6px; font-size: 13px !important; }
+
+.ext-grid { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+.ext-grid th, .ext-grid td {
+  border-bottom: 1px solid #f3f4f6; padding: 7px 10px; vertical-align: top; text-align: left;
+}
+.ext-grid th { background: #f9fafb; font-weight: 600; color: #374151; font-size: 12px; }
+.ext-muted { color: #9ca3af; font-style: italic; }
+
+.ext-pill { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+.ext-pill-primary { background: #dbeafe; color: #1e40af; }
+
+.ext-btn { background: #fff; border: 1px solid #d1d5db; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; }
+.ext-btn:hover:not([disabled]) { background: #f3f4f6; }
+.ext-btn-sm { padding: 3px 8px; font-size: 11px; }
+.ext-btn-xs { padding: 2px 6px; font-size: 10px; margin-left: 4px; }
+.ext-btn-primary { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
+.ext-btn-primary:hover:not([disabled]) { background: #1e40af; }
+.ext-btn-danger { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
+.ext-btn-danger:hover:not([disabled]) { background: #fecaca; }
+
+.ext-staff-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.ext-staff-group { background: #f9fafb; border-radius: 6px; padding: 8px 12px; }
+.ext-staff-group h4 { font-size: 12px; font-weight: 600; color: #374151; margin: 0 0 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+.ext-staff-group ul { list-style: none; padding: 0; margin: 0; }
+.ext-staff-group li { display: flex; align-items: center; gap: 6px; padding: 3px 0; font-size: 13px; }
+
+.ext-issue-draft { background: #fef3c7; border-radius: 6px; padding: 10px 12px; margin-bottom: 14px; }
+.ext-issue-draft h4 { margin: 0 0 8px; font-size: 13px; color: #92400e; }
+.ext-issue-row { display: flex; gap: 6px; align-items: center; margin-bottom: 4px; }
+.ext-issue-row input[type=text] { flex: 1; }
+
+.ext-section-title { font-size: 13px; font-weight: 600; color: #374151; margin: 14px 0 8px; }
+.ext-row-return td { background: #f3f4f6; color: #6b7280; }

@@ -1,0 +1,40 @@
+<div class="page mtq-shell">
+  <div class="mtq-head">
+    <h2 class="mtq-title">Medical transcription queue</h2>
+    <p class="mtq-sub">Discharge summaries pending draft. Acknowledge to claim a case.</p>
+  </div>
+
+  <div class="mtq-banner mtq-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
+  <div class="mtq-banner mtq-good" *ngIf="successMessage">{{ successMessage }}</div>
+  <div class="mtq-empty" *ngIf="!loading && !rows.length">No discharges pending draft.</div>
+
+  <table class="mtq-table" *ngIf="rows.length">
+    <thead>
+      <tr>
+        <th>Admission</th>
+        <th>PRN</th>
+        <th>Doctor</th>
+        <th>Ward / Bed</th>
+        <th>Ready since</th>
+        <th>Summary</th>
+        <th>MT ack</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let r of rows">
+        <td>{{ r.admissionNo }}</td>
+        <td>{{ r.prn }}</td>
+        <td>{{ r.admittingDoctor || '—' }}</td>
+        <td>{{ r.ward?.wardName || '—' }} · {{ r.bed?.bedNumber || '—' }}</td>
+        <td>{{ minsSince(r.dischargeReadyAt) }} ago</td>
+        <td><span class="mtq-pill mtq-status-{{ (r.discharge?.summaryStatus || 'NONE').toLowerCase() }}">{{ r.discharge?.summaryStatus || 'NONE' }}</span></td>
+        <td>{{ r.discharge?.mtAcknowledgedAt ? ((r.discharge?.mtAcknowledgedAt ?? '') | date:'h:mm a') : '—' }}</td>
+        <td>
+          <button class="mtq-btn" (click)="ack(r)" *ngIf="!r.discharge?.mtAcknowledgedAt">Claim</button>
+          <a class="mtq-btn" [routerLink]="['/ipd/admission', r.id, 'discharge']" *ngIf="r.discharge?.mtAcknowledgedAt">Open</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

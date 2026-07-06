@@ -60,6 +60,15 @@
             (click)="openUnavailableModal(doctor)"
             [disabled]="!(role === 'admin' || role === 'super_admin' || subAdminType === 'Tele Caller' || employeeId === 'JMRH124'|| employeeId === 'JMRH178')">Unavailable Slots</button>
         </div>
+        <div class="arrived-control" *ngIf="doctor.doctorType !=='Visiting Consultant'">
+          <button class="arrived-toggle" [ngClass]="{ 'is-arrived': isArrived(doctor) }"
+            (click)="toggleArrived(doctor)"
+            [disabled]="!isHaveAccess() || !isTodaySelected() || arrivedToggleBusy[doctor.id]"
+            [pTooltip]="!isTodaySelected() ? 'Arrival can be marked only for today' : (isArrived(doctor) ? 'Click to mark as not arrived' : 'Mark this doctor as arrived')">
+            <span class="status-dot"></span>
+            {{ isArrived(doctor) ? 'Arrived' : 'Mark Arrived' }}
+          </button>
+        </div>
         <!-- <div class="extra-slots-buttons" *ngIf="((role === 'admin' || role === 'super_admin') && doctor.doctorType !== 'Visiting Consultant')">
             <button type="button" class="button-after" (click)="addExtraSlotsBefore(doctor)"><img src="/before.svg"></button>
             <button type="button" class="button-after" (click)="addExtraSlotsAfter(doctor)"><img src="/after.svg"></button>

@@ -1,0 +1,183 @@
+/* Phase 9.11 — Reports tab (embedded on patient profile + IPD admission). */
+
+.prt-wrap {
+  font-family: Kanit, sans-serif;
+  color: #271e4a;
+}
+
+.prt-toolbar {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 12px 0 14px;
+  border-bottom: 1px solid #f3f4f6;
+  margin-bottom: 16px;
+}
+.prt-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: #7b7b7b;
+}
+.prt-filter label {
+  font-weight: 500;
+  color: #271e4a;
+}
+.prt-filter select {
+  height: 36px;
+  padding: 4px 10px;
+  font-family: Kanit, sans-serif;
+  font-size: 13px;
+  color: #271e4a;
+  background: #f0f3ff;
+  border: 1px solid #b4b6ba;
+  border-radius: 6px;
+  min-width: 140px;
+}
+.prt-meta {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 12px;
+  color: #7b7b7b;
+}
+.prt-meta-label { font-style: italic; }
+.prt-btn-link {
+  background: transparent;
+  border: 1px solid transparent;
+  color: #1d4ed8;
+  cursor: pointer;
+  font-family: Kanit, sans-serif;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+.prt-btn-link:hover { background: #eff6ff; }
+.prt-btn-link[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+.prt-banner {
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+.prt-bad { background: #fee2e2; color: #b91c1c; border-left: 3px solid #dc2626; }
+
+.prt-loading {
+  padding: 32px;
+  text-align: center;
+  color: #7b7b7b;
+  font-style: italic;
+}
+.prt-empty {
+  padding: 50px 20px;
+  text-align: center;
+  color: #9ca3af;
+}
+.prt-empty i {
+  font-size: 32px;
+  display: block;
+  margin-bottom: 6px;
+  color: #b4b6ba;
+}
+
+/* Groups */
+.prt-group { margin-bottom: 20px; }
+.prt-group-head {
+  font-size: 13px;
+  font-weight: 600;
+  color: #7b7b7b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed #e5e7eb;
+}
+.prt-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+.prt-card {
+  text-align: left;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  font-family: Kanit, sans-serif;
+  box-shadow: 0 1px 2px rgba(39, 30, 74, 0.04);
+  transition: transform 0.12s, box-shadow 0.12s, border-color 0.12s;
+}
+.prt-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(216, 210, 252, 0.6);
+  border-color: #c7d2fe;
+}
+.prt-card.prt-critical-unack {
+  border-color: #fca5a5;
+  background: #fff5f5;
+  box-shadow: 0 4px 15px rgba(252, 165, 165, 0.35);
+}
+
+.prt-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.prt-test {
+  font-size: 14px;
+  font-weight: 600;
+  color: #271e4a;
+  margin-right: 4px;
+}
+.prt-card-body {
+  font-size: 13px;
+  color: #271e4a;
+  line-height: 1.45;
+  margin-bottom: 8px;
+  word-break: break-word;
+}
+.prt-unit { color: #7b7b7b; font-weight: 400; }
+.prt-muted { color: #9ca3af; font-style: italic; font-size: 12px; }
+
+.prt-card-foot {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #7b7b7b;
+  padding-top: 8px;
+  border-top: 1px dashed #f3f4f6;
+}
+.prt-attach {
+  margin-left: auto;
+  color: #1d4ed8;
+}
+
+/* Pills */
+.prt-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 9px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+.prt-pill-lab        { background: #dbeafe; color: #1e40af; }
+.prt-pill-radiology  { background: #f3e8ff; color: #6b21a8; }
+.prt-status-pending  { background: #fef3c7; color: #92400e; }
+.prt-status-partial  { background: #fed7aa; color: #c2410c; }
+.prt-status-final    { background: #dcfce7; color: #166534; }
+.prt-pill-critical   { background: #fee2e2; color: #b91c1c; }

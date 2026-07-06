@@ -1,0 +1,126 @@
+<div class="ba-shell">
+  <h2 class="ba-title">Bedside Admission Acceptance</h2>
+
+  <div class="ba-loading" *ngIf="loading">Loading bed request&hellip;</div>
+
+  <div class="ba-banner ba-banner-bad" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+  <div class="ba-banner ba-banner-good" *ngIf="successMessage" role="status">{{ successMessage }}</div>
+
+  <ng-container *ngIf="!loading && request && !errorMessage">
+
+    <!-- Admission summary header — visible on every step -->
+    <div class="ba-card ba-summary">
+      <div class="ba-summary-row">
+        <span class="ba-pill" [class.ba-pill-em]="request.urgency === 'emergency'"
+                              [class.ba-pill-ur]="request.urgency === 'urgent'"
+                              [class.ba-pill-ro]="request.urgency === 'routine'">
+          {{ request.urgency }}
+        </span>
+        <strong>Admission {{ request.admission?.admissionNo || request.admissionId }}</strong>
+        <span class="ba-meta">PRN {{ request.admission?.prn }}</span>
+      </div>
+      <p class="ba-meta-line">
+        <strong>Diagnosis:</strong> {{ request.admission?.diagnosis }}
+      </p>
+      <p class="ba-meta-line">
+        <strong>Bed type:</strong> {{ request.preferredBedType }} &middot;
+        <strong>Department:</strong> {{ request.admission?.department }}
+      </p>
+    </div>
+
+    <!-- ─────────────────────────────────────────────────────────────────
+         STEP — collect attender details (before consent bundle starts)
+         ───────────────────────────────────────────────────────────────── -->
+    <ng-container *ngIf="step === 1 && consentSignatureIds.length === 0 && !attenderConfirmed">
+      <div class="ba-card">
+        <h3 class="ba-section-title">Who is the attender?</h3>
+        <p class="ba-hint">Required before consent bundle. They will sign on the patient's behalf.</p>
+
+        <div class="ba-form-row">
+          <input type="text"
+                 class="ba-input"
+                 placeholder="Attender full name"
+                 [(ngModel)]="attenderName"
+                 name="attenderName" />
+          <select class="ba-input" [(ngModel)]="attenderRelation" name="attenderRelation">
+            <option value="" disabled>Relation</option>
+            <option value="father">Father</option>
+            <option value="mother">Mother</option>
+            <option value="spouse">Spouse</option>
+            <option value="son">Son</option>
+            <option value="daughter">Daughter</option>
+            <option value="sibling">Sibling</option>
+            <option value="guardian">Guardian</option>
+            <option value="friend">Friend</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        <div class="ba-form-buttons">
+          <button type="button" class="ba-btn ba-btn-primary" (click)="proceedToConsent()">
+            Continue to consents &rarr;
+          </button>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- ─────────────────────────────────────────────────────────────────
+         STEP 1 — consent bundle (admission + treatment + financial)
+         ───────────────────────────────────────────────────────────────── -->
+    <ng-container *ngIf="step === 1 && attenderConfirmed && consentSignatureIds.length === 0">
+      <div class="ba-card">
+        <h3 class="ba-section-title">Consent bundle</h3>
+        <p class="ba-hint">Walk through the {{ consentTypes.length }} consents one by one. Attender signs each.</p>
+
+        <app-consent-bundle
+          [consentTypes]="consentTypes"
+          [language]="'en'"
+          [contextType]="'admission'"
+          [contextId]="request.admissionId"
+          [patientPrn]="request.admission?.prn"
+          [patientName]="request.admission?.admissionNo"
+          [signerMode]="'attender'"
+          [attenderName]="attenderName"
+          [attenderRelation]="attenderRelation"
+          (completed)="onConsentsCompleted($event)"
+          (cancelled)="onConsentBundleCancelled()">
+        </app-consent-bundle>
+      </div>
+    </ng-container>
+
+    <!-- ─────────────────────────────────────────────────────────────────
+         STEP 2 — facility acceptance signature at the bedside
+         ───────────────────────────────────────────────────────────────── -->
+    <ng-container *ngIf="step === 2">
+      <div class="ba-card">
+        <h3 class="ba-section-title">Facility acceptance</h3>
+        <p class="ba-hint">
+          Show the attender the room, bed, equipment, washroom. Confirm they are satisfied with the facility.
+          The signature below is a final acknowledgement that the patient is occupying the assigned bed.
+        </p>
+
+        <app-e-sign
+          [signerType]="'attender'"
+          [signerName]="attenderName"
+          [signerRelation]="attenderRelation"
+          [contextType]="'facility-acceptance'"
+          [contextId]="request.id"
+          [prompt]="'Attender — facility accepted at bedside'"
+          [disabled]="saving"
+          (signed)="onFacilitySigned($event)">
+        </app-e-sign>
+      </div>
+    </ng-container>
+
+    <!-- ─────────────────────────────────────────────────────────────────
+         STEP 3 — done
+         ───────────────────────────────────────────────────────────────── -->
+    <div class="ba-card ba-success" *ngIf="step === 3">
+      <h3 class="ba-section-title">Admission complete</h3>
+      <p>
+        {{ consentTypes.length }} consents recorded, facility-acceptance signed,
+        bed flipped to occupied. Returning to ward management&hellip;
+      </p>
+    </div>
+  </ng-container>
+</div>

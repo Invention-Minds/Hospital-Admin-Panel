@@ -107,6 +107,11 @@ export class AppointmentOverviewComponent implements AfterViewInit {
   showCCAppointments() {
     this.activeComponent = 'cc'
   }
+  // Merged Transfer / CC screen — one nav card, internal toggle picks the sub-tab.
+  apptSubTab: 'transfer' | 'cc' = 'transfer';
+  showTransferCC() {
+    this.activeComponent = 'transfercc';
+  }
   showFollowupAppointments() {
     this.activeComponent = 'followup'
   }

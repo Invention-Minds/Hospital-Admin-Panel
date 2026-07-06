@@ -1,0 +1,62 @@
+.eaa-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+}
+
+/* Icon-style action buttons — match the row of icon buttons in the table. */
+.eaa-icon {
+  width: 34px; height: 34px; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: none; border-radius: 8px; cursor: pointer;
+}
+.eaa-icon svg { width: 20px; height: 20px; }
+.eaa-icon[disabled] { opacity: 0.5; cursor: not-allowed; }
+.eaa-icon-refer { background: #0e2970; color: #fff; }
+.eaa-icon-refer:hover:not([disabled]) { background: #0a1f57; }
+.eaa-icon-ot { background: #169458; color: #fff; }
+.eaa-icon-ot:hover:not([disabled]) { background: #127a49; }
+.eaa-icon-done { background: #d1fae5; color: #065f46; cursor: default; }
+
+/* Modal footer buttons (rendered inside the p-dialog footer template). */
+.eaa-btn {
+  font-family: Kanit, sans-serif; font-size: 13px; font-weight: 500;
+  border-radius: 6px; padding: 7px 14px; border: 1px solid #d0d4e4;
+  background: #fff; color: #271e4a; cursor: pointer; white-space: nowrap;
+}
+.eaa-btn:hover:not([disabled]) { background: #f0f3ff; }
+.eaa-btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+.eaa-btn-primary { background: #0e2970; color: #fff; border-color: #0e2970; }
+.eaa-btn-primary:hover:not([disabled]) { background: #0a1f57; }
+
+/* Dialog content fields */
+.eaa-hint { margin: 0 0 14px; color: #7b7b7b; font-size: 12px; }
+.eaa-bad {
+  background: #ffe5e5; color: #d20006; border-radius: 6px;
+  padding: 8px 10px; font-size: 13px; margin-bottom: 12px;
+}
+.eaa-field, .eaa-row2 label, .eaa-row3 label {
+  display: flex; flex-direction: column; gap: 7px;
+  font-size: 13px; color: #271e4a; margin-bottom: 18px;
+}
+.eaa-field input, .eaa-field textarea, .eaa-field select,
+.eaa-row2 input, .eaa-row2 select, .eaa-row3 select {
+  border: 1px solid #d0d4e4; border-radius: 8px; padding: 8px 10px;
+  font-family: Kanit, sans-serif; font-size: 13px; color: #271e4a;
+}
+.eaa-field input:focus, .eaa-field textarea:focus, .eaa-field select:focus,
+.eaa-row2 input:focus, .eaa-row2 select:focus, .eaa-row3 select:focus {
+  outline: none; border-color: #0e2970;
+}
+.eaa-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.eaa-row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+/* Let the Surgeon picker fill the field width inside the dialog. */
+.eaa-field app-doctor-select { display: block; width: 100%; }
+
+@media (max-width: 560px) {
+  .eaa-row2, .eaa-row3 { grid-template-columns: 1fr; }
+}
+/* Dialog shell padding lives in global styles.css (.p-dialog.eaa-dialog …)
+   because the dialog is appended to body and a global !important reset must be
+   overridden there. */

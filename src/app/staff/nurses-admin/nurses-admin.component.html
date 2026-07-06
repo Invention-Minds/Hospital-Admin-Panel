@@ -1,0 +1,202 @@
+<div class="ns-shell">
+  <!-- Page header -->
+  <div class="ns-page-header">
+    <div>
+      <h2 class="ns-page-title">Nurses & Clinical Staff</h2>
+      <p class="ns-page-sub">Manage nurse accounts, ward assignments and OT staff mirroring.</p>
+    </div>
+    <button class="ns-btn ns-btn-primary" (click)="openCreate()">
+      <i class="pi pi-plus"></i> Add Nurse
+    </button>
+  </div>
+
+  <div class="ns-banner ns-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
+  <div class="ns-banner ns-good" *ngIf="successMessage" (click)="successMessage=''">{{ successMessage }}</div>
+
+  <!-- Filters -->
+  <div class="ns-filter-card">
+    <div class="ns-filter-grid">
+      <div class="ns-field">
+        <label class="ns-field-label">Search</label>
+        <input class="ns-input"
+               type="text"
+               placeholder="Name, username, phone, emp ID"
+               [(ngModel)]="filters.search"
+               (keyup.enter)="applyFilters()" />
+      </div>
+      <div class="ns-field">
+        <label class="ns-field-label">Designation</label>
+        <select class="ns-input" [(ngModel)]="filters.designation">
+          <option value="">All</option>
+          <option *ngFor="let d of designations" [value]="d">{{ d }}</option>
+        </select>
+      </div>
+      <div class="ns-field">
+        <label class="ns-field-label">Primary Ward</label>
+        <select class="ns-input" [(ngModel)]="filters.wardId">
+          <option value="">All wards</option>
+          <option *ngFor="let w of wards" [value]="w.id">{{ w.wardName }} ({{ w.wardCode }})</option>
+        </select>
+      </div>
+      <div class="ns-field ns-field-check">
+        <label class="ns-inline">
+          <input type="checkbox" [(ngModel)]="filters.includeInactive" />
+          <span>Include inactive</span>
+        </label>
+      </div>
+      <div class="ns-field ns-field-action">
+        <button class="ns-btn ns-btn-secondary" (click)="clearFilters()">Clear</button>
+        <button class="ns-btn ns-btn-primary" (click)="applyFilters()">Apply</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- List + side editor -->
+  <div class="ns-layout">
+    <div class="ns-grid-wrap">
+      <div class="ns-grid-header">
+        <h3 class="ns-grid-title">Nurses <span class="ns-count">({{ rows.length }})</span></h3>
+      </div>
+
+      <div class="ns-loading" *ngIf="loading">Loading nurses…</div>
+
+      <div class="ns-empty" *ngIf="!loading && !rows.length">
+        <i class="pi pi-users"></i>
+        <div>No nurses match these filters. Use “Add Nurse” to create one.</div>
+      </div>
+
+      <div class="ns-table-wrap" *ngIf="!loading && rows.length">
+        <table class="dm-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Designation</th>
+              <th>Qualification</th>
+              <th>Primary Ward</th>
+              <th>Phone</th>
+              <th>Status</th>
+              <th>OT</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let r of rows" [class.ns-row-inactive]="!r.isActive">
+              <td>
+                <div class="ns-name">{{ r.fullName || r.username }}</div>
+                <div class="ns-name-sub">{{ r.username }}<span *ngIf="r.employeeId"> · {{ r.employeeId }}</span></div>
+              </td>
+              <td>{{ r.designation || '—' }}</td>
+              <td>{{ r.qualification || '—' }}</td>
+              <td>{{ wardLabel(r.primaryWardId) }}</td>
+              <td>{{ r.phoneNumber || '—' }}</td>
+              <td>
+                <span class="ns-pill" [class.ns-pill-active]="r.isActive" [class.ns-pill-inactive]="!r.isActive">
+                  {{ r.isActive ? 'Active' : 'Inactive' }}
+                </span>
+              </td>
+              <td>
+                <span class="ns-pill ns-pill-ot" *ngIf="hasOtMirror(r)" title="Mirrored to OT staff master">Linked</span>
+                <span class="ns-muted" *ngIf="!hasOtMirror(r)">—</span>
+              </td>
+              <td class="ns-actions-cell">
+                <button class="ns-btn-link" (click)="openEdit(r)">Edit</button>
+                <button class="ns-btn-link" (click)="resetPassword(r)" *ngIf="r.isActive">Reset PW</button>
+                <button class="ns-btn-link"
+                        *ngIf="r.isActive && isOtEligible(r.designation) && !hasOtMirror(r)"
+                        (click)="syncToOt(r)"
+                        title="Mirror this nurse into the OT staff master so OT pickers can assign them">
+                  Sync OT
+                </button>
+                <button class="ns-btn-link ns-bad-link" *ngIf="r.isActive" (click)="deactivate(r)">Deactivate</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Editor -->
+    <aside class="ns-side" *ngIf="editing">
+      <div class="ns-side-header">
+        <h3 class="ns-side-title">{{ editing === 'new' ? 'Add Nurse' : 'Edit Nurse' }}</h3>
+        <button class="ns-icon-btn" (click)="closeEditor()" title="Close"><i class="pi pi-times"></i></button>
+      </div>
+
+      <ng-container *ngIf="editing === 'new'">
+        <div class="ns-form-row">
+          <label class="ns-field-label">Username *</label>
+          <input class="ns-input" type="text" [(ngModel)]="draft.username" autocomplete="off" />
+        </div>
+        <div class="ns-form-row">
+          <label class="ns-field-label">Password *</label>
+          <input class="ns-input" type="password" [(ngModel)]="draft.password" autocomplete="new-password"
+                 placeholder="At least 6 characters" />
+        </div>
+      </ng-container>
+
+      <div class="ns-form-row">
+        <label class="ns-field-label">Full Name *</label>
+        <input class="ns-input" type="text" [(ngModel)]="draft.fullName" />
+      </div>
+
+      <div class="ns-form-grid">
+        <div class="ns-form-row">
+          <label class="ns-field-label">Employee ID</label>
+          <input class="ns-input" type="text" [(ngModel)]="draft.employeeId" />
+        </div>
+        <div class="ns-form-row">
+          <label class="ns-field-label">Phone</label>
+          <input class="ns-input" type="tel" [(ngModel)]="draft.phoneNumber" />
+        </div>
+      </div>
+
+      <div class="ns-form-row">
+        <label class="ns-field-label">Designation *</label>
+        <select class="ns-input" [(ngModel)]="draft.designation">
+          <option *ngFor="let d of designations" [value]="d">{{ d }}</option>
+        </select>
+        <small class="ns-hint" *ngIf="isOtEligible(draft.designation)">
+          This designation can be mirrored to the OT staff master after save.
+        </small>
+      </div>
+
+      <div class="ns-form-row">
+        <label class="ns-field-label">Qualification</label>
+        <input class="ns-input" type="text" [(ngModel)]="draft.qualification" placeholder="GNM / B.Sc Nursing / Diploma…" />
+      </div>
+
+      <div class="ns-form-row">
+        <label class="ns-field-label">Primary Ward</label>
+        <select class="ns-input" [(ngModel)]="draft.primaryWardId">
+          <option value="">— none —</option>
+          <option *ngFor="let w of wards" [value]="w.id">{{ w.wardName }} ({{ w.wardCode }})</option>
+        </select>
+      </div>
+
+      <div class="ns-form-grid">
+        <div class="ns-form-row">
+          <label class="ns-field-label">Joining Date</label>
+          <input class="ns-input" type="date" [(ngModel)]="draft.joiningDate" />
+        </div>
+        <div class="ns-form-row">
+          <label class="ns-field-label">Date of Birth</label>
+          <input class="ns-input" type="date" [(ngModel)]="draft.dateOfBirth" />
+        </div>
+      </div>
+
+      <div class="ns-form-row">
+        <label class="ns-inline">
+          <input type="checkbox" [(ngModel)]="draft.isActive" />
+          <span>Active</span>
+        </label>
+      </div>
+
+      <div class="ns-side-actions">
+        <button class="ns-btn ns-btn-secondary" (click)="closeEditor()" [disabled]="saving">Cancel</button>
+        <button class="ns-btn ns-btn-primary" (click)="save()" [disabled]="saving">
+          {{ saving ? 'Saving…' : (editing === 'new' ? 'Create Nurse' : 'Save Changes') }}
+        </button>
+      </div>
+    </aside>
+  </div>
+</div>

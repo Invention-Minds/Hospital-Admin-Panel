@@ -16,8 +16,14 @@ import {
 })
 export class EmergencyListComponent implements OnInit, OnDestroy {
   emergencyCases: EmergencyCase[] = [];
+  filteredCases: EmergencyCase[] = [];
   loading = false;
   selectedCases: EmergencyCase[] = [];
+
+  // Search + manual pagination (matches the confirmed-appointment table pattern).
+  searchValue = '';
+  currentPage = 1;
+  pageSize = 10;
 
   // Sprint 3f — Admit-to-IPD modal wiring.
   admitModalVisible = false;
@@ -44,9 +50,11 @@ export class EmergencyListComponent implements OnInit, OnDestroy {
     { label: 'Stabilized', value: 'stabilized' },
     { label: 'Referred', value: 'referred' },
     { label: 'Admitted to IPD', value: 'admitted-ipd' },
+    { label: 'Shifted to OT', value: 'shifted-ot' },
     { label: 'LAMA', value: 'LAMA' },
     { label: 'DAMA', value: 'DAMA' },
-    { label: 'Discharged', value: 'discharged' }
+    { label: 'Discharged', value: 'discharged' },
+    { label: 'Expired', value: 'expired' }
   ];
 
   cols = [
@@ -66,6 +74,14 @@ export class EmergencyListComponent implements OnInit, OnDestroy {
     private router: Router
   ) { }
 
+  // ER Nurse (sub_admin) can view the queue and open cases but must not make
+  // clinical decisions — hide status-change + Convert-to-IPD for them.
+  get isErNurse(): boolean {
+    if (typeof window === 'undefined' || !window.localStorage) return false;
+    return localStorage.getItem('role') === 'sub_admin'
+      && localStorage.getItem('subAdminType') === 'ER Nurse';
+  }
+
   ngOnInit(): void {
     this.loadEmergencyCases();
   }
@@ -82,6 +98,7 @@ export class EmergencyListComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (cases) => {
           this.emergencyCases = cases;
+          this.applyFilter();
         },
         error: (error) => {
           this.messageService.add({
@@ -97,12 +114,56 @@ export class EmergencyListComponent implements OnInit, OnDestroy {
       });
   }
 
+  // ─── Search + pagination ────────────────────────────────────────────────
+  applyFilter(): void {
+    const q = (this.searchValue || '').trim().toLowerCase();
+    this.filteredCases = !q
+      ? [...this.emergencyCases]
+      : this.emergencyCases.filter((c) =>
+          (c.prn || '').toLowerCase().includes(q) ||
+          (c.status || '').toLowerCase().includes(q) ||
+          (c.triageCategory || '').toLowerCase().includes(q) ||
+          (this.getTriageLabel(c.triageCategory) || '').toLowerCase().includes(q) ||
+          (c.presentingComplaint || '').toLowerCase().includes(q),
+        );
+    const pages = this.totalPages;
+    if (this.currentPage > pages) this.currentPage = pages || 1;
+  }
+
+  onSearch(): void {
+    this.currentPage = 1;
+    this.applyFilter();
+  }
+
+  get totalPages(): number {
+    return Math.ceil(this.filteredCases.length / this.pageSize);
+  }
+
+  getPaginatedCases(): EmergencyCase[] {
+    const start = (this.currentPage - 1) * this.pageSize;
+    return this.filteredCases.slice(start, start + this.pageSize);
+  }
+
+  prevPage(): void {
+    if (this.currentPage > 1) this.currentPage--;
+  }
+
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) this.currentPage++;
+  }
+
+  onPageChange(): void {
+    if (this.currentPage < 1) this.currentPage = 1;
+    else if (this.currentPage > this.totalPages) this.currentPage = this.totalPages || 1;
+  }
+
   viewCase(caseId: string): void {
     this.router.navigate([`/emergency/${caseId}`]);
   }
 
   editCase(caseId: string): void {
-    this.router.navigate([`/emergency/${caseId}/edit`]);
+    // No /edit route exists; the detail page is where a case is managed.
+    this.router.navigate([`/emergency/${caseId}`]);
   }
 
   updateStatus(emergencyCase: EmergencyCase, newStatus: string): void {
@@ -154,7 +215,7 @@ export class EmergencyListComponent implements OnInit, OnDestroy {
     return this.triageLabels[category] || category;
   }
 
-  formatDate(date: Date): string {
-    return new Date(date).toLocaleString();
+  formatDate(date?: Date | string): string {
+    return date ? new Date(date).toLocaleString() : '-';
   }
 }

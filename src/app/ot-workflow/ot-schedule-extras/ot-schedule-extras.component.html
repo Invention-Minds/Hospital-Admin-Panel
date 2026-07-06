@@ -1,0 +1,162 @@
+<div class="ext-card">
+  <div class="ext-tabs">
+    <button [class.ext-tab-active]="activeTab === 'surgeries'" (click)="activeTab = 'surgeries'">Surgeries</button>
+    <button [class.ext-tab-active]="activeTab === 'staff'" (click)="activeTab = 'staff'">Staff</button>
+    <button [class.ext-tab-active]="activeTab === 'equipment'" (click)="activeTab = 'equipment'">Equipment</button>
+    <button [class.ext-tab-active]="activeTab === 'consumables'" (click)="activeTab = 'consumables'">Drugs &amp; Consumables</button>
+  </div>
+
+  <div class="ext-banner ext-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <!-- ─── Surgeries ─── -->
+  <div *ngIf="activeTab === 'surgeries'">
+    <div class="ext-form-row">
+      <select [(ngModel)]="draftSurgery.departmentName">
+        <option value="">— Department —</option>
+        <option *ngFor="let d of departments" [ngValue]="d.name">{{ d.name }}</option>
+      </select>
+      <input type="text" [(ngModel)]="draftSurgery.categoryCode" placeholder="Category (e.g. Level 4A)" />
+      <!-- Phase 9.5j — picker from surgery master (free-text fallback). Picking
+           a row auto-fills the type/department when blank. -->
+      <input type="text" [(ngModel)]="draftSurgery.surgeryName"
+             (ngModelChange)="onSurgeryMasterPick($event)"
+             placeholder="Surgery name *" list="ext-surgery-master" />
+      <datalist id="ext-surgery-master">
+        <option *ngFor="let s of surgeryMaster" [value]="s.name">{{ s.code || s.categoryCode || '' }}</option>
+      </datalist>
+      <select [(ngModel)]="draftSurgery.surgeryType">
+        <option *ngFor="let t of surgeryTypes" [ngValue]="t">{{ t }}</option>
+      </select>
+      <label class="ext-inline"><input type="checkbox" [(ngModel)]="draftSurgery.isPrimary" /> Primary</label>
+      <button class="ext-btn ext-btn-primary" (click)="addSurgery()">+ Add</button>
+    </div>
+    <table class="ext-grid">
+      <thead><tr><th>Department</th><th>Category</th><th>Surgery</th><th>Type</th><th>Primary</th><th></th></tr></thead>
+      <tbody>
+        <tr *ngIf="!surgeries.length"><td colspan="6" class="ext-muted">No surgeries listed yet.</td></tr>
+        <tr *ngFor="let r of surgeries">
+          <td>{{ r.departmentName || '—' }}</td>
+          <td>{{ r.categoryCode || '—' }}</td>
+          <td>{{ r.surgeryName }}</td>
+          <td>{{ r.surgeryType || '—' }}</td>
+          <td>
+            <span *ngIf="r.isPrimary" class="ext-pill ext-pill-primary">Primary</span>
+            <button *ngIf="!r.isPrimary" class="ext-btn ext-btn-sm" (click)="setSurgeryPrimary(r)">Make primary</button>
+          </td>
+          <td><button class="ext-btn ext-btn-sm ext-btn-danger" (click)="removeSurgery(r)">×</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ─── Staff ─── -->
+  <div *ngIf="activeTab === 'staff'">
+    <div class="ext-form-row">
+      <select [(ngModel)]="draftStaff.role">
+        <option *ngFor="let r of roles" [ngValue]="r.value">{{ r.label }}</option>
+      </select>
+      <!-- Phase 9.5j — staff master picker (datalist gives picker + free-text
+           fallback for doctor roles whose names aren't in the staff master). -->
+      <input type="text" [(ngModel)]="draftStaff.staffName"
+             placeholder="Staff name *" [attr.list]="'ext-staff-master-' + draftStaff.role" />
+      <datalist [attr.id]="'ext-staff-master-' + draftStaff.role">
+        <option *ngFor="let s of staffMasterFor(draftStaff.role)" [value]="s.name">{{ s.designation || s.role }}</option>
+      </datalist>
+      <label class="ext-inline"><input type="checkbox" [(ngModel)]="draftStaff.isPrimary" /> Primary</label>
+      <button class="ext-btn ext-btn-primary" (click)="addStaff()">+ Add</button>
+    </div>
+    <div class="ext-staff-groups">
+      <div class="ext-staff-group" *ngFor="let r of roles">
+        <h4>{{ r.label }}</h4>
+        <ul *ngIf="staffByRole(r.value).length; else noStaff">
+          <li *ngFor="let s of staffByRole(r.value)">
+            <strong>{{ s.staffName }}</strong>
+            <span *ngIf="s.isPrimary" class="ext-pill ext-pill-primary">Primary</span>
+            <button *ngIf="!s.isPrimary" class="ext-btn ext-btn-xs" (click)="setStaffPrimary(s)">Set primary</button>
+            <button class="ext-btn ext-btn-xs ext-btn-danger" (click)="removeStaff(s)">×</button>
+          </li>
+        </ul>
+        <ng-template #noStaff><div class="ext-muted">—</div></ng-template>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Equipment ─── -->
+  <div *ngIf="activeTab === 'equipment'">
+    <div class="ext-form-row">
+      <select [(ngModel)]="draftEquipment.equipmentName">
+        <option value="">— Equipment —</option>
+        <option *ngFor="let e of equipmentMaster" [ngValue]="e.name">{{ e.name }}{{ e.code ? ' (' + e.code + ')' : '' }}</option>
+        <!-- fallback suggestions if master is empty (first-run / pre-seed) -->
+        <ng-container *ngIf="!equipmentMaster.length">
+          <option *ngFor="let e of equipmentSuggestions" [ngValue]="e">{{ e }}</option>
+        </ng-container>
+      </select>
+      <input type="number" min="0" [(ngModel)]="draftEquipment.usedMinutes" placeholder="Used min" />
+      <input type="text" [(ngModel)]="draftEquipment.notes" placeholder="Notes" />
+      <button class="ext-btn ext-btn-primary" (click)="addEquipment()">+ Add</button>
+    </div>
+    <table class="ext-grid">
+      <thead><tr><th>Equipment</th><th>Used (min)</th><th>Notes</th><th></th></tr></thead>
+      <tbody>
+        <tr *ngIf="!equipment.length"><td colspan="4" class="ext-muted">No equipment logged.</td></tr>
+        <tr *ngFor="let r of equipment">
+          <td>{{ r.equipmentName }}</td>
+          <td>{{ r.usedMinutes }}</td>
+          <td>{{ r.notes || '—' }}</td>
+          <td><button class="ext-btn ext-btn-sm ext-btn-danger" (click)="removeEquipment(r)">×</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ─── Drugs & Consumables ─── -->
+  <div *ngIf="activeTab === 'consumables'">
+    <div class="ext-form-row">
+      <label>
+        Consumables set
+        <select [(ngModel)]="pickerSetId" (change)="onPickerChange()">
+          <option [ngValue]="null">— Select set —</option>
+          <option *ngFor="let s of consumableSets" [ngValue]="s.id">{{ s.name }}</option>
+        </select>
+      </label>
+      <button class="ext-btn" (click)="addBlankIssueLine()">+ Custom line</button>
+    </div>
+
+    <div *ngIf="issueDraft.length" class="ext-issue-draft">
+      <h4>Issue lines</h4>
+      <!-- Phase 9.5i — datalist of all known consumable items across all
+           sets; user can type to filter OR pick from the dropdown. Keeps
+           free-text fallback so out-of-catalog items can still be issued. -->
+      <datalist id="ext-consumable-items">
+        <option *ngFor="let n of allConsumableItemNames" [value]="n"></option>
+      </datalist>
+      <div class="ext-issue-row" *ngFor="let it of issueDraft; let i = index">
+        <input type="text" [(ngModel)]="it.itemName" placeholder="Item name" list="ext-consumable-items" />
+        <input type="number" min="0" [(ngModel)]="it.quantity" placeholder="Qty" />
+        <input type="text" [(ngModel)]="it.uom" placeholder="UOM" />
+        <button class="ext-btn ext-btn-xs ext-btn-danger" (click)="removeIssueLine(i)">×</button>
+      </div>
+      <button class="ext-btn ext-btn-primary" (click)="submitIssue()">Issue to OT</button>
+    </div>
+
+    <h4 class="ext-section-title">Ledger</h4>
+    <table class="ext-grid">
+      <thead><tr><th>Time</th><th>Item</th><th>Direction</th><th>Qty</th><th>Net</th><th>By</th><th></th></tr></thead>
+      <tbody>
+        <tr *ngIf="!consumableIssues.length"><td colspan="7" class="ext-muted">Nothing issued yet.</td></tr>
+        <tr *ngFor="let r of consumableIssues" [class.ext-row-return]="r.direction === 'returned'">
+          <td>{{ r.issuedAt | date:'dd-MMM HH:mm' }}</td>
+          <td>{{ r.itemName }}</td>
+          <td>{{ r.direction }}</td>
+          <td>{{ r.quantity }} {{ r.uom }}</td>
+          <td>{{ netQuantity(r.itemName) }}</td>
+          <td>{{ r.prescribedBy || '—' }}</td>
+          <td>
+            <button *ngIf="r.direction === 'issued'" class="ext-btn ext-btn-xs" (click)="returnRow(r)">Return</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -1,0 +1,112 @@
+<div class="os-shell">
+  <h2 class="os-title">Order Surgeries <span class="os-est">· Estimation {{ estimationId }}</span></h2>
+  <p class="os-sub">Per-role service line items — Surgeon / Co-Surgeon / Anaesthetist / OT Rent / etc.</p>
+
+  <div class="os-banner os-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="os-banner os-good" *ngIf="successMessage">{{ successMessage }}</div>
+  <div class="os-loading" *ngIf="loading">Loading…</div>
+
+  <!-- Add-line form -->
+  <div class="os-card">
+    <h3>Add Line</h3>
+    <div class="os-grid">
+      <label>Surgery name *
+        <input type="text" [(ngModel)]="draft.surgeryName"
+               (ngModelChange)="onSurgeryNamePick($event)"
+               placeholder="e.g. (RT) TKR" list="os-surgery-master" />
+        <datalist id="os-surgery-master">
+          <option *ngFor="let s of surgeryMaster" [value]="s.name">{{ s.code || s.categoryCode || '' }}</option>
+        </datalist>
+      </label>
+      <label>Department
+        <select [(ngModel)]="draft.departmentName">
+          <option value="">— select —</option>
+          <option *ngFor="let d of departments" [ngValue]="d.name">{{ d.name }}</option>
+        </select>
+      </label>
+      <label>Category
+        <input type="text" [(ngModel)]="draft.categoryCode" placeholder="Level 4A" />
+      </label>
+      <label>Role *
+        <select [(ngModel)]="draft.role">
+          <option *ngFor="let r of roles" [ngValue]="r.value">{{ r.label }}</option>
+        </select>
+      </label>
+      <label>Service code
+        <input type="text" [(ngModel)]="draft.serviceCode" />
+      </label>
+      <label>Service name *
+        <input type="text" [(ngModel)]="draft.serviceName" />
+      </label>
+      <label>Rendered by
+        <select [(ngModel)]="draft.renderedBy">
+          <option value="">— select doctor —</option>
+          <option *ngFor="let d of doctors" [ngValue]="d.name">{{ d.name }}{{ d.departmentName ? ' · ' + d.departmentName : '' }}</option>
+        </select>
+      </label>
+      <label>Rate
+        <input type="number" min="0" step="0.01" [(ngModel)]="draft.rate" />
+      </label>
+      <label>Qty
+        <input type="number" min="1" [(ngModel)]="draft.quantity" />
+      </label>
+      <label>Disc %
+        <input type="number" min="0" max="100" step="0.01" [(ngModel)]="draft.discountPercent" />
+      </label>
+      <label class="os-wide">Discount reason
+        <input type="text" [(ngModel)]="draft.discountReason" />
+      </label>
+      <label>Adjustment ₹
+        <input type="number" step="0.01" [(ngModel)]="draft.adjustmentAmount" placeholder="+ / −" />
+      </label>
+      <label class="os-wide">Adjustment reason
+        <input type="text" [(ngModel)]="draft.adjustmentReason" />
+      </label>
+    </div>
+    <div class="os-actions">
+      <button class="os-btn os-btn-primary" (click)="add()">+ Add Line</button>
+    </div>
+  </div>
+
+  <!-- Lines table -->
+  <div class="os-card">
+    <h3>Lines <span class="os-count" *ngIf="rows.length">({{ rows.length }})</span></h3>
+    <div class="os-grid-wrap">
+      <table class="os-grid-table">
+        <thead>
+          <tr>
+            <th>Surgery</th><th>Category</th><th>Rendered By</th><th>Role</th>
+            <th>Service</th><th>Rate</th><th>Qty</th><th>Disc%</th>
+            <th>Adjust ₹</th><th>Net</th><th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="!rows.length"><td colspan="11" class="os-muted">No lines yet.</td></tr>
+          <tr *ngFor="let r of rows">
+            <td>{{ r.surgeryName }}</td>
+            <td>{{ r.categoryCode || '—' }}</td>
+            <td>{{ r.renderedBy || '—' }}</td>
+            <td><span class="os-pill os-role">{{ r.role }}</span></td>
+            <td>
+              {{ r.serviceName }}
+              <small *ngIf="r.serviceCode">· {{ r.serviceCode }}</small>
+            </td>
+            <td class="os-num">{{ r.rate | number:'1.2-2' }}</td>
+            <td class="os-num">{{ r.quantity }}</td>
+            <td class="os-num">{{ r.discountPercent }}%</td>
+            <td class="os-num">{{ r.adjustmentAmount | number:'1.2-2' }}</td>
+            <td class="os-num os-net">{{ lineNet(r) | number:'1.2-2' }}</td>
+            <td><button class="os-btn os-btn-sm os-btn-danger" (click)="remove(r)">×</button></td>
+          </tr>
+        </tbody>
+        <tfoot *ngIf="rows.length">
+          <tr>
+            <td colspan="9" class="os-total-label">Subtotal</td>
+            <td class="os-num os-total">{{ subtotal | number:'1.2-2' }}</td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+</div>

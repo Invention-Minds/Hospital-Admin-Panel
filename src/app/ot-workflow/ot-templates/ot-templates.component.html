@@ -1,0 +1,63 @@
+<div class="tpl-shell">
+  <div class="tpl-head">
+    <h2 class="tpl-title">OT Notes Templates</h2>
+    <button class="tpl-btn tpl-btn-primary" (click)="newTemplate()">+ New Template</button>
+  </div>
+  <p class="tpl-sub">Reusable boilerplate for surgical notes + other clinical notes.</p>
+
+  <div class="tpl-banner tpl-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="tpl-banner tpl-good" *ngIf="successMessage">{{ successMessage }}</div>
+
+  <div class="tpl-tabs">
+    <button [class.tpl-tab-active]="activeTab === 'surgical'" (click)="setTab('surgical')">Surgical Notes</button>
+    <button [class.tpl-tab-active]="activeTab === 'other'" (click)="setTab('other')">Other Notes</button>
+  </div>
+
+  <div class="tpl-loading" *ngIf="loading">Loading…</div>
+
+  <div class="tpl-layout" *ngIf="!loading">
+    <div class="tpl-list">
+      <div class="tpl-row" *ngIf="!list().length"><em class="tpl-muted">No templates yet.</em></div>
+      <div class="tpl-row"
+           *ngFor="let t of list()"
+           [class.tpl-row-active]="selected?.id === t.id"
+           (click)="edit(t)">
+        <strong>{{ t.name }}</strong>
+        <span *ngIf="!t.isActive" class="tpl-pill tpl-inactive">Inactive</span>
+      </div>
+    </div>
+
+    <div class="tpl-editor" *ngIf="isNew || selected">
+      <h3>{{ isNew ? 'New' : 'Edit' }} {{ activeTab === 'surgical' ? 'Surgical' : 'Other' }} Template</h3>
+      <label class="tpl-field">
+        <span>Name *</span>
+        <input type="text" [(ngModel)]="draft.name" />
+      </label>
+      <label class="tpl-field">
+        <span>Department (optional)</span>
+        <select [(ngModel)]="draft.departmentId">
+          <option [ngValue]="null">— all departments —</option>
+          <option *ngFor="let d of departments" [ngValue]="d.id">{{ d.name }}</option>
+        </select>
+      </label>
+      <label class="tpl-field">
+        <span>Body (markdown / placeholders) *</span>
+        <textarea rows="12" [(ngModel)]="draft.bodyTemplate"
+                  placeholder="Position: ...&#10;Incision: ...&#10;Steps:&#10;1. ...&#10;2. ..."></textarea>
+      </label>
+      <label class="tpl-inline">
+        <input type="checkbox" [(ngModel)]="draft.isActive" /> Active
+      </label>
+      <div class="tpl-actions">
+        <button class="tpl-btn" (click)="cancel()" [disabled]="saving">Cancel</button>
+        <button class="tpl-btn tpl-btn-primary" (click)="save()" [disabled]="saving">
+          {{ saving ? 'Saving…' : 'Save' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="tpl-empty" *ngIf="!isNew && !selected">
+      Select a template from the list, or click "+ New Template".
+    </div>
+  </div>
+</div>

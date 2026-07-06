@@ -1,0 +1,82 @@
+<div class="prt-wrap">
+
+  <!-- Filter row -->
+  <div class="prt-toolbar">
+    <div class="prt-filter">
+      <label>Dept</label>
+      <select [(ngModel)]="filterDepartment" (change)="load()">
+        <option value="">All</option>
+        <option value="lab">Lab</option>
+        <option value="radiology">Radiology</option>
+      </select>
+    </div>
+    <div class="prt-filter">
+      <label>Status</label>
+      <select [(ngModel)]="filterStatus" (change)="load()">
+        <option value="">All</option>
+        <option value="pending">Pending</option>
+        <option value="partial">Partial</option>
+        <option value="final">Final</option>
+      </select>
+    </div>
+    <div class="prt-meta">
+      <span class="prt-meta-label" *ngIf="windowLabel">Admission window: {{ windowLabel }}</span>
+      <button class="prt-btn-link" (click)="load()" [disabled]="loading">
+        <i class="pi pi-refresh"></i> Refresh
+      </button>
+    </div>
+  </div>
+
+  <div class="prt-banner prt-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="prt-loading" *ngIf="loading">Loading reports…</div>
+
+  <div class="prt-empty" *ngIf="!loading && !rows.length">
+    <i class="pi pi-file"></i>
+    <div>No lab or radiology reports yet for this {{ mode === 'admission' ? 'admission' : 'patient' }}.</div>
+  </div>
+
+  <!-- Grouped timeline -->
+  <div class="prt-group" *ngFor="let g of groupedByDate">
+    <div class="prt-group-head">{{ g.date | date:'EEEE, d MMM y' }}</div>
+    <div class="prt-cards">
+      <button class="prt-card"
+              *ngFor="let r of g.rows"
+              [class.prt-critical-unack]="r.criticalFlag && !r.acknowledgedAt"
+              (click)="open(r)">
+        <div class="prt-card-head">
+          <span class="prt-test">{{ r.testName }}</span>
+          <span class="prt-pill prt-pill-{{ r.department }}">{{ r.department }}</span>
+          <span class="prt-pill prt-status-{{ r.status }}">{{ r.status }}</span>
+          <span class="prt-pill prt-pill-critical" *ngIf="r.criticalFlag" [title]="r.acknowledgedAt ? 'Acknowledged' : 'Unacknowledged'">
+            <i class="pi" [ngClass]="r.acknowledgedAt ? 'pi-check' : 'pi-exclamation-triangle'"></i>
+            CRITICAL
+          </span>
+        </div>
+        <div class="prt-card-body">
+          <ng-container *ngIf="r.department === 'lab'; else radBody">
+            <span *ngIf="r.result">{{ r.result }}<span class="prt-unit" *ngIf="r.unit"> {{ r.unit }}</span></span>
+            <span class="prt-muted" *ngIf="r.referenceRange"> · ref {{ r.referenceRange }}</span>
+            <span class="prt-muted" *ngIf="!r.result && !r.referenceRange && r.reportUrl">PDF report</span>
+          </ng-container>
+          <ng-template #radBody>
+            <span *ngIf="r.impression">{{ r.impression }}</span>
+            <span class="prt-muted" *ngIf="!r.impression && r.findings">{{ r.findings }}</span>
+            <span class="prt-muted" *ngIf="!r.impression && !r.findings && r.reportUrl">PDF report</span>
+          </ng-template>
+        </div>
+        <div class="prt-card-foot">
+          <span *ngIf="r.order?.doctorName">Ordered by {{ r.order?.doctorName }}</span>
+          <span *ngIf="r.reportedAt"> · {{ r.reportedAt | date:'HH:mm' }}</span>
+          <span class="prt-attach" *ngIf="r.reportUrl"><i class="pi pi-paperclip"></i></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<app-report-viewer
+  [open]="viewerOpen"
+  [result]="viewerResult"
+  (closed)="onViewerClosed()"
+  (acknowledged)="onAcknowledged($event)">
+</app-report-viewer>

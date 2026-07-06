@@ -1,0 +1,84 @@
+<div class="page q-shell">
+  <div class="q-head">
+    <div>
+      <h2 class="q-title">TAT events</h2>
+      <p class="q-sub">Log start / end timestamps for waiting-time and TAT indicators. Powers PSQ-005..015 (avg minutes) and OPS-002/005/006/007/008/010 (% within target).</p>
+    </div>
+    <div class="q-range">
+      <button class="qi-back" (click)="goBack()">← Indicators</button>
+    </div>
+  </div>
+
+  <div class="q-banner q-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
+  <div class="q-banner tat-banner-ok" *ngIf="successMessage">{{ successMessage }}</div>
+
+  <div class="tat-chapter-row">
+    <button class="qi-chip" *ngFor="let ch of CHAPTERS"
+            [class.qi-chip-on]="filterChapter === ch"
+            (click)="selectChapter(ch)">{{ ch }}</button>
+  </div>
+
+  <div class="tat-card">
+    <h3 class="tat-card-title">Record event</h3>
+
+    <div class="tat-row">
+      <label>Indicator
+        <select [(ngModel)]="draft.qiCode">
+          <option value="">— select —</option>
+          <option *ngFor="let i of filteredIndicators" [value]="i.qiCode">
+            {{ i.qiCode }} · {{ i.name }}
+          </option>
+        </select>
+      </label>
+      <label>Started at <input type="datetime-local" [(ngModel)]="draft.startedAt" /></label>
+      <label>Ended at <input type="datetime-local" [(ngModel)]="draft.endedAt" /></label>
+      <label>Location <input type="text" [(ngModel)]="draft.location" placeholder="Ward / OPD-2 / counter" /></label>
+    </div>
+
+    <div class="tat-row" *ngIf="selectedIndicator() as ind">
+      <div class="tat-context">
+        <div><strong>Chapter:</strong> {{ ind.chapter }} · {{ ind.department }}</div>
+        <div *ngIf="targetFor(ind.qiCode) as t">
+          <strong>Target:</strong> {{ t }} min
+          <span class="tat-meta">({{ ind.unit === '%' ? 'compliance %' : 'avg minutes' }})</span>
+        </div>
+        <div class="tat-meta"><em>Numerator:</em> {{ ind.numeratorDef }}</div>
+        <div class="tat-meta"><em>Denominator:</em> {{ ind.denominatorDef }}</div>
+      </div>
+    </div>
+
+    <label class="tat-fullrow">Notes
+      <textarea rows="2" [(ngModel)]="draft.notes" placeholder="Patient PRN, queue type, anything relevant"></textarea>
+    </label>
+
+    <div class="tat-foot">
+      <button class="tat-save" (click)="submit()" [disabled]="saving">{{ saving ? 'Saving…' : 'Record event' }}</button>
+    </div>
+  </div>
+
+  <div class="tat-card">
+    <h3 class="tat-card-title">This month — events ({{ rows.length }})</h3>
+    <div class="q-loading" *ngIf="loading">Loading…</div>
+    <div class="q-empty" *ngIf="!loading && rows.length === 0">No TAT events recorded this month.</div>
+    <table class="tat-table" *ngIf="rows.length > 0">
+      <thead>
+        <tr><th>Started</th><th>QI</th><th>Duration</th><th>vs target</th><th>Location</th><th>By</th><th></th></tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of rows">
+          <td>{{ r.startedAt | date:'yyyy-MM-dd HH:mm' }}</td>
+          <td class="tat-code">{{ r.qiCode }}</td>
+          <td>{{ r.durationMinutes }} min</td>
+          <td>
+            <span class="qi-pill" *ngIf="r.withinTarget === true" [class.q-good]="true">within</span>
+            <span class="qi-pill" *ngIf="r.withinTarget === false" [class.q-bad]="true">over</span>
+            <span *ngIf="r.withinTarget === null">—</span>
+          </td>
+          <td>{{ r.location || '—' }}</td>
+          <td>{{ r.capturedBy || '—' }}</td>
+          <td><button class="tat-delete" (click)="remove(r)">×</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

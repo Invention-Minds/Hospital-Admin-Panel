@@ -122,19 +122,59 @@
                  formControlName="witnessName" />
         </div>
         <div class="form__grid">
+          <!-- Patient signature (e-sign pad) -->
           <div class="form__field">
-            <label for="editPatientSignature" class="form__label">Patient signature reference</label>
-            <input pInputText id="editPatientSignature"
-                   type="text"
-                   class="form__input"
-                   formControlName="patientSignature" />
+            <label class="form__label">Patient signature</label>
+
+            <div *ngIf="editForm.get('patientSignature')?.value" class="sig-done" data-testid="edit-patient-signed">
+              ✓ Patient signed
+              <button type="button" class="sig-link" (click)="clearPatientSignature()">Re-sign</button>
+            </div>
+
+            <ng-container *ngIf="!editForm.get('patientSignature')?.value">
+              <button type="button" class="btn btn--secondary sig-capture-btn"
+                      *ngIf="!showPatientSign"
+                      (click)="showPatientSign = true">
+                + Capture patient signature
+              </button>
+              <app-e-sign
+                *ngIf="showPatientSign"
+                [signerType]="'patient'"
+                [signerName]="patientSignerName"
+                [contextType]="'lama-dama'"
+                [contextId]="signContextId"
+                (signed)="onPatientSigned($event)"
+                (cancelled)="showPatientSign = false">
+              </app-e-sign>
+            </ng-container>
           </div>
+
+          <!-- Witness signature (e-sign pad) -->
           <div class="form__field">
-            <label for="editWitnessSignature" class="form__label">Witness signature reference</label>
-            <input pInputText id="editWitnessSignature"
-                   type="text"
-                   class="form__input"
-                   formControlName="witnessSignature" />
+            <label class="form__label">Witness signature</label>
+
+            <div *ngIf="editForm.get('witnessSignature')?.value" class="sig-done" data-testid="edit-witness-signed">
+              ✓ Witness signed
+              <button type="button" class="sig-link" (click)="clearWitnessSignature()">Re-sign</button>
+            </div>
+
+            <ng-container *ngIf="!editForm.get('witnessSignature')?.value">
+              <small *ngIf="!witnessNameValue" class="form__hint">Enter the witness name above to capture their signature.</small>
+              <button type="button" class="btn btn--secondary sig-capture-btn"
+                      *ngIf="witnessNameValue && !showWitnessSign"
+                      (click)="showWitnessSign = true">
+                + Capture witness signature
+              </button>
+              <app-e-sign
+                *ngIf="witnessNameValue && showWitnessSign"
+                [signerType]="'witness'"
+                [signerName]="witnessNameValue"
+                [contextType]="'lama-dama'"
+                [contextId]="signContextId"
+                (signed)="onWitnessSigned($event)"
+                (cancelled)="showWitnessSign = false">
+              </app-e-sign>
+            </ng-container>
           </div>
         </div>
 

@@ -31,6 +31,14 @@ export class DoctorServiceService {
   deleteDoctor(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/doctors/${id}`);
   }
+
+  deactivateDoctor(id: number): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/doctors/${id}/deactivate`, {});
+  }
+
+  activateDoctor(id: number): Observable<any> {
+    return this.http.patch<any>(`${this.apiUrl}/doctors/${id}/activate`, {});
+  }
   // Get all doctors
   // getDoctors(): Observable<Doctor[]> {
   //   return this.http.get<Doctor[]>(`${this.apiUrl}/doctors`);
@@ -171,6 +179,17 @@ export class DoctorServiceService {
   }
   getDoctorByUserId(userId: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/doctors/get-doctor-by-userId/${userId}`);
+  }
+
+  // Daily doctor-arrival ("came today") — backed by a JSON file on the server, no DB.
+  getTodayAttendance(): Observable<{ date: string; doctorIds: number[] }> {
+    return this.http.get<{ date: string; doctorIds: number[] }>(`${this.apiUrl}/attendance/today`);
+  }
+  markArrived(doctorId: number): Observable<{ date: string; doctorIds: number[] }> {
+    return this.http.post<{ date: string; doctorIds: number[] }>(`${this.apiUrl}/attendance/mark`, { doctorId });
+  }
+  unmarkArrived(doctorId: number): Observable<{ date: string; doctorIds: number[] }> {
+    return this.http.post<{ date: string; doctorIds: number[] }>(`${this.apiUrl}/attendance/unmark`, { doctorId });
   }
   getBulkFutureBookedSlots(startDate: string, endDate: string, doctorIds: number[]): Observable<any> {
     return this.http.post(`${this.apiUrl}/doctors/bulk-future-slots`, { startDate, endDate, doctorIds });

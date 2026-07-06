@@ -1,0 +1,115 @@
+<div class="ru-overlay" *ngIf="open" (click)="close()">
+  <div class="ru-modal" (click)="$event.stopPropagation()">
+
+    <header class="ru-header">
+      <div>
+        <h3 class="ru-title">Upload Result / Report</h3>
+        <div class="ru-sub">
+          Order #{{ draft.orderId }}
+          <span *ngIf="prnLabel"> · PRN {{ prnLabel }}</span>
+        </div>
+      </div>
+      <button class="ru-icon-btn" (click)="close()" title="Close"><i class="pi pi-times"></i></button>
+    </header>
+
+    <div class="ru-body">
+
+      <div class="ru-banner ru-bad" *ngIf="errorMessage" (click)="errorMessage=''">
+        {{ errorMessage }}
+      </div>
+
+      <!-- Row 1: test name + department -->
+      <div class="ru-grid">
+        <div class="ru-field">
+          <label class="ru-label">Test Name *</label>
+          <input class="ru-input" type="text" [(ngModel)]="draft.testName" placeholder="e.g. CBC / Chest X-Ray" />
+        </div>
+        <div class="ru-field">
+          <label class="ru-label">Department *</label>
+          <select class="ru-input" [(ngModel)]="draft.department">
+            <option value="lab">Lab</option>
+            <option value="radiology">Radiology</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Row 2: status + reportedAt + critical flag -->
+      <div class="ru-grid ru-grid-3">
+        <div class="ru-field">
+          <label class="ru-label">Status *</label>
+          <select class="ru-input" [(ngModel)]="draft.status">
+            <option *ngFor="let s of statusOptions" [value]="s">{{ s }}</option>
+          </select>
+        </div>
+        <div class="ru-field">
+          <label class="ru-label">Reported at</label>
+          <input class="ru-input" type="datetime-local" [(ngModel)]="draft.reportedAt" />
+        </div>
+        <div class="ru-field ru-field-check">
+          <label class="ru-inline">
+            <input type="checkbox" [(ngModel)]="draft.criticalFlag" />
+            <span>Critical result</span>
+          </label>
+          <small class="ru-hint">Triggers a red banner and an urgent doctor notification.</small>
+        </div>
+      </div>
+
+      <!-- Lab structured fields -->
+      <div class="ru-grid ru-grid-3" *ngIf="draft.department === 'lab'">
+        <div class="ru-field">
+          <label class="ru-label">Result</label>
+          <input class="ru-input" type="text" [(ngModel)]="draft.result" placeholder="e.g. 13.4" />
+        </div>
+        <div class="ru-field">
+          <label class="ru-label">Unit</label>
+          <input class="ru-input" type="text" [(ngModel)]="draft.unit" placeholder="e.g. g/dL" />
+        </div>
+        <div class="ru-field">
+          <label class="ru-label">Reference Range</label>
+          <input class="ru-input" type="text" [(ngModel)]="draft.referenceRange" placeholder="e.g. 12.0–15.5" />
+        </div>
+      </div>
+
+      <!-- Radiology free-text fields -->
+      <ng-container *ngIf="draft.department === 'radiology'">
+        <div class="ru-field">
+          <label class="ru-label">Findings</label>
+          <textarea class="ru-input ru-textarea" rows="3" [(ngModel)]="draft.findings"
+                    placeholder="Detailed radiographic findings"></textarea>
+        </div>
+        <div class="ru-field">
+          <label class="ru-label">Impression</label>
+          <textarea class="ru-input ru-textarea" rows="2" [(ngModel)]="draft.impression"
+                    placeholder="Radiologist's interpretation / impression"></textarea>
+        </div>
+      </ng-container>
+
+      <!-- File upload -->
+      <div class="ru-field">
+        <label class="ru-label">Report File (PDF / JPG / PNG, max 25 MB)</label>
+        <div class="ru-file-row">
+          <label class="ru-file-btn">
+            <i class="pi pi-upload"></i>
+            <span>{{ fileName ? 'Change file' : 'Choose file' }}</span>
+            <input type="file" accept="application/pdf,image/jpeg,image/png" (change)="onFile($event)" hidden />
+          </label>
+          <div class="ru-file-name" *ngIf="fileName">
+            <i class="pi pi-file"></i> {{ fileName }}
+          </div>
+          <div class="ru-file-name ru-muted" *ngIf="!fileName">No file selected — metadata-only result will be saved.</div>
+        </div>
+        <small class="ru-error" *ngIf="fileError">{{ fileError }}</small>
+      </div>
+
+    </div>
+
+    <footer class="ru-footer">
+      <button class="ru-btn ru-btn-secondary" (click)="close()" [disabled]="saving">Cancel</button>
+      <button class="ru-btn ru-btn-primary" (click)="save()" [disabled]="saving">
+        <i class="pi pi-check" *ngIf="!saving"></i>
+        {{ saving ? 'Uploading…' : 'Save Result' }}
+      </button>
+    </footer>
+
+  </div>
+</div>

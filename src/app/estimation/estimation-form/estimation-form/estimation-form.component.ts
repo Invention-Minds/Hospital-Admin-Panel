@@ -6,6 +6,7 @@ import { MessageService } from 'primeng/api';
 import { NgForm } from '@angular/forms';
 import { AppointmentConfirmService } from '../../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../../services/doctor-details/doctor-service.service';
+import { AlertService } from '../../../services/alert.service';
 
 
 type InclusionsType = {
@@ -87,7 +88,7 @@ export class EstimationFormComponent {
 
 
 
-  constructor(private estimationService: EstimationService, private cdr: ChangeDetectorRef, private messageService: MessageService, private doctorService: DoctorServiceService, private appointmentService: AppointmentConfirmService, private eRef: ElementRef) {
+  constructor(private estimationService: EstimationService, private cdr: ChangeDetectorRef, private messageService: MessageService, private doctorService: DoctorServiceService, private appointmentService: AppointmentConfirmService, private eRef: ElementRef, private alertSvc: AlertService) {
     this.filteredRooms = [...this.availableRooms];
     this.availableRooms = [
       { name: 'General', cost: 1600 },
@@ -1869,7 +1870,7 @@ export class EstimationFormComponent {
   }
   submitRejection(): void {
     if (!this.rejectionReason.trim()) {
-      alert('Please enter a valid reason for rejection.');
+      this.alertSvc.show('Please enter a valid reason for rejection.', { severity: 'warning' });
       return;
     }
 

@@ -56,6 +56,52 @@
     transform: translateY(-5px);
     box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
   }
+
+  /* Navigation cards — tinted rounded icon badge for a cleaner, intentional look. */
+  .nav-ic {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    border-radius: 10px;
+    margin-right: 14px;
+  }
+  .nav-ic svg { width: 24px; height: 24px; }
+  .nav-ic-ipd  { background: #eef0ff; color: #4f46e5; }
+  .nav-ic-icu  { background: #f3e8ff; color: #9333ea; }
+  .nav-ic-ot   { background: #e6fbf6; color: #0d9488; }
+  .nav-ic-ward { background: #e8f1ff; color: #2563eb; }
+  .nav-ic-er   { background: #fdecee; color: #dc2626; }
+  .nav-ic-mlc  { background: #fff4e5; color: #d97706; }
+  .nav-ic-wa   { background: #e7f9ef; color: #1ebe57; }
+
+  /* Top-level group tabs (OPD / IPD / Emergency / WhatsApp) */
+  .group-tabs {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+  .group-tab {
+    padding: 9px 24px;
+    border: none;
+    border-radius: 999px;
+    background: #eceaf6;
+    color: #271E4A;
+    font-family: Kanit, sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+  .group-tab:hover { background: #dedaf0; }
+  .group-tab.active { background: #271E4A; color: #ffffff; }
+  .group-tab-ext { font-size: 11px; opacity: 0.7; margin-left: 2px; }
+
+  /* Inline pane that hosts an embedded page (IPD / ICU / OT / Ward / Emergency / MLC). */
+  .group-pane { margin-top: 4px; }
   
   .card-icon img {
     width: 36px;

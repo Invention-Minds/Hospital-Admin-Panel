@@ -1,0 +1,51 @@
+/* Phase 6 / Batch A — Role alias admin. */
+
+.ra-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; margin-bottom: 16px; flex-wrap: wrap; }
+.ra-title { font-size: 22px; font-weight: 600; margin: 0 0 4px; }
+.ra-sub { color: #6b7280; font-size: 13px; margin: 0; max-width: 720px; }
+
+.ra-banner { padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; font-size: 14px; cursor: pointer; }
+.ra-banner.ra-bad { background: #fee2e2; color: #b91c1c; }
+.ra-banner.ra-ok { background: #dcfce7; color: #166534; }
+.ra-loading { padding: 24px; text-align: center; color: #6b7280; font-style: italic; }
+.ra-empty { padding: 24px; text-align: center; color: #6b7280; background: #f9fafb;
+  border: 1px dashed #e5e7eb; border-radius: 10px; }
+.ra-empty code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+
+.ra-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px;
+  padding: 16px 20px; margin-bottom: 16px; }
+.ra-card-title { font-size: 15px; font-weight: 600; color: #271e4a; margin: 0 0 12px;
+  padding-bottom: 8px; border-bottom: 1px solid #f3f4f6; }
+
+.ra-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; align-items: flex-end; }
+.ra-row label, .ra-fullrow { display: flex; flex-direction: column; gap: 4px;
+  font-size: 12px; color: #6b7280; flex: 1; min-width: 150px; }
+.ra-fullrow { width: 100%; margin-bottom: 10px; }
+.ra-row input, .ra-fullrow input, .ra-fullrow textarea {
+  height: 34px; padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 6px;
+  font-size: 13px; font-family: inherit; }
+.ra-fullrow textarea { height: auto; min-height: 56px; resize: vertical; }
+.ra-check { flex-direction: row; align-items: center; gap: 6px; padding-top: 18px; }
+.ra-check input { width: auto; height: auto; }
+
+.ra-foot { display: flex; justify-content: flex-end; margin-top: 12px;
+  padding-top: 12px; border-top: 1px solid #f3f4f6; }
+.ra-save { background: #0e2970; color: #fff; border: none;
+  padding: 8px 22px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; }
+.ra-save:hover:not(:disabled) { background: #1e40af; }
+.ra-save:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.ra-table { width: 100%; border-collapse: collapse; }
+.ra-table thead th { text-align: left; font-size: 12px; color: #6b7280; text-transform: uppercase;
+  letter-spacing: 0.3px; background: #f9fafb; padding: 8px 10px; border-bottom: 1px solid #e5e7eb; }
+.ra-table tbody td { padding: 6px 10px; font-size: 13px; color: #374151; border-bottom: 1px solid #f3f4f6;
+  vertical-align: middle; }
+.ra-table tbody td input[type=text] { width: 100%; height: 30px; padding: 4px 8px;
+  border: 1px solid #d1d5db; border-radius: 4px; font-size: 13px; }
+.ra-alias { font-family: 'Roboto Mono', monospace; font-size: 12px; color: #0e2970; font-weight: 600; }
+.ra-actions { display: flex; gap: 4px; }
+.ra-tiny { background: transparent; border: 1px solid #d1d5db; color: #374151;
+  padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 11px; }
+.ra-tiny:hover { background: #f3f4f6; }
+.ra-tiny-bad { color: #b91c1c; }
+.ra-tiny-bad:hover { background: #fee2e2; border-color: #fee2e2; }

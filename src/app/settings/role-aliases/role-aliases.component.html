@@ -1,0 +1,62 @@
+<div class="page ra-shell">
+  <div class="ra-head">
+    <div>
+      <h2 class="ra-title">Notification role aliases</h2>
+      <p class="ra-sub">Maps spec strings ("Quality Manager", "grievance_officer", …) to the concrete role the notification dispatcher targets. Edit here when you need to re-route a bell.</p>
+    </div>
+  </div>
+
+  <div class="ra-banner ra-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
+  <div class="ra-banner ra-ok" *ngIf="successMessage">{{ successMessage }}</div>
+
+  <div class="ra-card">
+    <h3 class="ra-card-title">Add alias</h3>
+    <div class="ra-row">
+      <label>Alias (spec string)
+        <input type="text" [(ngModel)]="draft.alias" placeholder="e.g. Quality Manager" />
+      </label>
+      <label>Target role
+        <input type="text" [(ngModel)]="draft.targetRole" list="ra-roles" placeholder="admin / sub_admin / …" />
+        <datalist id="ra-roles">
+          <option *ngFor="let r of KNOWN_ROLES" [value]="r"></option>
+        </datalist>
+      </label>
+      <label class="ra-check">
+        <input type="checkbox" [(ngModel)]="draft.isActive" /> Active
+      </label>
+    </div>
+    <label class="ra-fullrow">Notes
+      <textarea rows="2" [(ngModel)]="draft.notes" placeholder="Where this alias fires from"></textarea>
+    </label>
+    <div class="ra-foot">
+      <button class="ra-save" (click)="submitNew()" [disabled]="saving">{{ saving ? 'Saving…' : 'Add' }}</button>
+    </div>
+  </div>
+
+  <div class="ra-card">
+    <h3 class="ra-card-title">Configured aliases ({{ rows.length }})</h3>
+    <div class="ra-loading" *ngIf="loading">Loading…</div>
+    <div class="ra-empty" *ngIf="!loading && rows.length === 0">No aliases yet. Run <code>npm run seed:role-aliases</code> to seed defaults.</div>
+    <table class="ra-table" *ngIf="rows.length > 0">
+      <thead>
+        <tr><th>Alias</th><th>Target role</th><th>Active</th><th>Notes</th><th></th></tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of rows">
+          <td class="ra-alias">{{ r.alias }}</td>
+          <td>
+            <input type="text" [(ngModel)]="r.targetRole" list="ra-roles" />
+          </td>
+          <td><input type="checkbox" [(ngModel)]="r.isActive" /></td>
+          <td>
+            <input type="text" [(ngModel)]="r.notes" />
+          </td>
+          <td class="ra-actions">
+            <button class="ra-tiny" (click)="saveRow(r)">Save</button>
+            <button class="ra-tiny ra-tiny-bad" (click)="deleteRow(r)">×</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

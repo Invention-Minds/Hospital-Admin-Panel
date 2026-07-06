@@ -1,0 +1,116 @@
+<div class="loading" *ngIf="isLoading">
+    <app-loading />
+</div>
+
+<div class="rootcontainer" *ngIf="!isLoading">
+
+    <!-- Header + filters -->
+    <div class="page_header">
+        <div class="heading">Module Utilization</div>
+        <div class="filters">
+            <div class="inputs">
+                <label for="fromDate"><strong>From:</strong></label>
+                <input type="date" id="fromDate" [(ngModel)]="fromDate" [max]="toDate">
+            </div>
+            <div class="inputs">
+                <label for="toDate"><strong>To:</strong></label>
+                <input type="date" id="toDate" [(ngModel)]="toDate" [min]="fromDate">
+            </div>
+            <button class="apply_btn" (click)="applyFilter()">Apply</button>
+        </div>
+    </div>
+
+    <div class="error_banner" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+    <!-- Summary cards -->
+    <div class="cards" *ngIf="summary">
+        <div class="card bg_color">
+            <div class="card_value">{{ summary.totalEligible }}</div>
+            <div class="card_label">Active Users</div>
+        </div>
+        <div class="card bg_color">
+            <div class="card_value">{{ modules.length }}</div>
+            <div class="card_label">Modules In Use</div>
+        </div>
+        <div class="card bg_color">
+            <div class="card_value small">{{ summary.from | date:'dd-MM-yyyy' }} — {{ summary.to | date:'dd-MM-yyyy' }}</div>
+            <div class="card_label">Date Range</div>
+        </div>
+    </div>
+
+    <!-- Adoption chart -->
+    <div class="chart_container bg_color" *ngIf="modules.length > 0">
+        <div class="section_heading">Adoption % by Module</div>
+        <div id="moduleAdoptionChart" [style.height.px]="60 + modules.length * 26"></div>
+    </div>
+
+    <!-- Table -->
+    <div class="table_container bg_color">
+        <div class="section_heading">Per-module Usage</div>
+        <div class="empty" *ngIf="modules.length === 0">
+            No module activity was recorded in the selected date range.
+        </div>
+        <table *ngIf="modules.length > 0">
+            <thead>
+                <tr>
+                    <th>No.</th>
+                    <th class="left">Module</th>
+                    <th>Active Users</th>
+                    <th>Not Using</th>
+                    <th class="left">Adoption %</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <ng-container *ngFor="let mod of modules; let i = index">
+                    <tr class="data_row" (click)="toggleExpand(mod.key)">
+                        <td>{{ i + 1 }}</td>
+                        <td class="left module_name">{{ mod.label }}</td>
+                        <td><span class="pill pill_active">{{ mod.activeCount }}</span></td>
+                        <td><span class="pill pill_inactive">{{ mod.inactiveCount }}</span></td>
+                        <td class="left adoption_cell">
+                            <div class="progress_track">
+                                <div class="progress_fill" [ngClass]="adoptionClass(mod.adoptionPct)"
+                                     [style.width.%]="mod.adoptionPct"></div>
+                            </div>
+                            <span class="adoption_value">{{ mod.adoptionPct }}%</span>
+                        </td>
+                        <td class="expander">
+                            <i class="fa-solid" [ngClass]="expandedKey === mod.key ? 'fa-angle-up' : 'fa-angle-down'"></i>
+                        </td>
+                    </tr>
+                    <tr *ngIf="expandedKey === mod.key" class="expanded_row">
+                        <td colspan="6">
+                            <div class="user_lists">
+                                <div class="user_list">
+                                    <div class="list_heading using">Using ({{ mod.activeCount }})</div>
+                                    <div class="empty_list" *ngIf="mod.activeUsers.length === 0">No users used this module in the range.</div>
+                                    <ul>
+                                        <li *ngFor="let user of mod.activeUsers">
+                                            <span class="user_name">{{ user.name }}</span>
+                                            <span class="user_role">{{ user.role }}</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="user_list">
+                                    <div class="list_heading not_using">Not Using ({{ mod.inactiveCount }})</div>
+                                    <div class="empty_list" *ngIf="mod.inactiveUsers.length === 0">Everyone used this module in the range.</div>
+                                    <ul>
+                                        <li *ngFor="let user of mod.inactiveUsers">
+                                            <span class="user_name">{{ user.name }}</span>
+                                            <span class="user_role">{{ user.role }}</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-container>
+            </tbody>
+        </table>
+        <div class="note" *ngIf="modules.length > 0">
+            Note: "Not Using" is measured against all active user accounts — per-module access
+            restrictions are not factored in.
+        </div>
+    </div>
+</div>

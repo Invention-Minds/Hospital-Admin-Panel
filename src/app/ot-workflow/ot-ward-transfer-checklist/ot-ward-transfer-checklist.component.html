@@ -1,0 +1,174 @@
+<div class="wtc-shell">
+  <!-- Header -->
+  <div class="wtc-page-header">
+    <div>
+      <h2 class="wtc-page-title">Pre-Operative Surgical Safety Checklist</h2>
+      <p class="wtc-page-sub">Ward → Operation Theatre — Nursing Format</p>
+    </div>
+    <button class="wtc-btn wtc-btn-secondary" (click)="goBack()">
+      <i class="pi pi-arrow-left"></i> Back
+    </button>
+  </div>
+
+  <div class="wtc-banner wtc-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
+  <div class="wtc-banner wtc-good" *ngIf="successMessage" (click)="successMessage=''">{{ successMessage }}</div>
+
+  <div class="wtc-loading" *ngIf="loading">Loading…</div>
+
+  <!-- Schedule picker (admission entry, multiple schedules) -->
+  <div class="wtc-card" *ngIf="showPicker">
+    <h3 class="wtc-section-title">Select the OT schedule</h3>
+    <p class="wtc-hint">This admission has more than one OT schedule. Pick the surgery this checklist is for.</p>
+    <div class="wtc-picker">
+      <button class="wtc-picker-row" *ngFor="let s of schedules" (click)="pickSchedule(s.id)">
+        <div class="wtc-picker-main">
+          <span class="wtc-picker-proc">{{ s.procedureName }}</span>
+          <span class="wtc-picker-meta">
+            {{ s.plannedStart | date:'d MMM y, HH:mm' }}
+            <span *ngIf="s.surgeonName"> · {{ s.surgeonName }}</span>
+            <span *ngIf="s.otRoom?.name"> · {{ s.otRoom?.name }}</span>
+          </span>
+        </div>
+        <span class="wtc-pill" [ngClass]="{
+          'wtc-pill-done': s.wardTransferChecklist?.status === 'OT_RECEIVED',
+          'wtc-pill-warn': s.wardTransferChecklist?.status === 'WARD_SIGNED',
+          'wtc-pill-draft': !s.wardTransferChecklist || s.wardTransferChecklist.status === 'DRAFT'
+        }">
+          {{ s.wardTransferChecklist?.status || 'NOT STARTED' }}
+        </span>
+      </button>
+    </div>
+  </div>
+
+  <ng-container *ngIf="!loading && !showPicker && scheduleId">
+    <!-- Patient context -->
+    <div class="wtc-card wtc-context" *ngIf="checklist?.schedule as sch">
+      <div><span class="wtc-ctx-label">Patient</span>{{ sch.patientName || '—' }}</div>
+      <div><span class="wtc-ctx-label">PRN</span>{{ sch.prn || '—' }}</div>
+      <div><span class="wtc-ctx-label">Procedure</span>{{ sch.procedureName }}</div>
+      <div><span class="wtc-ctx-label">Surgeon</span>{{ sch.surgeonName || '—' }}</div>
+      <div><span class="wtc-ctx-label">OT Room</span>{{ sch.otRoom?.name || '—' }}</div>
+      <div><span class="wtc-ctx-label">Planned</span>{{ sch.plannedStart | date:'d MMM y, HH:mm' }}</div>
+    </div>
+
+    <!-- Section A — Ward checklist -->
+    <div class="wtc-card">
+      <h3 class="wtc-section-title">
+        A. Pre-Operative Checklist in Ward
+        <span class="wtc-count">{{ sectionDone(wardItems) }}/{{ wardItems.length }}</span>
+      </h3>
+      <div class="wtc-grid">
+        <label class="wtc-check" *ngFor="let it of wardItems">
+          <input type="checkbox" [(ngModel)]="form[it.key]" [name]="it.key" [disabled]="wardSigned" />
+          <span>{{ it.label }}</span>
+        </label>
+      </div>
+      <div class="wtc-field">
+        <label class="wtc-field-label">Ward remarks</label>
+        <textarea class="wtc-input wtc-textarea" rows="2" [(ngModel)]="wardRemarks" name="wardRemarks"
+                  [disabled]="wardSigned" placeholder="Any item-specific remarks"></textarea>
+      </div>
+    </div>
+
+    <!-- Section B — Transfer -->
+    <div class="wtc-card">
+      <h3 class="wtc-section-title">
+        B. Transfer from Ward to OT
+        <span class="wtc-count">{{ sectionDone(transferItems) }}/{{ transferItems.length }}</span>
+      </h3>
+      <div class="wtc-grid">
+        <label class="wtc-check" *ngFor="let it of transferItems">
+          <input type="checkbox" [(ngModel)]="form[it.key]" [name]="it.key" [disabled]="wardSigned" />
+          <span>{{ it.label }}</span>
+        </label>
+      </div>
+      <div class="wtc-field">
+        <label class="wtc-field-label">Transfer remarks</label>
+        <textarea class="wtc-input wtc-textarea" rows="2" [(ngModel)]="transferRemarks" name="transferRemarks"
+                  [disabled]="wardSigned"></textarea>
+      </div>
+    </div>
+
+    <!-- Ward nurse signature -->
+    <div class="wtc-card wtc-sign-card">
+      <h3 class="wtc-section-title">Ward Nurse Handover</h3>
+      <div class="wtc-field">
+        <label class="wtc-field-label">Ward Nurse Name *</label>
+        <input class="wtc-input" type="text" [(ngModel)]="wardNurseName" name="wardNurseName"
+               [disabled]="wardSigned" />
+      </div>
+      <div class="wtc-signed" *ngIf="wardSigned">
+        <i class="pi pi-check-circle"></i>
+        Signed by {{ checklist?.wardNurseName }} on {{ checklist?.wardNurseSignedAt | date:'medium' }}
+      </div>
+      <app-e-sign *ngIf="!wardSigned && wardNurseName.trim()"
+                  [signerType]="'nurse'"
+                  [signerName]="wardNurseName"
+                  [signerRole]="'ward-nurse'"
+                  [contextType]="'ot-ward-transfer'"
+                  [contextId]="scheduleId"
+                  (signed)="onWardNurseSigned($event)">
+      </app-e-sign>
+      <p class="wtc-hint" *ngIf="!wardSigned && !wardNurseName.trim()">
+        Enter the ward nurse name to enable signing. Signing saves sections A &amp; B and locks them.
+      </p>
+    </div>
+
+    <!-- Section C — OT receiving -->
+    <div class="wtc-card">
+      <h3 class="wtc-section-title">
+        C. OT Receiving Checklist
+        <span class="wtc-count">{{ sectionDone(otReceivingItems) }}/{{ otReceivingItems.length }}</span>
+      </h3>
+      <p class="wtc-hint" *ngIf="!wardSigned">Completed by the OT receiving nurse after the ward nurse signs.</p>
+      <div class="wtc-grid">
+        <label class="wtc-check" *ngFor="let it of otReceivingItems">
+          <input type="checkbox" [(ngModel)]="form[it.key]" [name]="it.key" [disabled]="otSigned" />
+          <span>{{ it.label }}</span>
+        </label>
+      </div>
+      <div class="wtc-field">
+        <label class="wtc-field-label">OT receiving remarks</label>
+        <textarea class="wtc-input wtc-textarea" rows="2" [(ngModel)]="otReceivingRemarks" name="otReceivingRemarks"
+                  [disabled]="otSigned"></textarea>
+      </div>
+    </div>
+
+    <!-- OT receiving nurse signature -->
+    <div class="wtc-card wtc-sign-card">
+      <h3 class="wtc-section-title">OT Receiving Nurse</h3>
+      <div class="wtc-field">
+        <label class="wtc-field-label">OT Receiving Nurse Name *</label>
+        <input class="wtc-input" type="text" [(ngModel)]="otReceivingNurseName" name="otReceivingNurseName"
+               [disabled]="otSigned" />
+      </div>
+      <div class="wtc-signed" *ngIf="otSigned">
+        <i class="pi pi-check-circle"></i>
+        Signed by {{ checklist?.otReceivingNurseName }} on {{ checklist?.otReceivingNurseSignedAt | date:'medium' }}
+      </div>
+      <app-e-sign *ngIf="!otSigned && otReceivingNurseName.trim()"
+                  [signerType]="'nurse'"
+                  [signerName]="otReceivingNurseName"
+                  [signerRole]="'ot-receiving-nurse'"
+                  [contextType]="'ot-ward-transfer'"
+                  [contextId]="scheduleId"
+                  (signed)="onOtNurseSigned($event)">
+      </app-e-sign>
+      <p class="wtc-hint" *ngIf="!otSigned && !otReceivingNurseName.trim()">
+        Enter the OT receiving nurse name to enable signing.
+      </p>
+    </div>
+
+    <!-- Save bar -->
+    <div class="wtc-actions">
+      <span class="wtc-status-pill" [ngClass]="{
+        'wtc-pill-done': checklist?.status === 'OT_RECEIVED',
+        'wtc-pill-warn': checklist?.status === 'WARD_SIGNED',
+        'wtc-pill-draft': !checklist || checklist.status === 'DRAFT'
+      }">{{ checklist?.status || 'DRAFT' }}</span>
+      <button class="wtc-btn wtc-btn-primary" (click)="save()" [disabled]="saving || otSigned">
+        {{ saving ? 'Saving…' : 'Save Checklist' }}
+      </button>
+    </div>
+  </ng-container>
+</div>

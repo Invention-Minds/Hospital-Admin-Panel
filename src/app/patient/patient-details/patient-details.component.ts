@@ -25,6 +25,7 @@ export class PatientDetailsComponent {
   searchOptions = [
     { label: 'Patient Name', value: 'firstName' },
     { label: 'PRN', value: 'prn' },
+    { label: 'Phone Number', value: 'mobileNo' },
 
   ];
   selectedSearchOption: any = this.searchOptions[0];
@@ -94,14 +95,17 @@ export class PatientDetailsComponent {
 
       // Filter by search option
       if (this.selectedSearchOption && this.searchValue && service) {
-        switch (this.selectedSearchOption) {
+        switch (this.selectedSearchOption.value ?? this.selectedSearchOption) {
           case 'firstName':
-            matches = service.firstName
+            matches = service.name
               ?.toLowerCase()
               .includes(this.searchValue.toLowerCase());
             break;
           case 'prn':
             matches = service.prn?.toString().includes(this.searchValue);
+            break;
+          case 'mobileNo':
+            matches = service.mobileNo?.toString().includes(this.searchValue);
             break;
 
           case 'packageName':

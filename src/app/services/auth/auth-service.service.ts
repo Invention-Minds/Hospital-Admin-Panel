@@ -65,9 +65,18 @@ export class AuthServiceService {
           localStorage.setItem('adminType',user.adminType);
           localStorage.setItem('id', user.id);
           localStorage.setItem('therapistId', user.therapistId);
+          localStorage.setItem('departmentName', user.departmentName || '');
+          // NS — nurse sidebar capability flags. OPD-station nurse → appointments;
+          // IPD/ward-scoped nurse → clinical menus. A pure OPD nurse has only the
+          // first, so they see just Appointments + Incidents.
+          localStorage.setItem('isOpdNurse', user.isOpdNurse ? 'true' : 'false');
+          localStorage.setItem('isIpdNurse', user.isIpdNurse ? 'true' : 'false');
         }
       })
     );
+  }
+  getDepartmentName(): string {
+    return localStorage.getItem('departmentName') || '';
   }
   getUserId(): number | null {
     const userId = localStorage.getItem('userid');

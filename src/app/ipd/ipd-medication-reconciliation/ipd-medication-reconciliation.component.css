@@ -1,0 +1,38 @@
+.mr-shell { padding: 24px; max-width: 1500px; margin: 24px auto 24px 96px; }
+.mr-head { margin-bottom: 12px; }
+.mr-title { font-size: 22px; font-weight: 600; margin: 0 0 4px; }
+.mr-sub { color: #6b7280; font-size: 13px; margin: 0; }
+
+.mr-banner { padding: 10px 14px; border-radius: 6px; margin-bottom: 10px; font-size: 14px; }
+.mr-bad { background: #fee2e2; color: #b91c1c; }
+.mr-good { background: #dcfce7; color: #166534; }
+.mr-loading { padding: 60px; text-align: center; color: #6b7280; font-style: italic; }
+.mr-empty { padding: 40px; text-align: center; color: #9ca3af; font-style: italic; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; }
+
+.mr-table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden; font-size: 13px; }
+.mr-table th, .mr-table td { padding: 9px 12px; border-bottom: 1px solid #f3f4f6; text-align: left; vertical-align: middle; }
+.mr-table th { background: #f9fafb; font-weight: 600; color: #374151; }
+
+.mr-muted { color: #6b7280; }
+.mr-time { font-size: 11px; }
+.mr-chip { background: #fef3c7; color: #92400e; font-size: 11px; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+.mr-chip-inpatient { background: #dbeafe; color: #1e40af; }
+
+.mr-table select, .mr-table input.mr-reason {
+  border: 1px solid #d1d5db; border-radius: 6px; padding: 5px 8px; font-size: 13px; min-width: 130px;
+}
+.mr-table input.mr-reason { min-width: 200px; width: 100%; }
+.mr-required { border-color: #b91c1c !important; background: #fef2f2; }
+
+/* Action colour cues */
+.mr-action-hold { border-color: #f59e0b; background: #fffbeb; }
+.mr-action-disc { border-color: #b91c1c; background: #fef2f2; }
+.mr-action-change { border-color: #6366f1; background: #eef2ff; }
+.mr-action-cont { border-color: #16a34a; background: #f0fdf4; }
+.mr-action-rec { border-color: #2563eb; background: #eff6ff; }
+
+.mr-btn { background: #fff; border: 1px solid #d1d5db; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+.mr-btn:hover:not([disabled]) { background: #f3f4f6; }
+.mr-btn-primary { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
+.mr-btn-primary:hover:not([disabled]) { background: #1e40af; }
+.mr-btn[disabled] { opacity: 0.5; cursor: not-allowed; }

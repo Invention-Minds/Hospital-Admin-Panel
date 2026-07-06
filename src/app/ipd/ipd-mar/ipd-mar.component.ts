@@ -12,6 +12,7 @@ import {
   MarLogEntry,
 } from '../../services/ipd-prescription.service';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
+import { SignatureCreateResponse } from '../../services/signature.service';
 
 /**
  * Sprint 3c — Screen B — Medication Administration Record (MAR).
@@ -32,6 +33,10 @@ interface AdministerFormValue {
   quantity: number;
   route: string;
   remarks: string;
+  // Phase 4 (WF-3) — NABH MOM.4 / IPC.6 gates. Field names mirror backend
+  // `IpdMedicationLog.verifiedTwoIdentifiers` / `fiveRightsChecked`.
+  verifiedTwoIdentifiers: boolean;
+  fiveRightsChecked: boolean;
 }
 
 interface PatientMini {
@@ -60,6 +65,22 @@ export class IpdMarComponent implements OnInit, OnDestroy {
   administeringRx: IpdPrescription | null = null;
   administerSubmitting = false;
 
+  // Phase 9.5i — same route enum as ipd-pharmacy so MAR entries align with
+  // prescription routes for cross-reference.
+  readonly routeOptions: ReadonlyArray<{ value: string; label: string }> = [
+    { value: 'oral', label: 'Oral (PO)' },
+    { value: 'iv', label: 'Intravenous (IV)' },
+    { value: 'im', label: 'Intramuscular (IM)' },
+    { value: 'sc', label: 'Subcutaneous (SC)' },
+    { value: 'topical', label: 'Topical' },
+    { value: 'inhaled', label: 'Inhaled' },
+    { value: 'pr', label: 'Per Rectum (PR)' },
+    { value: 'sl', label: 'Sublingual (SL)' },
+    { value: 'nasal', label: 'Nasal' },
+    { value: 'ophthalmic', label: 'Ophthalmic (eye)' },
+    { value: 'otic', label: 'Otic (ear)' },
+  ];
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -74,6 +95,8 @@ export class IpdMarComponent implements OnInit, OnDestroy {
       quantity: [1, [Validators.required, Validators.min(1)]],
       route: ['oral', [Validators.required]],
       remarks: [''],
+      verifiedTwoIdentifiers: [false, [Validators.requiredTrue]],
+      fiveRightsChecked: [false, [Validators.requiredTrue]],
     });
   }
 
@@ -169,6 +192,8 @@ export class IpdMarComponent implements OnInit, OnDestroy {
       quantity: rx.quantity ?? 1,
       route: rx.route || 'oral',
       remarks: '',
+      verifiedTwoIdentifiers: false,
+      fiveRightsChecked: false,
     });
     this.administerModalVisible = true;
   }
@@ -185,12 +210,11 @@ export class IpdMarComponent implements OnInit, OnDestroy {
 
     this.prescriptionService
       .administerMedication(prescriptionId, {
-        prescriptionId,
-        adminTime: new Date(),
-        administeredBy: '', // backend stamps from req.user
-        dose: String(value.quantity), // UI column = quantity; wire field = dose
+        quantity: value.quantity,
         route: value.route,
-        notes: value.remarks || undefined,
+        remarks: value.remarks || undefined,
+        verifiedTwoIdentifiers: value.verifiedTwoIdentifiers,
+        fiveRightsChecked: value.fiveRightsChecked,
       })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -223,6 +247,79 @@ export class IpdMarComponent implements OnInit, OnDestroy {
   cancelAdminister(): void {
     this.administerModalVisible = false;
     this.administeringRx = null;
+  }
+
+  // ---- Witness co-signature (Phase 4 WF-3) --------------------------------
+  // Used for high-risk meds (insulin, opioids, anticoagulants). The original
+  // administering nurse already POSTed to /administer; the witness now signs
+  // on the same MAR log row to attach a co-signature.
+
+  /** High-risk classifier — drives whether the witness button shows on a row. */
+  isHighRiskLog(log: MarLogEntry): boolean {
+    const name = (log.prescription?.genericName || log.prescription?.brandName || '').toLowerCase();
+    const remarks = (log.remarks || '').toLowerCase();
+    const highRiskTerms = [
+      'insulin', 'heparin', 'warfarin', 'morphine', 'fentanyl',
+      'tramadol', 'pethidine', 'oxycodone', 'enoxaparin',
+    ];
+    if (highRiskTerms.some((t) => name.includes(t))) return true;
+    if (remarks.includes('high-risk') || remarks.includes('high risk')) return true;
+    return false;
+  }
+
+  /** Already witness-acknowledged → button hides / shows "co-signed". */
+  isAcknowledged(log: MarLogEntry): boolean {
+    return !!log.acknowledgedBySignatureId;
+  }
+
+  // Witness signature modal state.
+  witnessModalVisible = false;
+  witnessLog: MarLogEntry | null = null;
+  witnessName = '';
+  witnessSubmitting = false;
+
+  openWitnessAck(log: MarLogEntry): void {
+    this.witnessLog = log;
+    this.witnessName = '';
+    this.witnessModalVisible = true;
+  }
+
+  cancelWitnessAck(): void {
+    this.witnessModalVisible = false;
+    this.witnessLog = null;
+  }
+
+  onWitnessSigned(resp: SignatureCreateResponse): void {
+    if (!this.witnessLog) return;
+    this.witnessSubmitting = true;
+    this.prescriptionService
+      .acknowledgeMedicationLog(this.witnessLog.id, {
+        acknowledgedBySignatureId: resp.id,
+        acknowledgedBy: this.witnessName?.trim() || undefined,
+      })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.witnessSubmitting = false;
+          this.witnessModalVisible = false;
+          this.witnessLog = null;
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Co-signature recorded',
+            life: 3000,
+          });
+          this.loadAdministered();
+        },
+        error: (err: unknown) => {
+          this.witnessSubmitting = false;
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Could not record co-signature',
+            detail: toErrorMessage(err),
+            life: 5000,
+          });
+        },
+      });
   }
 
   // ---- View helpers -------------------------------------------------------

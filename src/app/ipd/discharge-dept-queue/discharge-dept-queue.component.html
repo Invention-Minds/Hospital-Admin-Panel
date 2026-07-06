@@ -1,0 +1,46 @@
+<div class="page ddq-shell">
+  <div class="ddq-head">
+    <div>
+      <h2 class="ddq-title">Discharge clearance queue · {{ dept || '—' }}</h2>
+      <p class="ddq-sub">Pending and rejected clearance items for your department. Refreshes every 30 s.</p>
+    </div>
+    <div class="ddq-switch">
+      <span class="ddq-switch-label">Switch dept:</span>
+      <button class="ddq-chip" *ngFor="let d of DEPARTMENTS" [class.ddq-chip-on]="d === dept" (click)="switchDept(d)">
+        {{ d }}
+      </button>
+    </div>
+  </div>
+
+  <div class="ddq-banner ddq-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
+  <div class="ddq-empty" *ngIf="!loading && !rows.length">No pending items.</div>
+
+  <table class="ddq-table" *ngIf="rows.length">
+    <thead>
+      <tr>
+        <th>Admission</th>
+        <th>PRN</th>
+        <th>Ward / Bed</th>
+        <th>Doctor</th>
+        <th>Ready since</th>
+        <th>Status</th>
+        <th>Notes</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let r of rows">
+        <td>{{ r.admission.admissionNo }}</td>
+        <td>{{ r.admission.prn }}</td>
+        <td>{{ r.admission.ward?.wardName || '—' }} · {{ r.admission.bed?.bedNumber || '—' }}</td>
+        <td>{{ r.admission.admittingDoctor || '—' }}</td>
+        <td>{{ r.admission.dischargeReadyAt | date:'dd/MM/yy h:mm a' }}</td>
+        <td><span class="ddq-pill ddq-status-{{ r.status }}">{{ r.status }}</span></td>
+        <td class="ddq-blocking">{{ r.blockingReason || '—' }}</td>
+        <td>
+          <a class="ddq-btn" [routerLink]="['/ipd/admission', r.admissionId, 'discharge-clearance']">Open</a>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

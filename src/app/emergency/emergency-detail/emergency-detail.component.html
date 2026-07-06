@@ -1,0 +1,622 @@
+<div class="erd-shell">
+  <div class="erd-banner erd-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="erd-loading" *ngIf="loading">Loading…</div>
+
+  <!-- Header summary -->
+  <div class="erd-card" *ngIf="summary">
+    <div class="erd-header">
+      <div>
+        <h2 class="erd-title">{{ summary.patientName }}</h2>
+        <div class="erd-sub">
+          ER# <strong>{{ summary.prn }}</strong>
+          <span *ngIf="summary.patientPrn"> · PRN <strong>{{ summary.patientPrn }}</strong></span>
+          · {{ summary.age ?? '?' }}y / {{ summary.gender ?? '?' }}
+          <span *ngIf="summary.phoneNumber"> · {{ summary.phoneNumber }}</span>
+          · Triage <span [class]="'erd-pill erd-triage-' + summary.triageCategory">{{ summary.triageCategory }}</span>
+          · Status <span class="erd-pill erd-status">{{ summary.status }}</span>
+        </div>
+        <div class="erd-sub erd-bad" *ngIf="summary.allergies">
+          ⚠ Allergies: <strong>{{ summary.allergies }}</strong>
+        </div>
+        <div class="erd-sub" *ngIf="summary.reasonsForMlc || summary.policeInformationGiven">
+          <span class="erd-pill erd-status">MLC indicated</span>
+          <span *ngIf="summary.reasonsForMlc"> — {{ summary.reasonsForMlc }}</span>
+        </div>
+        <div class="erd-sub" *ngIf="summary.workingDiagnosis">
+          Working diagnosis: <em>{{ summary.workingDiagnosis }}</em>
+        </div>
+        <div class="erd-sub" *ngIf="summary.oxygenFlowRate || summary.oxygenDelivery">
+          O₂: {{ summary.oxygenFlowRate ?? '—' }} L/min via {{ summary.oxygenDelivery ?? '—' }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Referrals to doctor / surgeon (acknowledgment + escalation) ═══ -->
+  <!-- Doctor-only clinical decision: hidden for ER nurses. -->
+  <div class="erd-card" *ngIf="summary && !isErNurse">
+    <h3 class="erd-section-title">Refer to doctor / surgeon</h3>
+    <div class="erd-banner erd-bad" *ngIf="referralError" (click)="referralError=''">{{ referralError }}</div>
+
+    <div class="erd-form-row erd-form-wide">
+      <select [(ngModel)]="draftReferral.referredToDoctorId">
+        <option [ngValue]="null">Select doctor / surgeon…</option>
+        <option *ngFor="let d of doctors" [ngValue]="d.id">{{ d.name }}<span *ngIf="d.departmentName"> — {{ d.departmentName }}</span></option>
+      </select>
+      <input type="text" [(ngModel)]="draftReferral.reason" placeholder="Reason for referral (optional)" />
+      <button class="erd-btn erd-btn-primary" (click)="createReferral()" [disabled]="savingReferral">
+        {{ savingReferral ? 'Referring…' : 'Refer' }}
+      </button>
+    </div>
+
+    <p class="erd-muted" *ngIf="!referrals.length">No referrals yet. The referred doctor must acknowledge; unacknowledged referrals escalate automatically per triage.</p>
+
+    <table class="erd-grid" *ngIf="referrals.length">
+      <thead>
+        <tr><th>Referred to</th><th>Reason</th><th>When</th><th>Status</th><th>Escalation</th><th></th></tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of referrals">
+          <td>{{ r.referredToDoctor?.name || '—' }}<div class="erd-muted" *ngIf="r.referredToDoctor?.departmentName">{{ r.referredToDoctor?.departmentName }}</div></td>
+          <td>{{ r.reason || '—' }}</td>
+          <td>{{ r.referredAt | date:'dd/MM/yy h:mm a' }}<div class="erd-muted">SLA {{ r.slaMinutes }} min</div></td>
+          <td>
+            <span class="erd-pill" [ngClass]="{
+              'erd-status': r.status === 'pending',
+              'erd-triage-green': r.status === 'acknowledged',
+              'erd-triage-black': r.status === 'cancelled'
+            }">{{ r.status }}</span>
+            <div class="erd-muted" *ngIf="r.status === 'acknowledged' && r.acknowledgedByName">by {{ r.acknowledgedByName }}</div>
+          </td>
+          <td>
+            <span *ngIf="r.status === 'pending' && r.escalationLevel > 0" class="erd-pill erd-triage-red">Level {{ r.escalationLevel }}</span>
+            <span *ngIf="r.escalationLevel === 0" class="erd-muted">—</span>
+          </td>
+          <td>
+            <button class="erd-btn erd-btn-sm erd-btn-primary" *ngIf="r.status === 'pending'" (click)="acknowledgeReferral(r)">Acknowledge</button>
+            <button class="erd-btn erd-btn-sm erd-btn-danger" *ngIf="r.status === 'pending'" (click)="cancelReferral(r)">Cancel</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══ MLC (Medico-Legal Case) record ═══ -->
+  <!-- Shown only when the intake flagged the case as medico-legal. Consent /
+       examiner signatures store the captured blobUrl onto the MlcCase row. -->
+  <div class="erd-card" *ngIf="(summary?.reasonsForMlc || summary?.policeInformationGiven) && !isErNurse">
+    <h3 class="erd-section-title">
+      MLC Record
+      <span class="erd-pill erd-status" *ngIf="mlc?.mlcNo">{{ mlc?.mlcNo }}</span>
+    </h3>
+
+    <div class="erd-form-row">
+      <label>Case type
+        <select [(ngModel)]="mlcForm.caseType" name="mlcCaseType">
+          <option value="accident">Accident</option>
+          <option value="assault">Assault</option>
+          <option value="poison">Poison</option>
+          <option value="burn">Burn</option>
+          <option value="other">Other</option>
+        </select>
+      </label>
+      <label>Status
+        <select [(ngModel)]="mlcForm.status" name="mlcStatus">
+          <option value="documented">Documented</option>
+          <option value="examination-done">Examination done</option>
+          <option value="samples-collected">Samples collected</option>
+          <option value="report-submitted">Report submitted</option>
+          <option value="closed">Closed</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="erd-form-row erd-form-wide">
+      <input type="text" [(ngModel)]="mlcForm.policeStationName" name="mlcPoliceStation" placeholder="Police station" />
+      <input type="text" [(ngModel)]="mlcForm.fir_No" name="mlcFirNo" placeholder="FIR No." />
+      <label>FIR date
+        <input type="date" [(ngModel)]="mlcForm.fir_Date" name="mlcFirDate" />
+      </label>
+      <input type="text" [(ngModel)]="mlcForm.investigatingOfficer" name="mlcInvOfficer" placeholder="Investigating officer" />
+    </div>
+
+    <div class="erd-form-row">
+      <label><input type="checkbox" [(ngModel)]="mlcForm.patientConsent" name="mlcConsent" /> Patient consent documented</label>
+      <input type="text" [(ngModel)]="mlcForm.examinerName" name="mlcExaminer" placeholder="Examiner name" />
+      <label><input type="checkbox" [(ngModel)]="mlcForm.firstExaminationDone" name="mlcFirstExam" /> First examination done</label>
+    </div>
+
+    <!-- Patient consent signature -->
+    <div class="erd-form-row erd-form-wide">
+      <div class="erd-sig-block">
+        <strong>Patient consent signature</strong>
+        <div *ngIf="mlcForm.consentSignature" class="erd-sig-stamp">✓ Signed</div>
+        <app-e-sign *ngIf="!mlcForm.consentSignature"
+                    [signerType]="'patient'"
+                    [signerName]="summary?.patientName || ''"
+                    [contextType]="'mlc-consent'"
+                    [contextId]="emergencyId.toString()"
+                    [prompt]="'Patient / attender — MLC consent'"
+                    [disabled]="savingMlc"
+                    (signed)="mlcForm.consentSignature = $event.id">
+        </app-e-sign>
+      </div>
+    </div>
+
+    <!-- Examiner signature -->
+    <div class="erd-form-row erd-form-wide">
+      <div class="erd-sig-block">
+        <strong>Examiner signature</strong>
+        <div *ngIf="mlcForm.examinerSignature" class="erd-sig-stamp">✓ Signed</div>
+        <app-e-sign *ngIf="!mlcForm.examinerSignature"
+                    [signerType]="'doctor'"
+                    [signerName]="mlcForm.examinerName"
+                    [contextType]="'mlc-examiner'"
+                    [contextId]="emergencyId.toString()"
+                    [prompt]="'Examining doctor — MLC examination'"
+                    [disabled]="savingMlc"
+                    (signed)="mlcForm.examinerSignature = $event.id">
+        </app-e-sign>
+      </div>
+    </div>
+
+    <div class="erd-form-row erd-form-wide">
+      <textarea [(ngModel)]="mlcForm.injuries" name="mlcInjuries" placeholder="Injuries (required) *" rows="3"></textarea>
+    </div>
+
+    <div class="erd-form-row">
+      <label><input type="checkbox" [(ngModel)]="mlcForm.photographsTaken" name="mlcPhotos" /> Photographs taken</label>
+      <input type="text" [(ngModel)]="mlcForm.samplesCollected" name="mlcSamples" placeholder="Samples collected" />
+    </div>
+
+    <div class="erd-form-row erd-form-wide">
+      <textarea [(ngModel)]="mlcForm.sampleStorageInfo" name="mlcSampleStorage" placeholder="Sample storage info" rows="2"></textarea>
+    </div>
+
+    <div class="erd-form-row erd-form-wide">
+      <textarea [(ngModel)]="mlcForm.finalReport" name="mlcFinalReport" placeholder="Final report" rows="3"></textarea>
+    </div>
+
+    <div class="erd-form-row">
+      <input type="text" [(ngModel)]="mlcForm.reportSubmittedTo" name="mlcReportTo" placeholder="Report submitted to (police / court)" />
+      <label>Submission date
+        <input type="date" [(ngModel)]="mlcForm.submissionDate" name="mlcSubmissionDate" />
+      </label>
+    </div>
+
+    <div class="erd-form-row">
+      <button class="erd-btn erd-btn-primary" (click)="saveMlc()"
+              [disabled]="savingMlc || !mlcForm.injuries.trim() || !mlcForm.caseType">
+        {{ savingMlc ? 'Saving…' : (mlc ? 'Update MLC' : 'Save MLC') }}
+      </button>
+    </div>
+  </div>
+
+  <!-- ═══ Against Medical Advice (LAMA / DAMA) ═══ -->
+  <!-- Doctor-only clinical decision: hidden for ER nurses. -->
+  <div class="erd-card" *ngIf="summary && !isErNurse">
+    <h3 class="erd-section-title">
+      Against Medical Advice (LAMA / DAMA)
+      <span class="erd-pill erd-status" *ngIf="lama">LAMA on file</span>
+      <span class="erd-pill erd-status" *ngIf="dama">DAMA on file</span>
+    </h3>
+
+    <p class="erd-note">
+      The case status can only be set to LAMA / DAMA after the matching form below is saved.
+    </p>
+
+    <div class="erd-form-row">
+      <label><input type="radio" name="amaMode" value="LAMA" [(ngModel)]="amaMode" /> LAMA (Left Against Medical Advice)</label>
+      <label><input type="radio" name="amaMode" value="DAMA" [(ngModel)]="amaMode" /> DAMA (Discharged Against Medical Advice)</label>
+    </div>
+
+    <!-- ── LAMA ── -->
+    <ng-container *ngIf="amaMode === 'LAMA'">
+      <div class="erd-form-row">
+        <label>LAMA time
+          <input type="datetime-local" [(ngModel)]="lamaForm.lamaTime" name="lamaTime" />
+        </label>
+        <label><input type="checkbox" [(ngModel)]="lamaForm.riskExplained" name="lamaRisk" /> Risks explained to patient</label>
+      </div>
+
+      <div class="erd-form-row erd-form-wide">
+        <textarea [(ngModel)]="lamaForm.doctorAdvice" name="lamaAdvice" placeholder="Doctor's advice (required) *" rows="3"></textarea>
+      </div>
+
+      <div class="erd-form-row erd-form-wide">
+        <textarea [(ngModel)]="lamaForm.reasonForLama" name="lamaReason" placeholder="Reason for leaving against advice (required) *" rows="2"></textarea>
+      </div>
+
+      <div class="erd-form-row">
+        <input type="text" [(ngModel)]="lamaForm.witnessName" name="lamaWitnessName" placeholder="Witness name" />
+      </div>
+
+      <div class="erd-form-row erd-form-wide">
+        <div class="erd-sig-block">
+          <strong>Patient signature</strong>
+          <div *ngIf="lamaForm.patientSignature && !showLamaPatientSign" class="erd-sig-stamp">
+            ✓ Signed <button type="button" class="erd-sig-link" (click)="showLamaPatientSign = true">Re-sign</button>
+          </div>
+          <button type="button" class="erd-btn erd-sig-cap"
+                  *ngIf="!lamaForm.patientSignature && !showLamaPatientSign"
+                  (click)="showLamaPatientSign = true">+ Capture patient signature</button>
+          <app-e-sign *ngIf="showLamaPatientSign"
+                      [signerType]="'patient'"
+                      [signerName]="summary.patientName || ''"
+                      [contextType]="'lama-patient'"
+                      [contextId]="emergencyId.toString()"
+                      [prompt]="'Patient — leaving against medical advice'"
+                      [disabled]="savingLama"
+                      (signed)="lamaForm.patientSignature = $event.id; showLamaPatientSign = false"
+                      (cancelled)="showLamaPatientSign = false">
+          </app-e-sign>
+        </div>
+        <div class="erd-sig-block">
+          <strong>Witness signature</strong>
+          <div *ngIf="lamaForm.witnessSignature && !showLamaWitnessSign" class="erd-sig-stamp">
+            ✓ Signed <button type="button" class="erd-sig-link" (click)="showLamaWitnessSign = true">Re-sign</button>
+          </div>
+          <small *ngIf="!lamaForm.witnessSignature && !showLamaWitnessSign && !lamaForm.witnessName.trim()" class="erd-muted">Enter witness name to capture.</small>
+          <button type="button" class="erd-btn erd-sig-cap"
+                  *ngIf="!lamaForm.witnessSignature && !showLamaWitnessSign && lamaForm.witnessName.trim()"
+                  (click)="showLamaWitnessSign = true">+ Capture witness signature</button>
+          <app-e-sign *ngIf="showLamaWitnessSign"
+                      [signerType]="'witness'"
+                      [signerName]="lamaForm.witnessName"
+                      [contextType]="'lama-witness'"
+                      [contextId]="emergencyId.toString()"
+                      [prompt]="'Witness — LAMA'"
+                      [disabled]="savingLama"
+                      (signed)="lamaForm.witnessSignature = $event.id; showLamaWitnessSign = false"
+                      (cancelled)="showLamaWitnessSign = false">
+          </app-e-sign>
+        </div>
+      </div>
+
+      <div class="erd-form-row">
+        <button class="erd-btn erd-btn-primary" (click)="saveLama()"
+                [disabled]="savingLama || !lamaForm.doctorAdvice.trim() || !lamaForm.reasonForLama.trim()">
+          {{ savingLama ? 'Saving…' : (lama ? 'Update LAMA' : 'Save LAMA') }}
+        </button>
+      </div>
+    </ng-container>
+
+    <!-- ── DAMA ── -->
+    <ng-container *ngIf="amaMode === 'DAMA'">
+      <div class="erd-form-row">
+        <label>Discharge time
+          <input type="datetime-local" [(ngModel)]="damaForm.dischargeTime" name="damaTime" />
+        </label>
+        <label><input type="checkbox" [(ngModel)]="damaForm.patientDeclinesAdvice" name="damaDeclines" /> Patient declines advice</label>
+      </div>
+
+      <div class="erd-form-row erd-form-wide">
+        <textarea [(ngModel)]="damaForm.doctorRecommendation" name="damaRecommendation" placeholder="Doctor's recommendation (required) *" rows="3"></textarea>
+      </div>
+
+      <div class="erd-form-row erd-form-wide">
+        <textarea [(ngModel)]="damaForm.followUpAdvice" name="damaFollowUp" placeholder="Follow-up advice" rows="2"></textarea>
+      </div>
+
+      <div class="erd-form-row">
+        <input type="text" [(ngModel)]="damaForm.witnessName" name="damaWitnessName" placeholder="Witness name" />
+      </div>
+
+      <div class="erd-form-row erd-form-wide">
+        <div class="erd-sig-block">
+          <strong>Patient signature</strong>
+          <div *ngIf="damaForm.patientSignature && !showDamaPatientSign" class="erd-sig-stamp">
+            ✓ Signed <button type="button" class="erd-sig-link" (click)="showDamaPatientSign = true">Re-sign</button>
+          </div>
+          <button type="button" class="erd-btn erd-sig-cap"
+                  *ngIf="!damaForm.patientSignature && !showDamaPatientSign"
+                  (click)="showDamaPatientSign = true">+ Capture patient signature</button>
+          <app-e-sign *ngIf="showDamaPatientSign"
+                      [signerType]="'patient'"
+                      [signerName]="summary.patientName || ''"
+                      [contextType]="'dama-patient'"
+                      [contextId]="emergencyId.toString()"
+                      [prompt]="'Patient — discharged against medical advice'"
+                      [disabled]="savingDama"
+                      (signed)="damaForm.patientSignature = $event.id; showDamaPatientSign = false"
+                      (cancelled)="showDamaPatientSign = false">
+          </app-e-sign>
+        </div>
+        <div class="erd-sig-block">
+          <strong>Witness signature</strong>
+          <div *ngIf="damaForm.witnessSignature && !showDamaWitnessSign" class="erd-sig-stamp">
+            ✓ Signed <button type="button" class="erd-sig-link" (click)="showDamaWitnessSign = true">Re-sign</button>
+          </div>
+          <small *ngIf="!damaForm.witnessSignature && !showDamaWitnessSign && !damaForm.witnessName.trim()" class="erd-muted">Enter witness name to capture.</small>
+          <button type="button" class="erd-btn erd-sig-cap"
+                  *ngIf="!damaForm.witnessSignature && !showDamaWitnessSign && damaForm.witnessName.trim()"
+                  (click)="showDamaWitnessSign = true">+ Capture witness signature</button>
+          <app-e-sign *ngIf="showDamaWitnessSign"
+                      [signerType]="'witness'"
+                      [signerName]="damaForm.witnessName"
+                      [contextType]="'dama-witness'"
+                      [contextId]="emergencyId.toString()"
+                      [prompt]="'Witness — DAMA'"
+                      [disabled]="savingDama"
+                      (signed)="damaForm.witnessSignature = $event.id; showDamaWitnessSign = false"
+                      (cancelled)="showDamaWitnessSign = false">
+          </app-e-sign>
+        </div>
+      </div>
+
+      <div class="erd-form-row">
+        <button class="erd-btn erd-btn-primary" (click)="saveDama()"
+                [disabled]="savingDama || !damaForm.doctorRecommendation.trim()">
+          {{ savingDama ? 'Saving…' : (dama ? 'Update DAMA' : 'Save DAMA') }}
+        </button>
+      </div>
+    </ng-container>
+  </div>
+
+  <!-- ═══ Initial Assessment (read-only, from intake) ═══ -->
+  <div class="erd-card" *ngIf="summary">
+    <h3 class="erd-section-title">Initial Assessment (UHJ/EMR/F-01)</h3>
+
+    <h4 class="erd-sub">Vitals at intake</h4>
+    <table class="erd-grid">
+      <tbody>
+        <tr><th>BP</th><td>{{ summary.vitalsBP || '—' }}</td><th>Heart rate</th><td>{{ summary.vitalsHR ?? '—' }}</td></tr>
+        <tr><th>Resp. rate</th><td>{{ summary.vitalsRR ?? '—' }}</td><th>SpO₂</th><td>{{ summary.vitalsSpO2 ?? '—' }}{{ summary.vitalsSpO2 != null ? '%' : '' }}</td></tr>
+        <tr><th>Temp (°C)</th><td>{{ summary.vitalsTemp ?? '—' }}</td><th>Pain score</th><td>{{ summary.painScore ?? '—' }}</td></tr>
+        <tr><th>Trauma score</th><td>{{ summary.traumaScore ?? '—' }}</td><th>Mode of arrival</th><td>{{ summary.modeOfArrival || '—' }}</td></tr>
+      </tbody>
+    </table>
+
+    <h4 class="erd-sub">Primary survey (ABCDE)</h4>
+    <table class="erd-grid">
+      <tbody>
+        <tr><th>A — Airway</th><td>{{ summary.airway || '—' }}</td><th>B — Breathing</th><td>{{ summary.breathing || '—' }}</td></tr>
+        <tr><th>C — Circulation</th><td>{{ summary.circulation || '—' }}</td><th>D — Mental status</th><td>{{ summary.mentalStatus || '—' }}</td></tr>
+        <tr><th>Pupils — Right</th><td>{{ summary.pupilsRight || '—' }}</td><th>Pupils — Left</th><td>{{ summary.pupilsLeft || '—' }}</td></tr>
+        <tr><th>O₂ support</th><td colspan="3">{{ summary.oxygenFlowRate ?? '—' }} L/min via {{ summary.oxygenDelivery || '—' }}</td></tr>
+      </tbody>
+    </table>
+
+    <h4 class="erd-sub">Complaint &amp; assessment</h4>
+    <table class="erd-grid">
+      <tbody>
+        <tr><th>Presenting complaint</th><td colspan="3">{{ summary.presentingComplaint || '—' }}</td></tr>
+        <tr><th>ABCDE assessment</th><td colspan="3">{{ summary.abcdeAssessment || '—' }}</td></tr>
+        <tr><th>Secondary survey</th><td colspan="3">{{ summary.secondarySurvey || '—' }}</td></tr>
+        <tr><th>Working diagnosis</th><td colspan="3">{{ summary.workingDiagnosis || '—' }}</td></tr>
+        <tr><th>Procedures done</th><td colspan="3">{{ summary.proceduresDone || '—' }}</td></tr>
+        <tr><th>Allergies</th><td colspan="3">{{ summary.allergies || '—' }}</td></tr>
+      </tbody>
+    </table>
+
+    <h4 class="erd-sub">Arrival &amp; identification</h4>
+    <table class="erd-grid">
+      <tbody>
+        <tr><th>Brought by</th><td>{{ summary.broughtBy || '—' }}</td><th>History given by</th><td>{{ summary.historyGivenBy || '—' }}</td></tr>
+        <tr><th>Referred from</th><td>{{ summary.referralFrom || '—' }}</td><th>Referred to</th><td>{{ summary.referredTo || '—' }}</td></tr>
+        <tr><th>Identification mark</th><td colspan="3">{{ summary.identificationMark || '—' }}</td></tr>
+        <tr><th>Police informed</th><td>{{ summary.policeInformationGiven ? 'Yes' : 'No' }}</td><th>Reasons for MLC</th><td>{{ summary.reasonsForMlc || '—' }}</td></tr>
+      </tbody>
+    </table>
+
+    <h4 class="erd-sub">Disposition &amp; hand-off</h4>
+    <table class="erd-grid">
+      <tbody>
+        <tr><th>Condition at disposition</th><td>{{ summary.conditionAtDisposition || '—' }}</td><th>Disposition</th><td>{{ summary.disposition || '—' }}</td></tr>
+        <tr><th>Hand-off doctor</th><td>{{ summary.handOffDoctorName || '—' }}</td><th>Receiving doctor</th><td>{{ summary.receivingDoctorName || '—' }}</td></tr>
+        <tr><th>Hand-off nurse</th><td>{{ summary.handOffNurseName || '—' }}</td><th>Receiving nurse</th><td>{{ summary.receivingNurseName || '—' }}</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══ Progress notes / serial vitals ═══ -->
+  <div class="erd-card">
+    <h3 class="erd-section-title">Progress notes &amp; serial vitals</h3>
+    <div class="erd-form-row erd-form-wide">
+      <app-doctor-select [source]="'doctors'" [(ngModel)]="draftNote.doctorName" name="doctorName"></app-doctor-select>
+      <input type="text" [(ngModel)]="draftNote.observation" placeholder="Observation *" />
+      <input type="text" [(ngModel)]="draftNote.vitalsBP" placeholder="BP" />
+      <input type="number" [(ngModel)]="draftNote.vitalsHR" placeholder="HR" />
+      <input type="number" [(ngModel)]="draftNote.vitalsRR" placeholder="RR" />
+      <input type="number" [(ngModel)]="draftNote.vitalsSpO2" placeholder="SpO₂" />
+      <input type="number" [(ngModel)]="draftNote.vitalsTemp" placeholder="Temp" />
+      <button class="erd-btn erd-btn-primary" (click)="addProgressNote()"
+              [disabled]="savingNote || !draftNote.doctorName.trim() || !draftNote.observation.trim()">
+        Add
+      </button>
+    </div>
+    <table class="erd-grid">
+      <thead>
+        <tr><th>Time</th><th>Doctor</th><th>Observation</th><th>BP</th><th>HR</th><th>RR</th><th>SpO₂</th><th>Temp</th></tr>
+      </thead>
+      <tbody>
+        <tr *ngIf="!progressNotes.length">
+          <td colspan="8" class="erd-muted">No progress notes yet.</td>
+        </tr>
+        <tr *ngFor="let n of progressNotes">
+          <td>{{ n.time | date:'dd-MMM HH:mm' }}</td>
+          <td>{{ n.doctorName }}</td>
+          <td>{{ n.observation }}</td>
+          <td>{{ n.vitalsBP || '—' }}</td>
+          <td>{{ n.vitalsHR ?? '—' }}</td>
+          <td>{{ n.vitalsRR ?? '—' }}</td>
+          <td>{{ n.vitalsSpO2 ?? '—' }}</td>
+          <td>{{ n.vitalsTemp ?? '—' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══ Investigations ═══ -->
+  <div class="erd-card">
+    <h3 class="erd-section-title">Lab / Radiology orders</h3>
+    <p class="erd-muted" *ngIf="!summary?.patientPrn" style="margin:0 0 10px">
+      Link a registered patient (PRN) to raise formal lab/radiology orders.
+    </p>
+    <app-investigation-order
+      *ngIf="summary?.patientPrn"
+      [prn]="summary?.patientPrn"
+      [doctorId]="orderingDoctorId"
+      [doctorName]="orderingDoctorName"
+      [patientName]="summary?.patientName"
+      [age]="summary?.age"
+      [gender]="summary?.gender"
+      [showActions]="true">
+    </app-investigation-order>
+  </div>
+
+  <!-- ═══ Investigations (quick in-ER tracking) ═══ -->
+  <div class="erd-card">
+    <h3 class="erd-section-title">Investigations — quick tracking</h3>
+    <div class="erd-form-row">
+      <select [(ngModel)]="draftInv.category">
+        <option *ngFor="let c of investigationCategories" [ngValue]="c.value">{{ c.label }}</option>
+      </select>
+      <input type="text" [(ngModel)]="draftInv.name" placeholder="e.g., GRBS, CBC, X-Ray Chest" />
+      <button class="erd-btn erd-btn-primary" (click)="addInvestigation()" [disabled]="!draftInv.name.trim()">
+        Add
+      </button>
+    </div>
+    <table class="erd-grid">
+      <thead>
+        <tr>
+          <th>Category</th><th>Name</th><th>Ordered</th><th>Sent</th><th>Reported</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngIf="!investigations.length">
+          <td colspan="6" class="erd-muted">No investigations yet.</td>
+        </tr>
+        <tr *ngFor="let r of investigations">
+          <td>{{ r.category }}</td>
+          <td>{{ r.name }}</td>
+          <td>{{ r.orderedAt | date:'dd-MMM HH:mm' }}<br><small>{{ r.orderedBy }}</small></td>
+          <td>
+            <span *ngIf="r.sentAt">{{ r.sentAt | date:'HH:mm' }}</span>
+            <button *ngIf="!r.sentAt" class="erd-btn erd-btn-sm" (click)="markSent(r)">Mark sent</button>
+          </td>
+          <td>
+            <span *ngIf="r.reportedAt">{{ r.reportedAt | date:'HH:mm' }}</span>
+            <button *ngIf="!r.reportedAt && r.sentAt" class="erd-btn erd-btn-sm" (click)="markReported(r)">Mark reported</button>
+          </td>
+          <td><button class="erd-btn erd-btn-sm erd-btn-danger" (click)="removeInvestigation(r)">×</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══ Treatments ═══ -->
+  <div class="erd-card">
+    <h3 class="erd-section-title">Treatment initiated (drug interventions)</h3>
+    <div class="erd-form-row erd-form-wide">
+      <input type="text" [(ngModel)]="draftTrt.drug" placeholder="Drug *" />
+      <input type="text" [(ngModel)]="draftTrt.dose" placeholder="Dose" />
+      <input type="text" [(ngModel)]="draftTrt.route" placeholder="Route" />
+      <input type="text" [(ngModel)]="draftTrt.frequency" placeholder="Frequency" />
+      <input type="datetime-local" [(ngModel)]="draftTrt.givenAt" />
+      <input type="text" [(ngModel)]="draftTrt.givenBy" placeholder="Given by" />
+      <button class="erd-btn erd-btn-primary" (click)="addTreatment()" [disabled]="!draftTrt.drug.trim()">
+        Add
+      </button>
+    </div>
+    <table class="erd-grid">
+      <thead>
+        <tr><th>Drug</th><th>Dose</th><th>Route</th><th>Freq</th><th>Given at</th><th>Given by</th><th></th></tr>
+      </thead>
+      <tbody>
+        <tr *ngIf="!treatments.length">
+          <td colspan="7" class="erd-muted">No treatments logged.</td>
+        </tr>
+        <tr *ngFor="let r of treatments">
+          <td>{{ r.drug }}</td>
+          <td>{{ r.dose || '—' }}</td>
+          <td>{{ r.route || '—' }}</td>
+          <td>{{ r.frequency || '—' }}</td>
+          <td>{{ r.givenAt ? (r.givenAt | date:'dd-MMM HH:mm') : '—' }}</td>
+          <td>{{ r.givenBy || '—' }}</td>
+          <td><button class="erd-btn erd-btn-sm erd-btn-danger" (click)="removeTreatment(r)">×</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══ Discharge / take-home prescription ═══ -->
+  <!-- Doctor-only clinical decision: hidden for ER nurses. -->
+  <div class="erd-card" *ngIf="!isErNurse">
+    <h3 class="erd-section-title">Discharge prescription</h3>
+    <p class="erd-muted" *ngIf="!summary?.patientPrn" style="margin:0">
+      Link a registered patient (PRN) to write a discharge prescription.
+    </p>
+    <app-prescription-capture
+      *ngIf="summary?.patientPrn"
+      [prn]="summary?.patientPrn || ''"
+      [patientName]="summary?.patientName || ''"
+      [doctorName]="orderingDoctorName">
+    </app-prescription-capture>
+  </div>
+
+  <!-- ═══ Procedures ═══ -->
+  <div class="erd-card">
+    <h3 class="erd-section-title">Procedures done</h3>
+    <div class="erd-form-row">
+      <select [(ngModel)]="draftProc.procedure">
+        <option *ngFor="let p of procedureTypes" [ngValue]="p.value">{{ p.label }}</option>
+      </select>
+      <input type="datetime-local" [(ngModel)]="draftProc.performedAt" />
+      <input type="text" [(ngModel)]="draftProc.notes" placeholder="Notes (site, size, attempts)" />
+      <button class="erd-btn erd-btn-primary" (click)="addProcedure()">
+        Add
+      </button>
+    </div>
+    <table class="erd-grid">
+      <thead><tr><th>Procedure</th><th>Performed</th><th>By</th><th>Notes</th><th></th></tr></thead>
+      <tbody>
+        <tr *ngIf="!procedures.length">
+          <td colspan="5" class="erd-muted">No procedures logged.</td>
+        </tr>
+        <tr *ngFor="let r of procedures">
+          <td>{{ r.procedure }}</td>
+          <td>{{ r.performedAt | date:'dd-MMM HH:mm' }}</td>
+          <td>{{ r.performedBy || '—' }}</td>
+          <td>{{ r.notes || '—' }}</td>
+          <td><button class="erd-btn erd-btn-sm erd-btn-danger" (click)="removeProcedure(r)">×</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══ Specimens (Material preserved) ═══ -->
+  <div class="erd-card">
+    <h3 class="erd-section-title">Material preserved (chain of custody)</h3>
+    <div class="erd-form-row">
+      <input type="text" [(ngModel)]="draftSpec.container" placeholder="Container (vacutainer, ziplock…)" />
+      <input type="text" [(ngModel)]="draftSpec.amount" placeholder="Amount" />
+      <input type="text" [(ngModel)]="draftSpec.handedOverTo" placeholder="Handed over to" />
+      <button class="erd-btn erd-btn-primary" (click)="addSpecimen()">
+        Add
+      </button>
+    </div>
+    <table class="erd-grid">
+      <thead>
+        <tr><th>Container</th><th>Amount</th><th>Nurse</th><th>Handed to</th><th>Handed at</th><th></th></tr>
+      </thead>
+      <tbody>
+        <tr *ngIf="!specimens.length">
+          <td colspan="6" class="erd-muted">No specimens preserved.</td>
+        </tr>
+        <tr *ngFor="let r of specimens">
+          <td>{{ r.container || '—' }}</td>
+          <td>{{ r.amount || '—' }}</td>
+          <td>{{ r.nurseSign || '—' }}</td>
+          <td>{{ r.handedOverTo || '—' }}</td>
+          <td>
+            <span *ngIf="r.handedOverAt">{{ r.handedOverAt | date:'dd-MMM HH:mm' }}</span>
+            <button *ngIf="!r.handedOverAt && r.handedOverTo" class="erd-btn erd-btn-sm" (click)="signHandover(r)">Sign handover</button>
+            <span *ngIf="!r.handedOverAt && !r.handedOverTo" class="erd-muted">—</span>
+          </td>
+          <td><button class="erd-btn erd-btn-sm erd-btn-danger" (click)="removeSpecimen(r)">×</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

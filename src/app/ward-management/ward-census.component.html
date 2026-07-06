@@ -112,4 +112,14 @@
   <div *ngIf="!loading && snapshotMissing" class="empty-state">
     No bed census snapshot was recorded for this date.
   </div>
+
+  <!--
+    Phase 3 (WF-2) — NS bed-request acceptance queue. Only shown in live mode
+    (the snapshot view is historical, so an interactive queue would be misleading).
+    The widget polls every 15s and lets ward staff Accept / Hold / Reject
+    incoming bed requests inline.
+  -->
+  <div class="ns-queue-section" *ngIf="mode === 'live'">
+    <app-ns-acceptance-queue></app-ns-acceptance-queue>
+  </div>
 </div>

@@ -41,7 +41,7 @@
         </div>
       </div>
 
-      <div class="card" 
+      <div class="card"
       [ngClass]="{'active-card': activeComponent === 'completed'}"
       (click)="showCompletedAppointments()">
         <div class="card-icon">
@@ -50,6 +50,28 @@
         <div class="card-content">
 
           <p>Completed Therapies</p>
+        </div>
+      </div>
+
+      <div class="card"
+      [ngClass]="{'active-card': activeComponent === 'courses'}"
+      (click)="showCourses()">
+        <div class="card-icon">
+          <img src="/complete-health.svg" alt="Courses Icon" />
+        </div>
+        <div class="card-content">
+          <p>Therapy Courses</p>
+        </div>
+      </div>
+
+      <div class="card"
+      [ngClass]="{'active-card': activeComponent === 'availability'}"
+      (click)="showTherapistAvailability()">
+        <div class="card-icon">
+          <img src="/confirm-health.svg" alt="Availability Icon" />
+        </div>
+        <div class="card-content">
+          <p>Therapist Availability</p>
         </div>
       </div>
 
@@ -62,5 +84,7 @@
     <app-therapy-confirmed *ngIf="activeComponent === 'confirmed'" (reschedule)="openAppointmentForm($event)"></app-therapy-confirmed>
     <app-therapy-cancelled *ngIf="activeComponent === 'cancelled'" (reschedule)="openAppointmentForm($event)"></app-therapy-cancelled>
     <app-therapy-completed *ngIf="activeComponent === 'completed'"></app-therapy-completed>
+    <app-therapy-courses *ngIf="activeComponent === 'courses'"></app-therapy-courses>
+    <app-therapist-availability *ngIf="activeComponent === 'availability'"></app-therapist-availability>
 
   </div>

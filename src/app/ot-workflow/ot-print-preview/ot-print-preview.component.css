@@ -1,0 +1,76 @@
+.pp-shell { font-family: Arial, sans-serif; color: #1f2937; }
+
+.pp-toolbar {
+  position: sticky; top: 0; z-index: 5;
+  display: flex; justify-content: space-between; gap: 12px;
+  padding: 10px 16px; background: #fff; border-bottom: 1px solid #e5e7eb;
+}
+.pp-forms { display: flex; gap: 4px; }
+.pp-forms button {
+  background: transparent; border: 1px solid #e5e7eb; padding: 6px 12px; font-size: 12px;
+  cursor: pointer; color: #4b5563; border-radius: 5px;
+}
+.pp-forms button:hover { background: #f3f4f6; }
+.pp-form-active { background: #dbeafe !important; color: #1e40af !important; border-color: #93c5fd !important; font-weight: 600; }
+.pp-btn { background: #fff; border: 1px solid #d1d5db; padding: 6px 16px; border-radius: 5px; cursor: pointer; font-size: 13px; }
+.pp-btn-primary { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
+.pp-btn-primary:hover:not([disabled]) { background: #1e40af; }
+.pp-btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+.pp-loading { padding: 40px; text-align: center; color: #6b7280; }
+.pp-error { padding: 14px; background: #fee2e2; color: #b91c1c; }
+.pp-muted { color: #9ca3af; font-style: italic; }
+
+.pp-page {
+  max-width: 800px; margin: 24px auto; background: #fff; padding: 30px 36px;
+  border: 1px solid #e5e7eb; border-radius: 8px;
+  page-break-after: always;
+}
+.pp-page:last-child { page-break-after: avoid; }
+
+.pp-hd { display: flex; justify-content: space-between; align-items: end; border-bottom: 2px solid #111827; padding-bottom: 8px; margin-bottom: 14px; }
+.pp-hd h1 { font-size: 20px; font-weight: 700; margin: 0; letter-spacing: 0.5px; }
+.pp-hd-sub { color: #6b7280; font-size: 11px; margin: 4px 0 0; }
+.pp-hd-meta { display: flex; gap: 16px; }
+.pp-hd-meta div { text-align: right; font-size: 12px; }
+.pp-hd-meta span { display: block; color: #6b7280; font-size: 10px; text-transform: uppercase; }
+.pp-hd-meta strong { font-size: 13px; }
+
+.pp-patient {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+  background: #f9fafb; padding: 10px 12px; border-radius: 6px; margin-bottom: 14px;
+  font-size: 12px;
+}
+.pp-patient span { display: block; color: #6b7280; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+.pp-patient strong { font-size: 13px; }
+
+.pp-block { padding: 10px 14px; border-radius: 6px; margin-bottom: 12px; font-size: 12px; }
+.pp-yellow { background: #fefce8; border-left: 4px solid #facc15; }
+.pp-green { background: #f0fdf4; border-left: 4px solid #22c55e; }
+.pp-blue { background: #eff6ff; border-left: 4px solid #3b82f6; }
+.pp-block h2 { font-size: 13px; font-weight: 700; margin: 0 0 8px; color: #374151; text-transform: uppercase; letter-spacing: 0.5px; }
+.pp-row { display: grid; grid-template-columns: 230px 1fr; gap: 8px; padding: 3px 0; border-bottom: 1px dotted #e5e7eb; }
+.pp-row:last-child { border-bottom: none; }
+.pp-row label { color: #4b5563; }
+.pp-row span { color: #111827; }
+
+.pp-sig { font-size: 11px; color: #4b5563; margin-top: 10px; padding-top: 6px; border-top: 1px dashed #d1d5db; }
+
+.pp-sigtable { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 14px; }
+.pp-sigtable td { border: 1px solid #d1d5db; padding: 8px 10px; text-align: left; }
+
+.pp-h3 { font-size: 13px; font-weight: 700; margin: 14px 0 6px; color: #374151; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid #e5e7eb; padding-bottom: 3px; }
+.pp-h4 { font-size: 12px; font-weight: 600; margin: 8px 0 4px; color: #4b5563; }
+.pp-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 24px; font-size: 12px; margin-bottom: 8px; }
+.pp-block-text { font-size: 12px; line-height: 1.5; white-space: pre-wrap; padding: 6px 0; }
+
+.pp-table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 8px 0; }
+.pp-table th, .pp-table td { border: 1px solid #d1d5db; padding: 6px 10px; text-align: left; }
+.pp-table th { background: #f9fafb; font-weight: 600; }
+.pp-table-2col td:first-child { background: #f9fafb; font-weight: 600; width: 220px; }
+
+@media print {
+  body { background: #fff !important; }
+  .pp-toolbar { display: none !important; }
+  .pp-page { box-shadow: none; border: none; margin: 0; padding: 16px 24px; max-width: 100%; }
+}

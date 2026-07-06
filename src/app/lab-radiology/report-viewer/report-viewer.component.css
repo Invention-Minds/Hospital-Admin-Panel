@@ -1,0 +1,220 @@
+/* Phase 9.11 — Report viewer modal. Self-contained styles; not part of the
+ * dm-* allow-list because this overlays on top of any page. */
+
+.rv-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  box-sizing: border-box;
+}
+.rv-modal {
+  background: #fff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 1180px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  font-family: Kanit, sans-serif;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+}
+
+/* Header */
+.rv-header {
+  padding: 16px 22px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+}
+.rv-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #271e4a;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.rv-sub {
+  color: #7b7b7b;
+  font-size: 12px;
+  margin-top: 4px;
+}
+.rv-icon-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: #7b7b7b;
+  cursor: pointer;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.rv-icon-btn:hover { background: #f3f4f6; color: #271e4a; }
+
+/* Pills */
+.rv-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+.rv-pill-lab        { background: #dbeafe; color: #1e40af; }
+.rv-pill-radiology  { background: #f3e8ff; color: #6b21a8; }
+.rv-status-pending  { background: #fef3c7; color: #92400e; }
+.rv-status-partial  { background: #fed7aa; color: #c2410c; }
+.rv-status-final    { background: #dcfce7; color: #166534; }
+.rv-pill-critical   { background: #fee2e2; color: #b91c1c; animation: rv-pulse 1.6s ease-in-out infinite; }
+@keyframes rv-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.55; }
+}
+
+/* Body */
+.rv-body {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 0;
+  min-height: 0;
+}
+@media (max-width: 900px) {
+  .rv-body { grid-template-columns: 1fr; }
+}
+
+.rv-pdf-wrap {
+  background: #f9fafb;
+  min-height: 480px;
+  display: flex;
+}
+.rv-pdf {
+  width: 100%;
+  height: 100%;
+  min-height: 480px;
+  border: none;
+}
+.rv-no-pdf {
+  margin: auto;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 14px;
+}
+.rv-no-pdf i {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 10px;
+  color: #b4b6ba;
+}
+
+/* Meta sidebar */
+.rv-meta {
+  background: #fff;
+  border-left: 1px solid #e5e7eb;
+  padding: 18px 20px;
+  overflow-y: auto;
+  max-height: calc(90vh - 130px);
+}
+.rv-meta-block {
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #f3f4f6;
+}
+.rv-meta-block:last-child { border-bottom: none; }
+.rv-meta-label {
+  color: #7b7b7b;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+.rv-meta-value {
+  color: #271e4a;
+  font-size: 14px;
+  font-weight: 500;
+}
+.rv-meta-pre {
+  color: #271e4a;
+  font-size: 13px;
+  white-space: pre-wrap;
+  line-height: 1.45;
+}
+.rv-meta-sub { color: #9ca3af; font-size: 11px; }
+.rv-unit     { color: #7b7b7b; font-weight: 400; }
+
+.rv-ack-done {
+  color: #166534;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.rv-ack-done i { color: #16a34a; }
+
+.rv-error {
+  color: #b91c1c;
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+/* Footer */
+.rv-footer {
+  padding: 12px 22px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  background: #fafafa;
+}
+
+/* Buttons */
+.rv-btn {
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 6px;
+  font-family: Kanit, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.rv-btn-primary {
+  background: #169458;
+  color: #fff;
+  border-color: #169458;
+}
+.rv-btn-primary:hover:not([disabled]) { background: #117849; border-color: #117849; }
+.rv-btn-secondary {
+  background: #fff;
+  color: #271e4a;
+  border-color: #d1d5db;
+}
+.rv-btn-secondary:hover:not([disabled]) { background: #f3f4f6; }
+.rv-btn-danger {
+  background: #dc2626;
+  color: #fff;
+  border-color: #dc2626;
+  width: 100%;
+}
+.rv-btn-danger:hover:not([disabled]) { background: #b91c1c; border-color: #b91c1c; }
+.rv-btn[disabled] { opacity: 0.55; cursor: not-allowed; }

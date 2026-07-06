@@ -9,6 +9,7 @@ import { AuthServiceService } from '../../services/auth/auth-service.service';
 import { EventService } from '../../services/event.service';
 import { Subscription, interval } from 'rxjs';
 import { environment } from '../../../environment/environment';
+import { resolveFileUrl } from '../../shared/file-url.util';
 
 import {
   trigger,
@@ -865,7 +866,7 @@ export class TvComponent implements OnInit, OnDestroy {
           activeMedia.forEach((media: any) => {
             this.mediaFiles.push({
               type: 'image',
-              src: media.url
+              src: resolveFileUrl(media.url)
             });
           });
         }
@@ -873,7 +874,7 @@ export class TvComponent implements OnInit, OnDestroy {
         if (ad.type === 'video' && ad.isActive && ad.content) {
           this.mediaFiles.push({
             type: 'video',
-            src: ad.content
+            src: resolveFileUrl(ad.content)
           });
         }
       });

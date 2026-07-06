@@ -9,6 +9,7 @@ import { CanComponentDeactivate } from '../../guards/unsaved-changes.guard';
 // import { HealthCheckupConfirmedComponent } from '../health-checkup-confirmed/health-checkup-confirmed/health-checkup-confirmed.component';
 import { request } from 'http';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
+import { AlertService } from '../../services/alert.service';
 
 
 @Component({
@@ -50,7 +51,7 @@ export class ServiceFormComponent implements OnInit {
   filteredHealthCheckupPRNs: any[] = []; // Filtered PRN list
 
 
-  constructor(private confirmationService: ConfirmationService, private healthCheckupService: RadiologyService, private messageService: MessageService, private route: ActivatedRoute, private appointmentService: AppointmentConfirmService) { }
+  constructor(private confirmationService: ConfirmationService, private healthCheckupService: RadiologyService, private messageService: MessageService, private route: ActivatedRoute, private appointmentService: AppointmentConfirmService, private alertSvc: AlertService) { }
   @Input() serviceData: any = null; // Input data from the overview component
   @Output() closeForm = new EventEmitter<void>(); // Event to notify form close
   @Output() formStatus = new EventEmitter<boolean>(); // Emit dirty state
@@ -309,7 +310,7 @@ export class ServiceFormComponent implements OnInit {
 
   canDeactivate(): boolean | Promise<boolean> {
     if (this.isDirty) {
-      return confirm('You have unsaved changes. Do you want to leave this page?');
+      return this.alertSvc.confirm('You have unsaved changes. Do you want to leave this page?', { severity: 'warning', confirmLabel: 'Leave' });
     }
     return true; // Allow navigation if the form is not dirty
   }
@@ -549,7 +550,7 @@ export class ServiceFormComponent implements OnInit {
           },
           error: (err) => {
             console.error('Error rescheduling service:', err);
-            alert('Failed to reschedule the service. Please try again.');
+            this.alertSvc.show('Failed to reschedule the service. Please try again.', { severity: 'danger', title: 'Error' });
             this.isLoading = false;
           },
         });
@@ -714,7 +715,7 @@ export class ServiceFormComponent implements OnInit {
           },
           error: (err) => {
             console.error('Error creating service:', err);
-            alert('Failed to create service. Please try again.');
+            this.alertSvc.show('Failed to create service. Please try again.', { severity: 'danger', title: 'Error' });
             this.isLoading = false;
           },
         });

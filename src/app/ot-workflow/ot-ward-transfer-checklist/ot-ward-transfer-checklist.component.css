@@ -1,0 +1,226 @@
+/* Phase 9.12 — Ward → OT Pre-Operative Surgical Safety Checklist.
+ * .wtc-shell is allow-listed in global forms.css. */
+
+.wtc-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+.wtc-page-title {
+  color: #271e4a;
+  font-family: Kanit, sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: 0.2px;
+}
+.wtc-page-sub { color: #7b7b7b; font-size: 13px; margin: 4px 0 0; }
+
+.wtc-banner {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: Kanit, sans-serif;
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+.wtc-bad  { background: #fee2e2; color: #b91c1c; border-left: 3px solid #dc2626; }
+.wtc-good { background: #dcfce7; color: #166534; border-left: 3px solid #16a34a; }
+
+.wtc-loading {
+  padding: 40px;
+  text-align: center;
+  color: #7b7b7b;
+  font-style: italic;
+  font-family: Kanit, sans-serif;
+}
+
+.wtc-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 18px 22px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 2px rgba(39, 30, 74, 0.04);
+}
+.wtc-section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #271e4a;
+  font-family: Kanit, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f3f4f6;
+}
+.wtc-count {
+  font-size: 12px;
+  font-weight: 500;
+  color: #7b7b7b;
+  background: #f0f3ff;
+  border-radius: 12px;
+  padding: 2px 10px;
+}
+.wtc-hint { color: #7b7b7b; font-size: 12px; margin: 0 0 12px; }
+
+/* Patient context strip */
+.wtc-context {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px 18px;
+  font-size: 13px;
+  color: #271e4a;
+}
+.wtc-ctx-label {
+  display: block;
+  color: #7b7b7b;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+/* Checklist grid */
+.wtc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 8px 18px;
+  margin-bottom: 14px;
+}
+.wtc-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-family: Kanit, sans-serif;
+  font-size: 13px;
+  color: #271e4a;
+  cursor: pointer;
+  padding: 5px 8px;
+  border-radius: 6px;
+  transition: background 0.12s;
+}
+.wtc-check:hover { background: #f9fafd; }
+.wtc-check input { margin-top: 2px; flex-shrink: 0; }
+.wtc-check input[disabled] + span { color: #9ca3af; }
+
+/* Fields */
+.wtc-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-top: 8px;
+}
+.wtc-field-label {
+  color: #271e4a;
+  font-family: Kanit, sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+}
+.wtc-input {
+  height: 40px;
+  padding: 8px 12px;
+  font-family: Kanit, sans-serif;
+  font-size: 14px;
+  color: #271e4a;
+  background: #f0f3ff;
+  border: 1px solid #b4b6ba;
+  border-radius: 6px;
+  box-sizing: border-box;
+  width: 100%;
+}
+.wtc-textarea { height: auto; resize: vertical; }
+.wtc-input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.18);
+  outline: none;
+}
+.wtc-input[disabled] { background: #f3f4f6; color: #9ca3af; }
+
+/* Sign card */
+.wtc-sign-card { background: #fbfbff; }
+.wtc-signed {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #166534;
+  font-size: 13px;
+  font-family: Kanit, sans-serif;
+  background: #dcfce7;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-top: 8px;
+}
+.wtc-signed i { color: #16a34a; }
+
+/* Picker */
+.wtc-picker { display: flex; flex-direction: column; gap: 8px; }
+.wtc-picker-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: Kanit, sans-serif;
+  text-align: left;
+  transition: background 0.12s, border-color 0.12s;
+}
+.wtc-picker-row:hover { background: #eff6ff; border-color: #93c5fd; }
+.wtc-picker-main { display: flex; flex-direction: column; gap: 2px; }
+.wtc-picker-proc { font-size: 14px; font-weight: 600; color: #271e4a; }
+.wtc-picker-meta { font-size: 12px; color: #7b7b7b; }
+
+/* Pills */
+.wtc-pill, .wtc-status-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+.wtc-pill-draft { background: #e5e7eb; color: #4b5563; }
+.wtc-pill-warn  { background: #fef3c7; color: #92400e; }
+.wtc-pill-done  { background: #dcfce7; color: #166534; }
+
+/* Action bar */
+.wtc-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  padding: 14px 0;
+}
+
+/* Buttons */
+.wtc-btn {
+  height: 40px;
+  padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: Kanit, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid transparent;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.wtc-btn-primary { background: #169458; color: #fff; border-color: #169458; min-width: 140px; }
+.wtc-btn-primary:hover:not([disabled]) { background: #117849; border-color: #117849; }
+.wtc-btn-secondary { background: #fff; color: #271e4a; border-color: #d1d5db; }
+.wtc-btn-secondary:hover:not([disabled]) { background: #f3f4f6; }
+.wtc-btn[disabled] { opacity: 0.55; cursor: not-allowed; }

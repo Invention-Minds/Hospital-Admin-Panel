@@ -1,0 +1,54 @@
+<div class="dcm-shell">
+  <h2 class="dcm-title">Diagnosis Codes Master (ICD-10 + CPT)</h2>
+  <p class="dcm-sub">Curated catalog for the autocomplete on Discharge Summary.</p>
+
+  <div class="dcm-tabs">
+    <button [class.dcm-tab-active]="activeTab === 'icd'" (click)="setTab('icd')">ICD-10</button>
+    <button [class.dcm-tab-active]="activeTab === 'cpt'" (click)="setTab('cpt')">CPT-4</button>
+  </div>
+
+  <div class="dcm-banner dcm-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="dcm-banner dcm-good" *ngIf="successMessage">{{ successMessage }}</div>
+
+  <div class="dcm-toolbar">
+    <input type="text" [(ngModel)]="search" (input)="load()" placeholder="Search code or description…" class="dcm-search" />
+  </div>
+
+  <div class="dcm-loading" *ngIf="loading">Loading…</div>
+
+  <div class="dcm-layout" *ngIf="!loading">
+    <div class="dcm-list">
+      <table>
+        <thead><tr><th>Code</th><th>Description</th><th></th></tr></thead>
+        <tbody>
+          <tr *ngIf="!rows.length"><td colspan="3" class="dcm-muted">No entries.</td></tr>
+          <tr *ngFor="let r of rows" [class.dcm-row-active]="selected?.id === r.id" (click)="edit(r)">
+            <td><strong>{{ r.code }}</strong></td>
+            <td>{{ r.description }}</td>
+            <td>
+              <button class="dcm-btn dcm-btn-sm dcm-btn-danger" (click)="$event.stopPropagation(); remove(r)">×</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="dcm-editor">
+      <h3>{{ selected ? 'Edit' : 'New' }} {{ activeTab === 'icd' ? 'ICD-10' : 'CPT-4' }} entry</h3>
+      <label>
+        <span>Code *</span>
+        <input type="text" [(ngModel)]="draft.code" placeholder="e.g. I10 / 27447" class="dcm-code" />
+      </label>
+      <label>
+        <span>Description *</span>
+        <textarea rows="3" [(ngModel)]="draft.description"></textarea>
+      </label>
+      <div class="dcm-editor-actions">
+        <button class="dcm-btn" (click)="cancelEdit()" [disabled]="saving">Cancel</button>
+        <button class="dcm-btn dcm-btn-primary" (click)="save()" [disabled]="saving">
+          {{ saving ? 'Saving…' : (selected ? 'Update' : 'Create') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

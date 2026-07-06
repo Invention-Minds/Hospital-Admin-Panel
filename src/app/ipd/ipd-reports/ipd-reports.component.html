@@ -1,0 +1,16 @@
+<div class="page">
+  <app-page-header
+    title="Lab & Radiology Reports"
+    subtitle="All results received during this admission"
+    [admissionId]="admissionId || null">
+  </app-page-header>
+
+  <app-admission-tabs [admissionId]="admissionId"></app-admission-tabs>
+
+  <div class="ipdr-loading" *ngIf="loading">Loading admission…</div>
+
+  <ng-container *ngIf="!loading && prn">
+    <app-critical-result-banner [prn]="prn"></app-critical-result-banner>
+    <app-patient-reports-tab mode="admission" [prn]="prn" [admissionId]="admissionId"></app-patient-reports-tab>
+  </ng-container>
+</div>

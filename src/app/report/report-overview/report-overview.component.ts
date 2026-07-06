@@ -22,6 +22,10 @@ export class ReportOverviewComponent {
     showCheckinReport() {
         this.activeComponent = 'checkin';
     }
+    // Phase 2.5 — Revenue tab.
+    showRevenueReport() {
+        this.activeComponent = 'revenue';
+    }
     ngOnInit(): void {
       if (typeof window !== 'undefined' && window.localStorage) {
         // Fetch role from localStorage or the authentication service

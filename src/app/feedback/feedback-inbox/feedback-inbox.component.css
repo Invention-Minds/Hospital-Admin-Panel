@@ -1,0 +1,65 @@
+.fb-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.fb-title { font-size: 22px; font-weight: 600; margin: 0 0 4px; }
+.fb-sub { color: #6b7280; font-size: 13px; margin: 0; }
+
+.fb-tiles { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+.fb-tile { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px 18px; min-width: 130px; display: flex; flex-direction: column; gap: 2px; }
+.fb-tile-label { font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.4px; }
+.fb-tile-val { font-size: 28px; font-weight: 700; color: #271e4a; }
+.fb-tile-meta { font-size: 12px; color: #9ca3af; }
+.fb-tile-hero { background: #0e2970; color: #fff; }
+.fb-tile-hero .fb-tile-label, .fb-tile-hero .fb-tile-meta { color: #cbd5e1; }
+.fb-tile-hero .fb-tile-val { color: #fff; font-size: 36px; }
+.fb-promoter .fb-tile-val { color: #166534; }
+.fb-passive .fb-tile-val { color: #92400e; }
+.fb-detractor .fb-tile-val { color: #b91c1c; }
+
+.fb-filters { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin-bottom: 14px; padding: 10px 14px; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; }
+.fb-filters label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #4b5563; }
+.fb-filters select { height: 34px; padding: 4px 10px; border: 1px solid #d1d5db; border-radius: 6px; min-width: 160px; }
+
+.fb-btn { height: 34px; padding: 0 12px; border-radius: 6px; border: 1px solid #d1d5db; background: #fff; color: #271e4a; cursor: pointer; font-family: Kanit, sans-serif; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
+.fb-btn-sm { height: 28px; padding: 0 8px; font-size: 12px; }
+
+.fb-banner { padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; font-size: 14px; cursor: pointer; }
+.fb-bad { background: #fee2e2; color: #b91c1c; }
+.fb-loading { padding: 30px; text-align: center; color: #6b7280; font-style: italic; }
+.fb-empty { padding: 44px; text-align: center; color: #6b7280; background: #f9fafb; border: 1px dashed #e5e7eb; border-radius: 10px; }
+
+.fb-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; }
+.fb-table th { background: #0e2970; color: #fff; padding: 10px; text-align: left; font-weight: 500; font-size: 12px; }
+.fb-table td { padding: 10px; border-bottom: 1px solid #f3f4f6; font-size: 13px; vertical-align: top; }
+.fb-comment { max-width: 280px; }
+.fb-muted { color: #9ca3af; }
+
+.fb-pill { display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+.fb-status-pending { background: #e5e7eb; color: #6b7280; }
+.fb-status-sent { background: #dbeafe; color: #1e40af; }
+.fb-status-completed { background: #dcfce7; color: #166534; }
+.fb-status-expired { background: #fee2e2; color: #b91c1c; }
+.fb-promoter { background: #dcfce7; color: #166534; }
+.fb-passive { background: #fef3c7; color: #92400e; }
+.fb-detractor { background: #fee2e2; color: #b91c1c; }
+
+/* Phase 6 — QR overlay (kiosk poster) */
+.fb-qr-overlay {
+  position: fixed; inset: 0; background: rgba(15, 23, 42, 0.55);
+  display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 24px;
+}
+.fb-qr-card {
+  background: #fff; border-radius: 14px; padding: 28px 32px; max-width: 380px; width: 100%;
+  text-align: center; box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+}
+.fb-qr-title { font-size: 18px; font-weight: 600; color: #271e4a; margin: 0 0 4px; }
+.fb-qr-sub { font-size: 13px; color: #6b7280; margin: 2px 0; }
+.fb-qr-code { display: flex; justify-content: center; margin: 18px 0; }
+.fb-qr-code :where(qrcode, qrcode > div, qrcode img) { display: block; margin: 0 auto; }
+.fb-qr-url { font-family: monospace; font-size: 11px; color: #4b5563; word-break: break-all; margin: 0 0 16px; }
+.fb-qr-actions { display: flex; justify-content: center; gap: 8px; }
+
+@media print {
+  .fb-shell > *:not(.fb-qr-overlay) { display: none !important; }
+  .fb-qr-overlay { position: static; background: none; padding: 0; }
+  .fb-qr-card { box-shadow: none; }
+  .fb-qr-actions { display: none; }
+}

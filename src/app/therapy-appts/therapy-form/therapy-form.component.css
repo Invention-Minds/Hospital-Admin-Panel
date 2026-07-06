@@ -14,6 +14,97 @@
     margin-bottom: 20px;
     text-align: left;
   }
+
+  /* Conflict popup — mirrors the MHC health-checkup-form dialog */
+  .custom-dialog-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  .custom-dialog {
+    border-radius: 8px;
+    background: linear-gradient(108deg, #dc3a35 0%, #a10500 100%);
+    padding: 20px;
+    padding-left: 5px;
+    padding-top: 5px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    text-align: right;
+    max-width: 600px;
+    width: 90%;
+    color: white;
+  }
+  .dialog-content {
+    display: flex;
+    align-items: flex-end;
+    justify-content: right;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  .icon-container {
+    flex-shrink: 0;
+  }
+  .dialog-icon {
+    width: 167px;
+  }
+  .custom-dialog h3 {
+    color: #fff;
+    font-family: Kanit;
+    font-size: 24px;
+    font-weight: 400;
+    margin-top: 10px;
+  }
+  .dialog-text p {
+    margin: 10px 0 0;
+    color: #fff;
+    text-align: right;
+    font-family: Kanit;
+    font-size: 13px;
+    font-weight: 300;
+  }
+  .dialog-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 20px;
+    margin-top: 20px;
+  }
+  .btn-primary {
+    border-radius: 8px;
+    background: #0e2970;
+    color: #fff;
+    font-family: Kanit;
+    font-weight: 400;
+    border: none;
+    padding: 10px 30px;
+    cursor: pointer;
+    font-size: 14px;
+    flex: 1;
+    max-width: 100px;
+    text-align: center;
+  }
+  .btn-primary:hover {
+    background-color: #002244;
+  }
+  .cancel {
+    border-radius: 8px;
+    background: #fff;
+    color: #000;
+    text-align: center;
+    font-family: Kanit;
+    font-weight: 400;
+    border: 2px solid #ccc;
+    padding: 10px 30px;
+    cursor: pointer;
+    font-size: 14px;
+    flex: 1;
+    max-width: 100px;
+  }
   
   .form-row {
     display: flex;

@@ -7,6 +7,7 @@ import { AppointmentConfirmService } from '../../services/appointment-confirm.se
 import { NgForm } from '@angular/forms';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { HandWrittenComponent } from '../hand-written/hand-written.component';
+import { resolveFileUrl } from '../../shared/file-url.util';
 
 @Component({
   selector: 'app-er-assessment',
@@ -221,9 +222,10 @@ ngAfterViewInit() {
       // Convert logo to Base64
       const logoBase64 = await this.getBase64ImageFromURL(logoUrl);
   
-      // // Convert doctor signature if it's a URL
-      if (d.doctorSign && d.doctorSign.startsWith('http')) {
-        d.doctorSign = await this.getBase64ImageFromURL(d.doctorSign);
+      // // Convert doctor signature if it's a URL (http OR relative /files path).
+      // Leaves inline data:/blob: captures (signature pad) untouched.
+      if (d.doctorSign && !/^(data:|blob:)/i.test(d.doctorSign)) {
+        d.doctorSign = await this.getBase64ImageFromURL(resolveFileUrl(d.doctorSign));
       }
       // d.doctorSign = '';
 

@@ -1,0 +1,251 @@
+<div class="ds-shell">
+  <h2 class="ds-title">Dietetics setup</h2>
+  <p class="ds-sub">
+    Meal-time slots, diet catalogue, meal items, weekly menu and canteen TV
+    channels. Settings here drive what the dietician can prescribe and what the
+    canteen sees each morning.
+  </p>
+
+  <div class="ds-banner ds-banner-bad" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+  <div class="ds-banner ds-banner-good" *ngIf="successMessage" role="status">{{ successMessage }}</div>
+
+  <div class="ds-tabs">
+    <button type="button" [class.active]="tab==='slots'" (click)="setTab('slots')">Meal times</button>
+    <button type="button" [class.active]="tab==='allergens'" (click)="setTab('allergens')">Allergens</button>
+    <button type="button" [class.active]="tab==='diets'" (click)="setTab('diets')">Diets</button>
+    <button type="button" [class.active]="tab==='meals'" (click)="setTab('meals')">Meals</button>
+    <button type="button" [class.active]="tab==='menu'" (click)="setTab('menu')">Weekly menu</button>
+    <button type="button" [class.active]="tab==='channels'" (click)="setTab('channels')">TV channels</button>
+  </div>
+
+  <!-- ─── Meal time slots ─── -->
+  <div *ngIf="tab==='slots'" class="ds-panel">
+    <div class="ds-grid-2">
+      <div>
+        <table class="ds-table">
+          <thead>
+            <tr><th>Name</th><th>Code</th><th>Start</th><th>End</th><th>Seq</th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let s of slots">
+              <td>{{ s.name }}</td>
+              <td>{{ s.code }}</td>
+              <td>{{ s.startTime }}</td>
+              <td>{{ s.endTime }}</td>
+              <td>{{ s.sequence }}</td>
+              <td><button type="button" class="ds-btn ds-btn-sm" (click)="editSlot(s)">Edit</button></td>
+            </tr>
+            <tr *ngIf="slots.length===0"><td colspan="6" class="ds-empty">No slots yet — add Breakfast / Lunch / Dinner first.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ds-form">
+        <h3>{{ slotForm.id ? 'Edit slot' : 'New slot' }}</h3>
+        <label>Name <input type="text" [(ngModel)]="slotForm.name" placeholder="Breakfast" /></label>
+        <label>Code <input type="text" [(ngModel)]="slotForm.code" placeholder="BFAST" /></label>
+        <label>Start (HH:mm) <input type="text" [(ngModel)]="slotForm.startTime" placeholder="07:00" /></label>
+        <label>End (HH:mm) <input type="text" [(ngModel)]="slotForm.endTime" placeholder="09:00" /></label>
+        <label>Sequence <input type="number" [(ngModel)]="slotForm.sequence" /></label>
+        <label class="ds-check"><input type="checkbox" [(ngModel)]="slotForm.isActive" /> Active</label>
+        <div class="ds-actions">
+          <button type="button" class="ds-btn ds-btn-primary" (click)="saveSlot()">Save</button>
+          <button type="button" class="ds-btn" (click)="slotForm = blankSlot()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Allergens ─── -->
+  <div *ngIf="tab==='allergens'" class="ds-panel">
+    <div class="ds-grid-2">
+      <div>
+        <table class="ds-table">
+          <thead><tr><th>Name</th><th>Active</th><th></th></tr></thead>
+          <tbody>
+            <tr *ngFor="let a of allergens">
+              <td>{{ a.name }}</td>
+              <td>{{ a.isActive ? 'Yes' : 'No' }}</td>
+              <td><button type="button" class="ds-btn ds-btn-sm" (click)="editAllergen(a)">Edit</button></td>
+            </tr>
+            <tr *ngIf="allergens.length===0"><td colspan="3" class="ds-empty">No allergens yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ds-form">
+        <h3>{{ allergenForm.id ? 'Edit allergen' : 'New allergen' }}</h3>
+        <label>Name <input type="text" [(ngModel)]="allergenForm.name" placeholder="Peanut" /></label>
+        <label class="ds-check"><input type="checkbox" [(ngModel)]="allergenForm.isActive" /> Active</label>
+        <div class="ds-actions">
+          <button type="button" class="ds-btn ds-btn-primary" (click)="saveAllergen()">Save</button>
+          <button type="button" class="ds-btn" (click)="allergenForm = blankAllergen()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Diets ─── -->
+  <div *ngIf="tab==='diets'" class="ds-panel">
+    <div class="ds-grid-2">
+      <div>
+        <table class="ds-table">
+          <thead><tr><th>Code</th><th>Name</th><th>kCal</th><th>Veg</th><th></th></tr></thead>
+          <tbody>
+            <tr *ngFor="let d of diets">
+              <td>{{ d.code }}</td>
+              <td>{{ d.name }}</td>
+              <td>{{ d.caloriesKcal ?? '—' }}</td>
+              <td>{{ d.isVeg ? '✓' : '' }}</td>
+              <td><button type="button" class="ds-btn ds-btn-sm" (click)="editDiet(d)">Edit</button></td>
+            </tr>
+            <tr *ngIf="diets.length===0"><td colspan="5" class="ds-empty">No diets yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ds-form">
+        <h3>{{ dietForm.id ? 'Edit diet' : 'New diet' }}</h3>
+        <label>Name <input type="text" [(ngModel)]="dietForm.name" placeholder="Diabetic 1800kcal" /></label>
+        <label>Code <input type="text" [(ngModel)]="dietForm.code" placeholder="DM-1800" /></label>
+        <label>Description <textarea [(ngModel)]="dietForm.description" rows="2"></textarea></label>
+        <div class="ds-row">
+          <label>kCal <input type="number" [(ngModel)]="dietForm.caloriesKcal" /></label>
+          <label>Protein g <input type="number" [(ngModel)]="dietForm.proteinG" /></label>
+          <label>Carbs g <input type="number" [(ngModel)]="dietForm.carbsG" /></label>
+          <label>Fat g <input type="number" [(ngModel)]="dietForm.fatG" /></label>
+        </div>
+        <div class="ds-row">
+          <label>Sodium mg <input type="number" [(ngModel)]="dietForm.sodiumMg" /></label>
+          <label>Potassium mg <input type="number" [(ngModel)]="dietForm.potassiumMg" /></label>
+          <label>Fluid ml <input type="number" [(ngModel)]="dietForm.fluidMl" /></label>
+        </div>
+        <label>Restrictions (free text) <textarea [(ngModel)]="dietForm.restrictions" rows="2"></textarea></label>
+        <label>Target conditions <textarea [(ngModel)]="dietForm.targetConditions" rows="2" placeholder="Diabetes, hypertension"></textarea></label>
+        <div class="ds-checks">
+          <label><input type="checkbox" [(ngModel)]="dietForm.isVeg" /> Vegetarian</label>
+          <label><input type="checkbox" [(ngModel)]="dietForm.isJain" /> Jain</label>
+          <label><input type="checkbox" [(ngModel)]="dietForm.isHalal" /> Halal</label>
+          <label><input type="checkbox" [(ngModel)]="dietForm.isKosher" /> Kosher</label>
+          <label><input type="checkbox" [(ngModel)]="dietForm.isNoOnionGarlic" /> No onion / garlic</label>
+          <label><input type="checkbox" [(ngModel)]="dietForm.isActive" /> Active</label>
+        </div>
+        <div class="ds-actions">
+          <button type="button" class="ds-btn ds-btn-primary" (click)="saveDiet()">Save</button>
+          <button type="button" class="ds-btn" (click)="dietForm = blankDiet()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Meals ─── -->
+  <div *ngIf="tab==='meals'" class="ds-panel">
+    <div class="ds-grid-2">
+      <div>
+        <table class="ds-table">
+          <thead><tr><th>Name</th><th>Category</th><th>kCal</th><th>Veg</th><th></th></tr></thead>
+          <tbody>
+            <tr *ngFor="let m of meals">
+              <td>{{ m.name }}</td>
+              <td>{{ m.category ?? '—' }}</td>
+              <td>{{ m.caloriesKcal ?? '—' }}</td>
+              <td>{{ m.isVeg ? '✓' : '' }}</td>
+              <td><button type="button" class="ds-btn ds-btn-sm" (click)="editMeal(m)">Edit</button></td>
+            </tr>
+            <tr *ngIf="meals.length===0"><td colspan="5" class="ds-empty">No meal items yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ds-form">
+        <h3>{{ mealForm.id ? 'Edit meal' : 'New meal' }}</h3>
+        <label>Name <input type="text" [(ngModel)]="mealForm.name" /></label>
+        <label>Category <input type="text" [(ngModel)]="mealForm.category" placeholder="Main / Side / Beverage" /></label>
+        <label>kCal <input type="number" [(ngModel)]="mealForm.caloriesKcal" /></label>
+        <label>Description <textarea [(ngModel)]="mealForm.description" rows="2"></textarea></label>
+        <div class="ds-checks">
+          <label><input type="checkbox" [(ngModel)]="mealForm.isVeg" /> Vegetarian</label>
+          <label><input type="checkbox" [(ngModel)]="mealForm.isActive" /> Active</label>
+        </div>
+        <fieldset class="ds-fs">
+          <legend>Compatible with diets</legend>
+          <label *ngFor="let d of diets" class="ds-check-inline">
+            <input type="checkbox"
+                   [checked]="mealForm.compatibleDietIds.includes(d.id)"
+                   (change)="toggleMealDiet(d.id)" />
+            {{ d.code }} · {{ d.name }}
+          </label>
+        </fieldset>
+        <fieldset class="ds-fs">
+          <legend>Contains allergens</legend>
+          <label *ngFor="let a of allergens" class="ds-check-inline">
+            <input type="checkbox"
+                   [checked]="mealForm.allergenIds.includes(a.id)"
+                   (change)="toggleMealAllergen(a.id)" />
+            {{ a.name }}
+          </label>
+        </fieldset>
+        <div class="ds-actions">
+          <button type="button" class="ds-btn ds-btn-primary" (click)="saveMeal()">Save</button>
+          <button type="button" class="ds-btn" (click)="mealForm = blankMeal()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Weekly menu grid ─── -->
+  <div *ngIf="tab==='menu'" class="ds-panel">
+    <label class="ds-field">
+      Diet
+      <select [(ngModel)]="menuDietId" (change)="loadMenu()">
+        <option value="">— select a diet —</option>
+        <option *ngFor="let d of diets" [value]="d.id">{{ d.code }} · {{ d.name }}</option>
+      </select>
+    </label>
+    <table class="ds-menu" *ngIf="menuDietId">
+      <thead>
+        <tr>
+          <th>Day</th>
+          <th *ngFor="let s of slots">{{ s.name }} <span class="ds-slot-time">{{ s.startTime }}</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let label of dayLabels; let dow = index">
+          <th>{{ label }}</th>
+          <td *ngFor="let s of slots">
+            <select [ngModel]="cellAt(dow, s.id)?.mealMasterId || ''"
+                    (ngModelChange)="setMenuCell(dow, s.id, $event)">
+              <option value="">—</option>
+              <option *ngFor="let m of meals" [value]="m.id">{{ m.name }}</option>
+            </select>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ─── Channels ─── -->
+  <div *ngIf="tab==='channels'" class="ds-panel">
+    <div class="ds-grid-2">
+      <div>
+        <table class="ds-table">
+          <thead><tr><th>Name</th><th>Active</th><th>TV URL</th><th></th></tr></thead>
+          <tbody>
+            <tr *ngFor="let c of channels">
+              <td>{{ c.name }}</td>
+              <td>{{ c.isActive ? 'Yes' : 'No' }}</td>
+              <td><code>/canteen-channel/{{ c.id }}</code></td>
+              <td><button type="button" class="ds-btn ds-btn-sm" (click)="editChannel(c)">Edit</button></td>
+            </tr>
+            <tr *ngIf="channels.length===0"><td colspan="4" class="ds-empty">No canteen TV channels yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ds-form">
+        <h3>{{ channelForm.id ? 'Edit channel' : 'New channel' }}</h3>
+        <label>Name <input type="text" [(ngModel)]="channelForm.name" placeholder="Main canteen" /></label>
+        <label class="ds-check"><input type="checkbox" [(ngModel)]="channelForm.isActive" /> Active</label>
+        <div class="ds-actions">
+          <button type="button" class="ds-btn ds-btn-primary" (click)="saveChannel()">Save</button>
+          <button type="button" class="ds-btn" (click)="channelForm = blankChannel()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

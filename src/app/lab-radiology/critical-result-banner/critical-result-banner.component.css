@@ -1,0 +1,77 @@
+/* Phase 9.11 — Critical-result banner (red, attention-grabbing). */
+
+.crb-wrap {
+  margin-bottom: 14px;
+  font-family: Kanit, sans-serif;
+}
+.crb-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  background: #fee2e2;
+  color: #7f1d1d;
+  border: 1px solid #fca5a5;
+  border-left: 4px solid #dc2626;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  animation: crb-pulse 2.4s ease-in-out infinite;
+}
+@keyframes crb-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.0); }
+  50%      { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0.12); }
+}
+.crb-banner i.pi-exclamation-triangle {
+  font-size: 18px;
+  color: #dc2626;
+}
+.crb-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.crb-sub {
+  font-weight: 400;
+  font-size: 12px;
+  color: #991b1b;
+}
+.crb-banner:hover { background: #fecaca; }
+
+.crb-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid #fca5a5;
+  border-top: none;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  background: #fff5f5;
+}
+.crb-list li { border-bottom: 1px solid #fee2e2; }
+.crb-list li:last-child { border-bottom: none; }
+.crb-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 18px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: Kanit, sans-serif;
+  font-size: 13px;
+  color: #7f1d1d;
+  text-align: left;
+}
+.crb-link:hover { background: #fee2e2; }
+.crb-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #dc2626;
+  flex-shrink: 0;
+}
+.crb-name { font-weight: 600; flex: 1; }
+.crb-meta { font-size: 11px; color: #991b1b; }

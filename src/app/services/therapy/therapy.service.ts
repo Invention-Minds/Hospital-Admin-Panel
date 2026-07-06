@@ -101,6 +101,37 @@ export class TherapyService {
     return this.http.post(`${this.BASE_URL}`, data);
   }
 
+  // ------------------- COURSE (multi-day) -------------------
+  createTherapyCourse(data: any): Observable<any> {
+    return this.http.post(`${this.BASE_URL}/courses`, data);
+  }
+
+  getTherapyCourses(status?: string): Observable<any[]> {
+    const q = status ? `?status=${encodeURIComponent(status)}` : '';
+    return this.http.get<any[]>(`${this.BASE_URL}/courses${q}`);
+  }
+
+  getTherapyCourseById(id: number): Observable<any> {
+    return this.http.get<any>(`${this.BASE_URL}/courses/${id}`);
+  }
+
+  previewCourseReschedule(id: number, dayNumber: number, newDate: string): Observable<any> {
+    return this.http.post<any>(`${this.BASE_URL}/courses/${id}/reschedule-preview`, { dayNumber, newDate });
+  }
+
+  applyCourseReschedule(id: number, dayNumber: number, newDate: string, rescheduledBy?: string, force = false): Observable<any> {
+    return this.http.post<any>(`${this.BASE_URL}/courses/${id}/reschedule`, { dayNumber, newDate, confirm: true, rescheduledBy, force });
+  }
+
+  cancelTherapyCourse(id: number, cancelledBy?: string): Observable<any> {
+    return this.http.patch<any>(`${this.BASE_URL}/courses/${id}/cancel`, { cancelledBy });
+  }
+
+  // ------------------- THERAPIST AVAILABILITY -------------------
+  getTherapistAvailability(therapistId: number, date: string): Observable<any> {
+    return this.http.get<any>(`${this.BASE_URL}/availability?therapistId=${therapistId}&date=${date}`);
+  }
+
   getAllTherapyAppointments(): Observable<TherapyAppointment[]> {
     return this.http.get<TherapyAppointment[]>(`${this.BASE_URL}`);
   }
@@ -116,6 +147,11 @@ export class TherapyService {
   // 🗓️ Get therapy schedule by date
   getTherapyScheduleByDate(date: string): Observable<any[]> {
     return this.http.get<any[]>(`${this.BASE_URL}/schedule/${date}`);
+  }
+
+  // Tentative (planned) course days on a date — for per-day availability hints.
+  getPlannedDaysByDate(date: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.BASE_URL}/planned-days?date=${date}`);
   }
 
   getConfirmedAppointments(): Observable<TherapyAppointment[]> {

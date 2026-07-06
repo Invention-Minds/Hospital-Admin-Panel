@@ -1,0 +1,94 @@
+<div class="dx-shell">
+  <div class="dx-head">
+    <h2 class="dx-title">Update Patient's Diagnosis</h2>
+    <button class="dx-btn" (click)="close()">Close</button>
+  </div>
+  <p class="dx-sub">Admission ID: <code>{{ admissionId }}</code></p>
+
+  <div class="dx-banner dx-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="dx-banner dx-good" *ngIf="successMessage">{{ successMessage }}</div>
+
+  <div class="dx-loading" *ngIf="loading">Loading…</div>
+
+  <div class="dx-two-col" *ngIf="!loading">
+    <!-- ICD column -->
+    <section class="dx-col">
+      <h3 class="dx-col-title">ICD Codes</h3>
+      <div class="dx-tabs">
+        <button [class.dx-tab-active]="icdTab === 'icd-provisional'" (click)="icdTab = 'icd-provisional'">Provisional</button>
+        <button [class.dx-tab-active]="icdTab === 'icd-final'" (click)="icdTab = 'icd-final'">Final</button>
+      </div>
+
+      <div class="dx-add">
+        <label class="dx-field">
+          <span>Search ICD master</span>
+          <input type="text" [(ngModel)]="icdSearch" (input)="onIcdSearch(icdSearch)" placeholder="Type code or text…" />
+        </label>
+        <div class="dx-master-list" *ngIf="icdMaster.length">
+          <div class="dx-master-row" *ngFor="let m of icdMaster" (click)="addCode(icdTab, m)">
+            <strong>{{ m.code }}</strong> — {{ m.description }}
+          </div>
+        </div>
+        <em class="dx-muted" *ngIf="icdSearch && !icdMaster.length">No master matches. You can add manually below.</em>
+        <details class="dx-manual">
+          <summary>Add manually</summary>
+          <input type="text" #icdCode placeholder="Code (e.g. I10)" />
+          <input type="text" #icdDesc placeholder="Description" />
+          <button class="dx-btn dx-btn-primary" (click)="addManual(icdTab, icdCode.value, icdDesc.value); icdCode.value=''; icdDesc.value=''" [disabled]="saving">Add</button>
+        </details>
+      </div>
+
+      <table class="dx-table">
+        <thead><tr><th>Code</th><th>Diagnosis</th><th></th></tr></thead>
+        <tbody>
+          <tr *ngIf="!rowsByCategory(icdTab).length">
+            <td colspan="3" class="dx-muted">No records to display.</td>
+          </tr>
+          <tr *ngFor="let r of rowsByCategory(icdTab)">
+            <td><strong>{{ r.code }}</strong></td>
+            <td>{{ r.description }}</td>
+            <td><button class="dx-btn-link" (click)="remove(r)">Remove</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- CPT column -->
+    <section class="dx-col">
+      <h3 class="dx-col-title">CPT Codes</h3>
+
+      <div class="dx-add">
+        <label class="dx-field">
+          <span>Search CPT master</span>
+          <input type="text" [(ngModel)]="cptSearch" (input)="onCptSearch(cptSearch)" placeholder="Type code or procedure…" />
+        </label>
+        <div class="dx-master-list" *ngIf="cptMaster.length">
+          <div class="dx-master-row" *ngFor="let m of cptMaster" (click)="addCode('cpt', m)">
+            <strong>{{ m.code }}</strong> — {{ m.description }}
+          </div>
+        </div>
+        <em class="dx-muted" *ngIf="cptSearch && !cptMaster.length">No master matches. You can add manually below.</em>
+        <details class="dx-manual">
+          <summary>Add manually</summary>
+          <input type="text" #cptCode placeholder="Code (e.g. 27447)" />
+          <input type="text" #cptDesc placeholder="Procedure description" />
+          <button class="dx-btn dx-btn-primary" (click)="addManual('cpt', cptCode.value, cptDesc.value); cptCode.value=''; cptDesc.value=''" [disabled]="saving">Add</button>
+        </details>
+      </div>
+
+      <table class="dx-table">
+        <thead><tr><th>Code</th><th>Procedure</th><th></th></tr></thead>
+        <tbody>
+          <tr *ngIf="!rowsByCategory('cpt').length">
+            <td colspan="3" class="dx-muted">No records to display.</td>
+          </tr>
+          <tr *ngFor="let r of rowsByCategory('cpt')">
+            <td><strong>{{ r.code }}</strong></td>
+            <td>{{ r.description }}</td>
+            <td><button class="dx-btn-link" (click)="remove(r)">Remove</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+</div>

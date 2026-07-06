@@ -1,0 +1,38 @@
+<section class="bl-card">
+  <header class="bl-header">
+    <div class="bl-title-wrap">
+      <i *ngIf="accentIcon" [class]="'bl-title-icon ' + accentIcon"></i>
+      <div>
+        <h2>{{ title }}</h2>
+        <p class="bl-sub" *ngIf="subTitle">{{ subTitle }}</p>
+      </div>
+    </div>
+  </header>
+
+  <ol class="bl-list" *ngIf="items.length; else emptyTpl">
+    <li *ngFor="let item of items; let i = index" class="bl-item">
+      <div class="bl-rank">#{{ i + 1 }}</div>
+      <div class="bl-row-wrap">
+        <div class="bl-row-top">
+          <span class="bl-label" [title]="item.label">{{ item.label }}</span>
+          <span class="bl-tag" *ngIf="item.tag" [attr.data-tone]="item.tagTone || 'default'">
+            {{ item.tag }}
+          </span>
+          <span class="bl-count">
+            {{ item.count }}<span class="bl-unit" *ngIf="unitLabel"> {{ unitLabel }}</span>
+          </span>
+        </div>
+        <div class="bl-bar-track">
+          <div class="bl-bar-fill" [style.width.%]="pct(item)"></div>
+        </div>
+      </div>
+    </li>
+  </ol>
+
+  <ng-template #emptyTpl>
+    <div class="bl-empty">
+      <i [class]="emptyIcon"></i>
+      <p>{{ emptyText }}</p>
+    </div>
+  </ng-template>
+</section>

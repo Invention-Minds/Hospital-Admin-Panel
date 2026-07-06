@@ -1,0 +1,298 @@
+<div class="q-shell">
+  <h2 class="q-title">ICU Transfer Queue</h2>
+
+  <div class="q-banner q-banner-bad" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+
+  <div class="q-tabs">
+    <button type="button"
+            class="q-tab"
+            [class.q-tab-active]="activeTab === 'awaiting'"
+            (click)="selectTab('awaiting')">
+      Awaiting acknowledgement
+      <span class="q-badge">{{ awaitingAck.length }}</span>
+    </button>
+    <button type="button"
+            class="q-tab"
+            [class.q-tab-active]="activeTab === 'ready'"
+            (click)="selectTab('ready')">
+      Ready for ICU
+      <span class="q-badge">{{ readyForIcu.length }}</span>
+    </button>
+    <button type="button"
+            class="q-tab"
+            [class.q-tab-active]="activeTab === 'inflight'"
+            (click)="selectTab('inflight')">
+      In-flight
+      <span class="q-badge">{{ inFlight.length }}</span>
+    </button>
+    <!-- Phase 9.6 — admissions currently in ICU (post-transfer). Each row links
+         to the ICU Workbench for vitals / progress / sedation / restraints /
+         bundles / family-comms / step-down. -->
+    <button type="button"
+            class="q-tab"
+            [class.q-tab-active]="activeTab === 'in-icu'"
+            (click)="selectTab('in-icu')">
+      Currently in ICU
+      <span class="q-badge">{{ inIcu.length }}</span>
+    </button>
+  </div>
+
+  <div class="q-loading" *ngIf="loading">Loading queue&hellip;</div>
+
+  <ng-container *ngIf="!loading">
+
+    <!-- ============ Tab 1: Awaiting (intensivist signs) ============ -->
+    <ng-container *ngIf="activeTab === 'awaiting'">
+      <div class="q-empty" *ngIf="awaitingAck.length === 0">
+        No transfer requests waiting for acknowledgement.
+      </div>
+
+      <div class="q-card" *ngFor="let row of awaitingAck">
+        <div class="q-card-head" (click)="toggleRow(row)">
+          <div>
+            <span [class]="pillClass(row.status)">{{ row.status }}</span>
+            <strong class="q-card-title">
+              {{ row.admission?.admissionNo || row.admissionId }}
+            </strong>
+            <span class="q-meta">PRN {{ row.admission?.prn }}</span>
+          </div>
+          <span class="q-time">{{ row.proposedAt | date:'short' }}</span>
+        </div>
+        <p class="q-rationale"><strong>Rationale:</strong> {{ row.rationale }}</p>
+
+        <div class="q-panel" *ngIf="isExpanded(row)">
+          <div class="q-form-row">
+            <label>
+              <input type="radio"
+                     name="ack-{{row.id}}"
+                     [value]="'ACKNOWLEDGED'"
+                     [(ngModel)]="ackOutcome" />
+              Acknowledge (sign as intensivist)
+            </label>
+            <label>
+              <input type="radio"
+                     name="ack-{{row.id}}"
+                     [value]="'DECLINED'"
+                     [(ngModel)]="ackOutcome" />
+              Decline
+            </label>
+          </div>
+
+          <ng-container *ngIf="ackOutcome === 'ACKNOWLEDGED'">
+            <div class="q-form-row">
+              <label class="q-full">
+                Intensivist name
+                <input type="text"
+                       [(ngModel)]="intensivistName"
+                       name="intensivistName-{{row.id}}"
+                       placeholder="Your full name (snapshot for audit)" />
+              </label>
+            </div>
+            <app-e-sign
+              [signerType]="'staff'"
+              [signerName]="intensivistName"
+              [contextType]="'icu-transfer-acknowledge'"
+              [contextId]="row.id"
+              [prompt]="'Intensivist — acknowledging ICU transfer'"
+              [disabled]="ackSubmitting"
+              (signed)="onAckSigned(row, $event)">
+            </app-e-sign>
+          </ng-container>
+
+          <ng-container *ngIf="ackOutcome === 'DECLINED'">
+            <div class="q-form-row">
+              <label class="q-full">
+                Decline reason
+                <textarea rows="2"
+                          [(ngModel)]="declineReason"
+                          name="declineReason-{{row.id}}"
+                          placeholder="Why is ICU not appropriate? (Sent back to proposing doctor.)"></textarea>
+              </label>
+            </div>
+            <div class="q-form-buttons">
+              <button type="button"
+                      class="q-btn q-btn-danger"
+                      [disabled]="ackSubmitting"
+                      (click)="submitDecline(row)">
+                {{ ackSubmitting ? 'Submitting…' : 'Decline transfer' }}
+              </button>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- ============ Tab 2: Ready for ICU (charge nurse picks bed) ============ -->
+    <ng-container *ngIf="activeTab === 'ready'">
+      <div class="q-empty" *ngIf="readyForIcu.length === 0">
+        No transfers ready for ICU bed assignment.
+      </div>
+
+      <div class="q-card" *ngFor="let row of readyForIcu">
+        <div class="q-card-head" (click)="toggleRow(row)">
+          <div>
+            <span [class]="pillClass(row.status)">{{ row.status }}</span>
+            <strong class="q-card-title">
+              {{ row.admission?.admissionNo || row.admissionId }}
+            </strong>
+            <span class="q-meta">PRN {{ row.admission?.prn }}</span>
+          </div>
+          <span class="q-time">Ack {{ row.acknowledgedAt | date:'short' }}</span>
+        </div>
+        <p class="q-rationale">{{ row.rationale }}</p>
+
+        <div class="q-panel" *ngIf="isExpanded(row)">
+          <div class="q-form-row">
+            <label>
+              ICU ward
+              <select [(ngModel)]="selectedWardId"
+                      name="ward-{{row.id}}"
+                      (change)="onWardChange()">
+                <option value="" disabled>Select ward</option>
+                <option *ngFor="let w of icuWards" [value]="w.id">
+                  {{ w.wardName }} ({{ w.wardCode }})
+                </option>
+              </select>
+            </label>
+            <label>
+              Bed
+              <select [(ngModel)]="selectedBedId" name="bed-{{row.id}}" [disabled]="!selectedWardId">
+                <option value="" disabled>Select bed</option>
+                <option *ngFor="let b of icuBeds" [value]="b.id">
+                  {{ b.bedNumber }} ({{ b.bedType }})
+                </option>
+              </select>
+            </label>
+          </div>
+
+          <p class="q-hint" *ngIf="selectedWardId && icuBeds.length === 0">
+            No available beds in this ward.
+          </p>
+
+          <!-- The e-sign component requires a non-empty signerName, so the
+               ICU charge nurse types their name here before signing. -->
+          <div class="q-form-row">
+            <label class="q-full">
+              ICU charge nurse name
+              <input type="text"
+                     [(ngModel)]="chargeNurseName"
+                     name="chargeNurseAccept-{{row.id}}"
+                     placeholder="Your full name (snapshot for audit)" />
+            </label>
+          </div>
+
+          <app-e-sign *ngIf="selectedBedId && chargeNurseName.trim()"
+                      [signerType]="'staff'"
+                      [signerName]="chargeNurseName"
+                      [contextType]="'icu-transfer-accept'"
+                      [contextId]="row.id"
+                      [prompt]="'ICU charge nurse — accepting transfer'"
+                      [disabled]="acceptSubmitting"
+                      (signed)="onAcceptSigned(row, $event)">
+          </app-e-sign>
+
+          <p class="q-hint" *ngIf="selectedBedId && !chargeNurseName.trim()">
+            Enter your name to enable signing.
+          </p>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- ============ Tab 3: In-flight (mark transit / complete) ============ -->
+    <ng-container *ngIf="activeTab === 'inflight'">
+      <div class="q-empty" *ngIf="inFlight.length === 0">
+        No transfers currently in-flight.
+      </div>
+
+      <div class="q-card" *ngFor="let row of inFlight">
+        <div class="q-card-head" (click)="toggleRow(row)">
+          <div>
+            <span [class]="pillClass(row.status)">{{ row.status }}</span>
+            <strong class="q-card-title">
+              {{ row.admission?.admissionNo || row.admissionId }}
+            </strong>
+            <span class="q-meta">PRN {{ row.admission?.prn }}</span>
+          </div>
+          <span class="q-time" *ngIf="row.status === 'ACCEPTED'">
+            Bed booked {{ row.acceptedAt | date:'short' }}
+          </span>
+          <span class="q-time" *ngIf="row.status === 'IN_TRANSIT'">
+            In transit {{ row.inTransitAt | date:'short' }}
+          </span>
+        </div>
+        <p class="q-rationale">{{ row.rationale }}</p>
+
+        <div class="q-panel" *ngIf="isExpanded(row)">
+
+          <div class="q-form-buttons" *ngIf="row.status === 'ACCEPTED'">
+            <button type="button"
+                    class="q-btn q-btn-primary"
+                    (click)="markInTransit(row)">
+              Mark in-transit
+            </button>
+          </div>
+
+          <ng-container *ngIf="row.status === 'IN_TRANSIT'">
+            <p class="q-hint">
+              Sign once the patient is on the ICU bed and handover is complete.
+              This frees the source bed and finalises the move.
+            </p>
+            <div class="q-form-row">
+              <label class="q-full">
+                ICU charge nurse name
+                <input type="text"
+                       [(ngModel)]="chargeNurseName"
+                       name="chargeNurseComplete-{{row.id}}"
+                       placeholder="Your full name (snapshot for audit)" />
+              </label>
+            </div>
+            <app-e-sign *ngIf="chargeNurseName.trim()"
+              [signerType]="'staff'"
+              [signerName]="chargeNurseName"
+              [contextType]="'icu-transfer-complete'"
+              [contextId]="row.id"
+              [prompt]="'ICU charge nurse — handover complete'"
+              [disabled]="completeSubmitting"
+              (signed)="onCompleteSigned(row, $event)">
+            </app-e-sign>
+            <p class="q-hint" *ngIf="!chargeNurseName.trim()">
+              Enter your name to enable signing.
+            </p>
+          </ng-container>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- ============ Tab 4: Currently in ICU (links to ICU Workbench) ============ -->
+    <ng-container *ngIf="activeTab === 'in-icu'">
+      <div class="q-empty" *ngIf="inIcu.length === 0">
+        No patients currently in ICU.
+      </div>
+
+      <div class="q-card" *ngFor="let a of inIcu">
+        <div class="q-card-head">
+          <div>
+            <span class="pill pill-completed">IN ICU</span>
+            <strong class="q-card-title">{{ a.admissionNo || a.id }}</strong>
+            <span class="q-meta">PRN {{ a.prn }} · {{ a.admittingDoctor }}</span>
+          </div>
+          <span class="q-time">
+            ICU day {{ icuDayOf(a) }} · since {{ a.icuAdmittedAt | date:'short' }}
+          </span>
+        </div>
+        <p class="q-rationale">
+          <strong>{{ a.diagnosis }}</strong>
+          <span *ngIf="a.ward"> · {{ a.ward.wardName }}</span>
+          <span *ngIf="a.bed"> · bed {{ a.bed.bedNumber }}</span>
+        </p>
+        <div class="q-form-buttons">
+          <a class="q-btn q-btn-primary"
+             [routerLink]="['/ipd/admission', a.id, 'icu']">
+            Open ICU Workbench
+          </a>
+        </div>
+      </div>
+    </ng-container>
+
+  </ng-container>
+</div>

@@ -1,0 +1,71 @@
+.ms-shell { padding: 24px; max-width: 1500px; margin: 24px auto 24px 96px; }
+.ms-title { font-size: 22px; font-weight: 600; margin-bottom: 4px; }
+.ms-sub { font-size: 13px; color: #6b7280; margin-bottom: 16px; }
+
+.ms-banner { padding: 10px 14px; border-radius: 6px; margin-bottom: 12px; font-size: 14px; }
+.ms-banner-bad { background: #fee2e2; color: #b91c1c; }
+.ms-banner-good { background: #dcfce7; color: #166534; }
+
+.ms-tabs { display: flex; gap: 4px; border-bottom: 1px solid #e5e7eb; margin-bottom: 18px; flex-wrap: wrap; }
+.ms-tabs button {
+  padding: 8px 14px; background: transparent; border: 0; cursor: pointer;
+  font-size: 14px; color: #4b5563; border-bottom: 2px solid transparent;
+}
+.ms-tabs button.active { color: #1d4ed8; border-bottom-color: #1d4ed8; font-weight: 600; }
+
+.ms-panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; }
+.ms-grid-2 { display: grid; grid-template-columns: 1.6fr 1fr; gap: 24px; }
+@media (max-width: 1100px) { .ms-grid-2 { grid-template-columns: 1fr; } }
+
+.ms-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ms-table th, .ms-table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #f3f4f6; vertical-align: top; }
+.ms-table th { background: #f9fafb; font-weight: 600; color: #374151; }
+.ms-empty { color: #9ca3af; font-style: italic; text-align: center; padding: 18px; }
+.ms-muted { color: #6b7280; font-size: 12px; }
+
+.ms-form { display: flex; flex-direction: column; gap: 10px; background: #f9fafb; padding: 14px; border-radius: 8px; }
+.ms-form h3 { margin: 0 0 6px; font-size: 15px; }
+.ms-form label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #4b5563; }
+.ms-form label.ms-check { flex-direction: row; align-items: center; gap: 6px; font-size: 13px; }
+.ms-form input[type="text"], .ms-form input[type="number"], .ms-form select, .ms-form textarea {
+  border: 1px solid #d1d5db; border-radius: 6px; padding: 6px 8px; font-size: 13px;
+}
+.ms-sub-form { color: #6b7280; font-size: 12px; margin: 0; }
+.ms-hint { color: #92400e; background: #fef3c7; padding: 8px 12px; border-radius: 6px; font-size: 12px; }
+
+.ms-bed-row { display: grid; grid-template-columns: 1.4fr 1fr auto; gap: 8px; align-items: center; }
+.ms-bed-row input, .ms-bed-row select {
+  border: 1px solid #d1d5db; border-radius: 6px; padding: 5px 8px; font-size: 13px;
+}
+
+.ms-actions { display: flex; gap: 8px; margin-top: 6px; }
+.ms-btn { background: #fff; border: 1px solid #d1d5db; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+.ms-btn:hover:not([disabled]) { background: #f3f4f6; }
+.ms-btn-primary { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
+.ms-btn-primary:hover:not([disabled]) { background: #1e40af; }
+.ms-btn-sm { padding: 3px 8px; font-size: 12px; }
+.ms-btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+.ms-field-inline { display: flex; gap: 8px; align-items: center; margin-bottom: 14px; font-size: 13px; }
+.ms-field-inline select { border: 1px solid #d1d5db; border-radius: 6px; padding: 4px 8px; }
+
+/* MHC-package multi-select: a scrollable checkbox list. The user picks names;
+   the component serialises ids back to the legacy comma-separated string the
+   backend expects. */
+.ms-multiselect { border: 1px solid #e5e7eb; border-radius: 6px; padding: 8px 12px; margin: 4px 0; background: #fff; }
+.ms-multiselect legend { font-size: 12px; color: #374151; padding: 0 6px; font-weight: 600; }
+.ms-multiselect-list {
+  max-height: 160px;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 12px;
+  padding: 4px 0;
+}
+@media (max-width: 800px) { .ms-multiselect-list { grid-template-columns: 1fr; } }
+.ms-check-row {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; color: #374151; cursor: pointer;
+  padding: 2px 4px; border-radius: 4px;
+}
+.ms-check-row:hover { background: #f3f4f6; }

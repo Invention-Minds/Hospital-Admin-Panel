@@ -7,6 +7,24 @@ import { environment } from '../../environment/environment.prod';
 import { tap } from 'rxjs/operators';
 import { Doctor } from '../models/doctor.model';
 
+/**
+ * Radiology safety-screening block, transcribed from the paper RADIOLOGY
+ * REQUEST FORM. Backend columns for these are added in a separate migration;
+ * until then the backend should accept-and-ignore this object. All optional.
+ */
+export interface RadiologySafetyInfo {
+  priority?: string;          // Emergency | Routine | In-Patient | Out-Patient | MLC | Health Check
+  clinicalDetails?: string;
+  serumCreatinine?: string;
+  creatinineDoneOn?: string;  // 'YYYY-MM-DD'
+  weightKg?: string;
+  pregnancy?: boolean;
+  lmp?: string;               // last menstrual period
+  allergyHistory?: string;
+  comorbidities?: string[];   // e.g. ['Asthma','Diabetes','HTN']
+  consentGiven?: boolean;
+}
+
 export interface InvestigationOrderPayload {
   prn: string;
   doctorId: number;
@@ -16,6 +34,7 @@ export interface InvestigationOrderPayload {
   labTests: number[];
   radiologyTests: number[];
   packages: number[];
+  radiology?: RadiologySafetyInfo; // present only when a radiology study is ordered
 }
 
 export interface Appointment {
@@ -594,6 +613,12 @@ export class AppointmentConfirmService {
   }
   createOrder(payload: InvestigationOrderPayload): Observable<any> {
     return this.http.post(`${this.investigationUrl}/investigation-orders`, payload);
+  }
+  // A patient's prior investigation orders (most recent first), with linked tests.
+  getInvestigationOrdersByPrn(prn: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.investigationUrl}/investigation-orders`, {
+      params: { prn },
+    });
   }
   addLabTest(payload: { description: string; department: string }) {
     return this.http.post<any>(`${this.investigationUrl}/lab-tests`, payload);

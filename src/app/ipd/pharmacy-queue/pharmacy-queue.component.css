@@ -1,0 +1,41 @@
+.pq-head { margin-bottom: 16px; }
+.pq-title { font-size: 22px; font-weight: 600; color: #271e4a; margin: 0 0 4px; }
+.pq-sub { color: #6b7280; font-size: 13px; margin: 0; }
+
+.pq-banner { padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; font-size: 14px; cursor: pointer; }
+.pq-bad { background: #fee2e2; color: #b91c1c; }
+.pq-good { background: #dcfce7; color: #166534; }
+.pq-empty { padding: 40px; text-align: center; color: #6b7280; font-style: italic; }
+
+.pq-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 12px; }
+.pq-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+.pq-card-stat { border-color: #b91c1c; box-shadow: 0 0 0 2px rgba(185,28,28,0.15); }
+
+.pq-card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.pq-generic { color: #271e4a; font-size: 15px; margin-left: 6px; }
+.pq-brand { color: #6b7280; font-size: 13px; margin-left: 4px; }
+.pq-meta { font-size: 11px; color: #6b7280; text-align: right; }
+.pq-meta div { margin: 1px 0; }
+
+.pq-rx-line { font-size: 13px; color: #4b5563; }
+.pq-route { background: #e5e7eb; color: #4b5563; padding: 1px 6px; border-radius: 4px; font-size: 11px; margin-left: 6px; }
+
+.pq-warn { background: #fef3c7; color: #92400e; padding: 6px 10px; border-radius: 6px; font-size: 12px; margin: 0; }
+
+.pq-state { display: flex; gap: 8px; align-items: center; font-size: 11px; color: #9ca3af; }
+.pq-state-on { color: #166534; font-weight: 600; }
+.pq-arrow { color: #d1d5db; }
+
+.pq-pill { display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 10px; font-weight: 600; }
+.pq-pill-type { background: #ede9fe; color: #5b21b6; margin-right: 4px; }
+.pq-pill-stat { background: #fee2e2; color: #b91c1c; margin-right: 4px; }
+
+.pq-actions, .pq-dispense-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.pq-dispense-row label { display: flex; flex-direction: column; gap: 2px; font-size: 11px; color: #6b7280; }
+.pq-dispense-row input { padding: 5px 9px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 12px; width: 90px; box-sizing: border-box; }
+
+.pq-card textarea { border: 1px solid #d1d5db; border-radius: 6px; padding: 6px 10px; font-size: 12px; font-family: Kanit, sans-serif; resize: vertical; width: 100%; box-sizing: border-box; }
+
+.pq-btn { height: 32px; padding: 0 12px; border-radius: 6px; border: 1px solid #d1d5db; background: #fff; color: #271e4a; cursor: pointer; font-family: Kanit, sans-serif; font-size: 12px; }
+.pq-btn-primary { background: #169458; color: #fff; border-color: #169458; }
+.pq-btn-warn { background: #fde68a; color: #92400e; border-color: #fde68a; }

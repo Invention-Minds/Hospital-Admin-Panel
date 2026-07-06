@@ -1,0 +1,57 @@
+/* Phase 9.26 — Quality dashboard. .page wrapper is in the forms.css allow-list. */
+.q-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; margin-bottom: 16px; flex-wrap: wrap; }
+.q-title { font-size: 22px; font-weight: 600; margin: 0 0 4px; }
+.q-sub { color: #6b7280; font-size: 13px; margin: 0; }
+.q-range { display: flex; gap: 12px; align-items: flex-end; }
+.q-range label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #6b7280; }
+.q-range input { height: 32px; padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 6px; }
+.q-link { background: transparent; border: 1px solid #0e2970; color: #0e2970; padding: 6px 14px;
+  border-radius: 6px; cursor: pointer; font-size: 13px; font-family: Kanit, sans-serif; height: 32px; }
+.q-link:hover { background: #0e2970; color: #fff; }
+
+.q-tabs { display: flex; gap: 6px; margin-bottom: 18px; border-bottom: 1px solid #e5e7eb; flex-wrap: wrap; }
+.q-tab {
+  background: transparent; border: none; padding: 10px 16px; cursor: pointer;
+  font-family: Kanit, sans-serif; font-size: 14px; color: #6b7280; border-bottom: 3px solid transparent;
+  margin-bottom: -1px;
+}
+.q-tab:hover { color: #271e4a; }
+.q-tab-on { color: #0e2970; font-weight: 600; border-bottom-color: #0e2970; }
+
+.q-banner { padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; font-size: 14px; cursor: pointer; }
+.q-banner.q-bad { background: #fee2e2; color: #b91c1c; }
+.q-loading { padding: 40px; text-align: center; color: #6b7280; font-style: italic; }
+.q-empty { padding: 44px; text-align: center; color: #6b7280; background: #f9fafb; border: 1px dashed #e5e7eb; border-radius: 10px; }
+
+.q-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.q-card {
+  background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px 18px;
+  display: flex; flex-direction: column; gap: 4px; border-left: 4px solid transparent;
+}
+.q-card-label { font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.4px; }
+.q-card-val { font-size: 30px; font-weight: 700; color: #271e4a; line-height: 1; }
+.q-card-meta { font-size: 12px; color: #9ca3af; }
+.q-card.q-good { border-left-color: #16a34a; }
+.q-card.q-good .q-card-val { color: #166534; }
+.q-card.q-warn { border-left-color: #d97706; background: #fffbeb; }
+.q-card.q-warn .q-card-val { color: #92400e; }
+.q-card.q-bad { border-left-color: #dc2626; background: #fef2f2; }
+.q-card.q-bad .q-card-val { color: #b91c1c; }
+.q-card-hero .q-card-val { font-size: 40px; }
+
+.q-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.q-block { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px 18px; }
+.q-block-title { font-size: 13px; font-weight: 600; color: #0e2970; margin: 0 0 10px; }
+.q-bars { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.q-bars li { display: flex; justify-content: space-between; font-size: 13px; color: #271e4a; padding: 4px 0; border-bottom: 1px dashed #f3f4f6; }
+.q-bar-label { color: #4b5563; text-transform: capitalize; }
+.q-bar-val { font-weight: 600; }
+
+.q-nabh-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; }
+.q-nabh-table th { background: #0e2970; color: #fff; padding: 10px; text-align: left; font-weight: 500; font-size: 12px; }
+.q-nabh-table td { padding: 10px; border-bottom: 1px solid #f3f4f6; font-size: 13px; }
+.q-pill { display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+.q-pill.q-bad { background: #fee2e2; color: #b91c1c; }
+.q-pill.q-good { background: #dcfce7; color: #166534; }
+.q-btn { background: transparent; border: 1px solid #d1d5db; border-radius: 6px; padding: 4px 12px; cursor: pointer; font-family: Kanit, sans-serif; font-size: 12px; color: #271e4a; }
+.q-btn:hover { background: #f3f4f6; }

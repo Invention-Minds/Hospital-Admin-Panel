@@ -5,11 +5,27 @@
  * ============================================================================ */
 
 .page {
-  padding: var(--space-40) var(--space-20);
+  margin-left: 70px;
+  padding: var(--space-40) var(--space-30);
   font-family: var(--font-family-primary);
   color: var(--color-text-heading);
   background: var(--color-surface-page);
   min-height: 100vh;
+  box-sizing: border-box;
+}
+.page > app-page-header,
+.page > .form,
+.page > .list-card {
+  max-width: 1080px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 768px) {
+  .page {
+    margin-left: 0;
+    padding: var(--space-20);
+  }
 }
 
 .form {

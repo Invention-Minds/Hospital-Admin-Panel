@@ -47,6 +47,15 @@
                 </div>
             </div>
         </div>
+
+        <!-- Phase 9.11 — patient-wide Reports entry (not tied to a single visit) -->
+        <div class="visit-list patient-wide-entry" (click)="activeView = 'reports'"
+             [class.active]="activeView === 'reports'">
+            <div class="visit-header">
+                <img src="patient-arrow.svg">
+                <div>Lab &amp; Radiology Reports</div>
+            </div>
+        </div>
     </div>
 
     <div class="main-content">
@@ -106,10 +115,10 @@
         </div>
 
         <div class="note-section" *ngIf="activeView === 'services'">
-            <div *ngIf="investigationOrders.length > 0">
+            <div *ngIf="selectedInvestigationOrders.length > 0">
                 <h3 style="font-family: Kanit;"><u>Investigation Requisition</u></h3>
               
-                <div *ngFor="let order of investigationOrders">
+                <div *ngFor="let order of selectedInvestigationOrders">
                   <p><strong>Order ID:</strong> {{ order.id }} |
                      <strong>Date:</strong> {{ order.date | date:'M/d/yyyy' }} |
                      <strong>Doctor:</strong> {{ order.doctorName }}</p>
@@ -151,7 +160,7 @@
               </div>
               
               <!-- Fallback for no orders -->
-              <div *ngIf="investigationOrders.length === 0">
+              <div *ngIf="selectedInvestigationOrders.length === 0">
                 <p>No investigation orders found.</p>
               </div>
               
@@ -506,6 +515,12 @@
             </div>
         </div>
 
+        <!-- Phase 9.11 — Lab & Radiology Reports (patient-wide timeline) -->
+        <div class="note-section reports-section" *ngIf="activeView === 'reports'">
+            <app-critical-result-banner [prn]="prn"></app-critical-result-banner>
+            <h3 class="note-heading">Lab &amp; Radiology Reports</h3>
+            <app-patient-reports-tab mode="patient" [prn]="prn"></app-patient-reports-tab>
+        </div>
 
     </div>
 </div>

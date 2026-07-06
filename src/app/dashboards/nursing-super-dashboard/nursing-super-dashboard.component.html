@@ -1,0 +1,302 @@
+<div class="ns-dashboard" *ngIf="!isLoading; else loadingTpl">
+  <ng-container *ngIf="summary as s">
+    <header class="dash-header">
+      <div>
+        <div class="greeting">{{ greeting }},</div>
+        <h1 class="page-title">
+          Nursing Oversight
+          <span class="role-chip">Superintendent</span>
+        </h1>
+        <div class="today-label">{{ todayLabel }}</div>
+      </div>
+      <div>
+        <button class="refresh-btn" (click)="refresh()" title="Refresh">
+          <i class="pi pi-refresh"></i>
+          <span>Refresh</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="error-banner" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+    <!-- ─── KPI strip ──────────────────────────────────────────────── -->
+    <section class="kpi-strip">
+      <app-kpi-tile
+        icon="pi pi-users"
+        label="Inpatients"
+        [value]="s.kpis.inpatientsTotal"
+        accent="blue">
+      </app-kpi-tile>
+      <app-kpi-tile
+        icon="pi pi-bolt"
+        label="Critical patients"
+        [value]="s.kpis.criticalPatients"
+        [accent]="s.kpis.criticalPatients > 0 ? 'red' : 'green'">
+      </app-kpi-tile>
+      <app-kpi-tile
+        icon="pi pi-user-plus"
+        label="Nurses on duty"
+        [value]="s.kpis.nursesOnDutyToday"
+        subLabel="No shows"
+        [subValue]="s.kpis.noShowNurses"
+        [accent]="s.kpis.noShowNurses > 0 ? 'amber' : 'violet'">
+      </app-kpi-tile>
+      <app-kpi-tile
+        icon="pi pi-file-edit"
+        label="Pending handovers"
+        [value]="s.kpis.pendingHandovers"
+        [accent]="s.kpis.pendingHandovers > 0 ? 'amber' : 'green'">
+      </app-kpi-tile>
+      <app-kpi-tile
+        icon="pi pi-home"
+        label="Bed occupancy"
+        [value]="s.kpis.bedOccupancyPercent !== null ? (s.kpis.bedOccupancyPercent + '%') : '—'"
+        [accent]="(s.kpis.bedOccupancyPercent || 0) > 90 ? 'red' : 'blue'">
+      </app-kpi-tile>
+      <app-kpi-tile
+        icon="pi pi-check-circle"
+        label="Vitals compliance"
+        [value]="s.kpis.complianceScore.percent !== null ? (s.kpis.complianceScore.percent + '%') : '—'"
+        subLabel="Reported"
+        [subValue]="s.kpis.complianceScore.compliant + ' / ' + s.kpis.complianceScore.total"
+        [accent]="(s.kpis.complianceScore.percent || 0) < 80 ? 'amber' : 'green'"
+        tooltip="Inpatients with vitals recorded in the last 8 hours">
+      </app-kpi-tile>
+    </section>
+
+    <!-- ─── Ward summary table ────────────────────────────────────── -->
+    <section class="card">
+      <header class="card-header">
+        <div>
+          <h2>Ward overview</h2>
+          <p class="card-sub">Occupancy and nurse-to-patient ratio per ward</p>
+        </div>
+      </header>
+      <div class="ward-table-wrap" *ngIf="s.wardSummary.length; else noWards">
+        <table class="ward-table">
+          <thead>
+            <tr>
+              <th>Ward</th>
+              <th>Dept</th>
+              <th class="num">Beds</th>
+              <th class="num">Occupied</th>
+              <th class="num">ICU</th>
+              <th class="num">Occupancy</th>
+              <th class="num">Nurses</th>
+              <th class="num">Ratio</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let w of s.wardSummary; trackBy: trackWard">
+              <td>
+                <div class="ward-name">{{ w.wardName }}</div>
+                <div class="ward-code muted">{{ w.wardCode }}</div>
+              </td>
+              <td>{{ w.department }}</td>
+              <td class="num">{{ w.totalBeds }}</td>
+              <td class="num">{{ w.occupied }}</td>
+              <td class="num">{{ w.icu }}</td>
+              <td class="num">
+                <span [class]="occupancyClass(w.occupancyPercent)" class="occupancy-pill">
+                  {{ w.occupancyPercent !== null ? (w.occupancyPercent + '%') : '—' }}
+                </span>
+              </td>
+              <td class="num">{{ w.nursesOnDuty }}</td>
+              <td class="num">
+                <span [class]="ratioClass(w.ratio)" class="ratio-pill">
+                  {{ w.ratio !== null ? (w.ratio + ' : 1') : '—' }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <ng-template #noWards>
+        <div class="empty-state empty-state-sm">
+          <i class="pi pi-home"></i>
+          <p>No wards configured yet.</p>
+        </div>
+      </ng-template>
+    </section>
+
+    <!-- ─── Lower row: bed requests | step-downs | discharge pipeline ─ -->
+    <div class="lower-row">
+      <section class="card">
+        <header class="card-header">
+          <div>
+            <h2>Pending bed requests</h2>
+            <p class="card-sub">{{ s.bedRequests.length }} awaiting ward acceptance</p>
+          </div>
+        </header>
+        <ul class="simple-list" *ngIf="s.bedRequests.length; else noBedReq">
+          <li *ngFor="let r of s.bedRequests" [attr.data-urgency]="r.urgency">
+            <div class="list-primary">
+              {{ r.wardName || 'Any ward' }}
+              <span class="urgency-pill" [attr.data-urgency]="r.urgency">{{ r.urgency }}</span>
+              <span class="age-pill">{{ r.ageMinutes }}m ago</span>
+            </div>
+            <div class="list-secondary">
+              {{ r.preferredBedType || '—' }} · requested by {{ r.requestedBy || 'system' }}
+            </div>
+          </li>
+        </ul>
+        <ng-template #noBedReq>
+          <div class="empty-state empty-state-sm">
+            <i class="pi pi-check-circle"></i>
+            <p>No pending bed requests.</p>
+          </div>
+        </ng-template>
+      </section>
+
+      <section class="card">
+        <header class="card-header">
+          <div>
+            <h2>ICU step-down requests</h2>
+            <p class="card-sub">{{ s.icuStepDowns.length }} in flight</p>
+          </div>
+        </header>
+        <ul class="simple-list" *ngIf="s.icuStepDowns.length; else noStepDown">
+          <li *ngFor="let r of s.icuStepDowns">
+            <div class="list-primary">
+              {{ r.toWardName || 'Target ward pending' }}
+              <span class="status-pill" [attr.data-status]="r.status">{{ r.status }}</span>
+            </div>
+            <div class="list-secondary">
+              Proposed by {{ r.proposedBy }}
+            </div>
+          </li>
+        </ul>
+        <ng-template #noStepDown>
+          <div class="empty-state empty-state-sm">
+            <i class="pi pi-check-circle"></i>
+            <p>No ICU step-downs pending.</p>
+          </div>
+        </ng-template>
+      </section>
+
+      <section class="card">
+        <header class="card-header">
+          <div>
+            <h2>NABH readiness — today</h2>
+            <p class="card-sub">Composite of three sub-scores</p>
+          </div>
+        </header>
+        <div class="nabh-body">
+          <div class="nabh-overall">
+            <div class="nabh-score">
+              {{ s.nabhReadinessScore.overallPercent !== null ? (s.nabhReadinessScore.overallPercent + '%') : '—' }}
+            </div>
+            <div class="nabh-overall-label">Overall</div>
+          </div>
+          <ul class="nabh-components">
+            <li>
+              <span class="comp-label">Vitals compliance</span>
+              <span class="comp-value">{{ s.nabhReadinessScore.vitalsCompliancePercent !== null ? (s.nabhReadinessScore.vitalsCompliancePercent + '%') : '—' }}</span>
+            </li>
+            <li>
+              <span class="comp-label">Handover sign-off</span>
+              <span class="comp-value">{{ s.nabhReadinessScore.handoverSignOffPercent !== null ? (s.nabhReadinessScore.handoverSignOffPercent + '%') : '—' }}</span>
+            </li>
+            <li>
+              <span class="comp-label">Assessment coverage</span>
+              <span class="comp-value">{{ s.nabhReadinessScore.assessmentCoveragePercent !== null ? (s.nabhReadinessScore.assessmentCoveragePercent + '%') : '—' }}</span>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="card">
+        <header class="card-header">
+          <div>
+            <h2>Discharge pipeline today</h2>
+            <p class="card-sub">{{ s.dischargePipeline.total }} discharges in motion</p>
+          </div>
+        </header>
+        <div class="pipeline-stages">
+          <div class="stage">
+            <div class="stage-count">{{ s.dischargePipeline.drafted }}</div>
+            <div class="stage-label">Drafted</div>
+          </div>
+          <i class="pi pi-angle-right stage-arrow"></i>
+          <div class="stage">
+            <div class="stage-count">{{ s.dischargePipeline.edited }}</div>
+            <div class="stage-label">Edited</div>
+          </div>
+          <i class="pi pi-angle-right stage-arrow"></i>
+          <div class="stage">
+            <div class="stage-count">{{ s.dischargePipeline.signed }}</div>
+            <div class="stage-label">Signed</div>
+          </div>
+          <i class="pi pi-angle-right stage-arrow"></i>
+          <div class="stage stage-done">
+            <div class="stage-count">{{ s.dischargePipeline.delivered }}</div>
+            <div class="stage-label">Delivered</div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ─── MAR compliance + LOS by ward + Critical patients ──────── -->
+    <div class="lower-row">
+      <section class="card">
+        <header class="card-header">
+          <div>
+            <h2>MAR compliance — hospital-wide</h2>
+            <p class="card-sub">Active prescriptions administered vs total</p>
+          </div>
+        </header>
+        <div class="mar-body">
+          <div class="mar-score" [class.warn]="(s.marCompliance.percent || 100) < 80">
+            {{ s.marCompliance.percent !== null ? (s.marCompliance.percent + '%') : '—' }}
+          </div>
+          <div class="mar-sub">
+            {{ s.marCompliance.administered }} / {{ s.marCompliance.total }} doses
+          </div>
+        </div>
+      </section>
+
+      <app-bar-list-card
+        title="Avg LOS by ward"
+        subTitle="Mean days of stay across active admissions"
+        accentIcon="pi pi-home"
+        [items]="losByWardItems"
+        emptyText="No active admissions to compute LOS."
+        emptyIcon="pi pi-home"
+        unitLabel="days">
+      </app-bar-list-card>
+
+      <section class="card">
+        <header class="card-header">
+          <div>
+            <h2>Critical patients hospital-wide</h2>
+            <p class="card-sub">{{ s.criticalPatientList.length }} flagged</p>
+          </div>
+        </header>
+        <ul class="simple-list" *ngIf="s.criticalPatientList.length; else noCrit">
+          <li *ngFor="let p of s.criticalPatientList">
+            <div class="list-primary">
+              {{ p.patientName }}
+              <span class="urgency-pill" data-urgency="emergency">{{ p.reason }}</span>
+            </div>
+            <div class="list-secondary">
+              Bed {{ p.bedNumber || '—' }} · {{ p.wardName || '—' }}
+            </div>
+          </li>
+        </ul>
+        <ng-template #noCrit>
+          <div class="empty-state empty-state-sm">
+            <i class="pi pi-check-circle"></i>
+            <p>No critical patients right now.</p>
+          </div>
+        </ng-template>
+      </section>
+    </div>
+  </ng-container>
+</div>
+
+<ng-template #loadingTpl>
+  <div class="loading-state">
+    <i class="pi pi-spin pi-spinner"></i>
+    <span>Loading nursing oversight…</span>
+  </div>
+</ng-template>

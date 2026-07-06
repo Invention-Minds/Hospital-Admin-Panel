@@ -1,6 +1,8 @@
 .bed-census-container {
   padding: 20px;
+  margin-left: 72px;
 }
+@media (max-width: 768px) { .bed-census-container { margin-left: 0; } }
 
 .page-header {
   display: flex;

@@ -1,0 +1,132 @@
+<div class="ndo-shell">
+  <div class="ndo-head">
+    <h2 class="ndo-title">Doctor Orders (Non-Drug)</h2>
+    <label class="ndo-filter">
+      <span>Status</span>
+      <select [(ngModel)]="filterStatus" (change)="onFilterChange()">
+        <option *ngFor="let s of statuses" [ngValue]="s.value">{{ s.label }}</option>
+      </select>
+    </label>
+  </div>
+
+  <p class="ndo-sub">
+    Diet, mobility, investigation, procedure, consult — tracked through a doctor → nurse → completion chain.
+  </p>
+
+  <div class="ndo-banner ndo-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="ndo-banner ndo-good" *ngIf="successMessage">{{ successMessage }}</div>
+
+  <!-- New order form -->
+  <div class="ndo-card">
+    <h3 class="ndo-card-title">New order</h3>
+    <div class="ndo-form-grid">
+      <label class="ndo-field">
+        <span>Category</span>
+        <select [(ngModel)]="draft.category" (ngModelChange)="onCategoryChange()">
+          <option value="">—</option>
+          <option *ngFor="let c of categories" [ngValue]="c.value">{{ c.label }}</option>
+        </select>
+      </label>
+
+      <!-- Phase 9.5i — investigation orders pick from the Lab + Radiology
+           master so the order links to a known test rather than free text. -->
+      <label class="ndo-field ndo-field-wide" *ngIf="draft.category === 'investigation'">
+        <span>Investigation</span>
+        <select [(ngModel)]="draft.investigationTestId" (ngModelChange)="onInvestigationPick()">
+          <option value="">— pick a lab or radiology test —</option>
+          <option *ngFor="let o of investigationOptions" [ngValue]="o.id">{{ o.label }}</option>
+        </select>
+      </label>
+
+      <label class="ndo-field ndo-field-wide">
+        <span>{{ draft.category === 'investigation' ? 'Order text (auto-filled, editable)' : 'Order text' }}</span>
+        <textarea rows="2" [(ngModel)]="draft.orderText"
+                  placeholder="e.g., Diet — soft, salt-restricted; Out of bed; Echo at bedside…"></textarea>
+      </label>
+
+      <div class="ndo-field ndo-field-action">
+        <button class="ndo-btn ndo-btn-primary" (click)="create()" [disabled]="creating || !draft.orderText.trim()">
+          {{ creating ? 'Saving…' : 'Add order' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order list -->
+  <div class="ndo-loading" *ngIf="loading">Loading…</div>
+
+  <div class="ndo-grid-wrap" *ngIf="!loading">
+    <table class="ndo-grid">
+      <thead>
+        <tr>
+          <th>Ordered</th>
+          <th>Order</th>
+          <th>Category</th>
+          <th>Doctor</th>
+          <th>Acknowledged</th>
+          <th>Completed</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngIf="!rows.length">
+          <td colspan="8" class="ndo-muted">No orders yet.</td>
+        </tr>
+        <tr *ngFor="let row of rows">
+          <td>{{ row.orderedAt | date:'dd-MMM HH:mm' }}</td>
+          <td class="ndo-order-text">{{ row.orderText }}</td>
+          <td>{{ row.category || '—' }}</td>
+          <td>{{ row.doctorName }}</td>
+          <td>
+            <span *ngIf="row.acknowledgedAt">
+              {{ row.acknowledgedByName }}<br>
+              <small>{{ row.acknowledgedAt | date:'dd-MMM HH:mm' }}</small>
+            </span>
+            <span *ngIf="!row.acknowledgedAt" class="ndo-muted">—</span>
+          </td>
+          <td>
+            <span *ngIf="row.completedAt">
+              {{ row.completedByName }}<br>
+              <small>{{ row.completedAt | date:'dd-MMM HH:mm' }}</small>
+              <div *ngIf="row.completionNotes" class="ndo-notes">"{{ row.completionNotes }}"</div>
+            </span>
+            <span *ngIf="!row.completedAt" class="ndo-muted">—</span>
+          </td>
+          <td>
+            <span [class]="statusClass(row.status)">{{ row.status }}</span>
+          </td>
+          <td>
+            <div class="ndo-actions">
+              <button class="ndo-btn ndo-btn-sm"
+                      *ngIf="row.status === 'ORDERED'"
+                      (click)="acknowledge(row)">Acknowledge</button>
+              <button class="ndo-btn ndo-btn-sm ndo-btn-primary"
+                      *ngIf="row.status === 'ORDERED' || row.status === 'ACKNOWLEDGED'"
+                      (click)="openComplete(row)">Complete</button>
+              <button class="ndo-btn ndo-btn-sm ndo-btn-danger"
+                      *ngIf="row.status !== 'COMPLETED' && row.status !== 'CANCELLED'"
+                      (click)="cancel(row)">Cancel</button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Complete modal -->
+  <div class="ndo-modal-bg" *ngIf="completeRowId" (click)="closeComplete()">
+    <div class="ndo-modal" (click)="$event.stopPropagation()">
+      <h3>Complete order</h3>
+      <p class="ndo-sub">Add a note (optional) describing how it was carried out.</p>
+      <label class="ndo-field">
+        <span>Completion notes</span>
+        <textarea rows="3" [(ngModel)]="completionNotes" placeholder="e.g., Echo done at 14:20, report attached"></textarea>
+      </label>
+      <div class="ndo-modal-actions">
+        <button class="ndo-btn" (click)="closeComplete()">Cancel</button>
+        <button class="ndo-btn ndo-btn-primary" (click)="confirmComplete()">Mark complete</button>
+      </div>
+    </div>
+  </div>
+</div>

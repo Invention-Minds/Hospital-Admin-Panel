@@ -1,0 +1,81 @@
+.erd-shell { padding: 20px; max-width: 1600px; margin: 24px auto 24px 96px; }
+
+.erd-banner { padding: 10px 14px; border-radius: 6px; margin-bottom: 10px; font-size: 14px; }
+.erd-bad { background: #fee2e2; color: #b91c1c; }
+.erd-loading { padding: 30px; text-align: center; color: #6b7280; font-style: italic; }
+
+.erd-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px 18px; margin-bottom: 16px; }
+.erd-header { display: flex; justify-content: space-between; align-items: start; gap: 14px; }
+.erd-title { font-size: 20px; font-weight: 600; margin: 0 0 4px; }
+.erd-sub { color: #6b7280; font-size: 13px; margin-bottom: 2px; }
+.erd-section-title { font-size: 14px; font-weight: 600; color: #374151; margin: 0 0 10px; }
+
+.erd-pill { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+.erd-triage-red    { background: #fee2e2; color: #b91c1c; }
+.erd-triage-yellow { background: #fef3c7; color: #92400e; }
+.erd-triage-green  { background: #dcfce7; color: #166534; }
+.erd-triage-black  { background: #1f2937; color: #fff; }
+.erd-status        { background: #dbeafe; color: #1e40af; }
+
+.erd-form-row { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
+
+.erd-note { font-size: 12px; color: #6b7280; margin: 0 0 12px; font-style: italic; }
+.erd-sig-block { flex: 1 1 260px; min-width: 240px; padding: 10px 12px; border: 1px dashed #d1d5db; border-radius: 6px; }
+.erd-sig-block > strong { display: block; font-size: 12px; color: #374151; margin-bottom: 6px; }
+.erd-sig-stamp { font-size: 13px; font-weight: 600; color: #166534; }
+.erd-form-row > * { font-size: 13px; }
+.erd-form-row input, .erd-form-row select {
+  border: 1px solid #d1d5db; border-radius: 6px; padding: 6px 8px; min-width: 130px;
+}
+/* Checkboxes/radios must NOT inherit the text-input box styling — otherwise
+   they render as wide bordered boxes that shove their label text far away. */
+.erd-form-row input[type=checkbox],
+.erd-form-row input[type=radio] {
+  min-width: 0; width: auto; border: none; padding: 0; margin: 0;
+  accent-color: #1d4ed8; flex: 0 0 auto;
+}
+/* Keep a control and its label text snug together. */
+.erd-form-row label { display: inline-flex; align-items: center; gap: 6px; }
+.erd-form-row > input[type=text]:nth-child(2) { min-width: 220px; flex: 1; }
+.erd-form-wide > input[type=text]:first-child { min-width: 160px; }
+
+/* Textareas span the full row instead of rendering at the tiny default size. */
+.erd-form-row textarea {
+  flex: 1 1 100%;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  line-height: 1.4;
+  resize: vertical;
+}
+/* A lone text input (e.g. witness name) gets a sensible, non-tiny width. */
+.erd-form-row > input[type=text]:only-child { flex: 1 1 320px; max-width: 420px; }
+/* Two signature blocks share the row evenly and don't get squished. */
+.erd-form-wide { gap: 16px; align-items: stretch; }
+.erd-sig-cap { margin-top: 4px; }
+.erd-sig-link {
+  background: none; border: none; padding: 0; margin-left: 8px;
+  color: #1d4ed8; text-decoration: underline; cursor: pointer; font-size: 12px;
+}
+
+.erd-grid { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+.erd-grid th, .erd-grid td {
+  border-bottom: 1px solid #f3f4f6; padding: 8px 10px;
+  vertical-align: top; text-align: left;
+}
+.erd-grid th { background: #f9fafb; font-weight: 600; color: #374151; font-size: 12px; }
+.erd-grid td small { color: #6b7280; font-size: 11px; }
+.erd-muted { color: #9ca3af; font-style: italic; }
+
+.erd-btn { background: #fff; border: 1px solid #d1d5db; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; }
+.erd-btn:hover:not([disabled]) { background: #f3f4f6; }
+.erd-btn-sm { padding: 3px 7px; font-size: 11px; }
+.erd-btn-primary { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
+.erd-btn-primary:hover:not([disabled]) { background: #1e40af; }
+.erd-btn-danger { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
+.erd-btn-danger:hover:not([disabled]) { background: #fecaca; }
+.erd-btn[disabled] { opacity: 0.5; cursor: not-allowed; }

@@ -1,5 +1,10 @@
+/* Full-width, centered page — matches the MLC cases layout so the table
+   spans the screen the same way. The navy/shadow table styling itself comes
+   from the global allow-list in src/styles/forms.css (.appointment-table). */
 .emergency-list-container {
   padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .list-header {
@@ -7,55 +12,204 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  padding-bottom: 15px;
-  border-bottom: 2px solid #dee2e6;
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
 .list-header h2 {
   margin: 0;
-  color: #333;
+  color: #222;
   font-size: 24px;
 }
 
+/* ── Search row ────────────────────────────────────────────────────────── */
+.form-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.search-box {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 360px;
+}
+.search-box .pi-search {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #888;
+  font-size: 14px;
+}
+.custom-input-text {
+  width: 100%;
+  padding: 9px 12px 9px 34px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 13px;
+}
+.custom-input-text:focus {
+  outline: none;
+  border-color: #0e2970;
+}
+
+/* ── Table — styling inherited from global forms.css; just hold a scroll
+      wrapper for narrow screens. ──────────────────────────────────────── */
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.complaint-cell {
+  text-align: left;
+  max-width: 280px;
+}
+
+/* ── Triage badge (re-uses the status-badge pill shape) ────────────────── */
+.status-badge {
+  display: inline-block;
+  color: white;
+  padding: 5px 10px;
+  text-transform: capitalize;
+  font-size: 14px;
+  font-family: Kanit;
+  font-weight: 400;
+  border-radius: 4px;
+  background: #79cfa6;
+}
+.status-badge.triage-red { background: #dc3545; }
+.status-badge.triage-yellow { background: #f0a500; }
+.status-badge.triage-green { background: #28a745; }
+.status-badge.triage-black { background: #6c757d; }
+
+/* ── Inline status dropdown ────────────────────────────────────────────── */
+::ng-deep .status-dropdown.p-dropdown {
+  width: 150px;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  background: #fff;
+}
+::ng-deep .status-dropdown .p-dropdown-label {
+  font-family: Kanit;
+  font-size: 13px;
+  padding: 8px 10px;
+}
+
+/* ── Action buttons ────────────────────────────────────────────────────── */
 .action-buttons {
   display: flex;
   gap: 8px;
   justify-content: center;
 }
+.btn-action {
+  background-color: transparent;
+  cursor: pointer;
+  outline: none;
+  border: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0e2970;
+  transition: background-color 0.2s ease;
+}
+.btn-action .pi { font-size: 17px; }
+.btn-action:hover:not([disabled]) { background-color: #e3e9ff; }
+.btn-action[disabled] { opacity: 0.4; cursor: not-allowed; }
 
-.action-buttons button {
-  width: 36px;
-  height: 36px;
-  padding: 0;
+.no-records-message {
+  text-align: center;
+  font-size: 18px;
+  color: #666;
+  padding: 20px;
+  font-family: Kanit;
 }
 
-.status-red {
-  color: #dc3545;
+/* ── Pagination ────────────────────────────────────────────────────────── */
+.pagination {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 20px;
+  font-size: 16px;
+}
+.pagination-btn {
+  padding: 8px 15px;
+  margin: 0 5px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+}
+.pagination-btn.next { background-color: #8cc152; color: white; }
+.pagination-btn.prev { background-color: white; color: #333; border: 2px solid #e0e0e0; }
+.pagination-btn:hover:not(:disabled) { background-color: #6baf40; color: #fff; }
+.pagination-btn:disabled { background-color: #f0f0f0; color: #ccc; cursor: not-allowed; }
+.page-info {
+  display: flex;
+  align-items: center;
+  color: #7b7b7b;
+  font-size: 16px;
+  font-family: Kanit;
+  margin-left: 20px;
+}
+.page-input {
+  width: 40px;
+  height: 30px;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+  text-align: center;
+  margin: 0 10px;
+  font-size: 16px;
+  padding: 5px;
+}
+
+/* ── Loader (matches confirmed-appointment table) ──────────────────────── */
+.loader {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 24px;
+  font-family: monospace;
+  line-height: 1.4;
   font-weight: bold;
+  color: #0e2970;
+  --c: no-repeat linear-gradient(#0e2970 0 0);
+  background: var(--c), var(--c), var(--c), var(--c), var(--c), var(--c), var(--c);
+  background-size: calc(1ch + 1px) 100%;
+  border-bottom: 10px solid #0e2970;
+  animation: l8-0 1s infinite linear;
+  clip-path: inset(-20px 0);
+  z-index: 999;
 }
-
-.status-yellow {
-  color: #ffc107;
-  font-weight: bold;
+.loader::before { content: "DocMinds"; }
+.loader::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 14px;
+  background: #F28729;
+  left: -10px;
+  bottom: 100%;
+  animation: l8-1 1s infinite linear;
 }
-
-.status-green {
-  color: #28a745;
-  font-weight: bold;
+@keyframes l8-0 {
+  0%, 12.5% { background-position: calc(0*100%/6) 0, calc(1*100%/6) 0, calc(2*100%/6) 0, calc(3*100%/6) 0, calc(4*100%/6) 0, calc(5*100%/6) 0, calc(6*100%/6) 0; }
+  25%   { background-position: calc(0*100%/6) 40px, calc(1*100%/6) 0, calc(2*100%/6) 0, calc(3*100%/6) 0, calc(4*100%/6) 0, calc(5*100%/6) 0, calc(6*100%/6) 0; }
+  37.5% { background-position: calc(0*100%/6) 40px, calc(1*100%/6) 40px, calc(2*100%/6) 0, calc(3*100%/6) 0, calc(4*100%/6) 0, calc(5*100%/6) 0, calc(6*100%/6) 0; }
+  50%   { background-position: calc(0*100%/6) 40px, calc(1*100%/6) 40px, calc(2*100%/6) 40px, calc(3*100%/6) 0, calc(4*100%/6) 0, calc(5*100%/6) 0, calc(6*100%/6) 0; }
+  62.5% { background-position: calc(0*100%/6) 40px, calc(1*100%/6) 40px, calc(2*100%/6) 40px, calc(3*100%/6) 40px, calc(4*100%/6) 0, calc(5*100%/6) 0, calc(6*100%/6) 0; }
+  75%   { background-position: calc(0*100%/6) 40px, calc(1*100%/6) 40px, calc(2*100%/6) 40px, calc(3*100%/6) 40px, calc(4*100%/6) 40px, calc(5*100%/6) 0, calc(6*100%/6) 0; }
+  87.4% { background-position: calc(0*100%/6) 40px, calc(1*100%/6) 40px, calc(2*100%/6) 40px, calc(3*100%/6) 40px, calc(4*100%/6) 40px, calc(5*100%/6) 40px, calc(6*100%/6) 0; }
+  100%  { background-position: calc(0*100%/6) 40px, calc(1*100%/6) 40px, calc(2*100%/6) 40px, calc(3*100%/6) 40px, calc(4*100%/6) 40px, calc(5*100%/6) 40px, calc(6*100%/6) 40px; }
 }
-
-.status-black {
-  color: #6c757d;
-  font-weight: bold;
-}
-
-::ng-deep .p-datatable .p-datatable-tbody > tr > td {
-  padding: 12px 8px;
-}
-
-::ng-deep .p-paginator {
-  padding: 10px 15px;
-}
+@keyframes l8-1 { 100% { left: 115%; } }
 
 @media (max-width: 768px) {
   .list-header {
@@ -63,17 +217,6 @@
     gap: 15px;
     align-items: flex-start;
   }
-
-  .list-header h2 {
-    width: 100%;
-  }
-
-  .action-buttons {
-    gap: 5px;
-  }
-
-  .action-buttons button {
-    width: 32px;
-    height: 32px;
-  }
+  .list-header h2 { width: 100%; }
+  .custom-input-text { width: 100%; }
 }

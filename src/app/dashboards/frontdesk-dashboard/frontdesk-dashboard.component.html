@@ -1,0 +1,340 @@
+<div class="fd-dashboard" *ngIf="!isLoading; else loadingTpl">
+  <ng-container *ngIf="summary as s">
+    <header class="dash-header">
+      <div>
+        <div class="greeting">{{ greeting }},</div>
+        <h1 class="page-title">
+          Front Desk
+          <span class="role-chip">Reception</span>
+        </h1>
+        <div class="today-label">{{ todayLabel }}</div>
+      </div>
+      <div>
+        <button class="refresh-btn" (click)="refresh()" title="Refresh">
+          <i class="pi pi-refresh"></i>
+          <span>Refresh</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Doctor availability tiles (Doctor Available / Unavailable / Absent /
+         Leave + Check-in Today with export) — same component the super-admin
+         dashboard-overview uses. Wrapped so we can normalize its layout to the
+         front-desk KPI-strip grid (see .fd-availability in the CSS). -->
+    <div class="fd-availability">
+      <app-total-overview></app-total-overview>
+    </div>
+
+    <div class="error-banner" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+    <!-- ─── KPI strip ──────────────────────────────────────────────── -->
+    <section class="kpi-strip">
+      <!-- 'Booked today' removed (shown as OPD Today in the availability tiles);
+           replaced with Arrived. -->
+      <app-kpi-tile
+        icon="pi pi-check-circle"
+        label="Arrived"
+        [value]="s.kpis.arrived"
+        accent="blue">
+      </app-kpi-tile>
+      <!-- 'Checked in' removed — now shown in the availability tiles above
+           (Check-in Today, with export). -->
+      <app-kpi-tile
+        icon="pi pi-user-minus"
+        label="No shows"
+        [value]="s.kpis.noShows"
+        [accent]="s.kpis.noShows > 0 ? 'amber' : 'slate'">
+      </app-kpi-tile>
+      <app-kpi-tile
+        icon="pi pi-times-circle"
+        label="Cancelled"
+        [value]="s.kpis.cancelled"
+        accent="slate">
+      </app-kpi-tile>
+      <app-kpi-tile
+        icon="pi pi-phone"
+        label="Pending callbacks"
+        [value]="s.kpis.pendingCallbacks"
+        [accent]="s.kpis.pendingCallbacks > 0 ? 'red' : 'green'">
+      </app-kpi-tile>
+      <app-kpi-tile
+        icon="pi pi-hourglass"
+        label="Avg wait now"
+        [value]="s.kpis.avgWaitNow !== null ? (s.kpis.avgWaitNow + 'm') : '—'"
+        [accent]="(s.kpis.avgWaitNow || 0) > 30 ? 'red' : 'blue'">
+      </app-kpi-tile>
+    </section>
+
+    <!-- ─── Main row: Queue | Side column (charts + callbacks) ─────── -->
+    <div class="main-row">
+      <section class="card queue-card">
+        <header class="card-header">
+          <div>
+            <h2>Today's appointment queue</h2>
+            <p class="card-sub">{{ filteredQueue.length }} of {{ s.queue.length }} appointments</p>
+          </div>
+          <div class="filter-pills">
+            <button class="pill" [class.active]="queueFilter === 'all'" (click)="setQueueFilter('all')">All</button>
+            <button class="pill" [class.active]="queueFilter === 'waiting'" (click)="setQueueFilter('waiting')">Waiting</button>
+            <button class="pill" [class.active]="queueFilter === 'done'" (click)="setQueueFilter('done')">Done</button>
+            <button class="pill" [class.active]="queueFilter === 'no-show'" (click)="setQueueFilter('no-show')">No-show</button>
+          </div>
+        </header>
+        <div class="queue-table-wrap" *ngIf="filteredQueue.length; else emptyQueue">
+          <table class="queue-table">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Patient</th>
+                <th>Doctor</th>
+                <th>Channel</th>
+                <th>Wait</th>
+                <th>Reminders</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let r of filteredQueue; trackBy: trackQueueRow">
+                <td class="cell-time">{{ r.time }}</td>
+                <td class="cell-patient">
+                  <div class="patient-name">{{ r.patientName }}</div>
+                  <div class="patient-meta">{{ r.phoneNumber }}</div>
+                </td>
+                <td class="cell-doctor">
+                  <div>{{ r.doctorName }}</div>
+                  <div class="muted">{{ r.department }}</div>
+                </td>
+                <td>
+                  <span class="channel-chip">{{ r.requestVia }}</span>
+                </td>
+                <td>
+                  <span *ngIf="r.waitMins !== null; else dash" [class]="waitClass(r.waitMins)">
+                    {{ r.waitMins }}m
+                  </span>
+                  <ng-template #dash><span class="muted">—</span></ng-template>
+                </td>
+                <td>
+                  <i *ngIf="r.contactedAny" class="pi pi-check-circle ok-icon" title="Reminder sent"></i>
+                  <i *ngIf="!r.contactedAny" class="pi pi-times-circle bad-icon" title="No reminder sent"></i>
+                </td>
+                <td><span [class]="statusClass(r)">{{ statusLabel(r) }}</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <ng-template #emptyQueue>
+          <div class="empty-state">
+            <i class="pi pi-inbox"></i>
+            <p>No appointments match this filter.</p>
+          </div>
+        </ng-template>
+      </section>
+
+      <div class="side-col">
+        <!-- Hourly arrivals heatmap -->
+        <section class="card chart-card">
+          <header class="card-header">
+            <div>
+              <h2>Hourly arrival pattern</h2>
+              <p class="card-sub">Today's bookings by hour of day</p>
+            </div>
+          </header>
+          <div class="heatmap-body" *ngIf="hourCells.length">
+            <div class="heatmap-row">
+              <div
+                *ngFor="let c of hourCells"
+                class="heat-cell"
+                [ngStyle]="heatmapCellStyle(c.intensity)"
+                [title]="c.label + ' — ' + c.count + ' bookings'">
+                <span class="heat-value">{{ c.count > 0 ? c.count : '' }}</span>
+              </div>
+            </div>
+            <div class="heatmap-axis">
+              <span>12 AM</span><span>6 AM</span><span>12 PM</span><span>6 PM</span><span>11 PM</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Channel mix donut -->
+        <section class="card chart-card">
+          <header class="card-header">
+            <div>
+              <h2>Channel mix</h2>
+              <p class="card-sub">How today's appointments were booked</p>
+            </div>
+          </header>
+          <div class="donut-wrap" *ngIf="channelSlices.length; else noChan">
+            <app-donut-chart [slices]="channelSlices" [showLegend]="true"></app-donut-chart>
+          </div>
+          <ng-template #noChan>
+            <div class="empty-state empty-state-sm">
+              <i class="pi pi-chart-pie"></i>
+              <p>No bookings today.</p>
+            </div>
+          </ng-template>
+        </section>
+
+        <!-- Reminder status -->
+        <section class="card reminder-card">
+          <header class="card-header">
+            <div>
+              <h2>Reminder status</h2>
+              <p class="card-sub">Out of {{ s.reminderStatus.total }} appointments</p>
+            </div>
+          </header>
+          <div class="reminder-grid">
+            <div class="reminder-cell">
+              <i class="pi pi-comment"></i>
+              <div>
+                <div class="reminder-label">SMS</div>
+                <div class="reminder-value">{{ s.reminderStatus.smsSent }}</div>
+              </div>
+            </div>
+            <div class="reminder-cell">
+              <i class="pi pi-whatsapp"></i>
+              <div>
+                <div class="reminder-label">WhatsApp</div>
+                <div class="reminder-value">{{ s.reminderStatus.whatsappSent }}</div>
+              </div>
+            </div>
+            <div class="reminder-cell">
+              <i class="pi pi-envelope"></i>
+              <div>
+                <div class="reminder-label">Email</div>
+                <div class="reminder-value">{{ s.reminderStatus.emailSent }}</div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ─── Dept distribution + Top doctors + Patient mix + Preview ─ -->
+    <div class="extra-row-4">
+      <section class="card">
+        <header class="card-header">
+          <div>
+            <h2>Department bookings</h2>
+            <p class="card-sub">Today's split across departments</p>
+          </div>
+        </header>
+        <div class="donut-wrap" *ngIf="deptBookingSlices.length; else noDept">
+          <app-donut-chart [slices]="deptBookingSlices" [showLegend]="true"></app-donut-chart>
+        </div>
+        <ng-template #noDept>
+          <div class="empty-state empty-state-sm">
+            <i class="pi pi-chart-pie"></i>
+            <p>No bookings yet.</p>
+          </div>
+        </ng-template>
+      </section>
+
+      <app-bar-list-card
+        title="Busiest doctors today"
+        subTitle="Top 5 by appointment count"
+        accentIcon="pi pi-user"
+        [items]="busiestDoctorsItems"
+        emptyText="No bookings yet."
+        emptyIcon="pi pi-user"
+        unitLabel="appts">
+      </app-bar-list-card>
+
+      <section class="card">
+        <header class="card-header">
+          <div>
+            <h2>Patient mix today</h2>
+            <p class="card-sub">New / Follow-up / Referral split</p>
+          </div>
+        </header>
+        <div class="donut-wrap" *ngIf="patientMixSlices.length; else noMix">
+          <app-donut-chart [slices]="patientMixSlices" [showLegend]="true"></app-donut-chart>
+        </div>
+        <ng-template #noMix>
+          <div class="empty-state empty-state-sm">
+            <i class="pi pi-users"></i>
+            <p>No patient mix data yet.</p>
+          </div>
+        </ng-template>
+      </section>
+
+      <section class="card preview-card">
+        <header class="card-header">
+          <div>
+            <h2>Upcoming preview</h2>
+            <p class="card-sub">Bookings already on the books</p>
+          </div>
+        </header>
+        <div class="preview-body">
+          <div class="preview-cell">
+            <div class="preview-label">Tomorrow</div>
+            <div class="preview-value">{{ s.upcomingPreview.tomorrow.count }}</div>
+            <div class="preview-sub">{{ s.upcomingPreview.tomorrow.date }}</div>
+          </div>
+          <div class="preview-cell">
+            <div class="preview-label">Day after</div>
+            <div class="preview-value">{{ s.upcomingPreview.dayAfter.count }}</div>
+            <div class="preview-sub">{{ s.upcomingPreview.dayAfter.date }}</div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ─── Lower row: Callbacks | Waiting alerts | Docs on leave ─── -->
+    <div class="lower-row">
+      <section class="card">
+        <header class="card-header">
+          <div>
+            <h2>Pending callbacks</h2>
+            <p class="card-sub">{{ s.callbacks.length }} waiting</p>
+          </div>
+        </header>
+        <ul class="simple-list" *ngIf="s.callbacks.length; else emptyCallbacks">
+          <li *ngFor="let c of s.callbacks; trackBy: trackCallback">
+            <div class="list-primary">{{ c.name }}</div>
+            <div class="list-secondary">{{ c.mobile }} · {{ c.source }}</div>
+          </li>
+        </ul>
+        <ng-template #emptyCallbacks>
+          <div class="empty-state empty-state-sm">
+            <i class="pi pi-check-circle"></i>
+            <p>No pending callbacks.</p>
+          </div>
+        </ng-template>
+      </section>
+
+      <section class="card">
+        <header class="card-header">
+          <div>
+            <h2>Waiting over 30 min</h2>
+            <p class="card-sub">Patients overdue for consultation</p>
+          </div>
+        </header>
+        <ul class="simple-list" *ngIf="s.waitingOver30.length; else emptyWait">
+          <li *ngFor="let w of s.waitingOver30">
+            <div class="list-primary">
+              {{ w.patientName }}
+              <span class="wait-pill wait-red">{{ w.waitMins }}m</span>
+            </div>
+            <div class="list-secondary">{{ w.doctorName }}</div>
+          </li>
+        </ul>
+        <ng-template #emptyWait>
+          <div class="empty-state empty-state-sm">
+            <i class="pi pi-check-circle"></i>
+            <p>No one is waiting too long.</p>
+          </div>
+        </ng-template>
+      </section>
+
+      <!-- 'Doctors on leave today' removed — now shown in the availability
+           tiles above (Doc Leave Details, click to see the list). -->
+    </div>
+  </ng-container>
+</div>
+
+<ng-template #loadingTpl>
+  <div class="loading-state">
+    <i class="pi pi-spin pi-spinner"></i>
+    <span>Loading the front-desk dashboard…</span>
+  </div>
+</ng-template>

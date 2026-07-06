@@ -1,0 +1,80 @@
+/* Phase 9.20 — emergency codes board. .page is allow-listed in forms.css. */
+.ecb-title { font-size: 22px; font-weight: 600; margin: 0 0 4px; }
+.ecb-sub { color: #6b7280; font-size: 13px; margin: 0 0 16px; }
+
+.ecb-banner { padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; font-size: 14px; cursor: pointer; }
+.ecb-bad { background: #fee2e2; color: #b91c1c; }
+
+.ecb-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 18px 20px; margin-bottom: 18px; }
+.ecb-section { font-size: 15px; font-weight: 600; color: #0e2970; margin: 0 0 12px; }
+.ecb-muted { color: #6b7280; font-size: 12px; margin-top: 3px; }
+
+/* Code colour map (matches the poster) */
+.ecb-red { background: #e23744; color: #fff; }
+.ecb-blue { background: #1f7ec2; color: #fff; }
+.ecb-pink { background: #c2249a; color: #fff; }
+.ecb-violet { background: #6b3fa0; color: #fff; }
+.ecb-yellow { background: #e9e520; color: #1a1a1a; }
+.ecb-orange { background: #ef8b3f; color: #fff; }
+.ecb-black { background: #111827; color: #fff; }
+
+/* Code board buttons */
+.ecb-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+.ecb-code {
+  border: none; border-radius: 10px; padding: 16px; cursor: pointer; text-align: left;
+  display: flex; flex-direction: column; gap: 4px; font-family: Kanit, sans-serif;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+.ecb-code:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.18); }
+.ecb-code-label { font-size: 18px; font-weight: 700; }
+.ecb-code-sit { font-size: 13px; opacity: 0.95; }
+.ecb-code-num { font-size: 12px; opacity: 0.85; margin-top: 4px; }
+
+/* Pills */
+.ecb-pill { display: inline-block; padding: 3px 11px; border-radius: 12px; font-size: 12px; font-weight: 700; text-transform: capitalize; }
+
+/* Suggestions */
+.ecb-suggestion { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid #f3f4f6; flex-wrap: wrap; }
+.ecb-suggestion:last-child { border-bottom: 0; }
+.ecb-sug-text { flex: 1; font-size: 13px; color: #374151; }
+
+/* Active codes */
+.ecb-active { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 8px; border-left: 4px solid #cbd5e1; background: #f9fafb; margin-bottom: 8px; flex-wrap: wrap; }
+.ecb-active-main { flex: 1; font-size: 13px; color: #271e4a; min-width: 200px; }
+.ecb-border-red { border-left-color: #e23744; }
+.ecb-border-blue { border-left-color: #1f7ec2; }
+.ecb-border-pink { border-left-color: #c2249a; }
+.ecb-border-violet { border-left-color: #6b3fa0; }
+.ecb-border-yellow { border-left-color: #e9e520; }
+.ecb-border-orange { border-left-color: #ef8b3f; }
+.ecb-border-black { border-left-color: #111827; }
+
+/* Dial banner */
+.ecb-dial {
+  display: flex; align-items: center; gap: 14px; padding: 14px 18px;
+  background: #fef2f2; border: 1px solid #fecaca; border-left: 5px solid #dc2626;
+  border-radius: 10px; margin-bottom: 16px; flex-wrap: wrap;
+}
+.ecb-dial-main { flex: 1; font-size: 14px; color: #7f1d1d; min-width: 240px; }
+.ecb-dial-extra { font-size: 12.5px; font-weight: 600; margin-top: 4px; }
+.ecb-call {
+  display: inline-block; background: #169458; color: #fff; padding: 10px 18px;
+  border-radius: 8px; font-weight: 700; font-size: 15px; text-decoration: none;
+}
+.ecb-call:hover { background: #117849; }
+.ecb-call-sm { padding: 6px 12px; font-size: 13px; }
+.ecb-x { background: transparent; border: none; font-size: 16px; cursor: pointer; color: #7f1d1d; }
+
+/* Buttons */
+.ecb-btn { height: 38px; padding: 0 16px; border-radius: 6px; border: 1px solid #d1d5db; background: #fff; color: #271e4a; cursor: pointer; font-family: Kanit, sans-serif; font-size: 13px; white-space: nowrap; }
+.ecb-btn:hover { background: #f3f4f6; }
+.ecb-btn-primary { background: #169458; color: #fff; border-color: #169458; }
+.ecb-btn-danger { background: #dc2626; color: #fff; border-color: #dc2626; }
+
+/* Modal */
+.ecb-modal-bg { position: fixed; inset: 0; background: rgba(15,23,42,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.ecb-modal { background: #fff; border-radius: 12px; width: 100%; max-width: 520px; padding: 22px 24px; font-family: Kanit, sans-serif; max-height: 90vh; overflow-y: auto; }
+.ecb-modal-title { margin: 0 0 14px; font-size: 16px; display: flex; align-items: center; gap: 10px; }
+.ecb-field { display: flex; flex-direction: column; gap: 5px; font-size: 12px; color: #4b5563; margin-bottom: 12px; }
+.ecb-field input, .ecb-field textarea { padding: 8px 12px; border: 1px solid #b4b6ba; border-radius: 6px; font-family: Kanit, sans-serif; font-size: 14px; box-sizing: border-box; }
+.ecb-modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; }

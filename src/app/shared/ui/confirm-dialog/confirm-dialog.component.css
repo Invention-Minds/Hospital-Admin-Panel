@@ -21,7 +21,7 @@
   z-index: 1000;
 }
 
-.confirm-shell {
+.confirm-panel {
   background: var(--color-surface-card);
   border-radius: var(--radius-xl);
   overflow: hidden;
@@ -31,28 +31,42 @@
   font-family: var(--font-family-primary);
 }
 
-/* Header bar — coloured strip */
+/* Header — icon-led, on the card surface (no heavy coloured bar) */
 .confirm-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  height: 60px;
-  padding: 0 var(--space-20);
-  color: var(--color-text-on-dark);
+  gap: var(--space-12);
+  padding: var(--space-20) var(--space-20) var(--space-12);
+  color: var(--color-text-heading);
 }
-.confirm-header--default { background: var(--color-brand-navy-700); }
-.confirm-header--warning { background: var(--color-warning-strong); }
-.confirm-header--danger  { background: var(--color-danger-strong); }
+
+/* Severity icon badge — soft tinted circle + strong-colour glyph */
+.confirm-header__icon {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full, 999px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-lg);
+}
+.confirm-header--default .confirm-header__icon { background: var(--color-info-bg);    color: var(--color-info-strong); }
+.confirm-header--warning .confirm-header__icon { background: var(--color-warning-bg);  color: var(--color-warning-strong); }
+.confirm-header--danger  .confirm-header__icon { background: var(--color-danger-bg);   color: var(--color-danger-strong); }
 
 .confirm-header__title {
   margin: 0;
   font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-xl);
+  font-size: var(--font-size-lg);
+  line-height: 1.3;
 }
 .confirm-header__close {
+  margin-left: auto;
+  align-self: flex-start;
   background: none;
   border: none;
-  color: inherit;
+  color: var(--color-text-muted);
   cursor: pointer;
   width: var(--size-icon-lg);
   height: var(--size-icon-lg);
@@ -61,21 +75,38 @@
   justify-content: center;
   font-size: var(--font-size-md);
 }
+.confirm-header__close:hover { color: var(--color-text-heading); }
 .confirm-header__close:focus-visible {
   outline: 2px solid var(--color-brand-navy-900);
   outline-offset: 2px;
 }
 
-/* Body */
+/* Body — message aligned under the title (past the icon badge) */
 .confirm-body {
-  padding: var(--space-20);
+  padding: 0 var(--space-20) var(--space-20);
+  margin-left: calc(40px + var(--space-12));
 }
 .confirm-body__message {
   margin: 0;
-  color: var(--color-text-heading);
+  color: var(--color-text-muted);
   font-size: var(--font-size-md);
-  line-height: 1.4;
+  line-height: 1.5;
+  white-space: pre-line;
 }
+.confirm-body__input {
+  display: block;
+  width: 100%;
+  margin-top: var(--space-12);
+  padding: var(--space-8) var(--space-12);
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-md);
+  color: var(--color-text-heading);
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-border-input);
+  border-radius: var(--radius-md);
+  box-sizing: border-box;
+}
+.confirm-body__input:focus { outline: 2px solid var(--color-brand-navy-900); outline-offset: -1px; }
 
 /* Footer: cancel left, confirm right */
 .confirm-footer {
@@ -117,3 +148,8 @@
 .confirm-btn--confirm-default { background: var(--color-brand-primary); }
 .confirm-btn--confirm-warning { background: var(--color-warning-strong); }
 .confirm-btn--confirm-danger  { background: var(--color-danger-strong); }
+
+/* Single-button (alert) mode — center the OK button so the footer doesn't
+   look lopsided with only one control. */
+.confirm-footer:has(> .confirm-btn:only-child) { justify-content: center; }
+.confirm-footer > .confirm-btn:only-child { min-width: 120px; }

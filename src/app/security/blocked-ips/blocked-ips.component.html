@@ -1,0 +1,58 @@
+<div class="page">
+  <div class="page-head">
+    <h2>Blocked IPs</h2>
+    <p class="hint">IPs auto-blocked by the global rate limiter. Unblock to restore access immediately.</p>
+  </div>
+
+  <div *ngIf="message" class="alert ok">{{ message }}</div>
+  <div *ngIf="error" class="alert err">{{ error }}</div>
+
+  <!-- Manual block + search bar -->
+  <div class="form-row">
+    <div class="column-1">
+      <input class="custom-input-text" [(ngModel)]="newIp" placeholder="IP e.g. 1.2.3.4" />
+      <input class="custom-input-text" [(ngModel)]="newReason" placeholder="Reason (optional)" />
+      <input class="custom-input-text mins" type="number" [(ngModel)]="newMinutes" placeholder="Minutes" />
+      <button class="btn-danger" (click)="blockIp()">Block IP</button>
+    </div>
+
+    <div class="right-controls">
+      <input class="custom-input-text search" [(ngModel)]="search" placeholder="Search IP / reason" />
+      <svg title="Refresh" (click)="refresh()" class="reverse" xmlns="http://www.w3.org/2000/svg" width="2.5em" height="2.5em" viewBox="-1.5 -2.5 24 24">
+        <path fill="currentColor" d="m4.859 5.308l1.594-.488a1 1 0 0 1 .585 1.913l-3.825 1.17a1 1 0 0 1-1.249-.665L.794 3.413a1 1 0 1 1 1.913-.585l.44 1.441C5.555.56 10.332-1.035 14.573.703a9.38 9.38 0 0 1 5.38 5.831a1 1 0 1 1-1.905.608A7.381 7.381 0 0 0 4.86 5.308zm12.327 8.195l-1.775.443a1 1 0 1 1-.484-1.94l3.643-.909a1 1 0 0 1 .61-.08a1 1 0 0 1 .84.75l.968 3.88a1 1 0 0 1-1.94.484l-.33-1.322a9.381 9.381 0 0 1-16.384-1.796l-.26-.634a1 1 0 1 1 1.851-.758l.26.633a7.381 7.381 0 0 0 13.001 1.25z" />
+      </svg>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <div class="table-wrapper">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>IP</th>
+            <th>Reason</th>
+            <th>Hits</th>
+            <th>Blocked At</th>
+            <th>Expires</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="displayed.length === 0">
+            <td colspan="6" class="no-records-message">No IPs are currently blocked.</td>
+          </tr>
+          <tr *ngFor="let b of displayed">
+            <td>{{ b.ip }}</td>
+            <td>{{ b.reason || '—' }}</td>
+            <td>{{ b.hitCount }}</td>
+            <td>{{ b.blockedAt | date: 'short' }}</td>
+            <td>{{ b.expiresAt ? (b.expiresAt | date: 'short') : 'Permanent' }}</td>
+            <td class="button">
+              <button class="btn-unblock" (click)="unblock(b)">Unblock</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

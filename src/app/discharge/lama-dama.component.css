@@ -1,8 +1,9 @@
 .lama-dama-container {
   padding: 20px;
   max-width: 1400px;
-  margin: 0 auto;
+  margin: 0 auto 0 96px;
 }
+@media (max-width: 768px) { .lama-dama-container { margin-left: auto; } }
 
 .page-header {
   display: flex;
@@ -29,6 +30,24 @@
   gap: 6px;
 }
 .btn-secondary:hover { background: #f5f5f5; }
+
+.btn-primary {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: 1px solid #2563eb;
+  background: #2563eb;
+  color: #fff;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+}
+.btn-primary:hover { background: #1d4ed8; border-color: #1d4ed8; }
+.btn-primary:active { transform: translateY(1px); }
+.btn-primary i { font-size: 12px; }
 
 .stats-grid {
   display: grid;

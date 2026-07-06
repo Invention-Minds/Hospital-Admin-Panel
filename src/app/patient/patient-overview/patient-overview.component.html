@@ -22,7 +22,7 @@
           <p>Patient Info</p>
         </div>
       </div>
-      <!-- <div class="card" 
+      <div class="card"
       [ngClass]="{'active-card': activeComponent === 'new'}"
       (click)="showNewPatient()">
         <div class="card-icon">
@@ -31,12 +31,12 @@
         <div class="card-content">
           <p>New Patient</p>
         </div>
-      </div> -->
+      </div>
     </div>
 
   </div>
   <div class="component-section">
     <app-patient-details *ngIf="activeComponent === 'details'" (viewPatient)="showPatientInfo($event)"></app-patient-details>
     <app-patient-info *ngIf="activeComponent === 'info'"  [patient]="selectedPatient" (back)="showAppointmentRequests()"></app-patient-info>
-    <!-- <app-patient-new *ngIf="activeComponent === 'new'"></app-patient-new> -->
+    <app-patient-new *ngIf="activeComponent === 'new'"></app-patient-new>
   </div>

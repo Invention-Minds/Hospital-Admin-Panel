@@ -94,6 +94,10 @@ export class LoginComponent implements OnInit {
           }
           else if (blockId && blockId[1]) {
             const blockNumber = blockId[1]; // Extract the number part
+            // Stash for the sidebar so its Appointments link can target the
+            // nurse's own block (/nursing/<blockId>) — without this, the link
+            // routes nowhere because the route requires a :blockId param.
+            localStorage.setItem('blockId', blockNumber);
             console.log(`🔀 Redirecting to /nursing/${blockNumber}`);
             this.router.navigate([`/nursing/${blockNumber}`]); // Navigate to the appropriate channel
           }
@@ -123,6 +127,18 @@ export class LoginComponent implements OnInit {
           }
           else if(response.user.subAdminType === 'Therapy Channel'){
             this.router.navigate(['/therapy-channel'])
+          }
+          else if(response.user.subAdminType === 'ER Nurse'){
+            this.router.navigate(['/emergency'])
+          }
+          else if(response.user.subAdminType === 'Nursing Superintendent'){
+            // Hospital-wide oversight dashboard (dispatcher renders the
+            // nursing-superintendent view for this subAdminType).
+            this.router.navigate(['/dashboard'])
+          }
+          // Canonical 'Nurse' (+ legacy nurse subtypes during migration) land on IPD.
+          else if(['Nurse', 'Nursing', 'IPD Nurse', 'ICU Nurse', 'Ward Coordinator'].includes(response.user.subAdminType)){
+            this.router.navigate(['/ipd'])
           }
           else if(response.user.adminType === 'IP Billing Manager'){
             this.router.navigate(['/estimation'])

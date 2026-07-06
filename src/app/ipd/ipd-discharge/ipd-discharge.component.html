@@ -7,10 +7,160 @@
 
   <app-admission-tabs [admissionId]="admissionId"></app-admission-tabs>
 
+  <!-- Phase D — Doctor "ready for discharge" toggle + clearance-board link.
+       This is the first thing the doctor sees on the discharge page so the
+       MT + diet + billing teams can start their parallel work while the
+       summary is still being drafted. -->
+  <div class="dcd-banner" *ngIf="!loading">
+    <div class="dcd-banner__body">
+      <ng-container *ngIf="!dischargeReadyAt">
+        <strong>Patient clinically ready to discharge?</strong>
+        <span>Flag this admission so MT can draft the summary and Diet + Billing can start closing out.</span>
+      </ng-container>
+      <ng-container *ngIf="dischargeReadyAt">
+        <strong>Flagged ready · {{ dischargeReadyAt | date:'medium' }}</strong>
+        <span>Once you sign the summary below, clearance rows spawn for each department in parallel. Front Desk can finalise discharge from the board after every clearance passes + attender ack + recent vitals.</span>
+      </ng-container>
+    </div>
+    <div class="dcd-banner__actions">
+      <button type="button" class="btn"
+              [class.btn--ai]="!dischargeReadyAt"
+              (click)="toggleReadyForDischarge()" [disabled]="togglingReady">
+        <i class="pi" [class.pi-check]="!dischargeReadyAt" [class.pi-undo]="dischargeReadyAt"></i>
+        {{ togglingReady ? 'Saving…' : (dischargeReadyAt ? 'Unflag ready' : 'Mark ready for discharge') }}
+      </button>
+      <button type="button" class="btn btn--ai-secondary" (click)="openClearanceBoard()" *ngIf="dischargeReadyAt">
+        <i class="pi pi-list"></i> Open clearance board
+      </button>
+    </div>
+  </div>
+
+  <!-- ACC.6 — record LAMA / DAMA against this IPD admission. Links the
+       regulatory record to the admission (not an ER case). -->
+  <div class="lama-dama-actions" *ngIf="!loading && admissionId">
+    <a
+      class="btn btn--secondary"
+      routerLink="/lama-dama/new"
+      [queryParams]="{ admissionId: admissionId, type: 'lama' }"
+      data-testid="btn-record-lama">
+      <i class="pi pi-sign-out"></i> Record LAMA
+    </a>
+    <a
+      class="btn btn--secondary"
+      routerLink="/lama-dama/new"
+      [queryParams]="{ admissionId: admissionId, type: 'dama' }"
+      data-testid="btn-record-dama">
+      <i class="pi pi-sign-out"></i> Record DAMA
+    </a>
+  </div>
+
+  <!-- Phase 6 (WF-5) — AI draft banner / status indicator -->
+  <div class="ai-banner" *ngIf="!loading">
+    <ng-container *ngIf="summaryStatus === 'NONE'">
+      <div class="ai-banner__body">
+        <strong>No discharge summary yet.</strong>
+        <span>Generate an AI-drafted summary from the admission record, or fill in the form manually.</span>
+      </div>
+      <button
+        type="button"
+        class="btn btn--ai"
+        (click)="generateAiDraft()"
+        [disabled]="drafting"
+        data-testid="btn-ai-draft">
+        <i class="pi pi-sparkles"></i>
+        {{ drafting ? 'Drafting…' : 'Generate AI draft' }}
+      </button>
+    </ng-container>
+
+    <ng-container *ngIf="summaryStatus === 'DRAFTED'">
+      <div class="ai-banner__body ai-banner--info">
+        <strong>Drafted by AI · review every field carefully.</strong>
+        <span *ngIf="discharge?.aiDraftedByModel">
+          Model: {{ discharge?.aiDraftedByModel }} · {{ discharge?.aiDraftedAt | date:'medium' }}
+        </span>
+      </div>
+      <button
+        type="button"
+        class="btn btn--ai-secondary"
+        (click)="generateAiDraft()"
+        [disabled]="drafting"
+        data-testid="btn-ai-redraft">
+        <i class="pi pi-refresh"></i>
+        {{ drafting ? 'Drafting…' : 'Re-draft' }}
+      </button>
+    </ng-container>
+
+    <ng-container *ngIf="summaryStatus === 'EDITED'">
+      <div class="ai-banner__body ai-banner--warn">
+        <strong>Edited by clinician.</strong>
+        <span>Save again any time. Sign at the bottom when satisfied.</span>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="summaryStatus === 'SIGNED'">
+      <div class="ai-banner__body ai-banner--good">
+        <strong>Signed by {{ discharge?.clinicianSignedBy || 'clinician' }} · {{ discharge?.clinicianSignedAt | date:'medium' }}</strong>
+        <span>Clearance rows spawned for each department. Track progress on the clearance board; Front Desk finalises (frees the bed) once every gate is green.</span>
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="summaryStatus === 'DELIVERED'">
+      <div class="ai-banner__body ai-banner--good">
+        <strong>Delivered.</strong>
+        <span>Acknowledged by {{ discharge?.attenderName }} ({{ discharge?.attenderRelation }}) · {{ discharge?.attenderAcknowledgedAt | date:'medium' }}</span>
+      </div>
+    </ng-container>
+  </div>
+
+  <!--
+    Note-template picker. Visible whenever there's at least one active discharge
+    template for the patient's department. Picking one swaps the legacy form
+    out for a dynamically-rendered form built from the template's `fields[]`.
+    Choosing "Free-text — no template" reverts to the legacy form.
+  -->
+  <div class="form__section template-picker"
+       *ngIf="!loading && (availableTemplates.length > 0 || isTemplated)">
+    <div class="form__field">
+      <label for="dischargeTemplate" class="form__label">
+        Discharge template
+        <small *ngIf="isTemplated" class="template-hint">
+          — only this template's fields will be saved + printed
+        </small>
+      </label>
+      <select id="dischargeTemplate"
+              class="form__input"
+              [value]="selectedTemplateId"
+              [disabled]="isLocked"
+              (change)="onTemplateSelected($any($event.target).value)">
+        <option value="">Free-text — no template</option>
+        <option *ngFor="let t of availableTemplates" [value]="t.id">
+          {{ t.name }}{{ t.isDefault ? ' (default)' : '' }}
+        </option>
+      </select>
+    </div>
+  </div>
+
+  <!--
+    Templated rendering path — dynamic fields from the selected template.
+    When the discharge is signed, `activeTemplateFields` becomes the snapshot
+    we adopted from the row, so a signed discharge always prints exactly as
+    it was signed even if the live template changes later.
+  -->
+  <div class="form__section" *ngIf="isTemplated">
+    <h2 class="form__section-heading">Discharge details</h2>
+    <app-template-form-renderer
+      [fields]="activeTemplateFields"
+      [values]="templateValues"
+      [readOnly]="isLocked"
+      (valuesChange)="onTemplateValuesChange($event)">
+    </app-template-form-renderer>
+  </div>
+
   <form
+    *ngIf="!isTemplated"
     class="form"
     [formGroup]="form"
-    (ngSubmit)="attemptDischarge()"
+    (ngSubmit)="$event.preventDefault()"
     novalidate
     data-testid="discharge-form"
   >
@@ -40,15 +190,14 @@
 
       <div class="form__field">
         <label for="conditionAtDischarge" class="form__label">Condition at discharge *</label>
-        <input
-          pInputText
+        <select
           id="conditionAtDischarge"
-          type="text"
           formControlName="conditionAtDischarge"
           class="form__input"
-          [class.form__input--error]="shouldShowError('conditionAtDischarge')"
-          placeholder="e.g. Stable, Improved, Unchanged"
-        />
+          [class.form__input--error]="shouldShowError('conditionAtDischarge')">
+          <option value="">— select —</option>
+          <option *ngFor="let c of conditionOptions" [value]="c">{{ c }}</option>
+        </select>
         <small
           *ngIf="shouldShowError('conditionAtDischarge')"
           class="form__error"
@@ -90,6 +239,12 @@
           placeholder="Optional"
         ></textarea>
       </div>
+
+      <!-- Phase 9.3b — Read-only operative notes pulled from OT records -->
+      <app-ipd-discharge-operative-notes [admissionId]="admissionId"></app-ipd-discharge-operative-notes>
+
+      <!-- Phase 9.3c — ICD-10 + CPT codes editor -->
+      <app-diagnosis-codes-card [admissionId]="admissionId"></app-diagnosis-codes-card>
 
       <div class="form__field">
         <label for="dischargeSummary" class="form__label">Discharge summary *</label>
@@ -133,12 +288,20 @@
         [attr.data-testid]="'med-row-' + i">
         <div class="med-row__grid">
           <div class="form__field">
-            <label [attr.for]="'med-name-' + i" class="form__label">Medication name</label>
-            <input pInputText [id]="'med-name-' + i" type="text" formControlName="name" class="form__input" />
+            <label [attr.for]="'med-generic-' + i" class="form__label">Generic name *</label>
+            <input pInputText [id]="'med-generic-' + i" type="text" formControlName="genericName" class="form__input" placeholder="Paracetamol" />
+          </div>
+          <div class="form__field">
+            <label [attr.for]="'med-brand-' + i" class="form__label">Brand name</label>
+            <input pInputText [id]="'med-brand-' + i" type="text" formControlName="brandName" class="form__input" placeholder="Optional" />
           </div>
           <div class="form__field">
             <label [attr.for]="'med-dose-' + i" class="form__label">Dose</label>
             <input pInputText [id]="'med-dose-' + i" type="text" formControlName="dose" class="form__input" placeholder="500 mg" />
+          </div>
+          <div class="form__field">
+            <label [attr.for]="'med-route-' + i" class="form__label">Route</label>
+            <input pInputText [id]="'med-route-' + i" type="text" formControlName="route" class="form__input" placeholder="oral" />
           </div>
           <div class="form__field">
             <label [attr.for]="'med-freq-' + i" class="form__label">Frequency</label>
@@ -148,11 +311,16 @@
             <label [attr.for]="'med-dur-' + i" class="form__label">Duration</label>
             <input pInputText [id]="'med-dur-' + i" type="text" formControlName="duration" class="form__input" placeholder="5 days" />
           </div>
+          <div class="form__field med-row__notes">
+            <label [attr.for]="'med-notes-' + i" class="form__label">Notes</label>
+            <input pInputText [id]="'med-notes-' + i" type="text" formControlName="notes" class="form__input" placeholder="Take after food, etc." />
+          </div>
         </div>
         <button
           type="button"
           class="btn btn--remove"
           (click)="removeMedicationRow(i)"
+          [disabled]="isLocked"
           [attr.aria-label]="'Remove medication ' + (i + 1)"
           [attr.data-testid]="'btn-remove-med-' + i">
           <i class="pi pi-trash"></i>
@@ -200,23 +368,158 @@
       </div>
     </section>
 
+    <!-- Phase 9.6 — ICU stay section (NABH COP.3). Rendered only when the
+         admission had any ICU exposure (currently in ICU or stepped down). -->
+    <section class="form__section" *ngIf="hadIcuStay">
+      <h2 class="form__section-title" style="color: #b91c1c;">ICU Stay (NABH COP.3)</h2>
+      <p class="form__hint">This admission had ICU exposure. Summarise the ICU course; intensivist sign-off is captured separately.</p>
+
+      <div class="form__field">
+        <label for="icuDays" class="form__label">ICU length of stay (days)</label>
+        <input pInputText id="icuDays" type="number" min="0" formControlName="icuDays" class="form__input" />
+      </div>
+
+      <div class="form__field">
+        <label for="icuOutcome" class="form__label">ICU outcome</label>
+        <select id="icuOutcome" formControlName="icuOutcome" class="form__input">
+          <option value="">— select —</option>
+          <option value="recovered">Recovered (back to ward)</option>
+          <option value="stepped-down">Stepped down (planned)</option>
+          <option value="transferred-out">Transferred to another facility</option>
+          <option value="expired">Death in ICU</option>
+        </select>
+      </div>
+
+      <div class="form__field">
+        <label for="icuSummary" class="form__label">ICU course summary</label>
+        <textarea
+          pInputText id="icuSummary" rows="4"
+          formControlName="icuSummary"
+          class="form__textarea"
+          placeholder="Reason for ICU admission, peak severity (SOFA/APACHE), interventions (ventilation, vasopressors, RRT), complications, response to treatment, condition at step-down."
+        ></textarea>
+      </div>
+    </section>
+
     <div class="form__footer">
       <button
         type="button"
         class="btn btn--cancel"
         (click)="cancel()"
         data-testid="btn-cancel">
-        Cancel
+        {{ isLocked ? 'Back to list' : 'Cancel' }}
       </button>
+
+      <!-- Save edits — visible whenever a draft/edit exists and the row isn't locked. -->
       <button
-        type="submit"
+        *ngIf="hasDraft && !isLocked"
+        type="button"
+        class="btn btn--secondary"
+        [disabled]="form.invalid || savingEdits"
+        (click)="saveEdits()"
+        data-testid="btn-save-edits">
+        {{ savingEdits ? 'Saving…' : 'Save edits' }}
+      </button>
+
+      <!-- Legacy free-text discharge (when summaryStatus = NONE — i.e. user did NOT
+           use AI draft and just wants to submit the form directly to the
+           original POST /discharge route). -->
+      <button
+        *ngIf="!hasDraft"
+        type="button"
         class="btn btn--primary"
-        [disabled]="form.invalid || submitting"
+        [disabled]="form.invalid || savingEdits"
+        (click)="attemptDischarge()"
         data-testid="btn-discharge">
-        {{ submitting ? 'Discharging…' : 'Discharge patient' }}
+        {{ savingEdits ? 'Discharging…' : 'Discharge patient' }}
       </button>
     </div>
   </form>
+
+  <!-- Phase 6 (WF-5) §3 — Clinician sign-off panel.
+       Visible once a draft/edit exists; collects clinician name + e-signature. -->
+  <section class="sign-card" *ngIf="hasDraft && !isLocked && !loading">
+    <h2 class="form__section-heading">Clinician sign-off</h2>
+    <p class="form__hint">
+      Save your edits first. Sign here once you're satisfied with every section.
+      Signing locks the summary, frees the bed, and marks the admission as discharged.
+    </p>
+
+    <div class="form__field">
+      <label for="clinicianName" class="form__label">Clinician name</label>
+      <input
+        pInputText
+        id="clinicianName"
+        type="text"
+        [(ngModel)]="clinicianName"
+        [ngModelOptions]="{ standalone: true }"
+        class="form__input"
+        placeholder="Your full name (defaults to logged-in user if blank)" />
+    </div>
+
+    <p class="form__hint" *ngIf="form.invalid">
+      Required form fields are missing — fix them before signing.
+    </p>
+
+    <app-e-sign *ngIf="canSign"
+                [signerType]="'staff'"
+                [signerName]="clinicianName"
+                [contextType]="'discharge-clinician'"
+                [contextId]="admissionId"
+                [prompt]="'Treating clinician — discharge sign-off'"
+                [disabled]="signing"
+                (signed)="onClinicianSigned($event)">
+    </app-e-sign>
+  </section>
+
+  <!-- Phase 6 (WF-5) §4 — Attender acknowledgement panel.
+       Visible once SIGNED until DELIVERED. -->
+  <section class="sign-card sign-card--ack" *ngIf="summaryStatus === 'SIGNED'">
+    <h2 class="form__section-heading">Attender acknowledgement</h2>
+    <p class="form__hint">
+      Hand the printed discharge summary to the attender. They sign here to
+      confirm receipt + understanding of follow-up instructions.
+    </p>
+
+    <div class="form__grid">
+      <div class="form__field">
+        <label for="attenderName" class="form__label">Attender name</label>
+        <input
+          pInputText
+          id="attenderName"
+          type="text"
+          [(ngModel)]="attenderName"
+          [ngModelOptions]="{ standalone: true }"
+          class="form__input"
+          placeholder="Full name" />
+      </div>
+      <div class="form__field">
+        <label for="attenderRelation" class="form__label">Relation</label>
+        <select id="attenderRelation"
+                class="form__input"
+                [(ngModel)]="attenderRelation"
+                [ngModelOptions]="{ standalone: true }">
+          <option value="" disabled>Relation</option>
+          <option *ngFor="let r of relationOptions" [value]="r">{{ r | titlecase }}</option>
+        </select>
+      </div>
+    </div>
+
+    <p class="form__hint" *ngIf="!canRecordAttenderAck">
+      Enter attender name and relation to enable signing.
+    </p>
+
+    <app-e-sign *ngIf="canRecordAttenderAck"
+                [signerType]="'attender'"
+                [signerName]="attenderName"
+                [signerRelation]="attenderRelation"
+                [contextType]="'discharge-attender-ack'"
+                [contextId]="admissionId"
+                [prompt]="'Attender — discharge summary received'"
+                [disabled]="ackSubmitting"
+                (signed)="onAttenderSigned($event)">
+    </app-e-sign>
+  </section>
 
   <!-- Irreversible-action confirmation -->
   <app-confirm-dialog

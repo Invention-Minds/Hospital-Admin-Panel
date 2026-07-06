@@ -1,0 +1,29 @@
+<div class="fks-shell">
+  <div class="fks-card">
+    <h1 class="fks-title">Share your feedback</h1>
+    <p class="fks-sub">It takes less than a minute. Your responses help us care for you better.</p>
+
+    <label class="fks-field">Your name
+      <input type="text" [(ngModel)]="form.patientName" placeholder="Full name" autocomplete="off" />
+    </label>
+
+    <label class="fks-field">PRN (if you remember it)
+      <input type="text" [(ngModel)]="form.patientPrn" placeholder="Optional" autocomplete="off" />
+    </label>
+
+    <div class="fks-field-label">What was your visit for?</div>
+    <div class="fks-visit-grid">
+      <label class="fks-visit-opt" *ngFor="let v of VISIT_TYPES">
+        <input type="radio" name="visitType" [value]="v.value" [(ngModel)]="form.visitType" />
+        <span>{{ v.label }}</span>
+      </label>
+    </div>
+
+    <p class="fks-error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+    <button class="fks-submit" (click)="submit()" [disabled]="submitting">
+      {{ submitting ? 'Starting…' : 'Start feedback' }}
+    </button>
+    <p class="fks-foot">Anonymous responses are welcome — leave the fields blank if you prefer.</p>
+  </div>
+</div>

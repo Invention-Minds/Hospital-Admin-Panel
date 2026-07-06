@@ -1,5 +1,6 @@
 import { Component, Output, EventEmitter } from '@angular/core';
 import { EstimationService } from '../../../services/estimation/estimation.service';
+import { AlertService } from '../../../services/alert.service';
 import { MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
 import * as XLSX from 'xlsx';
@@ -13,7 +14,7 @@ import * as FileSaver from 'file-saver';
 export class EstimationConfirmedComponent {
 
 
-  constructor(private estimationService: EstimationService, private messageService: MessageService, private router: Router) { }
+  constructor(private estimationService: EstimationService, private messageService: MessageService, private router: Router, private alertSvc: AlertService) { }
   pendingEstimations: any[] = [];
   filteredEstimations: any[] = [];
   currentPage = 1;
@@ -597,12 +598,12 @@ export class EstimationConfirmedComponent {
   }
   saveFollowUp(): void {
     if (!this.followUpDate || !this.feedback) {
-      alert('Please fill in all fields!');
+      this.alertSvc.show('Please fill in all fields!', { severity: 'warning' });
       return;
     }
 
     if (this.followUps.length >= 5) {
-      alert('You can only add up to 5 follow-ups.');
+      this.alertSvc.show('You can only add up to 5 follow-ups.', { severity: 'warning' });
       return;
     }
 
@@ -614,11 +615,11 @@ export class EstimationConfirmedComponent {
           this.followUps.push(response.followUp); // Update the UI with the new follow-up
           this.followUpDate = '';
           this.feedback = '';
-          alert('Follow-up saved successfully!');
+          this.alertSvc.show('Follow-up saved successfully!', { title: 'Success' });
         },
         (error) => {
           console.error('Error saving follow-up:', error);
-          alert('Error saving follow-up. Please try again.');
+          this.alertSvc.show('Error saving follow-up. Please try again.', { severity: 'danger', title: 'Error' });
         }
       );
   }

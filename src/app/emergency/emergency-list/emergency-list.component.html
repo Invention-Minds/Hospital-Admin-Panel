@@ -5,109 +5,95 @@
       class="p-button-primary" routerLink="/emergency/intake"></button>
   </div>
 
-  <p-table
-    #dt
-    [value]="emergencyCases"
-    [rows]="10"
-    [paginator]="true"
-    [globalFilterFields]="['prn', 'status', 'triageCategory']"
-    [loading]="loading"
-    responsiveLayout="scroll"
-    [(selection)]="selectedCases"
-    [rowsPerPageOptions]="[10, 20, 50]"
-    styleClass="p-datatable-striped"
-    [tableStyle]="{'min-width': '50rem'}"
-  >
-    <ng-template pTemplate="caption">
-      <div class="flex align-items-center justify-content-between">
-        <span class="p-input-icon-left">
-          <i class="pi pi-search"></i>
-          <input
-            pInputText
-            type="text"
-            (input)="dt.filterGlobal($any($event.target).value, 'contains')"
-            placeholder="Search cases..."
-          />
-        </span>
+  <!-- Search row -->
+  <div class="form-row">
+    <span class="search-box">
+      <i class="pi pi-search"></i>
+      <input type="text" pInputText [(ngModel)]="searchValue" (ngModelChange)="onSearch()"
+        placeholder="Search by PRN, status or triage…" class="custom-input-text" />
+    </span>
+  </div>
+
+  <div class="table-container" *ngIf="!loading">
+    <div class="table-wrapper">
+      <table class="appointment-table">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>PRN</th>
+            <th>Triage</th>
+            <th style="width: 280px;">Complaint</th>
+            <th>BP</th>
+            <th>HR</th>
+            <th>Status</th>
+            <th>Time</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="filteredCases.length === 0">
+            <td colspan="9" class="no-records-message">No emergency cases found.</td>
+          </tr>
+          <tr *ngFor="let row of getPaginatedCases(); let i = index">
+            <td>{{ (currentPage - 1) * pageSize + i + 1 }}</td>
+            <td><strong>{{ row.prn }}</strong></td>
+            <td>
+              <span class="status-badge" [ngClass]="'triage-' + row.triageCategory">
+                {{ getTriageLabel(row.triageCategory) }}
+              </span>
+            </td>
+            <td class="complaint-cell">
+              {{ row.presentingComplaint | slice:0:50 }}{{ (row.presentingComplaint || '').length > 50 ? '…' : '' }}
+            </td>
+            <td>{{ row.vitalsBP || '-' }}</td>
+            <td>{{ row.vitalsHR ? row.vitalsHR + ' bpm' : '-' }}</td>
+            <td>
+              <p-dropdown
+                *ngIf="!isErNurse"
+                [options]="statusOptions"
+                [ngModel]="row.status"
+                (onChange)="updateStatus(row, $event.value)"
+                optionLabel="label"
+                optionValue="value"
+                [showClear]="false"
+                styleClass="status-dropdown"
+              ></p-dropdown>
+              <!-- ER nurses see status read-only (no clinical status change). -->
+              <span *ngIf="isErNurse">{{ row.status }}</span>
+            </td>
+            <td>{{ formatDate(row.createdAt) }}</td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn-action" (click)="viewCase(row.id!)"
+                  pTooltip="View details" tooltipPosition="top">
+                  <i class="pi pi-eye"></i>
+                </button>
+                <button class="btn-action" *ngIf="!isErNurse" (click)="convertToIPD(row.id!)"
+                  [disabled]="row.status === 'admitted-ipd'"
+                  pTooltip="Convert to IPD" tooltipPosition="top">
+                  <i class="pi pi-arrow-right"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="totalPages > 0">
+      <button class="pagination-btn prev" (click)="prevPage()" [disabled]="currentPage === 1">←</button>
+      <button class="pagination-btn next" (click)="nextPage()" [disabled]="currentPage === totalPages">→</button>
+      <div class="page-info">
+        Page
+        <input type="number" [(ngModel)]="currentPage" min="1" [max]="totalPages" class="page-input"
+          (change)="onPageChange()">
+        of {{ totalPages }}
       </div>
-    </ng-template>
+    </div>
+  </div>
 
-    <ng-template pTemplate="header">
-      <tr>
-        <th style="width: 3rem">
-          <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
-        </th>
-        <th style="width: 10%">PRN</th>
-        <th style="width: 10%">Triage</th>
-        <th style="width: 25%">Complaint</th>
-        <th style="width: 10%">BP</th>
-        <th style="width: 8%">HR</th>
-        <th style="width: 12%">Status</th>
-        <th style="width: 15%">Time</th>
-        <th style="width: 10%">Actions</th>
-      </tr>
-    </ng-template>
-
-    <ng-template pTemplate="body" let-row>
-      <tr>
-        <td>
-          <p-tableCheckbox [value]="row"></p-tableCheckbox>
-        </td>
-        <td><strong>{{ row.prn }}</strong></td>
-        <td>
-          <p-tag
-            [value]="getTriageLabel(row.triageCategory)"
-            [severity]="triageSeverity[row.triageCategory]"
-          ></p-tag>
-        </td>
-        <td>
-          {{ row.presentingComplaint | slice:0:50 }}{{ row.presentingComplaint?.length > 50 ? '...' : '' }}
-        </td>
-        <td>{{ row.vitalsBP }}</td>
-        <td>{{ row.vitalsHR }} bpm</td>
-        <td>
-          <p-dropdown
-            [options]="statusOptions"
-            [ngModel]="row.status"
-            (onChange)="updateStatus(row, $event.value)"
-            optionLabel="label"
-            optionValue="value"
-            [showClear]="false"
-          ></p-dropdown>
-        </td>
-        <td>{{ formatDate(row.createdAt) }}</td>
-        <td>
-          <div class="action-buttons">
-            <button
-              pButton
-              type="button"
-              pTooltip="View details"
-              icon="pi pi-eye"
-              class="p-button-rounded p-button-info p-button-sm"
-              (click)="viewCase(row.id)"
-            ></button>
-            <button
-              pButton
-              type="button"
-              pTooltip="Convert to IPD"
-              icon="pi pi-arrow-right"
-              class="p-button-rounded p-button-success p-button-sm"
-              (click)="convertToIPD(row.id)"
-              [disabled]="row.status === 'admitted-ipd'"
-            ></button>
-          </div>
-        </td>
-      </tr>
-    </ng-template>
-
-    <ng-template pTemplate="emptymessage">
-      <tr>
-        <td colspan="9" style="text-align: center; padding: 2rem;">
-          No emergency cases found.
-        </td>
-      </tr>
-    </ng-template>
-  </p-table>
+  <div class="loader" *ngIf="loading"></div>
 
   <app-admit-to-ipd-modal
     [(visible)]="admitModalVisible"

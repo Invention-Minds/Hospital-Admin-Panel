@@ -1,0 +1,61 @@
+/* Phase 9.26 / Phase 5e — Generic TAT event capture. */
+
+.q-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; margin-bottom: 16px; flex-wrap: wrap; }
+.q-title { font-size: 22px; font-weight: 600; margin: 0 0 4px; }
+.q-sub { color: #6b7280; font-size: 13px; margin: 0; max-width: 720px; }
+.qi-back { background: transparent; border: 1px solid #d1d5db; color: #271e4a;
+  padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+.qi-back:hover { background: #f3f4f6; }
+
+.q-banner { padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; font-size: 14px; cursor: pointer; }
+.q-banner.q-bad { background: #fee2e2; color: #b91c1c; }
+.tat-banner-ok { background: #dcfce7; color: #166534; }
+.q-loading { padding: 24px; text-align: center; color: #6b7280; font-style: italic; }
+.q-empty { padding: 24px; text-align: center; color: #6b7280; background: #f9fafb;
+  border: 1px dashed #e5e7eb; border-radius: 10px; }
+
+.tat-chapter-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.qi-chip { background: #f3f4f6; border: 1px solid #e5e7eb; color: #374151;
+  padding: 5px 12px; border-radius: 999px; cursor: pointer; font-size: 13px; font-family: Kanit, sans-serif; }
+.qi-chip:hover { background: #e5e7eb; }
+.qi-chip-on { background: #0e2970; color: #fff; border-color: #0e2970; }
+
+.tat-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px;
+  padding: 16px 20px; margin-bottom: 16px; }
+.tat-card-title { font-size: 15px; font-weight: 600; color: #271e4a; margin: 0 0 12px;
+  padding-bottom: 8px; border-bottom: 1px solid #f3f4f6; }
+
+.tat-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; align-items: flex-end; }
+.tat-row label, .tat-fullrow { display: flex; flex-direction: column; gap: 4px;
+  font-size: 12px; color: #6b7280; flex: 1; min-width: 150px; }
+.tat-fullrow { width: 100%; margin-bottom: 10px; }
+.tat-row input, .tat-row select, .tat-fullrow input, .tat-fullrow textarea {
+  height: 34px; padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 6px;
+  font-size: 13px; font-family: inherit; }
+.tat-fullrow textarea { height: auto; min-height: 56px; resize: vertical; }
+
+.tat-context { width: 100%; background: #f9fafb; border: 1px solid #e5e7eb;
+  border-radius: 8px; padding: 10px 12px; font-size: 13px; color: #374151;
+  display: flex; flex-direction: column; gap: 4px; }
+.tat-meta { font-size: 12px; color: #6b7280; }
+
+.tat-foot { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px;
+  padding-top: 12px; border-top: 1px solid #f3f4f6; }
+.tat-save { background: #0e2970; color: #fff; border: none;
+  padding: 8px 22px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; }
+.tat-save:hover:not(:disabled) { background: #1e40af; }
+.tat-save:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.tat-table { width: 100%; border-collapse: collapse; }
+.tat-table thead th { text-align: left; font-size: 12px; color: #6b7280; text-transform: uppercase;
+  letter-spacing: 0.3px; background: #f9fafb; padding: 8px 10px; border-bottom: 1px solid #e5e7eb; }
+.tat-table tbody td { padding: 8px 10px; font-size: 13px; color: #374151; border-bottom: 1px solid #f3f4f6; }
+.tat-code { font-family: 'Roboto Mono', monospace; font-size: 12px; color: #0e2970; font-weight: 600; }
+.tat-delete { background: transparent; border: none; color: #b91c1c;
+  cursor: pointer; font-size: 16px; line-height: 1; padding: 0; }
+.tat-delete:hover { color: #7f1d1d; }
+
+.qi-pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px;
+  font-weight: 600; background: #f3f4f6; color: #6b7280; }
+.qi-pill.q-good { background: #dcfce7; color: #166534; }
+.qi-pill.q-bad { background: #fee2e2; color: #b91c1c; }

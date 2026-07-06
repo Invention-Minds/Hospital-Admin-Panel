@@ -1,0 +1,264 @@
+/* Phase 3 — NS acceptance queue. Compact list view; one row per pending
+   bed request, expands inline when the nurse picks an action. */
+
+.nsq-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 18px;
+  background: var(--color-surface-card, #ffffff);
+  border: 1px solid var(--color-border, #d7d7d7);
+  border-radius: 8px;
+  font-family: var(--font-family-primary, -apple-system, Segoe UI, Roboto, sans-serif);
+  color: var(--color-text-primary, #1a1a1a);
+}
+
+.nsq-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #eeeeee;
+  padding-bottom: 8px;
+}
+
+.nsq-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #271e4a;
+}
+
+.nsq-loading,
+.nsq-empty {
+  padding: 24px 0;
+  text-align: center;
+  color: var(--color-text-muted, #5a5a5a);
+  font-size: 13px;
+}
+
+.nsq-banner {
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  border-left: 3px solid;
+}
+
+.nsq-banner-bad {
+  background: #fdecee;
+  color: #7a1c25;
+  border-left-color: #b02a37;
+}
+
+/* ─── Each pending row ──────────────────────────────────────────────── */
+.nsq-row {
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #fcfcfd;
+}
+
+.nsq-row-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nsq-row-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nsq-row-meta {
+  font-size: 12.5px;
+  color: var(--color-text-muted, #5a5a5a);
+}
+
+/* Urgency pills */
+.nsq-pill {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.cb-urg-em {
+  background: #fdecee;
+  color: #b02a37;
+  border: 1px solid #f3bfc6;
+}
+
+.cb-urg-ur {
+  background: #fff4e0;
+  color: #b06a00;
+  border: 1px solid #f3d9a8;
+}
+
+.cb-urg-ro {
+  background: #e8f0fe;
+  color: #0b5ed7;
+  border: 1px solid #b8d4ff;
+}
+
+.nsq-bed-type {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.nsq-age {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--color-text-muted, #5a5a5a);
+  font-style: italic;
+}
+
+/* ─── Row action buttons ────────────────────────────────────────────── */
+.nsq-row-actions {
+  display: flex;
+  gap: 8px;
+  border-top: 1px dashed #eeeeee;
+  padding-top: 10px;
+}
+
+.nsq-action-panel {
+  border-top: 1px dashed #eeeeee;
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nsq-prompt {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-text-muted, #5a5a5a);
+}
+
+.nsq-input {
+  padding: 8px 10px;
+  border: 1px solid #b4b6ba;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 14px;
+  background: #ffffff;
+}
+
+.nsq-input:focus {
+  outline: none;
+  border-color: var(--color-brand-primary, #0b5ed7);
+  box-shadow: 0 0 3px rgba(11, 94, 215, 0.3);
+}
+
+.nsq-action-row {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+/* ─── Buttons ───────────────────────────────────────────────────────── */
+.nsq-btn {
+  border: 1px solid var(--color-border, #d7d7d7);
+  background: #ffffff;
+  color: var(--color-text-primary, #1a1a1a);
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 500;
+  transition: background-color 0.15s ease;
+}
+
+.nsq-btn:hover:not(:disabled) {
+  background: #f3f3f3;
+}
+
+.nsq-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.nsq-btn-ghost {
+  color: var(--color-text-muted, #5a5a5a);
+}
+
+.nsq-btn-cancel {
+  color: var(--color-text-muted, #5a5a5a);
+}
+
+.nsq-btn-accept {
+  background: #169458;
+  color: #ffffff;
+  border-color: transparent;
+}
+
+.nsq-btn-accept:hover:not(:disabled) {
+  background: #14823f;
+}
+
+.nsq-btn-warn {
+  background: #b06a00;
+  color: #ffffff;
+  border-color: transparent;
+}
+
+.nsq-btn-warn:hover:not(:disabled) {
+  background: #905800;
+}
+
+.nsq-btn-bad {
+  background: #b02a37;
+  color: #ffffff;
+  border-color: transparent;
+}
+
+.nsq-btn-bad:hover:not(:disabled) {
+  background: #8e1f29;
+}
+
+/* Phase 3 (WF-2) — bedside-acceptance pending section. */
+.nsq-section-divider {
+  height: 1px;
+  background: #e5e5e5;
+  margin: 18px 0 12px;
+}
+.nsq-row-accepted {
+  border-left: 4px solid #1e7e34;
+  background: #f3fbf5;
+}
+.nsq-meta {
+  font-size: 12.5px;
+  color: #5a5a5a;
+}
+
+/* Bed picker for the Accept panel. */
+.nsq-pick-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.nsq-pick {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 calc(50% - 12px);
+  min-width: 180px;
+  font-size: 13px;
+  color: #333;
+}
+.nsq-pick select {
+  padding: 8px 10px;
+  border: 1px solid #b4b6ba;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 14px;
+  background: #f6f8ff;
+}
+.nsq-hint { font-size: 12.5px; color: #5a5a5a; margin: 0 0 8px; }

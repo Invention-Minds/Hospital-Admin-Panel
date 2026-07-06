@@ -12,6 +12,7 @@
  */
 
 import { ComponentFixture, fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -21,6 +22,8 @@ import { MessageService } from 'primeng/api';
 
 import { IpdProgressNoteComponent } from './ipd-progress-note.component';
 import { IpdProgressNote, IpdService } from '../../services/ipd.service';
+import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
+import { AuthServiceService } from '../../services/auth/auth-service.service';
 import { ConfirmDialogComponent } from '../../shared/ui/confirm-dialog/confirm-dialog.component';
 import { EmptyStateComponent } from '../../shared/ui/empty-state/empty-state.component';
 import { PageHeaderComponent } from '../../shared/ui/page-header/page-header.component';
@@ -37,15 +40,35 @@ class IpdServiceStub {
   }
 }
 
+const SEED_DOCTORS = [
+  { id: 1, name: 'Dr. Jacob Ryan',  userId: 99, departmentName: 'General Medicine' },
+  { id: 2, name: 'Dr. Priya Sharma', userId: 3, departmentName: 'Cardiology' },
+];
+
+class DoctorServiceStub {
+  getAllDoctorsSpy = jasmine.createSpy('getAllDoctors').and.returnValue(of(SEED_DOCTORS));
+  getAllDoctors(): Observable<unknown> { return this.getAllDoctorsSpy(); }
+}
+
+class AuthServiceStub {
+  // Default to no logged-in user; tests override per-case.
+  getUserIdSpy = jasmine.createSpy('getUserId').and.returnValue(null);
+  getUserId(): number | null { return this.getUserIdSpy(); }
+}
+
 describe('IpdProgressNoteComponent', () => {
   let fixture: ComponentFixture<IpdProgressNoteComponent>;
   let component: IpdProgressNoteComponent;
   let ipdService: IpdServiceStub;
+  let doctorService: DoctorServiceStub;
+  let authService: AuthServiceStub;
   let messageServiceAdd: jasmine.Spy;
 
   const fillValidForm = () => {
+    // Doctor selection (from the seeded list) flows through the component's
+    // applyDoctorSelection helper to keep doctorId + doctorName aligned.
+    component.onDoctorChange(1); // Dr. Jacob Ryan
     component.form.patchValue({
-      doctorName: 'Dr. Jacob Ryan',
       subjective: 'Pain improving.',
       objective: 'BP 120/80, HR 72.',
       assessment: 'Post-op day 2, stable.',
@@ -56,6 +79,8 @@ describe('IpdProgressNoteComponent', () => {
 
   beforeEach(async () => {
     ipdService = new IpdServiceStub();
+    doctorService = new DoctorServiceStub();
+    authService = new AuthServiceStub();
     // Default: empty list response
     ipdService.getProgressNotesSpy.and.returnValue(of({ data: [] }));
 
@@ -64,13 +89,15 @@ describe('IpdProgressNoteComponent', () => {
       declarations: [IpdProgressNoteComponent, ConfirmDialogComponent, EmptyStateComponent, PageHeaderComponent],
       providers: [
         { provide: IpdService, useValue: ipdService },
+        { provide: DoctorServiceService, useValue: doctorService },
+        { provide: AuthServiceService, useValue: authService },
         {
           provide: ActivatedRoute,
           useValue: { snapshot: { paramMap: { get: (k: string) => (k === 'admissionId' ? 'adm-001' : null) } } },
         },
         MessageService,
       ],
-      schemas: [],
+      schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
 
     const ms = TestBed.inject(MessageService);

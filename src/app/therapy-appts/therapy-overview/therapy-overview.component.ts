@@ -79,6 +79,12 @@ export class TherapyOverviewComponent {
   showCompletedAppointments() {
     this.activeComponent = 'completed';
   }
+  showCourses() {
+    this.activeComponent = 'courses';
+  }
+  showTherapistAvailability() {
+    this.activeComponent = 'availability';
+  }
   showRepeatAppointments() {
     this.activeComponent = 'repeated';
   }

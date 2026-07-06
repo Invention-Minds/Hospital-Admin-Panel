@@ -1,0 +1,38 @@
+.fks-shell {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #eef2ff 0%, #f0f9ff 100%); padding: 24px;
+}
+.fks-card {
+  background: #fff; border-radius: 16px; padding: 32px 36px; width: 100%; max-width: 480px;
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
+}
+.fks-title { font-size: 24px; color: #271e4a; margin: 0 0 6px; font-weight: 600; }
+.fks-sub { color: #6b7280; font-size: 14px; margin: 0 0 22px; }
+
+.fks-field { display: flex; flex-direction: column; gap: 5px; font-size: 12px; color: #4b5563; margin-bottom: 14px; }
+.fks-field input {
+  border: 1px solid #d1d5db; border-radius: 8px; padding: 10px 14px; font-size: 15px;
+  font-family: Kanit, sans-serif; color: #271e4a; box-sizing: border-box; width: 100%;
+}
+.fks-field input:focus { outline: 2px solid #0e2970; outline-offset: -1px; }
+
+.fks-field-label { font-size: 12px; color: #4b5563; margin: 10px 0 6px; }
+.fks-visit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 18px; }
+@media (max-width: 480px) { .fks-visit-grid { grid-template-columns: 1fr; } }
+.fks-visit-opt {
+  display: flex; align-items: center; gap: 8px; padding: 10px 12px;
+  border: 1px solid #d1d5db; border-radius: 8px; font-size: 13px; color: #271e4a;
+  cursor: pointer; transition: background 120ms;
+}
+.fks-visit-opt:hover { background: #f3f4f6; }
+.fks-visit-opt input { accent-color: #0e2970; }
+
+.fks-submit {
+  width: 100%; height: 48px; border-radius: 10px; border: 0;
+  background: #169458; color: #fff; font-size: 16px; font-weight: 600;
+  font-family: Kanit, sans-serif; cursor: pointer;
+}
+.fks-submit:disabled { background: #6b7280; cursor: not-allowed; }
+
+.fks-foot { font-size: 11px; color: #9ca3af; text-align: center; margin: 14px 0 0; }
+.fks-error { background: #fee2e2; color: #b91c1c; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin: 12px 0; }

@@ -1,0 +1,165 @@
+/* Phase 3 — bedside acceptance screen styling. */
+
+.ba-shell {
+  max-width: 900px;
+  margin: 24px auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-family: var(--font-family-primary, -apple-system, Segoe UI, Roboto, sans-serif);
+  color: var(--color-text-primary, #1a1a1a);
+}
+
+.ba-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  color: #271e4a;
+}
+
+.ba-loading {
+  text-align: center;
+  padding: 40px 0;
+  color: var(--color-text-muted, #5a5a5a);
+}
+
+.ba-banner {
+  padding: 10px 14px;
+  border-radius: 6px;
+  border-left: 4px solid;
+  font-size: 14px;
+}
+
+.ba-banner-bad {
+  background: #fdecee;
+  color: #7a1c25;
+  border-left-color: #b02a37;
+}
+
+.ba-banner-good {
+  background: #e6f4ea;
+  color: #14562a;
+  border-left-color: #1e7e34;
+}
+
+.ba-card {
+  background: var(--color-surface-card, #ffffff);
+  border: 1px solid var(--color-border, #d7d7d7);
+  border-radius: 8px;
+  padding: 18px 20px;
+}
+
+.ba-summary {
+  background: #f6faff;
+  border-color: #b8d4ff;
+}
+
+.ba-summary-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+  font-size: 15px;
+}
+
+.ba-meta {
+  color: var(--color-text-muted, #5a5a5a);
+  font-size: 13px;
+}
+
+.ba-meta-line {
+  margin: 4px 0;
+  font-size: 13.5px;
+}
+
+.ba-pill {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.ba-pill-em { background: #fdecee; color: #b02a37; border: 1px solid #f3bfc6; }
+.ba-pill-ur { background: #fff4e0; color: #b06a00; border: 1px solid #f3d9a8; }
+.ba-pill-ro { background: #e8f0fe; color: #0b5ed7; border: 1px solid #b8d4ff; }
+
+.ba-section-title {
+  margin: 0 0 8px;
+  font-size: 16px;
+  color: #271e4a;
+  font-weight: 600;
+}
+
+.ba-hint {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: var(--color-text-muted, #5a5a5a);
+}
+
+.ba-form-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.ba-input {
+  padding: 10px 12px;
+  border: 1px solid #b4b6ba;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 14px;
+  background: #f0f3ff;
+  flex: 1;
+}
+
+.ba-input:focus {
+  outline: none;
+  border-color: var(--color-brand-primary, #0b5ed7);
+  box-shadow: 0 0 3px rgba(11, 94, 215, 0.3);
+}
+
+.ba-form-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.ba-btn {
+  border: 1px solid var(--color-border, #d7d7d7);
+  background: #ffffff;
+  color: var(--color-text-primary, #1a1a1a);
+  padding: 8px 18px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background-color 0.15s ease;
+}
+
+.ba-btn:hover:not(:disabled) {
+  background: #f3f3f3;
+}
+
+.ba-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ba-btn-primary {
+  background: var(--color-brand-primary, #0b5ed7);
+  color: #fff;
+  border-color: transparent;
+}
+
+.ba-btn-primary:hover:not(:disabled) {
+  background: #094bad;
+}
+
+.ba-success {
+  background: #e6f4ea;
+  border-color: #b8e0c4;
+}

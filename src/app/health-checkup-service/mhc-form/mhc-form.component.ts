@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, FormArray, Validators, FormControl } from '@ang
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { ChangeDetectorRef } from '@angular/core';
+import { AlertService } from '../../services/alert.service';
 
 @Component({
   selector: 'app-mhc-form',
@@ -22,7 +23,7 @@ export class MhcFormComponent implements OnInit {
   isLoading: boolean = false;
   doctorMap: Map<number, string> = new Map();
 
-  constructor(private fb: FormBuilder, private doctorService: DoctorServiceService, private appointmentService: AppointmentConfirmService, private cdRef: ChangeDetectorRef) { }
+  constructor(private fb: FormBuilder, private doctorService: DoctorServiceService, private appointmentService: AppointmentConfirmService, private cdRef: ChangeDetectorRef, private alertSvc: AlertService) { }
 
   ngOnInit(): void {
     this.initForm();
@@ -669,7 +670,7 @@ export class MhcFormComponent implements OnInit {
 
     // If no valid appointments, prevent API call
     if (validAppointments.length === 0) {
-      alert("No valid appointments to book.");
+      this.alertSvc.show("No valid appointments to book.", { severity: 'warning' });
       return;
     }
 

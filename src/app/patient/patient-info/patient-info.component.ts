@@ -39,6 +39,7 @@ export class PatientInfoComponent implements OnInit {
   historyNotes: any[] = [];
   selectedHistoryNotes: any ='';
   investigationOrders: any[] = [];
+  selectedInvestigationOrders: any[] = [];
 
   goBack() {
     this.back.emit();
@@ -99,7 +100,8 @@ export class PatientInfoComponent implements OnInit {
     this.selectedPrescription = this.prescription.filter(
       (appt: any) => appt.prescribedDate === date
     );
-    this.investigationOrders = this.investigationOrders.filter((appt: any) => appt.date === date);
+    this.selectedInvestigationOrders = this.investigationOrders.filter((appt: any) => appt.date === date);
+    this.selectedHistoryNotes = this.historyNotes.find(d => d.date === date) || {};
 
     // console.log(this.selectedService)
     // Add logic here to get selectedServices and selectedVitals by date

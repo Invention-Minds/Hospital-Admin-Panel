@@ -1,0 +1,253 @@
+<div class="nurse-dashboard" *ngIf="!isLoading; else loadingTpl">
+  <ng-container *ngIf="summary as s">
+    <header class="dash-header">
+      <div>
+        <div class="greeting">{{ greeting }},</div>
+        <h1 class="page-title">
+          Nursing Station
+          <span class="role-chip">Bedside Nurse</span>
+          <span class="block-chip" *ngIf="s.blockId">Block {{ s.blockId }}</span>
+        </h1>
+        <div class="today-label">{{ todayLabel }}</div>
+      </div>
+      <div>
+        <button class="refresh-btn" (click)="refresh()" title="Refresh">
+          <i class="pi pi-refresh"></i>
+          <span>Refresh</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="error-banner" *ngIf="errorMsg">{{ errorMsg }}</div>
+    <div class="info-banner" *ngIf="s.blockId && !s.blockResolved">
+      Block "{{ s.blockId }}" couldn't be matched to a specific ward. Showing all wards as a fallback.
+    </div>
+
+    <!-- ─── KPI strip ──────────────────────────────────────────────── -->
+    <section class="kpi-strip">
+      <app-kpi-tile
+        icon="pi pi-users"
+        label="Patients allotted"
+        [value]="s.kpis.patientsAllotted"
+        accent="blue">
+      </app-kpi-tile>
+      <app-kpi-tile
+        icon="pi pi-clock"
+        label="Upcoming meds (1h)"
+        [value]="s.kpis.upcomingMeds1h"
+        [accent]="s.kpis.upcomingMeds1h > 0 ? 'amber' : 'green'">
+      </app-kpi-tile>
+      <app-kpi-tile
+        icon="pi pi-exclamation-circle"
+        label="Overdue meds"
+        [value]="s.kpis.overdueMeds"
+        [accent]="s.kpis.overdueMeds > 0 ? 'red' : 'green'">
+      </app-kpi-tile>
+      <app-kpi-tile
+        icon="pi pi-heart"
+        label="Overdue vitals"
+        [value]="s.kpis.overdueVitals"
+        [accent]="s.kpis.overdueVitals > 0 ? 'amber' : 'green'">
+      </app-kpi-tile>
+      <app-kpi-tile
+        icon="pi pi-file-edit"
+        label="Pending orders"
+        [value]="s.kpis.pendingOrders"
+        [accent]="s.kpis.pendingOrders > 0 ? 'amber' : 'slate'">
+      </app-kpi-tile>
+      <app-kpi-tile
+        icon="pi pi-bolt"
+        label="Critical patients"
+        [value]="s.kpis.criticalPatients"
+        [accent]="s.kpis.criticalPatients > 0 ? 'red' : 'green'">
+      </app-kpi-tile>
+    </section>
+
+    <!-- ─── My shifts today ────────────────────────────────────────── -->
+    <section class="my-shifts" *ngIf="s.myShifts.length">
+      <div class="shift-chip" *ngFor="let sh of s.myShifts" [attr.data-status]="sh.status">
+        <i class="pi pi-clock"></i>
+        <span class="shift-name">{{ sh.shiftName }}</span>
+        <span class="shift-time">{{ sh.startTime }}–{{ sh.endTime }}</span>
+        <span class="shift-ward" *ngIf="sh.ward">{{ sh.ward }}</span>
+        <span class="shift-status">{{ sh.status }}</span>
+      </div>
+    </section>
+
+    <!-- ─── Main row: Patient cards | Acuity donut ─────────────────── -->
+    <div class="main-row">
+      <section class="card">
+        <header class="card-header">
+          <div>
+            <h2>My patients</h2>
+            <p class="card-sub">{{ filteredPatients.length }} of {{ s.patients.length }} patients</p>
+          </div>
+          <div class="filter-pills">
+            <button class="pill" [class.active]="patientFilter === 'all'" (click)="setPatientFilter('all')">All</button>
+            <button class="pill" [class.active]="patientFilter === 'critical'" (click)="setPatientFilter('critical')">Critical</button>
+            <button class="pill" [class.active]="patientFilter === 'overdue'" (click)="setPatientFilter('overdue')">Needs attention</button>
+          </div>
+        </header>
+
+        <div class="patient-grid" *ngIf="filteredPatients.length; else emptyPatients">
+          <article
+            class="patient-card"
+            *ngFor="let p of filteredPatients; trackBy: trackPatient"
+            [class.icu]="p.icu"
+            [class.critical]="p.critical"
+            (click)="openPatient(p)">
+            <header class="pc-header">
+              <div class="pc-bed">
+                <span class="bed-num">{{ p.bedNumber || '—' }}</span>
+                <span class="ward-name" *ngIf="p.wardName">{{ p.wardName }}</span>
+              </div>
+              <div class="pc-flags">
+                <span class="flag flag-icu" *ngIf="p.icu" title="ICU"><i class="pi pi-bolt"></i></span>
+                <span class="flag flag-critical" *ngIf="p.critical && !p.icu" title="Critical"><i class="pi pi-exclamation-triangle"></i></span>
+              </div>
+            </header>
+            <div class="pc-name">{{ p.patientName || ('PRN ' + p.prn) }}</div>
+            <div class="pc-meta">
+              <span>Day {{ p.dayOfStay }}</span>
+              <span>·</span>
+              <span>{{ p.roomType }}</span>
+            </div>
+            <div class="pc-doctor">{{ p.admittingDoctor }}</div>
+            <div class="pc-dx" *ngIf="p.diagnosisShort">{{ p.diagnosisShort }}</div>
+
+            <div class="pc-allergies" *ngIf="p.allergies.length">
+              <i class="pi pi-info-circle"></i>
+              Allergies: {{ p.allergies.join(', ') }}
+            </div>
+
+            <div class="pc-vitals" *ngIf="p.lastVitals">
+              <span *ngIf="p.lastVitals.bp">BP {{ p.lastVitals.bp }}</span>
+              <span *ngIf="p.lastVitals.pulse !== null">HR {{ p.lastVitals.pulse }}</span>
+              <span *ngIf="p.lastVitals.spo2 !== null"
+                [class.low-spo2]="p.lastVitals.spo2 < 92">
+                SpO₂ {{ p.lastVitals.spo2 }}
+              </span>
+              <span *ngIf="p.lastVitals.temperatureC !== null"
+                [class.fever]="p.lastVitals.temperatureC >= 38">
+                {{ p.lastVitals.temperatureC }}°C
+              </span>
+              <span class="vitals-age muted">
+                {{ vitalsAgeMins(p.lastVitals.recordedAt) }}m ago
+              </span>
+            </div>
+            <div class="pc-vitals empty" *ngIf="!p.lastVitals">
+              <i class="pi pi-exclamation-triangle"></i> No vitals yet
+            </div>
+
+            <div class="pc-tasks">
+              <span class="task-chip task-warn" *ngIf="p.overdueMeds > 0">
+                {{ p.overdueMeds }} overdue med{{ p.overdueMeds === 1 ? '' : 's' }}
+              </span>
+              <span class="task-chip" *ngIf="p.upcomingMeds > 0">
+                {{ p.upcomingMeds }} due in 1h
+              </span>
+              <span class="task-chip task-warn" *ngIf="p.pendingOrders > 0">
+                {{ p.pendingOrders }} new order{{ p.pendingOrders === 1 ? '' : 's' }}
+              </span>
+              <span class="task-chip task-warn" *ngIf="p.vitalsOverdue">
+                Vitals overdue
+              </span>
+            </div>
+          </article>
+        </div>
+
+        <ng-template #emptyPatients>
+          <div class="empty-state">
+            <i class="pi pi-inbox"></i>
+            <p>No patients match this filter.</p>
+          </div>
+        </ng-template>
+      </section>
+
+      <aside class="side-col">
+        <section class="card">
+          <header class="card-header">
+            <div>
+              <h2>Patient acuity</h2>
+              <p class="card-sub">Distribution across your block</p>
+            </div>
+          </header>
+          <div class="donut-wrap" *ngIf="acuitySlices.length">
+            <app-donut-chart [slices]="acuitySlices" [showLegend]="true"></app-donut-chart>
+          </div>
+        </section>
+
+        <app-mini-stat-card
+          label="My MAR compliance"
+          [value]="s.myMarCompliance.percent !== null ? (s.myMarCompliance.percent + '%') : '—'"
+          [subText]="s.myMarCompliance.total > 0 ? (s.myMarCompliance.administered + ' / ' + s.myMarCompliance.total + ' doses') : 'No active prescriptions'"
+          [accent]="(s.myMarCompliance.percent || 100) < 80 ? 'amber' : 'green'"
+          icon="pi pi-check-circle">
+        </app-mini-stat-card>
+      </aside>
+    </div>
+
+    <!-- ─── Med timeline next 4h + Block census 7d ────────────────── -->
+    <div class="extra-row">
+      <section class="card">
+        <header class="card-header">
+          <div>
+            <h2>Medication timeline — next 4 hours</h2>
+            <p class="card-sub">{{ s.medTimeline.length }} doses due (oldest first)</p>
+          </div>
+        </header>
+        <ul class="med-timeline" *ngIf="s.medTimeline.length; else noTl">
+          <li *ngFor="let m of s.medTimeline" [class.overdue]="m.isOverdue">
+            <div class="tl-time">
+              <span class="tl-clock">{{ m.minutesFromNow }}m</span>
+              <span class="tl-when" *ngIf="m.isOverdue">overdue</span>
+              <span class="tl-when" *ngIf="!m.isOverdue">to go</span>
+            </div>
+            <div class="tl-body">
+              <div class="tl-primary">
+                <span>{{ m.genericName }}</span>
+                <span class="tl-dose">{{ m.dose }} · {{ m.route }}</span>
+              </div>
+              <div class="tl-secondary">
+                {{ m.patientName }} · Bed {{ m.bedNumber || '—' }}
+              </div>
+            </div>
+          </li>
+        </ul>
+        <ng-template #noTl>
+          <div class="empty-state empty-state-sm">
+            <i class="pi pi-check-circle"></i>
+            <p>No medications due in the next 4 hours.</p>
+          </div>
+        </ng-template>
+      </section>
+
+      <section class="card">
+        <header class="card-header">
+          <div>
+            <h2>Block census — last 7 days</h2>
+            <p class="card-sub">Cumulative admissions trend</p>
+          </div>
+        </header>
+        <div class="census-sparkline" *ngIf="s.blockCensus7d.length">
+          <div class="census-bar"
+            *ngFor="let c of s.blockCensus7d"
+            [style.height.%]="(c.count / (censusMax() || 1)) * 100"
+            [title]="c.date + ' — ' + c.count + ' admissions'">
+            <span class="census-val">{{ c.count }}</span>
+          </div>
+        </div>
+        <div class="census-axis">
+          <span *ngFor="let c of s.blockCensus7d">{{ shortDay(c.date) }}</span>
+        </div>
+      </section>
+    </div>
+  </ng-container>
+</div>
+
+<ng-template #loadingTpl>
+  <div class="loading-state">
+    <i class="pi pi-spin pi-spinner"></i>
+    <span>Loading the nursing dashboard…</span>
+  </div>
+</ng-template>

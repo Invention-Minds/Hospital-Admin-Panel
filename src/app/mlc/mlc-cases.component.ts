@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Observable, Subject } from 'rxjs';
+import { map, takeUntil } from 'rxjs/operators';
 import { MessageService } from 'primeng/api';
 import { MlcService, MlcCase } from '../services/mlc.service';
 
@@ -27,6 +27,9 @@ export class MlcCasesComponent implements OnInit, OnDestroy {
   selectedStatus: string = 'all';
   selectedCaseType: string = 'all';
   searchTerm: string = '';
+
+  // A doctor sees only MLC cases whose emergency was referred/assigned to them.
+  private isDoctor = false;
 
   private destroy$ = new Subject<void>();
 
@@ -55,6 +58,9 @@ export class MlcCasesComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      this.isDoctor = (localStorage.getItem('role') || '') === 'doctor';
+    }
     this.loadCases();
     this.loadStats();
     this.loadPendingCount();
@@ -67,7 +73,10 @@ export class MlcCasesComponent implements OnInit, OnDestroy {
 
   loadCases(): void {
     this.loading = true;
-    this.mlcService.getAllMlcCases()
+    const source$: Observable<MlcCase[]> = this.isDoctor
+      ? this.mlcService.getMyMlcCases().pipe(map((r) => r?.data ?? []))
+      : this.mlcService.getAllMlcCases();
+    source$
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (res: any) => {

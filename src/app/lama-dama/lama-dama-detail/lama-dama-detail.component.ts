@@ -102,6 +102,43 @@ export class LamaDamaDetailComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  // ---- Signature capture (e-sign) -----------------------------------------
+  showPatientSign = false;
+  showWitnessSign = false;
+
+  get patientSignerName(): string {
+    return this.patient?.name
+      || (this.record as RecordWithEmergency | null)?.emergency?.patientName
+      || 'Patient';
+  }
+  get signContextId(): string {
+    const emgId = (this.record as { emergencyId?: number } | null)?.emergencyId
+      ?? (this.record as RecordWithEmergency | null)?.emergency?.id;
+    return String(emgId ?? this.id ?? '');
+  }
+  get witnessNameValue(): string {
+    return (this.editForm.get('witnessName')?.value || '').trim();
+  }
+
+  onPatientSigned(resp: { id: string }): void {
+    // Store the SignatureBlob id (short ref), not the data URL — matches the
+    // register form and fits the witness/patientSignature column.
+    this.editForm.patchValue({ patientSignature: resp.id });
+    this.showPatientSign = false;
+  }
+  onWitnessSigned(resp: { id: string }): void {
+    this.editForm.patchValue({ witnessSignature: resp.id });
+    this.showWitnessSign = false;
+  }
+  clearPatientSignature(): void {
+    this.editForm.patchValue({ patientSignature: '' });
+    this.showPatientSign = false;
+  }
+  clearWitnessSignature(): void {
+    this.editForm.patchValue({ witnessSignature: '' });
+    this.showWitnessSign = false;
+  }
+
   // ---- Display helpers ----------------------------------------------------
 
   get hmisId(): string | null {

@@ -1,0 +1,64 @@
+<div class="ir-bg" (click)="cancel()">
+  <div class="ir-modal" (click)="$event.stopPropagation()">
+    <h3 class="ir-title">🚩 Raise an incident</h3>
+    <p class="ir-sub">Patient-safety reporting. All raises are audit-logged.</p>
+
+    <div class="ir-banner ir-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+    <div class="ir-grid">
+      <label class="ir-field">Category *
+        <select [(ngModel)]="draft.category">
+          <option *ngFor="let c of CATEGORIES" [value]="c">{{ c }}</option>
+        </select>
+      </label>
+      <label class="ir-field">Severity *
+        <select [(ngModel)]="draft.severity">
+          <option *ngFor="let s of SEVERITIES" [value]="s">{{ s.replace('_',' ') }}</option>
+        </select>
+      </label>
+    </div>
+
+    <label class="ir-field">Title *
+      <input type="text" [(ngModel)]="draft.title" placeholder="One-line summary, e.g. 'Wrong-site marking missed in OT-2'" />
+    </label>
+
+    <label class="ir-field">Description *
+      <textarea rows="5" [(ngModel)]="draft.description"
+                placeholder="What happened? Who was involved? Immediate actions taken? Avoid PHI in the description."></textarea>
+    </label>
+
+    <div class="ir-grid">
+      <label class="ir-field">When did it occur?
+        <input type="datetime-local" [(ngModel)]="draft.occurredAt" />
+      </label>
+      <label class="ir-field">NABH clause (optional)
+        <input type="text" [(ngModel)]="draft.nabhClause" placeholder="e.g. PSQ.4" />
+      </label>
+      <label class="ir-field">QI indicator (optional)
+        <select [(ngModel)]="draft.qiCode">
+          <option [ngValue]="null">— none —</option>
+          <option *ngFor="let c of QI_CODES" [value]="c">{{ c }}</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="ir-context" *ngIf="patientPrn || patientName || ward || department || admissionId || emergencyId">
+      <span class="ir-ctx-label">Linked context</span>
+      <div class="ir-ctx-row">
+        <span *ngIf="patientName">{{ patientName }}</span>
+        <span *ngIf="patientPrn"> · PRN {{ patientPrn }}</span>
+        <span *ngIf="ward"> · {{ ward }}</span>
+        <span *ngIf="department"> · {{ department }}</span>
+        <span *ngIf="admissionId"> · admission</span>
+        <span *ngIf="emergencyId"> · ER #{{ emergencyId }}</span>
+      </div>
+    </div>
+
+    <div class="ir-actions">
+      <button class="ir-btn" (click)="cancel()" [disabled]="saving">Cancel</button>
+      <button class="ir-btn ir-btn-primary" (click)="save()" [disabled]="saving">
+        {{ saving ? 'Raising…' : 'Raise incident' }}
+      </button>
+    </div>
+  </div>
+</div>

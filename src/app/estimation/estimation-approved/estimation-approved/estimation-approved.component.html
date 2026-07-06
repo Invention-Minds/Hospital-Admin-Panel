@@ -171,21 +171,23 @@
           
           
           
-          <td class="button">
-
-            <button class="btn-action" *ngIf="estimation.statusOfEstimation !== 'completed'" (click)="openFollowUpPopup(estimation)" pTooltip="Follow-Ups"
-              tooltipPosition="top">
-              <img src="/follow-up.svg" alt="Confirm">
-            </button>
-            <button class="btn-action" (click)="openAppointmentForm(estimation)" pTooltip="View" tooltipPosition="top">
-              <img src="/view.svg" alt="Confirm">
-            </button>
-            <button class="btn-action" *ngIf="estimation.statusOfEstimation !== 'completed'" (click)="resend(estimation)" pTooltip="Resend" tooltipPosition="top">
-              <img src="/resend.svg" alt="Confirm">
-            </button>
-            <button class="btn-action"  (click)="print(estimation)" pTooltip="Print" tooltipPosition="top">
-              <img src="/print.svg" alt="Confirm">
-            </button>
+          <td class="button action-cell">
+            <div class="est-action-icons">
+              <button class="btn-action" *ngIf="estimation.statusOfEstimation !== 'completed'" (click)="openFollowUpPopup(estimation)" pTooltip="Follow-Ups"
+                tooltipPosition="top">
+                <img src="/follow-up.svg" alt="Confirm">
+              </button>
+              <button class="btn-action" (click)="openAppointmentForm(estimation)" pTooltip="View" tooltipPosition="top">
+                <img src="/view.svg" alt="Confirm">
+              </button>
+              <button class="btn-action" *ngIf="estimation.statusOfEstimation !== 'completed'" (click)="resend(estimation)" pTooltip="Resend" tooltipPosition="top">
+                <img src="/resend.svg" alt="Confirm">
+              </button>
+              <button class="btn-action"  (click)="print(estimation)" pTooltip="Print" tooltipPosition="top">
+                <img src="/print.svg" alt="Confirm">
+              </button>
+              <app-estimation-admission-actions [estimation]="estimation"></app-estimation-admission-actions>
+            </div>
           </td>
         </tr>
       </tbody>

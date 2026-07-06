@@ -1,206 +1,327 @@
-<div class="emergency-intake-container">
-  <div class="card">
-    <h2 class="section-title">Emergency Case Intake</h2>
+<!-- Phase 9.9 — redesigned with shared dm-* design module. All formControlName,
+     ngModel, p-autoComplete, p-dropdown bindings are preserved 1:1 — only the
+     wrapper class names and section structure changed. -->
+<div class="dm-page">
+  <div class="dm-page-header">
+    <div>
+      <h2 class="dm-page-title">Emergency Case Intake</h2>
+      <p class="dm-page-sub">ABCDE primary survey, triage, vitals and disposition handoff.</p>
+    </div>
+  </div>
 
-    <form [formGroup]="emergencyForm" (ngSubmit)="onSubmit()">
-      <div class="grid">
-        <!-- Patient Information -->
-        <div class="col-12">
-          <h4 class="form-section-title">Patient Information</h4>
+  <form [formGroup]="emergencyForm" (ngSubmit)="onSubmit()">
+    <!-- ── Patient Information ── -->
+    <div class="dm-card">
+      <h3 class="dm-section-title">Patient Information</h3>
+      <div class="dm-form-grid">
+        <div class="dm-field">
+          <label for="prn" class="dm-field-label">Patient <span class="dm-required">*</span></label>
+          <p-autoComplete
+            [(ngModel)]="selectedPatient"
+            [ngModelOptions]="{ standalone: true }"
+            [suggestions]="filteredPatients"
+            (completeMethod)="searchPatients($event)"
+            (onSelect)="onPatientSelect($event.value || $event)"
+            (onClear)="onPatientClear()"
+            field="name"
+            [forceSelection]="true"
+            placeholder="Type name or PRN…"
+            [style]="{'width':'100%'}"
+            [inputStyle]="{'width':'100%'}"
+            appendTo="body"
+            data-testid="emergency-intake-patient-picker">
+            <ng-template let-p pTemplate="item">
+              <div class="flex flex-column">
+                <span><strong>{{ p.name }}</strong></span>
+                <span class="text-sm text-color-secondary">PRN {{ p.prn }}<span *ngIf="p.mobileNo"> · {{ p.mobileNo }}</span></span>
+              </div>
+            </ng-template>
+          </p-autoComplete>
+          <small class="dm-error" *ngIf="emergencyForm.get('prn')?.invalid && emergencyForm.get('prn')?.touched">
+            Patient is required
+          </small>
         </div>
 
-        <div class="col-12 md:col-6">
-          <div class="form-group">
-            <label for="prn" class="form-label">PRN / UHID *</label>
-            <input
-              pInputText
-              id="prn"
-              formControlName="prn"
-              class="w-full"
-              placeholder="Enter PRN or new patient"
-            />
-            <small class="text-red-500" *ngIf="emergencyForm.get('prn')?.invalid && emergencyForm.get('prn')?.touched">
-              PRN is required
-            </small>
-          </div>
+        <div class="dm-field">
+          <label for="triageCategory" class="dm-field-label">Triage Category <span class="dm-required">*</span></label>
+          <p-dropdown
+            [options]="triageCategories"
+            formControlName="triageCategory"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Select triage category"
+            [style]="{'width': '100%'}"
+          ></p-dropdown>
         </div>
 
-        <div class="col-12 md:col-6">
-          <div class="form-group">
-            <label for="triageCategory" class="form-label">Triage Category *</label>
-            <p-dropdown
-              [options]="triageCategories"
-              formControlName="triageCategory"
-              optionLabel="label"
-              optionValue="value"
-              placeholder="Select triage category"
-              [style]="{'width': '100%'}"
-            ></p-dropdown>
-          </div>
+        <!-- Demographics — auto-filled from the patient master on select,
+             but editable for unknown/unconscious patients or stale records. -->
+        <div class="dm-field">
+          <label for="patientName" class="dm-field-label">Patient Name <span class="dm-required">*</span></label>
+          <input pInputText id="patientName" formControlName="patientName" class="dm-input" placeholder="Patient name" />
+          <small class="dm-error" *ngIf="emergencyForm.get('patientName')?.invalid && emergencyForm.get('patientName')?.touched">
+            Patient name is required
+          </small>
         </div>
-
-        <!-- Chief Complaint & Assessment -->
-        <div class="col-12">
-          <h4 class="form-section-title">Assessment</h4>
+        <div class="dm-field">
+          <label for="age" class="dm-field-label">Age</label>
+          <input pInputText id="age" formControlName="age" type="number" min="0" max="120" class="dm-input" placeholder="Years" />
         </div>
-
-        <div class="col-12">
-          <div class="form-group">
-            <label for="presentingComplaint" class="form-label">Presenting Complaint *</label>
-            <textarea
-              pInputTextarea
-              id="presentingComplaint"
-              formControlName="presentingComplaint"
-              rows="3"
-              class="w-full"
-              placeholder="Enter presenting complaint"
-            ></textarea>
-          </div>
+        <div class="dm-field">
+          <label for="gender" class="dm-field-label">Gender</label>
+          <select id="gender" formControlName="gender" class="dm-select">
+            <option value="">—</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+          </select>
         </div>
-
-        <div class="col-12">
-          <div class="form-group">
-            <label for="abcdeAssessment" class="form-label">ABCDE Assessment *</label>
-            <textarea
-              pInputTextarea
-              id="abcdeAssessment"
-              formControlName="abcdeAssessment"
-              rows="4"
-              class="w-full"
-              placeholder="A: Airway | B: Breathing | C: Circulation | D: Disability | E: Exposure"
-            ></textarea>
-          </div>
+        <div class="dm-field">
+          <label for="phoneNumber" class="dm-field-label">Phone Number</label>
+          <input pInputText id="phoneNumber" formControlName="phoneNumber" class="dm-input" placeholder="Contact number" />
         </div>
-
-        <div class="col-12 md:col-6">
-          <div class="form-group">
-            <label for="traumaScore" class="form-label">Trauma Score (ISS/GCS)</label>
-            <input
-              pInputText
-              id="traumaScore"
-              formControlName="traumaScore"
-              type="number"
-              class="w-full"
-              placeholder="e.g., 15 for GCS"
-            />
-          </div>
-        </div>
-
-        <!-- Vitals -->
-        <div class="col-12">
-          <h4 class="form-section-title">Vital Signs</h4>
-        </div>
-
-        <div class="col-12 md:col-6">
-          <div class="form-group">
-            <label for="vitalsBP" class="form-label">Blood Pressure *</label>
-            <input
-              pInputText
-              id="vitalsBP"
-              formControlName="vitalsBP"
-              class="w-full"
-              placeholder="e.g., 120/80"
-            />
-          </div>
-        </div>
-
-        <div class="col-12 md:col-6">
-          <div class="form-group">
-            <label for="vitalsHR" class="form-label">Heart Rate (bpm) *</label>
-            <input
-              pInputText
-              id="vitalsHR"
-              formControlName="vitalsHR"
-              type="number"
-              class="w-full"
-              placeholder="e.g., 80"
-            />
-          </div>
-        </div>
-
-        <div class="col-12 md:col-6">
-          <div class="form-group">
-            <label for="vitalsRR" class="form-label">Respiratory Rate (breaths/min) *</label>
-            <input
-              pInputText
-              id="vitalsRR"
-              formControlName="vitalsRR"
-              type="number"
-              class="w-full"
-              placeholder="e.g., 16"
-            />
-          </div>
-        </div>
-
-        <div class="col-12 md:col-6">
-          <div class="form-group">
-            <label for="vitalsSpO2" class="form-label">SpO2 (%) *</label>
-            <input
-              pInputText
-              id="vitalsSpO2"
-              formControlName="vitalsSpO2"
-              type="number"
-              class="w-full"
-              placeholder="e.g., 98"
-            />
-          </div>
-        </div>
-
-        <div class="col-12 md:col-6">
-          <div class="form-group">
-            <label for="vitalsTemp" class="form-label">Temperature (°C) *</label>
-            <input
-              pInputText
-              id="vitalsTemp"
-              formControlName="vitalsTemp"
-              type="number"
-              step="0.1"
-              class="w-full"
-              placeholder="e.g., 37.5"
-            />
-          </div>
-        </div>
-
-        <!-- Procedures -->
-        <div class="col-12">
-          <h4 class="form-section-title">Procedures & Interventions</h4>
-        </div>
-
-        <div class="col-12">
-          <div class="form-group">
-            <label for="proceduresDone" class="form-label">Procedures Done</label>
-            <textarea
-              pInputTextarea
-              id="proceduresDone"
-              formControlName="proceduresDone"
-              rows="3"
-              class="w-full"
-              placeholder="List any procedures performed"
-            ></textarea>
-          </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="col-12">
-          <div class="button-group">
-            <button
-              pButton
-              type="submit"
-              label="Register Emergency Case"
-              class="p-button-primary"
-              [loading]="loading"
-            ></button>
-            <button
-              pButton
-              type="button"
-              label="Reset"
-              class="p-button-outlined"
-              (click)="resetForm()"
-              [disabled]="loading"
-            ></button>
-          </div>
+        <div class="dm-field dm-field-full">
+          <label for="allergies" class="dm-field-label">Known Allergies / Drug Reactions</label>
+          <textarea pInputTextarea id="allergies" formControlName="allergies" rows="2"
+                    class="dm-textarea" placeholder="e.g., Penicillin, NSAIDs — or 'NKDA' if none known"></textarea>
         </div>
       </div>
-    </form>
-  </div>
+    </div>
+
+    <!-- ── Chief Complaint & Assessment ── -->
+    <div class="dm-card">
+      <h3 class="dm-section-title">Assessment</h3>
+      <div class="dm-form-grid">
+        <div class="dm-field dm-field-full">
+          <label for="presentingComplaint" class="dm-field-label">Presenting Complaint <span class="dm-required">*</span></label>
+          <textarea pInputTextarea id="presentingComplaint"
+                    formControlName="presentingComplaint" rows="3"
+                    class="dm-textarea"
+                    placeholder="Enter presenting complaint"></textarea>
+        </div>
+
+        <div class="dm-field dm-field-full">
+          <label for="abcdeAssessment" class="dm-field-label">ABCDE Assessment <span class="dm-required">*</span></label>
+          <textarea pInputTextarea id="abcdeAssessment"
+                    formControlName="abcdeAssessment" rows="4"
+                    class="dm-textarea"
+                    placeholder="A: Airway | B: Breathing | C: Circulation | D: Disability | E: Exposure"></textarea>
+        </div>
+
+        <div class="dm-field">
+          <label for="traumaScore" class="dm-field-label">Trauma Score (ISS/GCS)</label>
+          <input pInputText id="traumaScore" formControlName="traumaScore" type="number"
+                 class="dm-input" placeholder="e.g., 15 for GCS" />
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Vital Signs ── -->
+    <div class="dm-card">
+      <h3 class="dm-section-title">Vital Signs</h3>
+      <!-- 3-col so the 5 vitals fit in 2 tidy rows instead of 2½ -->
+      <div class="dm-form-grid-3">
+        <div class="dm-field">
+          <label for="vitalsBP" class="dm-field-label">Blood Pressure <span class="dm-required">*</span></label>
+          <input pInputText id="vitalsBP" formControlName="vitalsBP" class="dm-input" placeholder="e.g., 120/80" />
+        </div>
+        <div class="dm-field">
+          <label for="vitalsHR" class="dm-field-label">Heart Rate (bpm) <span class="dm-required">*</span></label>
+          <input pInputText id="vitalsHR" formControlName="vitalsHR" type="number" class="dm-input" placeholder="e.g., 80" />
+        </div>
+        <div class="dm-field">
+          <label for="vitalsRR" class="dm-field-label">Respiratory Rate <span class="dm-required">*</span></label>
+          <input pInputText id="vitalsRR" formControlName="vitalsRR" type="number" class="dm-input" placeholder="e.g., 16 /min" />
+        </div>
+        <div class="dm-field">
+          <label for="vitalsSpO2" class="dm-field-label">SpO₂ (%) <span class="dm-required">*</span></label>
+          <input pInputText id="vitalsSpO2" formControlName="vitalsSpO2" type="number" class="dm-input" placeholder="e.g., 98" />
+        </div>
+        <div class="dm-field">
+          <label for="vitalsTemp" class="dm-field-label">Temperature (°C) <span class="dm-required">*</span></label>
+          <input pInputText id="vitalsTemp" formControlName="vitalsTemp" type="number" step="0.1" class="dm-input" placeholder="e.g., 37.5" />
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Procedures & Interventions ── -->
+    <div class="dm-card">
+      <h3 class="dm-section-title">Procedures & Medications</h3>
+      <div class="dm-form-grid">
+        <div class="dm-field dm-field-full">
+          <label for="proceduresDone" class="dm-field-label">Procedures Done</label>
+          <textarea pInputTextarea id="proceduresDone" formControlName="proceduresDone" rows="3"
+                    class="dm-textarea" placeholder="List any procedures performed"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Arrival Context ── -->
+    <div class="dm-card">
+      <h3 class="dm-section-title">Arrival Context</h3>
+      <div class="dm-form-grid-3">
+        <div class="dm-field">
+          <label for="modeOfArrival" class="dm-field-label">Mode of Arrival</label>
+          <select id="modeOfArrival" formControlName="modeOfArrival" class="dm-select">
+            <option value="">—</option>
+            <option value="walk-in">Walk-in</option>
+            <option value="ambulance">Ambulance</option>
+            <option value="private-vehicle">Private Vehicle</option>
+            <option value="transferred">Transferred</option>
+            <option value="police">Police</option>
+          </select>
+        </div>
+        <div class="dm-field">
+          <label for="broughtBy" class="dm-field-label">Brought By</label>
+          <input pInputText id="broughtBy" formControlName="broughtBy" class="dm-input" placeholder="Relative / bystander name" />
+        </div>
+        <div class="dm-field">
+          <label for="historyGivenBy" class="dm-field-label">History Given By</label>
+          <input pInputText id="historyGivenBy" formControlName="historyGivenBy" class="dm-input" placeholder="Informant" />
+        </div>
+        <div class="dm-field">
+          <label for="referralFrom" class="dm-field-label">Referred From</label>
+          <input pInputText id="referralFrom" formControlName="referralFrom" class="dm-input" placeholder="Referring facility / doctor" />
+        </div>
+        <div class="dm-field">
+          <label for="referredTo" class="dm-field-label">Referred To</label>
+          <input pInputText id="referredTo" formControlName="referredTo" class="dm-input" placeholder="If onward referral" />
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Identification & MLC ── -->
+    <div class="dm-card">
+      <h3 class="dm-section-title">Identification &amp; MLC</h3>
+      <div class="dm-form-grid">
+        <div class="dm-field dm-field-full">
+          <label for="identificationMark" class="dm-field-label">Identification Mark</label>
+          <textarea pInputTextarea id="identificationMark" formControlName="identificationMark" rows="2"
+                    class="dm-textarea" placeholder="Visible scars, tattoos, distinguishing features"></textarea>
+        </div>
+        <div class="dm-field">
+          <label class="dm-inline">
+            <input type="checkbox" formControlName="policeInformationGiven" />
+            Police Information Given
+          </label>
+        </div>
+        <div class="dm-field dm-field-full">
+          <label for="reasonsForMlc" class="dm-field-label">Reasons for MLC</label>
+          <textarea pInputTextarea id="reasonsForMlc" formControlName="reasonsForMlc" rows="2"
+                    class="dm-textarea" placeholder="If MLC — e.g., RTA, assault, poisoning, burns"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Primary Survey & Triage ── -->
+    <div class="dm-card">
+      <h3 class="dm-section-title">Primary Survey &amp; Triage</h3>
+      <div class="dm-form-grid-3">
+        <div class="dm-field">
+          <label for="painScore" class="dm-field-label">Pain Score (0–10)</label>
+          <input pInputText id="painScore" formControlName="painScore" type="number" min="0" max="10" class="dm-input" placeholder="0–10" />
+        </div>
+        <div class="dm-field">
+          <label for="airway" class="dm-field-label">A — Airway</label>
+          <input pInputText id="airway" formControlName="airway" class="dm-input" placeholder="Patent / obstructed" />
+        </div>
+        <div class="dm-field">
+          <label for="breathing" class="dm-field-label">B — Breathing</label>
+          <input pInputText id="breathing" formControlName="breathing" class="dm-input" placeholder="Normal / laboured" />
+        </div>
+        <div class="dm-field">
+          <label for="circulation" class="dm-field-label">C — Circulation</label>
+          <input pInputText id="circulation" formControlName="circulation" class="dm-input" placeholder="Pulse / perfusion" />
+        </div>
+        <div class="dm-field">
+          <label for="mentalStatus" class="dm-field-label">D — Mental Status</label>
+          <input pInputText id="mentalStatus" formControlName="mentalStatus" class="dm-input" placeholder="AVPU / GCS" />
+        </div>
+        <div class="dm-field">
+          <label for="pupilsRight" class="dm-field-label">Pupils — Right</label>
+          <input pInputText id="pupilsRight" formControlName="pupilsRight" class="dm-input" placeholder="Size / reaction" />
+        </div>
+        <div class="dm-field">
+          <label for="pupilsLeft" class="dm-field-label">Pupils — Left</label>
+          <input pInputText id="pupilsLeft" formControlName="pupilsLeft" class="dm-input" placeholder="Size / reaction" />
+        </div>
+      </div>
+      <div class="dm-form-grid">
+        <div class="dm-field dm-field-full">
+          <label for="secondarySurvey" class="dm-field-label">Secondary Survey</label>
+          <textarea pInputTextarea id="secondarySurvey" formControlName="secondarySurvey" rows="3"
+                    class="dm-textarea" placeholder="Head-to-toe findings"></textarea>
+        </div>
+        <div class="dm-field dm-field-full">
+          <label for="workingDiagnosis" class="dm-field-label">Working Diagnosis</label>
+          <textarea pInputTextarea id="workingDiagnosis" formControlName="workingDiagnosis" rows="2"
+                    class="dm-textarea" placeholder="Provisional diagnosis"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Disposition & Hand-off ── -->
+    <div class="dm-card">
+      <h3 class="dm-section-title">Disposition &amp; Hand-off</h3>
+      <div class="dm-form-grid">
+        <div class="dm-field">
+          <label for="conditionAtDisposition" class="dm-field-label">Condition at Disposition</label>
+          <input pInputText id="conditionAtDisposition" formControlName="conditionAtDisposition" class="dm-input" placeholder="Stable / critical / deteriorating" />
+        </div>
+        <div class="dm-field">
+          <label for="disposition" class="dm-field-label">Disposition</label>
+          <select id="disposition" formControlName="disposition" class="dm-select">
+            <option value="">—</option>
+            <option value="admit-ward">Admit — Ward</option>
+            <option value="admit-icu">Admit — ICU</option>
+            <option value="ot">Shifted to OT</option>
+            <option value="discharge">Discharge</option>
+            <option value="dama">DAMA</option>
+            <option value="transferred">Transferred Out</option>
+            <option value="expired">Expired</option>
+          </select>
+        </div>
+        <div class="dm-field">
+          <label for="handOffDoctorName" class="dm-field-label">Hand-off Doctor</label>
+          <p-autoComplete id="handOffDoctorName" formControlName="handOffDoctorName"
+            [suggestions]="filteredDoctorNames" (completeMethod)="searchDoctors($event)"
+            [dropdown]="true" appendTo="body" placeholder="Outgoing doctor name"
+            [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" inputStyleClass="dm-input">
+          </p-autoComplete>
+        </div>
+        <div class="dm-field">
+          <label for="receivingDoctorName" class="dm-field-label">Receiving Doctor</label>
+          <p-autoComplete id="receivingDoctorName" formControlName="receivingDoctorName"
+            [suggestions]="filteredDoctorNames" (completeMethod)="searchDoctors($event)"
+            [dropdown]="true" appendTo="body" placeholder="Incoming doctor name"
+            [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" inputStyleClass="dm-input">
+          </p-autoComplete>
+        </div>
+        <div class="dm-field">
+          <label for="handOffNurseName" class="dm-field-label">Hand-off Nurse</label>
+          <p-autoComplete id="handOffNurseName" formControlName="handOffNurseName"
+            [suggestions]="filteredNurseNames" (completeMethod)="searchNurses($event)"
+            [dropdown]="true" appendTo="body" placeholder="Outgoing nurse name"
+            [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" inputStyleClass="dm-input">
+          </p-autoComplete>
+        </div>
+        <div class="dm-field">
+          <label for="receivingNurseName" class="dm-field-label">Receiving Nurse</label>
+          <p-autoComplete id="receivingNurseName" formControlName="receivingNurseName"
+            [suggestions]="filteredNurseNames" (completeMethod)="searchNurses($event)"
+            [dropdown]="true" appendTo="body" placeholder="Incoming nurse name"
+            [style]="{'width':'100%'}" [inputStyle]="{'width':'100%'}" inputStyleClass="dm-input">
+          </p-autoComplete>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Action footer ── -->
+    <div class="dm-actions">
+      <button pButton type="button" label="Reset" class="dm-btn dm-btn-secondary"
+              (click)="resetForm()" [disabled]="loading"></button>
+      <button pButton type="submit" label="Register Emergency Case"
+              class="dm-btn dm-btn-primary" [loading]="loading"></button>
+    </div>
+  </form>
 </div>

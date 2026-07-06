@@ -1,0 +1,92 @@
+<div class="ec-shell">
+  <div class="ec-head">
+    <div>
+      <h2 class="ec-title">Emergency Surgery Charges</h2>
+      <p class="ec-sub">Schedule: <code>{{ scheduleId }}</code></p>
+    </div>
+    <button class="ec-btn" (click)="close()">Close</button>
+  </div>
+
+  <div class="ec-banner ec-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="ec-banner ec-good" *ngIf="successMessage">{{ successMessage }}</div>
+
+  <div class="ec-loading" *ngIf="loading">Loading…</div>
+
+  <div class="ec-layout" *ngIf="!loading">
+    <!-- Add form -->
+    <section class="ec-card">
+      <h3 class="ec-card-h">Add Surcharge</h3>
+      <label class="ec-field">
+        <span>Type</span>
+        <select [(ngModel)]="draft.surchargeType">
+          <option *ngFor="let t of types" [value]="t.value">{{ t.label }}</option>
+        </select>
+      </label>
+      <label class="ec-field">
+        <span>Reason</span>
+        <input type="text" [(ngModel)]="draft.reason" placeholder="e.g. surgery began at 23:30" />
+      </label>
+      <div class="ec-row">
+        <label class="ec-field">
+          <span>Base Amount (₹)</span>
+          <input type="number" [(ngModel)]="draft.baseAmount" min="0" />
+        </label>
+        <label class="ec-field">
+          <span>Percent of Base (%)</span>
+          <input type="number" [(ngModel)]="draft.percent" min="0" max="100" step="0.01" />
+        </label>
+        <label class="ec-field">
+          <span>Flat Amount (₹)</span>
+          <input type="number" [(ngModel)]="draft.flatAmount" min="0" />
+        </label>
+      </div>
+      <div class="ec-total">Computed total: <strong>₹{{ computedTotal() }}</strong></div>
+      <div class="ec-actions">
+        <button class="ec-btn ec-btn-primary" (click)="add()" [disabled]="saving">
+          {{ saving ? 'Saving…' : 'Add Surcharge' }}
+        </button>
+      </div>
+    </section>
+
+    <!-- List -->
+    <section class="ec-card">
+      <h3 class="ec-card-h">Surcharges on this schedule</h3>
+      <table class="ec-table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Reason</th>
+            <th class="ec-r">Base</th>
+            <th class="ec-r">%</th>
+            <th class="ec-r">Flat</th>
+            <th class="ec-r">Total</th>
+            <th>Posted</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="!rows.length"><td colspan="8" class="ec-muted">No surcharges yet.</td></tr>
+          <tr *ngFor="let r of rows">
+            <td>{{ r.surchargeType }}</td>
+            <td>{{ r.reason || '—' }}</td>
+            <td class="ec-r">₹{{ r.baseAmount }}</td>
+            <td class="ec-r">{{ r.percent }}</td>
+            <td class="ec-r">₹{{ r.flatAmount }}</td>
+            <td class="ec-r"><strong>₹{{ r.totalAmount }}</strong></td>
+            <td>
+              <span *ngIf="r.appliedToEstimation" class="ec-pill ec-pill-good">Applied</span>
+              <span *ngIf="!r.appliedToEstimation" class="ec-pill">Draft</span>
+            </td>
+            <td>
+              <button class="ec-btn-link" *ngIf="!r.appliedToEstimation" (click)="apply(r)">Post</button>
+              <button class="ec-btn-link ec-bad-link" *ngIf="!r.appliedToEstimation" (click)="remove(r)">Remove</button>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot *ngIf="rows.length">
+          <tr><td colspan="5" class="ec-r"><strong>Grand Total</strong></td><td class="ec-r"><strong>₹{{ meta.grandTotal }}</strong></td><td colspan="2"></td></tr>
+        </tfoot>
+      </table>
+    </section>
+  </div>
+</div>

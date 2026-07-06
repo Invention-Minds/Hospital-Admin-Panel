@@ -1,0 +1,127 @@
+/* Phase 9.14 — Insulin Infusion Chart. Wrapper inherits .page + .dm-table
+ * (Confirmed-Appt design) from global forms.css. */
+
+.ins-banner {
+  padding: 11px 15px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: Kanit, sans-serif;
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+.ins-bad  { background: #fee2e2; color: #b91c1c; border-left: 3px solid #dc2626; }
+.ins-good { background: #dcfce7; color: #166534; border-left: 3px solid #16a34a; }
+
+/* Patient context strip */
+.ins-context {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px 28px;
+  align-items: center;
+  font-family: Kanit, sans-serif;
+  font-size: 14px;
+  color: #271e4a;
+}
+.ins-ctx-label {
+  display: block;
+  font-size: 11px;
+  color: #7b7b7b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+.ins-ctx-action { margin-left: auto; }
+
+/* Phase 9.18 — doctor-ordered glucose monitoring cadence */
+.ins-order {
+  display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: center;
+  justify-content: space-between; font-family: Kanit, sans-serif;
+}
+.ins-order-main { display: flex; flex-direction: column; gap: 6px; }
+.ins-order-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.ins-order-select {
+  height: 40px; padding: 8px 12px; font-family: Kanit, sans-serif; font-size: 14px;
+  color: #271e4a; background: #f0f3ff; border: 1px solid #b4b6ba; border-radius: 6px;
+  min-width: 200px;
+}
+.ins-order-select:focus { border-color: #007bff; box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.18); outline: none; }
+.ins-order-set { font-size: 12px; color: #7b7b7b; }
+.ins-order-status { display: flex; align-items: center; }
+.ins-overdue-pill {
+  font-size: 13px; font-weight: 600; border-radius: 14px; padding: 6px 14px; white-space: nowrap;
+}
+.ins-overdue-bad { background: #fee2e2; color: #b91c1c; }
+.ins-overdue-ok  { background: #dcfce7; color: #166534; }
+
+.ins-loading { padding: 40px; text-align: center; color: #7b7b7b; font-style: italic; font-family: Kanit, sans-serif; }
+.ins-empty { padding: 40px; text-align: center; color: #9ca3af; font-family: Kanit, sans-serif; }
+.ins-table-wrap { overflow-x: auto; }
+
+/* Glucose value emphasis */
+.ins-glucose { font-weight: 600; }
+.ins-glucose-high { color: #dc2626; }
+.ins-glucose-high::after { content: ' ▲'; font-size: 10px; }
+.ins-glucose-low  { color: #c2410c; }
+.ins-glucose-low::after { content: ' ▼'; font-size: 10px; }
+
+.ins-order-cell { text-align: left !important; }
+.ins-signed { color: #16a34a; font-size: 12px; margin-left: 4px; }
+
+.ins-actions-cell { white-space: nowrap; }
+.ins-btn-link {
+  background: transparent; border: none; color: #1d4ed8; cursor: pointer;
+  font-size: 12px; font-family: Kanit, sans-serif; padding: 0 6px;
+}
+.ins-btn-link:hover { text-decoration: underline; }
+.ins-btn-link[disabled] { opacity: 0.45; cursor: not-allowed; text-decoration: none; }
+.ins-bad-link { color: #b91c1c; }
+
+/* Modal */
+.ins-modal-bg {
+  position: fixed; inset: 0; background: rgba(15, 23, 42, 0.5); z-index: 1000;
+  display: flex; align-items: center; justify-content: center; padding: 24px;
+}
+.ins-modal {
+  background: #fff; border-radius: 12px; width: 100%; max-width: 600px;
+  max-height: 90vh; overflow-y: auto; padding: 22px 24px;
+  font-family: Kanit, sans-serif; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+.ins-modal-title { margin: 0 0 14px; font-size: 18px; font-weight: 600; color: #271e4a; }
+.ins-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 520px) { .ins-grid { grid-template-columns: 1fr; } }
+.ins-field {
+  display: flex; flex-direction: column; gap: 5px;
+  font-size: 12px; color: #4b5563; margin-bottom: 12px;
+}
+.ins-field input, .ins-field textarea {
+  height: 40px; padding: 8px 12px; font-family: Kanit, sans-serif; font-size: 14px;
+  color: #271e4a; background: #f0f3ff; border: 1px solid #b4b6ba;
+  border-radius: 6px; box-sizing: border-box;
+}
+.ins-field textarea { height: auto; resize: vertical; }
+.ins-field input:focus, .ins-field textarea:focus {
+  border-color: #007bff; box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.18); outline: none;
+}
+
+/* Sign rows */
+.ins-sign-row { display: flex; gap: 12px; align-items: flex-end; }
+.ins-field-grow { flex: 1; }
+.ins-sign-box { display: flex; align-items: center; min-height: 40px; margin-bottom: 12px; }
+.ins-signed-tag {
+  font-size: 12px; font-weight: 600; color: #166534;
+  background: #dcfce7; border-radius: 12px; padding: 4px 10px;
+}
+
+.ins-modal-actions {
+  display: flex; justify-content: flex-end; gap: 10px;
+  margin-top: 8px; padding-top: 14px; border-top: 1px solid #f3f4f6;
+}
+.ins-btn {
+  height: 40px; padding: 0 18px; border-radius: 6px; cursor: pointer;
+  font-family: Kanit, sans-serif; font-size: 14px; font-weight: 500;
+  border: 1px solid #d1d5db; background: #fff; color: #271e4a;
+}
+.ins-btn:hover:not([disabled]) { background: #f3f4f6; }
+.ins-btn-primary { background: #169458; color: #fff; border-color: #169458; min-width: 110px; }
+.ins-btn-primary:hover:not([disabled]) { background: #117849; border-color: #117849; }
+.ins-btn[disabled] { opacity: 0.55; cursor: not-allowed; }

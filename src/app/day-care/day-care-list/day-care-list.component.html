@@ -1,0 +1,48 @@
+<div class="dcl-shell">
+  <div class="dcl-head">
+    <h2 class="dcl-title">Day-Care Sessions</h2>
+    <div class="dcl-toolbar">
+      <label>Date <input type="date" [(ngModel)]="date" (change)="load()" /></label>
+      <label>Status
+        <select [(ngModel)]="statusFilter" (change)="load()">
+          <option value="">All</option>
+          <option *ngFor="let s of statuses" [value]="s">{{ s }}</option>
+        </select>
+      </label>
+      <button type="button" class="dcl-btn" (click)="load()">Refresh</button>
+      <a routerLink="/daycare/new" class="dcl-btn dcl-btn-primary">+ New session</a>
+    </div>
+  </div>
+
+  <div class="dcl-banner dcl-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div *ngIf="loading" class="dcl-loading">Loading…</div>
+
+  <table class="dcl-table" *ngIf="!loading">
+    <thead>
+      <tr>
+        <th>Patient</th>
+        <th>PRN</th>
+        <th>Procedure</th>
+        <th>Date</th>
+        <th>Status</th>
+        <th>Last reading</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let s of sessions">
+        <td><strong>{{ s.patientName }}</strong> <span class="dcl-muted">{{ s.age }}{{ s.gender }}</span></td>
+        <td>{{ s.prn || '—' }}</td>
+        <td>{{ s.procedureType }}</td>
+        <td>{{ s.dateOfService | date:'mediumDate' }}</td>
+        <td><span class="dcl-pill" [ngClass]="'dcl-pill-' + s.status.toLowerCase()">{{ s.status }}</span></td>
+        <td class="dcl-muted">
+          <ng-container *ngIf="s.readings && s.readings.length > 0">{{ s.readings[0].recordedAt | date:'short' }}</ng-container>
+          <span *ngIf="!s.readings || s.readings.length === 0">no readings</span>
+        </td>
+        <td><a [routerLink]="['/daycare', s.id]" class="dcl-btn dcl-btn-sm">Open ›</a></td>
+      </tr>
+      <tr *ngIf="sessions.length === 0"><td colspan="7" class="dcl-empty">No sessions for the selected filters.</td></tr>
+    </tbody>
+  </table>
+</div>

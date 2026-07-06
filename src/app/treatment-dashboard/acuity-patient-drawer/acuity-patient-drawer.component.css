@@ -1,0 +1,288 @@
+/* Phase 9.13 — patient acuity drawer. Self-contained overlay styles. */
+
+.apd-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  z-index: 1000;
+  display: flex;
+  justify-content: flex-end;
+}
+.apd-drawer {
+  width: 560px;
+  max-width: 100vw;
+  background: #fff;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-family: Kanit, sans-serif;
+  box-shadow: -8px 0 30px rgba(0, 0, 0, 0.2);
+  animation: apd-slide 0.18s ease-out;
+}
+@keyframes apd-slide {
+  from { transform: translateX(40px); opacity: 0.4; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+.apd-loading { padding: 40px; text-align: center; color: #7b7b7b; font-style: italic; }
+.apd-banner { padding: 10px 14px; border-radius: 8px; font-size: 13px; margin: 12px 18px 0; }
+.apd-bad  { background: #fee2e2; color: #b91c1c; }
+.apd-good { background: #dcfce7; color: #166534; }
+
+/* Header */
+.apd-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 18px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  border-top: 5px solid #16a34a;
+}
+.apd-band-high       { border-top-color: #dc2626; }
+.apd-band-medium     { border-top-color: #ea580c; }
+.apd-band-low-medium { border-top-color: #d97706; }
+.apd-band-low        { border-top-color: #16a34a; }
+.apd-header-main { display: flex; gap: 14px; align-items: flex-start; }
+.apd-ews-big {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  background: #f0f3ff;
+  flex-shrink: 0;
+}
+.apd-band-high .apd-ews-big   { background: #fee2e2; }
+.apd-band-medium .apd-ews-big { background: #ffedd5; }
+.apd-band-low-medium .apd-ews-big { background: #fef3c7; }
+.apd-band-low .apd-ews-big    { background: #dcfce7; }
+.apd-ews-num { font-size: 30px; font-weight: 700; color: #271e4a; line-height: 1; }
+.apd-ews-cap { font-size: 9px; font-weight: 700; letter-spacing: 0.5px; color: #7b7b7b; }
+.apd-name {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 600;
+  color: #271e4a;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.apd-sub { font-size: 12px; color: #7b7b7b; margin-top: 3px; }
+.apd-band-text { font-size: 12px; font-weight: 600; color: #4b5563; margin-top: 4px; }
+.apd-src { font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 10px; }
+.apd-src-IPD { background: #dbeafe; color: #1e40af; }
+.apd-src-ICU { background: #f3e8ff; color: #6b21a8; }
+.apd-icon-btn {
+  background: transparent;
+  border: none;
+  color: #7b7b7b;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+}
+.apd-icon-btn:hover { background: #f3f4f6; color: #271e4a; }
+
+/* Body */
+.apd-body { flex: 1; overflow-y: auto; padding: 16px 20px; }
+.apd-section { margin-bottom: 20px; }
+.apd-section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #271e4a;
+  margin: 0 0 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #f3f4f6;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.apd-count {
+  background: #fee2e2;
+  color: #b91c1c;
+  font-size: 11px;
+  border-radius: 10px;
+  padding: 1px 8px;
+  margin-left: 6px;
+}
+.apd-muted { color: #9ca3af; font-style: italic; font-size: 13px; }
+.apd-trend-box {
+  background: #f9fafd;
+  border: 1px solid #eef0f6;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+/* Breakdown */
+.apd-breakdown {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+}
+.apd-bd-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 10px;
+  background: #f9fafd;
+  border: 1px solid #eef0f6;
+  border-radius: 6px;
+  font-size: 12px;
+}
+.apd-bd-label { color: #4b5563; }
+.apd-bd-score { font-weight: 700; color: #16a34a; }
+.apd-bd-amber { background: #fef3c7; border-color: #fde68a; }
+.apd-bd-amber .apd-bd-score { color: #b45309; }
+.apd-bd-red { background: #fee2e2; border-color: #fca5a5; }
+.apd-bd-red .apd-bd-score { color: #b91c1c; }
+
+/* Vitals table */
+.apd-table-wrap { overflow-x: auto; }
+.apd-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.apd-table th {
+  background: #0e2970;
+  color: #fff;
+  padding: 7px 9px;
+  font-weight: 500;
+  text-align: center;
+}
+.apd-table th:first-child { border-top-left-radius: 6px; text-align: left; }
+.apd-table th:last-child { border-top-right-radius: 6px; }
+.apd-table td {
+  padding: 6px 9px;
+  text-align: center;
+  color: #271e4a;
+  border-bottom: 1px solid #f3f4f6;
+}
+.apd-table td:first-child { text-align: left; color: #7b7b7b; }
+
+/* Critical list */
+.apd-crit-list, .apd-esc-list { list-style: none; margin: 0; padding: 0; }
+.apd-crit-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 0;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 13px;
+}
+.apd-crit-dot { width: 8px; height: 8px; border-radius: 50%; background: #dc2626; flex-shrink: 0; }
+.apd-crit-name { font-weight: 600; color: #271e4a; }
+.apd-crit-meta { color: #7b7b7b; font-size: 12px; }
+
+/* Quick links */
+.apd-links { display: flex; flex-wrap: wrap; gap: 8px; }
+.apd-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  background: #f0f3ff;
+  border: 1px solid #c7d2fe;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #1e40af;
+  text-decoration: none;
+  cursor: pointer;
+}
+.apd-link:hover { background: #e0e7ff; }
+
+/* Progress note */
+.apd-note {
+  background: #f9fafd;
+  border: 1px solid #eef0f6;
+  border-radius: 8px;
+  padding: 12px;
+}
+.apd-note-head { font-size: 12px; color: #7b7b7b; margin-bottom: 6px; }
+.apd-note-line { margin: 4px 0; font-size: 13px; color: #271e4a; }
+
+/* Escalation history */
+.apd-esc-list li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 12px;
+}
+.apd-esc-action {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 9px;
+}
+.apd-esc-ACKNOWLEDGE { background: #dbeafe; color: #1e40af; }
+.apd-esc-ESCALATE    { background: #fee2e2; color: #b91c1c; }
+.apd-esc-REVIEW      { background: #dcfce7; color: #166534; }
+.apd-esc-meta { color: #7b7b7b; }
+
+/* Footer */
+.apd-footer {
+  border-top: 1px solid #e5e7eb;
+  padding: 12px 20px;
+  background: #fafafa;
+}
+.apd-note-input {
+  width: 100%;
+  height: 36px;
+  padding: 6px 10px;
+  font-family: Kanit, sans-serif;
+  font-size: 13px;
+  border: 1px solid #b4b6ba;
+  border-radius: 6px;
+  background: #fff;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+}
+.apd-actions { display: flex; gap: 8px; }
+.apd-btn {
+  flex: 1;
+  height: 38px;
+  border-radius: 6px;
+  font-family: Kanit, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+.apd-btn[disabled] { opacity: 0.55; cursor: not-allowed; }
+.apd-btn-ack { background: #fff; color: #1e40af; border-color: #93c5fd; }
+.apd-btn-ack:hover:not([disabled]) { background: #eff6ff; }
+.apd-btn-review { background: #fff; color: #166534; border-color: #86efac; }
+.apd-btn-review:hover:not([disabled]) { background: #f0fdf4; }
+.apd-btn-escalate { background: #dc2626; color: #fff; border-color: #dc2626; }
+.apd-btn-escalate:hover:not([disabled]) { background: #b91c1c; }
+
+/* "Open full IPD record" link — jumps from the acuity drawer to the
+   admission's progress-note page (the IPD admission entry point). */
+.apd-open-ipd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  border: 1px solid #c7d2fe;
+  background: #eef2ff;
+  color: #3730a3;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.apd-open-ipd:hover {
+  background: #e0e7ff;
+  border-color: #a5b4fc;
+}
+.apd-open-ipd-arrow {
+  margin-left: auto;
+  font-size: 14px;
+}

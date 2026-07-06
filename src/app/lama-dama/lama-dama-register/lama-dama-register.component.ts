@@ -11,6 +11,9 @@ import {
   LamaDamaService,
   LamaRecord,
 } from '../../services/lama-dama.service';
+import { EmergencyService, EmergencyCase } from '../../services/emergency.service';
+import { IpdService } from '../../services/ipd.service';
+import { SignatureCreateResponse } from '../../services/signature.service';
 import { environment } from '../../../environment/environment.prod';
 
 /**
@@ -57,6 +60,13 @@ interface DamaSpecific {
   followUpAdvice: string;
 }
 
+interface AdmissionContext {
+  id: string;
+  admissionNo?: string | null;
+  prn?: string | null;
+  patientName?: string | null;
+}
+
 @Component({
   selector: 'app-lama-dama-register',
   templateUrl: './lama-dama-register.component.html',
@@ -66,12 +76,22 @@ export class LamaDamaRegisterComponent implements OnInit, OnDestroy {
   type: LamaDamaType = 'lama';
   emergency: EmergencyContext | null = null;
 
+  /** IPD source — set when deep-linked with ?admissionId=…; replaces the ER picker. */
+  admissionId: string | null = null;
+  admission: AdmissionContext | null = null;
+
   sharedForm: FormGroup;
   lamaForm: FormGroup;
   damaForm: FormGroup;
 
   submitting = false;
   confirmVisible = false;
+
+  // Emergency-case picker — staff pick a human-readable case, not a DB id.
+  emergencyOptions: { value: string; label: string }[] = [];
+  loadingEmergencies = false;
+  /** When deep-linked with ?emergencyId=…, lock the picker to that case. */
+  lockedEmergency = false;
 
   typeOptions: { value: LamaDamaType; label: string }[] = [
     { value: 'lama', label: 'LAMA — Left Against Medical Advice' },
@@ -86,6 +106,8 @@ export class LamaDamaRegisterComponent implements OnInit, OnDestroy {
     private router: Router,
     private http: HttpClient,
     private lamaDamaService: LamaDamaService,
+    private emergencyService: EmergencyService,
+    private ipdService: IpdService,
     private messageService: MessageService
   ) {
     this.sharedForm = this.fb.group({
@@ -115,11 +137,69 @@ export class LamaDamaRegisterComponent implements OnInit, OnDestroy {
     if (typeParam === 'lama' || typeParam === 'dama') {
       this.type = typeParam;
     }
+    const admissionParam = qp.get('admissionId');
+    if (admissionParam) {
+      // IPD / post-op flow: link to the admission instead of an ER case.
+      // Drop the emergencyId required-validator and skip the ER picker entirely.
+      this.admissionId = admissionParam;
+      this.sharedForm.get('emergencyId')?.clearValidators();
+      this.sharedForm.get('emergencyId')?.updateValueAndValidity();
+      this.loadAdmissionContext(admissionParam);
+      return; // do not load ER cases for the picker
+    }
+
     const emergencyParam = qp.get('emergencyId');
     if (emergencyParam) {
+      this.lockedEmergency = true;
       this.sharedForm.patchValue({ emergencyId: emergencyParam });
       this.loadEmergencyContext(emergencyParam);
     }
+    this.loadEmergencies();
+  }
+
+  /** Populate the emergency-case dropdown with readable labels. */
+  private loadEmergencies(): void {
+    this.loadingEmergencies = true;
+    this.emergencyService
+      .getAllEmergencyCases()
+      .pipe(takeUntil(this.destroy$), catchError(() => of([] as EmergencyCase[])))
+      .subscribe((cases) => {
+        this.emergencyOptions = cases
+          .filter((c) => c.id != null)
+          .map((c) => ({ value: String(c.id), label: emergencyLabel(c) }));
+        this.loadingEmergencies = false;
+      });
+  }
+
+  /** When the user picks a case, refresh the header context (name / PRN). */
+  onEmergencySelect(emergencyId: string): void {
+    this.emergency = null;
+    if (emergencyId) this.loadEmergencyContext(emergencyId);
+  }
+
+  // ---- e-signature capture (patient + witness) -----------------------------
+  // The pad POSTs to /api/signature and returns a SignatureBlob id; we keep
+  // only that id in the form control (the image lives in SignatureBlob).
+  showPatientSign = false;
+  showWitnessSign = false;
+
+  get witnessName(): string {
+    return (this.sharedForm.get('witnessName')?.value ?? '').toString();
+  }
+
+  onPatientSigned(resp: SignatureCreateResponse): void {
+    this.sharedForm.patchValue({ patientSignature: resp.id });
+    this.showPatientSign = false;
+  }
+  onWitnessSigned(resp: SignatureCreateResponse): void {
+    this.sharedForm.patchValue({ witnessSignature: resp.id });
+    this.showWitnessSign = false;
+  }
+  clearPatientSignature(): void {
+    this.sharedForm.patchValue({ patientSignature: '' });
+  }
+  clearWitnessSignature(): void {
+    this.sharedForm.patchValue({ witnessSignature: '' });
   }
 
   ngOnDestroy(): void {
@@ -175,17 +255,23 @@ export class LamaDamaRegisterComponent implements OnInit, OnDestroy {
 
   get confirmMessage(): string {
     const label = this.type === 'lama' ? 'LAMA' : 'DAMA';
-    return `Recording ${label} for this patient updates the Emergency case status and cannot be reversed from this screen. Continue?`;
+    const source = this.isAdmissionSource ? 'admission' : 'Emergency case';
+    return `Recording ${label} for this patient is linked to the ${source} and cannot be reversed from this screen. Continue?`;
   }
 
   private performSubmit(): void {
     this.submitting = true;
     const shared = this.sharedForm.value as SharedFormValue;
 
+    // Send EITHER admissionId (IPD source) OR emergencyId (ER source).
+    const sourceLink = this.admissionId
+      ? { admissionId: this.admissionId }
+      : { emergencyId: shared.emergencyId };
+
     if (this.type === 'lama') {
       const lama = this.lamaForm.value as LamaSpecific;
       const payload: LamaRecord = {
-        emergencyId: shared.emergencyId,
+        ...sourceLink,
         lamaTime: shared.timestamp ?? new Date(),
         doctorAdvice: lama.doctorAdvice.trim(),
         riskExplained: !!lama.riskExplained,
@@ -207,7 +293,7 @@ export class LamaDamaRegisterComponent implements OnInit, OnDestroy {
 
     const dama = this.damaForm.value as DamaSpecific;
     const payload: DamaRecord = {
-      emergencyId: shared.emergencyId,
+      ...sourceLink,
       dischargeTime: shared.timestamp ?? new Date(),
       doctorRecommendation: dama.doctorRecommendation.trim(),
       patientDeclinesAdvice: !!dama.patientDeclinesAdvice,
@@ -261,9 +347,76 @@ export class LamaDamaRegisterComponent implements OnInit, OnDestroy {
         this.emergency = extractEmergency(res);
       });
   }
+
+  /** IPD flow — resolve the admission so the header shows PRN + admission no. */
+  private loadAdmissionContext(admissionId: string): void {
+    this.ipdService
+      .getAdmission(admissionId)
+      .pipe(takeUntil(this.destroy$), catchError(() => of(null)))
+      .subscribe((res) => {
+        if (!res) return;
+        const prn = res.prn ?? null;
+        this.admission = {
+          id: res.id ?? admissionId,
+          admissionNo: res.admissionNo ?? null,
+          prn,
+          patientName: null,
+        };
+        // The admission has no patient name field — resolve it from the PRN
+        // (same pattern the discharge summary uses) so the header + signature
+        // signer name are populated for IPD-sourced records.
+        if (prn) {
+          this.http
+            .post<{ patientData?: { name?: string } }>(
+              `${environment.apiUrl}/patients/get-details-by-prn`,
+              { prnNumber: prn },
+            )
+            .pipe(takeUntil(this.destroy$), catchError(() => of(null)))
+            .subscribe((r) => {
+              if (r?.patientData?.name && this.admission) {
+                this.admission.patientName = r.patientData.name;
+              }
+            });
+        }
+      });
+  }
+
+  /** True when this form is sourced from an IPD admission (not an ER case). */
+  get isAdmissionSource(): boolean {
+    return !!this.admissionId;
+  }
+
+  /** Patient name for the page-header — ER name, else null (admission has no name field). */
+  get headerPatientName(): string | null {
+    return this.emergency?.patientName ?? this.admission?.patientName ?? null;
+  }
+
+  /** PRN for the page-header — ER PRN, else the admission's PRN. */
+  get headerPatientPrn(): string | null {
+    return this.emergency?.prn ?? this.admission?.prn ?? null;
+  }
+
+  /** Signature pad context id — emergencyId for ER cases, admissionId for IPD. */
+  get signatureContextId(): string | undefined {
+    return this.admissionId ?? (this.sharedForm.get('emergencyId')?.value || undefined);
+  }
+
+  /** Whether the patient-signature pad may be shown (a source must be resolved). */
+  get hasResolvedSource(): boolean {
+    return !!this.emergency || !!this.admission;
+  }
 }
 
 // ---- Typed helpers --------------------------------------------------------
+
+/** Human-readable dropdown label: ER number — name (age) · triage. */
+function emergencyLabel(c: EmergencyCase): string {
+  const parts = [c.prn];
+  if (c.patientName) parts.push(`— ${c.patientName}`);
+  if (c.age != null) parts.push(`(${c.age}y)`);
+  if (c.triageCategory) parts.push(`· ${c.triageCategory}`);
+  return parts.join(' ');
+}
 
 function extractEmergency(res: unknown): EmergencyContext | null {
   if (!res || typeof res !== 'object') return null;

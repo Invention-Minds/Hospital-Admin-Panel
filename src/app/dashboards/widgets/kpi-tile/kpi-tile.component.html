@@ -1,0 +1,13 @@
+<div class="kpi-tile" [attr.data-accent]="accent" [title]="tooltip || ''">
+  <div class="kpi-icon">
+    <i [class]="icon"></i>
+  </div>
+  <div class="kpi-body">
+    <div class="kpi-label">{{ label }}</div>
+    <div class="kpi-value">{{ value }}</div>
+    <div class="kpi-sub" *ngIf="subLabel">
+      <span class="kpi-sub-label">{{ subLabel }}</span>
+      <span class="kpi-sub-value" *ngIf="subValue !== undefined && subValue !== null">{{ subValue }}</span>
+    </div>
+  </div>
+</div>

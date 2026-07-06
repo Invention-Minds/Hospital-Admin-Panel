@@ -1,0 +1,553 @@
+<div class="doctor-dashboard" *ngIf="!isLoading; else loadingTpl">
+  <ng-container *ngIf="summary as s">
+    <header class="dash-header">
+      <div class="header-left">
+        <div class="greeting">{{ greeting }},</div>
+        <h1 class="doctor-name">
+          Dr. {{ s.doctor.name || '—' }}
+          <span class="dept-chip" *ngIf="s.doctor.departmentName">
+            {{ s.doctor.departmentName }}
+          </span>
+          <span
+            class="specialty-chip"
+            *ngIf="s.specialtyGroup && s.specialtyGroup !== 'GENERAL'"
+            [attr.data-group]="s.specialtyGroup">
+            {{ specialtyLabel(s.specialtyGroup) }}
+          </span>
+        </h1>
+        <div class="today-label">{{ todayLabel }}</div>
+      </div>
+      <div class="header-right">
+        <button class="refresh-btn" (click)="refresh()" title="Refresh now">
+          <i class="pi pi-refresh"></i>
+          <span>Refresh</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="error-banner" *ngIf="errorMsg">{{ errorMsg }}</div>
+
+    <!-- ─── KPI strip ──────────────────────────────────────────────── -->
+    <section class="kpi-strip">
+      <app-kpi-tile
+        icon="pi pi-calendar"
+        label="Today's appointments"
+        [value]="s.kpis.todayScheduled"
+        subLabel="Done"
+        [subValue]="s.kpis.todayDone + ' / ' + s.kpis.todayScheduled"
+        accent="blue"
+        tooltip="Patients booked for you today">
+      </app-kpi-tile>
+
+      <app-kpi-tile
+        icon="pi pi-clock"
+        label="Remaining today"
+        [value]="s.kpis.todayRemaining"
+        [subLabel]="s.kpis.todayDone > 0 ? 'Already seen' : 'Not started yet'"
+        [subValue]="s.kpis.todayDone > 0 ? s.kpis.todayDone : undefined"
+        accent="amber"
+        tooltip="Patients yet to be consulted today">
+      </app-kpi-tile>
+
+      <app-kpi-tile
+        icon="pi pi-home"
+        label="IPD patients under me"
+        [value]="s.kpis.ipdActive"
+        subLabel="In ICU"
+        [subValue]="s.kpis.ipdIcu"
+        accent="violet"
+        tooltip="Active in-patient admissions where you are the admitting doctor">
+      </app-kpi-tile>
+
+      <app-kpi-tile
+        icon="pi pi-file-edit"
+        label="Pending discharge summaries"
+        [value]="s.kpis.pendingDischargeSummaries"
+        [accent]="s.kpis.pendingDischargeSummaries > 0 ? 'red' : 'green'"
+        tooltip="Discharge summaries not yet signed">
+      </app-kpi-tile>
+
+      <app-kpi-tile
+        icon="pi pi-heart"
+        label="OT cases today"
+        [value]="s.kpis.otCasesToday"
+        accent="slate"
+        tooltip="Scheduled OT cases where you are the surgeon">
+      </app-kpi-tile>
+
+      <app-kpi-tile
+        icon="pi pi-stopwatch"
+        label="Avg consult (7d)"
+        [value]="s.kpis.avgConsultMins7d !== null ? (s.kpis.avgConsultMins7d + ' min') : '—'"
+        accent="green"
+        tooltip="Average consultation duration in the last 7 days (check-in → end consultation)">
+      </app-kpi-tile>
+    </section>
+
+    <!-- ─── Performance strip ──────────────────────────────────────── -->
+    <section class="perf-strip">
+      <app-mini-stat-card
+        label="Avg wait today"
+        [value]="s.performance.avgWaitMinsToday !== null ? (s.performance.avgWaitMinsToday + 'm') : '—'"
+        subText="Last 7 days"
+        [sparkData]="s.performance.avgWaitMinsLast7d"
+        [trend]="inverseTrendFor(s.performance.avgWaitMinsToday, s.performance.avgWaitMinsLast7d)"
+        accent="blue"
+        icon="pi pi-hourglass"
+        tooltip="Minutes between check-in and being called in. Lower is better.">
+      </app-mini-stat-card>
+
+      <app-mini-stat-card
+        label="No-show rate today"
+        [value]="s.performance.noShowToday.percent !== null ? (s.performance.noShowToday.percent + '%') : '—'"
+        [subText]="s.performance.noShowLast7dPercent !== null ? ('7d avg ' + s.performance.noShowLast7dPercent + '%') : 'No comparison yet'"
+        [accent]="(s.performance.noShowToday.percent || 0) > 15 ? 'red' : 'amber'"
+        icon="pi pi-user-minus"
+        tooltip="Booked patients who did not arrive by their slot. Calculated against scheduled (excluding cancelled).">
+      </app-mini-stat-card>
+
+      <div class="perf-mix-card">
+        <div class="ms-label">
+          <i class="pi pi-users ms-icon"></i>
+          Patient mix (30d)
+        </div>
+        <div class="perf-mix-body">
+          <div class="perf-mix-donut">
+            <app-donut-chart
+              [slices]="patientMixSlices"
+              [showLegend]="false">
+            </app-donut-chart>
+          </div>
+          <ul class="perf-mix-legend">
+            <li><span class="dot" style="background:#3b82f6"></span>New <strong>{{ s.performance.patientMix.newCount }}</strong></li>
+            <li><span class="dot" style="background:#10b981"></span>Follow-up <strong>{{ s.performance.patientMix.followupCount }}</strong></li>
+            <li><span class="dot" style="background:#f59e0b"></span>Referral <strong>{{ s.performance.patientMix.referralCount }}</strong></li>
+          </ul>
+        </div>
+      </div>
+
+      <app-mini-stat-card
+        label="Critical results 7d"
+        [value]="s.performance.criticalRate7d.percent !== null ? (s.performance.criticalRate7d.percent + '%') : '—'"
+        [subText]="s.performance.criticalRate7d.total > 0 ? (s.performance.criticalRate7d.critical + ' of ' + s.performance.criticalRate7d.total + ' results') : 'No results yet'"
+        [accent]="(s.performance.criticalRate7d.percent || 0) > 10 ? 'red' : 'green'"
+        icon="pi pi-exclamation-triangle"
+        tooltip="Percentage of investigation results returning critical for your IPD patients (last 7 days).">
+      </app-mini-stat-card>
+    </section>
+
+    <!-- ─── EMERGENCY — active ER board (specialty-only) ──────────── -->
+    <section class="er-section" *ngIf="s.specialtyGroup === 'EMERGENCY'">
+      <div class="er-triage-strip">
+        <div
+          class="er-triage-pill"
+          *ngFor="let t of s.erTriageMix"
+          [attr.data-cat]="t.category">
+          <span class="er-triage-dot"></span>
+          <span class="er-triage-label">{{ t.category | titlecase }}</span>
+          <span class="er-triage-count">{{ t.count }}</span>
+        </div>
+      </div>
+      <app-patient-list-card
+        title="Active ER board"
+        subTitle="Live triage queue (red → yellow → green)"
+        accentIcon="pi pi-exclamation-circle"
+        [items]="erBoardItems"
+        emptyText="No active ER cases."
+        emptyIcon="pi pi-check-circle"
+        (itemClick)="openItem($event)">
+      </app-patient-list-card>
+    </section>
+
+    <!-- ─── Main row: queue | charts | alerts ─────────────────────── -->
+    <div class="main-row">
+      <!-- Queue (col 1) -->
+      <section class="card queue-card">
+        <header class="card-header">
+          <div>
+            <h2>Today's consultation queue</h2>
+            <p class="card-sub">
+              {{ filteredQueue.length }} of {{ s.queue.length }} patients
+            </p>
+          </div>
+          <div class="filter-pills">
+            <button class="pill" [class.active]="queueFilter === 'all'" (click)="setQueueFilter('all')">All</button>
+            <button class="pill" [class.active]="queueFilter === 'waiting'" (click)="setQueueFilter('waiting')">Waiting</button>
+            <button class="pill" [class.active]="queueFilter === 'done'" (click)="setQueueFilter('done')">Done</button>
+          </div>
+        </header>
+
+        <div class="queue-table-wrap" *ngIf="filteredQueue.length; else emptyQueue">
+          <table class="queue-table">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Patient</th>
+                <th>Age/Sex</th>
+                <th>Vitals</th>
+                <th>Wait</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of filteredQueue; trackBy: trackQueueRow">
+                <td class="cell-time">{{ row.time }}</td>
+                <td class="cell-patient">
+                  <div class="patient-name">{{ row.patientName }}</div>
+                  <div class="patient-meta" *ngIf="row.patientType || row.type">
+                    <span class="meta-chip" *ngIf="row.patientType">{{ row.patientType }}</span>
+                    <span class="meta-chip" *ngIf="row.type">{{ row.type }}</span>
+                  </div>
+                </td>
+                <td class="cell-age">
+                  <span *ngIf="row.age">{{ row.age }}</span>
+                  <span *ngIf="row.gender" class="muted">{{ row.gender ? ' / ' + row.gender : '' }}</span>
+                  <span *ngIf="!row.age && !row.gender" class="muted">—</span>
+                </td>
+                <td class="cell-vitals">
+                  <span *ngIf="vitalsSummary(row)">{{ vitalsSummary(row) }}</span>
+                  <span *ngIf="!vitalsSummary(row)" class="muted">—</span>
+                </td>
+                <td class="cell-wait">
+                  <span *ngIf="row.waitMins !== null; else dashCell" [class]="waitClass(row.waitMins)">
+                    {{ row.waitMins }}m
+                  </span>
+                  <ng-template #dashCell><span class="muted">—</span></ng-template>
+                </td>
+                <td class="cell-status">
+                  <span [class]="statusClass(row)">{{ statusLabel(row) }}</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <ng-template #emptyQueue>
+          <div class="empty-state">
+            <i class="pi pi-inbox"></i>
+            <p>No appointments match this filter.</p>
+          </div>
+        </ng-template>
+      </section>
+
+      <!-- Charts column (col 2): trend + diagnosis mix + adherence -->
+      <div class="charts-col">
+        <section class="card chart-card">
+          <header class="card-header">
+            <div>
+              <h2>Patients seen — last 30 days</h2>
+              <p class="card-sub">Completed consultations per day</p>
+            </div>
+          </header>
+          <div #trendChart class="trend-chart"></div>
+        </section>
+
+        <section class="card chart-card">
+          <header class="card-header">
+            <div>
+              <h2>Diagnosis mix (30d)</h2>
+              <p class="card-sub">Top ICD codes on your admissions</p>
+            </div>
+          </header>
+          <div class="donut-wrap" *ngIf="diagnosisSlices.length; else noDx">
+            <app-donut-chart [slices]="diagnosisSlices"></app-donut-chart>
+          </div>
+          <ng-template #noDx>
+            <div class="empty-state empty-state-sm">
+              <i class="pi pi-chart-pie"></i>
+              <p>No coded admissions in the last 30 days.</p>
+            </div>
+          </ng-template>
+        </section>
+
+        <section class="card chart-card">
+          <header class="card-header">
+            <div>
+              <h2>Follow-up adherence (30d)</h2>
+              <p class="card-sub">Scheduled follow-ups that returned</p>
+            </div>
+          </header>
+          <div class="donut-wrap">
+            <app-donut-chart
+              [slices]="adherenceSlices"
+              [centerLabel]="adherenceCenterLabel"
+              [centerSubLabel]="adherenceCenterSub"
+              [showLegend]="false">
+            </app-donut-chart>
+          </div>
+        </section>
+      </div>
+
+      <!-- Alerts rail (col 3) -->
+      <aside class="card alerts-card">
+        <header class="card-header">
+          <div>
+            <h2>Alerts</h2>
+            <p class="card-sub">{{ s.alerts.length }} item{{ s.alerts.length === 1 ? '' : 's' }} needing attention</p>
+          </div>
+        </header>
+        <div class="alerts-body" *ngIf="s.alerts.length; else noAlerts">
+          <app-alert-row
+            *ngFor="let a of s.alerts"
+            [alert]="a"
+            (openAlert)="openAlert($event)">
+          </app-alert-row>
+        </div>
+        <ng-template #noAlerts>
+          <div class="empty-state empty-state-sm">
+            <i class="pi pi-check-circle"></i>
+            <p>You're all caught up.</p>
+          </div>
+        </ng-template>
+      </aside>
+    </div>
+
+    <!-- ─── Insights row: demographics + hour heatmap ──────────────── -->
+    <div class="insights-row">
+      <section class="card insights-card">
+        <header class="card-header">
+          <div>
+            <h2>Patient demographics (30d)</h2>
+            <p class="card-sub">Who walks into your OPD</p>
+          </div>
+        </header>
+        <div class="demographics-body">
+          <div class="demo-gender">
+            <div class="demo-sub-label">Gender</div>
+            <div class="demo-donut" *ngIf="genderSlices.length; else demoEmpty">
+              <app-donut-chart [slices]="genderSlices" [showLegend]="true"></app-donut-chart>
+            </div>
+          </div>
+          <div class="demo-ages">
+            <div class="demo-sub-label">
+              {{ s.pediatricAgeBands ? 'Pediatric age bands' : 'Age bands' }}
+            </div>
+            <ul class="age-bars" *ngIf="ageBandsForRender().length; else demoEmpty">
+              <li *ngFor="let b of ageBandsForRender()">
+                <span class="age-label">{{ b.band }}</span>
+                <div class="age-bar-track">
+                  <div
+                    class="age-bar-fill"
+                    [style.width.%]="ageBandMax > 0 ? (b.count / ageBandMax) * 100 : 0">
+                  </div>
+                </div>
+                <span class="age-count">{{ b.count }}</span>
+              </li>
+            </ul>
+          </div>
+          <ng-template #demoEmpty>
+            <div class="empty-state empty-state-sm">
+              <i class="pi pi-users"></i>
+              <p>No patient data yet.</p>
+            </div>
+          </ng-template>
+        </div>
+      </section>
+
+      <section class="card insights-card">
+        <header class="card-header">
+          <div>
+            <h2>Busy-hour pattern (30d)</h2>
+            <p class="card-sub">When your patients book their slots</p>
+          </div>
+        </header>
+        <div class="heatmap-body" *ngIf="hourCells.length; else heatEmpty">
+          <div class="heatmap-row">
+            <div
+              *ngFor="let c of hourCells"
+              class="heat-cell"
+              [ngStyle]="heatmapCellStyle(c.intensity)"
+              [title]="c.label + ' — ' + c.count + ' booking' + (c.count === 1 ? '' : 's')">
+              <span class="heat-value">{{ c.count > 0 ? c.count : '' }}</span>
+            </div>
+          </div>
+          <div class="heatmap-axis">
+            <span>12 AM</span>
+            <span>6 AM</span>
+            <span>12 PM</span>
+            <span>6 PM</span>
+            <span>11 PM</span>
+          </div>
+          <div class="heatmap-legend">
+            <span class="heat-legend-label">Less</span>
+            <span class="heat-legend-cell" style="background: rgba(59,130,246,0.18)"></span>
+            <span class="heat-legend-cell" style="background: rgba(59,130,246,0.45)"></span>
+            <span class="heat-legend-cell" style="background: rgba(59,130,246,0.7)"></span>
+            <span class="heat-legend-cell" style="background: rgba(59,130,246,1)"></span>
+            <span class="heat-legend-label">More</span>
+          </div>
+        </div>
+        <ng-template #heatEmpty>
+          <div class="empty-state empty-state-sm">
+            <i class="pi pi-clock"></i>
+            <p>No bookings in the last 30 days.</p>
+          </div>
+        </ng-template>
+      </section>
+    </div>
+
+    <!-- ─── Lower row: IPD round list | OT board today ─────────────── -->
+    <div class="lower-row">
+      <app-patient-list-card
+        title="IPD round list"
+        subTitle="Active in-patients under your care"
+        accentIcon="pi pi-home"
+        [items]="ipdRoundItems"
+        emptyText="No active in-patients."
+        emptyIcon="pi pi-home"
+        (itemClick)="openIpdItem($event)">
+      </app-patient-list-card>
+
+      <app-patient-list-card
+        title="OT board — today"
+        subTitle="Cases scheduled for you today"
+        accentIcon="pi pi-heart"
+        [items]="otTodayItems"
+        emptyText="No OT cases scheduled today."
+        emptyIcon="pi pi-heart"
+        (itemClick)="openOtItem($event)">
+      </app-patient-list-card>
+    </div>
+
+    <!-- ─── SURGICAL — OT performance + Pre-op pipeline ───────────── -->
+    <ng-container *ngIf="s.specialtyGroup === 'SURGICAL' && s.otPerformance as otp">
+      <div class="surgical-row">
+        <section class="card ot-perf-card">
+          <header class="card-header">
+            <div>
+              <h2>OT performance (30d)</h2>
+              <p class="card-sub">Your operating-theatre efficiency</p>
+            </div>
+          </header>
+          <div class="ot-perf-grid">
+            <div class="ot-perf-cell">
+              <div class="ot-perf-label">Avg planned</div>
+              <div class="ot-perf-value">
+                {{ otp.avgPlannedMins !== null ? otp.avgPlannedMins + ' min' : '—' }}
+              </div>
+            </div>
+            <div class="ot-perf-cell">
+              <div class="ot-perf-label">Avg actual</div>
+              <div class="ot-perf-value">
+                {{ otp.avgActualMins !== null ? otp.avgActualMins + ' min' : '—' }}
+              </div>
+            </div>
+            <div class="ot-perf-cell">
+              <div class="ot-perf-label">On-time start</div>
+              <div class="ot-perf-value"
+                [class.warn]="otp.onTimeStartPercent !== null && otp.onTimeStartPercent < 70">
+                {{ otp.onTimeStartPercent !== null ? otp.onTimeStartPercent + '%' : '—' }}
+              </div>
+            </div>
+            <div class="ot-perf-cell">
+              <div class="ot-perf-label">30d cases</div>
+              <div class="ot-perf-value">{{ otp.last30dCases }}</div>
+            </div>
+            <div class="ot-perf-cell">
+              <div class="ot-perf-label">Cancel rate</div>
+              <div class="ot-perf-value"
+                [class.warn]="otp.cancelPercent !== null && otp.cancelPercent > 15">
+                {{ otp.cancelPercent !== null ? otp.cancelPercent + '%' : '—' }}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <app-patient-list-card
+          title="Pre-op pipeline (7d)"
+          subTitle="Surgeries scheduled in the next week"
+          accentIcon="pi pi-calendar-plus"
+          [items]="preOpPipelineItems"
+          emptyText="No surgeries booked in the next 7 days."
+          emptyIcon="pi pi-calendar-plus"
+          (itemClick)="openItem($event)">
+        </app-patient-list-card>
+      </div>
+    </ng-container>
+
+    <!-- ─── OBGYN — antenatal patients ─────────────────────────────── -->
+    <section class="obgyn-row" *ngIf="s.specialtyGroup === 'OBGYN'">
+      <app-patient-list-card
+        title="Antenatal & lactating in-patients"
+        subTitle="Pregnant or lactating admissions under your care"
+        accentIcon="pi pi-heart-fill"
+        [items]="antenatalItems"
+        emptyText="No antenatal or lactating patients currently admitted."
+        emptyIcon="pi pi-heart"
+        (itemClick)="openItem($event)">
+      </app-patient-list-card>
+    </section>
+
+    <!-- ─── Outcomes row: LOS | MAR | Investigation TAT ──────────── -->
+    <div class="outcomes-row">
+      <app-bar-list-card
+        title="My IPD patients — length of stay"
+        subTitle="Top 8 longest-staying admissions"
+        accentIcon="pi pi-clock"
+        [items]="myIpdLosItems"
+        emptyText="No active IPD admissions."
+        emptyIcon="pi pi-clock"
+        unitLabel="days">
+      </app-bar-list-card>
+
+      <app-mini-stat-card
+        label="My MAR compliance"
+        [value]="s.marCompliance.percent !== null ? (s.marCompliance.percent + '%') : '—'"
+        [subText]="s.marCompliance.total > 0 ? (s.marCompliance.administered + ' / ' + s.marCompliance.total + ' doses') : 'No active prescriptions'"
+        [accent]="(s.marCompliance.percent || 100) < 80 ? 'amber' : 'green'"
+        icon="pi pi-check-circle"
+        tooltip="Percentage of active prescriptions administered (vs total prescribed) for your patients.">
+      </app-mini-stat-card>
+
+      <app-mini-stat-card
+        label="Investigation TAT"
+        [value]="s.investigationTat.hours !== null ? (s.investigationTat.hours + 'h') : '—'"
+        [subText]="s.investigationTat.resultedCount > 0 ? (s.investigationTat.resultedCount + ' results in 30d') : 'No resulted orders yet'"
+        [accent]="(s.investigationTat.hours || 0) > 48 ? 'amber' : 'blue'"
+        icon="pi pi-stopwatch"
+        tooltip="Average hours from order placed to first result (last 30 days).">
+      </app-mini-stat-card>
+    </div>
+
+    <!-- ─── Clinical activity row: top meds | top tests ────────────── -->
+    <div class="clinical-row">
+      <app-bar-list-card
+        title="Top medications (30d)"
+        subTitle="Most-prescribed generics across your patients"
+        accentIcon="pi pi-tablet"
+        [items]="topMedicationsItems"
+        emptyText="No prescriptions captured in the last 30 days."
+        emptyIcon="pi pi-tablet"
+        unitLabel="rx">
+      </app-bar-list-card>
+
+      <app-bar-list-card
+        title="Top investigations (30d)"
+        subTitle="Most-ordered lab and imaging tests"
+        accentIcon="pi pi-search"
+        [items]="topInvestigationsItems"
+        emptyText="No investigations ordered in the last 30 days."
+        emptyIcon="pi pi-search"
+        unitLabel="orders">
+      </app-bar-list-card>
+
+      <app-bar-list-card
+        *ngIf="s.specialtyGroup === 'CARDIAC'"
+        title="Cardiac investigations (30d)"
+        subTitle="ECG, Echo, Troponin, CK-MB and related tests"
+        accentIcon="pi pi-heart-fill"
+        [items]="cardiacTestsItems"
+        emptyText="No cardiac investigations ordered in the last 30 days."
+        emptyIcon="pi pi-heart"
+        unitLabel="orders">
+      </app-bar-list-card>
+    </div>
+  </ng-container>
+</div>
+
+<ng-template #loadingTpl>
+  <div class="loading-state">
+    <i class="pi pi-spin pi-spinner"></i>
+    <span>Loading your dashboard…</span>
+  </div>
+</ng-template>

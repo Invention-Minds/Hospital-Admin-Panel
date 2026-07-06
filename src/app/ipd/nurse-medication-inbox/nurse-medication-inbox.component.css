@@ -1,0 +1,34 @@
+.nmi-head { margin-bottom: 16px; }
+.nmi-title { font-size: 22px; font-weight: 600; color: #271e4a; margin: 0 0 4px; }
+.nmi-sub { color: #6b7280; font-size: 13px; margin: 0; }
+
+.nmi-banner { padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; font-size: 14px; cursor: pointer; }
+.nmi-bad { background: #fee2e2; color: #b91c1c; }
+.nmi-good { background: #dcfce7; color: #166534; }
+.nmi-empty { padding: 40px; text-align: center; color: #6b7280; font-style: italic; }
+
+.nmi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 12px; }
+.nmi-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+.nmi-card-stat { border-color: #b91c1c; box-shadow: 0 0 0 2px rgba(185,28,28,0.15); }
+
+.nmi-card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+.nmi-generic { color: #271e4a; font-size: 15px; margin-left: 6px; }
+.nmi-brand { color: #6b7280; font-size: 13px; margin-left: 4px; }
+.nmi-meta { font-size: 11px; color: #6b7280; text-align: right; }
+.nmi-meta div { margin: 1px 0; }
+
+.nmi-rx-line { font-size: 13px; color: #4b5563; }
+.nmi-substitution { background: #fef3c7; color: #92400e; padding: 6px 10px; border-radius: 6px; font-size: 12px; margin: 0; }
+
+.nmi-pill { display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 10px; font-weight: 600; }
+.nmi-pill-stat { background: #fee2e2; color: #b91c1c; margin-right: 4px; }
+
+.nmi-actions-row { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
+.nmi-qty { display: flex; flex-direction: column; gap: 2px; font-size: 11px; color: #6b7280; }
+.nmi-qty input { padding: 5px 9px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 12px; width: 110px; box-sizing: border-box; }
+
+.nmi-card textarea { border: 1px solid #d1d5db; border-radius: 6px; padding: 6px 10px; font-size: 12px; font-family: Kanit, sans-serif; resize: vertical; width: 100%; box-sizing: border-box; }
+
+.nmi-btn { height: 32px; padding: 0 12px; border-radius: 6px; border: 1px solid #d1d5db; background: #fff; color: #271e4a; cursor: pointer; font-family: Kanit, sans-serif; font-size: 12px; }
+.nmi-btn-primary { background: #169458; color: #fff; border-color: #169458; }
+.nmi-btn-warn { background: #fde68a; color: #92400e; border-color: #fde68a; }

@@ -389,3 +389,27 @@ font-family: 900;
     min-width: unset;
   }
 }
+/* Merged Transfer / CC screen — sub-tab toggle */
+.transfercc-toggle {
+  display: inline-flex;
+  gap: 0;
+  margin: 4px 0 14px;
+  border: 1px solid #d6dce5;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.transfercc-toggle button {
+  border: none;
+  background: #fff;
+  color: #44546a;
+  padding: 7px 22px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.transfercc-toggle button + button {
+  border-left: 1px solid #d6dce5;
+}
+.transfercc-toggle button.active {
+  background: #1b6cb5;
+  color: #fff;
+}

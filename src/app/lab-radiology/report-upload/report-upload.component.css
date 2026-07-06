@@ -1,0 +1,202 @@
+/* Phase 9.11 — Report upload modal. Self-contained styles. */
+
+.ru-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  z-index: 1001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  box-sizing: border-box;
+}
+.ru-modal {
+  background: #fff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 720px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  font-family: Kanit, sans-serif;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+}
+
+/* Header */
+.ru-header {
+  padding: 16px 22px;
+  border-bottom: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+}
+.ru-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #271e4a;
+}
+.ru-sub {
+  color: #7b7b7b;
+  font-size: 12px;
+  margin-top: 4px;
+}
+.ru-icon-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: #7b7b7b;
+  cursor: pointer;
+  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.ru-icon-btn:hover { background: #f3f4f6; color: #271e4a; }
+
+/* Body */
+.ru-body {
+  padding: 18px 22px;
+  overflow-y: auto;
+  max-height: calc(90vh - 140px);
+}
+.ru-banner {
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-bottom: 14px;
+  cursor: pointer;
+}
+.ru-bad { background: #fee2e2; color: #b91c1c; border-left: 3px solid #dc2626; }
+
+.ru-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.ru-grid-3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+@media (max-width: 640px) {
+  .ru-grid, .ru-grid-3 { grid-template-columns: 1fr; }
+}
+.ru-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 14px;
+}
+.ru-field-check { justify-content: center; }
+.ru-label {
+  color: #271e4a;
+  font-size: 12px;
+  font-weight: 500;
+}
+.ru-input {
+  height: 38px;
+  padding: 8px 12px;
+  font-family: Kanit, sans-serif;
+  font-size: 13px;
+  color: #271e4a;
+  background: #f0f3ff;
+  border: 1px solid #b4b6ba;
+  border-radius: 6px;
+  box-sizing: border-box;
+  width: 100%;
+}
+.ru-textarea {
+  height: auto;
+  min-height: 64px;
+  resize: vertical;
+  padding: 8px 12px;
+}
+.ru-input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.18);
+  outline: none;
+}
+.ru-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #271e4a;
+  cursor: pointer;
+}
+.ru-hint { color: #7b7b7b; font-size: 11px; margin-top: 2px; }
+.ru-error { color: #b91c1c; font-size: 11px; margin-top: 4px; }
+.ru-muted { color: #9ca3af; font-style: italic; }
+
+/* File upload */
+.ru-file-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.ru-file-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: #f3f4f6;
+  border: 1px dashed #b4b6ba;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #271e4a;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+.ru-file-btn:hover { background: #eff6ff; border-color: #93c5fd; color: #1e40af; }
+.ru-file-name {
+  color: #271e4a;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Footer */
+.ru-footer {
+  padding: 12px 22px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  background: #fafafa;
+}
+
+/* Buttons */
+.ru-btn {
+  height: 38px;
+  padding: 0 18px;
+  border-radius: 6px;
+  font-family: Kanit, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  border: 1px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.ru-btn-primary {
+  background: #169458;
+  color: #fff;
+  border-color: #169458;
+}
+.ru-btn-primary:hover:not([disabled]) { background: #117849; border-color: #117849; }
+.ru-btn-secondary {
+  background: #fff;
+  color: #271e4a;
+  border-color: #d1d5db;
+}
+.ru-btn-secondary:hover:not([disabled]) { background: #f3f4f6; }
+.ru-btn[disabled] { opacity: 0.55; cursor: not-allowed; }

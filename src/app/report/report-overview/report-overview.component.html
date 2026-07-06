@@ -24,15 +24,27 @@
           <p>Health Checkup Report</p>
         </div>
       </div>
-      <div class="card" 
+      <div class="card"
       [ngClass]="{'active-card': activeComponent === 'checkin'}"
       (click)="showCheckinReport()">
         <div class="card-icon">
           <img src="/receptionist.svg" alt="Appointment Icon" />
         </div>
         <div class="card-content">
-  
+
           <p>Checkin Report</p>
+        </div>
+      </div>
+      <!-- Phase 2.5 — Revenue tab card (admin / billing only). -->
+      <div class="card"
+      *ngIf="role!='doctor'"
+      [ngClass]="{'active-card': activeComponent === 'revenue'}"
+      (click)="showRevenueReport()">
+        <div class="card-icon">
+          <img src="/details.svg" alt="Revenue Icon" />
+        </div>
+        <div class="card-content">
+          <p>Revenue Report</p>
         </div>
       </div>
     </div>
@@ -41,4 +53,5 @@
     <app-admin-report *ngIf="activeComponent === 'sub_admin'"></app-admin-report>
     <app-doctor-report *ngIf="activeComponent === 'doctor'"></app-doctor-report>
     <app-checkin-report *ngIf="activeComponent === 'checkin'"></app-checkin-report>
+    <app-revenue-report *ngIf="activeComponent === 'revenue'"></app-revenue-report>
   </div>

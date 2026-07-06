@@ -1,0 +1,55 @@
+.dx-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px 20px; margin: 16px 0; }
+.dx-title { font-size: 16px; font-weight: 600; margin: 0; color: #111827; }
+.dx-sub { color: #6b7280; font-size: 12px; margin: 4px 0 12px; }
+
+.dx-banner { padding: 8px 12px; border-radius: 6px; font-size: 13px; margin-bottom: 10px; }
+.dx-bad { background: #fee2e2; color: #b91c1c; }
+.dx-good { background: #dcfce7; color: #166534; }
+.dx-loading { padding: 20px; text-align: center; color: #6b7280; font-style: italic; }
+
+.dx-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.dx-col { background: #fafafa; border: 1px solid #e5e7eb; border-radius: 6px; padding: 12px 14px; }
+.dx-col h4 { font-size: 13px; font-weight: 600; margin: 0 0 8px; color: #1f2937; text-transform: uppercase; letter-spacing: 0.5px; }
+.dx-hint { color: #6b7280; font-size: 11px; margin: -4px 0 8px; }
+
+.dx-tabs { display: flex; gap: 4px; border-bottom: 1px solid #e5e7eb; margin-bottom: 10px; }
+.dx-tabs button {
+  background: transparent; border: none; padding: 5px 10px; font-size: 12px; cursor: pointer; color: #6b7280;
+  border-bottom: 2px solid transparent;
+}
+.dx-tabs button:hover { color: #1d4ed8; }
+.dx-tab-active { color: #1d4ed8 !important; border-bottom-color: #1d4ed8 !important; font-weight: 600; }
+
+.dx-form-row { display: flex; gap: 6px; align-items: center; margin-bottom: 10px; }
+.dx-form-row input { border: 1px solid #d1d5db; border-radius: 6px; padding: 5px 8px; font-size: 12px; flex: 1; }
+.dx-form-row input.dx-code { max-width: 110px; font-family: monospace; }
+
+/* Phase 9.4a — autocomplete dropdown */
+.dx-form-row-autocomplete { position: relative; }
+.dx-autocomplete {
+  position: absolute; left: 0; right: 0; top: 100%; z-index: 20;
+  background: #fff; border: 1px solid #d1d5db; border-top: 0;
+  border-radius: 0 0 6px 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  max-height: 240px; overflow-y: auto; list-style: none; margin: 0; padding: 4px 0;
+}
+.dx-autocomplete li {
+  padding: 6px 10px; font-size: 12px; cursor: pointer; color: #1f2937;
+}
+.dx-autocomplete li:hover { background: #dbeafe; }
+.dx-autocomplete li strong { color: #1d4ed8; font-family: monospace; margin-right: 4px; }
+
+.dx-grid { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 12px; }
+.dx-grid th, .dx-grid td {
+  border-bottom: 1px solid #f3f4f6; padding: 5px 8px; vertical-align: top; text-align: left;
+}
+.dx-grid th { background: #f9fafb; font-weight: 600; color: #374151; font-size: 11px; }
+.dx-muted { color: #9ca3af; font-style: italic; }
+
+.dx-btn { background: #fff; border: 1px solid #d1d5db; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; }
+.dx-btn:hover:not([disabled]) { background: #f3f4f6; }
+.dx-btn-sm { padding: 2px 6px; font-size: 11px; }
+.dx-btn-primary { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
+.dx-btn-primary:hover:not([disabled]) { background: #1e40af; }
+.dx-btn-danger { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
+.dx-btn-danger:hover:not([disabled]) { background: #fecaca; }
+.dx-btn[disabled] { opacity: 0.5; cursor: not-allowed; }

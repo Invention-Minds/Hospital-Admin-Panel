@@ -8,6 +8,7 @@ import {
   Output,
   ViewChild,
 } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import {
   SignatureService,
   SignerType,
@@ -36,6 +37,8 @@ import {
  */
 @Component({
   selector: 'app-e-sign',
+  standalone: true,
+  imports: [CommonModule],
   templateUrl: './e-sign.component.html',
   styleUrls: ['./e-sign.component.css'],
 })

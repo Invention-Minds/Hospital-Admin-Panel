@@ -1,0 +1,1379 @@
+/* =============================================================================
+ * Phase 9.9 — Shared form design module.
+ *
+ * Captures the visual vocabulary used by the Health Checkup Form
+ * (src/app/health-checkup-service/health-checkup-form) so the rest of the
+ * IPD / OT / Emergency forms can converge on the same look without each
+ * component re-inventing it.
+ *
+ * Class prefix: `dm-*` (Docminds). Opt-in — components that don't use the
+ * classes are unaffected. Pure presentation: no behaviour, no JS hooks.
+ *
+ * Palette (locked to the existing app — no visual reset):
+ *   Primary brand:   #271e4a (deep purple)
+ *   Action / submit: #169458 (green)
+ *   Action focus:    #007bff (blue)
+ *   Field bg:        #f0f3ff (lavender)
+ *   Field border:    #b4b6ba (cool gray)
+ *   Error:           #ff4d4d
+ *   Muted text:      #7b7b7b
+ * ============================================================================= */
+
+/* ── Page shell ─────────────────────────────────────────────────────────── */
+/* Padding:
+ *   top    56px — leaves room for the global floating Back button (44px tall + 12px gap)
+ *                 so it never overlaps page-title text.
+ *   left  100px — clears the 72px sidebar + breathing room.
+ *   bottom 40px — bottom safe-area before the sticky save bar / page bottom. */
+.dm-page {
+  max-width: 1600px;
+  margin: 0 auto 24px auto;
+  padding: 56px 32px 40px 100px;
+  font-family: Kanit, sans-serif;
+  color: #271e4a;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+@media (max-width: 768px) {
+  .dm-page { padding: 56px 16px 32px; }
+}
+
+/* ── Page header ────────────────────────────────────────────────────────── */
+.dm-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+/* Page title — !important guards against Material/PrimeNG h1/h2 defaults
+ * that otherwise inflate this to ~32px+. */
+.dm-page-title,
+h1.dm-page-title,
+h2.dm-page-title,
+h3.dm-page-title {
+  color: #271e4a !important;
+  font-family: Kanit, sans-serif !important;
+  font-size: 22px !important;
+  font-weight: 600 !important;
+  margin: 0 !important;
+  line-height: 1.3 !important;
+  letter-spacing: 0.2px;
+}
+.dm-page-sub {
+  color: #7b7b7b !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  margin: 4px 0 0 !important;
+  line-height: 1.4 !important;
+}
+.dm-page-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* ── Card / section grouping ────────────────────────────────────────────── */
+.dm-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 18px 22px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 2px rgba(39, 30, 74, 0.04);
+}
+/* Section title — !important guards against Material/PrimeNG h2-h6 defaults
+ * that otherwise blow these up to ~30px. */
+.dm-section-title,
+h2.dm-section-title,
+h3.dm-section-title,
+h4.dm-section-title {
+  color: #271e4a !important;
+  font-family: Kanit, sans-serif !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  margin: 0 0 16px !important;
+  padding: 0 0 8px !important;
+  border-bottom: 1px solid #f3f4f6;
+  letter-spacing: 0.2px;
+  line-height: 1.3 !important;
+}
+.dm-section-sub {
+  color: #7b7b7b !important;
+  font-size: 12px !important;
+  margin: -6px 0 12px !important;
+  line-height: 1.4 !important;
+}
+
+/* ── Form fields ────────────────────────────────────────────────────────── */
+/* Field grids — Use `dm-form-stack` when fields should always be a single
+ * column (long-form notes, narratives, history). */
+.dm-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 20px;
+}
+.dm-form-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px 20px;
+}
+.dm-form-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+@media (max-width: 900px) {
+  .dm-form-grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 768px) {
+  .dm-form-grid, .dm-form-grid-3 { grid-template-columns: 1fr; }
+}
+
+.dm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;                       /* allow flex children to shrink */
+}
+.dm-field-full {
+  grid-column: 1 / -1;
+}
+.dm-field-label {
+  color: #271e4a;
+  font-family: Kanit, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  line-height: 1.3;
+}
+.dm-field-label .dm-required { color: #ff4d4d; margin-left: 2px; }
+.dm-field-hint {
+  color: #7b7b7b;
+  font-size: 11px;
+  font-weight: 400;
+  margin-top: 2px;
+}
+
+/* Inputs — match the Health Checkup Form pattern.
+ * Phase 9.9.2 — dialled back from 44→40px after user feedback that 44 felt too tall. */
+.dm-input,
+.dm-select,
+.dm-textarea {
+  width: 100%;
+  height: 40px;
+  padding: 8px 12px;
+  color: #271e4a;
+  font-family: Kanit, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  border: 1px solid #b4b6ba;
+  border-radius: 6px;
+  background: #f0f3ff;
+  box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.dm-input:focus,
+.dm-select:focus,
+.dm-textarea:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.18);
+  outline: none;
+}
+.dm-input:hover:not(:disabled):not(:focus),
+.dm-select:hover:not(:disabled):not(:focus),
+.dm-textarea:hover:not(:disabled):not(:focus) {
+  border-color: #9aa0a6;
+}
+.dm-input::placeholder,
+.dm-textarea::placeholder {
+  color: rgba(123, 123, 123, 0.45);
+  font-weight: 400;
+}
+/* Textarea — overrides the 40px fixed height from .dm-input shorthand. */
+.dm-textarea {
+  resize: vertical;
+  height: auto;
+  min-height: 76px;
+  line-height: 1.45;
+  padding: 10px 12px;
+}
+.dm-input:disabled,
+.dm-select:disabled,
+.dm-textarea:disabled {
+  background: #f3f4f6;
+  color: #7b7b7b;
+  cursor: not-allowed;
+}
+.dm-input.dm-invalid,
+.dm-select.dm-invalid,
+.dm-textarea.dm-invalid {
+  border-color: #ff4d4d;
+  box-shadow: 0 0 3px rgba(255, 77, 77, 0.4);
+}
+.dm-error {
+  color: #ff4d4d;
+  font-size: 12px;
+  margin-top: 3px;
+  min-height: 16px;
+}
+
+/* Inline / checkbox / radio rows */
+.dm-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #271e4a;
+}
+.dm-radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-top: 4px;
+}
+.dm-radio-group label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #271e4a;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* ── Buttons ────────────────────────────────────────────────────────────── */
+.dm-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  align-items: center;
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid #f3f4f6;
+}
+.dm-actions-center { justify-content: center; }
+
+.dm-btn {
+  min-width: 130px;
+  height: 40px;
+  padding: 0 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: Kanit, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid transparent;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+}
+.dm-btn-primary {
+  background: #169458;
+  color: #fff;
+  border-color: #169458;
+}
+.dm-btn-primary:hover:not(:disabled) { background: #117849; border-color: #117849; }
+
+.dm-btn-secondary {
+  background: transparent;
+  color: #7b7b7b;
+  border-color: #7b7b7b;
+}
+.dm-btn-secondary:hover:not(:disabled) { background: #f3f4f6; }
+
+.dm-btn-danger {
+  background: #ff4d4d;
+  color: #fff;
+  border-color: #ff4d4d;
+}
+.dm-btn-danger:hover:not(:disabled) { background: #e63d3d; border-color: #e63d3d; }
+
+.dm-btn-link {
+  background: transparent;
+  color: #007bff;
+  border: none;
+  min-width: 0;
+  height: auto;
+  padding: 4px 8px;
+  font-size: 13px;
+}
+.dm-btn-link:hover:not(:disabled) { text-decoration: underline; }
+
+.dm-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  background: #cccccc;
+  color: #666666;
+  border-color: #cccccc;
+}
+
+.dm-btn-sm { min-width: 0; height: 32px; padding: 4px 12px; font-size: 13px; }
+
+/* ── Banners (info / success / error / warning) ─────────────────────────── */
+.dm-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  margin-bottom: 12px;
+  font-family: Kanit, sans-serif;
+}
+.dm-banner-good   { background: #dcfce7; color: #166534; border-left: 3px solid #16a34a; }
+.dm-banner-bad    { background: #fee2e2; color: #b91c1c; border-left: 3px solid #dc2626; }
+.dm-banner-info   { background: #eff6ff; color: #1e40af; border-left: 3px solid #2563eb; }
+.dm-banner-warn   { background: #fef3c7; color: #92400e; border-left: 3px solid #f59e0b; }
+
+/* ── Empty / loading states ─────────────────────────────────────────────── */
+.dm-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: #7b7b7b;
+  font-style: italic;
+  background: #f9fafb;
+  border-radius: 8px;
+  border: 1px dashed #e5e7eb;
+}
+.dm-loading {
+  padding: 40px 20px;
+  text-align: center;
+  color: #7b7b7b;
+  font-style: italic;
+}
+
+/* ── Tag pills (status / category) ──────────────────────────────────────── */
+.dm-pill {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #e5e7eb;
+  color: #4b5563;
+  letter-spacing: 0.3px;
+}
+.dm-pill-good { background: #dcfce7; color: #166534; }
+.dm-pill-bad  { background: #fee2e2; color: #b91c1c; }
+.dm-pill-warn { background: #fef3c7; color: #92400e; }
+.dm-pill-info { background: #dbeafe; color: #1e40af; }
+
+/* ── Read-only "info row" — paired label/value display ──────────────────── */
+.dm-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.dm-info-row {
+  background: #f9fafb;
+  border-radius: 6px;
+  padding: 8px 14px;
+}
+.dm-info-row > span {
+  display: block;
+  color: #7b7b7b;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+.dm-info-row > strong {
+  font-size: 14px;
+  color: #271e4a;
+  font-weight: 500;
+}
+
+/* ── Sticky save bar (long forms) ───────────────────────────────────────── */
+.dm-save-bar {
+  position: sticky;
+  bottom: 0;
+  background: #fff;
+  border-top: 1px solid #e5e7eb;
+  padding: 12px 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin: 18px -24px -20px;
+  box-shadow: 0 -2px 6px rgba(39, 30, 74, 0.04);
+  z-index: 5;
+}
+
+/* ── PrimeNG inputs inside dm-card / dm-field ───────────────────────────── */
+/* PrimeNG (p-autoComplete, p-dropdown, pInputText, pInputTextarea) ship
+ * their own height + radius. We nudge them so every field on a card lines
+ * up at the same 40px height as the native dm-input. */
+.dm-card .p-inputtext,
+.dm-card input[pInputText],
+.dm-card textarea[pInputTextarea],
+.dm-field .p-inputtext,
+.dm-field input[pInputText],
+.dm-field textarea[pInputTextarea] {
+  width: 100%;
+  height: 40px;
+  padding: 8px 12px;
+  font-family: Kanit, sans-serif;
+  font-size: 14px;
+  color: #271e4a;
+  background: #f0f3ff;
+  border: 1px solid #b4b6ba;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+.dm-card textarea[pInputTextarea],
+.dm-field textarea[pInputTextarea] {
+  height: auto;
+  min-height: 76px;
+  line-height: 1.45;
+  padding: 10px 12px;
+}
+.dm-card .p-inputtext:focus,
+.dm-card input[pInputText]:focus,
+.dm-card textarea[pInputTextarea]:focus,
+.dm-field .p-inputtext:focus,
+.dm-field input[pInputText]:focus,
+.dm-field textarea[pInputTextarea]:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.18);
+  outline: none;
+}
+
+.dm-card .p-dropdown,
+.dm-card .p-autocomplete,
+.dm-field .p-dropdown,
+.dm-field .p-autocomplete {
+  width: 100%;
+  height: 40px;
+  border-radius: 6px;
+  background: #f0f3ff;
+  border: 1px solid #b4b6ba;
+  font-family: Kanit, sans-serif;
+}
+.dm-card .p-dropdown .p-dropdown-label,
+.dm-card .p-autocomplete .p-autocomplete-input,
+.dm-field .p-dropdown .p-dropdown-label,
+.dm-field .p-autocomplete .p-autocomplete-input {
+  font-size: 14px;
+  padding: 8px 12px;
+  color: #271e4a;
+  background: transparent;
+  border: none;
+  line-height: 1.4;
+}
+
+/* ── Table — list of records ────────────────────────────────────────────── */
+.dm-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13px;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+}
+.dm-table th,
+.dm-table td {
+  padding: 9px 12px;
+  text-align: left;
+  border-bottom: 1px solid #f3f4f6;
+  vertical-align: top;
+}
+.dm-table th {
+  background: #f9fafb;
+  color: #271e4a;
+  font-weight: 500;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.dm-table tbody tr:last-child td { border-bottom: none; }
+.dm-table tbody tr:hover { background: #fafbff; }
+
+/* ============================================================================
+ * Phase 9.9.3 — Global "cascade" rules.
+ *
+ * The dm-* utilities above are opt-in: a component has to use those class
+ * names to get the new look. To propagate the design across the dozens of
+ * existing IPD / OT / Emergency forms without rewriting every template, the
+ * rules below act as a paint-bucket FALLBACK that targets:
+ *   1. Standard form elements (input/select/textarea/button)
+ *   2. inside any of the common page-wrapper class names that already exist
+ *      in this codebase (.page, .dm-page, *-shell, *-container, etc.)
+ *   3. AND any pre-existing legacy class names (.form-input, .form__input,
+ *      .form-control, .form-label, .section-title, etc.)
+ *
+ * Specificity trick — selectors are wrapped in :where() which has ZERO
+ * specificity. That means a component that has its own explicit input rule
+ * still wins; this just paints anything the component left unstyled.
+ * ============================================================================ */
+
+/* Set of "page wrapper" selectors that this codebase actually uses. */
+:where(
+  .page, .dm-page,
+  .shell, [class$="-shell"],
+  .container, [class$="-container"],
+  .form-container,
+  .ipd-overview, .ipd-admission-container,
+  .ward-container, .er-overview,
+  .lama-dama-container, .emergency-intake-container, .emergency-list-container,
+  .bed-census-container
+)
+  input[type="text"],
+:where(.page, .dm-page, .shell, [class$="-shell"], .container, [class$="-container"], .form-container, .ipd-overview, .ipd-admission-container, .ward-container, .er-overview, .lama-dama-container, .emergency-intake-container, .emergency-list-container, .bed-census-container)
+  input[type="number"],
+:where(.page, .dm-page, .shell, [class$="-shell"], .container, [class$="-container"], .form-container, .ipd-overview, .ipd-admission-container, .ward-container, .er-overview, .lama-dama-container, .emergency-intake-container, .emergency-list-container, .bed-census-container)
+  input[type="email"],
+:where(.page, .dm-page, .shell, [class$="-shell"], .container, [class$="-container"], .form-container, .ipd-overview, .ipd-admission-container, .ward-container, .er-overview, .lama-dama-container, .emergency-intake-container, .emergency-list-container, .bed-census-container)
+  input[type="tel"],
+:where(.page, .dm-page, .shell, [class$="-shell"], .container, [class$="-container"], .form-container, .ipd-overview, .ipd-admission-container, .ward-container, .er-overview, .lama-dama-container, .emergency-intake-container, .emergency-list-container, .bed-census-container)
+  input[type="password"],
+:where(.page, .dm-page, .shell, [class$="-shell"], .container, [class$="-container"], .form-container, .ipd-overview, .ipd-admission-container, .ward-container, .er-overview, .lama-dama-container, .emergency-intake-container, .emergency-list-container, .bed-census-container)
+  input[type="date"],
+:where(.page, .dm-page, .shell, [class$="-shell"], .container, [class$="-container"], .form-container, .ipd-overview, .ipd-admission-container, .ward-container, .er-overview, .lama-dama-container, .emergency-intake-container, .emergency-list-container, .bed-census-container)
+  input[type="time"],
+:where(.page, .dm-page, .shell, [class$="-shell"], .container, [class$="-container"], .form-container, .ipd-overview, .ipd-admission-container, .ward-container, .er-overview, .lama-dama-container, .emergency-intake-container, .emergency-list-container, .bed-census-container)
+  input[type="datetime-local"],
+:where(.page, .dm-page, .shell, [class$="-shell"], .container, [class$="-container"], .form-container, .ipd-overview, .ipd-admission-container, .ward-container, .er-overview, .lama-dama-container, .emergency-intake-container, .emergency-list-container, .bed-census-container)
+  input:not([type]),
+:where(.page, .dm-page, .shell, [class$="-shell"], .container, [class$="-container"], .form-container, .ipd-overview, .ipd-admission-container, .ward-container, .er-overview, .lama-dama-container, .emergency-intake-container, .emergency-list-container, .bed-census-container)
+  select,
+:where(.form-input, .form__input, .form-control) {
+  height: 40px;
+  padding: 8px 12px;
+  font-family: Kanit, sans-serif;
+  font-size: 14px;
+  color: #271e4a;
+  background: #f0f3ff;
+  border: 1px solid #b4b6ba;
+  border-radius: 6px;
+  box-sizing: border-box;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+:where(.page, .dm-page, .shell, [class$="-shell"], .container, [class$="-container"], .form-container, .ipd-overview, .ipd-admission-container, .ward-container, .er-overview, .lama-dama-container, .emergency-intake-container, .emergency-list-container, .bed-census-container)
+  textarea,
+:where(.form-textarea, .form__textarea) {
+  min-height: 76px;
+  padding: 10px 12px;
+  font-family: Kanit, sans-serif;
+  font-size: 14px;
+  color: #271e4a;
+  background: #f0f3ff;
+  border: 1px solid #b4b6ba;
+  border-radius: 6px;
+  box-sizing: border-box;
+  line-height: 1.45;
+  resize: vertical;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+/* Focus state — also applied via :where() so component rules still win */
+:where(.page, .dm-page, .shell, [class$="-shell"], .container, [class$="-container"], .form-container, .ipd-overview, .ipd-admission-container, .ward-container, .er-overview, .lama-dama-container, .emergency-intake-container, .emergency-list-container, .bed-census-container) input:focus,
+:where(.page, .dm-page, .shell, [class$="-shell"], .container, [class$="-container"], .form-container, .ipd-overview, .ipd-admission-container, .ward-container, .er-overview, .lama-dama-container, .emergency-intake-container, .emergency-list-container, .bed-census-container) select:focus,
+:where(.page, .dm-page, .shell, [class$="-shell"], .container, [class$="-container"], .form-container, .ipd-overview, .ipd-admission-container, .ward-container, .er-overview, .lama-dama-container, .emergency-intake-container, .emergency-list-container, .bed-census-container) textarea:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.18);
+  outline: none;
+}
+
+/* Placeholder color */
+:where(.page, .dm-page, .shell, [class$="-shell"], .container, [class$="-container"], .form-container) input::placeholder,
+:where(.page, .dm-page, .shell, [class$="-shell"], .container, [class$="-container"], .form-container) textarea::placeholder {
+  color: rgba(123, 123, 123, 0.45);
+  font-weight: 400;
+}
+
+/* Labels — both new and legacy class names. 13px / 500 / deep purple. */
+:where(.dm-field-label, .form-label, .form__label) {
+  color: #271e4a;
+  font-family: Kanit, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  line-height: 1.3;
+}
+
+/* Section titles — legacy classes get the same look as .dm-section-title.
+ * !important to beat Material's global h2-h6 rules. */
+:where(.section-title, .form-section-title, .form__section-heading) {
+  color: #271e4a !important;
+  font-family: Kanit, sans-serif !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  margin: 0 0 16px !important;
+  padding: 0 0 8px !important;
+  border-bottom: 1px solid #f3f4f6 !important;
+  letter-spacing: 0.2px;
+  line-height: 1.3 !important;
+}
+
+/* Buttons — match dm-btn shape. Legacy `.btn`, `.btn--primary`, `.btn-submit`,
+ * `.btn-cancel`, `.btn-secondary` etc. Selectors gated to known wrappers. */
+:where(.page, .dm-page, .shell, [class$="-shell"], .container, [class$="-container"], .form-container)
+  :where(.btn, button[type="submit"], button[type="button"].btn) {
+  min-width: 130px;
+  height: 40px;
+  padding: 0 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: Kanit, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid transparent;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  letter-spacing: 0.2px;
+}
+
+/* Primary action variants — green */
+:where(.btn-submit, .btn--primary, .btn-primary.p-button-primary) {
+  background: #169458;
+  color: #fff;
+  border-color: #169458;
+}
+:where(.btn-submit, .btn--primary, .btn-primary.p-button-primary):hover:not(:disabled) {
+  background: #117849;
+  border-color: #117849;
+}
+
+/* Secondary / cancel */
+:where(.btn-cancel, .btn--secondary, .btn--cancel) {
+  background: transparent;
+  color: #7b7b7b;
+  border-color: #7b7b7b;
+}
+:where(.btn-cancel, .btn--secondary, .btn--cancel):hover:not(:disabled) {
+  background: #f3f4f6;
+}
+
+/* Danger / remove */
+:where(.btn--danger, .btn--remove, .btn-delete) {
+  background: #ff4d4d;
+  color: #fff;
+  border-color: #ff4d4d;
+}
+:where(.btn--danger, .btn--remove, .btn-delete):hover:not(:disabled) {
+  background: #e63d3d;
+  border-color: #e63d3d;
+}
+
+/* Page wrappers that already exist in the codebase — give them the dm-page
+ * shell treatment (sidebar clearance, top padding for back button, max-width).
+ * !important on padding because some components define their own padding. */
+:where(.shell, [class$="-shell"]) {
+  max-width: 1600px;
+  margin: 0 auto 24px auto;
+  padding: 56px 32px 40px 100px;
+  font-family: Kanit, sans-serif;
+  color: #271e4a;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+@media (max-width: 768px) {
+  :where(.shell, [class$="-shell"]) { padding: 56px 16px 32px; }
+}
+
+/* PrimeNG controls inside ANY known wrapper (not just .dm-card/.dm-field) */
+:where(.page, .dm-page, .shell, [class$="-shell"], .container, [class$="-container"]) .p-inputtext,
+:where(.page, .dm-page, .shell, [class$="-shell"], .container, [class$="-container"]) input[pInputText],
+:where(.page, .dm-page, .shell, [class$="-shell"], .container, [class$="-container"]) textarea[pInputTextarea] {
+  width: 100%;
+  height: 40px;
+  padding: 8px 12px;
+  font-family: Kanit, sans-serif;
+  font-size: 14px;
+  color: #271e4a;
+  background: #f0f3ff;
+  border: 1px solid #b4b6ba;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+:where(.page, .dm-page, .shell, [class$="-shell"], .container, [class$="-container"]) textarea[pInputTextarea] {
+  height: auto;
+  min-height: 76px;
+  line-height: 1.45;
+  padding: 10px 12px;
+}
+:where(.page, .dm-page, .shell, [class$="-shell"], .container, [class$="-container"]) .p-dropdown,
+:where(.page, .dm-page, .shell, [class$="-shell"], .container, [class$="-container"]) .p-autocomplete {
+  width: 100%;
+  height: 40px;
+  border-radius: 6px;
+  background: #f0f3ff;
+  border: 1px solid #b4b6ba;
+  font-family: Kanit, sans-serif;
+}
+:where(.page, .dm-page, .shell, [class$="-shell"], .container, [class$="-container"]) .p-dropdown .p-dropdown-label,
+:where(.page, .dm-page, .shell, [class$="-shell"], .container, [class$="-container"]) .p-autocomplete .p-autocomplete-input {
+  font-size: 14px;
+  padding: 8px 12px;
+  color: #271e4a;
+  background: transparent;
+  border: none;
+}
+
+/* ============================================================================
+ * Phase 9.9.5 — Scoped clinical-form overrides.
+ *
+ * Earlier versions used wildcard selectors like [class*="-container"] which
+ * caught NON-clinical pages (login-container, ad-container, dialog-container,
+ * etc) and restyled them. This block uses an EXPLICIT allow-list of clinical
+ * page wrappers — anything not in the list is untouched.
+ *
+ * Allow-list:
+ *   .page (IPD/MLC/LAMA-DAMA legacy)
+ *   .ipd-overview, .ipd-admission-container
+ *   .ward-container, .bed-census-container
+ *   .er-overview, .emergency-intake-container, .emergency-list-container
+ *   .lama-dama-container
+ *   .cc-shell, .ndo-shell, .icu-shell, .q-shell,
+ *   .ia-shell, .ho-shell, .mr-shell, .dc-shell,
+ *   .ba-shell, .nsq-shell, .erd-shell             (IPD/Emergency modern)
+ *   .ot-shell, .ow-shell, .ec-shell, .id-shell, .ar-shell, .ds-shell,
+ *   .dx-shell, .su-shell, .tpl-shell, .rpt-shell, .ts-shell, .pp-shell,
+ *   .os-shell, .otd-shell                          (OT modern)
+ *
+ * `!important` is used so component-scoped CSS doesn't beat us on specificity.
+ * ============================================================================ */
+
+/* Page wrappers — sidebar clearance + Back-button top padding */
+.page,
+.ipd-overview,
+.ipd-admission-container,
+.ward-container,
+.bed-census-container,
+.er-overview,
+.emergency-intake-container,
+.emergency-list-container,
+.lama-dama-container,
+.cc-shell, .ndo-shell, .icu-shell, .q-shell,
+.ia-shell, .ho-shell, .mr-shell, .dc-shell, .ba-shell, .nsq-shell, .erd-shell,
+.ot-shell, .ow-shell, .ec-shell, .id-shell, .ar-shell, .ds-shell,
+.dx-shell, .su-shell, .tpl-shell, .rpt-shell, .ts-shell, .pp-shell,
+.os-shell, .otd-shell,
+.ns-shell, .lra-shell, .wtc-shell, .td-shell {
+  max-width: 1600px !important;
+  margin: 0 auto 24px auto !important;
+  padding: 56px 32px 40px 100px !important;
+  font-family: Kanit, sans-serif !important;
+  color: #271e4a !important;
+  box-sizing: border-box !important;
+  min-height: 100vh !important;
+}
+@media (max-width: 768px) {
+  .page,
+  .ipd-overview, .ipd-admission-container,
+  .ward-container, .bed-census-container,
+  .er-overview, .emergency-intake-container, .emergency-list-container,
+  .lama-dama-container,
+  .cc-shell, .ndo-shell, .icu-shell, .q-shell,
+.ia-shell, .ho-shell, .mr-shell, .dc-shell, .ba-shell, .nsq-shell, .erd-shell,
+  .ot-shell, .ow-shell, .ec-shell, .id-shell, .ar-shell, .ds-shell,
+  .dx-shell, .su-shell, .tpl-shell, .rpt-shell, .ts-shell, .pp-shell,
+  .os-shell, .otd-shell,
+  .ns-shell, .lra-shell, .wtc-shell, .td-shell {
+    padding: 56px 16px 32px !important;
+  }
+}
+
+/* Card containers — only inside an allow-listed page wrapper.
+ * The DESCENDANT selector here is the safety net: a plain `.card` outside a
+ * clinical wrapper (e.g. on a dashboard tile) is NOT restyled. */
+.page .form, .page .card, .page .list-card,
+.ipd-overview .card, .ipd-overview .list-card,
+.ipd-admission-container .card,
+.ward-container .card, .bed-census-container .card,
+.er-overview .card, .emergency-intake-container .card, .emergency-list-container .card,
+.lama-dama-container .card,
+.cc-shell .card, .ndo-shell .card, .icu-shell .card, .q-shell .card,
+.ia-shell .card, .ho-shell .card, .mr-shell .card, .dc-shell .card,
+.ba-shell .card, .nsq-shell .card, .erd-shell .card,
+.ot-shell .card, .ow-shell .card, .ec-shell .card, .id-shell .card,
+.ar-shell .card, .ds-shell .card, .dx-shell .card, .su-shell .card,
+.tpl-shell .card, .rpt-shell .card, .ts-shell .card, .pp-shell .card,
+.os-shell .card, .otd-shell .card,
+.ns-shell .card, .lra-shell .card, .wtc-shell .card, .td-shell .card {
+  background: #fff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 10px !important;
+  box-shadow: 0 1px 2px rgba(39, 30, 74, 0.04) !important;
+  padding: 18px 22px !important;
+  margin-bottom: 16px !important;
+}
+
+/* Section headings — only inside allow-listed wrappers */
+.page .section-title, .page .form-section-title,
+.page .form__section-heading, .page .list-card__title,
+.ipd-overview .section-title, .ipd-overview .form-section-title,
+.ipd-admission-container .section-title, .ipd-admission-container .form-section-title,
+.ward-container .section-title,
+.bed-census-container .section-title,
+.er-overview .section-title,
+.emergency-intake-container .section-title, .emergency-intake-container .form-section-title,
+.emergency-list-container .section-title,
+.lama-dama-container .section-title {
+  color: #271e4a !important;
+  font-family: Kanit, sans-serif !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  margin: 0 0 16px !important;
+  padding: 0 0 8px !important;
+  border-bottom: 1px solid #f3f4f6 !important;
+  letter-spacing: 0.2px;
+  line-height: 1.3 !important;
+}
+
+/* Field labels — only legacy class names, only inside allow-listed wrappers */
+.page .form-label, .page .form__label,
+.ipd-admission-container .form-label,
+.emergency-intake-container .form-label,
+.lama-dama-container .form-label {
+  color: #271e4a !important;
+  font-family: Kanit, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  line-height: 1.3 !important;
+  display: block !important;
+}
+
+/* Inputs — explicit page-wrapper prefix gates everything */
+.page input[type="text"], .page input[type="number"], .page input[type="email"],
+.page input[type="tel"], .page input[type="password"], .page input[type="date"],
+.page input[type="time"], .page input[type="datetime-local"],
+.page input:not([type]), .page select,
+.ipd-admission-container input[type="text"], .ipd-admission-container input[type="number"],
+.ipd-admission-container input[type="email"], .ipd-admission-container input[type="tel"],
+.ipd-admission-container input[type="date"], .ipd-admission-container input[type="time"],
+.ipd-admission-container input[type="datetime-local"], .ipd-admission-container input:not([type]),
+.ipd-admission-container select,
+.emergency-intake-container input[type="text"], .emergency-intake-container input[type="number"],
+.emergency-intake-container input[type="email"], .emergency-intake-container input[type="tel"],
+.emergency-intake-container input[type="date"], .emergency-intake-container input[type="time"],
+.emergency-intake-container input[type="datetime-local"], .emergency-intake-container input:not([type]),
+.emergency-intake-container select,
+.lama-dama-container input[type="text"], .lama-dama-container input[type="number"],
+.lama-dama-container input:not([type]), .lama-dama-container select,
+.ipd-overview input[type="text"], .ipd-overview select,
+.ward-container input[type="text"], .ward-container select,
+.bed-census-container input[type="text"], .bed-census-container select,
+.er-overview input[type="text"], .er-overview select,
+.emergency-list-container input[type="text"], .emergency-list-container select {
+  height: 40px !important;
+  padding: 8px 12px !important;
+  font-family: Kanit, sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  color: #271e4a !important;
+  background: #f0f3ff !important;
+  border: 1px solid #b4b6ba !important;
+  border-radius: 6px !important;
+  box-sizing: border-box !important;
+}
+
+.page textarea,
+.ipd-admission-container textarea,
+.emergency-intake-container textarea,
+.lama-dama-container textarea {
+  min-height: 76px !important;
+  padding: 10px 12px !important;
+  font-family: Kanit, sans-serif !important;
+  font-size: 14px !important;
+  color: #271e4a !important;
+  background: #f0f3ff !important;
+  border: 1px solid #b4b6ba !important;
+  border-radius: 6px !important;
+  box-sizing: border-box !important;
+  line-height: 1.45 !important;
+  resize: vertical !important;
+}
+
+.page input:focus, .page select:focus, .page textarea:focus,
+.ipd-admission-container input:focus, .ipd-admission-container select:focus,
+.ipd-admission-container textarea:focus,
+.emergency-intake-container input:focus, .emergency-intake-container select:focus,
+.emergency-intake-container textarea:focus,
+.lama-dama-container input:focus, .lama-dama-container select:focus,
+.lama-dama-container textarea:focus {
+  border-color: #007bff !important;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.18) !important;
+  outline: none !important;
+}
+
+/* PrimeNG controls only inside the allow-listed wrappers */
+.page .p-inputtext, .page input[pInputText], .page textarea[pInputTextarea],
+.ipd-admission-container .p-inputtext, .ipd-admission-container input[pInputText],
+.emergency-intake-container .p-inputtext, .emergency-intake-container input[pInputText],
+.lama-dama-container .p-inputtext,
+.cc-shell .p-inputtext, .ndo-shell .p-inputtext, .icu-shell .p-inputtext,
+.ia-shell .p-inputtext, .ho-shell .p-inputtext, .mr-shell .p-inputtext,
+.dc-shell .p-inputtext, .ba-shell .p-inputtext, .nsq-shell .p-inputtext,
+.erd-shell .p-inputtext,
+.ot-shell .p-inputtext, .ow-shell .p-inputtext, .otd-shell .p-inputtext {
+  height: 40px !important;
+  padding: 8px 12px !important;
+  font-family: Kanit, sans-serif !important;
+  font-size: 14px !important;
+  color: #271e4a !important;
+  background: #f0f3ff !important;
+  border: 1px solid #b4b6ba !important;
+  border-radius: 6px !important;
+  box-sizing: border-box !important;
+}
+.page textarea[pInputTextarea],
+.ipd-admission-container textarea[pInputTextarea],
+.emergency-intake-container textarea[pInputTextarea] {
+  height: auto !important;
+  min-height: 76px !important;
+  padding: 10px 12px !important;
+  line-height: 1.45 !important;
+}
+.page .p-dropdown, .page .p-autocomplete,
+.ipd-admission-container .p-dropdown, .ipd-admission-container .p-autocomplete,
+.emergency-intake-container .p-dropdown, .emergency-intake-container .p-autocomplete {
+  height: 40px !important;
+  border-radius: 6px !important;
+  background: #f0f3ff !important;
+  border: 1px solid #b4b6ba !important;
+  font-family: Kanit, sans-serif !important;
+}
+
+/* Buttons — only when used inside an allow-listed wrapper.
+ * NOTE: NO global .btn rule, so login's submit button (and dashboard tiles)
+ * stay untouched. */
+.page .btn, .page button.btn,
+.ipd-overview .btn, .ipd-admission-container .btn,
+.ward-container .btn, .bed-census-container .btn,
+.er-overview .btn, .emergency-intake-container .btn, .emergency-list-container .btn,
+.lama-dama-container .btn {
+  font-family: Kanit, sans-serif !important;
+  font-weight: 500 !important;
+  font-size: 14px !important;
+  border-radius: 6px !important;
+  padding: 0 20px !important;
+  height: 40px !important;
+  min-width: 120px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  letter-spacing: 0.2px;
+  border: 1px solid transparent !important;
+  cursor: pointer !important;
+}
+.page .btn--primary, .page .btn-submit, .page .btn-primary,
+.ipd-overview .btn--primary, .ipd-admission-container .btn-submit,
+.ward-container .btn-submit, .bed-census-container .btn-primary,
+.er-overview .btn-submit, .emergency-intake-container .btn-submit, .emergency-list-container .btn-primary,
+.lama-dama-container .btn--primary {
+  background: #169458 !important;
+  color: #fff !important;
+  border-color: #169458 !important;
+}
+.page .btn--cancel, .page .btn--secondary, .page .btn-cancel, .page .btn-secondary,
+.ipd-admission-container .btn-cancel,
+.emergency-intake-container .btn-cancel,
+.lama-dama-container .btn-cancel {
+  background: transparent !important;
+  color: #7b7b7b !important;
+  border-color: #7b7b7b !important;
+}
+.page .btn--danger, .page .btn--remove, .page .btn-delete,
+.emergency-intake-container .btn-delete,
+.lama-dama-container .btn-delete {
+  background: #ff4d4d !important;
+  color: #fff !important;
+  border-color: #ff4d4d !important;
+}
+
+/* Form action row — only inside allow-listed wrappers */
+.page .form__footer, .page .form-buttons, .page .button-group,
+.ipd-admission-container .form-buttons, .ipd-admission-container .button-group,
+.emergency-intake-container .button-group,
+.lama-dama-container .form-buttons {
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 12px !important;
+  margin-top: 18px !important;
+  padding-top: 14px !important;
+  border-top: 1px solid #f3f4f6 !important;
+}
+
+/* List items inside progress-note etc. */
+.page .list-item,
+.ipd-overview .list-item {
+  background: #f9fafb !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 8px !important;
+  padding: 12px 14px !important;
+}
+
+/* ============================================================================
+ * Phase 9.9.6 — Table design (matches Confirmed Appt reference).
+ *
+ * Navy thead, soft purple shadow rows, alternating tint, Kanit 14px, hover.
+ * Explicit allow-list — no wildcards. PrimeNG p-table, login, dashboard
+ * tiles, etc. are untouched because their class names aren't listed.
+ *
+ * Allow-list shared across thead/tbody/td blocks to avoid repetition. ~30
+ * named tables across IPD / OT / Emergency / Lab / Reports / Appointments.
+ * ============================================================================ */
+
+/* Table container — minimal: the actual <table> classes already wrap each
+ * row with shadow + radius via border-spacing trick, so no extra wrapper. */
+.appointment-table,
+.data-table,
+.styled-table,
+.summary-table,
+.modal-table,
+.scrollable-table,
+.popup-table,
+.pain-table,
+.queue-table,
+.report-table,
+.prescription-table,
+.dm-table,
+.ar-table, .cw-table, .dcl-table, .ds-table, .dt-table, .dx-table,
+.ec-table, .icu-table, .id-table, .mr-table, .ms-table, .na-table,
+.nc-counts-table, .pp-table, .rev-table, .su-table, .os-grid-table, .ow-grid,
+.rpt-grid, .req-grid, .ts-grid, .ext-grid {
+  width: 100% !important;
+  border-collapse: separate !important;
+  border-spacing: 0 6px !important;        /* row gap so shadow rows breathe */
+  font-family: Kanit, sans-serif !important;
+  font-size: 14px !important;
+  background: transparent !important;
+}
+
+/* THEAD — navy bar, white text */
+.appointment-table thead, .data-table thead, .styled-table thead,
+.summary-table thead, .modal-table thead, .scrollable-table thead,
+.popup-table thead, .pain-table thead, .queue-table thead,
+.report-table thead, .prescription-table thead, .dm-table thead,
+.ar-table thead, .cw-table thead, .dcl-table thead, .ds-table thead,
+.dt-table thead, .dx-table thead, .ec-table thead, .icu-table thead,
+.id-table thead, .mr-table thead, .ms-table thead, .na-table thead,
+.nc-counts-table thead, .pp-table thead, .rev-table thead, .su-table thead,
+.os-grid-table thead, .ow-grid thead,
+.rpt-grid thead, .req-grid thead, .ts-grid thead, .ext-grid thead {
+  background: #0e2970 !important;
+  color: #fff !important;
+}
+.appointment-table thead th, .data-table thead th, .styled-table thead th,
+.summary-table thead th, .modal-table thead th, .scrollable-table thead th,
+.popup-table thead th, .pain-table thead th, .queue-table thead th,
+.report-table thead th, .prescription-table thead th, .dm-table thead th,
+.ar-table thead th, .cw-table thead th, .dcl-table thead th, .ds-table thead th,
+.dt-table thead th, .dx-table thead th, .ec-table thead th, .icu-table thead th,
+.id-table thead th, .mr-table thead th, .ms-table thead th, .na-table thead th,
+.nc-counts-table thead th, .pp-table thead th, .rev-table thead th,
+.su-table thead th, .os-grid-table thead th, .ow-grid thead th,
+.rpt-grid thead th, .req-grid thead th, .ts-grid thead th, .ext-grid thead th {
+  background: #0e2970 !important;
+  color: #fff !important;
+  font-family: Kanit, sans-serif !important;
+  font-weight: 500 !important;
+  font-size: 13px !important;
+  padding: 14px 12px !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  border: none !important;
+  letter-spacing: 0.3px;
+  text-transform: none !important;
+}
+
+/* Round the first/last <th> so the header bar looks like a pill */
+.appointment-table thead th:first-child, .data-table thead th:first-child,
+.styled-table thead th:first-child, .summary-table thead th:first-child,
+.dm-table thead th:first-child, .modal-table thead th:first-child,
+.scrollable-table thead th:first-child, .popup-table thead th:first-child,
+.pain-table thead th:first-child, .queue-table thead th:first-child,
+.report-table thead th:first-child, .prescription-table thead th:first-child,
+.ar-table thead th:first-child, .cw-table thead th:first-child,
+.dcl-table thead th:first-child, .ds-table thead th:first-child,
+.dt-table thead th:first-child, .dx-table thead th:first-child,
+.ec-table thead th:first-child, .icu-table thead th:first-child,
+.id-table thead th:first-child, .mr-table thead th:first-child,
+.ms-table thead th:first-child, .na-table thead th:first-child,
+.nc-counts-table thead th:first-child, .pp-table thead th:first-child,
+.rev-table thead th:first-child, .su-table thead th:first-child,
+.os-grid-table thead th:first-child, .ow-grid thead th:first-child,
+.rpt-grid thead th:first-child, .req-grid thead th:first-child,
+.ts-grid thead th:first-child, .ext-grid thead th:first-child {
+  border-top-left-radius: 10px !important;
+  border-bottom-left-radius: 10px !important;
+}
+.appointment-table thead th:last-child, .data-table thead th:last-child,
+.styled-table thead th:last-child, .summary-table thead th:last-child,
+.dm-table thead th:last-child, .modal-table thead th:last-child,
+.scrollable-table thead th:last-child, .popup-table thead th:last-child,
+.pain-table thead th:last-child, .queue-table thead th:last-child,
+.report-table thead th:last-child, .prescription-table thead th:last-child,
+.ar-table thead th:last-child, .cw-table thead th:last-child,
+.dcl-table thead th:last-child, .ds-table thead th:last-child,
+.dt-table thead th:last-child, .dx-table thead th:last-child,
+.ec-table thead th:last-child, .icu-table thead th:last-child,
+.id-table thead th:last-child, .mr-table thead th:last-child,
+.ms-table thead th:last-child, .na-table thead th:last-child,
+.nc-counts-table thead th:last-child, .pp-table thead th:last-child,
+.rev-table thead th:last-child, .su-table thead th:last-child,
+.os-grid-table thead th:last-child, .ow-grid thead th:last-child,
+.rpt-grid thead th:last-child, .req-grid thead th:last-child,
+.ts-grid thead th:last-child, .ext-grid thead th:last-child {
+  border-top-right-radius: 10px !important;
+  border-bottom-right-radius: 10px !important;
+}
+
+/* TBODY rows — white card with soft purple shadow, alternating tint, hover */
+.appointment-table tbody tr, .data-table tbody tr, .styled-table tbody tr,
+.summary-table tbody tr, .modal-table tbody tr, .scrollable-table tbody tr,
+.popup-table tbody tr, .pain-table tbody tr, .queue-table tbody tr,
+.report-table tbody tr, .prescription-table tbody tr, .dm-table tbody tr,
+.ar-table tbody tr, .cw-table tbody tr, .dcl-table tbody tr, .ds-table tbody tr,
+.dt-table tbody tr, .dx-table tbody tr, .ec-table tbody tr, .icu-table tbody tr,
+.id-table tbody tr, .mr-table tbody tr, .ms-table tbody tr, .na-table tbody tr,
+.nc-counts-table tbody tr, .pp-table tbody tr, .rev-table tbody tr,
+.su-table tbody tr, .os-grid-table tbody tr, .ow-grid tbody tr,
+.rpt-grid tbody tr, .req-grid tbody tr, .ts-grid tbody tr, .ext-grid tbody tr {
+  background: #fff !important;
+  box-shadow: 0 4px 15px rgba(216, 210, 252, 0.64) !important;
+  border-radius: 12px !important;
+  height: 56px !important;
+  transition: background 0.15s !important;
+}
+.appointment-table tbody tr:nth-child(even),
+.data-table tbody tr:nth-child(even),
+.styled-table tbody tr:nth-child(even),
+.summary-table tbody tr:nth-child(even),
+.modal-table tbody tr:nth-child(even),
+.scrollable-table tbody tr:nth-child(even),
+.popup-table tbody tr:nth-child(even),
+.pain-table tbody tr:nth-child(even),
+.queue-table tbody tr:nth-child(even),
+.report-table tbody tr:nth-child(even),
+.prescription-table tbody tr:nth-child(even),
+.dm-table tbody tr:nth-child(even),
+.ar-table tbody tr:nth-child(even), .cw-table tbody tr:nth-child(even),
+.dcl-table tbody tr:nth-child(even), .ds-table tbody tr:nth-child(even),
+.dt-table tbody tr:nth-child(even), .dx-table tbody tr:nth-child(even),
+.ec-table tbody tr:nth-child(even), .icu-table tbody tr:nth-child(even),
+.id-table tbody tr:nth-child(even), .mr-table tbody tr:nth-child(even),
+.ms-table tbody tr:nth-child(even), .na-table tbody tr:nth-child(even),
+.nc-counts-table tbody tr:nth-child(even), .pp-table tbody tr:nth-child(even),
+.rev-table tbody tr:nth-child(even), .su-table tbody tr:nth-child(even),
+.os-grid-table tbody tr:nth-child(even), .ow-grid tbody tr:nth-child(even),
+.rpt-grid tbody tr:nth-child(even), .req-grid tbody tr:nth-child(even),
+.ts-grid tbody tr:nth-child(even), .ext-grid tbody tr:nth-child(even) {
+  background: #f9fafd !important;
+}
+.appointment-table tbody tr:hover, .data-table tbody tr:hover,
+.styled-table tbody tr:hover, .summary-table tbody tr:hover,
+.modal-table tbody tr:hover, .scrollable-table tbody tr:hover,
+.popup-table tbody tr:hover, .pain-table tbody tr:hover,
+.queue-table tbody tr:hover, .report-table tbody tr:hover,
+.prescription-table tbody tr:hover, .dm-table tbody tr:hover,
+.ar-table tbody tr:hover, .cw-table tbody tr:hover, .dcl-table tbody tr:hover,
+.ds-table tbody tr:hover, .dt-table tbody tr:hover, .dx-table tbody tr:hover,
+.ec-table tbody tr:hover, .icu-table tbody tr:hover, .id-table tbody tr:hover,
+.mr-table tbody tr:hover, .ms-table tbody tr:hover, .na-table tbody tr:hover,
+.nc-counts-table tbody tr:hover, .pp-table tbody tr:hover,
+.rev-table tbody tr:hover, .su-table tbody tr:hover,
+.os-grid-table tbody tr:hover, .ow-grid tbody tr:hover,
+.rpt-grid tbody tr:hover, .req-grid tbody tr:hover,
+.ts-grid tbody tr:hover, .ext-grid tbody tr:hover {
+  background: #eff6ff !important;
+}
+
+/* TBODY cells */
+.appointment-table tbody td, .data-table tbody td, .styled-table tbody td,
+.summary-table tbody td, .modal-table tbody td, .scrollable-table tbody td,
+.popup-table tbody td, .pain-table tbody td, .queue-table tbody td,
+.report-table tbody td, .prescription-table tbody td, .dm-table tbody td,
+.ar-table tbody td, .cw-table tbody td, .dcl-table tbody td, .ds-table tbody td,
+.dt-table tbody td, .dx-table tbody td, .ec-table tbody td, .icu-table tbody td,
+.id-table tbody td, .mr-table tbody td, .ms-table tbody td, .na-table tbody td,
+.nc-counts-table tbody td, .pp-table tbody td, .rev-table tbody td,
+.su-table tbody td, .os-grid-table tbody td, .ow-grid tbody td,
+.rpt-grid tbody td, .req-grid tbody td, .ts-grid tbody td, .ext-grid tbody td {
+  padding: 10px 12px !important;
+  text-align: center !important;
+  color: #271e4a !important;
+  font-family: Kanit, sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  border: none !important;
+  vertical-align: middle !important;
+  background: inherit !important;
+}
+.appointment-table tbody td:first-child, .data-table tbody td:first-child,
+.styled-table tbody td:first-child, .summary-table tbody td:first-child,
+.dm-table tbody td:first-child, .modal-table tbody td:first-child,
+.scrollable-table tbody td:first-child, .popup-table tbody td:first-child,
+.pain-table tbody td:first-child, .queue-table tbody td:first-child,
+.report-table tbody td:first-child, .prescription-table tbody td:first-child,
+.ar-table tbody td:first-child, .cw-table tbody td:first-child,
+.dcl-table tbody td:first-child, .ds-table tbody td:first-child,
+.dt-table tbody td:first-child, .dx-table tbody td:first-child,
+.ec-table tbody td:first-child, .icu-table tbody td:first-child,
+.id-table tbody td:first-child, .mr-table tbody td:first-child,
+.ms-table tbody td:first-child, .na-table tbody td:first-child,
+.nc-counts-table tbody td:first-child, .pp-table tbody td:first-child,
+.rev-table tbody td:first-child, .su-table tbody td:first-child,
+.os-grid-table tbody td:first-child, .ow-grid tbody td:first-child,
+.rpt-grid tbody td:first-child, .req-grid tbody td:first-child,
+.ts-grid tbody td:first-child, .ext-grid tbody td:first-child {
+  border-top-left-radius: 12px !important;
+  border-bottom-left-radius: 12px !important;
+  text-align: left !important;
+  padding-left: 16px !important;
+}
+.appointment-table tbody td:last-child, .data-table tbody td:last-child,
+.styled-table tbody td:last-child, .summary-table tbody td:last-child,
+.dm-table tbody td:last-child, .modal-table tbody td:last-child,
+.scrollable-table tbody td:last-child, .popup-table tbody td:last-child,
+.pain-table tbody td:last-child, .queue-table tbody td:last-child,
+.report-table tbody td:last-child, .prescription-table tbody td:last-child,
+.ar-table tbody td:last-child, .cw-table tbody td:last-child,
+.dcl-table tbody td:last-child, .ds-table tbody td:last-child,
+.dt-table tbody td:last-child, .dx-table tbody td:last-child,
+.ec-table tbody td:last-child, .icu-table tbody td:last-child,
+.id-table tbody td:last-child, .mr-table tbody td:last-child,
+.ms-table tbody td:last-child, .na-table tbody td:last-child,
+.nc-counts-table tbody td:last-child, .pp-table tbody td:last-child,
+.rev-table tbody td:last-child, .su-table tbody td:last-child,
+.os-grid-table tbody td:last-child, .ow-grid tbody td:last-child,
+.rpt-grid tbody td:last-child, .req-grid tbody td:last-child,
+.ts-grid tbody td:last-child, .ext-grid tbody td:last-child {
+  border-top-right-radius: 12px !important;
+  border-bottom-right-radius: 12px !important;
+}
+
+/* ============================================================================
+ * Table design — Group A extension.
+ *
+ * Additional list tables that were off the original allow-list but are plain
+ * row-lists like the rest: ward-table (nursing super dashboard), na-breach-table
+ * (NABH audit), apd-table (acuity drawer), dc-readings (day-care monitoring),
+ * opl-grid (OP procedure list), ndo-grid (non-drug orders), dx-grid (diagnosis
+ * codes). Same navy thead + shadow-row treatment as the blocks above.
+ * ============================================================================ */
+.ward-table, .na-breach-table, .apd-table, .dc-readings,
+.opl-grid, .ndo-grid, .dx-grid {
+  width: 100% !important;
+  border-collapse: separate !important;
+  border-spacing: 0 6px !important;
+  font-family: Kanit, sans-serif !important;
+  font-size: 14px !important;
+  background: transparent !important;
+}
+.ward-table thead, .na-breach-table thead, .apd-table thead, .dc-readings thead,
+.opl-grid thead, .ndo-grid thead, .dx-grid thead {
+  background: #0e2970 !important;
+  color: #fff !important;
+}
+.ward-table thead th, .na-breach-table thead th, .apd-table thead th,
+.dc-readings thead th, .opl-grid thead th, .ndo-grid thead th, .dx-grid thead th {
+  background: #0e2970 !important;
+  color: #fff !important;
+  font-family: Kanit, sans-serif !important;
+  font-weight: 500 !important;
+  font-size: 13px !important;
+  padding: 14px 12px !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  border: none !important;
+  letter-spacing: 0.3px;
+  text-transform: none !important;
+}
+.ward-table thead th:first-child, .na-breach-table thead th:first-child,
+.apd-table thead th:first-child, .dc-readings thead th:first-child,
+.opl-grid thead th:first-child, .ndo-grid thead th:first-child,
+.dx-grid thead th:first-child {
+  border-top-left-radius: 10px !important;
+  border-bottom-left-radius: 10px !important;
+}
+.ward-table thead th:last-child, .na-breach-table thead th:last-child,
+.apd-table thead th:last-child, .dc-readings thead th:last-child,
+.opl-grid thead th:last-child, .ndo-grid thead th:last-child,
+.dx-grid thead th:last-child {
+  border-top-right-radius: 10px !important;
+  border-bottom-right-radius: 10px !important;
+}
+.ward-table tbody tr, .na-breach-table tbody tr, .apd-table tbody tr,
+.dc-readings tbody tr, .opl-grid tbody tr, .ndo-grid tbody tr, .dx-grid tbody tr {
+  background: #fff !important;
+  box-shadow: 0 4px 15px rgba(216, 210, 252, 0.64) !important;
+  border-radius: 12px !important;
+  height: 56px !important;
+  transition: background 0.15s !important;
+}
+.ward-table tbody tr:nth-child(even), .na-breach-table tbody tr:nth-child(even),
+.apd-table tbody tr:nth-child(even), .dc-readings tbody tr:nth-child(even),
+.opl-grid tbody tr:nth-child(even), .ndo-grid tbody tr:nth-child(even),
+.dx-grid tbody tr:nth-child(even) {
+  background: #f9fafd !important;
+}
+.ward-table tbody tr:hover, .na-breach-table tbody tr:hover,
+.apd-table tbody tr:hover, .dc-readings tbody tr:hover, .opl-grid tbody tr:hover,
+.ndo-grid tbody tr:hover, .dx-grid tbody tr:hover {
+  background: #eff6ff !important;
+}
+.ward-table tbody td, .na-breach-table tbody td, .apd-table tbody td,
+.dc-readings tbody td, .opl-grid tbody td, .ndo-grid tbody td, .dx-grid tbody td {
+  padding: 10px 12px !important;
+  text-align: center !important;
+  color: #271e4a !important;
+  font-family: Kanit, sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  border: none !important;
+  vertical-align: middle !important;
+  background: inherit !important;
+}
+.ward-table tbody td:first-child, .na-breach-table tbody td:first-child,
+.apd-table tbody td:first-child, .dc-readings tbody td:first-child,
+.opl-grid tbody td:first-child, .ndo-grid tbody td:first-child,
+.dx-grid tbody td:first-child {
+  border-top-left-radius: 12px !important;
+  border-bottom-left-radius: 12px !important;
+  text-align: left !important;
+  padding-left: 16px !important;
+}
+.ward-table tbody td:last-child, .na-breach-table tbody td:last-child,
+.apd-table tbody td:last-child, .dc-readings tbody td:last-child,
+.opl-grid tbody td:last-child, .ndo-grid tbody td:last-child,
+.dx-grid tbody td:last-child {
+  border-top-right-radius: 12px !important;
+  border-bottom-right-radius: 12px !important;
+}
+
+/* ============================================================================
+ * Phase 9.13 — Treatment Dashboard TV / huddle mode.
+ *
+ * /treatment-dashboard?tv=1 makes the component add `tv-mode` to <body>.
+ * Hide every piece of app chrome so the watchboard fills a wall display:
+ * sidebar, top header bar, mobile header, the global Back button, and the
+ * floating critical-values widget (the red bell + "Disconnected" badge).
+ * ============================================================================ */
+body.tv-mode app-sidebar,
+body.tv-mode .mobile-header,
+body.tv-mode .header-container,
+body.tv-mode app-critical-values-alert,
+body.tv-mode .app-back-btn {
+  display: none !important;
+}
+/* The routed-content wrapper normally leaves room for the sidebar — in TV
+ * mode reclaim the whole viewport. */
+body.tv-mode .content {
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+}

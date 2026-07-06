@@ -1,0 +1,75 @@
+<div class="dx-card">
+  <h3 class="dx-title">Diagnosis Codes (ICD-10 + CPT)</h3>
+  <p class="dx-sub">Code at admission (provisional) and finalise at discharge.</p>
+
+  <div class="dx-banner dx-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="dx-banner dx-good" *ngIf="successMessage">{{ successMessage }}</div>
+  <div class="dx-loading" *ngIf="loading">Loading…</div>
+
+  <div class="dx-layout" *ngIf="!loading">
+    <!-- ICD column -->
+    <div class="dx-col">
+      <h4>ICD Codes</h4>
+      <div class="dx-tabs">
+        <button [class.dx-tab-active]="activeIcdTab === 'icd-provisional'" (click)="activeIcdTab = 'icd-provisional'">Provisional</button>
+        <button [class.dx-tab-active]="activeIcdTab === 'icd-final'" (click)="activeIcdTab = 'icd-final'">Final</button>
+      </div>
+      <div class="dx-form-row dx-form-row-autocomplete">
+        <input type="text" [(ngModel)]="draftIcd.code" (input)="searchIcd()"
+               (blur)="showIcdDropdown = false" (focus)="searchIcd()"
+               placeholder="Code (e.g. I10)" class="dx-code" autocomplete="off" />
+        <input type="text" [(ngModel)]="draftIcd.description" (input)="searchIcd()"
+               (blur)="showIcdDropdown = false" (focus)="searchIcd()"
+               placeholder="Diagnosis description" autocomplete="off" />
+        <button class="dx-btn dx-btn-primary" (click)="addIcd()" [disabled]="saving">+ Add</button>
+        <ul class="dx-autocomplete" *ngIf="showIcdDropdown && icdSuggestions.length">
+          <li *ngFor="let s of icdSuggestions" (mousedown)="pickIcd(s)">
+            <strong>{{ s.code }}</strong> — {{ s.description }}
+          </li>
+        </ul>
+      </div>
+      <table class="dx-grid">
+        <thead><tr><th>Code</th><th>Diagnosis</th><th></th></tr></thead>
+        <tbody>
+          <tr *ngIf="!rowsByCategory(activeIcdTab).length"><td colspan="3" class="dx-muted">No {{ activeIcdTab === 'icd-provisional' ? 'provisional' : 'final' }} diagnoses yet.</td></tr>
+          <tr *ngFor="let r of rowsByCategory(activeIcdTab)">
+            <td><strong>{{ r.code }}</strong></td>
+            <td>{{ r.description }}</td>
+            <td><button class="dx-btn dx-btn-sm dx-btn-danger" (click)="remove(r)">×</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- CPT column -->
+    <div class="dx-col">
+      <h4>CPT Codes</h4>
+      <p class="dx-hint">Procedures performed during admission.</p>
+      <div class="dx-form-row dx-form-row-autocomplete">
+        <input type="text" [(ngModel)]="draftCpt.code" (input)="searchCpt()"
+               (blur)="showCptDropdown = false" (focus)="searchCpt()"
+               placeholder="Code (e.g. 27447)" class="dx-code" autocomplete="off" />
+        <input type="text" [(ngModel)]="draftCpt.description" (input)="searchCpt()"
+               (blur)="showCptDropdown = false" (focus)="searchCpt()"
+               placeholder="Procedure" autocomplete="off" />
+        <button class="dx-btn dx-btn-primary" (click)="addCpt()" [disabled]="saving">+ Add</button>
+        <ul class="dx-autocomplete" *ngIf="showCptDropdown && cptSuggestions.length">
+          <li *ngFor="let s of cptSuggestions" (mousedown)="pickCpt(s)">
+            <strong>{{ s.code }}</strong> — {{ s.description }}
+          </li>
+        </ul>
+      </div>
+      <table class="dx-grid">
+        <thead><tr><th>Code</th><th>Procedure</th><th></th></tr></thead>
+        <tbody>
+          <tr *ngIf="!rowsByCategory('cpt').length"><td colspan="3" class="dx-muted">No CPT codes yet.</td></tr>
+          <tr *ngFor="let r of rowsByCategory('cpt')">
+            <td><strong>{{ r.code }}</strong></td>
+            <td>{{ r.description }}</td>
+            <td><button class="dx-btn dx-btn-sm dx-btn-danger" (click)="remove(r)">×</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

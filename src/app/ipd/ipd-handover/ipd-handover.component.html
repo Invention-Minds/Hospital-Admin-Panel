@@ -1,0 +1,216 @@
+<div class="ho-shell">
+  <div class="ho-head">
+    <h2 class="ho-title">Hand-off (SBAR)</h2>
+    <div class="ho-meta">
+      <span class="ho-pill"
+            [class.ho-pill-warn]="current?.status === 'HANDED_OVER'"
+            [class.ho-pill-ok]="current?.status === 'ACKNOWLEDGED'">
+        {{ current?.status || 'NEW' }}
+      </span>
+      <span *ngIf="readOnly" class="ho-readonly">Read-only — acknowledged</span>
+    </div>
+  </div>
+
+  <div class="ho-toolbar">
+    <label>Date <input type="date" [(ngModel)]="chartDate" (change)="load()" /></label>
+    <div class="ho-shift-picker">
+      <button type="button" [class.active]="shift === 'M'" (click)="setShift('M')">Morning</button>
+      <button type="button" [class.active]="shift === 'E'" (click)="setShift('E')">Evening</button>
+      <button type="button" [class.active]="shift === 'N'" (click)="setShift('N')">Night</button>
+    </div>
+    <span class="ho-window" *ngIf="pull?.shiftWindow">
+      Window: {{ pull?.shiftWindow?.start | date:'shortTime' }} – {{ pull?.shiftWindow?.end | date:'shortTime' }}
+    </span>
+  </div>
+
+  <div class="ho-banner ho-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="ho-banner ho-good" *ngIf="successMessage">{{ successMessage }}</div>
+
+  <div *ngIf="loading" class="ho-loading">Loading…</div>
+
+  <!-- ─── Live-pulled context panel ─── -->
+  <section class="ho-context" *ngIf="pull && !loading">
+    <h3>Patient context <span class="ho-fresh">live</span></h3>
+
+    <div class="ho-context-grid">
+      <div class="ho-card">
+        <h4>Admission</h4>
+        <div *ngIf="pull.admission as a">
+          <div><strong>{{ a.admissionNo }}</strong> · {{ a.prn }}</div>
+          <div class="ho-muted">{{ a.department }} · Bed {{ a.bed?.bedNumber || '—' }} · {{ a.ward?.wardName || '—' }}</div>
+          <div class="ho-muted">Dx: {{ a.diagnosis | slice:0:120 }}</div>
+        </div>
+      </div>
+
+      <div class="ho-card">
+        <h4>Allergies</h4>
+        <ng-container *ngIf="pull.allergies as al">
+          <div *ngIf="al.drug" class="ho-allergy">🛑 Drug allergy</div>
+          <div *ngIf="al.food">⚠ Food allergy</div>
+          <div *ngIf="al.transfusion">⚠ Transfusion reaction</div>
+          <div *ngIf="al.others" class="ho-muted">{{ al.others }}</div>
+          <div *ngIf="!al.drug && !al.food && !al.transfusion && !al.others" class="ho-muted">None recorded</div>
+        </ng-container>
+        <div *ngIf="!pull.allergies" class="ho-muted">No initial assessment yet</div>
+      </div>
+
+      <div class="ho-card">
+        <h4>Co-morbidities</h4>
+        <div *ngIf="pull.coMorbidities.length > 0">
+          <span *ngFor="let c of pull.coMorbidities" class="ho-chip">{{ c }}</span>
+        </div>
+        <div *ngIf="pull.coMorbidities.length === 0" class="ho-muted">None recorded</div>
+      </div>
+
+      <div class="ho-card">
+        <h4>Problems at admission</h4>
+        <div *ngIf="pull.problemsAtAdmission">{{ pull.problemsAtAdmission }}</div>
+        <div *ngIf="!pull.problemsAtAdmission" class="ho-muted">—</div>
+      </div>
+
+      <div class="ho-card">
+        <h4>I/O today</h4>
+        <div><strong>Intake:</strong> {{ pull.intakeTotalMl }} mL</div>
+        <div><strong>Output:</strong> {{ pull.outputTotalMl }} mL</div>
+      </div>
+
+      <div class="ho-card ho-card-wide">
+        <h4>Drugs given in this shift ({{ pull.medsGivenInShift.length }})</h4>
+        <div *ngIf="pull.medsGivenInShift.length === 0" class="ho-muted">None recorded for this shift window</div>
+        <table *ngIf="pull.medsGivenInShift.length > 0" class="ho-mini-table">
+          <thead><tr><th>Time</th><th>Drug</th><th>Dose</th><th>Route</th><th>By</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let m of pull.medsGivenInShift">
+              <td>{{ m.administeredAt | date:'shortTime' }}</td>
+              <td>{{ m.drug?.genericName || '—' }} <span *ngIf="m.drug?.brandName" class="ho-muted">({{ m.drug?.brandName }})</span></td>
+              <td>{{ m.drug?.dose || '—' }}</td>
+              <td>{{ m.route }}</td>
+              <td class="ho-muted">{{ m.administeredBy }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="ho-card ho-card-wide">
+        <h4>Active prescriptions ({{ pull.activePrescriptions.length }})</h4>
+        <table *ngIf="pull.activePrescriptions.length > 0" class="ho-mini-table">
+          <thead><tr><th>Drug</th><th>Dose · Freq · Route</th><th>Next due</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let p of pull.activePrescriptions">
+              <td>{{ p.genericName }} <span *ngIf="p.brandName" class="ho-muted">({{ p.brandName }})</span></td>
+              <td>{{ p.dose }} · {{ p.frequency }} · {{ p.route }}</td>
+              <td><span [class.ho-due]="p.nextAdminTime">{{ p.nextAdminTime ? (p.nextAdminTime | date:'short') : '—' }}</span></td>
+              <td>{{ p.adminStatus }}<span *ngIf="p.prescriptionType" class="ho-tag">{{ p.prescriptionType }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+        <div *ngIf="pull.activePrescriptions.length === 0" class="ho-muted">No active prescriptions</div>
+      </div>
+
+      <div class="ho-card ho-card-wide">
+        <h4>Vitals today ({{ pull.vitalsToday.length }})</h4>
+        <table *ngIf="pull.vitalsToday.length > 0" class="ho-mini-table">
+          <thead><tr><th>Time</th><th>Shift</th><th>T</th><th>P</th><th>R</th><th>BP</th><th>SpO₂</th><th>Pain</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let v of pull.vitalsToday">
+              <td>{{ v.recordedAt | date:'shortTime' }}</td>
+              <td>{{ v.shift }}</td>
+              <td>{{ v.temperatureF ?? v.temperatureC ?? '—' }}</td>
+              <td>{{ v.pulse ?? '—' }}</td>
+              <td>{{ v.respiration ?? '—' }}</td>
+              <td>{{ v.bpSystolic && v.bpDiastolic ? v.bpSystolic + '/' + v.bpDiastolic : '—' }}</td>
+              <td>{{ v.spo2 ?? '—' }}</td>
+              <td>{{ v.painScore ?? '—' }}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div *ngIf="pull.vitalsToday.length === 0" class="ho-muted">No readings today</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── Writable SBAR fields ─── -->
+  <section class="ho-form" *ngIf="!loading">
+    <h3>SBAR narrative — outgoing nurse fills</h3>
+
+    <details open>
+      <summary>Situation &amp; Background</summary>
+      <div class="ho-grid-3">
+        <label class="ho-field">Post-op day <input type="number" [(ngModel)]="form.postOpDay" [disabled]="readOnly" /></label>
+        <label class="ho-field">Diet <input type="text" [(ngModel)]="form.diet" [disabled]="readOnly" /></label>
+        <label class="ho-field">Ventilation <input type="text" [(ngModel)]="form.ventilation" [disabled]="readOnly" placeholder="self / NIV / IPPV" /></label>
+      </div>
+      <label class="ho-field">Invasive lines<textarea rows="2" [(ngModel)]="form.invasiveLines" [disabled]="readOnly" placeholder="e.g. R IJ CVL since 09/05, peripheral cannula L forearm"></textarea></label>
+    </details>
+
+    <details open>
+      <summary>Assessment</summary>
+      <div class="ho-grid-2">
+        <label class="ho-field">Infusions / transfusions<textarea rows="2" [(ngModel)]="form.infusionsTransfusions" [disabled]="readOnly"></textarea></label>
+        <label class="ho-field">PU (pressure-ulcer) prophylaxis<textarea rows="2" [(ngModel)]="form.puProphylaxis" [disabled]="readOnly"></textarea></label>
+        <label class="ho-field">DVT prophylaxis<textarea rows="2" [(ngModel)]="form.dvtProphylaxis" [disabled]="readOnly"></textarea></label>
+        <label class="ho-field">Pain scale (0-10) <input type="number" min="0" max="10" [(ngModel)]="form.painScale" [disabled]="readOnly" /></label>
+        <label class="ho-field">GCS / LOC <input type="text" [(ngModel)]="form.gcsLoc" [disabled]="readOnly" placeholder="GCS 15 / alert" /></label>
+        <label class="ho-field">Skin integrity<textarea rows="2" [(ngModel)]="form.skinIntegrity" [disabled]="readOnly"></textarea></label>
+        <label class="ho-field">Restraints <input type="text" [(ngModel)]="form.restraints" [disabled]="readOnly" /></label>
+        <label class="ho-field">Fall risk <input type="text" [(ngModel)]="form.fallRisk" [disabled]="readOnly" /></label>
+        <label class="ho-field">ADL<textarea rows="2" [(ngModel)]="form.adl" [disabled]="readOnly"></textarea></label>
+        <label class="ho-field">Ambulation<textarea rows="2" [(ngModel)]="form.ambulation" [disabled]="readOnly"></textarea></label>
+      </div>
+      <label class="ho-field">Critical lab values<textarea rows="2" [(ngModel)]="form.criticalLabValues" [disabled]="readOnly"></textarea></label>
+      <label class="ho-field">Current problems<textarea rows="3" [(ngModel)]="form.currentProblems" [disabled]="readOnly"></textarea></label>
+    </details>
+
+    <details open>
+      <summary>Recommendations</summary>
+      <label class="ho-field">Investigations ordered / planned<textarea rows="2" [(ngModel)]="form.investigationsOrdered" [disabled]="readOnly"></textarea></label>
+      <label class="ho-field">Reports pending<textarea rows="2" [(ngModel)]="form.reportsPending" [disabled]="readOnly"></textarea></label>
+      <label class="ho-field">Referrals<textarea rows="2" [(ngModel)]="form.referrals" [disabled]="readOnly" placeholder="Consultant · time-informed · time-seen"></textarea></label>
+      <label class="ho-field">Next-shift priorities<textarea rows="3" [(ngModel)]="form.nextShiftPriorities" [disabled]="readOnly"></textarea></label>
+    </details>
+
+    <div class="ho-actions">
+      <button type="button" class="ho-btn ho-btn-primary" [disabled]="saving || readOnly" (click)="saveDraft()">
+        {{ saving ? 'Saving…' : 'Save draft' }}
+      </button>
+    </div>
+  </section>
+
+  <!-- ─── Sign chain ─── -->
+  <section class="ho-sign" *ngIf="!loading">
+    <h3>Sign chain</h3>
+
+    <div class="ho-sig-block">
+      <h4>Outgoing nurse (handing over)</h4>
+      <div *ngIf="current?.handedOverAt" class="ho-sig-stamp">
+        ✓ Signed by <strong>{{ current?.handedOverByName }}</strong>
+        on {{ current?.handedOverAt | date:'medium' }}
+      </div>
+      <p *ngIf="!current" class="ho-hint">Save the draft first to enable signing.</p>
+      <app-e-sign
+        *ngIf="canHandOver && current"
+        [signerType]="'nurse'"
+        [signerName]="''"
+        [contextType]="'ipd-handover-handed-over'"
+        [contextId]="current.id"
+        (signed)="onHandedOverSigned($event)">
+      </app-e-sign>
+    </div>
+
+    <div class="ho-sig-block" *ngIf="current?.handedOverAt">
+      <h4>Incoming nurse (acknowledging)</h4>
+      <div *ngIf="current?.takenOverAt" class="ho-sig-stamp">
+        ✓ Acknowledged by <strong>{{ current?.takenOverByName }}</strong>
+        on {{ current?.takenOverAt | date:'medium' }}
+      </div>
+      <app-e-sign
+        *ngIf="canTakeOver && current"
+        [signerType]="'nurse'"
+        [signerName]="''"
+        [contextType]="'ipd-handover-taken-over'"
+        [contextId]="current.id"
+        (signed)="onTakenOverSigned($event)">
+      </app-e-sign>
+    </div>
+  </section>
+</div>

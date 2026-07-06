@@ -1,0 +1,112 @@
+.ia-shell { padding: 24px; max-width: 1500px; margin: 24px auto 24px 96px; }
+
+.ia-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 12px; flex-wrap: wrap; gap: 12px;
+}
+.ia-title { font-size: 22px; font-weight: 600; margin: 0; }
+.ia-meta { display: flex; align-items: center; gap: 10px; }
+.ia-pill {
+  font-size: 11px; padding: 3px 10px; border-radius: 12px;
+  background: #e5e7eb; color: #374151; font-weight: 600;
+}
+.ia-pill-warn { background: #fef3c7; color: #92400e; }
+.ia-pill-ok { background: #dcfce7; color: #166534; }
+.ia-readonly { font-size: 12px; color: #92400e; font-style: italic; }
+
+.ia-banner { padding: 10px 14px; border-radius: 6px; margin-bottom: 12px; font-size: 14px; }
+.ia-bad { background: #fee2e2; color: #b91c1c; }
+.ia-good { background: #dcfce7; color: #166534; }
+
+.ia-body { display: grid; grid-template-columns: 240px 1fr; gap: 18px; }
+@media (max-width: 1000px) { .ia-body { grid-template-columns: 1fr; } }
+
+.ia-tabs {
+  display: flex; flex-direction: column; gap: 2px;
+  background: #fff; border: 1px solid #e5e7eb; border-radius: 8px;
+  padding: 8px; position: sticky; top: 16px; align-self: flex-start;
+}
+.ia-tabs button {
+  text-align: left; padding: 8px 12px; border: 0; background: transparent;
+  cursor: pointer; border-radius: 6px; font-size: 13px; color: #374151;
+}
+.ia-tabs button:hover { background: #f3f4f6; }
+.ia-tabs button.active { background: #eff6ff; color: #1d4ed8; font-weight: 600; }
+.ia-tabs-actions {
+  margin-top: 10px; padding-top: 10px;
+  border-top: 1px solid #f3f4f6;
+  display: flex; flex-direction: column; gap: 6px;
+}
+
+.ia-section {
+  background: #fff; border: 1px solid #e5e7eb; border-radius: 8px;
+  padding: 20px 24px;
+}
+.ia-section h3 {
+  font-size: 15px; font-weight: 600; margin: 18px 0 8px;
+  color: #111827; border-bottom: 1px solid #f3f4f6; padding-bottom: 4px;
+}
+.ia-section h3:first-child { margin-top: 0; }
+.ia-section h4 { font-size: 14px; font-weight: 600; margin: 12px 0 6px; }
+.ia-section p.ia-sub { color: #6b7280; font-size: 12px; margin: 4px 0 12px; }
+.ia-hint { color: #92400e; background: #fef3c7; padding: 8px 12px; border-radius: 6px; font-size: 12px; }
+
+/* Inputs */
+.ia-section textarea,
+.ia-section input[type="text"],
+.ia-section input[type="number"],
+.ia-section select {
+  border: 1px solid #d1d5db; border-radius: 6px; padding: 7px 9px;
+  font-size: 13px; width: 100%; background: #fff; color: #111827;
+}
+.ia-section textarea[disabled],
+.ia-section input[disabled],
+.ia-section select[disabled] { background: #f9fafb; color: #6b7280; }
+
+.ia-field { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #4b5563; margin-bottom: 12px; }
+.ia-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 8px 0; }
+.ia-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 8px 0; }
+@media (max-width: 700px) {
+  .ia-grid-2, .ia-grid-3 { grid-template-columns: 1fr; }
+}
+
+.ia-checks { display: flex; gap: 14px; flex-wrap: wrap; margin: 6px 0 12px; }
+.ia-checks label, .ia-check-inline {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 13px; color: #374151; cursor: pointer;
+}
+
+/* Co-morbidities table */
+.ia-comorbid { width: 100%; border-collapse: collapse; font-size: 13px; margin: 6px 0 14px; }
+.ia-comorbid th, .ia-comorbid td {
+  text-align: left; padding: 7px 10px;
+  border-bottom: 1px solid #f3f4f6; vertical-align: middle;
+}
+.ia-comorbid th { background: #f9fafb; font-weight: 600; color: #374151; font-size: 12px; }
+.ia-comorbid input[type="text"] { padding: 4px 8px; }
+
+/* Systemic exam rows */
+.ia-sys-row {
+  display: grid; grid-template-columns: 220px 1fr;
+  gap: 12px; padding: 8px 0; border-bottom: 1px solid #f3f4f6;
+}
+.ia-sys-row:last-of-type { border-bottom: 0; }
+.ia-sys-label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; }
+.ia-sys-label strong { color: #111827; }
+
+/* Sign blocks */
+.ia-sig-block {
+  border: 1px solid #e5e7eb; border-radius: 8px;
+  padding: 14px 18px; margin: 12px 0;
+  background: #fafafa;
+}
+.ia-sig-stamp { color: #166534; background: #dcfce7; padding: 8px 12px; border-radius: 6px; font-size: 13px; }
+
+/* Buttons */
+.ia-btn { background: #fff; border: 1px solid #d1d5db; padding: 7px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+.ia-btn:hover:not([disabled]) { background: #f3f4f6; }
+.ia-btn-primary { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
+.ia-btn-primary:hover:not([disabled]) { background: #1e40af; }
+.ia-btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+.ia-loading { padding: 40px; text-align: center; color: #6b7280; font-style: italic; }

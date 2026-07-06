@@ -2,6 +2,7 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, FormArray, Validators, FormControl } from '@angular/forms';
 import { RadiologyService } from '../../services/radiology/radiology.service';
 import { ChangeDetectorRef } from '@angular/core';
+import { AlertService } from '../../services/alert.service';
 
 @Component({
   selector: 'app-mhc-radiology',
@@ -25,7 +26,8 @@ export class MhcRadiologyComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private radiologyService: RadiologyService, // ✅ Add Radiology Service
-    private cdRef: ChangeDetectorRef
+    private cdRef: ChangeDetectorRef,
+    private alertSvc: AlertService,
   ) {}
 
   ngOnInit(): void {
@@ -234,7 +236,7 @@ export class MhcRadiologyComponent implements OnInit {
       }));
 
     if (validRadiologyAppointments.length === 0) {
-      alert('No valid radiology appointments to book.');
+      this.alertSvc.show('No valid radiology appointments to book.', { severity: 'warning' });
       return;
     }
 

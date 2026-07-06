@@ -4,6 +4,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { MessageService } from 'primeng/api';
 import { LamaDamaService, LamaRecord, DamaRecord } from '../services/lama-dama.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-lama-dama',
@@ -124,22 +125,32 @@ export class LamaDamaComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (res: unknown) => {
           const data = extractVerifyData(res);
-          if (data?.compliant) {
-            this.messageService.add({
-              severity: 'success',
-              summary: 'Documentation compliant',
-              detail: `${type.toUpperCase()} record ${id} passes NABH checks.`,
-              life: 4000,
-            });
-          } else {
-            const issues = data?.issues?.join(', ') ?? 'Unknown issues';
-            this.messageService.add({
-              severity: 'warn',
-              summary: 'Compliance issues found',
-              detail: issues,
-              life: 8000,
-            });
-          }
+          const issues = data?.issues ?? [];
+          // NABH ACC.6 documentation-completeness check: confirms every
+          // mandatory element of the AMA record is present. Show the itemised
+          // result so the coordinator knows exactly what's complete / missing.
+          const required =
+            type === 'lama'
+              ? ['Patient signature', 'Witness name', 'Witness signature', 'Risk explained to patient', 'Reason for LAMA']
+              : ['Patient signature', 'Witness name', 'Witness signature', "Doctor's recommendation"];
+          const isMissing = (label: string) =>
+            issues.some((i) => i.toLowerCase().includes(label.toLowerCase().split(' ')[0]));
+          const rows = required
+            .map((label) => {
+              const ok = !isMissing(label);
+              return `<li style="text-align:left;list-style:none;margin:4px 0">
+                ${ok ? '✅' : '❌'} ${label} ${ok ? '' : '<span style="color:#b91c1c">— missing</span>'}
+              </li>`;
+            })
+            .join('');
+          Swal.fire({
+            icon: data?.compliant ? 'success' : 'warning',
+            title: data?.compliant ? 'Documentation complete' : 'Incomplete documentation',
+            html: `<p style="margin:0 0 8px">${type.toUpperCase()} ${id} — NABH ACC.6 required elements:</p>
+                   <ul style="margin:0;padding:0">${rows}</ul>
+                   ${data?.compliant ? '' : '<p style="margin:10px 0 0;color:#b91c1c">Complete the missing items, then verify again.</p>'}`,
+            confirmButtonColor: '#1d4ed8',
+          });
         },
         error: (err) => {
           console.error('Verify failed', err);

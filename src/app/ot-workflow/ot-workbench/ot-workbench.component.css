@@ -1,0 +1,355 @@
+/* Phase 9.9.8 — OT Workbench redesigned to align with the dm-* design module.
+ * .ow-shell wrapper styling comes from the global forms.css allow-list
+ * (sidebar clearance, top padding for Back button). Everything else below is
+ * scoped to this component. */
+
+/* ─── Page header ─────────────────────────────────────────────────────── */
+.ow-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+.ow-page-title {
+  color: #271e4a;
+  font-family: Kanit, sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: 0.2px;
+}
+.ow-page-sub {
+  color: #7b7b7b;
+  font-size: 13px;
+  margin: 4px 0 0;
+}
+
+/* ─── Filters card ────────────────────────────────────────────────────── */
+.ow-filter-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 2px rgba(39, 30, 74, 0.04);
+}
+.ow-filter-grid {
+  display: grid;
+  grid-template-columns: 180px 200px 1fr 1fr auto;
+  gap: 16px;
+  align-items: end;
+}
+@media (max-width: 1024px) {
+  .ow-filter-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .ow-field-action { grid-column: 1 / -1; }
+}
+@media (max-width: 640px) {
+  .ow-filter-grid { grid-template-columns: 1fr; }
+}
+.ow-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.ow-field-label {
+  color: #271e4a;
+  font-family: Kanit, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+}
+.ow-field-action {
+  align-self: end;
+}
+.ow-input {
+  height: 40px;
+  padding: 8px 12px;
+  font-family: Kanit, sans-serif;
+  font-size: 14px;
+  color: #271e4a;
+  background: #f0f3ff;
+  border: 1px solid #b4b6ba;
+  border-radius: 6px;
+  box-sizing: border-box;
+  width: 100%;
+}
+.ow-input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.18);
+  outline: none;
+}
+
+/* ─── Banner ─────────────────────────────────────────────────────────── */
+.ow-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: Kanit, sans-serif;
+  margin-bottom: 12px;
+}
+.ow-banner.ow-bad {
+  background: #fee2e2;
+  color: #b91c1c;
+  border-left: 3px solid #dc2626;
+}
+
+/* ─── Two-column layout ──────────────────────────────────────────────── */
+.ow-layout {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 16px;
+  align-items: start;
+}
+@media (max-width: 1024px) {
+  .ow-layout { grid-template-columns: 1fr; }
+}
+
+/* ─── Schedules section ──────────────────────────────────────────────── */
+.ow-grid-wrap {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 16px 20px;
+  box-shadow: 0 1px 2px rgba(39, 30, 74, 0.04);
+}
+.ow-grid-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 12px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid #f3f4f6;
+}
+.ow-grid-title {
+  color: #271e4a;
+  font-family: Kanit, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+.ow-count {
+  color: #7b7b7b;
+  font-size: 13px;
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+.ow-loading {
+  padding: 40px;
+  text-align: center;
+  color: #7b7b7b;
+  font-style: italic;
+  font-family: Kanit, sans-serif;
+}
+.ow-empty {
+  padding: 60px 20px;
+  text-align: center;
+  color: #9ca3af;
+  font-family: Kanit, sans-serif;
+}
+.ow-empty i {
+  font-size: 36px;
+  display: block;
+  margin-bottom: 8px;
+  color: #b4b6ba;
+}
+.ow-empty div { font-size: 14px; }
+
+/* Selected row + status pills — the table itself inherits Confirmed-Appt
+ * styling from forms.css (since .ow-grid is in the table allow-list). */
+.ow-row-sel { background: #dbeafe !important; }
+.ow-row-sel:hover { background: #c8dbf5 !important; }
+
+.ow-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+.ow-status-BOOKED      { background: #fef3c7; color: #92400e; }
+.ow-status-CONFIRMED   { background: #dbeafe; color: #1e40af; }
+.ow-status-IN_PROGRESS { background: #fed7aa; color: #c2410c; }
+.ow-status-CLOSED      { background: #dcfce7; color: #166534; }
+.ow-status-CANCELLED   { background: #fee2e2; color: #b91c1c; }
+.ow-status-RESCHEDULED { background: #e5e7eb; color: #4b5563; }
+
+/* ─── Action sidebar ─────────────────────────────────────────────────── */
+.ow-side {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 16px 18px;
+  box-shadow: 0 1px 2px rgba(39, 30, 74, 0.04);
+  position: sticky;
+  top: 70px;
+}
+.ow-side-header {
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #f3f4f6;
+}
+.ow-side-title {
+  color: #271e4a;
+  font-family: Kanit, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.ow-sel {
+  background: linear-gradient(135deg, #f0f3ff 0%, #e0e7ff 100%);
+  border: 1px solid #c7d2fe;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+}
+.ow-sel-procedure {
+  font-family: Kanit, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e40af;
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+.ow-sel-sub {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #4b5563;
+  font-size: 12px;
+}
+.ow-sel-pill {
+  display: inline-block;
+  align-self: flex-start;
+  background: rgba(255, 255, 255, 0.7);
+  color: #1e40af;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.ow-sel-empty {
+  background: #f9fafb;
+  border: 1px dashed #d1d5db;
+  text-align: center;
+  font-family: Kanit, sans-serif;
+}
+.ow-sel-empty i {
+  display: block;
+  font-size: 18px;
+  color: #9ca3af;
+  margin-bottom: 4px;
+}
+.ow-sel-empty em {
+  color: #9ca3af;
+  font-size: 12px;
+  font-style: normal;
+}
+
+.ow-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 480px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.ow-actions::-webkit-scrollbar { width: 4px; }
+.ow-actions::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 4px; }
+
+.ow-action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 14px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: Kanit, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1f2937;
+  text-align: left;
+  transition: background 0.12s, color 0.12s, border-color 0.12s, transform 0.1s;
+}
+.ow-action-btn:hover:not([disabled]) {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #1e40af;
+  transform: translateX(2px);
+}
+.ow-action-btn:active:not([disabled]) {
+  transform: translateX(0);
+}
+.ow-action-btn[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  background: #f9fafb;
+}
+.ow-action-btn[disabled] i { opacity: 0.3; }
+.ow-action-btn i {
+  color: #9ca3af;
+  font-size: 12px;
+  transition: color 0.12s;
+}
+.ow-action-btn:hover:not([disabled]) i {
+  color: #1e40af;
+}
+.ow-action-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ─── Buttons ────────────────────────────────────────────────────────── */
+.ow-btn {
+  height: 40px;
+  padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: Kanit, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid transparent;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.ow-btn-primary {
+  background: #169458;
+  color: #fff;
+  border-color: #169458;
+  min-width: 110px;
+}
+.ow-btn-primary:hover:not([disabled]) {
+  background: #117849;
+  border-color: #117849;
+}
+.ow-btn-secondary {
+  background: #fff;
+  color: #271e4a;
+  border-color: #d1d5db;
+}
+.ow-btn-secondary:hover:not([disabled]) {
+  background: #f3f4f6;
+}
+.ow-btn[disabled] { opacity: 0.55; cursor: not-allowed; }

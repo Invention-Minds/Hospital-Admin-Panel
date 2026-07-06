@@ -1,0 +1,178 @@
+<div class="page">
+  <app-page-header
+    title="Insulin Infusion Chart"
+    subtitle="Blood glucose & insulin infusion monitoring"
+    [patientPrn]="prn || null"
+    [admissionNo]="admissionNo || null">
+  </app-page-header>
+
+  <app-admission-tabs [admissionId]="admissionId"></app-admission-tabs>
+
+  <div class="ins-banner ins-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
+  <div class="ins-banner ins-good" *ngIf="successMessage" (click)="successMessage=''">{{ successMessage }}</div>
+
+  <!-- Patient context strip -->
+  <div class="ins-context card">
+    <div><span class="ins-ctx-label">PRN</span>{{ prn || '—' }}</div>
+    <div><span class="ins-ctx-label">Admission No</span>{{ admissionNo || '—' }}</div>
+    <div><span class="ins-ctx-label">Consultant</span>{{ admittingDoctor || '—' }}</div>
+    <div class="ins-ctx-action">
+      <button class="ins-btn ins-btn-primary" (click)="openAdd()">+ Add reading</button>
+    </div>
+  </div>
+
+  <!-- Doctor-ordered glucose monitoring cadence (drives the overdue check) -->
+  <div class="ins-order card" *ngIf="!loading">
+    <div class="ins-order-main">
+      <span class="ins-ctx-label">Glucose monitoring order</span>
+      <div class="ins-order-row">
+        <select class="ins-order-select" [(ngModel)]="freqDraft">
+          <option value="">Not ordered</option>
+          <option *ngFor="let o of freqOptions" [value]="o.code">{{ o.label }}</option>
+        </select>
+        <button class="ins-btn ins-btn-primary" (click)="saveFrequency()" [disabled]="savingFreq">
+          {{ savingFreq ? 'Saving…' : 'Save order' }}
+        </button>
+        <span class="ins-order-set" *ngIf="order?.glucoseMonitoringSetBy as by">
+          set by {{ by }}<span *ngIf="order?.glucoseMonitoringSetAt"> · {{ order?.glucoseMonitoringSetAt | date:'dd/MM/yy h:mm a' }}</span>
+        </span>
+      </div>
+    </div>
+    <div class="ins-order-status" *ngIf="glucoseOverdue as gd">
+      <span class="ins-overdue-pill ins-overdue-bad" *ngIf="gd.overdue">
+        ⚠ Glucose check overdue<span *ngIf="gd.sinceHrs >= 0"> ({{ gd.sinceHrs }}h since last, limit {{ gd.limitHrs }}h)</span><span *ngIf="gd.sinceHrs < 0"> (no readings yet)</span>
+      </span>
+      <span class="ins-overdue-pill ins-overdue-ok" *ngIf="!gd.overdue">
+        ✓ On schedule (≤ {{ gd.limitHrs }}h)
+      </span>
+    </div>
+  </div>
+
+  <div class="ins-loading" *ngIf="loading">Loading chart…</div>
+
+  <div class="card" *ngIf="!loading">
+    <div class="ins-empty" *ngIf="!readings.length">
+      No readings yet. Use “Add reading” to start the insulin infusion chart.
+    </div>
+
+    <div class="ins-table-wrap" *ngIf="readings.length">
+      <table class="dm-table">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Blood glucose (mg/dL)</th>
+            <th>Insulin (U/hour)</th>
+            <th>Doctor</th>
+            <th>Nurse</th>
+            <th>Remarks</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of readings">
+            <td>{{ r.recordedAt | date:'dd/MM/yy' }}</td>
+            <td>{{ r.recordedAt | date:'h:mm a' }}</td>
+            <td>
+              <span class="ins-glucose" [ngClass]="glucoseClass(r.bloodGlucoseMgDl)">
+                {{ r.bloodGlucoseMgDl ?? '—' }}
+              </span>
+            </td>
+            <td class="ins-order-cell">{{ r.insulinOrder || '—' }}</td>
+            <td>
+              {{ r.doctorName || '—' }}
+              <i class="pi pi-verified ins-signed" *ngIf="r.doctorSignatureId" title="E-signed"></i>
+            </td>
+            <td>
+              {{ r.nurseName || '—' }}
+              <i class="pi pi-verified ins-signed" *ngIf="r.nurseSignatureId" title="E-signed"></i>
+            </td>
+            <td>{{ r.remarks || '—' }}</td>
+            <td class="ins-actions-cell">
+              <button class="ins-btn-link" (click)="openEdit(r)">Edit</button>
+              <button class="ins-btn-link ins-bad-link" (click)="remove(r)">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Add / edit modal -->
+<div class="ins-modal-bg" *ngIf="modalOpen" (click)="closeModal()">
+  <div class="ins-modal" (click)="$event.stopPropagation()">
+    <h3 class="ins-modal-title">{{ editingId ? 'Edit reading' : 'Add reading' }}</h3>
+
+    <div class="ins-banner ins-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+    <div class="ins-grid">
+      <label class="ins-field">Date &amp; time
+        <input type="datetime-local" [(ngModel)]="draft.recordedAt" />
+      </label>
+      <label class="ins-field">Blood glucose (mg/dL)
+        <input type="number" min="0" [(ngModel)]="draft.bloodGlucoseMgDl" placeholder="e.g. 286" />
+      </label>
+    </div>
+
+    <label class="ins-field">Insulin (U/hour) — order / rate
+      <input type="text" [(ngModel)]="draft.insulinOrder"
+             placeholder="e.g. H. Actrapid 1.5 ml/hr on flow / Inj Piasp 12 units" />
+    </label>
+
+    <!-- Doctor -->
+    <div class="ins-sign-row">
+      <label class="ins-field ins-field-grow">Doctor name
+        <app-doctor-select [source]="'doctors'" [(ngModel)]="draft.doctorName" name="doctorName"></app-doctor-select>
+      </label>
+      <div class="ins-sign-box">
+        <span class="ins-signed-tag" *ngIf="draft.doctorSignatureId">✓ Signed</span>
+        <button type="button" class="ins-btn-link" *ngIf="!draft.doctorSignatureId && !showDoctorSign"
+                (click)="showDoctorSign = true" [disabled]="!draft.doctorName.trim()">
+          + e-sign
+        </button>
+      </div>
+    </div>
+    <app-e-sign *ngIf="showDoctorSign && draft.doctorName.trim()"
+                [signerType]="'doctor'"
+                [signerName]="draft.doctorName"
+                [signerRole]="'doctor'"
+                [contextType]="'ipd-insulin'"
+                [contextId]="admissionId"
+                (signed)="onDoctorSigned($event)">
+    </app-e-sign>
+
+    <!-- Nurse -->
+    <div class="ins-sign-row">
+      <label class="ins-field ins-field-grow">Nurse name
+        <input type="text" [(ngModel)]="draft.nurseName" placeholder="Sr. …" />
+      </label>
+      <div class="ins-sign-box">
+        <span class="ins-signed-tag" *ngIf="draft.nurseSignatureId">✓ Signed</span>
+        <button type="button" class="ins-btn-link" *ngIf="!draft.nurseSignatureId && !showNurseSign"
+                (click)="showNurseSign = true" [disabled]="!draft.nurseName.trim()">
+          + e-sign
+        </button>
+      </div>
+    </div>
+    <app-e-sign *ngIf="showNurseSign && draft.nurseName.trim()"
+                [signerType]="'nurse'"
+                [signerName]="draft.nurseName"
+                [signerRole]="'nurse'"
+                [contextType]="'ipd-insulin'"
+                [contextId]="admissionId"
+                (signed)="onNurseSigned($event)">
+    </app-e-sign>
+
+    <label class="ins-field">Remarks
+      <textarea rows="2" [(ngModel)]="draft.remarks"></textarea>
+    </label>
+
+    <div class="ins-modal-actions">
+      <button class="ins-btn" (click)="closeModal()" [disabled]="saving">Cancel</button>
+      <button class="ins-btn ins-btn-primary" (click)="save()" [disabled]="saving">
+        {{ saving ? 'Saving…' : 'Save' }}
+      </button>
+    </div>
+  </div>
+</div>

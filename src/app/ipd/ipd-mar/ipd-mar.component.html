@@ -93,7 +93,24 @@
           <dt>Route</dt><dd>{{ log.route }}</dd>
           <dt *ngIf="log.remarks">Remarks</dt>
           <dd *ngIf="log.remarks">{{ log.remarks }}</dd>
+          <dt *ngIf="isAcknowledged(log)">Co-signed by</dt>
+          <dd *ngIf="isAcknowledged(log)">
+            {{ log.acknowledgedBy || '—' }}
+            <span class="row__pill row__pill--good">witnessed</span>
+          </dd>
         </dl>
+        <div class="row__actions" *ngIf="isHighRiskLog(log)">
+          <span *ngIf="isAcknowledged(log)" class="row__hint">
+            <i class="pi pi-check-circle"></i> high-risk · witnessed
+          </span>
+          <button *ngIf="!isAcknowledged(log)"
+                  type="button"
+                  class="btn btn--secondary"
+                  (click)="openWitnessAck(log)"
+                  [attr.data-testid]="'btn-witness-' + log.id">
+            <i class="pi pi-user-plus"></i> Witness sign
+          </button>
+        </div>
       </li>
     </ul>
   </section>
@@ -125,7 +142,10 @@
         </div>
         <div class="form__field">
           <label for="administer-route" class="form__label">Route *</label>
-          <input pInputText id="administer-route" class="form__input" formControlName="route" />
+          <select id="administer-route" class="form__input" formControlName="route">
+            <option value="">— select route —</option>
+            <option *ngFor="let r of routeOptions" [value]="r.value">{{ r.label }}</option>
+          </select>
         </div>
         <div class="form__field">
           <label for="administer-remarks" class="form__label">Remarks</label>
@@ -136,6 +156,19 @@
                     formControlName="remarks"
                     placeholder="Optional"></textarea>
         </div>
+
+        <!-- NABH MOM.4 / IPC.6 gating — both must be ticked to enable submit. -->
+        <div class="form__gates">
+          <label class="form__check">
+            <input type="checkbox" formControlName="verifiedTwoIdentifiers" />
+            I verified two patient identifiers (PRN + name on band)
+          </label>
+          <label class="form__check">
+            <input type="checkbox" formControlName="fiveRightsChecked" />
+            I confirmed the five rights (patient, drug, dose, route, time)
+          </label>
+        </div>
+
         <div class="dialog__footer">
           <button type="button"
                   class="btn btn--cancel"
@@ -151,6 +184,47 @@
           </button>
         </div>
       </form>
+    </div>
+  </p-dialog>
+
+  <!-- ========== Witness co-signature modal (Phase 4 WF-3) ========== -->
+  <p-dialog
+    [(visible)]="witnessModalVisible"
+    modal="true"
+    [closable]="false"
+    [style]="{ width: '560px' }"
+    [showHeader]="false">
+    <div class="dialog" *ngIf="witnessModalVisible && witnessLog as log">
+      <div class="dialog__header dialog__header--primary">
+        <h2 class="dialog__title">Witness sign — {{ displayLogDrugName(log) }}</h2>
+        <button type="button" class="dialog__close" aria-label="Close"
+                (click)="cancelWitnessAck()"
+                data-testid="witness-close">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+      <div class="dialog__body">
+        <p class="form__hint">
+          High-risk medication. A second nurse must sign as witness on this MAR row.
+        </p>
+        <div class="form__field">
+          <label for="witness-name" class="form__label">Witness name</label>
+          <input pInputText id="witness-name"
+                 class="form__input"
+                 [(ngModel)]="witnessName"
+                 [ngModelOptions]="{ standalone: true }"
+                 placeholder="Defaults to the logged-in user if blank" />
+        </div>
+        <app-e-sign
+          [signerType]="'staff'"
+          [signerName]="witnessName"
+          [contextType]="'mar-witness'"
+          [contextId]="log.id"
+          [prompt]="'Witness — high-risk MAR co-signature'"
+          [disabled]="witnessSubmitting"
+          (signed)="onWitnessSigned($event)">
+        </app-e-sign>
+      </div>
     </div>
   </p-dialog>
 </div>

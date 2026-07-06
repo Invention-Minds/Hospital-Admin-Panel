@@ -1,0 +1,153 @@
+.bl-card {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #eef2f7;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 4px 14px rgba(15, 23, 42, 0.03);
+  overflow: hidden;
+}
+
+.bl-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.bl-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bl-title-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.bl-header h2 {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.bl-sub {
+  margin: 2px 0 0;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.bl-list {
+  list-style: none;
+  margin: 0;
+  padding: 8px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bl-item {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 6px 0;
+}
+
+.bl-rank {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #94a3b8;
+  width: 28px;
+  flex-shrink: 0;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.bl-row-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.bl-row-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.bl-label {
+  flex: 1;
+  font-size: 0.86rem;
+  color: #0f172a;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bl-tag {
+  font-size: 0.66rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.bl-tag[data-tone="lab"]        { background: #eff6ff; color: #1d4ed8; }
+.bl-tag[data-tone="radiology"]  { background: #f5f3ff; color: #6d28d9; }
+.bl-tag[data-tone="default"]    { background: #f1f5f9; color: #475569; }
+
+.bl-count {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #0f172a;
+  font-variant-numeric: tabular-nums;
+}
+
+.bl-unit {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.bl-bar-track {
+  width: 100%;
+  height: 6px;
+  background: #f1f5f9;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.bl-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+.bl-empty {
+  padding: 28px 16px;
+  text-align: center;
+  color: #94a3b8;
+}
+
+.bl-empty i {
+  font-size: 1.6rem;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.bl-empty p {
+  margin: 0;
+  font-size: 0.85rem;
+}

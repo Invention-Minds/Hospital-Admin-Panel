@@ -1,0 +1,202 @@
+<div class="ot-shell">
+  <h2 class="ot-title">OT Workflow</h2>
+  <p class="ot-kpi-period" *ngIf="kpis as k">
+    KPIs for the <strong>last 30 days</strong> ·
+    {{ k.fromDate | date:'dd MMM' }} – {{ k.toDate | date:'dd MMM y' }} ·
+    {{ k.totalSchedules }} cases scheduled
+  </p>
+
+
+  <!-- KPI strip -->
+  <div class="ot-kpi-row" *ngIf="kpis as k">
+    <div class="ot-kpi" title="Actual OT time used ÷ room capacity. Capacity = rooms × days × 12h. Counts only cases with both an actual start and end recorded.">
+      <span class="ot-kpi-label">Utilisation</span>
+      <span class="ot-kpi-value">{{ k.utilisation.percentage }}<small>%</small></span>
+      <span class="ot-kpi-meta">{{ k.utilisation.usedMinutes }} / {{ k.utilisation.totalRoomMinutes }} min</span>
+    </div>
+    <div class="ot-kpi" title="Cases that started within 15 minutes of their planned start ÷ cases that actually started.">
+      <span class="ot-kpi-label">On-time start</span>
+      <span class="ot-kpi-value">{{ k.onTimeStart.percentage }}<small>%</small></span>
+      <span class="ot-kpi-meta">{{ k.onTimeStart.onTime }} / {{ k.onTimeStart.total }} cases</span>
+    </div>
+    <div class="ot-kpi" title="Average idle minutes between two back-to-back closed cases in the same room on the same day. Each such gap is one sample.">
+      <span class="ot-kpi-label">Avg turnover</span>
+      <span class="ot-kpi-value">{{ k.turnoverTime.averageMinutes }}<small> min</small></span>
+      <span class="ot-kpi-meta">{{ k.turnoverTime.samples }} samples</span>
+    </div>
+    <div class="ot-kpi" title="Schedules marked RESCHEDULED ÷ all schedules in the period.">
+      <span class="ot-kpi-label">Reschedule rate</span>
+      <span class="ot-kpi-value">{{ k.rescheduleRate.percentage }}<small>%</small></span>
+      <span class="ot-kpi-meta">{{ k.rescheduleRate.rescheduled }} / {{ k.rescheduleRate.total }}</span>
+    </div>
+    <div class="ot-kpi ot-kpi-warn" [class.ot-kpi-bad]="k.unplannedReturnRate.percentage > 1"
+         title="Closed cases flagged as an unplanned return to OT ÷ all closed cases.">
+      <span class="ot-kpi-label">Unplanned return</span>
+      <span class="ot-kpi-value">{{ k.unplannedReturnRate.percentage }}<small>%</small></span>
+      <span class="ot-kpi-meta">{{ k.unplannedReturnRate.returned }} / {{ k.unplannedReturnRate.total }}</span>
+    </div>
+    <div class="ot-kpi ot-kpi-warn" [class.ot-kpi-bad]="k.ssiRate.percentage > 2"
+         title="Closed cases flagged with a surgical-site infection ÷ all closed cases.">
+      <span class="ot-kpi-label">SSI rate</span>
+      <span class="ot-kpi-value">{{ k.ssiRate.percentage }}<small>%</small></span>
+      <span class="ot-kpi-meta">{{ k.ssiRate.withSsi }} / {{ k.ssiRate.total }}</span>
+    </div>
+    <div class="ot-kpi" [class.ot-kpi-bad]="k.checklistAdherence.percentage < 100"
+         title="Closed cases with all 3 WHO signatures captured (sign-in, time-out, sign-out) ÷ all closed cases.">
+      <span class="ot-kpi-label">WHO checklist</span>
+      <span class="ot-kpi-value">{{ k.checklistAdherence.percentage }}<small>%</small></span>
+      <span class="ot-kpi-meta">{{ k.checklistAdherence.adherent }} / {{ k.checklistAdherence.total }}</span>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="ot-toolbar">
+    <label class="ot-field">
+      Date
+      <input type="date" [(ngModel)]="date" (change)="refresh()" />
+    </label>
+    <button type="button" class="ot-btn ot-btn-primary" (click)="openBooking()">
+      <i class="pi pi-plus"></i> Book a slot
+    </button>
+    <button type="button" class="ot-btn" (click)="refresh()">
+      <i class="pi pi-refresh"></i> Refresh
+    </button>
+  </div>
+
+  <!-- Board -->
+  <div class="ot-empty" *ngIf="loading">Loading…</div>
+
+  <div class="ot-empty" *ngIf="!loading && rooms.length === 0">
+    No OT rooms configured yet. Add rooms from the admin panel.
+  </div>
+
+  <div class="ot-board" *ngIf="!loading && rooms.length > 0">
+    <div class="ot-room-row" *ngFor="let room of rooms">
+      <div class="ot-room-head">
+        <div>
+          <strong>{{ room.code }}</strong>
+          <span class="ot-room-name">{{ room.name }}</span>
+          <span class="ot-room-type">{{ room.type }}</span>
+        </div>
+        <span class="ot-room-status" [ngClass]="roomStatusClass(room.status)">{{ room.status }}</span>
+      </div>
+
+      <div class="ot-slot-row">
+        <div class="ot-empty-slot" *ngIf="schedulesIn(room.id).length === 0">
+          <span>No bookings</span>
+          <button type="button" class="ot-btn ot-btn-mini" (click)="openBooking(room.id)">+ Book</button>
+        </div>
+
+        <div class="ot-slot"
+             *ngFor="let s of schedulesIn(room.id)"
+             [ngClass]="urgencyClass(s.urgency)"
+             (click)="openSchedule(s)">
+          <div class="ot-slot-time">{{ formatTime(s.plannedStart) }} → {{ formatTime(s.plannedEnd) }}</div>
+          <div class="ot-slot-procedure">{{ s.procedureName }}</div>
+          <div class="ot-slot-meta">
+            <span *ngIf="s.patientName">{{ s.patientName }}</span>
+            <span *ngIf="s.prn"> · PRN {{ s.prn }}</span>
+          </div>
+          <div class="ot-slot-team" *ngIf="s.surgeonName">Surgeon: {{ s.surgeonName }}</div>
+          <div class="ot-slot-foot">
+            <span [class]="pillClass(s.status)">{{ s.status }}</span>
+            <div class="ot-slot-actions">
+              <button *ngIf="s.status === 'BOOKED' || s.status === 'CONFIRMED'"
+                      type="button" class="ot-btn ot-btn-mini" (click)="startSlot(s, $event)">Start</button>
+              <button *ngIf="s.status === 'IN_PROGRESS'"
+                      type="button" class="ot-btn ot-btn-mini ot-btn-good" (click)="endSlot(s, $event)">End</button>
+              <button *ngIf="s.status === 'BOOKED' || s.status === 'CONFIRMED'"
+                      type="button" class="ot-btn ot-btn-mini ot-btn-bad" (click)="cancelSlot(s, $event)">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Booking modal -->
+  <div class="ot-overlay" *ngIf="bookingVisible" (click)="closeBooking()">
+    <div class="ot-modal" (click)="$event.stopPropagation()">
+      <h3>Book OT slot</h3>
+
+      <div class="ot-form-row">
+        <label>
+          OT room
+          <select [(ngModel)]="bookingForm.otRoomId" name="otRoomId">
+            <option value="" disabled>Select room</option>
+            <option *ngFor="let r of rooms" [value]="r.id" [disabled]="r.status !== 'available'">{{ r.code }} — {{ r.name }} ({{ r.type }}){{ r.status !== 'available' ? ' — ' + r.status : '' }}</option>
+          </select>
+        </label>
+        <label>
+          Urgency
+          <select [(ngModel)]="bookingForm.urgency" name="urgency">
+            <option *ngFor="let u of urgencyOptions" [value]="u.value">{{ u.label }}</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="ot-form-row">
+        <label>
+          Date
+          <input type="date" [(ngModel)]="bookingForm.date" name="bookDate" />
+        </label>
+        <label>
+          Start
+          <input type="time" [(ngModel)]="bookingForm.plannedStartTime" name="plannedStartTime" />
+        </label>
+        <label>
+          End
+          <input type="time" [(ngModel)]="bookingForm.plannedEndTime" name="plannedEndTime" />
+        </label>
+      </div>
+
+      <div class="ot-form-row">
+        <label class="ot-full">
+          Procedure name *
+          <input type="text" [(ngModel)]="bookingForm.procedureName" name="procedureName"
+                 placeholder="Laparoscopic cholecystectomy / ACL reconstruction / etc." />
+        </label>
+      </div>
+
+      <div class="ot-form-row">
+        <label>
+          Patient name
+          <input type="text" [(ngModel)]="bookingForm.patientName" name="patientName" />
+        </label>
+        <label>
+          PRN
+          <input type="text" [(ngModel)]="bookingForm.prn" name="prn" (change)="onPrnChange()" />
+        </label>
+      </div>
+
+      <div class="ot-form-row">
+        <label>
+          Surgeon
+          <app-doctor-select [source]="'surgeons'" [(ngModel)]="bookingForm.surgeonName" name="surgeonName"></app-doctor-select>
+        </label>
+        <label>
+          Anaesthesiologist
+          <app-doctor-select [source]="'doctors'" [(ngModel)]="bookingForm.anaesthesiologistName" name="anaesthesiologistName"></app-doctor-select>
+        </label>
+      </div>
+
+      <div class="ot-form-row">
+        <label>
+          Scrub nurse
+          <input type="text" [(ngModel)]="bookingForm.scrubNurseName" name="scrubNurseName" />
+        </label>
+        <label>
+          Runner
+          <input type="text" [(ngModel)]="bookingForm.runnerName" name="runnerName" />
+        </label>
+      </div>
+
+      <div class="ot-form-buttons">
+        <button type="button" class="ot-btn" (click)="closeBooking()" [disabled]="bookingSubmitting">Cancel</button>
+        <button type="button" class="ot-btn ot-btn-primary" (click)="submitBooking()" [disabled]="bookingSubmitting">
+          {{ bookingSubmitting ? 'Booking…' : 'Book slot' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

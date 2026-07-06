@@ -61,6 +61,29 @@
                     class="form__textarea"
                     formControlName="injuries"></textarea>
         </div>
+        <div class="form__field">
+          <label for="examiningDoctorRegNo" class="form__label">Examining doctor reg. no.</label>
+          <input pInputText id="examiningDoctorRegNo"
+                 type="text"
+                 class="form__input"
+                 formControlName="examiningDoctorRegNo"
+                 placeholder="e.g. KMC/12345" />
+        </div>
+        <div class="form__field">
+          <label for="injuryOpinion" class="form__label">Injury opinion</label>
+          <select id="injuryOpinion"
+                  class="form__input"
+                  formControlName="injuryOpinion">
+            <option value="">— Select —</option>
+            <option *ngFor="let opt of injuryOpinionOptions" [value]="opt">{{ opt }}</option>
+          </select>
+        </div>
+        <div class="form__field form__field--check">
+          <label class="form__check">
+            <input type="checkbox" formControlName="consentForExamination" />
+            <span>Consent for examination obtained</span>
+          </label>
+        </div>
         <div class="form__footer">
           <button type="submit"
                   class="btn btn--primary"
@@ -68,6 +91,163 @@
                   data-testid="btn-examination">
             {{ submitting.examination ? 'Saving…' : 'Save examination' }}
           </button>
+        </div>
+      </form>
+
+      <!-- Examiner signature — collapsed behind a capture button -->
+      <div class="form__field">
+        <label class="form__label">Examiner signature</label>
+        <p class="section__subtitle section__subtitle--muted"
+           *ngIf="mlcCase.examinerSignature && !showExaminerSign"
+           data-testid="examiner-signed-note">
+          ✓ Signed
+          <button type="button" class="sig-link" (click)="showExaminerSign = true">Re-sign</button>
+        </p>
+        <button type="button" class="btn btn--secondary sig-capture-btn"
+                *ngIf="!mlcCase.examinerSignature && !showExaminerSign"
+                (click)="showExaminerSign = true">
+          + Capture examiner signature
+        </button>
+        <app-e-sign
+          *ngIf="showExaminerSign"
+          [signerType]="'doctor'"
+          [signerName]="examinationForm.get('examinerName')?.value || mlcCase.examinerName || ''"
+          [contextType]="'mlc-examiner'"
+          [contextId]="mlcCase.id ?? mlcId"
+          prompt="Examining doctor — sign below"
+          (signed)="onExaminerSigned($event)"
+          (cancelled)="showExaminerSign = false"
+          data-testid="examiner-esign">
+        </app-e-sign>
+      </div>
+    </section>
+
+    <!-- ========== Per-injury documentation ========== -->
+    <section class="section" data-testid="mlc-injuries-detail-section">
+      <div class="section__head">
+        <h2 class="section__title">Injuries (detailed)</h2>
+        <p class="section__subtitle" *ngIf="injuriesDetail.length">
+          {{ injuriesDetail.length }} on record
+        </p>
+      </div>
+
+      <!-- Existing injuries list -->
+      <table class="table" *ngIf="injuriesDetail.length; else noInjuries" data-testid="injuries-table">
+        <thead>
+          <tr>
+            <th>Site</th>
+            <th>Type</th>
+            <th>Size</th>
+            <th>Age</th>
+            <th>Weapon</th>
+            <th>Simple / Grievous</th>
+            <th>Notes</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let inj of injuriesDetail" data-testid="injury-row">
+            <td>{{ inj.site }}</td>
+            <td>{{ inj.injuryType || '—' }}</td>
+            <td>{{ inj.size || '—' }}</td>
+            <td>{{ inj.ageOfInjury || '—' }}</td>
+            <td>{{ inj.weaponLikely || '—' }}</td>
+            <td>{{ inj.simpleOrGrievous || '—' }}</td>
+            <td>{{ inj.notes || '—' }}</td>
+            <td>
+              <button type="button"
+                      class="btn btn--icon btn--danger"
+                      title="Remove injury"
+                      (click)="removeInjury(inj.id)"
+                      data-testid="btn-remove-injury">×</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <ng-template #noInjuries>
+        <p class="section__subtitle section__subtitle--muted">No detailed injuries recorded yet.</p>
+      </ng-template>
+
+      <!-- Add-injury row -->
+      <form class="form" [formGroup]="injuryForm" (ngSubmit)="addInjury()">
+        <div class="form__grid">
+          <div class="form__field">
+            <label for="inj-site" class="form__label">Site *</label>
+            <input pInputText id="inj-site" type="text" class="form__input"
+                   formControlName="site" placeholder="e.g. Left forearm" />
+          </div>
+          <div class="form__field">
+            <label for="inj-type" class="form__label">Injury type</label>
+            <input pInputText id="inj-type" type="text" class="form__input"
+                   formControlName="injuryType" placeholder="e.g. Laceration" />
+          </div>
+          <div class="form__field">
+            <label for="inj-size" class="form__label">Size</label>
+            <input pInputText id="inj-size" type="text" class="form__input"
+                   formControlName="size" placeholder="e.g. 3 × 1 cm" />
+          </div>
+          <div class="form__field">
+            <label for="inj-age" class="form__label">Age of injury</label>
+            <input pInputText id="inj-age" type="text" class="form__input"
+                   formControlName="ageOfInjury" placeholder="e.g. ~6 hours" />
+          </div>
+          <div class="form__field">
+            <label for="inj-weapon" class="form__label">Weapon likely</label>
+            <input pInputText id="inj-weapon" type="text" class="form__input"
+                   formControlName="weaponLikely" placeholder="e.g. Blunt object" />
+          </div>
+          <div class="form__field">
+            <label for="inj-sog" class="form__label">Simple / grievous</label>
+            <select id="inj-sog" class="form__input" formControlName="simpleOrGrievous">
+              <option value="">— Select —</option>
+              <option *ngFor="let opt of simpleOrGrievousOptions" [value]="opt">{{ opt }}</option>
+            </select>
+          </div>
+          <div class="form__field">
+            <label for="inj-notes" class="form__label">Notes</label>
+            <input pInputText id="inj-notes" type="text" class="form__input"
+                   formControlName="notes" />
+          </div>
+        </div>
+        <div class="form__footer">
+          <button type="submit"
+                  class="btn btn--primary"
+                  [disabled]="injuryForm.invalid || addingInjury"
+                  data-testid="btn-add-injury">
+            {{ addingInjury ? 'Adding…' : 'Add injury' }}
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ========== Evidence / photographs ========== -->
+    <section class="section" data-testid="mlc-photographs-section">
+      <div class="section__head">
+        <h2 class="section__title">Evidence / photographs</h2>
+        <p class="section__subtitle" *ngIf="mlcCase.photoUrls?.length" data-testid="photo-count">
+          {{ mlcCase.photoUrls?.length }} photo(s) on record
+        </p>
+      </div>
+      <form class="form" [formGroup]="examinationForm">
+        <div class="form__field form__field--check">
+          <label class="form__check">
+            <input type="checkbox" formControlName="photographsTaken" />
+            <span>Photographs taken</span>
+          </label>
+        </div>
+        <div class="form__field">
+          <label for="mlc-photos" class="form__label">Upload photographs</label>
+          <input id="mlc-photos"
+                 type="file"
+                 class="form__input"
+                 accept="image/*"
+                 multiple
+                 [disabled]="uploadingPhotos"
+                 (change)="onPhotosSelected($event)"
+                 data-testid="input-photos" />
+          <p class="section__subtitle section__subtitle--muted" *ngIf="uploadingPhotos">
+            Uploading…
+          </p>
         </div>
       </form>
     </section>
@@ -134,12 +314,87 @@
                  placeholder="e.g. Koramangala PS · City Court"
                  [readonly]="isReportSubmitted()" />
         </div>
+        <div class="form__field">
+          <label for="followUpExams" class="form__label">Follow-up examinations</label>
+          <textarea pInputText id="followUpExams"
+                    rows="3"
+                    class="form__textarea"
+                    formControlName="followUpExams"
+                    placeholder="Optional — notes on follow-up / repeat exams"
+                    [readonly]="isReportSubmitted()"></textarea>
+        </div>
         <div class="form__footer" *ngIf="!isReportSubmitted()">
           <button type="submit"
                   class="btn btn--primary"
                   [disabled]="reportForm.invalid || submitting.report"
                   data-testid="btn-report">
             {{ submitting.report ? 'Submitting…' : 'Submit final report' }}
+          </button>
+        </div>
+      </form>
+
+      <!-- Submission proof upload (allowed after lock) -->
+      <div class="form__field">
+        <label for="mlc-submission-proof" class="form__label">Submission proof</label>
+        <p class="section__subtitle section__subtitle--muted"
+           *ngIf="mlcCase.submissionProof"
+           data-testid="submission-proof-note">
+          ✓ Proof on record
+        </p>
+        <input id="mlc-submission-proof"
+               type="file"
+               class="form__input"
+               [disabled]="uploadingProof"
+               (change)="onSubmissionProofSelected($event)"
+               data-testid="input-submission-proof" />
+        <p class="section__subtitle section__subtitle--muted" *ngIf="uploadingProof">
+          Uploading…
+        </p>
+      </div>
+    </section>
+
+    <!-- ========== Police intimation ========== -->
+    <section class="section" data-testid="mlc-police-intimation-section">
+      <div class="section__head">
+        <h2 class="section__title">Police intimation</h2>
+        <p class="section__subtitle section__subtitle--muted" *ngIf="isReportSubmitted()">
+          Captured with the submitted report — locked
+        </p>
+      </div>
+      <form class="form" [formGroup]="policeForm">
+        <div class="form__field">
+          <label for="policeIntimationTime" class="form__label">Intimation time</label>
+          <input pInputText id="policeIntimationTime"
+                 type="datetime-local"
+                 class="form__input"
+                 formControlName="policeIntimationTime"
+                 [readonly]="isReportSubmitted()" />
+        </div>
+        <div class="form__field">
+          <label for="policeIntimationMode" class="form__label">Mode</label>
+          <input pInputText id="policeIntimationMode"
+                 type="text"
+                 class="form__input"
+                 formControlName="policeIntimationMode"
+                 placeholder="e.g. Phone · Written"
+                 [readonly]="isReportSubmitted()" />
+        </div>
+        <div class="form__field">
+          <label for="policeIntimationBy" class="form__label">Intimated by</label>
+          <input pInputText id="policeIntimationBy"
+                 type="text"
+                 class="form__input"
+                 formControlName="policeIntimationBy"
+                 placeholder="e.g. Dr. Mehta"
+                 [readonly]="isReportSubmitted()" />
+        </div>
+        <div class="form__footer" *ngIf="!isReportSubmitted()">
+          <button type="button"
+                  class="btn btn--secondary"
+                  [disabled]="savingPolice"
+                  (click)="savePoliceIntimation()"
+                  data-testid="btn-save-police">
+            {{ savingPolice ? 'Saving…' : 'Save police intimation' }}
           </button>
         </div>
       </form>

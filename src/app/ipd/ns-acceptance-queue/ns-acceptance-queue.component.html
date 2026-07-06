@@ -1,0 +1,175 @@
+<div class="nsq-shell">
+  <div class="nsq-header">
+    <h3 class="nsq-title">Incoming bed requests</h3>
+    <button type="button" class="nsq-btn nsq-btn-ghost" (click)="refresh()" [disabled]="saving">
+      Refresh
+    </button>
+  </div>
+
+  <div class="nsq-banner nsq-banner-bad" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+
+  <div class="nsq-empty" *ngIf="!loading && rows.length === 0">
+    No pending bed requests. Polling every {{ pollMs / 1000 }}s.
+  </div>
+
+  <div class="nsq-loading" *ngIf="loading">Loading queue&hellip;</div>
+
+  <div class="nsq-row" *ngFor="let row of rows">
+    <div class="nsq-row-summary">
+      <div class="nsq-row-main">
+        <span class="nsq-pill" [ngClass]="urgencyClass(row.urgency)">{{ row.urgency }}</span>
+        <span class="nsq-bed-type">{{ row.preferredBedType || 'Any bed type' }}</span>
+        <span class="nsq-age">{{ ageMinutes(row.requestedAt) }} min ago</span>
+      </div>
+      <div class="nsq-row-meta">
+        <strong>Admission</strong> {{ row.admission?.admissionNo || row.admissionId }}
+        &middot; PRN {{ row.admission?.prn }}
+        &middot; Dx {{ (row.admission?.diagnosis || '').slice(0, 80) }}{{ (row.admission?.diagnosis || '').length > 80 ? '…' : '' }}
+        &middot; Requested by {{ row.requestedBy || '—' }}
+      </div>
+    </div>
+
+    <div class="nsq-row-actions" *ngIf="activeRowId !== row.id">
+      <button type="button" class="nsq-btn nsq-btn-accept" (click)="startAccept(row)" [disabled]="saving">
+        Accept
+      </button>
+      <button type="button" class="nsq-btn nsq-btn-warn" (click)="startHold(row)" [disabled]="saving">
+        Hold
+      </button>
+      <button type="button" class="nsq-btn nsq-btn-bad" (click)="startReject(row)" [disabled]="saving">
+        Reject
+      </button>
+    </div>
+
+    <!-- Action panel — opens inline below the row when an action is started. -->
+    <div class="nsq-action-panel" *ngIf="activeRowId === row.id">
+
+      <ng-container *ngIf="activeAction === 'accept'">
+        <p class="nsq-prompt">
+          Pick the actual ward + bed for this patient, then confirm the bed is ready
+          (equipment verified, monitors working, isolation flags noted) and sign.
+        </p>
+
+        <!-- Bed picker — gates the e-sign so we can't accept without a bed. -->
+        <div class="nsq-pick-row">
+          <label class="nsq-pick">
+            Ward
+            <select [(ngModel)]="selectedWardId"
+                    name="acceptWard-{{row.id}}"
+                    (change)="onWardChange(selectedWardId)">
+              <option value="" disabled>Select ward</option>
+              <option *ngFor="let w of wards" [value]="w.id">
+                {{ w.wardName }} ({{ w.wardCode }})
+              </option>
+            </select>
+          </label>
+          <label class="nsq-pick">
+            Bed
+            <select [(ngModel)]="selectedBedId"
+                    name="acceptBed-{{row.id}}"
+                    [disabled]="!selectedWardId">
+              <option value="" disabled>Select bed</option>
+              <option *ngFor="let b of beds" [value]="b.id">
+                {{ b.bedNumber }} ({{ b.bedType }})
+              </option>
+            </select>
+          </label>
+        </div>
+        <p class="nsq-hint" *ngIf="selectedWardId && beds.length === 0">
+          No available beds in this ward — pick another ward.
+        </p>
+        <p class="nsq-hint" *ngIf="!canSignAccept">
+          Pick ward + bed to enable signing.
+        </p>
+
+        <app-e-sign *ngIf="canSignAccept"
+          [signerType]="'nurse'"
+          [signerName]="'Nurse-in-charge'"
+          [contextType]="'bed-request'"
+          [contextId]="row.id"
+          [prompt]="'Bed ready, equipment verified — sign to accept'"
+          [disabled]="saving"
+          (signed)="onNurseSigned($event)"
+          (cancelled)="cancelAction()">
+        </app-e-sign>
+
+        <div class="nsq-action-row">
+          <button type="button" class="nsq-btn nsq-btn-cancel" (click)="cancelAction()" [disabled]="saving">
+            Cancel
+          </button>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="activeAction === 'hold'">
+        <p class="nsq-prompt">
+          Hold this request with a reason (e.g. "bed being cleaned, ready in 20 min", "isolation prep").
+        </p>
+        <input class="nsq-input"
+               [(ngModel)]="reasonInput"
+               name="holdReason-{{row.id}}"
+               placeholder="Reason for hold (min 5 chars)" />
+        <div class="nsq-action-row">
+          <button type="button" class="nsq-btn nsq-btn-cancel" (click)="cancelAction()" [disabled]="saving">
+            Cancel
+          </button>
+          <button type="button" class="nsq-btn nsq-btn-warn" (click)="confirmHold()" [disabled]="saving">
+            Confirm hold
+          </button>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="activeAction === 'reject'">
+        <p class="nsq-prompt">
+          Reject this request (admission goes back to PRE for re-routing). Reason is mandatory.
+        </p>
+        <input class="nsq-input"
+               [(ngModel)]="reasonInput"
+               name="rejectReason-{{row.id}}"
+               placeholder="Reason for rejection (min 5 chars)" />
+        <div class="nsq-action-row">
+          <button type="button" class="nsq-btn nsq-btn-cancel" (click)="cancelAction()" [disabled]="saving">
+            Cancel
+          </button>
+          <button type="button" class="nsq-btn nsq-btn-bad" (click)="confirmReject()" [disabled]="saving">
+            Confirm reject
+          </button>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+
+  <!--
+    Awaiting bedside acceptance — bed requests where NS has already accepted
+    but the attender hasn't been walked through the consent bundle + facility
+    acceptance yet. Reception/PRE staff click "Walk attender through" to open
+    the bedside-acceptance flow on a tablet at the bedside.
+  -->
+  <div class="nsq-section-divider" *ngIf="acceptedRows.length > 0"></div>
+
+  <div class="nsq-header" *ngIf="acceptedRows.length > 0">
+    <h3 class="nsq-title">Awaiting bedside acceptance</h3>
+    <span class="nsq-meta">
+      Reception walks the attender through admission consents + facility acceptance.
+    </span>
+  </div>
+
+  <div class="nsq-row nsq-row-accepted" *ngFor="let row of acceptedRows">
+    <div class="nsq-row-summary">
+      <div class="nsq-row-main">
+        <span class="nsq-pill" [ngClass]="urgencyClass(row.urgency)">{{ row.urgency }}</span>
+        <span class="nsq-bed-type">{{ row.preferredBedType || 'Any bed type' }}</span>
+        <span class="nsq-age">Accepted {{ ageMinutes(row.acceptedAt || row.requestedAt) }} min ago</span>
+      </div>
+      <div class="nsq-row-meta">
+        <strong>Admission</strong> {{ row.admission?.admissionNo || row.admissionId }}
+        &middot; PRN {{ row.admission?.prn }}
+        &middot; Bed booked by {{ row.acceptedBy || '—' }}
+      </div>
+    </div>
+    <div class="nsq-row-actions">
+      <button type="button" class="nsq-btn nsq-btn-accept" (click)="openBedsideFlow(row)">
+        Walk attender through →
+      </button>
+    </div>
+  </div>
+</div>

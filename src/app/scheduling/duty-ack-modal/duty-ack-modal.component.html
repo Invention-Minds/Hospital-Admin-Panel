@@ -1,0 +1,35 @@
+<div class="dam-bg" *ngIf="visible && current">
+  <div class="dam-modal">
+    <h3>Acknowledge your duty</h3>
+    <p class="dam-sub">
+      You are rostered for
+      <strong>{{ current.shift?.name }}</strong>
+      ({{ current.shift?.startTime }} – {{ current.shift?.endTime }})
+      <span *ngIf="current.ward">at <strong>{{ current.ward.wardName }}</strong></span>
+      on <strong>{{ current.date | date:'mediumDate' }}</strong>.
+    </p>
+    <p class="dam-warn">
+      Signing below records that you are present and accepting duty for this
+      shift. The signature becomes part of the audit trail (NABH HRM.5 / PSQ.5)
+      and ties every action you take this shift back to a known on-duty signer.
+    </p>
+
+    <div class="dam-banner-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+    <app-e-sign
+      [signerType]="'staff'"
+      [signerName]="signerName()"
+      [signerRole]="signerRole()"
+      [contextType]="'duty-acknowledgement'"
+      [contextId]="current.id"
+      [disabled]="saving"
+      (signed)="onSigned($event)">
+    </app-e-sign>
+
+    <div class="dam-actions">
+      <button type="button" class="dam-btn" (click)="dismiss()">
+        Not on shift yet — remind me later
+      </button>
+    </div>
+  </div>
+</div>

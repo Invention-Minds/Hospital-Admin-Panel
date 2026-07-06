@@ -1,0 +1,43 @@
+.cc-shell {
+  background: #0f172a;
+  color: #e5e7eb;
+  min-height: 100vh;
+  padding: 24px;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+.cc-header {
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 2px solid #1e293b;
+  padding-bottom: 12px; margin-bottom: 18px;
+}
+.cc-title { font-size: 28px; font-weight: 700; }
+.cc-slot { font-size: 22px; color: #38bdf8; }
+.cc-time { color: #64748b; font-size: 16px; }
+.cc-clock { font-size: 26px; font-weight: 600; color: #fbbf24; }
+
+.cc-err { background: #7f1d1d; padding: 10px 14px; border-radius: 6px; }
+
+.cc-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  gap: 18px;
+}
+
+.cc-ward {
+  background: #1e293b;
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.cc-ward h2 { font-size: 20px; margin: 0 0 10px; color: #fbbf24; }
+.cc-ward table { width: 100%; border-collapse: collapse; font-size: 16px; }
+.cc-ward th, .cc-ward td { padding: 7px 6px; text-align: left; border-bottom: 1px solid #334155; }
+.cc-ward th { color: #94a3b8; font-weight: 500; font-size: 13px; }
+
+.cc-pill { padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; background: #475569; }
+.cc-ordered { background: #475569; color: #f1f5f9; }
+.cc-plated { background: #1e40af; color: #dbeafe; }
+.cc-delivered { background: #166534; color: #dcfce7; }
+
+.cc-empty {
+  text-align: center; padding: 80px 20px; color: #64748b; font-size: 22px;
+}

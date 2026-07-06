@@ -19,21 +19,26 @@
       <h2 class="form__section-heading">Clinical assessment</h2>
 
       <div class="form__field">
-        <label for="doctorName" class="form__label">Doctor name *</label>
-        <input
-          pInputText
-          id="doctorName"
-          type="text"
-          formControlName="doctorName"
-          class="form__input"
-          [class.form__input--error]="shouldShowError('doctorName')"
-          autocomplete="off"
-        />
+        <label for="doctorId" class="form__label">Doctor *</label>
+        <p-dropdown
+          inputId="doctorId"
+          [options]="doctors"
+          formControlName="doctorId"
+          optionLabel="name"
+          optionValue="id"
+          placeholder="Select the documenting doctor"
+          [filter]="true"
+          filterBy="name,departmentName"
+          [showClear]="false"
+          (onChange)="onDoctorChange($event.value)"
+          [style]="{'width':'100%'}"
+          data-testid="ipd-progress-note-doctor-picker">
+        </p-dropdown>
         <small
-          *ngIf="shouldShowError('doctorName')"
+          *ngIf="shouldShowError('doctorId')"
           class="form__error"
           data-testid="err-doctorName"
-          >Doctor name is required.</small
+          >Doctor is required.</small
         >
       </div>
 
@@ -181,6 +186,32 @@
           formControlName="nursingNotes"
           class="form__textarea"
         ></textarea>
+      </div>
+
+      <!-- Phase 9.13 — re-order vitals monitoring frequency -->
+      <div class="form__field">
+        <label for="vitalsMonitoringFrequency" class="form__label">
+          Vitals monitoring frequency (re-order)
+        </label>
+        <select
+          id="vitalsMonitoringFrequency"
+          formControlName="vitalsMonitoringFrequency"
+          class="form__input"
+        >
+          <option [ngValue]="null">— leave unchanged —</option>
+          <option value="continuous">Continuous</option>
+          <option value="1h">Hourly (1h)</option>
+          <option value="2h">2nd hourly (2h)</option>
+          <option value="4h">4th hourly (4h)</option>
+          <option value="6h">6th hourly (6h)</option>
+          <option value="8h">8th hourly (8h)</option>
+          <option value="12h">12th hourly (12h)</option>
+          <option value="bd">Twice daily (BD)</option>
+        </select>
+        <small class="form__hint">
+          Only set this to change the order — it updates the patient's monitoring
+          frequency on the Treatment Dashboard.
+        </small>
       </div>
     </section>
 

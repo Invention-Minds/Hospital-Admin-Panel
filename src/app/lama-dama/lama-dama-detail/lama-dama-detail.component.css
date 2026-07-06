@@ -156,3 +156,28 @@
   height: 36px;
   font-size: var(--font-size-sm);
 }
+
+/* Signature capture (e-sign) — mirrors lama-dama-register */
+.sig-capture-btn {
+  align-self: flex-start;
+  height: auto;
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-sm);
+}
+.sig-done {
+  display: flex;
+  align-items: center;
+  gap: var(--space-10);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-success-strong, #166534);
+}
+.sig-link {
+  background: transparent;
+  border: none;
+  color: var(--color-brand-primary);
+  cursor: pointer;
+  font-size: var(--font-size-xs);
+  text-decoration: underline;
+  padding: 0;
+}

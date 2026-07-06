@@ -1,0 +1,97 @@
+<div class="eaa-actions">
+  <!-- Refer for admission — all estimation types -->
+  <button *ngIf="!links.admission" class="eaa-icon eaa-icon-refer" (click)="openRefer()" [disabled]="!estimationId"
+          pTooltip="Refer for Admission" tooltipPosition="top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M7 13c1.66 0 3-1.34 3-3S8.66 7 7 7s-3 1.34-3 3s1.34 3 3 3m12-6h-8v7H3V6H1v13h2v-3h18v3h2v-9c0-2.21-1.79-4-4-4"/></svg>
+  </button>
+  <span *ngIf="links.admission" class="eaa-icon eaa-icon-done"
+        [pTooltip]="'Referred ✓ ' + (links.admission.admissionNo || links.admission.status)" tooltipPosition="top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m-2 15l-5-5l1.41-1.41L10 14.17l7.59-7.59L19 8z"/></svg>
+  </span>
+
+  <!-- OT requisition — SM only -->
+  <ng-container *ngIf="isSM">
+    <button *ngIf="!links.requisition" class="eaa-icon eaa-icon-ot" (click)="openOt()" [disabled]="!estimationId"
+            pTooltip="Create OT Requisition" tooltipPosition="top">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M9.64 7.64c.23-.5.36-1.05.36-1.64c0-2.21-1.79-4-4-4S2 3.79 2 6s1.79 4 4 4c.59 0 1.14-.13 1.64-.36L10 12l-2.36 2.36C7.14 14.13 6.59 14 6 14c-2.21 0-4 1.79-4 4s1.79 4 4 4s4-1.79 4-4c0-.59-.13-1.14-.36-1.64L12 14l7 7h3v-1zM6 8c-1.1 0-2-.89-2-2s.9-2 2-2s2 .89 2 2s-.9 2-2 2m0 12c-1.1 0-2-.89-2-2s.9-2 2-2s2 .89 2 2s-.9 2-2 2m6-7.5c-.28 0-.5-.22-.5-.5s.22-.5.5-.5s.5.22.5.5s-.22.5-.5.5M19 3l-6 6l2 2l7-7V3z"/></svg>
+    </button>
+    <span *ngIf="links.requisition" class="eaa-icon eaa-icon-done eaa-icon-done-ot"
+          [pTooltip]="'Requisition ✓ ' + (links.requisition.requisitionNo || links.requisition.status)" tooltipPosition="top">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m-2 15l-5-5l1.41-1.41L10 14.17l7.59-7.59L19 8z"/></svg>
+    </span>
+  </ng-container>
+</div>
+
+<!-- Refer for admission modal -->
+<p-dialog header="Refer for Admission" [(visible)]="referOpen" [modal]="true" [appendTo]="'body'"
+          [style]="{ width: '520px', maxWidth: '95vw' }" [draggable]="false" [resizable]="false"
+          [dismissableMask]="true" styleClass="eaa-dialog">
+  <p class="eaa-hint">Raises a bed request to the nursing station. No ward/bed is chosen here — NS assigns it and the attender signs at the bedside.</p>
+  <div class="eaa-bad" *ngIf="referError">{{ referError }}</div>
+  <label class="eaa-field">Diagnosis *
+    <textarea rows="2" [(ngModel)]="referForm.diagnosis" name="eaaDiag" placeholder="Reason for admission"></textarea>
+  </label>
+  <div class="eaa-row3">
+    <label>Urgency
+      <select [(ngModel)]="referForm.urgency" name="eaaUrg">
+        <option value="routine">Routine</option>
+        <option value="urgent">Urgent</option>
+        <option value="emergency">Emergency</option>
+      </select>
+    </label>
+    <label>Preferred bed type
+      <select [(ngModel)]="referForm.preferredBedType" name="eaaBt">
+        <option value="general">General</option>
+        <option value="semi-private">Semi-private</option>
+        <option value="private">Private</option>
+        <option value="deluxe">Deluxe</option>
+        <option value="icu">ICU</option>
+      </select>
+    </label>
+    <label>Admission type
+      <select [(ngModel)]="referForm.admissionType" name="eaaAt">
+        <option value="elective">Elective</option>
+        <option value="emergency">Emergency</option>
+        <option value="transfer">Transfer</option>
+        <option value="routine">Routine</option>
+      </select>
+    </label>
+  </div>
+  <ng-template pTemplate="footer">
+    <button class="eaa-btn" (click)="closeRefer()" [disabled]="referSubmitting">Cancel</button>
+    <button class="eaa-btn eaa-btn-primary" (click)="submitRefer()" [disabled]="referSubmitting">
+      {{ referSubmitting ? 'Submitting…' : 'Raise bed request' }}
+    </button>
+  </ng-template>
+</p-dialog>
+
+<!-- OT requisition modal -->
+<p-dialog header="Create OT Requisition" [(visible)]="otOpen" [modal]="true" [appendTo]="'body'"
+          [style]="{ width: '560px', maxWidth: '95vw' }" [draggable]="false" [resizable]="false"
+          [dismissableMask]="true" styleClass="eaa-dialog">
+  <p class="eaa-hint">Raises a pending OT requisition pre-filled from this estimation. The OT manager schedules the slot.</p>
+  <div class="eaa-bad" *ngIf="otError">{{ otError }}</div>
+  <label class="eaa-field">Primary surgery *
+    <input type="text" [(ngModel)]="otForm.primarySurgery" name="eaaPsurg" />
+  </label>
+  <label class="eaa-field">Surgeon
+    <app-doctor-select [source]="'surgeons'" [(ngModel)]="otForm.surgeonName" name="eaaSurg"></app-doctor-select>
+  </label>
+  <div class="eaa-row2">
+    <label>Booking from *
+      <input type="datetime-local" [(ngModel)]="otForm.bookingFrom" name="eaaBf" />
+    </label>
+    <label>Booking to *
+      <input type="datetime-local" [(ngModel)]="otForm.bookingTo" name="eaaBto" />
+    </label>
+  </div>
+  <label class="eaa-field">Special instructions
+    <textarea rows="2" [(ngModel)]="otForm.specialInstructions" name="eaaSi"></textarea>
+  </label>
+  <ng-template pTemplate="footer">
+    <button class="eaa-btn" (click)="closeOt()" [disabled]="otSubmitting">Cancel</button>
+    <button class="eaa-btn eaa-btn-primary" (click)="submitOt()" [disabled]="otSubmitting">
+      {{ otSubmitting ? 'Creating…' : 'Create requisition' }}
+    </button>
+  </ng-template>
+</p-dialog>

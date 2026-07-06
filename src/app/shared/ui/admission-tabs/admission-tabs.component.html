@@ -1,9 +1,27 @@
 <nav class="admission-tabs" *ngIf="admissionId" aria-label="Admission sub-pages">
   <a class="admission-tab"
+     [routerLink]="['/ipd/admission', admissionId, 'initial-assessment']"
+     routerLinkActive="is-active">
+    <i class="pi pi-file"></i>
+    <span>Initial Assessment</span>
+  </a>
+  <a class="admission-tab"
      [routerLink]="['/ipd/admission', admissionId, 'progress-note']"
      routerLinkActive="is-active">
     <i class="pi pi-file-edit"></i>
     <span>Progress Notes</span>
+  </a>
+  <a class="admission-tab"
+     [routerLink]="['/ipd/admission', admissionId, 'clinical-chart']"
+     routerLinkActive="is-active">
+    <i class="pi pi-chart-line"></i>
+    <span>Clinical Chart</span>
+  </a>
+  <a class="admission-tab"
+     [routerLink]="['/ipd/admission', admissionId, 'insulin-chart']"
+     routerLinkActive="is-active">
+    <i class="pi pi-percentage"></i>
+    <span>Insulin Chart</span>
   </a>
   <a class="admission-tab"
      [routerLink]="['/ipd/admission', admissionId, 'pharmacy']"
@@ -16,6 +34,48 @@
      routerLinkActive="is-active">
     <i class="pi pi-list"></i>
     <span>MAR</span>
+  </a>
+  <a class="admission-tab"
+     [routerLink]="['/ipd/admission', admissionId, 'medication-reconciliation']"
+     routerLinkActive="is-active">
+    <i class="pi pi-sync"></i>
+    <span>Med Reconciliation</span>
+  </a>
+  <a class="admission-tab"
+     [routerLink]="['/ipd/admission', admissionId, 'non-drug-orders']"
+     routerLinkActive="is-active">
+    <i class="pi pi-clipboard"></i>
+    <span>Doctor Orders</span>
+  </a>
+  <a class="admission-tab"
+     [routerLink]="['/ipd/admission', admissionId, 'handover']"
+     routerLinkActive="is-active">
+    <i class="pi pi-users"></i>
+    <span>Hand-off</span>
+  </a>
+  <a class="admission-tab"
+     [routerLink]="['/ipd/admission', admissionId, 'daily-closure']"
+     routerLinkActive="is-active">
+    <i class="pi pi-calendar-times"></i>
+    <span>Daily Closure</span>
+  </a>
+  <a class="admission-tab"
+     [routerLink]="['/ipd/admission', admissionId, 'icu-transfer']"
+     routerLinkActive="is-active">
+    <i class="pi pi-arrow-up-right"></i>
+    <span>ICU Transfer</span>
+  </a>
+  <a class="admission-tab"
+     [routerLink]="['/ipd/admission', admissionId, 'reports']"
+     routerLinkActive="is-active">
+    <i class="pi pi-file-pdf"></i>
+    <span>Reports</span>
+  </a>
+  <a class="admission-tab"
+     [routerLink]="['/ipd/admission', admissionId, 'ward-transfer']"
+     routerLinkActive="is-active">
+    <i class="pi pi-send"></i>
+    <span>Ward → OT</span>
   </a>
   <a class="admission-tab"
      [routerLink]="['/ipd/admission', admissionId, 'discharge']"

@@ -1,5 +1,6 @@
 import { Component, Input, OnChanges } from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
+import { AlertService } from '../../services/alert.service';
 import * as FileSaver from 'file-saver';
 import * as XLSX from 'xlsx';
 import moment from 'moment-timezone';
@@ -56,7 +57,7 @@ export class AppointmentCompleteComponent {
 
 
 
-  constructor(private appointmentService: AppointmentConfirmService) { }
+  constructor(private appointmentService: AppointmentConfirmService, private alertSvc: AlertService) { }
 
 
 
@@ -426,7 +427,7 @@ export class AppointmentCompleteComponent {
       ? this.filteredServices
       : this.filteredAppointments;
     if (!sourceList || sourceList.length === 0) {
-      alert('No appointments in the current view. Adjust filters and try again.');
+      this.alertSvc.show('No appointments in the current view. Adjust filters and try again.');
       return;
     }
     const selectedFields = sourceList.map((appointment: Appointment) => {

@@ -1,0 +1,66 @@
+<div class="page cpd-shell">
+  <div class="cpd-head">
+    <button class="cpd-btn" (click)="back()">← Back</button>
+    <span *ngIf="complaint" class="cpd-code">{{ complaint.code }}</span>
+  </div>
+
+  <div class="cpd-banner cpd-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
+  <div class="cpd-banner cpd-good" *ngIf="successMessage">{{ successMessage }}</div>
+  <div class="cpd-loading" *ngIf="loading">Loading…</div>
+
+  <div class="cpd-grid" *ngIf="complaint as c">
+    <div class="cpd-card">
+      <div class="cpd-head-row">
+        <h2 class="cpd-title">{{ c.code }}</h2>
+        <span class="cp-pill cp-sev-{{ c.severity }}">{{ c.severity }}</span>
+        <span class="cp-pill cp-status-{{ c.status }}">{{ c.status }}</span>
+      </div>
+      <div class="cpd-meta">
+        <div><span>Raised</span> {{ c.raisedAt | date:'dd/MM/yy h:mm a' }}</div>
+        <div><span>Channel</span> {{ c.channel }}</div>
+        <div><span>Source</span> {{ c.source === 'survey' ? 'Auto from low-NPS survey' : 'Manual' }}</div>
+        <div *ngIf="c.slaDueAt"><span>SLA due</span> {{ c.slaDueAt | date:'dd/MM/yy h:mm a' }}</div>
+        <div *ngIf="c.resolvedAt"><span>Resolved</span> {{ c.resolvedAt | date:'dd/MM/yy h:mm a' }} by {{ c.resolvedBy }}</div>
+      </div>
+
+      <h3 class="cpd-section">Description</h3>
+      <p class="cpd-desc">{{ c.description }}</p>
+
+      <h3 class="cpd-section" *ngIf="c.patientName || c.patientPrn">Patient</h3>
+      <div *ngIf="c.patientName || c.patientPrn" class="cpd-context">
+        <div *ngIf="c.patientName"><span>Name</span> {{ c.patientName }}</div>
+        <div *ngIf="c.patientPrn"><span>PRN</span> {{ c.patientPrn }}</div>
+      </div>
+    </div>
+
+    <!-- Phase 6 / Option A — related incidents chip row. -->
+    <div class="cpd-card cpd-links" *ngIf="c.relatedIncidents && c.relatedIncidents.length > 0">
+      <h3 class="cpd-section">Linked incidents</h3>
+      <div class="cpd-link-row">
+        <a class="cpd-chip cpd-chip-related" *ngFor="let r of c.relatedIncidents"
+           [routerLink]="['/incidents', r.id]">
+          🔗 {{ r.code }} · {{ r.severity }} · {{ r.status }}
+        </a>
+      </div>
+    </div>
+
+    <div class="cpd-card">
+      <h3 class="cpd-section">Status &amp; resolution</h3>
+      <label class="cpd-field">Status
+        <select [(ngModel)]="draft.status">
+          <option *ngFor="let s of STATUSES" [value]="s">{{ s }}</option>
+        </select>
+      </label>
+      <label class="cpd-field">Assigned to
+        <input type="text" [(ngModel)]="draft.assignedTo" placeholder="Investigator / desk owner" />
+      </label>
+      <label class="cpd-field" *ngIf="draft.status === 'resolved' || draft.status === 'escalated'">
+        Resolution notes
+        <textarea rows="4" [(ngModel)]="draft.resolutionNotes"></textarea>
+      </label>
+      <div class="cpd-actions">
+        <button class="cpd-btn cpd-btn-primary" (click)="save()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>

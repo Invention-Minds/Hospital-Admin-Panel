@@ -2,8 +2,8 @@
   <app-page-header
     [title]="type === 'lama' ? 'Record LAMA' : 'Record DAMA'"
     subtitle="ACC.6 — regulatory discharge documentation"
-    [patientName]="emergency?.patientName ?? null"
-    [patientPrn]="emergency?.prn ?? null">
+    [patientName]="headerPatientName"
+    [patientPrn]="headerPatientPrn">
   </app-page-header>
 
   <div class="type-switch">
@@ -31,17 +31,24 @@
     <section class="form__section">
       <h2 class="form__section-heading">Case identifier</h2>
 
-      <div class="form__field">
-        <label for="emergencyId" class="form__label">Emergency case ID *</label>
-        <input
-          pInputText
-          id="emergencyId"
-          type="text"
+      <!-- ER source: pick an emergency case (existing flow). -->
+      <div class="form__field" *ngIf="!isAdmissionSource">
+        <label for="emergencyId" class="form__label">Emergency case *</label>
+        <p-dropdown
+          inputId="emergencyId"
           formControlName="emergencyId"
-          class="form__input"
+          [options]="emergencyOptions"
+          optionLabel="label"
+          optionValue="value"
+          [filter]="true"
+          filterBy="label"
+          [disabled]="lockedEmergency"
+          [placeholder]="loadingEmergencies ? 'Loading emergency cases…' : 'Select an emergency case'"
+          (onChange)="onEmergencySelect($event.value)"
+          styleClass="form__dropdown"
           [class.form__input--error]="shouldShowError('shared', 'emergencyId')"
-          [readonly]="emergency !== null"
-          [attr.aria-readonly]="emergency !== null" />
+          data-testid="emergency-picker">
+        </p-dropdown>
         <small
           *ngIf="emergency"
           class="form__hint"
@@ -52,8 +59,20 @@
           *ngIf="shouldShowError('shared', 'emergencyId')"
           class="form__error"
           data-testid="err-emergencyId">
-          Emergency case ID is required.
+          Emergency case is required.
         </small>
+      </div>
+
+      <!-- IPD source: admission is fixed (deep-linked), shown read-only. -->
+      <div class="form__field" *ngIf="isAdmissionSource" data-testid="admission-context">
+        <label class="form__label">IPD admission</label>
+        <div class="form__readonly">
+          <ng-container *ngIf="admission; else loadingAdmission">
+            Linked to admission {{ admission.admissionNo || admissionId }}
+            <span *ngIf="admission.prn"> · PRN {{ admission.prn }}</span>
+          </ng-container>
+          <ng-template #loadingAdmission>Loading admission…</ng-template>
+        </div>
       </div>
 
       <div class="form__field">
@@ -189,25 +208,64 @@
       </div>
 
       <div class="form__grid">
+        <!-- Patient signature (e-sign pad) -->
         <div class="form__field">
-          <label for="patientSignature" class="form__label">Patient signature reference</label>
-          <input
-            pInputText
-            id="patientSignature"
-            type="text"
-            formControlName="patientSignature"
-            class="form__input"
-            placeholder="URL or GCS reference" />
+          <label class="form__label">Patient signature</label>
+
+          <div *ngIf="sharedForm.get('patientSignature')?.value" class="sig-done" data-testid="patient-signed">
+            ✓ Patient signed
+            <button type="button" class="sig-link" (click)="clearPatientSignature()">Re-sign</button>
+          </div>
+
+          <ng-container *ngIf="!sharedForm.get('patientSignature')?.value">
+            <small *ngIf="!hasResolvedSource" class="form__hint">{{ isAdmissionSource ? 'Loading admission to capture the patient\'s signature…' : 'Select the emergency case first to capture the patient\'s signature.' }}</small>
+            <button
+              type="button"
+              class="btn btn--secondary sig-capture-btn"
+              *ngIf="hasResolvedSource && !showPatientSign"
+              (click)="showPatientSign = true">
+              + Capture patient signature
+            </button>
+            <app-e-sign
+              *ngIf="hasResolvedSource && showPatientSign"
+              [signerType]="'patient'"
+              [signerName]="headerPatientName || ''"
+              [contextType]="'lama-dama'"
+              [contextId]="signatureContextId"
+              (signed)="onPatientSigned($event)"
+              (cancelled)="showPatientSign = false">
+            </app-e-sign>
+          </ng-container>
         </div>
+
+        <!-- Witness signature (e-sign pad) -->
         <div class="form__field">
-          <label for="witnessSignature" class="form__label">Witness signature reference</label>
-          <input
-            pInputText
-            id="witnessSignature"
-            type="text"
-            formControlName="witnessSignature"
-            class="form__input"
-            placeholder="URL or GCS reference" />
+          <label class="form__label">Witness signature</label>
+
+          <div *ngIf="sharedForm.get('witnessSignature')?.value" class="sig-done" data-testid="witness-signed">
+            ✓ Witness signed
+            <button type="button" class="sig-link" (click)="clearWitnessSignature()">Re-sign</button>
+          </div>
+
+          <ng-container *ngIf="!sharedForm.get('witnessSignature')?.value">
+            <small *ngIf="!witnessName.trim()" class="form__hint">Enter the witness name above to capture their signature.</small>
+            <button
+              type="button"
+              class="btn btn--secondary sig-capture-btn"
+              *ngIf="witnessName.trim() && !showWitnessSign"
+              (click)="showWitnessSign = true">
+              + Capture witness signature
+            </button>
+            <app-e-sign
+              *ngIf="witnessName.trim() && showWitnessSign"
+              [signerType]="'witness'"
+              [signerName]="witnessName"
+              [contextType]="'lama-dama'"
+              [contextId]="signatureContextId"
+              (signed)="onWitnessSigned($event)"
+              (cancelled)="showWitnessSign = false">
+            </app-e-sign>
+          </ng-container>
         </div>
       </div>
     </section>

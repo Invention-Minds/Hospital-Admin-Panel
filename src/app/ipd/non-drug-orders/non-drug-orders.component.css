@@ -1,0 +1,59 @@
+.ndo-shell { padding: 20px; max-width: 1500px; margin: 24px auto 24px 96px; }
+.ndo-head { display: flex; justify-content: space-between; align-items: end; gap: 14px; flex-wrap: wrap; margin-bottom: 6px; }
+.ndo-title { font-size: 22px; font-weight: 600; margin: 0; }
+.ndo-sub { color: #6b7280; font-size: 13px; margin: 0 0 12px; }
+
+.ndo-filter { display: flex; flex-direction: column; font-size: 12px; color: #4b5563; gap: 3px; }
+.ndo-filter select { border: 1px solid #d1d5db; border-radius: 6px; padding: 6px 8px; font-size: 13px; }
+
+.ndo-banner { padding: 10px 14px; border-radius: 6px; margin-bottom: 10px; font-size: 14px; }
+.ndo-bad { background: #fee2e2; color: #b91c1c; }
+.ndo-good { background: #dcfce7; color: #166534; }
+
+.ndo-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px 18px; margin-bottom: 16px; }
+.ndo-card-title { font-size: 14px; font-weight: 600; color: #374151; margin: 0 0 10px; }
+.ndo-form-grid {
+  display: grid; grid-template-columns: 2fr 1fr auto; gap: 12px; align-items: end;
+}
+.ndo-field { display: flex; flex-direction: column; font-size: 12px; color: #4b5563; gap: 4px; }
+.ndo-field-wide { grid-column: span 1; }
+.ndo-field-action { display: flex; align-items: end; }
+.ndo-field textarea, .ndo-field select, .ndo-field input {
+  border: 1px solid #d1d5db; border-radius: 6px; padding: 6px 8px; font-size: 13px;
+}
+
+.ndo-loading { padding: 40px; text-align: center; color: #6b7280; font-style: italic; }
+
+.ndo-grid-wrap { overflow-x: auto; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; }
+.ndo-grid { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+.ndo-grid th, .ndo-grid td {
+  border-bottom: 1px solid #f3f4f6; padding: 9px 12px;
+  vertical-align: top; text-align: left;
+}
+.ndo-grid th { background: #f9fafb; font-weight: 600; color: #374151; font-size: 12px; }
+.ndo-grid td small { color: #6b7280; font-size: 11px; }
+
+.ndo-order-text { max-width: 320px; }
+.ndo-notes { color: #6b7280; font-style: italic; font-size: 11px; margin-top: 2px; }
+.ndo-muted { color: #9ca3af; font-style: italic; }
+
+.ndo-pill { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+.ndo-ordered { background: #dbeafe; color: #1e40af; }
+.ndo-ack { background: #fef3c7; color: #92400e; }
+.ndo-done { background: #dcfce7; color: #166534; }
+.ndo-cancel { background: #e5e7eb; color: #4b5563; }
+
+.ndo-actions { display: flex; gap: 4px; flex-wrap: wrap; }
+.ndo-btn { background: #fff; border: 1px solid #d1d5db; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; }
+.ndo-btn:hover:not([disabled]) { background: #f3f4f6; }
+.ndo-btn-sm { padding: 3px 8px; font-size: 11px; }
+.ndo-btn-primary { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
+.ndo-btn-primary:hover:not([disabled]) { background: #1e40af; }
+.ndo-btn-danger { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
+.ndo-btn-danger:hover:not([disabled]) { background: #fecaca; }
+.ndo-btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+.ndo-modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 100; }
+.ndo-modal { background: #fff; border-radius: 8px; padding: 18px 22px; width: 460px; max-width: 92vw; }
+.ndo-modal h3 { margin: 0 0 4px; font-size: 16px; }
+.ndo-modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; }

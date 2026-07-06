@@ -1,0 +1,60 @@
+<section class="plc-card">
+  <header class="plc-header">
+    <div class="plc-title-wrap">
+      <i *ngIf="accentIcon" [class]="'plc-title-icon ' + accentIcon"></i>
+      <div>
+        <h2>{{ title }}</h2>
+        <p class="plc-sub" *ngIf="subTitle">{{ subTitle }}</p>
+      </div>
+    </div>
+    <span class="plc-count" *ngIf="items.length">{{ items.length }}</span>
+  </header>
+
+  <ul class="plc-list" *ngIf="items.length; else emptyTpl">
+    <li
+      *ngFor="let item of items; trackBy: trackItem"
+      class="plc-item"
+      (click)="onItemClick(item)">
+      <div class="plc-badge" [attr.data-tone]="item.badgeTone || 'blue'">
+        <span class="plc-badge-main">{{ item.badge }}</span>
+        <span class="plc-badge-sub" *ngIf="item.badgeSub">{{ item.badgeSub }}</span>
+      </div>
+
+      <div class="plc-body">
+        <div class="plc-top">
+          <span class="plc-primary">{{ item.primary }}</span>
+          <span class="plc-flags" *ngIf="item.flags?.length">
+            <span
+              *ngFor="let f of item.flags"
+              class="plc-flag"
+              [attr.data-tone]="f.tone"
+              [title]="f.label">
+              <i [class]="f.icon"></i>
+            </span>
+          </span>
+          <span class="plc-meta-right" *ngIf="item.metaRight">{{ item.metaRight }}</span>
+        </div>
+        <div class="plc-secondary" *ngIf="item.secondary">{{ item.secondary }}</div>
+        <div class="plc-chips" *ngIf="item.chips?.length">
+          <span
+            *ngFor="let c of item.chips"
+            class="plc-chip"
+            [attr.data-tone]="c.tone">
+            {{ c.label }}
+          </span>
+        </div>
+      </div>
+
+      <div class="plc-arrow" aria-hidden="true">
+        <i class="pi pi-angle-right"></i>
+      </div>
+    </li>
+  </ul>
+
+  <ng-template #emptyTpl>
+    <div class="plc-empty">
+      <i [class]="emptyIcon"></i>
+      <p>{{ emptyText }}</p>
+    </div>
+  </ng-template>
+</section>

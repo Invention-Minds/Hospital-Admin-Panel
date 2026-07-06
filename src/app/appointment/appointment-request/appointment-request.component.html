@@ -61,6 +61,7 @@
         <th>Phone Number</th>
         <th>Doctor Name</th>
         <th>Department</th>
+        <th>Type</th>
         <th (click)="sortBy('date')">
           Date
           <span *ngIf="sortColumn === 'date' && sortDirection === 'asc'">&#9650;</span>
@@ -84,6 +85,13 @@
         <td>{{ appointment.phoneNumber }}</td>
         <td>{{ appointment.doctorName }}</td>
         <td>{{ appointment.department }}</td>
+        <td>
+          <span class="status-badge"
+                [style.background]="(appointment.isfollowup || appointment.type === 'followup') ? '#dcfce7' : '#dbeafe'"
+                [style.color]="(appointment.isfollowup || appointment.type === 'followup') ? '#166534' : '#1e40af'">
+            {{ (appointment.isfollowup || appointment.type === 'followup') ? 'Free Follow-up' : 'New' }}
+          </span>
+        </td>
         <td>{{ appointment.date | date:'dd-MM-yyyy' }}</td>
         <td>{{ appointment.time }}</td>
         <td>

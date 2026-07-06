@@ -12,6 +12,30 @@ export interface MlcCase {
   fir_No?: string;
   fir_Date?: Date;
   investigatingOfficer?: string;
+  // --- Incident details (NABH MLC expansion) ---
+  incidentDateTime?: Date;
+  incidentPlace?: string;
+  allegedCause?: string;
+  weaponType?: string;
+  // --- Brought by / informant ---
+  broughtBy?: string;
+  broughtByDetail?: string;
+  informantName?: string;
+  informantRelation?: string;
+  // --- Identification ---
+  identificationMark1?: string;
+  identificationMark2?: string;
+  // --- Consent for examination ---
+  consentForExamination?: boolean;
+  consentForExamTime?: Date;
+  // --- Opinion / police intimation ---
+  injuryOpinion?: string;
+  policeIntimationTime?: Date;
+  policeIntimationMode?: string;
+  policeIntimationBy?: string;
+  // --- Examining doctor / referral ---
+  examiningDoctorRegNo?: string;
+  referredTo?: string;
   patientConsent: boolean;
   consentTime?: Date;
   firstExaminationDone: boolean;
@@ -29,8 +53,20 @@ export interface MlcCase {
   submissionDate?: Date;
   submissionProof?: string;
   status: 'documented' | 'examination-done' | 'samples-collected' | 'report-submitted' | 'closed';
+  injuries_detail?: MlcInjury[];
   createdAt?: Date;
   updatedAt?: Date;
+}
+
+export interface MlcInjury {
+  id?: number;
+  site: string;
+  injuryType?: string;
+  size?: string;
+  ageOfInjury?: string;
+  weaponLikely?: string;
+  simpleOrGrievous?: string;
+  notes?: string;
 }
 
 @Injectable({
@@ -60,6 +96,11 @@ export class MlcService {
   // Get all MLC cases
   getAllMlcCases(): Observable<MlcCase[]> {
     return this.http.get<MlcCase[]>(`${this.apiUrl}/`);
+  }
+
+  /** MLC cases linked to emergencies referred/assigned to the logged-in doctor. */
+  getMyMlcCases(): Observable<{ data: MlcCase[] }> {
+    return this.http.get<{ data: MlcCase[] }>(`${this.apiUrl}/mine`);
   }
 
   // Get pending MLC cases (awaiting examination/sample/submission)
@@ -153,5 +194,20 @@ export class MlcService {
   // Get MLC case history
   getMlcCaseHistory(id: string): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/${id}/history`);
+  }
+
+  // Get injuries detail for an MLC case
+  getInjuries(id: string): Observable<MlcInjury[]> {
+    return this.http.get<MlcInjury[]>(`${this.apiUrl}/${id}/injuries`);
+  }
+
+  // Add an injury to an MLC case
+  addInjury(id: string, body: Partial<MlcInjury>): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${id}/injuries`, body);
+  }
+
+  // Delete an injury from an MLC case
+  deleteInjury(id: string, injuryId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}/injuries/${injuryId}`);
   }
 }

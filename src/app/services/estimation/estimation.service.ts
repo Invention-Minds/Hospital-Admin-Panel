@@ -107,4 +107,27 @@ export class EstimationService {
   createOTDetails(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/ot-details`, data);
   }
+
+  /**
+   * Refer a confirmed estimation for IPD admission (NABH WF-2). Creates a
+   * PROPOSED admission + bed request — no ward chosen here; NS assigns it.
+   */
+  referForAdmission(estimationId: string, payload: {
+    diagnosis: string;
+    urgency?: 'routine' | 'urgent' | 'emergency';
+    preferredBedType?: string;
+    admissionType?: string;
+  }): Observable<any> {
+    const id = encodeURIComponent(estimationId);
+    return this.http.post(`${this.apiUrl}/estimation-details/${id}/refer-for-admission`, payload);
+  }
+
+  /** Linkage status — does this estimation already have an OT requisition / IPD admission? */
+  getEstimationLinks(estimationId: string): Observable<{ data: {
+    requisition: { id: string; requisitionNo: string | null; status: string } | null;
+    admission: { id: string; admissionNo: string | null; status: string } | null;
+  } }> {
+    const id = encodeURIComponent(estimationId);
+    return this.http.get<any>(`${this.apiUrl}/estimation-details/${id}/links`);
+  }
 }

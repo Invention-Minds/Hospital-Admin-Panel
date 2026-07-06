@@ -6,6 +6,7 @@ import { ChangeDetectorRef } from '@angular/core';
 import { forkJoin } from 'rxjs';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { MessageService } from 'primeng/api';
+import { AlertService } from '../../services/alert.service';
 
 interface Slot {
   time: string;
@@ -54,18 +55,21 @@ export class DoctorAvailabilityComponent {
   subAdminType: string = ''; // Sub-admin type
   employeeId: string = ''; // Employee ID
   userId: string = ''; // User ID
+  arrivedDoctorIds: number[] = []; // Doctors marked "came" today (drives TV display)
+  arrivedToggleBusy: { [doctorId: number]: boolean } = {};
 
 
 
 
 
-  constructor(private doctorService: DoctorServiceService, private cdr: ChangeDetectorRef, private appointmentService: AppointmentConfirmService, private messageService: MessageService) {
+  constructor(private doctorService: DoctorServiceService, private cdr: ChangeDetectorRef, private appointmentService: AppointmentConfirmService, private messageService: MessageService, private alertSvc: AlertService) {
     this.tomorrow.setDate(this.todayforUnavialable.getDate() + 1);
     this.initializeTimeFormatCache()
   }
 
   ngOnInit(): void {
     this.fetchDoctors();
+    this.fetchTodayAttendance();
     this.role = localStorage.getItem('role') || ''
     console.log(this.role);
     this.subAdminType = localStorage.getItem('subAdminType') || ''; // Fetch sub-admin type from localStorage
@@ -576,6 +580,56 @@ export class DoctorAvailabilityComponent {
   isHaveAccess():boolean{
     return this.subAdminType === 'Tele Caller' || this.role === 'admin'|| this.role === 'super_admin'  || this.employeeId === 'JMRH124';
   }
+
+  fetchTodayAttendance(): void {
+    this.doctorService.getTodayAttendance().subscribe({
+      next: (res) => {
+        this.arrivedDoctorIds = res.doctorIds || [];
+      },
+      error: (error) => console.error('Error fetching today attendance:', error),
+    });
+  }
+
+  isArrived(doctor: any): boolean {
+    return this.arrivedDoctorIds.includes(doctor.id);
+  }
+
+  // Arrival can only be marked for the current day.
+  isTodaySelected(): boolean {
+    return this.selectedDate.toDateString() === new Date().toDateString();
+  }
+
+  toggleArrived(doctor: any): void {
+    if (!this.isHaveAccess() || !this.isTodaySelected() || this.arrivedToggleBusy[doctor.id]) {
+      return;
+    }
+    this.arrivedToggleBusy[doctor.id] = true;
+    const currentlyArrived = this.isArrived(doctor);
+    const request$ = currentlyArrived
+      ? this.doctorService.unmarkArrived(doctor.id)
+      : this.doctorService.markArrived(doctor.id);
+
+    request$.subscribe({
+      next: (res) => {
+        this.arrivedDoctorIds = res.doctorIds || [];
+        this.arrivedToggleBusy[doctor.id] = false;
+        this.messageService.add({
+          severity: 'success',
+          summary: currentlyArrived ? 'Marked not arrived' : 'Marked arrived',
+          detail: `${doctor.name} ${currentlyArrived ? 'removed from' : 'shown on'} TV.`,
+        });
+      },
+      error: (error) => {
+        console.error('Error updating arrival:', error);
+        this.arrivedToggleBusy[doctor.id] = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Update failed',
+          detail: 'Could not update arrival status.',
+        });
+      },
+    });
+  }
   openUnavailableModal(doctor: DoctorWithSlots): void {
     // console.log(doctor)
     const today = new Date();
@@ -870,7 +924,7 @@ export class DoctorAvailabilityComponent {
       const extraStart = currentStart - (existingExtras + 1) * 60;
 
       if (extraStart < previousExtendedEnd) {
-        alert('Cannot add extra slot — it overlaps with extra slots from the previous time range.');
+        this.alertSvc.show('Cannot add extra slot — it overlaps with extra slots from the previous time range.', { severity: 'warning' });
         return;
       }
     }
@@ -878,7 +932,7 @@ export class DoctorAvailabilityComponent {
       // Optional: prevent going before midnight
       const extraStart = currentStart - (existingExtras + 1) * 60;
       if (extraStart < 0) {
-        alert('Cannot add extra slot — it goes before 12:00 AM.');
+        this.alertSvc.show('Cannot add extra slot — it goes before 12:00 AM.', { severity: 'warning' });
         return;
       }
     }
@@ -913,7 +967,7 @@ export class DoctorAvailabilityComponent {
     const currentIndex = timeRanges.findIndex((r: string) => r === trimmedTimeRange);
 
     if (currentIndex === -1) {
-      alert('Time range not found.');
+      this.alertSvc.show('Time range not found.', { severity: 'warning' });
       return;
     }
 
@@ -933,7 +987,7 @@ export class DoctorAvailabilityComponent {
       const nextExtendedStart = nextStart - (nextExtraBefore * 60);
 
       if (extraEnd > nextExtendedStart) {
-        alert('Cannot add extra slot — it overlaps with extra before-slots from the next time range.');
+        this.alertSvc.show('Cannot add extra slot — it overlaps with extra before-slots from the next time range.', { severity: 'warning' });
         return;
       }
     }
@@ -1354,7 +1408,7 @@ export class DoctorAvailabilityComponent {
   checkFutureAppointments() {
     const selectedDoctorIds = this.unavailableDoctorList.filter(d => d.selected).map(d => d.id);
     if (!selectedDoctorIds.length || !this.unavailableStartDate || !this.unavailableEndDate) {
-      alert('Please select doctors and date range.');
+      this.alertSvc.show('Please select doctors and date range.', { severity: 'warning' });
       return;
     }
   
@@ -1383,7 +1437,7 @@ export class DoctorAvailabilityComponent {
     }).subscribe(() => {
       this.closeDialog();
       this.fetchDoctors();
-      alert('Unavailable dates updated.');
+      this.alertSvc.show('Unavailable dates updated.', { title: 'Success' });
     });
   }
   

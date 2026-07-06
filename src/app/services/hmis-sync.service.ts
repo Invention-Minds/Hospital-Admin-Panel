@@ -10,9 +10,63 @@ export interface HmisAuditLog {
   action: string;
   payload: any;
   response?: any;
-  status: 'success' | 'failed' | 'pending';
+  status: 'success' | 'failed' | 'pending' | 'dead';
   retryCount: number;
+  quarantinedAt?: string | null;
   createdAt?: Date;
+}
+
+/**
+ * Phase 9 — sync hardening types.
+ * Field names mirror HmisDeadLetter / HmisConflict schema columns 1:1.
+ */
+export type DeadLetterStatus = 'QUARANTINED' | 'RESOLVED' | 'IGNORED' | 'REPLAYED';
+
+export interface HmisDeadLetter {
+  id: number;
+  originalAuditLogId: number;
+  module: string;
+  action: string;
+  direction: 'push' | 'pull';
+  payload: string;
+  errorDetail: string;
+  retryCount: number;
+  status: DeadLetterStatus;
+  resolvedAt?: string | null;
+  resolvedBy?: string | null;
+  resolvedById?: number | null;
+  resolution?: string | null;
+  movedAt: string;
+  updatedAt: string;
+}
+
+export type ConflictStatus = 'OPEN' | 'RESOLVED_LOCAL' | 'RESOLVED_HMIS' | 'IGNORED';
+
+export interface HmisConflict {
+  id: number;
+  module: string;
+  entityType: string;
+  entityId: string;
+  fieldName: string;
+  localValue?: string | null;
+  hmisValue?: string | null;
+  detectedAt: string;
+  status: ConflictStatus;
+  resolution?: string | null;
+  resolvedAt?: string | null;
+  resolvedBy?: string | null;
+  resolvedById?: number | null;
+  triggerAuditLogId?: number | null;
+}
+
+export interface ResolveDeadLetterPayload {
+  outcome: 'RESOLVED' | 'IGNORED' | 'REPLAYED';
+  resolution: string;
+}
+
+export interface ResolveConflictPayload {
+  outcome: 'RESOLVED_LOCAL' | 'RESOLVED_HMIS' | 'IGNORED';
+  resolution: string;
 }
 
 export interface SyncStatus {
@@ -157,5 +211,41 @@ export class HmisSyncService {
   // Retry webhook delivery
   retryWebhookDelivery(webhookId: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/webhooks/${webhookId}/retry`, {});
+  }
+
+  // ─── Phase 9 — Dead-letter queue ──────────────────────────────────────
+  listDeadLetters(filters?: { status?: DeadLetterStatus | 'ALL'; module?: string }): Observable<HmisDeadLetter[]> {
+    let params = new HttpParams();
+    if (filters?.status) params = params.set('status', filters.status);
+    if (filters?.module) params = params.set('module', filters.module);
+    return this.http.get<HmisDeadLetter[]>(`${this.apiUrl}/dead-letter`, { params });
+  }
+
+  getDeadLetter(id: number): Observable<HmisDeadLetter> {
+    return this.http.get<HmisDeadLetter>(`${this.apiUrl}/dead-letter/${id}`);
+  }
+
+  resolveDeadLetter(id: number, payload: ResolveDeadLetterPayload): Observable<HmisDeadLetter> {
+    return this.http.post<HmisDeadLetter>(`${this.apiUrl}/dead-letter/${id}/resolve`, payload);
+  }
+
+  runDeadLetterMover(): Observable<{ ok: boolean; moved: number }> {
+    return this.http.post<{ ok: boolean; moved: number }>(`${this.apiUrl}/dead-letter/run-mover`, {});
+  }
+
+  // ─── Phase 9 — Conflict ledger ────────────────────────────────────────
+  listConflicts(filters?: { status?: ConflictStatus | 'ALL'; module?: string }): Observable<HmisConflict[]> {
+    let params = new HttpParams();
+    if (filters?.status) params = params.set('status', filters.status);
+    if (filters?.module) params = params.set('module', filters.module);
+    return this.http.get<HmisConflict[]>(`${this.apiUrl}/conflicts`, { params });
+  }
+
+  getConflict(id: number): Observable<HmisConflict> {
+    return this.http.get<HmisConflict>(`${this.apiUrl}/conflicts/${id}`);
+  }
+
+  resolveConflict(id: number, payload: ResolveConflictPayload): Observable<HmisConflict> {
+    return this.http.post<HmisConflict>(`${this.apiUrl}/conflicts/${id}/resolve`, payload);
   }
 }

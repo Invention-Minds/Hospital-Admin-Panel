@@ -1,0 +1,429 @@
+<div class="ia-shell">
+  <div class="ia-head">
+    <h2 class="ia-title">Initial Assessment on Admission</h2>
+    <div class="ia-meta">
+      <span class="ia-pill" *ngIf="serverRow"
+            [class.ia-pill-ok]="serverRow.status === 'CONSULTANT_SIGNED'"
+            [class.ia-pill-warn]="serverRow.status === 'FILLED'">
+        {{ serverRow.status }}
+      </span>
+      <span class="ia-pill" *ngIf="!serverRow">NEW</span>
+      <span class="ia-readonly" *ngIf="readOnly">Read-only — consultant co-signed</span>
+    </div>
+  </div>
+
+  <div class="ia-banner ia-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="ia-banner ia-good" *ngIf="successMessage">{{ successMessage }}</div>
+
+  <div class="ia-body" *ngIf="!loading">
+    <!-- ─── Left vertical-tabs navigation ─── -->
+    <nav class="ia-tabs">
+      <button type="button" [class.active]="section==='presenting'" (click)="setSection('presenting')">1. Presenting</button>
+      <button type="button" [class.active]="section==='past'" (click)="setSection('past')">2. Past history</button>
+      <button type="button" [class.active]="section==='personal'" (click)="setSection('personal')">3. Personal + OB/GYN</button>
+      <button type="button" [class.active]="section==='geriatric'" (click)="setSection('geriatric')">4. Geriatric ADL</button>
+      <button type="button" [class.active]="section==='vitals-exam'" (click)="setSection('vitals-exam')">5. Vitals + General exam</button>
+      <button type="button" [class.active]="section==='systemic'" (click)="setSection('systemic')">6. Systemic exam</button>
+      <button type="button" [class.active]="section==='plan'" (click)="setSection('plan')">7. Plan</button>
+      <button type="button" [class.active]="section==='sign'" (click)="setSection('sign')">8. Sign-off</button>
+
+      <div class="ia-tabs-actions">
+        <button type="button" class="ia-btn ia-btn-primary"
+                [disabled]="saving || readOnly"
+                (click)="saveDraft()">{{ saving ? 'Saving…' : 'Save' }}</button>
+      </div>
+    </nav>
+
+    <!-- ─── Right section content ─── -->
+    <main class="ia-section">
+
+      <!-- 1. Presenting illness + allergies -->
+      <section *ngIf="section==='presenting'">
+        <h3>Allergies</h3>
+        <div class="ia-checks">
+          <label><input type="checkbox" [(ngModel)]="form.allergyNotKnown" [disabled]="readOnly" /> Not known</label>
+          <label><input type="checkbox" [(ngModel)]="form.allergyDrug" [disabled]="readOnly" /> Drug</label>
+          <label><input type="checkbox" [(ngModel)]="form.allergyFood" [disabled]="readOnly" /> Food</label>
+          <label><input type="checkbox" [(ngModel)]="form.allergyTransfusion" [disabled]="readOnly" /> Transfusion reaction</label>
+        </div>
+        <label class="ia-field">Other allergies (specify)
+          <textarea rows="2" [(ngModel)]="form.allergyOthers" [disabled]="readOnly"></textarea>
+        </label>
+
+        <h3>Chief complaints &amp; duration</h3>
+        <textarea rows="3" [(ngModel)]="form.chiefComplaints" [disabled]="readOnly"
+                  placeholder="e.g. Chest pain × 2 days"></textarea>
+
+        <h3>History of presenting illness</h3>
+        <textarea rows="5" [(ngModel)]="form.presentingIllness" [disabled]="readOnly"></textarea>
+      </section>
+
+      <!-- 2. Past history -->
+      <section *ngIf="section==='past'">
+        <h3>Co-morbidities</h3>
+        <table class="ia-comorbid">
+          <thead><tr><th>Condition</th><th>Yes / No</th><th>Since</th><th>Current medications</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Hypertension</td>
+              <td><label><input type="checkbox" [(ngModel)]="form.hasHypertension" [disabled]="readOnly" /></label></td>
+              <td><input type="text" [(ngModel)]="form.hypertensionSince" [disabled]="readOnly || !form.hasHypertension" placeholder="e.g. 2010" /></td>
+              <td><input type="text" [(ngModel)]="form.hypertensionMeds" [disabled]="readOnly || !form.hasHypertension" /></td>
+            </tr>
+            <tr>
+              <td>Diabetes</td>
+              <td><label><input type="checkbox" [(ngModel)]="form.hasDiabetes" [disabled]="readOnly" /></label></td>
+              <td><input type="text" [(ngModel)]="form.diabetesSince" [disabled]="readOnly || !form.hasDiabetes" /></td>
+              <td><input type="text" [(ngModel)]="form.diabetesMeds" [disabled]="readOnly || !form.hasDiabetes" /></td>
+            </tr>
+            <tr>
+              <td>Cardiac disease</td>
+              <td><label><input type="checkbox" [(ngModel)]="form.hasCardiacDisease" [disabled]="readOnly" /></label></td>
+              <td><input type="text" [(ngModel)]="form.cardiacDiseaseSince" [disabled]="readOnly || !form.hasCardiacDisease" /></td>
+              <td><input type="text" [(ngModel)]="form.cardiacDiseaseMeds" [disabled]="readOnly || !form.hasCardiacDisease" /></td>
+            </tr>
+            <tr>
+              <td>Wound discharge / non-healing ulcer</td>
+              <td><label><input type="checkbox" [(ngModel)]="form.hasWoundDischarge" [disabled]="readOnly" /></label></td>
+              <td><input type="text" [(ngModel)]="form.woundDischargeSince" [disabled]="readOnly || !form.hasWoundDischarge" /></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>COPD / Asthma / TB</td>
+              <td><label><input type="checkbox" [(ngModel)]="form.hasCopd" [disabled]="readOnly" /></label></td>
+              <td><input type="text" [(ngModel)]="form.copdSince" [disabled]="readOnly || !form.hasCopd" /></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>Thyroid disorder</td>
+              <td><label><input type="checkbox" [(ngModel)]="form.hasThyroidDisorder" [disabled]="readOnly" /></label></td>
+              <td><input type="text" [(ngModel)]="form.thyroidDisorderSince" [disabled]="readOnly || !form.hasThyroidDisorder" /></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>H/O CVA / Epilepsy</td>
+              <td><label><input type="checkbox" [(ngModel)]="form.hasCva" [disabled]="readOnly" /></label></td>
+              <td><input type="text" [(ngModel)]="form.cvaSince" [disabled]="readOnly || !form.hasCva" /></td>
+              <td></td>
+            </tr>
+            <tr>
+              <td>H/O recurrent infection / unexplained fever</td>
+              <td><label><input type="checkbox" [(ngModel)]="form.hasRecurrentInfection" [disabled]="readOnly" /></label></td>
+              <td><input type="text" [(ngModel)]="form.recurrentInfectionSince" [disabled]="readOnly || !form.hasRecurrentInfection" /></td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Past surgical history</h3>
+        <textarea rows="3" [(ngModel)]="form.surgicalHistory" [disabled]="readOnly"></textarea>
+
+        <h3>Medication history</h3>
+        <textarea rows="3" [(ngModel)]="form.medicationHistory" [disabled]="readOnly"
+                  placeholder="Drug, dose, frequency, since when"></textarea>
+      </section>
+
+      <!-- 3. Personal + OB/GYN + Family -->
+      <section *ngIf="section==='personal'">
+        <h3>Personal history / habits</h3>
+        <div class="ia-grid-2">
+          <label class="ia-field">Occupation status
+            <select [(ngModel)]="form.occupationStatus" [disabled]="readOnly">
+              <option [ngValue]="null">—</option>
+              <option value="employed">Employed</option>
+              <option value="unemployed">Unemployed</option>
+            </select>
+          </label>
+          <label class="ia-field">Diet
+            <select [(ngModel)]="form.dietType" [disabled]="readOnly">
+              <option [ngValue]="null">—</option>
+              <option value="veg">Vegetarian</option>
+              <option value="non-veg">Non-vegetarian</option>
+              <option value="mixed">Mixed</option>
+            </select>
+          </label>
+          <label class="ia-field">Bowel / bladder
+            <select [(ngModel)]="form.bowelBladder" [disabled]="readOnly">
+              <option [ngValue]="null">—</option>
+              <option value="regular">Regular</option>
+              <option value="irregular">Irregular</option>
+            </select>
+          </label>
+          <label class="ia-field">Sleep
+            <select [(ngModel)]="form.sleep" [disabled]="readOnly">
+              <option [ngValue]="null">—</option>
+              <option value="normal">Normal</option>
+              <option value="disturbed">Disturbed</option>
+            </select>
+          </label>
+        </div>
+        <label class="ia-field">Habits (smoking, alcohol, tobacco, etc.)
+          <textarea rows="2" [(ngModel)]="form.habits" [disabled]="readOnly"></textarea>
+        </label>
+        <label class="ia-field">Occupation details (if relevant)
+          <textarea rows="2" [(ngModel)]="form.occupationDetails" [disabled]="readOnly"></textarea>
+        </label>
+
+        <h3>Obstetrics &amp; Gynaecology (female patients)</h3>
+        <div class="ia-checks" style="background:#fef3c7; padding:8px 12px; border-radius:6px; border:1px solid #fbbf24;">
+          <label><strong>⚠️ Pregnancy / lactation flags — drive teratogenic-drug alerts</strong></label>
+        </div>
+        <div class="ia-checks">
+          <label><input type="checkbox" [(ngModel)]="form.isPregnant" [disabled]="readOnly" /> Currently pregnant</label>
+          <label class="ia-field" *ngIf="form.isPregnant">Weeks of gestation
+            <input type="number" min="0" max="45" [(ngModel)]="form.pregnancyWeeks" [disabled]="readOnly" placeholder="weeks" />
+          </label>
+          <label><input type="checkbox" [(ngModel)]="form.isLactating" [disabled]="readOnly" /> Currently lactating</label>
+        </div>
+        <div class="ia-grid-3">
+          <label class="ia-field">LMP <input type="text" [(ngModel)]="form.lmp" [disabled]="readOnly" placeholder="dd/mm/yyyy" /></label>
+          <label class="ia-field">Menarche <input type="text" [(ngModel)]="form.menarche" [disabled]="readOnly" /></label>
+          <label class="ia-field">Menopause <input type="text" [(ngModel)]="form.menopause" [disabled]="readOnly" /></label>
+        </div>
+        <div class="ia-checks">
+          <label><input type="checkbox" [ngModel]="form.cycleRegular === true" (ngModelChange)="form.cycleRegular = $event ? true : null" [disabled]="readOnly" /> Cycle regular</label>
+          <label><input type="checkbox" [ngModel]="form.contraception === true" (ngModelChange)="form.contraception = $event ? true : null" [disabled]="readOnly" /> Contraception</label>
+          <label><input type="checkbox" [ngModel]="form.discharge === true" (ngModelChange)="form.discharge = $event ? true : null" [disabled]="readOnly" /> Discharge</label>
+          <label><input type="checkbox" [ngModel]="form.cervicalSmear === true" (ngModelChange)="form.cervicalSmear = $event ? true : null" [disabled]="readOnly" /> Cervical smear done</label>
+          <label><input type="checkbox" [ngModel]="form.obPain === true" (ngModelChange)="form.obPain = $event ? true : null" [disabled]="readOnly" /> Pain</label>
+          <label><input type="checkbox" [ngModel]="form.menorrhagia === true" (ngModelChange)="form.menorrhagia = $event ? true : null" [disabled]="readOnly" /> Menorrhagia</label>
+        </div>
+        <label class="ia-field">Immunization
+          <input type="text" [(ngModel)]="form.immunization" [disabled]="readOnly" />
+        </label>
+        <label class="ia-field">Obstetric history (G/P/L/A, deliveries)
+          <textarea rows="3" [(ngModel)]="form.obstetricHistory" [disabled]="readOnly"></textarea>
+        </label>
+
+        <h3>Family history</h3>
+        <textarea rows="3" [(ngModel)]="form.familyHistory" [disabled]="readOnly"
+                  placeholder="HTN, DM, cardiac, malignancies in first-degree relatives"></textarea>
+      </section>
+
+      <!-- 4. Geriatric ADL -->
+      <section *ngIf="section==='geriatric'">
+        <label class="ia-check-inline">
+          <input type="checkbox" [(ngModel)]="form.isGeriatric" [disabled]="readOnly" />
+          Patient is ≥ 65 years — fill the ADL screen below (NABH COP.8)
+        </label>
+
+        <ng-container *ngIf="form.isGeriatric">
+          <div class="ia-grid-2">
+            <label class="ia-field">Mental status<textarea rows="2" [(ngModel)]="form.mentalStatus" [disabled]="readOnly" placeholder="WNL / dementia / delirium / depression / moody / anxiety / others"></textarea></label>
+            <label class="ia-field">Emotional<textarea rows="2" [(ngModel)]="form.emotional" [disabled]="readOnly"></textarea></label>
+            <label class="ia-field">Communications &amp; speech<textarea rows="2" [(ngModel)]="form.communicationsSpeech" [disabled]="readOnly" placeholder="WNL / impaired / aids / others"></textarea></label>
+            <label class="ia-field">Mobility<textarea rows="2" [(ngModel)]="form.mobility" [disabled]="readOnly" placeholder="WNL / transfers I,A,D / walking I,A,D / fall(s)"></textarea></label>
+            <label class="ia-field">Balance<input type="text" [(ngModel)]="form.balance" [disabled]="readOnly" placeholder="WNL / impaired" /></label>
+            <label class="ia-field">Bowel<input type="text" [(ngModel)]="form.bowel" [disabled]="readOnly" placeholder="WNL / continent / incontinent / constipation" /></label>
+            <label class="ia-field">Bladder<input type="text" [(ngModel)]="form.bladder" [disabled]="readOnly" placeholder="WNL / continent / incontinent / catheter" /></label>
+            <label class="ia-field">Nutrition<textarea rows="2" [(ngModel)]="form.nutrition" [disabled]="readOnly" placeholder="Appetite WNL/fair/poor — Weight stable/loss/gain"></textarea></label>
+            <label class="ia-field">ADL<textarea rows="2" [(ngModel)]="form.adl" [disabled]="readOnly" placeholder="Bathing/Dressing/Cooking/Cleaning/Shopping/Banking/Driving — I,A,D"></textarea></label>
+            <label class="ia-field">Social support<input type="text" [(ngModel)]="form.social" [disabled]="readOnly" placeholder="Alone / spouse / others" /></label>
+            <label class="ia-field">Hearing<input type="text" [(ngModel)]="form.hearing" [disabled]="readOnly" /></label>
+            <label class="ia-field">Vision<input type="text" [(ngModel)]="form.vision" [disabled]="readOnly" /></label>
+          </div>
+          <p class="ia-sub">I = Independent · A = Assisted · D = Dependent</p>
+        </ng-container>
+      </section>
+
+      <!-- 5. Vitals + General examination -->
+      <section *ngIf="section==='vitals-exam'">
+        <h3>Vital signs</h3>
+        <div class="ia-grid-3">
+          <label class="ia-field">Temperature <input type="text" [(ngModel)]="form.vitalsTemp" [disabled]="readOnly" placeholder="°F or °C" /></label>
+          <label class="ia-field">Pulse <input type="text" [(ngModel)]="form.vitalsPulse" [disabled]="readOnly" placeholder="bpm" /></label>
+          <label class="ia-field">BP <input type="text" [(ngModel)]="form.vitalsBP" [disabled]="readOnly" placeholder="mmHg" /></label>
+          <label class="ia-field">RR <input type="text" [(ngModel)]="form.vitalsRR" [disabled]="readOnly" placeholder="/min" /></label>
+          <label class="ia-field">Weight <input type="text" [(ngModel)]="form.vitalsWeight" [disabled]="readOnly" placeholder="kg" /></label>
+          <label class="ia-field">Height <input type="text" [(ngModel)]="form.vitalsHeight" [disabled]="readOnly" placeholder="cm" /></label>
+        </div>
+        <div class="ia-grid-3">
+          <label class="ia-field">Pain score (0-10) <input type="number" min="0" max="10" [(ngModel)]="form.painScore" [disabled]="readOnly" /></label>
+          <label class="ia-field">Pain location <input type="text" [(ngModel)]="form.painLocation" [disabled]="readOnly" /></label>
+          <label class="ia-field">Pain duration <input type="text" [(ngModel)]="form.painDuration" [disabled]="readOnly" /></label>
+        </div>
+
+        <h3>General examination</h3>
+        <div class="ia-checks">
+          <label><input type="checkbox" [(ngModel)]="form.examPallor" [disabled]="readOnly" /> Pallor</label>
+          <label><input type="checkbox" [(ngModel)]="form.examEdema" [disabled]="readOnly" /> Edema</label>
+          <label><input type="checkbox" [(ngModel)]="form.examClubbing" [disabled]="readOnly" /> Clubbing</label>
+          <label><input type="checkbox" [(ngModel)]="form.examCyanosis" [disabled]="readOnly" /> Cyanosis</label>
+          <label><input type="checkbox" [(ngModel)]="form.examIcterus" [disabled]="readOnly" /> Icterus</label>
+          <label><input type="checkbox" [(ngModel)]="form.examEmaciated" [disabled]="readOnly" /> Emaciated</label>
+        </div>
+        <div class="ia-grid-2">
+          <label class="ia-field">Body habitus
+            <select [(ngModel)]="form.examBodyHabitus" [disabled]="readOnly">
+              <option [ngValue]="null">—</option>
+              <option value="obese">Obese</option>
+              <option value="average">Average built</option>
+              <option value="thin">Thin</option>
+            </select>
+          </label>
+          <label class="ia-field">Psychological state
+            <select [(ngModel)]="form.examPsychological" [disabled]="readOnly">
+              <option [ngValue]="null">—</option>
+              <option value="normal">No obvious abnormality</option>
+              <option value="anxious">Anxious</option>
+              <option value="depressed">Depressed</option>
+              <option value="aggressive">Aggressive</option>
+              <option value="altered">Altered mental behaviour</option>
+            </select>
+          </label>
+        </div>
+        <label class="ia-field">Lymph nodes
+          <textarea rows="2" [(ngModel)]="form.examLymphNode" [disabled]="readOnly"></textarea>
+        </label>
+        <label class="ia-field">Other findings
+          <textarea rows="2" [(ngModel)]="form.examOthers" [disabled]="readOnly"></textarea>
+        </label>
+      </section>
+
+      <!-- 6. Systemic exam -->
+      <section *ngIf="section==='systemic'">
+        <p class="ia-sub">Tick "NAD" (No Abnormality Detected) for each system you've examined; otherwise record findings in the box.</p>
+        <div class="ia-sys-row" *ngFor="let sys of systems">
+          <div class="ia-sys-label">
+            <strong [innerHTML]="sys.label"></strong>
+            <label class="ia-check-inline">
+              <input type="checkbox"
+                     [ngModel]="getSysNad(sys.key)"
+                     (ngModelChange)="setSysNad(sys.key, $event)"
+                     [disabled]="readOnly" />
+              NAD
+            </label>
+          </div>
+          <textarea rows="2"
+                    [ngModel]="getSysFindings(sys.key)"
+                    (ngModelChange)="setSysFindings(sys.key, $event)"
+                    [disabled]="readOnly || getSysNad(sys.key)"
+                    placeholder="Findings (if not NAD)"></textarea>
+        </div>
+
+        <h3>Other systems / general findings</h3>
+        <textarea rows="3" [(ngModel)]="form.otherSystems" [disabled]="readOnly"></textarea>
+      </section>
+
+      <!-- 7. Summary & plan -->
+      <section *ngIf="section==='plan'">
+        <h3>Findings summary</h3>
+        <textarea rows="3" [(ngModel)]="form.findings" [disabled]="readOnly"></textarea>
+
+        <h3>Provisional diagnosis</h3>
+        <textarea rows="3" [(ngModel)]="form.provisionalDiagnosis" [disabled]="readOnly"></textarea>
+
+        <h3>Investigations advised</h3>
+        <textarea rows="3" [(ngModel)]="form.investigationsAdvised" [disabled]="readOnly"></textarea>
+        <label class="ia-check-inline" style="display:flex; align-items:center; gap:8px; margin-top:6px; font-size:13px; color:#374151;">
+          <input type="checkbox" [(ngModel)]="form.previousInvestigationsEnclosed" [disabled]="readOnly" />
+          Relevant Previous Investigations Enclosed
+        </label>
+
+        <h3>Problems</h3>
+        <textarea rows="3" [(ngModel)]="form.problems" [disabled]="readOnly"></textarea>
+
+        <h3>Treatment plan</h3>
+        <textarea rows="4" [(ngModel)]="form.treatmentPlan" [disabled]="readOnly"></textarea>
+
+        <h3>Vitals monitoring frequency</h3>
+        <p class="ia-sub">How often nursing should record this patient's vitals. Drives the
+          Treatment Dashboard "vitals overdue" alert. Re-orderable later from a progress note.</p>
+        <label class="ia-field">Monitoring frequency
+          <select [(ngModel)]="form.vitalsMonitoringFrequency" [disabled]="readOnly">
+            <option [ngValue]="null">— not set —</option>
+            <option value="continuous">Continuous</option>
+            <option value="1h">Hourly (1h)</option>
+            <option value="2h">2nd hourly (2h)</option>
+            <option value="4h">4th hourly (4h)</option>
+            <option value="6h">6th hourly (6h)</option>
+            <option value="8h">8th hourly (8h)</option>
+            <option value="12h">12th hourly (12h)</option>
+            <option value="bd">Twice daily (BD)</option>
+          </select>
+        </label>
+
+        <h3>Glucose monitoring frequency</h3>
+        <p class="ia-sub">How often nursing should check blood glucose. Drives the
+          "glucose check overdue" alert on the Insulin Infusion Chart. Also
+          re-orderable from the Insulin Infusion Chart page.</p>
+        <label class="ia-field">Monitoring frequency
+          <select [(ngModel)]="form.glucoseMonitoringFrequency" [disabled]="readOnly">
+            <option [ngValue]="null">— not set —</option>
+            <option value="continuous">Continuous (≥ hourly)</option>
+            <option value="1h">Hourly (1h)</option>
+            <option value="2h">2nd hourly (2h)</option>
+            <option value="4h">4th hourly (4h)</option>
+            <option value="6h">6th hourly (6h)</option>
+            <option value="8h">8th hourly (8h)</option>
+            <option value="qid">QID (4×/day)</option>
+            <option value="bd">Twice daily (BD)</option>
+            <option value="premeal">Pre-meal + bedtime</option>
+          </select>
+        </label>
+
+        <h3>Discharge planning (NABH AAC.8)</h3>
+        <p class="ia-sub">Identify possible needs at home after discharge.</p>
+        <div class="ia-checks">
+          <label><input type="checkbox" [(ngModel)]="form.needsSocialSupport" [disabled]="readOnly" /> Social support</label>
+          <label><input type="checkbox" [(ngModel)]="form.needsHomeEquipment" [disabled]="readOnly" /> Home equipment</label>
+          <label><input type="checkbox" [(ngModel)]="form.needsPhysiotherapy" [disabled]="readOnly" /> Physiotherapy</label>
+          <label><input type="checkbox" [(ngModel)]="form.needsWoundCare" [disabled]="readOnly" /> Wound care</label>
+        </div>
+        <label class="ia-field">Other anticipated needs
+          <textarea rows="2" [(ngModel)]="form.otherDischargeNeeds" [disabled]="readOnly"></textarea>
+        </label>
+      </section>
+
+      <!-- 8. Sign-off -->
+      <section *ngIf="section==='sign'">
+        <h3>Sign-off</h3>
+        <p class="ia-sub">
+          The form must be saved (Section 7 button at the top of the page) before
+          the filler can sign. Once the filler signs, the consultant can co-sign;
+          a co-signed assessment is read-only.
+        </p>
+
+        <!-- Filler sign block -->
+        <div class="ia-sig-block">
+          <h4>Filler (M.O. / resident / registrar)</h4>
+          <div *ngIf="serverRow?.filledAt" class="ia-sig-stamp">
+            ✓ Signed by <strong>{{ serverRow?.filledByName }}</strong>
+            on {{ serverRow?.filledAt | date:'medium' }}
+          </div>
+          <app-e-sign
+            *ngIf="serverRow && !serverRow.filledAt"
+            [signerType]="'doctor'"
+            [signerRole]="'resident'"
+            [signerName]="''"
+            [contextType]="'ipd-initial-assessment-filler'"
+            [contextId]="serverRow.id"
+            (signed)="onFilledSigned($event)">
+          </app-e-sign>
+          <p *ngIf="!serverRow" class="ia-hint">Save the form first to enable signing.</p>
+        </div>
+
+        <!-- Consultant sign block -->
+        <div class="ia-sig-block" *ngIf="serverRow?.filledAt">
+          <h4>Consultant co-signature</h4>
+          <div *ngIf="serverRow?.consultantSignedAt" class="ia-sig-stamp">
+            ✓ Co-signed by <strong>{{ serverRow?.consultantName }}</strong>
+            on {{ serverRow?.consultantSignedAt | date:'medium' }}
+          </div>
+          <app-e-sign
+            *ngIf="serverRow?.filledAt && !serverRow?.consultantSignedAt && serverRow"
+            [signerType]="'doctor'"
+            [signerRole]="'consultant'"
+            [signerName]="''"
+            [contextType]="'ipd-initial-assessment-consultant'"
+            [contextId]="serverRow.id"
+            (signed)="onConsultantSigned($event)">
+          </app-e-sign>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <div *ngIf="loading" class="ia-loading">Loading…</div>
+</div>

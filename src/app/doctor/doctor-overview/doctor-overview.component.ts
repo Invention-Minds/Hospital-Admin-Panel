@@ -75,6 +75,14 @@ export class DoctorOverviewComponent implements OnInit {
       console.error('Access denied: Only sub_admin or admin can add a new doctor.');
     }
   }
+
+  showInactiveDoctors() {
+    if (this.role === 'admin' || this.role === 'super_admin' || this.role === 'sub_admin') {
+      this.activeComponent = 'inactive';
+    } else {
+      console.error('Access denied: Only sub_admin or admin can view inactive doctors.');
+    }
+  }
   setActiveComponent(componentName: string): void {
     this.activeComponent = componentName;
   }

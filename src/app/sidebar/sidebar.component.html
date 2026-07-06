@@ -1,261 +1,852 @@
+<!--
+  Sidebar — workflow-ordered.
+
+  Items are gated by role/sub-admin/admin type via *ngIf; each user only sees
+  the items their role allows, but the order matches the hospital workflow so
+  everyone navigates top → bottom in the same direction:
+
+    1. Dashboard / Analytics              ← start of day
+    ── OPD / Front Desk ──
+       Appointments (admin)
+       Appointments (Nursing — /nursing/<blockId>)
+       Doctor Appts (doctors)
+       Patients
+       Doctors
+       MHC
+    ── Investigations ──
+       Services
+       Radiology Services (Radiology Coordinator)
+       Lab
+       Therapies (3 role variants)
+    ── Emergency ──
+       Emergency
+       MLC Cases
+    ── IPD ──
+       IPD
+       Ward Mgmt
+       ICU Transfers
+       Handover
+       Day Care                           (day-procedure beds)
+    ── OT MGMT ──                         (Phase 9.5)
+       OT Workbench                       (primary entry — unified shell)
+       OT Workflow                        (board — Phase 11)
+       OT Requisitions
+       OT Reports
+       OP Procedures
+       Surgeries                          (legacy — kept for transition)
+    ── Dietetics ──
+       Dietetics
+       Canteen
+    ── Discharge & Finance ──
+       Estimation
+       LAMA/DAMA
+    ── Reporting ──
+       Report
+       TV Control
+    ── Admin & Compliance (super_admin) ──
+       Masters
+       OT Setup                           (equipment / consumables / fixed notes)
+       OT Templates                       (admin-curated boilerplate)
+       Roster
+       Duty sign-in
+       Note Templates
+       Diet setup
+       HMIS Sync
+       NABH Audit
+    Settings (always pinned bottom via CSS flex-margin)
+
+  Section dividers — first item of each new section carries the
+  `sidebar-section-start` class which adds a thin top border + spacing
+  (declared in sidebar.component.css).
+-->
 <div class="sidebar" *ngIf="isDesktopView">
   <div class="icon-container">
     <a href="/dashboard">
       <div class="icon-content">
-    <img  src="sidebar/IM-logo.png" alt="logo" class="logo">
-    <span class="logo-text">DocMinds</span>
+        <img src="sidebar/IM-logo.png" alt="logo" class="logo">
+        <span class="logo-text">DocMinds</span>
+      </div>
+    </a>
   </div>
-  </a>
-    
-  </div>
-<div class="icon-container icon-container_2">
-  <!-- <a [routerLink]="role !== 'admin' ? '/dashboard': 'analytics'" routerLinkActive="active" class="icon-wrapper" *ngIf="['super_admin', 'admin', 'sub_admin'].includes(role)&& isNotEstimator() && isNotMHC()"  >
-    <div class="icon-content" *ngIf="['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator()" >
-    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
-      <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6.625 2.75a3.875 3.875 0 1 0 0 7.75a3.875 3.875 0 0 0 0-7.75m10.75 0a3.875 3.875 0 1 0 0 7.75a3.875 3.875 0 0 0 0-7.75M6.625 13.5a3.875 3.875 0 1 0 0 7.75a3.875 3.875 0 0 0 0-7.75m10.75 0a3.875 3.875 0 1 0 0 7.75a3.875 3.875 0 0 0 0-7.75"/>
-    </svg>
-    <span>Dashboard</span>
-  </div>
-  </a> -->
-  <a [routerLink]="role === 'admin' ? '/analytics' : '/dashboard'" 
-   routerLinkActive="active" 
-   class="icon-wrapper" 
-   *ngIf="['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotMHC() && isNotIpBillingManager() && isNotRadiology() && isNotLab() && isNotNursing() && isNotOT()  && isNotTherapist() && isNotTVController()">
 
-  <div class="icon-content">
-    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
-      <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
-            d="M6.625 2.75a3.875 3.875 0 1 0 0 7.75a3.875 3.875 0 0 0 0-7.75m10.75 0a3.875 3.875 0 1 0 0 7.75a3.875 3.875 0 0 0 0-7.75M6.625 13.5a3.875 3.875 0 1 0 0 7.75a3.875 3.875 0 0 0 0-7.75m10.75 0a3.875 3.875 0 1 0 0 7.75a3.875 3.875 0 0 0 0-7.75"/>
-    </svg>
-    <span>{{ role === 'admin' ? 'Analytics' : 'Dashboard' }}</span>
-  </div>
-</a>
+  <div class="icon-container icon-container_2">
 
-  <!-- <a routerLink="/analytics" routerLinkActive="active" class="icon-wrapper" *ngIf="['super_admin', 'admin', 'sub_admin'].includes(role)&& isNotEstimator() && isNotMHC()"  >
-    <div class="icon-content" *ngIf="['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator()" >
-    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
-      <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6.625 2.75a3.875 3.875 0 1 0 0 7.75a3.875 3.875 0 0 0 0-7.75m10.75 0a3.875 3.875 0 1 0 0 7.75a3.875 3.875 0 0 0 0-7.75M6.625 13.5a3.875 3.875 0 1 0 0 7.75a3.875 3.875 0 0 0 0-7.75m10.75 0a3.875 3.875 0 1 0 0 7.75a3.875 3.875 0 0 0 0-7.75"/>
-    </svg>
-    <span>Analytics</span>
-  </div>
-  </a> -->
-  <a [routerLink]="role !== 'doctor'  ? '/appointments' : null" routerLinkActive="active" class="icon-wrapper" *ngIf="['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator()  && isNotMHC() && isNotIpBillingManager() && isNotRadiology() && !isMukund() && isNotLab() && isNotNursing() && isNotOT()  && isNotTherapist() && isNotTVController()" >
-    <div class="icon-content" *ngIf="['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotIpBillingManager() && isNotRadiology() &&!isMukund() && isNotLab() && isNotNursing() && isNotOT()  && isNotTherapist() && isNotTVController()" >
-    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24"><g fill="currentColor" fill-rule="evenodd"><path fill="currentColor" d="m12.594 23.258l-.012.002l-.071.035l-.02.004l-.014-.004l-.071-.036q-.016-.004-.024.006l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.016-.018m.264-.113l-.014.002l-.184.093l-.01.01l-.003.011l.018.43l.005.012l.008.008l.201.092q.019.005.029-.008l.004-.014l-.034-.614q-.005-.019-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.003-.011l.018-.43l-.003-.012l-.01-.01z"/><path fill="currentColor" d="M16 3a1 1 0 0 1 1 1v1h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2V4a1 1 0 0 1 2 0v1h6V4a1 1 0 0 1 1-1M8 7H5v2h14V7h-3zm-3 4v8h14v-8zm2 2a1 1 0 0 1 1-1h.01a1 1 0 1 1 0 2H8a1 1 0 0 1-1-1m1 2a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2zm3-2a1 1 0 0 1 1-1h.01a1 1 0 1 1 0 2H12a1 1 0 0 1-1-1m1 2a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2zm3-2a1 1 0 0 1 1-1h.01a1 1 0 1 1 0 2H16a1 1 0 0 1-1-1m1 2a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2z"/></g></svg>
-    <span>Appointments</span>
-    </div>
-  </a>
-  <a [routerLink]="role !== 'doctor'  ? '/nursing' : null" routerLinkActive="active" class="icon-wrapper" *ngIf="subAdminType === 'Nursing'" >
-    <div class="icon-content" *ngIf="subAdminType === 'Nursing'">
-    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24"><g fill="currentColor" fill-rule="evenodd"><path fill="currentColor" d="m12.594 23.258l-.012.002l-.071.035l-.02.004l-.014-.004l-.071-.036q-.016-.004-.024.006l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.016-.018m.264-.113l-.014.002l-.184.093l-.01.01l-.003.011l.018.43l.005.012l.008.008l.201.092q.019.005.029-.008l.004-.014l-.034-.614q-.005-.019-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.003-.011l.018-.43l-.003-.012l-.01-.01z"/><path fill="currentColor" d="M16 3a1 1 0 0 1 1 1v1h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2V4a1 1 0 0 1 2 0v1h6V4a1 1 0 0 1 1-1M8 7H5v2h14V7h-3zm-3 4v8h14v-8zm2 2a1 1 0 0 1 1-1h.01a1 1 0 1 1 0 2H8a1 1 0 0 1-1-1m1 2a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2zm3-2a1 1 0 0 1 1-1h.01a1 1 0 1 1 0 2H12a1 1 0 0 1-1-1m1 2a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2zm3-2a1 1 0 0 1 1-1h.01a1 1 0 1 1 0 2H16a1 1 0 0 1-1-1m1 2a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2z"/></g></svg>
-    <span>Appointments</span>
-    </div>
-  </a>
-  <a [routerLink]="role !== 'doctor' ? '/doctor': null" routerLinkActive="active" class="icon-wrapper" *ngIf="['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator()  && isNotMHC() && isNotIpBillingManager() && isNotRadiology() && !isMukund() && isNotLab() && isNotNursing() && isNotOT()  && isNotTherapist() && isNotTVController()" >
-    <div class="icon-content" *ngIf="['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotIpBillingManager() && isNotRadiology()  && !isMukund() && isNotLab() && isNotNursing() && isNotOT()  && isNotTherapist() && isNotTVController()" >
-    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 48 48"><g fill="currentColor"><path fill-rule="evenodd" d="M33.834 13.81c0 3.461-.86 7.975-2.183 7.29a8.001 8.001 0 0 1-15.611-1.54c-1.313-2.297-3.035-6.9 1.392-10.488c.08-.026.128-.242.2-.56c.274-1.203.881-3.877 4.71-3.366c2.953.393 11.492 1.918 11.492 8.665m-3.806 2.182s-.452 1.322-.028 2.795a6 6 0 0 1-11.996.197c.145-.55.145-1.481.144-2.516c-.001-1.867-.003-4.07.852-4.968c5.989 3.989 11.028 4.492 11.028 4.492" clip-rule="evenodd"/><path d="M13 36c0-1.082.573-2.03 1.433-2.558a12 12 0 0 1-.092-.375a22 22 0 0 1-.355-2.068a20 20 0 0 1-.155-2.006C9.61 30.65 6 33.538 6 36.57V42h36v-5.43c0-2.904-3.31-5.675-7.298-7.36v.028c.018.61-.016 1.31-.082 1.983c-.06.624-.149 1.246-.256 1.779H35a1 1 0 0 1 .894.553l1 2c.07.139.106.292.106.447v2a1 1 0 0 1-1 1h-2v-2h1v-.764L34.382 35h-2.764L31 36.236V37h1v2h-2a1 1 0 0 1-1-1v-2c0-.155.036-.308.106-.447l1-2A1 1 0 0 1 31 33h1.315q.033-.129.066-.286c.1-.471.189-1.068.249-1.685c.06-.618.088-1.231.073-1.735a5 5 0 0 0-.049-.624c-.022-.142-.044-.207-.048-.221q-.002-.005 0-.002l.003-.001A22 22 0 0 0 31 28.013c-.503-.115-1.023.577-1.25 1.01H18l-.086-.168c-.212-.422-.473-.943-.914-.842q-.578.131-1.155.297a7 7 0 0 0-.016.527c.004.553.057 1.23.142 1.914c.085.682.2 1.346.32 1.87q.052.227.1.404A3 3 0 1 1 13 36"/><path d="M17 36c0 .574-.462 1.015-1 1.015s-1-.44-1-1.015c0-.574.462-1.015 1-1.015s1 .44 1 1.015"/></g></svg>
-    <span>Doctors</span>
-    </div>
-</a>
-<a routerLink="/health-checkup" routerLinkActive="active" class="icon-wrapper" *ngIf="(isMHC() || (['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotIpBillingManager() && isNotRadiology() && isNotLab() && isNotNursing()&& isNotOT()  && isNotTherapist())) && isNotTVController()" >
-  <div class="icon-content" *ngIf="(isMHC() || (['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotIpBillingManager() && isNotRadiology()  && !isMukund() && isNotLab() && isNotNursing()&& isNotOT()  && isNotTherapist())) && isNotTVController()" >
-  <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24"><g fill="currentColor"></g>
-    <path fill="currentColor" fill-rule="evenodd" d="M7 18h2v-2h2v-2H9v-2H7v2H5v2h2zm6-3.5h6V13h-6zm0 3h4V16h-4zM4 22q-.825 0-1.412-.587T2 20V9q0-.825.588-1.412T4 7h5V4q0-.825.588-1.412T11 2h2q.825 0 1.413.588T15 4v3h5q.825 0 1.413.588T22 9v11q0 .825-.587 1.413T20 22zm0-2h16V9h-5q0 .825-.587 1.413T13 11h-2q-.825 0-1.412-.587T9 9H4zm7-11h2V4h-2zm1 5.5" />
-  </svg>
-  <span>MHC</span>
-  </div>
-</a>
-<a routerLink="/services" routerLinkActive="active" class="icon-wrapper" *ngIf="(['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotIpBillingManager() && isNotRadiology() && isNotMHC()  && !isMukund() && isNotLab() && isNotNursing()&& isNotOT()  && isNotTherapist() && isNotTVController())" >
-  <div class="icon-content" *ngIf="(['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotIpBillingManager() && isNotRadiology() && isNotMHC()  && !isMukund() && isNotLab() && isNotNursing()&& isNotOT()  && isNotTherapist() && isNotTVController())" >
-    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24"><path fill="currentColor" d="M19 5v14H5V5zm0-2H5c-1.11 0-2 .89-2 2v14c0 1.11.89 2 2 2h14c1.11 0 2-.89 2-2V5c0-1.11-.89-2-2-2m-7 3c.55 0 1 .45 1 1v1h3.17c.18.31.33.65.49 1H13v1h4c.1.33.17.67.19 1H13v1h4.2c-.04.35-.05.69-.1 1H13v1h4s-.06 3-1.5 3c-1.35 0-1-1.53-2.5-2v2c0 .55-.45 1-1 1s-1-.45-1-1v-2c-1.5.47-1.15 2-2.5 2C7.06 17 7 14 7 14h4v-1H6.9c-.05-.31-.06-.65-.1-1H11v-1H6.81c.02-.33.1-.67.19-1h4V9H7.34c.16-.35.31-.69.49-1H11V7c0-.55.45-1 1-1"/></svg>
-  <span>Services</span>
-  </div>
-</a>
-<a routerLink="/therapy" routerLinkActive="active" class="icon-wrapper" *ngIf="(['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotIpBillingManager() && isNotRadiology() && isNotMHC()  && !isMukund() && isNotLab() && isNotNursing()&& isNotOT()  && isNotTherapist() && isNotTVController())" >
-  <div class="icon-content" *ngIf="(['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotIpBillingManager() && isNotRadiology() && isNotMHC()  && !isMukund() && isNotLab() && isNotNursing()&& isNotOT()  && isNotTherapist() && isNotTVController())" >
-    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="38" viewBox="0 0 64 56"><path fill="currentColor" d="M30.827 19.223a5.887 5.887 0 0 0 5.892-5.881a5.884 5.884 0 0 0-5.892-5.879c-3.255 0-5.893 2.632-5.893 5.879a5.89 5.89 0 0 0 5.893 5.881M48.78 58.98H1.806c-1.323 0-1.187 1.04-1.187 1.04v1.731S.499 64 2.809 64h58.817c2.325 0 2.199-2.197 2.199-2.197v-4.794s-.197-1.516-1.98-1.516h-5.732c-1.965 0-3.589 3.486-7.332 3.486zm4.568-10.622c0 2.922 2.378 5.295 5.308 5.295s5.313-2.374 5.313-5.295c0-2.933-2.384-5.297-5.313-5.297a5.3 5.3 0 0 0-5.308 5.297M35.997 38.255a3.77 3.77 0 0 1-2.269 2.36l-4.727 1.753l1.744 1.731h7.98l-.005-12.215l-2.671 6.297c-.013.03-.037.047-.053.074z"/><path fill="currentColor" d="M47.458 47.001h-16.5l-3.978-3.884l-2.769 1.02c-2.054.735-4.555-.387-5.326-2.428c-.454-1.267-.391-2.682.367-3.713c-.339-.015-10.007 0-10.007 0a2.906 2.906 0 0 0-2.915 2.898c0 1.607 1.307 2.863 2.915 2.863h9.843l3.903 5.909L2.84 51.285a2.909 2.909 0 0 0 .651 5.745l22.609.003a4.13 4.13 0 0 1-.629-2.177a4.176 4.176 0 0 1 4.173-4.173h9.046l7.331-1.531l.407 1.947l-7.533 1.573h-9.252a2.18 2.18 0 0 0-.044 4.361l17.898.002a5.014 5.014 0 0 0 4.992-5.013A5.023 5.023 0 0 0 47.458 47z"/><path fill="currentColor" d="M23.862 42.315a2.31 2.31 0 0 1-3.038-1.185a2.303 2.303 0 0 1 1.187-3.04l8.401-3.154l2.596-6.192l-1.692-.625l-2.207 5.302l-6.395 2.355v-6.482l-6.251 6.827l-7.074-.007s12.379-13.57 12.766-13.976c.513-.509 1.686-1.353 3.898-1.353h7.949c4.516 0 5.385 4.502 4.461 6.832l-4.157 10.082a2.34 2.34 0 0 1-1.338 1.261l-9.106 3.353z"/></svg>
-    <span>Therapies</span>
-  </div>
-</a>
-<a [routerLink]="['super_admin', 'admin'].includes(role) ? '/report' : null" routerLinkActive="active" class="icon-wrapper" *ngIf="['super_admin', 'admin'].includes(role) && isNotIpBillingManager() && isNotIpBillingManager() && isNotRadiology() && !isMukund() && isNotLab()&& isNotOT()  && isNotTherapist()" >
-  <div *ngIf="['super_admin', 'admin'].includes(role)  && !isMukund()" class="icon-content">
-  <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24"><path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2M9 17H7v-7h2zm4 0h-2V7h2zm4 0h-2v-4h2z"/></svg>
-  <span>Report</span> 
-  </div> 
-</a>
-<a [routerLink]="['Manager','Management','Senior Manager','IT Manager'].includes(adminType) || role === 'super_admin' ? '/estimation': null" routerLinkActive="active" class="icon-wrapper" *ngIf="['Manager','Management','Senior Manager','IT Manager'].includes(adminType) ||  role === 'super_admin'"  >
-  <div class="icon-content" *ngIf="(['Manager','Management','Senior Manager','IT Manager' ].includes(adminType) ||  role === 'super_admin')  && !isMukund()">
-    <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 24 24" class="icon">
-      <rect width="24" height="24" fill="none" />
-      <g fill="#000" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" color="#000">
-        <path d="M17.5 11V7.3c0-2.263 0-3.394-.775-4.097c-.776-.703-2.023-.703-4.52-.703h-4.41c-2.497 0-3.744 0-4.52.703S2.5 5.037 2.5 7.3v6.4c0 2.263 0 3.394.775 4.097c.776.703 2.023.703 4.52.703H11m-5.5-12h9m-9 4h1m3 0h1m3 0h1m-9 4h1m3 0h1" />
-        <circle cx="17.5" cy="17.5" r="4" />
-        <path d="m18.5 18l-1-.5V16" />
-      </g>
-    </svg>
-  <span>Estimation</span>
-  </div>
-</a>
-<a [routerLink]="isEstimator() ? '/estimation': null" routerLinkActive="active" class="icon-wrapper" *ngIf="isEstimator()" >
-  <div class="icon-content" *ngIf="isEstimator()">
-    <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 24 24" class="icon">
-      <rect width="24" height="24" fill="none" />
-      <g fill="#000" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" color="#000">
-        <path d="M17.5 11V7.3c0-2.263 0-3.394-.775-4.097c-.776-.703-2.023-.703-4.52-.703h-4.41c-2.497 0-3.744 0-4.52.703S2.5 5.037 2.5 7.3v6.4c0 2.263 0 3.394.775 4.097c.776.703 2.023.703 4.52.703H11m-5.5-12h9m-9 4h1m3 0h1m3 0h1m-9 4h1m3 0h1" />
-        <circle cx="17.5" cy="17.5" r="4" />
-        <path d="m18.5 18l-1-.5V16" />
-      </g>
-    </svg>
-  <span>Estimation</span>
-  </div>
-</a>
-<a [routerLink]="isIpBillingManager() ? '/estimation': null" routerLinkActive="active" class="icon-wrapper" *ngIf="isIpBillingManager()" >
-  <div class="icon-content" *ngIf="isIpBillingManager()">
-    <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 24 24" class="icon">
-      <rect width="24" height="24" fill="none" />
-      <g fill="#000" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" color="#000">
-        <path d="M17.5 11V7.3c0-2.263 0-3.394-.775-4.097c-.776-.703-2.023-.703-4.52-.703h-4.41c-2.497 0-3.744 0-4.52.703S2.5 5.037 2.5 7.3v6.4c0 2.263 0 3.394.775 4.097c.776.703 2.023.703 4.52.703H11m-5.5-12h9m-9 4h1m3 0h1m3 0h1m-9 4h1m3 0h1" />
-        <circle cx="17.5" cy="17.5" r="4" />
-        <path d="m18.5 18l-1-.5V16" />
-      </g>
-    </svg>
-  <span>Estimation</span>
-  </div>
-</a>
-<a [routerLink]="isRadiology() ? '/radiology-services': null" routerLinkActive="active" class="icon-wrapper" *ngIf="isRadiology()" >
-  <div class="icon-content" *ngIf="isRadiology()">
-    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24"><path fill="currentColor" d="M19 5v14H5V5zm0-2H5c-1.11 0-2 .89-2 2v14c0 1.11.89 2 2 2h14c1.11 0 2-.89 2-2V5c0-1.11-.89-2-2-2m-7 3c.55 0 1 .45 1 1v1h3.17c.18.31.33.65.49 1H13v1h4c.1.33.17.67.19 1H13v1h4.2c-.04.35-.05.69-.1 1H13v1h4s-.06 3-1.5 3c-1.35 0-1-1.53-2.5-2v2c0 .55-.45 1-1 1s-1-.45-1-1v-2c-1.5.47-1.15 2-2.5 2C7.06 17 7 14 7 14h4v-1H6.9c-.05-.31-.06-.65-.1-1H11v-1H6.81c.02-.33.1-.67.19-1h4V9H7.34c.16-.35.31-.69.49-1H11V7c0-.55.45-1 1-1"/></svg>
-  <span>Services</span>
-  </div>
-</a>
-<a [routerLink]="isLab() ? '/lab': null" routerLinkActive="active" class="icon-wrapper" *ngIf="isLab()" >
-  <div class="icon-content" *ngIf="isLab()">
-    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 64 64">
-      <path fill="#000" d="M37.852 51.571L22.388 42.64l1.532-2.651l15.461 8.931z" stroke-width="1.5" stroke="#000" />
-      <path fill="#000" d="M53.631 56.656c4.466-4.218 7.296-10.144 7.296-16.758c0-8.149-4.28-15.499-10.935-19.627l7.456-12.906l-1.171-.675l1.839-3.198L53.295.709l-1.843 3.193l-1.233-.712l-18.33 31.752l1.601.924l-2.273 3.932l4.028 2.326l2.274-3.934l1.599.924l7.708-13.349a16.77 16.77 0 0 1 7.759 14.134c0 9.24-7.522 16.758-16.763 16.758H24.316v6.345h38.018v-6.345h-8.701zM19.883 7.865V2.828h.62l-.009-1.208h-5.649l.009 1.208h.666v5.037h-4.215V2.828h.618l-.007-1.208H6.262l.011 1.208h.666v5.037H.75v25.231h25.269V7.865h-6.134zm3.996 23.095H2.887V10.001h4.051v16.12c0 1.22.997 2.211 2.2 2.211c1.205-.005 2.166-.993 2.166-2.211v-16.12h4.215v16.12c0 1.22.998 2.211 2.201 2.211c1.205-.005 2.166-.993 2.164-2.211v-16.12h3.995z" stroke-width="1.5" stroke="#000" />
-    </svg>
-  <span>Lab</span>
-  </div>
-</a>
-<a [routerLink]="['Manager','Management','Senior Manager'].includes(adminType) || role === 'super_admin' || isTVController() ? '/tv-control' : null" routerLinkActive="active" class="icon-wrapper" *ngIf="['Manager','Management','Senior Manager'].includes(adminType) || role === 'super_admin' || isTVController()" >
-  <div *ngIf="(['super_admin', 'admin'].includes(role)  && !isMukund()) || isTVController()" class="icon-content">
-    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
-      <path fill="currentColor" fill-rule="evenodd" d="M3.2 5.2v12.6h17.6V5.2zM2 5a1 1 0 0 1 1-1h18a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1zm6 15.9c0-.331.266-.6.601-.6H15.4c.332 0 .601.278.601.6v.6H8zm3.665-12.004H9.81V15H8.716V8.896H6.558v-.942h5.958l1.919 5.816h.029l1.924-5.816h1.167L15.04 15h-1.196z" />
-    </svg>
-  <span>TV Control</span> 
-  </div> 
-</a>
-<a [routerLink]="role == 'doctor' ? '/doctor-appointments': null" routerLinkActive="active" class="icon-wrapper" *ngIf="['doctor'].includes(role)">
-  <div class="icon-content " *ngIf="['doctor'].includes(role)">
-    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 48 48"><g fill="currentColor"><path fill-rule="evenodd" d="M33.834 13.81c0 3.461-.86 7.975-2.183 7.29a8.001 8.001 0 0 1-15.611-1.54c-1.313-2.297-3.035-6.9 1.392-10.488c.08-.026.128-.242.2-.56c.274-1.203.881-3.877 4.71-3.366c2.953.393 11.492 1.918 11.492 8.665m-3.806 2.182s-.452 1.322-.028 2.795a6 6 0 0 1-11.996.197c.145-.55.145-1.481.144-2.516c-.001-1.867-.003-4.07.852-4.968c5.989 3.989 11.028 4.492 11.028 4.492" clip-rule="evenodd"/><path d="M13 36c0-1.082.573-2.03 1.433-2.558a12 12 0 0 1-.092-.375a22 22 0 0 1-.355-2.068a20 20 0 0 1-.155-2.006C9.61 30.65 6 33.538 6 36.57V42h36v-5.43c0-2.904-3.31-5.675-7.298-7.36v.028c.018.61-.016 1.31-.082 1.983c-.06.624-.149 1.246-.256 1.779H35a1 1 0 0 1 .894.553l1 2c.07.139.106.292.106.447v2a1 1 0 0 1-1 1h-2v-2h1v-.764L34.382 35h-2.764L31 36.236V37h1v2h-2a1 1 0 0 1-1-1v-2c0-.155.036-.308.106-.447l1-2A1 1 0 0 1 31 33h1.315q.033-.129.066-.286c.1-.471.189-1.068.249-1.685c.06-.618.088-1.231.073-1.735a5 5 0 0 0-.049-.624c-.022-.142-.044-.207-.048-.221q-.002-.005 0-.002l.003-.001A22 22 0 0 0 31 28.013c-.503-.115-1.023.577-1.25 1.01H18l-.086-.168c-.212-.422-.473-.943-.914-.842q-.578.131-1.155.297a7 7 0 0 0-.016.527c.004.553.057 1.23.142 1.914c.085.682.2 1.346.32 1.87q.052.227.1.404A3 3 0 1 1 13 36"/><path d="M17 36c0 .574-.462 1.015-1 1.015s-1-.44-1-1.015c0-.574.462-1.015 1-1.015s1 .44 1 1.015"/></g></svg>
-<span>Doctor Appts</span>
-</div>
-</a>
-<a routerLink="/therapy" routerLinkActive="active" class="icon-wrapper" *ngIf="(['doctor'].includes(role) && isAyurveda())" >
-  <div class="icon-content" *ngIf="([ 'doctor'].includes(role) && isAyurveda())" >
-    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="38" viewBox="0 0 64 56"><path fill="currentColor" d="M30.827 19.223a5.887 5.887 0 0 0 5.892-5.881a5.884 5.884 0 0 0-5.892-5.879c-3.255 0-5.893 2.632-5.893 5.879a5.89 5.89 0 0 0 5.893 5.881M48.78 58.98H1.806c-1.323 0-1.187 1.04-1.187 1.04v1.731S.499 64 2.809 64h58.817c2.325 0 2.199-2.197 2.199-2.197v-4.794s-.197-1.516-1.98-1.516h-5.732c-1.965 0-3.589 3.486-7.332 3.486zm4.568-10.622c0 2.922 2.378 5.295 5.308 5.295s5.313-2.374 5.313-5.295c0-2.933-2.384-5.297-5.313-5.297a5.3 5.3 0 0 0-5.308 5.297M35.997 38.255a3.77 3.77 0 0 1-2.269 2.36l-4.727 1.753l1.744 1.731h7.98l-.005-12.215l-2.671 6.297c-.013.03-.037.047-.053.074z"/><path fill="currentColor" d="M47.458 47.001h-16.5l-3.978-3.884l-2.769 1.02c-2.054.735-4.555-.387-5.326-2.428c-.454-1.267-.391-2.682.367-3.713c-.339-.015-10.007 0-10.007 0a2.906 2.906 0 0 0-2.915 2.898c0 1.607 1.307 2.863 2.915 2.863h9.843l3.903 5.909L2.84 51.285a2.909 2.909 0 0 0 .651 5.745l22.609.003a4.13 4.13 0 0 1-.629-2.177a4.176 4.176 0 0 1 4.173-4.173h9.046l7.331-1.531l.407 1.947l-7.533 1.573h-9.252a2.18 2.18 0 0 0-.044 4.361l17.898.002a5.014 5.014 0 0 0 4.992-5.013A5.023 5.023 0 0 0 47.458 47z"/><path fill="currentColor" d="M23.862 42.315a2.31 2.31 0 0 1-3.038-1.185a2.303 2.303 0 0 1 1.187-3.04l8.401-3.154l2.596-6.192l-1.692-.625l-2.207 5.302l-6.395 2.355v-6.482l-6.251 6.827l-7.074-.007s12.379-13.57 12.766-13.976c.513-.509 1.686-1.353 3.898-1.353h7.949c4.516 0 5.385 4.502 4.461 6.832l-4.157 10.082a2.34 2.34 0 0 1-1.338 1.261l-9.106 3.353z"/></svg>
-    <span>Therapies</span>
-  </div>
-</a>
-<!-- <a [routerLink]="role == 'doctor' ? '/er': null" routerLinkActive="active" class="icon-wrapper" *ngIf="['doctor'].includes(role)">
-  <div class="icon-content " *ngIf="['doctor'].includes(role)">
-    <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" class="icon" viewBox="0 0 24 24"><path fill="currentColor" d="M5 20v-2h1.6L9 10h6l2.4 8H19v2zm3.7-2h6.6l-1.8-6h-3zM11 8V3h2v5zm5.95 2.475L15.525 9.05l3.55-3.525l1.4 1.4zM18 15v-2h5v2zM7.05 10.475l-3.525-3.55l1.4-1.4l3.55 3.525zM1 15v-2h5v2zm11 3"/></svg>
-<span>Emergency</span>
-</div>
-</a> -->
+    <!-- ═══════════ Dashboard / Analytics ═══════════ -->
+    <a [routerLink]="role === 'admin' ? '/analytics' : '/dashboard'"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotMHC() && isNotIpBillingManager() && isNotRadiology() && isNotLab() && isNotNursing() && isNotOT() && isNotTherapist() && isNotTVController()">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M6.625 2.75a3.875 3.875 0 1 0 0 7.75a3.875 3.875 0 0 0 0-7.75m10.75 0a3.875 3.875 0 1 0 0 7.75a3.875 3.875 0 0 0 0-7.75M6.625 13.5a3.875 3.875 0 1 0 0 7.75a3.875 3.875 0 0 0 0-7.75m10.75 0a3.875 3.875 0 1 0 0 7.75a3.875 3.875 0 0 0 0-7.75"/>
+        </svg>
+        <span>{{ role === 'admin' ? 'Analytics' : 'Dashboard' }}</span>
+      </div>
+    </a>
 
-<a [routerLink]="(subAdminType === 'OT Coordinator' || role === 'super_admin') ? '/surgery': null" routerLinkActive="active" class="icon-wrapper" *ngIf="['OT Coordinator'].includes(subAdminType) || role === 'super_admin'">
-  <div class="icon-content " *ngIf="['OT Coordinator'].includes(subAdminType) || role === 'super_admin'">
-    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 48 48">
-      <g fill="currentColor">
-        <path fill-rule="evenodd" d="M40 8H8v32h32zM8 6a2 2 0 0 0-2 2v32a2 2 0 0 0 2 2h32a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2z" clip-rule="evenodd" />
-        <path fill-rule="evenodd" d="M16.828 28h4.724a4 4 0 0 0 2.798-1.142L28 23.284v-.456A4 4 0 0 1 29.172 20l1.689-1.69l-2.606-1.736zM12 30l16-16l6 4l-3.414 3.414A2 2 0 0 0 30 22.828v.456a2 2 0 0 1-.6 1.43l-3.65 3.573A6 6 0 0 1 21.551 30z" clip-rule="evenodd" />
-        <path fill-rule="evenodd" d="M26.707 21.293a1 1 0 0 1 0 1.414l-3 3a1 1 0 0 1-1.414-1.414l3-3a1 1 0 0 1 1.414 0m10-13.185l-7.6 7.6l-1.414-1.415l7.6-7.6zm1.5 4.285a1 1 0 0 1 0 1.414l-5.5 5.5l-1.414-1.415l5.5-5.5a1 1 0 0 1 1.414 0" clip-rule="evenodd" />
-        <path d="M30.15 35.234a1 1 0 1 0-1.055 1.7a1 1 0 0 0 1.056-1.7m-7.001-1a1 1 0 1 0-1.055 1.7a1 1 0 0 0 1.056-1.7m-9.001 1a1 1 0 1 0-1.055 1.7a1 1 0 0 0 1.055-1.7" />
-        <path d="M10 37h28v2H10zm0-5h28v2H10z" />
-        <path d="m26.556 32.243l7.53-7.531l1.415 1.414l-7.531 7.531z" />
-      </g>
-    </svg>
-<span>Surgeries</span>
-</div>
-</a>
-<a [routerLink]="subAdminType == 'Therapist' ? '/therapy-list': null" routerLinkActive="active" class="icon-wrapper" *ngIf="['Therapist'].includes(subAdminType)">
-  <div class="icon-content " *ngIf="['Therapist'].includes(subAdminType)">
-    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="38" viewBox="0 0 64 56"><path fill="currentColor" d="M30.827 19.223a5.887 5.887 0 0 0 5.892-5.881a5.884 5.884 0 0 0-5.892-5.879c-3.255 0-5.893 2.632-5.893 5.879a5.89 5.89 0 0 0 5.893 5.881M48.78 58.98H1.806c-1.323 0-1.187 1.04-1.187 1.04v1.731S.499 64 2.809 64h58.817c2.325 0 2.199-2.197 2.199-2.197v-4.794s-.197-1.516-1.98-1.516h-5.732c-1.965 0-3.589 3.486-7.332 3.486zm4.568-10.622c0 2.922 2.378 5.295 5.308 5.295s5.313-2.374 5.313-5.295c0-2.933-2.384-5.297-5.313-5.297a5.3 5.3 0 0 0-5.308 5.297M35.997 38.255a3.77 3.77 0 0 1-2.269 2.36l-4.727 1.753l1.744 1.731h7.98l-.005-12.215l-2.671 6.297c-.013.03-.037.047-.053.074z"/><path fill="currentColor" d="M47.458 47.001h-16.5l-3.978-3.884l-2.769 1.02c-2.054.735-4.555-.387-5.326-2.428c-.454-1.267-.391-2.682.367-3.713c-.339-.015-10.007 0-10.007 0a2.906 2.906 0 0 0-2.915 2.898c0 1.607 1.307 2.863 2.915 2.863h9.843l3.903 5.909L2.84 51.285a2.909 2.909 0 0 0 .651 5.745l22.609.003a4.13 4.13 0 0 1-.629-2.177a4.176 4.176 0 0 1 4.173-4.173h9.046l7.331-1.531l.407 1.947l-7.533 1.573h-9.252a2.18 2.18 0 0 0-.044 4.361l17.898.002a5.014 5.014 0 0 0 4.992-5.013A5.023 5.023 0 0 0 47.458 47z"/><path fill="currentColor" d="M23.862 42.315a2.31 2.31 0 0 1-3.038-1.185a2.303 2.303 0 0 1 1.187-3.04l8.401-3.154l2.596-6.192l-1.692-.625l-2.207 5.302l-6.395 2.355v-6.482l-6.251 6.827l-7.074-.007s12.379-13.57 12.766-13.976c.513-.509 1.686-1.353 3.898-1.353h7.949c4.516 0 5.385 4.502 4.461 6.832l-4.157 10.082a2.34 2.34 0 0 1-1.338 1.261l-9.106 3.353z"/></svg>
-<span>Therapies</span>
-</div>
-</a>
+    <!-- Module Utilization — per-module active vs inactive users (management analytics).
+         Admin-only (route is guarded by roleGuard data.roles = ['admin']; super_admin
+         always passes), mirroring the other admin analytics links. -->
+    <a [routerLink]="['super_admin', 'admin'].includes(role) ? '/module-utilization' : null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="['super_admin', 'admin'].includes(role) && isNotIpBillingManager()">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z"/>
+        </svg>
+        <span>Module Utilization</span>
+      </div>
+    </a>
 
-<!-- HMIS Modules -->
+    <!-- Notification Recipients — WhatsApp/SMS numbers per group (super_admin only) -->
+    <a [routerLink]="role === 'super_admin' ? '/settings/notification-recipients' : null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="role === 'super_admin'">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2m0 4l-8 5l-8-5V6l8 5l8-5z"/>
+        </svg>
+        <span>Notification Recipients</span>
+      </div>
+    </a>
 
-<!-- Emergency Module -->
-<a [routerLink]="(role === 'doctor' || role === 'super_admin') ? '/emergency': null" routerLinkActive="active" class="icon-wrapper" *ngIf="(role === 'doctor' || role === 'super_admin')">
-  <div class="icon-content" *ngIf="(role === 'doctor' || role === 'super_admin')">
-    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
-      <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m1 15h-2v-2h2v2m0-4h-2V7h2v6"/>
-    </svg>
-    <span>Emergency</span>
+    <!-- Blocked IPs — rate-limit unblock (super_admin only) -->
+    <a [routerLink]="role === 'super_admin' ? '/security/blocked-ips' : null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="role === 'super_admin'">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2m0 2a7.9 7.9 0 0 1 4.9 1.69L5.69 16.9A8 8 0 0 1 12 4m0 16a7.9 7.9 0 0 1-4.9-1.69L18.31 7.1A8 8 0 0 1 12 20"/>
+        </svg>
+        <span>Blocked IPs</span>
+      </div>
+    </a>
+
+    <!-- ═══════════ OPD / front-desk ═══════════ -->
+    <div class="sidebar-section-label" *ngIf="showOpdSection">OPD / Front Desk</div>
+    <a [routerLink]="role !== 'doctor' ? '/appointments' : null" routerLinkActive="active"
+       class="icon-wrapper sidebar-section-start"
+       *ngIf="['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotMHC() && isNotIpBillingManager() && isNotRadiology() && !isMukund() && isNotLab() && isNotNursing() && isNotOT() && isNotTherapist() && isNotTVController() && isNotDischargeCoordinator() && isNotErNurse()">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24"><g fill="currentColor" fill-rule="evenodd"><path fill="currentColor" d="m12.594 23.258l-.012.002l-.071.035l-.02.004l-.014-.004l-.071-.036q-.016-.004-.024.006l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.016-.018m.264-.113l-.014.002l-.184.093l-.01.01l-.003.011l.018.43l.005.012l.008.008l.201.092q.019.005.029-.008l.004-.014l-.034-.614q-.005-.019-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.003-.011l.018-.43l-.003-.012l-.01-.01z"/><path fill="currentColor" d="M16 3a1 1 0 0 1 1 1v1h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2V4a1 1 0 0 1 2 0v1h6V4a1 1 0 0 1 1-1M8 7H5v2h14V7h-3zm-3 4v8h14v-8zm2 2a1 1 0 0 1 1-1h.01a1 1 0 1 1 0 2H8a1 1 0 0 1-1-1m1 2a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2zm3-2a1 1 0 0 1 1-1h.01a1 1 0 1 1 0 2H12a1 1 0 0 1-1-1m1 2a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2zm3-2a1 1 0 0 1 1-1h.01a1 1 0 1 1 0 2H16a1 1 0 0 1-1-1m1 2a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2z"/></g></svg>
+        <span>Appointments</span>
+      </div>
+    </a>
+
+    <!-- Appointments for Nursing sub-admin — routes to the nurse's own block.
+         blockId is parsed from employeeId at login and persisted to localStorage;
+         falls back to '0' if missing so the link never goes nowhere. -->
+    <a [routerLink]="'/nursing/' + blockId" routerLinkActive="active"
+       class="icon-wrapper sidebar-section-start"
+       *ngIf="isOpdNurse">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24"><g fill="currentColor" fill-rule="evenodd"><path fill="currentColor" d="m12.594 23.258l-.012.002l-.071.035l-.02.004l-.014-.004l-.071-.036q-.016-.004-.024.006l-.004.01l-.017.428l.005.02l.01.013l.104.074l.015.004l.012-.004l.104-.074l.012-.016l.004-.017l-.017-.427q-.004-.016-.016-.018m.264-.113l-.014.002l-.184.093l-.01.01l-.003.011l.018.43l.005.012l.008.008l.201.092q.019.005.029-.008l.004-.014l-.034-.614q-.005-.019-.02-.022m-.715.002a.02.02 0 0 0-.027.006l-.006.014l-.034.614q.001.018.017.024l.015-.002l.201-.093l.01-.008l.003-.011l.018-.43l-.003-.012l-.01-.01z"/><path fill="currentColor" d="M16 3a1 1 0 0 1 1 1v1h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2V4a1 1 0 0 1 2 0v1h6V4a1 1 0 0 1 1-1M8 7H5v2h14V7h-3zm-3 4v8h14v-8zm2 2a1 1 0 0 1 1-1h.01a1 1 0 1 1 0 2H8a1 1 0 0 1-1-1m1 2a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2zm3-2a1 1 0 0 1 1-1h.01a1 1 0 1 1 0 2H12a1 1 0 0 1-1-1m1 2a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2zm3-2a1 1 0 0 1 1-1h.01a1 1 0 1 1 0 2H16a1 1 0 0 1-1-1m1 2a1 1 0 1 0 0 2h.01a1 1 0 1 0 0-2z"/></g></svg>
+        <span>Appointments</span>
+      </div>
+    </a>
+
+    <!-- Doctor's own appointment list -->
+    <a [routerLink]="role == 'doctor' ? '/doctor-appointments': null" routerLinkActive="active"
+       class="icon-wrapper sidebar-section-start"
+       *ngIf="['doctor'].includes(role)">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 48 48"><g fill="currentColor"><path fill-rule="evenodd" d="M33.834 13.81c0 3.461-.86 7.975-2.183 7.29a8.001 8.001 0 0 1-15.611-1.54c-1.313-2.297-3.035-6.9 1.392-10.488c.08-.026.128-.242.2-.56c.274-1.203.881-3.877 4.71-3.366c2.953.393 11.492 1.918 11.492 8.665m-3.806 2.182s-.452 1.322-.028 2.795a6 6 0 0 1-11.996.197c.145-.55.145-1.481.144-2.516c-.001-1.867-.003-4.07.852-4.968c5.989 3.989 11.028 4.492 11.028 4.492" clip-rule="evenodd"/><path d="M13 36c0-1.082.573-2.03 1.433-2.558a12 12 0 0 1-.092-.375a22 22 0 0 1-.355-2.068a20 20 0 0 1-.155-2.006C9.61 30.65 6 33.538 6 36.57V42h36v-5.43c0-2.904-3.31-5.675-7.298-7.36v.028c.018.61-.016 1.31-.082 1.983c-.06.624-.149 1.246-.256 1.779H35a1 1 0 0 1 .894.553l1 2c.07.139.106.292.106.447v2a1 1 0 0 1-1 1h-2v-2h1v-.764L34.382 35h-2.764L31 36.236V37h1v2h-2a1 1 0 0 1-1-1v-2c0-.155.036-.308.106-.447l1-2A1 1 0 0 1 31 33h1.315q.033-.129.066-.286c.1-.471.189-1.068.249-1.685c.06-.618.088-1.231.073-1.735a5 5 0 0 0-.049-.624c-.022-.142-.044-.207-.048-.221q-.002-.005 0-.002l.003-.001A22 22 0 0 0 31 28.013c-.503-.115-1.023.577-1.25 1.01H18l-.086-.168c-.212-.422-.473-.943-.914-.842q-.578.131-1.155.297a7 7 0 0 0-.016.527c.004.553.057 1.23.142 1.914c.085.682.2 1.346.32 1.87q.052.227.1.404A3 3 0 1 1 13 36"/><path d="M17 36c0 .574-.462 1.015-1 1.015s-1-.44-1-1.015c0-.574.462-1.015 1-1.015s1 .44 1 1.015"/></g></svg>
+        <span>Doctor Appts</span>
+      </div>
+    </a>
+
+    <!-- WhatsApp patient queries (doctors + admins) -->
+    <a [routerLink]="(['super_admin', 'admin', 'doctor'].includes(role)) ? '/whatsapp-queries' : null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="(['super_admin', 'admin', 'doctor'].includes(role))">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M12 2a10 10 0 0 0-8.94 14.46L2 22l5.66-1.05A10 10 0 1 0 12 2m0 1.8a8.2 8.2 0 0 1 0 16.4a8.1 8.1 0 0 1-4.15-1.14l-.3-.18l-3.36.62l.64-3.27l-.2-.31A8.2 8.2 0 0 1 12 3.8M8.5 7.3c-.17 0-.44.06-.67.31c-.23.25-.88.86-.88 2.1s.9 2.43 1.03 2.6c.13.17 1.77 2.82 4.4 3.84c2.18.85 2.62.68 3.1.64c.48-.04 1.54-.63 1.76-1.24c.22-.61.22-1.13.15-1.24c-.06-.11-.23-.17-.48-.3c-.25-.12-1.54-.76-1.78-.85c-.24-.09-.42-.13-.6.13c-.17.25-.68.84-.83 1.02c-.15.17-.3.19-.55.06c-.25-.12-1.07-.39-2.04-1.25c-.75-.67-1.26-1.5-1.4-1.76c-.15-.25-.02-.39.1-.51c.12-.12.25-.3.37-.45c.12-.15.16-.25.25-.42c.08-.17.04-.32-.02-.45c-.06-.12-.55-1.36-.78-1.86c-.18-.4-.37-.4-.53-.41z"/>
+        </svg>
+        <span>WhatsApp</span>
+      </div>
+    </a>
+
+    <!-- Doorstep service requests (ops/admins) -->
+    <a [routerLink]="(['super_admin', 'admin'].includes(role)) ? '/doorstep-requests' : null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="(['super_admin', 'admin'].includes(role))">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M19 7h-3V6a4 4 0 0 0-8 0v1H5a1 1 0 0 0-1 1v11a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8a1 1 0 0 0-1-1m-9-1a2 2 0 0 1 4 0v1h-4zm8 13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V9h2v1a1 1 0 0 0 2 0V9h4v1a1 1 0 0 0 2 0V9h2z"/>
+        </svg>
+        <span>Doorstep</span>
+      </div>
+    </a>
+
+    <!-- Patients -->
+    <a [routerLink]="(['super_admin', 'admin', 'sub_admin'].includes(role) || role === 'doctor') ? '/patient' : null"
+       routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="icon-wrapper"
+       *ngIf="(['super_admin', 'admin', 'sub_admin'].includes(role) || role === 'doctor') && isNotEstimator() && isNotIpBillingManager() && isNotRadiology() && !isMukund() && isNotLab() && isNotNursing() && isNotOT() && isNotTherapist() && isNotTVController() && isNotDischargeCoordinator() && isNotErNurse()">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M12 5.5A3.5 3.5 0 0 1 15.5 9a3.5 3.5 0 0 1-3.5 3.5A3.5 3.5 0 0 1 8.5 9A3.5 3.5 0 0 1 12 5.5M5 8c.56 0 1.08.15 1.53.42c-.15 1.43.27 2.85 1.13 3.96C7.16 13.34 6.16 14 5 14a3 3 0 0 1-3-3a3 3 0 0 1 3-3m14 0a3 3 0 0 1 3 3a3 3 0 0 1-3 3c-1.16 0-2.16-.66-2.66-1.62a5.54 5.54 0 0 0 1.13-3.96c.45-.27.97-.42 1.53-.42M5.5 18.25c0-2.07 2.91-3.75 6.5-3.75s6.5 1.68 6.5 3.75V20h-13zM0 20v-1.5c0-1.39 1.89-2.56 4.45-2.9c-.59.68-.95 1.62-.95 2.65V20zm24 0h-3.5v-1.75c0-1.03-.36-1.97-.95-2.65c2.56.34 4.45 1.51 4.45 2.9z"/>
+        </svg>
+        <span>Patients</span>
+      </div>
+    </a>
+
+    <!-- Phase 9.23 — Patient timeline (cross-module chronological view) -->
+    <a [routerLink]="(['super_admin', 'admin', 'doctor'].includes(role)) ? '/patient/timeline' : null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="(['super_admin', 'admin', 'doctor'].includes(role))">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M12 2a10 10 0 1 0 10 10h-2a8 8 0 1 1-8-8zm-1 4v6l5.25 3.15l.75-1.23l-4.5-2.67V6z"/>
+        </svg>
+        <span>Timeline</span>
+      </div>
+    </a>
+
+    <!-- Doctors -->
+    <a [routerLink]="role !== 'doctor' ? '/doctor': null" routerLinkActive="active" class="icon-wrapper"
+       *ngIf="['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotMHC() && isNotIpBillingManager() && isNotRadiology() && !isMukund() && isNotLab() && isNotNursing() && isNotOT() && isNotTherapist() && isNotTVController() && isNotDischargeCoordinator() && isNotErNurse()">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 48 48"><g fill="currentColor"><path fill-rule="evenodd" d="M33.834 13.81c0 3.461-.86 7.975-2.183 7.29a8.001 8.001 0 0 1-15.611-1.54c-1.313-2.297-3.035-6.9 1.392-10.488c.08-.026.128-.242.2-.56c.274-1.203.881-3.877 4.71-3.366c2.953.393 11.492 1.918 11.492 8.665m-3.806 2.182s-.452 1.322-.028 2.795a6 6 0 0 1-11.996.197c.145-.55.145-1.481.144-2.516c-.001-1.867-.003-4.07.852-4.968c5.989 3.989 11.028 4.492 11.028 4.492" clip-rule="evenodd"/><path d="M13 36c0-1.082.573-2.03 1.433-2.558a12 12 0 0 1-.092-.375a22 22 0 0 1-.355-2.068a20 20 0 0 1-.155-2.006C9.61 30.65 6 33.538 6 36.57V42h36v-5.43c0-2.904-3.31-5.675-7.298-7.36v.028c.018.61-.016 1.31-.082 1.983c-.06.624-.149 1.246-.256 1.779H35a1 1 0 0 1 .894.553l1 2c.07.139.106.292.106.447v2a1 1 0 0 1-1 1h-2v-2h1v-.764L34.382 35h-2.764L31 36.236V37h1v2h-2a1 1 0 0 1-1-1v-2c0-.155.036-.308.106-.447l1-2A1 1 0 0 1 31 33h1.315q.033-.129.066-.286c.1-.471.189-1.068.249-1.685c.06-.618.088-1.231.073-1.735a5 5 0 0 0-.049-.624c-.022-.142-.044-.207-.048-.221q-.002-.005 0-.002l.003-.001A22 22 0 0 0 31 28.013c-.503-.115-1.023.577-1.25 1.01H18l-.086-.168c-.212-.422-.473-.943-.914-.842q-.578.131-1.155.297a7 7 0 0 0-.016.527c.004.553.057 1.23.142 1.914c.085.682.2 1.346.32 1.87q.052.227.1.404A3 3 0 1 1 13 36"/><path d="M17 36c0 .574-.462 1.015-1 1.015s-1-.44-1-1.015c0-.574.462-1.015 1-1.015s1 .44 1 1.015"/></g></svg>
+        <span>Doctors</span>
+      </div>
+    </a>
+
+    <!-- MHC (Master Health Checkup) -->
+    <a routerLink="/health-checkup" routerLinkActive="active" class="icon-wrapper"
+       *ngIf="(isMHC() || (['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotIpBillingManager() && isNotRadiology() && !isMukund() && isNotLab() && isNotNursing() && isNotOT() && isNotTherapist())) && isNotTVController() && isNotDischargeCoordinator() && isNotErNurse()">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" fill-rule="evenodd" d="M7 18h2v-2h2v-2H9v-2H7v2H5v2h2zm6-3.5h6V13h-6zm0 3h4V16h-4zM4 22q-.825 0-1.412-.587T2 20V9q0-.825.588-1.412T4 7h5V4q0-.825.588-1.412T11 2h2q.825 0 1.413.588T15 4v3h5q.825 0 1.413.588T22 9v11q0 .825-.587 1.413T20 22zm0-2h16V9h-5q0 .825-.587 1.413T13 11h-2q-.825 0-1.412-.587T9 9H4zm7-11h2V4h-2zm1 5.5"/>
+        </svg>
+        <span>MHC</span>
+      </div>
+    </a>
+
+    <!-- ═══════════ Services / investigations ═══════════ -->
+    <div class="sidebar-section-label" *ngIf="showInvestigationsSection">Investigations</div>
+    <a routerLink="/services" routerLinkActive="active"
+       class="icon-wrapper sidebar-section-start"
+       *ngIf="(['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotIpBillingManager() && isNotRadiology() && isNotMHC() && !isMukund() && isNotLab() && isNotNursing() && isNotOT() && isNotTherapist() && isNotTVController() && isNotDischargeCoordinator() && isNotErNurse())">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24"><path fill="currentColor" d="M19 5v14H5V5zm0-2H5c-1.11 0-2 .89-2 2v14c0 1.11.89 2 2 2h14c1.11 0 2-.89 2-2V5c0-1.11-.89-2-2-2m-7 3c.55 0 1 .45 1 1v1h3.17c.18.31.33.65.49 1H13v1h4c.1.33.17.67.19 1H13v1h4.2c-.04.35-.05.69-.1 1H13v1h4s-.06 3-1.5 3c-1.35 0-1-1.53-2.5-2v2c0 .55-.45 1-1 1s-1-.45-1-1v-2c-1.5.47-1.15 2-2.5 2C7.06 17 7 14 7 14h4v-1H6.9c-.05-.31-.06-.65-.1-1H11v-1H6.81c.02-.33.1-.67.19-1h4V9H7.34c.16-.35.31-.69.49-1H11V7c0-.55.45-1 1-1"/></svg>
+        <span>Services</span>
+      </div>
+    </a>
+
+    <!-- Radiology services — Radiology Coordinator -->
+    <a [routerLink]="isRadiology() ? '/radiology-services': null" routerLinkActive="active"
+       class="icon-wrapper sidebar-section-start"
+       *ngIf="isRadiology()">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24"><path fill="currentColor" d="M19 5v14H5V5zm0-2H5c-1.11 0-2 .89-2 2v14c0 1.11.89 2 2 2h14c1.11 0 2-.89 2-2V5c0-1.11-.89-2-2-2m-7 3c.55 0 1 .45 1 1v1h3.17c.18.31.33.65.49 1H13v1h4c.1.33.17.67.19 1H13v1h4.2c-.04.35-.05.69-.1 1H13v1h4s-.06 3-1.5 3c-1.35 0-1-1.53-2.5-2v2c0 .55-.45 1-1 1s-1-.45-1-1v-2c-1.5.47-1.15 2-2.5 2C7.06 17 7 14 7 14h4v-1H6.9c-.05-.31-.06-.65-.1-1H11v-1H6.81c.02-.33.1-.67.19-1h4V9H7.34c.16-.35.31-.69.49-1H11V7c0-.55.45-1 1-1"/></svg>
+        <span>Services</span>
+      </div>
+    </a>
+
+    <!-- Lab — Lab Coordinator -->
+    <a [routerLink]="isLab() ? '/lab': null" routerLinkActive="active" class="icon-wrapper"
+       *ngIf="isLab()">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 64 64">
+          <path fill="#000" d="M37.852 51.571L22.388 42.64l1.532-2.651l15.461 8.931z" stroke-width="1.5" stroke="#000"/>
+          <path fill="#000" d="M53.631 56.656c4.466-4.218 7.296-10.144 7.296-16.758c0-8.149-4.28-15.499-10.935-19.627l7.456-12.906l-1.171-.675l1.839-3.198L53.295.709l-1.843 3.193l-1.233-.712l-18.33 31.752l1.601.924l-2.273 3.932l4.028 2.326l2.274-3.934l1.599.924l7.708-13.349a16.77 16.77 0 0 1 7.759 14.134c0 9.24-7.522 16.758-16.763 16.758H24.316v6.345h38.018v-6.345h-8.701zM19.883 7.865V2.828h.62l-.009-1.208h-5.649l.009 1.208h.666v5.037h-4.215V2.828h.618l-.007-1.208H6.262l.011 1.208h.666v5.037H.75v25.231h25.269V7.865h-6.134zm3.996 23.095H2.887V10.001h4.051v16.12c0 1.22.997 2.211 2.2 2.211c1.205-.005 2.166-.993 2.166-2.211v-16.12h4.215v16.12c0 1.22.998 2.211 2.201 2.211c1.205-.005 2.166-.993 2.164-2.211v-16.12h3.995z" stroke-width="1.5" stroke="#000"/>
+        </svg>
+        <span>Lab</span>
+      </div>
+    </a>
+
+    <!-- Therapies (admin/sub_admin view) -->
+    <a routerLink="/therapy" routerLinkActive="active" class="icon-wrapper"
+       *ngIf="(['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotIpBillingManager() && isNotRadiology() && isNotMHC() && !isMukund() && isNotLab() && isNotNursing() && isNotOT() && isNotTherapist() && isNotTVController() && isNotDischargeCoordinator() && isNotErNurse())">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="38" viewBox="0 0 64 56"><path fill="currentColor" d="M30.827 19.223a5.887 5.887 0 0 0 5.892-5.881a5.884 5.884 0 0 0-5.892-5.879c-3.255 0-5.893 2.632-5.893 5.879a5.89 5.89 0 0 0 5.893 5.881M48.78 58.98H1.806c-1.323 0-1.187 1.04-1.187 1.04v1.731S.499 64 2.809 64h58.817c2.325 0 2.199-2.197 2.199-2.197v-4.794s-.197-1.516-1.98-1.516h-5.732c-1.965 0-3.589 3.486-7.332 3.486zm4.568-10.622c0 2.922 2.378 5.295 5.308 5.295s5.313-2.374 5.313-5.295c0-2.933-2.384-5.297-5.313-5.297a5.3 5.3 0 0 0-5.308 5.297M35.997 38.255a3.77 3.77 0 0 1-2.269 2.36l-4.727 1.753l1.744 1.731h7.98l-.005-12.215l-2.671 6.297c-.013.03-.037.047-.053.074z"/><path fill="currentColor" d="M47.458 47.001h-16.5l-3.978-3.884l-2.769 1.02c-2.054.735-4.555-.387-5.326-2.428c-.454-1.267-.391-2.682.367-3.713c-.339-.015-10.007 0-10.007 0a2.906 2.906 0 0 0-2.915 2.898c0 1.607 1.307 2.863 2.915 2.863h9.843l3.903 5.909L2.84 51.285a2.909 2.909 0 0 0 .651 5.745l22.609.003a4.13 4.13 0 0 1-.629-2.177a4.176 4.176 0 0 1 4.173-4.173h9.046l7.331-1.531l.407 1.947l-7.533 1.573h-9.252a2.18 2.18 0 0 0-.044 4.361l17.898.002a5.014 5.014 0 0 0 4.992-5.013A5.023 5.023 0 0 0 47.458 47z"/><path fill="currentColor" d="M23.862 42.315a2.31 2.31 0 0 1-3.038-1.185a2.303 2.303 0 0 1 1.187-3.04l8.401-3.154l2.596-6.192l-1.692-.625l-2.207 5.302l-6.395 2.355v-6.482l-6.251 6.827l-7.074-.007s12.379-13.57 12.766-13.976c.513-.509 1.686-1.353 3.898-1.353h7.949c4.516 0 5.385 4.502 4.461 6.832l-4.157 10.082a2.34 2.34 0 0 1-1.338 1.261l-9.106 3.353z"/></svg>
+        <span>Therapies</span>
+      </div>
+    </a>
+
+    <!-- Therapies (Ayurveda doctor / Therapist sub-admin) -->
+    <a routerLink="/therapy" routerLinkActive="active" class="icon-wrapper"
+       *ngIf="(['doctor'].includes(role) && isAyurveda())">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="38" viewBox="0 0 64 56"><path fill="currentColor" d="M30.827 19.223a5.887 5.887 0 0 0 5.892-5.881a5.884 5.884 0 0 0-5.892-5.879c-3.255 0-5.893 2.632-5.893 5.879a5.89 5.89 0 0 0 5.893 5.881M48.78 58.98H1.806c-1.323 0-1.187 1.04-1.187 1.04v1.731S.499 64 2.809 64h58.817c2.325 0 2.199-2.197 2.199-2.197v-4.794s-.197-1.516-1.98-1.516h-5.732c-1.965 0-3.589 3.486-7.332 3.486zm4.568-10.622c0 2.922 2.378 5.295 5.308 5.295s5.313-2.374 5.313-5.295c0-2.933-2.384-5.297-5.313-5.297a5.3 5.3 0 0 0-5.308 5.297M35.997 38.255a3.77 3.77 0 0 1-2.269 2.36l-4.727 1.753l1.744 1.731h7.98l-.005-12.215l-2.671 6.297c-.013.03-.037.047-.053.074z"/><path fill="currentColor" d="M47.458 47.001h-16.5l-3.978-3.884l-2.769 1.02c-2.054.735-4.555-.387-5.326-2.428c-.454-1.267-.391-2.682.367-3.713c-.339-.015-10.007 0-10.007 0a2.906 2.906 0 0 0-2.915 2.898c0 1.607 1.307 2.863 2.915 2.863h9.843l3.903 5.909L2.84 51.285a2.909 2.909 0 0 0 .651 5.745l22.609.003a4.13 4.13 0 0 1-.629-2.177a4.176 4.176 0 0 1 4.173-4.173h9.046l7.331-1.531l.407 1.947l-7.533 1.573h-9.252a2.18 2.18 0 0 0-.044 4.361l17.898.002a5.014 5.014 0 0 0 4.992-5.013A5.023 5.023 0 0 0 47.458 47z"/><path fill="currentColor" d="M23.862 42.315a2.31 2.31 0 0 1-3.038-1.185a2.303 2.303 0 0 1 1.187-3.04l8.401-3.154l2.596-6.192l-1.692-.625l-2.207 5.302l-6.395 2.355v-6.482l-6.251 6.827l-7.074-.007s12.379-13.57 12.766-13.976c.513-.509 1.686-1.353 3.898-1.353h7.949c4.516 0 5.385 4.502 4.461 6.832l-4.157 10.082a2.34 2.34 0 0 1-1.338 1.261l-9.106 3.353z"/></svg>
+        <span>Therapies</span>
+      </div>
+    </a>
+    <a [routerLink]="subAdminType == 'Therapist' ? '/therapy-list': null" routerLinkActive="active"
+       class="icon-wrapper"
+       *ngIf="['Therapist'].includes(subAdminType)">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="24" height="38" viewBox="0 0 64 56"><path fill="currentColor" d="M30.827 19.223a5.887 5.887 0 0 0 5.892-5.881a5.884 5.884 0 0 0-5.892-5.879c-3.255 0-5.893 2.632-5.893 5.879a5.89 5.89 0 0 0 5.893 5.881M48.78 58.98H1.806c-1.323 0-1.187 1.04-1.187 1.04v1.731S.499 64 2.809 64h58.817c2.325 0 2.199-2.197 2.199-2.197v-4.794s-.197-1.516-1.98-1.516h-5.732c-1.965 0-3.589 3.486-7.332 3.486zm4.568-10.622c0 2.922 2.378 5.295 5.308 5.295s5.313-2.374 5.313-5.295c0-2.933-2.384-5.297-5.313-5.297a5.3 5.3 0 0 0-5.308 5.297M35.997 38.255a3.77 3.77 0 0 1-2.269 2.36l-4.727 1.753l1.744 1.731h7.98l-.005-12.215l-2.671 6.297c-.013.03-.037.047-.053.074z"/><path fill="currentColor" d="M47.458 47.001h-16.5l-3.978-3.884l-2.769 1.02c-2.054.735-4.555-.387-5.326-2.428c-.454-1.267-.391-2.682.367-3.713c-.339-.015-10.007 0-10.007 0a2.906 2.906 0 0 0-2.915 2.898c0 1.607 1.307 2.863 2.915 2.863h9.843l3.903 5.909L2.84 51.285a2.909 2.909 0 0 0 .651 5.745l22.609.003a4.13 4.13 0 0 1-.629-2.177a4.176 4.176 0 0 1 4.173-4.173h9.046l7.331-1.531l.407 1.947l-7.533 1.573h-9.252a2.18 2.18 0 0 0-.044 4.361l17.898.002a5.014 5.014 0 0 0 4.992-5.013A5.023 5.023 0 0 0 47.458 47z"/><path fill="currentColor" d="M23.862 42.315a2.31 2.31 0 0 1-3.038-1.185a2.303 2.303 0 0 1 1.187-3.04l8.401-3.154l2.596-6.192l-1.692-.625l-2.207 5.302l-6.395 2.355v-6.482l-6.251 6.827l-7.074-.007s12.379-13.57 12.766-13.976c.513-.509 1.686-1.353 3.898-1.353h7.949c4.516 0 5.385 4.502 4.461 6.832l-4.157 10.082a2.34 2.34 0 0 1-1.338 1.261l-9.106 3.353z"/></svg>
+        <span>Therapies</span>
+      </div>
+    </a>
+
+    <!-- ═══════════ Emergency & MLC ═══════════ -->
+    <div class="sidebar-section-label" *ngIf="showEmergencySection">Emergency</div>
+    <a [routerLink]="(role === 'super_admin' || isEmergencyDoctor() || isErNurse()) ? '/emergency': null"
+       routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="icon-wrapper sidebar-section-start"
+       *ngIf="(role === 'super_admin' || isEmergencyDoctor() || isErNurse())">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m1 15h-2v-2h2v2m0-4h-2V7h2v6"/>
+        </svg>
+        <span>Emergency</span>
+      </div>
+    </a>
+
+    <!-- Phase 9.20 — hospital emergency codes board (all clinical staff) -->
+    <a routerLink="/emergency/codes"
+       routerLinkActive="active" class="icon-wrapper">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M11 15h2v2h-2zm0-8h2v6h-2zm1-5C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8s8 3.59 8 8s-3.59 8-8 8"/>
+        </svg>
+        <span>Emergency Codes</span>
+      </div>
+    </a>
+
+    <!-- Phase 9.19 — referral acknowledgment inbox (doctors) -->
+    <a [routerLink]="(role === 'doctor' || role === 'super_admin') ? '/emergency/my-referrals': null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="(role === 'doctor' || role === 'super_admin')">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2m-9 12H9v-2h2zm0-4H9V6h2zm4 4h-2v-2h2zm0-4h-2V6h2z"/>
+        </svg>
+        <span>My Referrals</span>
+      </div>
+    </a>
+
+    <!-- Phase 9.19 — referral escalation chain + SLA config (admins) -->
+    <a [routerLink]="(role === 'super_admin' || role === 'admin') ? '/emergency/escalation-config': null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="(role === 'super_admin' || role === 'admin')">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M12 8a4 4 0 1 0 0 8a4 4 0 0 0 0-8m8.94 3a8 8 0 0 0-.69-1.66l1.4-1.4l-2.59-2.59l-1.4 1.4A8 8 0 0 0 16 6.06V4h-4v2.06a8 8 0 0 0-1.66.69l-1.4-1.4L6.35 7.94l1.4 1.4A8 8 0 0 0 7.06 11H5v4h2.06a8 8 0 0 0 .69 1.66l-1.4 1.4l2.59 2.59l1.4-1.4A8 8 0 0 0 12 19.94V22h4v-2.06a8 8 0 0 0 1.66-.69l1.4 1.4l2.59-2.59l-1.4-1.4A8 8 0 0 0 20.94 15H23v-4z"/>
+        </svg>
+        <span>Escalation Config</span>
+      </div>
+    </a>
+
+    <a [routerLink]="(role === 'super_admin' || role === 'admin' || role === 'doctor') ? '/mlc': null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="(role === 'super_admin' || role === 'admin' || role === 'doctor')">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m-2 15h4v2h-4zm0-5h4v4h-4zm0-5h4v4h-4z"/>
+        </svg>
+        <span>MLC Cases</span>
+      </div>
+    </a>
+
+    <!-- Phase 9.24 — Incident reporting (manual now; auto-capture rules in Phase 2) -->
+    <a [routerLink]="(['super_admin', 'admin', 'doctor', 'sub_admin'].includes(role)) ? '/incidents': null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="(['super_admin', 'admin', 'doctor', 'sub_admin'].includes(role))">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M12 2L1 21h22L12 2zm0 4l8.5 14.5h-17L12 6zm-1 5v5h2v-5h-2zm0 6v2h2v-2h-2z"/>
+        </svg>
+        <span>Incidents</span>
+      </div>
+    </a>
+
+    <!-- Phase 9.25 — Patient Feedback inbox -->
+    <a [routerLink]="(['super_admin', 'admin', 'sub_admin'].includes(role)) ? '/feedback': null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="(['super_admin', 'admin', 'sub_admin'].includes(role))">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m4.2 14.6L12 14l-4.2 2.6l1.2-4.8L5 8.8l4.8-.4L12 4l2.2 4.4l4.8.4l-4 3z"/>
+        </svg>
+        <span>Feedback</span>
+      </div>
+    </a>
+
+    <!-- Phase 9.25 — Complaints workflow -->
+    <a [routerLink]="(['super_admin', 'admin', 'sub_admin'].includes(role)) ? '/complaints': null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="(['super_admin', 'admin', 'sub_admin'].includes(role))">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2m-7 9h-2v-2h2zm0-4h-2V5h2z"/>
+        </svg>
+        <span>Complaints</span>
+      </div>
+    </a>
+
+    <!-- Phase 9.26 — Quality / NABH dashboard -->
+    <a [routerLink]="(['super_admin', 'admin'].includes(role)) ? '/quality': null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="(['super_admin', 'admin'].includes(role))">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>
+        </svg>
+        <span>Quality</span>
+      </div>
+    </a>
+
+    <!-- ═══════════ IPD lifecycle ═══════════ -->
+    <div class="sidebar-section-label" *ngIf="showIpdSection">IPD</div>
+    <a [routerLink]="(role === 'doctor' || role === 'super_admin' || isIpdNurse || isNursingSuper) ? '/ipd': null"
+       routerLinkActive="active" class="icon-wrapper sidebar-section-start"
+       *ngIf="(role === 'doctor' || role === 'super_admin' || isIpdNurse || isNursingSuper)">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M4 4h16v2H4V4m0 7h16v2H4v-2m0 7h16v2H4v-2m2-4h12v2H6v-2"/>
+        </svg>
+        <span>IPD</span>
+      </div>
+    </a>
+
+    <a [routerLink]="(role === 'super_admin' || isNursingSuper) ? '/ward-census': null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="(role === 'super_admin' || isNursingSuper)">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M3 13h2v8H3zm4-8h2v16H7zm4-2h2v18h-2zm4 4h2v14h-2zm4-4h2v18h-2z"/>
+        </svg>
+        <span>Ward Mgmt</span>
+      </div>
+    </a>
+
+    <a [routerLink]="(role === 'super_admin' || role === 'doctor' || isIpdNurse || isNursingSuper) ? '/icu-transfer-queue': null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="(role === 'super_admin' || role === 'doctor' || isIpdNurse || isNursingSuper)">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 12h14M13 5l7 7l-7 7"/>
+        </svg>
+        <span>ICU Transfers</span>
+      </div>
+    </a>
+
+    <a [routerLink]="(role === 'super_admin' || role === 'doctor' || isIpdNurse || isNursingSuper) ? '/staff-handover': null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="(role === 'super_admin' || role === 'doctor' || isIpdNurse || isNursingSuper)">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M16 13v-2H7V8l-5 4l5 4v-3zm5-9h-9c-1.1 0-2 .9-2 2v4h2V6h9v12h-9v-4h-2v4c0 1.1.9 2 2 2h9c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2"/>
+        </svg>
+        <span>Handover</span>
+      </div>
+    </a>
+
+    <!-- Day Care — outpatient day-procedure monitoring (Phase 5).
+         Stays inside IPD section: day-procedure beds are still ward beds. -->
+    <a [routerLink]="(role === 'doctor' || role === 'super_admin' || isIpdNurse) ? '/daycare' : null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="(role === 'doctor' || role === 'super_admin' || isIpdNurse)">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2m-2 11h-3v3h-4v-3H7v-4h3V7h4v3h3z"/>
+        </svg>
+        <span>Day Care</span>
+      </div>
+    </a>
+
+    <!-- ═══════════ OT MGMT ═══════════ -->
+    <div class="sidebar-section-label" *ngIf="showOtSection">OT MGMT</div>
+
+    <!-- Phase 9.5g — Unified OT Workbench (primary entry into OT flow). -->
+    <a [routerLink]="(role === 'super_admin' || subAdminType === 'OT Coordinator' || role === 'doctor') ? '/surgery-ot/workbench': null"
+       routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="icon-wrapper sidebar-section-start"
+       *ngIf="role === 'super_admin' || subAdminType === 'OT Coordinator' || role === 'doctor'">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M3 3h8v8H3zm10 0h8v8h-8zM3 13h8v8H3zm10 0h8v8h-8z"/>
+        </svg>
+        <span>OT Workbench</span>
+      </div>
+    </a>
+
+    <!-- OT Workflow board (Phase 11 — NABH COP.13/14/PSQ.3). -->
+    <a [routerLink]="(subAdminType === 'OT Coordinator' || role === 'super_admin' || role === 'doctor') ? '/surgery-ot': null"
+       routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="icon-wrapper"
+       *ngIf="['OT Coordinator'].includes(subAdminType) || role === 'super_admin' || role === 'doctor'">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M12 2L4 5v6c0 5 3.5 9.5 8 11c4.5-1.5 8-6 8-11V5l-8-3zm-1 6h2v3h3v2h-3v3h-2v-3H8v-2h3V8z"/>
+        </svg>
+        <span>OT Workflow</span>
+      </div>
+    </a>
+
+    <!-- Phase 9.1a — OT Requisition queue (ward → OT booking queue) -->
+    <a [routerLink]="(subAdminType === 'OT Coordinator' || role === 'super_admin' || role === 'doctor' || isIpdNurse) ? '/surgery-ot/requisitions': null"
+       routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="icon-wrapper"
+       *ngIf="subAdminType === 'OT Coordinator' || isIpdNurse || role === 'super_admin' || role === 'doctor'">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6m-1 13h-2v-3H8v-2h3V7h2v3h3v2h-3v3z"/>
+        </svg>
+        <span>OT Requisitions</span>
+      </div>
+    </a>
+
+    <!-- Phase 9.3a — OT Reports -->
+    <a [routerLink]="(role === 'super_admin' || subAdminType === 'OT Coordinator' || role === 'doctor') ? '/surgery-ot/reports': null"
+       routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="icon-wrapper"
+       *ngIf="role === 'super_admin' || subAdminType === 'OT Coordinator' || role === 'doctor'">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z"/>
+        </svg>
+        <span>OT Reports</span>
+      </div>
+    </a>
+
+    <!-- Phase D — Discharge clearance board (per-department coordinator queues) -->
+    <a [routerLink]="(role === 'super_admin' || role === 'admin' || ['Discharge Coordinator', 'Lab Coordinator', 'Radiology Coordinator', 'OT Coordinator', 'Dietician', 'Billing Coordinator', 'Pharmacy Coordinator'].includes(subAdminType)) ? '/discharge/queue/BILLING' : null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="role === 'super_admin' || role === 'admin' || ['Discharge Coordinator', 'Lab Coordinator', 'Radiology Coordinator', 'OT Coordinator', 'Dietician', 'Billing Coordinator', 'Pharmacy Coordinator'].includes(subAdminType)">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19L21 7l-1.41-1.41z"/>
+        </svg>
+        <span>Discharge Clearance</span>
+      </div>
+    </a>
+
+    <!-- Phase D — Medical Transcriptionist queue -->
+    <a [routerLink]="(role === 'super_admin' || role === 'admin' || subAdminType === 'Medical Transcriptionist') ? '/discharge/mt-queue' : null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="role === 'super_admin' || role === 'admin' || subAdminType === 'Medical Transcriptionist'">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8zm4 18H6V4h7v5h5z"/>
+        </svg>
+        <span>MT Queue</span>
+      </div>
+    </a>
+
+    <!-- Phase P — Pharmacy coordinator queue -->
+    <a [routerLink]="(role === 'super_admin' || role === 'admin' || subAdminType === 'Pharmacy Coordinator') ? '/pharmacy/queue' : null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="role === 'super_admin' || role === 'admin' || subAdminType === 'Pharmacy Coordinator'">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M4.22 11.29l7.07-7.07a4 4 0 0 1 5.66 5.66l-7.07 7.07a4 4 0 0 1-5.66-5.66m1.41 1.42a2 2 0 0 0 2.83 2.83l2.83-2.83l-2.83-2.83zm9.9-9.9L12.7 5.64l2.83 2.83l2.83-2.83a2 2 0 0 0-2.83-2.83z"/>
+        </svg>
+        <span>Pharmacy Queue</span>
+      </div>
+    </a>
+
+    <!-- Phase P — Nurse medication inbox -->
+    <a [routerLink]="(role === 'super_admin' || isIpdNurse) ? '/nurse/medication-inbox' : null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="role === 'super_admin' || isIpdNurse">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M19 3H5c-1.11 0-2 .89-2 2v14c0 1.11.89 2 2 2h14c1.11 0 2-.89 2-2V5c0-1.11-.89-2-2-2m-1 11h-4v4h-4v-4H6v-4h4V6h4v4h4z"/>
+        </svg>
+        <span>Medication Inbox</span>
+      </div>
+    </a>
+
+    <!-- Phase 9.4d — OP Procedures (outpatient minor procedure flow) -->
+    <a [routerLink]="(role === 'super_admin' || role === 'doctor' || isIpdNurse) ? '/op-procedures': null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="role === 'super_admin' || role === 'doctor' || isIpdNurse">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M19 8h-2V6c0-1.1-.9-2-2-2H9c-1.1 0-2 .9-2 2v2H5c-1.1 0-2 .9-2 2v9h2v-4h14v4h2v-9c0-1.1-.9-2-2-2M9 6h6v2H9V6m10 7H5v-3h14v3z"/>
+        </svg>
+        <span>OP Procedures</span>
+      </div>
+    </a>
+
+    <!-- Legacy Surgeries screen — kept during OT-board transition. -->
+    <a [routerLink]="(subAdminType === 'OT Coordinator' || role === 'super_admin') ? '/surgery': null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="['OT Coordinator'].includes(subAdminType) || role === 'super_admin'">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 48 48">
+          <g fill="currentColor">
+            <path fill-rule="evenodd" d="M40 8H8v32h32zM8 6a2 2 0 0 0-2 2v32a2 2 0 0 0 2 2h32a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2z" clip-rule="evenodd"/>
+            <path fill-rule="evenodd" d="M16.828 28h4.724a4 4 0 0 0 2.798-1.142L28 23.284v-.456A4 4 0 0 1 29.172 20l1.689-1.69l-2.606-1.736zM12 30l16-16l6 4l-3.414 3.414A2 2 0 0 0 30 22.828v.456a2 2 0 0 1-.6 1.43l-3.65 3.573A6 6 0 0 1 21.551 30z" clip-rule="evenodd"/>
+            <path fill-rule="evenodd" d="M26.707 21.293a1 1 0 0 1 0 1.414l-3 3a1 1 0 0 1-1.414-1.414l3-3a1 1 0 0 1 1.414 0m10-13.185l-7.6 7.6l-1.414-1.415l7.6-7.6zm1.5 4.285a1 1 0 0 1 0 1.414l-5.5 5.5l-1.414-1.415l5.5-5.5a1 1 0 0 1 1.414 0" clip-rule="evenodd"/>
+            <path d="M30.15 35.234a1 1 0 1 0-1.055 1.7a1 1 0 0 0 1.056-1.7m-7.001-1a1 1 0 1 0-1.055 1.7a1 1 0 0 0 1.056-1.7m-9.001 1a1 1 0 1 0-1.055 1.7a1 1 0 0 0 1.055-1.7"/>
+            <path d="M10 37h28v2H10zm0-5h28v2H10z"/>
+            <path d="m26.556 32.243l7.53-7.531l1.415 1.414l-7.531 7.531z"/>
+          </g>
+        </svg>
+        <span>Surgeries</span>
+      </div>
+    </a>
+
+    <!-- ═══════════ Dietetics ═══════════ -->
+    <div class="sidebar-section-label" *ngIf="showDieteticsSection">Dietetics</div>
+
+    <!-- Dietetics — dietician queue -->
+    <a [routerLink]="(subAdminType === 'Dietician' || role === 'super_admin' || role === 'doctor') ? '/dietetics/queue' : null"
+       routerLinkActive="active" class="icon-wrapper sidebar-section-start"
+       *ngIf="(subAdminType === 'Dietician' || role === 'super_admin' || role === 'doctor')">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4"/>
+        </svg>
+        <span>Dietetics</span>
+      </div>
+    </a>
+
+    <!-- Canteen workspace -->
+    <a [routerLink]="(subAdminType === 'Canteen Staff' || isIpdNurse || role === 'super_admin') ? '/dietetics/canteen' : null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="(subAdminType === 'Canteen Staff' || isIpdNurse || role === 'super_admin')">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M8.1 13.34l2.83-2.83L3.91 3.5a4 4 0 0 0 0 5.66zm6.78-1.81c1.53.71 3.68.21 5.27-1.38c1.91-1.91 2.28-4.65.81-6.12s-4.21-1.1-6.12.81c-1.59 1.59-2.09 3.74-1.38 5.27L3.7 19.87l1.41 1.42L12 14.41l6.88 6.88l1.41-1.41L13.41 13l1.47-1.47"/>
+        </svg>
+        <span>Canteen</span>
+      </div>
+    </a>
+
+    <!-- ═══════════ Discharge & Finance ═══════════ -->
+    <div class="sidebar-section-label" *ngIf="showDischargeSection">Discharge &amp; Finance</div>
+
+    <!-- Estimation — IPD billing surface (also serves OPD estimation for
+         managers). Collapsed from 3 role-gated rows into 1: covers
+         Manager/Management/Senior Manager/IT Manager admin types, the
+         Estimator + IP Billing Manager sub-admin types, plus super_admin. -->
+    <a routerLink="/estimation" routerLinkActive="active" class="icon-wrapper sidebar-section-start"
+       *ngIf="role === 'super_admin' || ['Manager','Management','Senior Manager','IT Manager'].includes(adminType) || isEstimator() || isIpBillingManager()">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 24 24" class="icon">
+          <rect width="24" height="24" fill="none"/>
+          <g fill="#000" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" color="#000">
+            <path d="M17.5 11V7.3c0-2.263 0-3.394-.775-4.097c-.776-.703-2.023-.703-4.52-.703h-4.41c-2.497 0-3.744 0-4.52.703S2.5 5.037 2.5 7.3v6.4c0 2.263 0 3.394.775 4.097c.776.703 2.023.703 4.52.703H11m-5.5-12h9m-9 4h1m3 0h1m3 0h1m-9 4h1m3 0h1"/>
+            <circle cx="17.5" cy="17.5" r="4"/>
+            <path d="m18.5 18l-1-.5V16"/>
+          </g>
+        </svg>
+        <span>Estimation</span>
+      </div>
+    </a>
+
+    <!-- LAMA / DAMA records — discharge alternatives -->
+    <a [routerLink]="(role === 'super_admin' || role === 'doctor' || subAdminType === 'Discharge Coordinator') ? '/lama-dama': null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="(role === 'super_admin' || role === 'doctor' || subAdminType === 'Discharge Coordinator')">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M19 6h-2V4c0-1.1-.9-2-2-2h-2c-1.1 0-2 .9-2 2v2h-2V4c0-1.1-.9-2-2-2H7c-1.1 0-2 .9-2 2v2H3c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-2h2v2h-2V4zm-5 2h2v2H7V6z"/>
+        </svg>
+        <span>LAMA/DAMA</span>
+      </div>
+    </a>
+
+    <!-- ═══════════ Reporting ═══════════ -->
+    <div class="sidebar-section-label" *ngIf="showReportingSection">Reporting</div>
+    <!-- Report -->
+    <a [routerLink]="['super_admin', 'admin'].includes(role) ? '/report' : null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="['super_admin', 'admin'].includes(role) && isNotIpBillingManager() && isNotRadiology() && !isMukund() && isNotLab() && isNotOT() && isNotTherapist()">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2M9 17H7v-7h2zm4 0h-2V7h2zm4 0h-2v-4h2z"/>
+        </svg>
+        <span>Report</span>
+      </div>
+    </a>
+
+    <!-- TV Control -->
+    <a [routerLink]="['Manager','Management','Senior Manager'].includes(adminType) || role === 'super_admin' || isTVController() ? '/tv-control' : null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="['Manager','Management','Senior Manager'].includes(adminType) || role === 'super_admin' || isTVController()">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" fill-rule="evenodd" d="M3.2 5.2v12.6h17.6V5.2zM2 5a1 1 0 0 1 1-1h18a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1zm6 15.9c0-.331.266-.6.601-.6H15.4c.332 0 .601.278.601.6v.6H8zm3.665-12.004H9.81V15H8.716V8.896H6.558v-.942h5.958l1.919 5.816h.029l1.924-5.816h1.167L15.04 15h-1.196z"/>
+        </svg>
+        <span>TV Control</span>
+      </div>
+    </a>
+
+    <!-- ═══════════ Admin / compliance (super_admin) ═══════════ -->
+    <div class="sidebar-section-label" *ngIf="showAdminSection">Admin &amp; Compliance</div>
+    <!-- Unified Masters admin — Departments / Wards / Beds / OT Rooms / Tablets / Shifts -->
+    <a [routerLink]="role === 'super_admin' ? '/masters' : null"
+       routerLinkActive="active" class="icon-wrapper sidebar-section-start"
+       *ngIf="role === 'super_admin'">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M3 3h8v8H3zm10 0h8v8h-8zM3 13h8v8H3zm10 0h8v8h-8z"/>
+        </svg>
+        <span>Masters</span>
+      </div>
+    </a>
+
+    <!-- Phase 9.5e — OT Setup (Equipment / Consumable Sets / Fixed Surgical Notes masters) -->
+    <a [routerLink]="(role === 'super_admin') ? '/surgery-ot/setup': null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="role === 'super_admin'">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M19.14 12.94c.04-.3.06-.61.06-.94c0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94c0 .31.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61zM12 15.6A3.6 3.6 0 0 1 8.4 12A3.6 3.6 0 0 1 12 8.4a3.6 3.6 0 0 1 3.6 3.6a3.6 3.6 0 0 1-3.6 3.6"/>
+        </svg>
+        <span>OT Setup</span>
+      </div>
+    </a>
+
+    <!-- Phase 9.2 — OT Notes Templates (admin-curated boilerplate) -->
+    <a [routerLink]="(role === 'super_admin' || subAdminType === 'OT Coordinator') ? '/surgery-ot/templates': null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="role === 'super_admin' || subAdminType === 'OT Coordinator'">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2m-3 14H8v-2h8v2m0-4H8v-2h8v2m0-4H8V7h8v2z"/>
+        </svg>
+        <span>OT Templates</span>
+      </div>
+    </a>
+
+    <!-- Phase 9.13 — Treatment Dashboard (NEWS2 deterioration watchboard).
+         For consultants + ward/ICU nurses + super_admin. -->
+    <a [routerLink]="(role === 'super_admin' || role === 'doctor' || isIpdNurse || isNursingSuper) ? '/treatment-dashboard' : null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="role === 'super_admin' || role === 'doctor' || isIpdNurse || isNursingSuper">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M3 13h2.5l2-6 4 12 3-9 1.5 3H21v2h-6.5l-2-4-3 9-4-12-1 4H3z"/>
+        </svg>
+        <span>Treatment Dashboard</span>
+      </div>
+    </a>
+
+    <!-- Phase 9.11 — Lab & Radiology Reports coordinator workbench.
+         Lists pending InvestigationOrders, lets coordinators upload PDF
+         results, notifies the ordering doctor automatically. Visible to
+         lab/radiology coordinators + super_admin. -->
+    <a [routerLink]="(role === 'super_admin' || subAdminType === 'Lab Coordinator' || subAdminType === 'Radiology Coordinator') ? '/lab-radiology/reports' : null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="role === 'super_admin' || subAdminType === 'Lab Coordinator' || subAdminType === 'Radiology Coordinator'">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 14H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
+        </svg>
+        <span>Lab & Rad Reports</span>
+      </div>
+    </a>
+
+    <!-- Phase 9.10 — Nurses & Clinical Staff admin (super_admin only).
+         Creates nurse User accounts with profile fields (designation,
+         ward, qualification, etc.) and optionally mirrors them into
+         the OT staff master so OT pickers can assign them. -->
+    <a [routerLink]="(role === 'super_admin') ? '/staff/nurses' : null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="role === 'super_admin'">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M12 5.5A3.5 3.5 0 0 1 15.5 9a3.5 3.5 0 0 1-3.5 3.5A3.5 3.5 0 0 1 8.5 9A3.5 3.5 0 0 1 12 5.5M5 8c.56 0 1.08.15 1.53.42c-.15 1.43.27 2.85 1.13 3.96C7.16 13.34 6.16 14 5 14a3 3 0 0 1-3-3a3 3 0 0 1 3-3m14 0a3 3 0 0 1 3 3a3 3 0 0 1-3 3c-1.16 0-2.16-.66-2.66-1.62a5.54 5.54 0 0 0 1.13-3.96c.45-.27.97-.42 1.53-.42M5.5 18.25c0-2.07 2.91-3.75 6.5-3.75s6.5 1.68 6.5 3.75V20h-13v-1.75M0 20v-1.5c0-1.39 1.89-2.56 4.45-2.9c-.59.68-.95 1.62-.95 2.65V20H0m24 0h-3.5v-1.75c0-1.03-.36-1.97-.95-2.65c2.56.34 4.45 1.51 4.45 2.9V20z"/>
+        </svg>
+        <span>Nurses & Staff</span>
+      </div>
+    </a>
+
+    <!-- Phase NS-4 — Nursing Stations admin (Nursing Superintendent + super_admin).
+         Group wards into stations and map nurses; this drives nurse ward-scoping. -->
+    <a [routerLink]="(role === 'super_admin' || subAdminType === 'Nursing Superintendent') ? '/nursing-stations' : null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="role === 'super_admin' || subAdminType === 'Nursing Superintendent'">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3m0 2.7l5 4.5V18h-2v-6H9v6H7v-7.8z"/>
+        </svg>
+        <span>Nursing Stations</span>
+      </div>
+    </a>
+
+    <!-- Roster — super_admin / Nursing Superintendent plan & assign shifts. -->
+    <a [routerLink]="(role === 'super_admin' || subAdminType === 'Nursing Superintendent') ? '/scheduling/roster' : null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="(role === 'super_admin' || subAdminType === 'Nursing Superintendent')">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M19 3h-1V2c0-.55-.45-1-1-1s-1 .45-1 1v1H8V2c0-.55-.45-1-1-1s-1 .45-1 1v1H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2m0 16H5V8h14zM7 10h5v5H7z"/>
+        </svg>
+        <span>Roster</span>
+      </div>
+    </a>
+
+    <!-- Duty sign-in kiosk — any logged-in clinical user can sign their own
+         shift; super_admin and charge nurses can use the kiosk view to sign
+         in on a shared tablet. -->
+    <a routerLink="/duty-signin" routerLinkActive="active" class="icon-wrapper"
+       *ngIf="role === 'doctor' || role === 'super_admin' || isIpdNurse || isNursingSuper || ['Therapist','OT Coordinator','Dietician','Canteen Staff'].includes(subAdminType)">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M9 16.17L4.83 12l-1.42 1.41L9 19L21 7l-1.41-1.41z"/>
+        </svg>
+        <span>Duty sign-in</span>
+      </div>
+    </a>
+    <a [routerLink]="role === 'super_admin' ? '/note-templates' : null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="role === 'super_admin'">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2m-2 4H7V5h10zm0 4H7V9h10zm-3 4H7v-2h7z"/>
+        </svg>
+        <span>Templates</span>
+      </div>
+    </a>
+
+    <a [routerLink]="role === 'doctor' ? '/my-opd-templates' : null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="role === 'doctor'">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2m-2 4H7V5h10zm0 4H7V9h10zm-3 4H7v-2h7z"/>
+        </svg>
+        <span>My OPD Templates</span>
+      </div>
+    </a>
+
+    <a [routerLink]="role === 'super_admin' ? '/dietetics/setup' : null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="role === 'super_admin'">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M21 5h-2.64l-.79-2.36A.996.996 0 0 0 16.6 2H7.4c-.43 0-.81.27-.95.68L5.66 5H3c-.55 0-1 .45-1 1v2c0 .55.45 1 1 1h1l1.66 11.32c.07.46.46.81.93.81h10.8c.47 0 .87-.35.93-.81L20 9h1c.55 0 1-.45 1-1V6c0-.55-.45-1-1-1"/>
+        </svg>
+        <span>Diet setup</span>
+      </div>
+    </a>
+
+    <a [routerLink]="(role === 'super_admin' || role === 'admin') ? '/hmis-sync': null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="(role === 'super_admin' || role === 'admin')">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6c0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6c0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4l-4-4v3z"/>
+        </svg>
+        <span>HMIS Sync</span>
+      </div>
+    </a>
+
+    <a [routerLink]="(role === 'super_admin' || role === 'admin') ? '/nabh-audit': null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="(role === 'super_admin' || role === 'admin')">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8zm-1 7V3.5L18.5 9H13z"/>
+        </svg>
+        <span>NABH Audit</span>
+      </div>
+    </a>
+
+    <!-- ═══════════ Settings (pinned bottom via flex margin-top: auto) ═══════════ -->
+    <a routerLinkActive="active" class="icon-wrapper">
+      <div class="icon-content" (click)="openSettings()">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon settings" width="2em" height="2em" viewBox="0 0 24 24"><path fill="currentColor" d="M19.5 12c0-.23-.01-.45-.03-.68l1.86-1.41c.4-.3.51-.86.26-1.3l-1.87-3.23a.987.987 0 0 0-1.25-.42l-2.15.91c-.37-.26-.76-.49-1.17-.68l-.29-2.31c-.06-.5-.49-.88-.99-.88h-3.73c-.51 0-.94.38-1 .88l-.29 2.31c-.41.19-.8.42-1.17.68l-2.15-.91c-.46-.2-1-.02-1.25.42L2.41 8.62c-.25.44-.14.99.26 1.3l1.86 1.41a7.3 7.3 0 0 0 0 1.35l-1.86 1.41c-.4.3-.51.86-.26 1.3l1.87 3.23c.25.44.79.62 1.25.42l2.15-.91c.37.26.76.49 1.17.68l.29 2.31c.06.5.49.88.99.88h3.73c.5 0 .93-.38.99-.88l.29-2.31c.41-.19.8-.42 1.17-.68l2.15.91c.46.2 1 .02 1.25-.42l1.87-3.23c.25-.44.14-.99-.26-1.3l-1.86-1.41c.03-.23.04-.45.04-.68m-7.46 3.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5s3.5 1.57 3.5 3.5s-1.57 3.5-3.5 3.5"/></svg>
+        <span>Settings</span>
+      </div>
+    </a>
+
   </div>
-</a>
-
-<!-- IPD Module -->
-<a [routerLink]="(role === 'doctor' || role === 'super_admin' || subAdminType === 'IPD Nurse' || subAdminType === 'ICU Nurse' || subAdminType === 'Ward Coordinator') ? '/ipd': null" routerLinkActive="active" class="icon-wrapper" *ngIf="(role === 'doctor' || role === 'super_admin' || subAdminType === 'IPD Nurse' || subAdminType === 'ICU Nurse' || subAdminType === 'Ward Coordinator')">
-  <div class="icon-content" *ngIf="(role === 'doctor' || role === 'super_admin' || subAdminType === 'IPD Nurse' || subAdminType === 'ICU Nurse' || subAdminType === 'Ward Coordinator')">
-    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
-      <path fill="currentColor" d="M4 4h16v2H4V4m0 7h16v2H4v-2m0 7h16v2H4v-2m2-4h12v2H6v-2"/>
-    </svg>
-    <span>IPD</span>
-  </div>
-</a>
-
-<!-- Ward Management -->
-<a [routerLink]="(role === 'super_admin' || subAdminType === 'Ward Coordinator') ? '/ward-census': null" routerLinkActive="active" class="icon-wrapper" *ngIf="(role === 'super_admin' || subAdminType === 'Ward Coordinator')">
-  <div class="icon-content" *ngIf="(role === 'super_admin' || subAdminType === 'Ward Coordinator')">
-    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
-      <path fill="currentColor" d="M3 13h2v8H3zm4-8h2v16H7zm4-2h2v18h-2zm4 4h2v14h-2zm4-4h2v18h-2z"/>
-    </svg>
-    <span>Ward Mgmt</span>
-  </div>
-</a>
-
-<!-- MLC Cases -->
-<a [routerLink]="(role === 'super_admin' || role === 'admin' || role === 'doctor') ? '/mlc': null" routerLinkActive="active" class="icon-wrapper" *ngIf="(role === 'super_admin' || role === 'admin' || role === 'doctor')">
-  <div class="icon-content" *ngIf="(role === 'super_admin' || role === 'admin' || role === 'doctor')">
-    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
-      <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m-2 15h4v2h-4zm0-5h4v4h-4zm0-5h4v4h-4z"/>
-    </svg>
-    <span>MLC Cases</span>
-  </div>
-</a>
-
-<!-- LAMA/DAMA Records -->
-<a [routerLink]="(role === 'super_admin' || role === 'doctor' || subAdminType === 'Discharge Coordinator') ? '/lama-dama': null" routerLinkActive="active" class="icon-wrapper" *ngIf="(role === 'super_admin' || role === 'doctor' || subAdminType === 'Discharge Coordinator')">
-  <div class="icon-content" *ngIf="(role === 'super_admin' || role === 'doctor' || subAdminType === 'Discharge Coordinator')">
-    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
-      <path fill="currentColor" d="M19 6h-2V4c0-1.1-.9-2-2-2h-2c-1.1 0-2 .9-2 2v2h-2V4c0-1.1-.9-2-2-2H7c-1.1 0-2 .9-2 2v2H3c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-2h2v2h-2V4zm-5 2h2v2H7V6z"/>
-    </svg>
-    <span>LAMA/DAMA</span>
-  </div>
-</a>
-
-<!-- HMIS Sync Status -->
-<a [routerLink]="(role === 'super_admin' || role === 'admin') ? '/hmis-sync': null" routerLinkActive="active" class="icon-wrapper" *ngIf="(role === 'super_admin' || role === 'admin')">
-  <div class="icon-content" *ngIf="(role === 'super_admin' || role === 'admin')">
-    <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
-      <path fill="currentColor" d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6c0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6c0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4l-4-4v3z"/>
-    </svg>
-    <span>HMIS Sync</span>
-  </div>
-</a>
-
-  <a  routerLinkActive="active" class="icon-wrapper" >
-    <div class="icon-content" (click)="openSettings()">
-    <svg xmlns="http://www.w3.org/2000/svg" class="icon settings" width="2em" height="2em" viewBox="0 0 24 24"><path fill="currentColor" d="M19.5 12c0-.23-.01-.45-.03-.68l1.86-1.41c.4-.3.51-.86.26-1.3l-1.87-3.23a.987.987 0 0 0-1.25-.42l-2.15.91c-.37-.26-.76-.49-1.17-.68l-.29-2.31c-.06-.5-.49-.88-.99-.88h-3.73c-.51 0-.94.38-1 .88l-.29 2.31c-.41.19-.8.42-1.17.68l-2.15-.91c-.46-.2-1-.02-1.25.42L2.41 8.62c-.25.44-.14.99.26 1.3l1.86 1.41a7.3 7.3 0 0 0 0 1.35l-1.86 1.41c-.4.3-.51.86-.26 1.3l1.87 3.23c.25.44.79.62 1.25.42l2.15-.91c.37.26.76.49 1.17.68l.29 2.31c.06.5.49.88.99.88h3.73c.5 0 .93-.38.99-.88l.29-2.31c.41-.19.8-.42 1.17-.68l2.15.91c.46.2 1 .02 1.25-.42l1.87-3.23c.25-.44.14-.99-.26-1.3l-1.86-1.41c.03-.23.04-.45.04-.68m-7.46 3.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5s3.5 1.57 3.5 3.5s-1.57 3.5-3.5 3.5"/></svg>
-  <span>Settings</span>
-  </div>
-</a>
-
-</div>
 </div>
 
 <!-- <app-settings *ngIf="openSetting"></app-settings> -->

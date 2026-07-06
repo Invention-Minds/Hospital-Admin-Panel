@@ -1,0 +1,154 @@
+<div class="ds-screen">
+  <!-- Toolbar (hidden when printing) -->
+  <div class="ds-toolbar no-print">
+    <button class="ds-btn" (click)="goBack()">← Back</button>
+    <button class="ds-btn ds-btn-primary" (click)="print()" [disabled]="!ctx">🖨 Print</button>
+  </div>
+
+  <div class="ds-loading no-print" *ngIf="loading">Assembling discharge summary…</div>
+  <div class="ds-banner no-print" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <div class="ds-sheet" *ngIf="ctx as c">
+    <h1 class="ds-title">Discharge Summary</h1>
+
+    <!-- Patient header -->
+    <table class="ds-head">
+      <tr>
+        <td><b>Patient Name</b></td><td>{{ c.patient?.name || '—' }}</td>
+        <td><b>Age/Sex</b></td><td>{{ c.patient?.age || '—' }} / {{ c.patient?.gender || '—' }}</td>
+      </tr>
+      <tr>
+        <td><b>PRN</b></td><td>{{ c.admission.prn || '—' }}</td>
+        <td><b>Admission Date</b></td><td>{{ c.admission.admissionDate | date:'dd/MM/yyyy' }} {{ c.admission.admissionTime }}</td>
+      </tr>
+      <tr>
+        <td><b>Admission No</b></td><td>{{ c.admission.admissionNo }}</td>
+        <td><b>Discharge Date</b></td><td>{{ dc?.['dischargeDate'] ? (dc?.['dischargeDate'] | date:'dd/MM/yyyy') : '—' }} {{ dc?.['dischargeTime'] || '' }}</td>
+      </tr>
+      <tr>
+        <td><b>Primary Consultant</b></td><td>{{ c.admission.admittingDoctor }}</td>
+        <td><b>Primary Dept</b></td><td>{{ c.admission.department }}</td>
+      </tr>
+      <tr>
+        <td><b>Ward</b></td><td>{{ c.admission.ward?.wardName || '—' }}<span *ngIf="c.admission.bed?.bedNumber"> / {{ c.admission.bed?.bedNumber }}</span></td>
+        <td><b>Discharge mode</b></td><td>{{ dc?.['dischargeType'] || '—' }}</td>
+      </tr>
+      <tr>
+        <td><b>Allergic To</b></td><td>{{ c.allergies.length ? c.allergies.join(', ') : 'NKDA' }}</td>
+        <td><b>Blood Group</b></td><td>{{ c.patient?.bloodGroup || '—' }}</td>
+      </tr>
+    </table>
+
+    <!-- Diagnosis -->
+    <section class="ds-sec">
+      <h2>Diagnosis</h2>
+      <p><b>Final:</b> {{ dc?.['finalDiagnosis'] || c.admission.diagnosis || '—' }}</p>
+    </section>
+
+    <!-- Chief complaints + history (from initial assessment) -->
+    <section class="ds-sec" *ngIf="ia">
+      <h2>Chief Complaints on Admission</h2>
+      <p>{{ ia['chiefComplaints'] || ia['presentingIllness'] || '—' }}</p>
+    </section>
+    <section class="ds-sec" *ngIf="ia">
+      <h2>Medical / Surgical History</h2>
+      <p *ngIf="comorbidities.length"><b>Co-morbidities:</b> {{ comorbidities.join('; ') }}</p>
+      <p *ngIf="ia['surgicalHistory']"><b>Surgical:</b> {{ ia['surgicalHistory'] }}</p>
+      <p *ngIf="ia['medicationHistory']"><b>Medications:</b> {{ ia['medicationHistory'] }}</p>
+      <p *ngIf="!comorbidities.length && !ia['surgicalHistory'] && !ia['medicationHistory']">Nothing significant</p>
+    </section>
+
+    <!-- Clinical findings on admission -->
+    <section class="ds-sec" *ngIf="ia">
+      <h2>Clinical Findings on Admission</h2>
+      <table class="ds-vitals">
+        <tr>
+          <td><b>Temp</b> {{ ia['vitalsTemp'] || '—' }}</td>
+          <td><b>Pulse</b> {{ ia['vitalsPulse'] || '—' }}</td>
+          <td><b>RR</b> {{ ia['vitalsRR'] || '—' }}</td>
+          <td><b>BP</b> {{ ia['vitalsBP'] || '—' }}</td>
+        </tr>
+        <tr>
+          <td><b>Weight</b> {{ ia['vitalsWeight'] || '—' }}</td>
+          <td><b>Height</b> {{ ia['vitalsHeight'] || '—' }}</td>
+          <td colspan="2"><b>General:</b>
+            <span *ngFor="let g of generalExam">{{ g.label }}: {{ g.present ? 'Present' : 'Nil' }}; </span>
+          </td>
+        </tr>
+      </table>
+      <p class="ds-sys" *ngFor="let s of systemicExam"><b>{{ s.sys }}:</b> {{ s.text }}</p>
+    </section>
+
+    <!-- Operative notes (OT) -->
+    <section class="ds-sec" *ngIf="c.otSchedules.length">
+      <h2>Operative Notes</h2>
+      <div class="ds-op" *ngFor="let s of c.otSchedules">
+        <p><b>Surgeon:</b> {{ s.surgeonName || '—' }} &nbsp; <b>Anaesthetist:</b> {{ s.anaesthesiologistName || '—' }}</p>
+        <div *ngFor="let n of s.intraOpNotes">
+          <p><b>Operation Date:</b> {{ n.startAt | date:'dd/MM/yyyy' }} &nbsp; <b>Anaesthesia:</b> {{ n.anaesthesiaType || '—' }}</p>
+          <p><b>Operation Done:</b> {{ n.procedureDone || s.procedureName }}</p>
+          <p *ngIf="n.findings"><b>Findings:</b> {{ n.findings }}</p>
+          <p *ngIf="n.complications"><b>Complications:</b> {{ n.complications }}</p>
+        </div>
+        <p *ngIf="!s.intraOpNotes.length"><b>Procedure:</b> {{ s.procedureName }}</p>
+      </div>
+    </section>
+
+    <!-- Investigations -->
+    <section class="ds-sec" *ngIf="c.results.length">
+      <h2>Investigations</h2>
+      <table class="ds-labs">
+        <thead><tr><th>Test</th><th>Result</th><th>Ref</th><th>Date</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let r of c.results" [class.ds-crit]="r.criticalFlag">
+            <td>{{ r.testName }}</td>
+            <td>{{ r.result || r.impression || '—' }}<span *ngIf="r.unit"> {{ r.unit }}</span></td>
+            <td>{{ r.referenceRange || '—' }}</td>
+            <td>{{ r.reportedAt | date:'dd/MM/yy' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Course in hospital -->
+    <section class="ds-sec" *ngIf="dc?.['dischargeSummary']">
+      <h2>Course in the Hospital</h2>
+      <p class="ds-pre">{{ dc?.['dischargeSummary'] }}</p>
+    </section>
+
+    <!-- Condition at discharge -->
+    <section class="ds-sec">
+      <h2>Condition at Discharge</h2>
+      <p>{{ dc?.['conditionAtDischarge'] || '—' }}</p>
+    </section>
+
+    <!-- Treatment advice (medications) -->
+    <section class="ds-sec" *ngIf="parseMedications(dc?.['medications']).length">
+      <h2>Treatment Advice on Discharge</h2>
+      <table class="ds-labs">
+        <thead><tr><th>Drug</th><th>Dose</th><th>Frequency</th><th>Duration</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let m of parseMedications(dc?.['medications'])">
+            <td>{{ m['name'] || m['drug'] || m['genericName'] || '—' }}</td>
+            <td>{{ m['dose'] || m['dosage'] || '—' }}</td>
+            <td>{{ m['frequency'] || m['freq'] || '—' }}</td>
+            <td>{{ m['duration'] || '—' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Special instructions + follow-up -->
+    <section class="ds-sec" *ngIf="dc?.['advice']">
+      <h2>Special Instructions</h2>
+      <p class="ds-pre">{{ dc?.['advice'] }}</p>
+    </section>
+    <section class="ds-sec" *ngIf="dc?.['followUpDate'] || dc?.['followUpDoctor']">
+      <h2>Follow Up</h2>
+      <p>{{ dc?.['followUpDate'] ? (dc?.['followUpDate'] | date:'dd/MM/yyyy') : '' }}
+         <span *ngIf="dc?.['followUpDoctor']">with {{ dc?.['followUpDoctor'] }}</span></p>
+    </section>
+
+    <p class="ds-foot">In case of emergency, contact the hospital / visit the triage. Bring this summary on follow-up.</p>
+  </div>
+</div>

@@ -6,6 +6,7 @@ import { Observable, interval } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { environment } from '../../../environment/environment';
 import { MessageService } from 'primeng/api';
+import { NotificationRecipientService } from '../../services/notification-recipient.service';
 
 interface Notification {
   id: number;
@@ -68,12 +69,23 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
   showLogoutConfirmDialog: boolean = false;
   showBubble: boolean = true; // Flag to show the bubble
   @Output() leaveRequestClicked = new EventEmitter<void>();
-  constructor(private authService: AuthServiceService, private router: Router, private appointmentService: AppointmentConfirmService, private changeDetector: ChangeDetectorRef, private messageService: MessageService, private elementRef: ElementRef) { }
+  /** Support WhatsApp number — DB-managed (support_contact group); falls back
+   *  to the previously-hardcoded value until the recipients table is seeded. */
+  supportPhone = '919844005600';
+
+  constructor(private authService: AuthServiceService, private router: Router, private appointmentService: AppointmentConfirmService, private changeDetector: ChangeDetectorRef, private messageService: MessageService, private elementRef: ElementRef, private recipientsSvc: NotificationRecipientService) { }
 
 
 
   ngOnInit(): void {
     if (typeof window !== 'undefined' && window.localStorage) {
+      // Support number from DB (best-effort; endpoint needs an auth token).
+      if (localStorage.getItem('token')) {
+        this.recipientsSvc.phones('support_contact').subscribe({
+          next: (res) => { if (res.phones?.length) this.supportPhone = res.phones[0]; },
+          error: () => {},
+        });
+      }
       setTimeout(() => {
         this.showBubble = false;
       }, 6000);
@@ -144,15 +156,44 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
     const isFrontDesk = this.subAdminType === 'Front Desk';
     const isAdminManager = this.adminType === 'Manager' || this.adminType === 'Senior Manager';
   
+    // Phase 9.19 — Emergency referral acknowledgment + escalation (in-app bell).
+    // A 'emergency_referral' is shown to the specific doctor it targets
+    // (matched by userId); 'emergency_referral_escalation' is shown to the
+    // targeted doctor (userId) or to the role it escalated to (targetRole).
+    const myUserId = (typeof localStorage !== 'undefined') ? localStorage.getItem('userid') : null;
+    const isReferralForMe =
+      (notification.type === 'emergency_referral' || notification.type === 'emergency_referral_escalation') &&
+      (
+        (notification['userId'] != null && String(notification['userId']) === myUserId) ||
+        (notification['targetRole'] != null && this.role === String(notification['targetRole']).replace(/_/g, ''))
+      );
+
+    // Phase 9.20 — hospital emergency codes are hospital-wide: show to everyone.
+    const isEmergencyCode = notification.type === 'emergency_code';
+
+    // Phase 9.24 / Phase 3 — Incident reporting bell.
+    //  - incident_raised: targetRole='admin' (admins triage).
+    //  - incident_assigned: userId = the investigator.
+    //  - incident_closed: userId = the original reporter.
+    const isIncidentForMe =
+      (notification.type === 'incident_raised' || notification.type === 'incident_assigned' || notification.type === 'incident_closed') &&
+      (
+        (notification['userId'] != null && String(notification['userId']) === myUserId) ||
+        (notification['targetRole'] != null && this.role === String(notification['targetRole']).replace(/_/g, ''))
+      );
+
     return (
+      isEmergencyCode ||
+      isReferralForMe ||
+      isIncidentForMe ||
       (this.role === 'subadmin' &&
         (
           (isEstimator && notification.type === 'estimation_request' && notification.title === 'New Estimation Raised') ||
           (isTelecaller && (notification.type === 'appointment_request' || notification.type === 'service_request')) ||
-          (isFrontDesk && 
-            (notification.type === 'appointment_remainder' || 
-             notification.type === 'service_remainder' || 
-             notification.type === 'appointment_request' || 
+          (isFrontDesk &&
+            (notification.type === 'appointment_remainder' ||
+             notification.type === 'service_remainder' ||
+             notification.type === 'appointment_request' ||
              notification.type === 'service_request'))
         )
       ) ||
@@ -220,10 +261,23 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
           this.notifications.splice(index, 1);
           this.showNotifications = false;
 
-          // Navigate to the appointments page
-          if(this.notifications[index].type === 'estimation_request'){
+          // Navigate based on the clicked notification's type.
+          const clickedType = notificationToDelete.type;
+          if (clickedType === 'emergency_referral' || clickedType === 'emergency_referral_escalation') {
+            // Phase 9.19 — take the doctor straight to their referral inbox.
+            this.router.navigate(['/emergency/my-referrals']);
+          } else if (clickedType === 'emergency_code') {
+            // Phase 9.20 — open the emergency codes board.
+            this.router.navigate(['/emergency/codes']);
+          } else if (clickedType === 'incident_raised' || clickedType === 'incident_assigned' || clickedType === 'incident_closed') {
+            // Phase 9.24 / Phase 3 — entityType is 'Incident:<uuid>'; jump to the detail.
+            const ent = notificationToDelete['entityType'] as string | undefined;
+            const incidentId = ent && ent.startsWith('Incident:') ? ent.slice('Incident:'.length) : null;
+            if (incidentId) this.router.navigate(['/incidents', incidentId]);
+            else this.router.navigate(['/incidents']);
+          } else if (clickedType === 'estimation_request') {
             this.router.navigate(['/estimation']);
-          }else{
+          } else {
             this.router.navigate(['/appointments']);
           }
 
@@ -327,6 +381,7 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
     localStorage.removeItem('username');
     localStorage.removeItem('role');
     localStorage.removeItem('token');
+    localStorage.removeItem('departmentName');
     this.router.navigate(['/login']);
     this.showLogoutConfirmDialog = false;
   }
@@ -340,7 +395,9 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
   //   // Add logout logic here
   // }
   openWhatsApp(): void {
-    const phone = '919844005600'; // Change to your WhatsApp number
+    // Old hardcoded number (kept for reference; now DB-managed via support_contact):
+    // const phone = '919844005600';
+    const phone = this.supportPhone;
     const message = encodeURIComponent('Hello! I need assistance.');
     window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
   }

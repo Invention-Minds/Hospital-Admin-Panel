@@ -1,0 +1,152 @@
+<div class="lra-shell">
+  <!-- Header -->
+  <div class="lra-page-header">
+    <div>
+      <h2 class="lra-page-title">Lab &amp; Radiology Reports</h2>
+      <p class="lra-page-sub">Upload results against open orders. Doctors are notified automatically.</p>
+    </div>
+    <button class="lra-btn lra-btn-secondary" (click)="load()" [disabled]="loading">
+      <i class="pi pi-refresh"></i> {{ loading ? 'Refreshing…' : 'Refresh' }}
+    </button>
+  </div>
+
+  <div class="lra-banner lra-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
+  <div class="lra-banner lra-good" *ngIf="successMessage" (click)="successMessage=''">{{ successMessage }}</div>
+
+  <!-- Filters -->
+  <div class="lra-filter-card">
+    <div class="lra-filter-grid">
+      <div class="lra-field">
+        <label class="lra-field-label">Department</label>
+        <select class="lra-input" [(ngModel)]="filterDepartment" (change)="load()">
+          <option value="">All</option>
+          <option value="lab">Lab</option>
+          <option value="radiology">Radiology</option>
+        </select>
+      </div>
+      <div class="lra-field">
+        <label class="lra-field-label">Look back (days)</label>
+        <select class="lra-input" [(ngModel)]="filterDays" (change)="load()">
+          <option [ngValue]="3">3</option>
+          <option [ngValue]="7">7</option>
+          <option [ngValue]="14">14</option>
+          <option [ngValue]="30">30</option>
+          <option [ngValue]="90">90</option>
+        </select>
+      </div>
+      <div class="lra-field">
+        <label class="lra-field-label">Search</label>
+        <input class="lra-input" type="text" placeholder="PRN or doctor name" [(ngModel)]="filterSearch" />
+      </div>
+      <div class="lra-field lra-field-check">
+        <label class="lra-inline">
+          <input type="checkbox" [(ngModel)]="filterShowComplete" />
+          <span>Show completed orders</span>
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="lra-grid-wrap">
+    <div class="lra-grid-header">
+      <h3 class="lra-grid-title">
+        Orders <span class="lra-count">({{ visibleRows.length }})</span>
+      </h3>
+    </div>
+
+    <div class="lra-loading" *ngIf="loading">Loading orders…</div>
+
+    <div class="lra-empty" *ngIf="!loading && !visibleRows.length">
+      <i class="pi pi-inbox"></i>
+      <div>No orders pending under these filters.</div>
+    </div>
+
+    <div class="lra-table-wrap" *ngIf="!loading && visibleRows.length">
+      <table class="dm-table">
+        <thead>
+          <tr>
+            <th>Order</th>
+            <th>PRN</th>
+            <th>Doctor</th>
+            <th>Tests</th>
+            <th>Uploaded</th>
+            <th>Pending</th>
+            <th>Critical</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of visibleRows" [class.lra-row-complete]="row.isComplete">
+            <td>
+              <div class="lra-name">#{{ row.id }}</div>
+              <div class="lra-name-sub">{{ row.createdAt | date:'d MMM, HH:mm' }}</div>
+            </td>
+            <td>{{ row.prn }}</td>
+            <td>
+              <div class="lra-name">{{ row.doctorName || '—' }}</div>
+              <div class="lra-name-sub" *ngIf="row.date">{{ row.date }}</div>
+            </td>
+            <td class="lra-tests-cell">
+              <div *ngIf="row.labTests.length" class="lra-tests-group">
+                <span class="lra-pill lra-pill-lab">Lab</span>
+                <span class="lra-test-list">{{ row.labTests.length }} test(s)</span>
+              </div>
+              <div *ngIf="row.radiologyTests.length" class="lra-tests-group">
+                <span class="lra-pill lra-pill-radiology">Rad</span>
+                <span class="lra-test-list">{{ row.radiologyTests.length }} test(s)</span>
+              </div>
+            </td>
+            <td>
+              <ng-container *ngIf="uploadedCount(row); else dashUp">
+                <button class="lra-btn-link" (click)="row.results.length === 1 ? openViewer(row.results[0].id) : null"
+                        [title]="row.results.length === 1 ? 'View result' : 'Multiple results — open from patient profile'">
+                  {{ uploadedCount(row) }}
+                </button>
+              </ng-container>
+              <ng-template #dashUp><span class="lra-muted">0</span></ng-template>
+            </td>
+            <td>
+              <span class="lra-pill" [class.lra-pill-warn]="pendingCount(row) > 0" [class.lra-pill-done]="pendingCount(row) === 0">
+                {{ pendingCount(row) }}
+              </span>
+            </td>
+            <td>
+              <span class="lra-pill lra-pill-critical" *ngIf="hasCritical(row)">YES</span>
+              <span class="lra-muted" *ngIf="!hasCritical(row)">—</span>
+            </td>
+            <td class="lra-actions-cell">
+              <ng-container *ngIf="row.pendingTests.length">
+                <select class="lra-input lra-input-sm"
+                        [value]="''"
+                        (change)="openUpload(row, { name: $any($event.target).value.split('::')[0], dept: $any($event.target).value.split('::')[1] }); $any($event.target).value=''">
+                  <option value="" disabled>Upload result…</option>
+                  <option *ngFor="let t of row.pendingTests" [value]="t.name + '::' + t.dept">
+                    {{ t.name }} ({{ t.dept }})
+                  </option>
+                </select>
+              </ng-container>
+              <button class="lra-btn-link" (click)="openUpload(row)">+ Other</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<app-report-upload
+  [open]="uploadOpen"
+  [orderId]="uploadOrderId"
+  [prnLabel]="uploadPrn"
+  [testName]="uploadTestName"
+  [department]="uploadDepartment"
+  (closed)="onUploadClosed()"
+  (saved)="onUploadSaved($event)">
+</app-report-upload>
+
+<app-report-viewer
+  [open]="viewerOpen"
+  [result]="viewerResult"
+  (closed)="onViewerClosed()">
+</app-report-viewer>

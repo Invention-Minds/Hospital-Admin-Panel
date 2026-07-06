@@ -5,7 +5,10 @@ import { environment } from '../../environment/environment.prod';
 
 export interface LamaRecord {
   id?: string;
-  emergencyId: string;
+  /** ER source — mutually exclusive with admissionId. */
+  emergencyId?: string;
+  /** IPD / post-op source — mutually exclusive with emergencyId. */
+  admissionId?: string;
   lamaTime: Date;
   doctorAdvice: string;
   riskExplained: boolean;
@@ -16,11 +19,18 @@ export interface LamaRecord {
   /** HMIS regulatory-system id — populated inline-await on create/update per Sprint 2f. Null = sync pending. */
   hmisLamaId?: string | null;
   createdAt?: Date;
+  /** Linked emergency case (list/detail include) — for showing the ER PRN. */
+  emergency?: { prn?: string; patientName?: string } | null;
+  /** Linked IPD admission (list/detail include) — for showing the IPD source. */
+  admission?: { admissionNo?: string; prn?: string } | null;
 }
 
 export interface DamaRecord {
   id?: string;
-  emergencyId: string;
+  /** ER source — mutually exclusive with admissionId. */
+  emergencyId?: string;
+  /** IPD / post-op source — mutually exclusive with emergencyId. */
+  admissionId?: string;
   dischargeTime: Date;
   doctorRecommendation: string;
   patientDeclinesAdvice: boolean;
@@ -31,6 +41,10 @@ export interface DamaRecord {
   /** HMIS regulatory-system id — populated inline-await on create/update per Sprint 2f. Null = sync pending. */
   hmisDamaId?: string | null;
   createdAt?: Date;
+  /** Linked emergency case (list/detail include) — for showing the ER PRN. */
+  emergency?: { prn?: string; patientName?: string } | null;
+  /** Linked IPD admission (list/detail include) — for showing the IPD source. */
+  admission?: { admissionNo?: string; prn?: string } | null;
 }
 
 @Injectable({

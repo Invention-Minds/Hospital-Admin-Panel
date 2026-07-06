@@ -1,0 +1,44 @@
+<div class="ds-wrap">
+  <div class="ds-head">
+    <h2>Doorstep Requests</h2>
+    <select [(ngModel)]="statusFilter" (change)="load()">
+      <option value="pending">Pending</option>
+      <option value="scheduled">Scheduled</option>
+      <option value="completed">Completed</option>
+      <option value="cancelled">Cancelled</option>
+      <option value="">All</option>
+    </select>
+  </div>
+
+  <div *ngIf="errorMessage" class="ds-error">{{ errorMessage }}</div>
+  <div *ngIf="loading" class="ds-muted">Loading…</div>
+  <div *ngIf="!loading && rows.length === 0" class="ds-muted">No requests.</div>
+
+  <div class="ds-card" *ngFor="let r of rows">
+    <div class="ds-card-top">
+      <div>
+        <span class="ds-name">{{ r.patientName }}</span>
+        <span class="ds-pill" [ngClass]="r.status">{{ r.status }}</span>
+      </div>
+      <span class="ds-ref">{{ r.refNo }}</span>
+    </div>
+    <div class="ds-row"><b>{{ serviceLabel(r) }}</b><span *ngIf="r.prn"> · PRN {{ r.prn }}</span></div>
+    <div class="ds-row">Phone: {{ r.patientPhone }}</div>
+    <div class="ds-row">{{ r.address }}</div>
+    <div class="ds-row" *ngIf="r.details"><i>{{ r.details }}</i></div>
+    <div class="ds-row" *ngIf="r.distanceKm != null">
+      Distance: {{ r.distanceKm }} km —
+      <span [class.ds-free]="r.withinFreeRadius" [class.ds-paid]="r.withinFreeRadius === false">
+        {{ r.withinFreeRadius ? 'within free radius' : (r.withinFreeRadius === false ? 'beyond free radius (chargeable)' : '') }}
+      </span>
+    </div>
+    <div class="ds-row" *ngIf="mapLink(r) as ml"><a [href]="ml" target="_blank" rel="noopener">Open location</a></div>
+    <div class="ds-row ds-time">{{ r.created_at | date: 'dd MMM, h:mm a' }}</div>
+
+    <div class="ds-actions" *ngIf="r.status !== 'completed' && r.status !== 'cancelled'">
+      <button *ngIf="r.status === 'pending'" (click)="setStatus(r, 'scheduled')" [disabled]="savingId === r.id">Mark scheduled</button>
+      <button (click)="setStatus(r, 'completed')" [disabled]="savingId === r.id">Complete</button>
+      <button class="ds-cancel" (click)="setStatus(r, 'cancelled')" [disabled]="savingId === r.id">Cancel</button>
+    </div>
+  </div>
+</div>

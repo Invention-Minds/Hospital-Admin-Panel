@@ -7,12 +7,14 @@
  * ============================================================================ */
 
 .page {
+  margin-left: 70px;
   padding: var(--space-40) var(--space-20);
   font-family: var(--font-family-primary);
   color: var(--color-text-heading);
   background: var(--color-surface-page);
   min-height: 100vh;
 }
+@media (max-width: 768px) { .page { margin-left: 0; } }
 
 .section {
   background: var(--color-surface-card);
@@ -131,6 +133,18 @@
 }
 
 /* ---------- Administer dialog ---------- */
+/* The administer / witness modals render a fully-styled custom .dialog
+   (own navy header + body + footer + rounding) inside PrimeNG's p-dialog.
+   PrimeNG's .p-dialog-content adds `padding: 0 1.5rem 2rem 1.5rem`, which
+   double-frames the custom dialog (white gap around the navy header, dead
+   space below the footer). Strip that padding so the custom dialog sits
+   flush, and let it own the rounding. */
+:host ::ng-deep .p-dialog .p-dialog-content {
+  padding: 0 !important;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
 .dialog {
   background: var(--color-surface-card);
   border-radius: var(--radius-xl);
@@ -207,4 +221,61 @@
 :host ::ng-deep .form__textarea {
   resize: vertical;
   min-height: 72px;
+}
+
+/* Phase 4 (WF-3) — gating checkboxes + witness button + co-signed pill. */
+:host ::ng-deep .form__gates {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #fff7e6;
+  border: 1px solid #f3d9a8;
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-top: 4px;
+}
+:host ::ng-deep .form__check {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: 13px;
+  color: #5a4400;
+  cursor: pointer;
+}
+:host ::ng-deep .form__check input {
+  margin-top: 2px;
+}
+:host ::ng-deep .form__hint {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: #5a5a5a;
+}
+:host ::ng-deep .row__pill {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-left: 6px;
+}
+:host ::ng-deep .row__pill--good {
+  background: #e6f4ea;
+  color: #14562a;
+  border: 1px solid #b8e0c4;
+}
+:host ::ng-deep .row__hint {
+  font-size: 12px;
+  color: #14562a;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+:host ::ng-deep .btn--secondary {
+  background: #fff;
+  color: #271e4a;
+  border: 1px solid #271e4a;
+}
+:host ::ng-deep .btn--secondary:hover {
+  background: #f3f3f7;
 }

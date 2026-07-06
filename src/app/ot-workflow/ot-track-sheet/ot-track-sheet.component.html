@@ -1,0 +1,145 @@
+<div class="ts-shell" *ngIf="!loading && schedule as s">
+  <!-- Toolbar — hidden in print -->
+  <div class="ts-toolbar">
+    <h2 class="ts-title">Surgery Track Sheet <span class="ts-formcode">(UHJ/OTS/F-04)</span></h2>
+    <button class="ts-btn" (click)="print()">🖨 Print</button>
+  </div>
+
+  <div class="ts-banner ts-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <!-- Header card -->
+  <div class="ts-card">
+    <div class="ts-row"><strong>Patient:</strong> {{ s.patientName || '—' }} · PRN {{ s.prn || '—' }}</div>
+    <div class="ts-row"><strong>Date:</strong> {{ s.date | date:'dd-MMM-yyyy' }}</div>
+    <div class="ts-row"><strong>OT Room:</strong> {{ s.otRoom?.name || s.otRoom?.code || '—' }}</div>
+    <div class="ts-row" *ngIf="primarySurgery() as ps">
+      <strong>Surgery:</strong> {{ ps.surgeryName }}
+      <span *ngIf="ps.surgeryType"> · {{ ps.surgeryType }}</span>
+      <span *ngIf="ps.categoryCode"> · {{ ps.categoryCode }}</span>
+    </div>
+    <div class="ts-row"><strong>Diagnosis:</strong> {{ primaryNote()?.preOpDiagnosis || '—' }}</div>
+    <div class="ts-row"><strong>Anaesthesia:</strong> {{ primaryNote()?.anaesthesiaType || '—' }}</div>
+  </div>
+
+  <!-- Timeline -->
+  <div class="ts-card">
+    <h3 class="ts-section">Timeline</h3>
+    <table class="ts-grid">
+      <tbody>
+        <tr *ngFor="let t of timeline">
+          <th>{{ t.label }}</th>
+          <td>{{ t.at ? (t.at | date:'dd-MMM-yyyy HH:mm') : '—' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Team -->
+  <div class="ts-card">
+    <h3 class="ts-section">Team</h3>
+    <table class="ts-grid">
+      <tbody>
+        <tr>
+          <th>Surgeon</th>
+          <td>{{ staffByRole('surgeon').length ? staffByRole('surgeon')[0].staffName : (s.surgeonName || '—') }}</td>
+        </tr>
+        <tr>
+          <th>Co-Surgeon</th>
+          <td>
+            <span *ngFor="let st of staffByRole('co-surgeon'); let last = last">{{ st.staffName }}<span *ngIf="!last">, </span></span>
+            <span *ngIf="!staffByRole('co-surgeon').length">—</span>
+          </td>
+        </tr>
+        <tr>
+          <th>Assistant Surgeon</th>
+          <td>
+            <span *ngFor="let st of staffByRole('assistant-surgeon'); let last = last">{{ st.staffName }}<span *ngIf="!last">, </span></span>
+            <span *ngIf="!staffByRole('assistant-surgeon').length">—</span>
+          </td>
+        </tr>
+        <tr>
+          <th>Anaesthetist</th>
+          <td>{{ staffByRole('anaesthetist').length ? staffByRole('anaesthetist')[0].staffName : (s.anaesthesiologistName || '—') }}</td>
+        </tr>
+        <tr>
+          <th>Scrub Nurse</th>
+          <td>{{ staffByRole('scrub-nurse').length ? staffByRole('scrub-nurse')[0].staffName : (s.scrubNurseName || '—') }}</td>
+        </tr>
+        <tr>
+          <th>Floor Nurse</th>
+          <td>
+            <span *ngFor="let st of staffByRole('floor-nurse'); let last = last">{{ st.staffName }}<span *ngIf="!last">, </span></span>
+            <span *ngIf="!staffByRole('floor-nurse').length">—</span>
+          </td>
+        </tr>
+        <tr>
+          <th>Technician</th>
+          <td>
+            <span *ngFor="let st of staffByRole('technician'); let last = last">{{ st.staffName }}<span *ngIf="!last">, </span></span>
+            <span *ngIf="!staffByRole('technician').length">—</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Equipment -->
+  <div class="ts-card">
+    <h3 class="ts-section">Equipment</h3>
+    <table class="ts-grid" *ngIf="equipment.length; else noEquip">
+      <thead><tr><th>Equipment</th><th>Used (min)</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr *ngFor="let e of equipment">
+          <td>{{ e.equipmentName }}</td>
+          <td>{{ e.usedMinutes }}</td>
+          <td>{{ e.notes || '—' }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <ng-template #noEquip><div class="ts-muted">No equipment logged.</div></ng-template>
+  </div>
+
+  <!-- Implants -->
+  <div class="ts-card" *ngIf="parseImplants().length">
+    <h3 class="ts-section">Implants</h3>
+    <table class="ts-grid">
+      <thead><tr><th>Name</th><th>Batch</th><th>Serial</th><th>Manufacturer</th></tr></thead>
+      <tbody>
+        <tr *ngFor="let i of parseImplants()">
+          <td>{{ i.name }}</td>
+          <td>{{ i.batch || '—' }}</td>
+          <td>{{ i.serial || '—' }}</td>
+          <td>{{ i.manufacturer || '—' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Shifted to -->
+  <div class="ts-card">
+    <h3 class="ts-section">Disposition</h3>
+    <div class="ts-row"><strong>Patient shifted to:</strong> {{ s.pacuRecord?.dischargedTo || primaryNote()?.disposition || '—' }}</div>
+    <div class="ts-row"><strong>Condition at end:</strong> {{ s.outcome ? 'Recorded' : '—' }}</div>
+  </div>
+
+  <!-- Sign-off footer -->
+  <div class="ts-card">
+    <h3 class="ts-section">Staff Signatures</h3>
+    <div class="ts-sig-grid">
+      <div class="ts-sig-block">
+        <div class="ts-sig-line"></div>
+        <small>Scrub Nurse — Date &amp; Time</small>
+      </div>
+      <div class="ts-sig-block">
+        <div class="ts-sig-line"></div>
+        <small>Floor Nurse — Date &amp; Time</small>
+      </div>
+      <div class="ts-sig-block">
+        <div class="ts-sig-line"></div>
+        <small>OT In-charge — Date &amp; Time</small>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ts-loading" *ngIf="loading">Loading…</div>

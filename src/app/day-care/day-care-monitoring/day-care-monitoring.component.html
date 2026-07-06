@@ -1,0 +1,199 @@
+<div class="dc-shell">
+  <div class="dc-head">
+    <h2 class="dc-title">Day-Care Monitoring</h2>
+    <div class="dc-meta">
+      <span *ngIf="session" class="dc-pill"
+            [class.dc-pill-warn]="session.status === 'IN_PROGRESS'"
+            [class.dc-pill-ok]="session.status === 'COMPLETED' || session.status === 'DISCHARGED'">
+        {{ session.status }}
+      </span>
+      <span *ngIf="isNew" class="dc-pill">NEW</span>
+    </div>
+  </div>
+
+  <div class="dc-banner dc-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="dc-banner dc-good" *ngIf="successMessage">{{ successMessage }}</div>
+
+  <div *ngIf="loading" class="dc-loading">Loading…</div>
+
+  <section class="dc-card" *ngIf="!loading">
+    <h3>Session details</h3>
+    <div class="dc-grid-3">
+      <label class="dc-field">Patient name <input type="text" [(ngModel)]="form.patientName" /></label>
+      <label class="dc-field">PRN (optional) <input type="text" [(ngModel)]="form.prn" /></label>
+      <label class="dc-field">Date of service <input type="date" [(ngModel)]="form.dateOfService" /></label>
+      <label class="dc-field">Age <input type="number" min="0" [(ngModel)]="form.age" /></label>
+      <label class="dc-field">Gender
+        <select [(ngModel)]="form.gender">
+          <option [ngValue]="null">—</option>
+          <option value="M">Male</option>
+          <option value="F">Female</option>
+          <option value="O">Other</option>
+        </select>
+      </label>
+      <label class="dc-field">Procedure type
+        <select [(ngModel)]="form.procedureType">
+          <option *ngFor="let p of procedureTypes" [value]="p">{{ p }}</option>
+        </select>
+      </label>
+    </div>
+    <label class="dc-field">Procedure details <textarea rows="2" [(ngModel)]="form.procedureDetails"></textarea></label>
+    <label class="dc-field">Allergies <textarea rows="2" [(ngModel)]="form.allergies"></textarea></label>
+    <label class="dc-field">Consultant <input type="text" [(ngModel)]="form.consultantName" /></label>
+    <div class="dc-grid-3">
+      <label class="dc-field">Started at <input type="datetime-local" [(ngModel)]="form.startedAt" /></label>
+      <label class="dc-field">Completed at <input type="datetime-local" [(ngModel)]="form.completedAt" /></label>
+      <label class="dc-field">Discharged at <input type="datetime-local" [(ngModel)]="form.dischargedAt" /></label>
+    </div>
+    <label class="dc-field">Status
+      <select [(ngModel)]="form.status">
+        <option value="OPEN">Open</option>
+        <option value="IN_PROGRESS">In progress</option>
+        <option value="COMPLETED">Completed</option>
+        <option value="DISCHARGED">Discharged</option>
+        <option value="CANCELLED">Cancelled</option>
+      </select>
+    </label>
+  </section>
+
+  <section class="dc-card" *ngIf="!loading">
+    <h3>Alert thresholds <span class="dc-sub">(server alerts when a reading breaches)</span></h3>
+    <p class="dc-help">Leave any field blank to skip that alert. Backend computes breaches on each reading insert.</p>
+    <table class="dc-thresholds">
+      <thead><tr><th>Vital</th><th>Alert if &lt;</th><th>Alert if &gt;</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>SpO₂ (%)</td>
+          <td><input type="number" [(ngModel)]="form.spo2Low" /></td>
+          <td><input type="number" [(ngModel)]="form.spo2High" /></td>
+        </tr>
+        <tr>
+          <td>BP systolic (mmHg)</td>
+          <td><input type="number" [(ngModel)]="form.bpSystolicLow" /></td>
+          <td><input type="number" [(ngModel)]="form.bpSystolicHigh" /></td>
+        </tr>
+        <tr>
+          <td>BP diastolic (mmHg)</td>
+          <td><input type="number" [(ngModel)]="form.bpDiastolicLow" /></td>
+          <td><input type="number" [(ngModel)]="form.bpDiastolicHigh" /></td>
+        </tr>
+        <tr>
+          <td>Heart rate (bpm)</td>
+          <td><input type="number" [(ngModel)]="form.hrLow" /></td>
+          <td><input type="number" [(ngModel)]="form.hrHigh" /></td>
+        </tr>
+        <tr>
+          <td>Respiratory rate (/min)</td>
+          <td><input type="number" [(ngModel)]="form.rrLow" /></td>
+          <td><input type="number" [(ngModel)]="form.rrHigh" /></td>
+        </tr>
+        <tr>
+          <td>Temperature (°F)</td>
+          <td><input type="number" step="0.1" [(ngModel)]="form.tempLow" /></td>
+          <td><input type="number" step="0.1" [(ngModel)]="form.tempHigh" /></td>
+        </tr>
+        <tr>
+          <td>Urine output (mL)</td>
+          <td><input type="number" [(ngModel)]="form.uopLow" /></td>
+          <td><input type="number" [(ngModel)]="form.uopHigh" /></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="dc-actions">
+      <button type="button" class="dc-btn dc-btn-primary" [disabled]="saving" (click)="saveSession()">
+        {{ saving ? 'Saving…' : 'Save session' }}
+      </button>
+    </div>
+  </section>
+
+  <section class="dc-card" *ngIf="!loading && session">
+    <div class="dc-readings-head">
+      <h3>Readings ({{ session.readings?.length || 0 }})</h3>
+      <button type="button" class="dc-btn dc-btn-primary" (click)="openReadingModal()">+ Add reading</button>
+    </div>
+    <table class="dc-readings">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>SpO₂</th>
+          <th>BP</th>
+          <th>HR</th>
+          <th>RR</th>
+          <th>Temp</th>
+          <th>UOP</th>
+          <th>IV</th>
+          <th>LOC</th>
+          <th>Remarks</th>
+          <th>Alerts</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of session.readings || []" [class.dc-row-alert]="alertList(r).length > 0">
+          <td>{{ r.recordedAt | date:'shortTime' }}</td>
+          <td>{{ r.spo2 ?? '—' }}</td>
+          <td>{{ r.bpSystolic ?? '—' }}/{{ r.bpDiastolic ?? '—' }}</td>
+          <td>{{ r.hr ?? '—' }}</td>
+          <td>{{ r.rr ?? '—' }}</td>
+          <td>{{ r.tempF ?? '—' }}</td>
+          <td>{{ r.uopMl ?? '—' }}</td>
+          <td>{{ r.ivPatency ?? '—' }}</td>
+          <td>{{ r.consciousnessLevel ?? '—' }}</td>
+          <td class="dc-remarks">{{ r.remarks }}</td>
+          <td class="dc-alerts">
+            <span *ngFor="let a of alertList(r)" class="dc-alert-chip">⚠ {{ a }}</span>
+            <span *ngIf="alertList(r).length === 0" class="dc-muted">—</span>
+          </td>
+          <td><button type="button" class="dc-btn dc-btn-xs" (click)="deleteReading(r)">×</button></td>
+        </tr>
+        <tr *ngIf="(session.readings?.length || 0) === 0">
+          <td colspan="12" class="dc-empty">No readings yet. Click "+ Add reading" once the procedure starts.</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="dc-loc-key">
+      <strong>LOC scale:</strong> 1=Alert · 2=Obeys verbal · 3=Responds to pain · 4=No response
+    </p>
+  </section>
+
+  <!-- Reading modal -->
+  <div class="dc-modal-bg" *ngIf="readingModalOpen" (click)="closeReadingModal()">
+    <div class="dc-modal" (click)="$event.stopPropagation()">
+      <h3>Add reading</h3>
+      <label class="dc-field">Time <input type="datetime-local" [(ngModel)]="readingBuf.recordedAt" /></label>
+      <div class="dc-grid-2">
+        <label class="dc-field">SpO₂ (%) <input type="number" [(ngModel)]="readingBuf.spo2" /></label>
+        <label class="dc-field">Heart rate (bpm) <input type="number" [(ngModel)]="readingBuf.hr" /></label>
+        <label class="dc-field">BP systolic <input type="number" [(ngModel)]="readingBuf.bpSystolic" /></label>
+        <label class="dc-field">BP diastolic <input type="number" [(ngModel)]="readingBuf.bpDiastolic" /></label>
+        <label class="dc-field">Respiratory rate <input type="number" [(ngModel)]="readingBuf.rr" /></label>
+        <label class="dc-field">Temp (°F) <input type="number" step="0.1" [(ngModel)]="readingBuf.tempF" /></label>
+        <label class="dc-field">Urine output (mL) <input type="number" [(ngModel)]="readingBuf.uopMl" /></label>
+        <label class="dc-field">IV patency
+          <select [(ngModel)]="readingBuf.ivPatency">
+            <option [ngValue]="null">—</option>
+            <option value="patent">Patent</option>
+            <option value="blocked">Blocked</option>
+            <option value="na">NA</option>
+          </select>
+        </label>
+      </div>
+      <label class="dc-field">Consciousness level
+        <select [(ngModel)]="readingBuf.consciousnessLevel">
+          <option [ngValue]="1">1 — Alert</option>
+          <option [ngValue]="2">2 — Obeys verbal commands</option>
+          <option [ngValue]="3">3 — Responds to pain</option>
+          <option [ngValue]="4">4 — No response to pain</option>
+        </select>
+      </label>
+      <label class="dc-field">Remarks <textarea rows="2" [(ngModel)]="readingBuf.remarks"></textarea></label>
+      <div class="dc-modal-actions">
+        <button type="button" class="dc-btn dc-btn-primary" [disabled]="savingReading" (click)="saveReading()">
+          {{ savingReading ? 'Saving…' : 'Save reading' }}
+        </button>
+        <button type="button" class="dc-btn" (click)="closeReadingModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>

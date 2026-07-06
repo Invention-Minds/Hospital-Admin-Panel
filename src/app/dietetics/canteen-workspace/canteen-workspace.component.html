@@ -1,0 +1,129 @@
+<div class="cw-shell">
+  <div class="cw-head">
+    <h2 class="cw-title">Canteen workspace</h2>
+    <div class="cw-toolbar">
+      <label>Date <input type="date" [(ngModel)]="date" (change)="refresh()" /></label>
+      <label>Meal time
+        <select [(ngModel)]="slotId" (change)="refresh()">
+          <option value="">All</option>
+          <option *ngFor="let s of slots" [value]="s.id">{{ s.name }} ({{ s.startTime }})</option>
+        </select>
+      </label>
+      <button type="button" class="cw-btn" (click)="refresh()">Refresh</button>
+      <button type="button" class="cw-btn" (click)="regenerate()">Regenerate</button>
+      <button type="button" class="cw-btn cw-btn-primary" (click)="selectAllOrdered()">Select all ordered</button>
+      <button type="button" class="cw-btn cw-btn-primary" [disabled]="selected.size === 0" (click)="bulkPlate()">
+        Plate selected ({{ selected.size }})
+      </button>
+    </div>
+  </div>
+
+  <div class="cw-banner cw-banner-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="cw-banner cw-banner-good" *ngIf="successMessage">{{ successMessage }}</div>
+
+  <table class="cw-table">
+    <thead>
+      <tr>
+        <th></th>
+        <th>Slot</th>
+        <th>Ward / Bed</th>
+        <th>Patient</th>
+        <th>Diet</th>
+        <th>Meal</th>
+        <th>Status</th>
+        <th>Tray temps</th>
+        <th>Intake</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let o of orders" [class.cw-row-skipped]="o.status === 'SKIPPED'">
+        <td>
+          <input type="checkbox" *ngIf="o.status === 'ORDERED'"
+                 [checked]="selected.has(o.id)" (change)="toggleSelect(o.id)" />
+        </td>
+        <td>{{ o.mealTimeSlot?.name }} <span class="cw-time">{{ o.scheduledFor | date:'shortTime' }}</span></td>
+        <td>{{ o.wardName ?? '—' }} <span class="cw-bed">{{ o.bedNumber }}</span></td>
+        <td>{{ o.patientName ?? '—' }}<br><span class="cw-pid">{{ o.admissionNo }}</span></td>
+        <td>{{ o.dietPlan?.diet?.code ?? '—' }}</td>
+        <td>{{ o.meal?.name ?? '—' }}</td>
+        <td><span class="cw-pill" [ngClass]="statusClass(o.status)">{{ o.status }}</span></td>
+        <td>
+          <span *ngIf="o.delivery?.trayHotTempC != null" [class.cw-bad]="trayTempBad(o.delivery?.trayHotTempC, 'hot')">H {{ o.delivery?.trayHotTempC }}°C</span>
+          <span *ngIf="o.delivery?.trayColdTempC != null" [class.cw-bad]="trayTempBad(o.delivery?.trayColdTempC, 'cold')">C {{ o.delivery?.trayColdTempC }}°C</span>
+          <span *ngIf="!o.delivery" class="cw-muted">—</span>
+        </td>
+        <td>
+          <span *ngIf="o.intake">{{ o.intake.percentConsumed }}%</span>
+          <span *ngIf="!o.intake" class="cw-muted">—</span>
+        </td>
+        <td class="cw-actions">
+          <button type="button" class="cw-btn cw-btn-sm" *ngIf="o.status === 'PLATED' || o.status === 'ORDERED'" (click)="openDeliver(o)">Deliver</button>
+          <button type="button" class="cw-btn cw-btn-sm" *ngIf="o.status === 'DELIVERED'" (click)="openIntake(o)">Intake</button>
+          <button type="button" class="cw-btn cw-btn-sm" *ngIf="o.status !== 'CONSUMED' && o.status !== 'SKIPPED'" (click)="openSkip(o)">Skip</button>
+        </td>
+      </tr>
+      <tr *ngIf="orders.length === 0"><td colspan="10" class="cw-empty">No meal orders for this date / slot.</td></tr>
+    </tbody>
+  </table>
+
+  <!-- ─── Deliver modal ─── -->
+  <div class="cw-modal-bg" *ngIf="modal === 'deliver' && active" (click)="closeModal()">
+    <div class="cw-modal" (click)="$event.stopPropagation()">
+      <h3>Deliver tray — {{ active.patientName }} ({{ active.admissionNo }})</h3>
+      <p class="cw-sub">{{ active.meal?.name }} · {{ active.mealTimeSlot?.name }}</p>
+      <div class="cw-form-row">
+        <label>Hot tray °C <input type="number" [(ngModel)]="deliverForm.trayHotTempC" step="0.5" /></label>
+        <label>Cold tray °C <input type="number" [(ngModel)]="deliverForm.trayColdTempC" step="0.5" /></label>
+      </div>
+      <label class="cw-check"><input type="checkbox" [(ngModel)]="deliverForm.twoIdVerified" /> Verified patient with two identifiers (name + admissionNo)</label>
+      <label>Notes <textarea rows="2" [(ngModel)]="deliverForm.notes"></textarea></label>
+      <h4>Nurse signature</h4>
+      <app-e-sign
+        [signerType]="'nurse'"
+        [signerName]="'Nurse'"
+        [contextType]="'meal-delivery'"
+        [contextId]="active.id"
+        (signed)="onDeliverSigned($event)"
+        (cancelled)="closeModal()">
+      </app-e-sign>
+    </div>
+  </div>
+
+  <!-- ─── Intake modal ─── -->
+  <div class="cw-modal-bg" *ngIf="modal === 'intake' && active" (click)="closeModal()">
+    <div class="cw-modal" (click)="$event.stopPropagation()">
+      <h3>Record intake — {{ active.patientName }}</h3>
+      <p class="cw-sub">{{ active.meal?.name }} · {{ active.mealTimeSlot?.name }}</p>
+      <label>% consumed
+        <select [(ngModel)]="intakeForm.percentConsumed">
+          <option [ngValue]="0">0%</option>
+          <option [ngValue]="25">25%</option>
+          <option [ngValue]="50">50%</option>
+          <option [ngValue]="75">75%</option>
+          <option [ngValue]="100">100%</option>
+        </select>
+      </label>
+      <label>Complaint <input type="text" [(ngModel)]="intakeForm.complaint" placeholder="Cold, salty, etc." /></label>
+      <label>Notes <textarea rows="2" [(ngModel)]="intakeForm.notes"></textarea></label>
+      <div class="cw-modal-actions">
+        <button type="button" class="cw-btn cw-btn-primary" (click)="saveIntake()">Save</button>
+        <button type="button" class="cw-btn" (click)="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Skip modal ─── -->
+  <div class="cw-modal-bg" *ngIf="modal === 'skip' && active" (click)="closeModal()">
+    <div class="cw-modal" (click)="$event.stopPropagation()">
+      <h3>Skip meal — {{ active.patientName }}</h3>
+      <label>Reason
+        <textarea rows="3" [(ngModel)]="skipForm.reason" placeholder="Refused / NPO order / Transferred"></textarea>
+      </label>
+      <div class="cw-modal-actions">
+        <button type="button" class="cw-btn cw-btn-primary" (click)="saveSkip()">Save</button>
+        <button type="button" class="cw-btn" (click)="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>

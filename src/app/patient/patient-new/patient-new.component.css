@@ -1,0 +1,283 @@
+/* ─── Layout ─────────────────────────────────────────────────────────── */
+.form-wrapper {
+  max-width: 90%;
+  margin: 20px;
+  padding-left: 90px;
+  padding-bottom: 30px;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.form-title {
+  color: #271e4a;
+  font-family: Kanit;
+  font-size: 24px;
+  font-weight: 500;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+/* Phase 1 — section dividers within the same form. */
+.section-title {
+  color: #271e4a;
+  font-family: Kanit;
+  font-size: 16px;
+  font-weight: 500;
+  margin: 28px 0 14px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #d7d7d7;
+}
+
+.section-title .hint-inline {
+  font-weight: 300;
+  color: #7b7b7b;
+  font-size: 13px;
+}
+
+.form-row {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 44px;
+}
+
+.form-group-1 {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+}
+
+.form-input {
+  padding: 10px;
+  color: #000;
+  font-family: Kanit;
+  font-size: 14px;
+  font-weight: 300;
+  line-height: normal;
+  border: 1px solid #b4b6ba;
+  border-radius: 4px;
+  background: #f0f3ff;
+}
+
+.form-input::placeholder {
+  color: rgba(123, 123, 123, 0.4);
+  font-family: Kanit;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.form-label {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  color: rgba(123, 123, 123, 0.6);
+  font-size: 14px;
+  pointer-events: none;
+  transition: 0.2s ease;
+}
+
+.form-input:focus + .form-label,
+.form-input:not(:placeholder-shown) + .form-label {
+  top: -12px;
+  left: 8px;
+  font-size: 0.8rem;
+  color: #007bff;
+  padding: 0 5px;
+  background: #f0f3ff;
+}
+
+.form-input:focus {
+  border: 1px solid #007bff;
+  box-shadow: 0 0 3px rgba(0, 123, 255, 0.4);
+  outline: none;
+}
+
+.form-input.ng-invalid.ng-touched {
+  border: 1px solid #ff4d4d;
+  box-shadow: 0 0 3px rgba(255, 77, 77, 0.4);
+}
+
+.form-input.ng-invalid.ng-touched + .form-label {
+  color: #ff4d4d;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* Inline hints under inputs. */
+.hint {
+  display: block;
+  margin-top: 4px;
+  font-size: 11.5px;
+  color: #7b7b7b;
+  font-family: Kanit;
+}
+
+/* Checkbox group reads inline at the form-row level. */
+.checkbox-group {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+  height: auto;
+  padding-top: 12px;
+}
+
+.checkbox-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: Kanit;
+  font-size: 14px;
+  color: #271e4a;
+  cursor: pointer;
+}
+
+/* ─── Banners (warn / bad / good) ─────────────────────────────────────── */
+.banner {
+  margin: 14px 0;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-family: Kanit;
+  font-size: 14px;
+  border-left: 4px solid;
+}
+
+.banner-warn {
+  background: #fff8ee;
+  border-left-color: #b06a00;
+  color: #6a3f00;
+}
+
+.banner-bad {
+  background: #fdecee;
+  border-left-color: #b02a37;
+  color: #7a1c25;
+}
+
+.banner-good {
+  background: #e6f4ea;
+  border-left-color: #1e7e34;
+  color: #14562a;
+}
+
+/* ─── Patient Rights card (step 2) ───────────────────────────────────── */
+.rights-card {
+  background: #f6faff;
+  border: 1px solid #b8d4ff;
+  border-radius: 8px;
+  padding: 18px 22px;
+  margin-bottom: 20px;
+  font-family: Kanit;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: #1a1a1a;
+}
+
+.rights-card .rights-note {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #d7d7d7;
+  color: #5a5a5a;
+}
+
+/* ─── Buttons ────────────────────────────────────────────────────────── */
+.btn {
+  display: flex;
+  height: 44px;
+  padding: 7px 18px;
+  justify-content: center;
+  align-items: center;
+  border: none;
+  cursor: pointer;
+  font-family: Kanit;
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.btn-submit {
+  border-radius: 4px;
+  background: #169458;
+  color: #fff;
+  min-width: 220px;
+}
+
+.btn-submit:hover:not(:disabled) {
+  background-color: #218838;
+}
+
+.btn-cancel {
+  border-radius: 4px;
+  border: 1px solid #7b7b7b;
+  color: #7b7b7b;
+  background-color: transparent;
+  min-width: 140px;
+}
+
+.btn-cancel:hover:not(:disabled) {
+  background-color: #e2e6ea;
+}
+
+.btn-submit:disabled,
+.btn-cancel:disabled {
+  background-color: #cccccc;
+  color: #666666;
+  cursor: not-allowed;
+  opacity: 0.6;
+  border-color: #cccccc;
+}
+
+.form-buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 40px;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+/* ─── Calendar tweaks (preserved from old form) ──────────────────────── */
+::ng-deep .p-inputtext {
+  height: 44px;
+  padding-left: 15px;
+  color: #7b7b7b;
+  font-family: Kanit;
+  font-size: 16px;
+  font-weight: 400;
+  background-color: transparent;
+  border: 1px solid #b4b6ba;
+}
+
+::ng-deep .calendar-group {
+  position: relative;
+}
+
+::ng-deep .floating-label {
+  position: absolute;
+  left: 12px;
+  top: 10px;
+  transition: 0.2s ease all;
+  pointer-events: none;
+  background: #f0f3ff;
+  padding: 0 4px;
+  font-size: 1rem;
+  color: gray;
+  z-index: 3;
+}
+
+::ng-deep .floating-label.active {
+  top: -10px;
+  left: 8px;
+  font-size: 0.75rem;
+  color: #007bff;
+}

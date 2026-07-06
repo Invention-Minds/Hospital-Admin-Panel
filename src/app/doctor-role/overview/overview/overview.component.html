@@ -2,54 +2,131 @@
     <p-toast></p-toast>
     <div class="dashboard-section">
       <!-- <h1>Appointments</h1> -->
-      <div class="stats-cards">
-        <div class="card" 
+      <!-- Top-level group tabs -->
+      <div class="group-tabs">
+        <button class="group-tab" [class.active]="selectedGroup === 'opd'" (click)="selectGroup('opd')">OPD</button>
+        <button class="group-tab" [class.active]="selectedGroup === 'ipd'" (click)="selectGroup('ipd')">IPD</button>
+        <button class="group-tab" [class.active]="selectedGroup === 'emergency'" (click)="selectGroup('emergency')">Emergency</button>
+        <button class="group-tab" (click)="selectGroup('whatsapp')">
+          WhatsApp <i class="pi pi-external-link group-tab-ext"></i>
+        </button>
+      </div>
+
+      <!-- OPD sub-tabs — inline consultation panes -->
+      <div class="stats-cards" *ngIf="selectedGroup === 'opd'">
+        <div class="card"
         [ngClass]="{'active-card': activeComponent === 'availability'}"
         (click)="showDoctorAvailability()">
           <div class="card-icon">
             <img src="/today-consul.svg" alt="OPD Icon" />
           </div>
           <div class="card-content">
-            <!-- <h2>40</h2> -->
             <p>Checked-In Consultations</p>
           </div>
         </div>
-        <div class="card" 
+        <div class="card"
         [ngClass]="{'active-card': activeComponent === 'arrived'}"
         (click)="showDoctorArrived()">
           <div class="card-icon">
             <img src="/arrived.svg" alt="OPD Icon" />
           </div>
           <div class="card-content">
-            <!-- <h2>40</h2> -->
             <p>Today Consultations</p>
           </div>
         </div>
-        <div class="card" 
+        <div class="card"
         [ngClass]="{'active-card': activeComponent === 'past'}"
         (click)="showPastDetails()">
           <div class="card-icon">
             <img src="/past-consul.svg" alt="Doctor Available Icon" />
           </div>
           <div class="card-content">
-            <!-- <h2>42</h2> -->
             <p>Past Consultations</p>
           </div>
         </div>
-        <div class="card" 
+        <div class="card"
         [ngClass]="{'active-card': activeComponent === 'details'}"
         (click)="showDoctorDetails()">
           <div class="card-icon">
             <img src="/future-consul.svg" alt="Doctor Available Icon" />
           </div>
           <div class="card-content">
-            <!-- <h2>42</h2> -->
             <p>Future Consultations</p>
           </div>
         </div>
+      </div>
 
+      <!-- IPD sub-tabs — render the selected page inline below -->
+      <div class="stats-cards" *ngIf="selectedGroup === 'ipd'">
+        <div class="card nav-card" [ngClass]="{'active-card': ipdSub === 'ipd'}" (click)="setIpdSub('ipd')">
+          <span class="nav-ic nav-ic-ipd">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M7 13c1.66 0 3-1.34 3-3S8.66 7 7 7s-3 1.34-3 3s1.34 3 3 3m12-6h-8v7H3V6H1v13h2v-3h18v3h2v-9c0-2.21-1.79-4-4-4"/>
+            </svg>
+          </span>
+          <div class="card-content"><p>IPD</p></div>
         </div>
-  <div>
+        <div class="card nav-card" [ngClass]="{'active-card': ipdSub === 'icu'}" (click)="setIpdSub('icu')">
+          <span class="nav-ic nav-ic-icu">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54z"/>
+            </svg>
+          </span>
+          <div class="card-content"><p>ICU</p></div>
+        </div>
+        <div class="card nav-card" [ngClass]="{'active-card': ipdSub === 'ot'}" (click)="setIpdSub('ot')">
+          <span class="nav-ic nav-ic-ot">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M9.64 7.64c.23-.5.36-1.05.36-1.64c0-2.21-1.79-4-4-4S2 3.79 2 6s1.79 4 4 4c.59 0 1.14-.13 1.64-.36L10 12l-2.36 2.36C7.14 14.13 6.59 14 6 14c-2.21 0-4 1.79-4 4s1.79 4 4 4s4-1.79 4-4c0-.59-.13-1.14-.36-1.64L12 14l7 7h3v-1zM6 8c-1.1 0-2-.89-2-2s.9-2 2-2s2 .89 2 2s-.9 2-2 2m0 12c-1.1 0-2-.89-2-2s.9-2 2-2s2 .89 2 2s-.9 2-2 2m6-7.5c-.28 0-.5-.22-.5-.5s.22-.5.5-.5s.5.22.5.5s-.22.5-.5.5M19 3l-6 6l2 2l7-7V3z"/>
+            </svg>
+          </span>
+          <div class="card-content"><p>OT</p></div>
+        </div>
+        <div class="card nav-card" [ngClass]="{'active-card': ipdSub === 'ward'}" (click)="setIpdSub('ward')">
+          <span class="nav-ic nav-ic-ward">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M17 11V3H7v4H3v14h8v-4h2v4h8V11zM7 19H5v-2h2zm0-4H5v-2h2zm0-4H5V9h2zm4 8H9v-2h2zm0-4H9v-2h2zm0-4H9V9h2zm0-4H9V5h2zm4 8h-2v-2h2zm0-4h-2v-2h2zm0-4h-2V5h2zm4 12h-2v-2h2zm0-4h-2v-2h2z"/>
+            </svg>
+          </span>
+          <div class="card-content"><p>Ward</p></div>
+        </div>
+      </div>
+
+      <!-- IPD inline panes -->
+      <div class="group-pane" *ngIf="selectedGroup === 'ipd'">
+        <app-ipd-overview         *ngIf="ipdSub === 'ipd'"></app-ipd-overview>
+        <app-icu-transfer-queue   *ngIf="ipdSub === 'icu'"></app-icu-transfer-queue>
+        <app-ot-workbench         *ngIf="ipdSub === 'ot'"></app-ot-workbench>
+        <app-ward-census          *ngIf="ipdSub === 'ward'"></app-ward-census>
+      </div>
+
+      <!-- Emergency sub-tabs -->
+      <div class="stats-cards" *ngIf="selectedGroup === 'emergency'">
+        <div class="card nav-card" [ngClass]="{'active-card': emgSub === 'emergency'}" (click)="setEmgSub('emergency')">
+          <span class="nav-ic nav-ic-er">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54zM13 5v3h-2v2h-2v2h2v2h2v-2h2v-2h-2z"/>
+            </svg>
+          </span>
+          <div class="card-content"><p>Emergency</p></div>
+        </div>
+        <div class="card nav-card" [ngClass]="{'active-card': emgSub === 'mlc'}" (click)="setEmgSub('mlc')">
+          <span class="nav-ic nav-ic-mlc">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M19 3h-4.18C14.4 1.84 13.3 1 12 1s-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2m-7 0c.55 0 1 .45 1 1s-.45 1-1 1s-1-.45-1-1s.45-1 1-1M7 7h10v2H7zm0 4h10v2H7zm0 4h7v2H7z"/>
+            </svg>
+          </span>
+          <div class="card-content"><p>MLC Cases</p></div>
+        </div>
+      </div>
+
+      <!-- Emergency inline panes -->
+      <div class="group-pane" *ngIf="selectedGroup === 'emergency'">
+        <app-referral-inbox *ngIf="emgSub === 'emergency'"></app-referral-inbox>
+        <app-mlc-cases      *ngIf="emgSub === 'mlc'"></app-mlc-cases>
+      </div>
+
+  <div *ngIf="selectedGroup === 'opd'">
     <app-today-consultations  *ngIf="activeComponent === 'availability'" (viewPatient)="showPatientInfo($event)"></app-today-consultations>
     <app-future-consultations *ngIf="activeComponent === 'details'"></app-future-consultations>
     <app-arrived-consultation *ngIf="activeComponent === 'arrived'"></app-arrived-consultation>

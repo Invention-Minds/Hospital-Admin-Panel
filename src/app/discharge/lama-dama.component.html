@@ -79,7 +79,7 @@
             (click)="openDetail('lama', r.id)"
             [attr.data-testid]="'lama-row-' + r.id">
           <td><strong>LAMA-{{ r.id }}</strong></td>
-          <td>{{ r.emergencyId }}</td>
+          <td>{{ r.emergency?.prn || '—' }}</td>
           <td>{{ r.lamaTime | date:'short' }}</td>
           <td>
             <span *ngIf="r.riskExplained" class="badge badge-success">Yes</span>
@@ -146,7 +146,7 @@
             (click)="openDetail('dama', r.id)"
             [attr.data-testid]="'dama-row-' + r.id">
           <td><strong>DAMA-{{ r.id }}</strong></td>
-          <td>{{ r.emergencyId }}</td>
+          <td>{{ r.emergency?.prn || '—' }}</td>
           <td>{{ r.dischargeTime | date:'short' }}</td>
           <td>
             <span *ngIf="r.patientDeclinesAdvice" class="badge badge-warning">Yes</span>

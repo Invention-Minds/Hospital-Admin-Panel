@@ -1,0 +1,50 @@
+<div class="fk-shell">
+  <div class="fk-card">
+    <div class="fk-loading" *ngIf="loading">Loading your survey…</div>
+
+    <ng-container *ngIf="!loading && errorMessage && !done">
+      <h2 class="fk-title">We're sorry</h2>
+      <p class="fk-error">{{ errorMessage }}</p>
+    </ng-container>
+
+    <ng-container *ngIf="!loading && done">
+      <h2 class="fk-title">🙏 Thank you</h2>
+      <p class="fk-sub">Your feedback helps us care for you better.</p>
+    </ng-container>
+
+    <ng-container *ngIf="!loading && survey && !done && !errorMessage">
+      <h2 class="fk-title">How was your visit?</h2>
+      <p class="fk-sub" *ngIf="survey.patientName">For {{ survey.patientName }}</p>
+
+      <div class="fk-q">
+        How likely are you to recommend us to a friend or family member?
+      </div>
+
+      <div class="fk-scale">
+        <button class="fk-num" *ngFor="let n of NPS_BUTTONS"
+                [class.fk-num-on]="npsScore === n"
+                [class.fk-num-low]="n <= 6"
+                [class.fk-num-mid]="n >= 7 && n <= 8"
+                [class.fk-num-hi]="n >= 9"
+                (click)="pickScore(n)">{{ n }}</button>
+      </div>
+      <div class="fk-scale-axis">
+        <span>Not at all likely</span>
+        <span>Extremely likely</span>
+      </div>
+
+      <p class="fk-score-tag" *ngIf="npsScore != null">
+        You picked <strong>{{ npsScore }}</strong> — {{ scoreLabel(npsScore) }}
+      </p>
+
+      <label class="fk-field">Anything we should know? (optional)
+        <textarea rows="4" [(ngModel)]="comments" placeholder="Tell us in your own words…"></textarea>
+      </label>
+
+      <button class="fk-submit" (click)="submit()" [disabled]="saving">
+        {{ saving ? 'Submitting…' : 'Submit' }}
+      </button>
+      <p class="fk-error" *ngIf="errorMessage">{{ errorMessage }}</p>
+    </ng-container>
+  </div>
+</div>

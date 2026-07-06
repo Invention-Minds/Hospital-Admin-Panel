@@ -1,0 +1,32 @@
+.ts-shell { padding: 20px; max-width: 900px; margin: 24px auto 24px 96px; color: #1f2937; }
+.ts-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.ts-title { font-size: 22px; font-weight: 600; margin: 0; }
+.ts-formcode { color: #9ca3af; font-weight: 400; font-size: 13px; }
+
+.ts-banner { padding: 10px 14px; border-radius: 6px; font-size: 14px; margin-bottom: 10px; }
+.ts-bad { background: #fee2e2; color: #b91c1c; }
+.ts-loading { padding: 40px; text-align: center; color: #6b7280; font-style: italic; }
+.ts-muted { color: #9ca3af; font-style: italic; padding: 6px 0; }
+
+.ts-card { background: #fff; border: 1px solid #d1d5db; padding: 14px 18px; margin-bottom: 14px; border-radius: 6px; }
+.ts-section { font-size: 14px; font-weight: 600; margin: 0 0 10px; color: #374151; text-transform: uppercase; letter-spacing: 0.5px; }
+.ts-row { font-size: 14px; padding: 3px 0; }
+
+.ts-grid { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ts-grid th { background: #f9fafb; font-weight: 600; color: #374151; text-align: left; padding: 6px 10px; border: 1px solid #e5e7eb; width: 35%; }
+.ts-grid td { padding: 6px 10px; border: 1px solid #e5e7eb; }
+
+.ts-sig-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 18px; }
+.ts-sig-block { text-align: center; }
+.ts-sig-line { height: 1px; background: #6b7280; margin: 40px 8px 6px; }
+.ts-sig-block small { color: #6b7280; font-size: 11px; }
+
+.ts-btn { background: #fff; border: 1px solid #d1d5db; padding: 6px 14px; border-radius: 5px; cursor: pointer; font-size: 13px; }
+.ts-btn:hover { background: #f3f4f6; }
+
+/* Print mode — drop chrome */
+@media print {
+  .ts-toolbar { display: none; }
+  .ts-shell { margin: 0; padding: 8mm; max-width: 100%; }
+  .ts-card { page-break-inside: avoid; }
+}

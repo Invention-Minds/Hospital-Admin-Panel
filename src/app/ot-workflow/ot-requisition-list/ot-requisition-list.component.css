@@ -1,0 +1,54 @@
+.req-shell { padding: 20px; max-width: 1600px; margin: 24px auto 24px 96px; }
+
+.req-head { display: flex; justify-content: space-between; align-items: end; gap: 14px; }
+.req-title { font-size: 22px; font-weight: 600; margin: 0; }
+.req-sub { color: #6b7280; font-size: 13px; margin: 4px 0 12px; }
+
+.req-banner { padding: 10px 14px; border-radius: 6px; margin-bottom: 10px; font-size: 14px; }
+.req-bad { background: #fee2e2; color: #b91c1c; }
+.req-good { background: #dcfce7; color: #166534; }
+
+.req-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px 14px; margin-bottom: 14px; }
+.req-filters { display: flex; gap: 14px; flex-wrap: wrap; }
+.req-filters label { display: flex; flex-direction: column; font-size: 12px; color: #4b5563; gap: 3px; }
+.req-filters input, .req-filters select { border: 1px solid #d1d5db; border-radius: 6px; padding: 5px 8px; font-size: 13px; min-width: 130px; }
+
+.req-loading { padding: 40px; text-align: center; color: #6b7280; font-style: italic; }
+.req-muted { color: #9ca3af; font-style: italic; }
+
+.req-grid-wrap { overflow-x: auto; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; }
+.req-grid { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+.req-grid th, .req-grid td {
+  border-bottom: 1px solid #f3f4f6; padding: 8px 10px;
+  vertical-align: top; text-align: left;
+}
+.req-grid th { background: #f9fafb; font-weight: 600; color: #374151; font-size: 12px; }
+
+.req-pill { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; text-transform: capitalize; }
+.req-pending   { background: #fef3c7; color: #92400e; }
+.req-scheduled { background: #dbeafe; color: #1e40af; }
+.req-fulfilled { background: #dcfce7; color: #166534; }
+.req-cancelled { background: #e5e7eb; color: #4b5563; }
+
+.req-btn { background: #fff; border: 1px solid #d1d5db; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; }
+.req-btn:hover:not([disabled]) { background: #f3f4f6; }
+.req-btn-sm { padding: 3px 8px; font-size: 11px; }
+.req-btn-primary { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
+.req-btn-primary:hover:not([disabled]) { background: #1e40af; }
+.req-btn-danger { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
+.req-btn-danger:hover:not([disabled]) { background: #fecaca; }
+.req-btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+.req-modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 100; }
+.req-modal { background: #fff; border-radius: 8px; padding: 18px 22px; width: 720px; max-width: 92vw; max-height: 92vh; overflow: auto; }
+.req-modal h3 { margin: 0 0 12px; font-size: 16px; }
+
+.req-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px; }
+.req-form-grid label { display: flex; flex-direction: column; font-size: 12px; color: #4b5563; gap: 3px; }
+.req-form-grid input, .req-form-grid select, .req-form-grid textarea {
+  border: 1px solid #d1d5db; border-radius: 6px; padding: 5px 8px; font-size: 13px;
+}
+.req-field-wide { grid-column: 1 / -1; }
+.req-check { flex-direction: row !important; align-items: center; gap: 8px; }
+
+.req-modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }

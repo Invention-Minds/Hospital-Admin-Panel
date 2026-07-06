@@ -10,6 +10,7 @@ import { ChangeDetectorRef } from '@angular/core';
 import { Doctor } from '../../../models/doctor.model';
 import { ChannelService } from '../../../services/channel/channel.service';
 import { environment } from '../../../../environment/environment';
+import { NotificationRecipientService } from '../../../services/notification-recipient.service';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { PrescriptionService } from '../../../services/prescription/prescription.service';
 import pdfMake from 'pdfmake/build/pdfmake';
@@ -17,6 +18,12 @@ import pdfFonts from 'pdfmake/build/vfs_fonts';
 import { forkJoin } from 'rxjs';
 import { app } from '../../../../../server';
 import { HealthCheckupServiceService } from '../../../services/health-checkup/health-checkup-service.service';
+import { AlertService } from '../../../services/alert.service';
+import {
+  FieldDef,
+  NoteTemplate,
+  NoteTemplateService,
+} from '../../../services/note-template.service';
 
 interface Appointment {
   id?: number;
@@ -114,8 +121,15 @@ export class TodayConsultationsComponent {
   confirmedAppointments: Appointment[] = [];
   @Output() consultationStarted = new EventEmitter<{ doctorId: number, appointmentId: number }>();
 
+  /** Leave-request admin recipients — DB-managed (today_consultation_admin group);
+   *  falls back to the previously-hardcoded list until the recipients table is seeded. */
+  adminLeavePhones: string[] = ["919880544866", "919341227264", "918904943673", "918951243004", "919633943037"];
+
   constructor(private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private messageService: MessageService, private cdRef: ChangeDetectorRef, private eventService: EventService, private estimationService: EstimationService, private channelService: ChannelService, private fb: FormBuilder, private prescriptionService: PrescriptionService,
-    private healthCheckupService: HealthCheckupServiceService  // Inject NoSleep service
+    private healthCheckupService: HealthCheckupServiceService,  // Inject NoSleep service
+    private noteTemplateService: NoteTemplateService,
+    private alertSvc: AlertService,
+    private recipientsSvc: NotificationRecipientService,
   ) {
     this.form = this.fb.group({
       prescribedBy: [''],
@@ -225,6 +239,18 @@ export class TodayConsultationsComponent {
   selectedPrint: any = null; // Variable to store the selected print option
   prescribedBy: string = ''; // Variable to store the name of the doctor who prescribed the medication
   doctorNotes: any[] = [];
+
+  // ─── Note-template integration (doctor manual notes) ─────────────────
+  // Active templates for the current doctor's department, loaded when the
+  // notes popup opens. Picking one swaps the legacy fixed sections for the
+  // dynamic renderer; backend snapshots the field defs at save-time so the
+  // saved row prints identically forever.
+  availableNoteTemplates: NoteTemplate[] = [];
+  selectedNoteTemplateId = '';
+  noteTemplateValues: Record<string, unknown> = {};
+  activeNoteTemplateFields: FieldDef[] = [];
+  loadingNoteTemplates = false;
+
   bloodGroupAppointments: any[] = []
   services: any[] = [];
   serviceAppointments: any[] = [];
@@ -272,6 +298,10 @@ export class TodayConsultationsComponent {
     { key: 'investigation', label: 'Investigation' },
   ];
   showOpdModal = false;
+  // Quick-access modals — the same investigation-order grid + prescription
+  // capture that live inside the OPD form, opened directly from the row.
+  showInvestigationModal = false;
+  showPrescriptionModal = false;
   showSignatureModel = false;
 
   deptId: number = 0;
@@ -341,6 +371,13 @@ export class TodayConsultationsComponent {
     this.checkScreenSize();
     this.loadDepartments();
     this.loadDoctors();
+    // Leave-request admin recipients from DB (best-effort; needs an auth token).
+    if (typeof window !== 'undefined' && localStorage.getItem('token')) {
+      this.recipientsSvc.phones('today_consultation_admin').subscribe({
+        next: (res) => { if (res.phones?.length) this.adminLeavePhones = res.phones; },
+        error: () => {},
+      });
+    }
 
     const today = new Date();
     const year = today.getFullYear();
@@ -467,6 +504,7 @@ export class TodayConsultationsComponent {
       (appointments) => {
         this.confirmedAppointments = appointments
         this.filteredAppointments = this.confirmedAppointments;
+        console.log(`Fetched ${appointments.length} appointments for doctor ID ${doctorId}`);
         this.startTimers();
         this.completedAppointments = this.filteredAppointments.filter(appointment => !appointment.checkedOut || (!appointment.checkedOut && !appointment.isCloseOPD))
         this.applySortWithPriority();
@@ -1481,8 +1519,9 @@ export class TodayConsultationsComponent {
       startDate: this.startDate,
       endDate: this.endDate,
     };
-    const adminPhoneNumber = ["919880544866", "919341227264", "918904943673", "918951243004", "919633943037"]
-    // const adminPhoneNumber = ["919342287945", "919342287945"]
+    // Old hardcoded recipients (kept for reference; now DB-managed via today_consultation_admin):
+    // const adminPhoneNumber = ["919880544866", "919341227264", "918904943673", "918951243004", "919633943037"];
+    const adminPhoneNumber = this.adminLeavePhones;
     this.appointmentService.sendAdminMessage(this.currentDoctorName, this.currentDepartmentName, this.startDate, this.endDate, adminPhoneNumber).subscribe({
       next: (response) => {
         // console.log('Leave request submitted:', response);
@@ -1493,7 +1532,7 @@ export class TodayConsultationsComponent {
       },
       error: (error) => {
         console.error('Error submitting leave request:', error);
-        alert('Error submitting leave request. Please try again.');
+        this.alertSvc.show('Error submitting leave request. Please try again.', { severity: 'danger', title: 'Error' });
         this.isButtonLoading = false;
       }
     });
@@ -2679,6 +2718,8 @@ export class TodayConsultationsComponent {
     this.appointmentService.getDoctorNoteByPRNAndDate(Number(service.prnNumber), service.date).subscribe({
       next: (res) => {
         this.doctorNoteData = res || {};  // If note exists, prefill
+        // Adopt any saved templated path on this note.
+        this.adoptDoctorNoteTemplate(res);
         console.log('Doctor note data:', this.doctorNoteData);
       },
       error: () => {
@@ -2693,24 +2734,110 @@ export class TodayConsultationsComponent {
           rs: '',
           pa: '',
         };
-
+        this.resetDoctorNoteTemplate();
       }
     });
+
+    // Load active templates for this doctor's department (independent of
+    // whether the note already exists — the picker should always be available).
+    this.loadDoctorNoteTemplates();
+  }
+
+  // ─── Note-template helpers (doctor manual notes) ────────────────────
+
+  /** Pull the active 'opd-doctor' templates for the doctor's department. */
+  loadDoctorNoteTemplates(): void {
+    const dept = this.department;
+    if (!dept) return;
+    this.loadingNoteTemplates = true;
+    this.noteTemplateService.getForDoctor(dept, 'opd-doctor').subscribe({
+      next: (rows) => {
+        this.availableNoteTemplates = rows ?? [];
+        this.loadingNoteTemplates = false;
+        if (!this.selectedNoteTemplateId && this.availableNoteTemplates.length > 0) {
+          const def = this.availableNoteTemplates.find((t) => t.isDefault);
+          if (def) this.applyDoctorNoteTemplate(def.id);
+        }
+      },
+      error: () => { this.loadingNoteTemplates = false; },
+    });
+  }
+
+  /** Hydrate template state from a loaded DoctorNote row, if present. */
+  private adoptDoctorNoteTemplate(note: { noteTemplateId?: string; templatedValues?: string } | null | undefined): void {
+    if (!note) { this.resetDoctorNoteTemplate(); return; }
+    if (note.noteTemplateId) this.selectedNoteTemplateId = note.noteTemplateId;
+    if (typeof note.templatedValues === 'string' && note.templatedValues.length > 0) {
+      try {
+        const parsed = JSON.parse(note.templatedValues) as { _schema?: FieldDef[]; _values?: Record<string, unknown> };
+        if (parsed?._values) this.noteTemplateValues = parsed._values;
+        if (Array.isArray(parsed?._schema) && parsed._schema.length > 0) {
+          this.activeNoteTemplateFields = parsed._schema;
+        }
+      } catch { /* ignore — leave defaults */ }
+    }
+  }
+
+  private resetDoctorNoteTemplate(): void {
+    this.selectedNoteTemplateId = '';
+    this.noteTemplateValues = {};
+    this.activeNoteTemplateFields = [];
+  }
+
+  /** Picker change handler. */
+  onDoctorNoteTemplateSelected(templateId: string): void {
+    this.applyDoctorNoteTemplate(templateId);
+  }
+
+  private applyDoctorNoteTemplate(templateId: string): void {
+    this.selectedNoteTemplateId = templateId;
+    if (!templateId) { this.activeNoteTemplateFields = []; return; }
+    const tpl = this.availableNoteTemplates.find((t) => t.id === templateId);
+    if (tpl) {
+      this.activeNoteTemplateFields = tpl.fields ?? [];
+      const seeded: Record<string, unknown> = { ...this.noteTemplateValues };
+      for (const f of this.activeNoteTemplateFields) {
+        if (!(f.key in seeded)) {
+          seeded[f.key] = f.type === 'multiselect' ? [] : f.type === 'checkbox' ? false : '';
+        }
+      }
+      this.noteTemplateValues = seeded;
+    }
+  }
+
+  onDoctorNoteTemplateValuesChange(values: Record<string, unknown>): void {
+    this.noteTemplateValues = values;
+  }
+
+  get isDoctorNoteTemplated(): boolean {
+    return !!this.selectedNoteTemplateId && this.activeNoteTemplateFields.length > 0;
   }
 
   // Submit notes
   submitDoctorNotes(): void {
     this.isButtonLoading = true;
-    const payload = {
+    const payload: Record<string, unknown> = {
       prn: Number(this.selectedService.prnNumber),
       date: this.selectedService.date,
       createdBy: this.historyData.createdBy ? this.historyData.createdBy : this.doctor.id.toString(),
       updatedBy: this.doctor.id.toString(),
       ...this.doctorNoteData
     };
+    // Templated path — backend snapshots the field defs at save-time.
+    if (this.isDoctorNoteTemplated) {
+      payload['noteTemplateId'] = this.selectedNoteTemplateId;
+      payload['templatedValueMap'] = this.noteTemplateValues;
+    }
 
     if (this.doctorNoteData?.id) {
-      this.appointmentService.saveDoctorNote(payload.prn, payload.date, payload.updatedBy, this.doctorNoteData).subscribe({
+      // Merge templated keys into the body the service sends, so they reach
+      // the backend regardless of whether the doctor used a template.
+      const updateBody: Record<string, unknown> = { ...this.doctorNoteData };
+      if (this.isDoctorNoteTemplated) {
+        updateBody['noteTemplateId'] = this.selectedNoteTemplateId;
+        updateBody['templatedValueMap'] = this.noteTemplateValues;
+      }
+      this.appointmentService.saveDoctorNote(payload['prn'] as number, payload['date'] as string, payload['updatedBy'] as string, updateBody).subscribe({
         next: () => {
           this.showNotesPopup = false;
           this.messageService.add({ severity: 'success', summary: 'Updated', detail: 'Doctor note updated successfully' });

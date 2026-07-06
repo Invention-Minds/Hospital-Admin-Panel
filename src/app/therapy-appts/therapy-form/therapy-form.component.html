@@ -166,6 +166,33 @@
 
 
 
+    <!-- Multi-day course: number of days + repeat interval (create mode only) -->
+    <div class="form-row" *ngIf="!serviceData">
+      <div class="form-group half-width">
+        <input type="number" class="form-input" name="totalDays" [(ngModel)]="formData.totalDays" min="1" step="1"
+          (ngModelChange)="onCourseConfigChange()" placeholder=" " />
+        <label class="form-label">Number of Days</label>
+      </div>
+      <div class="form-group half-width" *ngIf="formData.totalDays > 1">
+        <input type="number" class="form-input" name="intervalDays" [(ngModel)]="formData.intervalDays" min="1" step="1"
+          (ngModelChange)="onCourseConfigChange()" placeholder=" " />
+        <label class="form-label">Repeat every (days)</label>
+      </div>
+    </div>
+
+    <div class="therapist-note" *ngIf="!serviceData && formData.totalDays > 1">
+      <p class="note-title">🛈 Multi-day course ({{ formData.totalDays }} sessions, every {{ formData.intervalDays || 1 }} day(s))</p>
+      <ul class="note-list">
+        <li>
+          The <strong>date, time, therapist and room below are Day 1</strong>. Days 2–{{ formData.totalDays }} appear in
+          the "Per-day schedule" section lower down, pre-filled from Day 1 — edit any of them. Day 1 is booked now; later
+          days are scheduled as the patient checks in for the previous one.
+        </li>
+      </ul>
+    </div>
+
+    <!-- Per-day schedule is rendered after Remarks (see below) -->
+
     <!-- Row 6 - Date / Time -->
     <!-- <div class="form-row">
       <div class="form-group half-width">
@@ -245,7 +272,7 @@
     </div>
 
     <div class="form-row">
-  <div class="form-group full-width">
+  <div class="form-group full-width" style="height: auto;">
     <textarea
       class="form-input"
       name="remarks"
@@ -256,6 +283,72 @@
     <label class="form-label">Remarks (optional)</label>
   </div>
 </div>
+
+    <!-- Per-day editable schedule (multi-day course only) — form layout per day -->
+    <div *ngIf="!serviceData && formData.totalDays > 1 && dayRows.length" style="margin-top:10px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <strong style="color:#271E4A;">Per-day schedule (Day 2 onwards)</strong>
+        <button type="button" class="btn btn-cancel" style="padding:4px 12px;" (click)="resetDayRows()">
+          Reset to defaults
+        </button>
+      </div>
+      <p style="margin:0 0 14px; font-size:0.82rem; color:#7B7B7B;">
+        Day 1 is the date/time/therapist/room above. These additional days are pre-filled from Day 1 (every
+        {{ formData.intervalDays || 1 }} day(s)). Edit any day; days clashing a real booking show red, tentative
+        course clashes show amber.
+      </p>
+
+      <div *ngFor="let row of dayRows; let i = index"
+        style="border:1px solid #e3e8ef; border-radius:8px; padding:14px 14px 2px; margin-bottom:14px;"
+        [style.border-color]="row.unavailable ? '#e7b4ad' : (row.tentative ? '#e6c789' : '#e3e8ef')"
+        [style.background]="row.unavailable ? '#fdecea' : (row.tentative ? '#fff7e8' : '#fbfcfe')">
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <strong style="color:#271E4A;">Day {{ row.dayNumber }}</strong>
+          <span *ngIf="!row.unavailable && !row.tentative" style="color:#1e8e54; font-weight:600; font-size:0.85rem;">● Available</span>
+          <span *ngIf="row.tentative && !row.unavailable" style="color:#b9760a; font-weight:600; font-size:0.85rem;">● {{ row.reason }}</span>
+          <span *ngIf="row.unavailable" style="color:#c0392b; font-weight:600; font-size:0.85rem;">● {{ row.reason }}</span>
+        </div>
+
+        <ul *ngIf="row.conflicts?.length" style="margin:0 0 12px; padding-left:18px; font-size:0.8rem;"
+          [style.color]="row.unavailable ? '#c0392b' : '#b9760a'">
+          <li *ngFor="let c of row.conflicts">
+            <strong>{{ c.what }}</strong> — {{ c.when }} ({{ c.type }})
+          </li>
+        </ul>
+
+        <div class="form-row">
+          <div class="form-group half-width">
+            <input type="date" class="form-input" placeholder=" " [min]="minDate" [(ngModel)]="row.date"
+              name="dayDate{{ i }}" (ngModelChange)="onDayRowChange()" />
+            <label class="form-label">Date*</label>
+          </div>
+          <div class="form-group half-width">
+            <input type="time" class="form-input" placeholder=" " min="06:00" max="18:00" [(ngModel)]="row.time"
+              name="dayTime{{ i }}" (ngModelChange)="onDayRowChange()" />
+            <label class="form-label">Time*</label>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="half-width">
+            <p-multiSelect [options]="availableTherapists" class="custom-dropdown" [(ngModel)]="row.therapistIds"
+              name="dayTherapists{{ i }}" optionLabel="name" optionValue="id" [maxSelectedLabels]="2"
+              [selectionLimit]="2" placeholder="Select Therapists" [filter]="true" (onChange)="onDayRowChange()"
+              selectedItemsLabel="Therapists Selected"></p-multiSelect>
+          </div>
+          <div class="form-group half-width">
+            <select class="form-input" [(ngModel)]="row.roomNumber" name="dayRoom{{ i }}"
+              (ngModelChange)="onDayRowChange()">
+              <option value="" disabled selected>Select Room</option>
+              <option *ngFor="let r of roomNumbers" [value]="r">{{ r }}</option>
+            </select>
+            <label class="form-label">Room Number*</label>
+          </div>
+        </div>
+
+      </div>
+    </div>
 
 
 <div class="therapist-note" *ngIf="getSelectedTherapistBusySlots().length">
@@ -276,8 +369,8 @@
 
     <!-- Buttons -->
     <div class="form-buttons">
-      <button type="submit" class="btn btn-submit" [disabled]="form.invalid || isLoading">
-        <span *ngIf="!isLoading">Book Therapy</span>
+      <button type="submit" class="btn btn-submit" [disabled]="form.invalid || isLoading || hasBlockingConflict()">
+        <span *ngIf="!isLoading">{{ formData.totalDays > 1 ? 'Book Course' : 'Book Therapy' }}</span>
       </button>
       <button type="button" class="btn btn-cancel" (click)="resetForm(form)">Cancel</button>
     </div>
@@ -285,3 +378,22 @@
 </div>
 
 <p-toast></p-toast>
+
+<!-- Conflict popup (matches MHC design) -->
+<div class="custom-dialog-overlay" *ngIf="displayConflictDialog">
+  <div class="custom-dialog">
+    <div class="dialog-content">
+      <div class="icon-container">
+        <img src="warning.png" alt="Warning Icon" class="dialog-icon" />
+      </div>
+      <div class="dialog-text">
+        <h3>Conflict Detected</h3>
+        <p>{{ conflictMessage }}</p>
+      </div>
+    </div>
+    <div class="dialog-buttons">
+      <button type="button" class="cancel" (click)="onConflictReject()">No</button>
+      <button type="button" class="btn-primary" (click)="onConflictAccept()">Yes</button>
+    </div>
+  </div>
+</div>

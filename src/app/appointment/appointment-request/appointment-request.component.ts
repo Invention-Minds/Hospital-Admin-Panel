@@ -6,6 +6,7 @@ import { DoctorServiceService } from '../../services/doctor-details/doctor-servi
 import { app } from '../../../../server';
 import { ActivatedRoute } from '@angular/router';
 import { AuthServiceService } from '../../services/auth/auth-service.service';
+import { AlertService } from '../../services/alert.service';
 import { Subscription } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';  // Using uuid library for generating unique IDs
 import { MessageService } from 'primeng/api';
@@ -33,6 +34,8 @@ interface Appointment {
   isAccepted?: boolean;
   prnNumber?: any;
   prefix?: string;
+  isfollowup?: boolean;
+  type?: string;
 }
 const lockedAppointments = new Map<number, { userId: string; lockTime: number }>();
 @Component({
@@ -76,7 +79,8 @@ export class AppointmentRequestComponent implements OnInit {
   private lockSubscription: Subscription | undefined;
 
   constructor(public dialog: MatDialog, private appointmentService: AppointmentConfirmService, private route: ActivatedRoute, private doctorService: DoctorServiceService,
-    private authService: AuthServiceService, private messageService: MessageService
+    private authService: AuthServiceService, private messageService: MessageService,
+    private alertSvc: AlertService
   ) {
     this.userId = localStorage.getItem('userid')
   }
@@ -557,7 +561,7 @@ export class AppointmentRequestComponent implements OnInit {
           console.warn('The appointment is currently locked by another user.');
         } else if (error.status === 401) {
           console.error('Unauthorized access - maybe the session expired.');
-          alert('You are not authorized to access this resource. Please re-authenticate.');
+          this.alertSvc.show('You are not authorized to access this resource. Please re-authenticate.', { severity: 'danger', title: 'Unauthorized' });
         } else {
           console.error('Error locking the appointment:', error);
         }

@@ -1,0 +1,64 @@
+<div class="page tl-shell">
+  <div class="tl-head">
+    <div>
+      <h2 class="tl-title">Patient Timeline</h2>
+      <p class="tl-sub" *ngIf="response?.patient as p">
+        <strong>{{ p.name }}</strong> · PRN {{ p.prn }} · {{ p.age || '?' }}y / {{ p.gender || '?' }}
+        <span *ngIf="p.bloodGroup"> · {{ p.bloodGroup }}</span>
+        <span *ngIf="p.mobileNo"> · {{ p.mobileNo }}</span>
+        <span class="tl-allergy" *ngIf="p.knownAllergies"> · ⚠ Allergies: {{ p.knownAllergies }}</span>
+      </p>
+    </div>
+    <div class="tl-search">
+      <input type="text" [(ngModel)]="searchPrn" placeholder="Enter PRN…" (keydown.enter)="go()" />
+      <button class="tl-btn" (click)="go()">Go</button>
+    </div>
+  </div>
+
+  <div class="tl-banner tl-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
+
+  <!-- Filter chips by event type -->
+  <div class="tl-filters" *ngIf="response">
+    <span class="tl-chip"
+          *ngFor="let kv of response.counts | keyvalue"
+          [class.tl-chip-on]="activeTypes.has(kv.key)"
+          (click)="toggleType(kv.key)">
+      {{ typeLabel(kv.key) }} <span class="tl-count">{{ kv.value }}</span>
+    </span>
+    <span class="tl-chip tl-chip-clear" *ngIf="activeTypes.size" (click)="clearTypes()">✕ Clear</span>
+
+    <span class="tl-dates">
+      <label>From <input type="date" [(ngModel)]="fromDate" (change)="load()" /></label>
+      <label>To <input type="date" [(ngModel)]="toDate" (change)="load()" /></label>
+    </span>
+  </div>
+
+  <div class="tl-loading" *ngIf="loading">Loading timeline…</div>
+
+  <div class="tl-empty" *ngIf="!loading && response && grouped.length === 0">
+    No events for this patient with the current filters.
+  </div>
+
+  <!-- Vertical timeline grouped by day -->
+  <div class="tl-list" *ngIf="!loading">
+    <div class="tl-day" *ngFor="let g of grouped">
+      <div class="tl-day-head">{{ g.date | date:'EEE, d MMM y':'+0530' }}</div>
+      <div class="tl-rail">
+        <div class="tl-event" *ngFor="let e of g.items"
+             [class.tl-sev-critical]="e.severity === 'critical'"
+             [class.tl-sev-warn]="e.severity === 'warn'"
+             (click)="openEvent(e)">
+          <span class="tl-dot tl-dot-{{ e.type }}"></span>
+          <div class="tl-event-main">
+            <div class="tl-event-line">
+              <span class="tl-type">{{ typeLabel(e.type) }}</span>
+              <span class="tl-time">{{ e.ts | date:'h:mm a':'+0530' }}</span>
+            </div>
+            <div class="tl-event-title">{{ e.title }}</div>
+            <div class="tl-event-sum" *ngIf="e.summary">{{ e.summary }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

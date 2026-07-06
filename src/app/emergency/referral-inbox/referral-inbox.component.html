@@ -1,0 +1,44 @@
+<div class="page rin-shell">
+  <div class="rin-head">
+    <div>
+      <h2 class="rin-title">My emergency patients</h2>
+      <p class="rin-sub">Emergency cases referred and assigned to you.</p>
+    </div>
+    <button class="rin-btn" (click)="load()">↻ Refresh</button>
+  </div>
+
+  <div class="rin-banner rin-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
+  <div class="rin-banner rin-good" *ngIf="successMessage" (click)="successMessage=''">{{ successMessage }}</div>
+
+  <div class="rin-loading" *ngIf="loading">Loading…</div>
+
+  <div class="rin-empty" *ngIf="!loading && !referrals.length">
+    No emergency patients referred or assigned to you.
+  </div>
+
+  <div class="rin-list" *ngIf="!loading && referrals.length">
+    <div class="rin-card" *ngFor="let r of referrals" [class.rin-overdue]="isOverdue(r)">
+      <div class="rin-card-main">
+        <div class="rin-patient">
+          <span class="rin-name">{{ r.emergency?.patientName || '—' }}</span>
+          <span class="rin-pill rin-triage-{{ r.emergency?.triageCategory }}">{{ r.emergency?.triageCategory }}</span>
+          <span class="rin-er">ER# {{ r.emergency?.prn }}</span>
+        </div>
+        <div class="rin-meta">
+          Referred by {{ r.referredByName || '—' }} · {{ r.referredAt | date:'dd/MM/yy h:mm a' }}
+          · {{ minutesElapsed(r) }} min ago (SLA {{ r.slaMinutes }} min)
+        </div>
+        <div class="rin-reason" *ngIf="r.reason"><strong>Reason:</strong> {{ r.reason }}</div>
+        <div class="rin-flags">
+          <span class="rin-pill rin-good" *ngIf="r.status === 'acknowledged'">✓ Assigned to you</span>
+          <span class="rin-pill rin-warn" *ngIf="r.status === 'pending' && isOverdue(r)">⚠ Overdue</span>
+          <span class="rin-pill rin-esc" *ngIf="r.escalationLevel > 0">Escalated · Level {{ r.escalationLevel }}</span>
+        </div>
+      </div>
+      <div class="rin-actions">
+        <button class="rin-btn rin-btn-primary" *ngIf="r.status === 'pending'" (click)="acknowledge(r)">Acknowledge</button>
+        <button class="rin-btn" (click)="openCase(r)">Open case</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,120 @@
+<!-- Phase 9.9.8 — OT Workbench redesigned with dm-* design module.
+     All click handlers + ngModel bindings preserved 1:1. -->
+<div class="ow-shell">
+  <div class="ow-page-header">
+    <div>
+      <h2 class="ow-page-title">Operation Theatre Workbench</h2>
+      <p class="ow-page-sub">Single-page access to every OT sub-feature for the selected schedule.</p>
+    </div>
+    <button class="ow-btn ow-btn-secondary" (click)="load()" [disabled]="loading">
+      <i class="pi pi-refresh"></i> Refresh
+    </button>
+  </div>
+
+  <!-- Filters card -->
+  <div class="ow-filter-card">
+    <div class="ow-filter-grid">
+      <div class="ow-field">
+        <label class="ow-field-label">Date</label>
+        <input type="date" class="ow-input" [(ngModel)]="filterDate" (change)="load()" />
+      </div>
+      <div class="ow-field">
+        <label class="ow-field-label">Status</label>
+        <select class="ow-input" [(ngModel)]="filterStatus" (change)="load()">
+          <option value="">— any —</option>
+          <option value="BOOKED">Booked</option>
+          <option value="CONFIRMED">Confirmed</option>
+          <option value="IN_PROGRESS">In Progress</option>
+          <option value="CLOSED">Closed</option>
+          <option value="CANCELLED">Cancelled</option>
+        </select>
+      </div>
+      <div class="ow-field">
+        <label class="ow-field-label">Surgeon</label>
+        <input type="text" class="ow-input" [(ngModel)]="filterSurgeon" (keyup.enter)="load()" placeholder="contains…" />
+      </div>
+      <div class="ow-field">
+        <label class="ow-field-label">PRN</label>
+        <input type="text" class="ow-input" [(ngModel)]="filterPrn" (keyup.enter)="load()" placeholder="contains…" />
+      </div>
+      <div class="ow-field ow-field-action">
+        <button class="ow-btn ow-btn-primary" (click)="load()" [disabled]="loading">
+          <i class="pi pi-search"></i> Search
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="ow-banner ow-bad" *ngIf="errorMessage">
+    <i class="pi pi-exclamation-triangle"></i> {{ errorMessage }}
+  </div>
+
+  <div class="ow-layout">
+    <!-- Schedules table -->
+    <section class="ow-grid-wrap">
+      <div class="ow-grid-header">
+        <h3 class="ow-grid-title">Schedules <span class="ow-count" *ngIf="!loading">({{ schedules.length }})</span></h3>
+      </div>
+      <div class="ow-loading" *ngIf="loading">Loading schedules…</div>
+      <div class="ow-empty" *ngIf="!loading && !schedules.length">
+        <i class="pi pi-inbox"></i>
+        <div>No schedules for the selected filters.</div>
+      </div>
+      <table class="ow-grid" *ngIf="!loading && schedules.length">
+        <thead>
+          <tr>
+            <th>Req No.</th>
+            <th>From</th>
+            <th>To</th>
+            <th>PRN</th>
+            <th>Patient</th>
+            <th>Surgeon</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let s of schedules" [class.ow-row-sel]="selected?.id === s.id" (click)="select(s)">
+            <td>{{ s.id.slice(0, 8) }}</td>
+            <td>{{ s.plannedStart | date:'dd/MM HH:mm' }}</td>
+            <td>{{ s.plannedEnd | date:'dd/MM HH:mm' }}</td>
+            <td>{{ s.prn || '—' }}</td>
+            <td>{{ s.patientName || '—' }}</td>
+            <td>{{ s.surgeonName || '—' }}</td>
+            <td><span class="ow-pill" [ngClass]="statusPillClass(s.status)">{{ s.status }}</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Action sidebar -->
+    <aside class="ow-side">
+      <div class="ow-side-header">
+        <h3 class="ow-side-title">Actions</h3>
+      </div>
+      <div class="ow-sel" *ngIf="selected; else noSelection">
+        <div class="ow-sel-procedure">{{ selected.procedureName }}</div>
+        <div class="ow-sel-sub">
+          <span class="ow-sel-pill">PRN {{ selected.prn || '—' }}</span>
+          <span>{{ selected.patientName || '—' }}</span>
+        </div>
+      </div>
+      <ng-template #noSelection>
+        <div class="ow-sel ow-sel-empty">
+          <i class="pi pi-arrow-left"></i>
+          <em>Select a schedule from the table to enable actions</em>
+        </div>
+      </ng-template>
+
+      <div class="ow-actions">
+        <button
+          *ngFor="let a of actions"
+          class="ow-action-btn"
+          [disabled]="(a.needsSchedule && !selected)"
+          (click)="triggerAction(a)">
+          <span class="ow-action-label">{{ a.label }}</span>
+          <i class="pi pi-angle-right"></i>
+        </button>
+      </div>
+    </aside>
+  </div>
+</div>

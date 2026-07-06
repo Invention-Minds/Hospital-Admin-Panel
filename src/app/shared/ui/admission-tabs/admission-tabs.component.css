@@ -4,7 +4,16 @@
   border-bottom: 1px solid #e5e7eb;
   margin: 0 0 1.25rem 0;
   padding: 0;
+  /* Phase 9.9.7 — keep horizontal scroll BEHAVIOUR (so off-screen tabs are
+   * still reachable on narrow viewports) but hide the visible scrollbar.
+   * Looks ugly on Windows / Chrome's chunky bottom scrollbar. */
   overflow-x: auto;
+  scrollbar-width: none;            /* Firefox */
+  -ms-overflow-style: none;          /* IE/legacy Edge */
+}
+.admission-tabs::-webkit-scrollbar {  /* Chrome / Safari / new Edge */
+  display: none;
+  height: 0;
 }
 
 .admission-tab {

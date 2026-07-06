@@ -1,0 +1,182 @@
+<div class="inv-order">
+
+  <!-- Toolbar -->
+  <div class="inv-toolbar">
+    <div class="inv-title">Investigations</div>
+    <input
+      class="inv-search"
+      type="text"
+      placeholder="Search lab tests…"
+      [(ngModel)]="labSearch"
+      [disabled]="loading || catalogEmpty" />
+    <div class="inv-counts">
+      <span class="inv-chip-count" [class.active]="selectedLabCount > 0">Lab {{ selectedLabCount }}</span>
+      <span class="inv-chip-count" [class.active]="selectedRadiologyCount > 0">Radiology {{ selectedRadiologyCount }}</span>
+    </div>
+    <!-- One-time admin action: load the full paper-form catalog. Idempotent —
+         skips tests already present. Safe to remove/guard for production. -->
+    <button
+      type="button"
+      class="inv-print-btn"
+      (click)="printRequestForm()"
+      [disabled]="!hasPrintableInvestigations"
+      title="Print the investigation request form (selected + previously ordered)">
+      🖨 Print request
+    </button>
+    <button
+      type="button"
+      class="inv-seed-link"
+      (click)="seedCatalog()"
+      [disabled]="seeding || loading"
+      title="Load the full lab + radiology catalog from the paper forms (skips existing)">
+      {{ seeding ? 'Loading catalog…' : 'Load full catalog' }}
+    </button>
+  </div>
+
+  <!-- States -->
+  <div class="inv-state" *ngIf="loading">Loading catalog…</div>
+
+  <div class="inv-state inv-empty" *ngIf="!loading && catalogEmpty">
+    <p>The investigation catalog hasn't been loaded yet.</p>
+    <button type="button" class="inv-btn inv-btn-primary" (click)="seedCatalog()" [disabled]="seeding">
+      {{ seeding ? 'Loading…' : 'Load catalog from paper forms' }}
+    </button>
+  </div>
+
+  <!-- Previously ordered (read-only) — prior orders for this patient -->
+  <div class="prior-orders" *ngIf="priorOrders.length">
+    <div class="prior-header">Previously ordered</div>
+    <div class="prior-order" *ngFor="let o of priorOrders">
+      <div class="prior-meta">
+        <span class="prior-date">{{ o.date || (o.createdAt | date: 'dd MMM yyyy') }}</span>
+        <span class="prior-doctor" *ngIf="o.doctorName">· {{ o.doctorName }}</span>
+      </div>
+      <div class="prior-line" *ngIf="orderLabNames(o)"><strong>Lab:</strong> {{ orderLabNames(o) }}</div>
+      <div class="prior-line" *ngIf="orderRadiologyNames(o)"><strong>Radiology:</strong> {{ orderRadiologyNames(o) }}</div>
+      <div class="prior-line" *ngIf="o.remarks"><strong>Remarks:</strong> {{ o.remarks }}</div>
+    </div>
+  </div>
+
+  <ng-container *ngIf="!loading && !catalogEmpty">
+
+    <!-- LAB GRID — one box per department, mirroring the paper form -->
+    <div class="lab-grid">
+      <div class="lab-group" *ngFor="let group of visibleLabGroups">
+        <div class="lab-group-header">{{ group.department }}</div>
+        <label class="lab-item" *ngFor="let t of group.tests">
+          <input
+            type="checkbox"
+            [checked]="selectedLabIds.has(t.id)"
+            (change)="toggleLab(t.id)" />
+          <span>{{ t.description }}</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="lab-no-match" *ngIf="visibleLabGroups.length === 0">
+      No lab tests match “{{ labSearch }}”.
+    </div>
+
+    <!-- RADIOLOGY PANEL -->
+    <div class="radiology-panel">
+      <div class="rad-header">Radiology</div>
+
+      <div class="rad-modalities">
+        <label class="rad-modality" *ngFor="let r of radiologyTests">
+          <input
+            type="checkbox"
+            [checked]="selectedRadiologyIds.has(r.id)"
+            (change)="toggleRadiology(r.id)" />
+          <span>{{ r.description }}</span>
+        </label>
+      </div>
+
+      <!-- Safety screening — only when a radiology study is selected -->
+      <div class="rad-safety" *ngIf="hasRadiology">
+        <div class="rad-row">
+          <label class="rad-field">
+            <span>Priority</span>
+            <select [(ngModel)]="radiology.priority">
+              <option [ngValue]="undefined">—</option>
+              <option *ngFor="let p of priorities" [ngValue]="p">{{ p }}</option>
+            </select>
+          </label>
+          <label class="rad-field grow">
+            <span>Clinical details</span>
+            <input type="text" [(ngModel)]="radiology.clinicalDetails" />
+          </label>
+        </div>
+
+        <div class="rad-row">
+          <label class="rad-field">
+            <span>Serum creatinine</span>
+            <input type="text" [(ngModel)]="radiology.serumCreatinine" />
+          </label>
+          <label class="rad-field">
+            <span>Done on</span>
+            <input type="date" [(ngModel)]="radiology.creatinineDoneOn" />
+          </label>
+          <label class="rad-field">
+            <span>Weight (kg)</span>
+            <input type="text" [(ngModel)]="radiology.weightKg" />
+          </label>
+        </div>
+
+        <div class="rad-row">
+          <label class="rad-check">
+            <input type="checkbox" [(ngModel)]="radiology.pregnancy" />
+            <span>Pregnancy</span>
+          </label>
+          <label class="rad-field" *ngIf="radiology.pregnancy">
+            <span>LMP</span>
+            <input type="date" [(ngModel)]="radiology.lmp" />
+          </label>
+          <label class="rad-field grow">
+            <span>Allergic history</span>
+            <input type="text" [(ngModel)]="radiology.allergyHistory" />
+          </label>
+        </div>
+
+        <div class="rad-row rad-comorbid">
+          <span class="rad-row-label">History:</span>
+          <label class="rad-check" *ngFor="let c of comorbidityOptions">
+            <input
+              type="checkbox"
+              [checked]="(radiology.comorbidities || []).includes(c)"
+              (change)="toggleComorbidity(c)" />
+            <span>{{ c }}</span>
+          </label>
+          <input class="rad-other" type="text" placeholder="Other…" [(ngModel)]="radiology.otherComorbidity" />
+        </div>
+
+        <div class="rad-row">
+          <label class="rad-check">
+            <input type="checkbox" [(ngModel)]="radiology.consentGiven" />
+            <span>Consent obtained</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Remarks -->
+    <label class="inv-remarks">
+      <span>Remarks / clinical indication</span>
+      <textarea rows="2" [(ngModel)]="remarks"></textarea>
+    </label>
+
+    <!-- Selected summary -->
+    <div class="inv-summary" *ngIf="!isEmpty">
+      <div *ngIf="selectedLabNames.length"><strong>Lab:</strong> {{ selectedLabNames.join(', ') }}</div>
+      <div *ngIf="selectedRadiologyNames.length"><strong>Radiology:</strong> {{ selectedRadiologyNames.join(', ') }}</div>
+    </div>
+
+    <!-- Actions -->
+    <div class="inv-actions" *ngIf="showActions">
+      <button type="button" class="inv-btn" (click)="clearSelection()" [disabled]="isEmpty || saving">Clear</button>
+      <button type="button" class="inv-btn inv-btn-primary" (click)="saveOrder()" [disabled]="isEmpty || saving">
+        {{ saving ? 'Saving…' : 'Save investigation order' }}
+      </button>
+    </div>
+
+  </ng-container>
+</div>

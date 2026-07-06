@@ -1,7 +1,12 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { HmisSyncService } from '../services/hmis-sync.service';
+import {
+  HmisSyncService,
+  HmisDeadLetter,
+  HmisConflict,
+} from '../services/hmis-sync.service';
+import { AlertService } from '../services/alert.service';
 
 @Component({
   selector: 'app-sync-status',
@@ -16,9 +21,31 @@ export class SyncStatusComponent implements OnInit, OnDestroy {
   auditLogs: any[] = [];
   failedCount: number = 0;
 
+  // Phase 9 — sync hardening tabs.
+  activeTab: 'overview' | 'dead-letter' | 'conflicts' = 'overview';
+  deadLetters: HmisDeadLetter[] = [];
+  conflicts: HmisConflict[] = [];
+
+  // Resolve dialog state — single dialog reused for both DL and conflict rows.
+  resolveDialog: {
+    visible: boolean;
+    kind: 'dead-letter' | 'conflict' | null;
+    rowId: number | null;
+    outcome: string;
+    resolution: string;
+    submitting: boolean;
+  } = {
+    visible: false,
+    kind: null,
+    rowId: null,
+    outcome: '',
+    resolution: '',
+    submitting: false,
+  };
+
   private destroy$ = new Subject<void>();
 
-  constructor(private hmisSyncService: HmisSyncService) { }
+  constructor(private hmisSyncService: HmisSyncService, private alertSvc: AlertService) { }
 
   ngOnInit(): void {
     this.loadStatus();
@@ -89,8 +116,8 @@ export class SyncStatusComponent implements OnInit, OnDestroy {
       });
   }
 
-  retryAllFailed(): void {
-    if (!confirm('Retry all failed syncs?')) return;
+  async retryAllFailed(): Promise<void> {
+    if (!await this.alertSvc.confirm('Retry all failed syncs?', { confirmLabel: 'Retry all' })) return;
     this.hmisSyncService.retryAllFailedSyncs()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -130,6 +157,118 @@ export class SyncStatusComponent implements OnInit, OnDestroy {
     this.loadStats();
     this.loadAuditLogs();
     this.loadFailedCount();
+    if (this.activeTab === 'dead-letter') this.loadDeadLetters();
+    if (this.activeTab === 'conflicts') this.loadConflicts();
+  }
+
+  // ─── Phase 9 — Tab switching + loaders ────────────────────────────────
+  selectTab(tab: 'overview' | 'dead-letter' | 'conflicts'): void {
+    this.activeTab = tab;
+    if (tab === 'dead-letter') this.loadDeadLetters();
+    if (tab === 'conflicts') this.loadConflicts();
+  }
+
+  loadDeadLetters(): void {
+    this.hmisSyncService
+      .listDeadLetters({ status: 'QUARANTINED' })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (rows) => {
+          this.deadLetters = rows ?? [];
+        },
+        error: (err) => console.error('Dead-letter load failed', err),
+      });
+  }
+
+  loadConflicts(): void {
+    this.hmisSyncService
+      .listConflicts({ status: 'OPEN' })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (rows) => {
+          this.conflicts = rows ?? [];
+        },
+        error: (err) => console.error('Conflicts load failed', err),
+      });
+  }
+
+  runDeadLetterMover(): void {
+    this.hmisSyncService
+      .runDeadLetterMover()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (res) => {
+          this.alertSvc.show(`Dead-letter mover ran. ${res.moved} row(s) quarantined.`);
+          this.loadDeadLetters();
+          this.loadFailedCount();
+        },
+        error: (err) => this.alertSvc.show(err?.error?.error || 'Mover failed'),
+      });
+  }
+
+  // ─── Resolve dialog ───────────────────────────────────────────────────
+  openResolve(kind: 'dead-letter' | 'conflict', rowId: number): void {
+    this.resolveDialog = {
+      visible: true,
+      kind,
+      rowId,
+      outcome: kind === 'dead-letter' ? 'RESOLVED' : 'RESOLVED_LOCAL',
+      resolution: '',
+      submitting: false,
+    };
+  }
+
+  closeResolve(): void {
+    this.resolveDialog.visible = false;
+  }
+
+  submitResolve(): void {
+    const { kind, rowId, outcome, resolution } = this.resolveDialog;
+    if (!kind || rowId == null) return;
+    if (!resolution || resolution.trim().length < 5) {
+      this.alertSvc.show('Resolution note (min 5 chars) is required.');
+      return;
+    }
+    this.resolveDialog.submitting = true;
+
+    if (kind === 'dead-letter') {
+      this.hmisSyncService
+        .resolveDeadLetter(rowId, {
+          outcome: outcome as 'RESOLVED' | 'IGNORED' | 'REPLAYED',
+          resolution: resolution.trim(),
+        })
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            this.resolveDialog.submitting = false;
+            this.resolveDialog.visible = false;
+            this.loadDeadLetters();
+            this.loadFailedCount();
+          },
+          error: (err) => {
+            this.resolveDialog.submitting = false;
+            this.alertSvc.show(err?.error?.error || 'Resolve failed');
+          },
+        });
+    } else {
+      this.hmisSyncService
+        .resolveConflict(rowId, {
+          outcome: outcome as 'RESOLVED_LOCAL' | 'RESOLVED_HMIS' | 'IGNORED',
+          resolution: resolution.trim(),
+        })
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: () => {
+            this.resolveDialog.submitting = false;
+            this.resolveDialog.visible = false;
+            this.loadConflicts();
+          },
+          error: (err) => {
+            this.resolveDialog.submitting = false;
+            this.alertSvc.show(err?.error?.error || 'Resolve failed');
+          },
+        });
+    }
   }
 
   getStatusColor(status: string): string {

@@ -1,0 +1,42 @@
+<div class="page nmi-shell">
+  <div class="nmi-head">
+    <h2 class="nmi-title">Medication inbox</h2>
+    <p class="nmi-sub">Confirm what pharmacy has handed over. MAR will refuse administration until confirmed.</p>
+  </div>
+
+  <div class="nmi-banner nmi-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
+  <div class="nmi-banner nmi-good" *ngIf="successMessage">{{ successMessage }}</div>
+  <div class="nmi-empty" *ngIf="!loading && !rows.length">No medications waiting for collection.</div>
+
+  <div class="nmi-grid" *ngIf="rows.length">
+    <div class="nmi-card" *ngFor="let r of rows" [class.nmi-card-stat]="r.isStatBypass">
+      <div class="nmi-card-head">
+        <div>
+          <span class="nmi-pill nmi-pill-stat" *ngIf="r.isStatBypass">STAT</span>
+          <strong class="nmi-generic">{{ r.genericName }}</strong>
+          <span class="nmi-brand" *ngIf="r.substitutedBrand">↦ {{ r.substitutedBrand }}</span>
+          <span class="nmi-brand" *ngIf="!r.substitutedBrand && r.brandName">· {{ r.brandName }}</span>
+        </div>
+        <div class="nmi-meta">
+          <div>{{ r.admission.admissionNo }} · {{ r.admission.ward?.wardName }} · Bed {{ r.admission.bed?.bedNumber }}</div>
+          <div>PRN {{ r.admission.prn }} · Dr {{ r.admission.admittingDoctor || '—' }}</div>
+        </div>
+      </div>
+      <div class="nmi-rx-line">{{ r.dose }} · {{ r.frequency }} · qty dispensed: {{ r.dispensedQty ?? r.quantity }}/{{ r.quantity }}</div>
+      <p class="nmi-substitution" *ngIf="r.substitutedBrand">
+        ⚠ Brand substituted by pharmacy{{ r.substitutedReason ? ' — ' + r.substitutedReason : '' }}.
+      </p>
+
+      <div class="nmi-actions-row">
+        <label class="nmi-qty">Confirm qty
+          <input type="number" min="1" [placeholder]="(r.dispensedQty ?? r.quantity).toString()"
+                 [(ngModel)]="collectDraft[r.id]" />
+        </label>
+        <button class="nmi-btn nmi-btn-primary" (click)="collect(r)">✓ Confirm received</button>
+      </div>
+
+      <textarea rows="2" placeholder="Return reason (wrong patient, expired stock, wrong dose…)" [(ngModel)]="returnDraft[r.id]"></textarea>
+      <button class="nmi-btn nmi-btn-warn" (click)="returnRx(r)">↩ Return to pharmacy</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,10 @@
+/* Phase 9.11 — IPD admission "Reports" sub-page.
+ * Wrapper styling inherits from .page in global forms.css. */
+
+.ipdr-loading {
+  padding: 40px;
+  text-align: center;
+  color: #7b7b7b;
+  font-style: italic;
+  font-family: Kanit, sans-serif;
+}

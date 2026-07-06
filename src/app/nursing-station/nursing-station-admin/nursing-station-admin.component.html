@@ -1,0 +1,118 @@
+<div class="ns-page">
+  <header class="ns-header">
+    <div>
+      <h2>Nursing Stations</h2>
+      <p class="ns-sub">Group wards into stations and map nurses. A nurse sees only the admissions in the wards of the stations they're assigned to.</p>
+    </div>
+    <button class="ns-btn primary" (click)="startCreate()">+ New Station</button>
+  </header>
+
+  <div *ngIf="successMessage" class="ns-banner success">{{ successMessage }}</div>
+  <div *ngIf="errorMessage" class="ns-banner error">{{ errorMessage }}</div>
+
+  <!-- ─── List ─────────────────────────────────────────────────────────── -->
+  <div *ngIf="loading" class="ns-empty">Loading…</div>
+
+  <div *ngIf="!loading" class="ns-grid">
+    <div *ngIf="stations.length === 0" class="ns-empty">No nursing stations yet. Create one to start mapping wards and nurses.</div>
+
+    <div *ngFor="let s of stations" class="ns-card" [class.inactive]="!s.isActive">
+      <div class="ns-card-top">
+        <div>
+          <span class="ns-code">{{ s.code }}</span>
+          <span class="ns-type" [class.opd]="s.type === 'OPD'">{{ s.type }}</span>
+          <h3>{{ s.name }}</h3>
+        </div>
+        <span class="ns-badge" *ngIf="!s.isActive">Inactive</span>
+      </div>
+      <p class="ns-desc" *ngIf="s.description">{{ s.description }}</p>
+
+      <div class="ns-meta">
+        <div *ngIf="s.type !== 'OPD'">
+          <strong>Wards ({{ s.wards.length }})</strong>
+          <div class="ns-chips">
+            <span class="ns-chip" *ngFor="let w of s.wards">{{ w.wardName }}</span>
+            <span class="ns-muted" *ngIf="s.wards.length === 0">none</span>
+          </div>
+        </div>
+        <div *ngIf="s.type === 'OPD'">
+          <strong>Scope</strong>
+          <div class="ns-chips"><span class="ns-chip">All OPD appointments</span></div>
+        </div>
+        <div>
+          <strong>Nurses ({{ s.nurses.length }})</strong>
+          <div class="ns-chips">
+            <span class="ns-chip alt" *ngFor="let n of s.nurses">{{ n.fullName || n.username }}</span>
+            <span class="ns-muted" *ngIf="s.nurses.length === 0">none</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ns-card-actions">
+        <button class="ns-btn" (click)="startEdit(s)">Edit / Map</button>
+        <button class="ns-btn danger" (click)="remove(s)">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Editor ───────────────────────────────────────────────────────── -->
+  <div *ngIf="showEditor" class="ns-modal-backdrop" (click)="cancelEditor()">
+    <div class="ns-modal" (click)="$event.stopPropagation()">
+      <h3>{{ selected ? 'Edit station' : 'New station' }}</h3>
+
+      <div class="ns-form-row">
+        <label>Name *</label>
+        <input type="text" [(ngModel)]="form.name" placeholder="e.g. 3rd Floor Station" />
+      </div>
+      <div class="ns-form-row">
+        <label>Code *</label>
+        <input type="text" [(ngModel)]="form.code" [disabled]="!!selected" placeholder="e.g. NS-3F" />
+        <small *ngIf="selected" class="ns-muted">Code can't be changed after creation.</small>
+      </div>
+      <div class="ns-form-row">
+        <label>Type *</label>
+        <select [(ngModel)]="form.type">
+          <option value="IPD">IPD — ward-based (nurses see their wards' admissions)</option>
+          <option value="OPD">OPD — nurses see all of today's OPD appointments</option>
+        </select>
+      </div>
+      <div class="ns-form-row">
+        <label>Description</label>
+        <textarea [(ngModel)]="form.description" rows="2"></textarea>
+      </div>
+      <div class="ns-form-row inline">
+        <label><input type="checkbox" [(ngModel)]="form.isActive" /> Active</label>
+      </div>
+
+      <div class="ns-picker" *ngIf="form.type !== 'OPD'">
+        <strong>Wards in this station</strong>
+        <div class="ns-checklist">
+          <label *ngFor="let w of wards" class="ns-check">
+            <input type="checkbox" [(ngModel)]="wardChecked[w.id!]" />
+            {{ w.wardName }} <span class="ns-muted">({{ w.wardCode }})</span>
+          </label>
+          <span class="ns-muted" *ngIf="wards.length === 0">No wards found.</span>
+        </div>
+      </div>
+      <p class="ns-muted" *ngIf="form.type === 'OPD'">OPD stations cover OPD appointments — no wards needed. Nurses here see all of today's OPD appointments.</p>
+
+      <div class="ns-picker">
+        <strong>Nurses assigned to this station</strong>
+        <div class="ns-checklist">
+          <label *ngFor="let n of nurses" class="ns-check">
+            <input type="checkbox" [(ngModel)]="nurseChecked[n.id]" />
+            {{ nurseLabel(n) }}
+          </label>
+          <span class="ns-muted" *ngIf="nurses.length === 0">No nurses found.</span>
+        </div>
+      </div>
+
+      <div class="ns-modal-actions">
+        <button class="ns-btn" (click)="cancelEditor()" [disabled]="saving">Cancel</button>
+        <button class="ns-btn primary" (click)="save()" [disabled]="saving">
+          {{ saving ? 'Saving…' : (selected ? 'Save changes' : 'Create station') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

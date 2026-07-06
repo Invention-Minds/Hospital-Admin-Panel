@@ -492,6 +492,7 @@ resetPassword() {
     localStorage.removeItem('employeeId');
     localStorage.removeItem('subAdminType');
     localStorage.removeItem('adminType');
+    localStorage.removeItem('departmentName');
     localStorage.removeItem('userId');
     localStorage.removeItem('nurseId');
     localStorage.removeItem('name');

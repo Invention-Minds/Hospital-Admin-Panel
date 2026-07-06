@@ -1,0 +1,444 @@
+<div class="ms-shell">
+  <h2 class="ms-title">Masters</h2>
+  <p class="ms-sub">
+    Central admin for the reference catalogues that drive everything downstream
+    — departments, wards, beds, OT rooms, and the medication master.
+  </p>
+
+  <div class="ms-banner ms-banner-bad" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+  <div class="ms-banner ms-banner-good" *ngIf="successMessage" role="status">{{ successMessage }}</div>
+
+  <div class="ms-tabs">
+    <button type="button" [class.active]="tab==='departments'" (click)="setTab('departments')">Departments</button>
+    <button type="button" [class.active]="tab==='surgeons'" (click)="setTab('surgeons')">Surgeons</button>
+    <button type="button" [class.active]="tab==='wards'" (click)="setTab('wards')">Wards</button>
+    <button type="button" [class.active]="tab==='beds'" (click)="setTab('beds')">Beds</button>
+    <button type="button" [class.active]="tab==='ot-rooms'" (click)="setTab('ot-rooms')">OT Rooms</button>
+    <button type="button" [class.active]="tab==='tablets'" (click)="setTab('tablets')">Medications</button>
+    <button type="button" [class.active]="tab==='lab-tests'" (click)="setTab('lab-tests')">Lab tests</button>
+    <button type="button" [class.active]="tab==='radiology-tests'" (click)="setTab('radiology-tests')">Radiology tests</button>
+    <button type="button" [class.active]="tab==='packages'" (click)="setTab('packages')">MHC Packages</button>
+    <button type="button" [class.active]="tab==='shifts'" (click)="setTab('shifts')">Shifts</button>
+  </div>
+
+  <!-- ─── Departments ─── -->
+  <div *ngIf="tab==='departments'" class="ms-panel">
+    <div class="ms-grid-2">
+      <div>
+        <table class="ms-table">
+          <thead><tr><th>Name</th><th>Created</th><th></th></tr></thead>
+          <tbody>
+            <tr *ngFor="let d of departments">
+              <td>{{ d.name }}</td>
+              <td class="ms-muted">{{ d.createdAt | date:'short' }}</td>
+              <td><button type="button" class="ms-btn ms-btn-sm" (click)="editDept(d)">Edit</button></td>
+            </tr>
+            <tr *ngIf="departments.length===0"><td colspan="3" class="ms-empty">No departments yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ms-form">
+        <h3>{{ deptForm.id ? 'Edit department' : 'New department' }}</h3>
+        <label>Name <input type="text" [(ngModel)]="deptForm.name" placeholder="General Medicine" /></label>
+        <div class="ms-actions">
+          <button type="button" class="ms-btn ms-btn-primary" [disabled]="saving" (click)="saveDept()">{{ saving ? 'Saving…' : 'Save' }}</button>
+          <button type="button" class="ms-btn" (click)="deptForm = blankDept()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Surgeons ─── -->
+  <div *ngIf="tab==='surgeons'" class="ms-panel">
+    <div class="ms-grid-2">
+      <div>
+        <table class="ms-table">
+          <thead><tr><th>Name</th><th>Type</th><th>Qualification</th><th>Active</th><th></th></tr></thead>
+          <tbody>
+            <tr *ngFor="let s of surgeons">
+              <td>{{ s.name }}</td>
+              <td>{{ s.type === 'assistant' ? 'Assistant Surgeon' : 'Surgeon' }}</td>
+              <td class="ms-muted">{{ s.qualification ?? '—' }}</td>
+              <td>{{ s.isActive ? 'Yes' : 'No' }}</td>
+              <td><button type="button" class="ms-btn ms-btn-sm" (click)="editSurgeon(s)">Edit</button></td>
+            </tr>
+            <tr *ngIf="surgeons.length===0"><td colspan="5" class="ms-empty">No surgeons yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ms-form">
+        <h3>{{ surgeonForm.id ? 'Edit surgeon' : 'New surgeon' }}</h3>
+        <label>Name <input type="text" [(ngModel)]="surgeonForm.name" placeholder="Dr. A. Sharma" /></label>
+        <label>Type
+          <select [(ngModel)]="surgeonForm.type">
+            <option *ngFor="let t of surgeonTypes" [value]="t.value">{{ t.label }}</option>
+          </select>
+        </label>
+        <label>Qualification <input type="text" [(ngModel)]="surgeonForm.qualification" placeholder="MS, MCh" /></label>
+        <label *ngIf="surgeonForm.id" class="ms-check"><input type="checkbox" [(ngModel)]="surgeonForm.isActive" /> Active</label>
+        <div class="ms-actions">
+          <button type="button" class="ms-btn ms-btn-primary" [disabled]="saving" (click)="saveSurgeon()">{{ saving ? 'Saving…' : 'Save' }}</button>
+          <button type="button" class="ms-btn" (click)="surgeonForm = blankSurgeon()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Wards ─── -->
+  <div *ngIf="tab==='wards'" class="ms-panel">
+    <div class="ms-grid-2">
+      <div>
+        <table class="ms-table">
+          <thead>
+            <tr><th>Code</th><th>Name</th><th>Floor</th><th>Department</th><th>Total beds</th><th></th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let w of wards">
+              <td><strong>{{ w.wardCode }}</strong></td>
+              <td>{{ w.wardName }}</td>
+              <td>{{ w.floor ?? '—' }}</td>
+              <td>{{ w.department }}</td>
+              <td>{{ w.totalBeds }}</td>
+              <td><button type="button" class="ms-btn ms-btn-sm" (click)="editWard(w)">Edit</button></td>
+            </tr>
+            <tr *ngIf="wards.length===0"><td colspan="6" class="ms-empty">No wards yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ms-form">
+        <h3>{{ wardForm.id ? 'Edit ward' : 'New ward' }}</h3>
+        <label>Ward name <input type="text" [(ngModel)]="wardForm.wardName" placeholder="General Ward A" /></label>
+        <label>Code <input type="text" [(ngModel)]="wardForm.wardCode" placeholder="GW-A" /></label>
+        <label>Floor <input type="text" [(ngModel)]="wardForm.floor" placeholder="2nd Floor" /></label>
+        <label>Department
+          <select [(ngModel)]="wardForm.department">
+            <option value="">— select —</option>
+            <option *ngFor="let d of departments" [value]="d.name">{{ d.name }}</option>
+          </select>
+        </label>
+        <label>Total beds <input type="number" min="0" [(ngModel)]="wardForm.totalBeds" /></label>
+        <label>HMIS ward ID (optional) <input type="text" [(ngModel)]="wardForm.hmisWardId" /></label>
+        <div class="ms-actions">
+          <button type="button" class="ms-btn ms-btn-primary" [disabled]="saving" (click)="saveWard()">{{ saving ? 'Saving…' : 'Save' }}</button>
+          <button type="button" class="ms-btn" (click)="wardForm = blankWard()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Beds ─── -->
+  <div *ngIf="tab==='beds'" class="ms-panel">
+    <label class="ms-field-inline">
+      Filter ward
+      <select [(ngModel)]="bedFilterWardId">
+        <option value="">All wards</option>
+        <option *ngFor="let w of wards" [value]="w.id">{{ w.wardCode }} · {{ w.wardName }}</option>
+      </select>
+    </label>
+
+    <div class="ms-grid-2">
+      <div>
+        <table class="ms-table">
+          <thead><tr><th>Bed #</th><th>Ward</th><th>Type</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            <tr *ngFor="let b of bedsForCurrentWard()">
+              <td><strong>{{ b.bedNumber }}</strong></td>
+              <td>{{ b.ward?.wardName ?? wardName(b.wardId) }}</td>
+              <td>{{ b.bedType }}</td>
+              <td>
+                <select [ngModel]="b.status" (ngModelChange)="setBedStatus(b, $event)">
+                  <option *ngFor="let s of bedStatuses" [value]="s">{{ s }}</option>
+                </select>
+              </td>
+              <td><button type="button" class="ms-btn ms-btn-sm" (click)="editBed(b)">Edit</button></td>
+            </tr>
+            <tr *ngIf="bedsForCurrentWard().length===0"><td colspan="5" class="ms-empty">No beds in this ward yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ms-form">
+        <h3 *ngIf="bedForm.id">Edit bed</h3>
+        <ng-container *ngIf="bedForm.id">
+          <label>Bed number <input type="text" [(ngModel)]="bedForm.bedNumber" /></label>
+          <label>Bed type
+            <select [(ngModel)]="bedForm.bedType">
+              <option *ngFor="let t of bedTypes" [value]="t">{{ t }}</option>
+            </select>
+          </label>
+          <div class="ms-actions">
+            <button type="button" class="ms-btn ms-btn-primary" [disabled]="saving" (click)="saveBed()">{{ saving ? 'Saving…' : 'Save' }}</button>
+            <button type="button" class="ms-btn" (click)="bedForm = blankBed()">Cancel</button>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="!bedForm.id">
+          <h3>Bulk-add beds</h3>
+          <p class="ms-sub-form">
+            Pick a ward in the filter above, then add rows below. Each row creates
+            one bed. Bed numbers must be unique within the ward.
+          </p>
+          <div *ngIf="!bedFilterWardId" class="ms-hint">Select a ward to enable bulk-add.</div>
+          <ng-container *ngIf="bedFilterWardId">
+            <div *ngFor="let r of bedBulkRows; let i = index" class="ms-bed-row">
+              <input type="text" [(ngModel)]="r.bedNumber" placeholder="e.g. GW-A-101" />
+              <select [(ngModel)]="r.bedType">
+                <option *ngFor="let t of bedTypes" [value]="t">{{ t }}</option>
+              </select>
+              <button type="button" class="ms-btn ms-btn-sm" (click)="removeBulkBedRow(i)">×</button>
+            </div>
+            <div class="ms-actions">
+              <button type="button" class="ms-btn" (click)="addBulkBedRow()">+ Add row</button>
+              <button type="button" class="ms-btn ms-btn-primary"
+                      [disabled]="bedBulkRows.length === 0"
+                      (click)="saveBulkBeds()">Create beds</button>
+            </div>
+          </ng-container>
+        </ng-container>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── OT Rooms ─── -->
+  <div *ngIf="tab==='ot-rooms'" class="ms-panel">
+    <div class="ms-grid-2">
+      <div>
+        <table class="ms-table">
+          <thead><tr><th>Code</th><th>Name</th><th>Type</th><th>Equipment</th><th>HEPA</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            <tr *ngFor="let o of otRooms">
+              <td><strong>{{ o.code }}</strong></td>
+              <td>{{ o.name }}</td>
+              <td>{{ o.type }}</td>
+              <td>{{ o.equipmentClass ?? '—' }}</td>
+              <td>{{ o.hepaFiltered ? '✓' : '' }}</td>
+              <td>
+                <select [ngModel]="o.status" (ngModelChange)="setOtStatus(o, $event)">
+                  <option *ngFor="let s of otStatuses" [value]="s">{{ s }}</option>
+                </select>
+              </td>
+              <td><button type="button" class="ms-btn ms-btn-sm" (click)="editOt(o)">Edit</button></td>
+            </tr>
+            <tr *ngIf="otRooms.length===0"><td colspan="7" class="ms-empty">No OT rooms yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ms-form">
+        <h3>{{ otForm.id ? 'Edit OT room' : 'New OT room' }}</h3>
+        <label>Name <input type="text" [(ngModel)]="otForm.name" placeholder="Major OT 1 — General Surgery" /></label>
+        <label>Code
+          <input type="text" [(ngModel)]="otForm.code" placeholder="OT-MAJOR-1" [readonly]="!!otForm.id" />
+          <small *ngIf="otForm.id" class="ms-muted">Code is immutable once created.</small>
+        </label>
+        <label>Type
+          <select [(ngModel)]="otForm.type">
+            <option *ngFor="let t of otTypes" [value]="t">{{ t }}</option>
+          </select>
+        </label>
+        <label>Equipment class <input type="text" [(ngModel)]="otForm.equipmentClass" placeholder="general / ortho / neuro / cardiac" /></label>
+        <label class="ms-check"><input type="checkbox" [(ngModel)]="otForm.hepaFiltered" /> HEPA-filtered</label>
+        <div class="ms-actions">
+          <button type="button" class="ms-btn ms-btn-primary" [disabled]="saving" (click)="saveOt()">{{ saving ? 'Saving…' : 'Save' }}</button>
+          <button type="button" class="ms-btn" (click)="otForm = blankOt()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Tablets ─── -->
+  <div *ngIf="tab==='tablets'" class="ms-panel">
+    <div class="ms-grid-2">
+      <div>
+        <table class="ms-table">
+          <thead><tr><th>Brand</th><th>Generic</th><th>Type</th><th>Notes</th><th></th></tr></thead>
+          <tbody>
+            <tr *ngFor="let t of tablets">
+              <td><strong>{{ t.brandName }}</strong></td>
+              <td>{{ t.genericName }}</td>
+              <td>{{ t.type }}</td>
+              <td class="ms-muted">{{ t.description }}</td>
+              <td><button type="button" class="ms-btn ms-btn-sm" (click)="editTablet(t)">Edit</button></td>
+            </tr>
+            <tr *ngIf="tablets.length===0"><td colspan="5" class="ms-empty">No medications yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ms-form">
+        <h3>{{ tabletForm.id ? 'Edit medication' : 'New medication' }}</h3>
+        <label>Generic name <input type="text" [(ngModel)]="tabletForm.genericName" placeholder="paracetamol" /></label>
+        <label>Brand name <input type="text" [(ngModel)]="tabletForm.brandName" placeholder="Crocin 650" /></label>
+        <label>Type
+          <select [(ngModel)]="tabletForm.type">
+            <option *ngFor="let t of tabletTypes" [value]="t">{{ t }}</option>
+          </select>
+        </label>
+        <label>Description / strength <textarea rows="2" [(ngModel)]="tabletForm.description" placeholder="650 mg, oral"></textarea></label>
+        <div class="ms-actions">
+          <button type="button" class="ms-btn ms-btn-primary" [disabled]="saving" (click)="saveTablet()">{{ saving ? 'Saving…' : 'Save' }}</button>
+          <button type="button" class="ms-btn" (click)="tabletForm = blankTablet()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Lab tests ─── -->
+  <div *ngIf="tab==='lab-tests'" class="ms-panel">
+    <div class="ms-grid-2">
+      <div>
+        <table class="ms-table">
+          <thead><tr><th>Description</th><th>Department</th><th></th></tr></thead>
+          <tbody>
+            <tr *ngFor="let l of labTests">
+              <td>{{ l.description }}</td>
+              <td>{{ l.department }}</td>
+              <td><button type="button" class="ms-btn ms-btn-sm" (click)="editLab(l)">Edit</button></td>
+            </tr>
+            <tr *ngIf="labTests.length===0"><td colspan="3" class="ms-empty">No lab tests yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ms-form">
+        <h3>{{ labForm.id ? 'Edit lab test' : 'New lab test' }}</h3>
+        <label>Description <input type="text" [(ngModel)]="labForm.description" placeholder="CBC, LFT, RFT, etc." /></label>
+        <label>Department
+          <select [(ngModel)]="labForm.department">
+            <option value="">— select —</option>
+            <option *ngFor="let d of departments" [value]="d.name">{{ d.name }}</option>
+          </select>
+        </label>
+        <div class="ms-actions">
+          <button type="button" class="ms-btn ms-btn-primary" [disabled]="saving" (click)="saveLab()">{{ saving ? 'Saving…' : 'Save' }}</button>
+          <button type="button" class="ms-btn" (click)="labForm = blankLab()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Radiology tests ─── -->
+  <div *ngIf="tab==='radiology-tests'" class="ms-panel">
+    <div class="ms-grid-2">
+      <div>
+        <table class="ms-table">
+          <thead><tr><th>Description</th><th>Department</th><th></th></tr></thead>
+          <tbody>
+            <tr *ngFor="let r of radiologyTests">
+              <td>{{ r.description }}</td>
+              <td>{{ r.department }}</td>
+              <td><button type="button" class="ms-btn ms-btn-sm" (click)="editRad(r)">Edit</button></td>
+            </tr>
+            <tr *ngIf="radiologyTests.length===0"><td colspan="3" class="ms-empty">No radiology tests yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ms-form">
+        <h3>{{ radForm.id ? 'Edit radiology test' : 'New radiology test' }}</h3>
+        <label>Description <input type="text" [(ngModel)]="radForm.description" placeholder="X-Ray Chest, CT Brain, USG Abdomen, etc." /></label>
+        <label>Department
+          <select [(ngModel)]="radForm.department">
+            <option value="">— select —</option>
+            <option *ngFor="let d of departments" [value]="d.name">{{ d.name }}</option>
+          </select>
+        </label>
+        <div class="ms-actions">
+          <button type="button" class="ms-btn ms-btn-primary" [disabled]="saving" (click)="saveRad()">{{ saving ? 'Saving…' : 'Save' }}</button>
+          <button type="button" class="ms-btn" (click)="radForm = blankRad()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── MHC Packages ─── -->
+  <div *ngIf="tab==='packages'" class="ms-panel">
+    <div class="ms-grid-2">
+      <div>
+        <table class="ms-table">
+          <thead><tr><th>Name</th><th>Description</th><th></th></tr></thead>
+          <tbody>
+            <tr *ngFor="let p of packages">
+              <td><strong>{{ p.name }}</strong></td>
+              <td class="ms-muted">{{ p.description }}</td>
+              <td><button type="button" class="ms-btn ms-btn-sm" (click)="editPkg(p)">Edit</button></td>
+            </tr>
+            <tr *ngIf="packages.length===0"><td colspan="3" class="ms-empty">No packages yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ms-form">
+        <h3>{{ pkgForm.id ? 'Edit package' : 'New package' }}</h3>
+        <label>Name <input type="text" [(ngModel)]="pkgForm.name" placeholder="Executive Health Check" /></label>
+        <label>Description <textarea rows="2" [(ngModel)]="pkgForm.description"></textarea></label>
+
+        <label>Departments
+          <p-multiSelect
+            [options]="departments"
+            [(ngModel)]="pkgDeptIds"
+            optionLabel="name"
+            optionValue="id"
+            [filter]="true"
+            filterBy="name"
+            display="chip"
+            [placeholder]="departments.length ? 'Pick departments' : 'No departments yet — add some in the Departments tab first'"
+            [disabled]="departments.length === 0"
+            styleClass="ms-ps-multi">
+          </p-multiSelect>
+        </label>
+
+        <label>Radiology services
+          <p-multiSelect
+            [options]="radioServices"
+            [(ngModel)]="pkgRadioIds"
+            optionLabel="name"
+            optionValue="id"
+            [filter]="true"
+            filterBy="name"
+            display="chip"
+            [placeholder]="radioServices.length ? 'Pick radiology services' : 'No radiology services — add them on /radiology-services first'"
+            [disabled]="radioServices.length === 0"
+            styleClass="ms-ps-multi">
+          </p-multiSelect>
+        </label>
+
+        <div class="ms-actions">
+          <button type="button" class="ms-btn ms-btn-primary" [disabled]="saving" (click)="savePkg()">{{ saving ? 'Saving…' : 'Save' }}</button>
+          <button type="button" class="ms-btn" (click)="cancelPkg()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Shifts ─── -->
+  <div *ngIf="tab==='shifts'" class="ms-panel">
+    <div class="ms-grid-2">
+      <div>
+        <table class="ms-table">
+          <thead><tr><th>Code</th><th>Name</th><th>Start</th><th>End</th><th>Seq</th><th>Active</th><th></th></tr></thead>
+          <tbody>
+            <tr *ngFor="let s of shifts">
+              <td><strong>{{ s.code }}</strong></td>
+              <td>{{ s.name }}</td>
+              <td>{{ s.startTime }}</td>
+              <td>{{ s.endTime }}</td>
+              <td>{{ s.sequence }}</td>
+              <td>{{ s.isActive ? 'Yes' : 'No' }}</td>
+              <td><button type="button" class="ms-btn ms-btn-sm" (click)="editShift(s)">Edit</button></td>
+            </tr>
+            <tr *ngIf="shifts.length===0"><td colspan="7" class="ms-empty">No shifts yet — add Morning / Evening / Night first.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ms-form">
+        <h3>{{ shiftForm.id ? 'Edit shift' : 'New shift' }}</h3>
+        <label>Name <input type="text" [(ngModel)]="shiftForm.name" placeholder="Morning" /></label>
+        <label>Code <input type="text" [(ngModel)]="shiftForm.code" placeholder="MORNING" /></label>
+        <label>Start (HH:mm) <input type="text" [(ngModel)]="shiftForm.startTime" placeholder="06:00" /></label>
+        <label>End (HH:mm) <input type="text" [(ngModel)]="shiftForm.endTime" placeholder="14:00" /></label>
+        <small class="ms-muted">Night shifts wrap across midnight (e.g. 22:00 → 06:00). The roster handles this automatically.</small>
+        <label>Sequence <input type="number" [(ngModel)]="shiftForm.sequence" /></label>
+        <label class="ms-check"><input type="checkbox" [(ngModel)]="shiftForm.isActive" /> Active</label>
+        <div class="ms-actions">
+          <button type="button" class="ms-btn ms-btn-primary" [disabled]="saving" (click)="saveShift()">{{ saving ? 'Saving…' : 'Save' }}</button>
+          <button type="button" class="ms-btn" (click)="shiftForm = blankShift()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

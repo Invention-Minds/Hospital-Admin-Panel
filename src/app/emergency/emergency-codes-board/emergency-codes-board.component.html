@@ -1,0 +1,84 @@
+<div class="page ecb-shell">
+  <h2 class="ecb-title">Hospital Emergency Codes</h2>
+  <p class="ecb-sub">Activate a code to alert responders. In any emergency, dial <strong>3111</strong> from the intercom and announce the code &amp; location three times.</p>
+
+  <div class="ecb-banner ecb-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
+
+  <!-- Dial banner after activation -->
+  <div class="ecb-dial" *ngIf="lastDial">
+    <div class="ecb-dial-main">
+      <strong>{{ lastDial.label }} activated.</strong> {{ lastDial.script }}
+      <div class="ecb-dial-extra" *ngIf="lastDial.extra">⚠ {{ lastDial.extra }}</div>
+    </div>
+    <a class="ecb-call" [href]="'tel:' + lastDial.number">📞 Call {{ lastDial.number }}</a>
+    <button class="ecb-x" (click)="dismissDial()">✕</button>
+  </div>
+
+  <!-- Suggestions -->
+  <div class="ecb-card" *ngIf="suggestions.length">
+    <h3 class="ecb-section">Suggested by patient data</h3>
+    <div class="ecb-suggestion" *ngFor="let s of suggestions">
+      <span class="ecb-pill ecb-{{ s.code }}">{{ s.label }}</span>
+      <span class="ecb-sug-text">
+        <strong>{{ s.location }}</strong><span *ngIf="s.patientName"> · {{ s.patientName }}</span> — {{ s.reason }}
+      </span>
+      <button class="ecb-btn ecb-btn-primary" (click)="activateFromSuggestion(s)">Activate {{ s.label }}</button>
+    </div>
+  </div>
+
+  <!-- Active codes -->
+  <div class="ecb-card" *ngIf="active.length">
+    <h3 class="ecb-section">Active codes</h3>
+    <div class="ecb-active" *ngFor="let a of active" [ngClass]="'ecb-border-' + a.code">
+      <span class="ecb-pill ecb-{{ a.code }}">{{ a.code }}</span>
+      <span class="ecb-active-main">
+        <strong>{{ a.situation }}</strong> at <strong>{{ a.location }}</strong>
+        <span *ngIf="a.patientName"> · {{ a.patientName }}</span>
+        <div class="ecb-muted">by {{ a.triggeredByName || '—' }} · {{ a.triggeredAt | date:'dd/MM h:mm a' }}</div>
+      </span>
+      <a class="ecb-call ecb-call-sm" [href]="'tel:' + a.dialNumber">📞 {{ a.dialNumber }}</a>
+      <button class="ecb-btn" *ngIf="!a.attendedAt && a.code === 'blue'" (click)="markAttended(a)">Mark attended</button>
+      <span class="ecb-muted" *ngIf="a.attendedAt">attended {{ a.attendedAt | date:'h:mm a' }}</span>
+      <button class="ecb-btn" (click)="resolve(a)">Stand down</button>
+    </div>
+  </div>
+
+  <!-- Code board -->
+  <div class="ecb-card">
+    <h3 class="ecb-section">Activate a code</h3>
+    <div class="ecb-grid">
+      <button *ngFor="let c of codes" class="ecb-code ecb-{{ c.code }}" (click)="openActivate(c)">
+        <span class="ecb-code-label">{{ c.label }}</span>
+        <span class="ecb-code-sit">{{ c.situation }}</span>
+        <span class="ecb-code-num">{{ c.number }}</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Activation modal -->
+<div class="ecb-modal-bg" *ngIf="modalCode" (click)="closeModal()">
+  <div class="ecb-modal" (click)="$event.stopPropagation()">
+    <h3 class="ecb-modal-title"><span class="ecb-pill ecb-{{ modalCode.code }}">{{ modalCode.label }}</span> — {{ modalCode.situation }}</h3>
+    <div class="ecb-banner ecb-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+    <label class="ecb-field">Location *
+      <input type="text" [(ngModel)]="draft.location" placeholder="e.g. ICU Bed 4 / 2nd floor lobby" />
+    </label>
+    <label class="ecb-field" *ngIf="draft.patientName">Patient
+      <input type="text" [value]="draft.patientName" readonly />
+    </label>
+    <label class="ecb-field">Note (optional)
+      <textarea rows="2" [(ngModel)]="draft.note"></textarea>
+    </label>
+
+    <p class="ecb-muted">On confirm, responders are alerted and you'll get a "Call {{ modalCode.number }}" button. Announce <strong>"{{ modalCode.label }}, &lt;location&gt;"</strong> three times on the intercom.</p>
+
+    <div class="ecb-modal-actions">
+      <button class="ecb-btn" (click)="closeModal()" [disabled]="saving">Cancel</button>
+      <button class="ecb-btn ecb-btn-danger" (click)="confirmActivate()" [disabled]="saving">
+        {{ saving ? 'Activating…' : 'Activate ' + modalCode.label }}
+      </button>
+    </div>
+  </div>
+</div>

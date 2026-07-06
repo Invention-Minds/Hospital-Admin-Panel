@@ -62,9 +62,17 @@
 
   <!-- ========== Section 2: Active IPD ========== -->
   <section class="section" data-testid="pharmacy-active-section">
-    <div class="section__head">
-      <h2 class="section__title">Active IPD prescriptions</h2>
-      <p class="section__subtitle">Currently administered under this admission</p>
+    <div class="section__head section__head--with-action">
+      <div>
+        <h2 class="section__title">Active IPD prescriptions</h2>
+        <p class="section__subtitle">Currently administered under this admission</p>
+      </div>
+      <button type="button"
+              class="btn btn--primary"
+              (click)="openNewRx()"
+              data-testid="btn-new-rx">
+        <i class="pi pi-plus"></i> New prescription
+      </button>
     </div>
 
     <div *ngIf="loadingActive" class="section__loading" data-testid="active-loading">
@@ -171,6 +179,180 @@
           </button>
         </div>
       </form>
+    </div>
+  </p-dialog>
+
+  <!-- ========== New prescription modal ========== -->
+  <p-dialog
+    [(visible)]="newRxModalVisible"
+    modal="true"
+    [closable]="false"
+    [style]="{ width: '600px' }"
+    [showHeader]="false">
+    <div class="dialog" *ngIf="newRxModalVisible">
+      <div class="dialog__header dialog__header--primary">
+        <h2 class="dialog__title">New IPD prescription</h2>
+        <button type="button" class="dialog__close" aria-label="Close"
+                (click)="cancelNewRx()"
+                data-testid="newrx-close">
+          <i class="pi pi-times"></i>
+        </button>
+      </div>
+      <form class="dialog__body" [formGroup]="newRxForm" (ngSubmit)="submitNewRx()">
+        <!--
+          Generic + brand pull from the same tablet master the OPD doctor
+          manual-notes screen uses (/api/prescription/tablets). Picking one
+          auto-fills the other when there's exactly one match. p-dropdown
+          supports type-to-filter so doctors can narrow long lists quickly.
+        -->
+        <div class="form__field">
+          <label for="newrx-generic" class="form__label">Generic name *</label>
+          <p-dropdown inputId="newrx-generic"
+                      [options]="genericOptions"
+                      [filter]="true"
+                      filterBy="label"
+                      [showClear]="true"
+                      placeholder="Select generic"
+                      formControlName="genericName"
+                      styleClass="form__dropdown"
+                      [loading]="loadingTablets"
+                      (onChange)="onNewRxGenericChange($event.value)">
+          </p-dropdown>
+        </div>
+        <div class="form__field">
+          <label for="newrx-brand" class="form__label">Brand name</label>
+          <p-dropdown inputId="newrx-brand"
+                      [options]="brandOptions"
+                      [filter]="true"
+                      filterBy="label"
+                      [showClear]="true"
+                      placeholder="Optional"
+                      formControlName="brandName"
+                      styleClass="form__dropdown"
+                      [loading]="loadingTablets"
+                      (onChange)="onNewRxBrandChange($event.value)">
+          </p-dropdown>
+        </div>
+        <div class="form__row">
+          <div class="form__field form__field--half">
+            <label for="newrx-dose" class="form__label">Dose *</label>
+            <input pInputText id="newrx-dose" class="form__input" formControlName="dose"
+                   placeholder="500 mg" />
+          </div>
+          <div class="form__field form__field--half">
+            <label for="newrx-quantity" class="form__label">Quantity *</label>
+            <input pInputText id="newrx-quantity" type="number" min="1" class="form__input"
+                   formControlName="quantity" />
+          </div>
+        </div>
+        <div class="form__row">
+          <div class="form__field form__field--half">
+            <label for="newrx-frequency" class="form__label">Frequency *</label>
+            <input pInputText id="newrx-frequency" class="form__input" formControlName="frequency"
+                   placeholder="q8h / TDS" />
+          </div>
+          <div class="form__field form__field--half">
+            <label for="newrx-duration" class="form__label">Duration *</label>
+            <input pInputText id="newrx-duration" class="form__input" formControlName="duration"
+                   placeholder="5 days" />
+          </div>
+        </div>
+        <div class="form__field">
+          <label for="newrx-route" class="form__label">Route *</label>
+          <select id="newrx-route" class="form__input" formControlName="route">
+            <option value="">— select route —</option>
+            <option *ngFor="let r of routeOptions" [value]="r.value">{{ r.label }}</option>
+          </select>
+        </div>
+        <!-- Form 3 (Phase 8) — injection / patch site, required for im/sc/topical -->
+        <div class="form__field"
+             *ngIf="['im','sc','topical'].includes(newRxForm.get('route')?.value)">
+          <label for="newrx-site" class="form__label">
+            Site <span style="color:#b91c1c;">*</span>
+          </label>
+          <select id="newrx-site" class="form__input" formControlName="site">
+            <option value="">— select site —</option>
+            <option *ngFor="let s of siteOptions" [value]="s">{{ s }}</option>
+          </select>
+        </div>
+        <div class="form__field">
+          <label for="newrx-instructions" class="form__label">Instructions</label>
+          <textarea pInputText
+                    id="newrx-instructions"
+                    rows="2"
+                    class="form__textarea"
+                    formControlName="instructions"
+                    placeholder="Take after food, etc."></textarea>
+        </div>
+        <div class="dialog__footer">
+          <button type="button"
+                  class="btn btn--cancel"
+                  (click)="cancelNewRx()"
+                  data-testid="newrx-cancel">
+            Cancel
+          </button>
+          <button type="submit"
+                  class="btn btn--primary"
+                  [disabled]="newRxForm.invalid || newRxSubmitting"
+                  data-testid="newrx-submit">
+            {{ newRxSubmitting ? 'Adding…' : 'Add prescription' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </p-dialog>
+
+  <!-- ========== Pregnancy / lactation alert (Phase 7) ========== -->
+  <p-dialog
+    [(visible)]="pregnancyAlertModalVisible"
+    [modal]="true"
+    [closable]="false"
+    [closeOnEscape]="false"
+    [draggable]="false"
+    [resizable]="false"
+    header="⚠️ Pregnancy / Lactation Alert"
+    [style]="{ width: '560px' }">
+    <div class="dialog" *ngIf="pregnancyAlertModalVisible">
+      <p style="margin-top:0; color:#b91c1c; font-weight:600;">
+        This drug is flagged as unsafe for the patient's current state.
+      </p>
+      <p style="color:#374151; font-size:13px; margin-bottom:14px;">
+        The system pulled <strong>pregnancy / lactation flags</strong> from the patient's initial assessment.
+        Review each alert below. To proceed, you must explicitly acknowledge the risk — the override is audit-logged.
+      </p>
+
+      <div style="background:#fef3c7; border:1px solid #fbbf24; border-radius:6px; padding:10px 12px; margin-bottom:14px;">
+        <ul style="margin:0; padding-left:18px;">
+          <li *ngFor="let a of pendingPregnancyAlerts" style="margin-bottom:6px; font-size:13px;">
+            <strong>{{ a.drug }}</strong>
+            — <span style="color:#b91c1c; font-weight:600;">
+              {{ a.source === 'pregnancy' ? 'Pregnancy' : 'Lactation' }} · Cat {{ a.category }}
+            </span>
+            <div style="color:#374151; font-size:12px;">{{ a.reason }}</div>
+            <div style="color:#9ca3af; font-size:11px;">
+              source: {{ a.from === 'master' ? 'Tablet master' : 'Fallback list' }}
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <label style="display:flex; align-items:start; gap:8px; padding:8px 0; cursor:pointer;">
+        <input type="checkbox" [(ngModel)]="pregnancyAckChecked" style="margin-top:3px;" />
+        <span style="font-size:13px; color:#374151;">
+          I have reviewed the patient's pregnancy / lactation status and the alert(s) above.
+          I am proceeding with this prescription with full clinical responsibility.
+        </span>
+      </label>
+
+      <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:12px;">
+        <button pButton type="button" label="Cancel" class="p-button-text"
+                (click)="cancelPregnancyAck()" [disabled]="pregnancyResubmitting"></button>
+        <button pButton type="button" label="Proceed with override"
+                class="p-button-danger"
+                (click)="confirmPregnancyAck()"
+                [disabled]="!pregnancyAckChecked || pregnancyResubmitting"
+                [loading]="pregnancyResubmitting"></button>
+      </div>
     </div>
   </p-dialog>
 

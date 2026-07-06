@@ -1,0 +1,87 @@
+<div class="rs-shell">
+  <div class="rs-head">
+    <h2 class="rs-title">Roster</h2>
+    <div class="rs-toolbar">
+      <label>Date <input type="date" [(ngModel)]="date" (change)="refresh()" /></label>
+      <button type="button" class="rs-btn" (click)="refresh()">Refresh</button>
+    </div>
+  </div>
+
+  <div class="rs-banner rs-banner-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="rs-banner rs-banner-good" *ngIf="successMessage">{{ successMessage }}</div>
+
+  <p class="rs-sub" *ngIf="shifts.length === 0">
+    No active shifts defined. Add Morning / Evening / Night first in
+    <code>/masters → Shifts</code>.
+  </p>
+
+  <table class="rs-grid" *ngIf="shifts.length > 0">
+    <thead>
+      <tr>
+        <th class="rs-corner">Ward</th>
+        <th *ngFor="let s of shifts">{{ s.name }}<br><span class="rs-time">{{ s.startTime }} – {{ s.endTime }}</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let w of wards">
+        <th class="rs-rowhead">{{ w.wardCode }} · {{ w.wardName }}</th>
+        <td *ngFor="let s of shifts" class="rs-cell" (click)="openCell(w.id, s.id)">
+          <div class="rs-chip" *ngFor="let a of cellAssignments(w.id, s.id)" (click)="$event.stopPropagation()">
+            <span class="rs-chip-name">{{ a.user?.username }}</span>
+            <span [ngClass]="statusClass(a)">{{ a.status }}</span>
+            <button type="button" class="rs-chip-x" (click)="cancelAssignment(a)" title="Cancel">×</button>
+          </div>
+          <div class="rs-empty" *ngIf="cellAssignments(w.id, s.id).length === 0">＋ assign</div>
+        </td>
+      </tr>
+      <!-- Unassigned ward — for non-ward roles (OT Coordinator, Therapist, etc.) -->
+      <tr>
+        <th class="rs-rowhead rs-rowhead-virtual">— Unassigned ward —</th>
+        <td *ngFor="let s of shifts" class="rs-cell" (click)="openCell(null, s.id)">
+          <div class="rs-chip" *ngFor="let a of cellAssignments(null, s.id)" (click)="$event.stopPropagation()">
+            <span class="rs-chip-name">{{ a.user?.username }}</span>
+            <span [ngClass]="statusClass(a)">{{ a.status }}</span>
+            <button type="button" class="rs-chip-x" (click)="cancelAssignment(a)" title="Cancel">×</button>
+          </div>
+          <div class="rs-empty" *ngIf="cellAssignments(null, s.id).length === 0">＋ assign</div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Inline assignment modal -->
+  <div class="rs-modal-bg" *ngIf="cellShiftId" (click)="closeCell()">
+    <div class="rs-modal" (click)="$event.stopPropagation()">
+      <h3>Assign staff</h3>
+      <p class="rs-sub">
+        Date: <strong>{{ date }}</strong>
+        · Shift: <strong>{{ shifts.length ? '' : '' }}</strong>
+        <ng-container *ngFor="let s of shifts">
+          <ng-container *ngIf="s.id === cellShiftId">{{ s.name }} ({{ s.startTime }} – {{ s.endTime }})</ng-container>
+        </ng-container>
+        <span *ngIf="cellWardId">
+          · Ward:
+          <ng-container *ngFor="let w of wards">
+            <ng-container *ngIf="w.id === cellWardId">{{ w.wardCode }} · {{ w.wardName }}</ng-container>
+          </ng-container>
+        </span>
+        <span *ngIf="!cellWardId">· No ward (non-ward role)</span>
+      </p>
+      <label>Staff
+        <select [(ngModel)]="formUserId">
+          <option [ngValue]="null">— pick a staff member —</option>
+          <option *ngFor="let s of staff" [ngValue]="s.id">{{ staffLabel(s) }}</option>
+        </select>
+      </label>
+      <label>Notes (optional)
+        <input type="text" [(ngModel)]="formNotes" placeholder="e.g. covering for Asha" />
+      </label>
+      <div class="rs-modal-actions">
+        <button type="button" class="rs-btn rs-btn-primary" [disabled]="saving" (click)="assign()">
+          {{ saving ? 'Saving…' : 'Assign' }}
+        </button>
+        <button type="button" class="rs-btn" (click)="closeCell()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>

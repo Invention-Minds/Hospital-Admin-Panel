@@ -1,0 +1,190 @@
+<div class="ntm-shell">
+  <h2 class="ntm-title">My OPD Templates</h2>
+  <p class="ntm-sub">
+    Create and edit your own OPD note templates. These appear on your OPD
+    console and assessment forms; printed PDFs render only the fields the
+    template defines. Only you can see and edit these.
+  </p>
+
+  <div class="ntm-banner ntm-banner-bad" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+  <div class="ntm-banner ntm-banner-good" *ngIf="successMessage" role="status">{{ successMessage }}</div>
+
+  <div class="ntm-toolbar">
+    <button type="button" class="ntm-btn ntm-btn-primary" (click)="startNew()">
+      <i class="pi pi-plus"></i> New template
+    </button>
+  </div>
+
+  <div class="ntm-grid">
+
+    <!-- ───────────── Left: list ───────────── -->
+    <div class="ntm-list">
+      <div class="ntm-empty" *ngIf="loading">Loading…</div>
+      <div class="ntm-empty" *ngIf="!loading && templates.length === 0">
+        You don't have any templates yet. Click "New template" to create one.
+      </div>
+
+      <div class="ntm-row"
+           *ngFor="let t of templates"
+           [class.ntm-row-active]="editing?.id === t.id"
+           (click)="selectTemplate(t)">
+        <div class="ntm-row-head">
+          <strong>{{ t.name }}</strong>
+          <span class="ntm-pill ntm-pill-default" *ngIf="t.isDefault">DEFAULT</span>
+          <span class="ntm-pill ntm-pill-inactive" *ngIf="!t.isActive">INACTIVE</span>
+        </div>
+        <div class="ntm-row-meta">
+          {{ noteTypeLabel(t.noteType) }} · {{ t.fields.length }} fields
+        </div>
+      </div>
+    </div>
+
+    <!-- ───────────── Right: editor ───────────── -->
+    <div class="ntm-editor">
+      <div class="ntm-empty ntm-empty-pad" *ngIf="!editing && !isNew">
+        Pick a template on the left, or click "New template".
+      </div>
+
+      <ng-container *ngIf="editing || isNew">
+        <h3 class="ntm-section-title">
+          {{ isNew ? 'New template' : 'Edit template' }}
+        </h3>
+
+        <div class="ntm-form-row">
+          <label class="ntm-full">
+            Name
+            <input type="text"
+                   [(ngModel)]="editForm.name"
+                   placeholder='e.g. "My standard follow-up note"' />
+          </label>
+        </div>
+
+        <div class="ntm-form-row">
+          <label>
+            Note type
+            <select [(ngModel)]="editForm.noteType">
+              <option *ngFor="let opt of noteTypeOptions" [value]="opt.value">{{ opt.label }}</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="ntm-form-row">
+          <label class="ntm-inline">
+            <input type="checkbox" [(ngModel)]="editForm.isActive" />
+            Active (visible on my forms)
+          </label>
+          <label class="ntm-inline">
+            <input type="checkbox" [(ngModel)]="editForm.isDefault" />
+            Default for this note type
+          </label>
+        </div>
+
+        <!-- Fields list -->
+        <div class="ntm-fields-head">
+          <h4>Fields ({{ editForm.fields.length }})</h4>
+          <button type="button" class="ntm-btn" (click)="addField()">
+            <i class="pi pi-plus"></i> Add field
+          </button>
+        </div>
+
+        <div class="ntm-empty" *ngIf="editForm.fields.length === 0">
+          No fields yet. Click "Add field" to start.
+        </div>
+
+        <div class="ntm-field-card" *ngFor="let f of editForm.fields; let i = index">
+          <div class="ntm-field-head">
+            <span class="ntm-field-pos">#{{ i + 1 }}</span>
+            <button type="button" class="ntm-icon-btn" (click)="moveField(i, -1)" [disabled]="i === 0" title="Move up">↑</button>
+            <button type="button" class="ntm-icon-btn" (click)="moveField(i, 1)" [disabled]="i === editForm.fields.length - 1" title="Move down">↓</button>
+            <button type="button" class="ntm-icon-btn ntm-icon-bad" (click)="removeField(i)" title="Delete field">×</button>
+          </div>
+
+          <div class="ntm-form-row">
+            <label>
+              Key
+              <input type="text" [(ngModel)]="f.key" name="key-{{i}}" placeholder="lvef" />
+            </label>
+            <label>
+              Label
+              <input type="text" [(ngModel)]="f.label" name="label-{{i}}" placeholder="LVEF %" />
+            </label>
+            <label>
+              Type
+              <select [(ngModel)]="f.type" name="type-{{i}}" (change)="onFieldTypeChange(f)">
+                <option *ngFor="let opt of fieldTypeOptions" [value]="opt.value">{{ opt.label }}</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="ntm-form-row">
+            <label>
+              Group (optional)
+              <input type="text" [(ngModel)]="f.group" name="group-{{i}}" placeholder='e.g. "Vitals"' />
+            </label>
+            <label class="ntm-inline">
+              <input type="checkbox" [(ngModel)]="f.required" name="req-{{i}}" />
+              Required
+            </label>
+          </div>
+
+          <div class="ntm-form-row" *ngIf="fieldNeedsOptions(f.type)">
+            <label class="ntm-full">
+              Options (comma-separated)
+              <input type="text"
+                     [value]="optionsAsText(f)"
+                     (input)="setOptionsFromText(f, $any($event.target).value)"
+                     placeholder="I, II, III, IV" />
+            </label>
+          </div>
+
+          <div class="ntm-form-row">
+            <label class="ntm-full">
+              Help text (optional)
+              <input type="text" [(ngModel)]="f.helpText" name="help-{{i}}"
+                     placeholder='Shown below the input as a hint' />
+            </label>
+          </div>
+        </div>
+
+        <!-- Editor footer -->
+        <div class="ntm-editor-foot">
+          <button type="button" class="ntm-btn"
+                  (click)="showPreview = !showPreview">
+            {{ showPreview ? 'Hide preview' : 'Preview' }}
+          </button>
+
+          <span class="ntm-spacer"></span>
+
+          <button type="button" class="ntm-btn"
+                  (click)="setAsDefault()"
+                  [disabled]="isNew || !editing || editing.isDefault || saving">
+            Set as default
+          </button>
+          <button type="button" class="ntm-btn ntm-btn-bad"
+                  (click)="deactivate()"
+                  [disabled]="isNew || !editing || !editing.isActive || saving">
+            Deactivate
+          </button>
+          <button type="button" class="ntm-btn ntm-btn-primary"
+                  (click)="save()"
+                  [disabled]="saving">
+            {{ saving ? 'Saving…' : (isNew ? 'Create' : 'Save changes') }}
+          </button>
+        </div>
+
+        <!-- Live preview -->
+        <div class="ntm-preview" *ngIf="showPreview">
+          <h4>Form preview</h4>
+          <p class="ntm-preview-hint">
+            This is how the form will look. Inputs are interactive but not
+            saved — clear or close to reset.
+          </p>
+          <app-template-form-renderer
+            [fields]="editForm.fields"
+            [(values)]="previewValues">
+          </app-template-form-renderer>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>

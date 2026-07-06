@@ -1,0 +1,22 @@
+.mtq-head { margin-bottom: 16px; }
+.mtq-title { font-size: 22px; font-weight: 600; color: #271e4a; margin: 0 0 4px; }
+.mtq-sub { color: #6b7280; font-size: 13px; margin: 0; }
+
+.mtq-banner { padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; font-size: 14px; cursor: pointer; }
+.mtq-bad { background: #fee2e2; color: #b91c1c; }
+.mtq-good { background: #dcfce7; color: #166534; }
+.mtq-empty { padding: 40px; text-align: center; color: #6b7280; font-style: italic; }
+
+.mtq-table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 2px rgba(15,23,42,0.05); }
+.mtq-table th { background: #f9fafb; padding: 10px 12px; text-align: left; font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.4px; border-bottom: 1px solid #e5e7eb; }
+.mtq-table td { padding: 10px 12px; font-size: 13px; color: #271e4a; border-bottom: 1px solid #f3f4f6; }
+.mtq-table tbody tr:hover { background: #f9fafb; }
+
+.mtq-pill { display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 11px; font-weight: 600; text-transform: uppercase; }
+.mtq-status-none { background: #fef3c7; color: #92400e; }
+.mtq-status-drafted { background: #dbeafe; color: #1e40af; }
+.mtq-status-edited { background: #fce7f3; color: #9d174d; }
+.mtq-status-signed { background: #dcfce7; color: #166534; }
+
+.mtq-btn { padding: 5px 12px; border-radius: 6px; border: 1px solid #d1d5db; background: #fff; color: #0e2970; cursor: pointer; font-size: 12px; text-decoration: none; }
+.mtq-btn:hover { background: #f3f4f6; }

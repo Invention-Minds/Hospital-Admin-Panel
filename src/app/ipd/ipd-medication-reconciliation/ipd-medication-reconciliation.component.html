@@ -1,0 +1,79 @@
+<div class="mr-shell">
+  <div class="mr-head">
+    <h2 class="mr-title">Medication Reconciliation</h2>
+    <p class="mr-sub">
+      For each prescription, decide whether to continue, change, hold, discontinue
+      or reconcile. NABH MOM.1.c — every decision is audited.
+    </p>
+  </div>
+
+  <div class="mr-banner mr-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="mr-banner mr-good" *ngIf="successMessage">{{ successMessage }}</div>
+
+  <div *ngIf="loading" class="mr-loading">Loading prescriptions…</div>
+
+  <div class="mr-empty" *ngIf="!loading && rows.length === 0">No prescriptions to reconcile.</div>
+
+  <table class="mr-table" *ngIf="!loading && rows.length > 0">
+    <thead>
+      <tr>
+        <th>Drug</th>
+        <th>Dose · Freq · Route</th>
+        <th>Source</th>
+        <th>Type</th>
+        <th>Action</th>
+        <th>Reason</th>
+        <th>Reconciled by</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let r of rows">
+        <td>
+          <strong>{{ r.genericName }}</strong>
+          <div *ngIf="r.brandName" class="mr-muted">{{ r.brandName }}</div>
+        </td>
+        <td>{{ r.dose }} · {{ r.frequency }} · {{ r.route }}</td>
+        <td>
+          <span class="mr-chip" *ngIf="r.isCarryOver">Carry-over · {{ r.carryOverFrom || '—' }}</span>
+          <span class="mr-chip mr-chip-inpatient" *ngIf="!r.isCarryOver">Inpatient</span>
+        </td>
+        <td>
+          <select [(ngModel)]="buf[r.id].prescriptionType" [disabled]="buf[r.id].saving">
+            <option [ngValue]="''">—</option>
+            <option *ngFor="let t of prescriptionTypes" [ngValue]="t">{{ t }}</option>
+          </select>
+        </td>
+        <td>
+          <select [(ngModel)]="buf[r.id].reconciliationAction" [disabled]="buf[r.id].saving"
+                  [class.mr-action-hold]="buf[r.id].reconciliationAction === 'HOLD'"
+                  [class.mr-action-disc]="buf[r.id].reconciliationAction === 'DISCONTINUE'"
+                  [class.mr-action-change]="buf[r.id].reconciliationAction === 'CHANGE'"
+                  [class.mr-action-cont]="buf[r.id].reconciliationAction === 'CONTINUE'"
+                  [class.mr-action-rec]="buf[r.id].reconciliationAction === 'RECONCILE'">
+            <option [ngValue]="''">—</option>
+            <option *ngFor="let a of actions" [ngValue]="a">{{ a }}</option>
+          </select>
+        </td>
+        <td>
+          <input type="text" class="mr-reason"
+                 [(ngModel)]="buf[r.id].reconciliationReason"
+                 [disabled]="buf[r.id].saving"
+                 [class.mr-required]="needsReason(buf[r.id].reconciliationAction) && !buf[r.id].reconciliationReason"
+                 [placeholder]="needsReason(buf[r.id].reconciliationAction) ? 'Reason required' : 'Reason (optional)'" />
+        </td>
+        <td class="mr-muted">
+          <ng-container *ngIf="r.reconciledBy">{{ r.reconciledBy }}<br><span class="mr-time">{{ r.reconciledAt | date:'short' }}</span></ng-container>
+          <span *ngIf="!r.reconciledBy">—</span>
+        </td>
+        <td>
+          <button type="button" class="mr-btn mr-btn-primary"
+                  [disabled]="buf[r.id].saving"
+                  (click)="save(r)">
+            {{ buf[r.id].saving ? 'Saving…' : 'Save' }}
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

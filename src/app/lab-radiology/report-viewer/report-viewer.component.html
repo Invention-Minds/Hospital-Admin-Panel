@@ -1,0 +1,91 @@
+<div class="rv-overlay" *ngIf="open && result" (click)="close()">
+  <div class="rv-modal" (click)="$event.stopPropagation()">
+
+    <header class="rv-header">
+      <div>
+        <h3 class="rv-title">
+          {{ result.testName }}
+          <span class="rv-pill rv-pill-{{ result.department }}">{{ result.department }}</span>
+          <span class="rv-pill rv-status-{{ result.status }}">{{ result.status }}</span>
+          <span class="rv-pill rv-pill-critical" *ngIf="result.criticalFlag">CRITICAL</span>
+        </h3>
+        <div class="rv-sub">
+          PRN {{ result.prn }}
+          <span *ngIf="result.order?.doctorName"> · Ordered by {{ result.order?.doctorName }}</span>
+          <span *ngIf="result.reportedAt"> · Reported {{ result.reportedAt | date:'medium' }}</span>
+        </div>
+      </div>
+      <button class="rv-icon-btn" (click)="close()" title="Close"><i class="pi pi-times"></i></button>
+    </header>
+
+    <div class="rv-body">
+      <!-- Left: PDF iframe -->
+      <div class="rv-pdf-wrap">
+        <ng-container *ngIf="safeReportUrl; else noPdf">
+          <iframe class="rv-pdf" [src]="safeReportUrl" title="Report PDF"></iframe>
+        </ng-container>
+        <ng-template #noPdf>
+          <div class="rv-no-pdf">
+            <i class="pi pi-file-pdf"></i>
+            <div>No PDF attached. Metadata-only result.</div>
+          </div>
+        </ng-template>
+      </div>
+
+      <!-- Right: metadata sidebar -->
+      <aside class="rv-meta">
+        <div class="rv-meta-block" *ngIf="result.result || result.unit || result.referenceRange">
+          <div class="rv-meta-label">Result</div>
+          <div class="rv-meta-value">
+            {{ result.result || '—' }}
+            <span class="rv-unit" *ngIf="result.unit"> {{ result.unit }}</span>
+          </div>
+          <div class="rv-meta-sub" *ngIf="result.referenceRange">Ref: {{ result.referenceRange }}</div>
+        </div>
+
+        <div class="rv-meta-block" *ngIf="result.findings">
+          <div class="rv-meta-label">Findings</div>
+          <div class="rv-meta-pre">{{ result.findings }}</div>
+        </div>
+
+        <div class="rv-meta-block" *ngIf="result.impression">
+          <div class="rv-meta-label">Impression</div>
+          <div class="rv-meta-pre">{{ result.impression }}</div>
+        </div>
+
+        <div class="rv-meta-block">
+          <div class="rv-meta-label">Uploaded</div>
+          <div class="rv-meta-value">
+            {{ result.uploadedBy || '—' }}
+            <span class="rv-meta-sub" *ngIf="result.uploadedAt"> · {{ result.uploadedAt | date:'short' }}</span>
+          </div>
+        </div>
+
+        <div class="rv-meta-block" *ngIf="result.criticalFlag">
+          <div class="rv-meta-label">Critical-result acknowledgement</div>
+          <ng-container *ngIf="result.acknowledgedAt; else needsAck">
+            <div class="rv-ack-done">
+              <i class="pi pi-check-circle"></i>
+              Acknowledged by {{ result.acknowledgedBy || 'staff' }}
+              <span class="rv-meta-sub">on {{ result.acknowledgedAt | date:'medium' }}</span>
+            </div>
+          </ng-container>
+          <ng-template #needsAck>
+            <button class="rv-btn rv-btn-danger" (click)="acknowledge()" [disabled]="acking">
+              <i class="pi pi-exclamation-triangle"></i>
+              {{ acking ? 'Acknowledging…' : 'Acknowledge critical result' }}
+            </button>
+            <div class="rv-error" *ngIf="ackError">{{ ackError }}</div>
+          </ng-template>
+        </div>
+      </aside>
+    </div>
+
+    <footer class="rv-footer">
+      <button class="rv-btn rv-btn-secondary" (click)="close()">Close</button>
+      <button class="rv-btn rv-btn-primary" (click)="download()" [disabled]="!result.reportUrl">
+        <i class="pi pi-external-link"></i> Open in new tab
+      </button>
+    </footer>
+  </div>
+</div>

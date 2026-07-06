@@ -1,0 +1,123 @@
+.icu-shell { padding: 20px; max-width: 1500px; margin: 24px auto 24px 96px; font-family: var(--font-family-primary, sans-serif); }
+@media (max-width: 768px) { .icu-shell { margin-left: auto; } }
+
+.icu-head { display: flex; justify-content: space-between; align-items: end; flex-wrap: wrap; gap: 12px; }
+.icu-title { font-size: 22px; font-weight: 600; margin: 0; color: #b91c1c; }
+.icu-sub { color: #6b7280; font-size: 13px; margin: 4px 0 12px; }
+
+.icu-banner { padding: 10px 14px; border-radius: 6px; margin-bottom: 10px; font-size: 14px; }
+.icu-bad { background: #fee2e2; color: #b91c1c; }
+.icu-good { background: #dcfce7; color: #166534; }
+.icu-info { background: #eff6ff; color: #1e40af; }
+.icu-loading { padding: 40px; text-align: center; color: #6b7280; font-style: italic; }
+.icu-muted { color: #9ca3af; font-style: italic; }
+
+.icu-status { display: flex; align-items: center; gap: 16px; padding: 12px 16px; background: #fef2f2; border-radius: 8px; border-left: 4px solid #b91c1c; margin-bottom: 14px; flex-wrap: wrap; }
+.icu-status-pill { padding: 4px 14px; border-radius: 14px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; }
+.icu-status-pill-icu { background: #b91c1c; color: #fff; }
+.icu-status-pill-out { background: #e5e7eb; color: #4b5563; }
+.icu-day { display: flex; flex-direction: column; align-items: center; }
+.icu-day span { font-size: 10px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.5px; }
+.icu-day strong { font-size: 20px; color: #b91c1c; font-weight: 700; }
+.icu-admitted { font-size: 12px; color: #6b7280; }
+.icu-readmit-flag { background: #fde68a; color: #92400e; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+
+.icu-tabs { display: flex; flex-wrap: wrap; gap: 4px; border-bottom: 1px solid #e5e7eb; margin-bottom: 14px; }
+.icu-tabs button {
+  background: transparent; border: none; padding: 8px 14px; font-size: 13px; cursor: pointer; color: #6b7280;
+  border-bottom: 2px solid transparent;
+}
+.icu-tabs button:hover { color: #b91c1c; }
+.icu-tab-active { color: #b91c1c !important; border-bottom-color: #b91c1c !important; font-weight: 600; }
+
+.icu-panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px 20px; }
+.icu-card { background: #f9fafb; border-radius: 8px; padding: 14px 16px; margin-bottom: 16px; }
+.icu-card h4, .icu-card h5 { font-size: 13px; font-weight: 600; margin: 0 0 10px; color: #374151; text-transform: uppercase; letter-spacing: 0.5px; }
+.icu-card h5 { margin-top: 10px; font-size: 12px; color: #6b7280; }
+.icu-panel > h4 { font-size: 14px; font-weight: 600; margin: 14px 0 8px; color: #374151; }
+
+.icu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 10px; }
+.icu-grid > div { background: #f9fafb; padding: 8px 12px; border-radius: 6px; }
+.icu-grid span { display: block; color: #6b7280; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+.icu-grid strong { font-size: 13px; color: #111827; }
+.icu-text { white-space: pre-wrap; padding: 6px 0; font-size: 13px; }
+
+.icu-snap > div { padding: 6px 0; border-bottom: 1px dotted #e5e7eb; font-size: 13px; }
+.icu-snap > div:last-child { border-bottom: none; }
+
+.icu-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 10px; }
+.icu-form-grid label, .icu-wide { display: flex; flex-direction: column; font-size: 11px; color: #4b5563; gap: 3px; margin-bottom: 8px; }
+.icu-wide { display: flex; flex-direction: column; }
+.icu-form-grid input, .icu-form-grid select, .icu-form-grid textarea,
+.icu-wide input, .icu-wide select, .icu-wide textarea {
+  border: 1px solid #d1d5db; border-radius: 6px; padding: 5px 8px; font-size: 13px;
+}
+.icu-inline { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #4b5563; margin: 6px 0; }
+.icu-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+
+.icu-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; margin-top: 6px; }
+.icu-table th, .icu-table td { border-bottom: 1px solid #f3f4f6; padding: 6px 10px; text-align: left; vertical-align: top; }
+.icu-table th { background: #f9fafb; font-weight: 600; color: #374151; font-size: 12px; }
+
+.icu-pill { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; background: #e5e7eb; color: #4b5563; }
+.icu-pill-good { background: #dcfce7; color: #166534; }
+.icu-pill-PROPOSED { background: #fef3c7; color: #92400e; }
+.icu-pill-ACKNOWLEDGED { background: #dbeafe; color: #1e40af; }
+.icu-pill-ACCEPTED { background: #fed7aa; color: #c2410c; }
+.icu-pill-IN_TRANSIT { background: #ede9fe; color: #6d28d9; }
+.icu-pill-COMPLETED { background: #dcfce7; color: #166534; }
+.icu-pill-DECLINED { background: #fee2e2; color: #b91c1c; }
+
+.icu-soap { background: #f9fafb; border-left: 3px solid #b91c1c; padding: 10px 14px; margin-bottom: 10px; border-radius: 4px; }
+.icu-soap-h { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; margin-bottom: 6px; }
+.icu-soap-h strong { font-size: 13px; }
+.icu-soap-h span { color: #6b7280; font-size: 12px; }
+.icu-traj { padding: 1px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; text-transform: uppercase; }
+.icu-traj-improving { background: #dcfce7; color: #166534; }
+.icu-traj-stable { background: #dbeafe; color: #1e40af; }
+.icu-traj-deteriorating { background: #fef3c7; color: #92400e; }
+.icu-traj-critical { background: #fee2e2; color: #b91c1c; }
+.icu-soap-scores { display: flex; gap: 14px; font-size: 12px; color: #4b5563; margin: 6px 0; padding: 4px 0; border-top: 1px dashed #e5e7eb; border-bottom: 1px dashed #e5e7eb; }
+.icu-soap-b div { padding: 2px 0; font-size: 13px; }
+.icu-soap-b em { color: #374151; font-weight: 600; font-style: normal; margin-right: 4px; }
+
+.icu-restraint-card { padding: 10px 14px; background: #f9fafb; border-radius: 6px; margin-bottom: 8px; }
+.icu-restraint-active { background: #fef2f2; border-left: 3px solid #b91c1c; }
+.icu-restraint-h { display: flex; gap: 10px; align-items: center; }
+.icu-restraint-h strong { text-transform: capitalize; }
+.icu-restraint-meta { font-size: 12px; color: #6b7280; margin-top: 4px; }
+.icu-review-list { font-size: 12px; margin: 6px 0 0; padding-left: 18px; }
+.icu-review-form { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; align-items: center; }
+.icu-review-form input, .icu-review-form select { padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 5px; font-size: 12px; }
+
+.icu-bundle-row { display: grid; grid-template-columns: 1fr 160px; gap: 12px; align-items: center; padding: 6px 0; border-bottom: 1px dotted #e5e7eb; }
+.icu-bundle-label { font-size: 13px; }
+.icu-bundle-row select { padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 5px; font-size: 12px; }
+
+.icu-fc-card { background: #f9fafb; border-left: 3px solid #1d4ed8; padding: 10px 14px; margin-bottom: 8px; border-radius: 4px; }
+.icu-fc-h { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 6px; }
+.icu-fc-foot { font-size: 11px; color: #6b7280; margin-top: 6px; padding-top: 4px; border-top: 1px dashed #e5e7eb; }
+
+.icu-btn { background: #fff; border: 1px solid #d1d5db; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 13px; }
+.icu-btn:hover:not([disabled]) { background: #f3f4f6; }
+.icu-btn-primary { background: #b91c1c; color: #fff; border-color: #b91c1c; }
+.icu-btn-primary:hover:not([disabled]) { background: #991b1b; }
+.icu-btn-danger { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
+.icu-btn-sm { padding: 3px 10px; font-size: 12px; margin-right: 4px; }
+.icu-btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+/* Phase 9.16 — Nurses Care Record */
+.icu-panel-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.icu-row-removed { opacity: 0.55; }
+.icu-note-cell { text-align: left !important; white-space: pre-wrap; }
+.icu-sub { font-size: 13px; font-weight: 600; color: #271e4a; margin: 16px 0 8px; }
+.icu-goal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 6px 14px; }
+.icu-goal-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.icu-goal-tag { background: #dcfce7; color: #166534; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 11px; }
+.icu-careplan-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; }
+.icu-careplan-head { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+.icu-careplan-head strong { color: #271e4a; }
+.icu-cp-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr auto; gap: 8px; margin-bottom: 8px; }
+.icu-cp-row input { padding: 7px 9px; font-family: Kanit, sans-serif; font-size: 13px; border: 1px solid #b4b6ba; border-radius: 6px; background: #f0f3ff; }
+.icu-modal-bg { position: fixed; inset: 0; background: rgba(15,23,42,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.icu-modal { background: #fff; border-radius: 12px; width: 100%; max-width: 760px; max-height: 90vh; overflow-y: auto; padding: 22px 24px; font-family: Kanit, sans-serif; }

@@ -5,8 +5,9 @@ import { MessageService } from 'primeng/api';
 import { of, Subject } from 'rxjs';
 import { catchError, takeUntil } from 'rxjs/operators';
 
-import { MlcCase, MlcService } from '../../services/mlc.service';
+import { MlcCase, MlcInjury, MlcService } from '../../services/mlc.service';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
+import { SignatureCreateResponse } from '../../services/signature.service';
 
 /**
  * Sprint 3d Screen B — MLC Detail / Lifecycle view.
@@ -67,9 +68,20 @@ export class MlcDetailComponent implements OnInit, OnDestroy {
   examinationForm: FormGroup;
   sampleForm: FormGroup;
   reportForm: FormGroup;
+  injuryForm: FormGroup;
+  policeForm: FormGroup;
 
   // Final-report confirmation state
   reportConfirmVisible = false;
+
+  // Per-injury / upload state
+  addingInjury = false;
+  uploadingPhotos = false;
+  uploadingProof = false;
+  savingPolice = false;
+
+  injuryOpinionOptions = ['simple', 'grievous', 'dangerous', 'undetermined'];
+  simpleOrGrievousOptions = ['simple', 'grievous'];
 
   private destroy$ = new Subject<void>();
 
@@ -83,6 +95,10 @@ export class MlcDetailComponent implements OnInit, OnDestroy {
     this.examinationForm = this.fb.group({
       examinerName: ['', [Validators.required]],
       injuries: ['', [Validators.required]],
+      examiningDoctorRegNo: [''],
+      injuryOpinion: [''],
+      consentForExamination: [false],
+      photographsTaken: [false],
     });
     this.sampleForm = this.fb.group({
       samplesCollected: ['', [Validators.required]],
@@ -91,6 +107,21 @@ export class MlcDetailComponent implements OnInit, OnDestroy {
     this.reportForm = this.fb.group({
       finalReport: ['', [Validators.required]],
       reportSubmittedTo: [''],
+      followUpExams: [''],
+    });
+    this.injuryForm = this.fb.group({
+      site: ['', [Validators.required]],
+      injuryType: [''],
+      size: [''],
+      ageOfInjury: [''],
+      weaponLikely: [''],
+      simpleOrGrievous: [''],
+      notes: [''],
+    });
+    this.policeForm = this.fb.group({
+      policeIntimationTime: [''],
+      policeIntimationMode: [''],
+      policeIntimationBy: [''],
     });
   }
 
@@ -150,6 +181,10 @@ export class MlcDetailComponent implements OnInit, OnDestroy {
     this.examinationForm.reset({
       examinerName: this.mlc.examinerName ?? '',
       injuries: this.mlc.injuries ?? '',
+      examiningDoctorRegNo: this.mlc.examiningDoctorRegNo ?? '',
+      injuryOpinion: this.mlc.injuryOpinion ?? '',
+      consentForExamination: this.mlc.consentForExamination ?? false,
+      photographsTaken: this.mlc.photographsTaken ?? false,
     });
     this.sampleForm.reset({
       samplesCollected: this.mlc.samplesCollected ?? '',
@@ -158,6 +193,12 @@ export class MlcDetailComponent implements OnInit, OnDestroy {
     this.reportForm.reset({
       finalReport: this.mlc.finalReport ?? '',
       reportSubmittedTo: this.mlc.reportSubmittedTo ?? '',
+      followUpExams: this.mlc.followUpExams ?? '',
+    });
+    this.policeForm.reset({
+      policeIntimationTime: toDatetimeLocal(this.mlc.policeIntimationTime),
+      policeIntimationMode: this.mlc.policeIntimationMode ?? '',
+      policeIntimationBy: this.mlc.policeIntimationBy ?? '',
     });
   }
 
@@ -177,11 +218,21 @@ export class MlcDetailComponent implements OnInit, OnDestroy {
       return;
     }
     this.submitting.examination = true;
-    const value = this.examinationForm.value as { examinerName: string; injuries: string };
+    const value = this.examinationForm.value as {
+      examinerName: string;
+      injuries: string;
+      examiningDoctorRegNo: string;
+      injuryOpinion: string;
+      consentForExamination: boolean;
+    };
     this.mlcService
       .recordExamination(this.mlcId, {
         examinerName: value.examinerName.trim(),
         injuries: value.injuries.trim(),
+        examiningDoctorRegNo: value.examiningDoctorRegNo?.trim() || undefined,
+        injuryOpinion: value.injuryOpinion || undefined,
+        consentForExamination: value.consentForExamination,
+        consentForExamTime: value.consentForExamination ? new Date().toISOString() : undefined,
       })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -268,11 +319,23 @@ export class MlcDetailComponent implements OnInit, OnDestroy {
     const value = this.reportForm.value as {
       finalReport: string;
       reportSubmittedTo: string;
+      followUpExams: string;
+    };
+    const police = this.policeForm.value as {
+      policeIntimationTime: string;
+      policeIntimationMode: string;
+      policeIntimationBy: string;
     };
     this.mlcService
       .submitFinalReport(this.mlcId, {
         finalReport: value.finalReport.trim(),
         reportSubmittedTo: value.reportSubmittedTo.trim() || undefined,
+        followUpExams: value.followUpExams?.trim() || undefined,
+        policeIntimationTime: police.policeIntimationTime
+          ? new Date(police.policeIntimationTime).toISOString()
+          : undefined,
+        policeIntimationMode: police.policeIntimationMode?.trim() || undefined,
+        policeIntimationBy: police.policeIntimationBy?.trim() || undefined,
       })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -290,6 +353,225 @@ export class MlcDetailComponent implements OnInit, OnDestroy {
           this.messageService.add({
             severity: 'error',
             summary: 'Could not submit report',
+            detail: toErrorMessage(err),
+            life: 6000,
+          });
+        },
+      });
+  }
+
+  // ---- Examiner signature -------------------------------------------------
+
+  // Pad is collapsed by default behind a "Capture" button (matches register).
+  showExaminerSign = false;
+
+  onExaminerSigned(event: SignatureCreateResponse): void {
+    if (!this.mlcId) return;
+    this.mlcService
+      .updateMlcCase(this.mlcId, { examinerSignature: event.id })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.showExaminerSign = false;
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Examiner signature saved',
+            life: 3000,
+          });
+          this.loadCase();
+        },
+        error: (err) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Could not save signature',
+            detail: toErrorMessage(err),
+            life: 6000,
+          });
+        },
+      });
+  }
+
+  // ---- Per-injury documentation -------------------------------------------
+
+  get injuriesDetail(): MlcInjury[] {
+    return this.mlc?.injuries_detail ?? [];
+  }
+
+  addInjury(): void {
+    if (this.injuryForm.invalid || !this.mlcId) {
+      this.injuryForm.markAllAsTouched();
+      return;
+    }
+    this.addingInjury = true;
+    const v = this.injuryForm.value as Record<string, string>;
+    const body: Partial<MlcInjury> = {
+      site: v['site'].trim(),
+      injuryType: v['injuryType']?.trim() || undefined,
+      size: v['size']?.trim() || undefined,
+      ageOfInjury: v['ageOfInjury']?.trim() || undefined,
+      weaponLikely: v['weaponLikely']?.trim() || undefined,
+      simpleOrGrievous: v['simpleOrGrievous'] || undefined,
+      notes: v['notes']?.trim() || undefined,
+    };
+    this.mlcService
+      .addInjury(this.mlcId, body)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.addingInjury = false;
+          this.injuryForm.reset({
+            site: '',
+            injuryType: '',
+            size: '',
+            ageOfInjury: '',
+            weaponLikely: '',
+            simpleOrGrievous: '',
+            notes: '',
+          });
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Injury added',
+            life: 3000,
+          });
+          this.loadCase();
+        },
+        error: (err) => {
+          this.addingInjury = false;
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Could not add injury',
+            detail: toErrorMessage(err),
+            life: 6000,
+          });
+        },
+      });
+  }
+
+  removeInjury(injuryId?: number): void {
+    if (injuryId == null || !this.mlcId) return;
+    this.mlcService
+      .deleteInjury(this.mlcId, injuryId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Injury removed',
+            life: 3000,
+          });
+          this.loadCase();
+        },
+        error: (err) => {
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Could not remove injury',
+            detail: toErrorMessage(err),
+            life: 6000,
+          });
+        },
+      });
+  }
+
+  // ---- Photographs --------------------------------------------------------
+
+  onPhotosSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0 || !this.mlcId) return;
+    const files = Array.from(input.files);
+    this.uploadingPhotos = true;
+    this.mlcService
+      .uploadPhotographs(this.mlcId, files)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.uploadingPhotos = false;
+          input.value = '';
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Photographs uploaded',
+            life: 3000,
+          });
+          this.loadCase();
+        },
+        error: (err) => {
+          this.uploadingPhotos = false;
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Could not upload photographs',
+            detail: toErrorMessage(err),
+            life: 6000,
+          });
+        },
+      });
+  }
+
+  // ---- Submission proof ---------------------------------------------------
+
+  onSubmissionProofSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0 || !this.mlcId) return;
+    const file = input.files[0];
+    this.uploadingProof = true;
+    this.mlcService
+      .uploadSubmissionProof(this.mlcId, file)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.uploadingProof = false;
+          input.value = '';
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Submission proof uploaded',
+            life: 3000,
+          });
+          this.loadCase();
+        },
+        error: (err) => {
+          this.uploadingProof = false;
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Could not upload submission proof',
+            detail: toErrorMessage(err),
+            life: 6000,
+          });
+        },
+      });
+  }
+
+  // ---- Police intimation (save before report) -----------------------------
+
+  savePoliceIntimation(): void {
+    if (!this.mlcId) return;
+    this.savingPolice = true;
+    const police = this.policeForm.value as {
+      policeIntimationTime: string;
+      policeIntimationMode: string;
+      policeIntimationBy: string;
+    };
+    this.mlcService
+      .updateMlcCase(this.mlcId, {
+        policeIntimationTime: police.policeIntimationTime
+          ? new Date(police.policeIntimationTime)
+          : undefined,
+        policeIntimationMode: police.policeIntimationMode?.trim() || undefined,
+        policeIntimationBy: police.policeIntimationBy?.trim() || undefined,
+      })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.savingPolice = false;
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Police intimation saved',
+            life: 3000,
+          });
+          this.loadCase();
+        },
+        error: (err) => {
+          this.savingPolice = false;
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Could not save police intimation',
             detail: toErrorMessage(err),
             life: 6000,
           });
@@ -327,6 +609,18 @@ function extractPatient(res: unknown, fallbackPrn: string | number): PatientMini
     name: typeof data.name === 'string' ? data.name : undefined,
     prn: data.prn ?? fallbackPrn,
   };
+}
+
+function toDatetimeLocal(value: Date | string | undefined | null): string {
+  if (!value) return '';
+  const d = value instanceof Date ? value : new Date(value);
+  if (isNaN(d.getTime())) return '';
+  // Build a local "yyyy-MM-ddTHH:mm" string for <input type="datetime-local">.
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return (
+    `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` +
+    `T${pad(d.getHours())}:${pad(d.getMinutes())}`
+  );
 }
 
 function toErrorMessage(err: unknown): string {

@@ -1,0 +1,209 @@
+<div class="td-shell" [class.td-tv]="tvMode">
+  <!-- Header -->
+  <div class="td-page-header" *ngIf="!tvMode">
+    <div>
+      <h2 class="td-page-title">
+        Treatment Dashboard
+        <button class="td-info-btn" (click)="showLegend = !showLegend"
+                title="What do these scores mean?">i</button>
+      </h2>
+      <p class="td-page-sub">NEWS2 deterioration watchboard — IPD &amp; ICU, sickest first</p>
+    </div>
+    <div class="td-header-actions">
+      <span class="td-refreshed" *ngIf="lastRefreshed">Updated {{ lastRefreshed | date:'HH:mm:ss' }}</span>
+      <button class="td-btn td-btn-secondary" (click)="load()" [disabled]="loading">
+        <i class="pi pi-refresh"></i> Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- NEWS2 explainer — what the number + bands mean -->
+  <div class="td-legend" *ngIf="showLegend && !tvMode">
+    <div class="td-legend-head">
+      <strong>How to read this board</strong>
+      <button class="td-legend-close" (click)="showLegend = false" title="Close">✕</button>
+    </div>
+    <p class="td-legend-intro">
+      The big number on each patient is their <strong>NEWS2 score</strong> (National Early Warning
+      Score) — a 0–20 total calculated from 7 vital signs: respiration rate, SpO₂, supplemental
+      oxygen, temperature, systolic BP, pulse and consciousness level.
+      <strong>The higher the score, the sicker the patient.</strong> Patients are listed sickest-first.
+    </p>
+    <div class="td-legend-bands">
+      <div class="td-legend-band td-band-low">
+        <span class="td-legend-chip">0–4</span>
+        <div><strong>STABLE</strong><span>Low risk — routine monitoring</span></div>
+      </div>
+      <div class="td-legend-band td-band-low-medium">
+        <span class="td-legend-chip">!</span>
+        <div><strong>WATCH</strong><span>One vital sign severely abnormal — clinician review</span></div>
+      </div>
+      <div class="td-legend-band td-band-medium">
+        <span class="td-legend-chip">5–6</span>
+        <div><strong>MEDIUM</strong><span>Urgent review by the ward doctor</span></div>
+      </div>
+      <div class="td-legend-band td-band-high">
+        <span class="td-legend-chip">7+</span>
+        <div><strong>HIGH</strong><span>Emergency response — continuous monitoring</span></div>
+      </div>
+    </div>
+    <p class="td-legend-note">
+      The mini-graph is the score trend over recent readings. Chips flag other concerns
+      (critical lab result, no progress note today, vitals overdue, score rising 3 readings running).
+    </p>
+  </div>
+
+  <div class="td-tv-title" *ngIf="tvMode">
+    <h2>Ward Watch — NEWS2</h2>
+    <span *ngIf="lastRefreshed">{{ lastRefreshed | date:'EEE d MMM, HH:mm' }}</span>
+  </div>
+
+  <div class="td-banner td-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
+
+  <!-- Phase 9.20 — Code Blue dial banner after activation -->
+  <div class="td-codeblue-dial" *ngIf="codeDial">
+    <span class="td-cb-main"><strong>Code Blue activated.</strong> {{ codeDial.script }}</span>
+    <a class="td-cb-call" [href]="'tel:' + codeDial.number">📞 Call {{ codeDial.number }}</a>
+    <button class="td-cb-x" (click)="dismissCodeDial()">✕</button>
+  </div>
+
+  <!-- KPI strip — each tile is a click-to-filter for the list below. -->
+  <div class="td-kpis" *ngIf="kpis">
+    <button type="button" class="td-kpi td-kpi-total"
+            [class.td-kpi-on]="kpiFilter === 'all'" (click)="setKpiFilter('all')">
+      <span class="td-kpi-num">{{ kpis.total }}</span>
+      <span class="td-kpi-label">Admitted</span>
+    </button>
+    <button type="button" class="td-kpi td-kpi-high" [class.td-kpi-pulse]="kpis.high > 0"
+            [class.td-kpi-on]="kpiFilter === 'high'" (click)="setKpiFilter('high')">
+      <span class="td-kpi-num">{{ kpis.high }}</span>
+      <span class="td-kpi-label">Critical (high)</span>
+    </button>
+    <button type="button" class="td-kpi td-kpi-medium"
+            [class.td-kpi-on]="kpiFilter === 'medium'" (click)="setKpiFilter('medium')">
+      <span class="td-kpi-num">{{ kpis.medium }}</span>
+      <span class="td-kpi-label">Medium</span>
+    </button>
+    <button type="button" class="td-kpi td-kpi-deteriorating"
+            [class.td-kpi-on]="kpiFilter === 'deteriorating'" (click)="setKpiFilter('deteriorating')">
+      <span class="td-kpi-num">{{ kpis.deteriorating }}</span>
+      <span class="td-kpi-label">Deteriorating</span>
+    </button>
+    <button type="button" class="td-kpi td-kpi-lab"
+            [class.td-kpi-on]="kpiFilter === 'critical-lab'" (click)="setKpiFilter('critical-lab')">
+      <span class="td-kpi-num">{{ kpis.criticalLabs }}</span>
+      <span class="td-kpi-label">Critical results</span>
+    </button>
+    <button type="button" class="td-kpi td-kpi-gap"
+            [class.td-kpi-on]="kpiFilter === 'no-note'" (click)="setKpiFilter('no-note')">
+      <span class="td-kpi-num">{{ kpis.careGaps }}</span>
+      <span class="td-kpi-label">No progress note</span>
+    </button>
+    <button type="button" class="td-kpi td-kpi-icu"
+            [class.td-kpi-on]="kpiFilter === 'icu'" (click)="setKpiFilter('icu')">
+      <span class="td-kpi-num">{{ kpis.icu }}</span>
+      <span class="td-kpi-label">In ICU</span>
+    </button>
+  </div>
+  <div class="td-kpi-hint" *ngIf="kpiFilter !== 'all'">
+    Showing <strong>{{ visibleRows.length }}</strong> filtered — tap <strong>Admitted</strong> to show all.
+  </div>
+
+  <!-- Controls -->
+  <div class="td-controls" *ngIf="!tvMode">
+    <div class="td-seg">
+      <button [class.td-seg-active]="filters.source === 'all'" (click)="setSource('all')">All</button>
+      <button [class.td-seg-active]="filters.source === 'ipd'" (click)="setSource('ipd')">IPD</button>
+      <button [class.td-seg-active]="filters.source === 'icu'" (click)="setSource('icu')">ICU</button>
+    </div>
+    <div class="td-seg">
+      <button [class.td-seg-active]="lens === 'all'" (click)="lens = 'all'">Overview</button>
+      <button [class.td-seg-active]="lens === 'doctor'" (click)="lens = 'doctor'">Consultant lens</button>
+      <button [class.td-seg-active]="lens === 'nurse'" (click)="lens = 'nurse'">Nurse lens</button>
+    </div>
+    <label class="td-check">
+      <input type="checkbox" [(ngModel)]="criticalOnly" />
+      <span>Show only patients needing attention</span>
+    </label>
+    <input class="td-search" type="text" placeholder="Search name / PRN / bed"
+           [(ngModel)]="filters.search" (keyup.enter)="applyFilters()" />
+  </div>
+
+  <div class="td-loading" *ngIf="loading">Loading watchboard…</div>
+
+  <div class="td-empty" *ngIf="!loading && !visibleRows.length">
+    <i class="pi pi-check-circle"></i>
+    <div>No patients match — or no admitted patients to watch.</div>
+  </div>
+
+  <!-- Watchboard -->
+  <div class="td-board" *ngIf="!loading && visibleRows.length">
+    <button class="td-row td-band-{{ row.ewsBand || 'low' }}"
+            *ngFor="let row of visibleRows"
+            (click)="openPatient(row)">
+      <!-- EWS badge -->
+      <div class="td-ews" [title]="bandMeaning(row.ewsBand)">
+        <span class="td-ews-tag">NEWS2</span>
+        <span class="td-ews-score">{{ row.ewsScore ?? '–' }}</span>
+        <span class="td-ews-band">{{ bandLabel(row.ewsBand) }}</span>
+      </div>
+
+      <!-- Identity -->
+      <div class="td-identity">
+        <div class="td-name">
+          {{ row.patientName || 'PRN ' + (row.prn || '—') }}
+          <span class="td-src td-src-{{ row.source }}">{{ row.source }}</span>
+        </div>
+        <div class="td-meta">
+          {{ row.bed ? 'Bed ' + row.bed : '' }}
+          <span *ngIf="row.ward">· {{ row.ward }}</span>
+          <span *ngIf="row.admittingDoctor">· {{ row.admittingDoctor }}</span>
+        </div>
+      </div>
+
+      <!-- Trend -->
+      <div class="td-trend">
+        <app-ews-sparkline [points]="row.ewsHistory" [band]="row.ewsBand"></app-ews-sparkline>
+        <span class="td-trend-tag td-trend-{{ row.trend }}">
+          <i class="pi" [ngClass]="trendIcon(row.trend)"></i>
+          {{ row.trend || 'stable' }}
+        </span>
+      </div>
+
+      <!-- Alert chips -->
+      <div class="td-chips">
+        <span class="td-chip td-chip-{{ chip.kind }}" *ngFor="let chip of row.chips">
+          {{ chip.label }}<span *ngIf="chip.count && chip.count > 1"> ×{{ chip.count }}</span>
+        </span>
+        <span class="td-chip-none" *ngIf="!row.chips.length">No active alerts</span>
+      </div>
+
+      <!-- Vitals freshness + monitoring order -->
+      <div class="td-vitals-age">
+        <span class="td-vitals-label">Vitals</span>
+        <span class="td-vitals-val">{{ hoursAgo(row.vitalsRecordedAt) }}</span>
+        <span class="td-vitals-order" *ngIf="row.vitalsMonitoringFrequency"
+              title="Doctor-ordered monitoring frequency">
+          Order: {{ freqLabel(row.vitalsMonitoringFrequency) }}
+        </span>
+      </div>
+
+      <!-- Phase 9.20 — Code Blue on critical (high-band) rows. Span (not a
+           nested <button>) with stopPropagation so the row's drawer doesn't open. -->
+      <span class="td-codeblue" role="button" tabindex="0"
+            *ngIf="row.ewsBand === 'high'"
+            (click)="activateCodeBlue(row, $event)"
+            title="Raise Code Blue for this patient">
+        🚨 Code Blue
+      </span>
+    </button>
+  </div>
+</div>
+
+<!-- Patient drawer -->
+<app-acuity-patient-drawer
+  *ngIf="selectedAdmissionId"
+  [admissionId]="selectedAdmissionId"
+  (closed)="onDrawerClosed()"
+  (escalated)="onEscalationDone()">
+</app-acuity-patient-drawer>

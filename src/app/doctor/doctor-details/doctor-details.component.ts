@@ -88,35 +88,34 @@ export class DoctorDetailsComponent implements OnInit {
   //     // }
   //   });
   // }
-  doctorToDelete: Doctor | null = null; // Hold the doctor to delete
-  showDeleteConfirmDialog: boolean = false; // Control the visibility of the dialog
+  doctorToDeactivate: Doctor | null = null;
+  showDeactivateConfirmDialog: boolean = false;
 
-  // Method to open the delete confirmation dialog
-  deleteDoctor(doctor: Doctor): void {
-    this.doctorToDelete = doctor;
-    this.showDeleteConfirmDialog = true; // Show the dialog
+  deactivateDoctor(doctor: Doctor): void {
+    this.doctorToDeactivate = doctor;
+    this.showDeactivateConfirmDialog = true;
   }
 
-  // Method to handle delete confirmation
-  confirmDelete(): void {
-    if (this.doctorToDelete) {
-      this.doctorService.deleteDoctor(this.doctorToDelete.id).subscribe(
+  confirmDeactivate(): void {
+    if (this.doctorToDeactivate) {
+      this.doctorService.deactivateDoctor(this.doctorToDeactivate.id).subscribe(
         () => {
-          // console.log(`Dr. ${this.doctorToDelete!.name} has been deleted.`);
-          this.showDeleteConfirmDialog = false; // Close the dialog
-          this.fetchDepartmentsAndDoctors(); // Refresh the list after deletion
+          this.messageService.add({ severity: 'success', summary: 'Success', detail: `Dr. ${this.doctorToDeactivate!.name} has been deactivated.` });
+          this.showDeactivateConfirmDialog = false;
+          this.doctorToDeactivate = null;
+          this.fetchDepartmentsAndDoctors();
         },
         (error) => {
-          console.error('Error deleting doctor:', error);
-          alert('An error occurred while deleting the doctor.');
+          console.error('Error deactivating doctor:', error);
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to deactivate doctor.' });
         }
       );
     }
   }
 
-  // Method to close the dialog
-  closeDeleteDialog(): void {
-    this.showDeleteConfirmDialog = false;
+  closeDeactivateDialog(): void {
+    this.showDeactivateConfirmDialog = false;
+    this.doctorToDeactivate = null;
   }
 
 
@@ -149,7 +148,7 @@ export class DoctorDetailsComponent implements OnInit {
 
   fetchDoctors(): void {
     this.isLoading = true;
-    this.doctorService.getDoctors().subscribe({
+    this.doctorService.getActiveDoctors().subscribe({
       next: (doctors: Doctor[]) => {
         const today = new Date();
         const todayDay = this.getDayString(today);

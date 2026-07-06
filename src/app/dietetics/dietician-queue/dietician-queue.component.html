@@ -1,0 +1,147 @@
+<div class="dq-shell">
+  <h2 class="dq-title">Dietician queue</h2>
+
+  <div class="dq-banner dq-banner-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="dq-banner dq-banner-good" *ngIf="successMessage">{{ successMessage }}</div>
+
+  <div class="dq-grid">
+    <!-- ─── Left column — three buckets ─── -->
+    <div class="dq-buckets">
+      <section>
+        <h3 class="dq-bucket-title">Pending <span class="dq-count">{{ queue.pending.length }}</span></h3>
+        <p class="dq-bucket-sub">Admitted, no signed diet plan yet (24h SLA).</p>
+        <ul>
+          <li *ngFor="let r of queue.pending" (click)="selectAdmission(r)"
+              [class.active]="selected?.id === r.id">
+            <div class="dq-row-main">{{ r.admissionNo }} · {{ r.department }}</div>
+            <div class="dq-row-sub">{{ r.diagnosis | slice:0:80 }}</div>
+            <div class="dq-row-date">Admitted {{ r.admissionDate | date:'short' }}</div>
+          </li>
+          <li *ngIf="queue.pending.length===0" class="dq-empty">All admissions have a diet plan.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3 class="dq-bucket-title dq-warn">Re-assess <span class="dq-count">{{ queue.reassess.length }}</span></h3>
+        <p class="dq-bucket-sub">Low meal intake flagged in the last 48h.</p>
+        <ul>
+          <li *ngFor="let r of queue.reassess" (click)="selectAdmission(r, true)"
+              [class.active]="selected?.id === r.id">
+            <div class="dq-row-main">{{ r.admissionNo }} · {{ r.department }}</div>
+            <div class="dq-row-sub">{{ r.diagnosis | slice:0:80 }}</div>
+          </li>
+          <li *ngIf="queue.reassess.length===0" class="dq-empty">No re-assessment alerts.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3 class="dq-bucket-title">Active plans <span class="dq-count">{{ queue.active.length }}</span></h3>
+        <ul>
+          <li *ngFor="let p of queue.active" (click)="selectActivePlan(p)"
+              [class.active]="editingPlan?.id === p.id">
+            <div class="dq-row-main">{{ p.diet?.code }} · {{ p.diet?.name }}</div>
+            <div class="dq-row-sub">Signed {{ p.signedAt | date:'short' }} by {{ p.signedBy }}</div>
+          </li>
+          <li *ngIf="queue.active.length===0" class="dq-empty">No active plans.</li>
+        </ul>
+      </section>
+    </div>
+
+    <!-- ─── Right column — editor ─── -->
+    <div class="dq-editor" *ngIf="selected">
+      <div class="dq-editor-header">
+        <h3>{{ selected.admissionNo || 'Plan editor' }} <span class="dq-pill" *ngIf="editingPlan">{{ editingPlan.status }}</span></h3>
+        <div class="dq-meta" *ngIf="selected.diagnosis">{{ selected.department }} · {{ selected.diagnosis | slice:0:120 }}</div>
+      </div>
+
+      <div class="dq-form">
+        <label class="dq-field">
+          Diet
+          <select [(ngModel)]="form.dietMasterId">
+            <option value="">— select —</option>
+            <option *ngFor="let d of diets" [value]="d.id">{{ d.code }} · {{ d.name }}</option>
+          </select>
+        </label>
+
+        <div class="dq-row">
+          <label class="dq-field">Start date <input type="date" [(ngModel)]="form.startDate" /></label>
+          <label class="dq-field">End date <input type="date" [(ngModel)]="form.endDate" /></label>
+          <label class="dq-field">NPO until <input type="datetime-local" [(ngModel)]="form.npoUntil" /></label>
+        </div>
+
+        <fieldset class="dq-fs">
+          <legend>Allergens for this patient</legend>
+          <label class="dq-check-inline" *ngFor="let a of allergens">
+            <input type="checkbox"
+                   [checked]="form.allergensSnapshot.includes(a.name)"
+                   (change)="toggleAllergen(a.name)" />
+            {{ a.name }}
+          </label>
+        </fieldset>
+
+        <fieldset class="dq-fs">
+          <legend>Restrictions</legend>
+          <label class="dq-check-inline" *ngFor="let r of ['No salt','Low fat','Low protein','Soft','Liquid','Tube feed','Lactose-free','Gluten-free']">
+            <input type="checkbox"
+                   [checked]="form.restrictionsSnapshot.includes(r)"
+                   (change)="toggleRestriction(r)" />
+            {{ r }}
+          </label>
+        </fieldset>
+
+        <label class="dq-field">
+          Notes for kitchen
+          <textarea rows="2" [(ngModel)]="form.notesForKitchen"></textarea>
+        </label>
+
+        <label class="dq-field" *ngIf="form.reassessmentReason || (editingPlan && editingPlan.status === 'DRAFT')">
+          Re-assessment reason
+          <input type="text" [(ngModel)]="form.reassessmentReason" />
+        </label>
+
+        <label class="dq-field" *ngIf="templates.length > 0">
+          Note template (optional)
+          <select [(ngModel)]="form.noteTemplateId">
+            <option [ngValue]="null">— none —</option>
+            <option *ngFor="let t of templates" [ngValue]="t.id">{{ t.name }}</option>
+          </select>
+        </label>
+
+        <app-template-form-renderer
+          *ngIf="selectedTemplate() as t"
+          [fields]="t.fields"
+          [values]="form.templatedValueMap"
+          (valuesChange)="form.templatedValueMap = $event">
+        </app-template-form-renderer>
+
+        <div class="dq-actions">
+          <button type="button" class="dq-btn dq-btn-primary"
+                  [disabled]="saving || (editingPlan && editingPlan.status !== 'DRAFT')"
+                  (click)="saveDraft()">
+            {{ saving ? 'Saving…' : (editingPlan && editingPlan.status === 'DRAFT' ? 'Update draft' : 'Save as draft') }}
+          </button>
+          <button type="button" class="dq-btn"
+                  *ngIf="editingPlan && editingPlan.status === 'ACTIVE'"
+                  (click)="endPlan()">End plan</button>
+        </div>
+      </div>
+
+      <div class="dq-sign" *ngIf="editingPlan && editingPlan.status === 'DRAFT'">
+        <h4>Sign &amp; activate</h4>
+        <p class="dq-sub">Signing locks the plan, snapshots the template fields, and demotes any prior active plan.</p>
+        <app-e-sign
+          [signerType]="'staff'"
+          [signerRole]="'dietician'"
+          [signerName]="'Dietician'"
+          [contextType]="'diet-plan'"
+          [contextId]="editingPlan.id"
+          [disabled]="signing"
+          (signed)="onSigned($event)">
+        </app-e-sign>
+      </div>
+    </div>
+    <div class="dq-editor-empty" *ngIf="!selected">
+      Select a patient from the queue or an active plan to begin.
+    </div>
+  </div>
+</div>

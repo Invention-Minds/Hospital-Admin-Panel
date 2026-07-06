@@ -6,12 +6,14 @@
  * ============================================================================ */
 
 .page {
+  margin-left: 70px;
   padding: var(--space-40) var(--space-20);
   font-family: var(--font-family-primary);
   color: var(--color-text-heading);
   background: var(--color-surface-page);
   min-height: 100vh;
 }
+@media (max-width: 768px) { .page { margin-left: 0; } }
 
 .section {
   background: var(--color-surface-card);
@@ -259,4 +261,21 @@
 :host ::ng-deep .form__textarea {
   resize: vertical;
   min-height: 60px;
+}
+
+/* New-prescription button + modal — layout helpers. */
+:host ::ng-deep .section__head--with-action {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+:host ::ng-deep .form__row {
+  display: flex;
+  gap: 12px;
+}
+:host ::ng-deep .form__field--half {
+  flex: 1 1 calc(50% - 6px);
+  min-width: 140px;
 }

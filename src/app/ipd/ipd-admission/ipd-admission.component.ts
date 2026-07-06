@@ -227,7 +227,9 @@ export class IpdAdmissionComponent implements OnInit {
           summary: 'Success',
           detail: `IPD admission created. Admission No: ${response.admissionNo}`
         });
-        this.router.navigate([`/ipd/${response.id}`]);
+        // No bare /ipd/:id route exists — the admission entry point is the
+        // progress-note page (same target as IpdOverview's viewAdmission).
+        this.router.navigate(['/ipd/admission', response.id, 'progress-note']);
       },
       error: (error) => {
         this.messageService.add({

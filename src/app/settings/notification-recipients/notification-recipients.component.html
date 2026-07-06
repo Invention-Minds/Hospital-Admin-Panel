@@ -1,0 +1,71 @@
+<div class="page">
+  <div class="page-head">
+    <h2>Notification Recipients</h2>
+    <p class="hint">WhatsApp/SMS recipient numbers used by the backend, grouped by purpose. Edits apply to this deployment only.</p>
+  </div>
+
+  <div *ngIf="message" class="alert ok">{{ message }}</div>
+  <div *ngIf="error" class="alert err">{{ error }}</div>
+
+  <!-- Add / edit + search bar -->
+  <div class="form-row">
+    <div class="column-1">
+      <select class="custom-select" [(ngModel)]="formGroup" [disabled]="!!editingId">
+        <option *ngFor="let g of groups" [value]="g">{{ g }}</option>
+      </select>
+      <input class="custom-input-text" [(ngModel)]="formPhone" placeholder="Phone e.g. 919880544866" />
+      <input class="custom-input-text" [(ngModel)]="formLabel" placeholder="Label (optional)" />
+      <button class="btn-primary" (click)="save()">{{ editingId ? 'Save' : 'Add' }}</button>
+      <button *ngIf="editingId" class="btn-secondary" (click)="cancelEdit()">Cancel</button>
+    </div>
+
+    <div class="right-controls">
+      <select class="custom-select" [(ngModel)]="filterGroup" (ngModelChange)="refresh()">
+        <option value="">All groups</option>
+        <option *ngFor="let g of groups" [value]="g">{{ g }}</option>
+      </select>
+      <input class="custom-input-text search" [(ngModel)]="search" placeholder="Search phone / label" />
+      <svg title="Refresh" (click)="refresh()" class="reverse" xmlns="http://www.w3.org/2000/svg" width="2.5em" height="2.5em" viewBox="-1.5 -2.5 24 24">
+        <path fill="currentColor" d="m4.859 5.308l1.594-.488a1 1 0 0 1 .585 1.913l-3.825 1.17a1 1 0 0 1-1.249-.665L.794 3.413a1 1 0 1 1 1.913-.585l.44 1.441C5.555.56 10.332-1.035 14.573.703a9.38 9.38 0 0 1 5.38 5.831a1 1 0 1 1-1.905.608A7.381 7.381 0 0 0 4.86 5.308zm12.327 8.195l-1.775.443a1 1 0 1 1-.484-1.94l3.643-.909a1 1 0 0 1 .61-.08a1 1 0 0 1 .84.75l.968 3.88a1 1 0 0 1-1.94.484l-.33-1.322a9.381 9.381 0 0 1-16.384-1.796l-.26-.634a1 1 0 1 1 1.851-.758l.26.633a7.381 7.381 0 0 0 13.001 1.25z" />
+      </svg>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <div class="table-wrapper">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Group</th>
+            <th>Phone</th>
+            <th>Label</th>
+            <th>Active</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="displayed.length === 0">
+            <td colspan="5" class="no-records-message">No recipients configured.</td>
+          </tr>
+          <tr *ngFor="let r of displayed" [class.inactive]="!r.isActive">
+            <td>{{ r.groupKey }}</td>
+            <td>{{ r.phone }}</td>
+            <td>{{ r.label || '—' }}</td>
+            <td><span class="status-badge" [class.off]="!r.isActive">{{ r.isActive ? 'Active' : 'Off' }}</span></td>
+            <td class="button">
+              <button class="btn-action edit" title="Edit" (click)="startEdit(r)">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83l3.75 3.75z"/></svg>
+              </button>
+              <button class="btn-action toggle" [title]="r.isActive ? 'Deactivate' : 'Activate'" (click)="toggleActive(r)">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5C21.27 7.61 17 4.5 12 4.5m0 12a4.5 4.5 0 1 1 0-9a4.5 4.5 0 0 1 0 9m0-7a2.5 2.5 0 1 0 0 5a2.5 2.5 0 0 0 0-5"/></svg>
+              </button>
+              <button class="btn-action danger" title="Delete" (click)="remove(r)">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M6 19a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7H6zM19 4h-3.5l-1-1h-5l-1 1H5v2h14z"/></svg>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

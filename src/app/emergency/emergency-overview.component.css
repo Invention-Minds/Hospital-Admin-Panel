@@ -1,8 +1,9 @@
 .er-overview {
   padding: 20px;
   max-width: 1400px;
-  margin: 0 auto;
+  margin: 0 auto 0 96px;
 }
+@media (max-width: 768px) { .er-overview { margin-left: auto; } }
 
 .page-header {
   display: flex;

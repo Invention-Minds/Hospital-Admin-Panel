@@ -1,0 +1,49 @@
+/* Phase 9.26 / Phase 3 — QI RCA inbox. Reuses q-*/qi-* tokens. */
+
+.q-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; margin-bottom: 16px; flex-wrap: wrap; }
+.q-title { font-size: 22px; font-weight: 600; margin: 0 0 4px; }
+.q-sub { color: #6b7280; font-size: 13px; margin: 0; max-width: 720px; }
+
+.qi-back { background: transparent; border: 1px solid #d1d5db; color: #271e4a;
+  padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+.qi-back:hover { background: #f3f4f6; }
+
+.q-banner { padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; font-size: 14px; cursor: pointer; }
+.q-banner.q-bad { background: #fee2e2; color: #b91c1c; }
+.q-loading { padding: 40px; text-align: center; color: #6b7280; font-style: italic; }
+.q-empty { padding: 44px; text-align: center; color: #6b7280; background: #f9fafb; border: 1px dashed #e5e7eb; border-radius: 10px; }
+
+.q-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.q-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px 18px;
+  display: flex; flex-direction: column; gap: 4px; border-left: 4px solid transparent; }
+.q-card-label { font-size: 12px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.4px; }
+.q-card-val { font-size: 28px; font-weight: 700; color: #271e4a; line-height: 1; }
+.q-card.q-bad { border-left-color: #dc2626; background: #fef2f2; }
+.q-card.q-bad .q-card-val { color: #b91c1c; }
+.q-card.q-warn { border-left-color: #d97706; background: #fffbeb; }
+.q-card.q-warn .q-card-val { color: #92400e; }
+
+.qi-filters { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-bottom: 14px;
+  padding: 12px 14px; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; }
+.qi-filter { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #6b7280; }
+.qi-filter select, .qi-filter input { height: 32px; padding: 4px 10px; border: 1px solid #d1d5db;
+  border-radius: 6px; font-size: 13px; }
+.qi-toggle { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #6b7280; }
+
+.rca-table { width: 100%; border-collapse: collapse; background: #fff;
+  border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden; }
+.rca-table thead th { text-align: left; font-size: 12px; color: #6b7280; text-transform: uppercase;
+  letter-spacing: 0.3px; background: #f9fafb; padding: 10px 12px; border-bottom: 1px solid #e5e7eb; }
+.rca-table tbody tr { cursor: pointer; transition: background 0.1s; }
+.rca-table tbody tr:hover { background: #f9fafb; }
+.rca-table tbody td { padding: 12px; font-size: 13px; color: #374151; border-bottom: 1px solid #f3f4f6; vertical-align: top; }
+.rca-table tbody tr.rca-row-overdue { background: #fef2f2; }
+.rca-table tbody tr.rca-row-overdue:hover { background: #fee2e2; }
+.rca-code { font-family: 'Roboto Mono', monospace; font-size: 12px; color: #0e2970; font-weight: 600; }
+
+.qi-pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px;
+  font-weight: 600; background: #f3f4f6; color: #6b7280; }
+.qi-pill.q-good { background: #dcfce7; color: #166534; }
+.qi-pill.q-warn { background: #fef3c7; color: #92400e; }
+.qi-pill.q-bad { background: #fee2e2; color: #b91c1c; }
+.qi-pill.q-critical { background: #b91c1c; color: #fff; }

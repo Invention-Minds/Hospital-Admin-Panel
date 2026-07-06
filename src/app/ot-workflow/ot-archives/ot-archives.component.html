@@ -1,0 +1,183 @@
+<div class="ar-shell">
+  <div class="ar-head">
+    <h2 class="ar-title">Archives</h2>
+    <button class="ar-btn" (click)="close()">Close</button>
+  </div>
+
+  <div class="ar-banner ar-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="ar-loading" *ngIf="loading">Loading…</div>
+
+  <div class="ar-layout" *ngIf="!loading && payload">
+    <!-- Left sidebar -->
+    <aside class="ar-sidebar">
+      <div class="ar-profile">
+        <div class="ar-avatar">{{ (payload.patient?.name || '?').charAt(0) }}</div>
+        <div class="ar-name">{{ payload.patient?.name || '—' }}</div>
+        <div class="ar-meta">PRN: {{ payload.patient?.prn ?? prn }}</div>
+        <div class="ar-meta">{{ payload.patient?.age || '?' }} / {{ payload.patient?.gender || '?' }}</div>
+      </div>
+      <nav class="ar-nav">
+        <button [class.ar-nav-active]="section === 'dashboard'" (click)="setSection('dashboard')">Dashboard</button>
+        <button [class.ar-nav-active]="section === 'op-visits'" (click)="setSection('op-visits')">OP Visits ({{ payload.opVisits.length }})</button>
+        <button [class.ar-nav-active]="section === 'ip-visits'" (click)="setSection('ip-visits')">IP Visits ({{ payload.ipVisits.length }})</button>
+        <button [class.ar-nav-active]="section === 'laboratory'" (click)="setSection('laboratory')">Laboratory ({{ payload.labReports.length }})</button>
+        <button [class.ar-nav-active]="section === 'radiology'" (click)="setSection('radiology')">Radiology ({{ payload.radiologyReports.length }})</button>
+        <button [class.ar-nav-active]="section === 'surgical'" (click)="setSection('surgical')">Surgical History ({{ payload.surgicalHistory.length }})</button>
+        <button [class.ar-nav-active]="section === 'discharges'" (click)="setSection('discharges')">Discharges ({{ payload.discharges.length }})</button>
+      </nav>
+    </aside>
+
+    <!-- Main panel -->
+    <main class="ar-main">
+      <div class="ar-filters">
+        <label>From <input type="date" [(ngModel)]="fromDate" (change)="load()" /></label>
+        <label>To <input type="date" [(ngModel)]="toDate" (change)="load()" /></label>
+      </div>
+
+      <!-- Dashboard -->
+      <section *ngIf="section === 'dashboard'" class="ar-section">
+        <div class="ar-cards">
+          <div class="ar-card">
+            <h4>OP Visits</h4>
+            <em class="ar-muted" *ngIf="!payload.opVisits.length">None</em>
+            <div *ngFor="let v of payload.opVisits.slice(0, 5)">
+              <strong>{{ v.date }} {{ v.time }}</strong> · {{ v.doctorName }}
+              <span class="ar-pill">{{ v.department }}</span>
+            </div>
+          </div>
+          <div class="ar-card">
+            <h4>IP Visits</h4>
+            <em class="ar-muted" *ngIf="!payload.ipVisits.length">None</em>
+            <div *ngFor="let v of payload.ipVisits.slice(0, 5)">
+              <strong>{{ v.admissionNo }}</strong> · {{ v.admissionDate | date:'dd/MM/yyyy' }}
+              <span class="ar-pill">{{ v.department }}</span>
+            </div>
+          </div>
+          <div class="ar-card">
+            <h4>Recent Lab Reports</h4>
+            <em class="ar-muted" *ngIf="!payload.labReports.length">None</em>
+            <div *ngFor="let r of payload.labReports.slice(0, 5)">
+              <strong>{{ r.testName }}</strong> · {{ r.reportedAt || r.createdAt | date:'dd/MM/yyyy' }}
+              <span class="ar-pill" *ngIf="r.criticalFlag">CRITICAL</span>
+            </div>
+          </div>
+          <div class="ar-card">
+            <h4>Recent Radiology</h4>
+            <em class="ar-muted" *ngIf="!payload.radiologyReports.length">None</em>
+            <div *ngFor="let r of payload.radiologyReports.slice(0, 5)">
+              <strong>{{ r.testName }}</strong> · {{ r.reportedAt || r.createdAt | date:'dd/MM/yyyy' }}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- OP Visits -->
+      <section *ngIf="section === 'op-visits'" class="ar-section">
+        <table class="ar-table">
+          <thead><tr><th>Date</th><th>Time</th><th>Doctor</th><th>Department</th><th>Type</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr *ngIf="!payload.opVisits.length"><td colspan="6" class="ar-muted">No OP visits.</td></tr>
+            <tr *ngFor="let v of payload.opVisits">
+              <td>{{ v.date }}</td>
+              <td>{{ v.time }}</td>
+              <td>{{ v.doctorName }}</td>
+              <td>{{ v.department }}</td>
+              <td>{{ v.type || '—' }}</td>
+              <td>{{ v.status }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- IP Visits -->
+      <section *ngIf="section === 'ip-visits'" class="ar-section">
+        <table class="ar-table">
+          <thead><tr><th>Admission No</th><th>Date / Time</th><th>Doctor</th><th>Department</th><th>Room</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr *ngIf="!payload.ipVisits.length"><td colspan="6" class="ar-muted">No IP visits.</td></tr>
+            <tr *ngFor="let v of payload.ipVisits">
+              <td>{{ v.admissionNo }}</td>
+              <td>{{ v.admissionDate | date:'dd/MM/yyyy' }} {{ v.admissionTime }}</td>
+              <td>{{ v.admittingDoctor }}</td>
+              <td>{{ v.department }}</td>
+              <td>{{ v.roomType }}</td>
+              <td>{{ v.status }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Laboratory -->
+      <section *ngIf="section === 'laboratory'" class="ar-section">
+        <table class="ar-table">
+          <thead><tr><th>Test</th><th>Result</th><th>Unit</th><th>Range</th><th>Reported</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            <tr *ngIf="!payload.labReports.length"><td colspan="7" class="ar-muted">No lab reports.</td></tr>
+            <tr *ngFor="let r of payload.labReports" [class.ar-critical]="r.criticalFlag">
+              <td>{{ r.testName }}</td>
+              <td>{{ r.result || '—' }}</td>
+              <td>{{ r.unit || '—' }}</td>
+              <td>{{ r.referenceRange || '—' }}</td>
+              <td>{{ (r.reportedAt || r.createdAt) | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>{{ r.status }}</td>
+              <td><a *ngIf="r.reportUrl" [href]="r.reportUrl" target="_blank">PDF</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Radiology -->
+      <section *ngIf="section === 'radiology'" class="ar-section">
+        <table class="ar-table">
+          <thead><tr><th>Study</th><th>Result</th><th>Reported</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            <tr *ngIf="!payload.radiologyReports.length"><td colspan="5" class="ar-muted">No radiology reports.</td></tr>
+            <tr *ngFor="let r of payload.radiologyReports">
+              <td>{{ r.testName }}</td>
+              <td>{{ r.result || '—' }}</td>
+              <td>{{ (r.reportedAt || r.createdAt) | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>{{ r.status }}</td>
+              <td><a *ngIf="r.reportUrl" [href]="r.reportUrl" target="_blank">PDF</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Surgical -->
+      <section *ngIf="section === 'surgical'" class="ar-section">
+        <table class="ar-table">
+          <thead><tr><th>Date</th><th>Procedure</th><th>Surgeon</th><th>Anaesthetist</th><th>OT Room</th><th>Urgency</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr *ngIf="!payload.surgicalHistory.length"><td colspan="7" class="ar-muted">No surgical history.</td></tr>
+            <tr *ngFor="let s of payload.surgicalHistory">
+              <td>{{ s.date | date:'dd/MM/yyyy' }}</td>
+              <td>{{ s.procedureName }}</td>
+              <td>{{ s.surgeonName || '—' }}</td>
+              <td>{{ s.anaesthesiologistName || '—' }}</td>
+              <td>{{ s.otRoom || '—' }}</td>
+              <td>{{ s.urgency }}</td>
+              <td>{{ s.status }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Discharges -->
+      <section *ngIf="section === 'discharges'" class="ar-section">
+        <table class="ar-table">
+          <thead><tr><th>Date</th><th>Type</th><th>Final Diagnosis</th><th>Condition</th><th>Summary</th></tr></thead>
+          <tbody>
+            <tr *ngIf="!payload.discharges.length"><td colspan="5" class="ar-muted">No discharges.</td></tr>
+            <tr *ngFor="let d of payload.discharges">
+              <td>{{ d.dischargeDate | date:'dd/MM/yyyy' }}</td>
+              <td>{{ d.dischargeType }}</td>
+              <td>{{ d.finalDiagnosis }}</td>
+              <td>{{ d.conditionAtDischarge }}</td>
+              <td>{{ d.summaryStatus }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+</div>

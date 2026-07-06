@@ -3,6 +3,7 @@ import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { MessageService } from 'primeng/api';
+import { AlertService } from '../../services/alert.service';
 import { ChangeDetectorRef } from '@angular/core';
 import * as FileSaver from 'file-saver';
 import * as XLSX from 'xlsx';
@@ -47,7 +48,7 @@ interface Appointment {
 export class ConfirmMhcComponent {
   confirmedAppointments: Appointment[] = [];
 
-  constructor(private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private messageService: MessageService, private cdRef: ChangeDetectorRef) { }
+  constructor(private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private messageService: MessageService, private cdRef: ChangeDetectorRef, private alertSvc: AlertService) { }
   appointments: any[] = [
     // { id: '0001', patientName: 'Search Sundar', phoneNumber: '+91 7708590100', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Booked', smsSent: true },
   ];
@@ -1304,7 +1305,7 @@ export class ConfirmMhcComponent {
         } else if (error.status === 401) {
           // If unauthorized, do NOT redirect automatically, show a custom message instead
           console.error('Unauthorized access - maybe the session expired.');
-          alert('You are not authorized to access this resource. Please re-authenticate.');
+          this.alertSvc.show('You are not authorized to access this resource. Please re-authenticate.', { severity: 'danger', title: 'Unauthorized' });
         } else {
           console.error('Error locking the appointment:', error);
         }

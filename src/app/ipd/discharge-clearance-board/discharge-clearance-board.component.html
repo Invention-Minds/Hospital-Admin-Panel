@@ -1,0 +1,78 @@
+<div class="dcb-shell">
+  <div class="dcb-head">
+    <div>
+      <h3 class="dcb-title">Discharge clearance</h3>
+      <p class="dcb-sub">Each department clears in parallel after the discharge summary is signed.</p>
+    </div>
+    <div class="dcb-actions">
+      <button class="dcb-btn dcb-btn-primary" [disabled]="!gate?.eligible" (click)="finalize()" title="Front-Desk finalize">
+        ▶ Discharge patient
+      </button>
+      <button class="dcb-btn dcb-btn-warn" (click)="abandonOpen = !abandonOpen">Abandon (LAMA/DAMA)</button>
+    </div>
+  </div>
+
+  <div class="dcb-loading" *ngIf="loading">Loading…</div>
+
+  <!-- Gate summary banner -->
+  <div class="dcb-gate" *ngIf="gate">
+    <span class="dcb-gate-pill" [class.dcb-gate-on]="gate.eligible">
+      {{ gate.eligible ? '✓ Ready to discharge' : '⛔ ' + gate.blockers.length + ' blocker(s)' }}
+    </span>
+    <ul class="dcb-blockers" *ngIf="!gate.eligible">
+      <li *ngFor="let b of gate.blockers">{{ b }}</li>
+    </ul>
+  </div>
+
+  <!-- Abandon inline editor -->
+  <div class="dcb-card" *ngIf="abandonOpen">
+    <h4 class="dcb-section">Abandon discharge chain</h4>
+    <p class="dcb-hint">Use for LAMA / DAMA. Pending clearances will be marked rejected with this reason.</p>
+    <textarea rows="3" placeholder="Reason (required)" [(ngModel)]="abandonReason"></textarea>
+    <div class="dcb-actions">
+      <button class="dcb-btn" (click)="abandonOpen=false">Cancel</button>
+      <button class="dcb-btn dcb-btn-warn" (click)="abandon()">Abandon</button>
+    </div>
+  </div>
+
+  <!-- Department clearance rows -->
+  <div class="dcb-grid" *ngIf="!loading">
+    <div class="dcb-cell" *ngFor="let dept of DEPARTMENTS">
+      <ng-container *ngIf="rowFor(dept) as row; else nonApplicable">
+        <div class="dcb-cell-head">
+          <span class="dcb-dept">{{ dept }}</span>
+          <span class="dcb-pill dcb-status-{{ row.status }}">{{ row.status }}</span>
+        </div>
+
+        <div class="dcb-meta" *ngIf="row.status === 'cleared'">
+          <div>Cleared by <strong>{{ row.clearedBy || '—' }}</strong></div>
+          <div *ngIf="row.clearedAt">{{ row.clearedAt | date:'dd/MM/yy h:mm a' }}</div>
+          <div *ngIf="row.clearedNotes"><em>{{ row.clearedNotes }}</em></div>
+        </div>
+
+        <div class="dcb-meta dcb-meta-bad" *ngIf="row.status === 'rejected'">
+          <div>Blocked by <strong>{{ row.rejectedBy || '—' }}</strong></div>
+          <div *ngIf="row.rejectedAt">{{ row.rejectedAt | date:'dd/MM/yy h:mm a' }}</div>
+          <div *ngIf="row.blockingReason"><em>{{ row.blockingReason }}</em></div>
+        </div>
+
+        <ng-container *ngIf="row.status !== 'cleared'">
+          <textarea rows="2" placeholder="Notes (optional)" [(ngModel)]="clearDraft[dept]"></textarea>
+          <div class="dcb-row-actions">
+            <button class="dcb-btn dcb-btn-primary" (click)="clear(dept)">✓ Clear</button>
+            <button class="dcb-btn dcb-btn-warn" (click)="reject(dept)" *ngIf="row.status === 'pending'">⛔ Reject</button>
+          </div>
+          <textarea rows="2" *ngIf="row.status === 'pending'"
+                    placeholder="Reject reason (required if rejecting)" [(ngModel)]="rejectDraft[dept]"></textarea>
+        </ng-container>
+      </ng-container>
+      <ng-template #nonApplicable>
+        <div class="dcb-cell-head">
+          <span class="dcb-dept">{{ dept }}</span>
+          <span class="dcb-pill dcb-status-na">N/A</span>
+        </div>
+        <p class="dcb-hint">No row spawned — not applicable to this admission.</p>
+      </ng-template>
+    </div>
+  </div>
+</div>

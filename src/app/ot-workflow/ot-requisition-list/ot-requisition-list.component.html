@@ -1,0 +1,168 @@
+<div class="req-shell">
+  <div class="req-head">
+    <h2 class="req-title">OT Requisition Queue</h2>
+    <button class="req-btn req-btn-primary" (click)="openNew()">+ New Requisition</button>
+  </div>
+  <p class="req-sub">Ward → OT booking queue. OT manager turns requisitions into schedules.</p>
+
+  <div class="req-banner req-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="req-banner req-good" *ngIf="successMessage">{{ successMessage }}</div>
+
+  <!-- Filters -->
+  <div class="req-card">
+    <div class="req-filters">
+      <label>Status
+        <select [(ngModel)]="filterStatus" (change)="load()">
+          <option *ngFor="let s of statuses" [ngValue]="s.value">{{ s.label }}</option>
+        </select>
+      </label>
+      <label>From
+        <input type="date" [(ngModel)]="filterFrom" (change)="load()" />
+      </label>
+      <label>To
+        <input type="date" [(ngModel)]="filterTo" (change)="load()" />
+      </label>
+      <label>PRN
+        <input type="text" [(ngModel)]="filterPrn" (change)="load()" placeholder="PRN" />
+      </label>
+    </div>
+  </div>
+
+  <div class="req-loading" *ngIf="loading">Loading…</div>
+
+  <!-- List -->
+  <div class="req-grid-wrap" *ngIf="!loading">
+    <table class="req-grid">
+      <thead>
+        <tr>
+          <th>Req No.</th>
+          <th>Patient</th>
+          <th>PRN</th>
+          <th>Booking</th>
+          <th>Primary Surgery</th>
+          <th>Surgeon</th>
+          <th>Anaesthetist</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngIf="!rows.length">
+          <td colspan="9" class="req-muted">No requisitions found.</td>
+        </tr>
+        <tr *ngFor="let r of rows">
+          <td>{{ r.requisitionNo || '—' }}</td>
+          <td>{{ r.patientName || '—' }}</td>
+          <td>{{ r.prn || '—' }}</td>
+          <td>{{ r.bookingFrom | date:'dd-MMM HH:mm' }} → {{ r.bookingTo | date:'HH:mm' }}</td>
+          <td>{{ r.primarySurgery }}</td>
+          <td>{{ r.surgeonName || '—' }}</td>
+          <td>{{ r.anaesthetistName || '—' }}</td>
+          <td><span [class]="statusClass(r.status)">{{ r.status }}</span></td>
+          <td>
+            <button class="req-btn req-btn-sm req-btn-primary" *ngIf="r.status === 'pending'" (click)="openScheduleModal(r)">Schedule</button>
+            <button class="req-btn req-btn-sm" *ngIf="r.status === 'scheduled' && r.schedules?.[0]" (click)="openSchedule(r)">Open schedule</button>
+            <button class="req-btn req-btn-sm req-btn-danger" *ngIf="r.status === 'pending'" (click)="cancelRow(r)">Cancel</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- New requisition modal -->
+  <div class="req-modal-bg" *ngIf="newModalOpen" (click)="closeNew()">
+    <div class="req-modal" (click)="$event.stopPropagation()">
+      <h3>New OT Requisition</h3>
+      <div class="req-form-grid">
+        <label>Patient Name <input type="text" [(ngModel)]="draft.patientName" /></label>
+        <label>PRN <input type="text" [(ngModel)]="draft.prn" (change)="onPrnChange()" placeholder="enter to load admissions" /></label>
+        <label class="req-check">
+          <input type="checkbox" [(ngModel)]="draft.patientAdmitted" />
+          Patient Admitted
+        </label>
+        <label>Admission
+          <select [(ngModel)]="draft.admissionId" [disabled]="!admissionOptions.length">
+            <option value="">
+              {{ admissionLoading ? 'Loading…' : (!draft.prn ? 'enter PRN first' : (admissionOptions.length ? '— pick an admission —' : 'no admissions for this PRN')) }}
+            </option>
+            <option *ngFor="let a of admissionOptions" [ngValue]="a.id">
+              {{ a.admissionNo || a.id }} · {{ a.admissionDate | date:'dd/MM/yyyy' }} · {{ a.department }}
+            </option>
+          </select>
+        </label>
+        <label>Bed Category
+          <select [(ngModel)]="draft.bedCategory">
+            <option value="">—</option>
+            <option *ngFor="let b of bedCategories" [ngValue]="b">{{ b }}</option>
+          </select>
+        </label>
+        <label>Phone <input type="text" [(ngModel)]="draft.phoneNumber" /></label>
+        <label>Booking From * <input type="datetime-local" [(ngModel)]="draft.bookingFrom" /></label>
+        <label>Booking To * <input type="datetime-local" [(ngModel)]="draft.bookingTo" /></label>
+        <label class="req-field-wide">Primary Surgery *
+          <input type="text" [(ngModel)]="draft.primarySurgery" placeholder="e.g., (RT) TKR" />
+        </label>
+        <label>Category Code <input type="text" [(ngModel)]="draft.categoryCode" placeholder="e.g., Level 4A" /></label>
+        <label>Surgeon <app-doctor-select [source]="'surgeons'" [(ngModel)]="draft.surgeonName" name="surgeonName"></app-doctor-select></label>
+        <label>Anaesthetist <app-doctor-select [source]="'doctors'" [(ngModel)]="draft.anaesthetistName" name="anaesthetistName"></app-doctor-select></label>
+        <label>Anaesthesia Type
+          <select [(ngModel)]="draft.anaesthesiaType">
+            <option value="">—</option>
+            <option *ngFor="let t of anaesthesiaTypes" [ngValue]="t">{{ t }}</option>
+          </select>
+        </label>
+        <label>Requisition By <input type="text" [(ngModel)]="draft.requisitionBy" /></label>
+        <label class="req-field-wide">Special Instructions
+          <textarea rows="2" [(ngModel)]="draft.specialInstructions"></textarea>
+        </label>
+      </div>
+      <div class="req-modal-actions">
+        <button class="req-btn" (click)="closeNew()" [disabled]="creating">Cancel</button>
+        <button class="req-btn req-btn-primary" (click)="submitNew()" [disabled]="creating">
+          {{ creating ? 'Saving…' : 'Save' }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Schedule-from-requisition modal -->
+  <div class="req-modal-bg" *ngIf="scheduleModalOpen" (click)="closeScheduleModal()">
+    <div class="req-modal" (click)="$event.stopPropagation()">
+      <h3>Schedule OT Slot</h3>
+      <p class="req-sub" *ngIf="scheduleSource">
+        From requisition {{ scheduleSource.requisitionNo || '—' }} · pre-filled below, adjust as needed.
+      </p>
+      <div class="req-form-grid">
+        <label>OT Room *
+          <select [(ngModel)]="scheduleDraft.otRoomId">
+            <option value="">{{ rooms.length ? '— pick a room —' : 'no OT rooms configured' }}</option>
+            <option *ngFor="let room of rooms" [ngValue]="room.id">
+              {{ room.code }} · {{ room.name }} ({{ room.status }})
+            </option>
+          </select>
+        </label>
+        <label>Urgency
+          <select [(ngModel)]="scheduleDraft.urgency">
+            <option *ngFor="let u of urgencies" [ngValue]="u">{{ u }}</option>
+          </select>
+        </label>
+        <label>Planned Start * <input type="datetime-local" [(ngModel)]="scheduleDraft.plannedStart" /></label>
+        <label>Planned End * <input type="datetime-local" [(ngModel)]="scheduleDraft.plannedEnd" /></label>
+        <label class="req-field-wide">Procedure *
+          <input type="text" [(ngModel)]="scheduleDraft.procedureName" />
+        </label>
+        <label>Procedure Code <input type="text" [(ngModel)]="scheduleDraft.procedureCode" /></label>
+        <label>Patient Name <input type="text" [(ngModel)]="scheduleDraft.patientName" /></label>
+        <label>PRN <input type="text" [(ngModel)]="scheduleDraft.prn" /></label>
+        <label>Surgeon <app-doctor-select [source]="'surgeons'" [(ngModel)]="scheduleDraft.surgeonName" name="scheduleSurgeonName"></app-doctor-select></label>
+        <label>Anaesthesiologist <app-doctor-select [source]="'doctors'" [(ngModel)]="scheduleDraft.anaesthesiologistName" name="scheduleAnaesthesiologistName"></app-doctor-select></label>
+      </div>
+      <div class="req-modal-actions">
+        <button class="req-btn" (click)="closeScheduleModal()" [disabled]="scheduling">Cancel</button>
+        <button class="req-btn req-btn-primary" (click)="submitSchedule()" [disabled]="scheduling">
+          {{ scheduling ? 'Scheduling…' : 'Confirm & Book Slot' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,155 @@
+<div class="page q-shell">
+  <div class="q-head">
+    <div>
+      <h2 class="q-title">Infection control capture</h2>
+      <p class="q-sub">Surveillance events, device-day counts, and sterilization cycles. Powers ICO-001..005, ICO-008, HR-006.</p>
+    </div>
+    <div class="q-range">
+      <button class="qi-back" (click)="goBack()">← Indicators</button>
+    </div>
+  </div>
+
+  <div class="q-tabs">
+    <button class="q-tab" [class.q-tab-on]="tab === 'surveillance'" (click)="switchTab('surveillance')">Surveillance events</button>
+    <button class="q-tab" [class.q-tab-on]="tab === 'device-days'" (click)="switchTab('device-days')">Device-day counts</button>
+    <button class="q-tab" [class.q-tab-on]="tab === 'sterilization'" (click)="switchTab('sterilization')">Sterilization cycles</button>
+  </div>
+
+  <div class="q-banner q-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
+  <div class="q-banner ic-banner-ok" *ngIf="successMessage">{{ successMessage }}</div>
+
+  <!-- ── Surveillance tab ── -->
+  <ng-container *ngIf="tab === 'surveillance'">
+    <div class="ic-card">
+      <h3 class="ic-card-title">Record surveillance event</h3>
+      <div class="ic-row">
+        <label>Type
+          <select [(ngModel)]="survDraft.type">
+            <option *ngFor="let t of SURV_TYPES" [value]="t">{{ t }}</option>
+          </select>
+        </label>
+        <label>Observed at <input type="date" [(ngModel)]="survDraft.observedAt" /></label>
+        <label>Ward <input type="text" [(ngModel)]="survDraft.ward" placeholder="ICU / ward 4 / OT-2" /></label>
+        <label>Patient PRN <input type="text" [(ngModel)]="survDraft.patientPrn" /></label>
+      </div>
+      <div class="ic-row">
+        <label>Organism <input type="text" [(ngModel)]="survDraft.organism" placeholder="e.g. Klebsiella pneumoniae" /></label>
+        <label class="ic-check"><input type="checkbox" [(ngModel)]="survDraft.deviceRelated" /> Device-related</label>
+      </div>
+      <label class="ic-fullrow">Notes
+        <textarea rows="2" [(ngModel)]="survDraft.notes" placeholder="Source, antibiotic history, root cause"></textarea>
+      </label>
+      <div class="ic-foot">
+        <button class="ic-save" (click)="submitSurveillance()" [disabled]="saving">{{ saving ? 'Saving…' : 'Record event' }}</button>
+      </div>
+    </div>
+
+    <div class="ic-card">
+      <h3 class="ic-card-title">This month</h3>
+      <div class="q-loading" *ngIf="loading">Loading…</div>
+      <div class="q-empty" *ngIf="!loading && survRows.length === 0">No events recorded this month.</div>
+      <table class="ic-table" *ngIf="survRows.length > 0">
+        <thead><tr><th>When</th><th>Type</th><th>Ward</th><th>PRN</th><th>Organism</th><th>Device</th><th>Reporter</th><th></th></tr></thead>
+        <tbody>
+          <tr *ngFor="let r of survRows">
+            <td>{{ r.observedAt | date:'yyyy-MM-dd' }}</td>
+            <td><span class="qi-pill q-bad">{{ r.type }}</span></td>
+            <td>{{ r.ward || '—' }}</td>
+            <td>{{ r.patientPrn || '—' }}</td>
+            <td>{{ r.organism || '—' }}</td>
+            <td>{{ r.deviceRelated ? 'yes' : 'no' }}</td>
+            <td>{{ r.reporter || '—' }}</td>
+            <td><button class="ic-delete" (click)="removeSurveillance(r)">×</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </ng-container>
+
+  <!-- ── Device-day tab ── -->
+  <ng-container *ngIf="tab === 'device-days'">
+    <div class="ic-card">
+      <h3 class="ic-card-title">Record device-day count</h3>
+      <div class="ic-row">
+        <label>Date <input type="date" [(ngModel)]="ddDraft.date" /></label>
+        <label>Ward <input type="text" [(ngModel)]="ddDraft.ward" placeholder="ICU-A" /></label>
+        <label>Device
+          <select [(ngModel)]="ddDraft.deviceType">
+            <option *ngFor="let t of DEVICE_TYPES" [value]="t">{{ t.replace('_', ' ') }}</option>
+          </select>
+        </label>
+        <label>Count <input type="number" min="0" [(ngModel)]="ddDraft.count" /></label>
+      </div>
+      <div class="ic-foot">
+        <button class="ic-copy" (click)="copyYesterday()" type="button">Copy yesterday's count</button>
+        <button class="ic-save" (click)="submitDeviceDay()" [disabled]="saving">{{ saving ? 'Saving…' : 'Save count' }}</button>
+      </div>
+    </div>
+
+    <div class="ic-card">
+      <h3 class="ic-card-title">This month — recent counts</h3>
+      <div class="q-loading" *ngIf="loading">Loading…</div>
+      <div class="q-empty" *ngIf="!loading && ddRows.length === 0">No counts recorded this month.</div>
+      <table class="ic-table" *ngIf="ddRows.length > 0">
+        <thead><tr><th>Date</th><th>Ward</th><th>Device</th><th>Count</th><th>Captured by</th><th></th></tr></thead>
+        <tbody>
+          <tr *ngFor="let r of ddRows">
+            <td>{{ r.date | date:'yyyy-MM-dd' }}</td>
+            <td>{{ r.ward }}</td>
+            <td>{{ r.deviceType.replace('_', ' ') }}</td>
+            <td>{{ r.count }}</td>
+            <td>{{ r.capturedBy || '—' }}</td>
+            <td><button class="ic-delete" (click)="removeDeviceDay(r)">×</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </ng-container>
+
+  <!-- ── Sterilization tab ── -->
+  <ng-container *ngIf="tab === 'sterilization'">
+    <div class="ic-card">
+      <h3 class="ic-card-title">Log sterilization cycle</h3>
+      <div class="ic-row">
+        <label>Batch code <input type="text" [(ngModel)]="sterilDraft.batchCode" placeholder="BATCH-…" /></label>
+        <label>Run at <input type="datetime-local" [(ngModel)]="sterilDraft.runAt" /></label>
+        <label>Result
+          <select [(ngModel)]="sterilDraft.passed">
+            <option [ngValue]="true">Pass</option>
+            <option [ngValue]="false">Fail</option>
+          </select>
+        </label>
+      </div>
+      <label class="ic-fullrow" *ngIf="!sterilDraft.passed">Failure reason
+        <textarea rows="2" [(ngModel)]="sterilDraft.failureReason"
+                  placeholder="Bowie-Dick / biological indicator / load configuration / etc."></textarea>
+      </label>
+      <div class="ic-foot">
+        <button class="ic-save" (click)="submitSterilization()" [disabled]="saving">{{ saving ? 'Saving…' : 'Record cycle' }}</button>
+      </div>
+    </div>
+
+    <div class="ic-card">
+      <h3 class="ic-card-title">This month — cycles</h3>
+      <div class="q-loading" *ngIf="loading">Loading…</div>
+      <div class="q-empty" *ngIf="!loading && sterilRows.length === 0">No cycles recorded this month.</div>
+      <table class="ic-table" *ngIf="sterilRows.length > 0">
+        <thead><tr><th>Run at</th><th>Batch</th><th>Result</th><th>Reason</th><th>By</th><th></th></tr></thead>
+        <tbody>
+          <tr *ngFor="let r of sterilRows">
+            <td>{{ r.runAt | date:'yyyy-MM-dd HH:mm' }}</td>
+            <td>{{ r.batchCode || '—' }}</td>
+            <td>
+              <span class="qi-pill" [class.q-good]="r.passed" [class.q-bad]="!r.passed">
+                {{ r.passed ? 'Pass' : 'Fail' }}
+              </span>
+            </td>
+            <td>{{ r.failureReason || '—' }}</td>
+            <td>{{ r.capturedBy || '—' }}</td>
+            <td><button class="ic-delete" (click)="removeSterilization(r)">×</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </ng-container>
+</div>

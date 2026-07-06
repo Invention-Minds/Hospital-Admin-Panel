@@ -1,0 +1,73 @@
+<div class="page q-shell">
+  <div class="q-head">
+    <div>
+      <h2 class="q-title">Quality Indicator RCAs</h2>
+      <p class="q-sub">Root cause analyses opened against NABH/QCI indicators captured at Red or Critical tier.</p>
+    </div>
+    <div class="q-range">
+      <button class="qi-back" (click)="goBack()">← Indicators</button>
+    </div>
+  </div>
+
+  <div class="q-cards" *ngIf="stats as s">
+    <div class="q-card"><span class="q-card-label">Total RCAs</span><span class="q-card-val">{{ s.total }}</span></div>
+    <div class="q-card" [class.q-bad]="(s.byStatus['open']||0) > 0"><span class="q-card-label">Open</span><span class="q-card-val">{{ s.byStatus['open'] || 0 }}</span></div>
+    <div class="q-card" [class.q-warn]="(s.byStatus['in_progress']||0) > 0"><span class="q-card-label">In progress</span><span class="q-card-val">{{ s.byStatus['in_progress'] || 0 }}</span></div>
+    <div class="q-card"><span class="q-card-label">Closed</span><span class="q-card-val">{{ s.byStatus['closed'] || 0 }}</span></div>
+    <div class="q-card" [class.q-bad]="s.overdue > 0"><span class="q-card-label">Overdue</span><span class="q-card-val">{{ s.overdue }}</span></div>
+  </div>
+
+  <div class="qi-filters">
+    <label class="qi-filter">Status
+      <select [(ngModel)]="filters.status" (change)="load()">
+        <option value="">all</option>
+        <option *ngFor="let s of STATUSES" [value]="s">{{ s.replace('_', ' ') }}</option>
+      </select>
+    </label>
+    <label class="qi-filter">Owner
+      <input type="text" [(ngModel)]="filters.owner" (keyup.enter)="load()" placeholder="e.g. Quality Manager" />
+    </label>
+    <label class="qi-filter">QI code
+      <input type="text" [(ngModel)]="filters.qiCode" (keyup.enter)="load()" placeholder="PSQ-024" />
+    </label>
+    <label class="qi-toggle">
+      <input type="checkbox" [(ngModel)]="filters.overdue" (change)="load()" />
+      Overdue only
+    </label>
+  </div>
+
+  <div class="q-banner q-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
+  <div class="q-loading" *ngIf="loading">Loading RCAs…</div>
+  <div class="q-empty" *ngIf="!loading && rows.length === 0">No RCAs match your filters.</div>
+
+  <table class="rca-table" *ngIf="!loading && rows.length > 0">
+    <thead>
+      <tr>
+        <th>QI code</th>
+        <th>Indicator</th>
+        <th>Period</th>
+        <th>Value</th>
+        <th>Owner</th>
+        <th>Due</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let r of rows" (click)="openDetail(r)" [class.rca-row-overdue]="isOverdue(r)">
+        <td class="rca-code">{{ r.record?.qiCode }}</td>
+        <td>{{ r.record?.indicator?.name }}</td>
+        <td>{{ r.record?.period }}</td>
+        <td>
+          <span class="qi-pill" [ngClass]="statusClass(r.record?.status || '')">
+            {{ r.record?.calculatedValue }} {{ r.record?.indicator?.unit }}
+          </span>
+        </td>
+        <td>{{ r.owner || '—' }}</td>
+        <td>{{ r.dueDate ? (r.dueDate | date:'yyyy-MM-dd') : '—' }}</td>
+        <td>
+          <span class="qi-pill" [ngClass]="statusClass(r.status)">{{ r.status.replace('_', ' ') }}</span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

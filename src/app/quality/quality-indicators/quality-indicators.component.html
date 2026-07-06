@@ -1,0 +1,144 @@
+<div class="page q-shell">
+  <div class="q-head">
+    <div>
+      <h2 class="q-title">NABH/QCI Quality Indicators</h2>
+      <p class="q-sub">108 indicators across 10 chapters. Capture monthly numerator/denominator; status engine auto-evaluates Green / Amber / Red / Critical.</p>
+    </div>
+    <div class="q-range">
+      <button class="qi-back" (click)="openLabRad()">Lab/Rad events →</button>
+      <button class="qi-back" (click)="openPharmacy()">Pharmacy →</button>
+      <button class="qi-back" (click)="openTatEvents()">TAT events →</button>
+      <button class="qi-back" (click)="openFacility()">Facility →</button>
+      <button class="qi-back" (click)="openInfectionControl()">Infection control →</button>
+      <button class="qi-back" (click)="openDenominators()">Denominators →</button>
+      <button class="qi-back" (click)="openAudit()">Audit log →</button>
+      <button class="qi-back" (click)="openRcas()">Open RCAs →</button>
+      <button class="qi-back" (click)="goBack()">← Dashboard</button>
+    </div>
+  </div>
+
+  <!-- ── Stats tile ── -->
+  <div class="q-cards" *ngIf="stats as s">
+    <div class="q-card"><span class="q-card-label">Total</span><span class="q-card-val">{{ s.total }}</span><span class="q-card-meta">{{ s.active }} active</span></div>
+    <div class="q-card" [class.q-bad]="s.critical > 0"><span class="q-card-label">Critical-tier</span><span class="q-card-val">{{ s.critical }}</span></div>
+    <div class="q-card"><span class="q-card-label">Latest period</span><span class="q-card-val">{{ s.latestPeriod || '—' }}</span></div>
+    <div class="q-card" *ngIf="s.latestPeriod">
+      <span class="q-card-label">{{ s.latestPeriod }} status</span>
+      <span class="qi-statusrow">
+        <span class="qi-pill q-good">{{ s.latestPeriodStatus['green'] || 0 }} green</span>
+        <span class="qi-pill q-warn">{{ s.latestPeriodStatus['amber'] || 0 }} amber</span>
+        <span class="qi-pill q-bad">{{ s.latestPeriodStatus['red'] || 0 }} red</span>
+        <span class="qi-pill q-bad q-critical">{{ s.latestPeriodStatus['critical'] || 0 }} critical</span>
+      </span>
+    </div>
+  </div>
+
+  <!-- ── Chapter chips + search ── -->
+  <div class="qi-filters">
+    <button class="qi-chip" *ngFor="let ch of CHAPTERS"
+            [class.qi-chip-on]="filters.chapter === ch"
+            (click)="selectChapter(ch)">{{ ch }}</button>
+    <input class="qi-search" type="text" placeholder="Search name or code…"
+           [(ngModel)]="filters.search" (keyup.enter)="load()" />
+    <label class="qi-toggle">
+      <input type="checkbox" [(ngModel)]="filters.onlyActive" (change)="load()" />
+      Active only
+    </label>
+    <button class="qi-clear" (click)="clearFilters()">Clear</button>
+  </div>
+
+  <div class="q-banner q-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
+  <div class="q-loading" *ngIf="loading">Loading indicators…</div>
+  <div class="q-empty" *ngIf="!loading && rows.length === 0">No indicators match your filters.</div>
+
+  <!-- ── Indicators grouped by chapter ── -->
+  <ng-container *ngIf="!loading">
+    <section class="qi-section" *ngFor="let g of grouped">
+      <h3 class="qi-section-title">{{ g.chapter }} <span class="qi-section-count">{{ g.rows.length }}</span></h3>
+      <div class="qi-grid">
+        <div class="qi-card" *ngFor="let ind of g.rows" (click)="openCapture(ind)">
+          <div class="qi-card-head">
+            <span class="qi-code">{{ ind.qiCode }}</span>
+            <span class="qi-type">{{ ind.indicatorType }}</span>
+            <span class="qi-pill q-bad q-critical" *ngIf="ind.isCritical">CRITICAL</span>
+            <span class="qi-pill" *ngIf="!ind.isActive">disabled</span>
+          </div>
+          <div class="qi-name">{{ ind.name }}</div>
+          <div class="qi-meta">
+            <span>{{ ind.department }}</span>
+            <span>· {{ ind.unit }}</span>
+            <span *ngIf="ind.defaultBenchmark !== null">· target {{ ind.defaultBenchmark }}</span>
+          </div>
+          <div class="qi-card-foot">
+            <span class="qi-owner" title="Escalation owner">{{ ind.escalationOwner }}</span>
+            <span class="qi-action">Capture →</span>
+          </div>
+        </div>
+      </div>
+    </section>
+  </ng-container>
+
+  <!-- ── Capture dialog ── -->
+  <div class="qi-modal-backdrop" *ngIf="capture" (click)="closeCapture()"></div>
+  <div class="qi-modal" *ngIf="capture as ind">
+    <div class="qi-modal-head">
+      <div>
+        <div class="qi-modal-code">{{ ind.qiCode }} · {{ ind.chapter }}</div>
+        <h3 class="qi-modal-name">{{ ind.name }}</h3>
+      </div>
+      <button class="qi-modal-close" (click)="closeCapture()">×</button>
+    </div>
+
+    <div class="qi-modal-body">
+      <div class="qi-formula">
+        <div><strong>Numerator:</strong> {{ ind.numeratorDef }}</div>
+        <div><strong>Denominator:</strong> {{ ind.denominatorDef }}</div>
+        <div class="qi-formula-meta">
+          Multiplier: <strong>{{ ind.multiplier }}</strong> · Unit: <strong>{{ ind.unit }}</strong> · Direction: <strong>{{ ind.direction }}</strong>
+        </div>
+        <div class="qi-formula-meta" *ngIf="ind.criticalRule">
+          ⚠ Critical trigger: {{ ind.criticalRule }}
+        </div>
+      </div>
+
+      <div class="qi-row">
+        <label>Period (YYYY-MM)
+          <input type="text" [(ngModel)]="draftCapture.period" placeholder="2026-05" />
+        </label>
+        <label>Numerator
+          <input type="number" [(ngModel)]="draftCapture.numerator" min="0" />
+        </label>
+        <label>Denominator
+          <input type="number" [(ngModel)]="draftCapture.denominator" min="0" />
+        </label>
+      </div>
+
+      <label class="qi-fullrow">Remarks
+        <textarea rows="2" [(ngModel)]="draftCapture.remarks" placeholder="Optional notes for QI committee"></textarea>
+      </label>
+
+      <label class="qi-checkrow">
+        <input type="checkbox" [(ngModel)]="draftCapture.criticalTriggered" />
+        Flag this capture as a critical event (sentinel / patient harm / zero-tolerance breach)
+      </label>
+
+      <label class="qi-checkrow">
+        <input type="checkbox" [(ngModel)]="benchmarkOverrideEnabled" />
+        Override benchmark for this capture only
+      </label>
+      <div class="qi-row" *ngIf="benchmarkOverrideEnabled">
+        <label>Benchmark
+          <input type="number" [(ngModel)]="draftCapture.benchmarkOverride" />
+        </label>
+        <span class="qi-formula-meta">Default: {{ ind.defaultBenchmark !== null ? ind.defaultBenchmark : 'hospital-defined' }}</span>
+      </div>
+
+      <div class="q-banner q-bad" *ngIf="captureError">{{ captureError }}</div>
+    </div>
+
+    <div class="qi-modal-foot">
+      <button class="qi-cancel" (click)="closeCapture()" [disabled]="saving">Cancel</button>
+      <button class="qi-save" (click)="submitCapture()" [disabled]="saving">{{ saving ? 'Saving…' : 'Capture' }}</button>
+    </div>
+  </div>
+</div>

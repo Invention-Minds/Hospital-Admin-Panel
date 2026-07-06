@@ -1,0 +1,210 @@
+<div class="na-shell">
+  <h2 class="na-title">NABH Audit</h2>
+
+  <div class="na-banner na-banner-bad" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+  <div class="na-banner na-banner-good" *ngIf="successMessage" role="status">{{ successMessage }}</div>
+
+  <!-- Date range — shared across both tabs -->
+  <div class="na-card">
+    <div class="na-toolbar">
+      <label class="na-field">
+        From
+        <input type="date" [(ngModel)]="range.fromDate" />
+      </label>
+      <label class="na-field">
+        To
+        <input type="date" [(ngModel)]="range.toDate" />
+      </label>
+      <button type="button" class="na-btn na-btn-primary" (click)="loadScorecard()" [disabled]="loading">
+        <i class="pi pi-refresh"></i> {{ loading ? 'Running…' : 'Re-run scorecard' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="na-tabs">
+    <button type="button" class="na-tab" [class.na-tab-active]="activeTab === 'scorecard'" (click)="selectTab('scorecard')">
+      Compliance scorecard
+    </button>
+    <button type="button" class="na-tab" [class.na-tab-active]="activeTab === 'exports'" (click)="selectTab('exports')">
+      Evidence exports
+    </button>
+  </div>
+
+  <!-- ======================== SCORECARD TAB ======================== -->
+  <ng-container *ngIf="activeTab === 'scorecard'">
+    <div class="na-empty" *ngIf="loading">Running checks across the application…</div>
+
+    <ng-container *ngIf="!loading && report as r">
+      <!-- Overall headline -->
+      <div class="na-card na-overall">
+        <div class="na-overall-score">
+          <span class="na-overall-label">Overall NABH score</span>
+          <span [class]="scoreClass(r.overall.score)">{{ r.overall.score }}<small>/100</small></span>
+        </div>
+        <div class="na-overall-stats">
+          <div class="na-stat na-stat-pass">
+            <span class="na-stat-num">{{ r.overall.passed }}</span>
+            <span class="na-stat-label">Pass</span>
+          </div>
+          <div class="na-stat na-stat-warn">
+            <span class="na-stat-num">{{ r.overall.warning }}</span>
+            <span class="na-stat-label">Warning</span>
+          </div>
+          <div class="na-stat na-stat-fail">
+            <span class="na-stat-num">{{ r.overall.failed }}</span>
+            <span class="na-stat-label">Fail</span>
+          </div>
+          <div class="na-stat na-stat-na">
+            <span class="na-stat-num">{{ r.overall.notApplicable }}</span>
+            <span class="na-stat-label">N/A</span>
+          </div>
+          <div class="na-stat">
+            <span class="na-stat-num">{{ r.overall.totalChecks }}</span>
+            <span class="na-stat-label">Total checks</span>
+          </div>
+        </div>
+        <p class="na-meta">
+          Range: {{ r.fromDate | date:'shortDate' }} → {{ r.toDate | date:'shortDate' }}
+          · Generated {{ r.generatedAt | date:'medium' }}
+        </p>
+      </div>
+
+      <!-- Per-chapter cards -->
+      <div class="na-card na-chapter" *ngFor="let ch of r.chapters">
+        <div [class]="chapterStatusClass(ch)">
+          <div>
+            <span class="na-chapter-code">{{ ch.code }}</span>
+            <strong class="na-chapter-name">{{ ch.name }}</strong>
+          </div>
+          <div class="na-chapter-counts">
+            <span class="pill pill-pass" *ngIf="ch.passed > 0">{{ ch.passed }} pass</span>
+            <span class="pill pill-warn" *ngIf="ch.warning > 0">{{ ch.warning }} warn</span>
+            <span class="pill pill-fail" *ngIf="ch.failed > 0">{{ ch.failed }} fail</span>
+          </div>
+        </div>
+
+        <div class="na-standards">
+          <div class="na-standard" *ngFor="let s of ch.standards" [class.na-standard-open]="isExpanded(s.code)">
+            <div class="na-standard-row" (click)="toggleStandard(s.code)">
+              <div class="na-standard-meta">
+                <strong class="na-standard-code">{{ s.code }}</strong>
+                <span class="na-standard-name">{{ s.name }}</span>
+              </div>
+              <div class="na-standard-right">
+                <span class="na-standard-rate" *ngIf="s.status !== 'NOT_APPLICABLE'">
+                  {{ s.numerator }}/{{ s.denominator }} ({{ s.percentage }}%)
+                </span>
+                <span [class]="statusClass(s.status)">{{ s.status }}</span>
+                <i class="pi" [class.pi-chevron-down]="!isExpanded(s.code)" [class.pi-chevron-up]="isExpanded(s.code)"></i>
+              </div>
+            </div>
+            <div class="na-standard-detail" *ngIf="isExpanded(s.code)">
+              <p class="na-standard-desc">{{ s.description }}</p>
+              <p class="na-standard-threshold">
+                <strong>Threshold:</strong> ≥{{ s.threshold }}% &nbsp;
+                <strong>Achieved:</strong> {{ s.percentage }}%
+              </p>
+              <ng-container *ngIf="hasBreaches(s); else noBreaches">
+                <h4 class="na-breach-head">
+                  Breaches ({{ s.breaches.length }} sample{{ s.breaches.length === 1 ? '' : 's' }})
+                </h4>
+                <table class="na-breach-table">
+                  <thead>
+                    <tr>
+                      <th>Entity</th>
+                      <th>Id</th>
+                      <th>Issue</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let b of s.breaches">
+                      <td>{{ b.entityType }}</td>
+                      <td>{{ b.entityId }}</td>
+                      <td>{{ b.note }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </ng-container>
+              <ng-template #noBreaches>
+                <p class="na-empty" *ngIf="s.status !== 'NOT_APPLICABLE'">No breaches in this period — every row passes.</p>
+                <p class="na-empty" *ngIf="s.status === 'NOT_APPLICABLE'">No data in scope for this check (denominator = 0).</p>
+              </ng-template>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </ng-container>
+
+  <!-- ======================== EXPORTS TAB ======================== -->
+  <ng-container *ngIf="activeTab === 'exports'">
+    <div class="na-card">
+      <h3 class="na-section-title">Generate evidence bundle</h3>
+      <p class="na-hint">
+        Bundles the raw rows behind a workflow into a JSON file so auditors can
+        drill into specific records. Use the scorecard tab for the headline view.
+      </p>
+      <div class="na-form-row">
+        <label class="na-full">
+          Scope
+          <select [(ngModel)]="exportForm.scope" name="scope">
+            <option *ngFor="let opt of scopeOptions" [value]="opt.value">{{ opt.label }}</option>
+          </select>
+        </label>
+      </div>
+      <div class="na-form-buttons">
+        <button type="button" class="na-btn na-btn-primary" [disabled]="exporting" (click)="submitExport()">
+          {{ exporting ? 'Building…' : 'Generate evidence bundle' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="na-card">
+      <div class="na-card-head">
+        <h3 class="na-section-title">Recent exports</h3>
+        <button type="button" class="na-btn" (click)="loadExports()">
+          <i class="pi pi-refresh"></i> Refresh
+        </button>
+      </div>
+
+      <div class="na-empty" *ngIf="exports.length === 0">No exports yet.</div>
+
+      <table class="na-table" *ngIf="exports.length > 0">
+        <thead>
+          <tr>
+            <th>Scope</th>
+            <th>Range</th>
+            <th>Status</th>
+            <th>Rows</th>
+            <th>Size</th>
+            <th>Requested</th>
+            <th>Download</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of exports">
+            <td>{{ row.scope }}</td>
+            <td>{{ row.fromDate | date:'shortDate' }} → {{ row.toDate | date:'shortDate' }}</td>
+            <td><span class="pill" [class.pill-pass]="row.status==='READY'" [class.pill-fail]="row.status==='FAILED'">{{ row.status }}</span></td>
+            <td>{{ row.rowCount ?? '—' }}</td>
+            <td>{{ row.bundleBytes ? formatBytes(row.bundleBytes) : '—' }}</td>
+            <td>
+              {{ row.requestedAt | date:'short' }}
+              <span class="na-meta" *ngIf="row.requestedBy">by {{ row.requestedBy }}</span>
+            </td>
+            <td>
+              <a *ngIf="row.status === 'READY' && row.downloadUrl"
+                 [href]="resolveDownloadUrl(row.downloadUrl)"
+                 target="_blank"
+                 rel="noopener"
+                 class="na-link">
+                <i class="pi pi-download"></i> Download
+              </a>
+              <span *ngIf="row.status === 'FAILED'" class="na-fail">{{ row.errorDetail | slice:0:80 }}</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </ng-container>
+</div>

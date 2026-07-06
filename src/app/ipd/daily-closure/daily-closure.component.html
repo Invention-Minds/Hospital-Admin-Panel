@@ -1,0 +1,145 @@
+<div class="dc-shell">
+  <h2 class="dc-title">Daily Closure</h2>
+
+  <div class="dc-loading" *ngIf="loading">Loading daily closure&hellip;</div>
+
+  <div class="dc-banner dc-banner-bad" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+  <div class="dc-banner dc-banner-good" *ngIf="successMessage" role="status">{{ successMessage }}</div>
+
+  <ng-container *ngIf="!loading && closure">
+
+    <div class="dc-card dc-summary">
+      <div class="dc-summary-row">
+        <span class="dc-pill" [class.dc-pill-open]="!isLocked" [class.dc-pill-closed]="isLocked">
+          {{ isLocked ? 'CLOSED' : 'OPEN' }}
+        </span>
+        <strong>Closure for {{ closure.closureDate | date:'mediumDate' }}</strong>
+      </div>
+      <p class="dc-meta-line" *ngIf="closure.admission">
+        <strong>Admission:</strong> {{ closure.admission.admissionNo }} &middot;
+        PRN {{ closure.admission.prn }}
+      </p>
+    </div>
+
+    <!-- Care snapshot -->
+    <div class="dc-card">
+      <h3 class="dc-section-title">Care snapshot</h3>
+
+      <div class="dc-form-row">
+        <label>
+          Doctor visit time
+          <input type="datetime-local"
+                 [(ngModel)]="doctorVisitedAt"
+                 [disabled]="isLocked" />
+        </label>
+        <label>
+          Doctor name
+          <input type="text"
+                 [(ngModel)]="doctorVisitedBy"
+                 [disabled]="isLocked"
+                 placeholder="Consultant or registrar" />
+        </label>
+      </div>
+
+      <div class="dc-form-row">
+        <label class="dc-full">
+          Nursing summary
+          <textarea rows="3"
+                    [(ngModel)]="nursingSummary"
+                    [disabled]="isLocked"
+                    placeholder="Day's care notes — meds given, mobilisation, dressings, etc."></textarea>
+        </label>
+      </div>
+
+      <div class="dc-form-row">
+        <label class="dc-full">
+          Vitals digest
+          <textarea rows="2"
+                    [(ngModel)]="vitalsSummary"
+                    [disabled]="isLocked"
+                    placeholder="AM/PM vitals digest (BP, HR, SpO2, Temp)"></textarea>
+        </label>
+      </div>
+    </div>
+
+    <!-- Attender feedback -->
+    <div class="dc-card">
+      <h3 class="dc-section-title">Attender feedback</h3>
+      <p class="dc-hint">
+        Ask the attender how today went. A score of 2 or below, or any concerns,
+        will raise a PSQ flag for follow-up.
+      </p>
+
+      <div class="dc-scale">
+        <button type="button"
+                *ngFor="let opt of scaleOptions"
+                class="dc-scale-btn"
+                [class.dc-scale-active]="satisfactionScore === opt.value"
+                [class]="opt.tone"
+                [disabled]="isLocked"
+                (click)="pickScore(opt.value)">
+          <span class="dc-scale-num">{{ opt.value }}</span>
+          <span class="dc-scale-label">{{ opt.label }}</span>
+        </button>
+      </div>
+
+      <div class="dc-form-row">
+        <label class="dc-full">
+          Concerns / complaints (optional — anything raised → auto-flagged)
+          <textarea rows="2"
+                    [(ngModel)]="concerns"
+                    [disabled]="isLocked"
+                    placeholder="Anything the attender wants noted"></textarea>
+        </label>
+      </div>
+    </div>
+
+    <!-- Sign-off -->
+    <div class="dc-card" *ngIf="!isLocked">
+      <h3 class="dc-section-title">Attender sign-off</h3>
+
+      <div class="dc-form-row">
+        <label>
+          Attender name
+          <input type="text"
+                 [(ngModel)]="attenderName"
+                 placeholder="Full name" />
+        </label>
+        <label>
+          Relation
+          <select [(ngModel)]="attenderRelation">
+            <option value="" disabled>Relation</option>
+            <option *ngFor="let r of relationOptions" [value]="r">{{ r | titlecase }}</option>
+          </select>
+        </label>
+      </div>
+
+      <p class="dc-hint" *ngIf="!canSign">
+        Pick a satisfaction score and enter attender details to enable signing.
+      </p>
+
+      <app-e-sign *ngIf="canSign"
+                  [signerType]="'attender'"
+                  [signerName]="attenderName"
+                  [signerRelation]="attenderRelation"
+                  [contextType]="'daily-closure'"
+                  [contextId]="closure.id"
+                  [prompt]="'Attender — closing the day'"
+                  [disabled]="saving"
+                  (signed)="onAttenderSigned($event)">
+      </app-e-sign>
+    </div>
+
+    <div class="dc-card dc-locked" *ngIf="isLocked">
+      <h3 class="dc-section-title">Locked</h3>
+      <p>
+        Closed at {{ closure.closedAt | date:'medium' }} by {{ closure.closedBy }}.
+        Attender: <strong>{{ closure.attenderName }}</strong> ({{ closure.attenderRelation }}).
+      </p>
+      <p class="dc-flag" *ngIf="closure.negativeFlag">
+        ⚠ Negative flag raised — PSQ follow-up pending.
+      </p>
+    </div>
+
+  </ng-container>
+</div>

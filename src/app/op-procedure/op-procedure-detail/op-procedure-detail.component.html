@@ -1,0 +1,119 @@
+<div class="opd-shell">
+  <button class="opd-back" (click)="goBack()">← Back to list</button>
+
+  <div class="opd-banner opd-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="opd-banner opd-good" *ngIf="successMessage">{{ successMessage }}</div>
+  <div class="opd-loading" *ngIf="loading">Loading…</div>
+
+  <ng-container *ngIf="!loading && row as r">
+    <div class="opd-summary">
+      <h2>{{ r.patientName }} <small>· {{ r.procedureNo }}</small></h2>
+      <div class="opd-meta">
+        PRN <strong>{{ r.prn }}</strong>
+        · {{ r.age ?? '?' }}y / {{ r.gender ?? '?' }}
+        <span *ngIf="r.phoneNumber"> · {{ r.phoneNumber }}</span>
+        <span class="opd-pill" [class]="'opd-status-' + r.status">{{ r.status }}</span>
+      </div>
+      <div class="opd-meta">
+        <strong>{{ r.procedureName }}</strong>
+        <span *ngIf="r.procedureCode"> · {{ r.procedureCode }}</span>
+      </div>
+      <div class="opd-meta">
+        Dr. {{ r.performingDoctor }}<span *ngIf="r.departmentName"> · {{ r.departmentName }}</span>
+        <span *ngIf="r.scheduledAt"> · Scheduled {{ r.scheduledAt | date:'medium' }}</span>
+      </div>
+      <div class="opd-meta" *ngIf="r.startedAt || r.endedAt">
+        <span *ngIf="r.startedAt">Started {{ r.startedAt | date:'short' }}</span>
+        <span *ngIf="r.endedAt"> · Ended {{ r.endedAt | date:'short' }}</span>
+      </div>
+      <div class="opd-meta opd-cancel" *ngIf="r.cancelReason">
+        Cancelled: {{ r.cancelReason }}
+      </div>
+    </div>
+
+    <!-- Lifecycle actions -->
+    <div class="opd-actions">
+      <button class="opd-btn opd-btn-primary" *ngIf="r.status === 'SCHEDULED'" (click)="start()">▶ Start</button>
+      <button class="opd-btn opd-btn-success" *ngIf="r.status === 'IN_PROGRESS'" (click)="complete()">✓ Complete</button>
+      <button class="opd-btn opd-btn-danger" *ngIf="r.status === 'SCHEDULED' || r.status === 'IN_PROGRESS'" (click)="cancel()">Cancel</button>
+    </div>
+
+    <!-- Clinical fields -->
+    <div class="opd-card">
+      <h3>Procedure Details</h3>
+      <div class="opd-form-row">
+        <label>Room
+          <select [(ngModel)]="edit.roomName" [disabled]="!isEditable">
+            <option value="">— select —</option>
+            <option *ngFor="let r of otRooms" [ngValue]="r.name">{{ r.name }}{{ r.code ? ' (' + r.code + ')' : '' }}</option>
+          </select>
+        </label>
+        <label>Assistant
+          <input type="text" [(ngModel)]="edit.assistantName" [disabled]="!isEditable" list="opd-staff-master" />
+          <datalist id="opd-staff-master">
+            <option *ngFor="let s of staffMaster" [value]="s.name">{{ s.designation || s.role }}</option>
+          </datalist>
+        </label>
+        <label>Anaesthesia type
+          <select [(ngModel)]="edit.anaesthesiaType" [disabled]="!isEditable">
+            <option value="">—</option>
+            <option value="local">Local</option>
+            <option value="topical">Topical</option>
+            <option value="sedation">Sedation</option>
+            <option value="none">None</option>
+          </select>
+        </label>
+        <label>Anaesthesia agent
+          <input type="text" [(ngModel)]="edit.anaesthesiaAgent" [disabled]="!isEditable" list="opd-anaesthetic-agents" />
+          <datalist id="opd-anaesthetic-agents">
+            <option *ngFor="let t of anaestheticTablets" [value]="t.genericName">{{ t.brandName }}</option>
+          </datalist>
+        </label>
+      </div>
+      <label class="opd-wide">Procedure steps
+        <textarea rows="4" [(ngModel)]="edit.procedureSteps" [disabled]="!isEditable"></textarea>
+      </label>
+      <label class="opd-wide">Findings
+        <textarea rows="3" [(ngModel)]="edit.findings" [disabled]="!isEditable"></textarea>
+      </label>
+      <label class="opd-wide">Complications
+        <textarea rows="2" [(ngModel)]="edit.complications" [disabled]="!isEditable"></textarea>
+      </label>
+    </div>
+
+    <div class="opd-card">
+      <h3>Disposition</h3>
+      <div class="opd-form-row">
+        <label>Condition at end
+          <select [(ngModel)]="edit.conditionAtEnd" [disabled]="!isEditable">
+            <option value="">—</option>
+            <option value="stable">Stable</option>
+            <option value="fair">Fair</option>
+            <option value="critical">Critical</option>
+          </select>
+        </label>
+        <label>Disposition
+          <select [(ngModel)]="edit.disposition" [disabled]="!isEditable">
+            <option value="">—</option>
+            <option value="home">Home</option>
+            <option value="observation">Observation</option>
+            <option value="admit">Admit</option>
+          </select>
+        </label>
+      </div>
+      <label class="opd-wide">Post-procedure instructions
+        <textarea rows="3" [(ngModel)]="edit.postProcedureInstructions" [disabled]="!isEditable"></textarea>
+      </label>
+    </div>
+
+    <div class="opd-form-buttons" *ngIf="isEditable">
+      <button class="opd-btn opd-btn-primary" (click)="save()" [disabled]="saving">
+        {{ saving ? 'Saving…' : 'Save' }}
+      </button>
+    </div>
+
+    <div class="opd-signed" *ngIf="r.signedBy">
+      ✓ Signed off by {{ r.signedBy }} at {{ r.signedAt | date:'medium' }}
+    </div>
+  </ng-container>
+</div>

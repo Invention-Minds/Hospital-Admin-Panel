@@ -6,9 +6,10 @@ import { DoctorServiceService } from '../../services/doctor-details/doctor-servi
 import { MessageService } from 'primeng/api';
 import { ChangeDetectorRef } from '@angular/core';
 import { AuthServiceService } from '../../services/auth/auth-service.service';
+import { AlertService } from '../../services/alert.service';
 import { response } from 'express';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, firstValueFrom } from 'rxjs';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { app } from '../../../../server';
@@ -105,7 +106,7 @@ export class NewFormComponent {
 
 
 
-  constructor(private fb: FormBuilder, private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private messageService: MessageService, private cdr: ChangeDetectorRef, private authService: AuthServiceService, private router: Router) {
+  constructor(private fb: FormBuilder, private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private messageService: MessageService, private cdr: ChangeDetectorRef, private authService: AuthServiceService, private router: Router, private alertSvc: AlertService) {
     this.setMinTime();
   }
 
@@ -1200,7 +1201,7 @@ export class NewFormComponent {
         .subscribe(
           response => {
             // console.log('Slot marked as complete:', response);
-            alert('Slot successfully marked as complete!');
+            this.alertSvc.show('Slot successfully marked as complete!', { title: 'Success' });
             const username = localStorage.getItem('username')
             this.appointmentService.checkedinAppointment(appointmentId, username).subscribe({
               next: (response) => {
@@ -1217,7 +1218,7 @@ export class NewFormComponent {
 
           error => {
             console.error('Error marking slot as complete:', error);
-            alert('Failed to mark the slot as complete.');
+            this.alertSvc.show('Failed to mark the slot as complete.', { severity: 'danger', title: 'Error' });
           }
         );
 
@@ -1254,10 +1255,44 @@ export class NewFormComponent {
   saveToLocalStorage(): void {
     localStorage.setItem('appointments', JSON.stringify(this.completeAppointment));
   }
-  confirm() {
+  async confirm() {
     if (!this.appointmentForm.valid) {
       this.messageService.add({ severity: 'warn', summary: 'Warn', detail: 'Some fields are not filled' });
     }
+
+    // Re-validate the chosen slot at submit time. Closes the stale-cache window where
+    // two staff open the form, both see the slot as free, and one submits after the
+    // other has already booked it. Skipped for Cancel — cancellation doesn't claim a slot.
+    if (this.appointmentForm.value.appointmentStatus !== 'Cancel') {
+      try {
+        const doctorId = this.doctorId;
+        const chosenTime = this.doctorType === 'Visiting Consultant'
+          ? this.formatTimeTo12Hour(this.appointmentForm.value.appointmentTime)
+          : this.appointmentForm.value.appointmentTime;
+        if (doctorId && chosenTime) {
+          const formattedDate = this.formatDate(this.appointmentForm.value.appointmentDate);
+          const slots = await firstValueFrom(this.appointmentService.getBookedSlots(doctorId, formattedDate));
+          const taken = (slots ?? []).some((s: any) => !s.complete && s.time === chosenTime);
+          const currentAppt = this.currentAppointment || this.appointment;
+          const isOwnSlot = !!(currentAppt
+            && currentAppt.doctorId === doctorId
+            && currentAppt.date === formattedDate
+            && currentAppt.time === chosenTime);
+          if (taken && !isOwnSlot) {
+            this.messageService.add({
+              severity: 'error',
+              summary: 'Slot Unavailable',
+              detail: 'This slot was just booked. Please pick another time.'
+            });
+            return;
+          }
+        }
+      } catch (revalErr) {
+        // Fail open: backend transaction guard will still reject duplicates with 409.
+        console.error('Slot re-validation failed; letting backend decide:', revalErr);
+      }
+    }
+
     // console.log(this.appointmentForm.value)
     if (this.appointmentForm.value.appointmentStatus === 'Cancel') {
 

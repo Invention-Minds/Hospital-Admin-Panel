@@ -1,0 +1,144 @@
+/* Full-width data grid — override the global 1280px clinical-shell cap
+ * (forms.css uses !important, so this component rule must too; the
+ * component-scoped selector is more specific, so it wins). 100px left
+ * clears the fixed sidebar; 32px right gives breathing room. */
+.cc-shell {
+  max-width: none !important;
+  margin: 0 0 24px 0 !important;
+  padding: 56px 32px 40px 100px !important;
+}
+.cc-head { display: flex; justify-content: space-between; align-items: end; gap: 14px; flex-wrap: wrap; margin-bottom: 12px; }
+.cc-title { font-size: 22px; font-weight: 600; margin: 0; }
+.cc-toolbar { display: flex; gap: 8px; align-items: end; flex-wrap: wrap; }
+.cc-toolbar label { display: flex; flex-direction: column; font-size: 12px; color: #4b5563; gap: 3px; }
+.cc-toolbar input { border: 1px solid #d1d5db; border-radius: 6px; padding: 6px 8px; font-size: 13px; }
+
+.cc-banner { padding: 10px 14px; border-radius: 6px; margin-bottom: 10px; font-size: 14px; }
+.cc-bad { background: #fee2e2; color: #b91c1c; }
+.cc-good { background: #dcfce7; color: #166534; }
+
+.cc-loading { padding: 60px; text-align: center; color: #6b7280; font-style: italic; }
+
+/* Phase 9.13 — doctor-ordered vitals monitoring frequency banner */
+.cc-order {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 16px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-family: Kanit, sans-serif;
+  border-left: 4px solid #9ca3af;
+  background: #f3f4f6;
+  color: #374151;
+  flex-wrap: wrap;
+}
+.cc-order i { font-size: 16px; }
+.cc-order-main { flex: 1; min-width: 200px; }
+.cc-order-by { color: #6b7280; font-weight: 400; }
+.cc-order-status { font-weight: 600; }
+.cc-order-ok        { background: #eff6ff; border-left-color: #2563eb; color: #1e40af; }
+.cc-order-due-soon  { background: #fef3c7; border-left-color: #d97706; color: #92400e; }
+.cc-order-overdue   {
+  background: #fee2e2;
+  border-left-color: #dc2626;
+  color: #b91c1c;
+  animation: cc-order-pulse 2s ease-in-out infinite;
+}
+.cc-order-no-order  { background: #f3f4f6; border-left-color: #9ca3af; color: #4b5563; }
+@keyframes cc-order-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+  50%      { box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.13); }
+}
+
+/* Compact order reminder inside the vitals modal */
+.cc-modal-order {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 11px;
+  border-radius: 6px;
+  font-size: 12.5px;
+  margin: 4px 0 10px;
+  border-left: 3px solid #9ca3af;
+}
+.cc-modal-order i { font-size: 13px; }
+
+.cc-grid-wrap { overflow-x: auto; background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; }
+.cc-grid {
+  width: 100%; border-collapse: separate; border-spacing: 0;
+  font-size: 12px;
+}
+.cc-grid th, .cc-grid td {
+  border-right: 1px solid #f3f4f6; border-bottom: 1px solid #f3f4f6;
+  padding: 8px 10px; vertical-align: top; text-align: left;
+}
+.cc-rowhead {
+  position: sticky; left: 0; background: #f9fafb;
+  font-weight: 600; color: #374151; min-width: 160px;
+  z-index: 1;
+}
+.cc-dayhead {
+  background: #f9fafb; min-width: 220px;
+}
+.cc-date { font-weight: 600; font-size: 13px; color: #111827; }
+.cc-actions { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 4px; }
+
+.cc-muted { color: #9ca3af; font-style: italic; }
+
+.cc-vitals-cell, .cc-io-cell { font-size: 11px; }
+.cc-vitals-row, .cc-io-row {
+  display: flex; gap: 6px; align-items: center;
+  padding: 3px 0; border-bottom: 1px dashed #f3f4f6;
+  cursor: pointer;
+}
+.cc-vitals-row:hover, .cc-io-row:hover { background: #fef3c7; }
+.cc-vitals-row:last-child, .cc-io-row:last-child { border-bottom: 0; }
+.cc-vitals-time { color: #6b7280; font-weight: 500; min-width: 50px; }
+.cc-vitals-shift {
+  background: #dbeafe; color: #1e40af;
+  padding: 1px 5px; border-radius: 8px; font-size: 10px; font-weight: 600;
+}
+.cc-vitals-row-data { color: #111827; flex: 1; }
+.cc-io-in { color: #166534; font-weight: 600; }
+.cc-io-out { color: #b45309; font-weight: 600; }
+
+.cc-breakdown { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 3px; font-size: 11px; color: #6b7280; }
+.cc-breakdown span { background: #f3f4f6; padding: 1px 6px; border-radius: 6px; }
+
+.cc-sign-cell { font-size: 11px; }
+.cc-shift { display: flex; align-items: center; gap: 6px; padding: 2px 0; }
+.cc-shift-label {
+  background: #e5e7eb; padding: 2px 6px; border-radius: 4px;
+  font-weight: 600; min-width: 22px; text-align: center;
+}
+.cc-sign-ok { color: #166534; font-weight: 600; }
+
+.cc-btn { background: #fff; border: 1px solid #d1d5db; padding: 5px 10px; border-radius: 5px; cursor: pointer; font-size: 12px; }
+.cc-btn:hover:not([disabled]) { background: #f3f4f6; }
+.cc-btn-primary { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
+.cc-btn-primary:hover:not([disabled]) { background: #1e40af; }
+.cc-btn-sm { padding: 2px 7px; font-size: 11px; }
+.cc-btn-xs { padding: 1px 6px; font-size: 10px; }
+.cc-btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+
+.cc-modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 100; }
+.cc-modal { background: #fff; border-radius: 8px; padding: 18px 22px; width: 520px; max-width: 92vw; max-height: 92vh; overflow: auto; }
+.cc-modal-wide { width: 640px; }
+.cc-modal h3 { margin: 0 0 4px; font-size: 16px; }
+.cc-sub { color: #6b7280; font-size: 12px; margin: 0 0 12px; }
+
+/* min-width:0 lets the field shrink inside a grid track (grid items default
+ * to min-width:auto = min-content, which is what pushes inputs to overflow). */
+.cc-field { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #4b5563; margin-bottom: 10px; min-width: 0; }
+.cc-field input, .cc-field select, .cc-field textarea {
+  border: 1px solid #d1d5db; border-radius: 6px; padding: 6px 8px; font-size: 13px;
+  width: 100%; box-sizing: border-box; max-width: 100%;
+}
+.cc-grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.cc-grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+.cc-field-check { flex-direction: row; align-items: center; gap: 7px; }
+.cc-field-check input { width: auto; }
+
+.cc-modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 10px; }

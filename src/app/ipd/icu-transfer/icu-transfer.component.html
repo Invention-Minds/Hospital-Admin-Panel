@@ -1,0 +1,182 @@
+<div class="icu-shell">
+  <h2 class="icu-title">ICU Transfer</h2>
+
+  <div class="icu-loading" *ngIf="loading">Loading transfers&hellip;</div>
+
+  <div class="icu-banner icu-banner-bad" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+  <div class="icu-banner icu-banner-good" *ngIf="successMessage" role="status">{{ successMessage }}</div>
+
+  <!-- Phase 9.6 — once the transfer is COMPLETED, surface the ICU Workbench
+       prominently so the team starts logging vitals / progress / bundles
+       per NABH COP.3. -->
+  <div class="icu-banner icu-banner-good" *ngIf="latestStatus === 'COMPLETED'">
+    Patient is now in ICU.
+    <a [routerLink]="['/ipd/admission', admissionId, 'icu']" style="margin-left: 8px; color: #1d4ed8; font-weight: 600;">
+      Open ICU Workbench →
+    </a>
+  </div>
+
+  <ng-container *ngIf="!loading">
+
+    <!-- Active transfer card -->
+    <div class="icu-card" *ngIf="activeTransfer as t">
+      <div class="icu-card-head">
+        <h3 class="icu-section-title">Active transfer</h3>
+        <span [class]="pillClass(t.status)">{{ t.status }}</span>
+      </div>
+      <p class="icu-meta-line"><strong>Rationale:</strong> {{ t.rationale }}</p>
+      <p class="icu-meta-line" *ngIf="t.vitalsSnapshot">
+        <strong>Vitals snapshot:</strong> {{ t.vitalsSnapshot }}
+      </p>
+      <p class="icu-meta-line" *ngIf="t.linesAndDrains">
+        <strong>Lines / drains:</strong> {{ t.linesAndDrains }}
+      </p>
+      <p class="icu-meta-line" *ngIf="t.codeStatus">
+        <strong>Code status:</strong> {{ t.codeStatus }}
+      </p>
+      <p class="icu-meta-line" *ngIf="t.sedationPlan">
+        <strong>Sedation plan:</strong> {{ t.sedationPlan }}
+      </p>
+
+      <div class="icu-timeline">
+        <div class="icu-step icu-step-done">
+          <strong>Proposed</strong>
+          <span>{{ t.proposedAt | date:'medium' }}</span>
+          <em>{{ t.proposerName || t.proposedBy || '—' }}</em>
+        </div>
+        <div class="icu-step" [class.icu-step-done]="t.acknowledgedAt">
+          <strong>Acknowledged</strong>
+          <span *ngIf="t.acknowledgedAt">{{ t.acknowledgedAt | date:'medium' }}</span>
+          <span *ngIf="!t.acknowledgedAt">Pending intensivist</span>
+          <em *ngIf="t.intensivistName">{{ t.intensivistName }}</em>
+          <p class="icu-decline" *ngIf="t.status === 'DECLINED'">
+            Declined: {{ t.declineReason }}
+          </p>
+        </div>
+        <div class="icu-step" [class.icu-step-done]="t.acceptedAt">
+          <strong>Accepted by ICU</strong>
+          <span *ngIf="t.acceptedAt">{{ t.acceptedAt | date:'medium' }}</span>
+          <span *ngIf="!t.acceptedAt">Awaiting ICU bed</span>
+        </div>
+        <div class="icu-step" [class.icu-step-done]="t.completedAt">
+          <strong>Handover complete</strong>
+          <span *ngIf="t.completedAt">{{ t.completedAt | date:'medium' }}</span>
+          <span *ngIf="!t.completedAt">In progress</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Propose form (only if no active transfer) -->
+    <div class="icu-card" *ngIf="!activeTransfer">
+      <h3 class="icu-section-title">Propose ICU transfer</h3>
+      <p class="icu-hint">
+        Document why the patient needs ICU. The intensivist will review and
+        acknowledge before an ICU bed is offered.
+      </p>
+
+      <div class="icu-form-row">
+        <label class="icu-full">
+          Proposing doctor name
+          <input type="text"
+                 [(ngModel)]="proposeForm.proposerName"
+                 name="proposerName"
+                 placeholder="Your full name (snapshot for audit)" />
+        </label>
+      </div>
+
+      <div class="icu-form-row">
+        <label class="icu-full">
+          Rationale <span class="req">*</span>
+          <textarea rows="3"
+                    [(ngModel)]="proposeForm.rationale"
+                    name="rationale"
+                    placeholder="Worsening sepsis, vasopressor support needed, GCS drop, etc."></textarea>
+        </label>
+      </div>
+
+      <div class="icu-form-row">
+        <label class="icu-full">
+          Vitals snapshot
+          <textarea rows="2"
+                    [(ngModel)]="proposeForm.vitalsSnapshot"
+                    name="vitalsSnapshot"
+                    placeholder="BP 80/40 on noradrenaline 0.2 mcg/kg/min, HR 130, SpO2 88% on 6 L NC, GCS 11"></textarea>
+        </label>
+      </div>
+
+      <div class="icu-form-row">
+        <label class="icu-full">
+          Lines and drains
+          <textarea rows="2"
+                    [(ngModel)]="proposeForm.linesAndDrains"
+                    name="linesAndDrains"
+                    placeholder="Right IJV CVP, peripheral 18G x2, foley catheter, NG tube"></textarea>
+        </label>
+      </div>
+
+      <div class="icu-form-row icu-form-row-2">
+        <label>
+          Code status
+          <select [(ngModel)]="proposeForm.codeStatus" name="codeStatus">
+            <option value="">—</option>
+            <option value="full-code">Full code</option>
+            <option value="DNR">DNR</option>
+            <option value="DNI">DNI</option>
+            <option value="comfort-care">Comfort care</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="icu-form-row">
+        <label class="icu-full">
+          Sedation plan
+          <textarea rows="2"
+                    [(ngModel)]="proposeForm.sedationPlan"
+                    name="sedationPlan"
+                    placeholder="Continue fentanyl 25 mcg/h, target RASS -2 to 0"></textarea>
+        </label>
+      </div>
+
+      <p class="icu-hint" *ngIf="!canProposeSign">
+        Fill in proposer name and rationale (≥10 chars) to enable signing.
+      </p>
+
+      <app-e-sign *ngIf="canProposeSign"
+                  [signerType]="'staff'"
+                  [signerName]="proposeForm.proposerName"
+                  [contextType]="'icu-transfer-propose'"
+                  [contextId]="admissionId"
+                  [prompt]="'Proposing doctor — ICU transfer request'"
+                  [disabled]="saving"
+                  (signed)="onProposerSigned($event)">
+      </app-e-sign>
+    </div>
+
+    <!-- History table -->
+    <div class="icu-card" *ngIf="transfers.length > 0">
+      <h3 class="icu-section-title">History</h3>
+      <table class="icu-table">
+        <thead>
+          <tr>
+            <th>Proposed</th>
+            <th>Status</th>
+            <th>Rationale</th>
+            <th>Outcome</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of transfers">
+            <td>{{ row.proposedAt | date:'short' }}</td>
+            <td><span [class]="pillClass(row.status)">{{ row.status }}</span></td>
+            <td>{{ row.rationale | slice:0:80 }}{{ row.rationale.length > 80 ? '…' : '' }}</td>
+            <td>
+              <span *ngIf="row.status === 'COMPLETED'">Patient on ICU bed</span>
+              <span *ngIf="row.status === 'DECLINED'">{{ row.declineReason }}</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </ng-container>
+</div>

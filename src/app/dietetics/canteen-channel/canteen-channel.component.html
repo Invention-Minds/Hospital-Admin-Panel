@@ -1,0 +1,33 @@
+<div class="cc-shell">
+  <header class="cc-header">
+    <div class="cc-title">{{ snapshot?.channel?.name || 'Canteen' }}</div>
+    <div class="cc-slot" *ngIf="snapshot?.slot as slot">
+      {{ slot.name }} <span class="cc-time">({{ slot.startTime }} – {{ slot.endTime }})</span>
+    </div>
+    <div class="cc-clock">{{ now | date:'HH:mm:ss' }}</div>
+  </header>
+
+  <div class="cc-err" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <div class="cc-grid" *ngIf="snapshot && snapshot.groups.length > 0">
+    <section class="cc-ward" *ngFor="let g of snapshot.groups">
+      <h2>{{ g.wardName }}</h2>
+      <table>
+        <thead><tr><th>Bed</th><th>Adm#</th><th>Meal</th><th>Diet</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let r of g.rows">
+            <td>{{ r.bedNumber || '—' }}</td>
+            <td>{{ r.admissionNo }}</td>
+            <td>{{ r.mealName }}</td>
+            <td>{{ r.dietName }}</td>
+            <td><span class="cc-pill" [ngClass]="'cc-' + r.status.toLowerCase()">{{ r.status }}</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+
+  <div class="cc-empty" *ngIf="snapshot && snapshot.groups.length === 0">
+    No meal orders in this slot.
+  </div>
+</div>

@@ -1,0 +1,119 @@
+.ta-container {
+  padding: 16px 16px 16px 90px;
+  box-sizing: border-box;
+}
+
+.ta-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #271e4a;
+  margin: 0 0 14px;
+}
+
+.ta-controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.ta-input {
+  padding: 8px 10px;
+  border: 1px solid #d0d5dd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  min-width: 200px;
+}
+
+.ta-btn {
+  padding: 8px 16px;
+  border: 1px solid #2e6fb7;
+  background: #2e6fb7;
+  color: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.ta-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.ta-loading,
+.ta-hint {
+  color: #7b7b7b;
+  padding: 8px 0;
+}
+
+.ta-head {
+  margin-bottom: 12px;
+  color: #271e4a;
+}
+
+.ta-muted {
+  color: #98a2b3;
+  font-weight: 400;
+}
+
+.ta-dayoff {
+  color: #c0392b;
+  font-weight: 600;
+  padding: 12px;
+  background: #fdecea;
+  border-radius: 8px;
+}
+
+.ta-grid {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.ta-col {
+  flex: 1;
+  min-width: 240px;
+  border: 1px solid #e3e8ef;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.ta-col-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.ta-col-title.booked {
+  color: #c0392b;
+}
+
+.ta-col-title.free {
+  color: #1e8e54;
+}
+
+.ta-slot {
+  padding: 7px 10px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+  font-size: 0.9rem;
+}
+
+.ta-slot.booked {
+  background: #fdecea;
+  color: #a5281b;
+}
+
+.ta-slot.free {
+  background: #e3f7ec;
+  color: #176c41;
+}
+
+.ta-empty {
+  color: #98a2b3;
+  font-size: 0.88rem;
+}
+
+.ta-blocked {
+  margin-top: 12px;
+  font-size: 0.85rem;
+  color: #41505f;
+}

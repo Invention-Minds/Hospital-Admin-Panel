@@ -16,17 +16,45 @@
       <h2 class="form__section-heading">Case identifier</h2>
 
       <div class="form__field">
-        <label for="emergencyId" class="form__label">Emergency case ID *</label>
+        <label for="emergencyId" class="form__label">Emergency case *</label>
+
+        <!--
+          Deep-link path (?emergencyId=...): show the resolved patient as a
+          read-only chip — we already know which emergency this MLC is for.
+        -->
         <input
+          *ngIf="emergency"
           pInputText
           id="emergencyId"
           type="text"
-          formControlName="emergencyId"
+          [value]="emergency.prn + ' · ' + emergency.patientName"
           class="form__input"
-          [class.form__input--error]="shouldShowError('emergencyId')"
-          [readonly]="emergency !== null"
-          [attr.aria-readonly]="emergency !== null"
+          [readonly]="true"
+          [attr.aria-readonly]="true"
+          data-testid="emergency-readonly"
         />
+
+        <!--
+          Manual path: dropdown of emergencies that don't already have an MLC
+          (filter is server-side via ?withoutMlc=true).
+        -->
+        <p-dropdown
+          *ngIf="!emergency"
+          inputId="emergencyId"
+          formControlName="emergencyId"
+          [options]="emergencyOptions"
+          optionLabel="_label"
+          optionValue="id"
+          [filter]="true"
+          filterBy="prn,patientName"
+          [placeholder]="loadingEmergencies ? 'Loading…' : (emergencyOptions.length ? 'Search by PRN or patient name' : 'No eligible emergencies')"
+          [disabled]="loadingEmergencies || emergencyOptions.length === 0"
+          (onChange)="onEmergencyChange($event.value)"
+          styleClass="form__dropdown"
+          [class.form__input--error]="shouldShowError('emergencyId')"
+          data-testid="emergency-picker">
+        </p-dropdown>
+
         <small
           *ngIf="emergency"
           class="form__hint"
@@ -34,10 +62,15 @@
           Linked to {{ emergency.patientName }} · PRN {{ emergency.prn }}<span *ngIf="emergency.age != null"> · {{ emergency.age }}y</span>
         </small>
         <small
+          *ngIf="!emergency && !loadingEmergencies && emergencyOptions.length === 0"
+          class="form__hint">
+          No emergencies are awaiting MLC registration. Register an emergency first, or open this page from an emergency intake.
+        </small>
+        <small
           *ngIf="shouldShowError('emergencyId')"
           class="form__error"
           data-testid="err-emergencyId">
-          Emergency case ID is required.
+          Emergency case is required.
         </small>
       </div>
 
@@ -100,6 +133,177 @@
             styleClass="form__calendar">
           </p-calendar>
         </div>
+      </div>
+    </section>
+
+    <section class="form__section">
+      <h2 class="form__section-heading">Incident details (optional)</h2>
+
+      <div class="form__grid">
+        <div class="form__field">
+          <label for="incidentDateTime" class="form__label">Incident date &amp; time</label>
+          <p-calendar
+            inputId="incidentDateTime"
+            formControlName="incidentDateTime"
+            dateFormat="yy-mm-dd"
+            [showTime]="true"
+            hourFormat="24"
+            [showIcon]="true"
+            styleClass="form__calendar">
+          </p-calendar>
+        </div>
+        <div class="form__field">
+          <label for="incidentPlace" class="form__label">Place of incident</label>
+          <input
+            pInputText
+            id="incidentPlace"
+            type="text"
+            formControlName="incidentPlace"
+            class="form__input"
+            placeholder="e.g. NH-44, near toll plaza"
+          />
+        </div>
+      </div>
+
+      <div class="form__field">
+        <label for="allegedCause" class="form__label">Alleged cause</label>
+        <textarea
+          pInputText
+          id="allegedCause"
+          formControlName="allegedCause"
+          class="form__input"
+          rows="2"
+          placeholder="As stated by patient / informant"
+        ></textarea>
+      </div>
+
+      <div class="form__field">
+        <label for="weaponType" class="form__label">Weapon type</label>
+        <input
+          pInputText
+          id="weaponType"
+          type="text"
+          formControlName="weaponType"
+          class="form__input"
+          placeholder="e.g. blunt object, sharp weapon"
+        />
+      </div>
+    </section>
+
+    <section class="form__section">
+      <h2 class="form__section-heading">Brought by / informant (optional)</h2>
+
+      <div class="form__grid">
+        <div class="form__field">
+          <label for="broughtBy" class="form__label">Brought by</label>
+          <p-dropdown
+            inputId="broughtBy"
+            formControlName="broughtBy"
+            [options]="broughtByOptions"
+            optionLabel="label"
+            optionValue="value"
+            [showClear]="true"
+            placeholder="Select"
+            styleClass="form__dropdown">
+          </p-dropdown>
+        </div>
+        <div class="form__field">
+          <label for="broughtByDetail" class="form__label">Brought by — detail</label>
+          <input
+            pInputText
+            id="broughtByDetail"
+            type="text"
+            formControlName="broughtByDetail"
+            class="form__input"
+            placeholder="Name / badge no. / vehicle"
+          />
+        </div>
+      </div>
+
+      <div class="form__grid">
+        <div class="form__field">
+          <label for="informantName" class="form__label">Informant name</label>
+          <input
+            pInputText
+            id="informantName"
+            type="text"
+            formControlName="informantName"
+            class="form__input"
+          />
+        </div>
+        <div class="form__field">
+          <label for="informantRelation" class="form__label">Informant relation</label>
+          <input
+            pInputText
+            id="informantRelation"
+            type="text"
+            formControlName="informantRelation"
+            class="form__input"
+            placeholder="e.g. brother, neighbour"
+          />
+        </div>
+      </div>
+    </section>
+
+    <section class="form__section">
+      <h2 class="form__section-heading">Identification (optional)</h2>
+
+      <div class="form__grid">
+        <div class="form__field">
+          <label for="identificationMark1" class="form__label">Identification mark 1</label>
+          <input
+            pInputText
+            id="identificationMark1"
+            type="text"
+            formControlName="identificationMark1"
+            class="form__input"
+          />
+        </div>
+        <div class="form__field">
+          <label for="identificationMark2" class="form__label">Identification mark 2</label>
+          <input
+            pInputText
+            id="identificationMark2"
+            type="text"
+            formControlName="identificationMark2"
+            class="form__input"
+          />
+        </div>
+      </div>
+    </section>
+
+    <section class="form__section">
+      <h2 class="form__section-heading">Examining doctor (optional)</h2>
+
+      <div class="form__grid">
+        <div class="form__field">
+          <label for="investigatingOfficer" class="form__label">Investigating officer</label>
+          <input
+            pInputText
+            id="investigatingOfficer"
+            type="text"
+            formControlName="investigatingOfficer"
+            class="form__input"
+          />
+        </div>
+        <div class="form__field">
+          <label for="examiningDoctorRegNo" class="form__label">Examining doctor reg. no.</label>
+          <input
+            pInputText
+            id="examiningDoctorRegNo"
+            type="text"
+            formControlName="examiningDoctorRegNo"
+            class="form__input"
+          />
+        </div>
+      </div>
+
+      <div class="form__field form__field--inline">
+        <p-checkbox
+          formControlName="consentForExamination"
+          [binary]="true"
+          inputId="consentForExamination"></p-checkbox>
+        <label for="consentForExamination" class="form__label">Consent for examination obtained</label>
       </div>
     </section>
 

@@ -1,0 +1,87 @@
+<div class="opn-card">
+  <h3 class="opn-title">Operative Notes <span class="opn-count" *ngIf="notes.length">({{ notes.length }})</span></h3>
+  <p class="opn-sub">Read-only — pulled from OT records linked to this admission.</p>
+
+  <div class="opn-banner opn-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="opn-loading" *ngIf="loading">Loading…</div>
+
+  <div class="opn-empty" *ngIf="!loading && !notes.length">
+    No operative notes recorded for this admission yet.
+  </div>
+
+  <div class="opn-note" *ngFor="let n of notes; let i = index">
+    <div class="opn-note-head">
+      <h4>Operation Note {{ i + 1 }}<span *ngIf="notes.length > 1"> · #{{ n.noteNumber }}</span></h4>
+      <span class="opn-pill" *ngIf="n.signedBy">✓ Signed {{ n.signedAt | date:'dd-MMM HH:mm' }} by {{ n.signedBy }}</span>
+      <span class="opn-pill opn-unsigned" *ngIf="!n.signedBy">Unsigned</span>
+    </div>
+
+    <div class="opn-grid">
+      <div><strong>Date</strong>: {{ n.scheduleDate | date:'dd-MMM-yyyy' }}</div>
+      <div><strong>Surgery</strong>: {{ n.procedureName }}</div>
+      <div><strong>OT Room</strong>: {{ n.otRoom || '—' }}</div>
+      <div><strong>Surgeon</strong>: {{ n.surgeons || n.scheduleSurgeon || '—' }}</div>
+      <div><strong>Anaesthesia</strong>: {{ n.anaesthesiaType || '—' }}</div>
+      <div><strong>Anaesthetist</strong>: {{ n.scheduleAnaesthesiologist || '—' }}</div>
+      <div *ngIf="parseAssistants(n.assistants).length">
+        <strong>Assistants</strong>:
+        <span *ngFor="let a of parseAssistants(n.assistants); let last = last">
+          {{ a.name }}<span *ngIf="a.role"> ({{ a.role }})</span><span *ngIf="!last">, </span>
+        </span>
+      </div>
+      <div><strong>Start</strong>: {{ n.startAt | date:'dd-MMM HH:mm' }}</div>
+      <div *ngIf="n.endAt"><strong>End</strong>: {{ n.endAt | date:'HH:mm' }}</div>
+    </div>
+
+    <div class="opn-block" *ngIf="n.preOpDiagnosis">
+      <strong>Pre-op diagnosis:</strong> {{ n.preOpDiagnosis }}
+    </div>
+    <div class="opn-block" *ngIf="n.postOpDiagnosisSame">
+      <strong>Post-op diagnosis:</strong> Same as pre-op
+    </div>
+    <div class="opn-block" *ngIf="!n.postOpDiagnosisSame && n.postOpDiagnosis">
+      <strong>Post-op diagnosis:</strong> {{ n.postOpDiagnosis }}
+    </div>
+    <div class="opn-block" *ngIf="n.position">
+      <strong>Position:</strong> {{ n.position }}
+    </div>
+    <div class="opn-block" *ngIf="n.incision">
+      <strong>Incision:</strong> {{ n.incision }}
+    </div>
+    <div class="opn-block" *ngIf="n.findings">
+      <strong>Findings:</strong> {{ n.findings }}
+    </div>
+    <div class="opn-block" *ngIf="n.procedureDone">
+      <strong>Procedure:</strong> {{ n.procedureDone }}
+    </div>
+    <div class="opn-block" *ngIf="n.procedureSteps">
+      <strong>Steps:</strong>
+      <pre>{{ n.procedureSteps }}</pre>
+    </div>
+    <div class="opn-row" *ngIf="n.bloodLossMl !== null || n.fluidsMl !== null">
+      <span *ngIf="n.bloodLossMl !== null"><strong>Blood loss:</strong> {{ n.bloodLossMl }} ml</span>
+      <span *ngIf="n.fluidsMl !== null"><strong>Fluids:</strong> {{ n.fluidsMl }} ml</span>
+      <span *ngIf="n.drains"><strong>Drains:</strong> {{ n.drains }}</span>
+    </div>
+    <div class="opn-block" *ngIf="n.complications">
+      <strong>Complications:</strong> {{ n.complications }}
+    </div>
+    <div class="opn-block opn-event" *ngIf="n.significantIntraOpEvent">
+      <strong>Significant intra-op event:</strong> {{ n.significantIntraOpEvent }}
+    </div>
+    <div class="opn-block" *ngIf="parseImplants(n.implants).length">
+      <strong>Implants:</strong>
+      <ul>
+        <li *ngFor="let imp of parseImplants(n.implants)">
+          {{ imp.name }}<span *ngIf="imp.batch"> · batch {{ imp.batch }}</span><span *ngIf="imp.serial"> · serial {{ imp.serial }}</span><span *ngIf="imp.manufacturer"> · {{ imp.manufacturer }}</span>
+        </li>
+      </ul>
+    </div>
+    <div class="opn-block" *ngIf="n.prosthesisLabel">
+      <strong>Prosthesis label:</strong> {{ n.prosthesisLabel }}
+    </div>
+    <div class="opn-block" *ngIf="n.disposition">
+      <strong>Disposition:</strong> {{ n.disposition }}
+    </div>
+  </div>
+</div>

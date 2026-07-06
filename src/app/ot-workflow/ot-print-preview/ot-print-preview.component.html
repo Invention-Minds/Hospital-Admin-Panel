@@ -1,0 +1,244 @@
+<div class="pp-shell">
+  <!-- Toolbar — hidden when printing -->
+  <div class="pp-toolbar">
+    <div class="pp-forms">
+      <button [class.pp-form-active]="form === 'safety-checklist'" (click)="setForm('safety-checklist')">Safety Checklist (F-01)</button>
+      <button [class.pp-form-active]="form === 'operative-note'" (click)="setForm('operative-note')">Operative Note (F-03)</button>
+      <button [class.pp-form-active]="form === 'track-sheet'" (click)="setForm('track-sheet')">Track Sheet (F-04)</button>
+    </div>
+    <button class="pp-btn pp-btn-primary" (click)="print()" [disabled]="loading">Print</button>
+  </div>
+
+  <div class="pp-loading" *ngIf="loading">Loading…</div>
+  <div class="pp-error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <!-- =====================================================================
+       Safety Checklist (UHJ/OTS/F-01)
+       ===================================================================== -->
+  <article class="pp-page" *ngIf="!loading && form === 'safety-checklist' && schedule">
+    <header class="pp-hd">
+      <div>
+        <h1>SAFE SURGERY CHECKLIST</h1>
+        <p class="pp-hd-sub">Adapted from WHO Safe Surgery Checklist · UHJ/OTS/F-01</p>
+      </div>
+      <div class="pp-hd-meta">
+        <div><span>Date</span><strong>{{ schedule.date | date:'dd/MM/yyyy' }}</strong></div>
+        <div><span>OT Room</span><strong>{{ schedule.otRoom?.name || schedule.otRoom?.code || '—' }}</strong></div>
+      </div>
+    </header>
+    <div class="pp-patient">
+      <div><span>Patient</span><strong>{{ schedule.patientName || '—' }}</strong></div>
+      <div><span>PRN</span><strong>{{ schedule.prn || '—' }}</strong></div>
+      <div><span>Surgery</span><strong>{{ schedule.procedureName }}</strong></div>
+      <div><span>Surgeon</span><strong>{{ schedule.surgeonName || '—' }}</strong></div>
+    </div>
+
+    <ng-container *ngIf="safety() as s">
+      <!-- Sign In -->
+      <section class="pp-block pp-yellow">
+        <h2>SIGN IN (Before Induction of Anaesthesia)</h2>
+        <div class="pp-row"><label>Patient identity confirmed</label><span>{{ s.patientIdentityConfirmed ? 'Yes' : 'No' }}</span></div>
+        <div class="pp-row"><label>Site marked</label><span>{{ s.siteMarked ? 'Yes' : 'No' }}</span></div>
+        <div class="pp-row"><label>Consent received</label><span>{{ s.consentConfirmed ? 'Yes' : 'No' }}</span></div>
+        <div class="pp-row"><label>Known allergies</label><span>{{ s.knownAllergies ? 'Yes — ' + (s.allergyDescription || '') : 'No' }}</span></div>
+        <div class="pp-row"><label>Difficult airway / aspiration risk</label><span>{{ s.difficultAirwayRisk ? 'Yes — ' + (s.airwayRiskArrangement || '') : 'No' }}</span></div>
+        <div class="pp-row"><label>Risk of {{ '>' }}500 ml blood loss</label><span>{{ s.bloodLossRisk ? 'Yes — ' + (s.bloodLossArrangement || '') : 'No' }}</span></div>
+        <div class="pp-row"><label>Hypothermia risk (op {{ '>' }} 1 hr)</label><span>{{ s.hypothermiaRisk ? 'Yes — warmer ' + (s.warmerInPlace ? 'in place' : 'NOT in place') : 'No' }}</span></div>
+        <div class="pp-row"><label>Pre-op medication taken</label><span>{{ s.preopMedicationTaken ? 'Yes' : 'N/A' }}</span></div>
+        <div class="pp-row">
+          <label>Anaesthesia equipment check</label>
+          <span>
+            SpO2: {{ s.anaesthEquipSpo2 ? '✓' : '✗' }} ·
+            NIBP: {{ s.anaesthEquipNibp ? '✓' : '✗' }} ·
+            ECG: {{ s.anaesthEquipEcg ? '✓' : '✗' }} ·
+            BIS: {{ s.anaesthEquipBis ? '✓' : '✗' }}
+          </span>
+        </div>
+        <div class="pp-row"><label>Required equipment / implants available</label><span>{{ s.equipmentImplantsAvailable ? 'Yes' : 'No' }}</span></div>
+        <p class="pp-sig">Signed by: <strong>{{ s.signInBy || '—' }}</strong> at {{ s.signInAt ? (s.signInAt | date:'dd/MM/yyyy HH:mm') : '—' }}</p>
+      </section>
+
+      <!-- Time Out -->
+      <section class="pp-block pp-green">
+        <h2>TIME OUT (Before Skin Incision)</h2>
+        <div class="pp-row"><label>Team members introduced</label><span>{{ s.teamIntroduced ? 'Yes' : 'No' }}</span></div>
+        <div class="pp-row"><label>Procedure confirmed</label><span>{{ s.procedureConfirmed ? 'Yes' : 'No' }}</span></div>
+        <div class="pp-row"><label>Prophylactic antibiotic in last 60 min</label><span>{{ s.antibioticAdministered ? 'Yes — ' + (s.antibioticName || '') : 'No' }}</span></div>
+        <div class="pp-row"><label>Essential imaging displayed</label><span>{{ s.imagingDisplayed ? 'Yes' : 'No' }}</span></div>
+        <div class="pp-row"><label>VTE prophylaxis provided</label><span>{{ s.vteProphylaxisProvided ? 'Yes' : 'No' }}</span></div>
+        <div class="pp-row"><label>Anticipated duration</label><span>{{ s.anticipatedDurationMins || '—' }} min</span></div>
+        <div class="pp-row"><label>Anticipated blood loss</label><span>{{ s.anticipatedBloodLossMl || '—' }} ml — blood available: {{ s.bloodAvailable ? 'Yes' : 'No' }}</span></div>
+        <div class="pp-row"><label>Intra-op glycemic control</label><span>{{ s.glycemicControl || '—' }}</span></div>
+        <div class="pp-row"><label>Anaesthetist concerns</label><span>{{ s.anaesthetistConcerns || '—' }}</span></div>
+        <div class="pp-row"><label>Nursing — sterility concerns</label><span>{{ s.sterilityConcerns || '—' }}</span></div>
+        <p class="pp-sig">Signed by: <strong>{{ s.timeOutBy || '—' }}</strong> at {{ s.timeOutAt ? (s.timeOutAt | date:'dd/MM/yyyy HH:mm') : '—' }}</p>
+      </section>
+
+      <!-- Sign Out -->
+      <section class="pp-block pp-blue">
+        <h2>SIGN OUT (Before Patient Leaves OR)</h2>
+        <div class="pp-row"><label>Procedure recorded</label><span>{{ s.procedureRecordedName || '—' }}</span></div>
+        <div class="pp-row"><label>Instrument count complete</label><span>{{ s.instrumentCount ? 'Yes' : 'No' }} ({{ s.instrumentCountInitial }} → {{ s.instrumentCountFinal }})</span></div>
+        <div class="pp-row"><label>Sponge / swab count complete</label><span>{{ s.swabCount ? 'Yes' : 'No' }} ({{ s.swabCountInitial }} → {{ s.swabCountFinal }})</span></div>
+        <div class="pp-row"><label>Specimen labelled</label><span>{{ s.specimenLabelled ? 'Yes' : 'No' }}</span></div>
+        <div class="pp-row"><label>Equipment / instrument issues</label><span>{{ s.equipmentIssues || '—' }}</span></div>
+        <div class="pp-row"><label>Key concerns for recovery</label><span>{{ s.recoveryConcerns || '—' }}</span></div>
+        <div class="pp-row"><label>Corrective action by Nursing Supervisor</label><span>{{ s.correctiveAction || '—' }}</span></div>
+        <p class="pp-sig">Signed by: <strong>{{ s.signOutBy || '—' }}</strong> at {{ s.signOutAt ? (s.signOutAt | date:'dd/MM/yyyy HH:mm') : '—' }}</p>
+      </section>
+
+      <table class="pp-sigtable">
+        <tr><td>Surgeon</td><td>Anaesthetist</td><td>Nurse</td><td>Technician</td></tr>
+        <tr><td>{{ s.signOutBy || '_________' }}</td><td>{{ s.signOutAnaesthetistBy || '_________' }}</td><td>{{ s.signOutNurseBy || '_________' }}</td><td>{{ s.signOutTechnicianBy || '_________' }}</td></tr>
+      </table>
+    </ng-container>
+    <p *ngIf="!safety()" class="pp-muted">Safety checklist not yet filled.</p>
+  </article>
+
+  <!-- =====================================================================
+       Operative Note (UHJ/OTS/F-03)
+       ===================================================================== -->
+  <article class="pp-page" *ngIf="!loading && form === 'operative-note' && schedule">
+    <header class="pp-hd">
+      <div>
+        <h1>OPERATIVE NOTE</h1>
+        <p class="pp-hd-sub">UHJ/OTS/F-03</p>
+      </div>
+      <div class="pp-hd-meta">
+        <div><span>Date of Operation</span><strong>{{ schedule.date | date:'dd/MM/yyyy' }}</strong></div>
+      </div>
+    </header>
+    <div class="pp-patient">
+      <div><span>Patient</span><strong>{{ schedule.patientName || '—' }}</strong></div>
+      <div><span>PRN</span><strong>{{ schedule.prn || '—' }}</strong></div>
+      <div><span>Surgery</span><strong>{{ schedule.procedureName }}</strong></div>
+      <div><span>Urgency</span><strong>{{ schedule.urgency }}</strong></div>
+    </div>
+
+    <ng-container *ngIf="primaryNote() as n">
+      <div class="pp-grid2">
+        <div><strong>Case type:</strong> {{ n.caseType || 'routine' }}</div>
+        <div><strong>Anaesthesia:</strong> {{ n.anaesthesiaType || '—' }}</div>
+        <div><strong>Start:</strong> {{ n.startAt ? (n.startAt | date:'HH:mm') : '—' }}</div>
+        <div><strong>End:</strong> {{ n.endAt ? (n.endAt | date:'HH:mm') : '—' }}</div>
+      </div>
+
+      <h3 class="pp-h3">Team</h3>
+      <p>
+        <strong>Surgeon(s):</strong> {{ n.surgeons || schedule.surgeonName || '—' }} ·
+        <strong>Assistants:</strong> {{ n.assistants || '—' }} ·
+        <strong>Anaesthetist:</strong> {{ schedule.anaesthesiologistName || '—' }} ·
+        <strong>Scrub Nurse:</strong> {{ schedule.scrubNurseName || '—' }} ·
+        <strong>Floor Nurse:</strong> {{ staffByRole('floor-nurse')[0]?.staffName || '—' }}
+      </p>
+
+      <h3 class="pp-h3">Pre-Operative Diagnosis</h3>
+      <p class="pp-block-text">{{ n.preOpDiagnosis || '—' }}</p>
+      <h3 class="pp-h3">Post-Operative Diagnosis <span *ngIf="n.postOpDiagnosisSame">(same)</span></h3>
+      <p class="pp-block-text">{{ n.postOpDiagnosis || (n.postOpDiagnosisSame ? n.preOpDiagnosis : '—') }}</p>
+
+      <div class="pp-grid2">
+        <div><strong>Material to lab — HPE:</strong> {{ n.materialToLabHpe || '—' }}</div>
+        <div><strong>Material to lab — CIS:</strong> {{ n.materialToLabCis || '—' }}</div>
+        <div><strong>Material — Others:</strong> {{ n.materialToLabOthers || '—' }}</div>
+        <div><strong>Material to Security (MLC):</strong> {{ n.materialToSecurityMlc || '—' }}</div>
+      </div>
+
+      <div class="pp-grid2">
+        <div><strong>Drains:</strong> {{ n.drains || '—' }}</div>
+        <div><strong>EBL:</strong> {{ n.bloodLossMl ?? '—' }} ml</div>
+        <div><strong>I/O:</strong> {{ n.fluidsMl ?? '—' }} ml</div>
+        <div><strong>Prosthesis/Implant Label:</strong> {{ n.prosthesisLabel || '—' }}</div>
+      </div>
+
+      <h3 class="pp-h3">Findings</h3>
+      <p class="pp-block-text">{{ n.findings || '—' }}</p>
+
+      <h3 class="pp-h3">Significant Intra-Operative Event</h3>
+      <p class="pp-block-text">{{ n.significantIntraOpEvent || '—' }}</p>
+
+      <h3 class="pp-h3">Description of Procedure</h3>
+      <p><strong>Position:</strong> {{ n.position || '—' }}</p>
+      <p><strong>Incision:</strong> {{ n.incision || '—' }}</p>
+      <h4 class="pp-h4">Steps</h4>
+      <p class="pp-block-text">{{ n.procedureSteps || n.procedureDone || '—' }}</p>
+
+      <div class="pp-grid2">
+        <div><strong>Sponge / Instrument count verified:</strong> {{ n.spongeInstrumentCountVerified ? 'Yes' : 'No' }}</div>
+        <div><strong>Wound closure done:</strong> {{ n.woundClosureDone ? 'Yes' : 'No' }}</div>
+        <div><strong>Skin closure done:</strong> {{ n.skinClosureDone ? 'Yes' : 'No' }}</div>
+        <div><strong>Disposition:</strong> {{ n.disposition || '—' }}</div>
+      </div>
+
+      <h3 class="pp-h3" *ngIf="parseImplants().length">Implants used</h3>
+      <table class="pp-table" *ngIf="parseImplants().length">
+        <thead><tr><th>Name</th><th>Batch</th><th>Serial</th><th>Manufacturer</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let i of parseImplants()">
+            <td>{{ i.name }}</td><td>{{ i.batch || '—' }}</td><td>{{ i.serial || '—' }}</td><td>{{ i.manufacturer || '—' }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <table class="pp-sigtable">
+        <tr><td>Surgeon Name</td><td>{{ n.signedBy || '_____________' }}</td></tr>
+        <tr><td>Signature & Date</td><td>{{ n.signedAt ? (n.signedAt | date:'dd/MM/yyyy HH:mm') : '_____________' }}</td></tr>
+      </table>
+    </ng-container>
+    <p *ngIf="!primaryNote()" class="pp-muted">Operative note not yet written.</p>
+  </article>
+
+  <!-- =====================================================================
+       Track Sheet (UHJ/OTS/F-04)
+       ===================================================================== -->
+  <article class="pp-page" *ngIf="!loading && form === 'track-sheet' && schedule">
+    <header class="pp-hd">
+      <div>
+        <h1>SURGERY TRACK SHEET</h1>
+        <p class="pp-hd-sub">UHJ/OTS/F-04</p>
+      </div>
+      <div class="pp-hd-meta">
+        <div><span>Date</span><strong>{{ schedule.date | date:'dd/MM/yyyy' }}</strong></div>
+        <div><span>OT Room</span><strong>{{ schedule.otRoom?.name || schedule.otRoom?.code || '—' }}</strong></div>
+      </div>
+    </header>
+    <div class="pp-patient">
+      <div><span>Patient</span><strong>{{ schedule.patientName || '—' }}</strong></div>
+      <div><span>PRN</span><strong>{{ schedule.prn || '—' }}</strong></div>
+      <div><span>Surgery</span><strong>{{ primarySurgery()?.surgeryName || schedule.procedureName }}</strong></div>
+    </div>
+
+    <table class="pp-table pp-table-2col">
+      <tr><td>Diagnosis</td><td>{{ primaryNote()?.preOpDiagnosis || '—' }}</td></tr>
+      <tr><td>Surgeon</td><td>{{ schedule.surgeonName || '—' }}</td></tr>
+      <tr><td>Asst. Surgeons</td><td>{{ staffByRole('assistant-surgeon').length ? staffByRole('assistant-surgeon')[0].staffName : '—' }}</td></tr>
+      <tr><td>Anaesthetist</td><td>{{ schedule.anaesthesiologistName || '—' }}</td></tr>
+      <tr><td>Anaesthesia</td><td>{{ primaryNote()?.anaesthesiaType || '—' }}</td></tr>
+      <tr><td>Wheel-In Time</td><td>{{ schedule.otAdmissionAt ? (schedule.otAdmissionAt | date:'dd/MM HH:mm') : '—' }}</td></tr>
+      <tr><td>Sign-In Time</td><td>{{ safety()?.signInAt ? (safety()?.signInAt | date:'dd/MM HH:mm') : '—' }}</td></tr>
+      <tr><td>Induction Time</td><td>{{ schedule.inductionAt ? (schedule.inductionAt | date:'dd/MM HH:mm') : '—' }}</td></tr>
+      <tr><td>Time-Out</td><td>{{ safety()?.timeOutAt ? (safety()?.timeOutAt | date:'dd/MM HH:mm') : '—' }}</td></tr>
+      <tr><td>Incision Time</td><td>{{ primaryNote()?.incisionAt ? (primaryNote()?.incisionAt | date:'dd/MM HH:mm') : '—' }}</td></tr>
+      <tr><td>Sign-Out</td><td>{{ safety()?.signOutAt ? (safety()?.signOutAt | date:'dd/MM HH:mm') : '—' }}</td></tr>
+      <tr><td>Extubation Time</td><td>{{ schedule.extubationAt ? (schedule.extubationAt | date:'dd/MM HH:mm') : '—' }}</td></tr>
+      <tr><td>Wheel-Out</td><td>{{ schedule.otDischargeAt ? (schedule.otDischargeAt | date:'dd/MM HH:mm') : '—' }}</td></tr>
+      <tr><td>Equipments</td>
+        <td>
+          <span *ngFor="let e of equipment; last as last">{{ e.equipmentName }} ({{ e.usedMinutes }}m){{ !last ? ', ' : '' }}</span>
+          <span *ngIf="!equipment.length">—</span>
+        </td>
+      </tr>
+      <tr><td>Implants</td>
+        <td>
+          <span *ngFor="let i of parseImplants(); last as last">{{ i.name }} #{{ i.batch || i.serial }}{{ !last ? ', ' : '' }}</span>
+          <span *ngIf="!parseImplants().length">—</span>
+        </td>
+      </tr>
+      <tr><td>Scrub Nurse</td><td>{{ schedule.scrubNurseName || '—' }}</td></tr>
+      <tr><td>Floor Nurse</td><td>{{ staffByRole('floor-nurse')[0]?.staffName || '—' }}</td></tr>
+      <tr><td>Technician</td><td>{{ staffByRole('technician')[0]?.staffName || '—' }}</td></tr>
+    </table>
+
+    <p class="pp-sig">Staff signature: ________________________________</p>
+  </article>
+</div>

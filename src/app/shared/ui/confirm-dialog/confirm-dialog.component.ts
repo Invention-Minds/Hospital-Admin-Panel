@@ -40,11 +40,26 @@ export class ConfirmDialogComponent {
   /** Severity — picks header-bar + confirm-button color. */
   @Input() severity: ConfirmDialogSeverity = 'default';
 
+  /** When true, the Cancel button is hidden — single-button informational
+   * mode used by AlertService.show() to replace browser-native alert(). */
+  @Input() alertOnly = false;
+
+  /** When true, a text/password input renders between the message and the
+   * footer. Used by AlertService.prompt() to replace browser-native prompt().
+   * The confirm event emits the entered value; cancel emits null. */
+  @Input() promptMode = false;
+  @Input() inputType: 'text' | 'password' | 'number' = 'text';
+  @Input() inputPlaceholder = '';
+  @Input() inputValue = '';
+
+  @Output() promptConfirm = new EventEmitter<string>();
+
   @Output() visibleChange = new EventEmitter<boolean>();
   @Output() confirm = new EventEmitter<void>();
   @Output() cancel = new EventEmitter<void>();
 
   onConfirm(): void {
+    if (this.promptMode) this.promptConfirm.emit(this.inputValue ?? '');
     this.confirm.emit();
     this.hide();
   }

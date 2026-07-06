@@ -1,0 +1,321 @@
+/* Phase 9.10 — Nurses & Clinical Staff admin.
+ * .ns-shell wrapper styling comes from the global forms.css allow-list
+ * (sidebar clearance, top padding for Back button). The .dm-table inside
+ * inherits the Confirmed-Appt styling from forms.css. Everything below is
+ * component-scoped. */
+
+/* ─── Page header ────────────────────────────────────────────────────── */
+.ns-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+.ns-page-title {
+  color: #271e4a;
+  font-family: Kanit, sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: 0.2px;
+}
+.ns-page-sub {
+  color: #7b7b7b;
+  font-size: 13px;
+  margin: 4px 0 0;
+}
+
+/* ─── Banner ─────────────────────────────────────────────────────────── */
+.ns-banner {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: Kanit, sans-serif;
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+.ns-banner.ns-bad  { background: #fee2e2; color: #b91c1c; border-left: 3px solid #dc2626; }
+.ns-banner.ns-good { background: #dcfce7; color: #166534; border-left: 3px solid #16a34a; }
+
+/* ─── Filter card ────────────────────────────────────────────────────── */
+.ns-filter-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 2px rgba(39, 30, 74, 0.04);
+}
+.ns-filter-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1.2fr auto auto;
+  gap: 16px;
+  align-items: end;
+}
+@media (max-width: 1024px) {
+  .ns-filter-grid { grid-template-columns: 1fr 1fr; }
+  .ns-field-action { grid-column: 1 / -1; }
+}
+@media (max-width: 640px) {
+  .ns-filter-grid { grid-template-columns: 1fr; }
+}
+.ns-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.ns-field-label {
+  color: #271e4a;
+  font-family: Kanit, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+}
+.ns-field-check { align-self: end; padding-bottom: 8px; }
+.ns-field-action {
+  align-self: end;
+  flex-direction: row;
+  gap: 8px;
+}
+.ns-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: Kanit, sans-serif;
+  font-size: 13px;
+  color: #271e4a;
+  cursor: pointer;
+}
+.ns-input {
+  height: 40px;
+  padding: 8px 12px;
+  font-family: Kanit, sans-serif;
+  font-size: 14px;
+  color: #271e4a;
+  background: #f0f3ff;
+  border: 1px solid #b4b6ba;
+  border-radius: 6px;
+  box-sizing: border-box;
+  width: 100%;
+}
+.ns-input:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.18);
+  outline: none;
+}
+
+/* ─── Layout ─────────────────────────────────────────────────────────── */
+.ns-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 16px;
+  align-items: start;
+}
+.ns-layout:has(.ns-side:empty),
+.ns-layout:not(:has(.ns-side)) {
+  grid-template-columns: 1fr;
+}
+@media (max-width: 1100px) {
+  .ns-layout { grid-template-columns: 1fr; }
+}
+
+/* ─── Grid wrap (list card) ──────────────────────────────────────────── */
+.ns-grid-wrap {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 16px 20px;
+  box-shadow: 0 1px 2px rgba(39, 30, 74, 0.04);
+}
+.ns-grid-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 12px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid #f3f4f6;
+}
+.ns-grid-title {
+  color: #271e4a;
+  font-family: Kanit, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+.ns-count {
+  color: #7b7b7b;
+  font-size: 13px;
+  font-weight: 400;
+  margin-left: 4px;
+}
+.ns-loading {
+  padding: 40px;
+  text-align: center;
+  color: #7b7b7b;
+  font-style: italic;
+  font-family: Kanit, sans-serif;
+}
+.ns-empty {
+  padding: 60px 20px;
+  text-align: center;
+  color: #9ca3af;
+  font-family: Kanit, sans-serif;
+}
+.ns-empty i {
+  font-size: 36px;
+  display: block;
+  margin-bottom: 8px;
+  color: #b4b6ba;
+}
+.ns-empty div { font-size: 14px; }
+.ns-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* ─── Table cell tweaks (table itself inherits dm-table styling) ─────── */
+.ns-row-inactive { opacity: 0.55; }
+.ns-name {
+  font-weight: 500;
+  color: #271e4a;
+  text-align: left;
+}
+.ns-name-sub {
+  color: #7b7b7b;
+  font-size: 12px;
+  text-align: left;
+}
+.ns-actions-cell {
+  white-space: nowrap;
+}
+.ns-btn-link {
+  background: transparent;
+  border: none;
+  color: #1d4ed8;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: Kanit, sans-serif;
+  padding: 0 6px;
+}
+.ns-btn-link:hover { text-decoration: underline; }
+.ns-bad-link { color: #b91c1c; }
+.ns-muted { color: #9ca3af; font-style: italic; font-size: 12px; }
+
+/* ─── Pills ──────────────────────────────────────────────────────────── */
+.ns-pill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+.ns-pill-active   { background: #dcfce7; color: #166534; }
+.ns-pill-inactive { background: #fee2e2; color: #b91c1c; }
+.ns-pill-ot       { background: #dbeafe; color: #1e40af; }
+
+/* ─── Side editor ────────────────────────────────────────────────────── */
+.ns-side {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 16px 18px;
+  box-shadow: 0 1px 2px rgba(39, 30, 74, 0.04);
+  position: sticky;
+  top: 70px;
+  max-height: calc(100vh - 90px);
+  overflow-y: auto;
+}
+.ns-side-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 12px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid #f3f4f6;
+}
+.ns-side-title {
+  color: #271e4a;
+  font-family: Kanit, sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+.ns-icon-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: #7b7b7b;
+  cursor: pointer;
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.ns-icon-btn:hover { background: #f3f4f6; color: #271e4a; }
+.ns-form-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.ns-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.ns-hint {
+  color: #1e40af;
+  font-size: 11px;
+  margin-top: 4px;
+}
+.ns-side-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 14px;
+  margin-top: 10px;
+  border-top: 1px solid #f3f4f6;
+}
+
+/* ─── Buttons ────────────────────────────────────────────────────────── */
+.ns-btn {
+  height: 40px;
+  padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: Kanit, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid transparent;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+.ns-btn-primary {
+  background: #169458;
+  color: #fff;
+  border-color: #169458;
+  min-width: 120px;
+}
+.ns-btn-primary:hover:not([disabled]) {
+  background: #117849;
+  border-color: #117849;
+}
+.ns-btn-secondary {
+  background: #fff;
+  color: #271e4a;
+  border-color: #d1d5db;
+}
+.ns-btn-secondary:hover:not([disabled]) {
+  background: #f3f4f6;
+}
+.ns-btn[disabled] { opacity: 0.55; cursor: not-allowed; }

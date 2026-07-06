@@ -1,0 +1,319 @@
+.na-shell {
+  max-width: 1100px;
+  margin: 24px auto;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-family: var(--font-family-primary, -apple-system, Segoe UI, Roboto, sans-serif);
+  color: var(--color-text-primary, #1a1a1a);
+}
+
+.na-title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+  color: #271e4a;
+}
+
+.na-banner {
+  padding: 10px 14px;
+  border-radius: 6px;
+  border-left: 4px solid;
+  font-size: 14px;
+}
+.na-banner-bad { background: #fdecee; color: #7a1c25; border-left-color: #b02a37; }
+.na-banner-good { background: #e6f4ea; color: #14562a; border-left-color: #1e7e34; }
+
+.na-card {
+  background: #ffffff;
+  border: 1px solid #d7d7d7;
+  border-radius: 8px;
+  padding: 18px 20px;
+}
+.na-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.na-section-title { margin: 0 0 8px; font-size: 16px; color: #271e4a; font-weight: 600; }
+.na-hint { margin: 0 0 14px; font-size: 13px; color: #5a5a5a; }
+.na-empty { padding: 16px 0; color: #5a5a5a; font-size: 13px; text-align: center; }
+.na-meta { color: #5a5a5a; font-size: 12px; }
+
+/* ─── Toolbar / date range ─────────────────────────────────────────── */
+.na-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+}
+.na-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: #444;
+}
+.na-field input {
+  padding: 8px 10px;
+  border: 1px solid #b4b6ba;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 14px;
+  background: #f6f8ff;
+  min-width: 140px;
+}
+
+/* ─── Tabs ─────────────────────────────────────────────────────────── */
+.na-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid #d7d7d7;
+}
+.na-tab {
+  border: none;
+  background: transparent;
+  padding: 10px 16px;
+  font-family: inherit;
+  font-size: 14px;
+  color: #555;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+}
+.na-tab:hover { color: #271e4a; }
+.na-tab-active {
+  color: #271e4a;
+  font-weight: 600;
+  border-bottom-color: #271e4a;
+}
+
+/* ─── Overall headline card ────────────────────────────────────────── */
+.na-overall {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: linear-gradient(135deg, #f6faff 0%, #e8f0fe 100%);
+  border-color: #b8d4ff;
+}
+.na-overall-score {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.na-overall-label {
+  font-size: 13px;
+  color: #5a5a5a;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.score {
+  font-size: 56px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+.score small { font-size: 18px; font-weight: 500; color: #5a5a5a; }
+.score-good { color: #1e7e34; }
+.score-warn { color: #b06a00; }
+.score-bad { color: #b02a37; }
+
+.na-overall-stats {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+.na-stat {
+  background: #fff;
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border: 1px solid #e5e5e5;
+}
+.na-stat-num { font-size: 22px; font-weight: 700; color: #271e4a; }
+.na-stat-label { font-size: 11.5px; color: #5a5a5a; text-transform: uppercase; letter-spacing: 0.3px; }
+.na-stat-pass { border-left: 4px solid #1e7e34; }
+.na-stat-warn { border-left: 4px solid #b06a00; }
+.na-stat-fail { border-left: 4px solid #b02a37; }
+.na-stat-na   { border-left: 4px solid #b4b6ba; }
+
+/* ─── Chapter card ────────────────────────────────────────────────── */
+.na-chapter { padding: 0; overflow: hidden; }
+.chapter-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  border-left: 4px solid;
+}
+.chapter-pass { border-left-color: #1e7e34; background: #f3fbf5; }
+.chapter-warn { border-left-color: #b06a00; background: #fff7e6; }
+.chapter-fail { border-left-color: #b02a37; background: #fff0f1; }
+
+.na-chapter-code {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 13px;
+  font-weight: 700;
+  color: #271e4a;
+  margin-right: 8px;
+  background: rgba(255, 255, 255, 0.7);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.na-chapter-name { font-size: 15px; color: #271e4a; }
+.na-chapter-counts { display: flex; gap: 4px; }
+
+/* ─── Standard rows ────────────────────────────────────────────────── */
+.na-standards {
+  display: flex;
+  flex-direction: column;
+}
+.na-standard {
+  border-top: 1px solid #eee;
+}
+.na-standard-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  gap: 14px;
+}
+.na-standard-row:hover { background: #f9fafe; }
+.na-standard-meta { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.na-standard-code {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 12px;
+  color: #5a5a5a;
+}
+.na-standard-name { font-size: 14px; color: #271e4a; }
+.na-standard-right { display: flex; align-items: center; gap: 10px; }
+.na-standard-rate {
+  font-family: ui-monospace, SFMono-Regular, monospace;
+  font-size: 12px;
+  color: #5a5a5a;
+  white-space: nowrap;
+}
+.na-standard-row .pi { color: #5a5a5a; font-size: 12px; }
+
+.na-standard-detail {
+  padding: 12px 20px 16px;
+  background: #fafbfc;
+  border-top: 1px dashed #e5e5e5;
+}
+.na-standard-desc { margin: 0 0 8px; font-size: 13px; color: #444; }
+.na-standard-threshold { margin: 0 0 10px; font-size: 12.5px; color: #5a5a5a; }
+.na-breach-head { margin: 12px 0 6px; font-size: 13px; color: #271e4a; font-weight: 600; }
+
+.na-breach-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+  background: #fff;
+  border: 1px solid #f0d4d7;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.na-breach-table th, .na-breach-table td {
+  text-align: left;
+  padding: 6px 10px;
+  border-bottom: 1px solid #fceaeb;
+}
+.na-breach-table th {
+  background: #fdecee;
+  color: #7a1c25;
+  font-weight: 600;
+}
+
+/* ─── Pills ────────────────────────────────────────────────────────── */
+.pill {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  border: 1px solid #d7d7d7;
+  background: #f3f3f3;
+  color: #555;
+}
+.pill-pass { background: #e6f4ea; color: #14562a; border-color: #b8e0c4; }
+.pill-warn { background: #fff4e0; color: #b06a00; border-color: #f3d9a8; }
+.pill-fail { background: #fdecee; color: #7a1c25; border-color: #f3bfc6; }
+.pill-na { background: #f3f3f3; color: #777; border-color: #d7d7d7; }
+
+/* ─── Buttons ──────────────────────────────────────────────────────── */
+.na-btn {
+  border: 1px solid #d7d7d7;
+  background: #ffffff;
+  color: #1a1a1a;
+  padding: 8px 18px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.na-btn-primary { background: #0b5ed7; color: #fff; border-color: transparent; }
+.na-btn-primary:hover:not(:disabled) { background: #094bad; }
+.na-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ─── Form rows (exports tab) ──────────────────────────────────────── */
+.na-form-row { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+.na-form-row label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1 1 calc(50% - 12px);
+  min-width: 160px;
+  font-size: 13px;
+  color: #333;
+}
+.na-form-row label.na-full { flex: 1 1 100%; }
+.na-form-row select {
+  padding: 8px 10px;
+  border: 1px solid #b4b6ba;
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 14px;
+  background: #f6f8ff;
+}
+.na-form-buttons { display: flex; justify-content: flex-end; gap: 8px; }
+
+/* ─── Recent exports table ─────────────────────────────────────────── */
+.na-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.na-table th, .na-table td {
+  text-align: left;
+  border-bottom: 1px solid #eee;
+  padding: 10px 12px;
+}
+.na-table th {
+  background: #f6f8ff;
+  color: #271e4a;
+  font-weight: 600;
+}
+.na-link {
+  color: #0b5ed7;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.na-link:hover { text-decoration: underline; }
+.na-fail { color: #7a1c25; font-size: 12px; font-family: ui-monospace, SFMono-Regular, monospace; }
+
+@media (max-width: 720px) {
+  .na-overall-stats { grid-template-columns: repeat(2, 1fr); }
+}

@@ -37,6 +37,11 @@ export class PageHeaderComponent {
   /** Patient registration number. */
   @Input() patientPrn: number | string | null = null;
 
-  /** Admission id (uuid) — rendered muted. */
+  /** Admission id (uuid) — rendered muted. Kept for backward compatibility;
+   *  prefer `admissionNo` so users see the human-friendly number. */
   @Input() admissionId: string | null = null;
+
+  /** Human-friendly admission number (e.g. "11562"). When set, it is shown
+   *  in place of the raw `admissionId` uuid. */
+  @Input() admissionNo: string | null = null;
 }

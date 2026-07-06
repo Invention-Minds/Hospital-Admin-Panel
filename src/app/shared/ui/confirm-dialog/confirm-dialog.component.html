@@ -1,11 +1,17 @@
 <div class="confirm-scrim" *ngIf="visible" (click)="onClose()" data-testid="confirm-scrim">
-  <div class="confirm-shell" role="dialog" aria-modal="true"
+  <div class="confirm-panel" role="dialog" aria-modal="true"
        [attr.aria-labelledby]="'confirm-title'"
        (click)="$event.stopPropagation()">
     <div class="confirm-header"
          [class.confirm-header--default]="severity === 'default'"
          [class.confirm-header--warning]="severity === 'warning'"
          [class.confirm-header--danger]="severity === 'danger'">
+      <span class="confirm-header__icon" aria-hidden="true">
+        <i class="pi"
+           [class.pi-exclamation-triangle]="severity === 'warning'"
+           [class.pi-exclamation-circle]="severity === 'danger'"
+           [class.pi-info-circle]="severity === 'default'"></i>
+      </span>
       <h2 id="confirm-title" class="confirm-header__title">{{ title }}</h2>
       <button type="button" class="confirm-header__close" aria-label="Close dialog"
               (click)="onClose()" data-testid="confirm-close">
@@ -14,10 +20,17 @@
     </div>
     <div class="confirm-body">
       <p class="confirm-body__message">{{ message }}</p>
+      <input *ngIf="promptMode" class="confirm-body__input"
+             [type]="inputType"
+             [placeholder]="inputPlaceholder"
+             [(ngModel)]="inputValue"
+             (keydown.enter)="onConfirm()"
+             data-testid="confirm-input"
+             autofocus />
     </div>
     <div class="confirm-footer">
       <button type="button" class="confirm-btn confirm-btn--cancel"
-              (click)="onCancel()" data-testid="confirm-cancel">
+              (click)="onCancel()" *ngIf="!alertOnly" data-testid="confirm-cancel">
         {{ cancelLabel }}
       </button>
       <button type="button" class="confirm-btn confirm-btn--confirm"

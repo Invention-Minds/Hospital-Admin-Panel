@@ -9,6 +9,7 @@ import { AuthServiceService } from '../../services/auth/auth-service.service';
 import { EventService } from '../../services/event.service';
 import { Subscription, interval } from 'rxjs';
 import { environment } from '../../../environment/environment';
+import { resolveFileUrl } from '../../shared/file-url.util';
 import { TherapyService } from '../../services/therapy/therapy.service';
 import { trigger, transition, style, animate } from '@angular/animations';
 
@@ -308,7 +309,7 @@ export class TherapyChannelComponent {
           activeMedia.forEach((media: any) => {
             this.mediaFiles.push({
               type: 'image',
-              src: media.url
+              src: resolveFileUrl(media.url)
             });
           });
         }
@@ -316,7 +317,7 @@ export class TherapyChannelComponent {
         if (ad.type === 'video' && ad.isActive && ad.content) {
           this.mediaFiles.push({
             type: 'video',
-            src: ad.content
+            src: resolveFileUrl(ad.content)
           });
         }
       });

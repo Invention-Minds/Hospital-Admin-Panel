@@ -1,0 +1,73 @@
+<!-- Phase 9.9 — redesigned with shared dm-* design module. No functional change. -->
+<div class="dm-card">
+  <div class="dm-page-header" style="border-bottom: none; margin-bottom: 12px; padding-bottom: 0;">
+    <div>
+      <h3 class="dm-page-title" style="font-size: 18px;">OT Clearance <span style="color:#7b7b7b; font-size:13px; font-weight:400;">(UHJ/IPS/F-32)</span></h3>
+      <p class="dm-page-sub">Financial clearance before the OT slot is confirmed.</p>
+    </div>
+    <span [ngClass]="{
+      'dm-pill dm-pill-good': row?.clearanceStatus === 'cleared',
+      'dm-pill dm-pill-bad':  row?.clearanceStatus === 'rejected',
+      'dm-pill dm-pill-warn': row?.clearanceStatus === 'pending' || !row
+    }" *ngIf="!loading">
+      {{ row?.clearanceStatus ? (row?.clearanceStatus | titlecase) : 'Not started' }}
+    </span>
+  </div>
+
+  <div class="dm-banner dm-banner-info" *ngIf="row?.bypassReason">
+    Bypass active — {{ row?.bypassReason }}
+  </div>
+  <div class="dm-banner dm-banner-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="dm-banner dm-banner-good" *ngIf="successMessage">{{ successMessage }}</div>
+  <div class="dm-loading" *ngIf="loading">Loading…</div>
+
+  <ng-container *ngIf="!loading">
+    <div class="dm-form-grid">
+      <label class="dm-field">
+        <span class="dm-field-label">Payment Mode</span>
+        <select class="dm-select" [(ngModel)]="paymentMode"
+                [disabled]="row?.clearanceStatus === 'cleared'">
+          <option value="">— select —</option>
+          <option *ngFor="let m of paymentModes" [ngValue]="m.value">{{ m.label }}</option>
+        </select>
+      </label>
+      <label class="dm-field">
+        <span class="dm-field-label">Billing Notes</span>
+        <input class="dm-input" type="text" [(ngModel)]="billingNotes"
+               [disabled]="row?.clearanceStatus === 'cleared'"
+               placeholder="Insurance details, package cost, advance paid…" />
+      </label>
+      <label class="dm-field dm-field-full">
+        <span class="dm-field-label">Remarks</span>
+        <textarea class="dm-textarea" rows="2" [(ngModel)]="remarks"
+                  [disabled]="row?.clearanceStatus === 'cleared'"
+                  placeholder="Any blockers / conditions before clearance"></textarea>
+      </label>
+    </div>
+
+    <div class="dm-actions">
+      <button class="dm-btn dm-btn-secondary" (click)="saveDraft()"
+              [disabled]="saving || row?.clearanceStatus === 'cleared'">
+        Save Draft
+      </button>
+      <button class="dm-btn dm-btn-danger" (click)="reject()"
+              [disabled]="saving || !row || row.clearanceStatus === 'cleared'">
+        Reject
+      </button>
+      <button class="dm-btn dm-btn-secondary" (click)="reset()"
+              *ngIf="row && row.clearanceStatus !== 'pending'"
+              [disabled]="saving">
+        Reset to Pending
+      </button>
+      <button class="dm-btn dm-btn-primary" (click)="markCleared()"
+              [disabled]="saving || !row || row.clearanceStatus === 'cleared'">
+        Mark Cleared
+      </button>
+    </div>
+
+    <p class="dm-page-sub" *ngIf="row?.clearanceStatus === 'cleared'" style="text-align:right;">
+      Cleared by <strong>{{ row?.clearedBy }}</strong>
+      at {{ row?.clearedAt | date:'dd-MMM-yyyy HH:mm' }}
+    </p>
+  </ng-container>
+</div>

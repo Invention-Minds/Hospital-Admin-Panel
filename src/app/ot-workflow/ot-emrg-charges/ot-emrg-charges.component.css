@@ -1,0 +1,38 @@
+.ec-shell { padding: 20px; max-width: 1400px; margin: 24px auto 24px 96px; }
+.ec-head { display: flex; justify-content: space-between; align-items: end; }
+.ec-title { font-size: 22px; font-weight: 600; margin: 0; }
+.ec-sub { color: #6b7280; font-size: 12px; margin: 4px 0 14px; }
+.ec-sub code { background: #f3f4f6; padding: 1px 6px; border-radius: 4px; }
+
+.ec-banner { padding: 10px 14px; border-radius: 6px; margin-bottom: 10px; font-size: 14px; }
+.ec-bad { background: #fee2e2; color: #b91c1c; }
+.ec-good { background: #dcfce7; color: #166534; }
+.ec-loading { padding: 40px; text-align: center; color: #6b7280; font-style: italic; }
+.ec-muted { color: #9ca3af; font-style: italic; }
+
+.ec-layout { display: grid; grid-template-columns: 360px 1fr; gap: 16px; }
+.ec-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px 20px; }
+.ec-card-h { font-size: 14px; font-weight: 600; margin: 0 0 12px; color: #374151; text-transform: uppercase; letter-spacing: 0.5px; }
+
+.ec-field { display: flex; flex-direction: column; font-size: 12px; color: #4b5563; gap: 3px; margin-bottom: 10px; }
+.ec-field input, .ec-field select { border: 1px solid #d1d5db; border-radius: 6px; padding: 6px 8px; font-size: 13px; }
+.ec-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.ec-total { padding: 10px 14px; background: #eff6ff; color: #1e40af; border-radius: 6px; font-size: 14px; margin: 12px 0; }
+.ec-actions { display: flex; justify-content: flex-end; gap: 8px; }
+
+.ec-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+.ec-table th, .ec-table td { border-bottom: 1px solid #f3f4f6; padding: 7px 10px; text-align: left; vertical-align: top; }
+.ec-table th { background: #f9fafb; font-weight: 600; color: #374151; font-size: 12px; }
+.ec-r { text-align: right; }
+
+.ec-pill { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; background: #e5e7eb; color: #4b5563; }
+.ec-pill-good { background: #dcfce7; color: #166534; }
+
+.ec-btn { background: #fff; border: 1px solid #d1d5db; padding: 6px 12px; border-radius: 5px; cursor: pointer; font-size: 13px; }
+.ec-btn:hover:not([disabled]) { background: #f3f4f6; }
+.ec-btn-primary { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
+.ec-btn-primary:hover:not([disabled]) { background: #1e40af; }
+.ec-btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+.ec-btn-link { background: transparent; border: none; color: #1d4ed8; cursor: pointer; font-size: 12px; padding: 0 6px; }
+.ec-btn-link:hover { text-decoration: underline; }
+.ec-bad-link { color: #b91c1c; }

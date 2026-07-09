@@ -250,6 +250,88 @@ a {
 /* Legacy class still referenced in markup — keep neutral. */
 .appt { margin-top: 0; }
 
+/* ========================================================================
+   Accordion groups
+   Each workflow section is a collapsible group: a clickable header (section
+   icon + label + chevron) that toggles a panel of menu items. Strict
+   accordion — only one open at a time, driven by expandedGroup in the TS.
+   The header reuses .icon-wrapper so it inherits the rail's height, hover,
+   active-pill and icon alignment; we only reset the <button> defaults and
+   add the chevron + section divider here.
+======================================================================== */
+.sidebar-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  /* Thin divider between sections — mirrors the old section-label border so
+     the collapsed 72px rail still reads as grouped, not one long list. */
+  border-top: 1px solid rgba(255, 255, 255, 0.10);
+  margin-top: 6px;
+  padding-top: 4px;
+}
+
+/* <button> reset — .icon-wrapper supplies layout/hover/active. */
+.sidebar-group-header {
+  width: 100%;
+  background: transparent;
+  border: none;
+  font: inherit;
+  text-align: left;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+/* Chevron sits at the far right, hidden in the collapsed rail (like the
+   labels), fades in on hover, and flips when the section is open. Needs
+   higher specificity than `.icon-wrapper svg` (which forces 22px) to keep
+   its smaller size. */
+.sidebar-group-header .sidebar-chevron {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  margin-left: auto;
+  color: rgba(255, 255, 255, 0.55);
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.25s ease;
+}
+.sidebar:hover .sidebar-group-header .sidebar-chevron {
+  opacity: 1;
+}
+.sidebar-group-header.open .sidebar-chevron {
+  transform: rotate(180deg);
+}
+.sidebar-group-header.active .sidebar-chevron {
+  color: #fff;
+}
+
+/* Collapsible panel. In the collapsed rail keep item icons flush with the
+   header icon (no indent); on hover-expand, indent + a left rail line show
+   the parent → child relationship. */
+.sidebar-group-items {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+/* Collapsed rail (72px) shows only the main section-header icons; the
+   sub-modules of the open group appear, indented under their parent, once the
+   drawer expands on hover. Keeps the collapsed rail from stacking a header
+   icon and its children as look-alike siblings. */
+.sidebar:not(:hover) .sidebar-group-items {
+  display: none;
+}
+.sidebar:hover .sidebar-group-items {
+  margin-left: 12px;
+  padding-left: 8px;
+  border-left: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+/* The first item of a section no longer needs its own divider — the group
+   header already delineates. */
+.sidebar-group-items .sidebar-section-start {
+  margin-top: 0;
+  border-top: none;
+}
+
 /* -------------------------------------------------------------- Mobile hide */
 @media (max-width: 768px) {
   .sidebar {

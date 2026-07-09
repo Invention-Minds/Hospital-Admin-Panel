@@ -151,6 +151,15 @@
   border-radius: 8px;
 }
 .ns-chip.alt { color: #3a7d2c; background: #eef7ea; }
+/* "+N more" pill — caps the visible chips so cards stay a bounded, even height
+   no matter how many wards/nurses; click opens Edit / Map to see the full list. */
+.ns-chip.more {
+  color: #475467;
+  background: #eef0f4;
+  font-weight: 600;
+  cursor: pointer;
+}
+.ns-chip.more:hover { background: #e1e5ec; }
 .ns-muted { color: #98a2b3; font-size: 12px; font-style: italic; }
 
 /* ─── Actions ────────────────────────────────────────────────────────── */

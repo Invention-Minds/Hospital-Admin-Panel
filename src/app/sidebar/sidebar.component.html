@@ -123,7 +123,17 @@
     </a>
 
     <!-- ═══════════ OPD / front-desk ═══════════ -->
-    <div class="sidebar-section-label" *ngIf="showOpdSection">OPD / Front Desk</div>
+    <div class="sidebar-group" *ngIf="showOpdSection">
+    <button type="button" class="icon-wrapper sidebar-group-header"
+            [class.active]="activeGroup === 'opd'" [class.open]="expandedGroup === 'opd'"
+            (click)="toggleGroup('opd')">
+      <div class="icon-content">
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 24 24"><path fill="currentColor" d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2m0 18H4V8h16z"/></svg>
+        <span class="sidebar-group-title">OPD / Front Desk</span>
+        <svg class="sidebar-chevron" xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" viewBox="0 0 24 24"><path fill="currentColor" d="M8.12 9.29L12 13.17l3.88-3.88a.996.996 0 1 1 1.41 1.41l-4.59 4.59a.996.996 0 0 1-1.41 0L6.7 10.7a.996.996 0 0 1 0-1.41c.39-.38 1.03-.39 1.42 0"/></svg>
+      </div>
+    </button>
+    <div class="sidebar-group-items" *ngIf="expandedGroup === 'opd'">
     <a [routerLink]="role !== 'doctor' ? '/appointments' : null" routerLinkActive="active"
        class="icon-wrapper sidebar-section-start"
        *ngIf="['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotMHC() && isNotIpBillingManager() && isNotRadiology() && !isMukund() && isNotLab() && isNotNursing() && isNotOT() && isNotTherapist() && isNotTVController() && isNotDischargeCoordinator() && isNotErNurse()">
@@ -223,8 +233,21 @@
       </div>
     </a>
 
+    </div>
+    </div>
+
     <!-- ═══════════ Services / investigations ═══════════ -->
-    <div class="sidebar-section-label" *ngIf="showInvestigationsSection">Investigations</div>
+    <div class="sidebar-group" *ngIf="showInvestigationsSection">
+    <button type="button" class="icon-wrapper sidebar-group-header"
+            [class.active]="activeGroup === 'investigations'" [class.open]="expandedGroup === 'investigations'"
+            (click)="toggleGroup('investigations')">
+      <div class="icon-content">
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 24 24"><path fill="currentColor" d="M19 5v14H5V5zm0-2H5c-1.11 0-2 .89-2 2v14c0 1.11.89 2 2 2h14c1.11 0 2-.89 2-2V5c0-1.11-.89-2-2-2m-7 3c.55 0 1 .45 1 1v1h3.17c.18.31.33.65.49 1H13v1h4c.1.33.17.67.19 1H13v1h4.2c-.04.35-.05.69-.1 1H13v1h4s-.06 3-1.5 3c-1.35 0-1-1.53-2.5-2v2c0 .55-.45 1-1 1s-1-.45-1-1v-2c-1.5.47-1.15 2-2.5 2C7.06 17 7 14 7 14h4v-1H6.9c-.05-.31-.06-.65-.1-1H11v-1H6.81c.02-.33.1-.67.19-1h4V9H7.34c.16-.35.31-.69.49-1H11V7c0-.55.45-1 1-1"/></svg>
+        <span class="sidebar-group-title">Investigations</span>
+        <svg class="sidebar-chevron" xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" viewBox="0 0 24 24"><path fill="currentColor" d="M8.12 9.29L12 13.17l3.88-3.88a.996.996 0 1 1 1.41 1.41l-4.59 4.59a.996.996 0 0 1-1.41 0L6.7 10.7a.996.996 0 0 1 0-1.41c.39-.38 1.03-.39 1.42 0"/></svg>
+      </div>
+    </button>
+    <div class="sidebar-group-items" *ngIf="expandedGroup === 'investigations'">
     <a routerLink="/services" routerLinkActive="active"
        class="icon-wrapper sidebar-section-start"
        *ngIf="(['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotIpBillingManager() && isNotRadiology() && isNotMHC() && !isMukund() && isNotLab() && isNotNursing() && isNotOT() && isNotTherapist() && isNotTVController() && isNotDischargeCoordinator() && isNotErNurse())">
@@ -282,8 +305,21 @@
       </div>
     </a>
 
+    </div>
+    </div>
+
     <!-- ═══════════ Emergency & MLC ═══════════ -->
-    <div class="sidebar-section-label" *ngIf="showEmergencySection">Emergency</div>
+    <div class="sidebar-group" *ngIf="showEmergencySection">
+    <button type="button" class="icon-wrapper sidebar-group-header"
+            [class.active]="activeGroup === 'emergency'" [class.open]="expandedGroup === 'emergency'"
+            (click)="toggleGroup('emergency')">
+      <div class="icon-content">
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10s10-4.48 10-10S17.52 2 12 2m1 15h-2v-2h2v2m0-4h-2V7h2v6"/></svg>
+        <span class="sidebar-group-title">Emergency</span>
+        <svg class="sidebar-chevron" xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" viewBox="0 0 24 24"><path fill="currentColor" d="M8.12 9.29L12 13.17l3.88-3.88a.996.996 0 1 1 1.41 1.41l-4.59 4.59a.996.996 0 0 1-1.41 0L6.7 10.7a.996.996 0 0 1 0-1.41c.39-.38 1.03-.39 1.42 0"/></svg>
+      </div>
+    </button>
+    <div class="sidebar-group-items" *ngIf="expandedGroup === 'emergency'">
     <a [routerLink]="(role === 'super_admin' || isEmergencyDoctor() || isErNurse()) ? '/emergency': null"
        routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="icon-wrapper sidebar-section-start"
        *ngIf="(role === 'super_admin' || isEmergencyDoctor() || isErNurse())">
@@ -389,8 +425,21 @@
       </div>
     </a>
 
+    </div>
+    </div>
+
     <!-- ═══════════ IPD lifecycle ═══════════ -->
-    <div class="sidebar-section-label" *ngIf="showIpdSection">IPD</div>
+    <div class="sidebar-group" *ngIf="showIpdSection">
+    <button type="button" class="icon-wrapper sidebar-group-header"
+            [class.active]="activeGroup === 'ipd'" [class.open]="expandedGroup === 'ipd'"
+            (click)="toggleGroup('ipd')">
+      <div class="icon-content">
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 24 24"><path fill="currentColor" d="M4 4h16v2H4V4m0 7h16v2H4v-2m0 7h16v2H4v-2m2-4h12v2H6v-2"/></svg>
+        <span class="sidebar-group-title">IPD</span>
+        <svg class="sidebar-chevron" xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" viewBox="0 0 24 24"><path fill="currentColor" d="M8.12 9.29L12 13.17l3.88-3.88a.996.996 0 1 1 1.41 1.41l-4.59 4.59a.996.996 0 0 1-1.41 0L6.7 10.7a.996.996 0 0 1 0-1.41c.39-.38 1.03-.39 1.42 0"/></svg>
+      </div>
+    </button>
+    <div class="sidebar-group-items" *ngIf="expandedGroup === 'ipd'">
     <a [routerLink]="(role === 'doctor' || role === 'super_admin' || isIpdNurse || isNursingSuper) ? '/ipd': null"
        routerLinkActive="active" class="icon-wrapper sidebar-section-start"
        *ngIf="(role === 'doctor' || role === 'super_admin' || isIpdNurse || isNursingSuper)">
@@ -448,8 +497,21 @@
       </div>
     </a>
 
+    </div>
+    </div>
+
     <!-- ═══════════ OT MGMT ═══════════ -->
-    <div class="sidebar-section-label" *ngIf="showOtSection">OT MGMT</div>
+    <div class="sidebar-group" *ngIf="showOtSection">
+    <button type="button" class="icon-wrapper sidebar-group-header"
+            [class.active]="activeGroup === 'ot'" [class.open]="expandedGroup === 'ot'"
+            (click)="toggleGroup('ot')">
+      <div class="icon-content">
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 24 24"><path fill="currentColor" d="M3 3h8v8H3zm10 0h8v8h-8zM3 13h8v8H3zm10 0h8v8h-8z"/></svg>
+        <span class="sidebar-group-title">OT MGMT</span>
+        <svg class="sidebar-chevron" xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" viewBox="0 0 24 24"><path fill="currentColor" d="M8.12 9.29L12 13.17l3.88-3.88a.996.996 0 1 1 1.41 1.41l-4.59 4.59a.996.996 0 0 1-1.41 0L6.7 10.7a.996.996 0 0 1 0-1.41c.39-.38 1.03-.39 1.42 0"/></svg>
+      </div>
+    </button>
+    <div class="sidebar-group-items" *ngIf="expandedGroup === 'ot'">
 
     <!-- Phase 9.5g — Unified OT Workbench (primary entry into OT flow). -->
     <a [routerLink]="(role === 'super_admin' || subAdminType === 'OT Coordinator' || role === 'doctor') ? '/surgery-ot/workbench': null"
@@ -578,8 +640,21 @@
       </div>
     </a>
 
+    </div>
+    </div>
+
     <!-- ═══════════ Dietetics ═══════════ -->
-    <div class="sidebar-section-label" *ngIf="showDieteticsSection">Dietetics</div>
+    <div class="sidebar-group" *ngIf="showDieteticsSection">
+    <button type="button" class="icon-wrapper sidebar-group-header"
+            [class.active]="activeGroup === 'dietetics'" [class.open]="expandedGroup === 'dietetics'"
+            (click)="toggleGroup('dietetics')">
+      <div class="icon-content">
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 24 24"><path fill="currentColor" d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4"/></svg>
+        <span class="sidebar-group-title">Dietetics</span>
+        <svg class="sidebar-chevron" xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" viewBox="0 0 24 24"><path fill="currentColor" d="M8.12 9.29L12 13.17l3.88-3.88a.996.996 0 1 1 1.41 1.41l-4.59 4.59a.996.996 0 0 1-1.41 0L6.7 10.7a.996.996 0 0 1 0-1.41c.39-.38 1.03-.39 1.42 0"/></svg>
+      </div>
+    </button>
+    <div class="sidebar-group-items" *ngIf="expandedGroup === 'dietetics'">
 
     <!-- Dietetics — dietician queue -->
     <a [routerLink]="(subAdminType === 'Dietician' || role === 'super_admin' || role === 'doctor') ? '/dietetics/queue' : null"
@@ -605,8 +680,21 @@
       </div>
     </a>
 
+    </div>
+    </div>
+
     <!-- ═══════════ Discharge & Finance ═══════════ -->
-    <div class="sidebar-section-label" *ngIf="showDischargeSection">Discharge &amp; Finance</div>
+    <div class="sidebar-group" *ngIf="showDischargeSection">
+    <button type="button" class="icon-wrapper sidebar-group-header"
+            [class.active]="activeGroup === 'discharge'" [class.open]="expandedGroup === 'discharge'"
+            (click)="toggleGroup('discharge')">
+      <div class="icon-content">
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 24 24"><path fill="currentColor" d="M13.66 7C13.1 5.82 11.9 5 10.5 5H6V3h12v2h-3.76c.48.58.84 1.26 1.05 2H18v2h-2.02c-.25 2.8-2.61 5-5.48 5H9.71l6.29 6H13l-6-6v-2h3.5c1.76 0 3.22-1.3 3.46-3H6V7z"/></svg>
+        <span class="sidebar-group-title">Discharge &amp; Finance</span>
+        <svg class="sidebar-chevron" xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" viewBox="0 0 24 24"><path fill="currentColor" d="M8.12 9.29L12 13.17l3.88-3.88a.996.996 0 1 1 1.41 1.41l-4.59 4.59a.996.996 0 0 1-1.41 0L6.7 10.7a.996.996 0 0 1 0-1.41c.39-.38 1.03-.39 1.42 0"/></svg>
+      </div>
+    </button>
+    <div class="sidebar-group-items" *ngIf="expandedGroup === 'discharge'">
 
     <!-- Estimation — IPD billing surface (also serves OPD estimation for
          managers). Collapsed from 3 role-gated rows into 1: covers
@@ -639,8 +727,21 @@
       </div>
     </a>
 
+    </div>
+    </div>
+
     <!-- ═══════════ Reporting ═══════════ -->
-    <div class="sidebar-section-label" *ngIf="showReportingSection">Reporting</div>
+    <div class="sidebar-group" *ngIf="showReportingSection">
+    <button type="button" class="icon-wrapper sidebar-group-header"
+            [class.active]="activeGroup === 'reporting'" [class.open]="expandedGroup === 'reporting'"
+            (click)="toggleGroup('reporting')">
+      <div class="icon-content">
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 24 24"><path fill="currentColor" d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2M9 17H7v-7h2zm4 0h-2V7h2zm4 0h-2v-4h2z"/></svg>
+        <span class="sidebar-group-title">Reporting</span>
+        <svg class="sidebar-chevron" xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" viewBox="0 0 24 24"><path fill="currentColor" d="M8.12 9.29L12 13.17l3.88-3.88a.996.996 0 1 1 1.41 1.41l-4.59 4.59a.996.996 0 0 1-1.41 0L6.7 10.7a.996.996 0 0 1 0-1.41c.39-.38 1.03-.39 1.42 0"/></svg>
+      </div>
+    </button>
+    <div class="sidebar-group-items" *ngIf="expandedGroup === 'reporting'">
     <!-- Report -->
     <a [routerLink]="['super_admin', 'admin'].includes(role) ? '/report' : null"
        routerLinkActive="active" class="icon-wrapper"
@@ -665,8 +766,21 @@
       </div>
     </a>
 
+    </div>
+    </div>
+
     <!-- ═══════════ Admin / compliance (super_admin) ═══════════ -->
-    <div class="sidebar-section-label" *ngIf="showAdminSection">Admin &amp; Compliance</div>
+    <div class="sidebar-group" *ngIf="showAdminSection">
+    <button type="button" class="icon-wrapper sidebar-group-header"
+            [class.active]="activeGroup === 'admin'" [class.open]="expandedGroup === 'admin'"
+            (click)="toggleGroup('admin')">
+      <div class="icon-content">
+        <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 24 24"><path fill="currentColor" d="M19.14 12.94c.04-.3.06-.61.06-.94c0-.32-.02-.64-.07-.94l2.03-1.58a.49.49 0 0 0 .12-.61l-1.92-3.32a.488.488 0 0 0-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54a.484.484 0 0 0-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94c0 .31.02.64.07.94l-2.03 1.58a.49.49 0 0 0-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61zM12 15.6A3.6 3.6 0 0 1 8.4 12A3.6 3.6 0 0 1 12 8.4a3.6 3.6 0 0 1 3.6 3.6a3.6 3.6 0 0 1-3.6 3.6"/></svg>
+        <span class="sidebar-group-title">Admin &amp; Compliance</span>
+        <svg class="sidebar-chevron" xmlns="http://www.w3.org/2000/svg" width="1.1em" height="1.1em" viewBox="0 0 24 24"><path fill="currentColor" d="M8.12 9.29L12 13.17l3.88-3.88a.996.996 0 1 1 1.41 1.41l-4.59 4.59a.996.996 0 0 1-1.41 0L6.7 10.7a.996.996 0 0 1 0-1.41c.39-.38 1.03-.39 1.42 0"/></svg>
+      </div>
+    </button>
+    <div class="sidebar-group-items" *ngIf="expandedGroup === 'admin'">
     <!-- Unified Masters admin — Departments / Wards / Beds / OT Rooms / Tablets / Shifts -->
     <a [routerLink]="role === 'super_admin' ? '/masters' : null"
        routerLinkActive="active" class="icon-wrapper sidebar-section-start"
@@ -837,6 +951,9 @@
         <span>NABH Audit</span>
       </div>
     </a>
+
+    </div>
+    </div>
 
     <!-- ═══════════ Settings (pinned bottom via flex margin-top: auto) ═══════════ -->
     <a routerLinkActive="active" class="icon-wrapper">

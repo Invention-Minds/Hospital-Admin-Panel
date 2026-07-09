@@ -42,7 +42,8 @@
               <span class="ns-chip">All OPD appointments</span>
             </ng-container>
             <ng-container *ngIf="s.type !== 'OPD'">
-              <span class="ns-chip" *ngFor="let w of s.wards">{{ w.wardName }}</span>
+              <span class="ns-chip" *ngFor="let w of (s.wards | slice:0:6)">{{ w.wardName }}</span>
+              <span class="ns-chip more" *ngIf="s.wards.length > 6" (click)="startEdit(s)">+{{ s.wards.length - 6 }} more</span>
               <span class="ns-muted" *ngIf="s.wards.length === 0">No wards mapped</span>
             </ng-container>
           </div>
@@ -51,7 +52,8 @@
         <div class="ns-section">
           <div class="ns-section-label">Nurses ({{ s.nurses.length }})</div>
           <div class="ns-chips">
-            <span class="ns-chip alt" *ngFor="let n of s.nurses">{{ n.fullName || n.username }}</span>
+            <span class="ns-chip alt" *ngFor="let n of (s.nurses | slice:0:6)">{{ n.fullName || n.username }}</span>
+            <span class="ns-chip more" *ngIf="s.nurses.length > 6" (click)="startEdit(s)">+{{ s.nurses.length - 6 }} more</span>
             <span class="ns-muted" *ngIf="s.nurses.length === 0">No nurses assigned</span>
           </div>
         </div>

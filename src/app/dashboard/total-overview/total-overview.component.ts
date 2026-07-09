@@ -20,12 +20,18 @@ export class TotalOverviewComponent implements OnInit {
   absentDoctorsToday: number = 0;
   leaveDoctorsCount: number = 0;
   totalDoctorsToday: number = 0;
+  /** Doctors marked "Arrived" today via the doctor-availability attendance
+   *  toggle (GET /attendance/today → doctorIds). Shown against totalDoctorsToday. */
+  arrivedDoctorsToday: number = 0;
 
   doctors: any[] = [];
   availableDoctors: any[] = [];
   unavailableDoctors: any[] = [];
   absentDoctors: any[] = [];
   leaveDoctors: any[] = [];
+  arrivedDoctors: any[] = [];
+  /** Doctor ids marked arrived today (from GET /attendance/today). */
+  arrivedDoctorIds: number[] = [];
   appointments: any[] = [];
   todayAppointments: any[] = []
   date: string = '';
@@ -33,6 +39,7 @@ export class TotalOverviewComponent implements OnInit {
   showUnavailableDoctors: boolean = false;
   showAbsentDoctors: boolean = false;
   showLeaveDoctors: boolean = false;
+  showArrivedDoctors: boolean = false;
 
   private timeCache: { [key: string]: number } = {};
   private timeStringCache: { [key: number]: string } = {};
@@ -46,6 +53,21 @@ export class TotalOverviewComponent implements OnInit {
     this.date = this.formatDate(new Date());
     this.fetchStatistics();
     this.fetchDoctorsWithAvailability();
+    this.fetchArrivedDoctors();
+  }
+
+  private fetchArrivedDoctors(): void {
+    // Same source as the "Arrived" toggle on Doctor Availability, so the count
+    // reflects exactly which doctors were marked arrived today.
+    this.doctorService.getTodayAttendance().subscribe({
+      next: (res) => {
+        this.arrivedDoctorIds = res?.doctorIds ?? [];
+        this.arrivedDoctorsToday = this.arrivedDoctorIds.length;
+      },
+      error: (err) => {
+        console.error('Error fetching arrived doctors:', err);
+      }
+    });
   }
 
   private fetchStatistics(): void {
@@ -590,6 +612,22 @@ export class TotalOverviewComponent implements OnInit {
 
   closeLeaveDoctorList(): void {
     this.showLeaveDoctors = false;
+  }
+
+  toggleArrivedDoctors(): void {
+    // Resolve the arrived ids against the loaded doctor list at click time
+    // (both are fetched async; by the time the user clicks, both are ready).
+    this.arrivedDoctors = this.doctors.filter(
+      (doctor) => this.arrivedDoctorIds.includes(doctor.id)
+    );
+    this.showArrivedDoctors = true;
+    this.showAvailableDoctors = false;
+    this.showUnavailableDoctors = false;
+    this.showAbsentDoctors = false;
+  }
+
+  closeArrivedDoctorList(): void {
+    this.showArrivedDoctors = false;
   }
 
   private groupUnavailableDates(dates: string[]): string[] {

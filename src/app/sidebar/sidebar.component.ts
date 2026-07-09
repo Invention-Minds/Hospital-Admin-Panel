@@ -1,4 +1,6 @@
 import { Component , OnInit, Output, EventEmitter, HostListener} from '@angular/core';
+import { Router, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { SettingsComponent } from "../settings/settings/settings.component";
 import { AppointmentConfirmService } from '../services/appointment-confirm.service';
 
@@ -15,7 +17,105 @@ export class SidebarComponent implements OnInit {
   departmentName: string = '';
   type: string[] = [];
   // openSetting: boolean = false;
-  constructor(private appointmentService: AppointmentConfirmService) {}
+  constructor(private appointmentService: AppointmentConfirmService, private router: Router) {}
+
+  // ── Accordion state ───────────────────────────────────────────────────
+  // Only one section is expanded at a time (strict accordion). expandedGroup
+  // is the key of the open section; activeGroup is the section that owns the
+  // current route (drives the header highlight + auto-open on load/navigation).
+  expandedGroup: string | null = null;
+  activeGroup: string | null = null;
+
+  // Route-prefix → section key. Matching is longest-prefix (see groupForUrl),
+  // so more specific admin routes (e.g. /surgery-ot/setup) win over the broad
+  // OT prefix (/surgery-ot). Mirror the template: adding a link means adding
+  // its route here, or its section won't auto-open/highlight for that route.
+  private readonly groupRoutes: { prefix: string; group: string }[] = [
+    // OPD / Front Desk
+    { prefix: '/appointments', group: 'opd' },
+    { prefix: '/nursing', group: 'opd' },              // /nursing/<blockId>
+    { prefix: '/doctor-appointments', group: 'opd' },
+    { prefix: '/whatsapp-queries', group: 'opd' },
+    { prefix: '/doorstep-requests', group: 'opd' },
+    { prefix: '/patient', group: 'opd' },              // + /patient/timeline
+    { prefix: '/doctor', group: 'opd' },
+    { prefix: '/health-checkup', group: 'opd' },
+    // Investigations
+    { prefix: '/services', group: 'investigations' },
+    { prefix: '/radiology-services', group: 'investigations' },
+    { prefix: '/lab', group: 'investigations' },
+    { prefix: '/therapy', group: 'investigations' },   // /therapy + /therapy-list
+    // Emergency & MLC
+    { prefix: '/emergency', group: 'emergency' },      // + /emergency/*
+    { prefix: '/mlc', group: 'emergency' },
+    { prefix: '/incidents', group: 'emergency' },
+    { prefix: '/feedback', group: 'emergency' },
+    { prefix: '/complaints', group: 'emergency' },
+    { prefix: '/quality', group: 'emergency' },
+    // IPD
+    { prefix: '/ipd', group: 'ipd' },
+    { prefix: '/ward-census', group: 'ipd' },
+    { prefix: '/icu-transfer-queue', group: 'ipd' },
+    { prefix: '/staff-handover', group: 'ipd' },
+    { prefix: '/daycare', group: 'ipd' },
+    // OT MGMT
+    { prefix: '/surgery-ot', group: 'ot' },            // workbench/requisitions/reports/board
+    { prefix: '/discharge/queue', group: 'ot' },
+    { prefix: '/discharge/mt-queue', group: 'ot' },
+    { prefix: '/pharmacy/queue', group: 'ot' },
+    { prefix: '/nurse/medication-inbox', group: 'ot' },
+    { prefix: '/op-procedures', group: 'ot' },
+    { prefix: '/surgery', group: 'ot' },               // legacy /surgery
+    // Dietetics
+    { prefix: '/dietetics/queue', group: 'dietetics' },
+    { prefix: '/dietetics/canteen', group: 'dietetics' },
+    // Discharge & Finance
+    { prefix: '/estimation', group: 'discharge' },
+    { prefix: '/lama-dama', group: 'discharge' },
+    // Reporting
+    { prefix: '/report', group: 'reporting' },
+    { prefix: '/tv-control', group: 'reporting' },
+    // Admin & Compliance
+    { prefix: '/masters', group: 'admin' },
+    { prefix: '/surgery-ot/setup', group: 'admin' },
+    { prefix: '/surgery-ot/templates', group: 'admin' },
+    { prefix: '/treatment-dashboard', group: 'admin' },
+    { prefix: '/lab-radiology', group: 'admin' },
+    { prefix: '/staff/nurses', group: 'admin' },
+    { prefix: '/nursing-stations', group: 'admin' },
+    { prefix: '/scheduling/roster', group: 'admin' },
+    { prefix: '/duty-signin', group: 'admin' },
+    { prefix: '/note-templates', group: 'admin' },
+    { prefix: '/my-opd-templates', group: 'admin' },
+    { prefix: '/dietetics/setup', group: 'admin' },
+    { prefix: '/hmis-sync', group: 'admin' },
+    { prefix: '/nabh-audit', group: 'admin' },
+  ];
+
+  /** Longest-prefix match of the current URL to a section key (null = an
+   *  ungrouped top-level link like Dashboard, so nothing auto-expands). */
+  groupForUrl(url: string): string | null {
+    const path = (url || '').split('?')[0].split('#')[0];
+    let best: { prefix: string; group: string } | null = null;
+    for (const r of this.groupRoutes) {
+      if (path === r.prefix || path.startsWith(r.prefix + '/')) {
+        if (!best || r.prefix.length > best.prefix.length) best = r;
+      }
+    }
+    return best ? best.group : null;
+  }
+
+  /** Recompute the active section from the URL; keep it expanded so the user
+   *  always lands with their current section open. */
+  private syncActiveGroup(url: string): void {
+    this.activeGroup = this.groupForUrl(url);
+    if (this.activeGroup) this.expandedGroup = this.activeGroup;
+  }
+
+  /** Strict accordion: clicking a header opens it and closes any other. */
+  toggleGroup(key: string): void {
+    this.expandedGroup = this.expandedGroup === key ? null : key;
+  }
   isDesktopView: boolean = true;
   username: string = ''; // Initialize username
   deptId: number = 0; // Initialize deptId
@@ -61,6 +161,13 @@ export class SidebarComponent implements OnInit {
     } else {
       console.log('localStorage is not available');
     }
+
+    // Auto-open + highlight the section owning the current route, then keep it
+    // in sync as the user navigates.
+    this.syncActiveGroup(this.router.url);
+    this.router.events
+      .pipe(filter((e): e is NavigationEnd => e instanceof NavigationEnd))
+      .subscribe(e => this.syncActiveGroup(e.urlAfterRedirects || e.url));
   }
   isExpanded: boolean = false;
 

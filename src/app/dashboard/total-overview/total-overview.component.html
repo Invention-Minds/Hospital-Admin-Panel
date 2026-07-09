@@ -30,6 +30,15 @@
         </div>
         
       </div>
+      <div class="card" (click)="toggleArrivedDoctors()">
+        <div class="card-icon">
+          <img src="/stethoscope.svg" alt="Doctors Arrived Icon" />
+        </div>
+        <div class="card-content">
+          <p class="number">{{arrivedDoctorsToday}}/<span style="font-size: 14px;">{{totalDoctorsToday}}</span></p>
+          <p>Doctors Arrived</p>
+        </div>
+      </div>
       <div class="card" (click)="toggleUnavailableDoctors()">
         <div class="card-icon">
           <img src="/unavailable-doctor.svg" alt="Doctor Available Icon" />
@@ -154,6 +163,27 @@
     </div>
     <div *ngIf="leaveDoctors.length === 0">
       <div class="doctor-details doctor-card no-record">No Leave Doctors to Display</div>
+    </div>
+  </div>
+</div>
+
+<!-- Arrived Doctors List -->
+<div *ngIf="showArrivedDoctors" class="overlay">
+  <div class="container">
+    <div class="header">
+      <div>Doctors Arrived</div>
+      <button class="close-button" (click)="closeArrivedDoctorList()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="doctor-list">
+      <div *ngFor="let doctor of arrivedDoctors; let i=index" class="doctor-card">
+        <div class="doctor-details">
+          <div class="doctor-id">{{i + 1}}</div>
+          <div class="doctor-name">{{doctor.name}}</div>
+        </div>
+      </div>
+      <div *ngIf="arrivedDoctors.length === 0">
+        <div class="doctor-details doctor-card no-record">No Arrived Doctors to Display</div>
+      </div>
     </div>
   </div>
 </div>

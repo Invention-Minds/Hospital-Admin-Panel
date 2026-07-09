@@ -10,6 +10,7 @@ import { environment } from '../../environment/environment.prod';
 export class OtTvDisplayComponent {
   currentDate: string = '';
   currentTime: string = '';
+  currentYear = new Date().getFullYear();  // footer copyright year
   intervalId: any;
   hourlyRefreshId: any;
   confirmedEstimations: any[] = [];

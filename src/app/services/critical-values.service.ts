@@ -29,6 +29,12 @@ export class CriticalValuesService {
   private eventSource: EventSource | null = null;
   private alertSubject = new Subject<CriticalValueAlert>();
 
+  // True while the SSE stream is open (set on onopen / cleared on error/close).
+  // Drives the "Connected/Disconnected" badge — independent of whether any
+  // alert has actually arrived.
+  private connectionStatus = new BehaviorSubject<boolean>(false);
+  connectionStatus$ = this.connectionStatus.asObservable();
+
   constructor(private http: HttpClient) { }
 
   // Subscribe to critical value alerts via SSE
@@ -38,9 +44,17 @@ export class CriticalValuesService {
       this.eventSource.close();
     }
 
-    // Create SSE connection
-    const sseUrl = `${this.apiUrl}/stream?userId=${userId}`;
+    // Create SSE connection. The backend gates /stream on a JWT passed via the
+    // `token` query param (EventSource can't send an Authorization header) and
+    // derives the user from it. userId is kept only as a harmless extra.
+    const token = (typeof localStorage !== 'undefined' && localStorage.getItem('token')) || '';
+    const sseUrl = `${this.apiUrl}/stream?token=${encodeURIComponent(token)}&userId=${encodeURIComponent(userId)}`;
     this.eventSource = new EventSource(sseUrl);
+
+    // Connection is live once the stream opens — regardless of any alert traffic.
+    this.eventSource.onopen = () => {
+      this.connectionStatus.next(true);
+    };
 
     // Listen for critical-value events
     this.eventSource.addEventListener('critical-value', (event: any) => {
@@ -59,6 +73,7 @@ export class CriticalValuesService {
     // Handle connection errors
     this.eventSource.onerror = (error) => {
       console.error('SSE connection error:', error);
+      this.connectionStatus.next(false);
       this.eventSource?.close();
       // Optionally reconnect after delay
       setTimeout(() => this.subscribeToCriticalValues(userId), 5000);
@@ -73,6 +88,7 @@ export class CriticalValuesService {
       this.eventSource.close();
       this.eventSource = null;
     }
+    this.connectionStatus.next(false);
   }
 
   // Get all critical alerts (history)

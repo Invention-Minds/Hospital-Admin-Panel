@@ -1,11 +1,13 @@
-<div class="ns-page">
-  <header class="ns-header">
+<!-- Shared app shell: sidebar clearance + consistent width/padding (same as the
+     Nurses, Lab-Rad and Treatment-Dashboard modules). -->
+<div class="ns-shell">
+  <div class="ns-page-header">
     <div>
-      <h2>Nursing Stations</h2>
-      <p class="ns-sub">Group wards into stations and map nurses. A nurse sees only the admissions in the wards of the stations they're assigned to.</p>
+      <h2 class="ns-page-title">Nursing Stations</h2>
+      <p class="ns-page-sub">Group wards into stations and map nurses. A nurse sees only the admissions in the wards of the stations they're assigned to.</p>
     </div>
     <button class="ns-btn primary" (click)="startCreate()">+ New Station</button>
-  </header>
+  </div>
 
   <div *ngIf="successMessage" class="ns-banner success">{{ successMessage }}</div>
   <div *ngIf="errorMessage" class="ns-banner error">{{ errorMessage }}</div>
@@ -14,43 +16,51 @@
   <div *ngIf="loading" class="ns-empty">Loading…</div>
 
   <div *ngIf="!loading" class="ns-grid">
-    <div *ngIf="stations.length === 0" class="ns-empty">No nursing stations yet. Create one to start mapping wards and nurses.</div>
+    <div *ngIf="stations.length === 0" class="ns-empty">
+      No nursing stations yet. Create one to start mapping wards and nurses.
+    </div>
 
     <div *ngFor="let s of stations" class="ns-card" [class.inactive]="!s.isActive">
-      <div class="ns-card-top">
-        <div>
+      <!-- Head: pills + name + description -->
+      <div class="ns-card-head">
+        <div class="ns-pills">
           <span class="ns-code">{{ s.code }}</span>
           <span class="ns-type" [class.opd]="s.type === 'OPD'">{{ s.type }}</span>
-          <h3>{{ s.name }}</h3>
+          <span class="ns-status" [class.off]="!s.isActive">{{ s.isActive ? 'Active' : 'Inactive' }}</span>
         </div>
-        <span class="ns-badge" *ngIf="!s.isActive">Inactive</span>
+        <h3 class="ns-name">{{ s.name }}</h3>
+        <p class="ns-desc" *ngIf="s.description">{{ s.description }}</p>
       </div>
-      <p class="ns-desc" *ngIf="s.description">{{ s.description }}</p>
 
-      <div class="ns-meta">
-        <div *ngIf="s.type !== 'OPD'">
-          <strong>Wards ({{ s.wards.length }})</strong>
+      <!-- Body: wards / scope + nurses -->
+      <div class="ns-sections">
+        <div class="ns-section">
+          <div class="ns-section-label" *ngIf="s.type !== 'OPD'">Wards ({{ s.wards.length }})</div>
+          <div class="ns-section-label" *ngIf="s.type === 'OPD'">Scope</div>
           <div class="ns-chips">
-            <span class="ns-chip" *ngFor="let w of s.wards">{{ w.wardName }}</span>
-            <span class="ns-muted" *ngIf="s.wards.length === 0">none</span>
+            <ng-container *ngIf="s.type === 'OPD'">
+              <span class="ns-chip">All OPD appointments</span>
+            </ng-container>
+            <ng-container *ngIf="s.type !== 'OPD'">
+              <span class="ns-chip" *ngFor="let w of s.wards">{{ w.wardName }}</span>
+              <span class="ns-muted" *ngIf="s.wards.length === 0">No wards mapped</span>
+            </ng-container>
           </div>
         </div>
-        <div *ngIf="s.type === 'OPD'">
-          <strong>Scope</strong>
-          <div class="ns-chips"><span class="ns-chip">All OPD appointments</span></div>
-        </div>
-        <div>
-          <strong>Nurses ({{ s.nurses.length }})</strong>
+
+        <div class="ns-section">
+          <div class="ns-section-label">Nurses ({{ s.nurses.length }})</div>
           <div class="ns-chips">
             <span class="ns-chip alt" *ngFor="let n of s.nurses">{{ n.fullName || n.username }}</span>
-            <span class="ns-muted" *ngIf="s.nurses.length === 0">none</span>
+            <span class="ns-muted" *ngIf="s.nurses.length === 0">No nurses assigned</span>
           </div>
         </div>
       </div>
 
+      <!-- Actions -->
       <div class="ns-card-actions">
-        <button class="ns-btn" (click)="startEdit(s)">Edit / Map</button>
-        <button class="ns-btn danger" (click)="remove(s)">Delete</button>
+        <button class="ns-btn primary" (click)="startEdit(s)">Edit / Map</button>
+        <button class="ns-btn danger-ghost" (click)="remove(s)">Delete</button>
       </div>
     </div>
   </div>

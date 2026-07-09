@@ -80,6 +80,7 @@ export class TvComponent implements OnInit, OnDestroy {
   isImage = true;
   currentMediaIndex = 0;
   scrollingText = '';  // Scrolling text for marquee
+  currentYear = new Date().getFullYear();  // footer copyright year
   mediaFiles: { type: string, src: string }[] = [];
   ads: any[] = []
   adStatuses: { [key: string]: boolean } = {};

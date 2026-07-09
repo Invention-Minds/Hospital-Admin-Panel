@@ -1,56 +1,289 @@
-.ns-page { padding: 20px; max-width: 1100px; margin: 0 auto; }
+/* Nursing Stations — matches the app design system (Kanit, #271e4a / #7b7b7b,
+   #f0f3ff inputs). The container is the shared global .ns-shell (forms.css):
+   sidebar clearance + width + top padding, same as the Nurses module. */
 
-.ns-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 16px; }
-.ns-header h2 { margin: 0; color: #1f3a5f; }
-.ns-sub { margin: 4px 0 0; color: #6b7a90; font-size: 13px; max-width: 640px; }
+/* ─── Page header ────────────────────────────────────────────────────── */
+.ns-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 22px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #e5e7eb;
+}
+.ns-page-title {
+  margin: 0;
+  color: #271e4a;
+  font-family: Kanit, sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+.ns-page-sub {
+  margin: 6px 0 0;
+  color: #7b7b7b;
+  font-family: Kanit, sans-serif;
+  font-size: 13.5px;
+  line-height: 1.5;
+  max-width: 680px;
+}
 
-.ns-banner { padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; font-size: 14px; }
-.ns-banner.success { background: #e6f6ec; color: #1b7a3d; border: 1px solid #b7e3c6; }
-.ns-banner.error { background: #fdeaea; color: #b42318; border: 1px solid #f3c0bb; }
+/* ─── Banners ────────────────────────────────────────────────────────── */
+.ns-banner {
+  padding: 11px 16px;
+  border-radius: 8px;
+  margin-bottom: 14px;
+  font-family: Kanit, sans-serif;
+  font-size: 14px;
+}
+.ns-banner.success { background: #dcfce7; color: #166534; border-left: 3px solid #16a34a; }
+.ns-banner.error   { background: #fee2e2; color: #b91c1c; border-left: 3px solid #dc2626; }
 
-.ns-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
-.ns-empty { color: #6b7a90; padding: 24px; text-align: center; }
+/* ─── Grid + states ──────────────────────────────────────────────────── */
+.ns-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 18px;
+}
+.ns-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #7b7b7b;
+  font-family: Kanit, sans-serif;
+  font-size: 14px;
+  background: #fff;
+  border: 1px dashed #d7dbe3;
+  border-radius: 12px;
+  padding: 44px 20px;
+}
 
-.ns-card { border: 1px solid #e3e8ef; border-radius: 12px; padding: 16px; background: #fff; box-shadow: 0 1px 3px rgba(16,24,40,.04); }
-.ns-card.inactive { opacity: .65; }
-.ns-card-top { display: flex; justify-content: space-between; align-items: flex-start; }
-.ns-card-top h3 { margin: 4px 0 0; color: #1f3a5f; font-size: 17px; }
-.ns-code { font-size: 11px; font-weight: 600; color: #2563eb; background: #eaf0ff; padding: 2px 8px; border-radius: 999px; }
-.ns-type { font-size: 10px; font-weight: 700; letter-spacing: .04em; color: #3a7d2c; background: #eaf7e6; padding: 2px 7px; border-radius: 999px; margin-left: 6px; }
+/* ─── Station card ───────────────────────────────────────────────────── */
+.ns-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(39, 30, 74, 0.05);
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-family: Kanit, sans-serif;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+.ns-card:hover {
+  box-shadow: 0 8px 20px rgba(39, 30, 74, 0.10);
+  transform: translateY(-2px);
+}
+.ns-card.inactive { opacity: 0.7; }
+
+.ns-card-head { display: flex; flex-direction: column; gap: 8px; }
+.ns-pills { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.ns-code {
+  font-family: Kanit, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: #2563eb;
+  background: #eaf0ff;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+.ns-type {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: #166534;
+  background: #dcfce7;
+  padding: 3px 8px;
+  border-radius: 999px;
+}
 .ns-type.opd { color: #9a5b00; background: #fdf0dc; }
-.ns-badge { font-size: 11px; background: #f1f3f6; color: #6b7a90; padding: 2px 8px; border-radius: 999px; }
-.ns-desc { color: #6b7a90; font-size: 13px; margin: 8px 0; }
+.ns-status {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #166534;
+  background: #dcfce7;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+.ns-status.off { color: #b91c1c; background: #fee2e2; }
+.ns-name {
+  margin: 2px 0 0;
+  color: #271e4a;
+  font-family: Kanit, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+}
+.ns-desc {
+  margin: 0;
+  color: #7b7b7b;
+  font-size: 13px;
+  line-height: 1.45;
+}
 
-.ns-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 10px 0; }
-.ns-meta strong { font-size: 12px; color: #44546a; display: block; margin-bottom: 4px; }
-.ns-chips { display: flex; flex-wrap: wrap; gap: 4px; }
-.ns-chip { font-size: 11px; background: #eef6ff; color: #1f5fa8; padding: 2px 8px; border-radius: 6px; }
-.ns-chip.alt { background: #f0f7ee; color: #3a7d2c; }
-.ns-muted { color: #98a2b3; font-size: 12px; }
+/* ─── Body sections (stacked, roomy) ─────────────────────────────────── */
+.ns-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 14px 0;
+  border-top: 1px solid #f0f1f4;
+  border-bottom: 1px solid #f0f1f4;
+}
+.ns-section-label {
+  font-family: Kanit, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #271e4a;
+  margin-bottom: 8px;
+}
+.ns-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.ns-chip {
+  font-family: Kanit, sans-serif;
+  font-size: 12px;
+  color: #1f5fa8;
+  background: #eef6ff;
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+.ns-chip.alt { color: #3a7d2c; background: #eef7ea; }
+.ns-muted { color: #98a2b3; font-size: 12px; font-style: italic; }
 
-.ns-card-actions { display: flex; gap: 8px; margin-top: 12px; }
-
-.ns-btn { border: 1px solid #d0d5dd; background: #fff; color: #344054; border-radius: 8px; padding: 7px 14px; cursor: pointer; font-size: 13px; }
+/* ─── Actions ────────────────────────────────────────────────────────── */
+.ns-card-actions { display: flex; gap: 10px; }
+.ns-btn {
+  font-family: Kanit, sans-serif;
+  font-size: 13px;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  border: 1px solid #d0d5dd;
+  background: #fff;
+  color: #344054;
+  transition: background 0.15s ease;
+}
 .ns-btn:hover { background: #f7f8fa; }
 .ns-btn.primary { background: #2563eb; border-color: #2563eb; color: #fff; }
 .ns-btn.primary:hover { background: #1d4ed8; }
-.ns-btn.danger { color: #b42318; border-color: #f3c0bb; }
-.ns-btn.danger:hover { background: #fdeaea; }
-.ns-btn:disabled { opacity: .6; cursor: not-allowed; }
+.ns-btn.danger,
+.ns-btn.danger-ghost { color: #b42318; border-color: #f3c0bb; background: #fff; }
+.ns-btn.danger:hover,
+.ns-btn.danger-ghost:hover { background: #fdeaea; }
+.ns-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-.ns-modal-backdrop { position: fixed; inset: 0; background: rgba(16,24,40,.45); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
-.ns-modal { background: #fff; border-radius: 14px; padding: 22px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; }
-.ns-modal h3 { margin: 0 0 16px; color: #1f3a5f; }
-
-.ns-form-row { margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px; }
+/* ─── Editor modal ───────────────────────────────────────────────────── */
+.ns-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(16, 24, 40, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+.ns-modal {
+  background: #fff;
+  border-radius: 14px;
+  padding: 24px;
+  width: 100%;
+  max-width: 560px;
+  max-height: 90vh;
+  overflow-y: auto;
+  font-family: Kanit, sans-serif;
+}
+.ns-modal h3 {
+  margin: 0 0 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #eef0f4;
+  color: #271e4a;
+  font-family: Kanit, sans-serif;
+  font-size: 19px;
+  font-weight: 600;
+}
+.ns-form-row { margin-bottom: 14px; display: flex; flex-direction: column; gap: 5px; }
 .ns-form-row.inline { flex-direction: row; align-items: center; }
-.ns-form-row label { font-size: 13px; color: #44546a; font-weight: 500; }
-.ns-form-row input[type=text], .ns-form-row textarea, .ns-form-row select { border: 1px solid #d0d5dd; border-radius: 8px; padding: 8px 10px; font-size: 14px; }
-.ns-form-row input:disabled { background: #f1f3f6; }
+.ns-form-row.inline label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #271e4a;
+  font-weight: 500;
+}
+.ns-form-row.inline input[type=checkbox] { accent-color: #2563eb; }
+.ns-form-row label {
+  font-family: Kanit, sans-serif;
+  font-size: 13px;
+  color: #271e4a;
+  font-weight: 500;
+}
+.ns-form-row input[type=text],
+.ns-form-row textarea,
+.ns-form-row select {
+  border: 1px solid #b4b6ba;
+  border-radius: 6px;
+  padding: 9px 12px;
+  font-family: Kanit, sans-serif;
+  font-size: 14px;
+  color: #271e4a;
+  background: #f0f3ff;
+}
+.ns-form-row input:focus,
+.ns-form-row textarea:focus,
+.ns-form-row select:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.18);
+  outline: none;
+}
+.ns-form-row input:disabled { background: #eceef2; }
 
-.ns-picker { margin: 14px 0; }
-.ns-picker > strong { font-size: 13px; color: #44546a; display: block; margin-bottom: 6px; }
-.ns-checklist { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; max-height: 180px; overflow-y: auto; border: 1px solid #e3e8ef; border-radius: 8px; padding: 8px; }
-.ns-check { font-size: 13px; color: #344054; display: flex; align-items: center; gap: 6px; }
+.ns-picker { margin: 16px 0; }
+.ns-picker > strong {
+  font-family: Kanit, sans-serif;
+  font-size: 13px;
+  color: #271e4a;
+  display: block;
+  margin-bottom: 8px;
+}
+.ns-checklist {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 8px;
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 6px;
+  background: #fafbff;
+}
+.ns-check {
+  font-family: Kanit, sans-serif;
+  font-size: 13px;
+  color: #344054;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 7px 8px;
+  border-radius: 6px;
+  line-height: 1.35;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+.ns-check:hover { background: #eef2ff; }
+.ns-check input[type=checkbox] {
+  margin-top: 2px;
+  flex-shrink: 0;
+  accent-color: #2563eb;
+}
+/* de-emphasise the ward/nurse code inside a checklist row */
+.ns-check .ns-muted { font-style: normal; color: #98a2b3; font-size: 11px; }
+.ns-modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
 
-.ns-modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; }
+@media (max-width: 640px) {
+  .ns-grid { grid-template-columns: 1fr; }
+  .ns-checklist { grid-template-columns: 1fr; }
+}

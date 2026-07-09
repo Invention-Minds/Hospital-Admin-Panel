@@ -66,6 +66,17 @@ export class CriticalValuesAlertComponent implements OnInit, OnDestroy {
 
   connectToAlerts(): void {
     this.loading = true;
+
+    // Badge reflects whether the SSE stream is OPEN — not whether an alert has
+    // arrived. (Previously isConnected only flipped true on the first alert, so
+    // an idle-but-connected stream still showed "Disconnected".)
+    this.criticalValuesService.connectionStatus$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((connected) => {
+        this.isConnected = connected;
+        if (connected) this.loading = false;
+      });
+
     this.criticalValuesService
       .subscribeToCriticalValues(this.userId)
       .pipe(takeUntil(this.destroy$))

@@ -59,17 +59,27 @@
 
   <ng-container *ngIf="!loading && !catalogEmpty">
 
-    <!-- LAB GRID — one box per department, mirroring the paper form -->
+    <!-- LAB GRID — collapsible box per department, mirroring the paper form -->
     <div class="lab-grid">
       <div class="lab-group" *ngFor="let group of visibleLabGroups">
-        <div class="lab-group-header">{{ group.department }}</div>
-        <label class="lab-item" *ngFor="let t of group.tests">
-          <input
-            type="checkbox"
-            [checked]="selectedLabIds.has(t.id)"
-            (change)="toggleLab(t.id)" />
-          <span>{{ t.description }}</span>
-        </label>
+        <button type="button" class="group-header" [class.open]="isLabExpanded(group.department)"
+                (click)="toggleLabGroup(group.department)">
+          <span class="group-name">{{ group.department }}</span>
+          <span class="group-meta">
+            <span class="group-sel" *ngIf="labSelectedInGroup(group) as n">{{ n }} selected</span>
+            <span class="group-count">{{ group.tests.length }}</span>
+            <svg class="group-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"><path fill="currentColor" d="M8.12 9.29L12 13.17l3.88-3.88a.996.996 0 1 1 1.41 1.41l-4.59 4.59a.996.996 0 0 1-1.41 0L6.7 10.7a.996.996 0 0 1 0-1.41c.39-.38 1.03-.39 1.42 0"/></svg>
+          </span>
+        </button>
+        <div class="group-body" *ngIf="isLabExpanded(group.department)">
+          <label class="lab-item" *ngFor="let t of group.tests">
+            <input
+              type="checkbox"
+              [checked]="selectedLabIds.has(t.id)"
+              (change)="toggleLab(t.id)" />
+            <span>{{ t.description }}</span>
+          </label>
+        </div>
       </div>
     </div>
 
@@ -77,18 +87,43 @@
       No lab tests match “{{ labSearch }}”.
     </div>
 
-    <!-- RADIOLOGY PANEL -->
+    <!-- RADIOLOGY PANEL — collapsible modality subdivisions (CT / X-Ray / USG …) -->
     <div class="radiology-panel">
-      <div class="rad-header">Radiology</div>
+      <div class="rad-header-row">
+        <div class="rad-header">Radiology</div>
+        <input
+          class="inv-search rad-search"
+          type="text"
+          placeholder="Search radiology…"
+          [(ngModel)]="radiologySearch"
+          [disabled]="loading || catalogEmpty" />
+      </div>
 
-      <div class="rad-modalities">
-        <label class="rad-modality" *ngFor="let r of radiologyTests">
-          <input
-            type="checkbox"
-            [checked]="selectedRadiologyIds.has(r.id)"
-            (change)="toggleRadiology(r.id)" />
-          <span>{{ r.description }}</span>
-        </label>
+      <div class="rad-groups">
+        <div class="rad-group" *ngFor="let group of visibleRadiologyGroups">
+          <button type="button" class="group-header" [class.open]="isRadExpanded(group.modality)"
+                  (click)="toggleRadGroup(group.modality)">
+            <span class="group-name">{{ group.modality }}</span>
+            <span class="group-meta">
+              <span class="group-sel" *ngIf="radSelectedInGroup(group) as n">{{ n }} selected</span>
+              <span class="group-count">{{ group.tests.length }}</span>
+              <svg class="group-chevron" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"><path fill="currentColor" d="M8.12 9.29L12 13.17l3.88-3.88a.996.996 0 1 1 1.41 1.41l-4.59 4.59a.996.996 0 0 1-1.41 0L6.7 10.7a.996.996 0 0 1 0-1.41c.39-.38 1.03-.39 1.42 0"/></svg>
+            </span>
+          </button>
+          <div class="group-body" *ngIf="isRadExpanded(group.modality)">
+            <label class="rad-modality" *ngFor="let r of group.tests">
+              <input
+                type="checkbox"
+                [checked]="selectedRadiologyIds.has(r.id)"
+                (change)="toggleRadiology(r.id)" />
+              <span>{{ r.description }}</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="lab-no-match" *ngIf="visibleRadiologyGroups.length === 0">
+        No radiology tests match “{{ radiologySearch }}”.
       </div>
 
       <!-- Safety screening — only when a radiology study is selected -->

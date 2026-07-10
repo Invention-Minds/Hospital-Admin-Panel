@@ -316,8 +316,8 @@ export class EstimationBarComponent implements OnChanges {
   mapStatusesToDates() {
     const statusCount: any = {};
 
-    console.log(this.modJson)
-    console.log(this.monthDates)
+    // console.log(this.modJson)
+    // console.log(this.monthDates)
 
     if (this.monthDates) {
       for (let date of this.monthDates) {
@@ -335,7 +335,10 @@ export class EstimationBarComponent implements OnChanges {
             const pendingDate = entry.estimationDate;
             const submittedDate = entry.submittedDate;
 
-            console.log(formattedDate,overdueDate)
+            // Debug log removed from the hot loop — this ran for every
+            // date × estimation pair (tens of thousands of synchronous writes),
+            // which froze the analytics tab.
+            // console.log(formattedDate,overdueDate)
 
             if (entry.status === 'cancelled' && formattedDate === cancelledDate) {
               // console.log('Cancelled matched:', entry);
@@ -353,7 +356,7 @@ export class EstimationBarComponent implements OnChanges {
             }
 
             if (entry.status === 'overDue' && formattedDate === overdueDate) {
-              console.log('Overdue matched:', entry);
+              // console.log('Overdue matched:', entry);
               statusCount[date].overdue += 1;
             }
 

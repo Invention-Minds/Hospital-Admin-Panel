@@ -1708,7 +1708,8 @@ export class TodayConsultationsComponent {
       duration: [''],
       instructions: [''],
       quantity: [''],
-      isFavorite: [false] // <-- add this
+      isFavorite: [false], // <-- add this
+      freqCustom: [false], durCustom: [false], // UI-only: custom freq/duration toggle
     }));
 
     this.filteredBrandOptions.push([]);
@@ -1716,6 +1717,86 @@ export class TodayConsultationsComponent {
     console.log(this.brandOptions);
     this.brandOptions = this.allTablets.map((b: any) => b.brandName)
     this.filteredBrandNames.push([...this.brandOptions]); // default to full list
+  }
+
+  // ─── Quantity auto-calc + custom frequency/duration ─────────────────────
+  // Quantity = (doses/day summed from the frequency pattern) × (days from the
+  // duration). Non-numeric patterns (Stat / SOS / Daily …) can't be quantified,
+  // so quantity is left for manual entry there.
+
+  /** "1-0-1"→2, "1/2-0-1/2"→1, "5ml-5ml-5ml"→15; null if any token is non-numeric. */
+  private parseFrequencyPerDay(freq: any): number | null {
+    if (freq == null) return null;
+    const f = String(freq).trim().toLowerCase();
+    if (!f) return null;
+    let total = 0;
+    let counted = 0;
+    for (const raw of f.split('-')) {
+      const p = raw.replace(/\b(ml|tab|tabs|tsp|cap|caps|drops?|units?|puffs?)\b/gi, '').trim();
+      if (p === '') continue;
+      let val: number;
+      if (p.includes('/')) {
+        const [n, d] = p.split('/').map((x) => Number(x));
+        if (!isFinite(n) || !isFinite(d) || d === 0) return null;
+        val = n / d;
+      } else {
+        val = Number(p);
+        if (!isFinite(val)) return null;
+      }
+      total += val;
+      counted++;
+    }
+    return counted > 0 ? total : null;
+  }
+
+  /** First number in the duration ("3 days"→3, "7"→7, "Daily"→null). */
+  private parseDurationDays(dur: any): number | null {
+    if (dur == null) return null;
+    const m = String(dur).match(/\d+(\.\d+)?/);
+    return m ? Number(m[0]) : null;
+  }
+
+  /** Recompute a row's quantity from frequency × duration, when both parse. */
+  computeQuantity(index: number): void {
+    const row = this.tablets.at(index);
+    if (!row) return;
+    const perDay = this.parseFrequencyPerDay(row.get('frequency')?.value);
+    const days = this.parseDurationDays(row.get('duration')?.value);
+    if (perDay != null && days != null) {
+      row.get('quantity')?.setValue(Math.round(perDay * days * 100) / 100);
+    }
+  }
+
+  onFrequencyChange(index: number): void {
+    const row = this.tablets.at(index);
+    if (row.get('frequency')?.value === '__custom__') {
+      row.get('freqCustom')?.setValue(true);
+      row.get('frequency')?.setValue('');
+      return;
+    }
+    this.computeQuantity(index);
+  }
+  revertFrequency(index: number): void {
+    const row = this.tablets.at(index);
+    row.get('freqCustom')?.setValue(false);
+    row.get('frequency')?.setValue('');
+    this.computeQuantity(index);
+  }
+
+  onDurationChange(index: number): void {
+    const row = this.tablets.at(index);
+    if (row.get('duration')?.value === '__custom__') {
+      row.get('durCustom')?.setValue(true);
+      row.get('duration')?.setValue('');
+      return;
+    }
+    this.computeQuantity(index);
+  }
+  revertDuration(index: number): void {
+    const row = this.tablets.at(index);
+    row.get('durCustom')?.setValue(false);
+    row.get('duration')?.setValue('');
+    this.computeQuantity(index);
   }
 
   removeTablet(index: number) {
@@ -1726,7 +1807,15 @@ export class TodayConsultationsComponent {
   }
 
   save() {
-    const payload = this.form.value;
+    // Strip UI-only flags (freqCustom/durCustom drive the custom text toggle).
+    const rawForm = this.form.value;
+    const payload = {
+      ...rawForm,
+      tablets: (rawForm.tablets || []).map((t: any) => {
+        const { freqCustom, durCustom, ...rest } = t;
+        return rest;
+      }),
+    };
     console.log(payload)
     this.isButtonLoading = true;
     this.prescriptionService.createPrescription(payload).subscribe({
@@ -2197,8 +2286,10 @@ export class TodayConsultationsComponent {
       duration: [values.duration],
       instructions: [values.instructions],
       quantity: [''],
-      isFavorite: [values.isFavorite]
+      isFavorite: [values.isFavorite],
+      freqCustom: [false], durCustom: [false],
     }));
+    this.computeQuantity(this.tablets.length - 1);
   }
   addFavoriteToPrescription(index: number) {
     // const fav = this.favorites.at(index).getRawValue();
@@ -2217,10 +2308,12 @@ export class TodayConsultationsComponent {
       duration: [fav.duration || ''],
       instructions: [fav.instructions || ''],
       quantity: [''], // let user fill this
-      isFavorite: [true]
+      isFavorite: [true],
+      freqCustom: [false], durCustom: [false],
     }));
     // Get the index of the new tablet just added
     const tabletIndex = this.tablets.length - 1;
+    this.computeQuantity(tabletIndex);
 
     const brands = this.allTablets
       .filter(t => t.genericName === fav.genericName)
@@ -2394,12 +2487,56 @@ export class TodayConsultationsComponent {
   }
 
 
+  /** Build a labelled OPD-notes block for the PDF, skipping any empty field.
+   *  Returns [] when nothing is filled, so the whole section (incl. header)
+   *  is omitted from the document. */
+  private buildNotesSection(header: string, pairs: [string, any][]): any[] {
+    const filled = pairs.filter(([, v]) => v != null && String(v).trim() !== '' && String(v).trim() !== '-');
+    if (!filled.length) return [];
+    const out: any[] = [{ text: header, style: 'section', decoration: 'underline' }];
+    for (const [label, val] of filled) {
+      out.push({ text: label, style: 'section' });
+      out.push({ text: String(val), margin: [0, 0, 0, 6] });
+    }
+    return out;
+  }
+
+  /** Vitals table for the PDF — omitted entirely when no vital is recorded. */
+  private buildVitalsSection(vitals: any): any[] {
+    if (!vitals) return [];
+    const anyVital = [
+      vitals.height, vitals.BPs, vitals.BPd, vitals.weight, vitals.spo2, vitals.temp,
+      vitals.hb, vitals.pulse, vitals.sFerritin, vitals.RR, vitals.bloodGroupName,
+    ].some((v) => v != null && String(v).trim() !== '');
+    if (!anyVital) return [];
+    return [
+      { text: 'Vitals', style: 'section', decoration: 'underline' },
+      {
+        table: {
+          widths: ['auto', 'auto', 'auto', 'auto'],
+          body: [
+            [{ text: 'Height:', bold: true }, `${vitals?.height || '-'} cm`, { text: 'BP:', bold: true }, `${vitals?.BPs || '-'} / ${vitals?.BPd || '-'}`],
+            [{ text: 'Weight:', bold: true }, `${vitals?.weight || '-'} kg`, { text: 'SpO2:', bold: true }, `${vitals?.spo2 || '-'}%`],
+            [{ text: 'Temp:', bold: true }, `${vitals?.temp || '-'} °F`, { text: 'Hb:', bold: true }, `${vitals?.hb || '-'}`],
+            [{ text: 'Pulse:', bold: true }, `${vitals?.pulse || '-'}`, { text: 'Serum Ferritin:', bold: true }, `${vitals?.sFerritin || '-'}`],
+            [{ text: 'RR:', bold: true }, `${vitals?.RR || '-'}`, { text: 'Blood Group', bold: true }, `${vitals?.bloodGroupName || '-'}`],
+          ],
+        },
+        margin: [0, 5, 0, 8],
+      },
+    ];
+  }
+
   generatePdfWithPatient(patient: any, vitals: any, visit: any, history: any, prescriptions: any[], filteredInvestigationOrders: any[]) {
     console.log('Generating PDF with patient data:', patient, vitals, visit, history, prescriptions);
     const patientInfo = patient;
+    // Doctor + department for the top-of-document and footer identity lines.
+    const doctorName = this.doctor?.name || this.currentDoctorName || patient?.doctorName || '';
+    const departmentName = this.doctor?.departmentName || this.currentDepartmentName || '';
+    const docLine = `Doctor: ${doctorName || '-'}${departmentName ? '   |   Department: ' + departmentName : ''}`;
     const docDefinition: any = {
       pageSize: 'A4',
-      pageMargins: [40, 100, 40, 60],
+      pageMargins: [40, 100, 40, 66],
 
       header: function () {
         return {
@@ -2484,13 +2621,13 @@ export class TodayConsultationsComponent {
                   text: `Printed on: ${printedDate}`,
                   alignment: 'left',
                   fontSize: 9,
-                  margin: [0, 5, 0, 0]
+                  margin: [0, 3, 0, 0]
                 },
                 {
                   text: `Rashtrotthana Hospital | 080 6923 9999 | RajaRajeshwari Nagar, Bengaluru – 560 098`,
                   alignment: 'right',
                   fontSize: 9,
-                  margin: [0, 5, 0, 0]
+                  margin: [0, 3, 0, 0]
                 }
               ]
             }
@@ -2501,90 +2638,36 @@ export class TodayConsultationsComponent {
 
       content: [
         { text: 'OPD Visit Summary:', style: 'title' },
+        { text: docLine, bold: true, fontSize: 11, margin: [0, 0, 0, 8] },
 
+        // Vitals — omitted entirely when no vital is recorded.
+        ...this.buildVitalsSection(vitals),
 
-        {
-          text: 'Vitals',
-          style: 'section',
-          decoration: 'underline',
-        },
-        {
-          table: {
-            widths: ['auto', 'auto', 'auto', 'auto'],  // Adjust based on layout
-            body: [
-              [
-                { text: 'Height:', bold: true }, `${vitals?.height || '-'} cm`,
-                { text: 'BP:', bold: true }, `${vitals?.BPs || '-'} / ${vitals?.BPd || '-'}`
-              ],
-              [
-                { text: 'Weight:', bold: true }, `${vitals?.weight || '-'} kg`,
-                { text: 'SpO2:', bold: true }, `${vitals?.spo2 || '-'}%`
-              ],
-              [
-                { text: 'Temp:', bold: true }, `${vitals?.temp || '-'} °F`,
-                { text: 'Hb:', bold: true }, `${vitals?.hb || '-'}`
-              ],
-              [
-                { text: 'Pulse:', bold: true }, `${vitals?.pulse || '-'}`,
-                { text: 'Serum Ferritin:', bold: true }, `${vitals?.sFerritin || '-'}`
-              ],
-              [
-                { text: 'RR:', bold: true }, `${vitals?.RR || '-'}`,
-                { text: 'Blood Group', bold: true }, `${vitals?.bloodGroupName || '-'}`  // Leave the second half blank if not needed
-              ]
-            ]
-          },
-          // layout: 'noBorders',
-          margin: [0, 5, 0, 10]
-        },
+        // OPD Notes — only the filled fields are printed (empty ones skipped).
+        ...this.buildNotesSection('OPD Notes:', [
+          ['Chief Complaints', visit?.chiefComplaints],
+          ['Diagnosis', visit?.diagnosis],
+          ['General Examination', visit?.generalExamination],
+          ['Clinical Notes', visit?.clinicalNotes],
+          ['CVS', visit?.cvs],
+          ['RS', visit?.rs],
+          ['CNS', visit?.cns],
+          ['P/A', visit?.pa],
+        ]),
 
-        {
-          text: 'OPD Notes:',
-          style: 'section',
-          decoration: 'underline',
-        },
-        { text: 'Chief Complaints', style: 'section' },
-        { text: visit?.chiefComplaints || '-', margin: [0, 0, 0, 10] },
+        // OPD History — only filled fields; whole block skipped if all empty.
+        ...this.buildNotesSection('OPD History Notes:', [
+          ['Medical/ Surgical History', history?.medicalHistory],
+          ['Family History', history?.familyHistory],
+          ['Social History', history?.socialHistory],
+        ]),
 
-        { text: 'Diagnosis', style: 'section' },
-        { text: visit?.diagnosis || '-', margin: [0, 0, 0, 10] },
+        // Investigation Requisition — header shown only when there are orders.
+        ...((filteredInvestigationOrders && filteredInvestigationOrders.length)
+          ? [{ text: 'Investigation Requisition', style: 'section', decoration: 'underline', margin: [0, 5, 0, 10] }]
+          : []),
 
-        { text: 'General Examination', style: 'section' },
-        { text: visit?.generalExamination || '-', margin: [0, 0, 0, 10] },
-
-        { text: 'Clinical Notes', style: 'section' },
-        { text: visit?.clinicalNotes || '-', margin: [0, 0, 0, 10] },
-
-        { text: 'CVS', style: 'section' },
-        { text: visit?.cvs || '-', margin: [0, 0, 0, 10] },
-
-        { text: 'RS', style: 'section' },
-        { text: visit?.rs || '-', margin: [0, 0, 0, 10] },
-
-        { text: 'CNS', style: 'section' },
-        { text: visit?.cns || '-', margin: [0, 0, 0, 10] },
-
-        { text: 'P/A', style: 'section' },
-        { text: visit?.pa || '-', margin: [0, 0, 0, 10] },
-
-
-        {
-          text: 'OPD History Notes:',
-          style: 'section',
-          decoration: 'underline',
-        },
-        { text: 'Medical/ Surgical History', style: 'section' },
-        { text: history?.medicalHistory || '-', margin: [0, 0, 0, 10] },
-
-        { text: 'Family History', style: 'section' },
-        { text: history?.familyHistory || '-', margin: [0, 0, 0, 10] },
-
-        { text: 'Social History', style: 'section' },
-        { text: history?.socialHistory || '-', margin: [0, 0, 0, 10] },
-
-        { text: 'Investigation Requisition', style: 'section', decoration: 'underline', margin: [0, 5, 0, 10] },
-
-        ...filteredInvestigationOrders.map((order: any) => {
+        ...(filteredInvestigationOrders || []).map((order: any) => {
           const rows: any[] = [];
 
           // Add Lab Tests
@@ -2621,8 +2704,10 @@ export class TodayConsultationsComponent {
           ];
         }).flat(),
 
-        { text: 'Prescriptions', style: 'section', decoration: 'underline' },
-        ...prescriptions.map((p: any) => ([
+        ...((prescriptions && prescriptions.length)
+          ? [{ text: 'Prescriptions', style: 'section', decoration: 'underline' }]
+          : []),
+        ...(prescriptions || []).map((p: any) => ([
           { text: `Prescription ID: ${p.prescriptionId} | Date: ${new Date(p.prescribedDate).toLocaleDateString()}`, margin: [0, 10, 0, 5] },
           {
             table: {
@@ -2652,7 +2737,24 @@ export class TodayConsultationsComponent {
           },
 
 
-        ])).flat()
+        ])).flat(),
+
+        // Signature — collected at the end of the visit summary (doctor signs here).
+        {
+          margin: [0, 45, 0, 6],
+          columns: [
+            { width: '*', text: '' },
+            {
+              width: 200,
+              stack: [
+                { canvas: [{ type: 'line', x1: 0, y1: 0, x2: 180, y2: 0, lineWidth: 0.7 }] },
+                { text: doctorName || '-', bold: true, fontSize: 11, margin: [0, 5, 0, 0] },
+                ...(departmentName ? [{ text: departmentName, fontSize: 10 }] : []),
+                { text: 'Doctor Signature', fontSize: 9, color: '#555', margin: [0, 2, 0, 0] },
+              ],
+            },
+          ],
+        }
       ],
 
       images: {
@@ -2661,8 +2763,8 @@ export class TodayConsultationsComponent {
 
       styles: {
         header: { fontSize: 16, bold: true },
-        title: { fontSize: 18, bold: true, margin: [0, 20, 0, 10] },
-        section: { fontSize: 14, bold: true, margin: [0, 15, 0, 5] },
+        title: { fontSize: 16, bold: true, margin: [0, 4, 0, 6] },
+        section: { fontSize: 12, bold: true, margin: [0, 6, 0, 2] },
         patientInfo: { margin: [0, 10, 0, 10] }
       }
     };

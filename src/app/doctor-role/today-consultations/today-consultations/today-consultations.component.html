@@ -643,7 +643,7 @@
     <h2 class="title-bar">Prescription</h2>
 
     <div class="top-menu">
-      <span class="section-title">Add New Drug</span>
+      <!-- <span class="section-title">Add New Drug</span> -->
       <div class="menu-actions">
         <span (click)="openFavorite()" class="favorites">
           <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -714,18 +714,36 @@
               <option *ngFor="let item of filteredBrandOptions[i]" [value]="item">{{ item }}</option>
             </select>
 
-            <select formControlName="frequency" class="w-8">
-              <option value="">Select Frequency</option>
-              <option *ngFor="let item of frequencyOptions" [value]="item">{{ item }}</option>
-            </select>
+            <ng-container *ngIf="!tab.get('freqCustom')?.value; else freqCustomA">
+              <select formControlName="frequency" class="w-8" (change)="onFrequencyChange(i)">
+                <option value="">Frequency</option>
+                <option *ngFor="let item of frequencyOptions" [value]="item">{{ item }}</option>
+                <option value="__custom__">✎ Custom…</option>
+              </select>
+            </ng-container>
+            <ng-template #freqCustomA>
+              <div class="custom-cell w-8">
+                <input formControlName="frequency" placeholder="e.g. 1-1-1-1" (input)="computeQuantity(i)" />
+                <button type="button" class="revert-btn" (click)="revertFrequency(i)" title="Back to list">↩</button>
+              </div>
+            </ng-template>
 
-            <select formControlName="duration" class="w-8">
-              <option value="">Select Duration</option>
-              <option *ngFor="let item of durationOptions" [value]="item">{{ item }}</option>
-            </select>
+            <ng-container *ngIf="!tab.get('durCustom')?.value; else durCustomA">
+              <select formControlName="duration" class="w-8" (change)="onDurationChange(i)">
+                <option value="">Duration</option>
+                <option *ngFor="let item of durationOptions" [value]="item">{{ item }}</option>
+                <option value="__custom__">✎ Custom…</option>
+              </select>
+            </ng-container>
+            <ng-template #durCustomA>
+              <div class="custom-cell w-8">
+                <input formControlName="duration" placeholder="e.g. 15 days" (input)="computeQuantity(i)" />
+                <button type="button" class="revert-btn" (click)="revertDuration(i)" title="Back to list">↩</button>
+              </div>
+            </ng-template>
 
             <input formControlName="instructions" placeholder="Type Instruction" class="w-20" />
-            <input formControlName="quantity" type="number" placeholder="999" class="w-8" />
+            <input formControlName="quantity" type="number" placeholder="Qty" class="w-8" />
           </div>
         </div>
       </div>
@@ -1183,7 +1201,7 @@
     </div>
     <div class="tab-content" id="prescription" style="display:block" *ngIf="activeTab === 'prescription'">
       <div class="top-menu">
-        <span class="section-title">Add New Drug</span>
+        <!-- <span class="section-title">Add New Drug</span> -->
         <div class="menu-actions">
           <span (click)="openFavorite()" class="favorites">
             <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
@@ -1276,18 +1294,36 @@
               
 
 
-              <select formControlName="frequency" class="w-8">
-                <option value="">Select Frequency</option>
-                <option *ngFor="let item of frequencyOptions" [value]="item">{{ item }}</option>
-              </select>
+              <ng-container *ngIf="!tab.get('freqCustom')?.value; else freqCustomB">
+                <select formControlName="frequency" class="w-8" (change)="onFrequencyChange(i)">
+                  <option value="">Frequency</option>
+                  <option *ngFor="let item of frequencyOptions" [value]="item">{{ item }}</option>
+                  <option value="__custom__">✎ Custom…</option>
+                </select>
+              </ng-container>
+              <ng-template #freqCustomB>
+                <div class="custom-cell w-8">
+                  <input formControlName="frequency" placeholder="e.g. 1-1-1-1" (input)="computeQuantity(i)" />
+                  <button type="button" class="revert-btn" (click)="revertFrequency(i)" title="Back to list">↩</button>
+                </div>
+              </ng-template>
 
-              <select formControlName="duration" class="w-8">
-                <option value="">Select Duration</option>
-                <option *ngFor="let item of durationOptions" [value]="item">{{ item }}</option>
-              </select>
+              <ng-container *ngIf="!tab.get('durCustom')?.value; else durCustomB">
+                <select formControlName="duration" class="w-8" (change)="onDurationChange(i)">
+                  <option value="">Duration</option>
+                  <option *ngFor="let item of durationOptions" [value]="item">{{ item }}</option>
+                  <option value="__custom__">✎ Custom…</option>
+                </select>
+              </ng-container>
+              <ng-template #durCustomB>
+                <div class="custom-cell w-8">
+                  <input formControlName="duration" placeholder="e.g. 15 days" (input)="computeQuantity(i)" />
+                  <button type="button" class="revert-btn" (click)="revertDuration(i)" title="Back to list">↩</button>
+                </div>
+              </ng-template>
 
               <input formControlName="instructions" placeholder="Type Instruction" class="w-20" />
-              <input formControlName="quantity" type="number" placeholder="999" class="w-8"  (keydown)="onQuantityKeydown($event, i)"/>
+              <input formControlName="quantity" type="number" placeholder="Qty" class="w-8"  (keydown)="onQuantityKeydown($event, i)"/>
             </div>
           </div>
         </div>

@@ -177,6 +177,20 @@
         <div class="text">EST Confirmed</div>
     </div>
 
+    <div class="card pointer" style="background-color: #D9F2FF;" (click)="openCheckinReport()">
+        <div class="icon"><img src="/total-analytics.svg" alt=""
+                matTooltip="Patients checked in today (click to view the list)." matTooltipPosition="above"></div>
+        <div class="count">{{checkinList.length || checkIn || 0}}</div>
+        <div class="text">Check-in Today</div>
+    </div>
+
+    <div class="card pointer" *ngIf="isAdminView" style="background-color: #E7E9FF;" (click)="openConsultReport()">
+        <div class="icon"><img src="/avail.svg" alt=""
+                matTooltip="Consultations started / finished today, per doctor (click for details)." matTooltipPosition="above"></div>
+        <div class="count">{{consultStartedTotal}}/<span>{{consultFinishedTotal}}</span></div>
+        <div class="text">Consult (Start/Finish)</div>
+    </div>
+
     <div class="round">
         <div class="today">Today</div>
         <div class="today"><i class="fa-solid fa-arrow-left"></i></div>
@@ -371,6 +385,122 @@
         </div>
         <div *ngIf="leaveDoctors.length === 0">
             <div class="doctor-details doctor-card no-record">No Leave Doctors to Display</div>
+        </div>
+    </div>
+</div>
+
+<!-- Check-in Today list -->
+<div *ngIf="showCheckinReport" class="overlay">
+    <div class="container">
+        <div class="header">
+            <div>Check-in Today</div>
+            <div class="header-actions">
+                <button class="excel-btn" (click)="downloadCheckinExcel()" [disabled]="checkinList.length === 0">
+                    <i class="fa-solid fa-file-excel"></i> Excel
+                </button>
+                <button class="close-button" (click)="closeCheckinReport()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        </div>
+        <div class="doctor-list-est">
+            <table>
+                <thead>
+                    <tr>
+                        <td><b>S. No</b></td>
+                        <td><b>Patient Name</b></td>
+                        <td><b>PRN</b></td>
+                        <td><b>Doctor</b></td>
+                        <td><b>Department</b></td>
+                        <td><b>Time</b></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let c of checkinList; let i = index">
+                        <td>{{i+1}}</td>
+                        <td>{{c.patientName}}</td>
+                        <td>{{c.prnNumber || '-'}}</td>
+                        <td>{{c.doctorName}}</td>
+                        <td>{{c.department}}</td>
+                        <td>{{c.time}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div *ngIf="checkinList.length === 0">
+            <div class="doctor-details doctor-card no-record">No Check-ins to Display</div>
+        </div>
+    </div>
+</div>
+
+<!-- Consultations per doctor (admin) -->
+<div *ngIf="showConsultReport" class="overlay">
+    <div class="container">
+        <div class="header">
+            Consultations Today — by Doctor
+            <button class="close-button" (click)="closeConsultReport()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="doctor-list-est">
+            <table>
+                <thead>
+                    <tr>
+                        <td><b>S. No</b></td>
+                        <td><b>Doctor</b></td>
+                        <td><b>Started</b></td>
+                        <td><b>Finished</b></td>
+                        <td><b>Patients</b></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let d of consultSummary; let i = index" class="pointer" (click)="openConsultPatients(d)">
+                        <td>{{i+1}}</td>
+                        <td>{{d.doctorName}}</td>
+                        <td>{{d.started}}</td>
+                        <td>{{d.finished}}</td>
+                        <td><i class="fa-solid fa-eye"></i> View</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div *ngIf="consultSummary.length === 0">
+            <div class="doctor-details doctor-card no-record">No Consultations Started Today</div>
+        </div>
+    </div>
+</div>
+
+<!-- Consultations patient drill-down -->
+<div *ngIf="showConsultPatients" class="overlay">
+    <div class="container">
+        <div class="header">
+            {{ selectedConsultDoctor?.doctorName }} — Patients
+            <button class="close-button" (click)="closeConsultPatients()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="doctor-list-est">
+            <table>
+                <thead>
+                    <tr>
+                        <td><b>S. No</b></td>
+                        <td><b>Patient</b></td>
+                        <td><b>PRN</b></td>
+                        <td><b>Slot</b></td>
+                        <td><b>Started</b></td>
+                        <td><b>Finished</b></td>
+                        <td><b>State</b></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let p of selectedConsultDoctor?.patients; let i = index">
+                        <td>{{i+1}}</td>
+                        <td>{{p.patientName}}</td>
+                        <td>{{p.prnNumber || '-'}}</td>
+                        <td>{{p.time}}</td>
+                        <td>{{ p.startedAt ? (p.startedAt | date:'shortTime') : '-' }}</td>
+                        <td>{{ p.finishedAt ? (p.finishedAt | date:'shortTime') : '-' }}</td>
+                        <td>{{p.state}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div *ngIf="!selectedConsultDoctor?.patients?.length">
+            <div class="doctor-details doctor-card no-record">No Patients to Display</div>
         </div>
     </div>
 </div>

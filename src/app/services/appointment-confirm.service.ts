@@ -551,6 +551,12 @@ export class AppointmentConfirmService {
       params: { date: date }
     });
   }
+  /** Analytics: per-doctor started/finished consultation counts + patient list for a day. */
+  getConsultationSummary(date: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/consultation-summary`, {
+      params: { date: date }
+    });
+  }
   updateAppointmentVitals(appointmentId: number, vitals: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/${appointmentId}/vitals`, vitals);
   }

@@ -1360,13 +1360,18 @@ label {
 }
 
 .top-menu .section-title {
-  color: #fff;
+  /* !important + higher specificity to beat the global forms.css
+     :where(.section-title){color:#271e4a!important;border-bottom…} rule,
+     which was rendering this title dark-on-navy (invisible) with an underline. */
+  color: #fff !important;
   font-family: Kanit;
   font-size: 20px;
   font-style: normal;
   font-weight: 500;
   line-height: normal;
-  padding: 0 20px;
+  padding: 0 20px !important;
+  margin: 0 !important;
+  border-bottom: none !important;
 }
 
 .top-menu .menu-actions span {
@@ -1921,7 +1926,7 @@ select:disabled {
 /* Content Sections */
 .tab-content {
   display: none;
-  padding: 20px 0;
+  padding: 20px;
 }
 
 .tab-content h4 {
@@ -2742,3 +2747,26 @@ th.priority-col,td.priority-col{width:50px;text-align:center;padding:6px 4px}
   display: block;
   padding: 18px 20px 22px;
 }
+
+/* Custom-typed frequency / duration cell (drug rows) */
+.custom-cell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.custom-cell input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.revert-btn {
+  flex: 0 0 auto;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  color: #0e2970;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 5px 6px;
+  font-size: 12px;
+  line-height: 1;
+}
+.revert-btn:hover { background: #e0e7ff; }

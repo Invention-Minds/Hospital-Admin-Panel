@@ -94,3 +94,37 @@
 
 .prescription-block { margin-bottom: 18px; padding: 10px; background: #f9f9f9; border-radius: 8px; }
 .prescription-header { font-weight: 500; color: #0e2970; margin-bottom: 8px; }
+
+/* ── Main prescription table — aligned grid (header + rows share columns) ── */
+.rx-header,
+.rx-row {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1.5fr) minmax(0, 1.5fr) minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 1.7fr) minmax(0, 0.8fr);
+  align-items: center;
+  gap: 10px;
+}
+.rx-header { padding: 8px 16px; }
+.rx-header .column { width: auto; white-space: nowrap; }
+
+.rx-row { height: 52px; }
+.rx-row > select,
+.rx-row > input,
+.rx-row .custom-cell { width: 100%; box-sizing: border-box; }
+.rx-row select:focus,
+.rx-row input:focus {
+  outline: none;
+  border-color: #0e2970;
+  box-shadow: 0 0 0 2px rgba(14, 41, 112, 0.12);
+}
+
+.row-actions { display: flex; align-items: center; gap: 6px; }
+
+/* Custom-typed frequency / duration cell */
+.custom-cell { display: flex; align-items: center; gap: 4px; }
+.custom-cell input { flex: 1 1 auto; min-width: 0; }
+.revert-btn {
+  flex: 0 0 auto;
+  background: #eef2ff; border: 1px solid #c7d2fe; color: #0e2970;
+  border-radius: 6px; cursor: pointer; padding: 5px 7px; font-size: 12px; line-height: 1;
+}
+.revert-btn:hover { background: #e0e7ff; }

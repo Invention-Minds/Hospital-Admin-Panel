@@ -23,6 +23,11 @@ interface LabGroup {
   tests: CatalogTest[];
 }
 
+interface RadiologyGroup {
+  modality: string;
+  tests: CatalogTest[];
+}
+
 /**
  * Faithful digital replica of the paper LAB + RADIOLOGY request forms, embedded
  * in the OPD assessment. Renders the lab catalog as a grouped checkbox grid
@@ -70,12 +75,24 @@ export class InvestigationOrderComponent implements OnInit, OnChanges {
 
   labGroups: LabGroup[] = [];
   radiologyTests: CatalogTest[] = [];
+  radiologyGroups: RadiologyGroup[] = [];
 
   selectedLabIds = new Set<number>();
   selectedRadiologyIds = new Set<number>();
 
   labSearch = '';
+  radiologySearch = '';
   remarks = '';
+
+  // Collapsible group state — which department/modality panels are expanded.
+  // Default collapsed (1000+ tests): the doctor opens only what they need.
+  expandedLab = new Set<string>();
+  expandedRad = new Set<string>();
+
+  // Radiology modality buckets (derived from the test name — see deriveModality).
+  private readonly radModalityOrder = [
+    'X-Ray', 'CT', 'MRI', 'Ultrasound', 'Doppler', 'Mammography', 'BMD', 'PET', 'Others',
+  ];
 
   // Radiology safety screening (paper form).
   readonly priorities = ['Emergency', 'Routine', 'In-Patient', 'Out-Patient', 'MLC', 'Health Check'];
@@ -136,6 +153,7 @@ export class InvestigationOrderComponent implements OnInit, OnChanges {
         this.api.getRadiologyTests().subscribe({
           next: (rads) => {
             this.radiologyTests = (rads ?? []) as CatalogTest[];
+            this.radiologyGroups = this.groupRadiology(this.radiologyTests);
             this.catalogEmpty =
               this.labGroups.length === 0 && this.radiologyTests.length === 0;
             this.loading = false;
@@ -182,6 +200,71 @@ export class InvestigationOrderComponent implements OnInit, OnChanges {
         tests: g.tests.filter((t) => t.description.toLowerCase().includes(q)),
       }))
       .filter((g) => g.tests.length > 0);
+  }
+
+  // ─── Radiology grouping (derived modality) ──────────────────────────────
+  /** Classify a radiology study into a modality bucket from keywords in its name.
+   *  Order matters — the most specific patterns are tested first; anything
+   *  unmatched falls into 'Others'. Tweak the patterns if studies are mis-binned. */
+  private deriveModality(description: string): string {
+    const d = (description || '').toUpperCase();
+    if (/\bMRI\b|MAGNETIC RESONANCE/.test(d)) return 'MRI';
+    if (/DOPPLER/.test(d)) return 'Doppler';
+    if (/\bCT\b|CECT|NCCT|HRCT|CONTRAST CT|COMPUTED TOMOGRAPH/.test(d)) return 'CT';
+    if (/MAMMO/.test(d)) return 'Mammography';
+    if (/\bBMD\b|DEXA|BONE DENSIT/.test(d)) return 'BMD';
+    if (/\bPET\b/.test(d)) return 'PET';
+    if (/\bUSG\b|ULTRA\s?SOUND|SONO|\bU\.?S\.?G\b|SCAN\b|ABDOMEN|PELVI|OBST|ANOMALY|NT SCAN|TVS\b/.test(d)) return 'Ultrasound';
+    if (/X-?\s?RAY|\bXRAY\b|\bIVP\b|\bKUB\b|BARIUM|\bPNS\b|\bHSG\b|SKIAGRAM/.test(d)) return 'X-Ray';
+    return 'Others';
+  }
+
+  private groupRadiology(tests: CatalogTest[]): RadiologyGroup[] {
+    const byMod = new Map<string, CatalogTest[]>();
+    for (const t of tests) {
+      const mod = this.deriveModality(t.description);
+      if (!byMod.has(mod)) byMod.set(mod, []);
+      byMod.get(mod)!.push(t);
+    }
+    const ordered: RadiologyGroup[] = [];
+    for (const mod of this.radModalityOrder) {
+      if (byMod.has(mod)) {
+        ordered.push({ modality: mod, tests: byMod.get(mod)! });
+        byMod.delete(mod);
+      }
+    }
+    for (const [mod, list] of byMod) ordered.push({ modality: mod, tests: list });
+    return ordered;
+  }
+
+  /** Radiology groups filtered by the radiology search box. */
+  get visibleRadiologyGroups(): RadiologyGroup[] {
+    const q = this.radiologySearch.trim().toLowerCase();
+    if (!q) return this.radiologyGroups;
+    return this.radiologyGroups
+      .map((g) => ({ modality: g.modality, tests: g.tests.filter((t) => t.description.toLowerCase().includes(q)) }))
+      .filter((g) => g.tests.length > 0);
+  }
+
+  // ─── Collapse / expand + per-group selection counts ─────────────────────
+  toggleLabGroup(dept: string): void {
+    this.expandedLab.has(dept) ? this.expandedLab.delete(dept) : this.expandedLab.add(dept);
+  }
+  toggleRadGroup(mod: string): void {
+    this.expandedRad.has(mod) ? this.expandedRad.delete(mod) : this.expandedRad.add(mod);
+  }
+  /** A group is shown open when the user expanded it, or a search is filtering. */
+  isLabExpanded(dept: string): boolean {
+    return this.expandedLab.has(dept) || this.labSearch.trim().length > 0;
+  }
+  isRadExpanded(mod: string): boolean {
+    return this.expandedRad.has(mod) || this.radiologySearch.trim().length > 0;
+  }
+  labSelectedInGroup(group: LabGroup): number {
+    return group.tests.reduce((n, t) => n + (this.selectedLabIds.has(t.id) ? 1 : 0), 0);
+  }
+  radSelectedInGroup(group: RadiologyGroup): number {
+    return group.tests.reduce((n, t) => n + (this.selectedRadiologyIds.has(t.id) ? 1 : 0), 0);
   }
 
   toggleLab(id: number): void {

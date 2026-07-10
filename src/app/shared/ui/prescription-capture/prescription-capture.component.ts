@@ -182,6 +182,7 @@ export class PrescriptionCaptureComponent implements OnInit, OnChanges {
     this.tablets.push(this.fb.group({
       genericName: [''], brandName: [''], frequency: [''], duration: [''],
       instructions: [''], quantity: [''], isFavorite: [false],
+      freqCustom: [false], durCustom: [false],
     }));
     this.filteredBrandOptions.push([]);
     this.brandOptions = this.allTablets.map((b: any) => b.brandName);
@@ -236,6 +237,88 @@ export class PrescriptionCaptureComponent implements OnInit, OnChanges {
 
   confirmAllergyAlert(genericName: string): void {
     this.messageService.add({ severity: 'warn', summary: 'Allergy Alert', detail: `⚠️ ${genericName} is listed as an allergy for this patient.`, life: 5000 });
+  }
+
+  // ─── Quantity auto-calc + custom frequency/duration ─────────────────────
+  // Quantity = (doses per day, summed from the frequency pattern) × (number of
+  // days parsed from the duration). Non-numeric patterns (Stat / SOS / Daily …)
+  // can't be quantified, so quantity is left for manual entry in those cases.
+
+  /** Sum a dash-separated dose pattern into a per-day total.
+   *  "1-0-1" → 2, "1/2-0-1/2" → 1, "5ml-5ml-5ml" → 15. Returns null if any
+   *  token isn't numeric (e.g. "Stat", "SOS", "Daily"). */
+  private parseFrequencyPerDay(freq: any): number | null {
+    if (freq == null) return null;
+    const f = String(freq).trim().toLowerCase();
+    if (!f) return null;
+    let total = 0;
+    let counted = 0;
+    for (const raw of f.split('-')) {
+      const p = raw.replace(/\b(ml|tab|tabs|tsp|cap|caps|drops?|units?|puffs?)\b/gi, '').trim();
+      if (p === '') continue;
+      let val: number;
+      if (p.includes('/')) {
+        const [n, d] = p.split('/').map((x) => Number(x));
+        if (!isFinite(n) || !isFinite(d) || d === 0) return null;
+        val = n / d;
+      } else {
+        val = Number(p);
+        if (!isFinite(val)) return null;
+      }
+      total += val;
+      counted++;
+    }
+    return counted > 0 ? total : null;
+  }
+
+  /** First number found in the duration ("3 days" → 3, "7" → 7, "Daily" → null). */
+  private parseDurationDays(dur: any): number | null {
+    if (dur == null) return null;
+    const m = String(dur).match(/\d+(\.\d+)?/);
+    return m ? Number(m[0]) : null;
+  }
+
+  /** Recompute a row's quantity from its frequency × duration, when both parse. */
+  computeQuantity(index: number): void {
+    const row = this.tablets.at(index);
+    if (!row) return;
+    const perDay = this.parseFrequencyPerDay(row.get('frequency')?.value);
+    const days = this.parseDurationDays(row.get('duration')?.value);
+    if (perDay != null && days != null) {
+      row.get('quantity')?.setValue(Math.round(perDay * days * 100) / 100);
+    }
+  }
+
+  onFrequencyChange(index: number): void {
+    const row = this.tablets.at(index);
+    if (row.get('frequency')?.value === '__custom__') {
+      row.get('freqCustom')?.setValue(true);
+      row.get('frequency')?.setValue('');
+      return;
+    }
+    this.computeQuantity(index);
+  }
+  revertFrequency(index: number): void {
+    const row = this.tablets.at(index);
+    row.get('freqCustom')?.setValue(false);
+    row.get('frequency')?.setValue('');
+    this.computeQuantity(index);
+  }
+
+  onDurationChange(index: number): void {
+    const row = this.tablets.at(index);
+    if (row.get('duration')?.value === '__custom__') {
+      row.get('durCustom')?.setValue(true);
+      row.get('duration')?.setValue('');
+      return;
+    }
+    this.computeQuantity(index);
+  }
+  revertDuration(index: number): void {
+    const row = this.tablets.at(index);
+    row.get('durCustom')?.setValue(false);
+    row.get('duration')?.setValue('');
+    this.computeQuantity(index);
   }
 
   toggleFavorite(index: number): void {
@@ -328,8 +411,10 @@ export class PrescriptionCaptureComponent implements OnInit, OnChanges {
     this.tablets.push(this.fb.group({
       genericName: [fav.genericName], brandName: [fav.brandName], frequency: [fav.frequency || ''],
       duration: [fav.duration || ''], instructions: [fav.instructions || ''], quantity: [''], isFavorite: [true],
+      freqCustom: [false], durCustom: [false],
     }));
     const tabletIndex = this.tablets.length - 1;
+    this.computeQuantity(tabletIndex);
     const brands = this.allTablets.filter((t) => t.genericName === fav.genericName).map((t) => t.brandName);
     if (!brands.includes(fav.brandName)) brands.unshift(fav.brandName);
     this.filteredBrandOptions[tabletIndex] = brands;
@@ -418,7 +503,16 @@ export class PrescriptionCaptureComponent implements OnInit, OnChanges {
   // ─── Save / Print ────────────────────────────────────────────────────────
   save(): void {
     this.patchHeader();
-    const payload = this.form.value;
+    // Strip UI-only flags (freqCustom/durCustom drive the custom text toggle,
+    // they aren't part of the prescription record).
+    const raw = this.form.value;
+    const payload = {
+      ...raw,
+      tablets: (raw.tablets || []).map((t: any) => {
+        const { freqCustom, durCustom, ...rest } = t;
+        return rest;
+      }),
+    };
     this.isButtonLoading = true;
     this.prescriptionService.createPrescription(payload).subscribe({
       next: (response: any) => {

@@ -125,16 +125,22 @@
 }
 
 /* ── Lab grid ────────────────────────────── */
+/* Masonry via CSS multi-column: collapsed groups pack tightly, and an expanded
+   group grows only its own column — no stretched grid rows / empty gaps. */
 .lab-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 10px;
+  column-width: 230px;
+  column-gap: 10px;
 }
 .lab-group {
   border: 1px solid var(--inv-border);
   border-radius: 6px;
   overflow: hidden;
   break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+  page-break-inside: avoid;
+  display: inline-block;
+  width: 100%;
+  margin: 0 0 10px;
 }
 .lab-group-header {
   background: var(--inv-header-bg);
@@ -166,6 +172,65 @@
   text-align: center;
   color: #6b7785;
 }
+
+/* ── Collapsible group headers (lab departments + radiology modalities) ── */
+.group-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: var(--inv-header-bg);
+  border: none;
+  border-bottom: 1px solid var(--inv-border);
+  padding: 7px 10px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 11.5px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  color: #44546a;
+  text-align: left;
+}
+.group-header:hover { background: var(--inv-accent-soft); }
+.group-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.group-meta { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+.group-count {
+  background: #e5e9f0; color: #44546a; border-radius: 999px;
+  font-size: 10px; font-weight: 700; padding: 1px 7px; min-width: 20px; text-align: center;
+}
+.group-sel {
+  background: var(--inv-accent); color: #fff; border-radius: 999px;
+  font-size: 10px; font-weight: 700; padding: 1px 7px; text-transform: none; letter-spacing: 0;
+}
+.group-chevron { transition: transform 0.2s ease; color: #6b7785; }
+.group-header.open .group-chevron { transform: rotate(180deg); }
+.group-body { padding: 4px 0 6px; }
+
+/* Radiology modalities use the same masonry cards as the lab grid. */
+.rad-groups { column-width: 230px; column-gap: 10px; padding: 10px; }
+.rad-group {
+  border: 1px solid var(--inv-border);
+  border-radius: 6px;
+  overflow: hidden;
+  break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+  page-break-inside: avoid;
+  display: inline-block;
+  width: 100%;
+  margin: 0 0 10px;
+}
+.rad-group .group-body { display: flex; flex-direction: column; padding: 4px 0 6px; }
+.rad-group .rad-modality { padding: 3px 8px; line-height: 1.25; align-items: flex-start; }
+.rad-group .rad-modality:hover { background: var(--inv-accent-soft); }
+.rad-group .rad-modality input { margin-top: 2px; }
+
+.rad-header-row {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--inv-header-bg); border-bottom: 1px solid var(--inv-border); padding: 6px 10px;
+}
+.rad-header-row .rad-header { background: none; border: none; padding: 0; flex: 0 0 auto; }
+.rad-search { flex: 1 1 auto; min-width: 0; }
 
 /* ── Radiology panel ─────────────────────── */
 .radiology-panel {

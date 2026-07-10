@@ -44,6 +44,21 @@ export class TodayAnalyticsComponent {
   checkinData: any
   doctorsCount: any
 
+  // role gate for the admin-only consultation summary card
+  role: string = ''
+
+  // check-in list (today)
+  checkinList: any[] = []
+  showCheckinReport: boolean = false
+
+  // per-doctor consultation summary (admin)
+  consultSummary: any[] = []
+  consultStartedTotal: number = 0
+  consultFinishedTotal: number = 0
+  showConsultReport: boolean = false
+  showConsultPatients: boolean = false
+  selectedConsultDoctor: any = null
+
   // report
   popUpPresentReport: boolean = false
   popUpAbsentReport: boolean = false
@@ -63,14 +78,69 @@ export class TodayAnalyticsComponent {
 
   ngOnInit(): void {
     this.date = getTodayDate()
+    if (typeof window !== 'undefined' && window.localStorage) {
+      this.role = localStorage.getItem('role') || '';
+    }
     this.fetchDoctorsWithAvailability();
     this.confirmedEstimations();
     // this.roomAvailability();
     this.mhcConfirmed()
     this.getTodayCheckin()
+    this.fetchCheckinList()
+    if (this.isAdminView) this.fetchConsultationSummary()
     this.popUpPresentReport = false
     this.popUpAbsentReport = false
   }
+
+  // ── Check-in list (today) ───────────────────────────────────────────────
+  fetchCheckinList(): void {
+    this.appointment.getTodayCheckin(this.date).subscribe({
+      next: (rows: any) => { this.checkinList = Array.isArray(rows) ? rows : []; },
+      error: (err: any) => console.error('Error fetching check-in list:', err),
+    });
+  }
+  openCheckinReport(): void { this.showCheckinReport = true; }
+  closeCheckinReport(): void { this.showCheckinReport = false; }
+
+  downloadCheckinExcel(): void {
+    if (!this.checkinList || this.checkinList.length === 0) { return; }
+    const rows = this.checkinList.map((c: any, i: number) => ({
+      'S.No': i + 1,
+      'Patient Name': c.patientName || '',
+      'PRN': c.prnNumber ?? '',
+      'Phone': c.phoneNumber || '',
+      'Doctor': c.doctorName || '',
+      'Department': c.department || '',
+      'Time': c.time || '',
+      'Checked-in By': c.checkedInBy || '',
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Check-in');
+    XLSX.writeFile(wb, `checkin-${this.date}.xlsx`);
+  }
+
+  // ── Per-doctor consultation summary (admin) ─────────────────────────────
+  get isAdminView(): boolean {
+    return this.role === 'admin' || this.role === 'super_admin';
+  }
+  fetchConsultationSummary(): void {
+    this.appointment.getConsultationSummary(this.date).subscribe({
+      next: (rows: any) => {
+        this.consultSummary = Array.isArray(rows) ? rows : [];
+        this.consultStartedTotal = this.consultSummary.reduce((s, d) => s + (d.started || 0), 0);
+        this.consultFinishedTotal = this.consultSummary.reduce((s, d) => s + (d.finished || 0), 0);
+      },
+      error: (err: any) => console.error('Error fetching consultation summary:', err),
+    });
+  }
+  openConsultReport(): void { this.showConsultReport = true; }
+  closeConsultReport(): void { this.showConsultReport = false; this.showConsultPatients = false; }
+  openConsultPatients(doctor: any): void {
+    this.selectedConsultDoctor = doctor;
+    this.showConsultPatients = true;
+  }
+  closeConsultPatients(): void { this.showConsultPatients = false; this.selectedConsultDoctor = null; }
 
   private fetchDoctorsWithAvailability(): void {
     this.doctor.getAllDoctors(this.date).subscribe(

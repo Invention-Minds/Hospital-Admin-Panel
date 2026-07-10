@@ -11,32 +11,34 @@
     </div>
   </div>
 
-  <div class="header-row">
+  <div class="header-row rx-header">
     <button type="button" class="add-btn" (click)="addTablet()">Add +</button>
-    <span class="column column-w-18">Generic name</span>
-    <span class="column column-w-18">Brand Name</span>
-    <span class="column column-w-12">Frequency</span>
-    <span class="column column-w-11">Duration</span>
-    <span class="column column-w-20">Instruction</span>
-    <span class="column column-w-8">Qty</span>
+    <span class="column">Generic name</span>
+    <span class="column">Brand Name</span>
+    <span class="column">Frequency</span>
+    <span class="column">Duration</span>
+    <span class="column">Instruction</span>
+    <span class="column">Qty</span>
   </div>
 
   <form [formGroup]="form">
     <div class="tablet-rows-wrapper">
       <div formArrayName="tablets" class="tablet-rows scrollable">
-        <div *ngFor="let tab of tablets.controls; let i = index" [formGroupName]="i" class="tablet-row">
-          <button type="button" (click)="removeTablet(i)" class="delete-btn" title="Remove">🗑</button>
-          <button type="button" (click)="toggleFavorite(i)" class="favorite-btn" title="Favourite">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" *ngIf="!isFavorite(i)">
-              <path fill="none" stroke="#36B8B8" stroke-linejoin="round" stroke-width="1.5"
-                d="m12 2l3.104 6.728l7.358.873l-5.44 5.03l1.444 7.268L12 18.28L5.534 21.9l1.444-7.268L1.538 9.6l7.359-.873z" />
-            </svg>
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" *ngIf="isFavorite(i)">
-              <path fill="#36B8B8" fill-rule="evenodd"
-                d="M12.908 1.581a1 1 0 0 0-1.816 0l-2.87 6.22l-6.801.807a1 1 0 0 0-.562 1.727l5.03 4.65l-1.335 6.72a1 1 0 0 0 1.469 1.067L12 19.426l5.977 3.346a1 1 0 0 0 1.47-1.068l-1.335-6.718l5.029-4.651a1 1 0 0 0-.562-1.727L15.777 7.8z"
-                clip-rule="evenodd" stroke-width="0.5" stroke="#36B8B8" />
-            </svg>
-          </button>
+        <div *ngFor="let tab of tablets.controls; let i = index" [formGroupName]="i" class="tablet-row rx-row">
+          <div class="row-actions">
+            <button type="button" (click)="removeTablet(i)" class="delete-btn" title="Remove">🗑</button>
+            <button type="button" (click)="toggleFavorite(i)" class="favorite-btn" title="Favourite">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" *ngIf="!isFavorite(i)">
+                <path fill="none" stroke="#36B8B8" stroke-linejoin="round" stroke-width="1.5"
+                  d="m12 2l3.104 6.728l7.358.873l-5.44 5.03l1.444 7.268L12 18.28L5.534 21.9l1.444-7.268L1.538 9.6l7.359-.873z" />
+              </svg>
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" *ngIf="isFavorite(i)">
+                <path fill="#36B8B8" fill-rule="evenodd"
+                  d="M12.908 1.581a1 1 0 0 0-1.816 0l-2.87 6.22l-6.801.807a1 1 0 0 0-.562 1.727l5.03 4.65l-1.335 6.72a1 1 0 0 0 1.469 1.067L12 19.426l5.977 3.346a1 1 0 0 0 1.47-1.068l-1.335-6.718l5.029-4.651a1 1 0 0 0-.562-1.727L15.777 7.8z"
+                  clip-rule="evenodd" stroke-width="0.5" stroke="#36B8B8" />
+              </svg>
+            </button>
+          </div>
 
           <select formControlName="genericName" (change)="onGenericChange(i)" class="w-18">
             <option value="">Select Generic</option>
@@ -48,18 +50,36 @@
             <option *ngFor="let item of filteredBrandOptions[i]" [value]="item">{{ item }}</option>
           </select>
 
-          <select formControlName="frequency" class="w-8">
-            <option value="">Select Frequency</option>
-            <option *ngFor="let item of frequencyOptions" [value]="item">{{ item }}</option>
-          </select>
+          <ng-container *ngIf="!tab.get('freqCustom')?.value; else freqCustomTpl">
+            <select formControlName="frequency" class="w-12" (change)="onFrequencyChange(i)">
+              <option value="">Frequency</option>
+              <option *ngFor="let item of frequencyOptions" [value]="item">{{ item }}</option>
+              <option value="__custom__">✎ Custom…</option>
+            </select>
+          </ng-container>
+          <ng-template #freqCustomTpl>
+            <div class="custom-cell w-12">
+              <input formControlName="frequency" placeholder="e.g. 1-1-1-1" (input)="computeQuantity(i)" />
+              <button type="button" class="revert-btn" (click)="revertFrequency(i)" title="Back to list">↩</button>
+            </div>
+          </ng-template>
 
-          <select formControlName="duration" class="w-8">
-            <option value="">Select Duration</option>
-            <option *ngFor="let item of durationOptions" [value]="item">{{ item }}</option>
-          </select>
+          <ng-container *ngIf="!tab.get('durCustom')?.value; else durCustomTpl">
+            <select formControlName="duration" class="w-11" (change)="onDurationChange(i)">
+              <option value="">Duration</option>
+              <option *ngFor="let item of durationOptions" [value]="item">{{ item }}</option>
+              <option value="__custom__">✎ Custom…</option>
+            </select>
+          </ng-container>
+          <ng-template #durCustomTpl>
+            <div class="custom-cell w-11">
+              <input formControlName="duration" placeholder="e.g. 15 days" (input)="computeQuantity(i)" />
+              <button type="button" class="revert-btn" (click)="revertDuration(i)" title="Back to list">↩</button>
+            </div>
+          </ng-template>
 
           <input formControlName="instructions" placeholder="Type Instruction" class="w-20" />
-          <input formControlName="quantity" type="number" placeholder="999" class="w-8" />
+          <input formControlName="quantity" type="number" placeholder="Qty" class="w-8" />
         </div>
       </div>
     </div>

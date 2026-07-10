@@ -224,6 +224,12 @@ export class AppointmentConfirmService {
     });
   }
 
+  /** Observable variant so callers can sequence work after the update commits
+   *  (e.g. save the appointment type BEFORE calling /checkin). */
+  updateAppointmentObs(appointment: Appointment): Observable<any> {
+    return this.http.put<Appointment>(`${this.apiUrl}/${appointment.id}`, appointment);
+  }
+
   // Remove canceled appointment from backend
   removeCancelledAppointment(id: number): void {
     const currentCanceledAppointments = this.canceledAppointmentsSource.getValue();

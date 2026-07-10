@@ -256,8 +256,11 @@
       </div>
     </div>
     <div class="modal-footer">
-      <button class="save-button" (click)="completeAppointment(this.checkinAppointment!)">Check-in</button>
-      <button class="close-button" (click)="closePopup()">Cancel</button>
+      <button class="save-button" (click)="completeAppointment(this.checkinAppointment!)" [disabled]="checkingIn">
+        <span *ngIf="checkingIn" class="btn-spinner"></span>
+        {{ checkingIn ? 'Checking in…' : 'Check-in' }}
+      </button>
+      <button class="close-button" (click)="closePopup()" [disabled]="checkingIn">Cancel</button>
     </div>
   </div>
 </div>

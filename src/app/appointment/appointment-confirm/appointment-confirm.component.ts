@@ -69,6 +69,7 @@ export class AppointmentConfirmComponent {
   editingAppointmentId: number | null = null;
   showPopup: boolean = false;
   checkinAppointment: any = null;
+  checkingIn: boolean = false; // check-in request in progress (button loading)
   appointmentType: string = 'paid'
   searchValue: string = '';
   activeComponent: string = 'confirmed';
@@ -661,27 +662,48 @@ export class AppointmentConfirmComponent {
 
   completeAppointment(appointment: Appointment) {
     const appointmentId = appointment.id;
-    appointment.type = this.appointmentType;
-    appointment.checkedIn = true;
-    this.appointmentService.updateAppointment(appointment)
     if (appointment.date > this.today) {
       this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Cannot check-in for future appointments!' });
       return;
     }
-    if (appointmentId !== undefined) {
-      this.appointmentService.checkedinAppointment(appointmentId, this.username).subscribe({
-        next: (response) => {
-          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Checked in successfully!' });
-          appointment.checkedIn = true; // Update the UI to reflect the checked-in status
-          this.showPopup = false;
-          this.checkinAppointment = null;
-        },
-        error: (error) => {
-          console.error('Error during check-in:', error);
-          this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to check-in' });
-        },
-      });
-    }
+    if (appointmentId === undefined) return;
+
+    appointment.type = this.appointmentType;
+    appointment.checkedIn = true;
+    this.checkingIn = true;
+
+    // Sequence: persist the appointment (type/checkedIn) FIRST, THEN /checkin —
+    // so the backend's paid-type logic reads the saved type, and the two writes
+    // don't race. The generic update must not carry the check-in stamp, so send
+    // a copy with checkedInTime/checkedInBy removed (backend also strips them).
+    const payload: any = { ...appointment };
+    delete payload.checkedInTime;
+    delete payload.checkedInBy;
+
+    this.appointmentService.updateAppointmentObs(payload).subscribe({
+      next: () => {
+        this.appointmentService.checkedinAppointment(appointmentId, this.username).subscribe({
+          next: () => {
+            this.checkingIn = false;
+            this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Checked in successfully!' });
+            appointment.checkedIn = true; // Update the UI to reflect the checked-in status
+            this.showPopup = false;
+            this.checkinAppointment = null;
+            this.appointmentService.fetchAppointments();
+          },
+          error: (error) => {
+            this.checkingIn = false;
+            console.error('Error during check-in:', error);
+            this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to check-in' });
+          },
+        });
+      },
+      error: (error) => {
+        this.checkingIn = false;
+        console.error('Error saving appointment before check-in:', error);
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to save appointment' });
+      },
+    });
     this.saveToLocalStorage();
   }
 

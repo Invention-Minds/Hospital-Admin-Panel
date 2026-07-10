@@ -578,7 +578,7 @@ export class DoctorAvailabilityComponent {
     }
   }
   isHaveAccess():boolean{
-    return this.subAdminType === 'Tele Caller' || this.role === 'admin'|| this.role === 'super_admin'  || this.employeeId === 'JMRH124';
+    return this.subAdminType === 'Front Desk' || this.role === 'admin'|| this.role === 'super_admin'  || this.employeeId === 'JMRH124';
   }
 
   fetchTodayAttendance(): void {

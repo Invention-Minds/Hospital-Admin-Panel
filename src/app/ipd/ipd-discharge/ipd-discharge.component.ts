@@ -27,6 +27,7 @@ import {
   NoteTemplateService,
 } from '../../services/note-template.service';
 import { DischargeClearanceService } from '../../services/discharge-clearance.service';
+import { PrescriptionService } from '../../services/prescription/prescription.service';
 
 /**
  * Phase 6 (WF-5) — AI-drafted discharge summary with clinician sign-off.
@@ -154,6 +155,7 @@ export class IpdDischargeComponent
     private messageService: MessageService,
     private noteTemplateService: NoteTemplateService,
     private clearanceService: DischargeClearanceService,
+    private prescriptionService: PrescriptionService,
   ) {
     this.form = this.fb.group({
       dischargeType: ['regular' as DischargeFormValue['dischargeType'], [Validators.required]],
@@ -186,6 +188,41 @@ export class IpdDischargeComponent
     }
     this.loadExisting();
     this.loadTemplatesForAdmission();
+    this.loadDrugCatalog();
+  }
+
+  // ─── Drug catalog for the medication rows ────────────────────────────────
+  // Generic + brand were free-text only, so discharge meds could be typed any
+  // which way. Same tablet master the OPD prescription screens use, surfaced
+  // through native <datalist> so the existing pInputText fields stay as they
+  // are and just gain type-to-filter.
+  genericOptions: string[] = [];
+  brandOptions: string[] = [];
+  private brandsByGeneric = new Map<string, string[]>();
+
+  private loadDrugCatalog(): void {
+    this.prescriptionService.getAllTablets().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (tablets) => {
+        const rows = tablets ?? [];
+        this.genericOptions = [...new Set(rows.map((t: any) => t.genericName).filter(Boolean))];
+        this.brandOptions = [...new Set(rows.map((t: any) => t.brandName).filter(Boolean))];
+        this.brandsByGeneric.clear();
+        for (const t of rows) {
+          if (!t?.genericName || !t?.brandName) continue;
+          const list = this.brandsByGeneric.get(t.genericName) ?? [];
+          if (!list.includes(t.brandName)) list.push(t.brandName);
+          this.brandsByGeneric.set(t.genericName, list);
+        }
+      },
+      error: () => { /* catalog is an aid only — free text still works */ },
+    });
+  }
+
+  /** Brands for a row's chosen generic; all brands when none is chosen yet.
+   *  Cached so the template gets a stable array on every change detection. */
+  brandsForGeneric(generic: string | null | undefined): string[] {
+    if (!generic) return this.brandOptions;
+    return this.brandsByGeneric.get(generic) ?? this.brandOptions;
   }
 
   /**

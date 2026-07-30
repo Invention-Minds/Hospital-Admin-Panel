@@ -24,9 +24,12 @@
   <form [formGroup]="form">
     <div class="tablet-rows-wrapper">
       <div formArrayName="tablets" class="tablet-rows scrollable">
-        <div *ngFor="let tab of tablets.controls; let i = index" [formGroupName]="i" class="tablet-row rx-row">
+        <div *ngFor="let tab of tablets.controls; let i = index" [formGroupName]="i" class="tablet-row rx-row"
+             [class.phase-continuation]="isPhaseContinuation(i)">
           <div class="row-actions">
             <button type="button" (click)="removeTablet(i)" class="delete-btn" title="Remove">🗑</button>
+            <button type="button" class="phase-btn" (click)="addPhase(i)"
+                    title="Add the next stage of this drug (taper / phased course)">+P</button>
             <button type="button" (click)="toggleFavorite(i)" class="favorite-btn" title="Favourite">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" *ngIf="!isFavorite(i)">
                 <path fill="none" stroke="#36B8B8" stroke-linejoin="round" stroke-width="1.5"
@@ -40,15 +43,43 @@
             </button>
           </div>
 
-          <select formControlName="genericName" (change)="onGenericChange(i)" class="w-18">
-            <option value="">Select Generic</option>
-            <option *ngFor="let item of genericOptions" [value]="item">{{ item }}</option>
-          </select>
+          <div class="generic-input-container">
+            <input type="text"
+                   formControlName="genericName"
+                   placeholder="Search generic"
+                   (input)="onGenericInput('tablets', i, $event)"
+                   (focus)="onGenericInput('tablets', i, $event)"
+                   (blur)="hideGenericSuggestionsWithDelay('tablets', i)"
+                   (keydown)="onGenericKeydown($event, 'tablets', i)" />
+            <ul class="brand-suggestions"
+                *ngIf="showGenericSuggestions['tablets'][i] && filteredGenericNames['tablets'][i]?.length"
+                [style.top.px]="genericPopupPos['tablets'][i]?.top"
+                [style.left.px]="genericPopupPos['tablets'][i]?.left"
+                [style.width.px]="genericPopupPos['tablets'][i]?.width">
+              <li *ngFor="let generic of filteredGenericNames['tablets'][i]; let j = index"
+                  [class.highlighted]="highlightedGenericIndex['tablets'][i] === j"
+                  (mousedown)="onGenericSelect('tablets', i, generic)">
+                {{ generic }}
+              </li>
+            </ul>
+          </div>
 
-          <select formControlName="brandName" class="w-18" (change)="onBrandChange(i)">
-            <option value="">Select Brand</option>
-            <option *ngFor="let item of filteredBrandOptions[i]" [value]="item">{{ item }}</option>
-          </select>
+          <div class="brand-input-container">
+            <input type="text"
+                   formControlName="brandName"
+                   placeholder="Search brand"
+                   (input)="onBrandInput(i, $event)"
+                   (focus)="onBrandInput(i, $event)"
+                   (blur)="hideBrandSuggestionsWithDelay(i)" />
+            <ul class="brand-suggestions" *ngIf="showBrandSuggestions[i] && filteredBrandNames[i]?.length"
+                [style.top.px]="brandPopupPos[i]?.top"
+                [style.left.px]="brandPopupPos[i]?.left"
+                [style.width.px]="brandPopupPos[i]?.width">
+              <li *ngFor="let brand of filteredBrandNames[i]" (mousedown)="onBrandSelect(i, brand)">
+                {{ brand }}
+              </li>
+            </ul>
+          </div>
 
           <ng-container *ngIf="!tab.get('freqCustom')?.value; else freqCustomTpl">
             <select formControlName="frequency" class="w-12" (change)="onFrequencyChange(i)">
@@ -73,7 +104,7 @@
           </ng-container>
           <ng-template #durCustomTpl>
             <div class="custom-cell w-11">
-              <input formControlName="duration" placeholder="e.g. 15 days" (input)="computeQuantity(i)" />
+              <input formControlName="duration" placeholder="e.g. 15 days" (input)="onCustomDurationInput(i)" />
               <button type="button" class="revert-btn" (click)="revertDuration(i)" title="Back to list">↩</button>
             </div>
           </ng-template>
@@ -116,17 +147,36 @@
         <div formArrayName="favorites" class="tablet-rows">
           <div *ngFor="let fav of favorites.controls; let i = index" [formGroupName]="i" class="tablet-row">
             <button type="button" (click)="removeFavorite(i)" class="delete-btn">🗑</button>
-            <select formControlName="genericName" class="column-name" (change)="onGenericChange(i)">
-              <option value="">Select Generic</option>
-              <option *ngFor="let item of genericOptions" [value]="item">{{ item }}</option>
-            </select>
+            <div class="generic-input-container column-name">
+              <input type="text"
+                     formControlName="genericName"
+                     placeholder="Search generic"
+                     (input)="onGenericInput('favorites', i, $event)"
+                     (focus)="onGenericInput('favorites', i, $event)"
+                     (blur)="hideGenericSuggestionsWithDelay('favorites', i)"
+                     (keydown)="onGenericKeydown($event, 'favorites', i)" />
+              <ul class="brand-suggestions"
+                  *ngIf="showGenericSuggestions['favorites'][i] && filteredGenericNames['favorites'][i]?.length"
+                  [style.top.px]="genericPopupPos['favorites'][i]?.top"
+                  [style.left.px]="genericPopupPos['favorites'][i]?.left"
+                  [style.width.px]="genericPopupPos['favorites'][i]?.width">
+                <li *ngFor="let generic of filteredGenericNames['favorites'][i]; let j = index"
+                    [class.highlighted]="highlightedGenericIndex['favorites'][i] === j"
+                    (mousedown)="onGenericSelect('favorites', i, generic)">
+                  {{ generic }}
+                </li>
+              </ul>
+            </div>
             <div class="fav-brand-input-container">
               <input type="text" formControlName="brandName"
-                     (input)="onFavBrandInput(i)"
-                     (focus)="onFavBrandInput(i); showFavBrandSuggestions[i] = true"
+                     (input)="onFavBrandInput(i, $event)"
+                     (focus)="onFavBrandInput(i, $event); showFavBrandSuggestions[i] = true"
                      (blur)="hideFavBrandSuggestionsWithDelay(i)"
                      placeholder="Enter or select brand" />
-              <ul class="brand-suggestions" *ngIf="showFavBrandSuggestions[i] && filteredFavBrandNames[i]?.length">
+              <ul class="brand-suggestions" *ngIf="showFavBrandSuggestions[i] && filteredFavBrandNames[i]?.length"
+                  [style.top.px]="favBrandPopupPos[i]?.top"
+                  [style.left.px]="favBrandPopupPos[i]?.left"
+                  [style.width.px]="favBrandPopupPos[i]?.width">
                 <li *ngFor="let brand of filteredFavBrandNames[i]" (mousedown)="onFavBrandSelect(i, brand)">{{ brand }}</li>
               </ul>
             </div>
@@ -164,10 +214,26 @@
         <div formArrayName="allergies" class="tablet-rows">
           <div *ngFor="let fav of allergies.controls; let i = index" [formGroupName]="i" class="tablet-row">
             <button type="button" (click)="removeAllergies(i)" class="delete-btn">🗑</button>
-            <select formControlName="genericName" class="column-name">
-              <option value="">Select Generic</option>
-              <option *ngFor="let item of genericOptions" [value]="item">{{ item }}</option>
-            </select>
+            <div class="generic-input-container column-name">
+              <input type="text"
+                     formControlName="genericName"
+                     placeholder="Search generic"
+                     (input)="onGenericInput('allergies', i, $event)"
+                     (focus)="onGenericInput('allergies', i, $event)"
+                     (blur)="hideGenericSuggestionsWithDelay('allergies', i)"
+                     (keydown)="onGenericKeydown($event, 'allergies', i)" />
+              <ul class="brand-suggestions"
+                  *ngIf="showGenericSuggestions['allergies'][i] && filteredGenericNames['allergies'][i]?.length"
+                  [style.top.px]="genericPopupPos['allergies'][i]?.top"
+                  [style.left.px]="genericPopupPos['allergies'][i]?.left"
+                  [style.width.px]="genericPopupPos['allergies'][i]?.width">
+                <li *ngFor="let generic of filteredGenericNames['allergies'][i]; let j = index"
+                    [class.highlighted]="highlightedGenericIndex['allergies'][i] === j"
+                    (mousedown)="onGenericSelect('allergies', i, generic)">
+                  {{ generic }}
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>

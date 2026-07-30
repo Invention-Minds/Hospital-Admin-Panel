@@ -150,10 +150,12 @@ export class InvestigationOrderComponent implements OnInit, OnChanges {
     this.api.getLabTests().subscribe({
       next: (labs) => {
         this.labGroups = this.groupLabs(labs ?? []);
+        this.invalidateViewCache();
         this.api.getRadiologyTests().subscribe({
           next: (rads) => {
             this.radiologyTests = (rads ?? []) as CatalogTest[];
             this.radiologyGroups = this.groupRadiology(this.radiologyTests);
+            this.invalidateViewCache();
             this.catalogEmpty =
               this.labGroups.length === 0 && this.radiologyTests.length === 0;
             this.loading = false;
@@ -190,16 +192,34 @@ export class InvestigationOrderComponent implements OnInit, OnChanges {
     return ordered;
   }
 
+  // Filtered-view caches. The template reads these getters on every change-
+  // detection pass, and the consultation screen keeps a 1s timer running, so a
+  // getter that rebuilt its arrays each pass made *ngFor tear down and re-create
+  // every filtered row ~once a second — clicks then landed on a detached
+  // checkbox and never registered. Cache per search term so the identity is
+  // stable while the query is unchanged.
+  private labViewCache: { q: string; groups: LabGroup[] } | null = null;
+  private radViewCache: { q: string; groups: RadiologyGroup[] } | null = null;
+
+  private invalidateViewCache(): void {
+    this.labViewCache = null;
+    this.radViewCache = null;
+  }
+
   /** Lab groups filtered by the search box (a group is hidden when no test matches). */
   get visibleLabGroups(): LabGroup[] {
     const q = this.labSearch.trim().toLowerCase();
-    if (!q) return this.labGroups;
-    return this.labGroups
-      .map((g) => ({
-        department: g.department,
-        tests: g.tests.filter((t) => t.description.toLowerCase().includes(q)),
-      }))
-      .filter((g) => g.tests.length > 0);
+    if (this.labViewCache && this.labViewCache.q === q) return this.labViewCache.groups;
+    const groups = !q
+      ? this.labGroups
+      : this.labGroups
+          .map((g) => ({
+            department: g.department,
+            tests: g.tests.filter((t) => t.description.toLowerCase().includes(q)),
+          }))
+          .filter((g) => g.tests.length > 0);
+    this.labViewCache = { q, groups };
+    return groups;
   }
 
   // ─── Radiology grouping (derived modality) ──────────────────────────────
@@ -240,11 +260,20 @@ export class InvestigationOrderComponent implements OnInit, OnChanges {
   /** Radiology groups filtered by the radiology search box. */
   get visibleRadiologyGroups(): RadiologyGroup[] {
     const q = this.radiologySearch.trim().toLowerCase();
-    if (!q) return this.radiologyGroups;
-    return this.radiologyGroups
-      .map((g) => ({ modality: g.modality, tests: g.tests.filter((t) => t.description.toLowerCase().includes(q)) }))
-      .filter((g) => g.tests.length > 0);
+    if (this.radViewCache && this.radViewCache.q === q) return this.radViewCache.groups;
+    const groups = !q
+      ? this.radiologyGroups
+      : this.radiologyGroups
+          .map((g) => ({ modality: g.modality, tests: g.tests.filter((t) => t.description.toLowerCase().includes(q)) }))
+          .filter((g) => g.tests.length > 0);
+    this.radViewCache = { q, groups };
+    return groups;
   }
+
+  /** trackBy helpers — keep row DOM alive across re-renders. */
+  trackByDepartment = (_: number, g: LabGroup) => g.department;
+  trackByModality = (_: number, g: RadiologyGroup) => g.modality;
+  trackByTestId = (_: number, t: CatalogTest) => t.id;
 
   // ─── Collapse / expand + per-group selection counts ─────────────────────
   toggleLabGroup(dept: string): void {

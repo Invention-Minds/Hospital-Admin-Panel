@@ -86,11 +86,21 @@
 .column-name-4 { width: 60%; }
 .column-name-allergy { width: 100%; }
 
-.fav-brand-input-container { position: relative; width: 100%; }
-.fav-brand-input-container input { width: 100%; box-sizing: border-box; padding: 6px 10px; border: 1px solid #c2c2c2; border-radius: 6px; font-family: Kanit, sans-serif; }
-.brand-suggestions { position: absolute; background: #fff; border: 1px solid #ccc; width: 100%; z-index: 10; max-height: 150px; overflow-y: auto; padding: 0; margin: 0; list-style: none; }
+/* Typeahead cells — generic + brand on the drug rows, brand in the favorites
+   modal. All three share the .brand-suggestions popup styling below. */
+.fav-brand-input-container,
+.generic-input-container,
+.brand-input-container { position: relative; width: 100%; }
+.fav-brand-input-container input,
+.generic-input-container input,
+.brand-input-container input { width: 100%; box-sizing: border-box; padding: 6px 10px; border: 1px solid #c2c2c2; border-radius: 6px; font-family: Kanit, sans-serif; }
+/* position: fixed — the drug rows scroll inside a fixed-height wrapper, which
+   clipped an absolutely-positioned list. Coordinates are bound inline from the
+   input's rect (see popupPosFrom). */
+.brand-suggestions { position: fixed; background: #fff; border: 1px solid #ccc; border-radius: 6px; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18); box-sizing: border-box; z-index: 2000; max-height: 220px; overflow-y: auto; padding: 0; margin: 0; list-style: none; }
 .brand-suggestions li { padding: 8px 12px; cursor: pointer; }
 .brand-suggestions li:hover { background: #f0f0f0; }
+.brand-suggestions li.highlighted { background: #cce4ff; }
 
 .prescription-block { margin-bottom: 18px; padding: 10px; background: #f9f9f9; border-radius: 8px; }
 .prescription-header { font-weight: 500; color: #0e2970; margin-bottom: 8px; }
@@ -109,6 +119,8 @@
 .rx-row { height: 52px; }
 .rx-row > select,
 .rx-row > input,
+.rx-row > .generic-input-container,
+.rx-row > .brand-input-container,
 .rx-row .custom-cell { width: 100%; box-sizing: border-box; }
 .rx-row select:focus,
 .rx-row input:focus {
@@ -118,6 +130,17 @@
 }
 
 .row-actions { display: flex; align-items: center; gap: 6px; }
+
+/* ── Phased / tapering regimens ──────────────────────────────────────────
+   "+P" clones the row for the next stage of the same drug; continuation stages
+   are tinted so a taper reads as one block. */
+.phase-btn {
+  background: transparent; border: 1px solid #36b8b8; color: #1c7f7f;
+  border-radius: 4px; padding: 1px 5px; font-size: 11px; font-weight: 600;
+  font-family: Kanit, sans-serif; cursor: pointer; white-space: nowrap;
+}
+.phase-btn:hover { background: rgba(54, 184, 184, 0.12); }
+.rx-row.phase-continuation { background: rgba(54, 184, 184, 0.07); border-left: 3px solid #36b8b8; }
 
 /* Custom-typed frequency / duration cell */
 .custom-cell { display: flex; align-items: center; gap: 4px; }

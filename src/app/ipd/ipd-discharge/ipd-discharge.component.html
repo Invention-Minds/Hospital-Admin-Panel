@@ -281,6 +281,11 @@
         No medications added. Use the button above if the patient is going home with prescriptions.
       </p>
 
+      <!-- Drug master, shared by every generic-name box on this screen. -->
+      <datalist id="med-generic-options">
+        <option *ngFor="let generic of genericOptions" [value]="generic"></option>
+      </datalist>
+
       <div
         *ngFor="let row of medications.controls; let i = index"
         [formGroupName]="i"
@@ -289,11 +294,17 @@
         <div class="med-row__grid">
           <div class="form__field">
             <label [attr.for]="'med-generic-' + i" class="form__label">Generic name *</label>
-            <input pInputText [id]="'med-generic-' + i" type="text" formControlName="genericName" class="form__input" placeholder="Paracetamol" />
+            <input pInputText [id]="'med-generic-' + i" type="text" formControlName="genericName" class="form__input"
+                   placeholder="Paracetamol" [attr.list]="'med-generic-options'" autocomplete="off" />
           </div>
           <div class="form__field">
             <label [attr.for]="'med-brand-' + i" class="form__label">Brand name</label>
-            <input pInputText [id]="'med-brand-' + i" type="text" formControlName="brandName" class="form__input" placeholder="Optional" />
+            <input pInputText [id]="'med-brand-' + i" type="text" formControlName="brandName" class="form__input"
+                   placeholder="Optional" [attr.list]="'med-brand-options-' + i" autocomplete="off" />
+            <!-- Narrowed to the row's generic once one is picked. -->
+            <datalist [id]="'med-brand-options-' + i">
+              <option *ngFor="let brand of brandsForGeneric(row.get('genericName')?.value)" [value]="brand"></option>
+            </datalist>
           </div>
           <div class="form__field">
             <label [attr.for]="'med-dose-' + i" class="form__label">Dose</label>

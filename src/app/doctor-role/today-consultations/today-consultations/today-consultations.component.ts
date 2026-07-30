@@ -2695,20 +2695,20 @@ export class TodayConsultationsComponent {
         const filename = `VisitSummary_${prnNumber}_${date}.pdf`;
 
         pdfMake.createPdf(docDefinition).getBase64((base64: string) => {
-          this.appointmentService.sendVisitSummaryWhatsApp({
-            pdfBase64: base64, patientPhoneNumber: String(phone), patientName: name, filename,
-            prn: String(prnNumber), date: String(date),
-          }).subscribe({
-            next: () => {
-              this.sendingWhatsapp = false;
-              this.messageService.add({ severity: 'success', summary: 'Sent', detail: 'Visit summary sent to patient on WhatsApp.' });
-            },
-            error: (err: any) => {
-              this.sendingWhatsapp = false;
-              console.error('send visit summary error', err);
-              this.messageService.add({ severity: 'error', summary: 'Error', detail: err?.error?.error || 'Failed to send on WhatsApp.' });
-            },
-          });
+          // this.appointmentService.sendVisitSummaryWhatsApp({
+          //   pdfBase64: base64, patientPhoneNumber: String(phone), patientName: name, filename,
+          //   prn: String(prnNumber), date: String(date),
+          // }).subscribe({
+          //   next: () => {
+          //     this.sendingWhatsapp = false;
+          //     this.messageService.add({ severity: 'success', summary: 'Sent', detail: 'Visit summary sent to patient on WhatsApp.' });
+          //   },
+          //   error: (err: any) => {
+          //     this.sendingWhatsapp = false;
+          //     console.error('send visit summary error', err);
+          //     this.messageService.add({ severity: 'error', summary: 'Error', detail: err?.error?.error || 'Failed to send on WhatsApp.' });
+          //   },
+          // });
         });
       },
       error: (err: any) => {

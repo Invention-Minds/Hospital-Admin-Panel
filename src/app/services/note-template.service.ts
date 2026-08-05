@@ -27,7 +27,8 @@ export type FieldType =
   | 'multiselect'
   | 'checkbox'
   | 'radio'
-  | 'handwritten';
+  | 'handwritten'
+  | 'table';
 
 export interface FieldDef {
   key: string;
@@ -39,6 +40,8 @@ export interface FieldDef {
   placeholder?: string;
   group?: string;         // optional section heading
   order?: number;
+  rows?: string[];        // required when type = table — row labels
+  columns?: string[];     // required when type = table — column labels
 }
 
 export interface NoteTemplate {

@@ -86,23 +86,39 @@ export class TemplateFormRendererComponent implements OnChanges {
   asDataUrl(value: unknown): string {
     return typeof value === 'string' && value.startsWith('data:image') ? value : '';
   }
+
+  // ─── Table field (row x column grid) ────────────────────────────────
+  // Value shape: values[key] = { [row]: { [column]: string } }.
+  tableCell(key: string, row: string, column: string): string {
+    const table = this.values[key] as Record<string, Record<string, unknown>> | undefined;
+    const cell = table?.[row]?.[column];
+    return cell == null ? '' : String(cell);
+  }
+
+  setTableCell(key: string, row: string, column: string, value: string): void {
+    if (this.readOnly) return;
+    const table = (this.values[key] as Record<string, Record<string, string>> | undefined) ?? {};
+    const nextRow = { ...(table[row] ?? {}), [column]: value };
+    const nextTable = { ...table, [row]: nextRow };
+    this.setValue(key, nextTable);
+  }
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────
 
-function groupAndSort(fields: FieldDef[]): Array<{ group: string; fields: FieldDef[] }> {
-  // Stable-sort by (group ?? '') then (order ?? 0) then declaration index.
+export function groupAndSort(fields: FieldDef[]): Array<{ group: string; fields: FieldDef[] }> {
+  // Follow the template author's arrangement: stable-sort by (order ?? declaration
+  // index) alone. Group names are NOT compared — sorting on them alphabetised the
+  // sections and floated ungrouped fields to the top, ignoring the editor's layout.
   const indexed = fields.map((f, idx) => ({ ...f, _idx: idx }));
   indexed.sort((a, b) => {
-    const ga = a.group ?? '';
-    const gb = b.group ?? '';
-    if (ga !== gb) return ga.localeCompare(gb);
-    const oa = a.order ?? 0;
-    const ob = b.order ?? 0;
+    const oa = a.order ?? a._idx;
+    const ob = b.order ?? b._idx;
     if (oa !== ob) return oa - ob;
-    return (a as { _idx: number })._idx - (b as { _idx: number })._idx;
+    return a._idx - b._idx;
   });
 
+  // Map keeps insertion order, so a group lands where its FIRST field sits.
   const map = new Map<string, FieldDef[]>();
   for (const f of indexed) {
     const g = f.group ?? '';

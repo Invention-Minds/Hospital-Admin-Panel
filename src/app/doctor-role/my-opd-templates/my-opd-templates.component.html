@@ -137,6 +137,25 @@
             </label>
           </div>
 
+          <div class="ntm-form-row" *ngIf="f.type === 'table'">
+            <label class="ntm-full">
+              Rows (comma-separated)
+              <input type="text"
+                     [value]="rowsAsText(f)"
+                     (input)="setRowsFromText(f, $any($event.target).value)"
+                     placeholder="External Auditory Canal (EAC), Tympanic Membrane (TM), Post Aural Area" />
+            </label>
+          </div>
+          <div class="ntm-form-row" *ngIf="f.type === 'table'">
+            <label class="ntm-full">
+              Columns (comma-separated)
+              <input type="text"
+                     [value]="columnsAsText(f)"
+                     (input)="setColumnsFromText(f, $any($event.target).value)"
+                     placeholder="R, L" />
+            </label>
+          </div>
+
           <div class="ntm-form-row">
             <label class="ntm-full">
               Help text (optional)

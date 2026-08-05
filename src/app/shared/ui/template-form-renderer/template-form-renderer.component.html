@@ -95,6 +95,30 @@
         {{ f.label }}<span class="tf-req" *ngIf="f.required">*</span>
       </label>
 
+      <!-- table — row x column grid (e.g. ENT ear exam: EAC/TM/Post Aural x R/L) -->
+      <div *ngIf="f.type === 'table'" class="tf-table-wrap">
+        <table class="tf-table">
+          <thead>
+            <tr>
+              <th></th>
+              <th *ngFor="let col of f.columns">{{ col }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of f.rows">
+              <th class="tf-table-rowhead">{{ row }}</th>
+              <td *ngFor="let col of f.columns">
+                <input type="text"
+                       class="tf-table-input"
+                       [value]="tableCell(f.key, row, col)"
+                       [disabled]="readOnly"
+                       (input)="setTableCell(f.key, row, col, $any($event.target).value)" />
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
       <!--
         handwritten — option C from the design discussion. The OPD assessment
         already has a hand-written canvas component (app-hand-written) used on

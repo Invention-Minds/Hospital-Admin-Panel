@@ -370,6 +370,13 @@
   <div class="buttons">
     <button type="submit" [disabled]="isSubmitting" class="save-button">Submit</button>
     <button type="button" class="print-button" (click)="printAssessment()">Print</button>
+    <!-- DEFERRED — sending the visit summary on WhatsApp is not part of this
+         release. The parent (today-consultations) no longer binds sendWhatsapp,
+         so this button would do nothing; uncomment both together to re-enable.
+    <button type="button" class="print-button whatsapp-btn" (click)="sendWhatsapp.emit()" [disabled]="sendingWhatsapp">
+      {{ sendingWhatsapp ? 'Sending…' : '📲 WhatsApp' }}
+    </button>
+    -->
     <!-- Admission actions removed: the doctor only counsels/assesses here.
          Admission (Refer for Admission) and OT requisitions are raised from the
          Estimation screens, where ward/bed are assigned by NS downstream. -->

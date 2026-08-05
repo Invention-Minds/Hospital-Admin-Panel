@@ -71,6 +71,7 @@ export class NoteTemplateManagerComponent implements OnInit, OnDestroy {
     { value: 'radio',        label: 'Radio (single)' },
     { value: 'checkbox',     label: 'Yes / No checkbox' },
     { value: 'handwritten',  label: 'Hand-written canvas (option C)' },
+    { value: 'table',        label: 'Table (rows x columns grid)' },
   ];
 
   private destroy$ = new Subject<void>();
@@ -204,11 +205,34 @@ export class NoteTemplateManagerComponent implements OnInit, OnDestroy {
     const needsOptions = ['select', 'multiselect', 'radio'].includes(field.type);
     if (!needsOptions) field.options = undefined;
     else if (!field.options) field.options = [];
+
+    if (field.type !== 'table') {
+      field.rows = undefined;
+      field.columns = undefined;
+    } else {
+      if (!field.rows) field.rows = [];
+      if (!field.columns) field.columns = [];
+    }
   }
 
   /** Whether this field type needs the options input rendered. */
   fieldNeedsOptions(type: FieldType): boolean {
     return type === 'select' || type === 'multiselect' || type === 'radio';
+  }
+
+  /** Comma-separated string ↔ string[] helpers for the table field's rows/columns. */
+  rowsAsText(field: FieldDef): string {
+    return (field.rows ?? []).join(', ');
+  }
+  setRowsFromText(field: FieldDef, text: string): void {
+    field.rows = text.split(',').map((s) => s.trim()).filter(Boolean);
+  }
+
+  columnsAsText(field: FieldDef): string {
+    return (field.columns ?? []).join(', ');
+  }
+  setColumnsFromText(field: FieldDef, text: string): void {
+    field.columns = text.split(',').map((s) => s.trim()).filter(Boolean);
   }
 
   // ─── Save / publish ─────────────────────────────────────────────────
@@ -241,6 +265,10 @@ export class NoteTemplateManagerComponent implements OnInit, OnDestroy {
       }
       if (this.fieldNeedsOptions(f.type) && (!f.options || f.options.length === 0)) {
         this.errorMessage = `Field "${f.key}" (${f.type}) needs at least one option.`;
+        return;
+      }
+      if (f.type === 'table' && (!f.rows?.length || !f.columns?.length)) {
+        this.errorMessage = `Field "${f.key}" (table) needs at least one row and one column.`;
         return;
       }
     }

@@ -9,6 +9,7 @@ import { AppointmentConfirmService } from '../../services/appointment-confirm.se
 import { InvestigationOrderComponent } from '../investigation-order/investigation-order.component';
 import { getJmrhPdfBranding } from '../../shared/pdf/jmrh-letterhead';
 import { PrescriptionCaptureComponent } from '../../shared/ui/prescription-capture/prescription-capture.component';
+import { groupAndSort } from '../../shared/ui/template-form-renderer/template-form-renderer.component';
 import { VoiceOpdService } from '../../services/voice-opd/voice-opd.service';
 import {
   AdmitContext,
@@ -52,6 +53,8 @@ export class OpdAssessmentComponent {
   @Input() doctorId: number | undefined | null = null;
   @Output() close = new EventEmitter<void>(); // 🔴 Notify parent to close
   @Output() saved = new EventEmitter<any>();  // 🔴 Emit saved/updated record
+  @Output() sendWhatsapp = new EventEmitter<void>(); // 🟢 Parent WhatsApps the visit summary
+  @Input() sendingWhatsapp = false; // parent-driven loading state for the WhatsApp button
 
   // Embedded lab/radiology order grid; orders are dispatched on note save.
   @ViewChild('investigationOrderComp') investigationOrderComp?: InvestigationOrderComponent;
@@ -503,36 +506,50 @@ loadAssessment(appointmentId: number) {
     if (!this.isTemplated) return [];
     const content: unknown[] = [{ text: 'Department-specific fields:', style: 'sectionHeader' }];
 
-    // Sort + group exactly like the renderer does.
-    const indexed = this.activeTemplateFields.map((f, idx) => ({ ...f, _idx: idx }));
-    indexed.sort((a, b) => {
-      const ga = a.group ?? '';
-      const gb = b.group ?? '';
-      if (ga !== gb) return ga.localeCompare(gb);
-      const oa = a.order ?? 0;
-      const ob = b.order ?? 0;
-      if (oa !== ob) return oa - ob;
-      return (a as { _idx: number })._idx - (b as { _idx: number })._idx;
-    });
-
-    let currentGroup = '';
-    for (const f of indexed) {
-      const g = f.group ?? '';
-      if (g && g !== currentGroup) {
-        content.push({ text: g, style: 'subheader', margin: [0, 8, 0, 4] });
-        currentGroup = g;
+    // Sort + group via the renderer's own helper, so print can't drift from screen.
+    for (const { group, fields } of groupAndSort(this.activeTemplateFields)) {
+      if (group) {
+        content.push({ text: group, style: 'subheader', margin: [0, 8, 0, 4] });
       }
-      const raw = this.templateValues[f.key];
-      if (f.type === 'handwritten' && typeof raw === 'string' && raw.startsWith('data:image')) {
-        content.push({ text: `${f.label}:`, bold: true, margin: [0, 4, 0, 2] });
-        content.push({ image: raw, width: 380, margin: [0, 0, 0, 10] });
-      } else {
-        const formatted = this.formatTemplatedFieldForPrint(f.type, raw);
-        content.push({ text: `${f.label}: ${formatted}`, margin: [0, 0, 0, 4] });
+      for (const f of fields) {
+        const raw = this.templateValues[f.key];
+        if (f.type === 'handwritten' && typeof raw === 'string' && raw.startsWith('data:image')) {
+          content.push({ text: `${f.label}:`, bold: true, margin: [0, 4, 0, 2] });
+          content.push({ image: raw, width: 380, margin: [0, 0, 0, 10] });
+        } else if (f.type === 'table') {
+          content.push({ text: `${f.label}:`, bold: true, margin: [0, 4, 0, 2] });
+          content.push(this.buildTemplatedTablePdfBlock(f, raw));
+        } else {
+          const formatted = this.formatTemplatedFieldForPrint(f.type, raw);
+          content.push({ text: `${f.label}: ${formatted}`, margin: [0, 0, 0, 4] });
+        }
       }
     }
     content.push({ text: '', margin: [0, 0, 0, 10] }); // trailing spacer
     return content;
+  }
+
+  /** Renders a `type: table` field's rows x columns grid as a pdfMake table. */
+  private buildTemplatedTablePdfBlock(f: FieldDef, raw: unknown): unknown {
+    const rows = f.rows ?? [];
+    const columns = f.columns ?? [];
+    const data = (raw ?? {}) as Record<string, Record<string, unknown>>;
+    return {
+      table: {
+        widths: ['*', ...columns.map(() => 'auto')],
+        body: [
+          [{ text: '', bold: true }, ...columns.map((c) => ({ text: c, bold: true }))],
+          ...rows.map((r) => [
+            { text: r, bold: true },
+            ...columns.map((c) => {
+              const cell = data[r]?.[c];
+              return { text: cell == null || cell === '' ? '—' : String(cell) };
+            }),
+          ]),
+        ],
+      },
+      margin: [0, 0, 0, 10],
+    };
   }
 
   private formatTemplatedFieldForPrint(type: string, raw: unknown): string {

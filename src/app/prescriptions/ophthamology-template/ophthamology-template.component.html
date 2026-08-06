@@ -1,0 +1,1203 @@
+<div class="ophthal-wrapper">
+
+    <!-- TABS — an optometrist sees only the refraction work-up tabs. -->
+    <div class="ophth-tabs">
+        <div class="ophth-tab" *ngFor="let t of visibleTabs; trackBy: trackByTabKey"
+            [class.active]="tab===t.key" (click)="tab=t.key">{{ t.label }}</div>
+    </div>
+
+    <!-- WORK-UP PROVENANCE — who recorded these values, and has the doctor
+         checked them. Provisional values must never read as the doctor's. -->
+    <div class="workup-banner" *ngIf="hasWorkup"
+         [class.pending]="!isWorkupVerified" [class.verified]="isWorkupVerified">
+        <div class="workup-banner-text">
+            <strong>Refraction work-up recorded by {{ pres.recordedBy || 'optometrist' }}</strong>
+            <span *ngIf="pres.recordedAt"> at {{ pres.recordedAt | date:'shortTime' }}</span>
+
+            <ng-container *ngIf="isWorkupVerified">
+                — verified by {{ pres.verifiedBy }} at {{ pres.verifiedAt | date:'shortTime' }}
+                <span *ngIf="workupStatus === 'amended'" class="workup-amended-tag">
+                    ({{ changedFromWorkup.length }} value(s) corrected by the doctor)
+                </span>
+            </ng-container>
+            <ng-container *ngIf="!isWorkupVerified">
+                — <strong>not yet verified.</strong> These values are provisional and are
+                excluded from the printed prescription until you verify them.
+            </ng-container>
+        </div>
+
+        <button type="button" class="workup-verify-btn"
+                *ngIf="!isOptometrist && !isWorkupVerified"
+                (click)="verifyWorkup()" [disabled]="verifyingWorkup">
+            {{ verifyingWorkup ? 'Verifying…' : 'Verify work-up' }}
+        </button>
+    </div>
+
+    <div class="workup-locked" *ngIf="isWorkupLocked">
+        The doctor has verified this work-up — it can no longer be edited here.
+    </div>
+
+
+
+    <!-- ======================= VISUAL ACUITY ======================= -->
+    <div *ngIf="tab==='va'" class="tab-box">
+        <h4>Visual Acuity</h4>
+
+        <table class="eye-table">
+            <tr>
+                <th></th>
+                <th>Right</th>
+                <th>Left</th>
+            </tr>
+
+            <!-- UNAIDED -->
+            <tr>
+                <td>Unaided</td>
+
+                <td>
+                    <div class="dropdown-container">
+                        <input type="text" [(ngModel)]="pres.uaVr" (focus)="openDropdown('uaVr')"
+                            (input)="filterVA('uaVr')">
+                        <div class="dropdown" *ngIf="activeDropdown === 'uaVr' && filtered.uaVr?.length">
+                            <div class="dd-item" *ngFor="let v of filtered.uaVr" (click)="selectVA('uaVr', v)">
+                                {{v}}
+                            </div>
+                            <!-- <div class="dd-add" (click)="addNewVA('uaVr')">+ Add "{{pres.uaVr}}"</div> -->
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="dropdown-container">
+                        <input type="text" [(ngModel)]="pres.uaVl" (focus)="openDropdown('uaVl')"
+                            (input)="filterVA('uaVl')">
+                        <div class="dropdown" *ngIf="activeDropdown === 'uaVl' && filtered.uaVl?.length">
+                            <div class="dd-item" *ngFor="let v of filtered.uaVl" (click)="selectVA('uaVl', v)">
+                                {{v}}
+                            </div>
+                            <!-- <div class="dd-add" (click)="addNewVA('uaVl')">+ Add "{{pres.uaVl}}"</div> -->
+                        </div>
+                    </div>
+                </td>
+            </tr>
+
+            <!-- WITH GLASSES -->
+            <tr>
+                <td>With Glasses</td>
+
+                <td>
+                    <div class="dropdown-container">
+                        <input type="text" [(ngModel)]="pres.glVr" (focus)="openDropdown('glVr')"
+                            (input)="filterVA('glVr')">
+                        <div class="dropdown" *ngIf="activeDropdown === 'glVr' && filtered.glVr?.length">
+                            <div class="dd-item" *ngFor="let v of filtered.glVr" (click)="selectVA('glVr', v)">
+                                {{v}}
+                            </div>
+                            <!-- <div class="dd-add" (click)="addNewVA('glVr')">+ Add "{{pres.glVr}}"</div> -->
+                        </div>
+                    </div>
+
+                </td>
+
+                <td>
+                    <div class="dropdown-container">
+                        <input type="text" [(ngModel)]="pres.glVl" (focus)="openDropdown('glVl')"
+                            (input)="filterVA('glVl')">
+                        <div class="dropdown" *ngIf="activeDropdown === 'glVl' && filtered.glVl?.length">
+                            <div class="dd-item" *ngFor="let v of filtered.glVl" (click)="selectVA('glVl', v)">
+                                {{v}}
+                            </div>
+                            <!-- <div class="dd-add" (click)="addNewVA('glVl')">+ Add "{{pres.glVl}}"</div> -->
+                        </div>
+                    </div>
+                </td>
+            </tr>
+
+            <!-- NEAR -->
+            <tr>
+                <td>Near</td>
+
+                <td>
+                    <div class="dropdown-container">
+                        <input type="text" [(ngModel)]="pres.nearVr" (focus)="openDropdown('nearVr')"
+                            (input)="filterVA('nearVr')">
+                        <div class="dropdown" *ngIf="activeDropdown === 'nearVr' && filtered.nearVr?.length">
+                            <div class="dd-item" *ngFor="let v of filtered.nearVr" (click)="selectVA('nearVr', v)">
+                                {{v}}
+                            </div>
+                            <!-- <div class="dd-add" (click)="addNewVA('nearVr')">+ Add "{{pres.nearVr}}"</div> -->
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="dropdown-container">
+                        <input type="text" [(ngModel)]="pres.nearVl" (focus)="openDropdown('nearVl')"
+                            (input)="filterVA('nearVl')">
+                        <div class="dropdown" *ngIf="activeDropdown === 'nearVl' &&  filtered.nearVl?.length">
+                            <div class="dd-item" *ngFor="let v of filtered.nearVl" (click)="selectVA('nearVl', v)">
+                                {{v}}
+                            </div>
+                            <!-- <div class="dd-add" (click)="addNewVA('nearVl')">+ Add "{{pres.nearVl}}"</div> -->
+                        </div>
+                    </div>
+                </td>
+            </tr>
+
+        </table>
+    </div>
+
+
+
+
+    <!-- ======================= CURRENT POWER OF GLASS ======================= -->
+    <div *ngIf="tab==='cgp'" class="tab-box">
+        <h4>Current Power of Glass</h4>
+        <!-- DV ROW -->
+        <h4>Distance Vision (DV)</h4>
+
+
+        <!-- Measurement per row, eye per column - matches the VA / Examination tables. -->
+        <table class="power-table">
+            <tr>
+                <th></th>
+                <th>Right</th>
+                <th>Left</th>
+            </tr>
+
+            <tr *ngFor="let row of cpgDvRows">
+                <td>{{ row.label }}</td>
+
+                <td>
+                    <div class="dropdown-container">
+                        <input [(ngModel)]="pres[row.right]" (focus)="openDropdown(row.right)"
+                            [class.workup-changed]="isChangedFromWorkup(row.right)"
+                            [disabled]="isWorkupLocked"
+                            (input)="row.va ? filterVA(row.right) : filterPower(row.right)">
+                        <small class="workup-was" *ngIf="isChangedFromWorkup(row.right)">
+                            was {{ workupValue(row.right) }} (optometrist)
+                        </small>
+                        <div class="dropdown" *ngIf="activeDropdown === row.right && filtered[row.right]?.length">
+                            <div class="dd-item" *ngFor="let v of filtered[row.right]"
+                                (click)="row.va ? selectVA(row.right, v) : selectPower(row.right, v); $event.stopPropagation()">
+                                {{ v }}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="dropdown-container">
+                        <input [(ngModel)]="pres[row.left]" (focus)="openDropdown(row.left)"
+                            [class.workup-changed]="isChangedFromWorkup(row.left)"
+                            [disabled]="isWorkupLocked"
+                            (input)="row.va ? filterVA(row.left) : filterPower(row.left)">
+                        <small class="workup-was" *ngIf="isChangedFromWorkup(row.left)">
+                            was {{ workupValue(row.left) }} (optometrist)
+                        </small>
+                        <div class="dropdown" *ngIf="activeDropdown === row.left && filtered[row.left]?.length">
+                            <div class="dd-item" *ngFor="let v of filtered[row.left]"
+                                (click)="row.va ? selectVA(row.left, v) : selectPower(row.left, v); $event.stopPropagation()">
+                                {{ v }}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+        <!-- DV ROW -->
+        <h4>ADD</h4>
+
+        <!-- Measurement per row, eye per column - matches the VA / Examination tables. -->
+        <table class="power-table">
+            <tr>
+                <th></th>
+                <th>Right</th>
+                <th>Left</th>
+            </tr>
+
+            <tr *ngFor="let row of cpgAddRows">
+                <td>{{ row.label }}</td>
+
+                <td>
+                    <div class="dropdown-container">
+                        <input [(ngModel)]="pres[row.right]" (focus)="openDropdown(row.right)"
+                            [class.workup-changed]="isChangedFromWorkup(row.right)"
+                            [disabled]="isWorkupLocked"
+                            (input)="row.va ? filterVA(row.right) : filterPower(row.right)">
+                        <small class="workup-was" *ngIf="isChangedFromWorkup(row.right)">
+                            was {{ workupValue(row.right) }} (optometrist)
+                        </small>
+                        <div class="dropdown" *ngIf="activeDropdown === row.right && filtered[row.right]?.length">
+                            <div class="dd-item" *ngFor="let v of filtered[row.right]"
+                                (click)="row.va ? selectVA(row.right, v) : selectPower(row.right, v); $event.stopPropagation()">
+                                {{ v }}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="dropdown-container">
+                        <input [(ngModel)]="pres[row.left]" (focus)="openDropdown(row.left)"
+                            [class.workup-changed]="isChangedFromWorkup(row.left)"
+                            [disabled]="isWorkupLocked"
+                            (input)="row.va ? filterVA(row.left) : filterPower(row.left)">
+                        <small class="workup-was" *ngIf="isChangedFromWorkup(row.left)">
+                            was {{ workupValue(row.left) }} (optometrist)
+                        </small>
+                        <div class="dropdown" *ngIf="activeDropdown === row.left && filtered[row.left]?.length">
+                            <div class="dd-item" *ngFor="let v of filtered[row.left]"
+                                (click)="row.va ? selectVA(row.left, v) : selectPower(row.left, v); $event.stopPropagation()">
+                                {{ v }}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+
+        <!-- ADD / IPD / TYPE -->
+        <div class="three-col">
+
+            <div>
+                <label>IPD</label>
+                <input [(ngModel)]="pres.curIPD">
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+
+    <!-- ======================= AUTO REFRACTION =======================
+         Two readings: before the dilating drops, and again once they have
+         acted (cycloplegic). Identical capture for both. -->
+    <div *ngIf="tab==='ar'" class="tab-box">
+        <h4>Auto Refraction</h4>
+        <h4 class="ar-phase">Before Dilation</h4>
+        <!-- Measurement per row, eye per column - matches the VA / Examination tables. -->
+        <table class="power-table">
+            <tr>
+                <th></th>
+                <th>Right</th>
+                <th>Left</th>
+            </tr>
+
+            <tr *ngFor="let row of arDvRows">
+                <td>{{ row.label }}</td>
+
+                <td>
+                    <div class="dropdown-container">
+                        <input [(ngModel)]="pres[row.right]" (focus)="openDropdown(row.right)"
+                            [class.workup-changed]="isChangedFromWorkup(row.right)"
+                            [disabled]="isWorkupLocked"
+                            (input)="row.va ? filterVA(row.right) : filterPower(row.right)">
+                        <small class="workup-was" *ngIf="isChangedFromWorkup(row.right)">
+                            was {{ workupValue(row.right) }} (optometrist)
+                        </small>
+                        <div class="dropdown" *ngIf="activeDropdown === row.right && filtered[row.right]?.length">
+                            <div class="dd-item" *ngFor="let v of filtered[row.right]"
+                                (click)="row.va ? selectVA(row.right, v) : selectPower(row.right, v); $event.stopPropagation()">
+                                {{ v }}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="dropdown-container">
+                        <input [(ngModel)]="pres[row.left]" (focus)="openDropdown(row.left)"
+                            [class.workup-changed]="isChangedFromWorkup(row.left)"
+                            [disabled]="isWorkupLocked"
+                            (input)="row.va ? filterVA(row.left) : filterPower(row.left)">
+                        <small class="workup-was" *ngIf="isChangedFromWorkup(row.left)">
+                            was {{ workupValue(row.left) }} (optometrist)
+                        </small>
+                        <div class="dropdown" *ngIf="activeDropdown === row.left && filtered[row.left]?.length">
+                            <div class="dd-item" *ngFor="let v of filtered[row.left]"
+                                (click)="row.va ? selectVA(row.left, v) : selectPower(row.left, v); $event.stopPropagation()">
+                                {{ v }}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <div class="three-col">
+
+            <div>
+                <label>IPD</label>
+                <input [(ngModel)]="pres.arIPD" [disabled]="isWorkupLocked">
+            </div>
+
+        </div>
+
+        <!-- Repeat reading once the dilating drops have acted. -->
+        <h4 class="ar-phase">After Dilation</h4>
+        <table class="power-table">
+            <tr>
+                <th></th>
+                <th>Right</th>
+                <th>Left</th>
+            </tr>
+
+            <tr *ngFor="let row of arDilRows">
+                <td>{{ row.label }}</td>
+
+                <td>
+                    <div class="dropdown-container">
+                        <input [(ngModel)]="pres[row.right]" (focus)="openDropdown(row.right)"
+                            [class.workup-changed]="isChangedFromWorkup(row.right)"
+                            [disabled]="isWorkupLocked"
+                            (input)="row.va ? filterVA(row.right) : filterPower(row.right)">
+                        <small class="workup-was" *ngIf="isChangedFromWorkup(row.right)">
+                            was {{ workupValue(row.right) }} (optometrist)
+                        </small>
+                        <div class="dropdown" *ngIf="activeDropdown === row.right && filtered[row.right]?.length">
+                            <div class="dd-item" *ngFor="let v of filtered[row.right]"
+                                (click)="row.va ? selectVA(row.right, v) : selectPower(row.right, v); $event.stopPropagation()">
+                                {{ v }}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="dropdown-container">
+                        <input [(ngModel)]="pres[row.left]" (focus)="openDropdown(row.left)"
+                            [class.workup-changed]="isChangedFromWorkup(row.left)"
+                            [disabled]="isWorkupLocked"
+                            (input)="row.va ? filterVA(row.left) : filterPower(row.left)">
+                        <small class="workup-was" *ngIf="isChangedFromWorkup(row.left)">
+                            was {{ workupValue(row.left) }} (optometrist)
+                        </small>
+                        <div class="dropdown" *ngIf="activeDropdown === row.left && filtered[row.left]?.length">
+                            <div class="dd-item" *ngFor="let v of filtered[row.left]"
+                                (click)="row.va ? selectVA(row.left, v) : selectPower(row.left, v); $event.stopPropagation()">
+                                {{ v }}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <div class="three-col">
+
+            <div>
+                <label>IPD</label>
+                <input [(ngModel)]="pres.arDilIPD" [disabled]="isWorkupLocked">
+            </div>
+
+        </div>
+    </div>
+
+
+
+
+    <!-- ======================= SUBJECTIVE REFRACTION ======================= -->
+    <div *ngIf="tab==='sr'" class="tab-box">
+        <h4>Subjective Refraction</h4>
+
+        <!-- Measurement per row, eye per column - matches the VA / Examination tables. -->
+        <table class="power-table">
+            <tr>
+                <th></th>
+                <th>Right</th>
+                <th>Left</th>
+            </tr>
+
+            <tr *ngFor="let row of srDvRows">
+                <td>{{ row.label }}</td>
+
+                <td>
+                    <div class="dropdown-container">
+                        <input [(ngModel)]="pres[row.right]" (focus)="openDropdown(row.right)"
+                            [class.workup-changed]="isChangedFromWorkup(row.right)"
+                            [disabled]="isWorkupLocked"
+                            (input)="row.va ? filterVA(row.right) : filterPower(row.right)">
+                        <small class="workup-was" *ngIf="isChangedFromWorkup(row.right)">
+                            was {{ workupValue(row.right) }} (optometrist)
+                        </small>
+                        <div class="dropdown" *ngIf="activeDropdown === row.right && filtered[row.right]?.length">
+                            <div class="dd-item" *ngFor="let v of filtered[row.right]"
+                                (click)="row.va ? selectVA(row.right, v) : selectPower(row.right, v); $event.stopPropagation()">
+                                {{ v }}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="dropdown-container">
+                        <input [(ngModel)]="pres[row.left]" (focus)="openDropdown(row.left)"
+                            [class.workup-changed]="isChangedFromWorkup(row.left)"
+                            [disabled]="isWorkupLocked"
+                            (input)="row.va ? filterVA(row.left) : filterPower(row.left)">
+                        <small class="workup-was" *ngIf="isChangedFromWorkup(row.left)">
+                            was {{ workupValue(row.left) }} (optometrist)
+                        </small>
+                        <div class="dropdown" *ngIf="activeDropdown === row.left && filtered[row.left]?.length">
+                            <div class="dd-item" *ngFor="let v of filtered[row.left]"
+                                (click)="row.va ? selectVA(row.left, v) : selectPower(row.left, v); $event.stopPropagation()">
+                                {{ v }}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <!-- DV ROW -->
+        <h4>ADD</h4>
+
+        <!-- Measurement per row, eye per column - matches the VA / Examination tables. -->
+        <table class="power-table">
+            <tr>
+                <th></th>
+                <th>Right</th>
+                <th>Left</th>
+            </tr>
+
+            <tr *ngFor="let row of srAddRows">
+                <td>{{ row.label }}</td>
+
+                <td>
+                    <div class="dropdown-container">
+                        <input [(ngModel)]="pres[row.right]" (focus)="openDropdown(row.right)"
+                            [class.workup-changed]="isChangedFromWorkup(row.right)"
+                            [disabled]="isWorkupLocked"
+                            (input)="row.va ? filterVA(row.right) : filterPower(row.right)">
+                        <small class="workup-was" *ngIf="isChangedFromWorkup(row.right)">
+                            was {{ workupValue(row.right) }} (optometrist)
+                        </small>
+                        <div class="dropdown" *ngIf="activeDropdown === row.right && filtered[row.right]?.length">
+                            <div class="dd-item" *ngFor="let v of filtered[row.right]"
+                                (click)="row.va ? selectVA(row.right, v) : selectPower(row.right, v); $event.stopPropagation()">
+                                {{ v }}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+
+                <td>
+                    <div class="dropdown-container">
+                        <input [(ngModel)]="pres[row.left]" (focus)="openDropdown(row.left)"
+                            [class.workup-changed]="isChangedFromWorkup(row.left)"
+                            [disabled]="isWorkupLocked"
+                            (input)="row.va ? filterVA(row.left) : filterPower(row.left)">
+                        <small class="workup-was" *ngIf="isChangedFromWorkup(row.left)">
+                            was {{ workupValue(row.left) }} (optometrist)
+                        </small>
+                        <div class="dropdown" *ngIf="activeDropdown === row.left && filtered[row.left]?.length">
+                            <div class="dd-item" *ngFor="let v of filtered[row.left]"
+                                (click)="row.va ? selectVA(row.left, v) : selectPower(row.left, v); $event.stopPropagation()">
+                                {{ v }}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <div class="three-col">
+
+
+            <div>
+                <label>IPD</label>
+                <input [(ngModel)]="pres.srIPD">
+            </div>
+
+            <div>
+                <label>Type</label>
+                <input [(ngModel)]="pres.srType">
+            </div>
+        </div>
+
+    </div>
+
+
+
+
+    <!-- ======================= DROPS INSTILLED IN OPD ======================= -->
+    <!-- Administration record, not a prescription: each row is one instillation
+         with the time the server stamped, and entries are never edited away. -->
+    <div *ngIf="tab==='drops'" class="tab-box">
+        <h4>Drops Instilled in OPD</h4>
+
+        <div class="drop-entry">
+            <div class="drop-field drop-field-wide">
+                <label>Drug</label>
+                <div class="dropdown-container">
+                    <input [(ngModel)]="dropDraft.drugName" placeholder="e.g. Tropicamide 1%"
+                        (focus)="openDropdown('dropDrug'); filterDrops()" (input)="filterDrops()">
+                    <div class="dropdown" *ngIf="activeDropdown === 'dropDrug' && filteredDropOptions.length">
+                        <div class="dd-item" *ngFor="let o of filteredDropOptions"
+                            (click)="selectDrop(o); $event.stopPropagation()">
+                            {{ o }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="drop-field">
+                <label>Eye</label>
+                <select [(ngModel)]="dropDraft.eye">
+                    <option value="OD">Right (OD)</option>
+                    <option value="OS">Left (OS)</option>
+                    <option value="OU">Both (OU)</option>
+                </select>
+            </div>
+
+            <div class="drop-field drop-field-narrow">
+                <label>Drops</label>
+                <input type="number" min="1" [(ngModel)]="dropDraft.dropCount">
+            </div>
+
+            <div class="drop-field">
+                <label>Purpose</label>
+                <select [(ngModel)]="dropDraft.purpose">
+                    <option *ngFor="let p of dropPurposes" [value]="p">{{ p | titlecase }}</option>
+                </select>
+            </div>
+
+            <div class="drop-field drop-field-wide">
+                <label>Remarks (optional)</label>
+                <input [(ngModel)]="dropDraft.remarks" placeholder="e.g. 2nd dose">
+            </div>
+
+            <div class="drop-actions">
+                <button type="button" class="drop-instill-btn" (click)="instillDrop()" [disabled]="loggingDrop">
+                    {{ loggingDrop ? 'Recording…' : 'Instill now' }}
+                </button>
+                <button type="button" class="drop-add-option-btn" (click)="addNewDropOption()"
+                    *ngIf="dropDraft.drugName && !dropOptions.includes(dropDraft.drugName)">
+                    + Save "{{ dropDraft.drugName }}" to list
+                </button>
+            </div>
+        </div>
+
+        <!-- Dilation timer — measured from the FIRST dilating drop of the visit -->
+        <div class="dilation-banner" *ngIf="dilationReadyAt" [class.ready]="isDilationReady">
+            <ng-container *ngIf="isDilationReady; else waiting">
+                Dilated — ready for fundus examination (since {{ dilationReadyAt | date:'shortTime' }})
+            </ng-container>
+            <ng-template #waiting>
+                Dilating — review from {{ dilationReadyAt | date:'shortTime' }}
+            </ng-template>
+        </div>
+
+        <table class="drops-table" *ngIf="drops.length; else noDrops">
+            <tr>
+                <th>Time</th>
+                <th>Drug</th>
+                <th>Eye</th>
+                <th>Drops</th>
+                <th>Purpose</th>
+                <th>Given by</th>
+                <th>Elapsed</th>
+                <th>Remarks</th>
+            </tr>
+            <tr *ngFor="let d of drops">
+                <td>{{ d.instilledAt | date:'shortTime' }}</td>
+                <td>{{ d.drugName }}</td>
+                <td>{{ d.eye }}</td>
+                <td>{{ d.dropCount }}</td>
+                <td>{{ d.purpose || '-' }}</td>
+                <td>{{ d.instilledBy || '-' }}</td>
+                <td>{{ minutesSince(d.instilledAt) }} min ago</td>
+                <td>{{ d.remarks || '-' }}</td>
+            </tr>
+        </table>
+        <ng-template #noDrops>
+            <p class="drop-empty">No drops recorded for this visit yet.</p>
+        </ng-template>
+    </div>
+
+
+    <!-- ======================= IOP / NCT ======================= -->
+    <div *ngIf="tab==='iop'" class="tab-box">
+        <h4>IOP / NCT</h4>
+
+        <div class="two-col">
+            <div>
+                <label>Right Eye</label>
+                <input [(ngModel)]="pres.iopR">
+            </div>
+
+            <div>
+                <label>Left Eye</label>
+                <input [(ngModel)]="pres.iopL">
+            </div>
+        </div>
+        <!--   
+      <label class="chk">
+        <input type="checkbox" [(ngModel)]="pres.includeIOP">
+        Include IOP in final report
+      </label> -->
+    </div>
+
+
+
+
+    <!-- ======================= EXAMINATION ======================= -->
+    <div *ngIf="tab==='exam'" class="tab-box">
+        <h4>Examination</h4>
+
+        <table class="exam-table">
+            <tr>
+                <th>Field</th>
+                <th>Right</th>
+                <th>Left</th>
+            </tr>
+
+            <tr *ngFor="let f of examFields">
+                <td>{{f.label}}</td>
+
+                <!-- RIGHT -->
+                <td>
+                    <div class="dropdown-container">
+                        <input [(ngModel)]="pres[f.name + 'R']" (focus)="openDropdown(f.name + 'R')"
+                            (input)="filterExam(f.name + 'R')">
+
+                        <div class="dropdown" *ngIf="activeDropdown === f.name + 'R' || filtered[f.name + 'R']?.length">
+
+                            <div class="dd-item" *ngFor="let opt of filtered[f.name + 'R']"
+                                (click)="selectExam(f.name + 'R', opt)">
+                                {{opt}}
+                            </div>
+
+                            <div class="dd-add" (click)="addExamOption(f.name, pres[f.name + 'R'])">
+                                + Add "{{pres[f.name + 'R']}}"
+                            </div>
+                        </div>
+                    </div>
+                </td>
+
+                <!-- LEFT -->
+                <td>
+                    <div class="dropdown-container">
+                        <input [(ngModel)]="pres[f.name + 'L']" (focus)="openDropdown(f.name + 'L')"
+                            (input)="filterExam(f.name + 'L')">
+
+                        <div class="dropdown" *ngIf="activeDropdown === f.name + 'L' || filtered[f.name + 'L']?.length">
+
+                            <div class="dd-item" *ngFor="let opt of filtered[f.name + 'L']"
+                                (click)="selectExam(f.name + 'L', opt)">
+                                {{opt}}
+                            </div>
+
+                            <div class="dd-add" (click)="addExamOption(f.name, pres[f.name + 'L'])">
+                                + Add "{{pres[f.name + 'L']}}"
+                            </div>
+                        </div>
+                    </div>
+                </td>
+
+            </tr>
+        </table>
+    </div>
+
+
+
+
+    <!-- ======================= PUPILLARY REACTION ======================= -->
+    <div *ngIf="tab==='pupil'" class="tab-box">
+        <h4>Pupillary Reaction</h4>
+
+        <div class="two-col">
+            <div>
+                <label>Right</label>
+                <input [(ngModel)]="pres.pupilReactionR">
+            </div>
+
+            <div>
+                <label>Left</label>
+                <input [(ngModel)]="pres.pupilReactionL">
+            </div>
+        </div>
+    </div>
+
+    <div *ngIf="tab==='diagram'" class="tab-box diagram-box">
+
+
+        <h4>Ophthalmology Diagram</h4>
+
+        <!-- <div class="toolbar">
+          <button (click)="setMode('draw')" [class.active]="mode==='draw'">✏ Draw</button>
+          <button (click)="setMode('erase')" [class.active]="mode==='erase'">🩹 Erase</button>
+          <button (click)="clearAll()">Clear</button>
+        </div>
+      
+        <div class="diagram-wrapper">
+      
+          Background image
+          <img #diagramImg
+               src="/optha-diagram.png"
+               class="diagram-bg"
+               (load)="onImageLoaded()">
+      
+          Drawing canvas
+          <canvas #drawCanvas
+                  class="draw-layer"
+                  (mousedown)="startDraw($event)"
+                  (mousemove)="moveDraw($event)"
+                  (mouseup)="stopDraw()"
+                  (mouseleave)="stopDraw()"></canvas>
+      
+        </div> -->
+
+        <div class="dialog">
+
+            <!-- LEFT MENU -->
+            <div class="menu">
+                <div *ngFor="let d of diagrams" (click)="selectedDiagram=d.key"
+                    [class.active]="selectedDiagram===d.key">
+                    {{d.label}}
+                </div>
+            </div>
+
+            <!-- MAIN -->
+            <div class="content">
+
+                <div class="eyes">
+
+                    <!-- ================= EYE ================= -->
+                    <ng-container *ngIf="selectedDiagram==='eye'">
+                        <div class="eye-box" *ngFor="let eye of eyes">
+                            <h4>{{eye}}</h4>
+
+                            <svg viewBox="0 0 200 120" class="eye-svg" (click)="placeMark($event, eye)">
+                                <ellipse cx="100" cy="60" rx="90" ry="40" stroke="#555" fill="none" />
+                                <circle cx="100" cy="60" r="25" stroke="#555" fill="none" />
+
+                                <circle *ngFor="let m of marksFor(eye)" [attr.cx]="m.x" [attr.cy]="m.y"
+                                    [attr.r]="m.size" [attr.fill]="m.color" />
+                            </svg>
+                        </div>
+                    </ng-container>
+
+                    <!-- ================= CORNEA (FINAL MATCH) ================= -->
+                    <ng-container *ngIf="selectedDiagram === 'cornea'">
+
+                        <div class="eye-box" *ngFor="let eye of eyes">
+                            <h4>{{ eye }}</h4>
+
+                            <svg viewBox="0 0 273 273" class="cornea-svg" (click)="placeMark($event, eye)">
+
+                                <!-- ========= OD ========= -->
+                                <ng-container *ngIf="eye === 'OD'">
+
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="163" height="274"
+                                        viewBox="0 0 163 274" fill="none">
+                                        <path
+                                            d="M98 1.09863L103 26.0986C81.1662 32.7653 31.4986 47.0986 26.4986 136.099C22.5379 206.599 73.3315 241.265 102.499 248.099L98 272.099C65 267.265 0.998713 226.135 1 139.599C1.00142 44.0986 67.5 4.59863 98 1.09863Z"
+                                            stroke="black" stroke-width="2" />
+                                        <path
+                                            d="M101 232.099C79.4 174.099 92 79.932 101 40.0986C119.5 40.0986 157.298 65.9126 161.5 132.099C165.5 195.099 120 232.099 101 232.099Z"
+                                            stroke="black" stroke-width="2" />
+                                    </svg>
+                                </ng-container>
+
+                                <!-- ========= OS (MIRROR) ========= -->
+                                <ng-container *ngIf="eye === 'OS'">
+
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="163" height="274"
+                                        viewBox="0 0 163 274" fill="none">
+                                        <path
+                                            d="M64.7461 1.09863L59.7461 26.0986C81.5799 32.7653 131.247 47.0986 136.247 136.099C140.208 206.599 89.4146 241.265 60.2475 248.099L64.7461 272.099C97.7461 267.265 161.747 226.135 161.746 139.599C161.745 44.0986 95.2461 4.59863 64.7461 1.09863Z"
+                                            stroke="black" stroke-width="2" />
+                                        <path
+                                            d="M61.7461 232.099C83.3461 174.099 70.7461 79.932 61.7461 40.0986C43.2461 40.0986 5.44838 65.9126 1.24609 132.099C-2.75391 195.099 42.7461 232.099 61.7461 232.099Z"
+                                            stroke="black" stroke-width="2" />
+                                    </svg>
+                                </ng-container>
+
+                                <!-- ========= MARKS ========= -->
+                                <circle *ngFor="let m of marksFor(eye)" [attr.cx]="m.x" [attr.cy]="m.y"
+                                    [attr.r]="m.size" [attr.fill]="m.color" />
+
+                            </svg>
+                            <!--   
+      <div class="buttons">
+        <button (click)="undo()">Undo</button>
+        <button (click)="reset()">Reset</button>
+      </div> -->
+                        </div>
+
+                    </ng-container>
+
+                    <!-- ================= FUNDUS ================= -->
+                    <ng-container *ngIf="selectedDiagram === 'fundus'">
+
+                        <div class="eye-box" *ngFor="let eye of eyes">
+                            <h4>{{ eye }}</h4>
+
+                            <svg viewBox="0 0 273 273" class="fundus-svg" (click)="placeMark($event, eye)">
+
+                                <!-- ========= OD ========= -->
+                                <ng-container *ngIf="eye === 'OD'">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="273" height="273"
+                                        viewBox="0 0 273 273" fill="none">
+                                        <path
+                                            d="M136.5 0.25C211.749 0.25 272.75 61.2512 272.75 136.5C272.75 211.749 211.749 272.75 136.5 272.75C61.2512 272.75 0.25 211.749 0.25 136.5C0.25 61.2512 61.2512 0.25 136.5 0.25ZM196.75 137.5C196.75 140.242 194.983 142.57 192.526 143.412C191.798 141.524 191.055 139.597 190.301 137.646C191.088 135.608 191.866 133.595 192.628 131.621C195.032 132.492 196.75 134.795 196.75 137.5ZM190.032 138.339C190.714 140.103 191.387 141.845 192.047 143.557C191.552 143.683 191.034 143.75 190.5 143.75C189.658 143.75 188.854 143.582 188.121 143.28C188.762 141.623 189.4 139.974 190.032 138.339ZM136.5 137.146L131.677 132.323L131.323 132.677L136.146 137.5L131.323 142.323L131.677 142.677L136.5 137.854L141.323 142.677L141.677 142.323L136.854 137.5L141.677 132.677L141.323 132.323L136.5 137.146ZM190.5 131.25C191.071 131.25 191.625 131.328 192.15 131.472C191.456 133.271 190.748 135.101 190.032 136.953C189.369 135.238 188.699 133.504 188.024 131.76C188.784 131.432 189.621 131.25 190.5 131.25ZM184.25 137.5C184.25 135.106 185.596 133.026 187.572 131.977C188.309 133.882 189.042 135.776 189.765 137.646C189.072 139.439 188.371 141.251 187.667 143.071C185.639 142.038 184.25 139.932 184.25 137.5ZM197.25 137.5C197.25 134.583 195.399 132.097 192.808 131.154C195.806 123.384 198.559 116.235 200.733 110.59L200.74 110.572L200.744 110.555C201.061 109.129 202.774 105.803 207.085 104.235C211.475 102.639 221.899 99.5743 226.568 98.2402L226.432 97.7598C221.767 99.0924 211.325 102.161 206.915 103.765C202.449 105.389 200.625 108.837 200.262 110.422C198.085 116.075 195.33 123.229 192.33 131.003C191.748 130.839 191.134 130.75 190.5 130.75C189.557 130.75 188.659 130.944 187.844 131.293C178.724 107.726 168.873 82.5184 166.227 76.8936C162.56 69.1019 157.057 68.2516 152.602 66.2715L152.583 66.2637L152.563 66.2578L110.563 55.2578L110.437 55.7422L152.421 66.7373C156.961 68.7499 162.212 69.5381 165.773 77.1064C168.415 82.7198 178.27 107.935 187.392 131.508C185.228 132.632 183.75 134.893 183.75 137.5C183.75 140.144 185.272 142.432 187.486 143.539C178.48 166.807 168.876 191.363 166.273 196.894C162.712 204.462 157.46 205.249 152.921 207.262L110.937 218.258L111.063 218.742L153.063 207.742L153.083 207.736L153.102 207.729C157.557 205.748 163.06 204.898 166.727 197.106C169.335 191.564 178.936 167.01 187.941 143.746C188.731 144.07 189.594 144.25 190.5 144.25C191.097 144.25 191.675 144.171 192.227 144.025C195.072 151.401 197.681 158.174 199.762 163.577C200.124 165.162 201.948 168.611 206.415 170.235C210.825 171.839 221.267 174.908 225.932 176.24L226.068 175.76C221.399 174.426 210.975 171.361 206.585 169.765C202.274 168.197 200.561 164.871 200.244 163.445L200.24 163.428L200.233 163.41L192.706 143.879C195.35 142.965 197.25 140.455 197.25 137.5Z"
+                                            stroke="black" stroke-width="0.5" />
+                                    </svg>
+                                </ng-container>
+
+                                <!-- ========= OS (MIRROR) ========= -->
+                                <ng-container *ngIf="eye === 'OS'">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="273" height="273"
+                                        viewBox="0 0 273 273" fill="none">
+                                        <path
+                                            d="M136.5 0.25C211.749 0.25 272.75 61.2512 272.75 136.5C272.75 211.749 211.749 272.75 136.5 272.75C61.2512 272.75 0.25 211.749 0.25 136.5C0.25 61.2512 61.2512 0.25 136.5 0.25ZM88.75 137.5C88.75 139.932 87.3602 142.038 85.332 143.071C84.6275 141.251 83.9273 139.439 83.2344 137.646C83.9571 135.776 84.6895 133.882 85.4268 131.977C87.4036 133.026 88.75 135.106 88.75 137.5ZM84.8779 143.28C84.1448 143.582 83.3421 143.75 82.5 143.75C81.9657 143.75 81.4472 143.683 80.9521 143.557C81.6123 141.845 82.2854 140.103 82.9668 138.339C83.5987 139.974 84.2367 141.623 84.8779 143.28ZM136.5 137.146L131.677 132.323L131.323 132.677L136.146 137.5L131.323 142.323L131.677 142.677L136.5 137.854L141.323 142.677L141.677 142.323L136.854 137.5L141.677 132.677L141.323 132.323L136.5 137.146ZM82.5 131.25C83.3792 131.25 84.2157 131.432 84.9746 131.76C84.2999 133.504 83.6296 135.238 82.9668 136.953C82.2512 135.101 81.5428 133.271 80.8486 131.472C81.3748 131.328 81.9283 131.25 82.5 131.25ZM76.25 137.5C76.25 134.796 77.9673 132.492 80.3711 131.621C81.1329 133.595 81.911 135.608 82.6982 137.646C81.9443 139.597 81.2011 141.524 80.4727 143.412C78.0162 142.57 76.25 140.242 76.25 137.5ZM89.25 137.5C89.25 134.893 87.7713 132.632 85.6074 131.508C94.7294 107.935 104.585 82.7198 107.227 77.1064C110.788 69.5386 116.039 68.7496 120.578 66.7373L162.563 55.7422L162.437 55.2578L120.437 66.2578L120.417 66.2637L120.398 66.2715C115.943 68.2516 110.44 69.1019 106.773 76.8936C104.126 82.5184 94.275 107.726 85.1553 131.293C84.3402 130.944 83.4428 130.75 82.5 130.75C81.8652 130.75 81.2513 130.839 80.6689 131.003C77.6695 123.229 74.9145 116.075 72.7373 110.422C72.3744 108.837 70.551 105.389 66.085 103.765C61.6747 102.161 51.2325 99.0924 46.5684 97.7598L46.4316 98.2402C51.1007 99.5743 61.525 102.639 65.915 104.235C70.2258 105.803 71.939 109.129 72.2559 110.555L72.2598 110.572L72.2666 110.59C74.4408 116.235 77.1933 123.384 80.1914 131.154C77.6002 132.097 75.75 134.583 75.75 137.5C75.75 140.455 77.6492 142.964 80.293 143.879C77.4498 151.249 74.8441 158.016 72.7666 163.41L72.7598 163.428L72.7559 163.445C72.439 164.871 70.7258 168.197 66.415 169.765C62.025 171.361 51.6007 174.426 46.9316 175.76L47.0684 176.24C51.7325 174.908 62.1747 171.839 66.585 170.235C71.0518 168.611 72.8749 165.162 73.2373 163.577C75.3181 158.174 77.9273 151.401 80.7725 144.025C81.324 144.171 81.9027 144.25 82.5 144.25C83.4055 144.25 84.2686 144.07 85.0576 143.746C94.0629 167.01 103.665 191.564 106.273 197.106C109.94 204.898 115.443 205.748 119.898 207.729L119.917 207.736L119.937 207.742L161.937 218.742L162.063 218.258L120.078 207.262C115.539 205.249 110.288 204.461 106.727 196.894C104.124 191.363 94.5195 166.807 85.5127 143.539C87.7277 142.432 89.25 140.145 89.25 137.5Z"
+                                            stroke="black" stroke-width="0.5" />
+                                    </svg>
+                                </ng-container>
+
+                                <!-- ========= MARKS ========= -->
+                                <circle *ngFor="let m of marksFor(eye)" [attr.cx]="m.x" [attr.cy]="m.y"
+                                    [attr.r]="m.size" [attr.fill]="m.color" />
+
+
+                            </svg>
+                        </div>
+
+                    </ng-container>
+
+
+                    <!-- ================= VISUAL FIELD ================= -->
+                    <ng-container *ngIf="selectedDiagram === 'vf'">
+
+                        <div class="eyes">
+
+                            <div class="eye-box" *ngFor="let eye of eyes">
+                                <h4>{{ eye }}</h4>
+
+                                <svg viewBox="0 0 240 240" class="vf-svg" (click)="onVfClick($event, eye)">
+
+                                    <!-- Outer border -->
+                                    <rect x="10" y="10" width="220" height="220" fill="none" stroke="#555" />
+
+                                    <!-- Circle -->
+                                    <circle cx="120" cy="120" r="90" fill="none" stroke="#000" />
+
+                                    <!-- Cross lines -->
+                                    <line x1="120" y1="30" x2="120" y2="210" stroke="#000" />
+                                    <line x1="30" y1="120" x2="210" y2="120" stroke="#000" />
+
+                                    <!-- Quadrants -->
+                                    <!-- Top Left -->
+                                    <path d="M120 120 L120 30 A90 90 0 0 0 30 120 Z"
+                                        [attr.fill]="vf[eye]?.tl ? '#000' : 'transparent'" />
+
+                                    <!-- Top Right -->
+                                    <path d="M120 120 L210 120 A90 90 0 0 0 120 30 Z"
+                                        [attr.fill]="vf[eye]?.tr ? '#000' : 'transparent'" />
+
+                                    <!-- Bottom Right -->
+                                    <path d="M120 120 L120 210 A90 90 0 0 0 210 120 Z"
+                                        [attr.fill]="vf[eye]?.br ? '#000' : 'transparent'" />
+
+                                    <!-- Bottom Left -->
+                                    <path d="M120 120 L30 120 A90 90 0 0 0 120 210 Z"
+                                        [attr.fill]="vf[eye]?.bl ? '#000' : 'transparent'" />
+
+                                </svg>
+
+                            </div>
+
+                        </div>
+
+                    </ng-container>
+
+
+                    <ng-container *ngIf="selectedDiagram === 'eom'">
+
+                        <div class="eyes">
+                            <div class="eye-box" *ngFor="let eye of eyes">
+                                <h4>{{ eye }}</h4>
+
+                                <svg viewBox="0 0 240 240" class="eom-svg">
+
+                                    <!-- OUTER BORDER -->
+                                    <rect x="10" y="10" width="220" height="220" fill="none" stroke="#555" />
+
+                                    <!-- STAR LINES -->
+                                    <line x1="120" y1="20" x2="120" y2="220" stroke="#000" />
+                                    <line x1="20" y1="120" x2="220" y2="120" stroke="#000" />
+                                    <line x1="40" y1="40" x2="200" y2="200" stroke="#000" />
+                                    <line x1="200" y1="40" x2="40" y2="200" stroke="#000" />
+
+                                    <!-- CENTER -->
+                                    <circle cx="120" cy="120" r="3" fill="#000" />
+
+                                    <!-- ⬆️ UP -->
+                                    <foreignObject x="95" y="20" width="50" height="30">
+                                        <input type="number" class="eom-input" [(ngModel)]="eom[eye].up" />
+                                    </foreignObject>
+
+                                    <!-- ⬇️ DOWN -->
+                                    <foreignObject x="95" y="190" width="50" height="30">
+                                        <input type="number" class="eom-input" [(ngModel)]="eom[eye].down" />
+                                    </foreignObject>
+
+                                    <!-- ⬅️ LEFT -->
+                                    <foreignObject x="20" y="105" width="40" height="30">
+                                        <input type="number" class="eom-input" [(ngModel)]="eom[eye].left" />
+                                    </foreignObject>
+
+                                    <!-- ➡️ RIGHT -->
+                                    <foreignObject x="180" y="105" width="40" height="30">
+                                        <input type="number" class="eom-input" [(ngModel)]="eom[eye].right" />
+                                    </foreignObject>
+
+                                    <!-- ↖️ UP LEFT -->
+                                    <foreignObject x="35" y="35" width="40" height="30">
+                                        <input type="number" class="eom-input" [(ngModel)]="eom[eye].upLeft" />
+                                    </foreignObject>
+
+                                    <!-- ↗️ UP RIGHT -->
+                                    <foreignObject x="165" y="35" width="40" height="30">
+                                        <input type="number" class="eom-input" [(ngModel)]="eom[eye].upRight" />
+                                    </foreignObject>
+
+                                    <!-- ↙️ DOWN LEFT -->
+                                    <foreignObject x="35" y="175" width="40" height="30">
+                                        <input type="number" class="eom-input" [(ngModel)]="eom[eye].downLeft" />
+                                    </foreignObject>
+
+                                    <!-- ↘️ DOWN RIGHT -->
+                                    <foreignObject x="165" y="175" width="40" height="30">
+                                        <input type="number" class="eom-input" [(ngModel)]="eom[eye].downRight" />
+                                    </foreignObject>
+
+                                </svg>
+                            </div>
+                        </div>
+
+                    </ng-container>
+
+
+
+                    <!-- ================= GONIOSCOPY ================= -->
+                    <ng-container *ngIf="selectedDiagram === 'gonio'">
+
+                        <div class="eyes">
+
+                            <div class="eye-box" *ngFor="let eye of eyes">
+                                <h4>{{ eye }}</h4>
+                                <svg viewBox="0 0 240 240" class="gonio-svg">
+
+                                    <!-- CLIP PATH -->
+                                    <defs>
+                                      <clipPath id="gonioClip">
+                                        <circle cx="120" cy="120" r="90" />
+                                      </clipPath>
+                                    </defs>
+                                  
+                                    <!-- OUTER BORDER -->
+                                    <rect x="10" y="10" width="220" height="220" fill="none" stroke="#555" />
+                                  
+                                    <!-- CIRCLE -->
+                                    <circle cx="120" cy="120" r="90" fill="none" stroke="#000" />
+                                  
+                                    <!-- DIAGONAL LINES (CLIPPED INSIDE CIRCLE) -->
+                                    <g clip-path="url(#gonioClip)">
+                                      <line x1="30" y1="30" x2="210" y2="210" stroke="#000" />
+                                      <line x1="210" y1="30" x2="30" y2="210" stroke="#000" />
+                                    </g>
+                                  
+                                    <!-- SUPERIOR -->
+                                    <foreignObject x="95" y="40" width="50" height="30">
+                                      <select class="gonio-select" [(ngModel)]="gonio[eye].sup">
+                                        <option *ngFor="let o of gonioOptions">{{ o }}</option>
+                                      </select>
+                                    </foreignObject>
+                                  
+                                    <!-- NASAL -->
+                                    <foreignObject x="40" y="100" width="50" height="30">
+                                      <select class="gonio-select" [(ngModel)]="gonio[eye].nas">
+                                        <option *ngFor="let o of gonioOptions">{{ o }}</option>
+                                      </select>
+                                    </foreignObject>
+                                  
+                                    <!-- TEMPORAL -->
+                                    <foreignObject x="150" y="100" width="50" height="30">
+                                      <select class="gonio-select" [(ngModel)]="gonio[eye].temp">
+                                        <option *ngFor="let o of gonioOptions">{{ o }}</option>
+                                      </select>
+                                    </foreignObject>
+                                  
+                                    <!-- INFERIOR -->
+                                    <foreignObject x="95" y="160" width="50" height="30">
+                                      <select class="gonio-select" [(ngModel)]="gonio[eye].inf">
+                                        <option *ngFor="let o of gonioOptions">{{ o }}</option>
+                                      </select>
+                                    </foreignObject>
+                                  
+                                  </svg>
+                                  
+
+                            </div>
+
+                        </div>
+
+                    </ng-container>
+
+
+                </div>
+
+
+                    <div class="controls">
+                        <div class="colors"  *ngIf="selectedDiagram!=='gonio' && selectedDiagram!=='vf' && selectedDiagram!=='eom'">
+                          <div
+                            *ngFor="let cg of colorGroups"
+                            class="color-wrapper"
+                            [class.active]="selectedColorGroup === cg"
+                            (click)="selectColorGroup(cg)"
+                          >
+                            <div
+                              class="color"
+                              [style.background]="cg.color"
+                            ></div>
+                      
+                            <!-- TOOLTIP -->
+                            <div class="color-tooltip">
+                              <div *ngFor="let l of cg.labels">
+                                {{ l }}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                      
+
+
+
+
+                    <div class="slider" *ngIf="selectedDiagram!=='gonio' && selectedDiagram!=='vf' && selectedDiagram!=='eom'">
+                        Brush size
+                        <input type="range" min="2" max="12" [(ngModel)]="brushSize">
+                    </div>
+
+                    <button (click)="undo()">Undo</button>
+                    <button (click)="reset()">Reset</button>
+                </div>
+
+            </div>
+</div>
+
+
+    </div>
+
+
+
+    <div *ngIf="tab==='diagnosis'" class="tab-box">
+        <h4>Diagnosis (ICD-10)</h4>
+
+        <input [(ngModel)]="diagnosisSearch" placeholder="Search diagnosis…" (input)="searchDiagnosis()">
+
+        <div class="diag-results" *ngIf="diagFiltered.length">
+            <div class="diag-item" *ngFor="let d of diagFiltered" (click)="addDiagnosis(d)">
+                {{d.code}} – {{d.label}}
+            </div>
+        </div>
+
+        <h4>Selected Diagnoses</h4>
+        <div *ngFor="let d of pres.diagnosisList" class="diag-selected">
+            {{d.code}} – {{d.label}}
+            <span (click)="removeDiagnosis(d)">✖</span>
+        </div>
+    </div>
+
+    <div *ngIf="tab==='plan'" class="tab-box">
+        <h4>Doctor Advice</h4>
+        <textarea [(ngModel)]="pres.advice"></textarea>
+
+        <h4>Review After</h4>
+        <input type="text" [(ngModel)]="pres.reviewAfter" placeholder="e.g. 1 Week, 2 Weeks, 1 Month">
+    </div>
+
+
+    <!-- SAVE BUTTON -->
+
+
+</div>
+
+<!-- <div class="print-options">
+    <div class="print-header">Print Sections</div>
+
+    <div class="print-grid">
+        <label><input type="checkbox" [(ngModel)]="printSections.va"> Visual Acuity</label>
+        <label><input type="checkbox" [(ngModel)]="printSections.cgp"> Current Power of Glass</label>
+        <label><input type="checkbox" [(ngModel)]="printSections.ar"> Auto Refraction</label>
+        <label><input type="checkbox" [(ngModel)]="printSections.sr"> Subjective Refraction</label>
+        <label><input type="checkbox" [(ngModel)]="printSections.iop"> IOP / NCT</label>
+        <label><input type="checkbox" [(ngModel)]="printSections.drops"> Drops Instilled</label>
+        <label><input type="checkbox" [(ngModel)]="printSections.exam"> Examination</label>
+        <label><input type="checkbox" [(ngModel)]="printSections.pupil"> Pupillary Reaction</label>
+        <label><input type="checkbox" [(ngModel)]="printSections.diagram"> Diagram</label>
+        <label><input type="checkbox" [(ngModel)]="printSections.diagnosis"> Diagnosis</label>
+        <label><input type="checkbox" [(ngModel)]="printSections.plan"> Advice / Review</label>
+    </div>
+</div> -->
+
+
+<div class="btn-group">
+    <!-- Optometrist submits a work-up for verification; the doctor saves the note. -->
+    <ng-container *ngIf="isOptometrist; else doctorActions">
+        <button class="save-button" (click)="submitWorkup()"
+                [disabled]="submittingWorkup || isWorkupLocked">
+            {{ submittingWorkup ? 'Submitting…' : 'Submit work-up' }}
+        </button>
+    </ng-container>
+    <ng-template #doctorActions>
+        <button class="save-button" (click)="save()">Save </button>
+        <button class="close-button" (click)="openPrintDialog()">Print </button>
+    </ng-template>
+</div>
+
+<!-- PRINT MODAL BACKDROP -->
+<div class="modal-backdrop" *ngIf="showPrintDialog"></div>
+
+<!-- PRINT MODAL -->
+<div class="modal" *ngIf="showPrintDialog">
+  <div class="modal-card">
+
+    <!-- HEADER -->
+    <div class="modal-header">
+      <h3>Select Sections to Print</h3>
+      <span class="close-btn" (click)="closePrintDialog()">✕</span>
+    </div>
+
+    <!-- BODY -->
+    <div class="modal-body">
+      <div class="print-grid">
+        <label><input type="checkbox" [(ngModel)]="printSections.va"> Visual Acuity</label>
+        <label><input type="checkbox" [(ngModel)]="printSections.cgp"> Current Power of Glass</label>
+        <label><input type="checkbox" [(ngModel)]="printSections.ar"> Auto Refraction</label>
+        <label><input type="checkbox" [(ngModel)]="printSections.sr"> Subjective Refraction</label>
+        <label><input type="checkbox" [(ngModel)]="printSections.iop"> IOP / NCT</label>
+        <label><input type="checkbox" [(ngModel)]="printSections.drops"> Drops Instilled</label>
+        <label><input type="checkbox" [(ngModel)]="printSections.exam"> Examination</label>
+        <label><input type="checkbox" [(ngModel)]="printSections.pupil"> Pupillary Reaction</label>
+        <label><input type="checkbox" [(ngModel)]="printSections.diagram"> Diagram</label>
+        <label><input type="checkbox" [(ngModel)]="printSections.diagnosis"> Diagnosis</label>
+        <label><input type="checkbox" [(ngModel)]="printSections.plan"> Advice / Review</label>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="modal-footer">
+      <!-- <button class="btn-secondary" (click)="closePrintDialog()">Cancel</button> -->
+      <button class="btn-primary" (click)="confirmPrint()">Print</button>
+    </div>
+
+  </div>
+</div>

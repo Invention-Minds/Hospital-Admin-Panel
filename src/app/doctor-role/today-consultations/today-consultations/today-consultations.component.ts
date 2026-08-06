@@ -216,7 +216,8 @@ export class TodayConsultationsComponent {
   isMonitoringActive: boolean = false;
   isEndConsultation: boolean = false;
   isButtonLoading: boolean = false;
-  sendingWhatsapp: boolean = false; // OPD visit-summary WhatsApp send in progress
+  // DEFERRED with sendVisitSummaryWhatsApp() — see that method for how to re-enable.
+  // sendingWhatsapp: boolean = false; // OPD visit-summary WhatsApp send in progress
   departments: any = [];
   allDoctors: any = [];
   filteredDoctors: any = [];
@@ -305,6 +306,17 @@ export class TodayConsultationsComponent {
     { key: 'prescription', label: 'Prescription' },
     { key: 'investigation', label: 'Investigation' },
   ];
+
+  /**
+   * Ophthalmology-only tab. Gated on the department NAME rather than a numeric
+   * id so it survives environments where department ids differ.
+   */
+  get isOphthalmologyDept(): boolean {
+    const dept = (this.doctor?.departmentName || this.currentDepartmentName || '')
+      .toLowerCase().replace(/[^a-z]/g, '');
+    // Accepts "Ophthalmology" and the common "Opthalmology" misspelling.
+    return dept.includes('ophthalm') || dept.includes('opthalm');
+  }
   showOpdModal = false;
   // Quick-access modals — the same investigation-order grid + prescription
   // capture that live inside the OPD form, opened directly from the row.
@@ -2651,15 +2663,22 @@ export class TodayConsultationsComponent {
 
   }
 
-  /** Build the SAME visit-summary PDF as printVisitSummary and WhatsApp it to the
-   *  patient (notes + investigations + prescription). Mirrors the estimation flow:
-   *  generate the PDF here, POST it as base64, backend uploads to GoBuzz + sends.
+  /* DEFERRED — "send visit summary on WhatsApp" is not part of this release.
+   * The whole handler is commented out (not just the service call) so nothing
+   * references appointmentService.sendVisitSummaryWhatsApp() — that service
+   * method and its backend endpoint can be commented out too without breaking
+   * the build.
    *
-   *  DEFERRED — not part of this release. Kept intact but currently unreachable:
-   *  both callers are commented out (the WhatsApp icon in the OP consulting-notes
-   *  header here, and the WhatsApp button in opd-assessment.component.html plus
-   *  the [sendingWhatsapp]/(sendWhatsapp) bindings on <app-opd-assessment>).
-   *  Uncomment those to bring the feature back — no other change needed. */
+   * To re-enable, uncomment all four together:
+   *   1. this method
+   *   2. the WhatsApp icon in the OP consulting-notes header (this .html)
+   *   3. the [sendingWhatsapp] / (sendWhatsapp) bindings on <app-opd-assessment>
+   *   4. the WhatsApp button in opd-assessment.component.html
+   *
+   * It built the SAME visit-summary PDF as printVisitSummary and sent it to the
+   * patient (notes + investigations + prescription), mirroring the estimation
+   * flow: generate the PDF here, POST it as base64, backend uploads to GoBuzz.
+
   sendVisitSummaryWhatsApp(data: any): void {
     if (this.sendingWhatsapp) return;
     const { date, prnNumber } = data || {};
@@ -2718,6 +2737,7 @@ export class TodayConsultationsComponent {
       },
     });
   }
+  */
 
 
   /** Build a labelled OPD-notes block for the PDF, skipping any empty field.

@@ -1,0 +1,111 @@
+<!-- ─────────── Board ─────────── -->
+<ng-container *ngIf="!activeAppointment">
+
+  <!-- Header strip — same shell as the appointment lists (form-row carries the
+       90px sidebar offset every page in this app uses). -->
+  <div class="form-row">
+    <div class="oq-heading">
+      <h2 class="oq-title">Optometry Queue</h2>
+      <p class="oq-sub">
+        Ophthalmology appointments for the day. Record the refraction work-up;
+        the treating doctor verifies it before it becomes part of the signed record.
+      </p>
+    </div>
+
+    <div class="oq-controls">
+      <label class="oq-date">
+        Date
+        <input type="date" [(ngModel)]="selectedDate" (change)="refresh()" />
+      </label>
+      <button type="button" class="oq-btn" (click)="refresh()">Refresh</button>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <div class="oq-banner oq-banner-bad" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+
+    <div class="oq-summary" *ngIf="!loading && rows.length">
+      {{ rows.length }} appointment(s) · <strong>{{ pendingCount }}</strong> awaiting work-up
+    </div>
+
+    <div class="oq-empty" *ngIf="loading">Loading…</div>
+
+    <div class="table-wrapper" *ngIf="!loading">
+      <table class="appointment-table">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Time</th>
+            <th style="width: 220px">Patient Name</th>
+            <th>PRN</th>
+            <th>Age / Sex</th>
+            <th>Doctor Name</th>
+            <th>Work-up</th>
+            <th>Recorded By</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="rows.length === 0">
+            <td colspan="9" class="no-records-message">
+              No ophthalmology appointments for this date.
+            </td>
+          </tr>
+
+          <tr *ngFor="let r of rows; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ r.time }}</td>
+            <td style="width: 220px">
+              {{ r.patientName }}
+              <span class="checkin-badge" *ngIf="r.checkedIn">Checked in</span>
+            </td>
+            <td>{{ r.prnNumber || '-' }}</td>
+            <td>{{ r.age || '-' }} / {{ r.gender || '-' }}</td>
+            <td>{{ r.doctorName }}</td>
+            <td>
+              <span class="oq-status" [ngClass]="'oq-status-' + r.workupStatus">
+                {{ statusLabel(r.workupStatus) }}
+              </span>
+            </td>
+            <td>
+              <ng-container *ngIf="r.workup?.recordedBy; else noRecorder">
+                {{ r.workup?.recordedBy }}
+                <small *ngIf="r.workup?.recordedAt">· {{ r.workup?.recordedAt | date:'shortTime' }}</small>
+              </ng-container>
+              <ng-template #noRecorder>-</ng-template>
+            </td>
+            <td>
+              <button type="button" class="oq-btn oq-btn-primary" (click)="openWorkup(r)">
+                {{ r.workupStatus === 'pending' ? 'Start work-up' : 'Open' }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</ng-container>
+
+<!-- ─────────── Work-up form for one patient ─────────── -->
+<ng-container *ngIf="activeAppointment">
+  <div class="form-row">
+    <div class="oq-heading">
+      <h2 class="oq-title">{{ activeAppointment.patientName }}</h2>
+      <p class="oq-sub">
+        PRN {{ activeAppointment.prnNumber || '-' }} ·
+        {{ activeAppointment.age || '-' }} / {{ activeAppointment.gender || '-' }} ·
+        {{ activeAppointment.time }} · Dr. {{ activeAppointment.doctorName }}
+      </p>
+    </div>
+    <button type="button" class="oq-btn" (click)="closeWorkup()">← Back to queue</button>
+  </div>
+
+  <!-- Same form the doctor uses, restricted to the refraction work-up tabs.
+       The server enforces the same split independently of this flag. -->
+  <div class="oq-workup">
+    <app-ophthamology-template
+      viewMode="optometrist"
+      [appointment]="activeAppointment">
+    </app-ophthamology-template>
+  </div>
+</ng-container>

@@ -19,6 +19,7 @@
     <button type="button" [class.active]="tab==='radiology-tests'" (click)="setTab('radiology-tests')">Radiology tests</button>
     <button type="button" [class.active]="tab==='packages'" (click)="setTab('packages')">MHC Packages</button>
     <button type="button" [class.active]="tab==='shifts'" (click)="setTab('shifts')">Shifts</button>
+    <button type="button" [class.active]="tab==='therapies'" (click)="setTab('therapies')">Therapies</button>
   </div>
 
   <!-- ─── Departments ─── -->
@@ -437,6 +438,37 @@
         <div class="ms-actions">
           <button type="button" class="ms-btn ms-btn-primary" [disabled]="saving" (click)="saveShift()">{{ saving ? 'Saving…' : 'Save' }}</button>
           <button type="button" class="ms-btn" (click)="shiftForm = blankShift()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Therapies ─── -->
+  <div *ngIf="tab==='therapies'" class="ms-panel">
+    <div class="ms-grid-2">
+      <div>
+        <table class="ms-table">
+          <thead><tr><th>Name</th><th>Duration</th><th>Description</th><th></th></tr></thead>
+          <tbody>
+            <tr *ngFor="let t of therapies">
+              <td><strong>{{ t.name }}</strong></td>
+              <td>{{ t.duration ?? '—' }} min</td>
+              <td class="ms-muted">{{ t.description }}</td>
+              <td><button type="button" class="ms-btn ms-btn-sm" (click)="editTherapy(t)">Edit</button></td>
+            </tr>
+            <tr *ngIf="therapies.length===0"><td colspan="4" class="ms-empty">No therapies yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ms-form">
+        <h3>{{ therapyForm.id ? 'Edit therapy' : 'New therapy' }}</h3>
+        <label>Name <input type="text" [(ngModel)]="therapyForm.name" placeholder="Abhyanga" /></label>
+        <label>Duration (minutes) <input type="number" min="1" [(ngModel)]="therapyForm.duration" /></label>
+        <small class="ms-muted">Drives slot length on the therapy booking form. Names must be unique.</small>
+        <label>Description <textarea rows="2" [(ngModel)]="therapyForm.description" placeholder="Full-body warm oil massage"></textarea></label>
+        <div class="ms-actions">
+          <button type="button" class="ms-btn ms-btn-primary" [disabled]="saving" (click)="saveTherapy()">{{ saving ? 'Saving…' : 'Save' }}</button>
+          <button type="button" class="ms-btn" (click)="therapyForm = blankTherapy()">Cancel</button>
         </div>
       </div>
     </div>

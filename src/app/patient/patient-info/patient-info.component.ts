@@ -74,6 +74,8 @@ export class PatientInfoComponent implements OnInit {
       this.opdDates = sortedAppointments.map((d: any, i: number) => ({
         date: d.date,
         label: sortedAppointments.length - i, // descending labels
+        doctorName: d.doctorName,
+        department: d.department,
         notes: d
       }));
 

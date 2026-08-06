@@ -40,6 +40,7 @@ export class SidebarComponent implements OnInit {
     { prefix: '/patient', group: 'opd' },              // + /patient/timeline
     { prefix: '/doctor', group: 'opd' },
     { prefix: '/health-checkup', group: 'opd' },
+    { prefix: '/optometry', group: 'opd' },
     // Investigations
     { prefix: '/services', group: 'investigations' },
     { prefix: '/radiology-services', group: 'investigations' },

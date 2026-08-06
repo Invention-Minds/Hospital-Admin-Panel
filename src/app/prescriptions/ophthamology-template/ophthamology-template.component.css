@@ -1,0 +1,1324 @@
+/* Wrapper */
+.ophthal-wrapper {
+    padding: 15px;
+    background: #fdfdfd;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-family: 'Kanit';
+  }
+  
+  /* ======================= TABS ======================= */
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    border-bottom: 2px solid #ddd;
+    padding-bottom: 5px;
+  }
+
+  /* AUTO-WRAP TABS INTO MULTIPLE ROWS */
+.ophth-tabs {
+    display: flex;
+    flex-wrap: wrap;      /* key line */
+    gap: 15px 20px;       /* row-gap column-gap */
+    padding: 15px 20px;
+    justify-content: flex-start;
+}
+
+  
+.ophth-tab {
+    padding: 12px 22px;
+    background: #7A7A7A;
+    color: white;
+    border-radius: 30px;
+    font-family: Kanit;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 180px;     /* keeps uniform look */
+    text-align: center;
+    white-space: nowrap;
+    transition: 0.25s;
+}
+
+.ophth-tab.active {
+    background: #062A78;
+    color: #fff;
+}
+
+  
+  .ophth-tab:hover {
+    background: #6B6B6B;
+  }
+
+  
+  
+  .tab {
+    padding: 8px 14px;
+    cursor: pointer;
+    border-radius: 4px 4px 0 0;
+    background: #eee;
+    border: 1px solid #ccc;
+    border-bottom: none;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  
+  .tab.active {
+    background: #fff;
+    border: 1px solid #999;
+    border-bottom: 2px solid #fff;
+  }
+  
+  /* ======================= BOX ======================= */
+  .tab-box {
+    margin-top: 12px;
+    background: #fff;
+    padding: 14px 30px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+  }
+  
+/* --- TABLE WRAPPER --- */
+.eye-table, .power-table, .exam-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 18px;
+    background: #ffffff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* --- TABLE HEADER --- */
+.eye-table th, .power-table th, .exam-table th {
+    background: #f3f6ff;
+    color: #062A78;
+    font-weight: 700;
+    padding: 12px;
+    font-size: 15px;
+    text-transform: uppercase;
+    border-bottom: 1px solid #d9dff5;
+}
+
+/* --- TABLE CELLS --- */
+.eye-table td, .power-table td, .exam-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #e8e8e8;
+    font-size: 15px;
+}
+
+.eye-table tr:last-child td,
+.power-table tr:last-child td,
+.exam-table tr:last-child td {
+    border-bottom: none;
+}
+
+/* --- LEFT COLUMN --- */
+.eye-table td:first-child,
+.power-table td:first-child,
+.exam-table td:first-child {
+    font-weight: 600;
+    background: #fafafa;
+    color: #444;
+    width: 160px;
+}
+.eye-table,
+.power-table,
+.exam-table,
+.tab-box {
+    overflow: visible !important;
+}
+.tab-box {
+    overflow: visible !important;
+}
+
+  
+  /* ======================= INPUTS ======================= */
+  input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1.5px solid #cfd4e4;
+    border-radius: 6px;
+    font-size: 15px;
+    transition: 0.2s;
+    background: #fff;
+}
+
+input:focus {
+    border-color: #062A78;
+    box-shadow: 0 0 0 3px rgba(6,42,120,0.15);
+    outline: none;
+}
+
+  
+/* === COMPACT SMALL DROPDOWN GRID === */
+.dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    background: #ffffff;
+    border-radius: 6px;
+    border: 1px solid #d8d8d8;
+    padding: 6px;
+    display: grid;
+    grid-template-columns: repeat(4, auto);   /* 4 small columns */
+    gap: 4px;                                 /* very tight gap */
+    z-index: 9999;
+    max-height: 180px;                         /* small height */
+    overflow-y: auto;
+    box-shadow: 0px 4px 8px rgba(0,0,0,0.14);
+    width: auto;                               /* prevent full width */
+    min-width: 180px;                          /* compact box */
+}
+
+.dropdown-container {
+    position: relative;
+    overflow: visible !important;
+    /* z-index: 9999; */
+}
+
+
+
+/* --- Small square items --- */
+.dd-item {
+    padding: 6px 8px;                          /* VERY small */
+    background: #f3f5fa;
+    border-radius: 4px;
+    border: 1px solid #e0e0e0;
+    font-size: 13px;                           /* small text */
+    text-align: center;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: 0.15s;
+}
+
+.dd-item:hover {
+    background: #062A78;
+    color: white;
+    border-color: #062A78;
+}
+
+/* Add-new row — small and compact too */
+.dd-add {
+    grid-column: span 4;
+    padding: 6px;
+    margin-top: 4px;
+    text-align: center;
+    background: #062A78;
+    color: white;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+/* Smooth dropdown animation */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+  /* ======================= INLINE GRID ======================= */
+  .two-col,
+  .three-col {
+    display: grid;
+    gap: 12px;
+    margin-top: 15px;
+  }
+  
+  .two-col {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .three-col {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+  
+  label {
+    font-size: 13px;
+    font-weight: 600;
+  }
+  
+  /* ======================= CHECKBOX ======================= */
+  .chk {
+    display: flex;
+    align-items: center;
+    margin-top: 8px;
+    gap: 6px;
+    font-size: 14px;
+  }
+  
+  /* ======================= SAVE BUTTON ======================= */
+  .save-button {
+    background-color: #169458;
+    color: #fff;
+    font-family: Kanit;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: flex;
+    /* min-width, not a fixed width — longer labels ("Submit work-up")
+       wrapped mid-word at 150px. */
+    min-width: 150px;
+    padding: 7px 20px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+  }
+  .save-button:disabled {
+    background-color: #8fbfa6;
+    cursor: not-allowed;
+  }
+
+  .close-button {
+    display: flex;
+    width: 150px;
+    padding: 7px 0px;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    border: 1px solid #05154a;
+    color: #ffffff;
+    font-family: Kanit;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: normal;
+    background-color: #05154a;
+  }
+  .print-btn {
+    margin-left: 10px;
+    padding: 8px 14px;
+    background: #2c3e50;
+    color: white;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+  }
+
+  h3, h4{
+    color: #271E4A;
+    font-family: Kanit;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+  }
+
+  .diagram-wrapper {
+    position: relative;
+    display: inline-block;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid #dcdcdc;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+    background: #fff;
+    padding: 0 !important;   /* CRITICAL FIX */
+  }
+  
+  .diagram-bg {
+    display: block;
+    width: 100%;
+    height: auto;
+    pointer-events: none;
+    user-select: none;
+  }
+  
+  .draw-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 20;
+    cursor: crosshair;
+    pointer-events: auto;
+  }
+  
+  .toolbar {
+    margin-bottom: 14px;
+    display: flex;
+    gap: 10px;
+}
+
+.toolbar button {
+    padding: 8px 16px;
+    border-radius: 6px;
+    border: 1px solid #cfd4e4;
+    background: #f7f9ff;
+    cursor: pointer;
+    font-size: 15px;
+    transition: 0.2s;
+    font-weight: 600;
+}
+
+.toolbar button:hover {
+    background: #eef3ff;
+    border-color: #b7c4e6;
+}
+
+.toolbar button.active {
+    background: #062A78;
+    color: white;
+    border-color: #062A78;
+    box-shadow: 0 2px 8px rgba(6,42,120,0.35);
+}
+
+  
+  .btn-group{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    gap: 30px;
+  }
+
+  /* ----------------------- DIAGNOSIS SEARCH ----------------------- */
+.diag-results {
+    margin-top: 6px;
+    background: #ffffff;
+    border-radius: 8px;
+    border: 1px solid #dcdcdc;
+    max-height: 220px;
+    overflow-y: auto;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.12);
+    animation: fadeIn 0.15s ease-in-out;
+}
+
+.diag-item {
+    padding: 10px;
+    font-size: 14px;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    transition: 0.2s;
+}
+
+.diag-item:hover {
+    background: #eef3ff;
+    color: #062A78;
+    padding-left: 14px;
+}
+
+.diag-selected {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #eef3ff;
+    border-left: 4px solid #062A78;
+    padding: 10px 12px;
+    border-radius: 6px;
+    margin-top: 8px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.diag-selected span {
+    cursor: pointer;
+    font-size: 15px;
+    color: #c90000;
+    font-weight: bold;
+    margin-left: 10px;
+    transition: 0.2s;
+}
+
+.diag-selected span:hover {
+    color: #7a0000;
+    transform: scale(1.1);
+}
+textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 10px;
+    border: 1.5px solid #cfd4e4;
+    border-radius: 6px;
+    font-size: 15px;
+    resize: vertical;
+    transition: 0.2s;
+}
+
+textarea:focus {
+    border-color: #062A78;
+    box-shadow: 0 0 0 3px rgba(6,42,120,0.15);
+    outline: none;
+}
+.print-options {
+  margin: 12px 0;
+  padding: 10px;
+  border: 1px solid #ddd;
+  background: #fafafa;
+  border-radius: 6px;
+}
+
+.print-header {
+  font-weight: 600;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+
+
+.diagram-container {
+  display: flex;
+  height: 100%;
+}
+
+/* .diagram-menu {
+  width: 160px;
+  border-right: 1px solid #ddd;
+}
+
+.diagram-menu div {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.diagram-menu .active {
+  background: #007bff;
+  color: #fff;
+}
+
+.diagram-main {
+  flex: 1;
+  padding: 10px;
+}
+
+.eyes {
+  display: flex;
+  justify-content: space-around;
+}
+
+.eye-box {
+  text-align: center;
+}
+/* 
+svg {
+  width: 220px;
+  height: 140px;
+  border: 1px solid #ccc;
+  cursor: crosshair;
+} 
+
+.controls {
+  margin-top: 10px;
+}
+
+.eye-svg {
+  width: 240px;
+  height: 140px;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: crosshair;
+}
+
+.color-wrapper {
+  position: relative;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.color {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 1px solid #444;
+}
+
+
+.color-tooltip {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #4a4a4a;
+  color: #fff;
+  font-size: 12px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  display: none;
+  z-index: 1000;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.color-tooltip div {
+  line-height: 1.4;
+}
+
+
+.color-wrapper:hover .color-tooltip {
+  display: block;
+}
+
+.colors {
+  display: flex;
+  gap: 8px;
+}
+
+.color-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 1px solid #333;
+}
+
+.legend {
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.brush {
+  margin-top: 8px;
+}
+.dialog {
+  display: flex;
+  height: 100%;
+  font-family: Arial, sans-serif;
+}
+
+.menu {
+  width: 160px;
+  border-right: 1px solid #ccc;
+}
+
+.menu div {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.menu .active {
+  background: #dbe9ff;
+  font-weight: bold;
+}
+
+.content {
+  flex: 1;
+  padding: 10px;
+}
+
+.eyes {
+  display: flex;
+  justify-content: space-around;
+}
+
+.eye-box {
+  text-align: center;
+}
+
+svg {
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: crosshair;
+}
+
+.controls {
+  margin-top: 10px;
+}
+
+.colors {
+  display: flex;
+  gap: 8px;
+}
+
+.color {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid #000;
+  cursor: pointer;
+}
+
+.slider {
+  margin: 8px 0;
+}
+
+.gonio {
+  width: 160px;
+  height: 160px;
+  border: 1px solid #555;
+  border-radius: 50%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  place-items: center;
+}
+
+.save {
+  background: #007bff;
+  color: white;
+  padding: 6px 14px;
+  border: none;
+}
+ .fundus-svg {
+  width: 335px;
+  height: 309px;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: crosshair;
+}
+.cornea-svg{
+  width: 280px;
+  height: 300px;
+}
+
+.eye-box {
+  text-align: center;
+}
+.eom-svg {
+  width: 240px;
+  height: 240px;
+}
+
+.eom-input {
+  width: 100%;
+  height: 100%;
+  border: 1px solid #aaa;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 14px;
+  background: white;
+  outline: none;
+}
+
+
+.eom-input::-webkit-inner-spin-button,
+.eom-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.eom-input {
+  -moz-appearance: textfield;
+}
+
+.gonio-svg {
+  width: 240px;
+  height: 240px;
+}
+
+.gonio-select {
+  width: 100%;
+  height: 100%;
+  font-size: 13px;
+  border: 1px solid #aaa;
+  border-radius: 6px;
+  background: white;
+  text-align: center;
+}
+
+
+.vf-svg {
+  width: 240px;
+  height: 240px;
+  cursor: pointer;
+} */
+/* ================= DIAGRAM SECTION ================= */
+
+.diagram-box {
+  padding: 20px;
+}
+
+/* Dialog container */
+.dialog {
+  display: flex;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* LEFT MENU */
+.menu {
+  width: 180px;
+  background: #f7f9ff;
+  border-right: 1px solid #d9dff5;
+}
+
+.menu div {
+  padding: 12px 14px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 1px solid #e6e9f5;
+  transition: 0.2s;
+}
+
+.menu div:hover {
+  background: #eef3ff;
+}
+
+.menu .active {
+  background: #062A78;
+  color: #fff;
+}
+/* MAIN CONTENT */
+.content {
+  flex: 1;
+  padding: 16px;
+  background: #fafbff;
+}
+
+/* Eye containers */
+.eyes {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-top: 10px;
+}
+
+/* Each eye */
+.eye-box {
+  background: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  width: fit-content;
+}
+
+.eye-box h4 {
+  margin-bottom: 8px;
+}
+.eye-svg,
+.fundus-svg,
+.cornea-svg,
+.eom-svg,
+.gonio-svg,
+.vf-svg {
+  border: 1px solid #cfd4e4;
+  border-radius: 8px;
+  background: #ffffff;
+}
+/* CONTROLS */
+.controls {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid #ddd;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+
+/* Buttons */
+.controls button {
+  padding: 8px 14px;
+  border-radius: 6px;
+  border: 1px solid #cfd4e4;
+  background: #f7f9ff;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.controls button:hover {
+  background: #eef3ff;
+}
+
+.controls .save {
+  background: #062A78;
+  color: white;
+  border-color: #062A78;
+}
+.color-wrapper {
+  position: relative;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.color {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 1px solid #444;
+}
+
+/* TOOLTIP */
+.color-tooltip {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #4a4a4a;
+  color: #fff;
+  font-size: 12px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+  display: none;
+  z-index: 1000;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.color-tooltip div {
+  line-height: 1.4;
+}
+
+/* SHOW ON HOVER */
+.color-wrapper:hover .color-tooltip {
+  display: block;
+}
+
+
+.eyes {
+  display: flex;
+  justify-content: space-around;
+}
+
+.eye-box {
+  text-align: center;
+}
+
+svg {
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: crosshair;
+}
+
+.controls {
+  margin-top: 10px;
+}
+
+.colors {
+  display: flex;
+  gap: 8px;
+}
+
+.color {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid #000;
+  cursor: pointer;
+}
+
+.slider {
+  margin: 8px 0;
+}
+
+.gonio {
+  width: 160px;
+  height: 160px;
+  border: 1px solid #555;
+  border-radius: 50%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  place-items: center;
+}
+
+.save {
+  background: #007bff;
+  color: white;
+  padding: 6px 14px;
+  border: none;
+}
+ .fundus-svg {
+  width: 335px;
+  height: 309px;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: crosshair;
+}
+.cornea-svg{
+  width: 280px;
+  height: 300px;
+}
+
+.eye-box {
+  text-align: center;
+}
+.eom-svg {
+  width: 240px;
+  height: 240px;
+}
+
+.eom-input {
+  width: 100%;
+  height: 100%;
+  border: 1px solid #aaa;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 14px;
+  background: white;
+  outline: none;
+}
+
+
+.eom-input::-webkit-inner-spin-button,
+.eom-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.eom-input {
+  -moz-appearance: textfield;
+}
+
+.gonio-svg {
+  width: 240px;
+  height: 240px;
+}
+
+.gonio-select {
+  width: 100%;
+  height: 100%;
+  font-size: 13px;
+  border: 1px solid #aaa;
+  border-radius: 6px;
+  background: white;
+  text-align: center;
+}
+.color-wrapper.active .color {
+  outline: 3px solid #062A78;
+  outline-offset: 2px;
+}
+
+
+.vf-svg {
+  width: 240px;
+  height: 240px;
+  cursor: pointer;
+}
+.eye-svg {
+  width: 240px;
+  height: 140px;
+  border: 1px solid #ccc;
+  background: #fff;
+  cursor: crosshair;
+}
+/* BACKDROP */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1000;
+}
+
+/* MODAL */
+.modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1001;
+}
+
+.modal-card {
+  background: #fff;
+  width: 520px;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  overflow: hidden;
+}
+
+/* HEADER */
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.modal-header h3 {
+  color: #271E4A;
+  font-family: Kanit;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: normal;
+  margin: 0;
+}
+
+
+.close-btn {
+  cursor: pointer;
+  font-size: 20px;
+  color: #777;
+}
+
+/* BODY */
+.modal-body {
+  padding: 26px 30px;
+}
+
+
+.print-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  column-gap: 60px;
+  row-gap: 22px;
+}
+
+.print-grid label {
+  display: flex;
+  align-items: center;     /* vertical alignment fix */
+  gap: 10px;               /* space between checkbox & text */
+  font-size: 15px;
+  font-weight: 500;
+  color: #000;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.print-grid input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: #169458; /* red tick like screenshot */
+}
+.print-grid label:hover {
+  background: #f5f7ff;
+  border-radius: 6px;
+  padding: 4px 6px;
+}
+
+
+/* FOOTER */
+.modal-footer {
+  padding: 14px 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  border-top: 1px solid #eee;
+}
+
+.btn-primary {
+  border-radius: 4px;
+  background: #169458;
+  color: #fff;
+  border: none;
+  display: flex;
+  width: 200px;
+  padding: 7px 14px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.btn-secondary {
+  background: #e5e7eb;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* ======================= DROPS INSTILLED IN OPD ======================= */
+.drop-entry {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 14px;
+  margin-bottom: 16px;
+  background: #f7f9ff;
+  border: 1px solid #dfe5f5;
+  border-radius: 8px;
+}
+
+.drop-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 130px;
+}
+.drop-field-wide   { flex: 1 1 220px; }
+.drop-field-narrow { min-width: 80px; width: 80px; }
+
+.drop-field label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+}
+
+.drop-field select {
+  padding: 8px 10px;
+  border: 1.5px solid #cfd4e4;
+  border-radius: 6px;
+  font-size: 15px;
+  background: #fff;
+}
+
+.drop-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.drop-instill-btn {
+  background: #062A78;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 9px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.drop-instill-btn:disabled {
+  background: #9aa3bd;
+  cursor: not-allowed;
+}
+
+.drop-add-option-btn {
+  background: none;
+  border: none;
+  color: #0b5ed7;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+}
+
+/* Dilation countdown — amber while waiting, green once the wait has elapsed. */
+.dilation-banner {
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  background: #fff6e0;
+  border: 1px solid #f0d089;
+  color: #7a5300;
+}
+.dilation-banner.ready {
+  background: #e6f6ec;
+  border-color: #a6d9b9;
+  color: #146c37;
+}
+
+.drop-empty {
+  color: #6b7280;
+  font-style: italic;
+  padding: 10px 0;
+}
+
+/* Drops log — same shell as the exam tables, but every column is a data
+   column (no grey label column, so Time isn't styled as a row header). */
+.drops-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+.drops-table th {
+  background: #f3f6ff;
+  color: #062A78;
+  font-weight: 700;
+  padding: 10px 12px;
+  font-size: 13px;
+  text-transform: uppercase;
+  text-align: left;
+  border-bottom: 1px solid #d9dff5;
+}
+.drops-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #e8e8e8;
+  font-size: 14px;
+}
+.drops-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* ======================= WORK-UP PROVENANCE BANNER ======================= */
+/* Amber while the optometrist's values are unverified, green once the doctor
+   has signed off — so provisional data never reads as the doctor's word. */
+.workup-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 11px 16px;
+  margin: 0 0 14px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+.workup-banner.pending {
+  background: #fff6e0;
+  border: 1px solid #f0d089;
+  color: #7a5300;
+}
+.workup-banner.verified {
+  background: #e6f6ec;
+  border: 1px solid #a6d9b9;
+  color: #146c37;
+}
+.workup-banner-text { flex: 1 1 320px; }
+
+.workup-amended-tag {
+  font-weight: 600;
+}
+
+.workup-verify-btn {
+  background: #062A78;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 18px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.workup-verify-btn:disabled {
+  background: #9aa3bd;
+  cursor: not-allowed;
+}
+
+.workup-locked {
+  padding: 10px 16px;
+  margin: 0 0 14px;
+  border-radius: 8px;
+  background: #f1f2f6;
+  border: 1px solid #d7dae3;
+  color: #4b5163;
+  font-size: 13px;
+}
+
+/* A value the doctor changed after the optometrist recorded it — the original
+   stays visible underneath so both entries are attributable. */
+input.workup-changed {
+  border-color: #d98c00;
+  background: #fffdf6;
+}
+.workup-was {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  color: #7a5300;
+  white-space: nowrap;
+}
+
+/* Sub-heading separating the before/after dilation AR readings. */
+.ar-phase {
+  margin-top: 18px;
+  color: #062A78;
+  border-bottom: 1px solid #dfe5f5;
+  padding-bottom: 4px;
+}

@@ -35,7 +35,7 @@
                 *ngFor="let date of opdDates;index as i">
                 <div class="visit-header" (click)="toggleVisit(i)">
                     <img src="plus-arrow.svg">
-                    <div>OPD Visit {{ date.label }} — {{ date.date }}</div>
+                    <div class="visit-title">{{ date.doctorName || 'Doctor not recorded' }} — {{ date.date }}</div>
                 </div>
                 <div class="visit-options" *ngIf="expandedVisitIndex === i">
                     <div (click)="toggleView('history', date.date)"><img src="patient-arrow.svg"> History</div>

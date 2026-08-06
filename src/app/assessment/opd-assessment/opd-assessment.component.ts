@@ -55,6 +55,10 @@ export class OpdAssessmentComponent {
   @Output() saved = new EventEmitter<any>();  // 🔴 Emit saved/updated record
   @Output() sendWhatsapp = new EventEmitter<void>(); // 🟢 Parent WhatsApps the visit summary
   @Input() sendingWhatsapp = false; // parent-driven loading state for the WhatsApp button
+  // Ophthalmology department form — the full appointment row it needs, plus the
+  // parent's department gate. Both are inert for every other department.
+  @Input() appointment: any = null;
+  @Input() showOphthalmology = false;
 
   // Embedded lab/radiology order grid; orders are dispatched on note save.
   @ViewChild('investigationOrderComp') investigationOrderComp?: InvestigationOrderComponent;
@@ -650,6 +654,24 @@ loadAssessment(appointmentId: number) {
    * data-URLs → image; anything else (typed text) → plain text. Avoids pdfMake
    * treating typed text as an image filename and throwing "Invalid image".
    */
+  /**
+   * Heading + value for one free-text / hand-written section, or [] when the
+   * doctor left it blank.
+   *
+   * A doctor using their own template fills the template's fields instead of
+   * these fixed sections, so the fixed ones stay empty — they used to print as
+   * a run of headings each followed by a dash. An empty section says nothing
+   * and is omitted from the printout entirely.
+   */
+  private noteSection(label: string, value: any): any[] {
+    const blank = value === null || value === undefined || String(value).trim() === '';
+    if (blank) return [];
+    return [
+      { text: label, style: 'sectionHeader' },
+      this.renderNoteField(value),
+    ];
+  }
+
   private renderNoteField(value: any): any {
     if (value === null || value === undefined || value === '') {
       return { text: '-', margin: [0, 5, 0, 15] };
@@ -977,23 +999,17 @@ loadAssessment(appointmentId: number) {
           // Handwritten/typed sections — render as image only when the value is
           // a canvas data-URL; otherwise as plain text (fixes pdfMake throwing
           // "Invalid image" on typed-in textarea content).
-          { text: "History:", style: "sectionHeader" },
-          this.renderNoteField(d.history),
-
-          { text: "Examination:", style: "sectionHeader" },
-          this.renderNoteField(d.examination),
-
-          { text: "Diagnosis:", style: "sectionHeader" },
-          this.renderNoteField(d.diagnosis),
-
-          { text: "Investigation:", style: "sectionHeader" },
-          this.renderNoteField(d.investigation),
+          // Each section is dropped when the doctor left it blank — a template
+          // user fills the template's own fields, not these.
+          ...this.noteSection("History:", d.history),
+          ...this.noteSection("Examination:", d.examination),
+          ...this.noteSection("Diagnosis:", d.diagnosis),
+          ...this.noteSection("Investigation:", d.investigation),
 
           // Structured lab/radiology orders selected in the grid (Phase 4).
           ...this.buildInvestigationOrdersPdf(),
 
-          { text: "Treatment Plan:", style: "sectionHeader" },
-          this.renderNoteField(d.treatmentPlan),
+          ...this.noteSection("Treatment Plan:", d.treatmentPlan),
 
           // Prescription (drug rows — on-screen or latest saved).
           ...this.buildPrescriptionPdf(rxPrint),

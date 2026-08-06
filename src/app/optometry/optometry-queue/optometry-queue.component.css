@@ -1,0 +1,216 @@
+/* Layout + table styling mirrors the appointment lists (appointment-confirm)
+   so this page reads as part of the same app. The 90px left padding is the
+   collapsed-sidebar offset every page in this app uses — without it the
+   sidebar overlaps the content. */
+
+.form-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 10px;
+  padding-left: 90px;
+  background-color: #F0F3FF;
+  border-radius: 12px;
+}
+
+.oq-heading { flex: 1 1 360px; }
+
+.oq-title {
+  margin: 0 0 2px;
+  font-size: 20px;
+  color: #0e2970;
+  font-family: Kanit, sans-serif;
+  font-weight: 500;
+}
+
+.oq-sub {
+  margin: 0;
+  font-size: 13px;
+  color: #5a5a5a;
+  max-width: 620px;
+}
+
+.oq-controls {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.oq-date {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+}
+
+.oq-date input {
+  padding: 7px 10px;
+  border: 1.5px solid #cfd4e4;
+  border-radius: 6px;
+  font-size: 14px;
+  background: #fff;
+}
+
+.oq-btn {
+  background: #fff;
+  border: 1px solid #d4dae9;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13.5px;
+  cursor: pointer;
+  color: #23304f;
+  white-space: nowrap;
+}
+.oq-btn:hover { background: #eef1f8; }
+
+.oq-btn-primary {
+  background: #0e2970;
+  border-color: #0e2970;
+  color: #fff;
+  font-weight: 500;
+}
+.oq-btn-primary:hover { background: #17398f; }
+
+/* ── Table shell — same as the appointment tables ── */
+.table-container {
+  border-radius: 10px;
+  background-color: #f0f3ff;
+  padding: 20px;
+  padding-left: 90px;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.appointment-table {
+  width: 100%;
+  min-width: 1000px;
+  border-collapse: collapse;
+}
+
+thead {
+  background: #0e2970;
+  box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64);
+  border-radius: 16px;
+  color: white;
+  font-size: 14px;
+  font-family: Kanit;
+  font-weight: 400;
+}
+
+thead th {
+  padding: 12px;
+  text-align: center;
+  color: white;
+  font-size: 14px;
+  font-family: Kanit;
+  font-weight: 400;
+  text-wrap: nowrap;
+  height: 54px;
+}
+
+tbody tr {
+  box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64);
+  border-radius: 16px;
+  height: 60px;
+}
+
+tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64);
+  border-radius: 16px;
+}
+
+tbody td {
+  padding: 0px 8px;
+  text-align: center;
+  color: black;
+  font-size: 14px;
+  font-family: Kanit;
+  font-weight: 400;
+}
+
+tbody tr:hover { background-color: #f0f8ff; }
+
+tbody td small { color: #6b7280; }
+
+.no-records-message {
+  text-align: center;
+  color: #6b7280;
+  padding: 24px 0;
+}
+
+.checkin-badge {
+  display: inline-block;
+  color: white;
+  padding: 3px 9px;
+  margin-left: 6px;
+  font-size: 12px;
+  font-family: Kanit;
+  font-weight: 400;
+  background: #79cfa6;
+  border-radius: 4px;
+}
+
+/* Status reads at a glance: grey = not started, amber = waiting on the
+   doctor, green = signed off. */
+.oq-status {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.oq-status-pending {
+  background: #e7e9f0;
+  color: #4b5163;
+}
+.oq-status-submitted {
+  background: #f5c26b;
+  color: #4a3000;
+}
+.oq-status-verified,
+.oq-status-amended {
+  background: #79cfa6;
+  color: #fff;
+}
+
+.oq-banner {
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 13.5px;
+}
+.oq-banner-bad {
+  background: #fdecec;
+  border: 1px solid #f2b8b8;
+  color: #8c2020;
+}
+
+.oq-summary {
+  font-size: 13px;
+  color: #4b5163;
+  margin-bottom: 10px;
+}
+
+.oq-empty {
+  padding: 28px;
+  text-align: center;
+  color: #6b7280;
+  background: #fff;
+  border: 1px dashed #d7d7d7;
+  border-radius: 8px;
+}
+
+/* The eye form needs the same sidebar offset as the table. */
+.oq-workup {
+  padding: 20px;
+  padding-left: 90px;
+}

@@ -246,6 +246,9 @@ import { TreatmentDashboardComponent } from './treatment-dashboard/treatment-das
 import { NoteTemplateManagerComponent } from './note-template-manager/note-template-manager.component';
 import { MyOpdTemplatesComponent } from './doctor-role/my-opd-templates/my-opd-templates.component';
 import { TemplateFormRendererComponent } from './shared/ui/template-form-renderer/template-form-renderer.component';
+// Ophthalmology department OPD prescription (ported from DocMinds Clinic)
+import { OphthamologyTemplateComponent } from './prescriptions/ophthamology-template/ophthamology-template.component';
+import { OptometryQueueComponent } from './optometry/optometry-queue/optometry-queue.component';
 import { PrescriptionCaptureComponent } from './shared/ui/prescription-capture/prescription-capture.component';
 import { InvestigationOrderComponent } from './assessment/investigation-order/investigation-order.component';
 import { DoctorSelectComponent } from './shared/ui/doctor-select/doctor-select.component';
@@ -467,6 +470,8 @@ import { NursingSuperDashboardComponent } from './dashboards/nursing-super-dashb
     NoteTemplateManagerComponent,
     MyOpdTemplatesComponent,
     TemplateFormRendererComponent,
+    OphthamologyTemplateComponent,
+    OptometryQueueComponent,
     // Sprint 3e — LAMA/DAMA
     LamaDamaRegisterComponent,
     LamaDamaDetailComponent,

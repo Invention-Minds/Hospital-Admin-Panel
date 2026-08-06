@@ -19,6 +19,7 @@ import {
   MasterRadioService,
 } from '../services/masters.service';
 import { SchedulingService, Shift } from '../services/scheduling.service';
+import { TherapyService, Therapy } from '../services/therapy/therapy.service';
 
 /**
  * Unified Masters admin page — `/masters` (super_admin only).
@@ -37,7 +38,7 @@ import { SchedulingService, Shift } from '../services/scheduling.service';
  * to deactivate (where supported) or just rename.
  */
 type Tab = 'departments' | 'surgeons' | 'wards' | 'beds' | 'ot-rooms' | 'tablets'
-         | 'lab-tests' | 'radiology-tests' | 'packages' | 'shifts';
+         | 'lab-tests' | 'radiology-tests' | 'packages' | 'shifts' | 'therapies';
 
 interface NewBedRow { bedNumber: string; bedType: string; }
 
@@ -67,6 +68,9 @@ export class MastersComponent implements OnInit, OnDestroy {
   /** Shift master — Morning/Evening/Night etc. Drives the roster page. */
   shifts: Shift[] = [];
   shiftForm: Partial<Shift> = this.blankShift();
+  /** Therapy master — drives the therapy-booking form's therapy dropdown. */
+  therapies: Therapy[] = [];
+  therapyForm: Partial<Therapy> = this.blankTherapy();
 
   // Editor buffers — one per master.
   deptForm: Partial<MasterDepartment> = this.blankDept();
@@ -108,6 +112,7 @@ export class MastersComponent implements OnInit, OnDestroy {
   constructor(
     private svc: MastersService,
     private scheduling: SchedulingService,
+    private therapySvc: TherapyService,
   ) {}
 
   ngOnInit(): void {
@@ -170,6 +175,41 @@ export class MastersComponent implements OnInit, OnDestroy {
     this.scheduling.listShifts().pipe(takeUntil(this.destroy$)).subscribe({
       next: (r) => { this.shifts = r ?? []; },
       error: () => { this.shifts = []; },
+    });
+    this.therapySvc.getAllTherapies().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (r) => { this.therapies = r ?? []; },
+      error: () => { this.therapies = []; },
+    });
+  }
+
+  // ─── Therapies ──────────────────────────────────────────────────────
+  editTherapy(t: Therapy): void {
+    this.therapyForm = { ...t };
+    this.errorMessage = '';
+    this.successMessage = '';
+  }
+  saveTherapy(): void {
+    const name = this.therapyForm.name?.trim();
+    if (!name) { this.errorMessage = 'Name is required.'; return; }
+    const duration = Number(this.therapyForm.duration ?? 0);
+    if (!Number.isFinite(duration) || duration <= 0) {
+      this.errorMessage = 'Duration must be a positive number of minutes.';
+      return;
+    }
+    this.successMessage = ''; this.errorMessage = '';
+    const payload = {
+      name,
+      description: this.therapyForm.description?.trim() || undefined,
+      duration,
+    };
+    if (this.saving) return;
+    const obs = this.therapyForm.id
+      ? this.therapySvc.updateTherapy(this.therapyForm.id, payload)
+      : this.therapySvc.createTherapy(payload as Therapy);
+    this.saving = true;
+    obs.pipe(takeUntil(this.destroy$), finalize(() => this.saving = false)).subscribe({
+      next: () => { this.successMessage = 'Therapy saved.'; this.therapyForm = this.blankTherapy(); this.refreshAll(); },
+      error: (e) => { this.errorMessage = e?.error?.message || e?.error?.error || 'Save failed'; },
     });
   }
 
@@ -531,4 +571,6 @@ export class MastersComponent implements OnInit, OnDestroy {
   blankShift(): Partial<Shift> {
     return { name: '', code: '', startTime: '', endTime: '', sequence: 0, isActive: true };
   }
+  /** 75 min mirrors the Therapy.duration DB default. */
+  blankTherapy(): Partial<Therapy> { return { name: '', description: '', duration: 75 }; }
 }

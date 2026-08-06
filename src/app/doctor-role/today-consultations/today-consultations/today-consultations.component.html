@@ -424,6 +424,8 @@
       <app-opd-assessment
       [appointmentId]="selectedAppointment?.id"
       [doctorId]="doctor?.id"
+      [appointment]="selectedAppointment"
+      [showOphthalmology]="isOphthalmologyDept"
       (close)="showOpdModal = false"
       (saved)="onAssessmentSaved($event)">
     </app-opd-assessment>
@@ -1164,6 +1166,10 @@
           (click)="setActiveTab(tab.key)">
           {{ tab.label }}
         </button>
+        <button *ngIf="isOphthalmologyDept" class="tab-btn" [class.active]="activeTab === 'ophthalmology'"
+          (click)="setActiveTab('ophthalmology')">
+          Ophthalmology
+        </button>
 
       </div>
       <div class="print-section">
@@ -1605,6 +1611,12 @@
           <!-- <button class="close-button" (click)="close()">Cancel</button> -->
         </div>
       </div>
+    </div>
+
+    <!-- Ophthalmology department form — only rendered for ophthalmology doctors. -->
+    <div class="tab-content" id="ophthalmology" style="display:block" *ngIf="activeTab === 'ophthalmology'">
+      <app-ophthamology-template [appointment]="selectedService">
+      </app-ophthamology-template>
     </div>
   </div>
 </div>

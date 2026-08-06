@@ -233,6 +233,21 @@
       </div>
     </a>
 
+    <!-- Optometry queue — today's ophthalmology appointments. The optometrist
+         records the refraction work-up; the doctor verifies it before it
+         counts as part of the signed record. Lives under OPD because that is
+         where the optometrist works (the Admin group is hidden to them). -->
+    <a [routerLink]="(role === 'super_admin' || subAdminType === 'Optometrist') ? '/optometry/queue' : null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="role === 'super_admin' || subAdminType === 'Optometrist'">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 12a4.5 4.5 0 1 1 0-9a4.5 4.5 0 0 1 0 9zm0-7.2a2.7 2.7 0 1 0 0 5.4a2.7 2.7 0 0 0 0-5.4z"/>
+        </svg>
+        <span>Optometry Queue</span>
+      </div>
+    </a>
+
     </div>
     </div>
 

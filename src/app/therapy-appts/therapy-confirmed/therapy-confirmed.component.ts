@@ -174,6 +174,115 @@ export class TherapyConfirmedComponent {
     FileSaver.saveAs(blob, 'confirmed_appointments.csv');
   }
 
+  printTherapyDetails(): void {
+    const sourceList = this.filteredServices && this.filteredServices.length
+      ? this.filteredServices
+      : this.confirmedAppointments;
+
+    if (!sourceList || sourceList.length === 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Nothing to print',
+        detail: 'No therapy appointments in the current view. Adjust filters and try again.',
+        life: 4000
+      });
+      return;
+    }
+
+    const selectedFields = sourceList.map((service: any) => ({
+      'Patient Name': `${service.prefix ? service.prefix + ' ' : ''}${service.name || '-'}`,
+      'PRN': service.prn ?? '-',
+      'Phone Number': service.phone || '-',
+      'Email': service.email || '-',
+      'Gender': service.gender || '-',
+      'Age': service.age ?? '-',
+      'Therapy Name': service.therapyNames || service.therapyName || '-',
+      'Appointment Date': this.formatPrintDate(service.date),
+      'Appointment Time': this.getTimeRange(service),
+      'Duration (mins)': service.totalDurationMinutes ?? '-',
+      'Doctor Name': service.doctorName || '-',
+      'Therapist Name': this.getTherapistNames(service),
+      'Room No': service.roomNumber || '-',
+      'Booked On': this.formatPrintDateTime(service.createdAt),
+      'Whatsapp Sent': service.whatsappSent ? 'Yes' : 'No',
+      'Email Sent': service.emailSent ? 'Yes' : 'No',
+      'SMS Sent': service.smsSent ? 'Yes' : 'No',
+      'Status': service.checkedIn ? 'Checked In' : 'Confirmed',
+      'Remarks': service.remarks || '-',
+    }));
+
+    const printWindow = window.open('', '', 'width=800,height=600');
+    if (!printWindow) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Print blocked',
+        detail: 'Please allow pop-ups for this site to print.',
+        life: 4000
+      });
+      return;
+    }
+
+    const tableHTML = `
+        <html>
+        <head>
+          <title>Therapy Appointment Details</title>
+          <style>
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin: 20px 0;
+              font-size: 12px;
+              text-align: left;
+            }
+            th, td {
+              border: 1px solid #ddd;
+              padding: 6px;
+            }
+            th {
+              background-color: #f2f2f2;
+            }
+            @page { size: landscape; }
+          </style>
+        </head>
+        <body>
+          <h2>Confirmed Therapy Appointment Details</h2>
+          <table>
+            <thead>
+              <tr>
+                ${Object.keys(selectedFields[0]).map(key => `<th>${key}</th>`).join('')}
+              </tr>
+            </thead>
+            <tbody>
+              ${selectedFields.map((row: any) => `<tr>${Object.values(row).map(value => `<td>${value}</td>`).join('')}</tr>`).join('')}
+            </tbody>
+          </table>
+        </body>
+        </html>
+      `;
+
+    printWindow.document.write(tableHTML);
+    printWindow.document.close();
+    printWindow.print();
+  }
+
+  private formatPrintDate(value: any): string {
+    if (!value) return '-';
+    const d = new Date(value);
+    if (isNaN(d.getTime())) return String(value);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    return `${day}-${month}-${d.getFullYear()}`;
+  }
+
+  private formatPrintDateTime(value: any): string {
+    if (!value) return '-';
+    const d = new Date(value);
+    if (isNaN(d.getTime())) return String(value);
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    return `${this.formatPrintDate(value)} ${hours}:${minutes}`;
+  }
+
   // Utility to Convert JSON to CSV
   private convertToCSV(data: TherapyAppointment[]): string {
     const headers = Object.keys(data[0]).join(',');

@@ -108,6 +108,7 @@ import { OpProcedureDetailComponent } from './op-procedure/op-procedure-detail/o
 import { OtScheduleDetailComponent } from './ot-workflow/ot-schedule-detail/ot-schedule-detail.component';
 import { NoteTemplateManagerComponent } from './note-template-manager/note-template-manager.component';
 import { MyOpdTemplatesComponent } from './doctor-role/my-opd-templates/my-opd-templates.component';
+import { OptometryQueueComponent } from './optometry/optometry-queue/optometry-queue.component';
 import { MlcCasesComponent } from './mlc/mlc-cases.component';
 import { MlcRegisterComponent } from './mlc/mlc-register/mlc-register.component';
 import { MlcDetailComponent } from './mlc/mlc-detail/mlc-detail.component';
@@ -377,6 +378,8 @@ const routes: Routes = [
   { path: 'note-templates', component: NoteTemplateManagerComponent, canActivate:[authGuard] },
   // Phase 9.21 — doctor self-service manager for their own OPD templates.
   { path: 'my-opd-templates', component: MyOpdTemplatesComponent, canActivate:[authGuard] },
+  // Optometrist board — today's eye appointments + refraction work-up capture.
+  { path: 'optometry/queue', component: OptometryQueueComponent, canActivate:[authGuard] },
   // Phase 3 — bedside attender-acceptance flow (final step of WF-2 handshake).
   { path: 'bedside-acceptance/:bedRequestId', component: BedsideAcceptanceComponent, canActivate:[authGuard] },
   { path: 'mlc', component: MlcCasesComponent, canActivate:[authGuard] },

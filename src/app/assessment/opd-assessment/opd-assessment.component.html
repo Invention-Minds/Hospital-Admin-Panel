@@ -295,6 +295,14 @@
 
 
 
+  <!-- Ophthalmology department form — rendered only for ophthalmology doctors.
+       Saves independently through its own endpoint, not with this note. -->
+  <ng-container *ngIf="showOphthalmology">
+    <h3>Ophthalmology</h3>
+    <app-ophthamology-template [appointment]="appointment">
+    </app-ophthamology-template>
+  </ng-container>
+
   <!-- Phase 9.22 — Prescription capture (full parity with consulting notes) -->
   <h3>Prescription</h3>
   <app-prescription-capture

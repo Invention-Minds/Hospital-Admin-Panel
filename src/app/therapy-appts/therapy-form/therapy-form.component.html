@@ -106,6 +106,7 @@
   placeholder="Select Therapies"
   [filter]="true"
   class="custom-dropdown"
+  (onChange)="onTherapyChange()"
   required>
 </p-multiSelect>
 <!-- <label class="form-label">Therapies*</label> -->
@@ -119,7 +120,7 @@
 
       <div class="form-group half-width">
         <input type="number" class="form-input" name="totalDurationInput" [(ngModel)]="formData.totalDurationMinutes"
-        (blur)="calculateDurations()"
+        (blur)="onDurationChange()"
         placeholder=" " required min="1" />
         <label class="form-label">Total Duration (mins)*</label>
       </div>
@@ -129,7 +130,7 @@
           <input type="checkbox"
                  name="hasBathing"
                  [(ngModel)]="formData.hasBathing"
-                 (change)="calculateDurations()" />
+                 (change)="onDurationChange()" />
           <span class="checkmark"></span>
           Include Bathing?
         </label>
@@ -293,9 +294,10 @@
         </button>
       </div>
       <p style="margin:0 0 14px; font-size:0.82rem; color:#7B7B7B;">
-        Day 1 is the date/time/therapist/room above. These additional days are pre-filled from Day 1 (every
-        {{ formData.intervalDays || 1 }} day(s)). Edit any day; days clashing a real booking show red, tentative
-        course clashes show amber.
+        Day 1 is the date/time/therapist/room/therapy above. These additional days are pre-filled from Day 1 (every
+        {{ formData.intervalDays || 1 }} day(s)). Edit any day — including its therapies and duration, so a course
+        can change treatment partway through. Once you edit a day's therapies or duration it stops following Day 1;
+        "Reset to defaults" re-links every day. Days clashing a real booking show red, tentative course clashes amber.
       </p>
 
       <div *ngFor="let row of dayRows; let i = index"
@@ -344,6 +346,31 @@
               <option *ngFor="let r of roomNumbers" [value]="r">{{ r }}</option>
             </select>
             <label class="form-label">Room Number*</label>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="half-width">
+            <p-multiSelect [options]="therapies" class="custom-dropdown" [(ngModel)]="row.therapyIds"
+              name="dayTherapies{{ i }}" optionLabel="name" optionValue="id" placeholder="Select Therapies"
+              [filter]="true" (onChange)="onDayTherapyChange(row)"
+              selectedItemsLabel="Therapies Selected"></p-multiSelect>
+          </div>
+          <div class="form-group half-width">
+            <input type="number" class="form-input" placeholder=" " min="1" [(ngModel)]="row.totalDurationMinutes"
+              name="dayDuration{{ i }}" (blur)="onDayDurationChange(row)" />
+            <label class="form-label">Total Duration (mins)*</label>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group half-width checkbox-group">
+            <label class="checkbox-container">
+              <input type="checkbox" name="dayBathing{{ i }}" [(ngModel)]="row.hasBathing"
+                (change)="onDayDurationChange(row)" />
+              <span class="checkmark"></span>
+              Include Bathing?
+            </label>
           </div>
         </div>
 

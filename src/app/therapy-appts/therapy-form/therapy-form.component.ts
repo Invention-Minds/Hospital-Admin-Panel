@@ -289,14 +289,35 @@ export class TherapyFormComponent {
     if (isCourse) {
       if (!this.dayRows.length) this.buildDayRows();
 
-      // Days 2..N (the cards) each need date/time/therapist/room. Day 1 is the
-      // top fields, already enforced by the form's `required` validation.
+      // Days 2..N (the cards) each need date/time/therapist/room/therapy/duration.
+      // Day 1 is the top fields, already enforced by the form's `required` validation.
       for (const r of this.dayRows) {
-        if (!r.date || !r.time || !r.roomNumber || !r.therapistIds?.length) {
+        if (!r.date || !r.time || !r.roomNumber || !r.therapistIds?.length || !r.therapyIds?.length) {
           this.messageService.add({
             severity: 'error',
             summary: `Day ${r.dayNumber} incomplete`,
-            detail: 'Date, time, therapist and room are required for every day.',
+            detail: 'Date, time, therapist, room and therapy are required for every day.',
+          });
+          this.isLoading = false;
+          return;
+        }
+        if (!(Number(r.totalDurationMinutes) > 0)) {
+          this.messageService.add({
+            severity: 'error',
+            summary: `Day ${r.dayNumber} duration`,
+            detail: 'Total duration must be greater than 0 for every day.',
+          });
+          this.isLoading = false;
+          return;
+        }
+        // Each day's own slot must still fit the 06:00–18:00 window (+5 min buffer),
+        // which a longer per-day duration can push it past.
+        const rStart = this.toMinutes(r.time);
+        if (rStart < 360 || rStart + Number(r.totalDurationMinutes) + 5 > 1080) {
+          this.messageService.add({
+            severity: 'error',
+            summary: `Day ${r.dayNumber} outside hours`,
+            detail: 'Each session must finish within 06:00–18:00 (including the 5-min buffer).',
           });
           this.isLoading = false;
           return;
@@ -314,15 +335,15 @@ export class TherapyFormComponent {
         return;
       }
 
-      const dur = Number(this.formData.totalDurationMinutes);
-      const hasBathing = !!this.formData.hasBathing;
-      // Day 1 = top fields; Days 2..N = the cards.
+      // Day 1 = top fields; Days 2..N = the cards, each carrying its OWN
+      // therapies / duration / bathing (the backend validates and stores them
+      // per plan-day, so a course can change therapy partway through).
       const day1 = {
         plannedDate: this.formData.date,
         time: this.formData.time,
         roomNumber: this.formData.roomNumber,
-        totalDurationMinutes: dur,
-        hasBathing,
+        totalDurationMinutes: Number(this.formData.totalDurationMinutes),
+        hasBathing: !!this.formData.hasBathing,
         therapistIds: this.formData.therapistIds.map((id: any) => Number(id)),
         therapyIds,
       };
@@ -330,10 +351,10 @@ export class TherapyFormComponent {
         plannedDate: r.date,
         time: r.time,
         roomNumber: r.roomNumber,
-        totalDurationMinutes: dur,
-        hasBathing,
+        totalDurationMinutes: Number(r.totalDurationMinutes),
+        hasBathing: !!r.hasBathing,
         therapistIds: r.therapistIds.map((id: any) => Number(id)),
-        therapyIds,
+        therapyIds: r.therapyIds.map((id: any) => Number(id)),
       }));
       const days = [day1, ...extraDays];
 
@@ -711,8 +732,8 @@ export class TherapyFormComponent {
   }
 
   /** Build the ADDITIONAL day cards (Day 2..N). Day 1 is the top form fields.
-   *  Dates spaced from the start date by the interval; time/room/therapist seeded
-   *  from the top (Day 1). Recomputes dates on rebuild; keeps edited values. */
+   *  Dates spaced from the start date by the interval; time/room/therapist/therapy
+   *  seeded from the top (Day 1). Recomputes dates on rebuild; keeps edited values. */
   buildDayRows() {
     const n = Number(this.formData.totalDays) || 1;
     if (n <= 1) {
@@ -730,6 +751,13 @@ export class TherapyFormComponent {
         time: ex?.time || this.formData.time || '',
         roomNumber: ex?.roomNumber || this.formData.roomNumber || '',
         therapistIds: ex?.therapistIds?.length ? ex.therapistIds : [...(this.formData.therapistIds || [])],
+        therapyIds: ex?.therapyIds?.length ? ex.therapyIds : [...(this.formData.therapyIds || [])],
+        totalDurationMinutes: ex?.totalDurationMinutes || Number(this.formData.totalDurationMinutes) || 0,
+        hasBathing: ex ? !!ex.hasBathing : !!this.formData.hasBathing,
+        // Sticky flags: once a card's therapies/duration are edited by hand, a
+        // later Day-1 change no longer overwrites them.
+        customTherapies: !!ex?.customTherapies,
+        customDuration: !!ex?.customDuration,
       });
     }
     this.dayRows = rows;
@@ -744,8 +772,50 @@ export class TherapyFormComponent {
       if (!r.time) r.time = this.formData.time || '';
       if (!r.roomNumber) r.roomNumber = this.formData.roomNumber || '';
       if (!r.therapistIds?.length) r.therapistIds = [...(this.formData.therapistIds || [])];
+      if (!r.therapyIds?.length) r.therapyIds = [...(this.formData.therapyIds || [])];
+      if (!r.totalDurationMinutes) r.totalDurationMinutes = Number(this.formData.totalDurationMinutes) || 0;
     });
     this.refreshDayAvailability();
+  }
+
+  /** Day 1's therapies cascade to every card the operator hasn't customised. */
+  onTherapyChange() {
+    if (Number(this.formData.totalDays) > 1 && this.dayRows.length) {
+      this.dayRows
+        .filter((r) => !r.customTherapies)
+        .forEach((r) => (r.therapyIds = [...(this.formData.therapyIds || [])]));
+    }
+  }
+
+  /** Day 1's duration/bathing cascade the same way, then re-split + re-flag. */
+  onDurationChange() {
+    this.calculateDurations();
+    if (Number(this.formData.totalDays) > 1 && this.dayRows.length) {
+      this.dayRows
+        .filter((r) => !r.customDuration)
+        .forEach((r) => {
+          r.totalDurationMinutes = Number(this.formData.totalDurationMinutes) || 0;
+          r.hasBathing = !!this.formData.hasBathing;
+        });
+      this.refreshDayAvailability();
+    }
+  }
+
+  /** A card's own therapy edit — pins it against future Day-1 cascades. */
+  onDayTherapyChange(row: any) {
+    row.customTherapies = true;
+  }
+
+  /** A card's own duration/bathing edit — pins it and re-runs the clash check
+   *  (duration changes the slot length, so availability must be recomputed). */
+  onDayDurationChange(row: any) {
+    row.customDuration = true;
+    this.refreshDayAvailability();
+  }
+
+  /** A card's effective slot length — its own value, else Day 1's. */
+  private rowDuration(row: any): number {
+    return Number(row?.totalDurationMinutes) || Number(this.formData.totalDurationMinutes) || 0;
   }
 
   resetDayRows() {
@@ -830,7 +900,6 @@ export class TherapyFormComponent {
   /** Flag each card: red "busy" for a real booking clash, amber "tentative" for
    *  another course's planned-day clash, else available — with who/when details. */
   private computeDayFlags() {
-    const dur = Number(this.formData.totalDurationMinutes) || 0;
     this.dayRows.forEach((row, idx) => {
       row.unavailable = false;
       row.tentative = false;
@@ -839,16 +908,16 @@ export class TherapyFormComponent {
       if (!row.date || !row.time) return;
 
       const start = this.toMinutes(row.time);
-      const end = start + dur + 5; // 5-min post-session buffer (matches backend)
+      const end = start + this.rowDuration(row) + 5; // 5-min post-session buffer (matches backend)
       const tIds = (row.therapistIds || []).map((x: any) => Number(x));
 
-      // Other cards in THIS form on the same date.
+      // Other cards in THIS form on the same date — each with its own length.
       const sameForm = this.dayRows
         .filter((other, j) => j !== idx && other.date === row.date)
         .map((other) => ({
           time: other.time,
           roomNumber: other.roomNumber,
-          totalDurationMinutes: dur,
+          totalDurationMinutes: this.rowDuration(other),
           therapists: (other.therapistIds || []).map((id: any) => ({ therapistId: Number(id) })),
         }));
 
@@ -889,9 +958,8 @@ export class TherapyFormComponent {
    *  current selection visible so it isn't lost. */
   availableRoomsForRow(row: any): string[] {
     if (!row.date || !row.time) return this.roomNumbers;
-    const dur = Number(this.formData.totalDurationMinutes) || 0;
     const start = this.toMinutes(row.time);
-    const end = start + dur + 5;
+    const end = start + this.rowDuration(row) + 5;
     const blocked = new Set<string>();
 
     (this.scheduleByDate[row.date] || []).forEach((a: any) => {
@@ -904,7 +972,7 @@ export class TherapyFormComponent {
     this.dayRows.forEach((o) => {
       if (o === row || o.date !== row.date || !o.roomNumber) return;
       const oStart = this.toMinutes(o.time);
-      const oEnd = oStart + dur + 5;
+      const oEnd = oStart + this.rowDuration(o) + 5;
       if (this.isOverlap(start, end, oStart, oEnd)) blocked.add(o.roomNumber);
     });
 
@@ -1004,15 +1072,6 @@ export class TherapyFormComponent {
     this.formData.email = selectedPatient.email || '';
     this.formData.prefix = prefix || ''
     this.prnSuggestions = false;
-  }
-  onTherapyChange() {
-    const therapy = this.therapies.find(t => t.id == this.formData.therapyId);
-    this.selectedTherapy = therapy || null;
-
-    if (therapy) {
-      this.formData.hasBathing = false;   // reset bathing selection
-      this.calculateDurations();
-    }
   }
   calculateDurations(isEdit: boolean = false) {
     const total = Number(this.formData.totalDurationMinutes);

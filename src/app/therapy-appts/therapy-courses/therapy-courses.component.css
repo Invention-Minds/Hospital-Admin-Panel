@@ -5,10 +5,16 @@
   box-sizing: border-box;
 }
 
-/* Wide tables scroll inside their own box instead of widening the page. */
+/* Wide tables scroll inside their own box instead of widening the page.
+   Backdrop matches the Confirmed Appointments table container. */
 .c-table-wrap {
   width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 10px;
+  background-color: #f0f3ff;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 .courses-header {
@@ -78,25 +84,90 @@
   cursor: not-allowed;
 }
 
+/* Table styling mirrors the Confirmed Appointments table: navy header bar and
+   white rows floating on the light-blue backdrop with a soft shadow. */
 .c-table {
   width: 100%;
-  min-width: 680px;
-  border-collapse: collapse;
+  min-width: 900px;
+  border-collapse: separate;
+  border-spacing: 0 5px;
+  font-family: Kanit;
+}
+
+.c-table thead {
+  background: #0e2970;
+  box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64);
+  color: #fff;
+}
+
+.c-table thead th {
+  padding: 12px;
+  height: 54px;
+  text-align: center;
+  color: #fff;
+  font-size: 14px;
+  font-family: Kanit;
+  font-weight: 400;
+  white-space: nowrap;
+}
+
+.c-table thead th:first-child {
+  border-top-left-radius: 16px;
+  border-bottom-left-radius: 16px;
+}
+
+.c-table thead th:last-child {
+  border-top-right-radius: 16px;
+  border-bottom-right-radius: 16px;
+}
+
+.c-table tbody tr {
+  box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64);
+  border-radius: 16px;
+  height: 60px;
+}
+
+.c-table tbody td {
+  padding: 8px;
+  text-align: center;
   background: #fff;
-  font-size: 0.88rem;
+  color: #000;
+  font-size: 14px;
+  font-family: Kanit;
+  font-weight: 400;
 }
 
-.c-table th,
-.c-table td {
-  text-align: left;
-  padding: 10px 12px;
-  border-bottom: 1px solid #eceff3;
+.c-table tbody td:first-child {
+  border-top-left-radius: 16px;
+  border-bottom-left-radius: 16px;
 }
 
-.c-table th {
-  background: #f7f9fb;
-  font-weight: 600;
-  color: #41505f;
+.c-table tbody td:last-child {
+  border-top-right-radius: 16px;
+  border-bottom-right-radius: 16px;
+}
+
+.c-table tbody tr:hover td {
+  background-color: #f0f8ff;
+}
+
+/* Preview table inside the reschedule panel — same look, tighter. */
+.c-table.compact {
+  min-width: 0;
+}
+
+.c-table.compact thead th {
+  height: 44px;
+  padding: 8px;
+  font-size: 13px;
+}
+
+.c-table.compact tbody tr {
+  height: 48px;
+}
+
+.c-table.compact tbody td {
+  font-size: 13px;
 }
 
 .c-empty,

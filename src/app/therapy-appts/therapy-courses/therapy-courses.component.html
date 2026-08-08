@@ -77,6 +77,8 @@
             <th>Day</th>
             <th>Planned date</th>
             <th>Time</th>
+            <th>Therapies</th>
+            <th>Therapists</th>
             <th>Room</th>
             <th>Plan status</th>
             <th>Appointment</th>
@@ -88,6 +90,8 @@
             <td>{{ d.dayNumber }}</td>
             <td>{{ d.plannedDate }}</td>
             <td>{{ d.time }}</td>
+            <td>{{ d.therapyNames?.length ? d.therapyNames.join(', ') : '—' }}</td>
+            <td>{{ d.therapistNames?.length ? d.therapistNames.join(', ') : '—' }}</td>
             <td>{{ d.roomNumber }}</td>
             <td><span class="badge" [ngClass]="'st-' + d.status">{{ d.status }}</span></td>
             <td>

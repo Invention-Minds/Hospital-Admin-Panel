@@ -29,7 +29,7 @@
         styleClass="custom-calendar" 
         [(ngModel)]="selectedDateRange"
         selectionMode="range"
-        (ngModelChange)="onSearch()"
+        (ngModelChange)="onDateRangeChange()"
         placeholder="Calendar"
         dateFormat="dd-mm-yy">
           <ng-template pTemplate="date" let-date>

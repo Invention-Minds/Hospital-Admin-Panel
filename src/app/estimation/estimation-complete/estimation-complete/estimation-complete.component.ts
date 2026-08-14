@@ -52,9 +52,9 @@ export class EstimationCompleteComponent {
 
     this.fetchPendingEstimations();
   }
-  fetchPendingEstimations(): void {
+  fetchPendingEstimations(fromDate?: string, toDate?: string): void {
     this.isLoading = true
-    this.estimationService.getAllEstimation().subscribe({
+    this.estimationService.getAllEstimation(fromDate, toDate).subscribe({
       next: (estimation: any[]) => {
         console.log(estimation)
         // Process the services when the API call is successful
@@ -68,6 +68,7 @@ export class EstimationCompleteComponent {
           return dateB.getTime() - dateA.getTime();
         });
         this.filteredEstimations = [...this.pendingEstimations];
+        this.onSearch();
         console.log('Services processed successfully.');
       },
       error: (err) => {
@@ -131,30 +132,21 @@ export class EstimationCompleteComponent {
 
       }
 
-      // Filter by date range
+      // Filter by date range — match surgery date OR raised date, mirroring the
+      // server-side range filter so unscheduled estimations stay visible.
       if (this.selectedDateRange && this.selectedDateRange.length) {
-        const serviceDate = new Date(service.estimatedDate);
         const startDate = new Date(this.selectedDateRange[0]);
-        const endDate = this.selectedDateRange[1]
-          ? new Date(this.selectedDateRange[1])
-          : startDate; // Use the same date for both start and end if it's a single date
+        startDate.setHours(0, 0, 0, 0);
+        const endDate = new Date(this.selectedDateRange[1] || this.selectedDateRange[0]);
+        endDate.setHours(23, 59, 59, 999);
 
-        // Normalize endDate to include the full day
-        const normalizedEndDate = new Date(endDate);
-        normalizedEndDate.setHours(23, 59, 59, 999);
+        const inRange = (value: any) => {
+          if (!value) return false;
+          const d = new Date(value);
+          return !isNaN(d.getTime()) && d >= startDate && d <= endDate;
+        };
 
-        if (startDate.getTime() === normalizedEndDate.getTime()) {
-          // Single date selected
-          matches =
-            matches &&
-            serviceDate.toDateString() === startDate.toDateString(); // Match only the date part
-        } else {
-          // Date range selected
-          matches =
-            matches &&
-            serviceDate >= startDate &&
-            serviceDate <= normalizedEndDate; // Match within the range
-        }
+        matches = matches && (inRange(service.estimatedDate) || inRange(service.estimationCreatedTime));
       }
 
       // Filter by specific date
@@ -170,9 +162,32 @@ export class EstimationCompleteComponent {
 
     });
   }
+  /** Format a picker date as YYYY-MM-DD in local time (toISOString() would shift the day in IST). */
+  private toApiDate(date: Date): string {
+    const d = new Date(date);
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return d.getFullYear() + '-' + month + '-' + day;
+  }
+
+  /**
+   * Date range picked → refetch from the server, so estimations outside the
+   * default window are reachable. Range cleared → refetch the default window.
+   */
+  onDateRangeChange(): void {
+    const from = this.selectedDateRange && this.selectedDateRange[0];
+    const to = this.selectedDateRange && this.selectedDateRange[1];
+    if (from && to) {
+      this.fetchPendingEstimations(this.toApiDate(from), this.toApiDate(to));
+    } else if (!from && !to) {
+      this.fetchPendingEstimations();
+    } else {
+      this.onSearch();
+    }
+  }
   refresh() {
     this.selectedDateRange = []
-    this.filteredEstimations = [...this.pendingEstimations]
+    this.fetchPendingEstimations()
   }
   downloadData(data: any): void {
     this.exportToExcel(data, 'Estimation-Completed-Summary');

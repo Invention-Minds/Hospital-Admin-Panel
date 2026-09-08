@@ -127,6 +127,9 @@
       </label>
       <div class="ins-sign-box">
         <span class="ins-signed-tag" *ngIf="draft.doctorSignatureId">✓ Signed</span>
+        <span class="ins-resign-tag" *ngIf="priorDoctorSigner && !draft.doctorSignatureId">
+          Previously signed by {{ priorDoctorSigner }} — re-sign required
+        </span>
         <button type="button" class="ins-btn-link" *ngIf="!draft.doctorSignatureId && !showDoctorSign"
                 (click)="showDoctorSign = true" [disabled]="!draft.doctorName.trim()">
           + e-sign
@@ -149,6 +152,9 @@
       </label>
       <div class="ins-sign-box">
         <span class="ins-signed-tag" *ngIf="draft.nurseSignatureId">✓ Signed</span>
+        <span class="ins-resign-tag" *ngIf="priorNurseSigner && !draft.nurseSignatureId">
+          Previously signed by {{ priorNurseSigner }} — re-sign required
+        </span>
         <button type="button" class="ins-btn-link" *ngIf="!draft.nurseSignatureId && !showNurseSign"
                 (click)="showNurseSign = true" [disabled]="!draft.nurseName.trim()">
           + e-sign

@@ -65,9 +65,9 @@ export class EstimationOverdueComponent {
 
 this.fetchPendingEstimations();
   }
-  fetchPendingEstimations(fromDate?: string, toDate?: string): void {
+  fetchPendingEstimations(fromDate?: string, toDate?: string, search?: string): void {
     this.isLoading = true
-    this.estimationService.getAllEstimation(fromDate, toDate).subscribe({
+    this.estimationService.getAllEstimation(fromDate, toDate, search).subscribe({
       next: (estimation: any[]) => {
         console.log(estimation)
         
@@ -161,6 +161,8 @@ this.fetchPendingEstimations();
       
     });
   }
+  private searchDebounce: any;
+
   /** Format a picker date as YYYY-MM-DD in local time (toISOString() would shift the day in IST). */
   private toApiDate(date: Date): string {
     const d = new Date(date);
@@ -176,13 +178,32 @@ this.fetchPendingEstimations();
   onDateRangeChange(): void {
     const from = this.selectedDateRange && this.selectedDateRange[0];
     const to = this.selectedDateRange && this.selectedDateRange[1];
+    const term = (this.searchValue || '').trim() || undefined;
     if (from && to) {
-      this.fetchPendingEstimations(this.toApiDate(from), this.toApiDate(to));
+      this.fetchPendingEstimations(this.toApiDate(from), this.toApiDate(to), term);
     } else if (!from && !to) {
-      this.fetchPendingEstimations();
+      this.fetchPendingEstimations(undefined, undefined, term);
     } else {
       this.onSearch();
     }
+  }
+
+  /**
+   * Search runs on the server so estimations outside the default window are found.
+   * Debounced to avoid a request per keystroke; onSearch() then refines the result
+   * locally by the selected "Search By" field.
+   */
+  onSearchInput(): void {
+    clearTimeout(this.searchDebounce);
+    this.searchDebounce = setTimeout(() => {
+      const from = this.selectedDateRange && this.selectedDateRange[0];
+      const to = this.selectedDateRange && this.selectedDateRange[1];
+      this.fetchPendingEstimations(
+        from && to ? this.toApiDate(from) : undefined,
+        from && to ? this.toApiDate(to) : undefined,
+        (this.searchValue || '').trim() || undefined
+      );
+    }, 400);
   }
   refresh() {
     this.selectedDateRange = []
@@ -196,6 +217,7 @@ this.fetchPendingEstimations();
   onClear() {
     this.searchValue = '';
     this.selectedSearchOption = this.searchOptions[0];
+    this.onSearchInput();
     // this.selectedDateRange = [];
   }
 

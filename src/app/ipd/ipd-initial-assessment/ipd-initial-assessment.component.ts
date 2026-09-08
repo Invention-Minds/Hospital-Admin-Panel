@@ -6,6 +6,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { ESignComponent } from '../../shared/ui/e-sign/e-sign.component';
+import { AuthServiceService } from '../../services/auth/auth-service.service';
 import {
   IpdInitialAssessmentService,
   IpdInitialAssessment,
@@ -53,15 +54,22 @@ export class IpdInitialAssessmentComponent implements OnInit, OnDestroy {
   form: UpsertAssessmentPayload = this.blank();
   serverRow: IpdInitialAssessment | null = null;
 
+  /** Name bound to both sign pads. Defaults to the logged-in user; editable so
+   *  a different clinician can sign at a shared terminal. The e-sign component
+   *  rejects an empty name, so this must never be blank. */
+  signerName = '';
+
   private destroy$ = new Subject<void>();
 
   constructor(
     private route: ActivatedRoute,
     private svc: IpdInitialAssessmentService,
+    private auth: AuthServiceService,
   ) {}
 
   ngOnInit(): void {
     this.admissionId = this.route.snapshot.paramMap.get('admissionId') ?? '';
+    this.signerName = this.auth.getUsername() ?? '';
     if (this.admissionId) this.load();
   }
   ngOnDestroy(): void { this.destroy$.next(); this.destroy$.complete(); }
@@ -121,7 +129,8 @@ export class IpdInitialAssessmentComponent implements OnInit, OnDestroy {
   }
 
   onFilledSigned(sig: SignatureCreateResponse): void {
-    this.svc.signFilled(this.admissionId, { signatureId: sig.id })
+    const signerName = this.signerName.trim() || undefined;
+    this.svc.signFilled(this.admissionId, { signatureId: sig.id, signerName })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (row) => { this.serverRow = row; this.successMessage = 'Filler signed.'; this.load(); },
@@ -129,7 +138,8 @@ export class IpdInitialAssessmentComponent implements OnInit, OnDestroy {
       });
   }
   onConsultantSigned(sig: SignatureCreateResponse): void {
-    this.svc.signConsultant(this.admissionId, { signatureId: sig.id })
+    const consultantName = this.signerName.trim() || undefined;
+    this.svc.signConsultant(this.admissionId, { signatureId: sig.id, consultantName })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (row) => { this.serverRow = row; this.successMessage = 'Consultant co-signed.'; this.load(); },

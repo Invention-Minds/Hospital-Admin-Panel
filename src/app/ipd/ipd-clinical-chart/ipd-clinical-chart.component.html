@@ -2,9 +2,11 @@
   <div class="cc-head">
     <h2 class="cc-title">Clinical Chart</h2>
     <div class="cc-toolbar">
-      <button type="button" class="cc-btn" (click)="shiftToday(-1)">‹ Previous week</button>
-      <label>From <input type="date" [(ngModel)]="from" (change)="load()" /></label>
-      <label>To <input type="date" [(ngModel)]="to" (change)="load()" /></label>
+      <button type="button" class="cc-btn" (click)="shiftToday(-1)"
+              [disabled]="atAdmissionStart"
+              [title]="atAdmissionStart ? 'The chart starts on the admission date' : ''">‹ Previous week</button>
+      <label>From <input type="date" [(ngModel)]="from" (change)="load()" [attr.min]="admissionDate" /></label>
+      <label>To <input type="date" [(ngModel)]="to" (change)="load()" [attr.min]="admissionDate" /></label>
       <button type="button" class="cc-btn" (click)="shiftToday(1)">Next week ›</button>
       <button type="button" class="cc-btn" (click)="load()">Refresh</button>
     </div>

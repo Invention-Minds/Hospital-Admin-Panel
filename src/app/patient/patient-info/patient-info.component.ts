@@ -2,6 +2,15 @@
 import { Component, OnInit, Input, EventEmitter, Output, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
+import { groupAndSort } from '../../shared/ui/template-form-renderer/template-form-renderer.component';
+import {
+  buildOpdAssessmentContent,
+  buildInvestigationBlocks,
+  buildPrescriptionBlocks,
+  plainNoteSection,
+  OPD_ASSESSMENT_PDF_STYLES,
+} from '../../shared/pdf/opd-assessment-pdf';
+import { getJmrhPdfBranding } from '../../shared/pdf/jmrh-letterhead';
 
 import pdfMake from 'pdfmake/build/pdfmake';
 import pdfFonts from 'pdfmake/build/vfs_fonts';
@@ -41,6 +50,16 @@ export class PatientInfoComponent implements OnInit {
   investigationOrders: any[] = [];
   selectedInvestigationOrders: any[] = [];
 
+  // OPD assessments are the note the doctor writes for every visit now that
+  // the DoctorNote screen is retired; the visit summary falls back to these
+  // when a visit predates / lacks a doctor note.
+  opdAssessments: any[] = [];
+  selectedAssessment: any = null;
+
+  // Ophthalmology eye record for the selected visit (eye department only).
+  ophthalmologyPrescriptions: any[] = [];
+  selectedEyeRecord: any = null;
+
   goBack() {
     this.back.emit();
   }
@@ -58,7 +77,10 @@ export class PatientInfoComponent implements OnInit {
 
   fetchPatientData(prn: string) {
     this.patientService.getDetailsByPRN(prn.toString()).subscribe((res: any) => {
-      const { appointments, doctorNotes, patientData, transfusionData, prescriptionData, historyData, investigationOrders} = res;
+      const { appointments, doctorNotes, patientData, transfusionData, prescriptionData, historyData, investigationOrders,
+              opdAssessments, ophthalmologyPrescriptions } = res;
+      this.opdAssessments = opdAssessments ?? [];
+      this.ophthalmologyPrescriptions = ophthalmologyPrescriptions ?? [];
       this.patientData = patientData; // assuming first for top display
       this.bloodGroupAppointments = appointments
       this.prescription = prescriptionData
@@ -91,7 +113,14 @@ export class PatientInfoComponent implements OnInit {
     });
   }
 
-  toggleView(view: string, date: string) {
+  /**
+   * @param apptId  The visit's appointment id. Required to disambiguate — a
+   *   patient can have several appointments on ONE date (e.g. Cardiology and
+   *   Ophthalmology the same morning), and matching on the date string alone
+   *   silently picks the first one, so the wrong visit's assessment / eye
+   *   record would show.
+   */
+  toggleView(view: string, date: string, apptId?: number | null) {
     this.activeView = view;
     // Filter by selected date
     this.selectedVisit = this.doctorNotes.find(d => d.date === date) || {};
@@ -105,8 +134,350 @@ export class PatientInfoComponent implements OnInit {
     this.selectedInvestigationOrders = this.investigationOrders.filter((appt: any) => appt.date === date);
     this.selectedHistoryNotes = this.historyNotes.find(d => d.date === date) || {};
 
+    this.resolveVisitRecords(date, apptId);
+
     // console.log(this.selectedService)
     // Add logic here to get selectedServices and selectedVitals by date
+  }
+
+  /**
+   * Resolve the OPD assessment + ophthalmology record for one visit.
+   *
+   * Keyed on appointmentId, NOT the date: a patient can have two appointments
+   * on the same day in different departments, and a date-only match returns
+   * whichever came first — printing the eye record against the wrong visit, or
+   * dropping it entirely. The date fallback only applies to legacy rows that
+   * were saved without an appointmentId.
+   */
+  private resolveVisitRecords(date: string, apptId?: number | null): void {
+    const id = apptId ?? this.opdDates.find((v: any) => v.date === date)?.notes?.id ?? null;
+
+    this.selectedAssessment =
+      (id != null && this.opdAssessments.find((a: any) => a.appointmentId === id))
+      || (id == null ? this.opdAssessments.find((a: any) => a.date === date) : null)
+      || this.opdAssessments.find((a: any) => a.date === date && a.appointmentId == null)
+      || null;
+
+    this.selectedEyeRecord =
+      (id != null && this.ophthalmologyPrescriptions.find((p: any) => p.appointmentId === id))
+      || null;
+  }
+
+  /** This visit has an OPD assessment — the form doctors now use. */
+  get showAssessmentInsteadOfNote(): boolean {
+    return !!this.selectedAssessment;
+  }
+
+  /**
+   * The visit also carries a legacy DoctorNote (recorded before that screen was
+   * retired). Shown underneath the assessment so nothing is lost for visits
+   * captured during the changeover.
+   */
+  get hasLegacyNote(): boolean {
+    const note = this.selectedVisit;
+    return !!note && Object.keys(note).some(
+      (k) => k !== 'date' && note[k] !== null && note[k] !== undefined && String(note[k]).trim() !== ''
+    );
+  }
+
+  /**
+   * Everything else the OPD assessment captures, so the visit view reflects
+   * the live form rather than the retired DoctorNote screen. Blank rows drop.
+   */
+  assessmentDetailBlocks(): { title: string; rows: { label: string; value: string }[] }[] {
+    const a = this.selectedAssessment;
+    if (!a) return [];
+    const yn = (v: any) => (v === true ? 'Yes' : v === false ? 'No' : '');
+    const pick = (rows: [string, any][]) =>
+      rows
+        .map(([label, value]) => ({
+          label,
+          value: value === null || value === undefined ? '' : String(value).trim(),
+        }))
+        .filter((r) => r.value !== '');
+
+    // Vitals are deliberately NOT here — this visit already has its own
+    // Vitals Details view, and the printed summary opens with a vitals table.
+    return [
+      {
+        title: 'Nutritional Assessment',
+        rows: pick([
+          ['Oral diet', a.oralDiet], ['Enteral feed', a.enteralFeed],
+          ['NPO', yn(a.npo)], ['Specify', a.specify], ['Allergies', a.allergies],
+        ]),
+      },
+      {
+        title: 'Pain & Screening',
+        rows: pick([
+          ['Pain score', a.painScore],
+          ['Other screening required', yn(a.screeningReq)],
+          ['Counselling on implants', yn(a.implantCounsel)],
+        ]),
+      },
+      {
+        title: 'Recorded By',
+        rows: pick([
+          ['Doctor', a.doctorName], ['KMC No', a.kmcNo],
+          ['Staff', a.staffName], ['Staff Emp ID', a.staffEmpId],
+          ['Assessment time', a.assessmentTime],
+        ]),
+      },
+    ].filter((b) => b.rows.length > 0);
+  }
+
+  /**
+   * "Print Full OPD Summary" for a visit that has an OPD assessment — same
+   * body as the OPD assessment form's own print, built by the shared builder
+   * so the two can't drift. Fed from the SAVED row rather than live form
+   * state, so anything not persisted (e.g. the doctor's signature image) is
+   * simply absent and its block drops.
+   */
+  private async buildAssessmentStyleSummary(): Promise<any> {
+    const a = this.selectedAssessment ?? {};
+    // Same JMRH letterhead the OPD assessment print uses.
+    const brand = await getJmrhPdfBranding();
+
+    const content = buildOpdAssessmentContent({
+      d: {
+        patientName: a.name || this.patientData?.patientName,
+        age: a.age, gender: a.gender, uhid: a.uhId,
+        height: a.height, weight: a.weight, date: a.date,
+        consultant: a.consultant, department: a.department,
+        assessmentTime: a.assessmentTime,
+
+        hr: a.hr, rr: a.rr, pulse: a.pulse, bp: a.bp, temp: a.temp, spo2: a.spo2,
+
+        dietType: a.oralDiet, enteralFeed: a.enteralFeed,
+        npo: a.npo, allergies: a.allergies,
+        painScore: a.painScore,
+        otherScreening: a.screeningReq, counsellingImplants: a.implantCounsel,
+
+        history: a.history, examination: a.examination,
+        investigation: a.investigation, treatmentPlan: a.treatmentPlan,
+
+        staffName: a.staffName, staffEmpId: a.staffEmpId,
+        doctorName: a.doctorName, kmcNo: a.kmcNo,
+        doctorSign: a.doctorSealSign,
+      },
+      templatedBlocks: this.templatedPdfBlocks(),
+      eyeBlocks: this.eyeRecordPdfBlocks(),
+      investigationBlocks: this.investigationPdfBlocks(),
+      prescriptionBlocks: this.prescriptionPdfBlocks(),
+      noteSection: plainNoteSection,
+    });
+
+    return {
+      pageSize: 'A4',
+      pageMargins: brand.pageMargins,
+      background: brand.background,
+      footer: brand.footer,
+      content,
+      styles: OPD_ASSESSMENT_PDF_STYLES,
+    };
+  }
+
+  /**
+   * Lab / radiology ordered on this visit, reshaped into the same
+   * `labByDept` / `radiologyNames` form the OPD order grid emits so the saved
+   * summary and the live assessment print render an identical section.
+   */
+  private investigationPdfBlocks(): any[] {
+    const orders = this.selectedInvestigationOrders ?? [];
+    if (!orders.length) return [];
+
+    const byDept = new Map<string, string[]>();
+    const radiologyNames: string[] = [];
+    const remarks: string[] = [];
+
+    for (const o of orders) {
+      for (const t of o.labTests ?? []) {
+        const dept = t.department || t.category || 'Laboratory';
+        if (!byDept.has(dept)) byDept.set(dept, []);
+        byDept.get(dept)!.push(t.testName || t.name || '-');
+      }
+      for (const r of o.radiologyTests ?? []) {
+        radiologyNames.push(r.testName || r.name || '-');
+      }
+      if (o.remarks?.trim()) remarks.push(o.remarks.trim());
+    }
+
+    return buildInvestigationBlocks({
+      labByDept: Array.from(byDept.entries()).map(([department, tests]) => ({ department, tests })),
+      radiologyNames,
+      radiology: orders[0] ?? {},
+      remarks: remarks.join(' · '),
+    });
+  }
+
+  /** Template fields (grouped, ordered) as pdfMake blocks. */
+  private templatedPdfBlocks(): any[] {
+    const blocks: any[] = [];
+    for (const group of this.assessmentTemplatedGroups()) {
+      if (group.group) {
+        blocks.push({ text: group.group, style: 'sectionHeader' });
+      }
+      for (const row of group.rows) {
+        blocks.push({ text: `${row.label}: ${row.value}`, margin: [0, 0, 0, 4] });
+      }
+    }
+    return blocks.length ? [...blocks, { text: '', margin: [0, 0, 0, 10] }] : [];
+  }
+
+  /** Drugs prescribed on this visit — same table as the assessment print. */
+  private prescriptionPdfBlocks(): any[] {
+    const tablets = (this.selectedPrescription ?? []).flatMap((p: any) => p.tablets ?? []);
+    return buildPrescriptionBlocks(tablets);
+  }
+
+  /** OPD assessment as pdfMake blocks — used when a visit has no doctor note. */
+  private assessmentPdfBlocks(): any[] {
+    const a = this.selectedAssessment;
+    if (!a) return [];
+    const blocks: any[] = [];
+    for (const row of this.assessmentTemplatedRows()) {
+      blocks.push({ text: row.label, style: 'section' });
+      blocks.push({ text: row.value, margin: [0, 0, 0, 10] });
+    }
+    const fixed: [string, string][] = [
+      ['History', a.history],
+      ['Examination', a.examination],
+      ['Investigation', a.investigation],
+      ['Treatment Plan', a.treatmentPlan],
+    ];
+    for (const [label, value] of fixed) {
+      if (value && String(value).trim() !== '') {
+        blocks.push({ text: label, style: 'section' });
+        blocks.push({ text: String(value), margin: [0, 0, 0, 10] });
+      }
+    }
+
+    // Nutrition / pain / screening / who recorded it — the same blocks the
+    // on-screen view shows. Without these a note carrying only nutritional
+    // data printed an empty "OPD Notes:" heading.
+    for (const block of this.assessmentDetailBlocks()) {
+      blocks.push({ text: block.title, style: 'section', decoration: 'underline', margin: [0, 6, 0, 4] });
+      for (const row of block.rows) {
+        blocks.push({ text: row.label, style: 'section' });
+        blocks.push({ text: row.value, margin: [0, 0, 0, 10] });
+      }
+    }
+
+    return blocks;
+  }
+
+  /** Ophthalmology work-up for the selected visit as pdfMake blocks. */
+  private eyeRecordPdfBlocks(): any[] {
+    const e = this.selectedEyeRecord;
+    if (!e) return [];
+
+    const table = (title: string, rows: { label: string; right: string; left: string }[]) => ([
+      { text: title, style: 'section' },
+      {
+        table: {
+          widths: ['*', '*', '*'],
+          body: [
+            ['', 'Right', 'Left'],
+            ...rows.map((r) => [r.label, r.right, r.left]),
+          ],
+        },
+        layout: 'lightHorizontalLines',
+        margin: [0, 0, 0, 10],
+      },
+    ]);
+
+    const provenance = e.recordedBy
+      ? `Recorded by ${e.recordedBy}${e.verifiedBy ? ` · verified by ${e.verifiedBy}` : ' · NOT VERIFIED by the doctor'}`
+      : '';
+
+    return [
+      { text: 'Ophthalmology:', style: 'section', decoration: 'underline' },
+      ...(provenance ? [{ text: provenance, margin: [0, 0, 0, 8], italics: true }] : []),
+      ...table('Visual Acuity', this.eyeVaTable()),
+      ...table('Auto Refraction — Before Dilation', this.eyeTable('ar')),
+      ...(this.hasDilatedAr ? table('Auto Refraction — After Dilation', this.eyeTable('arDil')) : []),
+      ...table('Subjective Refraction', this.eyeTable('sr')),
+      { text: 'IOP / NCT', style: 'section' },
+      { text: `Right: ${this.eyeVal('iopR')} · Left: ${this.eyeVal('iopL')}`, margin: [0, 0, 0, 10] },
+      ...(e.diagnosis ? [{ text: 'Eye Diagnosis', style: 'section' }, { text: e.diagnosis, margin: [0, 0, 0, 10] }] : []),
+      ...(e.advice ? [{ text: 'Eye Advice', style: 'section' }, { text: e.advice, margin: [0, 0, 0, 10] }] : []),
+    ];
+  }
+
+  /** One eye-record cell, blank-safe. */
+  private eyeVal(key: string): string {
+    const v = this.selectedEyeRecord?.[key];
+    return v === null || v === undefined || v === '' ? '-' : String(v);
+  }
+
+  /**
+   * Rows for a refraction table (`ar`, `arDil`, `sr`) — measurement per row,
+   * eye per column, same shape as the ophthalmology form.
+   */
+  eyeTable(prefix: string): { label: string; right: string; left: string }[] {
+    return [
+      { label: 'SPH',  right: this.eyeVal(prefix + 'SphR'),  left: this.eyeVal(prefix + 'SphL') },
+      { label: 'CYL',  right: this.eyeVal(prefix + 'CylR'),  left: this.eyeVal(prefix + 'CylL') },
+      { label: 'AXIS', right: this.eyeVal(prefix + 'AxisR'), left: this.eyeVal(prefix + 'AxisL') },
+      { label: 'V/A',  right: this.eyeVal(prefix + 'VAR'),   left: this.eyeVal(prefix + 'VAL') },
+    ];
+  }
+
+  /** Visual-acuity rows (unaided / with glasses / near). */
+  eyeVaTable(): { label: string; right: string; left: string }[] {
+    return [
+      { label: 'Unaided',      right: this.eyeVal('uaVr'),   left: this.eyeVal('uaVl') },
+      { label: 'With Glasses', right: this.eyeVal('glVr'),   left: this.eyeVal('glVl') },
+      { label: 'Near',         right: this.eyeVal('nearVr'), left: this.eyeVal('nearVl') },
+    ];
+  }
+
+  /** True when a dilated AR reading was recorded for this visit. */
+  get hasDilatedAr(): boolean {
+    return !!(this.selectedEyeRecord?.arDilSphR || this.selectedEyeRecord?.arDilSphL);
+  }
+
+  /**
+   * The doctor's template fields as snapshotted on this assessment, under
+   * their group headings and in the template's own order — the same
+   * `groupAndSort` the form and the OPD print use, so all three agree.
+   */
+  assessmentTemplatedGroups(): { group: string; rows: { label: string; value: string }[] }[] {
+    const raw = this.selectedAssessment?.templatedValues;
+    if (!raw) return [];
+    let parsed: any;
+    try {
+      parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+    } catch {
+      return [];
+    }
+    const schema: any[] = parsed?._schema ?? [];
+    const values: Record<string, unknown> = parsed?._values ?? {};
+
+    return groupAndSort(schema)
+      .map((block) => ({
+        group: block.group,
+        rows: block.fields
+          .map((f: any) => ({
+            label: f.label ?? f.key,
+            value: this.formatTemplatedValue(values[f.key]),
+          }))
+          .filter((r) => r.value !== ''),
+      }))
+      .filter((b) => b.rows.length > 0);
+  }
+
+  /** Flat list of the same rows — used by the printed summary. */
+  assessmentTemplatedRows(): { label: string; value: string }[] {
+    return this.assessmentTemplatedGroups().flatMap((b) => b.rows);
+  }
+
+  private formatTemplatedValue(v: unknown): string {
+    if (v === null || v === undefined || v === '') return '';
+    if (Array.isArray(v)) return v.join(', ');
+    if (typeof v === 'boolean') return v ? 'Yes' : 'No';
+    const s = String(v);
+    // Hand-written canvases are data-URLs — not printable as text here.
+    return s.startsWith('data:image') ? '(hand-written)' : s;
   }
   expandedVisitIndex: number | null = null;
 
@@ -219,7 +590,8 @@ export class PatientInfoComponent implements OnInit {
       }
     }, 100); // Delay by 100ms (can increase to 200ms if needed)
   }
-  printVisitSummary(date: any) {
+  /** @param apptId disambiguates same-date visits — see toggleView. */
+  printVisitSummary(date: any, apptId?: number | null) {
     this.selectedVisit = this.doctorNotes.find(d => d.date === date) || {};
     this.selectedVitals = this.bloodGroupAppointments.find((appt: any) => appt.date === date);
     this.selectedService = this.serviceAppointments.filter((appt: any) => appt.appointmentDate === date);
@@ -227,16 +599,25 @@ export class PatientInfoComponent implements OnInit {
     this.selectedTransfusion = this.transfusionAppointments.filter((appt: any) => appt.appointmentDate === date);
     this.selectedHistoryNotes = this.historyNotes.find(d => d.date === date) || {};
     this.selectedService = this.investigationOrders.filter((appt: any) => appt.date === date);
-    setTimeout(() => {
-      const docDefinition = this.generatePdfWithPatient(
-        this.patientData,
-        this.selectedVitals,
-        this.selectedVisit,
-        this.selectedService,
-        this.selectedHistoryNotes,
-        this.selectedPrescription,
-        this.selectedTransfusion
-      );
+
+    // Resolve this visit's assessment + eye record so the print includes them.
+    this.resolveVisitRecords(date, apptId);
+
+    setTimeout(async () => {
+      // A visit with an OPD assessment prints exactly like the OPD assessment
+      // form (shared builder + same letterhead). Older visits — doctor-note
+      // only — keep the legacy layout, otherwise they'd come out blank.
+      const docDefinition = this.selectedAssessment
+        ? await this.buildAssessmentStyleSummary()
+        : this.generatePdfWithPatient(
+          this.patientData,
+          this.selectedVitals,
+          this.selectedVisit,
+          this.selectedService,
+          this.selectedHistoryNotes,
+          this.selectedPrescription,
+          this.selectedTransfusion
+        );
       pdfMake.createPdf(docDefinition).open(); // or .print(), .download()
     }, 100);
 
@@ -390,29 +771,39 @@ export class PatientInfoComponent implements OnInit {
           style: 'section',
           decoration: 'underline',
         },
-        { text: 'Chief Complaints', style: 'section' },
-        { text: visit?.chiefComplaints || '-', margin: [0, 0, 0, 10] },
+        // Visits recorded since the DoctorNote screen was retired have no
+        // legacy note — print the OPD assessment for those instead of eight
+        // headings each followed by a dash.
+        ...(this.showAssessmentInsteadOfNote
+          ? this.assessmentPdfBlocks()
+          : [
+            { text: 'Chief Complaints', style: 'section' },
+            { text: visit?.chiefComplaints || '-', margin: [0, 0, 0, 10] },
 
-        { text: 'Diagnosis', style: 'section' },
-        { text: visit?.diagnosis || '-', margin: [0, 0, 0, 10] },
+            { text: 'Diagnosis', style: 'section' },
+            { text: visit?.diagnosis || '-', margin: [0, 0, 0, 10] },
 
-        { text: 'General Examination', style: 'section' },
-        { text: visit?.generalExamination || '-', margin: [0, 0, 0, 10] },
+            { text: 'General Examination', style: 'section' },
+            { text: visit?.generalExamination || '-', margin: [0, 0, 0, 10] },
 
-        { text: 'Clinical Notes', style: 'section' },
-        { text: visit?.clinicalNotes || '-', margin: [0, 0, 0, 10] },
+            { text: 'Clinical Notes', style: 'section' },
+            { text: visit?.clinicalNotes || '-', margin: [0, 0, 0, 10] },
 
-        { text: 'CVS', style: 'section' },
-        { text: visit?.cvs || '-', margin: [0, 0, 0, 10] },
+            { text: 'CVS', style: 'section' },
+            { text: visit?.cvs || '-', margin: [0, 0, 0, 10] },
 
-        { text: 'RS', style: 'section' },
-        { text: visit?.rs || '-', margin: [0, 0, 0, 10] },
+            { text: 'RS', style: 'section' },
+            { text: visit?.rs || '-', margin: [0, 0, 0, 10] },
 
-        { text: 'CNS', style: 'section' },
-        { text: visit?.cns || '-', margin: [0, 0, 0, 10] },
+            { text: 'CNS', style: 'section' },
+            { text: visit?.cns || '-', margin: [0, 0, 0, 10] },
 
-        { text: 'P/A', style: 'section' },
-        { text: visit?.pa || '-', margin: [0, 0, 0, 10] },
+            { text: 'P/A', style: 'section' },
+            { text: visit?.pa || '-', margin: [0, 0, 0, 10] },
+          ]),
+
+        // Ophthalmology work-up for this visit, when there is one.
+        ...this.eyeRecordPdfBlocks(),
 
 
         {

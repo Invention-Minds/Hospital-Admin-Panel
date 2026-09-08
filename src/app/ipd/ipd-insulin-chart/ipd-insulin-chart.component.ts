@@ -76,6 +76,13 @@ export class IpdInsulinChartComponent implements OnInit, OnDestroy {
   showDoctorSign = false;
   showNurseSign = false;
 
+  /** Name on the signature the row carried when the edit modal was opened.
+   *  Editing a signed row voids that attestation — the prior signature is
+   *  dropped from the draft and a fresh e-sign is required before Save, so the
+   *  stored signature always attests to the values actually persisted. */
+  priorDoctorSigner: string | null = null;
+  priorNurseSigner: string | null = null;
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -172,22 +179,28 @@ export class IpdInsulinChartComponent implements OnInit, OnDestroy {
     this.draft = this.blank();
     this.showDoctorSign = false;
     this.showNurseSign = false;
+    this.priorDoctorSigner = null;
+    this.priorNurseSigner = null;
     this.errorMessage = '';
     this.modalOpen = true;
   }
 
   openEdit(r: InsulinReading): void {
     this.editingId = r.id;
+    // Deliberately do NOT carry the existing signature ids into the draft — the
+    // old signature attests to the old values. Whoever edits must re-sign.
     this.draft = {
       recordedAt: r.recordedAt ? this.toLocalInput(r.recordedAt) : this.nowLocalInput(),
       bloodGlucoseMgDl: r.bloodGlucoseMgDl,
       insulinOrder: r.insulinOrder ?? '',
       doctorName: r.doctorName ?? '',
-      doctorSignatureId: r.doctorSignatureId,
+      doctorSignatureId: null,
       nurseName: r.nurseName ?? '',
-      nurseSignatureId: r.nurseSignatureId,
+      nurseSignatureId: null,
       remarks: r.remarks ?? '',
     };
+    this.priorDoctorSigner = r.doctorSignatureId ? (r.doctorName ?? '—') : null;
+    this.priorNurseSigner = r.nurseSignatureId ? (r.nurseName ?? '—') : null;
     this.showDoctorSign = false;
     this.showNurseSign = false;
     this.errorMessage = '';
@@ -210,6 +223,16 @@ export class IpdInsulinChartComponent implements OnInit, OnDestroy {
     this.errorMessage = '';
     if (this.draft.bloodGlucoseMgDl == null && !this.draft.insulinOrder.trim()) {
       this.errorMessage = 'Enter at least a blood glucose value or an insulin order.';
+      return;
+    }
+    // A row that arrived signed cannot be saved back unsigned — the edit voided
+    // the original attestation, so a fresh one is mandatory.
+    if (this.priorDoctorSigner && !this.draft.doctorSignatureId) {
+      this.errorMessage = 'This reading was signed by the doctor. Re-sign the doctor e-signature to save your changes.';
+      return;
+    }
+    if (this.priorNurseSigner && !this.draft.nurseSignatureId) {
+      this.errorMessage = 'This reading was signed by the nurse. Re-sign the nurse e-signature to save your changes.';
       return;
     }
     const body: InsulinReadingBody = {

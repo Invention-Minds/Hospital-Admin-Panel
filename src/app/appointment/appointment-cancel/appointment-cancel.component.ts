@@ -3,6 +3,12 @@ import { AppointmentConfirmService } from '../../services/appointment-confirm.se
 import { app } from '../../../../server';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { AlertService } from '../../services/alert.service';
+import {
+  AppointmentHistoryService,
+  actorLabel,
+  istDateTime,
+  slotText,
+} from '../../services/appointment-history.service';
 import * as FileSaver from 'file-saver';
 import { stat } from 'node:fs';
 import * as XLSX from 'xlsx';
@@ -66,10 +72,40 @@ export class AppointmentCancelComponent {
   itemsPerPage = 10;
   sortColumn: keyof Appointment | undefined = undefined;
   sortDirection: string = 'asc';
+  // Appointment lifecycle trail popup (who rescheduled / cancelled, when).
+  showHistoryDialog = false;
+  historyAppointmentId: number | null = null;
 
 
-  constructor(private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private alertSvc: AlertService) {
+  constructor(private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private alertSvc: AlertService, private historyService: AppointmentHistoryService) {
     this.userId = localStorage.getItem('userid')
+  }
+
+  openHistory(appointment: Appointment): void {
+    this.historyAppointmentId = appointment.id ?? null;
+    this.showHistoryDialog = true;
+  }
+
+  closeHistory(): void {
+    this.showHistoryDialog = false;
+    this.historyAppointmentId = null;
+  }
+
+  /**
+   * `cancelledBy` is stamped by the backend lifecycle trail — a username for a
+   * staff cancel, or the cron source for the 3-hour no-show auto-cancel. Rows
+   * cancelled before the trail existed have nothing stamped.
+   */
+  cancelledByLabel(appointment: Appointment): string {
+    const by = appointment['cancelledBy'];
+    if (!by) return '-';
+    if (this.isAutoCancelled(appointment)) return 'Auto (no-show)';
+    return by;
+  }
+
+  isAutoCancelled(appointment: Appointment): boolean {
+    const by = String(appointment['cancelledBy'] ?? '');
+    return by === 'system' || by.startsWith('cron:');
   }
 
   ngOnInit() {
@@ -369,9 +405,22 @@ export class AppointmentCancelComponent {
     this.filteredAppointments = this.filteredList;
     this.currentPage = 1;
   }
-  downloadFilteredData(): void {
-    if (this.filteredServices && this.filteredServices.length > 0) {
-      const selectedFields = this.filteredServices.map((appointment: Appointment) => {
+  async downloadFilteredData(): Promise<void> {
+    // filteredServices is only populated by a search or Clear, so on a fresh
+    // load it's empty and the download used to silently do nothing. Fall back
+    // to the rows actually on screen.
+    const rows: Appointment[] = (this.filteredServices && this.filteredServices.length > 0)
+      ? this.filteredServices
+      : this.filteredAppointments;
+
+    if (rows && rows.length > 0) {
+      // One request for the whole export: who booked / rescheduled / cancelled.
+      const trailById = await this.historyService.getEventSummaries(
+        rows.map((a) => Number(a.id)).filter((id) => !!id)
+      );
+
+      const selectedFields = rows.map((appointment: Appointment) => {
+        const trail = trailById[String(appointment.id)];
         if (appointment.created_at) {
           const createdAt = new Date(appointment?.created_at);
           const indianTime = moment.tz(createdAt, "America/New_York").tz("Asia/Kolkata");
@@ -397,6 +446,22 @@ export class AppointmentCancelComponent {
           'SMS Sent': appointment.messageSent ? 'Yes' : 'No',
           'Status': appointment.status,
           'Appointment Handled By': appointment.user?.username || '-',
+          // --- Lifecycle trail ---------------------------------------------
+          'Booked By': trail ? actorLabel(trail.bookedBy, trail.bookedByType) : '-',
+          'Booked At': istDateTime(trail?.bookedAt ?? null),
+          'Rescheduled (times)': trail?.rescheduleCount ?? appointment['rescheduleCount'] ?? 0,
+          'Last Rescheduled By': trail?.lastRescheduledAt
+            ? actorLabel(trail.lastRescheduledBy, trail.lastRescheduledByType)
+            : '-',
+          'Last Rescheduled At': istDateTime(trail?.lastRescheduledAt ?? null),
+          'Previous Slot': trail
+            ? slotText(trail.previousDate, trail.previousTime, trail.previousDoctorName)
+            : '-',
+          'Cancelled By': trail?.cancelledAt
+            ? actorLabel(trail.cancelledBy, trail.cancelledByType, trail.cancelledBySource)
+            : this.cancelledByLabel(appointment),
+          'Cancelled At': istDateTime(trail?.cancelledAt ?? appointment['cancelledAt'] ?? null),
+          'Cancel Reason': trail?.cancelReason || appointment['cancelReason'] || '-',
         };
 
       });

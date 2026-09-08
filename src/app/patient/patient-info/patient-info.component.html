@@ -38,12 +38,15 @@
                     <div class="visit-title">{{ date.doctorName || 'Doctor not recorded' }} — {{ date.date }}</div>
                 </div>
                 <div class="visit-options" *ngIf="expandedVisitIndex === i">
-                    <div (click)="toggleView('history', date.date)"><img src="patient-arrow.svg"> History</div>
-                    <div (click)="toggleView('notes', date.date)"><img src="patient-arrow.svg"> OPD Notes</div>
-                    <div (click)="toggleView('vitals', date.date)"><img src="patient-arrow.svg"> Vitals Details</div>
-                    <div (click)="toggleView('services', date.date)"><img src="patient-arrow.svg"> Investigation Requisition</div>
-                    <div (click)="toggleView('prescription', date.date)"><img src="patient-arrow.svg"> Prescription</div>
-                    <div (click)="printVisitSummary(date.date)"><img src="patient-arrow.svg">Print Full OPD Summary</div>
+                    <!-- date.notes.id is the appointment id — passed so a patient with
+                         two visits on one date resolves to the right one. -->
+                    <div (click)="toggleView('history', date.date, date.notes?.id)"><img src="patient-arrow.svg"> History</div>
+                    <div (click)="toggleView('notes', date.date, date.notes?.id)"><img src="patient-arrow.svg"> OPD Notes</div>
+                    <div (click)="toggleView('vitals', date.date, date.notes?.id)"><img src="patient-arrow.svg"> Vitals Details</div>
+                    <div (click)="toggleView('services', date.date, date.notes?.id)"><img src="patient-arrow.svg"> Investigation Requisition</div>
+                    <div (click)="toggleView('prescription', date.date, date.notes?.id)"><img src="patient-arrow.svg"> Prescription</div>
+                    <div (click)="toggleView('eye', date.date, date.notes?.id)"><img src="patient-arrow.svg"> Eye Record</div>
+                    <div (click)="printVisitSummary(date.date, date.notes?.id)"><img src="patient-arrow.svg">Print Full OPD Summary</div>
                 </div>
             </div>
         </div>
@@ -59,7 +62,68 @@
     </div>
 
     <div class="main-content">
-        <div class="note-section" *ngIf="activeView === 'notes'">
+        <!-- OPD notes are now written in the OPD assessment form, so a visit
+             recorded after that change has no legacy DoctorNote. Show the
+             assessment instead rather than a page of dashes. -->
+        <div class="note-section" *ngIf="activeView === 'notes' && showAssessmentInsteadOfNote">
+
+            <!-- The doctor's own template, in the template's order and groups. -->
+            <ng-container *ngFor="let block of assessmentTemplatedGroups()">
+                <h3 class="note-group-heading" *ngIf="block.group">{{ block.group }}</h3>
+                <div class="note-block" *ngFor="let row of block.rows">
+                    <h3 class="note-heading">{{ row.label }}</h3>
+                    <p>{{ row.value }}</p>
+                </div>
+            </ng-container>
+
+            <!-- Free-text sections of the assessment (used when no template,
+                 or alongside one). Blank sections are omitted. -->
+            <div class="note-block" *ngIf="selectedAssessment?.history">
+                <h3 class="note-heading">History</h3>
+                <p>{{ selectedAssessment?.history }}</p>
+            </div>
+            <div class="note-block" *ngIf="selectedAssessment?.examination">
+                <h3 class="note-heading">Examination</h3>
+                <p>{{ selectedAssessment?.examination }}</p>
+            </div>
+            <div class="note-block" *ngIf="selectedAssessment?.investigation">
+                <h3 class="note-heading">Investigation</h3>
+                <p>{{ selectedAssessment?.investigation }}</p>
+            </div>
+            <div class="note-block" *ngIf="selectedAssessment?.treatmentPlan">
+                <h3 class="note-heading">Treatment Plan</h3>
+                <p>{{ selectedAssessment?.treatmentPlan }}</p>
+            </div>
+
+            <!-- Everything else the assessment captures: vitals, nutrition,
+                 pain/screening, and who recorded it. -->
+            <ng-container *ngFor="let block of assessmentDetailBlocks()">
+                <h3 class="note-group-heading">{{ block.title }}</h3>
+                <div class="note-block" *ngFor="let row of block.rows">
+                    <h3 class="note-heading">{{ row.label }}</h3>
+                    <p>{{ row.value }}</p>
+                </div>
+            </ng-container>
+
+            <!-- A visit from the changeover may also have an old doctor note. -->
+            <ng-container *ngIf="hasLegacyNote">
+                <h3 class="note-group-heading">Earlier clinical notes (retired screen)</h3>
+                <div class="note-block" *ngIf="selectedVisit?.chiefComplaints">
+                    <h3 class="note-heading">Chief Complaints</h3>
+                    <p>{{ selectedVisit?.chiefComplaints }}</p>
+                </div>
+                <div class="note-block" *ngIf="selectedVisit?.diagnosis">
+                    <h3 class="note-heading">Diagnosis</h3>
+                    <p>{{ selectedVisit?.diagnosis }}</p>
+                </div>
+                <div class="note-block" *ngIf="selectedVisit?.clinicalNotes">
+                    <h3 class="note-heading">Clinical Notes</h3>
+                    <p>{{ selectedVisit?.clinicalNotes }}</p>
+                </div>
+            </ng-container>
+        </div>
+
+        <div class="note-section" *ngIf="activeView === 'notes' && !showAssessmentInsteadOfNote">
             <div class="note-block">
                 <h3 class="note-heading">Chief Complaints</h3>
                 <p>{{ selectedVisit?.chiefComplaints || '-' }}</p>
@@ -96,6 +160,75 @@
             </div>
 
 
+        </div>
+
+        <!-- ─── Ophthalmology eye record for this visit ─── -->
+        <div class="note-section" *ngIf="activeView === 'eye'">
+            <div class="note-block" *ngIf="!selectedEyeRecord">
+                <p>No eye record for this visit.</p>
+            </div>
+
+            <ng-container *ngIf="selectedEyeRecord">
+                <!-- Who recorded the refraction and whether the doctor verified it. -->
+                <div class="note-block" *ngIf="selectedEyeRecord.recordedBy">
+                    <h3 class="note-heading">Work-up</h3>
+                    <p>
+                        Recorded by {{ selectedEyeRecord.recordedBy }}
+                        <ng-container *ngIf="selectedEyeRecord.recordedAt">
+                            on {{ selectedEyeRecord.recordedAt | date:'short' }}
+                        </ng-container>
+                        <ng-container *ngIf="selectedEyeRecord.verifiedBy">
+                            · verified by {{ selectedEyeRecord.verifiedBy }}
+                            <ng-container *ngIf="selectedEyeRecord.verifiedAt">
+                                on {{ selectedEyeRecord.verifiedAt | date:'short' }}
+                            </ng-container>
+                            <ng-container *ngIf="selectedEyeRecord.workupStatus === 'amended'">
+                                (corrected by the doctor)
+                            </ng-container>
+                        </ng-container>
+                        <ng-container *ngIf="!selectedEyeRecord.verifiedBy">
+                            · <strong>not verified by the doctor</strong>
+                        </ng-container>
+                    </p>
+                </div>
+
+                <ng-template #eyeTbl let-rows let-title="title">
+                    <div class="note-block">
+                        <h3 class="note-heading">{{ title }}</h3>
+                        <table class="eye-summary-table">
+                            <tr><th></th><th>Right</th><th>Left</th></tr>
+                            <tr *ngFor="let r of rows">
+                                <td>{{ r.label }}</td><td>{{ r.right }}</td><td>{{ r.left }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </ng-template>
+
+                <ng-container *ngTemplateOutlet="eyeTbl; context: { $implicit: eyeVaTable(), title: 'Visual Acuity' }"></ng-container>
+                <ng-container *ngTemplateOutlet="eyeTbl; context: { $implicit: eyeTable('ar'), title: 'Auto Refraction — Before Dilation' }"></ng-container>
+                <ng-container *ngIf="hasDilatedAr"
+                    [ngTemplateOutlet]="eyeTbl"
+                    [ngTemplateOutletContext]="{ $implicit: eyeTable('arDil'), title: 'Auto Refraction — After Dilation' }"></ng-container>
+                <ng-container *ngTemplateOutlet="eyeTbl; context: { $implicit: eyeTable('sr'), title: 'Subjective Refraction' }"></ng-container>
+
+                <div class="note-block">
+                    <h3 class="note-heading">IOP / NCT</h3>
+                    <p>Right: {{ selectedEyeRecord.iopR || '-' }} · Left: {{ selectedEyeRecord.iopL || '-' }}</p>
+                </div>
+
+                <div class="note-block" *ngIf="selectedEyeRecord.diagnosis">
+                    <h3 class="note-heading">Diagnosis</h3>
+                    <p>{{ selectedEyeRecord.diagnosis }}</p>
+                </div>
+                <div class="note-block" *ngIf="selectedEyeRecord.advice">
+                    <h3 class="note-heading">Advice</h3>
+                    <p>{{ selectedEyeRecord.advice }}</p>
+                </div>
+                <div class="note-block" *ngIf="selectedEyeRecord.reviewAfter">
+                    <h3 class="note-heading">Review After</h3>
+                    <p>{{ selectedEyeRecord.reviewAfter }}</p>
+                </div>
+            </ng-container>
         </div>
 
         <div class="note-section" *ngIf="activeView === 'history'">

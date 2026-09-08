@@ -26,6 +26,12 @@ export class ReportOverviewComponent {
     showRevenueReport() {
         this.activeComponent = 'revenue';
     }
+    // Reschedule / cancellation trail tab.
+    showRescheduleReport() {
+        if (this.role != 'doctor') {
+          this.activeComponent = 'reschedule';
+        }
+    }
     ngOnInit(): void {
       if (typeof window !== 'undefined' && window.localStorage) {
         // Fetch role from localStorage or the authentication service

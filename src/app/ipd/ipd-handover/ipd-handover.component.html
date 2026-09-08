@@ -187,10 +187,14 @@
         on {{ current?.handedOverAt | date:'medium' }}
       </div>
       <p *ngIf="!current" class="ho-hint">Save the draft first to enable signing.</p>
+      <label class="ho-field" *ngIf="canHandOver && current">Outgoing nurse name
+        <input type="text" [(ngModel)]="signerName" name="handedOverNurseName"
+               placeholder="Name of the nurse handing over" />
+      </label>
       <app-e-sign
         *ngIf="canHandOver && current"
         [signerType]="'nurse'"
-        [signerName]="''"
+        [signerName]="signerName"
         [contextType]="'ipd-handover-handed-over'"
         [contextId]="current.id"
         (signed)="onHandedOverSigned($event)">
@@ -203,10 +207,14 @@
         ✓ Acknowledged by <strong>{{ current?.takenOverByName }}</strong>
         on {{ current?.takenOverAt | date:'medium' }}
       </div>
+      <label class="ho-field" *ngIf="canTakeOver && current">Incoming nurse name
+        <input type="text" [(ngModel)]="signerName" name="takenOverNurseName"
+               placeholder="Name of the nurse taking over" />
+      </label>
       <app-e-sign
         *ngIf="canTakeOver && current"
         [signerType]="'nurse'"
-        [signerName]="''"
+        [signerName]="signerName"
         [contextType]="'ipd-handover-taken-over'"
         [contextId]="current.id"
         (signed)="onTakenOverSigned($event)">

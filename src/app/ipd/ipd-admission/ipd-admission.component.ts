@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { IpdService } from '../../services/ipd.service';
-import { WardManagementService } from '../../services/ward-management.service';
+import { WardManagementService, isBedFree } from '../../services/ward-management.service';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { MessageService } from 'primeng/api';
@@ -190,7 +190,7 @@ export class IpdAdmissionComponent implements OnInit {
 
     this.wardService.getBedsByWard(wardId).subscribe({
       next: (beds) => {
-        this.availableBeds = beds.filter(b => b.status === 'available');
+        this.availableBeds = beds.filter(isBedFree);
         this.admissionForm.patchValue({ bedId: '' });
       },
       error: (error) => {

@@ -489,3 +489,24 @@ font-weight: 400;
       max-width: 100% !important;
     }
   }
+/* History action column — matches the icon buttons on the confirmed table. */
+.button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 10px !important;
+}
+
+.btn-action {
+  background-color: transparent;
+  cursor: pointer;
+  outline: none;
+  border: none;
+  display: flex;
+  gap: 10px;
+}
+
+.btn-history svg {
+  width: 26px;
+  height: 26px;
+}

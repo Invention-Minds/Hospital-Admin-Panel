@@ -300,9 +300,23 @@ export class TodayConsultationsComponent {
   filteredBrandNames: string[][] = []; // List of filtered suggestions per input
   showFavBrandSuggestions: boolean[] = [];
   filteredFavBrandNames: string[][] = []; // List of filtered suggestions per input
+  /**
+   * Clinical Notes (the DoctorNote capture screen) was retired: it collected
+   * the same clinical content as the OPD assessment form, with a second set of
+   * templates ('opd-doctor' vs 'opd-handwritten') into a second table — two
+   * places to write one note. The OPD assessment form is now the single
+   * capture surface.
+   *
+   * NOTHING is deleted. The tab entry below is commented out, the panel markup
+   * is kept behind this flag, and every doctor-note method + saved record is
+   * untouched — past notes still show in Patient Records, patient-info and the
+   * visit-summary PDF. Flip this to true to bring the tab back.
+   */
+  readonly showLegacyClinicalNotes = false;
+
   tabs = [
     { key: 'history', label: 'History' },
-    { key: 'clinical', label: 'Clinical Notes' },
+    // { key: 'clinical', label: 'Clinical Notes' },  // retired — see showLegacyClinicalNotes
     { key: 'prescription', label: 'Prescription' },
     { key: 'investigation', label: 'Investigation' },
   ];

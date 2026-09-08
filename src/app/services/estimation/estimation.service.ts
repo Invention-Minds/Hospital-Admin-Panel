@@ -26,10 +26,12 @@ export class EstimationService {
   createEstimationDetails(estimationDetails: any): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/estimation-details`, estimationDetails);
   }
-  getAllEstimation(fromDate?: string, toDate?: string): Observable<any> {
+  getAllEstimation(fromDate?: string, toDate?: string, search?: string): Observable<any> {
     let params = new HttpParams();
     if (fromDate) params = params.set('fromDate', fromDate);
     if (toDate)   params = params.set('toDate', toDate);
+    // A search term makes the server span all history instead of the default window.
+    if (search)   params = params.set('search', search);
     return this.http.get<any>(`${this.apiUrl}`, { params });
   }
   getFollowUpEstimation(): Observable<any> {

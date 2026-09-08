@@ -730,8 +730,20 @@ button {
 .table-body-wrapper {
   max-height: 400px;
   overflow-y: auto;
-   scrollbar-width: none; 
+   scrollbar-width: none;
    -ms-overflow-style: none;
+}
+
+/* Overall EST table only — .doctor-list sets text-wrap: nowrap, so without a clip
+   long values (doctor names, estimation IDs) spill over the next column instead of
+   being cut. The full text stays available via each cell's title attribute. */
+.summary-table--overall th,
+.summary-table--overall td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-left: 8px;
+  padding-right: 8px;
 }
 .table-body-wrapper::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */

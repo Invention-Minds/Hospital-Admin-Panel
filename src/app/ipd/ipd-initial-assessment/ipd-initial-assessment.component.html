@@ -391,11 +391,15 @@
             ✓ Signed by <strong>{{ serverRow?.filledByName }}</strong>
             on {{ serverRow?.filledAt | date:'medium' }}
           </div>
+          <label class="ia-field" *ngIf="serverRow && !serverRow.filledAt">Signing clinician
+            <input type="text" [(ngModel)]="signerName" name="fillerSignerName"
+                   placeholder="Name of the M.O. / resident signing" />
+          </label>
           <app-e-sign
             *ngIf="serverRow && !serverRow.filledAt"
             [signerType]="'doctor'"
             [signerRole]="'resident'"
-            [signerName]="''"
+            [signerName]="signerName"
             [contextType]="'ipd-initial-assessment-filler'"
             [contextId]="serverRow.id"
             (signed)="onFilledSigned($event)">
@@ -410,11 +414,15 @@
             ✓ Co-signed by <strong>{{ serverRow?.consultantName }}</strong>
             on {{ serverRow?.consultantSignedAt | date:'medium' }}
           </div>
+          <label class="ia-field" *ngIf="serverRow?.filledAt && !serverRow?.consultantSignedAt">Consultant name
+            <input type="text" [(ngModel)]="signerName" name="consultantSignerName"
+                   placeholder="Name of the co-signing consultant" />
+          </label>
           <app-e-sign
             *ngIf="serverRow?.filledAt && !serverRow?.consultantSignedAt && serverRow"
             [signerType]="'doctor'"
             [signerRole]="'consultant'"
-            [signerName]="''"
+            [signerName]="signerName"
             [contextType]="'ipd-initial-assessment-consultant'"
             [contextId]="serverRow.id"
             (signed)="onConsultantSigned($event)">

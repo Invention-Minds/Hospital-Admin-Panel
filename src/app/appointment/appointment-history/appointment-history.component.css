@@ -1,0 +1,228 @@
+/* Overlay + shell — same modal language as the check-in / PRN popups. */
+.close-opd-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content-history {
+  border-radius: 20px;
+  background: #fff;
+  padding: 20px;
+  width: 1100px;
+  max-width: 95vw;
+  max-height: 88vh;
+  overflow-y: auto;
+  flex-shrink: 0;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.modal-header h3 {
+  color: #0e2970;
+  font-family: Kanit;
+  font-size: 22px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.popup-close {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.modal-body {
+  padding: 10px 0 0 0;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  margin-top: 20px;
+}
+
+.close-button {
+  display: flex;
+  width: 150px;
+  padding: 7px 65px;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  border-radius: 4px;
+  border: 1px solid #7b7b7b;
+  color: #7b7b7b;
+  font-family: Kanit;
+  font-size: 20px;
+  font-weight: 400;
+}
+
+/* Summary strip above the table */
+.hist-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px;
+  padding: 14px 18px;
+  margin-bottom: 14px;
+  background: #f0f3ff;
+  border-radius: 10px;
+}
+
+.hist-summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hist-label {
+  color: #7b7b7b;
+  font-family: Kanit;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.hist-value {
+  color: #0e2970;
+  font-family: Kanit;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.hist-count {
+  color: #d97706;
+}
+
+.hist-cancel-note {
+  background: #fdecea;
+  border-radius: 8px;
+  padding: 10px 16px;
+  margin-bottom: 14px;
+  color: #b3261e;
+  font-family: Kanit;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.hist-error {
+  background: #fdecea;
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: #b3261e;
+  font-family: Kanit;
+  font-size: 14px;
+}
+
+.hist-loading {
+  padding: 30px 0;
+  text-align: center;
+  color: #0e2970;
+  font-family: Kanit;
+  font-size: 16px;
+}
+
+/* Table — identical treatment to the confirmed-appointments table */
+.table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.appointment-table {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: collapse;
+}
+
+thead {
+  background: #0e2970;
+  box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64);
+  border-radius: 16px;
+  color: white;
+  font-size: 14px;
+  font-family: Kanit;
+  font-weight: 400;
+}
+
+thead th {
+  padding: 12px;
+  text-align: center;
+  color: white;
+  font-size: 14px;
+  font-family: Kanit;
+  font-weight: 400;
+  text-wrap: nowrap;
+  height: 54px;
+}
+
+tbody tr {
+  box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64);
+  border-radius: 16px;
+  height: 60px;
+}
+
+tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0px 4px 15px rgba(216, 210, 252, 0.64);
+  border-radius: 16px;
+}
+
+tbody td {
+  padding: 0px 8px;
+  text-align: center;
+  color: black;
+  font-size: 14px;
+  font-family: Kanit;
+  font-weight: 400;
+}
+
+tbody tr:hover {
+  background-color: #f0f8ff;
+}
+
+.no-records-message {
+  text-align: center;
+  color: #7b7b7b;
+  font-family: Kanit;
+  font-size: 14px;
+}
+
+.hist-reason {
+  max-width: 220px;
+  white-space: normal;
+}
+
+/* Event pills — same shape as the table status badges, different fills */
+.status-badge {
+  display: inline-block;
+  color: white;
+  padding: 5px 10px;
+  text-transform: capitalize;
+  font-size: 14px;
+  font-family: Kanit;
+  font-weight: 400;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.evt-booked { background: #6b8afd; }
+.evt-confirmed,
+.evt-completed { background: #79cfa6; }
+.evt-rescheduled { background: #f0a04b; }
+.evt-cancelled { background: #e57373; }
+.evt-checkedin { background: #4bb3a5; }
+.evt-neutral { background: #9aa5b1; }

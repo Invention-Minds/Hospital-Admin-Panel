@@ -37,6 +37,21 @@ export interface Bed {
     name: string;
     admissionNo: string;
   };
+  /** Admissions still holding this bed ('admitted' or 'BED_ACCEPTED'). A bed
+   *  with any of these is taken even if `status` says 'available' — the two
+   *  drift apart, which is how booked beds used to reach the dropdowns. */
+  admissions?: Array<{
+    id: string;
+    prn: string;
+    admissionNo: string;
+    admittingDoctor: string;
+    status: string;
+  }>;
+}
+
+/** A bed is only offerable when its status says free AND nothing is holding it. */
+export function isBedFree(b: Bed): boolean {
+  return b.status === 'available' && !(b.admissions && b.admissions.length > 0);
 }
 
 export interface BedCensus {

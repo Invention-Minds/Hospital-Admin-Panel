@@ -1,0 +1,132 @@
+<div class="form-row">
+  <div class="column-1">
+    <div class="p-field p-col-2">
+      <label class="range-label">From</label>
+      <input type="date" class="custom-input-text" [(ngModel)]="from" (change)="runReport()" />
+    </div>
+    <div class="p-field p-col-2">
+      <label class="range-label">To</label>
+      <input type="date" class="custom-input-text" [(ngModel)]="to" (change)="runReport()" />
+    </div>
+    <div class="p-field p-col-3 quick-ranges">
+      <button type="button" class="quick-btn" (click)="setRangeToday()">Today</button>
+      <button type="button" class="quick-btn" (click)="setRangeLast7()">Last 7 days</button>
+      <button type="button" class="quick-btn" (click)="setRangeLast30()">Last 30 days</button>
+    </div>
+  </div>
+
+  <div class="p-field p-col-3 calendar">
+    <svg pTooltip="Refresh" (click)="refresh()" class="reverse" xmlns="http://www.w3.org/2000/svg" width="2.5em"
+      height="2.5em" viewBox="-1.5 -2.5 24 24">
+      <path fill="currentColor"
+        d="m4.859 5.308l1.594-.488a1 1 0 0 1 .585 1.913l-3.825 1.17a1 1 0 0 1-1.249-.665L.794 3.413a1 1 0 1 1 1.913-.585l.44 1.441C5.555.56 10.332-1.035 14.573.703a9.38 9.38 0 0 1 5.38 5.831a1 1 0 1 1-1.905.608A7.381 7.381 0 0 0 4.86 5.308zm12.327 8.195l-1.775.443a1 1 0 1 1-.484-1.94l3.643-.909a1 1 0 0 1 .61-.08a1 1 0 0 1 .84.75l.968 3.88a1 1 0 0 1-1.94.484l-.33-1.322a9.381 9.381 0 0 1-16.384-1.796l-.26-.634a1 1 0 1 1 1.851-.758l.26.633a7.381 7.381 0 0 0 13.001 1.25z" />
+    </svg>
+  </div>
+</div>
+
+<div class="report-error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+<div class="table-container" *ngIf="!isLoading">
+  <!-- Totals -->
+  <div class="stats-strip" *ngIf="report">
+    <div class="stat-card">
+      <span class="stat-label">Rescheduled</span>
+      <span class="stat-value stat-warn">{{ report.totals.rescheduled }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Cancelled</span>
+      <span class="stat-value stat-bad">{{ report.totals.cancelled }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Total events</span>
+      <span class="stat-value">{{ report.totals.all }}</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Range</span>
+      <span class="stat-value stat-small">
+        {{ report.range.from | date:'dd-MM-yyyy' }} → {{ report.range.to | date:'dd-MM-yyyy' }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Breakdown switcher -->
+  <div class="breakdown-tabs" *ngIf="report">
+    <button type="button" class="breakdown-btn" [class.breakdown-active]="breakdown === 'actor'"
+      (click)="setBreakdown('actor')">By staff</button>
+    <button type="button" class="breakdown-btn" [class.breakdown-active]="breakdown === 'doctor'"
+      (click)="setBreakdown('doctor')">By doctor</button>
+    <button type="button" class="breakdown-btn" [class.breakdown-active]="breakdown === 'source'"
+      (click)="setBreakdown('source')">By source</button>
+  </div>
+
+  <div class="table-wrapper">
+    <table class="appointment-table">
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>{{ breakdownLabel }}</th>
+          <th>Rescheduled</th>
+          <th>Cancelled</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngIf="rows.length === 0">
+          <td colspan="5" class="no-records-message">
+            No records to display
+          </td>
+        </tr>
+        <tr *ngFor="let row of getPaginatedRows(); let i = index">
+          <td>{{ (currentPage - 1) * itemsPerPage + i + 1 }}</td>
+          <td>{{ rowLabel(row.label) }}</td>
+          <td>{{ row.rescheduled }}</td>
+          <td>{{ row.cancelled }}</td>
+          <td>{{ row.total }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination Controls -->
+  <div class="pagination" *ngIf="rows.length > 0">
+    <button class="pagination-btn prev" (click)="prevPage()" [disabled]="currentPage === 1">←</button>
+    <button class="pagination-btn next" (click)="nextPage()" [disabled]="currentPage === totalPages">→</button>
+    <div class="page-info">
+      Page
+      <input type="number" [(ngModel)]="currentPage" min="1" [max]="totalPages" class="page-input"
+        (change)="onPageChange()">
+      of {{ totalPages }}
+    </div>
+  </div>
+
+  <!-- Appointments moved more than once in the range -->
+  <div class="repeat-section" *ngIf="report && report.repeatOffenders.length > 0">
+    <h3 class="section-title">Rescheduled more than once</h3>
+    <div class="table-wrapper">
+      <table class="appointment-table">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Patient Name</th>
+            <th>PRN</th>
+            <th>Doctor Name</th>
+            <th>Times Rescheduled</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of report.repeatOffenders; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ row.patientName || '-' }}</td>
+            <td>{{ row.prnNumber || '-' }}</td>
+            <td>{{ row.doctorName || '-' }}</td>
+            <td>
+              <span class="status-badge repeat-badge">{{ row.rescheduleCount }}</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="loader" *ngIf="isLoading"></div>

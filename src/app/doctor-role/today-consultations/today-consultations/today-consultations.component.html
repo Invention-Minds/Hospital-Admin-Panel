@@ -99,11 +99,17 @@
               (click)="appointment.checkedOut === false && startConsultation(appointment)">
               <img class="image" src="/start.svg">Start
             </button>
+            <!-- RETIRED — this modal's tabs are all reachable from their own
+                 buttons in this row: History → "P. History", plus the
+                 "Prescription" and "Investigation" buttons below. Kept here so
+                 it can be restored by uncommenting.
             <button class="prescription" (click)="openModal('history',appointment)">
-              <img class="image" src="/notes.svg">OPD Notes
+              <img class="image" src="/notes.svg">Patient Records
             </button>
+            -->
+            <!-- The single place OPD notes are written (templates + ophthalmology). -->
             <button class="prescription" (click)="showOpdModal = true; selectedAppointment = appointment">
-              <img class="image" src="/notes.svg">Smart Voice OPD
+              <img class="image" src="/notes.svg">OPD Notes
             </button>
             <button class="investigation" (click)="showInvestigationModal = true; selectedAppointment = appointment">
               <img class="image" src="/lab.svg">Investigation
@@ -1166,10 +1172,12 @@
           (click)="setActiveTab(tab.key)">
           {{ tab.label }}
         </button>
+        <!-- Ophthalmology moved to the OPD assessment form — one place to write.
         <button *ngIf="isOphthalmologyDept" class="tab-btn" [class.active]="activeTab === 'ophthalmology'"
           (click)="setActiveTab('ophthalmology')">
           Ophthalmology
         </button>
+        -->
 
       </div>
       <div class="print-section">
@@ -1193,7 +1201,11 @@
       </div>
     </div>
 
-    <div class="tab-content" id="clinical" style="display: block;" *ngIf="activeTab === 'clinical'">
+    <!-- RETIRED — the OPD assessment form is now the only place OPD notes are
+         written. Markup kept intact; set showLegacyClinicalNotes = true in the
+         component to bring this tab back. -->
+    <div class="tab-content" id="clinical" style="display: block;"
+         *ngIf="showLegacyClinicalNotes && activeTab === 'clinical'">
       <div class="clinical-modal-wrapper"> <!-- Flex container -->
 
         <!-- Optional Top Header or Spacer -->
@@ -1613,11 +1625,14 @@
       </div>
     </div>
 
-    <!-- Ophthalmology department form — only rendered for ophthalmology doctors. -->
+    <!-- Ophthalmology now lives in the OPD assessment form (see the
+         [showOphthalmology] binding on <app-opd-assessment>), so the eye
+         record is written in the same place as the rest of the OPD note.
     <div class="tab-content" id="ophthalmology" style="display:block" *ngIf="activeTab === 'ophthalmology'">
       <app-ophthamology-template [appointment]="selectedService">
       </app-ophthamology-template>
     </div>
+    -->
   </div>
 </div>
 

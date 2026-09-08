@@ -726,3 +726,8 @@ width:39px
     max-width: 100% !important;
   }
 }
+/* History button — inline SVG, so size it like the icon buttons beside it. */
+.btn-history svg {
+  width: 26px;
+  height: 26px;
+}

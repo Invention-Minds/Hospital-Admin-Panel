@@ -563,6 +563,12 @@ export class AppointmentConfirmService {
       params: { date: date }
     });
   }
+
+  /** Send an OPD visit-summary PDF (base64, built on the frontend) to the patient
+   *  over WhatsApp — mirrors the estimation document flow. */
+  sendVisitSummaryWhatsApp(payload: { pdfBase64: string; patientPhoneNumber: string; patientName: string; filename: string; prn: string; date: string; }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/send-visit-summary`, payload);
+  }
   updateAppointmentVitals(appointmentId: number, vitals: any): Observable<any> {
     return this.http.put(`${this.apiUrl}/${appointmentId}/vitals`, vitals);
   }

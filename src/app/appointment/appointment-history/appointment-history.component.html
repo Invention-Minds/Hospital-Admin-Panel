@@ -1,0 +1,100 @@
+<div class="close-opd-modal" *ngIf="showDialog">
+  <div class="modal-content-history">
+    <div class="modal-header">
+      <h3>Appointment History</h3>
+      <button class="popup-close" (click)="closeDialog()">
+        <img src="/popup-close.svg" alt="Close Popup" />
+      </button>
+    </div>
+    <hr />
+
+    <div class="modal-body">
+      <div class="hist-error" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+      <ng-container *ngIf="history">
+        <!-- Patient / appointment summary strip -->
+        <div class="hist-summary">
+          <div class="hist-summary-item">
+            <span class="hist-label">Patient</span>
+            <span class="hist-value">{{ history.appointment.patientName }}</span>
+          </div>
+          <div class="hist-summary-item">
+            <span class="hist-label">PRN</span>
+            <span class="hist-value">{{ history.appointment.prnNumber || '-' }}</span>
+          </div>
+          <div class="hist-summary-item">
+            <span class="hist-label">Doctor</span>
+            <span class="hist-value">{{ history.appointment.doctorName }}</span>
+          </div>
+          <div class="hist-summary-item">
+            <span class="hist-label">Current slot</span>
+            <span class="hist-value">
+              {{ history.appointment.date | date:'dd-MM-yyyy' }} {{ history.appointment.time }}
+            </span>
+          </div>
+          <div class="hist-summary-item">
+            <span class="hist-label">Rescheduled</span>
+            <span class="hist-value hist-count">{{ history.summary.rescheduleCount }} time(s)</span>
+          </div>
+        </div>
+
+        <!-- Cancellation attribution — the question the trail was built for -->
+        <div class="hist-cancel-note" *ngIf="history.summary.cancelled">
+          Cancelled by <strong>{{ history.summary.cancelledBy || 'unknown' }}</strong>
+          <span *ngIf="history.summary.cancelledAt">
+            on {{ history.summary.cancelledAt | date:'dd-MM-yyyy HH:mm' }}
+          </span>
+          <span *ngIf="history.summary.cancelReason"> — {{ history.summary.cancelReason }}</span>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="appointment-table">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Event</th>
+                <th>From</th>
+                <th>To</th>
+                <th>By</th>
+                <th>Source</th>
+                <th>Reason</th>
+                <th>When</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="history.events.length === 0">
+                <td colspan="8" class="no-records-message">
+                  No history recorded for this appointment yet
+                </td>
+              </tr>
+              <tr *ngFor="let event of history.events; let i = index">
+                <td>{{ i + 1 }}</td>
+                <td>
+                  <span class="status-badge" [ngClass]="eventClass(event.eventType)">
+                    {{ eventLabel(event.eventType) }}
+                  </span>
+                </td>
+                <td>
+                  {{ slotText(event.fromDate, event.fromTime, event.fromDoctorName) || '-' }}
+                </td>
+                <td>
+                  {{ slotText(event.toDate, event.toTime, event.toDoctorName) || '-' }}
+                </td>
+                <td>{{ actorText(event) }}</td>
+                <td>{{ sourceLabel(event.source) }}</td>
+                <td class="hist-reason">{{ event.reason || '-' }}</td>
+                <td>{{ event.createdAt | date:'dd-MM-yyyy HH:mm' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </ng-container>
+
+      <div class="hist-loading" *ngIf="isLoading">Loading history…</div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="close-button" (click)="closeDialog()">Close</button>
+    </div>
+  </div>
+</div>

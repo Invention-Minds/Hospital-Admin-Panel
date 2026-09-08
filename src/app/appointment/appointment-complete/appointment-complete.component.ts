@@ -1,6 +1,12 @@
 import { Component, Input, OnChanges } from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { AlertService } from '../../services/alert.service';
+import {
+  AppointmentHistoryService,
+  actorLabel,
+  istDateTime,
+  slotText,
+} from '../../services/appointment-history.service';
 import * as FileSaver from 'file-saver';
 import * as XLSX from 'xlsx';
 import moment from 'moment-timezone';
@@ -23,6 +29,10 @@ interface Appointment {
   user?: any;
   prnNumber?: any;
   patientType?: string;
+  // Returned by /completed-appts for the Excel export's trail columns.
+  checkedInBy?: string | null;
+  checkedInTime?: string | null;
+  rescheduleCount?: number;
 }
 @Component({
   selector: 'app-appointment-complete',
@@ -54,10 +64,23 @@ export class AppointmentCompleteComponent {
     { label: 'Department', value: 'department' },
   ];
   selectedSearchOption: any = this.searchOptions[0];
+  // Appointment lifecycle trail popup (who rescheduled / cancelled, when).
+  showHistoryDialog = false;
+  historyAppointmentId: number | null = null;
 
 
 
-  constructor(private appointmentService: AppointmentConfirmService, private alertSvc: AlertService) { }
+  constructor(private appointmentService: AppointmentConfirmService, private alertSvc: AlertService, private historyService: AppointmentHistoryService) { }
+
+  openHistory(appointment: Appointment): void {
+    this.historyAppointmentId = appointment.id ?? null;
+    this.showHistoryDialog = true;
+  }
+
+  closeHistory(): void {
+    this.showHistoryDialog = false;
+    this.historyAppointmentId = null;
+  }
 
 
 
@@ -360,10 +383,23 @@ export class AppointmentCompleteComponent {
       this.filterAppointmentsByDate(new Date());
     }
   }
-  downloadFilteredData(): void {
-    if (this.filteredServices && this.filteredServices.length > 0) {
+  async downloadFilteredData(): Promise<void> {
+    // filteredServices is only populated by a search or Clear, so on a fresh
+    // load it's empty and the download used to silently do nothing. Fall back
+    // to the rows actually on screen.
+    const rows: Appointment[] = (this.filteredServices && this.filteredServices.length > 0)
+      ? this.filteredServices
+      : this.filteredAppointments;
+
+    if (rows && rows.length > 0) {
+      // One request for the whole export: who booked / rescheduled / cancelled.
+      const trailById = await this.historyService.getEventSummaries(
+        rows.map((a) => Number(a.id)).filter((id) => !!id)
+      );
+
       // Step 1: Convert the filtered data to a worksheet
-      const selectedFields = this.filteredServices.map((appointment: Appointment) => {
+      const selectedFields = rows.map((appointment: Appointment) => {
+        const trail = trailById[String(appointment.id)];
         if (appointment.created_at) {
           const createdAt = new Date(appointment?.created_at);
           const indianTime = moment.tz(createdAt, "America/New_York").tz("Asia/Kolkata");
@@ -391,6 +427,19 @@ export class AppointmentCompleteComponent {
           'SMS Sent': appointment.messageSent ? 'Yes' : 'No',
           'Status': appointment.status,
           'Appointment Handled By': appointment.user?.username || '-',
+          'Checked In By': appointment.checkedInBy || '-',
+          'Checked In Time': istDateTime(appointment.checkedInTime ?? null),
+          // --- Lifecycle trail ---------------------------------------------
+          'Booked By': trail ? actorLabel(trail.bookedBy, trail.bookedByType) : '-',
+          'Booked At': istDateTime(trail?.bookedAt ?? null),
+          'Rescheduled (times)': trail?.rescheduleCount ?? appointment.rescheduleCount ?? 0,
+          'Last Rescheduled By': trail?.lastRescheduledAt
+            ? actorLabel(trail.lastRescheduledBy, trail.lastRescheduledByType)
+            : '-',
+          'Last Rescheduled At': istDateTime(trail?.lastRescheduledAt ?? null),
+          'Previous Slot': trail
+            ? slotText(trail.previousDate, trail.previousTime, trail.previousDoctorName)
+            : '-',
         };
 
       });

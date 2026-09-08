@@ -6,6 +6,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { ESignComponent } from '../../shared/ui/e-sign/e-sign.component';
+import { AuthServiceService } from '../../services/auth/auth-service.service';
 import {
   IpdHandoverService,
   IpdHandover,
@@ -48,15 +49,22 @@ export class IpdHandoverComponent implements OnInit, OnDestroy {
   errorMessage = '';
   successMessage = '';
 
+  /** Name bound to both sign pads. Defaults to the logged-in user; editable so
+   *  the incoming nurse can sign on the same terminal. The e-sign component
+   *  rejects an empty name, so this must never be blank. */
+  signerName = '';
+
   private destroy$ = new Subject<void>();
 
   constructor(
     private route: ActivatedRoute,
     private svc: IpdHandoverService,
+    private auth: AuthServiceService,
   ) {}
 
   ngOnInit(): void {
     this.admissionId = this.route.snapshot.paramMap.get('admissionId') ?? '';
+    this.signerName = this.auth.getUsername() ?? '';
     this.load();
   }
   ngOnDestroy(): void { this.destroy$.next(); this.destroy$.complete(); }
@@ -127,7 +135,10 @@ export class IpdHandoverComponent implements OnInit, OnDestroy {
 
   onHandedOverSigned(sig: SignatureCreateResponse): void {
     if (!this.current) return;
-    this.svc.signHandedOver(this.admissionId, this.current.id, { signatureId: sig.id })
+    this.svc.signHandedOver(this.admissionId, this.current.id, {
+      signatureId: sig.id,
+      nurseName: this.signerName.trim() || undefined,
+    })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => { this.successMessage = 'Outgoing nurse signed.'; this.load(); },
@@ -136,7 +147,10 @@ export class IpdHandoverComponent implements OnInit, OnDestroy {
   }
   onTakenOverSigned(sig: SignatureCreateResponse): void {
     if (!this.current) return;
-    this.svc.signTakenOver(this.admissionId, this.current.id, { signatureId: sig.id })
+    this.svc.signTakenOver(this.admissionId, this.current.id, {
+      signatureId: sig.id,
+      nurseName: this.signerName.trim() || undefined,
+    })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => { this.successMessage = 'Incoming nurse acknowledged.'; this.load(); },

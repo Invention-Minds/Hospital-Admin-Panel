@@ -111,6 +111,12 @@
   font-size: 12px; font-weight: 600; color: #166534;
   background: #dcfce7; border-radius: 12px; padding: 4px 10px;
 }
+/* Editing a signed row voids the old signature — flag that a re-sign is due. */
+.ins-resign-tag {
+  font-size: 12px; font-weight: 600; color: #92400e;
+  background: #fef3c7; border-radius: 12px; padding: 4px 10px;
+  margin-right: 10px;
+}
 
 .ins-modal-actions {
   display: flex; justify-content: flex-end; gap: 10px;

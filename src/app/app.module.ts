@@ -231,6 +231,8 @@ import { ReferralInboxComponent } from './emergency/referral-inbox/referral-inbo
 import { StaffHandoverComponent } from './staff-handover/staff-handover.component';
 // Phase 2.5 — Revenue report tab
 import { RevenueReportComponent } from './report/revenue-report/revenue-report.component';
+import { RescheduleReportComponent } from './report/reschedule-report/reschedule-report.component';
+import { AppointmentHistoryComponent } from './appointment/appointment-history/appointment-history.component';
 // Phase 10 — NABH audit pack export
 import { NabhAuditComponent } from './nabh-audit/nabh-audit.component';
 // Phase 11 — OT workflow
@@ -461,6 +463,8 @@ import { NursingSuperDashboardComponent } from './dashboards/nursing-super-dashb
     StaffHandoverComponent,
     // Phase 2.5 — Revenue report
     RevenueReportComponent,
+    RescheduleReportComponent,
+    AppointmentHistoryComponent,
     // Phase 10 — NABH audit pack
     NabhAuditComponent,
     // Phase 11 — OT workflow

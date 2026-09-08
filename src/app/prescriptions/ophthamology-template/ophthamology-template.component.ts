@@ -1107,13 +1107,42 @@ export class OphthamologyTemplateComponent {
 
   //   pdfMake.createPdf(docDefinition).open();
   // }
+  /**
+   * Standalone ophthalmology prescription — wraps the eye sections in the
+   * hospital letterhead and opens them. The sections themselves come from
+   * `buildEyePdfContent`, which the OPD assessment print reuses so both PDFs
+   * render the eye record identically.
+   */
   async printPrescriptionPDF(data: any) {
+    const brand = await getJmrhPdfBranding();
+    const content = this.buildEyePdfContent(data, true);
 
-    console.log("Generating PDF for Ophthalmology Prescription...", data);
+    const docDefinition: any = {
+      pageSize: "A4",
+      background: brand.background,
+      pageMargins: brand.pageMargins,
+      footer: brand.footer,
+      content,
+      styles: {
+        subheader: { fontSize: 13, bold: true },
+        sectionHeader: { fontSize: 12, bold: true, margin: [0, 10, 0, 4] }
+      }
+    };
 
+    pdfMake.createPdf(docDefinition).open();
+  }
+
+  /**
+   * Eye-record pdfMake blocks, honouring the "select sections to print"
+   * checkboxes. Called twice:
+   *   • by the standalone eye prescription (withHeader = true — its own title
+   *     + patient strip), and
+   *   • by the OPD assessment print, which already carries the patient header
+   *     (withHeader = false) and just appends the eye record to the note.
+   */
+  buildEyePdfContent(data: any, withHeader: boolean): any[] {
     const get = (v: any) => (v && v !== "" ? v : "-");
 
-    const brand = await getJmrhPdfBranding();
     const now = new Date();
 
     /* ================= PARSE DIAGNOSIS ================= */
@@ -1131,24 +1160,29 @@ export class OphthamologyTemplateComponent {
     /* ================= BUILD CONTENT DYNAMICALLY ================= */
     const content: any[] = [];
 
-    /* ---------- HEADER ---------- */
-    // Hospital identity comes from the letterhead background — title only here.
-    content.push(
-      { text: "OPHTHALMOLOGY PRESCRIPTION", style: "subheader", alignment: "center", margin: [0, 2, 0, 12] }
-    );
+    /* ---------- HEADER ----------
+       Only on the standalone print. Inside the OPD note the patient strip is
+       already at the top of the document, so we just title the section. */
+    if (withHeader) {
+      // Hospital identity comes from the letterhead background — title only here.
+      content.push(
+        { text: "OPHTHALMOLOGY PRESCRIPTION", style: "subheader", alignment: "center", margin: [0, 2, 0, 12] }
+      );
 
-    /* ---------- PATIENT INFO ---------- */
-    content.push({
-      table: {
-        widths: ["*", "*"],
-        body: [
-          [`Patient: ${get(data.patientName)}`, `PRN: ${get(data.prn)}`],
-          [`Age/Gender: ${get(data.patientAge)} / ${get(data.patientGender)}`, `Date: ${now.toLocaleDateString()}`]
-        ]
-      },
-      layout: "lightHorizontalLines",
-      margin: [0, 0, 0, 15]
-    });
+      content.push({
+        table: {
+          widths: ["*", "*"],
+          body: [
+            [`Patient: ${get(data.patientName)}`, `PRN: ${get(data.prn)}`],
+            [`Age/Gender: ${get(data.patientAge)} / ${get(data.patientGender)}`, `Date: ${now.toLocaleDateString()}`]
+          ]
+        },
+        layout: "lightHorizontalLines",
+        margin: [0, 0, 0, 15]
+      });
+    } else {
+      content.push({ text: "Ophthalmology", style: "sectionHeader" });
+    }
 
     /* ================= WORK-UP GATE =================
        An optometrist's refraction is provisional until the doctor verifies
@@ -1433,20 +1467,21 @@ export class OphthamologyTemplateComponent {
     }
 
 
-    /* ================= FINAL PDF ================= */
-    const docDefinition: any = {
-      pageSize: "A4",
-      background: brand.background,
-      pageMargins: brand.pageMargins,
-      footer: brand.footer,
-      content,
-      styles: {
-        subheader: { fontSize: 13, bold: true },
-        sectionHeader: { fontSize: 12, bold: true, margin: [0, 10, 0, 4] }
-      }
-    };
+    return content;
+  }
 
-    pdfMake.createPdf(docDefinition).open();
+  /**
+   * The eye record as it should appear inside the OPD note — current form
+   * values, no header. Returns [] for non-ophthalmology use so the caller can
+   * spread it unconditionally.
+   */
+  buildEyeSectionsForOpdNote(): any[] {
+    try {
+      return this.buildEyePdfContent(this.pres, false);
+    } catch (e) {
+      console.error('[ophthalmology] building eye PDF sections failed:', e);
+      return [];
+    }
   }
 
   async getBase64ImageFromURL(url: string): Promise<string> {

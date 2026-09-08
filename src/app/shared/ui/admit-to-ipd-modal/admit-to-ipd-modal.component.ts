@@ -19,6 +19,7 @@ import {
   WardManagementService,
   Ward,
   Bed,
+  isBedFree,
 } from '../../../services/ward-management.service';
 
 /**
@@ -174,7 +175,7 @@ export class AdmitToIpdModalComponent implements OnChanges {
         catchError(() => of([] as Bed[]))
       )
       .subscribe((beds) => {
-        this.availableBeds = (beds ?? []).filter((b) => b.status === 'available');
+        this.availableBeds = (beds ?? []).filter(isBedFree);
         this.bedsLoading = false;
       });
   }

@@ -602,3 +602,42 @@
     margin-left: 0;
   }
 }
+/* Eye record tables in the visit-wise summary — measurement per row, eye per
+   column, matching the ophthalmology form. */
+.eye-summary-table {
+  width: 100%;
+  max-width: 520px;
+  border-collapse: collapse;
+  margin-top: 6px;
+}
+.eye-summary-table th {
+  background: #f3f6ff;
+  color: #062A78;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  padding: 6px 10px;
+  border-bottom: 1px solid #d9dff5;
+}
+.eye-summary-table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid #eceef4;
+  font-size: 14px;
+}
+.eye-summary-table td:first-child {
+  font-weight: 600;
+  color: #444;
+  width: 130px;
+}
+.eye-summary-table tr:last-child td { border-bottom: none; }
+
+/* Section heading inside the visit note — template groups, and the
+   vitals/nutrition/screening blocks of the OPD assessment. */
+.note-group-heading {
+  margin: 18px 0 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #062A78;
+  border-bottom: 1px solid #dfe5f5;
+  padding-bottom: 4px;
+}

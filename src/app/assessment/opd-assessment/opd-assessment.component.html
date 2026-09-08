@@ -299,7 +299,7 @@
        Saves independently through its own endpoint, not with this note. -->
   <ng-container *ngIf="showOphthalmology">
     <h3>Ophthalmology</h3>
-    <app-ophthamology-template [appointment]="appointment">
+    <app-ophthamology-template #eyeComp [appointment]="appointment">
     </app-ophthamology-template>
   </ng-container>
 

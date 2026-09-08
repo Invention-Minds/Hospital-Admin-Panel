@@ -100,6 +100,8 @@ export interface ChartResponse {
   admissionId: string;
   from: string;
   to: string;
+  /** Admission timestamp — the chart never shows columns before this day. */
+  admissionDate?: string | null;
   days: DayBlock[];
   monitoring?: ChartMonitoring;
 }

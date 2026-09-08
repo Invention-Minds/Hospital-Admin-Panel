@@ -321,7 +321,7 @@
     <div class="filters">
       <div>
         <input type="text" [(ngModel)]="globalSearchText" (ngModelChange)="applyGlobalSearch()"
-          placeholder="Search by Estimation ID, Patient or Doctor" class="by-search" />
+          placeholder="Search all records by Estimation ID, Patient, PRN or Doctor" class="by-search" />
       </div>
 
       <div>
@@ -415,7 +415,22 @@
     </div> -->
 
     <div class="doctor-list scrollable-table-container">
-      <table class="summary-table">
+      <table class="summary-table summary-table--overall">
+        <!-- Header and body are separate tables, so both must declare the identical
+             colgroup or their auto-computed widths drift apart and the text overlaps.
+             Keep these two colgroups in sync. -->
+        <colgroup>
+          <col style="width: 4%" />
+          <col style="width: 14%" />
+          <col style="width: 15%" />
+          <col style="width: 14%" />
+          <col style="width: 7%" />
+          <col style="width: 11%" />
+          <col style="width: 10%" />
+          <col style="width: 10%" />
+          <col style="width: 9%" />
+          <col style="width: 6%" />
+        </colgroup>
         <thead>
           <tr>
             <th>No.</th>
@@ -432,13 +447,26 @@
         </thead>
       </table>
       <div class="table-body-wrapper">
-        <table class="summary-table">
+        <table class="summary-table summary-table--overall">
+          <!-- Must match the header colgroup above exactly. -->
+          <colgroup>
+            <col style="width: 4%" />
+            <col style="width: 14%" />
+            <col style="width: 15%" />
+            <col style="width: 14%" />
+            <col style="width: 7%" />
+            <col style="width: 11%" />
+            <col style="width: 10%" />
+            <col style="width: 10%" />
+            <col style="width: 9%" />
+            <col style="width: 6%" />
+          </colgroup>
           <tbody>
             <tr *ngFor="let doc of totalEstimationsOverall; let i = index">
               <td>{{ i + 1 }}</td>
-              <td>{{ doc.consultantName }}</td>
-              <td>{{ doc.estimationId }}</td>
-              <td>{{ doc.patientName }}</td>
+              <td [title]="doc.consultantName">{{ doc.consultantName }}</td>
+              <td [title]="doc.estimationId">{{ doc.estimationId }}</td>
+              <td [title]="doc.patientName">{{ doc.patientName }}</td>
               <td>{{ doc.patientUHID }}</td>
               <td>
                 {{

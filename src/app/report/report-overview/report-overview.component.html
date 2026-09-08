@@ -47,6 +47,18 @@
           <p>Revenue Report</p>
         </div>
       </div>
+      <!-- Reschedule / cancellation trail (AppointmentEvent). -->
+      <div class="card"
+      *ngIf="role!='doctor'"
+      [ngClass]="{'active-card': activeComponent === 'reschedule'}"
+      (click)="showRescheduleReport()">
+        <div class="card-icon">
+          <img src="/details.svg" alt="Reschedule Icon" />
+        </div>
+        <div class="card-content">
+          <p>Reschedule Report</p>
+        </div>
+      </div>
     </div>
   </div>
   <div class="component-section">
@@ -54,4 +66,5 @@
     <app-doctor-report *ngIf="activeComponent === 'doctor'"></app-doctor-report>
     <app-checkin-report *ngIf="activeComponent === 'checkin'"></app-checkin-report>
     <app-revenue-report *ngIf="activeComponent === 'revenue'"></app-revenue-report>
+    <app-reschedule-report *ngIf="activeComponent === 'reschedule'"></app-reschedule-report>
   </div>

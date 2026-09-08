@@ -10,6 +10,13 @@ import { InvestigationOrderComponent } from '../investigation-order/investigatio
 import { getJmrhPdfBranding } from '../../shared/pdf/jmrh-letterhead';
 import { PrescriptionCaptureComponent } from '../../shared/ui/prescription-capture/prescription-capture.component';
 import { groupAndSort } from '../../shared/ui/template-form-renderer/template-form-renderer.component';
+import { OphthamologyTemplateComponent } from '../../prescriptions/ophthamology-template/ophthamology-template.component';
+import {
+  buildOpdAssessmentContent,
+  buildInvestigationBlocks,
+  buildPrescriptionBlocks,
+  OPD_ASSESSMENT_PDF_STYLES,
+} from '../../shared/pdf/opd-assessment-pdf';
 import { VoiceOpdService } from '../../services/voice-opd/voice-opd.service';
 import {
   AdmitContext,
@@ -64,6 +71,9 @@ export class OpdAssessmentComponent {
   @ViewChild('investigationOrderComp') investigationOrderComp?: InvestigationOrderComponent;
   // Embedded prescription capture; read for the complete-assessment PDF.
   @ViewChild('prescriptionComp') prescriptionComp?: PrescriptionCaptureComponent;
+  // Ophthalmology form (eye departments only) — its sections are appended to
+  // this note's PDF so one print carries the whole OPD note.
+  @ViewChild('eyeComp') eyeComp?: OphthamologyTemplateComponent;
   formData: any = {
     // Patient Info
     patientName: '',
@@ -702,51 +712,8 @@ loadAssessment(appointmentId: number) {
     if (!comp) return [];
     // Unified source: live selection merged with saved prior orders, so the
     // section prints whether or not the order was already saved this session.
-    const inv = comp.getPrintableInvestigations();
-    const labGroups = inv.labByDept;
-    const radNames = inv.radiologyNames;
-    if (!labGroups.length && !radNames.length) return [];
-
-    const content: any[] = [{ text: 'Investigation Orders:', style: 'sectionHeader' }];
-
-    if (labGroups.length) {
-      content.push({
-        table: {
-          widths: ['auto', '*'],
-          body: [
-            [{ text: 'Category', bold: true }, { text: 'Tests', bold: true }],
-            ...labGroups.map((g) => [{ text: g.department, bold: true, color: '#44546a' }, { text: g.tests.join(', ') }]),
-          ],
-        },
-        layout: this.pdfGridLayout,
-        margin: [0, 5, 0, 12],
-      });
-    }
-
-    if (radNames.length) {
-      content.push({ text: `Radiology: ${radNames.join(', ')}`, margin: [0, 0, 0, 6] });
-      const r: any = inv.radiology || {};
-      const safety: string[] = [];
-      if (r.priority) safety.push(`Priority: ${r.priority}`);
-      if (r.clinicalDetails) safety.push(`Clinical details: ${r.clinicalDetails}`);
-      if (r.serumCreatinine) {
-        safety.push(`S. Creatinine: ${r.serumCreatinine}${r.creatinineDoneOn ? ` (done ${r.creatinineDoneOn})` : ''}`);
-      }
-      if (r.weightKg) safety.push(`Weight: ${r.weightKg} kg`);
-      if (r.pregnancy) safety.push(`Pregnancy: Yes${r.lmp ? `, LMP ${r.lmp}` : ''}`);
-      if (r.allergyHistory) safety.push(`Allergy: ${r.allergyHistory}`);
-      const comorbid = [...(r.comorbidities || [])];
-      if (r.otherComorbidity) comorbid.push(r.otherComorbidity);
-      if (comorbid.length) safety.push(`History: ${comorbid.join(', ')}`);
-      if (r.consentGiven) safety.push('Consent obtained');
-      if (safety.length) content.push({ text: safety.join('   •   '), fontSize: 9, margin: [0, 0, 0, 12] });
-    }
-
-    if (inv.remarks?.trim()) {
-      content.push({ text: `Remarks: ${inv.remarks.trim()}`, margin: [0, 0, 0, 12] });
-    }
-
-    return content;
+    // Rendering is shared with the patient module's visit summary.
+    return buildInvestigationBlocks(comp.getPrintableInvestigations() as any);
   }
 
   /**
@@ -754,35 +721,10 @@ loadAssessment(appointmentId: number) {
    * the prescription grid isn't mounted or has no filled rows.
    */
   private buildPrescriptionPdf(rx: { prescribedDate: string; tablets: any[] } | null): any[] {
-    if (!rx || !rx.tablets.length) return [];
-
-    return [
-      { text: 'Prescription:', style: 'sectionHeader' },
-      {
-        table: {
-          widths: ['*', 'auto', 'auto', 'auto', '*'],
-          body: [
-            [
-              { text: 'Drug', bold: true },
-              { text: 'Frequency', bold: true },
-              { text: 'Duration', bold: true },
-              { text: 'Qty', bold: true },
-              { text: 'Instructions', bold: true },
-            ],
-            ...rx.tablets.map((t: any) => [
-              { text: [t.brandName, t.genericName].filter(Boolean).join(' / ') || '-' },
-              { text: t.frequency || '-' },
-              { text: t.duration || '-' },
-              { text: t.quantity || '-' },
-              { text: t.instructions || '-' },
-            ]),
-          ],
-        },
-        layout: this.pdfGridLayout,
-        margin: [0, 5, 0, 15],
-      },
-    ];
+    // Shared with the patient module's visit summary so both print the same table.
+    return buildPrescriptionBlocks(rx?.tablets ?? []);
   }
+
 
   // Sprint 3f — Admit-to-IPD handlers.
   openAdmitToIpd(): void {
@@ -893,143 +835,24 @@ loadAssessment(appointmentId: number) {
     const brand = await getJmrhPdfBranding();
 
     this.getBase64ImageFromURL(logoUrl).then((logoBase64) => {
+      // Body comes from the shared builder so this print and the patient
+      // module's "Print Full OPD Summary" can never drift apart.
       const docDefinition: any = {
         pageSize: "A4",
         pageMargins: brand.pageMargins,
         background: brand.background,
         footer: brand.footer,
-        content: [
-          // Hospital header is supplied by the letterhead background.
-          { text: "OPD INITIAL ASSESSMENT", style: "subheader", alignment: "center", margin: [0, 0, 0, 20] },
-
-          // Patient Info
-          {
-            table: {
-              widths: ["*", "*", "*"],
-              body: [
-                [
-                  { text: `Name: ${d.patientName || "-"}` },
-                  { text: `Age/Sex: ${d.age || "-"} / ${d.gender || "-"}` },
-                  { text: `UHID: ${d.uhid || "-"}` }
-                ],
-                [
-                  { text: `Ht: ${d.height || "-"}` },
-                  { text: `Wt: ${d.weight || "-"}` },
-                  { text: `Date: ${d.date || "-"}` }
-                ],
-                [
-                  { text: `Consultant: ${d.consultant || "-"}` },
-                  { text: `Department: ${d.department || "-"}` },
-                  { text: `Assessment Time: ${d.assessmentTime || "-"}` }
-                ]
-              ]
-            },
-            margin: [0, 0, 0, 20]
-          },
-
-          // Vitals
-          { text: "Vitals:", style: "sectionHeader" },
-          {
-            columns: [
-              { text: `HR: ${d.hr || "-"}` },
-              { text: `RR: ${d.rr || "-"}` },
-              { text: `Pulse: ${d.pulse || "-"}` },
-              { text: `BP: ${d.bp || "-"}` },
-              { text: `Temp: ${d.temp || "-"}` },
-              { text: `SPO2: ${d.spo2 || "-"}` }
-            ],
-            margin: [0, 0, 0, 20]
-          },
-
-          // Nutrition
-          { text: "Nutritional Assessment:", style: "sectionHeader" },
-          {
-            table: {
-              widths: ["*", "*", "*", "*"],
-              body: [
-                [
-                  { text: `Oral: ${d.dietType || "-"}` },
-                  { text: `Enteral: ${d.enteralFeed || "-"}` },
-                  { text: `NPO: ${d.npo ? "Yes" : "No"}` },
-                  { text: `Allergies: ${d.allergies || "None"}` }
-                ]
-              ]
-            },
-            margin: [0, 0, 0, 20]
-          },
-
-          // Pain Score (Legend with selection)
-          { text: "Pain Score:", style: "sectionHeader" },
-          {
-            table: {
-              widths: ["auto", "*"],
-              body: [
-                ["0", d.painScore === "0" ? "No hurt - Selected" : "No hurt"],
-                ["1-3", d.painScore === "1-3" ? "Mild - Selected" : "Mild"],
-                ["4-7", d.painScore === "4-7" ? "Moderate - Selected" : "Moderate"],
-                ["8-10", d.painScore === "8-10" ? "Severe - Selected" : "Severe"]
-              ]
-            },
-            margin: [0, 0, 0, 20]
-          },
-
-          // Screening
-          { text: "Screening:", style: "sectionHeader" },
-          {
-            table: {
-              widths: ["*", "*"],
-              body: [
-                [
-                  { text: `Requirement for any other screening: ${d.otherScreening ? "Yes" : "No"}` },
-                  { text: `Counselling on implants: ${d.counsellingImplants ? "Yes" : "No"}` }
-                ]
-              ]
-            },
-            margin: [0, 0, 0, 20]
-          },
-
-          // Department-specific templated fields (option C). When a template
-          // is in use we render its snapshot here, alongside the hand-written
-          // sections below — both can co-exist because the template can
-          // itself include hand-written canvas fields.
-          ...(this.isTemplated
-            ? this.buildTemplatedPdfContent()
-            : []),
-
-          // Handwritten/typed sections — render as image only when the value is
-          // a canvas data-URL; otherwise as plain text (fixes pdfMake throwing
-          // "Invalid image" on typed-in textarea content).
-          // Each section is dropped when the doctor left it blank — a template
-          // user fills the template's own fields, not these.
-          ...this.noteSection("History:", d.history),
-          ...this.noteSection("Examination:", d.examination),
-          ...this.noteSection("Diagnosis:", d.diagnosis),
-          ...this.noteSection("Investigation:", d.investigation),
-
-          // Structured lab/radiology orders selected in the grid (Phase 4).
-          ...this.buildInvestigationOrdersPdf(),
-
-          ...this.noteSection("Treatment Plan:", d.treatmentPlan),
-
-          // Prescription (drug rows — on-screen or latest saved).
-          ...this.buildPrescriptionPdf(rxPrint),
-
-          // Staff
-          { text: "Staff:", style: "sectionHeader" },
-          { text: `Name: ${d.staffName || "-"}, Emp ID: ${d.staffEmpId || "-"}`, margin: [0, 0, 0, 20] },
-
-          // Doctor
-          { text: "Doctor:", style: "sectionHeader" },
-          { text: `Name: ${d.doctorName || "-"}, KMC No: ${d.kmcNo || "-"}` },
-          d.doctorSign ? { image: d.doctorSign, width: 200, margin: [0, 10, 0, 0] } : {}
-          // ✅ Doctor Signature Section
-
-        ],
-        styles: {
-          header: { fontSize: 16, bold: true },
-          subheader: { fontSize: 14, bold: true },
-          sectionHeader: { fontSize: 12, bold: true, margin: [0, 10, 0, 5] }
-        }
+        content: buildOpdAssessmentContent({
+          d,
+          templatedBlocks: this.isTemplated ? this.buildTemplatedPdfContent() : [],
+          eyeBlocks: this.showOphthalmology && this.eyeComp
+            ? this.eyeComp.buildEyeSectionsForOpdNote()
+            : [],
+          investigationBlocks: this.buildInvestigationOrdersPdf(),
+          prescriptionBlocks: this.buildPrescriptionPdf(rxPrint),
+          noteSection: (label, value) => this.noteSection(label, value),
+        }),
+        styles: OPD_ASSESSMENT_PDF_STYLES
       };
 
       pdfMake.createPdf(docDefinition).open();

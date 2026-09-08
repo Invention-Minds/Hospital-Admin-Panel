@@ -96,11 +96,12 @@ export class EstimationOverviewComponent {
 
   /**
    * Load estimations from backend.
-   * - No params → default last 30 days (server-side filter)
-   * - With params → exact date range
+   * - No params → server's default recency window
+   * - With a date range → that exact range
+   * - With a search term → all history, ignoring the window
    */
-  loadEstimations(fromDate?: string, toDate?: string): void {
-    this.estimationService.getAllEstimation(fromDate, toDate).subscribe({
+  loadEstimations(fromDate?: string, toDate?: string, search?: string): void {
+    this.estimationService.getAllEstimation(fromDate, toDate, search).subscribe({
       next: (estimations: any[]) => {
         this.estimations = estimations;
         this.totalEstimationsOverall = estimations.sort((a, b) => {
@@ -116,6 +117,8 @@ export class EstimationOverviewComponent {
         ).length;
         this.processTodayEstimations(estimations);
         this.processMonthlyRaised(this.estimations);
+        // Re-apply whatever filters are active, otherwise a refetch silently drops them.
+        this.overAllESTSummary(this.estimations, this.selectedDoctorName);
         this.doctorService.getDepartments().subscribe((departments: any[]) => {
           this.departmentList = departments.map(d => d.name);
         });
@@ -641,6 +644,17 @@ export class EstimationOverviewComponent {
     }
     console.log(startDate, endDate);
 
+    // A full range refetches from the server so older estimations are reachable;
+    // a partial/cleared range just re-filters what is already loaded.
+    if (startDate && endDate) {
+      this.loadEstimations(
+        this.toApiDate(startDate),
+        this.toApiDate(endDate),
+        this.globalSearchText.trim() || undefined
+      );
+      return;
+    }
+
     this.overAllESTSummary(
       this.estimations,
       this.selectedDoctorName,
@@ -652,7 +666,8 @@ export class EstimationOverviewComponent {
     this.selectedDoctorName = '';
     this.selectedStatus = '';
     this.selectedEstimationType = '';
-    this.totalSearch(); // reloads with no date filter
+    this.globalSearchText = '';
+    this.loadEstimations(); // back to the server's default window, filters cleared
   }
   showOverall(){
     this.showMonthWiseDate = true
@@ -663,6 +678,11 @@ export class EstimationOverviewComponent {
     console.log('filtering')
     const overAllSummary = estimations.filter(e => {
       let matches = true;
+
+      // Free-text box composes with the dropdowns rather than replacing them.
+      if (!this.matchesGlobalSearch(e)) {
+        return false;
+      }
 
       if (this.selectedDateRange && this.selectedDateRange.length) {
         const serviceDate = new Date(e.estimatedDate); // use completedDateAndTime
@@ -862,14 +882,43 @@ exportToExcel(data: any[], fileName: string = 'Estimation-Summary') {
 }
 globalSearchText: string = '';
 filteredEstimationsOverall: any[] = [];
+private globalSearchDebounce: any;
 
+/**
+ * Free-text search. Hits the server (debounced) so estimations outside the
+ * default recency window are found, then overAllESTSummary() re-applies it
+ * locally alongside the doctor / status / type / date filters.
+ */
 applyGlobalSearch() {
-  const searchText = this.globalSearchText.toLowerCase();
-  this.totalEstimationsOverall = this.estimations.filter((estimation) =>
-    estimation.patientUHID?.toLowerCase().includes(searchText) ||
-    estimation.patientName?.toLowerCase().includes(searchText) ||
-    estimation.consultantName?.toLowerCase().includes(searchText)
-  );
+  clearTimeout(this.globalSearchDebounce);
+  this.globalSearchDebounce = setTimeout(() => {
+    const from = this.selectedDateRange && this.selectedDateRange[0];
+    const to = this.selectedDateRange && this.selectedDateRange[1];
+    this.loadEstimations(
+      from && to ? this.toApiDate(from) : undefined,
+      from && to ? this.toApiDate(to) : undefined,
+      this.globalSearchText.trim() || undefined
+    );
+  }, 400);
+}
+
+/** Format a picker date as YYYY-MM-DD in local time (toISOString() would shift the day in IST). */
+private toApiDate(date: Date): string {
+  const d = new Date(date);
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return d.getFullYear() + '-' + month + '-' + day;
+}
+
+/**
+ * True when a row matches the free-text box. patientUHID is an Int, so it must
+ * be stringified — calling .toLowerCase() on it throws and kills the whole filter.
+ */
+private matchesGlobalSearch(e: any): boolean {
+  const term = this.globalSearchText.trim().toLowerCase();
+  if (!term) return true;
+  return [e.patientName, e.estimationId, e.consultantName, e.patientUHID, e.patientPhoneNumber]
+    .some(v => String(v ?? '').toLowerCase().includes(term));
 }
 
 

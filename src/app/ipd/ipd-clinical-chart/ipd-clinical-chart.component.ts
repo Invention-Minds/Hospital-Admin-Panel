@@ -51,6 +51,8 @@ export class IpdClinicalChartComponent implements OnInit, OnDestroy {
   admissionId = '';
   from = '';
   to = '';
+  /** Admission day (YYYY-MM-DD) — the chart's hard left edge. */
+  admissionDate: string | null = null;
   chart: ChartResponse | null = null;
   loading = false;
   errorMessage = '';
@@ -81,10 +83,10 @@ export class IpdClinicalChartComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.admissionId = this.route.snapshot.paramMap.get('admissionId') ?? '';
-    const today = new Date();
-    const weekAgo = new Date(today); weekAgo.setDate(today.getDate() - 6);
-    this.to = today.toISOString().slice(0, 10);
-    this.from = weekAgo.toISOString().slice(0, 10);
+    // Leave from/to empty on the first call: the server anchors the window to
+    // the admission date and echoes back the range it used, which we adopt.
+    this.from = '';
+    this.to = '';
     this.load();
   }
   ngOnDestroy(): void { this.destroy$.next(); this.destroy$.complete(); }
@@ -96,9 +98,26 @@ export class IpdClinicalChartComponent implements OnInit, OnDestroy {
     this.svc.getChart(this.admissionId, this.from, this.to)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (res) => { this.chart = res; this.loading = false; },
+        next: (res) => {
+          this.chart = res;
+          // Adopt the window the server actually applied — it clamps `from` to
+          // the admission date, so the inputs must reflect that, not the range
+          // we asked for.
+          if (res.from) this.from = localDate(new Date(res.from));
+          if (res.to) this.to = localDate(new Date(res.to));
+          this.admissionDate = res.admissionDate
+            ? localDate(new Date(res.admissionDate))
+            : null;
+          this.loading = false;
+        },
         error: (e) => { this.errorMessage = e?.error?.error || 'Failed to load chart'; this.loading = false; },
       });
+  }
+
+  /** True once the window's first column is the admission day — there is
+   *  nothing earlier to page to. */
+  get atAdmissionStart(): boolean {
+    return !!this.admissionDate && !!this.from && this.from <= this.admissionDate;
   }
 
   // ─── Phase 9.13 — doctor-ordered monitoring frequency banner ─────────
@@ -161,10 +180,11 @@ export class IpdClinicalChartComponent implements OnInit, OnDestroy {
   shiftToday(direction: -1 | 1): void {
     // Shift the visible 7-day window forward/back. Calendar day arithmetic on
     // string dates is safest by going through Date.
+    if (direction === -1 && this.atAdmissionStart) return;
     const f = new Date(this.from); f.setDate(f.getDate() + direction * 7);
     const t = new Date(this.to); t.setDate(t.getDate() + direction * 7);
-    this.from = f.toISOString().slice(0, 10);
-    this.to = t.toISOString().slice(0, 10);
+    this.from = localDate(f);
+    this.to = localDate(t);
     this.load();
   }
 
@@ -197,7 +217,10 @@ export class IpdClinicalChartComponent implements OnInit, OnDestroy {
   // ─── Save handlers ──────────────────────────────────────────────────
   saveVitals(): void {
     if (!this.modal || this.modal.kind !== 'vitals') return;
-    this.svc.createVitals(this.admissionId, this.vitalsBuf)
+    this.svc.createVitals(this.admissionId, {
+      ...this.vitalsBuf,
+      recordedAt: toInstant(this.vitalsBuf.recordedAt),
+    })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => { this.successMessage = 'Vitals recorded.'; this.closeModal(); this.load(); },
@@ -211,7 +234,7 @@ export class IpdClinicalChartComponent implements OnInit, OnDestroy {
       this.errorMessage = 'Amount must be a positive number.'; return;
     }
     this.svc.createIntakeOutput(this.admissionId, {
-      recordedAt: this.ioBuf.recordedAt,
+      recordedAt: toInstant(this.ioBuf.recordedAt),
       entryType: this.ioBuf.entryType,
       category: this.ioBuf.category,
       amountMl: this.ioBuf.amountMl,
@@ -321,4 +344,19 @@ function pad2(n: number): string { return String(n).padStart(2, '0'); }
 function isoLocal(d: Date): string {
   // <input type="datetime-local"> expects YYYY-MM-DDTHH:mm in local time.
   return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+}
+/** Local calendar date as YYYY-MM-DD. NOT toISOString().slice(0,10) — that
+ *  returns the UTC date, which is the previous day for an IST user before
+ *  05:30, so the chart silently lost today's column. */
+function localDate(d: Date): string {
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+/** Turn a <input type="datetime-local"> value into a real instant.
+ *  The raw YYYY-MM-DDTHH:mm carries no offset, so sending it as-is makes the
+ *  server re-read it in *its* timezone and the reading shifts by the UTC
+ *  offset — the "wrong timing" on the chart. new Date() reads it as the local
+ *  time the nurse actually typed; toISOString() pins it to an instant. */
+function toInstant(localInput: string): string {
+  const d = new Date(localInput);
+  return Number.isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
 }

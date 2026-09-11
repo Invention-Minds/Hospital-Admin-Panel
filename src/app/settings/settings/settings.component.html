@@ -27,7 +27,7 @@
       User Status
     </div>
     <div class="settings-tab" [ngClass]="{'active-tab': selectedTab === 'est_locked'}" (click)="switchTab('est_locked')"
-      *ngIf="loggedInAdminType === 'IT Manager' || role === 'super_admin'">
+      *ngIf="loggedInAdminType === 'IT Manager' || role === 'super_admin' || loggedInAdminType === 'IT Support'">
       Locked Ids
     </div>
   </div>
@@ -221,6 +221,7 @@
           <select id="adminType" [(ngModel)]="adminType" (ngModelChange)="typeChange()" class="styled-select">
             <option value="Manager">Manager</option>
             <option value="IT Manager">IT Manager</option>
+            <option value="IT Support">IT Support</option>
             <option value="Senior Manager">Senior Manager</option>
             <option value="Management">Management</option>
             <option value="IP Billing Manager">IP Billing Manager</option>

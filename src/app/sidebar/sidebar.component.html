@@ -716,7 +716,7 @@
          Manager/Management/Senior Manager/IT Manager admin types, the
          Estimator + IP Billing Manager sub-admin types, plus super_admin. -->
     <a routerLink="/estimation" routerLinkActive="active" class="icon-wrapper sidebar-section-start"
-       *ngIf="role === 'super_admin' || ['Manager','Management','Senior Manager','IT Manager'].includes(adminType) || isEstimator() || isIpBillingManager()">
+       *ngIf="role === 'super_admin' || ['Manager','Management','Senior Manager','IT Manager','IT Support'].includes(adminType) || isEstimator() || isIpBillingManager()">
       <div class="icon-content">
         <svg xmlns="http://www.w3.org/2000/svg" width="2em" height="2em" viewBox="0 0 24 24" class="icon">
           <rect width="24" height="24" fill="none"/>

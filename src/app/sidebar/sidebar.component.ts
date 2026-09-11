@@ -317,7 +317,7 @@ get showDieteticsSection(): boolean {
 get showDischargeSection(): boolean {
   return this.role === 'super_admin' || this.role === 'doctor'
     || this.subAdminType === 'Discharge Coordinator'
-    || ['Manager', 'Management', 'Senior Manager', 'IT Manager'].includes(this.adminType)
+    || ['Manager', 'Management', 'Senior Manager', 'IT Manager','IT Support'].includes(this.adminType)
     || this.isEstimator() || this.isIpBillingManager();
 }
 

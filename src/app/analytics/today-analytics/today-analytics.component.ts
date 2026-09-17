@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import * as echarts from 'echarts/core';
+import { EChartsTracker } from '../../shared/charts/echarts-tracker';
 import { utcToIstDate, getLast14Days, getPositiveNegative, getTodayDate } from '../functions'
 import { EstimationService } from '../../services/estimation/estimation.service';
 import { HealthCheckupServiceService } from '../../services/health-checkup/health-checkup-service.service';
@@ -13,6 +14,8 @@ import * as XLSX from 'xlsx';  // Import xlsx library
   styleUrl: './today-analytics.component.css'
 })
 export class TodayAnalyticsComponent {
+  private charts = new EChartsTracker();
+
   constructor(private doctor: DoctorServiceService, private estimations: EstimationService, private healthCheckUp: HealthCheckupServiceService, private appointment: AppointmentConfirmService) { }
   date: any = '';
   doctors: any[] = [];
@@ -493,7 +496,7 @@ export class TodayAnalyticsComponent {
 
   initChart(data: any, containerId: any, color: string, name: string): void {
     const chartDom = document.getElementById(containerId)!;
-    const myChart = echarts.init(chartDom);
+    const myChart = this.charts.init(chartDom);
 
     // console.log(data, "form chart")
 
@@ -1083,4 +1086,8 @@ export class TodayAnalyticsComponent {
   //     }
   //   );
   // }
+
+  ngOnDestroy(): void {
+    this.charts.disposeAll();
+  }
 }

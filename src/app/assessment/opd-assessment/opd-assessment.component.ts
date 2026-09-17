@@ -15,6 +15,7 @@ import {
   buildOpdAssessmentContent,
   buildInvestigationBlocks,
   buildPrescriptionBlocks,
+  keepHeadingsWithContent,
   OPD_ASSESSMENT_PDF_STYLES,
 } from '../../shared/pdf/opd-assessment-pdf';
 import { VoiceOpdService } from '../../services/voice-opd/voice-opd.service';
@@ -841,6 +842,7 @@ loadAssessment(appointmentId: number) {
         pageSize: "A4",
         pageMargins: brand.pageMargins,
         background: brand.background,
+        images: brand.images,
         footer: brand.footer,
         content: buildOpdAssessmentContent({
           d,
@@ -852,7 +854,8 @@ loadAssessment(appointmentId: number) {
           prescriptionBlocks: this.buildPrescriptionPdf(rxPrint),
           noteSection: (label, value) => this.noteSection(label, value),
         }),
-        styles: OPD_ASSESSMENT_PDF_STYLES
+        styles: OPD_ASSESSMENT_PDF_STYLES,
+        pageBreakBefore: keepHeadingsWithContent,
       };
 
       pdfMake.createPdf(docDefinition).open();

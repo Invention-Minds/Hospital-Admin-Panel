@@ -215,7 +215,10 @@ export class TherapyChannelComponent {
     if (this.intervalId) {
       clearInterval(this.intervalId);
     }
-
+    clearInterval(this.switchInterval);
+    this.eventSource?.close();
+    this.eventSource = null;
+    this.eventSubscription?.unsubscribe();
   }
 
   trackByFn(index: number, item: any): number {

@@ -84,9 +84,21 @@
   }
   .buttons {
     display: flex;
+    flex-wrap: wrap;
+    align-items: center;
     gap: 10px;
     margin-top: 20px;
     justify-content: center;
+  }
+  /* One row of equal-height actions — an icon or two-line label can't make one
+     button taller than its neighbours. */
+  .buttons > button {
+    height: 44px;
+    white-space: nowrap;
+  }
+  .buttons > button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
   }
   .save-button {
     background-color: #169458;
@@ -123,6 +135,26 @@
     justify-content: center;
     align-items: center;
     gap: 10px;
+  }
+  /* Send to patient on WhatsApp — secondary action, outlined so it doesn't
+     compete with Submit (green) or Print (navy). Declared after .print-button,
+     whose layout it shares. */
+  .whatsapp-btn {
+    background-color: #fff;
+    color: #128c7e;
+    border: 1.5px solid #128c7e;
+    width: auto;
+    min-width: 150px;
+  }
+  .whatsapp-btn svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    fill: currentColor;
+  }
+  .whatsapp-btn:hover:not(:disabled) {
+    background-color: #128c7e;
+    color: #fff;
   }
   /* Sprint 3f — Admit to IPD. Token-only; sibling of save/print but a new CTA color. */
   .admit-button {

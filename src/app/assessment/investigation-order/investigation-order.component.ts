@@ -384,8 +384,16 @@ export class InvestigationOrderComponent implements OnInit, OnChanges {
       if (!deptMap.has(d)) deptMap.set(d, new Set());
       deptMap.get(d)!.add(desc);
     };
+    // priorOrders is every order this patient has ever had. When a visit date
+    // is known, print only that visit's orders — otherwise an OPD print lists
+    // tests from past visits as if ordered today. No date (e.g. emergency)
+    // keeps the previous behaviour.
+    const visitOrders = this.date
+      ? this.priorOrders.filter((o) => o?.date === this.date)
+      : this.priorOrders;
+
     for (const g of this.selectedLabByDepartment) for (const t of g.tests) addLab(g.department, t);
-    for (const o of this.priorOrders) for (const t of o?.labTests ?? []) addLab(t.department, t.description);
+    for (const o of visitOrders) for (const t of o?.labTests ?? []) addLab(t.department, t.description);
 
     const labByDept: { department: string; tests: string[] }[] = [];
     for (const dept of this.groupOrder) {
@@ -397,10 +405,10 @@ export class InvestigationOrderComponent implements OnInit, OnChanges {
     for (const [dept, set] of deptMap) labByDept.push({ department: dept, tests: [...set] });
 
     const radSet = new Set<string>(this.selectedRadiologyNames);
-    for (const o of this.priorOrders) for (const t of o?.radiologyTests ?? []) radSet.add(t.description);
+    for (const o of visitOrders) for (const t of o?.radiologyTests ?? []) radSet.add(t.description);
 
     const remarks =
-      this.remarks?.trim() || this.priorOrders.find((o) => o?.remarks)?.remarks || '';
+      this.remarks?.trim() || visitOrders.find((o) => o?.remarks)?.remarks || '';
 
     return {
       labByDept,
@@ -527,6 +535,7 @@ export class InvestigationOrderComponent implements OnInit, OnChanges {
         pageSize: 'A4',
         pageMargins: brand.pageMargins,
         background: brand.background,
+        images: brand.images,
         footer: brand.footer,
         defaultStyle: { fontSize: 10, color: '#2b3440' },
         content,

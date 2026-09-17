@@ -1,5 +1,6 @@
 import { Component, Output, EventEmitter, Input, OnChanges, SimpleChanges } from '@angular/core';
 import * as echarts from 'echarts';
+import { EChartsTracker } from '../../shared/charts/echarts-tracker';
 import { EstimationService } from '../../services/estimation/estimation.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { DatePipe } from '@angular/common';
@@ -14,6 +15,8 @@ import { MessageService } from 'primeng/api';
   styleUrl: './estimation-bar.component.css'
 })
 export class EstimationBarComponent implements OnChanges {
+  private charts = new EChartsTracker();
+
 
   constructor(private estimation: EstimationService, private datePipe: DatePipe, private docDetails: DoctorServiceService, private messageService : MessageService) { }
 
@@ -87,7 +90,7 @@ export class EstimationBarComponent implements OnChanges {
 
   initChart(): void {
     const chartDom = document.getElementById('bar-chart')!;
-    const myChart = echarts.init(chartDom);
+    const myChart = this.charts.init(chartDom);
 
     this.option = {
       tooltip: {
@@ -489,7 +492,7 @@ export class EstimationBarComponent implements OnChanges {
 
   ViewMorechart(data: any): void {
     const chartDom = document.getElementById('viewMoreEstChart')!;
-    const myChart = echarts.init(chartDom);
+    const myChart = this.charts.init(chartDom);
 
     this.viewMoreoption = {
       tooltip: {
@@ -859,5 +862,9 @@ export class EstimationBarComponent implements OnChanges {
     this.selectedViewDoctor = 'all'
     this.viewmore()
     this.dateInput = []
+  }
+
+  ngOnDestroy(): void {
+    this.charts.disposeAll();
   }
 }

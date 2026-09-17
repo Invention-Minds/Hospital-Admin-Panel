@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import * as echarts from 'echarts';
+import { EChartsTracker } from '../../shared/charts/echarts-tracker';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { getYesterdayDate, getIndividualDates, utcToIstTime, getLastThirtyDaysFromSelected, getLastSevenDays, captureScreenshot } from '../functions';
 import { error } from 'console';
@@ -14,6 +15,8 @@ import { saveAs } from 'file-saver';
   styleUrls: ['./average-waiting-time.component.css']
 })
 export class AverageWaitingTimeComponent implements OnInit, OnChanges {
+  private charts = new EChartsTracker();
+
 
   constructor(private appointment: AppointmentConfirmService, private docDetails: DoctorServiceService, private messageService: MessageService) { }
 
@@ -74,7 +77,7 @@ export class AverageWaitingTimeComponent implements OnInit, OnChanges {
 
   initChart(): void {
     const chartDom = document.getElementById('horizontal-bar-charts')!;
-    const myChart = echarts.init(chartDom);
+    const myChart = this.charts.init(chartDom);
 
     this.option = {
       tooltip: {
@@ -391,7 +394,7 @@ export class AverageWaitingTimeComponent implements OnInit, OnChanges {
 
   ViewMorechart(data: any): void {
     const chartDom = document.getElementById('viewMoreAverageWaitingTime')!;
-    const myChart = echarts.init(chartDom);
+    const myChart = this.charts.init(chartDom);
 
     this.viewMoreChart = {
       tooltip: {
@@ -653,4 +656,8 @@ export class AverageWaitingTimeComponent implements OnInit, OnChanges {
     this.dateInput = []
   }
 
+
+  ngOnDestroy(): void {
+    this.charts.disposeAll();
+  }
 }

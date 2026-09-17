@@ -3,6 +3,7 @@ import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from
 import { HealthCheckupServiceService } from '../../services/health-checkup/health-checkup-service.service';
 import { RadiologyService } from '../../services/radiology/radiology.service';
 import * as echarts from 'echarts';
+import { EChartsTracker } from '../../shared/charts/echarts-tracker';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { MessageService } from 'primeng/api';
@@ -15,6 +16,8 @@ import { captureScreenshot, getLast7Days, getLastThirtyDaysFromSelected } from '
   styleUrl: './mhc-waiting-time.component.css'
 })
 export class MhcWaitingTimeComponent implements OnChanges {
+  private charts = new EChartsTracker();
+
   constructor(private healthCheckupService: HealthCheckupServiceService, private messageService: MessageService, private router: Router, private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private radiologyService: RadiologyService) { }
 
   rawData: any
@@ -341,7 +344,7 @@ export class MhcWaitingTimeComponent implements OnChanges {
 
   initChart(data: any): void {
     const chartDom = document.getElementById('MhcWaitingTime');
-    const myChart = echarts.init(chartDom);
+    const myChart = this.charts.init(chartDom);
 
     console.log(data, "chart data")
     this.option = {
@@ -483,7 +486,7 @@ export class MhcWaitingTimeComponent implements OnChanges {
 
   ViewMorechart(data: any): void {
     const chartDom = document.getElementById('viewMoreMhcWaitingTime');
-    const myChart = echarts.init(chartDom);
+    const myChart = this.charts.init(chartDom);
 
     this.viewMoreoption = {
       tooltip: {
@@ -622,6 +625,10 @@ export class MhcWaitingTimeComponent implements OnChanges {
     this.selectedViewDoctor = 'all'
   }
 
+
+  ngOnDestroy(): void {
+    this.charts.disposeAll();
+  }
 }
 
 

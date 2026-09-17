@@ -11,8 +11,8 @@ import { AlertService } from '../../services/alert.service';
 import { response } from 'express';
 import { Router } from '@angular/router';
 import { Subscription, firstValueFrom } from 'rxjs';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Subject, of } from 'rxjs';
+import { catchError, debounceTime, switchMap, takeUntil } from 'rxjs/operators';
 import { app } from '../../../../server';
 import { start } from 'node:repl';
 import { stat } from 'node:fs';
@@ -102,7 +102,9 @@ export class AppointmentFormComponent implements OnInit {
   disabledDates: Date[] = [];
   department: string = '';
   doctorType: string = '';
-  patients: any[] = [];
+  // Typed PRN input → server search (see ngOnInit). Replaces loading every
+  // patient on open, which took ~1 min once the table grew.
+  private prnSearch$ = new Subject<string>();
   filteredPRNs: any[] = []; // To store filtered PRN suggestions
   showSuggestions = false; // Control visibility of suggestion dropdown
   appointmentStatus: string = 'pending';
@@ -140,12 +142,23 @@ isLoading: boolean = false;
       this.minDate = new Date(); // Reset to today's date
     }
     this.loadDoctors();
-    this.appointmentService.getAllPatients().subscribe(
-      (patients => {
-        this.patients = patients;
-        // console.log(this.patients)
-      })
-    )
+
+    // PRN suggestions as you type: wait for a pause, and let switchMap drop a
+    // slower earlier request so stale results never replace newer ones. No
+    // distinctUntilChanged — onPRNChange clears the list synchronously, so a
+    // repeated query must still re-fill it. A failed lookup shows nothing.
+    this.prnSearch$
+      .pipe(
+        debounceTime(250),
+        switchMap((q) =>
+          q ? this.appointmentService.searchPatientsByPrn(q).pipe(catchError(() => of([]))) : of([]),
+        ),
+        takeUntil(this.unsubscribe$),
+      )
+      .subscribe((patients) => {
+        this.filteredPRNs = patients;
+        this.showSuggestions = patients.length > 0;
+      });
 
 
 
@@ -529,24 +542,17 @@ isLoading: boolean = false;
   //   }
   // }
   onPRNChange() {
-    const input = this.appointmentForm.get('prnNumber')?.value || '';
+    const input = String(this.appointmentForm.get('prnNumber')?.value ?? '').trim();
 
-    if (!input) {
+    // PRNs are digits only — anything else can't match, so don't ask the server.
+    if (!/^\d+$/.test(input)) {
       this.filteredPRNs = [];
+      this.showSuggestions = false;
+      this.prnSearch$.next('');
       return;
     }
 
-    // Filter PRN suggestions
-    this.filteredPRNs = this.patients.filter(patient =>
-      String(patient.prn).trim().includes(String(input)) // Convert to string before calling startsWith()
-    );
-    console.log(this.filteredPRNs)
-
-    if (this.filteredPRNs.length === 0) {
-      this.showSuggestions = false;
-    } else {
-      this.showSuggestions = true;
-    }
+    this.prnSearch$.next(input);
   }
 
   selectPRN(selectedPatient: any) {

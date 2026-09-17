@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import * as echarts from 'echarts'
+import { EChartsTracker } from '../../shared/charts/echarts-tracker';
 import { getYesterdayDate, getIndividualDates, getLastSevenDaysFromSelected, getLastThirtyDaysFromSelected, reorderDateFormat, getLast7Days, getLastSevenDays, captureScreenshot } from '../functions'
 import { MessageService } from 'primeng/api';
 
@@ -12,6 +13,8 @@ import { MessageService } from 'primeng/api';
   styleUrl: './opd-time-wise.component.css'
 })
 export class OpdTimeWiseComponent implements OnChanges {
+  private charts = new EChartsTracker();
+
   constructor(private appointmentService: AppointmentConfirmService, private docDetails: DoctorServiceService, private messageService: MessageService) { }
 
   @Input() selectedDate: any[] = [];
@@ -62,7 +65,7 @@ export class OpdTimeWiseComponent implements OnChanges {
 
   initChart(data: any): void {
     const chartDom = document.getElementById('timeOpdChart')!;
-    const myChart = echarts.init(chartDom);
+    const myChart = this.charts.init(chartDom);
     this.option = {
       tooltip: {
         trigger: 'axis'
@@ -323,7 +326,7 @@ export class OpdTimeWiseComponent implements OnChanges {
 
   ViewMorechart(data: any): void {
     const chartDom = document.getElementById('viewMoreTimeWise')!;
-    const myChart = echarts.init(chartDom);
+    const myChart = this.charts.init(chartDom);
 
     this.viewMoreoption = {
       tooltip: {
@@ -488,5 +491,9 @@ export class OpdTimeWiseComponent implements OnChanges {
     this.departmentValue = 'all'
     this.viewmore()
     this.dateInput = []
+  }
+
+  ngOnDestroy(): void {
+    this.charts.disposeAll();
   }
 }

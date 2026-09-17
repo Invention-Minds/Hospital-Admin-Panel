@@ -1,6 +1,7 @@
 import { Component, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import * as echarts from 'echarts'
+import { EChartsTracker } from '../../shared/charts/echarts-tracker';
 import { getYesterdayDate, getIndividualDates, getLastSevenDays, getLastThirtyDaysFromSelected, reorderDateFormat, captureScreenshot } from '../functions'
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { MessageService } from 'primeng/api';
@@ -12,6 +13,8 @@ import { MessageService } from 'primeng/api';
   styleUrl: './gender-overview.component.css'
 })
 export class GenderOverviewComponent implements OnChanges {
+  private charts = new EChartsTracker();
+
 
   constructor(private appointment: AppointmentConfirmService, private docDetails: DoctorServiceService, private messageService: MessageService) { }
 
@@ -63,7 +66,7 @@ export class GenderOverviewComponent implements OnChanges {
   initChart(data: any): void {
 
     const chartDom = document.getElementById('genderLineChart')!;
-    const myChart = echarts.init(chartDom);
+    const myChart = this.charts.init(chartDom);
 
     this.option = {
       tooltip: { trigger: 'axis' },
@@ -341,7 +344,7 @@ export class GenderOverviewComponent implements OnChanges {
 
   ViewMorechart(data: any): void {
     const chartDom = document.getElementById('viewMoreGender')!;
-    const myChart = echarts.init(chartDom);
+    const myChart = this.charts.init(chartDom);
 
     // console.log(data)
 
@@ -466,4 +469,8 @@ export class GenderOverviewComponent implements OnChanges {
     this.dateInput = []
   }
 
+
+  ngOnDestroy(): void {
+    this.charts.disposeAll();
+  }
 }

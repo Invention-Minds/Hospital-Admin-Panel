@@ -6,6 +6,7 @@ import { map } from 'rxjs/operators';
 import { getLastSevenDays, getIndividualDates, getLastThirtyDaysFromSelected, reorderDateFormat, captureScreenshot  } from '../functions';
 import { error } from 'console';
 import * as echarts from 'echarts';
+import { EChartsTracker } from '../../shared/charts/echarts-tracker';
 import { MessageService } from 'primeng/api';
 
 
@@ -15,6 +16,8 @@ import { MessageService } from 'primeng/api';
   styleUrl: './opd-overview.component.css'
 })
 export class OpdOverviewComponent {
+  private charts = new EChartsTracker();
+
   constructor(private appointment: AppointmentConfirmService, private docDetails :  DoctorServiceService, private messageService : MessageService) { }
 
   dates: any
@@ -117,7 +120,7 @@ export class OpdOverviewComponent {
 
   chart(): void {
     const chartDom = document.getElementById('opdOverview')!;
-    const myChart = echarts.init(chartDom);
+    const myChart = this.charts.init(chartDom);
     this.chartoption = {
       tooltip: {
         trigger: 'axis'
@@ -391,7 +394,7 @@ export class OpdOverviewComponent {
 
   ViewMorechart(data: any): void {
     const chartDom = document.getElementById('viewMoreOpdOverview')!;
-    const myChart = echarts.init(chartDom);
+    const myChart = this.charts.init(chartDom);
 
     // console.log(data)
 
@@ -586,5 +589,9 @@ export class OpdOverviewComponent {
     this.selectedViewDepartment = 'all'
     this.viewmore()
     this.dateInput = []
+  }
+
+  ngOnDestroy(): void {
+    this.charts.disposeAll();
   }
 }

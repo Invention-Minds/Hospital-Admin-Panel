@@ -443,14 +443,24 @@ export class AppointmentConfirmService {
   getAllPatients(): Observable<any> {
     return this.http.get(`${environment.apiUrl}/patients`);
   }
+  /** As-you-type PRN lookup: up to `limit` slim patients whose PRN contains `q`. */
+  searchPatientsByPrn(q: string, limit = 20): Observable<any[]> {
+    const params = new HttpParams().set('q', q).set('limit', String(limit));
+    return this.http.get<any[]>(`${environment.apiUrl}/patients/search`, { params });
+  }
   getDetailsByPRN(prnNumber: string): Observable<any> {
     return this.http.post(`${environment.apiUrl}/patients/get-details-by-prn`, { prnNumber });
   }
   updatePatientByPRN(prn: string, data: any): Observable<any> {
     return this.http.put(`${environment.apiUrl}/patients/${prn}`, data);
   }
-  checkedinAppointment(appointmentId: number, username: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${appointmentId}/checkin`, { username });
+  /** `prnNumber` only when reception entered it in the check-in popup — the
+   *  backend then syncs name/age/gender from the registered patient record. */
+  checkedinAppointment(appointmentId: number, username: any, prnNumber?: number): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${appointmentId}/checkin`, {
+      username,
+      ...(prnNumber !== undefined && { prnNumber }),
+    });
   }
   deleteAppointment(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`, { headers: this.getHeaders() });
@@ -566,7 +576,8 @@ export class AppointmentConfirmService {
 
   /** Send an OPD visit-summary PDF (base64, built on the frontend) to the patient
    *  over WhatsApp — mirrors the estimation document flow. */
-  sendVisitSummaryWhatsApp(payload: { pdfBase64: string; patientPhoneNumber: string; patientName: string; filename: string; prn: string; date: string; }): Observable<any> {
+  /** The backend derives the recipient + name from the appointment's patient record. */
+  sendVisitSummaryWhatsApp(payload: { appointmentId: number; pdfBase64: string }): Observable<any> {
     return this.http.post(`${this.apiUrl}/send-visit-summary`, payload);
   }
   updateAppointmentVitals(appointmentId: number, vitals: any): Observable<any> {

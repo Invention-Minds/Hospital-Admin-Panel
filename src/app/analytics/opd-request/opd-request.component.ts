@@ -2,6 +2,7 @@ import { Component, Input, OnChanges, SimpleChanges, Output, EventEmitter } from
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import * as echarts from 'echarts';
+import { EChartsTracker } from '../../shared/charts/echarts-tracker';
 import { download, countByDate, filteredAppointments, getLastThirtyDaysFromSelected, getLastSevenDays, captureScreenshot } from '../functions';
 import { Console, error } from 'console';
 import { doctors } from '../../Analytics-Folder/data';
@@ -15,6 +16,8 @@ import { title } from 'process';
   styleUrl: './opd-request.component.css'
 })
 export class OpdRequestComponent {
+  private charts = new EChartsTracker();
+
   constructor(private appointment: AppointmentConfirmService, private docDetails: DoctorServiceService, private messageService : MessageService) { }
 
   appVia: any = {
@@ -178,7 +181,7 @@ export class OpdRequestComponent {
   chart(): void {
 
     const chartContainer = document.getElementById('chart-container') as HTMLElement;
-    this.chartInstance = echarts.init(chartContainer);
+    this.chartInstance = this.charts.init(chartContainer);
 
     const viewMoreOption = {
       // title :{
@@ -406,7 +409,7 @@ export class OpdRequestComponent {
         return;
     }
 
-    const myChart = echarts.init(chartDom);
+    const myChart = this.charts.init(chartDom);
 
     // Define the option with proper typing and remove duplicate label property
     const viewMoreOption = {
@@ -546,5 +549,9 @@ export class OpdRequestComponent {
     this.departmentValue = 'all'
     this.viewmore()
     this.dateInput = []
+  }
+
+  ngOnDestroy(): void {
+    this.charts.disposeAll();
   }
 }

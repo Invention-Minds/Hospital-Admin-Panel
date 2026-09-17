@@ -1,5 +1,6 @@
 import { Component, Output, EventEmitter, Input, OnChanges, SimpleChanges } from '@angular/core';
 import * as echarts from 'echarts';
+import { EChartsTracker } from '../../shared/charts/echarts-tracker';
 import { HealthCheckupServiceService } from '../../services/health-checkup/health-checkup-service.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { getYesterdayDate, getIndividualDates, getLastThirtyDaysFromSelected, getLastSevenDays, captureScreenshot } from '../functions'
@@ -14,6 +15,8 @@ import { app } from '../../../../server';
   styleUrls: ['./mhc-overview.component.css'] // Fixed typo from styleUrl to styleUrls
 })
 export class MhcOverviewComponent implements OnChanges {
+  private charts = new EChartsTracker();
+
 
   constructor(private healthCheckup: HealthCheckupServiceService, private docDetails: DoctorServiceService, private messageService : MessageService) { }
 
@@ -64,7 +67,7 @@ export class MhcOverviewComponent implements OnChanges {
 
   initChart(): void {
     const chartDom = document.getElementById('mhc-chart')!;
-    const myChart = echarts.init(chartDom);
+    const myChart = this.charts.init(chartDom);
 
     // Use the dataForPiechart array directly, which includes name, value, and itemStyle.color
     const chartData = this.dataForPiehart;
@@ -296,7 +299,7 @@ export class MhcOverviewComponent implements OnChanges {
 
   ViewMorechart(data: any): void {
     const chartDom = document.getElementById('viewMoreMHCoverview');
-    const myChart = echarts.init(chartDom);
+    const myChart = this.charts.init(chartDom);
 
     const chartData = data
 
@@ -454,5 +457,9 @@ export class MhcOverviewComponent implements OnChanges {
     this.dateInput = []
     this.packagesName = []
     this.selectedViewDoctor = 'all'
+  }
+
+  ngOnDestroy(): void {
+    this.charts.disposeAll();
   }
 }

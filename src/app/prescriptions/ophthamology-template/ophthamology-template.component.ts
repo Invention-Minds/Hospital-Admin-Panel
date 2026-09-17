@@ -1120,6 +1120,7 @@ export class OphthamologyTemplateComponent {
     const docDefinition: any = {
       pageSize: "A4",
       background: brand.background,
+      images: brand.images,
       pageMargins: brand.pageMargins,
       footer: brand.footer,
       content,

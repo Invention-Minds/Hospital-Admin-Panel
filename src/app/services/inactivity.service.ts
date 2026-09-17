@@ -6,7 +6,9 @@ import { Router } from '@angular/router';
 })
 export class InactivityService {
   private logoutTimer: any;
+  private lastReset = 0;
   private readonly INACTIVITY_TIME_LIMIT = 10 * 60 * 1000; // 10 minutes
+  private readonly RESET_THROTTLE_MS = 1000;
 
   constructor(private router: Router, private ngZone: NgZone) {
     this.startInactivityWatch();
@@ -16,9 +18,19 @@ export class InactivityService {
   private startInactivityWatch(): void {
     this.resetLogoutTimer();
 
-    ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart'].forEach(event => {
-      window.addEventListener(event, () => this.resetLogoutTimer());
+    // Listen outside Angular's zone: these events fire many times per second, and
+    // inside the zone each one triggers change detection across the whole app.
+    this.ngZone.runOutsideAngular(() => {
+      ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart'].forEach(event => {
+        window.addEventListener(event, () => this.onActivity(), { passive: true });
+      });
     });
+  }
+
+  private onActivity(): void {
+    const now = Date.now();
+    if (now - this.lastReset < this.RESET_THROTTLE_MS) return;
+    this.resetLogoutTimer();
   }
   private isChannelRoute(): boolean {
     return this.router.url.startsWith('/channel/');
@@ -39,6 +51,7 @@ export class InactivityService {
 
   // Function to reset the inactivity timer
   private resetLogoutTimer(): void {
+    this.lastReset = Date.now();
     // Clear any existing timer
     clearTimeout(this.logoutTimer);
     // Set a new timer

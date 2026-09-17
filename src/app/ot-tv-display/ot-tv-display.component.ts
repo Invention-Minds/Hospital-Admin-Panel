@@ -36,6 +36,13 @@ export class OtTvDisplayComponent {
     }, 3600000);
   }
 
+  ngOnDestroy() {
+    this.eventSource?.close();
+    this.eventSource = null;
+    clearInterval(this.intervalId);
+    clearInterval(this.hourlyRefreshId);
+  }
+
   updateDateTime() {
     const now = new Date();
     const options: Intl.DateTimeFormatOptions = {

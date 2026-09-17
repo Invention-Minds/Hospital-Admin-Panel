@@ -94,6 +94,11 @@ export class TvControlComponent {
     });
   }
 
+  ngOnDestroy() {
+    this.eventSource?.close();
+    this.eventSource = null;
+  }
+
   openForm(channelIndex: number, doctorIndex: number) {
     this.selectedChannelIndex = channelIndex;
     this.selectedDoctorIndex = doctorIndex;

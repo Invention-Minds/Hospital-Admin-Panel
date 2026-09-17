@@ -14,6 +14,8 @@
  * letterhead wrapper (pageMargins / background / footer) and `pdfMake.createPdf`.
  */
 
+import { PAGE_FOOTER_STYLE } from './jmrh-letterhead';
+
 /** Assessment fields, in the `formData` shape the OPD form already uses. */
 export interface OpdAssessmentPdfData {
   patientName?: string;
@@ -74,6 +76,23 @@ export const OPD_ASSESSMENT_PDF_STYLES = {
   subheader: { fontSize: 14, bold: true },
   sectionHeader: { fontSize: 12, bold: true, margin: [0, 10, 0, 5] },
 };
+
+/**
+ * pdfMake `pageBreakBefore` for these documents: never leave a section heading
+ * stranded at the foot of a page while its content starts on the next one.
+ * Callers put it on the doc definition: `pageBreakBefore: keepHeadingsWithContent`.
+ */
+export function keepHeadingsWithContent(
+  currentNode: any,
+  followingNodesOnPage: any[],
+  nodesOnNextPage: any[],
+): boolean {
+  const isHeading = currentNode?.style === 'sectionHeader' || currentNode?.style === 'section';
+  if (!isHeading) return false;
+  // The page footer is reported among the page's nodes — it isn't content.
+  const contentAfter = followingNodesOnPage.filter((n) => n?.style !== PAGE_FOOTER_STYLE);
+  return contentAfter.length === 0 && nodesOnNextPage.length > 0;
+}
 
 export function buildOpdAssessmentContent(input: OpdAssessmentPdfInput): any[] {
   const { d, noteSection } = input;

@@ -84,6 +84,10 @@ export class AppointmentConfirmComponent {
   username: any;
   showPrnPopup = false;
   enteredPrn = '';
+  // PRN entered in the "Missing PRN" popup for the appointment being checked
+  // in. Sent with /checkin so the backend syncs name/age/gender from the
+  // patient record; null when the appointment already had a PRN.
+  prnCapturedAtCheckin: number | null = null;
   lockedUser: string = ''
   searchOptions = [
     { label: 'Patient Name', value: 'patientName' },
@@ -700,6 +704,12 @@ export class AppointmentConfirmComponent {
     this.checkinAppointment = appointment
   }
   closePopup() {
+    // Check-in abandoned — the popup's PRN was never saved, so don't leave it
+    // showing on the row as if it were.
+    if (this.prnCapturedAtCheckin !== null && this.checkinAppointment) {
+      this.checkinAppointment.prnNumber = null;
+    }
+    this.prnCapturedAtCheckin = null;
     this.showPopup = false;
     this.checkinAppointment = null;
   }
@@ -726,9 +736,14 @@ export class AppointmentConfirmComponent {
 
     this.appointmentService.updateAppointmentObs(payload).subscribe({
       next: () => {
-        this.appointmentService.checkedinAppointment(appointmentId, this.username).subscribe({
+        this.appointmentService.checkedinAppointment(
+          appointmentId,
+          this.username,
+          this.prnCapturedAtCheckin ?? undefined,
+        ).subscribe({
           next: () => {
             this.checkingIn = false;
+            this.prnCapturedAtCheckin = null;
             this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Checked in successfully!' });
             appointment.checkedIn = true; // Update the UI to reflect the checked-in status
             this.showPopup = false;
@@ -752,6 +767,7 @@ export class AppointmentConfirmComponent {
   }
 
   prnCheck(appointment: any): void {
+    this.prnCapturedAtCheckin = null;
     const prn = appointment.prnNumber !== undefined && appointment.prnNumber !== null
       ? appointment.prnNumber.toString().trim()
       : '';
@@ -767,7 +783,7 @@ export class AppointmentConfirmComponent {
   }
 
   submitPrn(prnValue: string): void {
-    if (!prnValue || prnValue.trim() === '') {
+    if (!prnValue || !/^\d+$/.test(prnValue.trim()) || Number(prnValue.trim()) <= 0) {
       this.messageService.add({
         severity: 'error',
         summary: 'Invalid PRN',
@@ -776,9 +792,12 @@ export class AppointmentConfirmComponent {
       return;
     }
 
-    // Assign PRN to appointment
-    this.checkinAppointment.prnNumber = Number(prnValue.trim());
-    this.appointmentService.updateAppointment(this.checkinAppointment);
+    // Assign PRN to appointment. Not saved here: completeAppointment PUTs the
+    // whole appointment and then /checkin saves the PRN and syncs name/age/
+    // gender from the patient record. A separate save here would race that.
+    const prn = Number(prnValue.trim());
+    this.checkinAppointment.prnNumber = prn;
+    this.prnCapturedAtCheckin = prn;
     this.enteredPrn = ''
 
     // Close PRN popup and proceed
@@ -786,6 +805,13 @@ export class AppointmentConfirmComponent {
 
     // Continue with next checks
     this.handleCheckin(this.checkinAppointment);
+
+    // handleCheckin refused (already checked in / outside the time window), so
+    // the check-in popup never opened and this PRN will never be saved.
+    if (!this.showPopup) {
+      this.checkinAppointment.prnNumber = null;
+      this.prnCapturedAtCheckin = null;
+    }
   }
 
   handleCheckin(appointment: any): void {
@@ -816,9 +842,9 @@ export class AppointmentConfirmComponent {
     appointmentDate.setMinutes(minutes);
     appointmentDate.setSeconds(0);
 
-    // Define the time window (30 mins before and after)
-    const startWindow = new Date(appointmentDate.getTime() - 300 * 60000); // 30 mins before
-    const endWindow = new Date(appointmentDate.getTime() + 300 * 60000);   // 30 mins after
+    // Define the time window (300 mins before and after)
+    const startWindow = new Date(appointmentDate.getTime() - 300 * 60000); // 300 mins before
+    const endWindow = new Date(appointmentDate.getTime() + 300 * 60000);   // 300 mins after
 
     // Enable if the current time is within the window
     return currentTime >= startWindow && currentTime <= endWindow;

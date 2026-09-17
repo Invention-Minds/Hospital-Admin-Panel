@@ -88,6 +88,11 @@ export class TodayOtComponent {
     });
   }
 
+  ngOnDestroy(): void {
+    this.eventSource?.close();
+    this.eventSource = null;
+  }
+
 
 
   fetchConfirmedAppointments(): void {

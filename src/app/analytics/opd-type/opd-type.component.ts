@@ -2,6 +2,7 @@ import { Component, Input, SimpleChanges, Output, EventEmitter } from '@angular/
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { getYesterdayDate, lastSelectedSevenDays, getIndividualDates, getLastThirtyDaysFromSelected, reorderDateFormat, sortByDateOldToNew, getLastSevenDays, captureScreenshot } from '../functions';
 import * as echarts from 'echarts'
+import { EChartsTracker } from '../../shared/charts/echarts-tracker';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { MessageService } from 'primeng/api';
 
@@ -12,6 +13,8 @@ import { MessageService } from 'primeng/api';
   styleUrl: './opd-type.component.css'
 })
 export class OpdTypeComponent {
+  private charts = new EChartsTracker();
+
 
   constructor(private appointment: AppointmentConfirmService, private docDetails: DoctorServiceService, private messageService : MessageService) { }
 
@@ -94,7 +97,7 @@ export class OpdTypeComponent {
 
   inItChart(data: any): void {
     const chartContainer = document.getElementById('pieOpdType') as HTMLElement;
-    this.chartInstance = echarts.init(chartContainer);
+    this.chartInstance = this.charts.init(chartContainer);
 
     this.option = {
       tooltip: {
@@ -368,7 +371,7 @@ export class OpdTypeComponent {
 
   ViewMorechart(data: any): void {
     const chartDom = document.getElementById('viewMoreEstType');
-    const myChart = echarts.init(chartDom);
+    const myChart = this.charts.init(chartDom);
 
     this.viewMoreoption = {
       tooltip: {
@@ -589,6 +592,10 @@ export class OpdTypeComponent {
     this.dateInput = []
   }
 
+
+  ngOnDestroy(): void {
+    this.charts.disposeAll();
+  }
 }
 
 

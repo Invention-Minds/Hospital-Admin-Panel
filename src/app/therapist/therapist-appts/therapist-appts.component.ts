@@ -576,6 +576,9 @@ startCleaning(service: any): void {
   ngOnDestroy(): void {
     // Unlock the service on component destroy if locked
     console.log('Destroying confirmed component...', this.activeComponent);
+    this.eventSource?.close();
+    this.eventSource = null;
+    this.eventSubscription?.unsubscribe();
     if (this.activeServiceId && this.activeComponent !== 'form') {
       // this.unlockService();
     }

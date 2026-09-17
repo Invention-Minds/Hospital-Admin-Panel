@@ -278,6 +278,7 @@ export class OtTrackSheetComponent implements OnInit, OnDestroy {
       pageSize: 'A4',
       pageMargins: brand.pageMargins,
       background: brand.background,
+      images: brand.images,
       footer: brand.footer,
       content,
       styles: {

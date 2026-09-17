@@ -1,5 +1,6 @@
 import { Component, Output, EventEmitter, Input, output, OnChanges, SimpleChanges } from '@angular/core';
 import * as echarts from 'echarts';
+import { EChartsTracker } from '../../shared/charts/echarts-tracker';
 import { EstimationService } from '../../services/estimation/estimation.service';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
@@ -15,6 +16,8 @@ import { constants } from 'buffer';
   styleUrl: './opd-estimation-pie.component.css'
 })
 export class OpdEstimationPieComponent implements OnChanges {
+  private charts = new EChartsTracker();
+
 
   constructor(private appointment: AppointmentConfirmService, private estimation: EstimationService, private doctor: DoctorServiceService, private messageService: MessageService) { }
 
@@ -79,7 +82,7 @@ export class OpdEstimationPieComponent implements OnChanges {
 
   initChart(data: any): void {
     const chartContainer = document.getElementById('pie-chart') as HTMLElement;
-    this.chartInstance = echarts.init(chartContainer);
+    this.chartInstance = this.charts.init(chartContainer);
 
     // Filter out data points where value is 0
     const filteredData = [
@@ -316,7 +319,7 @@ export class OpdEstimationPieComponent implements OnChanges {
 
   ViewMorechart(data: any): void {
     const chartContainer = document.getElementById('viewMoreOpdEst') as HTMLElement;
-    this.chartInstance = echarts.init(chartContainer);
+    this.chartInstance = this.charts.init(chartContainer);
 
     const chartOptions = {
       tooltip: {
@@ -455,5 +458,9 @@ export class OpdEstimationPieComponent implements OnChanges {
     this.selectedViewDoctor = 'all'
     this.viewmore()
     this.dateInput = []
+  }
+
+  ngOnDestroy(): void {
+    this.charts.disposeAll();
   }
 }

@@ -1,6 +1,5 @@
 import { Component, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
-import * as echarts from 'echarts'
 import { request } from 'http';
 import { countByDate, processAppointmentData } from '../data';
 import { Observable, of } from 'rxjs';

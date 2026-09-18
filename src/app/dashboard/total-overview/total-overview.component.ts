@@ -2,7 +2,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
-import * as XLSX from 'xlsx';
 
 import * as moment from 'moment-timezone';
 
@@ -100,7 +99,9 @@ export class TotalOverviewComponent implements OnInit {
 
 
 
-  downloadFilteredData(): void {
+  async downloadFilteredData(): Promise<void> {
+    // Excel export library is loaded only when the user exports.
+    const XLSX = await import('xlsx');
     // console.log('Downloading completed appointments data...');
     if (this.appointments && this.appointments.length > 0) {
       const selectedFields = this.appointments.map((appointment: any) => {
@@ -178,7 +179,9 @@ export class TotalOverviewComponent implements OnInit {
     }
   }
 
-  downlaodTodayAppts(): void {
+  async downlaodTodayAppts(): Promise<void> {
+    // Excel export library is loaded only when the user exports.
+    const XLSX = await import('xlsx');
     // console.log('Downloading completed appointments data...');
     if (this.todayAppointments && this.todayAppointments.length > 0) {
       const selectedFields = this.todayAppointments.map((appointment: any) => {

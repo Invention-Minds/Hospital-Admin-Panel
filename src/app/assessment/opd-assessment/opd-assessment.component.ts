@@ -3,8 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { HandWrittenComponent } from '../hand-written/hand-written.component';
 import { OpdAssessmentsService } from '../../services/opd-assessment/opd-assessments.service';
 import { MessageService } from 'primeng/api';
-import pdfMake from 'pdfmake/build/pdfmake';
-import pdfFonts from 'pdfmake/build/vfs_fonts';
+import { loadPdfMake } from '../../shared/pdf/pdfmake-loader';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { InvestigationOrderComponent } from '../investigation-order/investigation-order.component';
 import { getJmrhPdfBranding } from '../../shared/pdf/jmrh-letterhead';
@@ -818,6 +817,8 @@ loadAssessment(appointmentId: number) {
       });
   }
   async printAssessment() {
+    // PDF library is loaded only when a PDF is generated.
+    const pdfMake = await loadPdfMake();
     const d = this.formData;
     const now = new Date();
     const logoUrl = "/rash-logo.png";

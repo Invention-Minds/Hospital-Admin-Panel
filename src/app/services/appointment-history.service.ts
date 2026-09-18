@@ -136,6 +136,36 @@ export interface AppointmentEventSummary {
   cancelReason: string | null;
 }
 
+/**
+ * Result of reversing a check-in. The flags describe what actually changed on
+ * the row, so the UI can explain a visible change rather than announce one
+ * that didn't happen — re-entering the PRN the booking already had restores
+ * the same value, which is not a change.
+ */
+/**
+ * Why a check-in is being reversed. A closed list rather than free text — the
+ * code decides what else happens, and keeps the trail countable.
+ */
+export type UndoCheckInReason = 'wrongly_marked' | 'cancel' | 'reschedule';
+
+export interface UndoCheckInResult {
+  message: string;
+  reasonCode: UndoCheckInReason;
+  /** True when the backend also cancelled the appointment (reasonCode 'cancel'). */
+  appointmentCancelled: boolean;
+  /** Where to go next — set on the reschedule path. */
+  guidance: string | null;
+  /** patientName / age / gender were put back to the booking's values. */
+  demographicsRestored: boolean;
+  /** The PRN typed into the check-in popup was cleared. */
+  prnCleared: boolean;
+  /** The visit type picked in the check-in popup was cleared. */
+  typeCleared: boolean;
+  /** paymentStatus / paidAt / paymentSource were unwound. */
+  paymentReverted: boolean;
+  warning: string | null;
+}
+
 /** Keyed by appointment id (as a string, since it comes back as JSON keys). */
 export type AppointmentEventSummaryMap = Record<string, AppointmentEventSummary>;
 
@@ -179,6 +209,43 @@ export const istDateTime = (iso: string | null): string => {
   return `${get('day')}-${get('month')}-${get('year')} ${get('hour')}:${get('minute')}`;
 };
 
+/**
+ * Minutes since midnight for an appointment's `time`.
+ *
+ * Stored times are not one format: "9:40 PM", "03:00 PM", "10:15 AM" and a
+ * handful of bare 24-hour "14:30" all exist, so a string sort would put
+ * "10:00 AM" ahead of "9:00 AM" and interleave AM with PM. Anything blank or
+ * unparseable sorts last rather than silently landing at midnight.
+ */
+export const minutesOfDay = (time: string | null | undefined): number => {
+  if (!time) return Number.MAX_SAFE_INTEGER;
+  const match = time.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)?$/i);
+  if (!match) return Number.MAX_SAFE_INTEGER;
+
+  let hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  const meridiem = match[3]?.toUpperCase();
+  if (meridiem === 'PM' && hours !== 12) hours += 12;
+  if (meridiem === 'AM' && hours === 12) hours = 0;
+  return hours * 60 + minutes;
+};
+
+/**
+ * Chronological order by appointment slot — date, then time. Used for the
+ * print-out and the Excel export, where a queue reads better in slot order
+ * than in the newest-booking-first order the tables use on screen.
+ *
+ * `date` is a 'YYYY-MM-DD' string, so a plain compare is already chronological.
+ */
+export const byAppointmentSlot = (
+  a: { date?: string | null; time?: string | null },
+  b: { date?: string | null; time?: string | null }
+): number => {
+  const byDate = (a.date ?? '').localeCompare(b.date ?? '');
+  if (byDate !== 0) return byDate;
+  return minutesOfDay(a.time) - minutesOfDay(b.time);
+};
+
 /** "2026-09-08 02:00 PM · Dr. Karuna" — blank when there was no prior slot. */
 export const slotText = (
   date: string | null,
@@ -194,6 +261,23 @@ export class AppointmentHistoryService {
   private apiUrl = `${environment.apiUrl}/appointments`;
 
   constructor(private http: HttpClient) {}
+
+  /**
+   * PUT /api/appointments/:id/undo-checkin — correction for a check-in made on
+   * the wrong appointment. Reception and admin only; the backend restores the
+   * demographics/PRN/payment that check-in overwrote and refuses once the
+   * consultation has started.
+   */
+  undoCheckIn(
+    appointmentId: number,
+    reasonCode: UndoCheckInReason,
+    note?: string
+  ): Observable<UndoCheckInResult> {
+    return this.http.put<UndoCheckInResult>(
+      `${this.apiUrl}/${appointmentId}/undo-checkin`,
+      { reasonCode, note }
+    );
+  }
 
   /** GET /api/appointments/:id/history */
   getHistory(appointmentId: number): Observable<AppointmentHistoryResponse> {

@@ -2,8 +2,6 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import SignaturePad from 'signature_pad';
-import { PDFDocument, rgb } from 'pdf-lib';
-import { jsPDF } from 'jspdf';
 
 @Component({
   selector: 'app-signature',
@@ -64,6 +62,8 @@ export class SignatureComponent {
   //   pdf.save('completed-estimation.pdf');
   // }
   async generatePDF() {
+    // PDF library is loaded only when a PDF is generated.
+    const { PDFDocument, rgb } = await import('pdf-lib');
     // Load the template PDF
     const existingPdfBytes = await fetch('/Estimation.pdf').then((res) =>
       res.arrayBuffer()

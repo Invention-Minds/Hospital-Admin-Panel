@@ -1,7 +1,6 @@
 import { Component, Input, HostListener, ViewChild, ElementRef } from '@angular/core';
 import { OpthPresService } from '../../services/ophthamology-prescription/opth-pres.service';
-import pdfMake from 'pdfmake/build/pdfmake';
-import pdfFonts from 'pdfmake/build/vfs_fonts';
+import { loadPdfMake } from '../../shared/pdf/pdfmake-loader';
 import { MessageService } from 'primeng/api';
 import { getJmrhPdfBranding } from '../../shared/pdf/jmrh-letterhead';
 type DiagramType = 'eye' | 'cornea' | 'fundus' | 'vf' | 'eom' | 'gonio';
@@ -1114,6 +1113,8 @@ export class OphthamologyTemplateComponent {
    * render the eye record identically.
    */
   async printPrescriptionPDF(data: any) {
+    // PDF library is loaded only when a PDF is generated.
+    const pdfMake = await loadPdfMake();
     const brand = await getJmrhPdfBranding();
     const content = this.buildEyePdfContent(data, true);
 

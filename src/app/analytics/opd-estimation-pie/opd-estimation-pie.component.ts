@@ -1,5 +1,4 @@
 import { Component, Output, EventEmitter, Input, output, OnChanges, SimpleChanges } from '@angular/core';
-import * as echarts from 'echarts';
 import { EChartsTracker } from '../../shared/charts/echarts-tracker';
 import { EstimationService } from '../../services/estimation/estimation.service';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
@@ -80,9 +79,9 @@ export class OpdEstimationPieComponent implements OnChanges {
     this.isLoading = false
   }
 
-  initChart(data: any): void {
+  async initChart(data: any): Promise<void> {
     const chartContainer = document.getElementById('pie-chart') as HTMLElement;
-    this.chartInstance = this.charts.init(chartContainer);
+    this.chartInstance = await this.charts.init(chartContainer);
 
     // Filter out data points where value is 0
     const filteredData = [
@@ -317,9 +316,9 @@ export class OpdEstimationPieComponent implements OnChanges {
   //   }))
   // }
 
-  ViewMorechart(data: any): void {
+  async ViewMorechart(data: any): Promise<void> {
     const chartContainer = document.getElementById('viewMoreOpdEst') as HTMLElement;
-    this.chartInstance = this.charts.init(chartContainer);
+    this.chartInstance = await this.charts.init(chartContainer);
 
     const chartOptions = {
       tooltip: {

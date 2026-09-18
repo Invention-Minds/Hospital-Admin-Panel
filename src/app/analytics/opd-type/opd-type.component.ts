@@ -1,7 +1,6 @@
 import { Component, Input, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { getYesterdayDate, lastSelectedSevenDays, getIndividualDates, getLastThirtyDaysFromSelected, reorderDateFormat, sortByDateOldToNew, getLastSevenDays, captureScreenshot } from '../functions';
-import * as echarts from 'echarts'
 import { EChartsTracker } from '../../shared/charts/echarts-tracker';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { MessageService } from 'primeng/api';
@@ -95,9 +94,9 @@ export class OpdTypeComponent {
     })
   }
 
-  inItChart(data: any): void {
+  async inItChart(data: any): Promise<void> {
     const chartContainer = document.getElementById('pieOpdType') as HTMLElement;
-    this.chartInstance = this.charts.init(chartContainer);
+    this.chartInstance = await this.charts.init(chartContainer);
 
     this.option = {
       tooltip: {
@@ -369,9 +368,9 @@ export class OpdTypeComponent {
     this.viewMoreData(); // Call after filtering
   }
 
-  ViewMorechart(data: any): void {
+  async ViewMorechart(data: any): Promise<void> {
     const chartDom = document.getElementById('viewMoreEstType');
-    const myChart = this.charts.init(chartDom);
+    const myChart = await this.charts.init(chartDom);
 
     this.viewMoreoption = {
       tooltip: {

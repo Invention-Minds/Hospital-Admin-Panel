@@ -1,10 +1,8 @@
 import { Component, Output, EventEmitter, Input, OnChanges, SimpleChanges } from '@angular/core';
-import * as echarts from 'echarts';
 import { EChartsTracker } from '../../shared/charts/echarts-tracker';
 import { HealthCheckupServiceService } from '../../services/health-checkup/health-checkup-service.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { getYesterdayDate, getIndividualDates, getLastThirtyDaysFromSelected, getLastSevenDays, captureScreenshot } from '../functions'
-import { TextAlignment } from 'pdf-lib';
 import { MessageService } from 'primeng/api';
 import { app } from '../../../../server';
 
@@ -65,9 +63,9 @@ export class MhcOverviewComponent implements OnChanges {
   }
 
 
-  initChart(): void {
+  async initChart(): Promise<void> {
     const chartDom = document.getElementById('mhc-chart')!;
-    const myChart = this.charts.init(chartDom);
+    const myChart = await this.charts.init(chartDom);
 
     // Use the dataForPiechart array directly, which includes name, value, and itemStyle.color
     const chartData = this.dataForPiehart;
@@ -297,9 +295,9 @@ export class MhcOverviewComponent implements OnChanges {
   //   }))
   // }
 
-  ViewMorechart(data: any): void {
+  async ViewMorechart(data: any): Promise<void> {
     const chartDom = document.getElementById('viewMoreMHCoverview');
-    const myChart = this.charts.init(chartDom);
+    const myChart = await this.charts.init(chartDom);
 
     const chartData = data
 

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { ErService } from '../../services/er/er.service';
-import pdfMake from 'pdfmake/build/pdfmake';
+import { loadPdfMake } from '../../shared/pdf/pdfmake-loader';
 
 @Component({
   selector: 'app-er-list',
@@ -231,6 +231,8 @@ export class ErListComponent {
 // }
 
 async printAssessment(data: any) {
+  // PDF library is loaded only when a PDF is generated.
+  const pdfMake = await loadPdfMake();
   const d = { ...data };
   const now = new Date();
   const logoUrl = "/rash-logo.png";

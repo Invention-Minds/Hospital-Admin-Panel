@@ -6,7 +6,7 @@ import { MaternityEstimationComponent } from "../../maternity-estimation/materni
 import { EstimationService } from '../../../services/estimation/estimation.service';
 import { DoctorServiceService } from '../../../services/doctor-details/doctor-service.service';
 import { DateTime } from 'luxon';
-import * as XLSX from 'xlsx';
+import type * as XLSXTypes from 'xlsx';
 import * as FileSaver from 'file-saver';
 import { MessageService } from 'primeng/api';
 import { EstimationAnalyticsComponent } from "../../../estimation-analytics/estimation-analytics.component";
@@ -674,7 +674,7 @@ export class EstimationOverviewComponent {
     this.activeComponent = 'overAll'
     console.log('open')
   }
-  overAllESTSummary(estimations: any[],selectedDoctorName?: string) {
+  async overAllESTSummary(estimations: any[],selectedDoctorName?: string) {
     console.log('filtering')
     const overAllSummary = estimations.filter(e => {
       let matches = true;
@@ -744,7 +744,9 @@ downloadEstimationSummary() {
   this.exportToExcel(this.totalEstimationsOverall, 'Estimation-Summary');
 }
 
-exportToExcel(data: any[], fileName: string = 'Estimation-Summary') {
+async exportToExcel(data: any[], fileName: string = 'Estimation-Summary') {
+  // Excel export library is loaded only when the user exports.
+  const XLSX = await import('xlsx');
 
   const headerMap: Record<string, string> = {
     id: "ID",
@@ -863,8 +865,8 @@ exportToExcel(data: any[], fileName: string = 'Estimation-Summary') {
     return renamed;
   });
 
-  const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(filteredData);
-  const workbook: XLSX.WorkBook = {
+  const worksheet: XLSXTypes.WorkSheet = XLSX.utils.json_to_sheet(filteredData);
+  const workbook: XLSXTypes.WorkBook = {
     Sheets: { 'data': worksheet },
     SheetNames: ['data']
   };

@@ -3,7 +3,7 @@ import { EstimationService } from '../../../services/estimation/estimation.servi
 import { MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
 import { HealthCheckupServiceService } from '../../../services/health-checkup/health-checkup-service.service';
-import * as XLSX from 'xlsx';
+import type * as XLSXTypes from 'xlsx';
 import * as FileSaver from 'file-saver';
 
 
@@ -545,7 +545,9 @@ export class EstimationRequestComponent {
       //   complete: () => (this.isLoading = false),
       // });
     }
-    exportToExcel(data: any[], fileName: string = 'Estimation-Summary') {
+    async exportToExcel(data: any[], fileName: string = 'Estimation-Summary') {
+      // Excel export library is loaded only when the user exports.
+      const XLSX = await import('xlsx');
       const dateFieldsToConvert = [
         'estimationCreatedTime',
         'approvedDateAndTime',
@@ -583,8 +585,8 @@ export class EstimationRequestComponent {
         return rest;
       });
     
-      const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(filteredData);
-      const workbook: XLSX.WorkBook = {
+      const worksheet: XLSXTypes.WorkSheet = XLSX.utils.json_to_sheet(filteredData);
+      const workbook: XLSXTypes.WorkBook = {
         Sheets: { 'data': worksheet },
         SheetNames: ['data']
       };

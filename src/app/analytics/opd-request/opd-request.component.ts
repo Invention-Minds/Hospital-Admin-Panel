@@ -1,7 +1,6 @@
 import { Component, Input, OnChanges, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
-import * as echarts from 'echarts';
 import { EChartsTracker } from '../../shared/charts/echarts-tracker';
 import { download, countByDate, filteredAppointments, getLastThirtyDaysFromSelected, getLastSevenDays, captureScreenshot } from '../functions';
 import { Console, error } from 'console';
@@ -178,10 +177,10 @@ export class OpdRequestComponent {
 
   // 
 
-  chart(): void {
+  async chart(): Promise<void> {
 
     const chartContainer = document.getElementById('chart-container') as HTMLElement;
-    this.chartInstance = this.charts.init(chartContainer);
+    this.chartInstance = await this.charts.init(chartContainer);
 
     const viewMoreOption = {
       // title :{
@@ -395,7 +394,7 @@ export class OpdRequestComponent {
   //     }
   //   }))
   // }
-  ViewMorechart(data: any): void {
+  async ViewMorechart(data: any): Promise<void> {
     // Add null check for chartDom
     const chartDom = document.getElementById('viewMoreOpdReq');
     if (!chartDom) {
@@ -403,13 +402,7 @@ export class OpdRequestComponent {
         return;
     }
 
-    // Ensure echarts is available
-    if (!echarts) {
-        console.error('ECharts library not found');
-        return;
-    }
-
-    const myChart = this.charts.init(chartDom);
+    const myChart = await this.charts.init(chartDom);
 
     // Define the option with proper typing and remove duplicate label property
     const viewMoreOption = {

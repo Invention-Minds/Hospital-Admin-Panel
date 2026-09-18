@@ -1,5 +1,4 @@
 import { Component, Output, EventEmitter, Input, OnChanges, SimpleChanges } from '@angular/core';
-import * as echarts from 'echarts';
 import { EChartsTracker } from '../../shared/charts/echarts-tracker';
 import { EstimationService } from '../../services/estimation/estimation.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
@@ -88,9 +87,9 @@ export class EstimationBarComponent implements OnChanges {
     }
   }
 
-  initChart(): void {
+  async initChart(): Promise<void> {
     const chartDom = document.getElementById('bar-chart')!;
-    const myChart = this.charts.init(chartDom);
+    const myChart = await this.charts.init(chartDom);
 
     this.option = {
       tooltip: {
@@ -490,9 +489,9 @@ export class EstimationBarComponent implements OnChanges {
     this.viewMoreData(); // Call after filtering
   }
 
-  ViewMorechart(data: any): void {
+  async ViewMorechart(data: any): Promise<void> {
     const chartDom = document.getElementById('viewMoreEstChart')!;
-    const myChart = this.charts.init(chartDom);
+    const myChart = await this.charts.init(chartDom);
 
     this.viewMoreoption = {
       tooltip: {

@@ -30,6 +30,12 @@ export interface StationNurseRef {
 
 export type StationType = 'IPD' | 'OPD';
 
+/** An OPD department a station's nurses cover (vitals scoping). */
+export interface StationDepartmentRef {
+  id: number;
+  name: string;
+}
+
 export interface NursingStationRow {
   id: string;
   name: string;
@@ -38,8 +44,11 @@ export interface NursingStationRow {
   type: StationType;
   isActive: boolean;
   wards: StationWardRef[];
+  /** OPD stations only. Empty = the station covers EVERY department. */
+  departments: StationDepartmentRef[];
   nurses: StationNurseRef[];
   wardCount?: number;
+  departmentCount?: number;
   nurseCount?: number;
 }
 
@@ -50,6 +59,8 @@ export interface StationCreateBody {
   type?: StationType;
   isActive?: boolean;
   wardIds?: string[];
+  /** OPD stations only — omit or leave empty to cover every department. */
+  departmentIds?: number[];
 }
 
 export type StationUpdateBody = Partial<Pick<StationCreateBody, 'name' | 'description' | 'type' | 'isActive'>>;
@@ -89,6 +100,16 @@ export class NursingStationService {
 
   setWards(id: string, wardIds: string[]): Observable<{ data: { id: string; wardIds: string[] } }> {
     return this.http.put<{ data: { id: string; wardIds: string[] } }>(`${this.base}/${id}/wards`, { wardIds });
+  }
+
+  /**
+   * OPD counterpart to setWards — which departments this station's nurses
+   * cover. An empty list means every department (unscoped), matching how the
+   * backend behaved before departments existed.
+   */
+  setDepartments(id: string, departmentIds: number[]): Observable<{ data: { id: string; departmentIds: number[] } }> {
+    return this.http.put<{ data: { id: string; departmentIds: number[] } }>(
+      `${this.base}/${id}/departments`, { departmentIds });
   }
 
   assignNurses(id: string, userIds: number[]): Observable<{ data: { stationId: string; assigned: number[]; rejectedNonNurse: number[] } }> {

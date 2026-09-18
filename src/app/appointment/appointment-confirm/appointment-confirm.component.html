@@ -201,6 +201,15 @@
               <img src="book.svg" alt="Confirm">
             </button>
 
+            <!-- Undo check-in — correction when the wrong patient was checked in -->
+            <button class="btn-action btn-undo-checkin" *ngIf="appointment.checkedIn"
+              (click)="openUndoCheckin(appointment)" pTooltip="Undo check-in" tooltipPosition="top">
+              <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24">
+                <path fill="#b3261e"
+                  d="M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88c3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8" />
+              </svg>
+            </button>
+
             <!-- History Button — full lifecycle trail for this appointment -->
             <button class="btn-action btn-history" (click)="openHistory(appointment)" pTooltip="History"
               tooltipPosition="top">
@@ -306,6 +315,58 @@
   [appointmentId]="historyAppointmentId"
   (close)="closeHistory()"
 ></app-appointment-history>
+
+<!-- Undo check-in — reason is mandatory, it goes onto the appointment trail -->
+<div class="close-opd-modal" *ngIf="showUndoCheckinPopup">
+  <div class="modal-content-transfer">
+    <div class="modal-header">
+      <h3>Undo Check-in</h3>
+      <button class="popup-close" (click)="closeUndoCheckin()" [disabled]="undoingCheckin">
+        <img src="/popup-close.svg" alt="Close Popup" />
+      </button>
+    </div>
+    <hr />
+    <div class="modal-body">
+      <p class="undo-summary" *ngIf="undoCheckinAppointment">
+        <strong>{{ undoCheckinAppointment.patientName }}</strong>
+        <span *ngIf="undoCheckinAppointment.prnNumber"> · PRN {{ undoCheckinAppointment.prnNumber }}</span>
+        — {{ undoCheckinAppointment.date | date:'dd-MM-yyyy' }} {{ undoCheckinAppointment.time }},
+        {{ undoCheckinAppointment.doctorName }}
+      </p>
+      <p class="undo-note">
+        This puts the appointment back to not-checked-in and restores the patient details
+        that check-in overwrote. The check-in is reversed for every reason below — what
+        differs is what happens next.
+      </p>
+      <label class="estimation-type-label">Reason for the correction *</label>
+      <div class="input-container">
+        <select class="custom-input" [(ngModel)]="undoCheckinReasonCode" [disabled]="undoingCheckin">
+          <option value="">Select a reason…</option>
+          <option *ngFor="let r of undoCheckinReasons" [value]="r.value">{{ r.label }}</option>
+        </select>
+      </div>
+
+      <!-- What the chosen reason will actually do, before they commit to it. -->
+      <p class="undo-hint" *ngIf="undoCheckinHint">{{ undoCheckinHint }}</p>
+
+      <label class="estimation-type-label">Note (optional)</label>
+      <div class="input-container">
+        <input type="text" class="custom-input" [(ngModel)]="undoCheckinNote"
+          placeholder="Any extra detail for the record" [disabled]="undoingCheckin" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="save-button" (click)="confirmUndoCheckin()"
+        [disabled]="undoingCheckin || !undoCheckinReasonCode">
+        <span *ngIf="undoingCheckin" class="btn-spinner"></span>
+        {{ undoingCheckin
+            ? 'Reversing…'
+            : (undoCheckinReasonCode === 'cancel' ? 'Undo check-in & cancel' : 'Undo check-in') }}
+      </button>
+      <button class="close-button" (click)="closeUndoCheckin()" [disabled]="undoingCheckin">Cancel</button>
+    </div>
+  </div>
+</div>
 
 
 

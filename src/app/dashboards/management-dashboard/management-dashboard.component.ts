@@ -12,7 +12,8 @@ import {
 import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { Subscription, interval } from 'rxjs';
-import * as echarts from 'echarts';
+import type * as echarts from 'echarts';
+import { loadECharts } from '../../shared/charts/echarts-tracker';
 import {
   DashboardService,
   ManagementSummary,
@@ -170,12 +171,13 @@ export class ManagementDashboardComponent implements OnInit, AfterViewInit, OnDe
     });
   }
 
-  private renderTrend(): void {
+  private async renderTrend(): Promise<void> {
     if (!this.isBrowser || !this.summary) return;
     const el = this.trendChartEl?.nativeElement;
     if (!el) return;
+    const lib = await loadECharts();
     if (this.trendChart) this.trendChart.dispose();
-    this.trendChart = echarts.init(el);
+    this.trendChart = lib.init(el);
 
     const dates = this.summary.footfallTrend30d.map((d) => this.shortDate(d.date));
     this.trendChart.setOption({
@@ -234,12 +236,13 @@ export class ManagementDashboardComponent implements OnInit, AfterViewInit, OnDe
     });
   }
 
-  private renderFunnel(): void {
+  private async renderFunnel(): Promise<void> {
     if (!this.isBrowser || !this.summary) return;
     const el = this.funnelChartEl?.nativeElement;
     if (!el) return;
+    const lib = await loadECharts();
     if (this.funnelChart) this.funnelChart.dispose();
-    this.funnelChart = echarts.init(el);
+    this.funnelChart = lib.init(el);
 
     this.funnelChart.setOption({
       tooltip: { trigger: 'item', formatter: '{b}: {c}' },
@@ -277,12 +280,13 @@ export class ManagementDashboardComponent implements OnInit, AfterViewInit, OnDe
     return this.summary?.hospitalDemographics?.ageBands || [];
   }
 
-  private renderRevTrend(): void {
+  private async renderRevTrend(): Promise<void> {
     if (!this.isBrowser || !this.summary) return;
     const el = this.revTrendChartEl?.nativeElement;
     if (!el) return;
+    const lib = await loadECharts();
     if (this.revTrendChart) this.revTrendChart.dispose();
-    this.revTrendChart = echarts.init(el);
+    this.revTrendChart = lib.init(el);
     const dates = this.summary.revenueTrend30d.map((d) => this.shortDate(d.date));
     const values = this.summary.revenueTrend30d.map((d) => Math.round(d.amount));
     this.revTrendChart.setOption({
@@ -318,7 +322,7 @@ export class ManagementDashboardComponent implements OnInit, AfterViewInit, OnDe
           data: values,
           lineStyle: { color: '#10b981', width: 2 },
           areaStyle: {
-            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            color: new lib.graphic.LinearGradient(0, 0, 0, 1, [
               { offset: 0, color: 'rgba(16, 185, 129, 0.30)' },
               { offset: 1, color: 'rgba(16, 185, 129, 0.02)' },
             ]),
@@ -328,12 +332,13 @@ export class ManagementDashboardComponent implements OnInit, AfterViewInit, OnDe
     });
   }
 
-  private renderAdmDis(): void {
+  private async renderAdmDis(): Promise<void> {
     if (!this.isBrowser || !this.summary) return;
     const el = this.admDisChartEl?.nativeElement;
     if (!el) return;
+    const lib = await loadECharts();
     if (this.admDisChart) this.admDisChart.dispose();
-    this.admDisChart = echarts.init(el);
+    this.admDisChart = lib.init(el);
     const dates = this.summary.admissionsVsDischarges30d.map((d) => this.shortDate(d.date));
     this.admDisChart.setOption({
       grid: { left: 36, right: 16, top: 32, bottom: 36 },

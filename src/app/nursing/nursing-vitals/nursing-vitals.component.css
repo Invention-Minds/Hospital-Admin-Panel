@@ -1173,3 +1173,29 @@
   border-left-color: #d4a017;
   background: #fffbeb;
 }
+
+/* Recorded readings at a glance in the table row. */
+.vitals-cell {
+  white-space: nowrap;
+  font-family: Kanit;
+  font-size: 13px;
+  color: #0e2970;
+}
+
+/* Attribution line in the edit popup — who captured the readings first. */
+.vitals-recorded-note {
+  margin: 0 0 12px 0;
+  font-family: Kanit;
+  font-size: 13px;
+  color: #7b7b7b;
+}
+
+/* The action cell is narrow, so PrimeNG was flipping the tooltip and letting it
+   collapse to one character per line. Let it size to its text. */
+::ng-deep .p-tooltip {
+  max-width: none;
+}
+
+::ng-deep .p-tooltip .p-tooltip-text {
+  white-space: nowrap;
+}

@@ -11,7 +11,8 @@ import {
   ViewChild,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import * as echarts from 'echarts';
+import type * as echarts from 'echarts';
+import { loadECharts } from '../../../shared/charts/echarts-tracker';
 
 /**
  * Compact KPI card with a tiny inline sparkline. Sits in the performance
@@ -62,12 +63,13 @@ export class MiniStatCardComponent implements AfterViewInit, OnChanges, OnDestro
     return '';
   }
 
-  private renderSpark(): void {
+  private async renderSpark(): Promise<void> {
     if (!this.isBrowser) return;
     if (!this.sparkData || this.sparkData.length === 0) return;
     const el = this.sparkEl?.nativeElement;
     if (!el) return;
-    if (!this.chart) this.chart = echarts.init(el);
+    const lib = await loadECharts();
+    if (!this.chart) this.chart = lib.init(el);
 
     const colorMap: Record<string, string> = {
       blue: '#3b82f6',
@@ -93,7 +95,7 @@ export class MiniStatCardComponent implements AfterViewInit, OnChanges, OnDestro
             symbol: 'none',
             lineStyle: { width: 1.6, color: stroke },
             areaStyle: {
-              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              color: new lib.graphic.LinearGradient(0, 0, 0, 1, [
                 { offset: 0, color: this.hexWithAlpha(stroke, 0.28) },
                 { offset: 1, color: this.hexWithAlpha(stroke, 0.02) },
               ]),

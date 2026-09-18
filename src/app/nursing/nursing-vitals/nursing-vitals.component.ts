@@ -1,4 +1,5 @@
-import { Component, Input, OnChanges, SimpleChanges, HostListener } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, SimpleChanges, HostListener } from '@angular/core';
+import { environment } from '../../../environment/environment.prod';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { MessageService } from 'primeng/api';
@@ -6,7 +7,6 @@ import { AlertService } from '../../services/alert.service';
 import { ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import * as FileSaver from 'file-saver';
-import * as XLSX from 'xlsx';
 import { start } from 'node:repl';
 import * as moment from 'moment-timezone';
 import { app } from '../../../../server';
@@ -38,6 +38,11 @@ interface Appointment {
   prefix?:string;
   patientType?:string;
   arrived?:boolean;
+  // Vitals capture — stamped server-side from the logged-in nursing account.
+  arrivedBy?: string | null;
+  arrivedTime?: string | null;
+  BPs?: any; BPd?: any; pulse?: any; RR?: any;
+  temp?: any; spo2?: any; height?: any; weight?: any;
 
 }
 @Component({
@@ -46,7 +51,19 @@ interface Appointment {
   styleUrl: './nursing-vitals.component.css',
   providers: [MessageService],
 })
-export class NursingVitalsComponent {
+export class NursingVitalsComponent implements OnDestroy {
+  /**
+   * Live queue — the same SSE stream the doctor's Today Consultations screen
+   * uses. `notifyDoctor` already fires on every check-in (and on an undo), so
+   * a patient appears here without a manual refresh.
+   *
+   * No client-side filtering is needed: getTodayCheckin is scoped to the
+   * nurse's OPD-station departments server-side, so the refetch can only ever
+   * return her own patients. The broadcast payload is just a doctor id.
+   */
+  private eventSource: EventSource | null = null;
+  private refreshTimer: any = null;
+
   confirmedAppointments: Appointment[] = [];
 
   constructor(
@@ -205,9 +222,6 @@ export class NursingVitalsComponent {
   // Method to handle sorting by a specific column
   ngOnInit() {
     const token = localStorage.getItem('token');
-    const nurseId = localStorage.getItem('nurseId');
-    this.showPopup = nurseId ? false : true;
-    console.log(nurseId,this.showPopup)
 
     const today = new Date();
     const year = today.getFullYear();
@@ -220,7 +234,6 @@ export class NursingVitalsComponent {
     this.username = localStorage.getItem('username')
     console.log(this.username)
     this.blockId =  this.route.snapshot.paramMap.get('blockId') || '0';
-    this.employeeId = localStorage.getItem('nurseId') || '0';
 
 
     // Subscribe to confirmed appointments
@@ -254,6 +267,51 @@ export class NursingVitalsComponent {
       complete: () => {
       }
     });
+
+    this.subscribeToLiveUpdates();
+  }
+
+  /**
+   * Re-read the queue when a check-in happens anywhere. Debounced because a
+   * busy front desk checks several patients in quickly and every open nursing
+   * terminal would otherwise refetch once per event.
+   */
+  private subscribeToLiveUpdates(): void {
+    // EventSource is browser-only; the SSR build has no window.
+    if (typeof window === 'undefined' || this.eventSource) return;
+
+    this.eventSource = new EventSource(`${environment.apiUrl}/appointments/updates`);
+    this.eventSource.addEventListener('loadDoctor', () => {
+      // Unlike the doctor screen we don't match on the broadcast doctor id —
+      // a nurse covers every doctor in her departments, and the server decides
+      // which appointments come back.
+      if (this.refreshTimer) clearTimeout(this.refreshTimer);
+      this.refreshTimer = setTimeout(() => this.reloadQueue(), 500);
+    });
+  }
+
+  /** Silent refetch — no spinner, so the queue doesn't flicker under the nurse. */
+  private reloadQueue(): void {
+    this.appointmentService.getTodayCheckin(this.today).subscribe({
+      next: (appointments: any[]) => {
+        this.confirmedAppointments = appointments;
+        this.appointments = appointments;
+        this.confirmedAppointments.sort((a, b) => {
+          const dateA = new Date(a.created_at!);
+          const dateB = new Date(b.created_at!);
+          return dateB.getTime() - dateA.getTime();
+        });
+        this.filteredAppointments = [...this.confirmedAppointments];
+        this.filterAppointmentsByDate(new Date());
+      },
+      error: (error) => console.error('Live queue refresh failed:', error),
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.refreshTimer) clearTimeout(this.refreshTimer);
+    this.eventSource?.close();
+    this.eventSource = null;
   }
 
 
@@ -572,12 +630,7 @@ export class NursingVitalsComponent {
     this.messageService.add({ severity: type, summary: message });
   }
 
-  openCheckinPopup(appointment: any) {
-    this.showPopup = true;
-    this.checkinAppointment = appointment
-  }
   closePopup() {
-    this.showPopup = false;
     this.checkinAppointment = null;
   }
 
@@ -621,7 +674,38 @@ export class NursingVitalsComponent {
   }
   completeAppointment(appointment: any): void {
     this.selectedAppointment = appointment;
+    // Pre-fill from the row so an already-arrived patient opens showing what
+    // was recorded, rather than a blank form. The readings come back on the
+    // appointment itself, so there's nothing extra to fetch.
+    this.vitalsData = {
+      height: appointment.height ?? '',
+      weight: appointment.weight ?? '',
+      temp: appointment.temp ?? '',
+      pulse: appointment.pulse ?? '',
+      RR: appointment.RR ?? '',
+      BPs: appointment.BPs ?? '',
+      BPd: appointment.BPd ?? '',
+      spo2: appointment.spo2 ?? '',
+    };
+    this.selectedPriority = 'normal';
+    this.priorityReason = '';
     this.showVitalsPopup = true;
+  }
+
+  /** Editing readings that were already captured, rather than a first capture. */
+  get isEditingVitals(): boolean {
+    return this.selectedAppointment?.arrived === true;
+  }
+
+  /** "120/80 · P 72 · SpO₂ 98" for the table; '-' when nothing recorded yet. */
+  vitalsSummary(appointment: any): string {
+    if (!appointment?.arrived) return '-';
+    const parts: string[] = [];
+    if (appointment.BPs && appointment.BPd) parts.push(`${appointment.BPs}/${appointment.BPd}`);
+    if (appointment.pulse) parts.push(`P ${appointment.pulse}`);
+    if (appointment.spo2) parts.push(`SpO₂ ${appointment.spo2}`);
+    if (appointment.temp) parts.push(`T ${appointment.temp}`);
+    return parts.length ? parts.join(' · ') : '-';
   }
   cancelVitals(): void {
     this.showVitalsPopup = false;
@@ -636,12 +720,13 @@ export class NursingVitalsComponent {
     }
 
     this.isButtonLoading = true;
+    // arrivedBy / arrivedTime are stamped by the backend from the logged-in
+    // user — sending them here would be ignored, and the typed-in employee id
+    // this used to send was never verified against the account.
     const updatedVitals = {
       ...this.selectedAppointment,
       ...this.vitalsData,
       arrived: true,
-      arrivedBy: this.employeeId,
-      arrivedTime: new Date(),
       blockId: this.blockId
     };
     const prn = this.selectedAppointment?.prnNumber;
@@ -653,16 +738,21 @@ export class NursingVitalsComponent {
         appointmentId: this.selectedAppointment.id,
         priority: this.selectedPriority,
         reason: this.priorityReason,
-        setBy: `${this.name || 'Nurse'} (${this.employeeId})`
+        // Logged-in account — the same identity the backend stamps on arrivedBy.
+        setBy: this.username || 'Nurse'
       }).subscribe({
         next: () => console.log('✅ Priority set:', this.selectedPriority),
         error: (err) => console.error('Priority set failed', err)
       });
     }
 
+    const wasEditing = this.isEditingVitals;
     this.appointmentService.updatePatientByPRN(prn, this.vitalsData).subscribe({
       next: () => {
-        this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Vitals updated and patient checked in.' });
+        this.messageService.add({
+          severity: 'success', summary: 'Success',
+          detail: wasEditing ? 'Vitals updated.' : 'Vitals recorded and patient marked arrived.',
+        });
         this.showVitalsPopup = false;
         this.isButtonLoading = false;
         this.selectedPriority = 'normal';
@@ -675,13 +765,5 @@ export class NursingVitalsComponent {
         this.messageService.add({ severity: 'warn', summary: 'Warning', detail: 'Checked-in but patient data not updated.' });
       }
     });
-  }
-  updateDetails(){
-    this.isButtonLoading = true;
-    localStorage.setItem('name', this.name)
-    localStorage.setItem('blockId', this.blockId)
-    localStorage.setItem('nurseId', this.employeeId)
-    this.showPopup = false;
-    this.isButtonLoading = false;
   }
 }

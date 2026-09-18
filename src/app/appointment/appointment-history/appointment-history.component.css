@@ -225,4 +225,6 @@ tbody tr:hover {
 .evt-rescheduled { background: #f0a04b; }
 .evt-cancelled { background: #e57373; }
 .evt-checkedin { background: #4bb3a5; }
+.evt-reversed { background: #8a6bbf; }
+.evt-vitals { background: #3f8fd0; }
 .evt-neutral { background: #9aa5b1; }

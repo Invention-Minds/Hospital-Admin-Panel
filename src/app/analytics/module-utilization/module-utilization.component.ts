@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import * as echarts from 'echarts';
+import type * as echarts from 'echarts';
+import { loadECharts } from '../../shared/charts/echarts-tracker';
 import { ModuleUsageService, ModuleUsageRow, ModuleUsageSummary } from '../../services/module-usage.service';
 
 /**
@@ -81,7 +82,7 @@ export class ModuleUtilizationComponent implements OnInit {
     return 'adoption-low';
   }
 
-  private renderChart(): void {
+  private async renderChart(): Promise<void> {
     if (typeof window === 'undefined') return; // SSR guard
     const chartDom = document.getElementById('moduleAdoptionChart');
     if (!chartDom) return;
@@ -96,7 +97,8 @@ export class ModuleUtilizationComponent implements OnInit {
     const sorted = [...this.modules]
       .sort((a, b) => a.adoptionPct - b.adoptionPct);
 
-    this.chart = echarts.init(chartDom);
+    const lib = await loadECharts();
+    this.chart = lib.init(chartDom);
     this.chart.setOption({
       tooltip: {
         trigger: 'axis',

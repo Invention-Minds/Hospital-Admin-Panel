@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
-import { Workbook } from 'exceljs';
 import * as FileSaver from 'file-saver';
 import { MessageService } from 'primeng/api';
 
@@ -153,7 +152,9 @@ export class CheckinReportComponent {
     }
   }
 
-  download(): void {
+  async download(): Promise<void> {
+    // Excel library is loaded only when the user downloads a report.
+    const { Workbook } = await import('exceljs');
     if (!this.appointments || this.appointments.length === 0) {
       return;
     }

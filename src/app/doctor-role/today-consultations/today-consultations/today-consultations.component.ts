@@ -13,8 +13,7 @@ import { environment } from '../../../../environment/environment';
 import { NotificationRecipientService } from '../../../services/notification-recipient.service';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { PrescriptionService } from '../../../services/prescription/prescription.service';
-import pdfMake from 'pdfmake/build/pdfmake';
-import pdfFonts from 'pdfmake/build/vfs_fonts';
+import { loadPdfMake } from '../../../shared/pdf/pdfmake-loader';
 import { getJmrhPdfBranding, JmrhPdfBranding } from '../../../shared/pdf/jmrh-letterhead';
 import { keepHeadingsWithContent, OPD_ASSESSMENT_PDF_STYLES } from '../../../shared/pdf/opd-assessment-pdf';
 import { buildSavedVisitSummaryContent, resolveVisitRecords } from '../../../shared/pdf/opd-visit-summary-pdf';
@@ -2602,7 +2601,9 @@ export class TodayConsultationsComponent {
   }
 
 
-  printVisitSummary(data: any) {
+  async printVisitSummary(data: any) {
+    // PDF library is loaded only when a PDF is generated.
+    const pdfMake = await loadPdfMake();
     console.log(data)
     const { date, prnNumber } = data;
 
@@ -2736,7 +2737,9 @@ export class TodayConsultationsComponent {
    * backend; it picks the recipient from the registered patient record, so the
    * doctor can't mistype or redirect the number.
    */
-  sendVisitSummaryWhatsApp(data: any): void {
+  async sendVisitSummaryWhatsApp(data: any): Promise<void> {
+    // PDF library is loaded only when a PDF is generated.
+    const pdfMake = await loadPdfMake();
     if (this.sendingWhatsapp) return;
     const { id, date, prnNumber } = data || {};
     if (!id || !prnNumber || !date) {

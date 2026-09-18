@@ -6,12 +6,12 @@ import { AlertService } from '../../services/alert.service';
 import {
   AppointmentHistoryService,
   actorLabel,
+  byAppointmentSlot,
   istDateTime,
   slotText,
 } from '../../services/appointment-history.service';
 import * as FileSaver from 'file-saver';
 import { stat } from 'node:fs';
-import * as XLSX from 'xlsx';
 import moment from 'moment-timezone';
 interface Appointment {
   id?: number;
@@ -406,12 +406,15 @@ export class AppointmentCancelComponent {
     this.currentPage = 1;
   }
   async downloadFilteredData(): Promise<void> {
+    // Excel export library is loaded only when the user exports.
+    const XLSX = await import('xlsx');
     // filteredServices is only populated by a search or Clear, so on a fresh
     // load it's empty and the download used to silently do nothing. Fall back
     // to the rows actually on screen.
-    const rows: Appointment[] = (this.filteredServices && this.filteredServices.length > 0)
+    // Sorted copy so the sheet matches the print-out: chronological by slot.
+    const rows: Appointment[] = [...((this.filteredServices && this.filteredServices.length > 0)
       ? this.filteredServices
-      : this.filteredAppointments;
+      : this.filteredAppointments)].sort(byAppointmentSlot);
 
     if (rows && rows.length > 0) {
       // One request for the whole export: who booked / rescheduled / cancelled.
@@ -503,9 +506,11 @@ export class AppointmentCancelComponent {
     }
   }
   printAppointmentDetails(): void {
-    const sourceList = (this.filteredServices && this.filteredServices.length)
+    // Sorted copy: the filter still decides WHICH rows print, this only decides
+    // their order — chronological by slot, which is how a queue list reads.
+    const sourceList = [...((this.filteredServices && this.filteredServices.length)
       ? this.filteredServices
-      : this.filteredAppointments;
+      : this.filteredAppointments)].sort(byAppointmentSlot);
     if (!sourceList || sourceList.length === 0) {
       this.alertSvc.show('No appointments in the current view. Adjust filters and try again.');
       return;

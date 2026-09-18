@@ -11,7 +11,8 @@ import {
   ViewChild,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import * as echarts from 'echarts';
+import type * as echarts from 'echarts';
+import { loadECharts } from '../../../shared/charts/echarts-tracker';
 
 export interface DonutSlice {
   name: string;
@@ -65,13 +66,14 @@ export class DonutChartComponent implements AfterViewInit, OnChanges, OnDestroy 
     this.chart = null;
   }
 
-  private render(): void {
+  private async render(): Promise<void> {
     if (!this.isBrowser) return;
     const el = this.host?.nativeElement;
     if (!el) return;
 
     if (!this.chart) {
-      this.chart = echarts.init(el);
+      const lib = await loadECharts();
+      this.chart = lib.init(el);
     }
 
     const palette = [

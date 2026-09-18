@@ -36,10 +36,16 @@
       <div class="ns-sections">
         <div class="ns-section">
           <div class="ns-section-label" *ngIf="s.type !== 'OPD'">Wards ({{ s.wards.length }})</div>
-          <div class="ns-section-label" *ngIf="s.type === 'OPD'">Scope</div>
+          <div class="ns-section-label" *ngIf="s.type === 'OPD'">Departments ({{ (s.departments || []).length }})</div>
           <div class="ns-chips">
             <ng-container *ngIf="s.type === 'OPD'">
-              <span class="ns-chip">All OPD appointments</span>
+              <!-- No departments mapped = unscoped, which is how OPD stations
+                   behaved before department scoping existed. -->
+              <span class="ns-chip" *ngIf="(s.departments || []).length === 0">All OPD departments</span>
+              <span class="ns-chip" *ngFor="let d of (s.departments || [] | slice:0:6)">{{ d.name }}</span>
+              <span class="ns-chip more" *ngIf="(s.departments || []).length > 6" (click)="startEdit(s)">
+                +{{ s.departments.length - 6 }} more
+              </span>
             </ng-container>
             <ng-container *ngIf="s.type !== 'OPD'">
               <span class="ns-chip" *ngFor="let w of (s.wards | slice:0:6)">{{ w.wardName }}</span>
@@ -85,7 +91,7 @@
         <label>Type *</label>
         <select [(ngModel)]="form.type">
           <option value="IPD">IPD — ward-based (nurses see their wards' admissions)</option>
-          <option value="OPD">OPD — nurses see all of today's OPD appointments</option>
+          <option value="OPD">OPD — nurses see today's appointments for the station's departments</option>
         </select>
       </div>
       <div class="ns-form-row">
@@ -106,7 +112,20 @@
           <span class="ns-muted" *ngIf="wards.length === 0">No wards found.</span>
         </div>
       </div>
-      <p class="ns-muted" *ngIf="form.type === 'OPD'">OPD stations cover OPD appointments — no wards needed. Nurses here see all of today's OPD appointments.</p>
+      <div class="ns-picker" *ngIf="form.type === 'OPD'">
+        <strong>OPD departments this station covers</strong>
+        <p class="ns-muted">
+          Nurses here can capture vitals only for today's appointments in the departments
+          ticked below. Tick none to let them see every department.
+        </p>
+        <div class="ns-checklist">
+          <label *ngFor="let d of departments" class="ns-check">
+            <input type="checkbox" [(ngModel)]="deptChecked[d.id]" />
+            {{ d.name }}
+          </label>
+          <span class="ns-muted" *ngIf="departments.length === 0">No departments found.</span>
+        </div>
+      </div>
 
       <div class="ns-picker">
         <strong>Nurses assigned to this station</strong>

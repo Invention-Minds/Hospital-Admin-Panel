@@ -2,7 +2,6 @@
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { HealthCheckupServiceService } from '../../services/health-checkup/health-checkup-service.service';
 import { RadiologyService } from '../../services/radiology/radiology.service';
-import * as echarts from 'echarts';
 import { EChartsTracker } from '../../shared/charts/echarts-tracker';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
@@ -342,9 +341,9 @@ export class MhcWaitingTimeComponent implements OnChanges {
     });
   }
 
-  initChart(data: any): void {
+  async initChart(data: any): Promise<void> {
     const chartDom = document.getElementById('MhcWaitingTime');
-    const myChart = this.charts.init(chartDom);
+    const myChart = await this.charts.init(chartDom);
 
     console.log(data, "chart data")
     this.option = {
@@ -484,9 +483,9 @@ export class MhcWaitingTimeComponent implements OnChanges {
     this.showViewMore = false
   }
 
-  ViewMorechart(data: any): void {
+  async ViewMorechart(data: any): Promise<void> {
     const chartDom = document.getElementById('viewMoreMhcWaitingTime');
-    const myChart = this.charts.init(chartDom);
+    const myChart = await this.charts.init(chartDom);
 
     this.viewMoreoption = {
       tooltip: {

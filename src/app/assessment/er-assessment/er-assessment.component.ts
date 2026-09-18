@@ -1,8 +1,7 @@
 import { Component, Input, Output, EventEmitter, ViewChild } from '@angular/core';
 import { ErService } from '../../services/er/er.service';
 import { MessageService } from 'primeng/api';
-import pdfMake from 'pdfmake/build/pdfmake';
-import pdfFonts from 'pdfmake/build/vfs_fonts';
+import { loadPdfMake } from '../../shared/pdf/pdfmake-loader';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { NgForm } from '@angular/forms';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
@@ -213,6 +212,8 @@ ngAfterViewInit() {
     }
   }
   async printAssessment() {
+    // PDF library is loaded only when a PDF is generated.
+    const pdfMake = await loadPdfMake();
     const d = this.formData;
     const now = new Date();
     const logoUrl = "/rash-logo.png";

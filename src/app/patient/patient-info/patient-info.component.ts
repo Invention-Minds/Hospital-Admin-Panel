@@ -15,10 +15,8 @@ import {
 } from '../../shared/pdf/opd-visit-summary-pdf';
 import { getJmrhPdfBranding } from '../../shared/pdf/jmrh-letterhead';
 
-import pdfMake from 'pdfmake/build/pdfmake';
-import pdfFonts from 'pdfmake/build/vfs_fonts';
+import { loadPdfMake } from '../../shared/pdf/pdfmake-loader';
 
-pdfMake.vfs = pdfFonts.vfs;
 
 
 
@@ -398,7 +396,9 @@ export class PatientInfoComponent implements OnInit {
     }, 100); // Delay by 100ms (can increase to 200ms if needed)
   }
   /** @param apptId disambiguates same-date visits — see toggleView. */
-  printVisitSummary(date: any, apptId?: number | null) {
+  async printVisitSummary(date: any, apptId?: number | null) {
+    // PDF library is loaded only when a PDF is generated.
+    const pdfMake = await loadPdfMake();
     this.selectedVisit = this.doctorNotes.find(d => d.date === date) || {};
     this.selectedVitals = this.bloodGroupAppointments.find((appt: any) => appt.date === date);
     this.selectedService = this.serviceAppointments.filter((appt: any) => appt.appointmentDate === date);

@@ -12,7 +12,8 @@ import {
 import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { Subscription, interval } from 'rxjs';
-import * as echarts from 'echarts';
+import type * as echarts from 'echarts';
+import { loadECharts } from '../../shared/charts/echarts-tracker';
 import {
   AntenatalRow,
   CardiacTest,
@@ -576,16 +577,17 @@ export class DoctorDashboardComponent implements OnInit, AfterViewInit, OnDestro
     this.adherenceCenterSub = `${a.returned} of ${a.scheduled}`;
   }
 
-  private renderChart(): void {
+  private async renderChart(): Promise<void> {
     if (!this.isBrowser || !this.summary) return;
     const el = this.trendChartEl?.nativeElement;
     if (!el) return;
 
+    const lib = await loadECharts();
     if (this.chartInstance) {
       this.chartInstance.dispose();
       this.chartInstance = null;
     }
-    this.chartInstance = echarts.init(el);
+    this.chartInstance = lib.init(el);
 
     const xLabels = this.summary.last30Days.map((d) => this.shortDate(d.date));
     const values = this.summary.last30Days.map((d) => d.count);
@@ -624,7 +626,7 @@ export class DoctorDashboardComponent implements OnInit, AfterViewInit, OnDestro
           lineStyle: { color: '#3b82f6', width: 2 },
           itemStyle: { color: '#3b82f6' },
           areaStyle: {
-            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            color: new lib.graphic.LinearGradient(0, 0, 0, 1, [
               { offset: 0, color: 'rgba(59, 130, 246, 0.30)' },
               { offset: 1, color: 'rgba(59, 130, 246, 0.02)' },
             ]),

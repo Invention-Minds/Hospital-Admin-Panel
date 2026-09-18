@@ -5,7 +5,6 @@ import { DoctorServiceService } from '../../services/doctor-details/doctor-servi
 import { map } from 'rxjs/operators';
 import { getLastSevenDays, getIndividualDates, getLastThirtyDaysFromSelected, reorderDateFormat, captureScreenshot  } from '../functions';
 import { error } from 'console';
-import * as echarts from 'echarts';
 import { EChartsTracker } from '../../shared/charts/echarts-tracker';
 import { MessageService } from 'primeng/api';
 
@@ -118,9 +117,9 @@ export class OpdOverviewComponent {
     )
   }
 
-  chart(): void {
+  async chart(): Promise<void> {
     const chartDom = document.getElementById('opdOverview')!;
-    const myChart = this.charts.init(chartDom);
+    const myChart = await this.charts.init(chartDom);
     this.chartoption = {
       tooltip: {
         trigger: 'axis'
@@ -392,9 +391,9 @@ export class OpdOverviewComponent {
     this.viewMoreData(); // Call after filtering
   }
 
-  ViewMorechart(data: any): void {
+  async ViewMorechart(data: any): Promise<void> {
     const chartDom = document.getElementById('viewMoreOpdOverview')!;
-    const myChart = this.charts.init(chartDom);
+    const myChart = await this.charts.init(chartDom);
 
     // console.log(data)
 

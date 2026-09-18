@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import pdfMake from 'pdfmake/build/pdfmake';
+import { loadPdfMake } from '../../shared/pdf/pdfmake-loader';
 import 'pdfmake/build/vfs_fonts';
 import { getJmrhPdfBranding, JmrhPdfBranding } from '../../shared/pdf/jmrh-letterhead';
 import {
@@ -431,7 +431,9 @@ export class InvestigationOrderComponent implements OnInit, OnChanges {
     getJmrhPdfBranding().then((brand) => this.openRequestPdf(inv, brand));
   }
 
-  private openRequestPdf(inv: ReturnType<InvestigationOrderComponent['getPrintableInvestigations']>, brand: JmrhPdfBranding): void {
+  private async openRequestPdf(inv: ReturnType<InvestigationOrderComponent['getPrintableInvestigations']>, brand: JmrhPdfBranding): Promise<void> {
+    // PDF library is loaded only when a PDF is generated.
+    const pdfMake = await loadPdfMake();
     const now = new Date();
     const accent = '#1b6cb5';
     const headerFill = '#eef3fa';

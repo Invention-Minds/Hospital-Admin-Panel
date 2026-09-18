@@ -4,8 +4,6 @@ import { AppointmentConfirmService } from '../../services/appointment-confirm.se
 import { AuthServiceService } from '../../services/auth/auth-service.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { Subscription } from 'rxjs';
-import * as XLSX from 'xlsx';
-import { Workbook } from 'exceljs';
 import * as FileSaver from 'file-saver';
 import { app } from '../../../../server';
 import { MessageService } from 'primeng/api';
@@ -312,7 +310,9 @@ export class AdminReportComponent {
       }
     }
   }
-  filterAppointments(): void {
+  async filterAppointments(): Promise<void> {
+    // Excel library is loaded only when the user downloads a report.
+    const { Workbook } = await import('exceljs');
     this.filteredAppointments = this.appointments.filter(appointment => {
       const matchesUsername = this.usernameFilter.trim()
         ? appointment.username?.toLowerCase().includes(this.usernameFilter.trim().toLowerCase())
@@ -933,7 +933,9 @@ export class AdminReportComponent {
 
 
 
-  download() {
+  async download() {
+    // Excel library is loaded only when the user downloads a report.
+    const { Workbook } = await import('exceljs');
     if (this.selectedDateRange && this.selectedDateRange.length === 2) {
       const startDate = this.selectedDateRange[0];
       const endDate = this.selectedDateRange[1] ? this.selectedDateRange[1] : startDate;
@@ -1034,7 +1036,9 @@ export class AdminReportComponent {
   }
 
 
-  downloadAppointments(userId: number | string, role: string): void {
+  async downloadAppointments(userId: number | string, role: string): Promise<void> {
+    // Excel library is loaded only when the user downloads a report.
+    const { Workbook } = await import('exceljs');
     const userAppointments = this.filterAppointmentsByUser(userId, role);
     // console.log('Downloading appointments for user ID:', userId);
     let startDate: Date;

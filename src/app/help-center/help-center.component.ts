@@ -1,6 +1,5 @@
 import { Component, ViewChild, ElementRef } from '@angular/core';
 import { flush } from '@angular/core/testing';
-import { FLAG_ID } from 'html2canvas/dist/types/css/syntax/tokenizer';
 
 @Component({
   selector: 'app-help-center',

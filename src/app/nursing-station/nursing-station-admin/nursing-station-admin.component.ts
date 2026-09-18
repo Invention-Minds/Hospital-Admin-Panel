@@ -9,6 +9,7 @@ import {
 } from '../../services/nursing-station.service';
 import { WardManagementService, Ward } from '../../services/ward-management.service';
 import { NurseStaffService, NurseRow } from '../../services/nurse-staff.service';
+import { MastersService, MasterDepartment } from '../../services/masters.service';
 import { AlertService } from '../../services/alert.service';
 
 /**
@@ -37,6 +38,7 @@ export class NursingStationAdminComponent implements OnInit, OnDestroy {
 
   stations: NursingStationRow[] = [];
   wards: Ward[] = [];
+  departments: MasterDepartment[] = [];
   nurses: NurseRow[] = [];
 
   // Editor state. `selected` is the station being edited; null when creating.
@@ -45,6 +47,8 @@ export class NursingStationAdminComponent implements OnInit, OnDestroy {
   form: StationCreateBody = this.blankForm();
   /** wardId → checked, for the ward picker. */
   wardChecked: Record<string, boolean> = {};
+  /** departmentId → checked, for the OPD department picker. */
+  deptChecked: Record<number, boolean> = {};
   /** userId → checked, for the nurse picker. */
   nurseChecked: Record<number, boolean> = {};
 
@@ -54,6 +58,7 @@ export class NursingStationAdminComponent implements OnInit, OnDestroy {
     private stationSvc: NursingStationService,
     private wardSvc: WardManagementService,
     private nurseSvc: NurseStaffService,
+    private mastersSvc: MastersService,
     private alertSvc: AlertService,
   ) {}
 
@@ -80,6 +85,10 @@ export class NursingStationAdminComponent implements OnInit, OnDestroy {
       next: (rows) => { this.wards = rows ?? []; },
       error: () => { /* non-fatal */ },
     });
+    this.mastersSvc.listDepartments().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (rows) => { this.departments = rows ?? []; },
+      error: () => { /* non-fatal */ },
+    });
     this.nurseSvc.list({}).pipe(takeUntil(this.destroy$)).subscribe({
       next: (res) => { this.nurses = res.data ?? []; },
       error: () => { /* non-fatal */ },
@@ -92,6 +101,7 @@ export class NursingStationAdminComponent implements OnInit, OnDestroy {
     this.selected = null;
     this.form = this.blankForm();
     this.wardChecked = {};
+    this.deptChecked = {};
     this.nurseChecked = {};
     this.showEditor = true;
     this.clearMessages();
@@ -110,6 +120,8 @@ export class NursingStationAdminComponent implements OnInit, OnDestroy {
     };
     this.wardChecked = {};
     for (const w of station.wards) this.wardChecked[w.id] = true;
+    this.deptChecked = {};
+    for (const d of station.departments ?? []) this.deptChecked[d.id] = true;
     this.nurseChecked = {};
     for (const n of station.nurses) this.nurseChecked[n.id] = true;
     this.showEditor = true;
@@ -123,6 +135,12 @@ export class NursingStationAdminComponent implements OnInit, OnDestroy {
 
   private selectedWardIds(): string[] {
     return Object.keys(this.wardChecked).filter((k) => this.wardChecked[k]);
+  }
+
+  private selectedDepartmentIds(): number[] {
+    return Object.keys(this.deptChecked)
+      .filter((k) => this.deptChecked[Number(k)])
+      .map((k) => Number(k));
   }
 
   private selectedNurseIds(): number[] {
@@ -140,13 +158,14 @@ export class NursingStationAdminComponent implements OnInit, OnDestroy {
     this.saving = true;
 
     const wardIds = this.selectedWardIds();
+    const departmentIds = this.selectedDepartmentIds();
     const nurseIds = this.selectedNurseIds();
 
     try {
       if (!this.selected) {
-        // Create — wards can go in the create body; nurses assigned after.
+        // Create — wards/departments go in the create body; nurses after.
         const created = await this.stationSvc
-          .create({ ...this.form, wardIds })
+          .create({ ...this.form, wardIds, departmentIds })
           .toPromise();
         const id = created!.data.id;
         if (nurseIds.length > 0) {
@@ -160,6 +179,10 @@ export class NursingStationAdminComponent implements OnInit, OnDestroy {
           .toPromise();
         // Replace ward set (OPD stations carry no wards).
         await this.stationSvc.setWards(id, this.form.type === 'OPD' ? [] : wardIds).toPromise();
+        // Replace department set — OPD only; the endpoint rejects IPD stations.
+        if (this.form.type === 'OPD') {
+          await this.stationSvc.setDepartments(id, departmentIds).toPromise();
+        }
         // Sync nurse assignments — assign new, unassign removed.
         const prev = new Set(this.selected.nurses.map((n) => n.id));
         const now = new Set(nurseIds);

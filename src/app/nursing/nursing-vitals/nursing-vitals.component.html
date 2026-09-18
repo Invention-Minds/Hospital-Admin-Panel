@@ -69,6 +69,7 @@
                     <th>Visit Type</th>
                     <th>Source</th>
                     <th>Type</th>
+                    <th>Vitals</th>
                     <th>Status</th>
                     <th>Action</th>
                 </tr>
@@ -109,8 +110,13 @@
                     <td>{{appointment.patientType || '-'}}</td>
                     <td>{{ appointment.requestVia }}</td>
                     <td style="text-transform: capitalize;">{{appointment.type ? appointment.type : '-' }}</td>
+                    <!-- Recorded readings at a glance, so a captured patient can be
+                         checked without opening anything. -->
+                    <td class="vitals-cell" [title]="appointment.arrivedBy ? 'Recorded by ' + appointment.arrivedBy : ''">
+                        {{ vitalsSummary(appointment) }}
+                    </td>
                     <td>
-                        <span class="status-badge" [ngClass]="{ 
+                        <span class="status-badge" [ngClass]="{
           'confirmed-status': !appointment.checkedIn, 
           'checked-in-status': appointment.checkedIn 
         }">
@@ -119,9 +125,12 @@
 
                     </td>
                     <td class="button">
-                        <button class="btn-action" [disabled]="appointment.arrived">
+                        <!-- Stays enabled once arrived so the readings can be
+                             reviewed and corrected; the edit is audited. -->
+                        <button class="btn-action">
                             <img src="check-in.png" alt="check" class="action-icon"
-                                (click)="!appointment.arrived && completeAppointment(appointment)" pTooltip="Arrived"
+                                (click)="completeAppointment(appointment)"
+                                [pTooltip]="appointment.arrived ? 'View / edit vitals' : 'Capture vitals'"
                                 tooltipPosition="top">
                         </button>
                     </td>
@@ -164,9 +173,11 @@
                 <p class="patient">PRN:{{appointment.prnNumber}}</p>
                 <div class="arrived-status">
                     <img src="check-in.svg" alt="check" class="action-icon"
-                    (click)="!appointment.arrived && completeAppointment(appointment)" pTooltip="Arrived"
+                    (click)="completeAppointment(appointment)"
+                    [pTooltip]="appointment.arrived ? 'View / edit vitals' : 'Capture vitals'"
                     tooltipPosition="top">
                 </div>
+                <p class="patient" *ngIf="appointment.arrived">{{ vitalsSummary(appointment) }}</p>
               </div>
               
             </div>
@@ -198,12 +209,20 @@
 <div class="estimation-modal" *ngIf="showVitalsPopup">
     <div class="modal-content">
         <div class="modal-header">
-            <h3>Vital Info Update</h3>
+            <h3>{{ isEditingVitals ? 'Edit Vitals' : 'Vital Info Update' }}</h3>
             <button class="popup-close" (click)="cancelVitals()">
                 <img src="/popup-close.svg" />
             </button>
         </div>
         <hr />
+        <!-- Who captured these originally. An edit never rewrites that — the
+             correction is logged separately on the appointment history. -->
+        <p class="vitals-recorded-note" *ngIf="isEditingVitals && selectedAppointment?.arrivedBy">
+            Recorded by <strong>{{ selectedAppointment?.arrivedBy }}</strong>
+            <span *ngIf="selectedAppointment?.arrivedTime">
+                on {{ selectedAppointment?.arrivedTime | date:'dd-MM-yyyy HH:mm' }}
+            </span>
+        </p>
 
         <div class="modal-body">
             <div class="vitals-grid">
@@ -240,7 +259,7 @@
         <div class="modal-footer-close-opd">
             <button class="save-button" [disabled]="!allVitalsFilled() || isButtonLoading" (click)="submitVitals()">
                 <ng-container *ngIf="!isButtonLoading; else loading">
-                    Submit
+                    {{ isEditingVitals ? 'Update vitals' : 'Submit' }}
                 </ng-container>
                 <ng-template #loading>
                     <span class="spinner"></span> Saving...
@@ -251,39 +270,8 @@
         </div>
     </div>
 </div>
-<div class="estimation-modal" *ngIf="showPopup">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3>Nurse Details</h3>
-        </div>
-        <hr />
-
-        <div class="modal-body">
-            <div class="vitals-grid">
-                <div class="form-group name-width">
-                    <input type="text" class="form-input" id="firstName" [name]="name" ngModel
-                        [(ngModel)]="name" required placeholder=" " pattern="^[a-zA-Z]*$" />
-                    <label [for]="name" class="form-label">Name</label>
-                </div>
-                <div class="form-group name-width">
-                    <input type="text" class="form-input" id="firstName" [name]="employeeId" ngModel
-                        [(ngModel)]="employeeId" required placeholder=" " pattern="^[a-zA-Z]*$" />
-                    <label [for]="employeeId" class="form-label">Employee ID</label>
-                </div>
-            </div>
-        </div>
-
-        <div class="modal-footer-close-opd">
-            <button class="save-button" (click)="updateDetails()">
-                <ng-container *ngIf="!isButtonLoading; else loading">
-                    Submit
-                </ng-container>
-                <ng-template #loading>
-                    <span class="spinner"></span> Saving...
-                </ng-template>
-            </button>
-        </div>
-    </div>
-</div>
+<!-- The "Nurse Details" modal (Name + Employee ID) was removed: vitals are now
+     attributed to the logged-in account server-side, so there was nothing left
+     for the typed-in employee id to do except block the screen on first load. -->
 
 <div class="loader" *ngIf="isLoading"></div>

@@ -1,12 +1,11 @@
 import { Component, Input } from '@angular/core';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
-import * as echarts from 'echarts/core';
 import { EChartsTracker } from '../../shared/charts/echarts-tracker';
 import { utcToIstDate, getLast14Days, getPositiveNegative, getTodayDate } from '../functions'
 import { EstimationService } from '../../services/estimation/estimation.service';
 import { HealthCheckupServiceService } from '../../services/health-checkup/health-checkup-service.service';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
-import * as XLSX from 'xlsx';  // Import xlsx library
+import type * as XLSXTypes from 'xlsx';
 
 @Component({
   selector: 'app-today-analytics',
@@ -105,7 +104,9 @@ export class TodayAnalyticsComponent {
   openCheckinReport(): void { this.showCheckinReport = true; }
   closeCheckinReport(): void { this.showCheckinReport = false; }
 
-  downloadCheckinExcel(): void {
+  async downloadCheckinExcel(): Promise<void> {
+    // Excel export library is loaded only when the user exports.
+    const XLSX = await import('xlsx');
     if (!this.checkinList || this.checkinList.length === 0) { return; }
     const rows = this.checkinList.map((c: any, i: number) => ({
       'S.No': i + 1,
@@ -494,9 +495,9 @@ export class TodayAnalyticsComponent {
     return totalMinutes;
   }
 
-  initChart(data: any, containerId: any, color: string, name: string): void {
+  async initChart(data: any, containerId: any, color: string, name: string): Promise<void> {
     const chartDom = document.getElementById(containerId)!;
-    const myChart = this.charts.init(chartDom);
+    const myChart = await this.charts.init(chartDom);
 
     // console.log(data, "form chart")
 
@@ -890,7 +891,9 @@ export class TodayAnalyticsComponent {
       );
   }
 
-  checkInReportDownload(): void {
+  async checkInReportDownload(): Promise<void> {
+    // Excel export library is loaded only when the user exports.
+    const XLSX = await import('xlsx');
     const columns = [
       'Patient Name', 'Phone Number', 'Patient Email', 'Doctor Name',
       'Department', 'Appointment Date', 'Appointment Time', 'Appointment Request Via',
@@ -919,10 +922,10 @@ export class TodayAnalyticsComponent {
     ]);
 
     // Create a worksheet from the header and rows
-    const ws: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet([header, ...rows]);
+    const ws: XLSXTypes.WorkSheet = XLSX.utils.aoa_to_sheet([header, ...rows]);
 
     // Create a workbook and append the sheet
-    const wb: XLSX.WorkBook = XLSX.utils.book_new();
+    const wb: XLSXTypes.WorkBook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Report');
 
     // Trigger the file download

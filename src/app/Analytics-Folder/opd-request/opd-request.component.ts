@@ -1,6 +1,5 @@
 import { Component,Input, OnChanges, SimpleChanges } from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
-import * as echarts from 'echarts';
 import { EChartsTracker } from '../../shared/charts/echarts-tracker';
 import { download, countByDate, filteredAppointments } from '../data';
 
@@ -54,9 +53,9 @@ export class OpdRequestComponent implements OnChanges{
     });
   }
 
-  chart(): void {
+  async chart(): Promise<void> {
     const chartContainer = document.getElementById('chart-container') as HTMLElement;
-    this.chartInstance = this.charts.init(chartContainer);
+    this.chartInstance = await this.charts.init(chartContainer);
 
 
     const chartOptions = {

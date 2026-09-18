@@ -1,7 +1,6 @@
 import { Component, ViewChild, ElementRef, Input, Output, EventEmitter, AfterViewInit, HostListener, SimpleChanges } from '@angular/core';
 import { last } from 'rxjs';
 import SignaturePad from 'signature_pad';
-import paper from 'paper';
 
 
 

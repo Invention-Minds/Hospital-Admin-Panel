@@ -1,5 +1,4 @@
 import * as moment from 'moment-timezone';
-import html2canvas from 'html2canvas';
 
 
 export const download : Function = (name:any, containerName : any) => {
@@ -368,9 +367,11 @@ export const filterAppointments = (data:any[], doctorId:any, departmentId:any, d
 
 }
 
-export const captureScreenshot = (divId: string, name : String): void => {
+export const captureScreenshot = async (divId: string, name : String): Promise<void> => {
   const element = document.getElementById(divId);
   if (element) {
+    // Screenshot library is loaded only when the user captures a screenshot.
+    const html2canvas = (await import('html2canvas')).default;
     html2canvas(element).then((canvas) => {
       // Convert canvas to image and trigger download
       const link = document.createElement('a');

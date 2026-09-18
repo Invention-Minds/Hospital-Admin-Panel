@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { HealthCheckupServiceService } from '../../services/health-checkup/health-checkup-service.service';
 import { MessageService } from 'primeng/api';
-import { Workbook } from 'exceljs';
 import * as FileSaver from 'file-saver';
 
 @Component({
@@ -263,7 +262,9 @@ generateCombinedReport(): void {
   downloadReport(): void {
     // Download logic for combinedReport
   }
-  download() {
+  async download() {
+    // Excel library is loaded only when the user downloads a report.
+    const { Workbook } = await import('exceljs');
     if (this.selectedDateRange && this.selectedDateRange.length === 2) {
       const startDate = this.selectedDateRange[0];
       const endDate = this.selectedDateRange[1] || startDate;
@@ -402,7 +403,9 @@ this.loadServices();
       return 0; // Default to no sorting if types are not strings
     });
   }
-  downloadAppointments(userId: number | string, role: string): void {
+  async downloadAppointments(userId: number | string, role: string): Promise<void> {
+    // Excel library is loaded only when the user downloads a report.
+    const { Workbook } = await import('exceljs');
     let filteredData: any[];
   
     // Filter data based on role

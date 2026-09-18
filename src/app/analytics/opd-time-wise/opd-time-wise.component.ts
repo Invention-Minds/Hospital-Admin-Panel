@@ -1,7 +1,6 @@
 import { Component, Input, Output, EventEmitter, OnChanges, SimpleChanges } from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
-import * as echarts from 'echarts'
 import { EChartsTracker } from '../../shared/charts/echarts-tracker';
 import { getYesterdayDate, getIndividualDates, getLastSevenDaysFromSelected, getLastThirtyDaysFromSelected, reorderDateFormat, getLast7Days, getLastSevenDays, captureScreenshot } from '../functions'
 import { MessageService } from 'primeng/api';
@@ -63,9 +62,9 @@ export class OpdTimeWiseComponent implements OnChanges {
     }
   }
 
-  initChart(data: any): void {
+  async initChart(data: any): Promise<void> {
     const chartDom = document.getElementById('timeOpdChart')!;
-    const myChart = this.charts.init(chartDom);
+    const myChart = await this.charts.init(chartDom);
     this.option = {
       tooltip: {
         trigger: 'axis'
@@ -324,9 +323,9 @@ export class OpdTimeWiseComponent implements OnChanges {
   //   }))
   // }
 
-  ViewMorechart(data: any): void {
+  async ViewMorechart(data: any): Promise<void> {
     const chartDom = document.getElementById('viewMoreTimeWise')!;
-    const myChart = this.charts.init(chartDom);
+    const myChart = await this.charts.init(chartDom);
 
     this.viewMoreoption = {
       tooltip: {

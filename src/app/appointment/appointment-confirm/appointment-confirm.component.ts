@@ -5,13 +5,14 @@ import { MessageService } from 'primeng/api';
 import { AlertService } from '../../services/alert.service';
 import {
   AppointmentHistoryService,
+  UndoCheckInReason,
   actorLabel,
+  byAppointmentSlot,
   istDateTime,
   slotText,
 } from '../../services/appointment-history.service';
 import { ChangeDetectorRef } from '@angular/core';
 import * as FileSaver from 'file-saver';
-import * as XLSX from 'xlsx';
 import { start } from 'node:repl';
 import * as moment from 'moment-timezone';
 import { app } from '../../../../server';
@@ -42,6 +43,9 @@ interface Appointment {
   checkedInTime?: any;
   prefix?: string;
   patientType?: string;
+  // Vitals capture — stamped server-side from the logged-in nursing account.
+  arrivedBy?: string | null;
+  arrivedTime?: string | null;
 
 }
 @Component({
@@ -100,6 +104,35 @@ export class AppointmentConfirmComponent {
   // Appointment lifecycle trail popup (who rescheduled / cancelled, when).
   showHistoryDialog = false;
   historyAppointmentId: number | null = null;
+  // Undo check-in — correction for a check-in on the wrong appointment.
+  showUndoCheckinPopup = false;
+  undoCheckinAppointment: Appointment | null = null;
+  undoCheckinReasonCode: UndoCheckInReason | '' = '';
+  undoCheckinNote = '';
+  undoingCheckin = false;
+  // Fixed list — free text let staff describe a cancellation as anything else.
+  // 'cancel' makes the backend cancel the appointment in the same call.
+  undoCheckinReasons: { value: UndoCheckInReason; label: string; hint: string }[] = [
+    {
+      value: 'wrongly_marked',
+      label: 'Wrongly marked — checked in the wrong patient',
+      hint: 'The check-in is reversed. Nothing else changes.',
+    },
+    {
+      value: 'cancel',
+      label: 'Appointment to be cancelled',
+      hint: 'The check-in is reversed AND the appointment is cancelled, freeing the slot. The patient and doctor are notified.',
+    },
+    {
+      value: 'reschedule',
+      label: 'Transfer / reschedule to another slot or doctor',
+      hint: 'The check-in is reversed. If the doctor has not started the consultation, reschedule from Confirmed Appointments. If it has started, ask the doctor to raise a transfer appointment.',
+    },
+  ];
+
+  get undoCheckinHint(): string {
+    return this.undoCheckinReasons.find((r) => r.value === this.undoCheckinReasonCode)?.hint ?? '';
+  }
 
 
 
@@ -113,6 +146,129 @@ export class AppointmentConfirmComponent {
   closeHistory(): void {
     this.showHistoryDialog = false;
     this.historyAppointmentId = null;
+  }
+
+  /**
+   * Patient + doctor cancellation messages — the same calls the Cancel button
+   * makes, so a cancellation raised from the undo dialog reads identically to
+   * one raised from the row. The status change itself is already done
+   * server-side; this is notification only.
+   */
+  private sendCancellationNotices(appointment: Appointment): void {
+    this.doctorService.getDoctorDetails(appointment.doctorId).subscribe({
+      next: (response: any) => {
+        const appointmentDetails = {
+          patientName: appointment?.patientName,
+          doctorName: appointment?.doctorName,
+          date: appointment?.date,
+          time: appointment?.time,
+          doctorPhoneNumber: response?.phone_number,
+          patientPhoneNumber: appointment?.phoneNumber,
+          status: 'cancelled',
+          prefix: appointment?.prefix,
+        };
+        this.appointmentService.sendSmsMessage(appointmentDetails).subscribe({
+          next: () => {},
+          error: (error: any) => console.error('Error sending cancellation SMS:', error),
+        });
+        this.appointmentService.sendWhatsAppMessage(appointmentDetails).subscribe({
+          next: () => {},
+          error: (error: any) => console.error('Error sending cancellation WhatsApp:', error),
+        });
+      },
+      error: (error: any) => console.error('Error fetching doctor for cancellation notice:', error),
+    });
+  }
+
+  openUndoCheckin(appointment: Appointment): void {
+    this.undoCheckinAppointment = appointment;
+    this.undoCheckinReasonCode = '';
+    this.undoCheckinNote = '';
+    this.showUndoCheckinPopup = true;
+  }
+
+  closeUndoCheckin(): void {
+    this.showUndoCheckinPopup = false;
+    this.undoCheckinAppointment = null;
+    this.undoCheckinReasonCode = '';
+    this.undoCheckinNote = '';
+  }
+
+  /**
+   * Reverse a check-in made on the wrong appointment. The backend restores the
+   * patient name/age/gender and PRN that check-in overwrote, so the correction
+   * has to go through it rather than a plain status flip here.
+   */
+  confirmUndoCheckin(): void {
+    const appointment = this.undoCheckinAppointment;
+    if (!appointment?.id) return;
+    if (!this.undoCheckinReasonCode) {
+      this.messageService.add({ severity: 'warn', summary: 'Reason required', detail: 'Please choose why the check-in is being reversed.' });
+      return;
+    }
+
+    this.undoingCheckin = true;
+    this.historyService.undoCheckIn(appointment.id, this.undoCheckinReasonCode, this.undoCheckinNote.trim()).subscribe({
+      next: (res) => {
+        this.undoingCheckin = false;
+        this.closeUndoCheckin();
+
+        // Spell out anything the reversal changed on screen. When the PRN was
+        // typed in at check-in, check-in had pulled the name/age/gender from
+        // the patient record — undoing puts the booking's values back, so the
+        // row visibly changes and the front desk needs to know why.
+        const changes: string[] = [];
+        if (res.demographicsRestored) {
+          changes.push('Patient name, age and gender have been set back to the details entered at booking.');
+        }
+        if (res.prnCleared) {
+          changes.push('The PRN entered at check-in has been removed.');
+        }
+        if (res.typeCleared) {
+          changes.push('The visit type selected at check-in has been cleared.');
+        }
+        if (res.paymentReverted) {
+          changes.push('Payment is back to unpaid.');
+        }
+        if (res.appointmentCancelled) {
+          changes.push('The appointment has been cancelled and the slot freed.');
+        } else {
+          changes.push('You can now check in the correct patient.');
+        }
+
+        this.messageService.add({
+          severity: res.warning ? 'warn' : 'success',
+          summary: res.appointmentCancelled ? 'Check-in reversed & appointment cancelled' : 'Check-in reversed',
+          detail: res.warning || changes.join(' '),
+          life: res.warning || changes.length > 1 ? 10000 : 5000,
+        });
+
+        // Where to go next when they picked transfer/reschedule. Shown as its
+        // own sticky message so it isn't lost among the change notes.
+        if (res.guidance) {
+          this.messageService.add({
+            severity: 'info', summary: 'What to do next', detail: res.guidance, life: 15000,
+          });
+        }
+
+        // The backend has already cancelled the appointment — this only sends
+        // the patient/doctor the same messages the Cancel button sends.
+        if (res.appointmentCancelled) {
+          this.sendCancellationNotices(appointment);
+        }
+
+        this.loadConfirmedAppointments(this.today);
+      },
+      error: (error) => {
+        this.undoingCheckin = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Could not reverse check-in',
+          detail: error?.error?.error || 'Please try again.',
+          life: 8000,
+        });
+      },
+    });
   }
 
 
@@ -431,7 +587,9 @@ export class AppointmentConfirmComponent {
     this.currentPage = 1; // Reset to first page whenever new filters are applied
   }
 
-  downloadLastWeekData(): void {
+  async downloadLastWeekData(): Promise<void> {
+    // Excel export library is loaded only when the user exports.
+    const XLSX = await import('xlsx');
     this.loadLastWeekAppointments();
     if (this.lastWeekAppointments && this.lastWeekAppointments.length > 0) {
 
@@ -482,12 +640,15 @@ export class AppointmentConfirmComponent {
   }
   // Method to download the filtered data as Excel
   async downloadFilteredData(): Promise<void> {
+    // Excel export library is loaded only when the user exports.
+    const XLSX = await import('xlsx');
     // filteredServices is only populated by a search or Clear, so on a fresh
     // load it's empty and the download used to silently do nothing. Fall back
     // to the rows actually on screen.
-    const rows: Appointment[] = (this.filteredServices && this.filteredServices.length > 0)
+    // Sorted copy so the sheet matches the print-out: chronological by slot.
+    const rows: Appointment[] = [...((this.filteredServices && this.filteredServices.length > 0)
       ? this.filteredServices
-      : this.filteredAppointments;
+      : this.filteredAppointments)].sort(byAppointmentSlot);
 
     if (rows && rows.length > 0) {
       // One request for the whole export: who booked / rescheduled / cancelled.
@@ -521,6 +682,9 @@ export class AppointmentConfirmComponent {
           'Appointment Handled By': appointment.user?.username || '-',
           'Checked In By': appointment.checkedInBy || '-',
           'Checked In Time': istDateTime(appointment.checkedInTime ?? null),
+          // Stamped by the backend from the logged-in nursing account.
+          'Vitals By': appointment.arrivedBy || '-',
+          'Vitals At': istDateTime(appointment.arrivedTime ?? null),
           // --- Lifecycle trail ---------------------------------------------
           'Booked By': trail ? actorLabel(trail.bookedBy, trail.bookedByType) : '-',
           'Booked At': istDateTime(trail?.bookedAt ?? null),
@@ -567,9 +731,11 @@ export class AppointmentConfirmComponent {
   }
   printAppointmentDetails(): void {
     // Use whichever list has data — filteredServices populates on search, otherwise use filteredAppointments
-    const sourceList = (this.filteredServices && this.filteredServices.length)
+    // Sorted copy: the filter still decides WHICH rows print, this only decides
+    // their order — chronological by slot, which is how a queue list reads.
+    const sourceList = [...((this.filteredServices && this.filteredServices.length)
       ? this.filteredServices
-      : this.filteredAppointments;
+      : this.filteredAppointments)].sort(byAppointmentSlot);
 
     if (!sourceList || sourceList.length === 0) {
       this.messageService.add({

@@ -731,3 +731,36 @@ width:39px
   width: 26px;
   height: 26px;
 }
+
+/* Undo check-in — inline SVG sized like the icon buttons beside it. */
+.btn-undo-checkin svg {
+  width: 26px;
+  height: 26px;
+}
+
+.undo-summary {
+  font-family: Kanit;
+  font-size: 15px;
+  color: #0e2970;
+  margin: 0 0 10px 0;
+}
+
+.undo-note {
+  font-family: Kanit;
+  font-size: 13px;
+  color: #7b7b7b;
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
+
+/* Spells out what the selected undo reason will do, before it is committed. */
+.undo-hint {
+  margin: 8px 0 16px 0;
+  padding: 10px 14px;
+  background: #f0f3ff;
+  border-radius: 8px;
+  font-family: Kanit;
+  font-size: 13px;
+  color: #0e2970;
+  line-height: 1.5;
+}

@@ -6,7 +6,6 @@ import { MessageService } from 'primeng/api';
 import { AlertService } from '../../services/alert.service';
 import { ChangeDetectorRef } from '@angular/core';
 import * as FileSaver from 'file-saver';
-import * as XLSX from 'xlsx';
 import { start } from 'node:repl';
 import * as moment from 'moment-timezone';
 import { app } from '../../../../server';
@@ -566,7 +565,9 @@ export class ConfirmMhcComponent {
     this.currentPage = 1; // Reset to first page whenever new filters are applied
   }
 
-  downloadLastWeekData(): void {
+  async downloadLastWeekData(): Promise<void> {
+    // Excel export library is loaded only when the user exports.
+    const XLSX = await import('xlsx');
     this.loadLastWeekAppointments();
     // console.log('Downloading last week\'s data...',this.lastWeekAppointments);
     if (this.lastWeekAppointments && this.lastWeekAppointments.length > 0) {
@@ -617,7 +618,9 @@ export class ConfirmMhcComponent {
     }
   }
   // Method to download the filtered data as Excel
-  downloadFilteredData(): void {
+  async downloadFilteredData(): Promise<void> {
+    // Excel export library is loaded only when the user exports.
+    const XLSX = await import('xlsx');
     if (this.filteredServices && this.filteredServices.length > 0) {
 
       const selectedFields = this.filteredServices.map((appointment: Appointment) => {

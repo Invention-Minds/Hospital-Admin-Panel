@@ -1,5 +1,5 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, OnInit } from '@angular/core';
-import * as XLSX from 'xlsx';
+import type * as XLSXTypes from 'xlsx';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { getLastThirtyDaysFromSelected, getYesterdayDate } from '../functions';
 import { HealthCheckupServiceService } from '../../services/health-checkup/health-checkup-service.service';
@@ -229,10 +229,12 @@ export class ReportFilterComponent implements OnInit, OnChanges {
   }
 
   // Download data as Excel file
-  downloadExcel(data:any): void {
+  async downloadExcel(data:any): Promise<void> {
+    // Excel export library is loaded only when the user exports.
+    const XLSX = await import('xlsx');
     const header = this.columns.map(col => col.header);
     const rows = data.map((row: any) => this.columns.map(col => row[col.key]));
-    const ws: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet([header, ...rows]);
+    const ws: XLSXTypes.WorkSheet = XLSX.utils.aoa_to_sheet([header, ...rows]);
 
     const headerStyle = {
       font: { bold: true, color: { rgb: 'FFFFFF' } },
@@ -269,7 +271,7 @@ export class ReportFilterComponent implements OnInit, OnChanges {
       }
     }
 
-    const wb: XLSX.WorkBook = XLSX.utils.book_new();
+    const wb: XLSXTypes.WorkBook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Report');
     XLSX.writeFile(wb, `${this.reportName} report.xlsx`);
   }

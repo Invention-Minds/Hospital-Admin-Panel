@@ -68,6 +68,8 @@ export class AppointmentHistoryComponent implements OnChanges {
       case 'RESCHEDULED': return 'Rescheduled';
       case 'CANCELLED': return 'Cancelled';
       case 'CHECKED_IN': return 'Checked In';
+      case 'CHECKIN_REVERSED': return 'Check-in Undone';
+      case 'VITALS_RECORDED': return 'Vitals Recorded';
       case 'CHECKED_OUT': return 'Checked Out';
       case 'COMPLETED': return 'Completed';
       case 'OPD_CLOSED': return 'OPD Closed';
@@ -85,6 +87,8 @@ export class AppointmentHistoryComponent implements OnChanges {
       case 'BOOKED': return 'evt-booked';
       case 'CONFIRMED': return 'evt-confirmed';
       case 'CHECKED_IN': return 'evt-checkedin';
+      case 'CHECKIN_REVERSED': return 'evt-reversed';
+      case 'VITALS_RECORDED': return 'evt-vitals';
       case 'COMPLETED': return 'evt-completed';
       default: return 'evt-neutral';
     }
@@ -121,6 +125,7 @@ export class AppointmentHistoryComponent implements OnChanges {
       case 'cron:expired-3h': return 'Auto (no-show 3h)';
       case 'cron:mark-complete': return 'Auto (end of day)';
       case 'service-close': return 'Service closed';
+      case 'nursing-station': return 'Nursing station';
       case 'followup-automation': return 'Follow-up automation';
       case 'scheduled-completion': return 'Auto (scheduled)';
       default: return source;

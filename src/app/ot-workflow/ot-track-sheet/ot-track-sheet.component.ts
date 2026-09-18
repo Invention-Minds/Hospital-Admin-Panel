@@ -3,8 +3,7 @@ import { CommonModule, formatDate } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { forkJoin, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import pdfMake from 'pdfmake/build/pdfmake';
-import pdfFonts from 'pdfmake/build/vfs_fonts';
+import { loadPdfMake } from '../../shared/pdf/pdfmake-loader';
 
 import { OtSchedule, OtWorkflowService } from '../../services/ot-workflow.service';
 import {
@@ -12,7 +11,6 @@ import {
 } from '../../services/ot-schedule-extras.service';
 import { getJmrhPdfBranding } from '../../shared/pdf/jmrh-letterhead';
 
-pdfMake.vfs = pdfFonts.vfs;
 
 /**
  * Phase 9.2 — Surgery Track Sheet (UHJ/OTS/F-04).
@@ -149,6 +147,8 @@ export class OtTrackSheetComponent implements OnInit, OnDestroy {
   }
 
   async print(): Promise<void> {
+    // PDF library is loaded only when a PDF is generated.
+    const pdfMake = await loadPdfMake();
     const s = this.schedule;
     if (!s) return;
     const note = this.primaryNote();

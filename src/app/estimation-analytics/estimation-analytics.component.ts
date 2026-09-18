@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { EstimationService } from '../services/estimation/estimation.service';
 import { DoctorServiceService } from '../services/doctor-details/doctor-service.service';
 
-import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 
 @Component({
@@ -1335,7 +1334,9 @@ export class EstimationAnalyticsComponent {
     };
   }
 
-  exportPopupTable() {
+  async exportPopupTable() {
+    // Excel export library is loaded only when the user exports.
+    const XLSX = await import('xlsx');
     if (!this.popupTableData || this.popupTableData.length === 0) {
       return;
     }

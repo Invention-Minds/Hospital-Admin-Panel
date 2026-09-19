@@ -124,8 +124,16 @@ export class DoctorServiceService {
 
     return this.http.post<any>(markCompleteUrl, body);
   }
-  getCancelledSlots(doctorId: number, date: string, time: string): Observable<any> {
-    const bookingData = { doctorId, date, time };
+  /**
+   * Release a booked slot (POST /doctors/cancel-booked-slot).
+   *
+   * Pass `appointmentId` whenever the slot is being released on behalf of one
+   * appointment — e.g. the old slot in a reschedule. Without it the backend can
+   * only match on doctor/date/time and will remove every hold at that time,
+   * including another patient's confirmed slot.
+   */
+  getCancelledSlots(doctorId: number, date: string, time: string, appointmentId?: number): Observable<any> {
+    const bookingData = { doctorId, date, time, appointmentId };
     return this.http.post(`${environment.apiUrl}/doctors/cancel-booked-slot`, bookingData);
   }
   addUnavailableDates(doctorId: number, startDate: string, endDate: string, unavailableDates: string[], userId: string): Observable<any> {

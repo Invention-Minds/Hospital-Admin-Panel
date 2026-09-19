@@ -1056,7 +1056,8 @@ export class ConfirmMhcComponent {
     };
     // console.log('Cancelled appointment:', cancelled);
     this.appointmentService.addCancelledAppointment(cancelled);
-    this.doctorService.getCancelledSlots(appointment.doctorId, appointment.date, appointment.time).subscribe({
+    // Scoped: only this appointment's hold on the slot is released.
+    this.doctorService.getCancelledSlots(appointment.doctorId, appointment.date, appointment.time, appointment.id).subscribe({
       next: (response) => {
         // console.log('Cancelled slots:', response);
         // const cancelledSlots = response;

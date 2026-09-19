@@ -1653,7 +1653,8 @@ isLoading: boolean = false;
       };
       // console.log(appointmentDetails)
       this.appointmentService.addCancelledAppointment(appointmentDetails);
-      this.doctorService.getCancelledSlots(doctorId, appointmentDetails.date, appointmentDetails.time).subscribe({
+      // Scoped: only this appointment's hold on the slot is released.
+      this.doctorService.getCancelledSlots(doctorId, appointmentDetails.date, appointmentDetails.time, appointmentDetails.id).subscribe({
         next: (response) => {
           // console.log('Cancelled slots:', response);
           // const cancelledSlots = response;
@@ -2129,7 +2130,9 @@ isLoading: boolean = false;
           this.appointmentService.addBookedSlot(this.appointment.doctorId, this.appointment.date, this.appointment.time, this.userId).subscribe({
             next: (response) => {
               console.log(this.oldDoctorId, this.oldDate, this.oldTime)
-              this.doctorService.getCancelledSlots(this.oldDoctorId, this.oldDate, this.oldTime).subscribe({
+              // Scoped to this appointment: releasing the OLD slot must not
+              // remove another patient's hold at the same doctor/date/time.
+              this.doctorService.getCancelledSlots(this.oldDoctorId, this.oldDate, this.oldTime, this.appointment?.id).subscribe({
                 next: (response) => {
                   // console.log('Cancelled slots:', response);
                   // const cancelledSlots = response;

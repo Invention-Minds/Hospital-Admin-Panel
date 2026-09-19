@@ -219,6 +219,8 @@ tbody tr:hover {
   white-space: nowrap;
 }
 
+/* Requested = awaiting confirmation, so amber rather than the settled blue. */
+.evt-requested { background: #c9922e; }
 .evt-booked { background: #6b8afd; }
 .evt-confirmed,
 .evt-completed { background: #79cfa6; }

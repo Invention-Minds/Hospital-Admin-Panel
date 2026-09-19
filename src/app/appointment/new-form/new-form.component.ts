@@ -1339,7 +1339,8 @@ export class NewFormComponent {
       };
       // console.log(appointmentDetails)
       this.appointmentService.addCancelledAppointment(appointmentDetails);
-      this.doctorService.getCancelledSlots(doctorId, appointmentDetails.date, appointmentDetails.time).subscribe({
+      // Scoped: only this appointment's hold on the slot is released.
+      this.doctorService.getCancelledSlots(doctorId, appointmentDetails.date, appointmentDetails.time, appointmentDetails.id).subscribe({
         next: (response) => {
           // console.log('Cancelled slots:', response);
           // const cancelledSlots = response;
@@ -1780,7 +1781,9 @@ export class NewFormComponent {
             });
           }
           this.appointmentService.addConfirmedAppointment(this.appointment);
-          this.doctorService.getCancelledSlots(doctorId, oldDate, oldTime).subscribe({
+          // Scoped to this appointment: releasing the OLD slot must not remove
+          // another patient's hold at the same doctor/date/time.
+          this.doctorService.getCancelledSlots(doctorId, oldDate, oldTime, this.appointment?.id).subscribe({
             next: (response) => {
               // console.log('Cancelled slots:', response);
               const cancelledSlots = response;

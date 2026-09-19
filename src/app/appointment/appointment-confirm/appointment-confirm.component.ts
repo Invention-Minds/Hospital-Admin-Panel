@@ -1088,7 +1088,8 @@ export class AppointmentConfirmComponent {
       requestVia: appointment.requestVia
     };
     this.appointmentService.addCancelledAppointment(cancelled);
-    this.doctorService.getCancelledSlots(appointment.doctorId, appointment.date, appointment.time).subscribe({
+    // Scoped: only this appointment's hold on the slot is released.
+    this.doctorService.getCancelledSlots(appointment.doctorId, appointment.date, appointment.time, appointment.id).subscribe({
       next: (response) => {
       },
       error: (error) => {

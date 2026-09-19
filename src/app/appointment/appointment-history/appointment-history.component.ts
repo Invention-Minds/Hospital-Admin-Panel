@@ -63,6 +63,8 @@ export class AppointmentHistoryComponent implements OnChanges {
   /** Human label for the status-badge pill in the Event column. */
   eventLabel(type: string): string {
     switch (type) {
+      case 'REQUESTED': return 'Requested';
+      // Pre-rename spelling, still on rows written before the change.
       case 'BOOKED': return 'Booked';
       case 'CONFIRMED': return 'Confirmed';
       case 'RESCHEDULED': return 'Rescheduled';
@@ -84,6 +86,7 @@ export class AppointmentHistoryComponent implements OnChanges {
     switch (type) {
       case 'CANCELLED': return 'evt-cancelled';
       case 'RESCHEDULED': return 'evt-rescheduled';
+      case 'REQUESTED': return 'evt-requested';
       case 'BOOKED': return 'evt-booked';
       case 'CONFIRMED': return 'evt-confirmed';
       case 'CHECKED_IN': return 'evt-checkedin';

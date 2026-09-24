@@ -17,7 +17,18 @@ export class LoginComponent implements OnInit {
   role: string = ''; // Track the user role
   subAdminType: string = ''
   adminType: string = ''
-  
+
+  // ── Sign-in copy ─────────────────────────────────────────────────────
+  currentYear = new Date().getFullYear();
+
+  /** "Good morning" / "Good afternoon" / "Good evening" — local clock. */
+  greeting = (() => {
+    const h = new Date().getHours();
+    if (h < 12) return 'Good morning';
+    if (h < 17) return 'Good afternoon';
+    return 'Good evening';
+  })();
+
   constructor(private authService: AuthServiceService, private router: Router,private messageService: MessageService) {}
   ngOnInit(): void {
     // Check if the user is already logged in by checking the token in localStorage or sessionStorage
@@ -177,5 +188,6 @@ export class LoginComponent implements OnInit {
   togglePasswordVisibility() {
     this.isPasswordVisible = !this.isPasswordVisible;
   }
+
   
 }

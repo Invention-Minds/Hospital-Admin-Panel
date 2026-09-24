@@ -1,70 +1,501 @@
-<!-- login.component.html
-<div class="login-container">
-    <div class="login-form">
-      <div class="logo">
-        <img src="/login-logo.png" alt="Login Logo" />
+<!-- ═══════════════════════════════════════════════════════════════════════
+     DocMinds sign-in.
+
+     Behind the form runs one hospital day, told as six acts on a loop —
+     front office, consultation, lab & radiology, the ward, theatre, and
+     discharge & billing. Each act, as it plays, raises its own column on
+     the planning board to the right, so by the end of the loop the board
+     is full: the day's work *is* the management picture. That is the one
+     thing the login screen is here to say.
+
+     The whole scene is decorative: aria-hidden, pointer-events none, and
+     every moving part is switched off under prefers-reduced-motion.
+     ═══════════════════════════════════════════════════════════════════════ -->
+
+<div class="lgn-auth">
+
+  <!-- Ambient ground: a soft morning sky, two glows and a fine dot grid. -->
+  <span class="glow glow-a" aria-hidden="true"></span>
+  <span class="glow glow-b" aria-hidden="true"></span>
+  <span class="grid-veil" aria-hidden="true"></span>
+
+  <svg class="scene" viewBox="0 0 1440 360" preserveAspectRatio="xMidYMax meet"
+       aria-hidden="true" focusable="false">
+
+    <defs>
+      <!-- Keeps the scrolling token queue inside its display board. -->
+      <clipPath id="dmQueueClip">
+        <rect x="104" y="122" width="124" height="52"/>
+      </clipPath>
+      <!-- Keeps the X-ray scan line inside the view box. -->
+      <clipPath id="dmFilmClip">
+        <rect x="104" y="104" width="134" height="94" rx="4"/>
+      </clipPath>
+    </defs>
+
+    <!-- ── The hospital's pulse, along the foot of the page ─────────────
+             One continuous vitals trace with a live beat running along it.
+             It reads at any size, unlike the ward plan it replaced, which
+             at this scale was just rows of boxes. -->
+    <path class="pulse-base"
+          d="M0 330 h46 q10 -8 20 0 h10 l6 6 l8 -46 l8 52 l6 -12 h14 q14 -14 28 0 h34
+             h46 q10 -8 20 0 h10 l6 6 l8 -46 l8 52 l6 -12 h14 q14 -14 28 0 h34
+             h46 q10 -8 20 0 h10 l6 6 l8 -46 l8 52 l6 -12 h14 q14 -14 28 0 h34
+             h46 q10 -8 20 0 h10 l6 6 l8 -46 l8 52 l6 -12 h14 q14 -14 28 0 h34
+             h46 q10 -8 20 0 h10 l6 6 l8 -46 l8 52 l6 -12 h14 q14 -14 28 0 h34
+             h46 q10 -8 20 0 h10 l6 6 l8 -46 l8 52 l6 -12 h14 q14 -14 28 0 h34
+             h46 q10 -8 20 0 h10 l6 6 l8 -46 l8 52 l6 -12 h14 q14 -14 28 0 h34
+             h46 q10 -8 20 0 h10 l6 6 l8 -46 l8 52 l6 -12 h14 q14 -14 28 0 h34"
+          fill="none" stroke="#5882C1" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round" opacity="0.26"/>
+    <path class="pulse-live" pathLength="100" stroke-dasharray="7 93"
+          d="M0 330 h46 q10 -8 20 0 h10 l6 6 l8 -46 l8 52 l6 -12 h14 q14 -14 28 0 h34
+             h46 q10 -8 20 0 h10 l6 6 l8 -46 l8 52 l6 -12 h14 q14 -14 28 0 h34
+             h46 q10 -8 20 0 h10 l6 6 l8 -46 l8 52 l6 -12 h14 q14 -14 28 0 h34
+             h46 q10 -8 20 0 h10 l6 6 l8 -46 l8 52 l6 -12 h14 q14 -14 28 0 h34
+             h46 q10 -8 20 0 h10 l6 6 l8 -46 l8 52 l6 -12 h14 q14 -14 28 0 h34
+             h46 q10 -8 20 0 h10 l6 6 l8 -46 l8 52 l6 -12 h14 q14 -14 28 0 h34
+             h46 q10 -8 20 0 h10 l6 6 l8 -46 l8 52 l6 -12 h14 q14 -14 28 0 h34
+             h46 q10 -8 20 0 h10 l6 6 l8 -46 l8 52 l6 -12 h14 q14 -14 28 0 h34"
+          fill="none" stroke="#FB9C2A" stroke-width="3.5"
+          stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- ── The pipeline: the day's work flowing to the planning board ────
+             It runs behind the sign-in card, which is the point — the link
+             is continuous even where you cannot see it. -->
+    <path class="pipe" d="M430 188 C 620 188, 820 172, 1010 176"
+          fill="none" stroke="#5882C1" stroke-width="3" stroke-linecap="round"
+          stroke-dasharray="10 14" opacity="0.5"/>
+    <path d="M1002 176 l-13 -7 v14 z" fill="#5882C1" opacity="0.5"/>
+    <circle class="landing" cx="1010" cy="176" r="7" fill="#FB9C2A" opacity="0.35"/>
+
+    <!-- ══ LEFT · one hospital day, six acts on a 42-second loop ═════════
+             Both panels are pushed out to the edges by this transform rather
+             than by moving every coordinate: on a short viewport the scene
+             is small and centred, and at 80/960 the sign-in card cropped the
+             board's heading. -->
+    <g transform="translate(-50, 0)">
+    <rect x="80" y="62" width="72" height="5" rx="2.5" fill="#5882C1"/>
+    <rect x="80" y="72" width="400" height="214" rx="16" fill="#FFFFFF"/>
+    <rect x="80" y="72" width="400" height="214" rx="16" fill="none"
+          stroke="#5882C1" stroke-width="2" opacity="0.32"/>
+
+    <!-- ── Act 1 · Front office ── walk-in to booked, all in one queue ─── -->
+    <g class="act act-1">
+      <rect x="96" y="96" width="140" height="84" rx="8" fill="#EEF3FC"/>
+      <text class="mini" x="108" y="116">TOKEN QUEUE</text>
+      <g clip-path="url(#dmQueueClip)">
+        <g class="queue">
+          <rect x="108" y="126" width="112" height="11" rx="3" fill="#FB9C2A" opacity="0.8"/>
+          <rect x="108" y="144" width="112" height="11" rx="3" fill="#5882C1" opacity="0.3"/>
+          <rect x="108" y="162" width="112" height="11" rx="3" fill="#5882C1" opacity="0.3"/>
+          <rect x="108" y="180" width="112" height="11" rx="3" fill="#FB9C2A" opacity="0.8"/>
+          <rect x="108" y="198" width="112" height="11" rx="3" fill="#5882C1" opacity="0.3"/>
+          <rect x="108" y="216" width="112" height="11" rx="3" fill="#5882C1" opacity="0.3"/>
+        </g>
+      </g>
+
+      <rect x="96" y="246" width="368" height="3" rx="1.5" fill="#5882C1" opacity="0.16"/>
+      <circle cx="300" cy="152" r="15" fill="#2F5597"/>
+      <path d="M280 172 h40 v14 h-40 z" fill="#2F5597"/>
+
+      <rect x="360" y="128" width="76" height="44" rx="4" fill="#2F5597"/>
+      <rect class="screen" x="365" y="133" width="66" height="30" rx="2" fill="#FB9C2A" opacity="0.45"/>
+      <rect x="392" y="172" width="12" height="5" fill="#2F5597"/>
+
+      <rect x="252" y="176" width="196" height="11" rx="5" fill="#5882C1"/>
+      <rect x="262" y="187" width="176" height="61" rx="4" fill="#EEF3FC"/>
+
+      <g class="wlk">
+        <circle cx="232" cy="192" r="13" fill="#5882C1"/>
+        <path d="M219 210 h26 v36 h-26 z" fill="#5882C1"/>
+        <rect x="245" y="212" width="10" height="18" rx="4" fill="#FB9C2A" opacity="0.85"/>
+      </g>
+      <g class="token">
+        <rect x="266" y="166" width="38" height="10" rx="3" fill="#FFFFFF"
+              stroke="#5882C1" stroke-width="1.5"/>
+        <rect x="271" y="170" width="18" height="3" rx="1.5" fill="#FB9C2A"/>
+      </g>
+
+      <text class="cap" x="96" y="268">Front office — register, book, queue</text>
+    </g>
+
+    <!-- ── Act 2 · Consultation ── the visit writing itself into the record -->
+    <g class="act act-2">
+      <rect x="96" y="92" width="126" height="96" rx="8" fill="#EEF3FC"/>
+      <text class="mini" x="108" y="116">Rx · NOTES</text>
+      <g fill="#5882C1" opacity="0.45">
+        <rect class="ln ln-1" x="108" y="128" width="96" height="8" rx="4"/>
+        <rect class="ln ln-2" x="108" y="144" width="82" height="8" rx="4"/>
+        <rect class="ln ln-3" x="108" y="160" width="94" height="8" rx="4"/>
+        <rect class="ln ln-4" x="108" y="176" width="68" height="8" rx="4"/>
+      </g>
+
+      <rect x="352" y="88" width="112" height="68" rx="7" fill="#2F5597"/>
+      <rect x="358" y="94" width="100" height="48" rx="3" fill="#16335E"/>
+      <path class="ecg"
+            d="M360 118 h14 l5 -14 l5 24 l5 -10 h16 l5 -16 l5 26 l5 -10 h18 l5 -14 l5 22 l5 -8"
+            fill="none" stroke="#3FD08A" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <g fill="#7FA8DC" opacity="0.6">
+        <rect x="358" y="146" width="36" height="6" rx="3"/>
+        <rect x="400" y="146" width="24" height="6" rx="3"/>
+      </g>
+      <circle class="beacon" cx="450" cy="149" r="4" fill="#3FD08A"/>
+
+      <rect x="96" y="246" width="368" height="3" rx="1.5" fill="#5882C1" opacity="0.16"/>
+
+      <!-- The patient across the desk -->
+      <circle cx="246" cy="180" r="14" fill="#5882C1"/>
+      <path d="M232 198 h28 v18 h-28 z" fill="#5882C1"/>
+
+      <!-- The doctor, stethoscope and all -->
+      <circle cx="352" cy="176" r="15" fill="#2F5597"/>
+      <path d="M336 195 q16 -9 32 0 v21 h-32 z" fill="#F2F7FF" stroke="#2F5597" stroke-width="2"/>
+      <path d="M344 196 l8 10 l8 -10" fill="none" stroke="#2F5597" stroke-width="2"/>
+      <path d="M344 200 q8 11 16 1" fill="none" stroke="#FB9C2A" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="361" cy="202" r="3" fill="#FB9C2A"/>
+
+      <rect x="112" y="214" width="336" height="11" rx="5" fill="#5882C1"/>
+      <rect x="128" y="225" width="14" height="23" fill="#5882C1" opacity="0.5"/>
+      <rect x="418" y="225" width="14" height="23" fill="#5882C1" opacity="0.5"/>
+      <rect x="268" y="202" width="62" height="12" rx="2" fill="#FFFFFF" stroke="#5882C1" stroke-width="1.2"/>
+      <rect class="pen" x="316" y="196" width="18" height="6" rx="3" fill="#2F5597"/>
+
+      <text class="cap" x="96" y="268">Consultation — notes, orders, prescriptions</text>
+    </g>
+
+    <!-- ── Act 3 · Lab & radiology ── samples in, reports out ──────────── -->
+    <g class="act act-3">
+      <rect x="96" y="96" width="150" height="110" rx="8" fill="#2F5597"/>
+      <rect x="104" y="104" width="134" height="94" rx="4" fill="#16335E"/>
+      <g clip-path="url(#dmFilmClip)">
+        <!-- A chest film: shoulders, spine and ribs curving out and down. -->
+        <g stroke="#7FA8DC" fill="none" opacity="0.5" stroke-width="2.5" stroke-linecap="round">
+          <path d="M141 124 q30 -9 60 0"/>
+          <line x1="171" y1="122" x2="171" y2="188"/>
+          <path d="M169 134 A 30 24 0 0 0 139 158"/>
+          <path d="M173 134 A 30 24 0 0 1 203 158"/>
+          <path d="M169 148 A 27 21 0 0 0 142 169"/>
+          <path d="M173 148 A 27 21 0 0 1 200 169"/>
+          <path d="M169 162 A 22 17 0 0 0 147 179"/>
+          <path d="M173 162 A 22 17 0 0 1 195 179"/>
+        </g>
+        <ellipse cx="181" cy="158" rx="15" ry="18" fill="#7FA8DC" opacity="0.16"/>
+        <rect class="scan" x="104" y="104" width="134" height="16" fill="#BFD3EE" opacity="0.18"/>
+      </g>
+
+      <rect x="96" y="246" width="368" height="3" rx="1.5" fill="#5882C1" opacity="0.16"/>
+      <circle cx="424" cy="164" r="14" fill="#2F5597"/>
+      <path d="M408 183 q16 -9 32 0 v23 h-32 z" fill="#F2F7FF" stroke="#2F5597" stroke-width="2"/>
+
+      <!-- Bench, rack and three samples filling -->
+      <rect x="268" y="206" width="196" height="11" rx="5" fill="#5882C1"/>
+      <rect x="276" y="217" width="180" height="31" rx="3" fill="#EEF3FC"/>
+      <rect x="282" y="196" width="104" height="10" rx="3" fill="#5882C1" opacity="0.5"/>
+      <g>
+        <rect x="290" y="158" width="18" height="48" rx="9" fill="#FFFFFF" stroke="#5882C1" stroke-width="1.5"/>
+        <rect class="tube tube-1" x="292" y="176" width="14" height="28" rx="7" fill="#E4572E" opacity="0.7"/>
+        <rect x="324" y="158" width="18" height="48" rx="9" fill="#FFFFFF" stroke="#5882C1" stroke-width="1.5"/>
+        <rect class="tube tube-2" x="326" y="176" width="14" height="28" rx="7" fill="#FB9C2A" opacity="0.75"/>
+        <rect x="358" y="158" width="18" height="48" rx="9" fill="#FFFFFF" stroke="#5882C1" stroke-width="1.5"/>
+        <rect class="tube tube-3" x="360" y="176" width="14" height="28" rx="7" fill="#3FA46A" opacity="0.7"/>
+      </g>
+
+      <!-- The report leaving for the patient's file -->
+      <g class="report">
+        <rect x="268" y="222" width="70" height="24" rx="3" fill="#FFFFFF" stroke="#5882C1" stroke-width="1.5"/>
+        <g fill="#5882C1" opacity="0.5">
+          <rect x="275" y="228" width="40" height="4" rx="2"/>
+          <rect x="275" y="236" width="52" height="4" rx="2"/>
+        </g>
+      </g>
+
+      <text class="cap" x="96" y="268">Lab &amp; radiology — samples, scans, reports</text>
+    </g>
+
+    <!-- ── Act 4 · Admission & ward ── the round, bed by bed ───────────── -->
+    <g class="act act-4">
+      <g class="vit vit-1">
+        <rect x="118" y="100" width="62" height="28" rx="9" fill="#FFFFFF" stroke="#5882C1" stroke-width="1.5"/>
+        <path d="M126 114 h8 l4 -8 l5 16 l4 -8 h10" fill="none" stroke="#3FA46A" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="170" cy="114" r="3" fill="#FB9C2A"/>
+      </g>
+      <g class="vit vit-2">
+        <rect x="244" y="100" width="62" height="28" rx="9" fill="#FFFFFF" stroke="#5882C1" stroke-width="1.5"/>
+        <path d="M252 114 h8 l4 -8 l5 16 l4 -8 h10" fill="none" stroke="#3FA46A" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="296" cy="114" r="3" fill="#FB9C2A"/>
+      </g>
+      <g class="vit vit-3">
+        <rect x="370" y="100" width="62" height="28" rx="9" fill="#FFFFFF" stroke="#5882C1" stroke-width="1.5"/>
+        <path d="M378 114 h8 l4 -8 l5 16 l4 -8 h10" fill="none" stroke="#3FA46A" stroke-width="2.5"
+              stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="420" cy="114" r="3" fill="#FB9C2A"/>
+      </g>
+
+      <g fill="#5882C1">
+        <rect x="95"  y="138" width="6" height="38" rx="2"/>
+        <rect x="191" y="152" width="6" height="30" rx="2"/>
+        <rect x="100" y="164" width="92" height="10" rx="4"/>
+        <rect x="106" y="174" width="4"  height="14" opacity="0.6"/>
+        <rect x="182" y="174" width="4"  height="14" opacity="0.6"/>
+        <rect x="221" y="138" width="6" height="38" rx="2"/>
+        <rect x="317" y="152" width="6" height="30" rx="2"/>
+        <rect x="226" y="164" width="92" height="10" rx="4"/>
+        <rect x="232" y="174" width="4"  height="14" opacity="0.6"/>
+        <rect x="308" y="174" width="4"  height="14" opacity="0.6"/>
+        <rect x="347" y="138" width="6" height="38" rx="2"/>
+        <rect x="443" y="152" width="6" height="30" rx="2"/>
+        <rect x="352" y="164" width="92" height="10" rx="4"/>
+        <rect x="358" y="174" width="4"  height="14" opacity="0.6"/>
+        <rect x="434" y="174" width="4"  height="14" opacity="0.6"/>
+      </g>
+      <g fill="#DCE7F8">
+        <rect x="126" y="152" width="66" height="14" rx="6"/>
+        <rect x="252" y="152" width="66" height="14" rx="6"/>
+        <rect x="378" y="152" width="66" height="14" rx="6"/>
+      </g>
+      <g fill="#FFFFFF">
+        <rect x="104" y="144" width="24" height="12" rx="5"/>
+        <rect x="230" y="144" width="24" height="12" rx="5"/>
+        <rect x="356" y="144" width="24" height="12" rx="5"/>
+      </g>
+      <g fill="#2F5597">
+        <circle cx="116" cy="140" r="8"/>
+        <circle cx="242" cy="140" r="8"/>
+        <circle cx="368" cy="140" r="8"/>
+      </g>
+      <rect x="96" y="188" width="368" height="3" rx="1.5" fill="#5882C1" opacity="0.14"/>
+
+      <rect x="206" y="106" width="3" height="82" fill="#5882C1" opacity="0.7"/>
+      <rect x="197" y="106" width="20" height="26" rx="5" fill="#BFD3EE"/>
+      <circle class="drip" cx="207.5" cy="134" r="2.6" fill="#5882C1"/>
+
+      <rect x="96" y="250" width="368" height="3" rx="1.5" fill="#5882C1" opacity="0.16"/>
+      <g class="nurse">
+        <circle cx="150" cy="202" r="13" fill="#2F5597"/>
+        <rect x="137" y="192" width="26" height="6" rx="2" fill="#FFFFFF"/>
+        <rect x="148" y="192" width="4"  height="6" fill="#FB9C2A"/>
+        <path d="M134 220 q16 -9 32 0 v30 h-32 z" fill="#F2F7FF" stroke="#2F5597" stroke-width="2"/>
+        <rect x="166" y="226" width="18" height="13" rx="2" fill="#FB9C2A" opacity="0.85"/>
+      </g>
+
+      <text class="cap" x="96" y="268">Ward — admission, vitals, medication, handover</text>
+    </g>
+
+    <!-- ── Act 5 · Theatre ── scheduled, in use, tracked ───────────────── -->
+    <g class="act act-5">
+      <rect x="198" y="92" width="4" height="16" fill="#5882C1"/>
+      <circle class="lamp" cx="200" cy="126" r="28" fill="#FB9C2A" opacity="0.3"/>
+      <circle cx="200" cy="126" r="17" fill="#FFE2AE"/>
+      <circle cx="200" cy="126" r="17" fill="none" stroke="#FB9C2A" stroke-width="2" opacity="0.6"/>
+
+      <rect x="96" y="246" width="368" height="3" rx="1.5" fill="#5882C1" opacity="0.16"/>
+
+      <!-- Table and the patient on it -->
+      <rect x="132" y="196" width="180" height="12" rx="6" fill="#5882C1"/>
+      <rect x="146" y="184" width="150" height="13" rx="6" fill="#C9DCF5"/>
+      <rect x="148" y="180" width="28" height="12" rx="5" fill="#FFFFFF"/>
+      <circle cx="162" cy="176" r="9" fill="#2F5597"/>
+      <rect x="206" y="208" width="16" height="32" fill="#5882C1" opacity="0.6"/>
+      <rect x="186" y="240" width="56" height="6" rx="3" fill="#5882C1" opacity="0.6"/>
+
+      <!-- Two of the team, working -->
+      <g>
+        <circle cx="116" cy="168" r="13" fill="#2F5597"/>
+        <path d="M102 186 q14 -9 28 0 v60 h-28 z" fill="#DFF2E8" stroke="#3FA46A" stroke-width="2"/>
+        <rect class="arm arm-l" x="128" y="192" width="28" height="8" rx="4" fill="#DFF2E8" stroke="#3FA46A" stroke-width="2"/>
+      </g>
+      <g>
+        <circle cx="330" cy="164" r="13" fill="#2F5597"/>
+        <path d="M316 182 q14 -9 28 0 v64 h-28 z" fill="#DFF2E8" stroke="#3FA46A" stroke-width="2"/>
+        <rect class="arm arm-r" x="290" y="190" width="28" height="8" rx="4" fill="#DFF2E8" stroke="#3FA46A" stroke-width="2"/>
+      </g>
+
+      <!-- Anaesthesia monitor and the theatre status -->
+      <rect x="360" y="104" width="100" height="68" rx="6" fill="#2F5597"/>
+      <rect x="366" y="110" width="88" height="42" rx="3" fill="#16335E"/>
+      <path class="ecg ecg-ot"
+            d="M370 130 h12 l5 -14 l5 24 l5 -10 h14 l5 -16 l5 26 l5 -10 h15"
+            fill="none" stroke="#3FD08A" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <g fill="#7FA8DC" opacity="0.6">
+        <rect x="366" y="158" width="32" height="6" rx="3"/>
+        <rect x="404" y="158" width="20" height="6" rx="3"/>
+      </g>
+      <circle class="beacon" cx="366" cy="190" r="5" fill="#E4572E"/>
+      <text class="mini" x="378" y="195">IN USE</text>
+
+      <text class="cap" x="96" y="268">Theatre — scheduled, staffed, tracked</text>
+    </g>
+
+    <!-- ── Act 6 · Discharge & billing ── summary, bill, settled ───────── -->
+    <g class="act act-6">
+      <rect x="96" y="96" width="140" height="124" rx="8" fill="#EEF3FC"/>
+      <text class="mini" x="108" y="116">FINAL BILL</text>
+      <g>
+        <rect class="bl bl-1" x="108" y="126" width="72" height="7" rx="3.5" fill="#5882C1" opacity="0.45"/>
+        <rect class="bl bl-1" x="192" y="126" width="32" height="7" rx="3.5" fill="#5882C1" opacity="0.3"/>
+        <rect class="bl bl-2" x="108" y="142" width="60" height="7" rx="3.5" fill="#5882C1" opacity="0.45"/>
+        <rect class="bl bl-2" x="192" y="142" width="32" height="7" rx="3.5" fill="#5882C1" opacity="0.3"/>
+        <rect class="bl bl-3" x="108" y="158" width="80" height="7" rx="3.5" fill="#5882C1" opacity="0.45"/>
+        <rect class="bl bl-3" x="192" y="158" width="32" height="7" rx="3.5" fill="#5882C1" opacity="0.3"/>
+        <rect class="bl bl-4" x="108" y="174" width="54" height="7" rx="3.5" fill="#5882C1" opacity="0.45"/>
+        <rect class="bl bl-4" x="192" y="174" width="32" height="7" rx="3.5" fill="#5882C1" opacity="0.3"/>
+      </g>
+      <rect class="bl bl-5" x="108" y="190" width="116" height="2" rx="1" fill="#5882C1" opacity="0.4"/>
+      <rect class="bl bl-5" x="108" y="198" width="50" height="9" rx="4.5" fill="#FB9C2A" opacity="0.85"/>
+      <rect class="bl bl-5" x="184" y="198" width="40" height="9" rx="4.5" fill="#FB9C2A" opacity="0.85"/>
+
+      <rect x="96" y="246" width="368" height="3" rx="1.5" fill="#5882C1" opacity="0.16"/>
+      <circle cx="290" cy="152" r="15" fill="#2F5597"/>
+      <path d="M270 172 h40 v14 h-40 z" fill="#2F5597"/>
+      <rect x="232" y="176" width="216" height="11" rx="5" fill="#5882C1"/>
+      <rect x="242" y="187" width="196" height="61" rx="4" fill="#EEF3FC"/>
+
+      <!-- Card machine, and the payment clearing -->
+      <rect x="376" y="152" width="36" height="24" rx="3" fill="#2F5597"/>
+      <rect x="380" y="156" width="28" height="11" rx="2" fill="#BFD3EE"/>
+      <path class="tick" d="M382 190 l7 8 l14 -17" fill="none" stroke="#3FA46A"
+            stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+
+      <!-- Home, with the discharge summary in hand -->
+      <g class="leave">
+        <circle cx="300" cy="202" r="12" fill="#5882C1"/>
+        <path d="M288 218 h24 v30 h-24 z" fill="#5882C1"/>
+        <rect x="310" y="222" width="13" height="17" rx="2" fill="#FFFFFF" stroke="#5882C1" stroke-width="1.5"/>
+      </g>
+
+      <text class="cap" x="96" y="268">Discharge — summary, bill, settled</text>
+    </g>
+    </g>
+
+    <!-- ══ RIGHT · the planning board the whole day feeds ════════════════
+             Each column rises as its act plays and stays up, so by the end
+             of the loop the board holds the day. Then it clears and the
+             next day starts. -->
+    <g transform="translate(50, 0)">
+    <rect x="960" y="62" width="72" height="5" rx="2.5" fill="#FB9C2A"/>
+    <rect x="960" y="72" width="400" height="214" rx="16" fill="#FFFFFF"/>
+    <rect x="960" y="72" width="400" height="214" rx="16" fill="none"
+          stroke="#5882C1" stroke-width="2" opacity="0.32"/>
+    <text class="mini" x="976" y="106">TODAY AT A GLANCE</text>
+
+    <path class="trend" pathLength="100" stroke-dasharray="100"
+          d="M976 156 L1016 146 L1056 152 L1096 132 L1136 140 L1176 120 L1216 128 L1256 112 L1296 118 L1336 100"
+          fill="none" stroke="#FB9C2A" stroke-width="3"
+          stroke-linecap="round" stroke-linejoin="round"/>
+
+    <g class="bars">
+      <rect class="bar bar-1" x="976"  y="186" width="44" height="62" rx="6" fill="#5882C1"/>
+      <rect class="bar bar-2" x="1041" y="164" width="44" height="84" rx="6" fill="#5882C1"/>
+      <rect class="bar bar-3" x="1106" y="198" width="44" height="50" rx="6" fill="#5882C1"/>
+      <rect class="bar bar-4" x="1170" y="156" width="44" height="92" rx="6" fill="#5882C1"/>
+      <rect class="bar bar-5" x="1235" y="190" width="44" height="58" rx="6" fill="#5882C1"/>
+      <rect class="bar bar-6" x="1300" y="170" width="44" height="78" rx="6" fill="#5882C1"/>
+    </g>
+
+    <rect x="970" y="248" width="380" height="3" rx="1.5" fill="#5882C1" opacity="0.25"/>
+    <g class="lbl">
+      <text x="998"  y="268">Appts</text>
+      <text x="1063" y="268">Consults</text>
+      <text x="1128" y="268">Scans</text>
+      <text x="1192" y="268">Beds</text>
+      <text x="1257" y="268">Theatre</text>
+      <text x="1322" y="268">Bills</text>
+    </g>
+    </g>
+  </svg>
+
+  <!-- ── Foreground ──────────────────────────────────────────────────── -->
+  <div class="lgn-col">
+
+    <!-- Mark plus wordmark, the same lockup the app header uses. The mark on
+         its own carries no name, so the product was going unnamed on the one
+         screen every user sees. The alt is empty because the name is right
+         beside it as text. -->
+    <div class="lgn-brand">
+      <img src="/sidebar/IM-logo.png" alt=""/>
+      <span class="lgn-brand__name">DocMinds</span>
+    </div>
+
+    <p class="lgn-kicker">One sign-in for the whole hospital</p>
+
+    <div class="lgn-card">
+
+      <div class="lgn-greet">
+        <h1>{{ greeting }}</h1>
+        <p class="lgn-greet__line">Welcome to seamless healthcare management.</p>
       </div>
-      <h2>LOGIN</h2>
-      <p>Welcome to seamless healthcare management</p>
-      
-      <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
-        <div class="input-group">
-            <img src="/username.png" alt="Username Icon" class="icon" />
-          <input type="text" placeholder="Username" [(ngModel)]="username"
-          name="username"
-          required />
-        </div>
-        <div class="input-group">
-            <img src="/password.png" alt="Username Icon" class="icon" />
-            <input [type]="isPasswordVisible ? 'text' : 'password'"  class="input-field"  [(ngModel)]="password" placeholder="Password" name="password" required/>  
-            <img [src]="isPasswordVisible? '/not-show.png': '/show-password.png'" alt="Show Password" class="eye-icon" (click)="togglePasswordVisibility()">
-          </div>
-        <div class="login">
-            <button  type="submit" [disabled]="!loginForm.valid " mat-raised-button [class.spinner]="isLoading"><span *ngIf="!isLoading">Login Now</span></button>
-            <p-toast />
-        </div>
-      </form>
-    </div>
-    <div class="image">
-        <div class="welcome-image">
-            <h3>Welcome Back</h3>
-            <img src="/login-doctor.png" alt="Doctors Illustration" />
-    </div>
 
-    </div>
-   <p-toast></p-toast>
-  </div>
-   -->
+      <form (ngSubmit)="onSubmit()" #loginForm="ngForm" class="lgn-form">
 
-   <div class="root-container">
-      <div class="box">
-        <div class="logoSection">
-          <img src="/docminds_logo.png" alt="Login Logo" />
-        </div>
-        <div class="login_text">
-          <div class="login">Login</div>
-          <div class="quote">Welcome to seamless healthcare management</div>
-        </div>
-        <div class="form">
-          <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
-            <div class="input-group">
-              <label for="" class="">User ID</label>
-              <input type="text" placeholder="Username" [(ngModel)]="username"
+        <div class="lgn-field">
+          <label for="lgn-user">User ID</label>
+          <div class="lgn-input">
+            <i class="pi pi-user" aria-hidden="true"></i>
+            <input
+              id="lgn-user"
+              type="text"
               name="username"
-              required />
-            </div>
-            <div class="input-group">
-                <label for="">Password</label>
-                <input [type]="isPasswordVisible ? 'text' : 'password'"  class="input-field"  [(ngModel)]="password" placeholder="Password" name="password" required/>  
-                <div class="eye">
-                  <img [src]="isPasswordVisible? '/not-show.png': '/show-password.png'" alt="Show Password" class="eye-icon" (click)="togglePasswordVisibility()">
-                </div>
-            </div>
-            <div class="login marginTop">
-                <button  type="submit" [disabled]="!loginForm.valid " mat-raised-button [class.spinner]="isLoading"><span *ngIf="!isLoading">Sign In</span></button>
-            </div>
-          </form>
+              [(ngModel)]="username"
+              placeholder="Enter your user ID"
+              autocomplete="username"
+              aria-describedby="lgn-hint"
+              required
+            />
+          </div>
         </div>
-      </div>
-      <p-toast />
-   </div>
+
+        <div class="lgn-field">
+          <label for="lgn-pass">Password</label>
+          <div class="lgn-input">
+            <i class="pi pi-lock" aria-hidden="true"></i>
+            <input
+              id="lgn-pass"
+              [type]="isPasswordVisible ? 'text' : 'password'"
+              name="password"
+              [(ngModel)]="password"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              required
+            />
+            <button
+              type="button"
+              class="lgn-eye"
+              [attr.aria-label]="isPasswordVisible ? 'Hide password' : 'Show password'"
+              (click)="togglePasswordVisibility()"
+            >
+              <i [class]="isPasswordVisible ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Which credential to use — the question the help desk fields daily -->
+        <p class="lgn-hint" id="lgn-hint">
+          <i class="pi pi-info-circle" aria-hidden="true"></i>
+          <span>Use the user ID issued by your hospital administrator.</span>
+        </p>
+
+        <button type="submit" class="lgn-submit" [disabled]="!loginForm.valid || isLoading">
+          @if (isLoading) {
+            <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+            <span>Signing in…</span>
+          } @else {
+            <i class="pi pi-sign-in" aria-hidden="true"></i>
+            <span>Sign In</span>
+          }
+        </button>
+
+      </form>
+
+      <p class="lgn-help">Trouble signing in? Contact your hospital administrator.</p>
+    </div>
+
+    <p class="lgn-legal">© {{ currentYear }} DocMinds · Seamless healthcare management</p>
+  </div>
+
+  <p-toast />
+</div>

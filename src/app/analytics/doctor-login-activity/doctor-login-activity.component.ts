@@ -1,4 +1,5 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import * as FileSaver from 'file-saver';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { utcToIst, getYesterdayDate } from '../functions';
@@ -231,6 +232,43 @@ loadAllAppointments(){
     return {
       checkedOutTime: checkedOutTime.split(' ')[1].slice(0, 5) // Extract HH:MM format
     };
+  }
+
+  // Download the detailed view as an Excel file
+  async downloadExcel(): Promise<void> {
+    if (!this.doctorDelaysForReport?.length) return;
+
+    // Excel export library is loaded only when the user exports.
+    const { Workbook } = await import('exceljs');
+
+    const workbook = new Workbook();
+    const worksheet = workbook.addWorksheet('Doctor Login Activity');
+
+    worksheet.columns = [
+      { header: 'No.', key: 'no', width: 6 },
+      { header: 'Doctor Name', key: 'doctorName', width: 30 },
+      { header: 'OPD Start Time', key: 'opdStartTime', width: 18 },
+      { header: 'Delay (min)', key: 'delay', width: 14 },
+      { header: 'Checked-Out Time', key: 'checkedOutTime', width: 20 },
+    ];
+
+    worksheet.getRow(1).font = { bold: true };
+
+    this.doctorDelaysForReport.forEach((doctor, index) => {
+      // delay is held as '15 mins' / '- min'; export a number so it stays sortable
+      const delayMinutes = parseInt(doctor.delay, 10);
+      worksheet.addRow({
+        no: index + 1,
+        doctorName: doctor.doctorName,
+        opdStartTime: doctor.opdStartTime || '-',
+        delay: isNaN(delayMinutes) ? '-' : delayMinutes,
+        checkedOutTime: doctor.checkedOutTime || '-',
+      });
+    });
+
+    workbook.xlsx.writeBuffer().then((buffer) => {
+      FileSaver.saveAs(new Blob([buffer]), `Doctor_Login_Activity_${this.reportDate}.xlsx`);
+    });
   }
 
   calculateDelay(availableFrom: string, checkedOutTime: string): number {

@@ -568,10 +568,12 @@ export class AppointmentConfirmService {
     });
   }
   /** Analytics: per-doctor started/finished consultation counts + patient list for a day. */
-  getConsultationSummary(date: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/consultation-summary`, {
-      params: { date: date }
-    });
+  // Omit toDate (or pass the same day) for the single-day summary.
+  getConsultationSummary(fromDate: string, toDate?: string): Observable<any> {
+    const params: { [param: string]: string } = toDate && toDate !== fromDate
+      ? { fromDate: fromDate, toDate: toDate }
+      : { date: fromDate };
+    return this.http.get(`${this.apiUrl}/consultation-summary`, { params });
   }
 
   /** Send an OPD visit-summary PDF (base64, built on the frontend) to the patient

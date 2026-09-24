@@ -435,9 +435,27 @@
 <div *ngIf="showConsultReport" class="overlay">
     <div class="container">
         <div class="header">
-            Consultations Today — by Doctor
-            <button class="close-button" (click)="closeConsultReport()"><i class="fa-solid fa-xmark"></i></button>
+            <div>Consultations — by Doctor</div>
+            <div class="header-actions">
+                <button class="excel-btn" (click)="downloadConsultExcel()" [disabled]="consultSummary.length === 0">
+                    <i class="fa-solid fa-file-excel"></i> Excel
+                </button>
+                <button class="close-button" (click)="closeConsultReport()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
         </div>
+
+        <div class="consult-filters">
+            <div class="consult-range">
+                <label for="consultFrom"><b>From</b></label>
+                <input type="date" id="consultFrom" [(ngModel)]="consultFrom" [max]="consultTo"
+                    (change)="applyConsultRange()">
+                <label for="consultTo"><b>To</b></label>
+                <input type="date" id="consultTo" [(ngModel)]="consultTo" [min]="consultFrom"
+                    (change)="applyConsultRange()">
+            </div>
+            <span class="consult-totals">Started {{consultRangeStarted}} / Finished {{consultRangeFinished}}</span>
+        </div>
+
         <div class="doctor-list-est">
             <table>
                 <thead>
@@ -460,8 +478,8 @@
                 </tbody>
             </table>
         </div>
-        <div *ngIf="consultSummary.length === 0">
-            <div class="doctor-details doctor-card no-record">No Consultations Started Today</div>
+        <div *ngIf="consultSummary.length === 0 && !consultRangeLoading">
+            <div class="doctor-details doctor-card no-record">No Consultations for {{consultRangeLabel}}</div>
         </div>
     </div>
 </div>
@@ -470,14 +488,21 @@
 <div *ngIf="showConsultPatients" class="overlay">
     <div class="container">
         <div class="header">
-            {{ selectedConsultDoctor?.doctorName }} — Patients
-            <button class="close-button" (click)="closeConsultPatients()"><i class="fa-solid fa-xmark"></i></button>
+            <div>{{ selectedConsultDoctor?.doctorName }} — Patients</div>
+            <div class="header-actions">
+                <button class="excel-btn" (click)="downloadConsultPatientsExcel()"
+                    [disabled]="!selectedConsultDoctor?.patients?.length">
+                    <i class="fa-solid fa-file-excel"></i> Excel
+                </button>
+                <button class="close-button" (click)="closeConsultPatients()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
         </div>
         <div class="doctor-list-est">
             <table>
                 <thead>
                     <tr>
                         <td><b>S. No</b></td>
+                        <td><b>Date</b></td>
                         <td><b>Patient</b></td>
                         <td><b>PRN</b></td>
                         <td><b>Slot</b></td>
@@ -489,6 +514,7 @@
                 <tbody>
                     <tr *ngFor="let p of selectedConsultDoctor?.patients; let i = index">
                         <td>{{i+1}}</td>
+                        <td>{{p.date || '-'}}</td>
                         <td>{{p.patientName}}</td>
                         <td>{{p.prnNumber || '-'}}</td>
                         <td>{{p.time}}</td>

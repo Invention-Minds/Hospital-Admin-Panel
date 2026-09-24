@@ -60,6 +60,10 @@ export class TodayAnalyticsComponent {
   showConsultReport: boolean = false
   showConsultPatients: boolean = false
   selectedConsultDoctor: any = null
+  // popup-only date range; the tile totals above stay pinned to today
+  consultFrom: string = ''
+  consultTo: string = ''
+  consultRangeLoading: boolean = false
 
   // report
   popUpPresentReport: boolean = false
@@ -80,6 +84,8 @@ export class TodayAnalyticsComponent {
 
   ngOnInit(): void {
     this.date = getTodayDate()
+    this.consultFrom = this.date
+    this.consultTo = this.date
     if (typeof window !== 'undefined' && window.localStorage) {
       this.role = localStorage.getItem('role') || '';
     }
@@ -132,13 +138,177 @@ export class TodayAnalyticsComponent {
     this.appointment.getConsultationSummary(this.date).subscribe({
       next: (rows: any) => {
         this.consultSummary = Array.isArray(rows) ? rows : [];
+        // Tile totals are today's, and stay that way regardless of the popup's range.
         this.consultStartedTotal = this.consultSummary.reduce((s, d) => s + (d.started || 0), 0);
         this.consultFinishedTotal = this.consultSummary.reduce((s, d) => s + (d.finished || 0), 0);
       },
       error: (err: any) => console.error('Error fetching consultation summary:', err),
     });
   }
-  openConsultReport(): void { this.showConsultReport = true; }
+
+  // Reload just the popup table for the chosen range.
+  applyConsultRange(): void {
+    if (!this.consultFrom || !this.consultTo) return;
+    if (this.consultTo < this.consultFrom) { this.consultTo = this.consultFrom; }
+    this.consultRangeLoading = true;
+    this.appointment.getConsultationSummary(this.consultFrom, this.consultTo).subscribe({
+      next: (rows: any) => { this.consultSummary = Array.isArray(rows) ? rows : []; },
+      error: (err: any) => console.error('Error fetching consultation summary:', err),
+      complete: () => { this.consultRangeLoading = false; },
+    });
+  }
+
+  get consultRangeLabel(): string {
+    if (!this.consultFrom) return '';
+    return this.consultFrom === this.consultTo ? this.consultFrom : `${this.consultFrom} to ${this.consultTo}`;
+  }
+
+  get consultRangeStarted(): number {
+    return this.consultSummary.reduce((s, d) => s + (d.started || 0), 0);
+  }
+
+  get consultRangeFinished(): number {
+    return this.consultSummary.reduce((s, d) => s + (d.finished || 0), 0);
+  }
+
+  // Flatten the per-doctor summary into one row per appointment.
+  private consultAppointmentRows(): any[] {
+    const rows: any[] = [];
+    for (const doc of this.consultSummary) {
+      for (const p of (doc.patients || [])) {
+        rows.push({ ...p, doctorName: p.doctorName || doc.doctorName, department: p.department || doc.department });
+      }
+    }
+    return rows;
+  }
+
+  private static toClockTime(value: any): string {
+    if (!value) return '-';
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? '-' : d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+  }
+
+  // Shared appointment-detail sheet, used by both the summary and the per-doctor export.
+  private buildConsultDetailSheet(workbook: any, sheetName: string, rows: any[]): void {
+    const sheet = workbook.addWorksheet(sheetName);
+    sheet.columns = [
+      { header: 'S. No', key: 'no', width: 8 },
+      { header: 'Date', key: 'date', width: 14 },
+      { header: 'Doctor', key: 'doctorName', width: 30 },
+      { header: 'Department', key: 'department', width: 24 },
+      { header: 'Patient', key: 'patientName', width: 28 },
+      { header: 'PRN', key: 'prnNumber', width: 14 },
+      { header: 'Phone', key: 'phoneNumber', width: 16 },
+      { header: 'Age', key: 'age', width: 8 },
+      { header: 'Gender', key: 'gender', width: 10 },
+      { header: 'Type', key: 'type', width: 14 },
+      { header: 'Request Via', key: 'requestVia', width: 14 },
+      { header: 'Slot', key: 'time', width: 12 },
+      { header: 'Checked-In', key: 'checkedInTime', width: 14 },
+      { header: 'Started', key: 'startedAt', width: 14 },
+      { header: 'Finished', key: 'finishedAt', width: 14 },
+      { header: 'Waiting Time', key: 'waitingTime', width: 14 },
+      { header: 'State', key: 'state', width: 12 },
+    ];
+    sheet.getRow(1).font = { bold: true };
+    rows.forEach((p: any, i: number) => {
+      sheet.addRow({
+        no: i + 1,
+        date: p.date || '-',
+        doctorName: p.doctorName || '-',
+        department: p.department || '-',
+        patientName: p.patientName || '-',
+        prnNumber: p.prnNumber ?? '-',
+        phoneNumber: p.phoneNumber || '-',
+        age: p.age || '-',
+        gender: p.gender || '-',
+        type: p.type || '-',
+        requestVia: p.requestVia || '-',
+        time: p.time || '-',
+        checkedInTime: TodayAnalyticsComponent.toClockTime(p.checkedInTime),
+        startedAt: TodayAnalyticsComponent.toClockTime(p.startedAt),
+        finishedAt: TodayAnalyticsComponent.toClockTime(p.finishedAt),
+        waitingTime: p.waitingTime || '-',
+        state: p.state || '-',
+      });
+    });
+  }
+
+  // Download just the selected doctor's patients.
+  async downloadConsultPatientsExcel(): Promise<void> {
+    const doc = this.selectedConsultDoctor;
+    if (!doc?.patients?.length) return;
+
+    // Excel export library is loaded only when the user exports.
+    const { Workbook } = await import('exceljs');
+    const FileSaver = await import('file-saver');
+
+    const workbook = new Workbook();
+    const rows = doc.patients.map((p: any) => ({
+      ...p,
+      doctorName: p.doctorName || doc.doctorName,
+      department: p.department || doc.department,
+    }));
+    this.buildConsultDetailSheet(workbook, 'Patients', rows);
+
+    workbook.xlsx.writeBuffer().then((buffer) => {
+      const suffix = this.consultFrom === this.consultTo
+        ? this.consultFrom
+        : `${this.consultFrom}_to_${this.consultTo}`;
+      // Doctor names carry dots and spaces; keep the filename filesystem-safe.
+      const safeName = String(doc.doctorName || 'Doctor').replace(/[^a-z0-9]+/gi, '_').replace(/^_+|_+$/g, '');
+      FileSaver.saveAs(new Blob([buffer]), `Consultations_${safeName}_${suffix}.xlsx`);
+    });
+  }
+
+  // Download the consultation summary plus the underlying appointment details.
+  async downloadConsultExcel(): Promise<void> {
+    if (!this.consultSummary.length) return;
+
+    // Excel export library is loaded only when the user exports.
+    const { Workbook } = await import('exceljs');
+    const FileSaver = await import('file-saver');
+
+    const workbook = new Workbook();
+
+    // Sheet 1 — per-doctor totals, matching the table on screen.
+    const summarySheet = workbook.addWorksheet('Summary');
+    summarySheet.columns = [
+      { header: 'S. No', key: 'no', width: 8 },
+      { header: 'Doctor', key: 'doctorName', width: 30 },
+      { header: 'Department', key: 'department', width: 24 },
+      { header: 'Started', key: 'started', width: 10 },
+      { header: 'Finished', key: 'finished', width: 10 },
+    ];
+    summarySheet.getRow(1).font = { bold: true };
+    this.consultSummary.forEach((d: any, i: number) => {
+      summarySheet.addRow({
+        no: i + 1,
+        doctorName: d.doctorName,
+        department: d.department || '-',
+        started: d.started || 0,
+        finished: d.finished || 0,
+      });
+    });
+
+    // Sheet 2 — one row per appointment.
+    this.buildConsultDetailSheet(workbook, 'Appointment Details', this.consultAppointmentRows());
+
+    workbook.xlsx.writeBuffer().then((buffer) => {
+      const suffix = this.consultFrom === this.consultTo
+        ? this.consultFrom
+        : `${this.consultFrom}_to_${this.consultTo}`;
+      FileSaver.saveAs(new Blob([buffer]), `Consultations_${suffix}.xlsx`);
+    });
+  }
+
+  openConsultReport(): void {
+    this.showConsultReport = true;
+    // Open on today; the user can widen the range from inside the popup.
+    this.consultFrom = this.date;
+    this.consultTo = this.date;
+    this.fetchConsultationSummary();
+  }
   closeConsultReport(): void { this.showConsultReport = false; this.showConsultPatients = false; }
   openConsultPatients(doctor: any): void {
     this.selectedConsultDoctor = doctor;

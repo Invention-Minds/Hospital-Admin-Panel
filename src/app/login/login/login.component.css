@@ -1,165 +1,717 @@
-.root-container {
-  width: 100vw;
-  height: 100vh;
-  background-image: url('/docMindsLogin.png');
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center center;
+/* ══════════════════════════════════════════════════════════════════════
+   DocMinds sign-in.
+
+   Daylight, not the old 9 MB night-time photograph: the whole backdrop is
+   now a gradient plus one inline SVG, so the page paints immediately.
+
+   TIMING — everything in the scene hangs off one 42-second day, six acts
+   of seven seconds each. Each act's internal animations carry a delay
+   equal to that act's start (0s, 7s, 14s, 21s, 28s, 35s) and a duration
+   that divides 42, so an act always begins at the top of its own little
+   story rather than halfway through it. Change the 42s and every delay
+   below has to move with it.
+
+   Every animation here is decorative and is switched off wholesale at the
+   bottom of this file under prefers-reduced-motion.
+   ══════════════════════════════════════════════════════════════════════ */
+
+:host {
+  --dm-blue: #5882C1;
+  --dm-blue-deep: #2F5597;
+  --dm-blue-ink: #1F3B66;
+  --dm-orange: #FB9C2A;
+  --dm-line: rgba(88, 130, 193, 0.18);
+  --dm-muted: #6B7C99;
+}
+
+/* ── Shell ──────────────────────────────────────────────────────────── */
+.lgn-auth {
+  position: relative;
+  /* border-box, or the padding is added to a full-viewport min-height and
+     the page scrolls by exactly the padding. */
+  box-sizing: border-box;
+  min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
+  align-items: center;
   justify-content: center;
-  align-items: center;
-  flex-direction: column;
+  padding: 18px 20px;
+  overflow: hidden;
+  /* An even clinical wash, not a sky. It is lit from the floor upward —
+     the cool lift at the bottom sits under the ward plan — and never
+     reaches white, because the scene's two panels are white and would
+     disappear into a white floor. */
+  background:
+    radial-gradient(120% 78% at 50% 112%, rgba(88, 130, 193, 0.30) 0%, transparent 62%),
+    linear-gradient(162deg, #EDF4FE 0%, #E4EDFB 46%, #DCE7F8 100%);
 }
 
-.logoSection img{
-  width: 100px;
-  height: auto;
-}
-
-.box {
-  border-radius: 28.458px;
-  border: 2.134px solid rgba(88, 130, 193, 0.49);
-  background: rgba(88, 130, 193, 0.28);
-  backdrop-filter: blur(8.893229484558105px);
-  height: 552px;
-  width: 380px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.login {
-  color: #FFF;
-  font-family: Kanit;
-  margin-top: 15px;
-  font-size: 32px;
-  font-style: normal;
-  font-weight: 600;
-  line-height: normal;
-  text-align: center;
-}
-
-.quote {
-  color: #FFF;
-  font-family: Kanit;
-  font-size: 12px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: normal;
-  text-align: center;
-}
-
-.input-group{
-  width: 100%;
-  margin-top: 10px;
-}
-
-.input-group label {
-  color: #FFF;
-  font-family: Kanit;
-  font-size: 13px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: normal;
-  margin: 10px 0 5px 0;
-}
-
-.input-group input {
-  display: flex;
-  width: 270px;
-  height: 32px;
-  padding: 16px;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-  border-radius: 5px;
-  border: 0.711px solid #BCBEC0;
-  background: #FFF;
-  outline: none;
-  margin-top: 4px;
-}
-
-.input-group input::placeholder{
-  color: #BCBEC0;
-  font-family: Kanit;
-  font-size: 13px;
-  font-style: normal;
-  font-weight: 400;
-  line-height: normal;
-}
-
-.input-group .eye{
-  position: relative;
-  right: 0;
-  display: flex;
-  justify-content: right;
-  align-items: center;
-  cursor: pointer;
-}
-
-.eye img{
-  position: relative;
-  margin-top: -32px;
-  margin-right: 10px;
-  width: 13px;
-  height: 13px;
-}
-
-.marginTop{
-  margin-top: 20px;
-}
-
-.login button{
-  border-radius: 7.115px;
-  background: #FB9C2A;
-  width: 270px;
-  height: 40px;
-  margin-top: 8%;
-  cursor: pointer;
-  color: #FFF;
-  font-family: Kanit;
-  font-size: 16px;
-  font-style: normal;
-  font-weight: 600;
-  line-height: normal;
-  border: none;
-}
-
-.spinner {
-  position: relative;
-  pointer-events: none; /* Prevent interaction while loading */
-}
-
-.spinner::after {
-  content: '';
+.glow {
   position: absolute;
-  margin-top: -15px;
-  width: 20px;
-  height: 20px;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #3498db;
+  pointer-events: none;
   border-radius: 50%;
-  animation: spin 0.5s linear infinite;
-  /* transform: translate(-50%, -50%); */
+}
+/* One warm accent, kept high and to the right and deliberately weak: the
+   brand orange should read on the button, not on the wall. */
+.glow-a {
+  width: 620px; height: 480px;
+  top: -210px; right: 6%;
+  background: radial-gradient(closest-side, rgba(251, 156, 42, 0.20) 0%, transparent 72%);
+}
+.glow-b {
+  width: 780px; height: 560px;
+  top: 8%; left: -220px;
+  background: radial-gradient(closest-side, rgba(47, 85, 151, 0.14) 0%, transparent 70%);
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+/* A field of faint medical crosses instead of a dot grid, strongest across
+   the lower half where the scene lives and gone by the top of the page. */
+.grid-veil {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.85;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='46' height='46'%3E%3Cpath d='M20.5 13h5v7.5H33v5h-7.5V33h-5v-7.5H13v-5h7.5z' fill='%232F5597' fill-opacity='0.05'/%3E%3C/svg%3E");
+  background-size: 46px 46px;
+  -webkit-mask-image: linear-gradient(180deg, transparent 10%, #000 60%, #000 100%);
+  mask-image: linear-gradient(180deg, transparent 10%, #000 60%, #000 100%);
 }
 
+/* Fixed to the viewport, not the shell: on a short screen the card can grow
+   past the fold, and anchored to the shell the street would drop below it. */
+.scene {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: clamp(300px, 46vh, 460px);
+  pointer-events: none;
+  z-index: 0;
+}
 
+/* ── Scene type ─────────────────────────────────────────────────────── */
+.mini {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  fill: var(--dm-blue);
+  opacity: 0.9;
+}
+.cap {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  fill: var(--dm-blue-deep);
+}
+.lbl text {
+  font-size: 13px;
+  font-weight: 500;
+  fill: var(--dm-blue);
+  opacity: 0.85;
+  text-anchor: middle;
+}
 
+/* ── The pulse along the foot of the page ───────────────────────────── */
+/* pathLength 100 turns the dash into a percentage of the trace, so the
+   live beat is a 7% segment travelling the full width every nine seconds
+   regardless of how long the path actually measures. */
+.pulse-live { animation: dm-pulse 9s linear infinite; }
+@keyframes dm-pulse {
+  from { stroke-dashoffset: 0; }
+  to   { stroke-dashoffset: -100; }
+}
 
-@media(max-width : 400px){
+.beacon { animation: dm-beacon 1.1s ease-in-out infinite; }
+@keyframes dm-beacon {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.25; }
+}
 
-  .box{
-    width: 300px;
+/* ── The pipeline into the planning board ───────────────────────────── */
+.pipe { animation: dm-flow 1.75s linear infinite; }
+@keyframes dm-flow { to { stroke-dashoffset: -48; } }
+
+.landing {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: dm-land 1.75s ease-out infinite;
+}
+@keyframes dm-land {
+  0%       { transform: scale(0.5); opacity: 0.5; }
+  70%,100% { transform: scale(1.5); opacity: 0; }
+}
+
+/* ── The day, act by act ────────────────────────────────────────────── */
+/* Every act runs the same 42s animation, offset seven seconds from the
+   last, so the six hand over in sequence and cannot drift apart. Fill mode
+   "both" holds each at its opening frame during its delay — otherwise all
+   six would be stacked on top of each other until their turn came round. */
+.act {
+  opacity: 0;
+  animation: dm-act 42s ease-in-out infinite both;
+}
+.act-2 { animation-delay: 7s; }
+.act-3 { animation-delay: 14s; }
+.act-4 { animation-delay: 21s; }
+.act-5 { animation-delay: 28s; }
+.act-6 { animation-delay: 35s; }
+/* visibility is animated alongside opacity so the five acts that are not on
+   screen are genuinely not rendered. opacity:0 alone still costs style and
+   paint work for the whole subtree; visibility:hidden skips it. It
+   interpolates discretely in the right direction — any interval with a
+   visible endpoint is visible throughout — so the fades are unaffected. */
+@keyframes dm-act {
+  0%         { opacity: 0; visibility: hidden;  transform: translateY(8px); }
+  2%, 14.5%  { opacity: 1; visibility: visible; transform: none; }
+  16.6%,100% { opacity: 0; visibility: hidden;  transform: translateY(-5px); }
+}
+
+/* ── Act 1 · Front office ───────────────────────────────────────────── */
+/* The queue steps up a slot at a time rather than gliding — a queue moves
+   when someone is called, not continuously. */
+.queue {
+  transform-box: fill-box;
+  animation: dm-queue 7s steps(3, end) infinite both;
+}
+@keyframes dm-queue {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-54px); }
+}
+
+.screen { animation: dm-screen 3.5s ease-in-out infinite both; }
+@keyframes dm-screen {
+  0%, 100% { opacity: 0.45; }
+  45%      { opacity: 0.22; }
+  70%      { opacity: 0.55; }
+}
+
+/* One patient walks up, is registered, and leaves with a token. */
+.wlk {
+  transform-box: fill-box;
+  animation: dm-walkin 7s ease-in-out infinite both;
+}
+@keyframes dm-walkin {
+  0%       { transform: translateX(-150px); opacity: 0; }
+  10%      { transform: translateX(-120px); opacity: 1; }
+  40%,76%  { transform: translateX(0);      opacity: 1; }
+  90%      { transform: translateX(26px);   opacity: 0; }
+  100%     { transform: translateX(-150px); opacity: 0; }
+}
+
+.token {
+  transform-box: fill-box;
+  animation: dm-token 7s ease-in-out infinite both;
+}
+@keyframes dm-token {
+  0%, 46%  { transform: translateX(22px);  opacity: 0; }
+  54%      { transform: translateX(6px);   opacity: 1; }
+  70%      { transform: translateX(-20px); opacity: 1; }
+  80%,100% { transform: translateX(-20px); opacity: 0; }
+}
+
+/* ── Act 2 · Consultation ───────────────────────────────────────────── */
+/* The note fills in line by line while the consultation runs. The delays
+   are the act's start (7s) plus each line's own stagger. */
+.ln {
+  transform-box: fill-box;
+  transform-origin: 0 50%;
+  animation: dm-line 7s ease-in-out infinite both;
+  animation-delay: 7s;
+}
+.ln-2 { animation-delay: 7.5s; }
+.ln-3 { animation-delay: 8s; }
+.ln-4 { animation-delay: 8.5s; }
+@keyframes dm-line {
+  0%       { transform: scaleX(0); opacity: 0; }
+  6%       { opacity: 0.9; }
+  14%,88%  { transform: scaleX(1); opacity: 0.9; }
+  96%,100% { transform: scaleX(1); opacity: 0; }
+}
+
+/* A trace sweeping across the monitor rather than a static squiggle. */
+.ecg {
+  animation: dm-ecg 2.333s linear infinite both;
+  animation-delay: 7s;
+}
+@keyframes dm-ecg {
+  from { stroke-dasharray: 90 320; stroke-dashoffset: 410; }
+  to   { stroke-dasharray: 90 320; stroke-dashoffset: 0; }
+}
+
+.pen {
+  transform-box: fill-box;
+  transform-origin: 100% 50%;
+  animation: dm-write 2.333s ease-in-out infinite both;
+  animation-delay: 7s;
+}
+@keyframes dm-write {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  30%      { transform: translate(-6px, -2px) rotate(-6deg); }
+  65%      { transform: translate(-2px, 2px)  rotate(3deg); }
+}
+
+/* ── Act 3 · Lab & radiology ────────────────────────────────────────── */
+.scan {
+  transform-box: fill-box;
+  animation: dm-scan 3.5s ease-in-out infinite both;
+  animation-delay: 14s;
+}
+@keyframes dm-scan {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(78px); }
+}
+
+/* Tubes filling: the sample coming in before the report goes out. */
+.tube {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: dm-fill 7s ease-out infinite both;
+  animation-delay: 14s;
+}
+.tube-2 { animation-delay: 14.4s; }
+.tube-3 { animation-delay: 14.8s; }
+@keyframes dm-fill {
+  0%       { transform: scaleY(0.12); }
+  26%,86%  { transform: scaleY(1); }
+  96%,100% { transform: scaleY(0.12); }
+}
+
+.report {
+  transform-box: fill-box;
+  animation: dm-report 7s ease-in-out infinite both;
+  animation-delay: 14s;
+}
+@keyframes dm-report {
+  0%, 44%  { transform: translateX(0);    opacity: 0; }
+  56%      { transform: translateX(22px); opacity: 1; }
+  80%      { transform: translateX(96px); opacity: 1; }
+  92%,100% { transform: translateX(120px); opacity: 0; }
+}
+
+/* ── Act 4 · Admission & ward ───────────────────────────────────────── */
+/* One seven-second round drives both the walk and the charting, so vitals
+   can never light for a bed she is not standing at. */
+.nurse {
+  transform-box: fill-box;
+  animation: dm-round 7s ease-in-out infinite both;
+  animation-delay: 21s;
+}
+@keyframes dm-round {
+  0%, 14%   { transform: translateX(0); }
+  26%, 44%  { transform: translateX(126px); }
+  56%, 74%  { transform: translateX(252px); }
+  88%, 100% { transform: translateX(0); }
+}
+
+.vit {
+  transform-box: fill-box;
+  animation: dm-vit 7s ease-in-out infinite both;
+  animation-delay: 21s;
+}
+.vit-2 { animation-delay: 22.82s; }
+.vit-3 { animation-delay: 24.92s; }
+@keyframes dm-vit {
+  0%       { opacity: 0.32; transform: translateY(4px); }
+  8%, 20%  { opacity: 1;    transform: none; }
+  30%,100% { opacity: 0.32; transform: none; }
+}
+
+.drip {
+  transform-box: fill-box;
+  animation: dm-drip 1.75s ease-in infinite both;
+  animation-delay: 21s;
+}
+@keyframes dm-drip {
+  0%       { transform: translateY(0);    opacity: 0; }
+  12%      { opacity: 1; }
+  70%      { transform: translateY(40px); opacity: 0.9; }
+  75%,100% { transform: translateY(40px); opacity: 0; }
+}
+
+/* ── Act 5 · Theatre ────────────────────────────────────────────────── */
+.lamp {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: dm-lamp 3.5s ease-in-out infinite both;
+  animation-delay: 28s;
+}
+@keyframes dm-lamp {
+  0%, 100% { opacity: 0.3;  transform: scale(1); }
+  50%      { opacity: 0.44; transform: scale(1.06); }
+}
+
+.arm { transform-box: fill-box; }
+.arm-l {
+  transform-origin: 0 50%;
+  animation: dm-arm-l 1.75s ease-in-out infinite both;
+  animation-delay: 28s;
+}
+.arm-r {
+  transform-origin: 100% 50%;
+  animation: dm-arm-r 1.75s ease-in-out infinite both;
+  animation-delay: 28s;
+}
+@keyframes dm-arm-l {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(9deg); }
+}
+@keyframes dm-arm-r {
+  0%, 100% { transform: rotate(0deg); }
+  50%      { transform: rotate(-9deg); }
+}
+
+.ecg-ot { animation-delay: 28s; }
+
+/* ── Act 6 · Discharge & billing ────────────────────────────────────── */
+/* The bill totals itself a line at a time, then the payment clears. */
+.bl {
+  transform-box: fill-box;
+  transform-origin: 0 50%;
+  animation: dm-line 7s ease-in-out infinite both;
+  animation-delay: 35s;
+}
+.bl-2 { animation-delay: 35.5s; }
+.bl-3 { animation-delay: 36s; }
+.bl-4 { animation-delay: 36.5s; }
+.bl-5 { animation-delay: 37.2s; }
+
+.tick {
+  animation: dm-tick 7s ease-out infinite both;
+  animation-delay: 35s;
+}
+@keyframes dm-tick {
+  0%, 56%  { opacity: 0; stroke-dasharray: 34; stroke-dashoffset: 34; }
+  64%      { opacity: 1; stroke-dasharray: 34; stroke-dashoffset: 34; }
+  76%, 92% { opacity: 1; stroke-dasharray: 34; stroke-dashoffset: 0; }
+  100%     { opacity: 0; stroke-dasharray: 34; stroke-dashoffset: 0; }
+}
+
+.leave {
+  transform-box: fill-box;
+  animation: dm-leave 7s ease-in-out infinite both;
+  animation-delay: 35s;
+}
+@keyframes dm-leave {
+  0%, 55%  { transform: translateX(0);     opacity: 1; }
+  85%      { transform: translateX(96px);  opacity: 1; }
+  96%,100% { transform: translateX(124px); opacity: 0; }
+}
+
+/* ── The planning board ─────────────────────────────────────────────── */
+.trend {
+  animation: dm-trend 42s ease-in-out infinite both;
+}
+@keyframes dm-trend {
+  0%       { stroke-dashoffset: 100; }
+  88%,96%  { stroke-dashoffset: 0; }
+  100%     { stroke-dashoffset: 100; }
+}
+
+/* Each column rises as its act plays, burns orange while that act is on
+   screen, then settles back to blue and stays up for the rest of the day.
+   The percentages are act starts on the same 42s clock — act n begins at
+   (n-1) x 16.67%. Written out rather than driven by delays because a
+   delayed animation would also reset on its own clock, not the day's. */
+.bar {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation-duration: 42s;
+  animation-timing-function: ease-out;
+  animation-iteration-count: infinite;
+  animation-fill-mode: both;
+}
+.bar-1 { animation-name: dm-bar-1; }
+.bar-2 { animation-name: dm-bar-2; }
+.bar-3 { animation-name: dm-bar-3; }
+.bar-4 { animation-name: dm-bar-4; }
+.bar-5 { animation-name: dm-bar-5; }
+.bar-6 { animation-name: dm-bar-6; }
+
+@keyframes dm-bar-1 {
+  0%, 1%     { transform: scaleY(0.08); opacity: 0.25; fill: #5882C1; }
+  5%, 14%    { transform: scaleY(1);    opacity: 0.95; fill: #FB9C2A; }
+  19%, 98%   { transform: scaleY(1);    opacity: 0.5;  fill: #5882C1; }
+  100%       { transform: scaleY(0.08); opacity: 0.25; fill: #5882C1; }
+}
+@keyframes dm-bar-2 {
+  0%, 17.7%  { transform: scaleY(0.08); opacity: 0.25; fill: #5882C1; }
+  21.7%, 31% { transform: scaleY(1);    opacity: 0.95; fill: #FB9C2A; }
+  36%, 98%   { transform: scaleY(1);    opacity: 0.5;  fill: #5882C1; }
+  100%       { transform: scaleY(0.08); opacity: 0.25; fill: #5882C1; }
+}
+@keyframes dm-bar-3 {
+  0%, 34.3%  { transform: scaleY(0.08); opacity: 0.25; fill: #5882C1; }
+  38.3%,47.7%{ transform: scaleY(1);    opacity: 0.95; fill: #FB9C2A; }
+  52.6%, 98% { transform: scaleY(1);    opacity: 0.5;  fill: #5882C1; }
+  100%       { transform: scaleY(0.08); opacity: 0.25; fill: #5882C1; }
+}
+@keyframes dm-bar-4 {
+  0%, 51%    { transform: scaleY(0.08); opacity: 0.25; fill: #5882C1; }
+  55%, 64.3% { transform: scaleY(1);    opacity: 0.95; fill: #FB9C2A; }
+  69.3%, 98% { transform: scaleY(1);    opacity: 0.5;  fill: #5882C1; }
+  100%       { transform: scaleY(0.08); opacity: 0.25; fill: #5882C1; }
+}
+@keyframes dm-bar-5 {
+  0%, 67.7%  { transform: scaleY(0.08); opacity: 0.25; fill: #5882C1; }
+  71.7%, 81% { transform: scaleY(1);    opacity: 0.95; fill: #FB9C2A; }
+  86%, 98%   { transform: scaleY(1);    opacity: 0.5;  fill: #5882C1; }
+  100%       { transform: scaleY(0.08); opacity: 0.25; fill: #5882C1; }
+}
+@keyframes dm-bar-6 {
+  0%, 84.3%  { transform: scaleY(0.08); opacity: 0.25; fill: #5882C1; }
+  88.3%,96%  { transform: scaleY(1);    opacity: 0.95; fill: #FB9C2A; }
+  98%        { transform: scaleY(1);    opacity: 0.5;  fill: #5882C1; }
+  100%       { transform: scaleY(0.08); opacity: 0.25; fill: #5882C1; }
+}
+
+/* ── Foreground column ──────────────────────────────────────────────── */
+/* The column is deliberately compact. At 125% display scaling a 1080p
+   screen is only ~730 CSS px tall, and anything taller than that puts a
+   scrollbar on a page that is one short form. */
+.lgn-col {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 388px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+}
+
+.lgn-brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+/* Wider than it looks: logo_1.png carries a transparent margin around the
+   circle, so the mark reads about a third smaller than its box. */
+.lgn-brand img {
+  width: 64px;
+  height: auto;
+  display: block;
+  user-select: none;
+  filter: drop-shadow(0 5px 14px rgba(31, 59, 102, 0.18));
+}
+.lgn-brand__name {
+  color: var(--dm-blue-ink);
+  font-size: 27px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.015em;
+  user-select: none;
+}
+
+.lgn-kicker {
+  margin: -2px 0 0;
+  text-align: center;
+  color: var(--dm-muted);
+  font-size: 13px;
+  letter-spacing: 0.01em;
+}
+
+.lgn-card {
+  width: 100%;
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px 24px 16px;
+  border: 1px solid var(--dm-line);
+  box-shadow:
+    0 1px 2px rgba(47, 85, 151, 0.06),
+    0 18px 42px rgba(31, 59, 102, 0.16);
+}
+
+/* ── Greeting ───────────────────────────────────────────────────────── */
+.lgn-greet { margin-bottom: 14px; }
+.lgn-greet h1 {
+  margin: 0 0 2px;
+  color: var(--dm-blue-ink);
+  font-size: 1.3rem;
+  font-weight: 600;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+.lgn-greet__line {
+  margin: 0;
+  color: var(--dm-muted);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+/* ── Form ───────────────────────────────────────────────────────────── */
+.lgn-field { margin-bottom: 11px; }
+.lgn-field label {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--dm-blue-ink);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+/* The wrapper is a positioning context only. It carries no box of its own —
+   the global dm-* form module owns names like .dm-input, which is why these
+   are prefixed lgn- instead. */
+.lgn-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.lgn-input > i {
+  position: absolute;
+  left: 12px;
+  font-size: 13px;
+  color: #9AA8BF;
+  pointer-events: none;
+  z-index: 1;
+}
+.lgn-input input {
+  width: 100%;
+  height: 40px;
+  padding: 0 40px 0 34px;
+  border-radius: 9px;
+  border: 1px solid #D5DEEC;
+  background: #FBFCFE;
+  color: var(--dm-blue-ink);
+  font-family: inherit;
+  font-size: 13.5px;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+.lgn-input input::placeholder { color: #A8B4C8; }
+.lgn-input input:focus {
+  background: #fff;
+  border-color: var(--dm-blue);
+  box-shadow: 0 0 0 3px rgba(88, 130, 193, 0.16);
+}
+
+/* Chrome paints autofilled fields its own pale blue and ignores background;
+   an inset shadow the width of the field is the only way to override it. */
+.lgn-input input:-webkit-autofill,
+.lgn-input input:-webkit-autofill:hover,
+.lgn-input input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--dm-blue-ink);
+  -webkit-box-shadow: 0 0 0 1000px #FBFCFE inset;
+  box-shadow: 0 0 0 1000px #FBFCFE inset;
+  caret-color: var(--dm-blue-ink);
+  transition: background-color 9999s ease-out 0s;
+}
+.lgn-input input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px #fff inset, 0 0 0 3px rgba(88, 130, 193, 0.16);
+  box-shadow: 0 0 0 1000px #fff inset, 0 0 0 3px rgba(88, 130, 193, 0.16);
+}
+
+.lgn-eye {
+  position: absolute;
+  right: 0;
+  height: 100%;
+  width: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: #9AA8BF;
+  cursor: pointer;
+}
+.lgn-eye:hover { color: var(--dm-blue); }
+.lgn-eye i { font-size: 13px; }
+
+.lgn-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 9px;
+  background: #EEF3FC;
+  color: var(--dm-blue-deep);
+  font-size: 12px;
+  line-height: 1.4;
+}
+.lgn-hint i { margin-top: 1px; font-size: 12px; }
+
+.lgn-submit {
+  width: 100%;
+  height: 42px;
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: 9px;
+  background: var(--dm-orange);
+  color: #fff;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(251, 156, 42, 0.32);
+  transition: background 0.15s ease, box-shadow 0.15s ease, transform 0.08s ease;
+}
+.lgn-submit:hover:not(:disabled) { background: #EC8C18; }
+.lgn-submit:active:not(:disabled) { transform: translateY(1px); }
+.lgn-submit:disabled {
+  background: #E4C9A6;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+.lgn-submit i { font-size: 14px; }
+
+.lgn-help {
+  margin: 12px 0 0;
+  padding-top: 11px;
+  border-top: 1px solid var(--dm-line);
+  text-align: center;
+  color: #93A1B8;
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+
+.lgn-legal {
+  margin: 0;
+  text-align: center;
+  color: #8D9CB5;
+  font-size: 11px;
+}
+
+/* ── Narrow and short screens ───────────────────────────────────────── */
+/* Only width crowds the scene: below roughly 1150px the card starts to sit
+   over the two panels, so the scene steps back to being a backdrop. A short
+   viewport is a different problem — there the scene shrinks but keeps its
+   contrast, because dimming it there was what made it invisible at 125%
+   display scaling, where a 1080p screen is only ~730 CSS px tall. */
+@media (max-width: 1150px) { .scene { opacity: 0.5; } }
+@media (max-height: 780px) { .scene { height: clamp(250px, 40vh, 320px); } }
+@media (max-height: 620px) { .scene { height: 210px; opacity: 0.45; } }
+
+/* Below 900px the card covers most of the width and the scene was already
+   faded to near nothing — display:none rather than a low opacity, so phones
+   and tablets pay no style, paint or compositing cost for it at all. */
+@media (max-width: 900px) { .scene { display: none; } }
+
+@media (max-width: 420px) {
+  .lgn-card { padding: 18px 16px 14px; }
+  .lgn-brand img { width: 52px; }
+  .lgn-brand__name { font-size: 23px; }
+  .lgn-kicker { font-size: 12px; }
+}
+
+/* ── Reduced motion ─────────────────────────────────────────────────── */
+/* Everything stops; the scene stays as a still illustration. The six acts
+   cannot simply freeze — they all sit at the same coordinates — so only
+   the first is kept, and the parts of it that are mid-flight are hidden. */
+@media (prefers-reduced-motion: reduce) {
+  .scene, .scene * {
+    animation: none !important;
+    transition: none !important;
   }
+  .lgn-input input, .lgn-submit, .lgn-eye { transition: none; }
 
-  .input-group input, .login button{
-    width: 250px;
-  }
+  .pulse-live { opacity: 0; }
+  .act        { opacity: 0; }
+  .act-1 { opacity: 1; }
+  .token { opacity: 0; }
+  .bar   { opacity: 0.5; }
 }

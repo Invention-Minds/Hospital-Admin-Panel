@@ -339,6 +339,44 @@ tbody tr:hover {
   background: rgba(255, 255, 255, 0.30);
 }
 
+.excel-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Consultation popup — date range bar */
+.consult-filters {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 14px 20px 0;
+}
+
+.consult-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.consult-range label {
+  font-size: 14px;
+}
+
+.consult-range input {
+  padding: 5px 8px;
+  font-size: 14px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.consult-totals {
+  margin-left: auto;
+  font-size: 14px;
+  color: #169458;
+  font-weight: 600;
+}
+
 .doctor-list {
   width: 100%;
   padding: 10px;

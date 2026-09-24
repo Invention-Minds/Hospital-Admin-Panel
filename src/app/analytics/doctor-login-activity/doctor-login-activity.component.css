@@ -143,6 +143,21 @@ tbody tr:hover {
     border-radius: 4px;
 }
 
+/* Excel download */
+.download {
+    margin-left: auto;
+}
+
+.download_icon {
+    font-size: 20px;
+    color: #1a2a6c;
+    padding: 4px 8px;
+}
+
+.download_icon:hover {
+    color: #0d1642;
+}
+
 /* Table Container */
 .modal-table-container {
     max-height: 400px;

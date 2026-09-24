@@ -53,7 +53,12 @@
                 <label for="datePicker"><strong>Select Date:</strong></label>
                 <input type="date" id="datePicker" [(ngModel)]="reportDate" (change)="loadDoctorDelayReport(reportDate)">
             </div>
-            <div class="download"></div>
+            <div class="download">
+                <div class="download_icon pointer" (click)="downloadExcel()" matTooltip="download"
+                    matTooltipPosition="above">
+                    <i class="fa-solid fa-download"></i>
+                </div>
+            </div>
         </div>
 
         <!-- Table -->

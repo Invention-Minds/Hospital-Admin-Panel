@@ -987,7 +987,7 @@ export class AppointmentConfirmComponent {
     }
 
     if (!this.isCheckInEnabled(appointment)) {
-      this.messageService.add({ severity: 'warn', summary: 'Check-in Not Allowed', detail: 'You can check-in only 90 minutes before or 90 minutes after the slot time.' });
+      this.messageService.add({ severity: 'warn', summary: 'Check-in Not Allowed', detail: `You can check-in only ${this.checkInWindowLabel} before or ${this.checkInWindowLabel} after the slot time.` });
       return;
     }
 
@@ -995,6 +995,20 @@ export class AppointmentConfirmComponent {
     this.showPopup = true;
     this.checkinAppointment = appointment;
   }
+
+  /** How long either side of the slot time check-in stays open. */
+  readonly checkInWindowMinutes = 300;
+
+  /** The same window in words. The toast is built from this rather than
+   *  repeating the number, which is how it came to claim 90 minutes while
+   *  the rule below allowed 300. */
+  get checkInWindowLabel(): string {
+    const mins = this.checkInWindowMinutes;
+    if (mins % 60 !== 0) return `${mins} minutes`;
+    const hours = mins / 60;
+    return `${hours} hour${hours === 1 ? '' : 's'}`;
+  }
+
   isCheckInEnabled(appointment: any): boolean {
     const currentTime = new Date();
 
@@ -1008,9 +1022,10 @@ export class AppointmentConfirmComponent {
     appointmentDate.setMinutes(minutes);
     appointmentDate.setSeconds(0);
 
-    // Define the time window (300 mins before and after)
-    const startWindow = new Date(appointmentDate.getTime() - 300 * 60000); // 300 mins before
-    const endWindow = new Date(appointmentDate.getTime() + 300 * 60000);   // 300 mins after
+    // Define the time window, either side of the slot
+    const windowMs = this.checkInWindowMinutes * 60000;
+    const startWindow = new Date(appointmentDate.getTime() - windowMs);
+    const endWindow = new Date(appointmentDate.getTime() + windowMs);
 
     // Enable if the current time is within the window
     return currentTime >= startWindow && currentTime <= endWindow;

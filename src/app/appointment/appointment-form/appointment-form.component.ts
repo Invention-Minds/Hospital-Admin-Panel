@@ -645,6 +645,8 @@ isLoading: boolean = false;
   ngOnDestroy(): void {
     this.unsubscribe$.next();
     this.unsubscribe$.complete();
+    // Stops the release timer firing detectChanges() on a dead view.
+    clearTimeout(this.submitReleaseTimer);
   }
   // ngOnChanges(): void {
   //   if (this.currentAppointment) {
@@ -1559,13 +1561,47 @@ isLoading: boolean = false;
     }
     return invalidControls;
   }
+  /**
+   * True while a submit is in flight. The Book button is disabled on this, so
+   * a second click cannot start the notification flow again — each run sends
+   * an SMS and a WhatsApp to the patient and a WhatsApp to the doctor, and
+   * nothing downstream de-duplicates them.
+   */
+  isSubmitting = false;
+  private submitReleaseTimer: any;
+
+  /**
+   * confirm() is a long branching flow with no single completion point. On
+   * success the parent drops this component, so the flag dies with it; the
+   * timer is the safety net for branches that fail and leave the form open,
+   * where otherwise the button would stay dead and the booking unsavable.
+   */
+  private lockSubmit(): void {
+    this.isSubmitting = true;
+    clearTimeout(this.submitReleaseTimer);
+    this.submitReleaseTimer = setTimeout(() => this.releaseSubmit(), 20000);
+  }
+
+  private releaseSubmit(): void {
+    clearTimeout(this.submitReleaseTimer);
+    this.submitReleaseTimer = null;
+    this.isSubmitting = false;
+    this.cdr.detectChanges();
+  }
+
   async confirm() {
+    // Repeat clicks land here while the first submit is still running.
+    if (this.isSubmitting) return;
 
     this.getInvalidControls(this.appointmentForm);
     if (!this.appointmentForm.valid) {
       this.messageService.add({ severity: 'warn', summary: 'Warn', detail: 'Some fields are not filled' });
       return;
     }
+
+    // Locked before the awaited re-validation below, not after it — that await
+    // is a window a second click would otherwise slip through.
+    this.lockSubmit();
 
     // Re-validate the chosen slot at submit time. Closes the stale-cache window where
     // two staff open the form, both see the slot as free, and one submits after the
@@ -1591,6 +1627,8 @@ isLoading: boolean = false;
               summary: 'Slot Unavailable',
               detail: 'This slot was just booked. Please pick another time.'
             });
+            // Nothing was sent and the form stays open, so hand the button back.
+            this.releaseSubmit();
             return;
           }
         }

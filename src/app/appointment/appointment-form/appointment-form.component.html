@@ -287,11 +287,14 @@
 
         <!-- Buttons -->
         <div class="button_section">
-          <button *ngIf="!isBookedSlot" class="btn-primary book-btn" [disabled]="!appointmentForm.valid"
+          <!-- isSubmitting, not isLoading: isLoading is only set on the new-booking
+               branch, so on a re-confirm the button showed no feedback at all. -->
+          <button *ngIf="!isBookedSlot" class="btn-primary book-btn"
+            [disabled]="!appointmentForm.valid || isSubmitting"
             (click)="confirm()">
-            <span *ngIf="!isLoading">Book Appointment</span>
+            <span *ngIf="!isSubmitting">Book Appointment</span>
 
-            <span *ngIf="isLoading">
+            <span *ngIf="isSubmitting">
               <i class="pi pi-spin pi-spinner"></i> Booking...
             </span></button>
           <!-- <button *ngIf="isBookedSlot" class="btn-primary" [disabled]="!appointmentForm.valid"

@@ -188,6 +188,129 @@ export class TodayAnalyticsComponent {
     return isNaN(d.getTime()) ? '-' : d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
   }
 
+  // ── Session stats for the per-doctor popup ──────────────────────────────
+  // All derived from the rows already on screen, so no extra API call.
+
+  private static toDate(value: any): Date | null {
+    if (!value) return null;
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  private static minutesBetween(from: any, to: any): number | null {
+    const a = TodayAnalyticsComponent.toDate(from);
+    const b = TodayAnalyticsComponent.toDate(to);
+    // A finish before its own start is bad data, not a negative consultation.
+    if (!a || !b || b.getTime() < a.getTime()) return null;
+    return Math.round((b.getTime() - a.getTime()) / 60000);
+  }
+
+  static formatMinutes(mins: number | null): string {
+    if (mins === null || mins === undefined) return '-';
+    if (mins < 60) return `${mins} min`;
+    const h = Math.floor(mins / 60);
+    const m = mins % 60;
+    return m ? `${h} h ${m} min` : `${h} h`;
+  }
+
+  private get consultPatientsInView(): any[] {
+    return this.selectedConsultDoctor?.patients || [];
+  }
+
+  /**
+   * Earliest consultation start in view. The table is ordered by slot, so the
+   * doctor's first *actual* consultation is often not the first row — this is
+   * a min() over startedAt, not patients[0].
+   */
+  get consultFirstStartedAt(): Date | null {
+    const times = this.consultPatientsInView
+      .map((p) => TodayAnalyticsComponent.toDate(p.startedAt))
+      .filter((d): d is Date => d !== null)
+      .map((d) => d.getTime());
+    return times.length ? new Date(Math.min(...times)) : null;
+  }
+
+  get consultLastFinishedAt(): Date | null {
+    const times = this.consultPatientsInView
+      .map((p) => TodayAnalyticsComponent.toDate(p.finishedAt))
+      .filter((d): d is Date => d !== null)
+      .map((d) => d.getTime());
+    return times.length ? new Date(Math.max(...times)) : null;
+  }
+
+  /** One consultation's length, for the per-row column. */
+  consultDuration(p: any): string {
+    return TodayAnalyticsComponent.formatMinutes(
+      TodayAnalyticsComponent.minutesBetween(p?.startedAt, p?.finishedAt),
+    );
+  }
+
+  /** Time actually spent consulting — the sum of the individual consultations. */
+  get consultingMinutes(): number | null {
+    const durations = this.consultPatientsInView
+      .map((p) => TodayAnalyticsComponent.minutesBetween(p.startedAt, p.finishedAt))
+      .filter((m): m is number => m !== null);
+    return durations.length ? durations.reduce((a, b) => a + b, 0) : null;
+  }
+
+  get consultingTimeLabel(): string {
+    return TodayAnalyticsComponent.formatMinutes(this.consultingMinutes);
+  }
+
+  get consultAverageLabel(): string {
+    const durations = this.consultPatientsInView
+      .map((p) => TodayAnalyticsComponent.minutesBetween(p.startedAt, p.finishedAt))
+      .filter((m): m is number => m !== null);
+    if (!durations.length) return '-';
+    return TodayAnalyticsComponent.formatMinutes(
+      Math.round(durations.reduce((a, b) => a + b, 0) / durations.length),
+    );
+  }
+
+  /**
+   * First start to last finish. Deliberately separate from consulting time:
+   * the gap between the two is how long the doctor was on the floor without a
+   * patient in front of them, which is the number the OPD actually plans on.
+   */
+  get consultSpanLabel(): string {
+    return TodayAnalyticsComponent.formatMinutes(
+      TodayAnalyticsComponent.minutesBetween(this.consultFirstStartedAt, this.consultLastFinishedAt),
+    );
+  }
+
+  get consultFirstStartedLabel(): string {
+    return TodayAnalyticsComponent.toClockTime(this.consultFirstStartedAt);
+  }
+
+  /** Marked arrived in Doctor Availability. Null if nobody marked them. */
+  get consultArrivedAt(): Date | null {
+    return TodayAnalyticsComponent.toDate(this.selectedConsultDoctor?.arrivedAt);
+  }
+
+  get consultArrivedLabel(): string {
+    return this.consultArrivedAt ? TodayAnalyticsComponent.toClockTime(this.consultArrivedAt) : 'Not marked';
+  }
+
+  /**
+   * Arrival to first consultation — the lead time before any patient was seen.
+   * The number the OPD can act on; the arrival time alone just says they came.
+   */
+  get consultArrivalGapLabel(): string {
+    return TodayAnalyticsComponent.formatMinutes(
+      TodayAnalyticsComponent.minutesBetween(this.consultArrivedAt, this.consultFirstStartedAt),
+    );
+  }
+
+  get consultLastFinishedLabel(): string {
+    return TodayAnalyticsComponent.toClockTime(this.consultLastFinishedAt);
+  }
+
+  /** Several days in view makes a single "first consultation" time misleading. */
+  get consultSpansMultipleDays(): boolean {
+    const dates = new Set(this.consultPatientsInView.map((p) => p.date).filter(Boolean));
+    return dates.size > 1;
+  }
+
   // Shared appointment-detail sheet, used by both the summary and the per-doctor export.
   private buildConsultDetailSheet(workbook: any, sheetName: string, rows: any[]): void {
     const sheet = workbook.addWorksheet(sheetName);
@@ -204,9 +327,11 @@ export class TodayAnalyticsComponent {
       { header: 'Type', key: 'type', width: 14 },
       { header: 'Request Via', key: 'requestVia', width: 14 },
       { header: 'Slot', key: 'time', width: 12 },
+      { header: 'Doctor Arrived', key: 'doctorArrivedAt', width: 16 },
       { header: 'Checked-In', key: 'checkedInTime', width: 14 },
       { header: 'Started', key: 'startedAt', width: 14 },
       { header: 'Finished', key: 'finishedAt', width: 14 },
+      { header: 'Duration', key: 'duration', width: 14 },
       { header: 'Waiting Time', key: 'waitingTime', width: 14 },
       { header: 'State', key: 'state', width: 12 },
     ];
@@ -225,9 +350,11 @@ export class TodayAnalyticsComponent {
         type: p.type || '-',
         requestVia: p.requestVia || '-',
         time: p.time || '-',
+        doctorArrivedAt: TodayAnalyticsComponent.toClockTime(p.doctorArrivedAt),
         checkedInTime: TodayAnalyticsComponent.toClockTime(p.checkedInTime),
         startedAt: TodayAnalyticsComponent.toClockTime(p.startedAt),
         finishedAt: TodayAnalyticsComponent.toClockTime(p.finishedAt),
+        duration: this.consultDuration(p),
         waitingTime: p.waitingTime || '-',
         state: p.state || '-',
       });

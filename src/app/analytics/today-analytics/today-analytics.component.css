@@ -278,9 +278,13 @@ tbody tr:hover {
   border-radius: 9px 9px 0 0;
   display: flex;
   justify-content: space-between;
-  position: fixed;
-  width: 90vw;
-
+  /* sticky, not fixed: fixed took the header out of flow, so every popup had
+     to reserve space for it by hand (the lists carried margin-top: 3rem) and
+     anything that did not — the range filters, the session summary — rendered
+     underneath it. Sticky still pins the header while the list scrolls. */
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 
 .header.absent {
@@ -377,10 +381,60 @@ tbody tr:hover {
   font-weight: 600;
 }
 
+/* Session summary above the per-doctor patient list. Wraps rather than
+   scrolls — on a narrow screen the stats stack instead of being cut off. */
+.consult-session {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 28px;
+  margin: 14px 18px 0;
+  padding: 14px 18px;
+  background: #f1f8f4;
+  border: 1px solid #cfe8da;
+  border-radius: 8px;
+}
+
+.consult-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 108px;
+}
+
+.consult-stat__label {
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #6b7c74;
+}
+
+.consult-stat__value {
+  font-size: 17px;
+  font-weight: 600;
+  color: #146c43;
+  line-height: 1.2;
+}
+
+/* "Not marked" is an absent record, not a result — it shouldn't read as a
+   figure alongside the real ones. */
+.consult-stat__value--muted {
+  color: #9aa5a0;
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.consult-session__note {
+  margin: 8px 18px 0;
+  font-size: 12px;
+  color: #7b7b7b;
+}
+
+/* No margin-top here any more — it existed only to clear the formerly
+   position:fixed header, which now takes its own space in flow. */
 .doctor-list {
   width: 100%;
   padding: 10px;
-  margin-top: 3rem;
   display: grid;
   column-gap: 20px;
   grid-template-columns: 33% 33% 33%;
@@ -389,7 +443,6 @@ tbody tr:hover {
 .doctor-list-est{
   width: 100%;
   padding: 10px;
-  margin-top: 3rem;
   display: flex;
   /* column-gap: 20px;
   grid-template-columns: 33% 33% 33%; */

@@ -497,6 +497,48 @@
                 <button class="close-button" (click)="closeConsultPatients()"><i class="fa-solid fa-xmark"></i></button>
             </div>
         </div>
+        <!-- Session summary. Everything here is derived from the rows below,
+             so it follows the date range the popup is showing. -->
+        <div class="consult-session" *ngIf="selectedConsultDoctor?.patients?.length">
+            <div class="consult-stat">
+                <span class="consult-stat__label">Arrived</span>
+                <span class="consult-stat__value"
+                    [class.consult-stat__value--muted]="!consultArrivedAt">{{ consultArrivedLabel }}</span>
+            </div>
+            <div class="consult-stat">
+                <span class="consult-stat__label">Started consulting</span>
+                <span class="consult-stat__value">{{ consultFirstStartedLabel }}</span>
+            </div>
+            <div class="consult-stat" *ngIf="consultArrivedAt">
+                <span class="consult-stat__label">Arrived → 1st consult</span>
+                <span class="consult-stat__value">{{ consultArrivalGapLabel }}</span>
+            </div>
+            <div class="consult-stat">
+                <span class="consult-stat__label">Last finished</span>
+                <span class="consult-stat__value">{{ consultLastFinishedLabel }}</span>
+            </div>
+            <div class="consult-stat">
+                <span class="consult-stat__label">On floor</span>
+                <span class="consult-stat__value">{{ consultSpanLabel }}</span>
+            </div>
+            <div class="consult-stat">
+                <span class="consult-stat__label">Consulting time</span>
+                <span class="consult-stat__value">{{ consultingTimeLabel }}</span>
+            </div>
+            <div class="consult-stat">
+                <span class="consult-stat__label">Avg per patient</span>
+                <span class="consult-stat__value">{{ consultAverageLabel }}</span>
+            </div>
+            <div class="consult-stat">
+                <span class="consult-stat__label">Patients</span>
+                <span class="consult-stat__value">{{ selectedConsultDoctor?.patients?.length }}</span>
+            </div>
+        </div>
+        <!-- With several days on screen "started consulting" is the earliest
+             across the whole range, which is not a daily arrival time. -->
+        <div class="consult-session__note" *ngIf="consultSpansMultipleDays">
+            Showing {{ consultRangeLabel }} — times are the earliest and latest across the whole range, not one day.
+        </div>
         <div class="doctor-list-est">
             <table>
                 <thead>
@@ -508,6 +550,7 @@
                         <td><b>Slot</b></td>
                         <td><b>Started</b></td>
                         <td><b>Finished</b></td>
+                        <td><b>Duration</b></td>
                         <td><b>State</b></td>
                     </tr>
                 </thead>
@@ -520,6 +563,7 @@
                         <td>{{p.time}}</td>
                         <td>{{ p.startedAt ? (p.startedAt | date:'shortTime') : '-' }}</td>
                         <td>{{ p.finishedAt ? (p.finishedAt | date:'shortTime') : '-' }}</td>
+                        <td>{{ consultDuration(p) }}</td>
                         <td>{{p.state}}</td>
                     </tr>
                 </tbody>

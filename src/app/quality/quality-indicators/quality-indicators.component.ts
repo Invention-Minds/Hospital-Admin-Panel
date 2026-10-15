@@ -8,6 +8,7 @@ import { takeUntil } from 'rxjs/operators';
 import {
   QualityService, QualityIndicator, IndicatorStats, CaptureBody,
 } from '../../services/quality.service';
+import { isQualityEditor } from '../quality-access';
 
 /**
  * Phase 9.26 / Phase 1 — NABH/QCI 108-indicator master.
@@ -43,6 +44,8 @@ export class QualityIndicatorsComponent implements OnInit, OnDestroy {
   benchmarkOverrideEnabled = false;
   saving = false;
   captureError = '';
+  /** Quality Manager / super_admin; senior management view read-only. */
+  readonly canEdit = isQualityEditor();
 
   private destroy$ = new Subject<void>();
 
@@ -108,6 +111,7 @@ export class QualityIndicatorsComponent implements OnInit, OnDestroy {
 
   // ── Capture dialog ───────────────────────────────────────────────────
   openCapture(ind: QualityIndicator): void {
+    if (!this.canEdit) return;   // senior management: view only
     this.capture = ind;
     this.benchmarkOverrideEnabled = false;
     this.captureError = '';

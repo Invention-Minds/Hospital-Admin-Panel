@@ -1,0 +1,22 @@
+.dl-grid { display: grid; gap: 2mm; }
+.dl-label {
+  position: relative; box-sizing: border-box; border: 1px dashed #9ca3af; border-radius: 3mm;
+  padding: 2mm 2.5mm; overflow: hidden; background: #fff; font-size: 9.5pt; line-height: 1.2;
+}
+.dl-extra { border-style: dotted; }
+.dl-top { display: flex; justify-content: space-between; align-items: baseline; gap: 2mm; padding-right: 15mm; }
+.dl-bed { font-weight: 800; font-size: 12pt; }
+.dl-code { font-weight: 800; font-size: 11pt; }
+.dl-name { font-weight: 700; padding-right: 15mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dl-prn { font-size: 8pt; color: #374151; }
+.dl-avoid { font-size: 8.5pt; font-weight: 700; color: #b91c1c; }
+.dl-item { font-size: 8.5pt; margin-top: 0.5mm; }
+.dl-foot { display: flex; flex-wrap: wrap; gap: 1mm; margin-top: 0.5mm; }
+.dl-tag { font-size: 7pt; border: 1px solid #374151; border-radius: 2mm; padding: 0 1.2mm; }
+.dl-qr { position: absolute; top: 1.5mm; right: 1.5mm; width: 14mm; height: 14mm; }
+.dl-qr :where(qrcode, qrcode > div, qrcode canvas, qrcode img) { display: block; width: 14mm !important; height: 14mm !important; }
+
+@media print {
+  @page { size: A4; margin: 6mm; }
+  .dl-label { border-color: transparent; break-inside: avoid; }
+}

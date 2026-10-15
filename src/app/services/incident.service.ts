@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environment/environment.prod';
+import { isIncidentManager as qualityIsIncidentManager } from '../quality/quality-access';
 
 // Phase 9.24 — incident reporting (Phase 1: manual raise + inbox).
 
@@ -31,12 +32,14 @@ export interface Incident {
   occurredAt: string | null;
   reportedAt: string;
   reportedBy: string | null;
+  reportedById?: number | null;
   status: IncidentStatus;
   severityFinal: string | null;
   nabhClause: string | null;
   qiCode: string | null;          // Phase 5c — QI indicator tag
   evidenceLinks: string | null;
   assignedTo: string | null;
+  assignedToId?: number | null;
   closedAt: string | null;
   closedBy: string | null;
   closureNotes: string | null;
@@ -104,6 +107,24 @@ export interface CreateIncidentPayload {
   nabhClause?: string | null;
   qiCode?: string | null;          // Phase 5c — optional QI tag at raise time
   evidenceLinks?: Array<{ label: string; url: string }>;
+}
+
+// Mirrors backend ALLOWED_TRANSITIONS (closed → investigated / cancelled → open are reopens).
+export const INCIDENT_TRANSITIONS: Record<IncidentStatus, IncidentStatus[]> = {
+  open: ['triaged', 'cancelled'],
+  triaged: ['investigated', 'cancelled', 'open'],
+  investigated: ['capa_in_progress', 'closed', 'triaged'],
+  capa_in_progress: ['closed', 'investigated'],
+  closed: ['investigated'],
+  cancelled: ['open'],
+};
+
+/**
+ * Mirrors backend isIncidentManager (super_admin, or admin + adminType
+ * 'Quality Manager') — UI gating only; the API enforces it.
+ */
+export function isIncidentManager(): boolean {
+  return qualityIsIncidentManager();
 }
 
 @Injectable({ providedIn: 'root' })

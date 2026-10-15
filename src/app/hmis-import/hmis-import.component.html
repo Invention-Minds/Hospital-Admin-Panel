@@ -1,0 +1,129 @@
+<div class="dx-shell">
+  <div class="dx-head">
+    <div>
+      <h2 class="dx-title">HMIS import</h2>
+      <p class="dx-sub">Upload the HMIS exports about once an hour to keep admissions, bed changes and discharges current. Use the files exactly as HMIS exports them.</p>
+    </div>
+  </div>
+
+  <!-- Last import -->
+  <div class="hi-status" *ngIf="statusLoaded" [ngClass]="'is-' + statusTone">
+    <ng-container *ngIf="status; else neverImported">
+      <span class="hi-status-main">Last import {{ sinceText }}</span>
+      <span class="hi-status-meta">{{ status.at | date:'d MMM, hh:mm a' }}<ng-container *ngIf="status.by"> · {{ status.by }}</ng-container></span>
+      <span class="hi-status-due" *ngIf="statusTone === 'bad'">Due — upload the latest exports</span>
+    </ng-container>
+    <ng-template #neverImported><span class="hi-status-main">No import yet — upload the first set of exports</span></ng-template>
+  </div>
+
+  <!-- Drop zone -->
+  <label class="hi-drop" [class.is-over]="dragging" (dragover)="onDragOver($event)" (dragleave)="dragging = false" (drop)="onDrop($event)">
+    <input type="file" multiple accept=".xls,.html,.htm" (change)="onPick($event)" />
+    <svg class="hi-drop-ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4m0 0l-4 4m4-4l4 4M5 16v3a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3"/></svg>
+    <span class="hi-drop-main">Drop HMIS exports here or <u>choose files</u></span>
+    <span class="hi-drop-sub">Current Occupancy · Admissions · Discharge Summary (Patient Movement is optional)</span>
+  </label>
+
+  <ul class="hi-files" *ngIf="files.length">
+    <li *ngFor="let f of files">
+      <span class="hi-file-name">{{ f.name }}</span>
+      <span class="hi-file-kind">{{ fileKind(f) }}</span>
+      <button type="button" class="dx-btn dx-btn-link dx-btn-sm" (click)="removeFile(f)" [disabled]="!!busy">Remove</button>
+    </li>
+  </ul>
+
+  <div class="dx-banner dx-banner-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="dx-empty" *ngIf="busy === 'preview'">Reading the exports…</div>
+
+  <ng-container *ngIf="preview && busy !== 'preview'">
+    <div class="dx-banner dx-banner-good" *ngIf="applied && !applied.summary.failed">
+      Imported: {{ applied.summary.ADMIT }} admitted, {{ applied.summary.TRANSFER }} bed changes, {{ applied.summary.DISCHARGE }} discharged.
+      Kitchen and dietitian alerts were raised.
+    </div>
+    <div class="dx-banner dx-banner-bad" *ngIf="applied?.summary?.failed">
+      {{ applied!.summary.failed }} rows could not be imported — see "Needs attention". The rest were applied.
+    </div>
+
+    <!-- What will change -->
+    <div class="dx-summary hi-summary">
+      <span class="is-act"><b>{{ preview.summary.ADMIT }}</b> to admit</span>
+      <span><b>{{ preview.summary.TRANSFER }}</b> bed changes</span>
+      <span><b>{{ preview.summary.DISCHARGE }}</b> to discharge</span>
+      <span [class.is-bad]="preview.summary.REVIEW"><b>{{ preview.summary.REVIEW }}</b> to check</span>
+      <span><b>{{ preview.summary.UNCHANGED }}</b> no change</span>
+      <span class="hi-new" *ngIf="preview.summary.newWards || preview.summary.newBeds || preview.summary.newPatients">
+        Creates {{ preview.summary.newWards }} wards, {{ preview.summary.newBeds }} beds, {{ preview.summary.newPatients }} patients
+      </span>
+    </div>
+
+    <div class="dx-actionbar" *ngIf="!applied">
+      <span class="hi-action-text">
+        <ng-container *ngIf="changeCount; else nothingToDo">Nothing changes until you apply. Rows marked "Check" are left out.</ng-container>
+        <ng-template #nothingToDo>DocMinds already matches these exports.</ng-template>
+      </span>
+      <span class="dx-spacer"></span>
+      <button type="button" class="dx-btn" (click)="clear()" [disabled]="!!busy">Cancel</button>
+      <button type="button" class="dx-btn dx-btn-primary" (click)="apply()" [disabled]="!!busy || !changeCount">
+        {{ busy === 'apply' ? 'Applying…' : 'Apply ' + changeCount + ' changes' }}
+      </button>
+    </div>
+    <div class="dx-actionbar" *ngIf="applied">
+      <span class="hi-action-text">Done. Upload the next exports in about an hour.</span>
+      <span class="dx-spacer"></span>
+      <button type="button" class="dx-btn dx-btn-primary" (click)="clear()">New import</button>
+    </div>
+
+    <!-- Ward matching -->
+    <section class="dx-card" *ngIf="preview.wards.length">
+      <div class="dx-card-head"><h3>Wards</h3></div>
+      <p class="dx-muted hi-card-sub">Each HMIS ward is matched to an existing DocMinds ward (spelling variants count as the same ward). Unmatched wards are created and remembered for next time.</p>
+      <div class="dx-scroll">
+        <table class="diet-grid">
+          <thead><tr><th>HMIS ward</th><th>DocMinds ward</th><th>How</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let w of preview.wards" [class.is-new]="w.how === 'new'">
+              <td class="is-strong">{{ w.hmisName }}</td>
+              <td>{{ w.matchedTo || 'Will be created' }}</td>
+              <td><span class="dx-pill" [ngClass]="w.how === 'new' ? 'dx-pill-new' : w.how === 'similar' ? 'dx-pill-warn' : 'dx-pill-ok'">{{ howLabel[w.how] }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Patients -->
+    <section class="dx-card">
+      <div class="dx-tabs">
+        <button type="button" [class.active]="tab === 'attention'" (click)="tab = 'attention'">Needs attention <span class="dx-count">{{ tabCount('attention') }}</span></button>
+        <button type="button" [class.active]="tab === 'ADMIT'" (click)="tab = 'ADMIT'">Admit <span class="dx-count">{{ tabCount('ADMIT') }}</span></button>
+        <button type="button" [class.active]="tab === 'TRANSFER'" (click)="tab = 'TRANSFER'">Bed changes <span class="dx-count">{{ tabCount('TRANSFER') }}</span></button>
+        <button type="button" [class.active]="tab === 'DISCHARGE'" (click)="tab = 'DISCHARGE'">Discharge <span class="dx-count">{{ tabCount('DISCHARGE') }}</span></button>
+        <button type="button" [class.active]="tab === 'all'" (click)="tab = 'all'">All <span class="dx-count">{{ tabCount('all') }}</span></button>
+      </div>
+
+      <div class="dx-empty" *ngIf="rows.length === 0">
+        {{ tab === 'attention' ? 'Nothing to check — every row matched cleanly.' : 'No rows here.' }}
+      </div>
+      <div class="dx-scroll" *ngIf="rows.length">
+        <table class="diet-grid">
+          <thead>
+            <tr><th>Action</th><th>Adm no.</th><th>PRN</th><th>Patient</th><th>Ward</th><th>Bed</th><th>Note</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let i of rows" [class.is-act]="i.action === 'REVIEW' || i.error" [class.is-muted]="i.action === 'UNCHANGED' || i.action === 'SKIP'">
+              <td><span class="dx-pill" [ngClass]="i.error ? 'dx-pill-bad' : actionPill[i.action]">{{ i.error ? 'Failed' : actionLabel[i.action] }}</span></td>
+              <td class="is-strong dx-tight">{{ i.hmisAdmissionNo }}</td>
+              <td class="dx-tight">{{ i.prn || '—' }}</td>
+              <td>{{ i.patientName || '—' }}</td>
+              <td>{{ i.ward || '—' }}</td>
+              <td class="dx-tight">
+                <ng-container *ngIf="i.fromBed">{{ i.fromBed }} → </ng-container>{{ i.bed || '—' }}
+              </td>
+              <td class="hi-note">{{ i.error || i.note || '' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </ng-container>
+</div>

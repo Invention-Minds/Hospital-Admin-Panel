@@ -10,6 +10,7 @@ import {
   DenominatorUpsertBody,
 } from '../../services/quality.service';
 import { AlertService } from '../../services/alert.service';
+import { isQualityEditor } from '../quality-access';
 
 /**
  * Phase 9.26 / Phase 5c — Monthly denominator capture.
@@ -52,6 +53,8 @@ export class QualityDenominatorsComponent implements OnInit, OnDestroy {
   ];
 
   filterPeriod = this.currentMonth();
+  /** Quality Manager / super_admin; senior management view read-only. */
+  readonly canEdit = isQualityEditor();
   draft: DenominatorUpsertBody = {
     qiCode: '',
     period: this.currentMonth(),
@@ -106,10 +109,14 @@ export class QualityDenominatorsComponent implements OnInit, OnDestroy {
       value: Number(this.draft.value),
       notes: this.draft.notes || undefined,
     }).pipe(takeUntil(this.destroy$)).subscribe({
-      next: () => {
+      next: (r) => {
         this.saving = false;
-        this.successMessage = 'Saved';
-        setTimeout(() => (this.successMessage = ''), 2500);
+        const a = r.autoSource;
+        this.successMessage = !a ? 'Saved'
+          : a.written > 0 ? 'Saved — indicator recalculated'
+          : a.skippedManual > 0 ? 'Saved — indicator has a manual entry, not recalculated'
+          : a.failed > 0 ? 'Saved — indicator recalculation failed' : 'Saved';
+        setTimeout(() => (this.successMessage = ''), 3500);
         this.draft = {
           qiCode: this.draft.qiCode,    // keep selected
           period: this.draft.period,    // keep period

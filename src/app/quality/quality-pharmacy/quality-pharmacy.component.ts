@@ -11,6 +11,7 @@ import {
   PharmacyStockEvent, StockEventCreateBody, PharmacyEventType,
 } from '../../services/quality.service';
 import { AlertService } from '../../services/alert.service';
+import { isQualityEditor } from '../quality-access';
 
 type Tab = 'drugs' | 'events';
 
@@ -33,6 +34,8 @@ export class QualityPharmacyComponent implements OnInit, OnDestroy {
 
   loading = false; saving = false;
   errorMessage = ''; successMessage = '';
+  /** Quality Manager / super_admin; senior management view read-only. */
+  readonly canEdit = isQualityEditor();
 
   drugs: PharmacyCriticalDrug[] = [];
   events: PharmacyStockEvent[] = [];

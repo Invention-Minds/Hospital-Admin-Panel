@@ -7,6 +7,7 @@ import { switchMap } from 'rxjs/operators';
 import { environment } from '../../../environment/environment';
 import { MessageService } from 'primeng/api';
 import { NotificationRecipientService } from '../../services/notification-recipient.service';
+import { isQualityEditor } from '../../quality/quality-access';
 
 interface Notification {
   id: number;
@@ -182,10 +183,25 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
         (notification['targetRole'] != null && this.role === String(notification['targetRole']).replace(/_/g, ''))
       );
 
+    // Complaints (assigned / resolved / SLA breach) + feedback reminders are
+    // addressed per user (userId), with a targetRole fallback.
+    const isGrievanceForMe =
+      (notification.type?.startsWith('complaint_') || notification.type === 'feedback_reminder') &&
+      (
+        (notification['userId'] != null && String(notification['userId']) === myUserId) ||
+        (notification['targetRole'] != null && this.role === String(notification['targetRole']).replace(/_/g, ''))
+      );
+
+    // Quality alerts (RCA opened, two-month red trend, missing monthly data)
+    // target an escalation-owner alias, so show them to Quality editors.
+    const isQualityAlert = notification.type?.startsWith('qi_') && isQualityEditor();
+
     return (
       isEmergencyCode ||
       isReferralForMe ||
       isIncidentForMe ||
+      isGrievanceForMe ||
+      isQualityAlert ||
       (this.role === 'subadmin' &&
         (
           (isEstimator && notification.type === 'estimation_request' && notification.title === 'New Estimation Raised') ||
@@ -275,6 +291,17 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
             const incidentId = ent && ent.startsWith('Incident:') ? ent.slice('Incident:'.length) : null;
             if (incidentId) this.router.navigate(['/incidents', incidentId]);
             else this.router.navigate(['/incidents']);
+          } else if (clickedType?.startsWith('complaint_')) {
+            const ent = notificationToDelete['entityType'] as string | undefined;
+            const complaintId = ent && ent.startsWith('Complaint:') ? ent.slice('Complaint:'.length) : null;
+            if (complaintId) this.router.navigate(['/complaints', complaintId]);
+            else this.router.navigate(['/complaints']);
+          } else if (clickedType === 'qi_rca_opened' || clickedType === 'qi_trend_breach') {
+            this.router.navigate(['/quality/rcas']);
+          } else if (clickedType?.startsWith('qi_')) {
+            this.router.navigate(['/quality/indicators']);
+          } else if (clickedType === 'feedback_reminder') {
+            this.router.navigate(['/feedback']);
           } else if (clickedType === 'estimation_request') {
             this.router.navigate(['/estimation']);
           } else {
@@ -382,6 +409,7 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
     localStorage.removeItem('role');
     localStorage.removeItem('token');
     localStorage.removeItem('departmentName');
+    localStorage.removeItem('department');
     this.router.navigate(['/login']);
     this.showLogoutConfirmDialog = false;
   }

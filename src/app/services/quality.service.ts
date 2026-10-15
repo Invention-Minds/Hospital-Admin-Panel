@@ -265,7 +265,7 @@ export interface FacilityEquipmentEvent {
   performedBy: string | null;
   notes: string | null;
   createdAt: string;
-  equipment?: { code: string; name: string; isCritical: boolean };
+  equipment?: { code: string; name: string; isCritical: boolean; status?: EquipmentStatus };
 }
 
 export interface EquipmentEventCreateBody {
@@ -439,6 +439,14 @@ export interface QualityMonthlyDenominator {
   updatedAt: string;
 }
 
+/** Recompute summary returned after a denominator save (null when not run). */
+export interface DenominatorAutoSourceResult {
+  written: number;
+  skippedManual: number;
+  skippedNoData: number;
+  failed: number;
+}
+
 export interface DenominatorUpsertBody {
   qiCode: string;
   period: string;
@@ -606,6 +614,11 @@ export class QualityService {
     return this.http.get<AuditPeriodSummary>(`${this.auditBase}/summary`, { params: p });
   }
 
+  /** qiCodes whose auto-source counts audit observations (single source: backend). */
+  auditBackedCodes(): Observable<{ data: string[] }> {
+    return this.http.get<{ data: string[] }>(`${this.auditBase}/codes`);
+  }
+
   // ── Denominators (Phase 5c) ───────────────────────────────────────────
   private denomBase = `${environment.apiUrl}/quality/denominators`;
 
@@ -618,8 +631,9 @@ export class QualityService {
       this.denomBase, { params: p });
   }
 
-  upsertDenominator(body: DenominatorUpsertBody): Observable<{ data: QualityMonthlyDenominator }> {
-    return this.http.post<{ data: QualityMonthlyDenominator }>(this.denomBase, body);
+  upsertDenominator(body: DenominatorUpsertBody):
+    Observable<{ data: QualityMonthlyDenominator; autoSource?: DenominatorAutoSourceResult | null }> {
+    return this.http.post<{ data: QualityMonthlyDenominator; autoSource?: DenominatorAutoSourceResult | null }>(this.denomBase, body);
   }
 
   deleteDenominator(id: number): Observable<{ ok: true }> {
@@ -684,11 +698,12 @@ export class QualityService {
   private ambBase = `${environment.apiUrl}/quality/ambulance-calls`;
   private maintBase = `${environment.apiUrl}/quality/maintenance-complaints`;
 
-  listEquipment(opts: { isCritical?: boolean; status?: EquipmentStatus; search?: string } = {}):
+  listEquipment(opts: { isCritical?: boolean; status?: EquipmentStatus; search?: string; includeRetired?: boolean } = {}):
     Observable<{ data: FacilityEquipment[]; total: number }> {
     let p = new HttpParams();
     if (opts.isCritical !== undefined) p = p.set('isCritical', String(opts.isCritical));
     if (opts.status) p = p.set('status', opts.status);
+    if (opts.includeRetired) p = p.set('includeRetired', 'true');
     if (opts.search) p = p.set('search', opts.search);
     return this.http.get<{ data: FacilityEquipment[]; total: number }>(this.equipBase, { params: p });
   }
@@ -698,8 +713,9 @@ export class QualityService {
   updateEquipment(id: string, body: Partial<EquipmentCreateBody>): Observable<{ data: FacilityEquipment }> {
     return this.http.put<{ data: FacilityEquipment }>(`${this.equipBase}/${id}`, body);
   }
-  deleteEquipment(id: string): Observable<{ ok: true }> {
-    return this.http.delete<{ ok: true }>(`${this.equipBase}/${id}`);
+  /** Retires (soft) when the equipment has event history; hard-deletes otherwise. */
+  deleteEquipment(id: string): Observable<{ ok: true; retired: boolean }> {
+    return this.http.delete<{ ok: true; retired: boolean }>(`${this.equipBase}/${id}`);
   }
 
   listEquipmentEvents(opts: { equipmentId?: string; eventType?: EquipmentEventType; from?: string; to?: string } = {}):
@@ -713,6 +729,10 @@ export class QualityService {
   }
   createEquipmentEvent(body: EquipmentEventCreateBody): Observable<{ data: FacilityEquipmentEvent }> {
     return this.http.post<{ data: FacilityEquipmentEvent }>(this.equipEventBase, body);
+  }
+  resolveEquipmentEvent(id: number, body: { resolvedAt?: string; notes?: string } = {}):
+    Observable<{ data: FacilityEquipmentEvent }> {
+    return this.http.put<{ data: FacilityEquipmentEvent }>(`${this.equipEventBase}/${id}/resolve`, body);
   }
   deleteEquipmentEvent(id: number): Observable<{ ok: true }> {
     return this.http.delete<{ ok: true }>(`${this.equipEventBase}/${id}`);

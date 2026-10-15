@@ -2,7 +2,10 @@
   <div class="inc-head">
     <div>
       <h2 class="inc-title">Incidents</h2>
-      <p class="inc-sub">Patient-safety incidents — manual raises now; auto-capture rules ship in Phase 2.</p>
+      <p class="inc-sub" *ngIf="isManager">Patient-safety incidents — manual raises and auto-captured rule breaches.</p>
+      <p class="inc-sub" *ngIf="!isManager && isDeptViewer && isSuperintendent">Incidents you reported or are assigned, plus your department's and all ward incidents (view only).</p>
+      <p class="inc-sub" *ngIf="!isManager && isDeptViewer && !isSuperintendent">Incidents you reported or are assigned, plus your department's incidents (view only).</p>
+      <p class="inc-sub" *ngIf="!isManager && !isDeptViewer">Incidents you reported or are assigned to you.</p>
     </div>
     <button class="inc-btn inc-btn-primary" (click)="showRaise = true">+ Raise incident</button>
   </div>

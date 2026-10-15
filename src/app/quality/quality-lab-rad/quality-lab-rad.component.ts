@@ -7,6 +7,7 @@ import { takeUntil } from 'rxjs/operators';
 
 import { QualityService, QualityLabRadEvent, LabRadEventCreateBody, LabRadEventType } from '../../services/quality.service';
 import { AlertService } from '../../services/alert.service';
+import { isQualityEditor } from '../quality-access';
 
 /**
  * Phase 9.26 / Phase 5i — Lab/Radiology amendment + rejection + repeat log.
@@ -26,6 +27,8 @@ export class QualityLabRadComponent implements OnInit, OnDestroy {
   rows: QualityLabRadEvent[] = [];
   loading = false; saving = false;
   errorMessage = ''; successMessage = '';
+  /** Quality Manager / super_admin; senior management view read-only. */
+  readonly canEdit = isQualityEditor();
 
   readonly EVENT_TYPES: { value: LabRadEventType; label: string; qi: string }[] = [
     { value: 'lab_amended',         label: 'Lab report amended',         qi: 'PSQ-002' },

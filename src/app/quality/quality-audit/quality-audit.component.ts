@@ -10,6 +10,7 @@ import {
   AuditObservationCreateBody, AuditPeriodSummary,
 } from '../../services/quality.service';
 import { AlertService } from '../../services/alert.service';
+import { isQualityEditor } from '../quality-access';
 
 /**
  * Phase 9.26 / Phase 5a — Generic audit observation capture.
@@ -39,20 +40,10 @@ export class QualityAuditComponent implements OnInit, OnDestroy {
 
   // Chapter filter chips — narrow the indicator dropdown.
   readonly CHAPTERS: string[] = ['PSQ', 'ICO', 'OT', 'LAB', 'RAD', 'PRE', 'MRD', 'HR', 'FMS'];
-  // qiCodes that are observation-backed (mirror of AUDIT_BACKED_INDICATORS in the backend).
-  readonly AUDIT_BACKED: string[] = [
-    'PSQ-004',
-    'ICO-006', 'ICO-007', 'ICO-009', 'ICO-010', 'ICO-011', 'ICO-012',
-    'OT-003', 'OT-004', 'OT-010',
-    'LAB-005', 'LAB-006',
-    'RAD-004',
-    'PRE-005', 'PRE-006', 'PRE-007', 'PRE-008', 'PRE-009',
-    'MRD-001', 'MRD-002', 'MRD-003', 'MRD-004', 'MRD-005', 'MRD-006', 'MRD-007', 'MRD-008',
-    'HR-001', 'HR-002', 'HR-003', 'HR-004', 'HR-005',
-    'FMS-005', 'FMS-006', 'FMS-010',
-  ];
 
   filterChapter = '';
+  /** Quality Manager / super_admin; senior management view read-only. */
+  readonly canEdit = isQualityEditor();
 
   draft: AuditObservationCreateBody = {
     qiCode: '',
@@ -75,11 +66,13 @@ export class QualityAuditComponent implements OnInit, OnDestroy {
     this.errorMessage = '';
     forkJoin({
       indicators: this.svc.listIndicators({ active: true }),
+      codes: this.svc.auditBackedCodes(),
       observations: this.svc.listObservations({ period: this.currentMonth() }),
       summary: this.svc.observationSummary(this.currentMonth()),
     }).pipe(takeUntil(this.destroy$)).subscribe({
-      next: ({ indicators, observations, summary }) => {
-        this.indicators = indicators.data.filter((i) => this.AUDIT_BACKED.includes(i.qiCode));
+      next: ({ indicators, codes, observations, summary }) => {
+        const auditBacked = new Set(codes.data);
+        this.indicators = indicators.data.filter((i) => auditBacked.has(i.qiCode));
         this.recent = observations.data.slice(0, 30);
         this.summary = summary;
         this.loading = false;

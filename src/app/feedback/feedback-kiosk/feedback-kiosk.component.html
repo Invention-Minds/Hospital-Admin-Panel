@@ -2,9 +2,9 @@
   <div class="fk-card">
     <div class="fk-loading" *ngIf="loading">Loading your survey…</div>
 
-    <ng-container *ngIf="!loading && errorMessage && !done">
+    <ng-container *ngIf="!loading && loadError && !done">
       <h2 class="fk-title">We're sorry</h2>
-      <p class="fk-error">{{ errorMessage }}</p>
+      <p class="fk-error">{{ loadError }}</p>
     </ng-container>
 
     <ng-container *ngIf="!loading && done">
@@ -12,7 +12,7 @@
       <p class="fk-sub">Your feedback helps us care for you better.</p>
     </ng-container>
 
-    <ng-container *ngIf="!loading && survey && !done && !errorMessage">
+    <ng-container *ngIf="!loading && survey && !done && !loadError">
       <h2 class="fk-title">How was your visit?</h2>
       <p class="fk-sub" *ngIf="survey.patientName">For {{ survey.patientName }}</p>
 
@@ -38,7 +38,7 @@
       </p>
 
       <label class="fk-field">Anything we should know? (optional)
-        <textarea rows="4" [(ngModel)]="comments" placeholder="Tell us in your own words…"></textarea>
+        <textarea rows="4" [(ngModel)]="comments" [maxlength]="MAX_COMMENT" placeholder="Tell us in your own words…"></textarea>
       </label>
 
       <button class="fk-submit" (click)="submit()" [disabled]="saving">

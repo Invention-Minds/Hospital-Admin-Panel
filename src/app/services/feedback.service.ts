@@ -31,17 +31,32 @@ export interface SurveyStats {
   nps: { score: number; promoters: number; passives: number; detractors: number; total: number };
 }
 
+export interface WalkUpOtpChallenge {
+  message: string;
+  challengeId?: string;
+  phoneLast4?: string | null;
+  expiresAt?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class FeedbackService {
   private base = `${environment.apiUrl}/feedback`;
   constructor(private http: HttpClient) {}
 
-  list(filters?: { status?: string; template?: string; patientPrn?: string }): Observable<{ data: FeedbackSurvey[] }> {
+  // Handler-only (Quality Manager / Patient Relations). `token` is present on
+  // pending/sent rows only.
+  list(filters?: { status?: string; template?: string; patientPrn?: string; from?: string; to?: string }): Observable<{ data: FeedbackSurvey[] }> {
     let params = new HttpParams();
     if (filters) for (const [k, v] of Object.entries(filters)) if (v) params = params.set(k, v);
     return this.http.get<{ data: FeedbackSurvey[] }>(`${this.base}/surveys`, { params });
   }
-  stats(): Observable<SurveyStats> { return this.http.get<SurveyStats>(`${this.base}/surveys/stats`); }
+  /** Aggregate NPS; from/to (YYYY-MM-DD) filter on respondedAt. */
+  stats(range?: { from?: string; to?: string }): Observable<SurveyStats> {
+    let params = new HttpParams();
+    if (range?.from) params = params.set('from', range.from);
+    if (range?.to) params = params.set('to', range.to);
+    return this.http.get<SurveyStats>(`${this.base}/surveys/stats`, { params });
+  }
   create(body: Partial<FeedbackSurvey> & { template: SurveyTemplate; expiresInDays?: number }): Observable<{ data: FeedbackSurvey }> {
     return this.http.post<{ data: FeedbackSurvey }>(`${this.base}/surveys`, body);
   }
@@ -53,10 +68,14 @@ export class FeedbackService {
   submitByToken(token: string, body: { npsScore: number; comments?: string; satisfactionScores?: Record<string, number>; channel?: string }): Observable<{ data: { id: string; status: string } }> {
     return this.http.post<{ data: { id: string; status: string } }>(`${this.base}/surveys/by-token/${token}/respond`, body);
   }
-  // Phase 6 — walk-up kiosk: patient mints their own survey, server returns
-  // the new token which the FE then navigates to.
-  startWalkUp(body: { patientName: string; patientPrn?: string | null; visitType?: string }):
+  // Walk-up kiosk: PRN → SMS OTP to the phone on record → verify → the server
+  // mints a survey and returns its token. challengeId is absent when no OTP
+  // was sent (unknown PRN / no phone on file).
+  requestWalkUpOtp(patientPrn: string): Observable<{ data: WalkUpOtpChallenge }> {
+    return this.http.post<{ data: WalkUpOtpChallenge }>(`${this.base}/surveys/walk-up/request-otp`, { patientPrn });
+  }
+  verifyWalkUpOtp(body: { challengeId: string; otp: string; visitType?: string }):
     Observable<{ data: { token: string; id: string } }> {
-    return this.http.post<{ data: { token: string; id: string } }>(`${this.base}/surveys/walk-up`, body);
+    return this.http.post<{ data: { token: string; id: string } }>(`${this.base}/surveys/walk-up/verify`, body);
   }
 }

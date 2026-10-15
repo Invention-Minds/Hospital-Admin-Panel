@@ -8,6 +8,7 @@ import { takeUntil } from 'rxjs/operators';
 import {
   QualityService, SafetyKpis, ClinicalKpis, TimelinessKpis, ExperienceKpis, OtKpis, NabhScorecard,
 } from '../../services/quality.service';
+import { isQualityEditor } from '../quality-access';
 
 type Tab = 'safety' | 'clinical' | 'timeliness' | 'experience' | 'ot' | 'nabh';
 
@@ -36,18 +37,25 @@ export class QualityDashboardComponent implements OnInit, OnDestroy {
   experience: ExperienceKpis | null = null;
   ot: OtKpis | null = null;
   nabh: NabhScorecard | null = null;
+  /** Quality Manager / super_admin; senior management view read-only. */
+  readonly canEdit = isQualityEditor();
 
   private destroy$ = new Subject<void>();
 
   constructor(private svc: QualityService, private router: Router) {}
 
   ngOnInit(): void {
-    // Default window: last 30 days.
+    // Default window: last 30 days, as local calendar days (backend reads
+    // YYYY-MM-DD as IST start/end of day).
     const now = new Date();
-    const past = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    this.to = now.toISOString().slice(0, 10);
-    this.from = past.toISOString().slice(0, 10);
+    const past = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 30);
+    this.to = this.localDayKey(now);
+    this.from = this.localDayKey(past);
     this.loadCurrent();
+  }
+
+  private localDayKey(d: Date): string {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }
   ngOnDestroy(): void { this.destroy$.next(); this.destroy$.complete(); }
 

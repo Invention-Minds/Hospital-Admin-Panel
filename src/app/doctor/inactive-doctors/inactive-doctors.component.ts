@@ -54,7 +54,7 @@ export class InactiveDoctorsComponent implements OnInit {
     const doctor = this.doctorToActivate;
     this.doctorService.activateDoctor(doctor.id).subscribe({
       next: () => {
-        this.messageService.add({ severity: 'success', summary: 'Success', detail: `Dr. ${doctor.name} has been activated.` });
+        this.messageService.add({ severity: 'success', summary: 'Success', detail: `${doctor.name.replace(/^(dr\.\s*|dr\s+)?/i, 'Dr. ')} has been activated.` });
         this.showActivateConfirmDialog = false;
         this.doctorToActivate = null;
         this.fetchInactiveDoctors();

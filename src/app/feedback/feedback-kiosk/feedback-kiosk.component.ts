@@ -23,6 +23,7 @@ export class FeedbackKioskComponent implements OnInit {
   token = '';
   loading = false;
   errorMessage = '';
+  loadError = '';
   done = false;
   survey: FeedbackSurvey | null = null;
 
@@ -31,12 +32,13 @@ export class FeedbackKioskComponent implements OnInit {
   saving = false;
 
   readonly NPS_BUTTONS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+  readonly MAX_COMMENT = 2000;
 
   constructor(private route: ActivatedRoute, private svc: FeedbackService) {}
 
   ngOnInit(): void {
     this.token = this.route.snapshot.paramMap.get('token') ?? '';
-    if (!this.token) { this.errorMessage = 'Invalid link.'; return; }
+    if (!this.token) { this.loadError = 'Invalid link.'; return; }
     this.loading = true;
     this.svc.getByToken(this.token).subscribe({
       next: (r) => {
@@ -46,7 +48,7 @@ export class FeedbackKioskComponent implements OnInit {
       },
       error: (e) => {
         this.loading = false;
-        this.errorMessage = e?.error?.message || 'This survey link is no longer valid.';
+        this.loadError = e?.error?.message || 'This survey link is no longer valid.';
       },
     });
   }
@@ -63,7 +65,11 @@ export class FeedbackKioskComponent implements OnInit {
       channel: 'kiosk',
     }).subscribe({
       next: () => { this.saving = false; this.done = true; },
-      error: (e) => { this.saving = false; this.errorMessage = e?.error?.message || 'Could not submit — please try again.'; },
+      error: (e) => {
+        this.saving = false;
+        if (e?.status === 409) { this.done = true; return; }
+        this.errorMessage = e?.error?.message || e?.error?.error || 'Could not submit — please try again.';
+      },
     });
   }
 

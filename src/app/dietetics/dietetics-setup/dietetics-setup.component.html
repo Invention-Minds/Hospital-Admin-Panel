@@ -1,9 +1,10 @@
 <div class="ds-shell">
   <h2 class="ds-title">Dietetics setup</h2>
   <p class="ds-sub">
-    Meal-time slots, diet catalogue, meal items, weekly menu and canteen TV
-    channels. Settings here drive what the dietician can prescribe and what the
-    canteen sees each morning.
+    The hospital's own codes and timings: meal times, diet codes, textures
+    (SD / VSD / MSD…), supplements, meal items, weekly menu, label layout and
+    canteen TV channels. Settings here drive what the dietitian can prescribe,
+    what the Diet Information Sheet shows and what the kitchen prints.
   </p>
 
   <div class="ds-banner ds-banner-bad" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
@@ -13,8 +14,11 @@
     <button type="button" [class.active]="tab==='slots'" (click)="setTab('slots')">Meal times</button>
     <button type="button" [class.active]="tab==='allergens'" (click)="setTab('allergens')">Allergens</button>
     <button type="button" [class.active]="tab==='diets'" (click)="setTab('diets')">Diets</button>
+    <button type="button" [class.active]="tab==='textures'" (click)="setTab('textures')">Textures</button>
+    <button type="button" [class.active]="tab==='supplements'" (click)="setTab('supplements')">Supplements</button>
     <button type="button" [class.active]="tab==='meals'" (click)="setTab('meals')">Meals</button>
     <button type="button" [class.active]="tab==='menu'" (click)="setTab('menu')">Weekly menu</button>
+    <button type="button" [class.active]="tab==='settings'" (click)="setTab('settings')">Sheet &amp; labels</button>
     <button type="button" [class.active]="tab==='channels'" (click)="setTab('channels')">TV channels</button>
   </div>
 
@@ -22,9 +26,9 @@
   <div *ngIf="tab==='slots'" class="ds-panel">
     <div class="ds-grid-2">
       <div>
-        <table class="ds-table">
+        <table class="diet-grid">
           <thead>
-            <tr><th>Name</th><th>Code</th><th>Start</th><th>End</th><th>Seq</th><th></th></tr>
+            <tr><th>Name</th><th>Code</th><th>Start</th><th>End</th><th>Cut-off</th><th>Seq</th><th></th></tr>
           </thead>
           <tbody>
             <tr *ngFor="let s of slots">
@@ -32,10 +36,11 @@
               <td>{{ s.code }}</td>
               <td>{{ s.startTime }}</td>
               <td>{{ s.endTime }}</td>
+              <td>{{ s.orderCutoff || '—' }}</td>
               <td>{{ s.sequence }}</td>
               <td><button type="button" class="ds-btn ds-btn-sm" (click)="editSlot(s)">Edit</button></td>
             </tr>
-            <tr *ngIf="slots.length===0"><td colspan="6" class="ds-empty">No slots yet — add Breakfast / Lunch / Dinner first.</td></tr>
+            <tr *ngIf="slots.length===0"><td colspan="7" class="ds-empty">No slots yet — add Early morning / Breakfast / Mid-morning / Lunch / Evening / Dinner / Bed time.</td></tr>
           </tbody>
         </table>
       </div>
@@ -45,6 +50,9 @@
         <label>Code <input type="text" [(ngModel)]="slotForm.code" placeholder="BFAST" /></label>
         <label>Start (HH:mm) <input type="text" [(ngModel)]="slotForm.startTime" placeholder="07:00" /></label>
         <label>End (HH:mm) <input type="text" [(ngModel)]="slotForm.endTime" placeholder="09:00" /></label>
+        <label>Change cut-off (HH:mm) <span class="ds-hint">— last time a diet change reaches the kitchen for this meal</span>
+          <input type="text" [(ngModel)]="slotForm.orderCutoff" placeholder="05:00" />
+        </label>
         <label>Sequence <input type="number" [(ngModel)]="slotForm.sequence" /></label>
         <label class="ds-check"><input type="checkbox" [(ngModel)]="slotForm.isActive" /> Active</label>
         <div class="ds-actions">
@@ -59,7 +67,7 @@
   <div *ngIf="tab==='allergens'" class="ds-panel">
     <div class="ds-grid-2">
       <div>
-        <table class="ds-table">
+        <table class="diet-grid">
           <thead><tr><th>Name</th><th>Active</th><th></th></tr></thead>
           <tbody>
             <tr *ngFor="let a of allergens">
@@ -87,24 +95,30 @@
   <div *ngIf="tab==='diets'" class="ds-panel">
     <div class="ds-grid-2">
       <div>
-        <table class="ds-table">
-          <thead><tr><th>Code</th><th>Name</th><th>kCal</th><th>Veg</th><th></th></tr></thead>
+        <table class="diet-grid">
+          <thead><tr><th>Code</th><th>Name</th><th>Kind</th><th>kCal</th><th>Veg</th><th></th></tr></thead>
           <tbody>
             <tr *ngFor="let d of diets">
               <td>{{ d.code }}</td>
               <td>{{ d.name }}</td>
+              <td>{{ d.kind === 'FEED' ? 'Feed' : d.kind === 'NO_TRAY' ? 'No tray' : 'Oral' }}</td>
               <td>{{ d.caloriesKcal ?? '—' }}</td>
               <td>{{ d.isVeg ? '✓' : '' }}</td>
               <td><button type="button" class="ds-btn ds-btn-sm" (click)="editDiet(d)">Edit</button></td>
             </tr>
-            <tr *ngIf="diets.length===0"><td colspan="5" class="ds-empty">No diets yet.</td></tr>
+            <tr *ngIf="diets.length===0"><td colspan="6" class="ds-empty">No diets yet.</td></tr>
           </tbody>
         </table>
       </div>
       <div class="ds-form">
         <h3>{{ dietForm.id ? 'Edit diet' : 'New diet' }}</h3>
         <label>Name <input type="text" [(ngModel)]="dietForm.name" placeholder="Diabetic 1800kcal" /></label>
-        <label>Code <input type="text" [(ngModel)]="dietForm.code" placeholder="DM-1800" /></label>
+        <label>Code <input type="text" [(ngModel)]="dietForm.code" placeholder="SRDD" /></label>
+        <label>Kind
+          <select [(ngModel)]="dietForm.kind">
+            <option *ngFor="let k of dietKinds" [ngValue]="k.value">{{ k.label }}</option>
+          </select>
+        </label>
         <label>Description <textarea [(ngModel)]="dietForm.description" rows="2"></textarea></label>
         <div class="ds-row">
           <label>kCal <input type="number" [(ngModel)]="dietForm.caloriesKcal" /></label>
@@ -117,20 +131,130 @@
           <label>Potassium mg <input type="number" [(ngModel)]="dietForm.potassiumMg" /></label>
           <label>Fluid ml <input type="number" [(ngModel)]="dietForm.fluidMl" /></label>
         </div>
-        <label>Restrictions (free text) <textarea [(ngModel)]="dietForm.restrictions" rows="2"></textarea></label>
-        <label>Target conditions <textarea [(ngModel)]="dietForm.targetConditions" rows="2" placeholder="Diabetes, hypertension"></textarea></label>
+        <label>Restrictions (comma-separated) <textarea [(ngModel)]="dietRestrictionsText" rows="2" placeholder="Low salt, No added sugar"></textarea></label>
+        <label>Target conditions (comma-separated — used to suggest this diet from the diagnosis) <textarea [(ngModel)]="dietTargetConditionsText" rows="2" placeholder="Diabetes, Hypertension"></textarea></label>
         <div class="ds-checks">
           <label><input type="checkbox" [(ngModel)]="dietForm.isVeg" /> Vegetarian</label>
           <label><input type="checkbox" [(ngModel)]="dietForm.isJain" /> Jain</label>
           <label><input type="checkbox" [(ngModel)]="dietForm.isHalal" /> Halal</label>
           <label><input type="checkbox" [(ngModel)]="dietForm.isKosher" /> Kosher</label>
           <label><input type="checkbox" [(ngModel)]="dietForm.isNoOnionGarlic" /> No onion / garlic</label>
+          <label title="Normal / non-therapeutic diet. NABH COP.7.b flags chronic-condition patients put on it."><input type="checkbox" [(ngModel)]="dietForm.isGeneral" /> General (non-therapeutic)</label>
           <label><input type="checkbox" [(ngModel)]="dietForm.isActive" /> Active</label>
         </div>
         <div class="ds-actions">
           <button type="button" class="ds-btn ds-btn-primary" (click)="saveDiet()">Save</button>
-          <button type="button" class="ds-btn" (click)="dietForm = blankDiet()">Cancel</button>
+          <button type="button" class="ds-btn" (click)="resetDietForm()">Cancel</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Textures (consistency modifiers) ─── -->
+  <div *ngIf="tab==='textures'" class="ds-panel">
+    <div class="ds-grid-2">
+      <div>
+        <p class="ds-hint">Combined with the diet code on the sheet and labels: diet <b>SRDD</b> + texture <b>SD</b> → <b>SRDD-SD</b>.</p>
+        <table class="diet-grid">
+          <thead><tr><th>Code</th><th>Name</th><th>Seq</th><th>Active</th><th></th></tr></thead>
+          <tbody>
+            <tr *ngFor="let t of textures">
+              <td>{{ t.code }}</td>
+              <td>{{ t.name }}</td>
+              <td>{{ t.sequence }}</td>
+              <td>{{ t.isActive ? 'Yes' : 'No' }}</td>
+              <td><button type="button" class="ds-btn ds-btn-sm" (click)="editTexture(t)">Edit</button></td>
+            </tr>
+            <tr *ngIf="textures.length===0"><td colspan="5" class="ds-empty">No textures yet — e.g. SD Soft, VSD Very soft, MSD Mashed, Blended, Liquid.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ds-form">
+        <h3>{{ textureForm.id ? 'Edit texture' : 'New texture' }}</h3>
+        <label>Code <input type="text" [(ngModel)]="textureForm.code" placeholder="SD" /></label>
+        <label>Name <input type="text" [(ngModel)]="textureForm.name" placeholder="Soft diet" /></label>
+        <label>Description <textarea [(ngModel)]="textureForm.description" rows="2"></textarea></label>
+        <label>Sequence <input type="number" [(ngModel)]="textureForm.sequence" /></label>
+        <label class="ds-check"><input type="checkbox" [(ngModel)]="textureForm.isActive" /> Active</label>
+        <div class="ds-actions">
+          <button type="button" class="ds-btn ds-btn-primary" (click)="saveTexture()">Save</button>
+          <button type="button" class="ds-btn" (click)="textureForm = blankTexture()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Supplements ─── -->
+  <div *ngIf="tab==='supplements'" class="ds-panel">
+    <div class="ds-grid-2">
+      <div>
+        <p class="ds-hint">Picked per meal on the Diet Information Sheet (e.g. Ensure DM at Evening — 2.5 scoops in 150 ml warm water).</p>
+        <table class="diet-grid">
+          <thead><tr><th>Name</th><th>Unit</th><th>Default dose</th><th>Active</th><th></th></tr></thead>
+          <tbody>
+            <tr *ngFor="let s of supplements">
+              <td>{{ s.name }}</td>
+              <td>{{ s.unit || '—' }}</td>
+              <td>{{ s.defaultDose || '—' }}</td>
+              <td>{{ s.isActive ? 'Yes' : 'No' }}</td>
+              <td><button type="button" class="ds-btn ds-btn-sm" (click)="editSupplement(s)">Edit</button></td>
+            </tr>
+            <tr *ngIf="supplements.length===0"><td colspan="5" class="ds-empty">No supplements yet — e.g. Ensure DM, Resource Dialysis, Celnutra 2.0.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ds-form">
+        <h3>{{ supplementForm.id ? 'Edit supplement' : 'New supplement' }}</h3>
+        <label>Name <input type="text" [(ngModel)]="supplementForm.name" placeholder="Ensure DM" /></label>
+        <label>Unit <input type="text" [(ngModel)]="supplementForm.unit" placeholder="scoops / ml / sachet" /></label>
+        <label>Default dose <input type="text" [(ngModel)]="supplementForm.defaultDose" placeholder="2.5 scoops in 150 ml warm water" /></label>
+        <label>Notes <textarea [(ngModel)]="supplementForm.notes" rows="2"></textarea></label>
+        <label class="ds-check"><input type="checkbox" [(ngModel)]="supplementForm.isActive" /> Active</label>
+        <div class="ds-actions">
+          <button type="button" class="ds-btn ds-btn-primary" (click)="saveSupplement()">Save</button>
+          <button type="button" class="ds-btn" (click)="supplementForm = blankSupplement()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Sheet & label settings ─── -->
+  <div *ngIf="tab==='settings'" class="ds-panel">
+    <div class="ds-form ds-form-wide" *ngIf="settings">
+      <h3>Diet Information Sheet</h3>
+      <label>Sheet starts at meal
+        <span class="ds-hint">— e.g. Evening: the sheet covers Evening today → the slot before it tomorrow (Lunch)</span>
+        <select [(ngModel)]="settings.sheetStartSlotId">
+          <option [ngValue]="null">First meal of the day</option>
+          <option *ngFor="let s of slots" [ngValue]="s.id">{{ s.name }} ({{ s.startTime }})</option>
+        </select>
+      </label>
+      <label>Standing kitchen notes <span class="ds-hint">— printed on every sheet header</span>
+        <textarea rows="3" [(ngModel)]="settings.sheetStandingNotes"
+                  placeholder="Send OBG ward breakfast by 7:30 AM. No juices/fruits for diabetic/renal patients unless advised by the dietitian."></textarea>
+      </label>
+
+      <h3>Diet labels</h3>
+      <div class="ds-row">
+        <label>Label width (mm) <input type="number" min="20" [(ngModel)]="settings.labelWidthMm" /></label>
+        <label>Label height (mm) <input type="number" min="15" [(ngModel)]="settings.labelHeightMm" /></label>
+        <label>Labels per row <input type="number" min="1" max="6" [(ngModel)]="settings.labelColumns" /></label>
+      </div>
+      <label class="ds-check"><input type="checkbox" [(ngModel)]="settings.labelShowQr" /> Print QR code (scan at bedside)</label>
+
+      <h3>Nutrition screening</h3>
+      <label>Default form for adults
+        <select [(ngModel)]="settings.defaultScreeningForm">
+          <option value="NRS2002">NRS-2002</option>
+        </select>
+      </label>
+      <label>Departments that use the Maternal form (comma-separated)
+        <input type="text" [(ngModel)]="maternalDepartmentsText" placeholder="OBG, Obstetrics, Gynaecology" />
+      </label>
+      <p class="ds-hint">Patients under 18 get STAMP; pregnant patients (from the doctor's initial assessment) or these departments get the Maternal form; everyone else NRS-2002. The dietitian can always switch.</p>
+
+      <div class="ds-actions">
+        <button type="button" class="ds-btn ds-btn-primary" (click)="saveSettings()">Save settings</button>
       </div>
     </div>
   </div>
@@ -139,7 +263,7 @@
   <div *ngIf="tab==='meals'" class="ds-panel">
     <div class="ds-grid-2">
       <div>
-        <table class="ds-table">
+        <table class="diet-grid">
           <thead><tr><th>Name</th><th>Category</th><th>kCal</th><th>Veg</th><th></th></tr></thead>
           <tbody>
             <tr *ngFor="let m of meals">
@@ -198,7 +322,7 @@
         <option *ngFor="let d of diets" [value]="d.id">{{ d.code }} · {{ d.name }}</option>
       </select>
     </label>
-    <table class="ds-menu" *ngIf="menuDietId">
+    <table class="diet-grid ds-menu" *ngIf="menuDietId">
       <thead>
         <tr>
           <th>Day</th>
@@ -224,26 +348,60 @@
   <div *ngIf="tab==='channels'" class="ds-panel">
     <div class="ds-grid-2">
       <div>
-        <table class="ds-table">
-          <thead><tr><th>Name</th><th>Active</th><th>TV URL</th><th></th></tr></thead>
+        <div class="ds-banner ds-banner-bad" *ngIf="unassignedWards.length">
+          {{ unassignedWards.length }} ward{{ unassignedWards.length === 1 ? '' : 's' }} not on any ticket channel —
+          their trays won't show in the kitchen: {{ unassignedWardNames }}
+        </div>
+        <table class="diet-grid">
+          <thead><tr><th>Name</th><th>Wards</th><th>Shows</th><th>Active</th><th>TV URL</th><th></th></tr></thead>
           <tbody>
             <tr *ngFor="let c of channels">
               <td>{{ c.name }}</td>
+              <td>{{ channelWardLabel(c) }}</td>
+              <td>{{ channelModeLabel(c) }}</td>
               <td>{{ c.isActive ? 'Yes' : 'No' }}</td>
               <td><code>/canteen-channel/{{ c.id }}</code></td>
               <td><button type="button" class="ds-btn ds-btn-sm" (click)="editChannel(c)">Edit</button></td>
             </tr>
-            <tr *ngIf="channels.length===0"><td colspan="4" class="ds-empty">No canteen TV channels yet.</td></tr>
+            <tr *ngIf="channels.length===0"><td colspan="6" class="ds-empty">No canteen TV channels yet.</td></tr>
           </tbody>
         </table>
+        <p class="ds-hint ds-channel-tip">
+          One ward on a pantry tablet: add <code>?ward=&lt;ward id&gt;</code> to any channel's URL.
+        </p>
       </div>
       <div class="ds-form">
         <h3>{{ channelForm.id ? 'Edit channel' : 'New channel' }}</h3>
-        <label>Name <input type="text" [(ngModel)]="channelForm.name" placeholder="Main canteen" /></label>
+        <label>Name <input type="text" [(ngModel)]="channelForm.name" placeholder="Block A – Floors 1-3" /></label>
+        <fieldset class="ds-fs">
+          <legend>Shows</legend>
+          <label class="ds-check-inline">
+            <input type="radio" name="channelMode" value="tickets" [(ngModel)]="channelMode" />
+            Tickets <span class="ds-hint">— a slip per tray, for the plating line</span>
+          </label>
+          <label class="ds-check-inline">
+            <input type="radio" name="channelMode" value="summary" [(ngModel)]="channelMode" />
+            Summary <span class="ds-hint">— counts per ward, for the supervisor</span>
+          </label>
+        </fieldset>
+        <fieldset class="ds-fs ds-ward-fs">
+          <legend>Wards <span class="ds-hint">({{ channelWardIds.length ? channelWardIds.length + ' selected' : 'none = all wards' }})</span></legend>
+          <input type="text" class="ds-ward-search" [(ngModel)]="wardFilter" placeholder="Filter by name, code or floor" />
+          <div class="ds-ward-list">
+            <label *ngFor="let w of filteredWards" class="ds-check-inline">
+              <input type="checkbox"
+                     [checked]="channelWardIds.includes(w.id)"
+                     (change)="toggleChannelWard(w.id)" />
+              {{ w.wardName }} <span class="ds-hint">{{ w.floor ? 'Fl ' + w.floor + ' · ' : '' }}{{ w.totalBeds }} beds</span>
+            </label>
+            <span *ngIf="filteredWards.length === 0" class="ds-hint">No wards match.</span>
+          </div>
+          <button type="button" class="ds-btn ds-btn-sm" *ngIf="channelWardIds.length" (click)="channelWardIds = []">Clear selection</button>
+        </fieldset>
         <label class="ds-check"><input type="checkbox" [(ngModel)]="channelForm.isActive" /> Active</label>
         <div class="ds-actions">
           <button type="button" class="ds-btn ds-btn-primary" (click)="saveChannel()">Save</button>
-          <button type="button" class="ds-btn" (click)="channelForm = blankChannel()">Cancel</button>
+          <button type="button" class="ds-btn" (click)="resetChannel()">Cancel</button>
         </div>
       </div>
     </div>

@@ -6,6 +6,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { QualityService, QualityIndicatorRca, RcaUpdateBody, RcaStatus } from '../../services/quality.service';
+import { isQualityEditor } from '../quality-access';
 
 /**
  * Phase 9.26 / Phase 3 — RCA detail + editor.
@@ -38,6 +39,8 @@ export class QualityRcaDetailComponent implements OnInit, OnDestroy {
   };
 
   readonly STATUSES: RcaStatus[] = ['open', 'in_progress', 'closed'];
+  /** Quality Manager / super_admin; senior management view read-only. */
+  readonly canEdit = isQualityEditor();
 
   private destroy$ = new Subject<void>();
 
@@ -80,11 +83,18 @@ export class QualityRcaDetailComponent implements OnInit, OnDestroy {
   }
 
   save(): void {
-    if (!this.rca) return;
+    if (!this.rca || !this.canEdit) return;
     this.saving = true;
     this.errorMessage = '';
     this.successMessage = '';
-    this.svc.updateRca(this.rca.id, this.draft).pipe(takeUntil(this.destroy$)).subscribe({
+    // Empty date inputs clear the stored date.
+    const body: RcaUpdateBody = {
+      ...this.draft,
+      dueDate: this.draft.dueDate || null,
+      completedAt: this.draft.completedAt || null,
+      effectivenessReviewAt: this.draft.effectivenessReviewAt || null,
+    };
+    this.svc.updateRca(this.rca.id, body).pipe(takeUntil(this.destroy$)).subscribe({
       next: (r) => {
         this.rca = r.data;
         this.hydrate(r.data);

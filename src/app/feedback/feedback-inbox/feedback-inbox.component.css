@@ -17,6 +17,9 @@
 .fb-filters { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin-bottom: 14px; padding: 10px 14px; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; }
 .fb-filters label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #4b5563; }
 .fb-filters select { height: 34px; padding: 4px 10px; border: 1px solid #d1d5db; border-radius: 6px; min-width: 160px; }
+.fb-filters input { height: 34px; padding: 4px 10px; border: 1px solid #d1d5db; border-radius: 6px; box-sizing: border-box; }
+.fb-create input[type='number'] { width: 90px; }
+.fb-head-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
 .fb-btn { height: 34px; padding: 0 12px; border-radius: 6px; border: 1px solid #d1d5db; background: #fff; color: #271e4a; cursor: pointer; font-family: Kanit, sans-serif; font-size: 13px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px; }
 .fb-btn-sm { height: 28px; padding: 0 8px; font-size: 12px; }

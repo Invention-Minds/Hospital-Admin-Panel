@@ -6,6 +6,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { Incident, IncidentService, IncidentStats } from '../../services/incident.service';
+import { isIncidentManager, isIncidentDepartmentViewer, isNursingSuperintendent } from '../../quality/quality-access';
 import { IncidentRaiseComponent } from '../incident-raise/incident-raise.component';
 
 /**
@@ -26,6 +27,13 @@ export class IncidentInboxComponent implements OnInit, OnDestroy {
   loading = false;
   errorMessage = '';
   showRaise = false;
+  // Managers (super_admin / Quality Manager admin) see everything. Others see
+  // what they reported / are assigned; department viewers (other admins,
+  // Nursing Superintendent) also see their department read-only. The server
+  // scopes both the list and the stats.
+  readonly isManager = isIncidentManager();
+  readonly isDeptViewer = isIncidentDepartmentViewer();
+  readonly isSuperintendent = isNursingSuperintendent();
 
   filters = { status: '', severity: '', category: '', source: '', nabhClause: '', qiCode: '' };
   // Phase 6g — "Mine only" toggle. Sent as a separate query param so the
@@ -62,6 +70,7 @@ export class IncidentInboxComponent implements OnInit, OnDestroy {
   }
   toggleMine(): void { this.mineOnly = !this.mineOnly; this.load(); }
   loadStats(): void {
+    // Open to everyone — the server scopes the counts to what the caller can see.
     this.svc.stats().pipe(takeUntil(this.destroy$)).subscribe({
       next: (s) => { this.stats = s; },
       error: () => { /* tiles are best-effort */ },

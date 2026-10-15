@@ -1,0 +1,12 @@
+.na-grid { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 14px; align-items: start; }
+@media (max-width: 1100px) { .na-grid { grid-template-columns: 1fr; } }
+.na-formhead { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.na-formhead select { border: 1px solid #d1d5db; border-radius: 6px; padding: 6px 8px; font-size: 13px; }
+.dx-card h4 { margin: 14px 0 6px; font-size: 13px; color: #1f2937; border-bottom: 1px solid #eef0f3; padding-bottom: 3px; }
+.na-yn td:last-child { width: 80px; }
+.na-checks, .na-risks { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+.na-risks { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+.na-score { margin-top: 12px; padding: 10px 12px; background: #f3f6fb; border-radius: 6px; font-size: 14px; }
+.na-note { border-top: 1px solid #f3f4f6; padding: 6px 0; }
+.na-note-meta { font-size: 11px; color: #6b7280; }
+.na-note-text { font-size: 13px; white-space: pre-line; }

@@ -123,6 +123,7 @@ export class DoctorOverviewComponent implements OnInit {
         },
         (error) => {
           console.error('Error saving new doctor:', error);
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: error?.error?.error || 'Error in adding doctor', life: 6000 });
           this.isLoading = false;
         }
       );

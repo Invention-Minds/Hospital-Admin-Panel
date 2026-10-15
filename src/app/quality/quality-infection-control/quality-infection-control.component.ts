@@ -12,6 +12,7 @@ import {
   QualitySterilizationCycle, SterilizationCreateBody,
 } from '../../services/quality.service';
 import { AlertService } from '../../services/alert.service';
+import { isQualityEditor, isInfectionControlEditor, isQualityViewer } from '../quality-access';
 
 type Tab = 'surveillance' | 'device-days' | 'sterilization';
 
@@ -40,6 +41,10 @@ export class QualityInfectionControlComponent implements OnInit, OnDestroy {
   saving = false;
   errorMessage = '';
   successMessage = '';
+  /** Quality Manager / super_admin / Infection Control Nurse may capture; senior management view only. */
+  readonly canEdit = isQualityEditor() || isInfectionControlEditor();
+  /** The rest of the Quality module (back-link to indicators) is for quality viewers only. */
+  readonly canViewQuality = isQualityViewer();
 
   // Surveillance state.
   survRows: QualitySurveillanceEvent[] = [];
@@ -143,17 +148,19 @@ export class QualityInfectionControlComponent implements OnInit, OnDestroy {
     });
   }
   copyYesterday(): void {
-    // Find the previous day's row for the same (ward, deviceType).
-    const cur = new Date(this.ddDraft.date);
-    const prev = new Date(cur.getTime() - 24 * 60 * 60 * 1000);
-    const target = prev.toISOString().slice(0, 10);
-    const prior = this.ddRows.find((r) => r.date.slice(0, 10) === target
+    // Find the previous day's row for the same (ward, deviceType). Compare by
+    // local calendar day — stored dates are local midnight, which is the
+    // previous day in UTC.
+    const [y, m, d] = (this.ddDraft.date || '').split('-').map(Number);
+    if (!y || !m || !d) { this.errorMessage = 'Pick a date first'; return; }
+    const target = this.localDayKey(new Date(y, m - 1, d - 1));
+    const prior = this.ddRows.find((r) => this.localDayKey(new Date(r.date)) === target
       && r.ward === this.ddDraft.ward && r.deviceType === this.ddDraft.deviceType);
     if (prior) this.ddDraft.count = prior.count;
     else this.errorMessage = `No prior count for ${this.ddDraft.ward} / ${this.ddDraft.deviceType} on ${target}`;
   }
   async removeDeviceDay(row: QualityDeviceDayCount): Promise<void> {
-    if (!await this.alertSvc.confirm(`Delete ${row.ward} / ${row.deviceType} count for ${row.date.slice(0, 10)}?`, { severity: 'danger', confirmLabel: 'Delete' })) return;
+    if (!await this.alertSvc.confirm(`Delete ${row.ward} / ${row.deviceType} count for ${this.localDayKey(new Date(row.date))}?`, { severity: 'danger', confirmLabel: 'Delete' })) return;
     this.svc.deleteDeviceDay(row.id).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => this.load(),
       error: (e) => (this.errorMessage = e?.error?.message || 'Failed to delete'),
@@ -187,8 +194,8 @@ export class QualityInfectionControlComponent implements OnInit, OnDestroy {
   }
 
   // ── Helpers ──────────────────────────────────────────────────────────
-  private today(): string {
-    const d = new Date();
+  private today(): string { return this.localDayKey(new Date()); }
+  private localDayKey(d: Date): string {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }
   private todayLocalIso(): string {

@@ -29,6 +29,7 @@
 
 .incd-btn { height: 38px; padding: 0 16px; border-radius: 6px; border: 1px solid #d1d5db; background: #fff; color: #271e4a; cursor: pointer; font-family: Kanit, sans-serif; font-size: 13px; }
 .incd-btn-primary { background: #169458; color: #fff; border-color: #169458; }
+.incd-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
 .incd-pill { display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 11px; font-weight: 600; text-transform: capitalize; }
 .incd-sev-near_miss { background: #f3f4f6; color: #374151; }
@@ -52,6 +53,10 @@
 .incd-subhead { font-size: 12px; font-weight: 600; color: #4b5563; margin: 14px 0 6px; text-transform: uppercase; letter-spacing: 0.4px; }
 .incd-capa-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
 @media (max-width: 700px) { .incd-capa-row { grid-template-columns: 1fr; } }
+.incd-capa-fields { border: 0; padding: 0; margin: 0; min-width: 0; }
+.incd-capa-fields:disabled .incd-field select,
+.incd-capa-fields:disabled .incd-field input,
+.incd-capa-fields:disabled .incd-field textarea { background: #f9fafb; color: #374151; }
 .incd-capa-saved { color: #166534; font-size: 12px; font-style: italic; margin-right: 12px; }
 
 /* Phase 6f — Evidence card */

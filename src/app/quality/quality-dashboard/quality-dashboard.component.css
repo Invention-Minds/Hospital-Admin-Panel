@@ -55,3 +55,6 @@
 .q-pill.q-good { background: #dcfce7; color: #166534; }
 .q-btn { background: transparent; border: 1px solid #d1d5db; border-radius: 6px; padding: 4px 12px; cursor: pointer; font-family: Kanit, sans-serif; font-size: 12px; color: #271e4a; }
 .q-btn:hover { background: #f3f4f6; }
+
+/* Read-only mode note (non-editors) */
+.q-view-only { display: inline-block; margin-left: 10px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; vertical-align: middle; background: #f3f4f6; color: #4b5563; }

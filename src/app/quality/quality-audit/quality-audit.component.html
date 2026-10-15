@@ -1,7 +1,7 @@
 <div class="page q-shell">
   <div class="q-head">
     <div>
-      <h2 class="q-title">Audit observations</h2>
+      <h2 class="q-title">Audit observations <span class="q-view-only" *ngIf="!canEdit">View only</span></h2>
       <p class="q-sub">Capture compliance audits (hand hygiene, BMW, MRD, HR training, fire drill…). The monthly auto-source rolls these into NABH indicator records.</p>
     </div>
     <div class="q-range">
@@ -12,7 +12,8 @@
   <div class="q-banner q-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
   <div class="q-banner audit-banner-ok" *ngIf="successMessage">{{ successMessage }}</div>
 
-  <!-- ── Chapter filter ── -->
+  <ng-container *ngIf="canEdit">
+  <!-- ── Chapter filter (narrows the capture dropdown) ── -->
   <div class="audit-chapter-row">
     <button class="qi-chip" *ngFor="let ch of CHAPTERS"
             [class.qi-chip-on]="filterChapter === ch"
@@ -71,6 +72,7 @@
       <button class="audit-save" (click)="submit()" [disabled]="saving">{{ saving ? 'Saving…' : 'Record observation' }}</button>
     </div>
   </div>
+  </ng-container>
 
   <!-- ── This-month summary ── -->
   <div class="audit-card" *ngIf="summary && (objectKeys(summary.data).length > 0)">
@@ -114,7 +116,7 @@
             </span>
           </td>
           <td>{{ r.auditor || '—' }}</td>
-          <td><button class="audit-delete" (click)="remove(r)">×</button></td>
+          <td><button class="audit-delete" *ngIf="canEdit" (click)="remove(r)">×</button></td>
         </tr>
       </tbody>
     </table>

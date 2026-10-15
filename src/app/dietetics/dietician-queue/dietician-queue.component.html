@@ -1,147 +1,241 @@
-<div class="dq-shell">
-  <h2 class="dq-title">Dietician queue</h2>
-
-  <div class="dq-banner dq-banner-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
-  <div class="dq-banner dq-banner-good" *ngIf="successMessage">{{ successMessage }}</div>
-
-  <div class="dq-grid">
-    <!-- ─── Left column — three buckets ─── -->
-    <div class="dq-buckets">
-      <section>
-        <h3 class="dq-bucket-title">Pending <span class="dq-count">{{ queue.pending.length }}</span></h3>
-        <p class="dq-bucket-sub">Admitted, no signed diet plan yet (24h SLA).</p>
-        <ul>
-          <li *ngFor="let r of queue.pending" (click)="selectAdmission(r)"
-              [class.active]="selected?.id === r.id">
-            <div class="dq-row-main">{{ r.admissionNo }} · {{ r.department }}</div>
-            <div class="dq-row-sub">{{ r.diagnosis | slice:0:80 }}</div>
-            <div class="dq-row-date">Admitted {{ r.admissionDate | date:'short' }}</div>
-          </li>
-          <li *ngIf="queue.pending.length===0" class="dq-empty">All admissions have a diet plan.</li>
-        </ul>
-      </section>
-
-      <section>
-        <h3 class="dq-bucket-title dq-warn">Re-assess <span class="dq-count">{{ queue.reassess.length }}</span></h3>
-        <p class="dq-bucket-sub">Low meal intake flagged in the last 48h.</p>
-        <ul>
-          <li *ngFor="let r of queue.reassess" (click)="selectAdmission(r, true)"
-              [class.active]="selected?.id === r.id">
-            <div class="dq-row-main">{{ r.admissionNo }} · {{ r.department }}</div>
-            <div class="dq-row-sub">{{ r.diagnosis | slice:0:80 }}</div>
-          </li>
-          <li *ngIf="queue.reassess.length===0" class="dq-empty">No re-assessment alerts.</li>
-        </ul>
-      </section>
-
-      <section>
-        <h3 class="dq-bucket-title">Active plans <span class="dq-count">{{ queue.active.length }}</span></h3>
-        <ul>
-          <li *ngFor="let p of queue.active" (click)="selectActivePlan(p)"
-              [class.active]="editingPlan?.id === p.id">
-            <div class="dq-row-main">{{ p.diet?.code }} · {{ p.diet?.name }}</div>
-            <div class="dq-row-sub">Signed {{ p.signedAt | date:'short' }} by {{ p.signedBy }}</div>
-          </li>
-          <li *ngIf="queue.active.length===0" class="dq-empty">No active plans.</li>
-        </ul>
-      </section>
+<div class="dx-shell">
+  <div class="dx-head">
+    <div>
+      <h2 class="dx-title">Dietician queue</h2>
+      <p class="dx-sub">Assess new admissions within 24 hours, re-assess low intake and sign diet plans. Per-meal items are set on the Diet sheet.</p>
     </div>
-
-    <!-- ─── Right column — editor ─── -->
-    <div class="dq-editor" *ngIf="selected">
-      <div class="dq-editor-header">
-        <h3>{{ selected.admissionNo || 'Plan editor' }} <span class="dq-pill" *ngIf="editingPlan">{{ editingPlan.status }}</span></h3>
-        <div class="dq-meta" *ngIf="selected.diagnosis">{{ selected.department }} · {{ selected.diagnosis | slice:0:120 }}</div>
-      </div>
-
-      <div class="dq-form">
-        <label class="dq-field">
-          Diet
-          <select [(ngModel)]="form.dietMasterId">
-            <option value="">— select —</option>
-            <option *ngFor="let d of diets" [value]="d.id">{{ d.code }} · {{ d.name }}</option>
-          </select>
-        </label>
-
-        <div class="dq-row">
-          <label class="dq-field">Start date <input type="date" [(ngModel)]="form.startDate" /></label>
-          <label class="dq-field">End date <input type="date" [(ngModel)]="form.endDate" /></label>
-          <label class="dq-field">NPO until <input type="datetime-local" [(ngModel)]="form.npoUntil" /></label>
-        </div>
-
-        <fieldset class="dq-fs">
-          <legend>Allergens for this patient</legend>
-          <label class="dq-check-inline" *ngFor="let a of allergens">
-            <input type="checkbox"
-                   [checked]="form.allergensSnapshot.includes(a.name)"
-                   (change)="toggleAllergen(a.name)" />
-            {{ a.name }}
-          </label>
-        </fieldset>
-
-        <fieldset class="dq-fs">
-          <legend>Restrictions</legend>
-          <label class="dq-check-inline" *ngFor="let r of ['No salt','Low fat','Low protein','Soft','Liquid','Tube feed','Lactose-free','Gluten-free']">
-            <input type="checkbox"
-                   [checked]="form.restrictionsSnapshot.includes(r)"
-                   (change)="toggleRestriction(r)" />
-            {{ r }}
-          </label>
-        </fieldset>
-
-        <label class="dq-field">
-          Notes for kitchen
-          <textarea rows="2" [(ngModel)]="form.notesForKitchen"></textarea>
-        </label>
-
-        <label class="dq-field" *ngIf="form.reassessmentReason || (editingPlan && editingPlan.status === 'DRAFT')">
-          Re-assessment reason
-          <input type="text" [(ngModel)]="form.reassessmentReason" />
-        </label>
-
-        <label class="dq-field" *ngIf="templates.length > 0">
-          Note template (optional)
-          <select [(ngModel)]="form.noteTemplateId">
-            <option [ngValue]="null">— none —</option>
-            <option *ngFor="let t of templates" [ngValue]="t.id">{{ t.name }}</option>
-          </select>
-        </label>
-
-        <app-template-form-renderer
-          *ngIf="selectedTemplate() as t"
-          [fields]="t.fields"
-          [values]="form.templatedValueMap"
-          (valuesChange)="form.templatedValueMap = $event">
-        </app-template-form-renderer>
-
-        <div class="dq-actions">
-          <button type="button" class="dq-btn dq-btn-primary"
-                  [disabled]="saving || (editingPlan && editingPlan.status !== 'DRAFT')"
-                  (click)="saveDraft()">
-            {{ saving ? 'Saving…' : (editingPlan && editingPlan.status === 'DRAFT' ? 'Update draft' : 'Save as draft') }}
-          </button>
-          <button type="button" class="dq-btn"
-                  *ngIf="editingPlan && editingPlan.status === 'ACTIVE'"
-                  (click)="endPlan()">End plan</button>
-        </div>
-      </div>
-
-      <div class="dq-sign" *ngIf="editingPlan && editingPlan.status === 'DRAFT'">
-        <h4>Sign &amp; activate</h4>
-        <p class="dq-sub">Signing locks the plan, snapshots the template fields, and demotes any prior active plan.</p>
-        <app-e-sign
-          [signerType]="'staff'"
-          [signerRole]="'dietician'"
-          [signerName]="'Dietician'"
-          [contextType]="'diet-plan'"
-          [contextId]="editingPlan.id"
-          [disabled]="signing"
-          (signed)="onSigned($event)">
-        </app-e-sign>
-      </div>
-    </div>
-    <div class="dq-editor-empty" *ngIf="!selected">
-      Select a patient from the queue or an active plan to begin.
+    <div class="dx-toolbar">
+      <a routerLink="/dietetics/rounds" class="dx-btn">Rounds list</a>
+      <a routerLink="/dietetics/sheet" class="dx-btn">Diet sheet</a>
     </div>
   </div>
+
+  <div class="dx-banner dx-banner-bad" *ngIf="errorMessage && !selected" role="alert">{{ errorMessage }}</div>
+  <div class="dx-banner dx-banner-good" *ngIf="successMessage && !selected" role="status">{{ successMessage }}</div>
+
+  <!-- ─── Worklist tabs ─── -->
+  <div class="dx-tabs dq-tabs" role="tablist">
+    <button type="button" role="tab" *ngFor="let t of tabs" [class.active]="tab === t.key"
+            [attr.aria-selected]="tab === t.key" (click)="tab = t.key">
+      {{ t.label }} <span class="dq-tabn" [class.is-hot]="t.key === 'pending' && t.count">{{ t.count }}</span>
+    </button>
+  </div>
+
+  <div class="dq-bar">
+    <label class="dq-search">
+      <span class="dq-visually-hidden">Search</span>
+      <input type="search" [(ngModel)]="search" placeholder="Search name, PRN, bed or diagnosis" />
+    </label>
+    <label class="dq-ward">
+      <span class="dq-visually-hidden">Ward</span>
+      <select [(ngModel)]="wardFilter">
+        <option value="">All wards</option>
+        <option *ngFor="let w of wards" [value]="w">{{ w }}</option>
+      </select>
+    </label>
+    <span class="dq-bar-note" *ngIf="tab === 'pending' && overdueCount">
+      <b>{{ overdueCount }}</b> past the 24-hour assessment target
+    </span>
+    <span class="dq-spacer"></span>
+    <button type="button" class="dx-btn" (click)="refreshQueue()" [disabled]="loading">{{ loading ? 'Refreshing…' : 'Refresh' }}</button>
+  </div>
+
+  <div class="dx-scroll dq-scroll">
+    <table class="diet-grid dq-grid">
+      <thead>
+        <tr>
+          <th>Bed</th>
+          <th>Patient</th>
+          <th>Diagnosis</th>
+          <th *ngIf="tab === 'pending'">Waiting</th>
+          <th *ngIf="tab === 'reassess'">Admitted</th>
+          <th *ngIf="tab === 'check'">To verify</th>
+          <th *ngIf="tab === 'active'">Diet</th>
+          <th *ngIf="tab === 'active'">Signed</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of rows" class="is-click" [class.is-selected]="selected?.id === item.row.id" (click)="openRow(item)">
+          <td class="dq-bed">{{ item.row.bedNumber || '—' }}</td>
+          <td class="dq-patient">
+            <span class="dx-strong">{{ item.row.patientName || item.row.admissionNo }}</span>
+            <span class="dq-age" *ngIf="item.row.age">{{ item.row.age }}{{ item.row.sex ? ' · ' + (item.row.sex | slice:0:1) : '' }}</span>
+          </td>
+          <td class="dq-dx" [title]="item.row.diagnosis">{{ item.row.diagnosis }}</td>
+          <td class="dx-tight" *ngIf="tab === 'pending'">
+            <span class="dx-pill" [class.dx-pill-bad]="overdue(item.row.admissionDate)" [class.dx-pill-info]="!overdue(item.row.admissionDate)"
+                  [title]="'Admitted ' + (item.row.admissionDate | date:'dd MMM yyyy, HH:mm')">
+              {{ overdue(item.row.admissionDate) ? 'Overdue · ' : '' }}{{ waiting(item.row.admissionDate) }}
+            </span>
+            <span class="dx-pill dx-pill-warn dq-interim" *ngIf="item.row.interimDiet" title="Interim diet from the nursing census">Interim {{ item.row.interimDiet.code }}</span>
+          </td>
+          <td class="dx-tight" *ngIf="tab === 'reassess'">{{ item.row.admissionDate | date:'dd MMM' }}</td>
+          <td *ngIf="tab === 'check'">{{ item.row.checkNote || 'Check diet' }}</td>
+          <td class="dx-tight" *ngIf="tab === 'active'" [title]="item.plan?.diet?.name || ''">
+            <span class="dx-strong">{{ item.plan?.diet?.code }}<span *ngIf="item.plan?.texture">-{{ item.plan?.texture?.code }}</span></span>
+          </td>
+          <td class="dx-tight dx-muted" *ngIf="tab === 'active'">{{ item.plan?.signedAt | date:'dd MMM' }}</td>
+          <td class="dx-right dx-tight">
+            <span class="dq-open">{{ tab === 'active' ? 'Edit' : 'Assess' }} →</span>
+          </td>
+        </tr>
+        <tr *ngIf="!loading && rows.length === 0">
+          <td colspan="7" class="dx-empty">
+            {{ search || wardFilter ? 'No patients match this search.' :
+               tab === 'pending' ? 'Every admitted patient has a signed diet.' :
+               tab === 'reassess' ? 'No low-intake alerts in the last 48 hours.' :
+               tab === 'check' ? 'No diets flagged to verify.' : 'No active plans.' }}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
+
+<!-- ═══════════ Editor side panel ═══════════ -->
+<div class="dq-drawer-bg" *ngIf="selected" (click)="closeEditor()"></div>
+<aside class="dq-drawer" *ngIf="selected" role="dialog" aria-modal="false" [attr.aria-label]="'Diet plan for ' + (selected.patientName || selected.admissionNo)">
+  <header class="dq-drawer-head">
+    <div class="dq-drawer-title">
+      <h3>{{ selected.patientName || selected.admissionNo || 'Diet plan' }}
+        <span class="dx-pill" *ngIf="editingPlan"
+              [class.dx-pill-ok]="editingPlan.status==='ACTIVE'"
+              [class.dx-pill-warn]="editingPlan.status==='DRAFT' || editingPlan.status==='INTERIM'">{{ editingPlan.status }}</span>
+      </h3>
+      <p class="dx-sub">
+        {{ selected.bedNumber }}{{ selected.wardName ? ' · ' + selected.wardName : '' }}
+        {{ selected.age ? ' · ' + selected.age : '' }}{{ selected.sex ? '/' + (selected.sex | slice:0:1) : '' }}
+        {{ selected.prn ? ' · PRN ' + selected.prn : '' }}
+      </p>
+      <p class="dx-sub" *ngIf="selected.diagnosis">{{ selected.diagnosis | slice:0:160 }}</p>
+    </div>
+    <button type="button" class="dq-close" (click)="closeEditor()" aria-label="Close">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M18.3 5.71a1 1 0 0 0-1.41 0L12 10.59L7.11 5.7A1 1 0 0 0 5.7 7.11L10.59 12L5.7 16.89a1 1 0 1 0 1.41 1.41L12 13.41l4.89 4.89a1 1 0 0 0 1.41-1.41L13.41 12l4.89-4.89a1 1 0 0 0 0-1.4"/></svg>
+    </button>
+  </header>
+
+  <div class="dq-drawer-links">
+    <a [routerLink]="['/dietetics/nutrition', selected.id]">Screening &amp; notes</a>
+    <a [routerLink]="['/ipd/admission', selected.id, 'diet']">Diet tab &amp; history</a>
+  </div>
+
+  <div class="dq-drawer-body">
+    <div class="dx-banner dx-banner-bad" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+    <div class="dx-banner dx-banner-good" *ngIf="successMessage" role="status">{{ successMessage }}</div>
+    <div class="dx-banner dx-banner-warn" *ngIf="editingPlan?.status === 'INTERIM'">
+      Interim diet from the nursing census{{ editingPlan?.remarks ? ' — ' + editingPlan?.remarks : '' }}. Assess and sign a plan to replace it.
+    </div>
+
+    <div class="dq-section">
+      <h4>Diet</h4>
+      <div class="dx-row">
+        <label class="dx-field">Diet
+          <select [ngModel]="form.dietMasterId" (ngModelChange)="onDietChange($event)">
+            <option value="">Select a diet</option>
+            <optgroup *ngIf="suggestedDiets.length" label="Suggested for this diagnosis">
+              <option *ngFor="let d of suggestedDiets" [value]="d.id">{{ d.code }} · {{ d.name }}</option>
+            </optgroup>
+            <optgroup [label]="suggestedDiets.length ? 'All other diets' : 'All diets'">
+              <option *ngFor="let d of otherDiets" [value]="d.id">{{ d.code }} · {{ d.name }}</option>
+            </optgroup>
+          </select>
+        </label>
+        <label class="dx-field">Texture / consistency
+          <select [(ngModel)]="form.textureId">
+            <option value="">None</option>
+            <option *ngFor="let t of textures" [value]="t.id">{{ t.code }} · {{ t.name }}</option>
+          </select>
+        </label>
+      </div>
+      <div class="dx-row">
+        <label class="dx-field">Start date <input type="date" [(ngModel)]="form.startDate" /></label>
+        <label class="dx-field">End date <input type="date" [(ngModel)]="form.endDate" /></label>
+      </div>
+    </div>
+
+    <div class="dq-section">
+      <h4>NPO</h4>
+      <div class="dx-row">
+        <label class="dx-field">From <input type="datetime-local" [(ngModel)]="form.npoFrom" /></label>
+        <label class="dx-field">Until <span class="dq-hint-inline">blank = till further orders</span>
+          <input type="datetime-local" [(ngModel)]="form.npoUntil" />
+        </label>
+      </div>
+    </div>
+
+    <div class="dq-section">
+      <h4>Allergy, avoid &amp; restrictions</h4>
+      <label class="dx-field">Food allergy / avoid <span class="dq-hint-inline">as written on the sheet</span>
+        <input type="text" [(ngModel)]="form.foodAvoid" placeholder="e.g. No curd / fruits, no onion-garlic" />
+      </label>
+      <div class="dq-chips" role="group" aria-label="Allergens">
+        <span class="dq-chips-label">Allergens</span>
+        <label class="dq-chip" *ngFor="let a of allergens" [class.is-on]="form.allergensSnapshot.includes(a.name)">
+          <input type="checkbox" [checked]="form.allergensSnapshot.includes(a.name)" (change)="toggleAllergen(a.name)" /> {{ a.name }}
+        </label>
+      </div>
+      <div class="dq-chips" role="group" aria-label="Restrictions">
+        <span class="dq-chips-label">Restrictions</span>
+        <label class="dq-chip" *ngFor="let r of restrictionOptions" [class.is-on]="form.restrictionsSnapshot.includes(r)">
+          <input type="checkbox" [checked]="form.restrictionsSnapshot.includes(r)" (change)="toggleRestriction(r)" /> {{ r }}
+        </label>
+      </div>
+      <p class="dq-hint">The selected diet's own restrictions are ticked automatically.</p>
+    </div>
+
+    <div class="dq-section">
+      <h4>Service details</h4>
+      <div class="dx-row">
+        <label class="dx-field">Fluid restriction (ml/day)
+          <input type="number" min="0" step="100" [(ngModel)]="form.fluidRestrictionMl" placeholder="e.g. 1200" />
+        </label>
+        <label class="dx-check dq-check-cell"><input type="checkbox" [(ngModel)]="form.disposablePlate" /> Disposable plate</label>
+      </div>
+      <div class="dx-row" *ngIf="selectedDiet?.kind === 'FEED' || form.feedVolumeMl || form.feedNotes">
+        <label class="dx-field">Feed volume (ml) <input type="number" min="0" [(ngModel)]="form.feedVolumeMl" /></label>
+        <label class="dx-field">Every (hours) <input type="number" min="0" step="0.5" [(ngModel)]="form.feedIntervalHours" /></label>
+        <label class="dx-field">Formula / notes <input type="text" [(ngModel)]="form.feedNotes" placeholder="e.g. Celnutra 2.0" /></label>
+      </div>
+      <label class="dx-field">Remarks <span class="dq-hint-inline">printed in the sheet's Remark column</span>
+        <input type="text" [(ngModel)]="form.remarks" placeholder="e.g. One grain only" />
+      </label>
+      <label class="dx-field">Notes for kitchen <textarea rows="2" [(ngModel)]="form.notesForKitchen"></textarea></label>
+      <div class="dx-row">
+        <label class="dx-check dq-check-cell"><input type="checkbox" [(ngModel)]="form.needsCheck" /> Needs check</label>
+        <label class="dx-field" *ngIf="form.needsCheck">What to verify
+          <input type="text" [(ngModel)]="form.checkNote" placeholder="e.g. NPO? ND? — confirm with ward" />
+        </label>
+      </div>
+      <label class="dx-field" *ngIf="form.reassessmentReason || (editingPlan && editingPlan.status !== 'DRAFT')">Re-assessment reason
+        <input type="text" [(ngModel)]="form.reassessmentReason" />
+      </label>
+      <label class="dx-field" *ngIf="templates.length > 0">Note template
+        <select [(ngModel)]="form.noteTemplateId">
+          <option [ngValue]="null">None</option>
+          <option *ngFor="let t of templates" [ngValue]="t.id">{{ t.name }}</option>
+        </select>
+      </label>
+      <app-template-form-renderer *ngIf="selectedTemplate() as t" [fields]="t.fields" [values]="form.templatedValueMap"
+                                  (valuesChange)="form.templatedValueMap = $event">
+      </app-template-form-renderer>
+    </div>
+
+    <div class="dq-sign" *ngIf="editingPlan && editingPlan.status === 'DRAFT'">
+      <h4>Sign and activate</h4>
+      <p class="dx-sub">Signing locks the plan, replaces any previous or interim plan, and updates the kitchen immediately.</p>
+      <app-e-sign [signerType]="'staff'" [signerRole]="'dietician'" [signerName]="'Dietician'"
+                  [contextType]="'diet-plan'" [contextId]="editingPlan.id" [disabled]="signing" (signed)="onSigned($event)">
+      </app-e-sign>
+    </div>
+  </div>
+
+  <footer class="dq-drawer-foot">
+    <button type="button" class="dx-btn" (click)="closeEditor()">Close</button>
+    <span class="dq-spacer"></span>
+    <button type="button" class="dx-btn" *ngIf="editingPlan && editingPlan.status === 'ACTIVE'" (click)="endPlan()">End plan</button>
+    <button type="button" class="dx-btn dx-btn-primary"
+            [disabled]="saving || (editingPlan && (editingPlan.status === 'SUPERSEDED' || editingPlan.status === 'ENDED'))"
+            (click)="saveDraft()">{{ saveLabel }}</button>
+  </footer>
+</aside>

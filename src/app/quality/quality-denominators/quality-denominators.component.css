@@ -51,3 +51,6 @@
 .den-delete { background: transparent; border: none; color: #b91c1c;
   cursor: pointer; font-size: 16px; line-height: 1; padding: 0; }
 .den-delete:hover { color: #7f1d1d; }
+
+/* Read-only mode note (non-editors) */
+.q-view-only { display: inline-block; margin-left: 10px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; vertical-align: middle; background: #f3f4f6; color: #4b5563; }

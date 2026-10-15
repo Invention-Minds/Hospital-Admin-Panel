@@ -35,4 +35,12 @@
 .fks-submit:disabled { background: #6b7280; cursor: not-allowed; }
 
 .fks-foot { font-size: 11px; color: #9ca3af; text-align: center; margin: 14px 0 0; }
+.fks-info { background: #ecfdf5; color: #166534; padding: 10px 14px; border-radius: 8px; font-size: 14px; margin: 0 0 14px; font-weight: 500; }
+.fks-field input.fks-otp { font-size: 24px; letter-spacing: 10px; text-align: center; }
+.fks-otp-actions { display: flex; justify-content: space-between; margin-top: 14px; }
+.fks-link {
+  background: none; border: 0; padding: 4px 0; color: #0e2970; font-size: 13px;
+  font-family: Kanit, sans-serif; cursor: pointer; text-decoration: underline;
+}
+.fks-link:disabled { color: #9ca3af; cursor: not-allowed; text-decoration: none; }
 .fks-error { background: #fee2e2; color: #b91c1c; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin: 12px 0; }

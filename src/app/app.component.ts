@@ -110,7 +110,7 @@ export class AppComponent {
     });
   }
   isChannelRoute(): boolean {
-    return this.router.url.startsWith('/channel/');
+    return this.router.url.startsWith('/channel/') || this.router.url.startsWith('/canteen-channel/');
   }
   private isDoctorRoute(): boolean {
     return this.router.url.startsWith('/doctor-appointments');

@@ -16,10 +16,13 @@
         <span class="cp-pill cp-status-{{ c.status }}">{{ c.status }}</span>
       </div>
       <div class="cpd-meta">
-        <div><span>Raised</span> {{ c.raisedAt | date:'dd/MM/yy h:mm a' }}</div>
+        <div><span>Raised</span> {{ c.raisedAt | date:'dd/MM/yy h:mm a' }}<ng-container *ngIf="c.raisedByName"> by {{ c.raisedByName }}</ng-container></div>
         <div><span>Channel</span> {{ c.channel }}</div>
         <div><span>Source</span> {{ c.source === 'survey' ? 'Auto from low-NPS survey' : 'Manual' }}</div>
+        <div><span>Department</span> {{ c.department || '—' }}</div>
+        <div *ngIf="c.assignedTo"><span>Assigned to</span> {{ c.assignedTo }}</div>
         <div *ngIf="c.slaDueAt"><span>SLA due</span> {{ c.slaDueAt | date:'dd/MM/yy h:mm a' }}</div>
+        <div *ngIf="c.escalatedAt"><span>Escalated</span> {{ c.escalatedAt | date:'dd/MM/yy h:mm a' }}</div>
         <div *ngIf="c.resolvedAt"><span>Resolved</span> {{ c.resolvedAt | date:'dd/MM/yy h:mm a' }} by {{ c.resolvedBy }}</div>
       </div>
 
@@ -31,6 +34,11 @@
         <div *ngIf="c.patientName"><span>Name</span> {{ c.patientName }}</div>
         <div *ngIf="c.patientPrn"><span>PRN</span> {{ c.patientPrn }}</div>
       </div>
+
+      <ng-container *ngIf="c.resolutionNotes && (!isHandler || c.status === 'resolved')">
+        <h3 class="cpd-section">Resolution</h3>
+        <p class="cpd-desc">{{ c.resolutionNotes }}</p>
+      </ng-container>
     </div>
 
     <!-- Phase 6 / Option A — related incidents chip row. -->
@@ -44,22 +52,42 @@
       </div>
     </div>
 
-    <div class="cpd-card">
+    <div class="cpd-card" *ngIf="isHandler">
       <h3 class="cpd-section">Status &amp; resolution</h3>
       <label class="cpd-field">Status
         <select [(ngModel)]="draft.status">
-          <option *ngFor="let s of STATUSES" [value]="s">{{ s }}</option>
+          <option *ngFor="let s of statusOptions()" [value]="s">{{ s === 'acknowledged' && c.status === 'resolved' ? 'acknowledged (reopen)' : s }}</option>
         </select>
       </label>
-      <label class="cpd-field">Assigned to
-        <input type="text" [(ngModel)]="draft.assignedTo" placeholder="Investigator / desk owner" />
+      <label class="cpd-field">Department
+        <select [(ngModel)]="draft.department">
+          <option value="">— not specified —</option>
+          <option *ngFor="let d of departmentOptions()" [value]="d">{{ d }}</option>
+        </select>
       </label>
-      <label class="cpd-field" *ngIf="draft.status === 'resolved' || draft.status === 'escalated'">
-        Resolution notes
+      <label class="cpd-field">Assign to staff
+        <select [ngModel]="draft.assignedToId" (ngModelChange)="onAssigneeSelected($event)">
+          <option [ngValue]="null">— not in list / unassigned —</option>
+          <option *ngFor="let u of staff" [ngValue]="u.id">
+            {{ u.username }}{{ u.subAdminType ? ' · ' + u.subAdminType : (u.role === 'doctor' ? ' · Doctor' : '') }}
+          </option>
+        </select>
+      </label>
+      <label class="cpd-field">Assignee name
+        <input type="text" [(ngModel)]="draft.assignedTo" [readonly]="draft.assignedToId !== null" placeholder="Investigator / desk owner" />
+      </label>
+      <label class="cpd-field" *ngIf="draft.status === 'resolved'">
+        Resolution notes{{ needsNotes() ? ' *' : '' }}
         <textarea rows="4" [(ngModel)]="draft.resolutionNotes"></textarea>
       </label>
+      <p class="cpd-hint" *ngIf="c.status === 'resolved' && draft.status !== 'resolved'">
+        Reopening clears the resolution (notes, resolved by / at).
+      </p>
       <div class="cpd-actions">
-        <button class="cpd-btn cpd-btn-primary" (click)="save()">Save</button>
+        <button class="cpd-btn cpd-btn-primary" (click)="save()"
+                [disabled]="saving || (needsNotes() && !draft.resolutionNotes.trim())">
+          {{ saving ? 'Saving…' : 'Save' }}
+        </button>
       </div>
     </div>
   </div>

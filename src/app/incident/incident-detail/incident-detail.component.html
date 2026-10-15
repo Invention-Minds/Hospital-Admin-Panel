@@ -31,8 +31,8 @@
       <h3 class="incd-section">Description</h3>
       <p class="incd-desc">{{ inc.description }}</p>
 
-      <h3 class="incd-section" *ngIf="inc.patientName || inc.patientPrn || inc.admissionId || inc.emergencyId">Patient context</h3>
-      <div class="incd-context" *ngIf="inc.patientName || inc.patientPrn || inc.admissionId || inc.emergencyId">
+      <h3 class="incd-section" *ngIf="inc.patientName || inc.patientPrn || inc.admissionId || inc.emergencyId || inc.ward || inc.department">Patient context</h3>
+      <div class="incd-context" *ngIf="inc.patientName || inc.patientPrn || inc.admissionId || inc.emergencyId || inc.ward || inc.department">
         <div *ngIf="inc.patientName"><span>Patient</span> {{ inc.patientName }}</div>
         <div *ngIf="inc.patientPrn"><span>PRN</span> {{ inc.patientPrn }}</div>
         <div *ngIf="inc.ward"><span>Ward</span> {{ inc.ward }}</div>
@@ -43,13 +43,13 @@
       </div>
     </div>
 
-    <!-- Right: status workflow -->
-    <div class="incd-card">
+    <!-- Right: status workflow (managers edit; everyone else sees it read-only) -->
+    <div class="incd-card" *ngIf="isManager">
       <h3 class="incd-section">Status &amp; assignment</h3>
 
       <label class="incd-field">Status
         <select [(ngModel)]="draft.status">
-          <option *ngFor="let s of STATUSES" [value]="s">{{ statusLabel(s) }}</option>
+          <option *ngFor="let s of statusOptions()" [value]="s">{{ statusLabel(s) }}</option>
         </select>
       </label>
 
@@ -60,19 +60,44 @@
         </select>
       </label>
 
-      <label class="incd-field">Assigned to
-        <input type="text" [(ngModel)]="draft.assignedTo" placeholder="Investigator name" />
+      <label class="incd-field">Assign to staff
+        <select [ngModel]="draft.assignedToId" (ngModelChange)="onAssigneeSelected($event)">
+          <option [ngValue]="null">— not in list / unassigned —</option>
+          <option *ngFor="let u of staff" [ngValue]="u.id">
+            {{ u.username }}{{ u.subAdminType ? ' · ' + u.subAdminType : (u.role === 'doctor' ? ' · Doctor' : '') }}
+          </option>
+        </select>
+      </label>
+
+      <label class="incd-field">Assignee name
+        <input type="text" [(ngModel)]="draft.assignedTo" [readonly]="draft.assignedToId !== null" placeholder="Investigator name" />
       </label>
 
       <label class="incd-field" *ngIf="draft.status === 'closed' || draft.status === 'cancelled'">
         Closure notes
         <textarea rows="3" [(ngModel)]="draft.closureNotes"></textarea>
       </label>
+      <p class="incd-hint" *ngIf="draft.status === 'closed' && inc.status !== 'closed'">
+        Closing needs a saved CAPA (root cause + corrective actions) and closure notes.
+      </p>
 
       <div class="incd-actions">
-        <button class="incd-btn incd-btn-primary" (click)="saveStatus()">Save</button>
+        <button class="incd-btn incd-btn-primary" (click)="saveStatus()" [disabled]="saving">
+          {{ saving ? 'Saving…' : 'Save' }}
+        </button>
       </div>
 
+    </div>
+
+    <div class="incd-card" *ngIf="!isManager">
+      <h3 class="incd-section">Status &amp; assignment</h3>
+      <div class="incd-meta">
+        <div><span>Status</span> {{ statusLabel(inc.status) }}</div>
+        <div *ngIf="inc.severityFinal"><span>Severity (revised)</span> {{ statusLabel(inc.severityFinal) }}</div>
+        <div><span>Assigned to</span> {{ inc.assignedTo || '—' }}</div>
+        <div *ngIf="inc.closedAt"><span>Closed</span> {{ inc.closedAt | date:'dd/MM/yy h:mm a' }}<span *ngIf="inc.closedBy"> by {{ inc.closedBy }}</span></div>
+        <div *ngIf="inc.closureNotes"><span>Closure notes</span> {{ inc.closureNotes }}</div>
+      </div>
     </div>
   </div>
 
@@ -112,7 +137,8 @@
     <div class="incd-ev-empty" *ngIf="evidenceList().length === 0">No files attached yet.</div>
 
     <div class="incd-ev-uploader">
-      <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/*,application/pdf" />
+      <input type="file" #fileInput (change)="onFileSelected($event)"
+             accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt,.csv" />
       <input type="text" [(ngModel)]="evidenceLabel" placeholder="Label (optional)" class="incd-ev-label" />
       <button class="incd-btn" (click)="uploadEvidence(fileInput)" [disabled]="!pendingFile || evidenceUploading">
         {{ evidenceUploading ? 'Uploading…' : 'Upload' }}
@@ -122,8 +148,9 @@
   </div>
 
   <!-- Phase 3 — CAPA chain: root cause + corrective + preventive actions. -->
-  <div *ngIf="incident" class="incd-card incd-capa">
+  <div *ngIf="incident && (isManager || incident.capa)" class="incd-card incd-capa">
     <h3 class="incd-section">CAPA — Root cause &amp; actions</h3>
+    <fieldset class="incd-capa-fields" [disabled]="!isManager">
 
     <label class="incd-field">Immediate actions taken
       <textarea rows="2" [(ngModel)]="capaDraft.immediateActions" placeholder="What was done right away to contain the harm?"></textarea>
@@ -178,8 +205,9 @@
         <input type="date" [(ngModel)]="capaDraft.effectivenessReviewAt" />
       </label>
     </div>
+    </fieldset>
 
-    <div class="incd-actions">
+    <div class="incd-actions" *ngIf="isManager">
       <span class="incd-capa-saved" *ngIf="capaSavedAt">Saved at {{ capaSavedAt | date:'h:mm a' }}</span>
       <button class="incd-btn incd-btn-primary" (click)="saveCapa()" [disabled]="capaSaving">
         {{ capaSaving ? 'Saving…' : 'Save CAPA' }}

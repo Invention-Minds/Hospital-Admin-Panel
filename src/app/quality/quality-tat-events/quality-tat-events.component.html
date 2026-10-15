@@ -1,7 +1,7 @@
 <div class="page q-shell">
   <div class="q-head">
     <div>
-      <h2 class="q-title">TAT events</h2>
+      <h2 class="q-title">TAT events <span class="q-view-only" *ngIf="!canEdit">View only</span></h2>
       <p class="q-sub">Log start / end timestamps for waiting-time and TAT indicators. Powers PSQ-005..015 (avg minutes) and OPS-002/005/006/007/008/010 (% within target).</p>
     </div>
     <div class="q-range">
@@ -12,6 +12,7 @@
   <div class="q-banner q-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
   <div class="q-banner tat-banner-ok" *ngIf="successMessage">{{ successMessage }}</div>
 
+  <ng-container *ngIf="canEdit">
   <div class="tat-chapter-row">
     <button class="qi-chip" *ngFor="let ch of CHAPTERS"
             [class.qi-chip-on]="filterChapter === ch"
@@ -55,6 +56,7 @@
       <button class="tat-save" (click)="submit()" [disabled]="saving">{{ saving ? 'Saving…' : 'Record event' }}</button>
     </div>
   </div>
+  </ng-container>
 
   <div class="tat-card">
     <h3 class="tat-card-title">This month — events ({{ rows.length }})</h3>
@@ -76,7 +78,7 @@
           </td>
           <td>{{ r.location || '—' }}</td>
           <td>{{ r.capturedBy || '—' }}</td>
-          <td><button class="tat-delete" (click)="remove(r)">×</button></td>
+          <td><button class="tat-delete" *ngIf="canEdit" (click)="remove(r)">×</button></td>
         </tr>
       </tbody>
     </table>

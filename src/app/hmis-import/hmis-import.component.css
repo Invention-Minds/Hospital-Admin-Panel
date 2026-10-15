@@ -1,0 +1,63 @@
+/* HMIS import — builds on dietetics-shared.css (same admin family). */
+
+.hi-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 14px;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--dx-line);
+  background: #fff;
+}
+.hi-status-main { font-size: 15px; font-weight: 600; color: var(--dx-ink); }
+.hi-status-meta { font-size: 13px; color: var(--dx-muted); }
+.hi-status-due { margin-left: auto; font-size: 13px; font-weight: 600; }
+.hi-status.is-good { border-color: #b7e0c6; background: #f1faf4; }
+.hi-status.is-good .hi-status-main { color: #1d6b3a; }
+.hi-status.is-warn { border-color: #f3d58a; background: #fff8e6; }
+.hi-status.is-bad { border-color: #f2b8ad; background: #fdf0ed; }
+.hi-status.is-bad .hi-status-main, .hi-status.is-bad .hi-status-due { color: #a3321c; }
+
+.hi-drop {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 28px 16px;
+  border: 2px dashed #c4cde3;
+  border-radius: 12px;
+  background: #fafbff;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.hi-drop:hover, .hi-drop.is-over { border-color: var(--dx-navy); background: #f0f3ff; }
+.hi-drop:focus-within { outline: 2px solid var(--dx-navy); outline-offset: 2px; }
+.hi-drop input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.hi-drop-ic { width: 30px; height: 30px; fill: none; stroke: var(--dx-navy); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.hi-drop-main { font-size: 15px; font-weight: 600; color: var(--dx-ink); }
+.hi-drop-main u { color: var(--dx-navy); text-underline-offset: 3px; }
+.hi-drop-sub { font-size: 13px; color: var(--dx-muted); }
+
+.hi-files { list-style: none; margin: 12px 0 16px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.hi-files li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  border: 1px solid var(--dx-line);
+  border-radius: 8px;
+  background: #fff;
+  font-size: 13px;
+}
+.hi-file-name { font-weight: 600; color: var(--dx-ink); overflow-wrap: anywhere; }
+.hi-file-kind { flex: 1; color: var(--dx-muted); }
+
+.hi-summary { margin: 4px 0 12px; }
+.hi-new { margin-left: auto; font-size: 13px; color: var(--dx-muted); }
+.hi-action-text { font-size: 13px; color: var(--dx-muted); }
+.hi-card-sub { margin: -4px 0 12px; font-size: 13px; }
+.hi-note { min-width: 220px; font-size: 13px; color: var(--dx-muted); }

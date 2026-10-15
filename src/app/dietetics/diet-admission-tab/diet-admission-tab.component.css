@@ -1,33 +1,34 @@
-.dt-shell { padding: 24px; max-width: 1100px; margin: 24px auto 24px 96px; }
-.dt-banner { padding: 8px 12px; border-radius: 6px; margin-bottom: 10px; font-size: 13px; }
-.dt-banner-bad { background: #fee2e2; color: #b91c1c; }
+/* Bedside Diet tab — same compact system as the other Dietary pages
+   (variables come from ../dietetics-shared.css). */
+.dt-shell { padding: 8px 28px 40px; max-width: 1100px; margin: 64px auto 0 96px; }
+@media (max-width: 900px) { .dt-shell { margin: 64px 0 0; padding: 8px 14px 32px; } }
+.dt-banner { padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; font-size: 13.5px; border: 1px solid transparent; }
+.dt-banner-bad { background: var(--dx-bad-bg); color: var(--dx-bad-ink); border-color: var(--dx-bad-line); }
 
-.dt-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px; margin-bottom: 14px; }
-.dt-card h3 { font-size: 15px; margin: 0 0 8px; }
-.dt-warn-card { border-color: #fbbf24; background: #fffbeb; }
-.dt-warn-card h3 { color: #b45309; }
+.dt-card { background: #fff; border: 1px solid var(--dx-line); border-radius: 10px; padding: 16px 18px; margin-bottom: 14px; }
+.dt-card h3 { font-size: 15px; font-weight: 600; margin: 0 0 10px; color: var(--dx-navy-ink); }
+/* Holds and drug-food warnings come first and read as warnings. */
+.dt-warn-card { border-color: var(--dx-act-line); background: var(--dx-act-bg); }
+.dt-warn-card h3 { color: var(--dx-act-ink); }
 .dt-warn-card ul { list-style: none; padding: 0; margin: 0; }
-.dt-warn-card li { padding: 6px 0; border-bottom: 1px solid #fef3c7; font-size: 13px; }
-.dt-warn-card li:last-child { border-bottom: 0; }
+.dt-warn-card li { padding: 7px 0; border-top: 1px solid var(--dx-act-line); font-size: 13px; }
+.dt-warn-card li:first-child { border-top: none; }
 
-.dt-empty { color: #9ca3af; font-style: italic; padding: 8px; }
-.dt-muted { color: #9ca3af; }
+.dt-empty { color: var(--dx-muted); padding: 6px 0; font-size: 13px; }
+.dt-muted { color: var(--dx-muted); }
 
-.dt-plan-head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
-.dt-plan-code { font-weight: 600; color: #1d4ed8; }
-.dt-plan-name { font-size: 14px; }
-.dt-pill { background: #e0e7ff; color: #3730a3; font-size: 11px; padding: 2px 8px; border-radius: 10px; }
-.dt-pill-critical { background: #fecaca; color: #991b1b; }
-.dt-pill.dt-ok { background: #dcfce7; color: #166534; }
-.dt-pill.dt-info { background: #dbeafe; color: #1e40af; }
-.dt-pill.dt-warn { background: #fef3c7; color: #92400e; }
+.dt-plan-head { display: flex; align-items: baseline; flex-wrap: wrap; gap: 10px; margin-bottom: 8px; }
+.dt-plan-code { font-size: 18px; font-weight: 600; color: var(--dx-navy-ink); letter-spacing: -0.01em; }
+.dt-plan-name { font-size: 14px; color: var(--dx-ink); }
+.dt-pill { display: inline-flex; align-items: center; font-size: 11.5px; font-weight: 600; line-height: 1; padding: 4px 8px; border-radius: 999px; background: var(--dx-info-bg); color: var(--dx-info-ink); white-space: nowrap; }
+.dt-pill-critical { background: var(--dx-bad-bg); color: var(--dx-bad-ink); }
+.dt-pill.dt-ok { background: var(--dx-ok-bg); color: var(--dx-ok-ink); }
+.dt-pill.dt-info { background: var(--dx-info-bg); color: var(--dx-info-ink); }
+.dt-pill.dt-warn { background: var(--dx-act-bg); color: var(--dx-act-ink); }
 
-.dt-macros { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: #4b5563; margin: 6px 0; }
-.dt-macros span { background: #f3f4f6; padding: 2px 8px; border-radius: 10px; }
-.dt-row { font-size: 13px; margin: 4px 0; color: #374151; }
-.dt-sig { color: #6b7280; font-size: 12px; margin-top: 8px; padding-top: 6px; border-top: 1px solid #f3f4f6; }
-.dt-guidance { color: #92400e; font-size: 12px; margin-top: 2px; }
-
-.dt-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-.dt-table th, .dt-table td { padding: 7px 10px; border-bottom: 1px solid #f3f4f6; text-align: left; }
-.dt-table th { background: #f9fafb; font-weight: 600; color: #374151; }
+.dt-macros { display: flex; gap: 6px; flex-wrap: wrap; font-size: 12px; color: var(--dx-ink); margin: 4px 0 10px; font-variant-numeric: tabular-nums; }
+.dt-macros span { background: #f3f5fa; padding: 3px 9px; border-radius: 999px; }
+.dt-row { font-size: 13px; line-height: 1.5; margin: 3px 0; color: var(--dx-ink); }
+.dt-row strong { font-weight: 600; color: var(--dx-navy-ink); }
+.dt-sig { color: var(--dx-muted); font-size: 12px; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--dx-line); }
+.dt-guidance { color: var(--dx-act-ink); font-size: 12.5px; margin-top: 2px; }

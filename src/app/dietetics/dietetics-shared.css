@@ -1,0 +1,185 @@
+/* ============================================================================
+ * Dietary Services — shared compact worksheet styles.
+ *
+ * Same family as DocMinds (navy #0e2970, Kanit, page #f0f3ff, orange accent
+ * for focus) but built for dense clinical worksheets: flat panels, 36–40px
+ * rows, left-aligned columns, hairline dividers, tabular numerals, and
+ * "needs action" rows pulled forward.
+ *
+ * Tables use `.diet-grid` on purpose: the app-wide table skin in
+ * styles/forms.css (navy pill header, 56px card rows) targets an allow-list
+ * of class names and must not apply to these worksheets.
+ * ============================================================================ */
+:host {
+  --dx-navy: var(--color-brand-navy-700, #0e2970);
+  --dx-navy-ink: #13214f;
+  --dx-ink: #1d2233;
+  --dx-muted: #5a6275;          /* 6.1:1 on white */
+  --dx-faint: #8a92a3;          /* labels only, ≥ 3:1 large/bold */
+  --dx-line: #e2e7f1;
+  --dx-line-strong: #cfd7e6;
+  --dx-head: #eef2fa;
+  --dx-hover: #f6f8fd;
+  --dx-page: var(--color-surface-page, #f0f3ff);
+  --dx-accent: var(--color-brand-primary, #fb9c2a);
+
+  --dx-act-ink: #9a3a06;   --dx-act-bg: #fff4e8;   --dx-act-line: #fbd5ad;
+  --dx-bad-ink: #b42318;   --dx-bad-bg: #fef1f0;   --dx-bad-line: #f8c9c4;
+  --dx-ok-ink: #0b6b45;    --dx-ok-bg: #ebf8f1;    --dx-ok-line: #b9e6cf;
+  --dx-info-ink: #1e3a8a;  --dx-info-bg: #eef2ff;  --dx-info-line: #c9d4f7;
+  --dx-new-ink: #0b6b45;   --dx-new-bg: #e6f6ee;
+
+  display: block;
+  font-family: var(--font-family-primary, 'Kanit', sans-serif);
+  color: var(--dx-ink);
+}
+:host ::selection { background: #ffe1bd; color: var(--dx-ink); }
+
+/* ── Page frame ─────────────────────────────────────────────────────────── */
+.dx-shell { padding: 12px 36px 48px 36px; max-width: 1560px; margin: 64px auto 0 96px; }
+.dx-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px 24px; margin-bottom: 24px; flex-wrap: wrap; }
+.dx-title { font-size: 24px; line-height: 1.2; font-weight: 600; margin: 0; color: var(--color-text-heading, #271e4a); letter-spacing: -0.01em; }
+.dx-sub { color: var(--dx-muted); font-size: 13.5px; line-height: 1.5; margin: 6px 0 0; max-width: 72ch; }
+.dx-muted { color: var(--dx-muted); }
+.dx-num { font-variant-numeric: tabular-nums; }
+
+/* Summary line under a heading: "12 patients · 1 needs action · 1 NPO". */
+.dx-summary { display: flex; flex-wrap: wrap; gap: 8px 28px; font-size: 13.5px; color: var(--dx-muted); margin: 0 0 20px; }
+.dx-summary b { color: var(--dx-ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+.dx-summary .is-act b { color: var(--dx-act-ink); }
+.dx-summary .is-bad b { color: var(--dx-bad-ink); }
+
+/* ── Controls ───────────────────────────────────────────────────────────── */
+.dx-toolbar { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
+.dx-toolbar label, .dx-field { display: flex; flex-direction: column; font-size: 12px; font-weight: 500; color: var(--dx-muted); gap: 4px; }
+.dx-toolbar input, .dx-toolbar select,
+.dx-field input, .dx-field select, .dx-field textarea, .dx-input {
+  font: inherit; font-size: 13px; color: var(--dx-ink);
+  border: 1px solid var(--dx-line-strong); border-radius: 8px; padding: 8px 12px;
+  background: #fff; min-height: 38px; box-sizing: border-box;
+}
+.dx-field textarea { min-height: 64px; resize: vertical; line-height: 1.45; }
+.dx-input { width: 100%; padding: 5px 8px; min-height: 30px; font-size: 12.5px; }
+.dx-toolbar input:hover, .dx-toolbar select:hover, .dx-field input:hover, .dx-field select:hover, .dx-input:hover { border-color: #b6c1d6; }
+:host input:focus-visible, :host select:focus-visible, :host textarea:focus-visible,
+:host button:focus-visible, :host a:focus-visible {
+  outline: 2px solid var(--dx-accent); outline-offset: 2px; border-color: var(--dx-navy);
+}
+.dx-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+.dx-check { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--dx-ink); cursor: pointer; }
+:host input[type='checkbox'] { width: 16px; height: 16px; accent-color: var(--dx-navy); margin: 0; }
+
+.dx-btn {
+  font: inherit; font-size: 13px; font-weight: 500; line-height: 1;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  min-height: 38px; padding: 0 16px; border-radius: 8px; cursor: pointer;
+  border: 1px solid var(--dx-line-strong); background: #fff; color: var(--dx-navy-ink);
+  text-decoration: none; transition: background-color 120ms ease-out, border-color 120ms ease-out;
+}
+.dx-btn:hover:not([disabled]) { background: var(--dx-hover); border-color: #b6c1d6; }
+.dx-btn-primary { background: var(--dx-navy); border-color: var(--dx-navy); color: #fff; }
+.dx-btn-primary:hover:not([disabled]) { background: #0a1f57; border-color: #0a1f57; }
+.dx-btn-sm { min-height: 32px; padding: 0 12px; font-size: 12.5px; }
+.dx-btn-link { border: none; background: none; padding: 0; min-height: 0; color: var(--dx-navy); text-decoration: underline; text-underline-offset: 3px; }
+.dx-btn-link:hover:not([disabled]) { background: none; color: #0a1f57; }
+.dx-btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+.dx-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+
+/* ── Messages ───────────────────────────────────────────────────────────── */
+.dx-banner { padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; font-size: 13.5px; line-height: 1.45; border: 1px solid transparent; }
+.dx-banner-bad { background: var(--dx-bad-bg); color: var(--dx-bad-ink); border-color: var(--dx-bad-line); }
+.dx-banner-good { background: var(--dx-ok-bg); color: var(--dx-ok-ink); border-color: var(--dx-ok-line); }
+.dx-banner-warn { background: var(--dx-act-bg); color: var(--dx-act-ink); border-color: var(--dx-act-line); }
+.dx-empty { color: var(--dx-muted); text-align: center; padding: 28px 16px; font-size: 13px; }
+
+/* ── Panels (flat, not floating cards) ─────────────────────────────────── */
+/* min-width + overflow keep a wide table inside its panel instead of spilling out. */
+.dx-card { background: #fff; border: 1px solid var(--dx-line); border-radius: 12px; padding: 22px 24px; margin-bottom: 20px; min-width: 0; overflow-x: auto; }
+.dx-card h3 { margin: 0 0 14px; font-size: 16px; font-weight: 600; color: var(--dx-navy-ink); }
+.dx-card h4 { margin: 18px 0 8px; font-size: 13px; font-weight: 600; color: var(--dx-navy-ink); }
+.dx-card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+.dx-card-head h3 { margin: 0; }
+
+/* ── Worksheet grid ─────────────────────────────────────────────────────── */
+.dx-scroll { overflow: auto; max-height: 70vh; border: 1px solid var(--dx-line); border-radius: 10px; background: #fff; }
+.dx-scroll > .diet-grid { border: none; border-radius: 0; }
+.diet-grid { width: 100%; border-collapse: collapse; font-size: 13.5px; background: #fff; border: 1px solid var(--dx-line); border-radius: 10px; font-variant-numeric: tabular-nums; }
+.diet-grid th {
+  position: sticky; top: 0; z-index: 1;
+  background: var(--dx-head); color: var(--dx-navy-ink);
+  font-size: 12px; font-weight: 600; text-align: left; white-space: nowrap;
+  padding: 12px 16px; border-bottom: 1px solid var(--dx-line-strong);
+}
+.diet-grid td { padding: 14px 16px; border-bottom: 1px solid var(--dx-line); vertical-align: top; line-height: 1.45; }
+.diet-grid tbody tr:last-child td { border-bottom: none; }
+.diet-grid tbody tr:hover td { background: var(--dx-hover); }
+.diet-grid tr.is-click { cursor: pointer; }
+.diet-grid tr.is-selected td { background: var(--dx-info-bg); }
+.diet-grid tr.is-act td { background: #fffaf3; }
+.diet-grid tr.is-act:hover td { background: #fff4e8; }
+.diet-grid tr.is-new td { background: #f1fbf6; }
+.diet-grid tr.is-muted td { color: var(--dx-muted); }
+.diet-grid td.is-strong, .diet-grid .dx-strong { font-weight: 600; color: var(--dx-ink); }
+.diet-grid .dx-tight { white-space: nowrap; }
+.diet-grid .dx-right { text-align: right; }
+/* A group heading row inside a grid ("Needs action (1)", "No change (11)"). */
+.diet-grid tr.dx-group td { background: #f8f9fc; color: var(--dx-navy-ink); font-size: 12.5px; font-weight: 600; padding: 10px 16px; border-bottom: 1px solid var(--dx-line-strong); }
+.diet-grid tr.dx-group:hover td { background: #f8f9fc; }
+.dx-sub-line { display: block; font-size: 12px; color: var(--dx-muted); margin-top: 3px; font-weight: 400; }
+
+/* ── Status tags ────────────────────────────────────────────────────────── */
+.dx-pill { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 600; line-height: 1; padding: 4px 8px; border-radius: 999px; background: #eef0f4; color: #3c4456; white-space: nowrap; vertical-align: 1px; }
+.dx-pill-ok { background: var(--dx-ok-bg); color: var(--dx-ok-ink); }
+.dx-pill-info { background: var(--dx-info-bg); color: var(--dx-info-ink); }
+.dx-pill-warn { background: var(--dx-act-bg); color: var(--dx-act-ink); }
+.dx-pill-bad { background: var(--dx-bad-bg); color: var(--dx-bad-ink); }
+.dx-pill-new { background: var(--dx-new-bg); color: var(--dx-new-ink); }
+/* Inline action / info notes under a patient. */
+.dx-note { display: block; font-size: 12px; line-height: 1.35; margin-top: 3px; }
+.dx-note-act { color: var(--dx-act-ink); font-weight: 500; }
+.dx-note-bad { color: var(--dx-bad-ink); font-weight: 600; }
+.dx-note-info { color: var(--dx-muted); }
+.dx-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; background: currentColor; }
+
+/* Closed-loop step trail: Sent → Received → Acknowledged. */
+.dx-steps { display: flex; flex-wrap: wrap; gap: 4px 0; font-size: 12.5px; color: var(--dx-muted); margin: 0 0 12px; padding: 0; list-style: none; }
+.dx-steps li { display: inline-flex; align-items: center; }
+.dx-steps li + li::before { content: ''; width: 18px; height: 1px; background: var(--dx-line-strong); margin: 0 8px; }
+.dx-steps li.is-done { color: var(--dx-ink); }
+.dx-steps li.is-done .dx-dot { color: var(--dx-ok-ink); }
+.dx-steps li.is-todo .dx-dot { color: var(--dx-line-strong); }
+
+/* ── Tabs ───────────────────────────────────────────────────────────────── */
+.dx-tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--dx-line); margin-bottom: 20px; flex-wrap: wrap; }
+.dx-tabs button { font: inherit; background: none; border: none; padding: 12px 16px; cursor: pointer; font-size: 14px; color: var(--dx-muted); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.dx-tabs button:hover { color: var(--dx-ink); }
+.dx-tabs button.active { color: var(--dx-navy-ink); border-bottom-color: var(--dx-navy); font-weight: 600; }
+.dx-tabs .dx-count { font-variant-numeric: tabular-nums; color: var(--dx-faint); margin-left: 4px; font-weight: 500; }
+
+/* ── Dialogs ────────────────────────────────────────────────────────────── */
+.dx-modal-bg { position: fixed; inset: 0; background: rgba(15, 23, 51, 0.42); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 16px; }
+.dx-modal { background: #fff; border-radius: 12px; padding: 20px 22px; width: 560px; max-width: 100%; max-height: 92vh; overflow: auto; box-shadow: 0 18px 48px rgba(15, 23, 51, 0.22); }
+.dx-modal h3 { margin: 0 0 4px; font-size: 16px; font-weight: 600; color: var(--dx-navy-ink); }
+.dx-modal .dx-sub { margin-bottom: 14px; }
+.dx-modal .dx-field { margin-bottom: 10px; }
+.dx-modal .dx-actions { justify-content: flex-end; margin-top: 14px; }
+
+/* Sticky action bar at the bottom of a panel (acknowledge, send). */
+.dx-actionbar { position: sticky; bottom: 0; display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; justify-content: flex-end; background: #fff; border-top: 1px solid var(--dx-line); padding: 12px 0 0; margin-top: 12px; }
+.dx-actionbar .dx-spacer { flex: 1; }
+
+/* Scrollbars inside worksheets. */
+.dx-scroll { scrollbar-width: thin; scrollbar-color: var(--dx-line-strong) transparent; }
+.dx-scroll::-webkit-scrollbar { width: 10px; height: 10px; }
+.dx-scroll::-webkit-scrollbar-thumb { background: var(--dx-line-strong); border-radius: 10px; border: 2px solid #fff; }
+
+@media (max-width: 900px) {
+  .dx-shell { margin: 64px 0 0 0; padding: 8px 14px 32px; }
+}
+
+@media print {
+  .dx-noprint { display: none !important; }
+  .dx-shell { margin: 0; padding: 0; max-width: none; }
+  .dx-scroll { max-height: none; overflow: visible; border: none; }
+  .diet-grid th { position: static; }
+}

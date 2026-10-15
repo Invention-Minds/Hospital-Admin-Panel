@@ -1,0 +1,51 @@
+<div class="dx-shell">
+  <div class="dx-head dx-noprint">
+    <div>
+      <h2 class="dx-title">Diet labels</h2>
+      <p class="dx-sub">One label per tray for the selected meal. Skipped / NPO trays are not printed. Size is set in Setup → Sheet &amp; labels.</p>
+    </div>
+    <div class="dx-toolbar">
+      <label>Date <input type="date" [(ngModel)]="date" (change)="load()" /></label>
+      <label>Meal
+        <select [(ngModel)]="slotId" (change)="load()">
+          <option *ngFor="let s of slots" [value]="s.id">{{ s.name }} ({{ s.startTime }})</option>
+        </select>
+      </label>
+      <label>Ward
+        <select [(ngModel)]="wardId" (change)="load()">
+          <option value="">All wards</option>
+          <option *ngFor="let w of wards" [value]="w.id">{{ w.wardName }}</option>
+        </select>
+      </label>
+      <button type="button" class="dx-btn" (click)="load()">Refresh</button>
+      <button type="button" class="dx-btn dx-btn-primary" (click)="print()" [disabled]="!sheet?.labels?.length">Print {{ sheet?.labels?.length || 0 }} labels</button>
+    </div>
+  </div>
+
+  <div class="dx-banner dx-banner-bad dx-noprint" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="dx-empty dx-noprint" *ngIf="loading">Loading…</div>
+  <div class="dx-empty dx-noprint" *ngIf="!loading && sheet && sheet.labels.length === 0">
+    No trays for {{ sheet.slot?.name }} on {{ sheet.date | date:'dd-MM-yyyy' }}. Issue the diet sheet or regenerate orders first.
+  </div>
+
+  <div class="dl-grid" *ngIf="sheet?.labels?.length" [ngStyle]="gridStyle">
+    <div class="dl-label" *ngFor="let l of sheet!.labels" [class.dl-extra]="l.kind === 'EXTRA'">
+      <div class="dl-top">
+        <span class="dl-bed">{{ l.bedNumber || '—' }}</span>
+        <span class="dl-code">{{ l.dietCode }}</span>
+      </div>
+      <div class="dl-name">{{ l.patientName || l.admissionNo }}</div>
+      <div class="dl-prn">PRN {{ l.prn }} · {{ sheet!.slot?.name }} {{ sheet!.date | date:'dd/MM' }}</div>
+      <div class="dl-avoid" *ngIf="l.avoid">⚠ {{ l.avoid }}</div>
+      <div class="dl-item" *ngIf="l.item">{{ l.item }}</div>
+      <div class="dl-foot">
+        <span *ngIf="l.disposable" class="dl-tag">DISPOSABLE</span>
+        <span *ngIf="l.fluidRestrictionMl" class="dl-tag">F/R {{ l.fluidRestrictionMl }} ml</span>
+        <span *ngFor="let f of l.flags" class="dl-tag">{{ f }}</span>
+      </div>
+      <div class="dl-qr" *ngIf="sheet!.layout.showQr">
+        <qrcode [qrdata]="l.qr" [width]="64" [margin]="0" [errorCorrectionLevel]="'M'"></qrcode>
+      </div>
+    </div>
+  </div>
+</div>

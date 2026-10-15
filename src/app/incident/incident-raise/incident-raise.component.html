@@ -42,15 +42,33 @@
       </label>
     </div>
 
-    <div class="ir-context" *ngIf="patientPrn || patientName || ward || department || admissionId || emergencyId">
+    <div class="ir-grid">
+      <label class="ir-field">Patient PRN
+        <input type="text" [(ngModel)]="ctx.patientPrn" placeholder="If a patient was involved" />
+      </label>
+      <label class="ir-field">Patient name
+        <input type="text" [(ngModel)]="ctx.patientName" />
+      </label>
+    </div>
+
+    <div class="ir-grid">
+      <label class="ir-field">Department
+        <select [(ngModel)]="ctx.department">
+          <option value="">— none —</option>
+          <option *ngFor="let d of departments" [value]="d">{{ d }}</option>
+        </select>
+      </label>
+      <label class="ir-field">Ward
+        <input type="text" [(ngModel)]="ctx.ward" placeholder="e.g. Ward 3B" />
+      </label>
+    </div>
+
+    <div class="ir-context" *ngIf="admissionId || emergencyId || appointmentId">
       <span class="ir-ctx-label">Linked context</span>
       <div class="ir-ctx-row">
-        <span *ngIf="patientName">{{ patientName }}</span>
-        <span *ngIf="patientPrn"> · PRN {{ patientPrn }}</span>
-        <span *ngIf="ward"> · {{ ward }}</span>
-        <span *ngIf="department"> · {{ department }}</span>
-        <span *ngIf="admissionId"> · admission</span>
+        <span *ngIf="admissionId">Admission</span>
         <span *ngIf="emergencyId"> · ER #{{ emergencyId }}</span>
+        <span *ngIf="appointmentId"> · OPD appointment</span>
       </div>
     </div>
 

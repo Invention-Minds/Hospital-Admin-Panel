@@ -69,4 +69,14 @@
 .cp-field input, .cp-field select, .cp-field textarea {
   border: 1px solid #d1d5db; border-radius: 6px; padding: 8px 12px; font-size: 14px; box-sizing: border-box; width: 100%; font-family: Kanit, sans-serif;
 }
+.cp-filters input[type="date"] { height: 34px; padding: 4px 10px; border: 1px solid #d1d5db; border-radius: 6px; }
+.cp-bulk-notes { height: 30px; padding: 4px 10px; border: 1px solid #d1d5db; border-radius: 6px; min-width: 240px; }
+.cp-pager { display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin-top: 12px; font-size: 13px; color: #4b5563; }
+.cp-pager .cp-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.cp-encounter { font-size: 12px; color: #4b5563; margin: -4px 0 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+.cp-dupes { background: #fffbeb; border: 1px solid #fcd34d; border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; font-size: 13px; }
+.cp-dupes-title { margin: 0 0 6px; color: #92400e; font-weight: 600; }
+.cp-dupes ul { margin: 0; padding-left: 18px; }
+.cp-dupes li { margin: 3px 0; }
+.cp-dupes a { color: #0e2970; font-weight: 600; }
 .cp-modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; padding-top: 14px; border-top: 1px solid #f3f4f6; }

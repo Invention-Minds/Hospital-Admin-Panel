@@ -1,0 +1,261 @@
+<div class="dx-shell">
+  <div class="dx-head">
+    <div>
+      <h2 class="dx-title">Clinical nutrition — screening &amp; notes</h2>
+      <p class="dx-sub" *ngIf="record as r">
+        <b>{{ r.patient.patientName || r.patient.admissionNo }}</b> · PRN {{ r.patient.prn }} · {{ r.patient.age }}{{ r.patient.sex ? '/' + r.patient.sex : '' }}
+        · {{ r.patient.wardName }} {{ r.patient.bedNumber }} · {{ r.patient.consultant }}
+        · Admitted {{ r.patient.admissionDate | date:'dd-MM-yyyy' }}
+      </p>
+      <p class="dx-sub" *ngIf="record">Diagnosis: {{ record.patient.diagnosis }} · Diet: {{ record.dietOnAdmission || 'none yet' }}</p>
+    </div>
+    <div class="dx-toolbar">
+      <a class="dx-btn" routerLink="/dietetics/rounds">Rounds list</a>
+      <a class="dx-btn" routerLink="/dietetics/queue">Diet plan</a>
+    </div>
+  </div>
+
+  <div class="dx-banner dx-banner-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="dx-banner dx-banner-good" *ngIf="successMessage">{{ successMessage }}</div>
+  <div class="dx-empty" *ngIf="loading">Loading…</div>
+
+  <div class="na-grid" *ngIf="record && !loading">
+    <!-- ─── New screening ─── -->
+    <div class="dx-card">
+      <div class="na-formhead">
+        <h3>New screening</h3>
+        <select [(ngModel)]="formType">
+          <option *ngFor="let f of formTypes" [ngValue]="f">{{ formLabel[f] }}{{ f === record.suggestedForm ? ' — suggested' : '' }}</option>
+        </select>
+      </div>
+      <p class="dx-sub" *ngIf="record.patient.ia?.nutritionNote">Doctor's initial assessment — nutrition: {{ record.patient.ia?.nutritionNote }}</p>
+
+      <!-- Anthropometry (all forms) -->
+      <h4>Anthropometric measurement</h4>
+      <div class="dx-row">
+        <label class="dx-field">{{ formType === 'STAMP' ? 'Height / length (cm)' : 'Height (cm)' }} <input type="number" [(ngModel)]="common.heightCm" /></label>
+        <label class="dx-field">{{ formType === 'MATERNAL' ? 'Current weight (kg)' : 'Weight (kg)' }} <input type="number" [(ngModel)]="common.weightKg" /></label>
+        <label class="dx-field">BMI (kg/m²) <input type="text" [value]="bmi ?? ''" disabled /></label>
+        <label class="dx-field">IBW (kg) <input type="number" [(ngModel)]="common.ibwKg" /></label>
+        <label class="dx-field" *ngIf="formType === 'STAMP'">Head circumference (cm) <input type="number" [(ngModel)]="stamp.headCircumferenceCm" /></label>
+      </div>
+
+      <!-- ── NRS-2002 ── -->
+      <ng-container *ngIf="formType === 'NRS2002'">
+        <label class="dx-field">Diet advised (on admission) <input type="text" [(ngModel)]="nrs.dietAdvisedOnAdmission" /></label>
+        <h4>Medical history</h4>
+        <label class="dx-field">Present complaints <textarea rows="2" [(ngModel)]="nrs.presentComplaints"></textarea></label>
+        <label class="dx-field">Past medical history <textarea rows="2" [(ngModel)]="nrs.pastHistory"></textarea></label>
+        <h4>Nutrition history</h4>
+        <div class="dx-row">
+          <label class="dx-field">Food allergy <input type="text" [(ngModel)]="nrs.foodAllergy" /></label>
+          <label class="dx-field">Food preference <input type="text" [(ngModel)]="nrs.foodPreference" /></label>
+        </div>
+        <h4>Table 1 — initial screening</h4>
+        <table class="diet-grid na-yn">
+          <tr><td>Is BMI &lt; 20.5?</td><td><label class="dx-check"><input type="checkbox" [(ngModel)]="nrs.initial.bmiBelow205" /> Yes</label></td></tr>
+          <tr><td>Has the patient lost weight within the last 3 months?</td><td><label class="dx-check"><input type="checkbox" [(ngModel)]="nrs.initial.weightLoss3m" /> Yes</label></td></tr>
+          <tr><td>Has the patient had a reduced dietary intake in the last week?</td><td><label class="dx-check"><input type="checkbox" [(ngModel)]="nrs.initial.reducedIntake" /> Yes</label></td></tr>
+          <tr><td>Is the patient severely ill (e.g. in intensive therapy)?</td><td><label class="dx-check"><input type="checkbox" [(ngModel)]="nrs.initial.severelyIll" /> Yes</label></td></tr>
+        </table>
+        <ng-container *ngIf="nrs.initial.bmiBelow205 || nrs.initial.weightLoss3m || nrs.initial.reducedIntake || nrs.initial.severelyIll">
+          <h4>Table 2 — final screening</h4>
+          <div class="dx-row">
+            <label class="dx-field">Impaired nutritional status
+              <select [(ngModel)]="nrs.nutritionScore">
+                <option [ngValue]="null">—</option>
+                <option [ngValue]="0">0 Absent — normal requirements</option>
+                <option [ngValue]="1">1 Mild — wt loss &gt; 5% in 3 months or intake 50–75% last week</option>
+                <option [ngValue]="2">2 Moderate — wt loss &gt; 5% in 2 months, BMI 18.5–20.5 + impaired condition, or intake 20–60%</option>
+                <option [ngValue]="3">3 Severe — wt loss &gt; 5% in 1 month, BMI &lt; 18.5 + impaired condition, or intake 0–25%</option>
+              </select>
+            </label>
+            <label class="dx-field">Severity of disease
+              <select [(ngModel)]="nrs.severityScore">
+                <option [ngValue]="null">—</option>
+                <option [ngValue]="0">0 Absent — normal requirements</option>
+                <option [ngValue]="1">1 Mild — hip fracture, chronic with complications, COPD, haemodialysis, diabetes, oncology</option>
+                <option [ngValue]="2">2 Moderate — major abdominal surgery, stroke, severe pneumonia, haematologic malignancy</option>
+                <option [ngValue]="3">3 Severe — head injury, bone marrow transplant, ICU (APACHE &gt; 10)</option>
+              </select>
+            </label>
+          </div>
+        </ng-container>
+        <label class="dx-field">Nutrient &amp; drug interaction <textarea rows="2" [(ngModel)]="nrs.drugNutrientInteraction"></textarea></label>
+      </ng-container>
+
+      <!-- ── STAMP ── -->
+      <ng-container *ngIf="formType === 'STAMP'">
+        <label class="dx-field">Diet prescription (on admission) <input type="text" [(ngModel)]="stamp.dietPrescription" /></label>
+        <h4>Physical symptoms</h4>
+        <div class="na-checks">
+          <label class="dx-check" *ngFor="let s of stampSymptoms"><input type="checkbox" [checked]="stamp.symptoms.includes(s)" (change)="toggle(stamp.symptoms, s)" /> {{ s }}</label>
+        </div>
+        <div class="dx-row">
+          <label class="dx-field">Food &amp; nutrient intake
+            <select [(ngModel)]="stamp.intakeRoute"><option>Oral</option><option>Enteral</option><option>Parenteral</option></select>
+          </label>
+          <label class="dx-field">Diet pattern <input type="text" [(ngModel)]="stamp.dietPattern" placeholder="Veg / Non-veg / Mixed" /></label>
+        </div>
+        <div class="dx-row">
+          <label class="dx-field">Food allergies <input type="text" [(ngModel)]="stamp.foodAllergies" /></label>
+          <label class="dx-field">Vitamin / mineral / supplement use <input type="text" [(ngModel)]="stamp.supplements" /></label>
+        </div>
+        <h4>Nutritional indicator</h4>
+        <div class="na-checks">
+          <label class="dx-check" *ngFor="let s of stampIndicators"><input type="checkbox" [checked]="stamp.indicators.includes(s)" (change)="toggle(stamp.indicators, s)" /> {{ s }}</label>
+        </div>
+        <h4>STAMP score</h4>
+        <div class="dx-row">
+          <label class="dx-field">1. Diagnosis with nutritional implication
+            <select [(ngModel)]="stamp.diagnosisScore">
+              <option [ngValue]="null">—</option><option [ngValue]="3">Definite (3)</option><option [ngValue]="2">Possible (2)</option><option [ngValue]="0">None (0)</option>
+            </select>
+          </label>
+          <label class="dx-field">2. Nutritional intake
+            <select [(ngModel)]="stamp.intakeScore">
+              <option [ngValue]="null">—</option><option [ngValue]="3">No intake (3)</option><option [ngValue]="2">Recently reduced / poor (2)</option><option [ngValue]="0">No change / good (0)</option>
+            </select>
+          </label>
+          <label class="dx-field">3. Weight &amp; height (centiles)
+            <select [(ngModel)]="stamp.anthroScore">
+              <option [ngValue]="null">—</option><option [ngValue]="3">&gt; 3 centile spaces apart or weight &lt; 2nd centile (3)</option><option [ngValue]="1">&gt; 2 centile spaces apart (1)</option><option [ngValue]="0">0–1 centile spaces apart (0)</option>
+            </select>
+          </label>
+        </div>
+        <label class="dx-field">Abnormal BCP <input type="text" [(ngModel)]="stamp.abnormalBcp" /></label>
+      </ng-container>
+
+      <!-- ── Maternal ── -->
+      <ng-container *ngIf="formType === 'MATERNAL'">
+        <div class="dx-row">
+          <label class="dx-field">Gravida <input type="text" [(ngModel)]="maternal.gravida" /></label>
+          <label class="dx-field">Para <input type="text" [(ngModel)]="maternal.para" /></label>
+          <label class="dx-field">Gestational age (weeks) <input type="number" [(ngModel)]="maternal.gestationalWeeks" /></label>
+        </div>
+        <h4>Nutritional history</h4>
+        <label class="dx-field">Diet prescription (on admission) <input type="text" [(ngModel)]="maternal.dietPrescription" /></label>
+        <div class="dx-row">
+          <label class="dx-field">Appetite <select [(ngModel)]="maternal.appetite"><option value="">—</option><option>Poor</option><option>Moderate</option><option>Good</option></select></label>
+          <label class="dx-field">Reason &amp; duration <input type="text" [(ngModel)]="maternal.appetiteReason" /></label>
+        </div>
+        <div class="dx-row">
+          <label class="dx-field">Food allergy <input type="text" [(ngModel)]="maternal.foodAllergy" /></label>
+          <label class="dx-field">Diet pattern <input type="text" [(ngModel)]="maternal.dietPattern" placeholder="Veg / Non-veg / Mixed" /></label>
+          <label class="dx-field">Nutritional supplement <input type="text" [(ngModel)]="maternal.supplements" /></label>
+        </div>
+        <h4>Medical &amp; obstetric history</h4>
+        <label class="dx-field">Past history <input type="text" [(ngModel)]="maternal.pastHistory" /></label>
+        <label class="dx-field">Current medications / supplements (IFA / Calcium / Vit D) <input type="text" [(ngModel)]="maternal.medications" /></label>
+        <h4>Biochemical parameters</h4>
+        <div class="dx-row">
+          <label class="dx-field">Hb <input type="text" [(ngModel)]="maternal.biochem.hb" /></label>
+          <label class="dx-field">RBS / FBS <input type="text" [(ngModel)]="maternal.biochem.rbsFbs" /></label>
+          <label class="dx-field">HbA1c <input type="text" [(ngModel)]="maternal.biochem.hba1c" /></label>
+          <label class="dx-field">Ferritin <input type="text" [(ngModel)]="maternal.biochem.ferritin" /></label>
+          <label class="dx-field">B12 <input type="text" [(ngModel)]="maternal.biochem.b12" /></label>
+          <label class="dx-field">Vit D <input type="text" [(ngModel)]="maternal.biochem.vitD" /></label>
+          <label class="dx-field">Others <input type="text" [(ngModel)]="maternal.biochem.others" /></label>
+        </div>
+        <h4>Clinical assessment</h4>
+        <div class="na-checks">
+          <label class="dx-check" *ngFor="let c of maternalClinical"><input type="checkbox" [checked]="maternal.clinical.includes(c)" (change)="toggle(maternal.clinical, c)" /> {{ c }}</label>
+          <label class="dx-field">Hydration <select [(ngModel)]="maternal.hydration"><option>Adequate</option><option>Inadequate</option></select></label>
+        </div>
+        <h4>Anthropometry &amp; gestational weight gain</h4>
+        <div class="dx-row">
+          <label class="dx-field">Pre-pregnancy weight (kg) <input type="number" [(ngModel)]="maternal.prePregnancyWeightKg" /></label>
+          <label class="dx-field">Pre-pregnancy BMI <input type="text" [value]="prePregBmi !== null ? prePregBmi + ' · ' + prePregBmiCategory : ''" disabled /></label>
+          <label class="dx-field">GWG
+            <select [(ngModel)]="maternal.gwgStatus"><option value="">—</option><option>Adequate</option><option>Inadequate</option><option>Excessive</option></select>
+          </label>
+          <label class="dx-field">Weight gain (kg) <input type="number" [(ngModel)]="maternal.weightGainKg" /></label>
+        </div>
+        <h4>Nutrition risk screening (tick if present)</h4>
+        <div class="na-risks">
+          <label class="dx-check" *ngFor="let r of maternalRisks">
+            <input type="checkbox" [checked]="maternal.riskFactors.includes(r.key)" (change)="toggle(maternal.riskFactors, r.key)" /> {{ r.label }}
+          </label>
+        </div>
+        <label class="dx-check"><input type="checkbox" [(ngModel)]="maternal.severeCondition" /> Severe condition present (forces High risk)</label>
+        <label class="dx-field">Diet counselling <textarea rows="2" [(ngModel)]="maternal.counselling"></textarea></label>
+      </ng-container>
+
+      <!-- ── Re-assessment ── -->
+      <ng-container *ngIf="formType === 'REASSESSMENT'">
+        <p class="dx-sub">For long-stay patients (&gt; 1 week) and patients whose diet changes with their clinical condition.</p>
+        <label class="dx-field">Changes in BCP <input type="text" [(ngModel)]="reassess.changesInBcp" /></label>
+        <label class="dx-field">Change in intake <input type="text" [(ngModel)]="reassess.changeInIntake" /></label>
+        <label class="dx-field">Change in diagnosis <input type="text" [(ngModel)]="reassess.changeInDiagnosis" /></label>
+        <label class="dx-field">Wt gain / wt loss / maintaining wt <input type="text" [(ngModel)]="reassess.weightTrend" /></label>
+        <label class="dx-field">Diet advised <textarea rows="3" [(ngModel)]="reassess.dietAdvised"></textarea></label>
+      </ng-container>
+
+      <!-- Requirements + intervention (all forms) -->
+      <h4>Nutrient requirement</h4>
+      <div class="dx-row">
+        <label class="dx-field">Energy (kcal/day) <input type="number" [(ngModel)]="common.energyKcal" /></label>
+        <label class="dx-field">Protein (g/day) <input type="number" [(ngModel)]="common.proteinG" /></label>
+        <label class="dx-field">Fluid (ml/day) <input type="number" [(ngModel)]="common.fluidMl" /></label>
+        <label class="dx-field">Other nutrient <input type="text" [(ngModel)]="common.otherNutrients" /></label>
+      </div>
+      <label class="dx-field">Nutrition intervention / care plan <textarea rows="2" [(ngModel)]="common.intervention"></textarea></label>
+
+      <div class="na-score" *ngIf="formType !== 'REASSESSMENT'">
+        Score: <b>{{ preview.score ?? '—' }}</b> · Risk: <b>{{ preview.level }}</b> <span class="dx-muted">— {{ preview.note }}</span>
+      </div>
+
+      <div style="margin-top: 10px">
+        <button type="button" class="dx-btn dx-btn-primary" *ngIf="!signingAssessment" (click)="signingAssessment = true">Sign &amp; save {{ formLabel[formType] }}</button>
+        <app-e-sign *ngIf="signingAssessment" [signerType]="'staff'" [signerRole]="'dietician'" [signerName]="username || 'Dietitian'"
+                    [contextType]="'nutrition-assessment'" [contextId]="admissionId"
+                    (signed)="onAssessmentSigned($event)" (cancelled)="signingAssessment = false">
+        </app-e-sign>
+      </div>
+    </div>
+
+    <!-- ─── Right: history, notes, diet changes ─── -->
+    <div>
+      <div class="dx-card">
+        <h3>Screening history</h3>
+        <table class="diet-grid">
+          <thead><tr><th>Date</th><th>Form</th><th>Wt / BMI</th><th>Score</th><th>Next due</th><th>By</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let a of record.assessments">
+              <td>{{ a.assessedAt | date:'dd-MM HH:mm' }}</td>
+              <td>{{ formLabel[a.formType] }}</td>
+              <td>{{ a.weightKg ?? '—' }} kg / {{ a.bmi ?? '—' }}</td>
+              <td><span class="dx-pill" [class.dx-pill-bad]="a.atRisk">{{ a.riskLevel ?? '—' }}{{ a.riskScore !== null ? ' (' + a.riskScore + ')' : '' }}</span></td>
+              <td>{{ a.nextScreeningDue | date:'dd-MM' }}</td>
+              <td>{{ a.assessedBy }}</td>
+            </tr>
+            <tr *ngIf="record.assessments.length===0"><td colspan="6" class="dx-empty">Not screened yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="dx-card">
+        <h3>Dietitian notes</h3>
+        <label class="dx-field"><textarea rows="3" [(ngModel)]="noteText" placeholder="Progress note…"></textarea></label>
+        <button type="button" class="dx-btn" *ngIf="!signingNote" (click)="signingNote = true" [disabled]="!noteText.trim()">Sign &amp; add note</button>
+        <app-e-sign *ngIf="signingNote" [signerType]="'staff'" [signerRole]="'dietician'" [signerName]="username || 'Dietitian'"
+                    [contextType]="'dietitian-note'" [contextId]="admissionId"
+                    (signed)="onNoteSigned($event)" (cancelled)="signingNote = false">
+        </app-e-sign>
+        <div class="na-note" *ngFor="let n of record.notes">
+          <div class="na-note-meta">{{ n.writtenAt | date:'dd-MM-yyyy HH:mm' }} · {{ n.writtenBy }}</div>
+          <div class="na-note-text">{{ n.note }}</div>
+        </div>
+      </div>
+
+      <div class="dx-card">
+        <h3>Diet change history</h3>
+        <div class="na-note" *ngFor="let h of history">
+          <div class="na-note-meta">{{ h.at | date:'dd-MM-yyyy HH:mm' }}{{ h.by ? ' · ' + h.by : '' }}</div>
+          <div class="na-note-text">{{ h.what }}</div>
+        </div>
+        <div class="dx-empty" *ngIf="history.length===0">No diet changes recorded.</div>
+      </div>
+    </div>
+  </div>
+</div>

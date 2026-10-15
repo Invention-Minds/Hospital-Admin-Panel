@@ -5,14 +5,16 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { QRCodeModule } from 'angularx-qrcode';
 
-import { FeedbackService, FeedbackSurvey, SurveyStats } from '../../services/feedback.service';
+import { FeedbackService, FeedbackSurvey, SurveyStats, SurveyTemplate } from '../../services/feedback.service';
+import { isComplaintHandler, isFeedbackCollector, isFeedbackViewer } from '../../quality/quality-access';
 
 /**
  * Phase 9.25 / Phase 4 — Feedback inbox (staff view).
  * Route: /feedback
- * Lists all survey rows with NPS + status. The kiosk URL for any pending row
- * is shown so staff can copy/share it manually until SMS/WhatsApp delivery is
- * wired into the cron.
+ *   - complaint handlers: survey list (kiosk links/QR on pending rows) + sweeps
+ *   - feedback viewers (incl. senior management): aggregate NPS only
+ *   - collectors (incl. Front Desk): create a survey and hand out its QR
+ * The API enforces all of this; a 403 just hides the section.
  */
 @Component({
   selector: 'app-feedback-inbox',
@@ -27,7 +29,16 @@ export class FeedbackInboxComponent implements OnInit, OnDestroy {
   loading = false;
   errorMessage = '';
 
+  canList = isComplaintHandler();
+  canStats = isFeedbackViewer();
+  canCreate = isFeedbackCollector();
+
   filters = { status: '', template: '' };
+  npsRange = { from: '', to: '' };
+
+  createForm = { template: 'general' as SurveyTemplate, patientPrn: '', patientName: '', expiresInDays: 14 };
+  createOpen = false;
+  creating = false;
 
   // Phase 6 — QR overlay state. When a row is selected the kiosk URL renders
   // as a scannable code so the patient can lift it off a printed page.
@@ -36,7 +47,7 @@ export class FeedbackInboxComponent implements OnInit, OnDestroy {
   walkUpPosterOpen = false;
 
   readonly STATUSES = ['pending', 'sent', 'completed', 'expired'];
-  readonly TEMPLATES = ['opd-post-visit', 'ipd-discharge', 'er-discharge', 'day-care', 'general'];
+  readonly TEMPLATES: SurveyTemplate[] = ['opd-post-visit', 'ipd-discharge', 'er-discharge', 'day-care', 'general'];
 
   private destroy$ = new Subject<void>();
   constructor(private svc: FeedbackService) {}
@@ -45,14 +56,58 @@ export class FeedbackInboxComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void { this.destroy$.next(); this.destroy$.complete(); }
 
   load(): void {
+    if (!this.canList) return;
     this.loading = true; this.errorMessage = '';
-    this.svc.list(this.filters as Record<string, string>).pipe(takeUntil(this.destroy$)).subscribe({
+    this.svc.list(this.filters).pipe(takeUntil(this.destroy$)).subscribe({
       next: (r) => { this.rows = r.data ?? []; this.loading = false; },
-      error: (e) => { this.errorMessage = e?.error?.message || 'Failed to load surveys'; this.loading = false; },
+      error: (e) => {
+        this.loading = false;
+        if (e?.status === 403) { this.canList = false; this.rows = []; return; }
+        this.errorMessage = this.errText(e, 'Failed to load surveys');
+      },
     });
   }
+
   loadStats(): void {
-    this.svc.stats().pipe(takeUntil(this.destroy$)).subscribe({ next: (s) => (this.stats = s), error: () => { /* best-effort */ } });
+    if (!this.canStats) return;
+    if (this.npsRange.from && this.npsRange.to && this.npsRange.from > this.npsRange.to) {
+      this.errorMessage = '"From" must be on or before "To".';
+      return;
+    }
+    this.svc.stats(this.npsRange).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (s) => (this.stats = s),
+      error: (e) => {
+        if (e?.status === 403) { this.canStats = false; this.stats = null; return; }
+        this.errorMessage = this.errText(e, 'Failed to load NPS');
+      },
+    });
+  }
+
+  clearNpsRange(): void { this.npsRange = { from: '', to: '' }; this.loadStats(); }
+
+  createSurvey(): void {
+    const days = Number(this.createForm.expiresInDays);
+    if (!Number.isInteger(days) || days < 1 || days > 60) { this.errorMessage = 'Link validity must be 1–60 days.'; return; }
+    this.creating = true; this.errorMessage = '';
+    this.svc.create({
+      template: this.createForm.template,
+      patientPrn: this.createForm.patientPrn.trim() || null,
+      patientName: this.createForm.patientName.trim() || null,
+      expiresInDays: days,
+    }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (r) => {
+        this.creating = false;
+        this.createOpen = false;
+        this.createForm = { template: 'general', patientPrn: '', patientName: '', expiresInDays: 14 };
+        this.qrSurvey = r.data;
+        this.load();
+      },
+      error: (e) => {
+        this.creating = false;
+        if (e?.status === 403) { this.canCreate = false; this.createOpen = false; }
+        this.errorMessage = this.errText(e, 'Failed to create survey');
+      },
+    });
   }
 
   kioskUrl(row: FeedbackSurvey): string {
@@ -64,15 +119,13 @@ export class FeedbackInboxComponent implements OnInit, OnDestroy {
     navigator.clipboard?.writeText(u);
   }
 
-  /** The QR / Copy / Open actions only make sense when the kiosk URL is live —
-   * the public token endpoint rejects re-submit + post-expiry, so showing them
-   * for completed/expired rows is misleading. */
+  /** QR / Copy / Open only when the server returned a live token (pending/sent rows). */
   canCollect(r: FeedbackSurvey): boolean {
     if (!r.token) return false;
     return r.status === 'pending' || r.status === 'sent';
   }
 
-  openQr(row: FeedbackSurvey): void { this.qrSurvey = row; }
+  openQr(row: FeedbackSurvey): void { if (row.token) this.qrSurvey = row; }
   closeQr(): void { this.qrSurvey = null; }
   printQr(): void { window.print(); }
 
@@ -85,5 +138,9 @@ export class FeedbackInboxComponent implements OnInit, OnDestroy {
     if (s >= 9) return 'fb-promoter';
     if (s >= 7) return 'fb-passive';
     return 'fb-detractor';
+  }
+
+  private errText(e: any, fallback: string): string {
+    return e?.error?.message || e?.error?.error || fallback;
   }
 }

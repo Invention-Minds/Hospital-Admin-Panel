@@ -1,33 +1,166 @@
-<div class="cc-shell">
-  <header class="cc-header">
-    <div class="cc-title">{{ snapshot?.channel?.name || 'Canteen' }}</div>
-    <div class="cc-slot" *ngIf="snapshot?.slot as slot">
-      {{ slot.name }} <span class="cc-time">({{ slot.startTime }} – {{ slot.endTime }})</span>
+<div class="pass">
+  <!-- Icon set: one stroke weight, drawn for this screen -->
+  <svg class="sprite" aria-hidden="true" focusable="false">
+    <symbol id="cc-pot" viewBox="0 0 24 24"><path d="M3 10h18M5 10v6a4 4 0 0 0 4 4h6a4 4 0 0 0 4-4v-6M1.5 12H5M19 12h3.5M10 7.5h4"/></symbol>
+    <symbol id="cc-cloche" viewBox="0 0 24 24"><path d="M2.5 18h19M4.5 18a7.5 7.5 0 0 1 15 0M12 10.5V8.5M10.2 8.5h3.6"/></symbol>
+    <symbol id="cc-cart" viewBox="0 0 24 24"><path d="M2 5h2.5l2.2 10h11.8l2-7H6"/><circle cx="9" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></symbol>
+    <symbol id="cc-check" viewBox="0 0 24 24"><path d="M5 12.5l4.2 4.2L19 7"/></symbol>
+    <symbol id="cc-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></symbol>
+  </svg>
+
+  <!-- Top: hospital + clock -->
+  <header class="top">
+    <img src="sidebar/IM-logo.png" alt="Logo" class="top-logo" />
+    <div class="top-name">
+      <h1>Rashtrotthana Hospital - Bangalore</h1>
+      <span>{{ subtitle }}</span>
     </div>
-    <div class="cc-clock">{{ now | date:'HH:mm:ss' }}</div>
+    <div class="top-clock">
+      <span class="top-time">{{ now | date:'hh:mm' }}<small>{{ now | date:':ss a' }}</small></span>
+      <span class="top-date">{{ now | date:'EEEE, d MMM' }}</span>
+    </div>
   </header>
 
-  <div class="cc-err" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <main class="floor">
+    <!-- Service line: the meal, its window, and the kitchen's tally -->
+    <section class="service" *ngIf="snapshot?.slot as slot">
+      <div class="meal">
+        <h2 class="meal-name">{{ slot.name }}</h2>
+        <span class="meal-window">{{ slot.startTime }} – {{ slot.endTime }}</span>
+      </div>
 
-  <div class="cc-grid" *ngIf="snapshot && snapshot.groups.length > 0">
-    <section class="cc-ward" *ngFor="let g of snapshot.groups">
-      <h2>{{ g.wardName }}</h2>
-      <table>
-        <thead><tr><th>Bed</th><th>Adm#</th><th>Meal</th><th>Diet</th><th>Status</th></tr></thead>
-        <tbody>
-          <tr *ngFor="let r of g.rows">
-            <td>{{ r.bedNumber || '—' }}</td>
-            <td>{{ r.admissionNo }}</td>
-            <td>{{ r.mealName }}</td>
-            <td>{{ r.dietName }}</td>
-            <td><span class="cc-pill" [ngClass]="'cc-' + r.status.toLowerCase()">{{ r.status }}</span></td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="clock" [ngClass]="'ph-' + phase.toLowerCase()" [class.urgent]="isUrgent">
+        <div class="clock-head">
+          <svg class="ic"><use href="#cc-clock" /></svg>
+          <span class="clock-text">{{ clockText }}</span>
+          <span class="clock-phase" [ngSwitch]="phase">
+            <ng-container *ngSwitchCase="'NOW'">Now serving</ng-container>
+            <ng-container *ngSwitchCase="'NEXT'">Up next</ng-container>
+            <ng-container *ngSwitchDefault>Prep for tomorrow</ng-container>
+          </span>
+        </div>
+        <div class="track" aria-hidden="true">
+          <span class="track-fill" [style.width.%]="windowPct"></span>
+          <span class="track-now" *ngIf="phase === 'NOW'" [style.left.%]="windowPct"></span>
+        </div>
+      </div>
+
+      <div class="tally">
+        <div class="t pending">
+          <span class="t-icon">
+            <svg class="ic"><use href="#cc-pot" /></svg>
+            <i class="steam" *ngIf="totals.toPrepare > 0"></i><i class="steam" *ngIf="totals.toPrepare > 0"></i><i class="steam" *ngIf="totals.toPrepare > 0"></i>
+          </span>
+          <b>{{ totals.toPrepare }}</b><span>to prepare</span>
+        </div>
+        <div class="t prepared">
+          <span class="t-icon"><svg class="ic"><use href="#cc-cloche" /></svg></span>
+          <b>{{ totals.prepared }}</b><span>prepared</span>
+        </div>
+        <div class="t served">
+          <span class="t-icon"><svg class="ic"><use href="#cc-cart" /></svg></span>
+          <b>{{ totals.served }}</b><span>served</span>
+        </div>
+      </div>
     </section>
-  </div>
 
-  <div class="cc-empty" *ngIf="snapshot && snapshot.groups.length === 0">
-    No meal orders in this slot.
-  </div>
+    <div class="offline" *ngIf="errorMessage" role="status">{{ errorMessage }}</div>
+
+    <!-- The pass: one ticket rail per ward. Always rendered so it can be measured. -->
+    <div class="stage" #stage>
+      <!-- Summary: one count card per ward, for the supervisor -->
+      <ng-container *ngIf="isSummary">
+        <div class="cards"
+             *ngFor="let p of [pageIndex]"
+             [style.grid-template-columns]="'repeat(' + cardsPerRow + ', minmax(0, 1fr))'">
+          <section class="card" *ngFor="let c of currentCards; trackBy: trackCard" [ngClass]="'is-' + laneState(c.counts)">
+            <header class="card-head">
+              <h3>{{ c.wardName }}</h3>
+              <span class="card-count">{{ c.counts.served }}/{{ c.counts.total }}</span>
+            </header>
+            <div class="card-bar" aria-hidden="true">
+              <span class="seg served" [style.width.%]="pct(c.counts.served, c.counts)"></span>
+              <span class="seg prepared" [style.width.%]="pct(c.counts.prepared, c.counts)"></span>
+              <span class="seg pending" [style.width.%]="pct(c.counts.toPrepare, c.counts)"></span>
+            </div>
+            <div class="card-meta" [ngSwitch]="laneState(c.counts)">
+              <span class="card-state" *ngSwitchCase="'served'"><svg class="ic"><use href="#cc-check" /></svg>All served</span>
+              <span class="card-state" *ngSwitchCase="'ready'"><svg class="ic"><use href="#cc-cart" /></svg>Ready to dispatch</span>
+              <ng-container *ngSwitchDefault>
+                <span class="card-num pending"><b>{{ c.counts.toPrepare }}</b> to prepare</span>
+                <span class="card-num prepared"><b>{{ c.counts.prepared }}</b> prepared</span>
+              </ng-container>
+            </div>
+          </section>
+        </div>
+      </ng-container>
+
+      <div class="board"
+           *ngFor="let p of (isSummary ? [] : [pageIndex])"
+           [style.grid-template-columns]="'repeat(' + lanesPerPage + ', minmax(0, 1fr))'">
+        <section class="lane" *ngFor="let l of currentLanes; trackBy: trackLane" [ngClass]="'is-' + laneState(l.counts)">
+          <header class="plate">
+            <div class="plate-title">
+              <h3>{{ l.wardName }}</h3>
+              <span class="plate-part" *ngIf="l.part">{{ l.part }}</span>
+            </div>
+            <div class="plate-meta" [ngSwitch]="laneState(l.counts)">
+              <span class="plate-state" *ngSwitchCase="'served'"><svg class="ic"><use href="#cc-check" /></svg>All served</span>
+              <span class="plate-state" *ngSwitchCase="'ready'"><svg class="ic"><use href="#cc-cart" /></svg>Ready to dispatch</span>
+              <span class="plate-state" *ngSwitchDefault>{{ l.counts.toPrepare }} to prepare</span>
+              <span class="plate-count">{{ l.counts.served }}/{{ l.counts.total }} served</span>
+            </div>
+          </header>
+
+          <div class="rail" aria-hidden="true">
+            <span class="rail-cart" *ngIf="laneState(l.counts) === 'ready'"><svg class="ic"><use href="#cc-cart" /></svg></span>
+          </div>
+
+          <ol class="slips">
+            <li *ngFor="let t of l.tickets; let i = index; trackBy: trackTicket"
+                class="slip"
+                [ngClass]="statusClass(t.status)"
+                [class.fresh]="isFresh(t)"
+                [style.--tilt]="tilt(i, t)"
+                [style.--i]="i">
+              <div class="paper" *ngIf="t.status !== 'DELIVERED'; else sentSlip">
+                <div class="slip-top">
+                  <span class="bed">{{ t.bedNumber || 'No bed' }}</span>
+                  <span class="tag" *ngIf="t.status === 'ORDERED'"><svg class="ic"><use href="#cc-pot" /></svg>To prepare</span>
+                  <span class="stamp" *ngIf="t.status === 'PLATED'">Prepared</span>
+                </div>
+                <div class="adm">{{ t.admissionNo }}</div>
+                <div class="diet">{{ t.dietName }}<span class="flag" *ngFor="let f of t.dietFlags ?? []">{{ f }}</span></div>
+                <div class="dish">{{ t.mealName }}</div>
+              </div>
+              <ng-template #sentSlip>
+                <div class="sent">
+                  <svg class="ic"><use href="#cc-check" /></svg>
+                  <span class="sent-bed">{{ t.bedNumber || 'No bed' }}</span>
+                  <span class="sent-line">{{ t.dietName }}</span>
+                  <span class="sent-lbl">Served</span>
+                </div>
+              </ng-template>
+            </li>
+          </ol>
+        </section>
+      </div>
+
+      <div class="pager" *ngIf="pageCount > 1">
+        <span class="pager-text">Page {{ pageIndex + 1 }} of {{ pageCount }}</span>
+        <span *ngFor="let p of (isSummary ? cardPages : pages); let i = index" class="pip" [class.on]="i === pageIndex"></span>
+      </div>
+
+      <div class="empty" *ngIf="snapshot && pageCount === 0">
+        <svg class="empty-ic"><use href="#cc-cloche" /></svg>
+        <h3>The pass is clear for {{ snapshot.slot?.name || 'this meal' }}</h3>
+        <p>Order slips appear here once the dietitian signs a patient's diet and the meal orders are generated.</p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <p>Match the diet label to the bed before every tray leaves the kitchen.</p>
+    <span class="foot-copy">Doc Minds · ⓒ {{ currentYear }}</span>
+  </footer>
 </div>

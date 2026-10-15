@@ -265,7 +265,14 @@ import { DieteticsSetupComponent } from './dietetics/dietetics-setup/dietetics-s
 import { DieticianQueueComponent } from './dietetics/dietician-queue/dietician-queue.component';
 import { CanteenWorkspaceComponent } from './dietetics/canteen-workspace/canteen-workspace.component';
 import { CanteenChannelComponent } from './dietetics/canteen-channel/canteen-channel.component';
+import { HmisImportComponent } from './hmis-import/hmis-import.component';
 import { DietAdmissionTabComponent } from './dietetics/diet-admission-tab/diet-admission-tab.component';
+import { DietSheetComponent } from './dietetics/diet-sheet/diet-sheet.component';
+import { DietCensusComponent } from './dietetics/diet-census/diet-census.component';
+import { DietLabelsComponent } from './dietetics/diet-labels/diet-labels.component';
+import { DietRoundsComponent } from './dietetics/diet-rounds/diet-rounds.component';
+import { NutritionAssessmentComponent } from './dietetics/nutrition-assessment/nutrition-assessment.component';
+import { QRCodeModule } from 'angularx-qrcode';
 import { MastersComponent } from './masters/masters.component';
 import { DutyAckModalComponent } from './scheduling/duty-ack-modal/duty-ack-modal.component';
 // Designation-scoped dashboards (Phase 1 — Doctor)
@@ -488,7 +495,14 @@ import { NursingSuperDashboardComponent } from './dashboards/nursing-super-dashb
     DieticianQueueComponent,
     CanteenWorkspaceComponent,
     CanteenChannelComponent,
+    HmisImportComponent,
     DietAdmissionTabComponent,
+    // Dietary Services workflow — sheet, nursing census, labels, rounds, screening
+    DietSheetComponent,
+    DietCensusComponent,
+    DietLabelsComponent,
+    DietRoundsComponent,
+    NutritionAssessmentComponent,
     // Duty-ack modal — mounted globally in app.component, declared here so
     // AppComponent's template can resolve <app-duty-ack-modal>. It uses
     // <app-e-sign> internally, which works because ESignComponent (standalone)
@@ -544,6 +558,8 @@ import { NursingSuperDashboardComponent } from './dashboards/nursing-super-dashb
     ChartModule,
     CheckboxModule,
     BadgeModule,
+    // QR codes on the printed diet labels (bedside identification).
+    QRCodeModule,
     // Standalone components — listed here, not in `declarations`.
     ESignComponent,
     PrescriptionCaptureComponent,

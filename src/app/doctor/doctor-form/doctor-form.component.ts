@@ -614,15 +614,20 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
 
 
 
+  // The form keeps the 10-digit number the user typed; the saved copy carries the 91 country code.
+  // (Mutating the form value left "91XXXXXXXXXX" in the field after a failed save, and skipped
+  // numbers that happen to start with 91.)
+  private withCountryCode(doctor: Doctor): Doctor {
+    const digits = String(doctor.phone_number ?? '').replace(/\D/g, '');
+    return { ...doctor, phone_number: digits.length === 10 ? `91${digits}` : digits };
+  }
+
   // Refactored method to handle the actual save operation
   private saveDoctorDetails(): void {
     console.log(this.doctor)
     if (this.doctor?.doctorType === 'Visiting Consultant') {
       // console.log('Visiting Consultant', this.doctor)
-      if (!this.doctor?.phone_number.startsWith('91')) {
-        this.doctor!.phone_number = '91' + this.doctor?.phone_number;
-      }
-      this.save.emit(this.doctor!);
+      this.save.emit(this.withCountryCode(this.doctor!));
       this.isButtonLoading = true;
     }
     else {
@@ -663,10 +668,6 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
 
 
 
-      if (!this.doctor?.phone_number.startsWith('91')) {
-        this.doctor!.phone_number = '91' + this.doctor?.phone_number;
-      }
-
       // Add unavailable slots for each date
       // Object.keys(this.unavailableSlotsPerDate).forEach(date => {
       //   const times = this.unavailableSlotsPerDate[date].map(slot => slot.value);
@@ -686,7 +687,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
 
       // Emit the save event with the doctor details
       // this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Doctor details saved successfully' });
-      this.save.emit(this.doctor!);
+      this.save.emit(this.withCountryCode(this.doctor!));
       console.log(this.doctor);
       this.isButtonLoading = true;
       // this.doctor = null; // Reset the doctor object after saving
@@ -725,8 +726,10 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
       this.useSameTimeForAllDays = false;
       this.individualAvailability = {};
     } else {
-      // Reset fields for regular doctors (if needed)
+      // Reset fields for regular doctors, restoring the defaults the visiting branch cleared
       this.initializeIndividualAvailability();
+      this.useSameTimeForAllDays = true;
+      if (!this.generalSlotDuration) this.generalSlotDuration = 20;
     }
   }
 
@@ -738,13 +741,15 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
     }
   }
   isDoctorValid(): boolean {
+    if (!this.doctor) return false;
+    const { name, qualification, email, phone_number, departmentName } = this.doctor;
     return !!(
-      this.doctor &&
-      this.doctor.name &&
-      this.doctor.qualification &&
-      this.doctor.phone_number &&
-      this.doctor.departmentName
-    )
+      name && /^[a-zA-Z.() ]+$/.test(name) && // letters, spaces, dots and brackets only
+      qualification &&
+      phone_number && /^[0-9]{10}$/.test(phone_number) &&
+      departmentName &&
+      (!email || /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) // email is optional, but must be valid if given
+    );
   }
   // get selectedDateKey(): string {
   //   return this.selectedDate ? this.selectedDate.toISOString().split('T')[0] : '';
@@ -757,13 +762,7 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
 
   isFormValid(): boolean {
     if (this.doctor?.doctorType === 'Visiting Consultant') {
-      return !!(
-        this.doctor &&
-        this.doctor.name &&
-        this.doctor.qualification &&
-        this.doctor.phone_number &&
-        this.doctor.departmentName
-      );
+      return this.isDoctorValid();
     }
     // console.log('Doctor:', this.doctor);
 
@@ -798,19 +797,11 @@ export class DoctorFormComponent implements OnInit, AfterViewInit {
 
     // console.log(availableTimePattern.test(this.generalAvailableFrom));
     return !!(
-      this.doctor &&
-      this.doctor.name &&
-      this.doctor.qualification &&
-      this.doctor.phone_number &&
-      this.doctor.departmentName &&
-      this.doctor.availability &&
-      this.doctor.slotDuration !== undefined &&
-      this.doctor.slotDuration !== null &&
-      this.doctor.slotDuration > 0 &&
-      /^[a-zA-Z.() ]+$/.test(this.doctor.name) || // Ensure name has letters, spaces, and dots only
-      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(this.doctor!.email) && // Ensure email is valid
-      /^[0-9]{10}$/.test(this.doctor!.phone_number) &&
-      // && // Ensure phone number is 10 digits
+      this.isDoctorValid() && // name, qualification, email (if given), 10-digit phone, department
+      this.doctor!.availability &&
+      this.doctor!.slotDuration !== undefined &&
+      this.doctor!.slotDuration !== null &&
+      this.doctor!.slotDuration > 0 &&
       (this.useSameTimeForAllDays ? isGeneralTimeValid : allIndividualTimesValid) // Check generalAvailableFrom if useSameTimeForAllDays is true, otherwise validate individual times
     );
   }

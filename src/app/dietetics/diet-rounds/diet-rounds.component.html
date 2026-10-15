@@ -1,0 +1,71 @@
+<div class="dx-shell">
+  <div class="dx-head">
+    <div>
+      <h2 class="dx-title">Dietitian rounds — current IP list</h2>
+      <p class="dx-sub">Height and weight come from the last screening, else the doctor's initial assessment (marked IA).</p>
+    </div>
+    <div class="dx-toolbar">
+      <label>Ward
+        <select [(ngModel)]="wardId" (change)="load()">
+          <option value="">All wards</option>
+          <option *ngFor="let w of wards" [value]="w.id">{{ w.wardName }}</option>
+        </select>
+      </label>
+      <label>Search <input type="text" [(ngModel)]="search" placeholder="Name / PRN / bed / diagnosis" /></label>
+      <label class="dx-check"><input type="checkbox" [(ngModel)]="onlyAction" /> Only action needed</label>
+      <button type="button" class="dx-btn" (click)="load()">Refresh</button>
+      <button type="button" class="dx-btn" (click)="exportExcel()" [disabled]="!visible.length">Export Excel</button>
+    </div>
+  </div>
+
+  <div class="dx-banner dx-banner-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="dx-summary" *ngIf="rows.length">
+    <span><b>{{ rows.length }}</b> patients</span>
+    <span [class.is-act]="dueCount"><b>{{ dueCount }}</b> screening or re-assessment due</span>
+    <span [class.is-bad]="atRiskCount"><b>{{ atRiskCount }}</b> nutritionally at risk</span>
+  </div>
+  <div class="dx-empty" *ngIf="loading">Loading…</div>
+
+  <div class="dx-scroll" *ngIf="!loading">
+    <table class="diet-grid">
+      <thead>
+        <tr>
+          <th>#</th><th>Bed</th><th>PRN</th><th>Patient</th><th>Age</th><th>Ht</th><th>Wt</th><th>BMI</th>
+          <th>Admitted</th><th>Consultant</th><th>Provisional diagnosis</th><th>Diet</th><th>Remarks</th>
+          <th>Nutrition risk</th><th>Due</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of visible; let i = index">
+          <td>{{ i + 1 }}</td>
+          <td class="dr-bed">{{ r.bedNumber || '—' }}<div class="dr-ward">{{ r.wardName }}</div></td>
+          <td>{{ r.prn }}</td>
+          <td><b>{{ r.patientName || r.admissionNo }}</b><div class="dx-muted" *ngIf="r.dietPattern">{{ r.dietPattern }}</div></td>
+          <td>{{ r.age }}<span *ngIf="r.sex">/{{ r.sex | slice:0:1 }}</span></td>
+          <td>{{ r.heightCm ?? '—' }}</td>
+          <td>{{ r.weightKg ?? '—' }}<span class="dr-src" *ngIf="r.anthroSource === 'INITIAL_ASSESSMENT'"> IA</span></td>
+          <td>{{ r.bmi ?? '—' }}</td>
+          <td>{{ r.admissionDate | date:'dd-MM-yy' }}<div class="dx-muted">{{ r.daysAdmitted }}d</div></td>
+          <td>{{ r.consultant }}</td>
+          <td>{{ r.diagnosis | slice:0:60 }}</td>
+          <td>
+            <b *ngIf="r.diet">{{ r.diet.code }}</b>
+            <span class="dx-pill dx-pill-warn" *ngIf="r.diet?.status === 'INTERIM'">Interim</span>
+            <span class="dx-pill dx-pill-bad" *ngIf="!r.diet">None</span>
+          </td>
+          <td>{{ r.remark }}<div class="dx-muted" *ngIf="r.doctorNutritionNote">Dr: {{ r.doctorNutritionNote | slice:0:50 }}</div></td>
+          <td>
+            <ng-container *ngIf="r.screening as s">
+              <span class="dx-pill" [ngClass]="riskClass(r)">{{ s.riskLevel }}{{ s.riskScore !== null ? ' (' + s.riskScore + ')' : '' }}</span>
+              <div class="dx-muted">{{ formLabel[s.formType] }} · {{ s.assessedAt | date:'dd-MM' }}</div>
+            </ng-container>
+            <span class="dx-muted" *ngIf="!r.screening">Not screened</span>
+          </td>
+          <td><span class="dx-pill dx-pill-warn" *ngIf="r.actionNeeded">{{ r.actionNeeded }}</span></td>
+          <td><a class="dx-btn dx-btn-sm" [routerLink]="['/dietetics/nutrition', r.admissionId]">Open</a></td>
+        </tr>
+        <tr *ngIf="visible.length===0"><td colspan="16" class="dx-empty">No patients.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>

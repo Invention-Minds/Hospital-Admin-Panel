@@ -1,8 +1,9 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { IncidentService, CreateIncidentPayload, IncidentSeverity, IncidentCategory } from '../../services/incident.service';
+import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 
 /**
  * Phase 9.24 / Phase 1 — Reusable "raise incident" modal.
@@ -18,7 +19,7 @@ import { IncidentService, CreateIncidentPayload, IncidentSeverity, IncidentCateg
   templateUrl: './incident-raise.component.html',
   styleUrls: ['./incident-raise.component.css'],
 })
-export class IncidentRaiseComponent {
+export class IncidentRaiseComponent implements OnInit {
   @Input() patientPrn: string | null = null;
   @Input() patientName: string | null = null;
   @Input() admissionId: string | null = null;
@@ -42,6 +43,11 @@ export class IncidentRaiseComponent {
   saving = false;
   errorMessage = '';
 
+  // Editable context — pre-filled from @Inputs when raised from a patient
+  // screen; department/ward decide which managers can see the incident.
+  ctx = { patientPrn: '', patientName: '', ward: '', department: '' };
+  departments: string[] = [];
+
   readonly CATEGORIES: IncidentCategory[] = ['clinical', 'medication', 'documentation', 'fall', 'infection', 'equipment', 'behavioural', 'security', 'other'];
   readonly SEVERITIES: IncidentSeverity[] = ['near_miss', 'minor', 'moderate', 'major', 'sentinel'];
   // Phase 5c — QI indicator codes that explicitly need tagged incidents.
@@ -55,7 +61,22 @@ export class IncidentRaiseComponent {
     'PSQ-030',
   ];
 
-  constructor(private svc: IncidentService) {}
+  constructor(private svc: IncidentService, private doctorService: DoctorServiceService) {}
+
+  ngOnInit(): void {
+    this.ctx = {
+      patientPrn: this.patientPrn ?? '',
+      patientName: this.patientName ?? '',
+      ward: this.ward ?? '',
+      department: this.department ?? '',
+    };
+    this.doctorService.getDepartments().subscribe({
+      next: (rows: Array<{ name?: string }>) => {
+        this.departments = (rows ?? []).map((d) => d.name ?? '').filter(Boolean).sort();
+      },
+      error: () => { /* picker is best-effort */ },
+    });
+  }
 
   save(): void {
     if (this.saving) return;
@@ -67,13 +88,13 @@ export class IncidentRaiseComponent {
       ...this.draft,
       title: this.draft.title.trim(),
       description: this.draft.description.trim(),
-      patientPrn: this.patientPrn,
-      patientName: this.patientName,
+      patientPrn: this.ctx.patientPrn.trim() || null,
+      patientName: this.ctx.patientName.trim() || null,
       admissionId: this.admissionId,
       emergencyId: this.emergencyId,
       appointmentId: this.appointmentId,
-      ward: this.ward,
-      department: this.department,
+      ward: this.ctx.ward.trim() || null,
+      department: this.ctx.department || null,
       occurredAt: this.draft.occurredAt ? new Date(this.draft.occurredAt).toISOString() : null,
     };
     this.svc.create(payload).subscribe({

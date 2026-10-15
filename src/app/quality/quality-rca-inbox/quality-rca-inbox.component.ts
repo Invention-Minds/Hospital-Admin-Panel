@@ -6,6 +6,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { QualityService, QualityIndicatorRca, RcaStats, RcaStatus } from '../../services/quality.service';
+import { isQualityEditor } from '../quality-access';
 
 /**
  * Phase 9.26 / Phase 3 — Quality Indicator RCA inbox.
@@ -31,6 +32,8 @@ export class QualityRcaInboxComponent implements OnInit, OnDestroy {
     status: '', owner: '', qiCode: '', overdue: false,
   };
   readonly STATUSES: RcaStatus[] = ['open', 'in_progress', 'closed'];
+  /** Quality Manager / super_admin; senior management view read-only. */
+  readonly canEdit = isQualityEditor();
 
   private destroy$ = new Subject<void>();
 

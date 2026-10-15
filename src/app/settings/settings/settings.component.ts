@@ -59,6 +59,7 @@ export class SettingsComponent implements OnInit {
   showReceptionistOptions: boolean = false;
   employeeId: string = '';
   selectedDepartment: string = '';
+  newUserDepartment: string = ''; // optional department scope for new admin / Nursing Superintendent
   selectedDoctor: any;
   filteredDoctors: any[] = [];
   departments: any[] = [];
@@ -115,8 +116,9 @@ therapists: any[] = [];
       if (validRoles.includes(this.role as UserRole)) {
         this.currentUserRole = this.role as UserRole;
         // console.log("current user role in settings",this.currentUserRole)
-        if (this.currentUserRole === 'super_admin' || this.currentUserRole === 'admin' || this.currentUserRole === 'sub_admin') {
-          this.loadUsers(); // Load users if the role is super admin
+        // get-all-users is admin-only on the backend; sub-admins have no user tabs.
+        if (this.currentUserRole === 'super_admin' || this.currentUserRole === 'admin') {
+          this.loadUsers();
         }
       } else {
         this.currentUserRole = 'sub_admin'; // Default role in case of an invalid role
@@ -288,7 +290,12 @@ createAccount() {
 
   console.log(this.subAdminType,"subadmin")
   console.log(this.adminType,"adminType")
-  this.authService.register(this.username, this.password,this.isReceptionist, this.employeeId, this.role!, this.subAdminType,this.adminType, this.createdBy).subscribe(response => {
+  // Department scope only applies to admins and the Nursing Superintendent.
+  const department = (this.isAdmin || (this.isSubAdmin && this.subAdminType === 'Nursing Superintendent'))
+    ? (this.newUserDepartment || null) : null;
+  // NOTE: subAdminType/adminType argument order is intentionally swapped vs the
+  // service signature — the backend swaps them back. Do not "fix" one side only.
+  this.authService.register(this.username, this.password,this.isReceptionist, this.employeeId, this.role!, this.subAdminType,this.adminType, this.createdBy, department).subscribe(response => {
     if (this.isSubAdmin && this.subAdminType === 'Therapist') {
       this.selectedTherapist.userId = response.id;
       this.therapyService.updateTherapist(this.selectedTherapist.id, this.selectedTherapist).subscribe(
@@ -305,6 +312,7 @@ createAccount() {
     this.showReceptionistOptions = false;  // Reset the checkbox
     this.employeeId='';
     this.selectedDepartment ='';
+    this.newUserDepartment = '';
     // this.selectedDoctor = [];
     this.subAdminType='';
     this.name='';
@@ -323,7 +331,8 @@ createAccount() {
     }
   }, error => {
     if (error.status === 400) {
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'This username has already been used.' });
+      const msg: string = error?.error?.error || '';
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: msg.includes('department') ? msg : 'This username has already been used.' });
       this.buttonClicked = false;
     }
     else{
@@ -493,6 +502,7 @@ resetPassword() {
     localStorage.removeItem('subAdminType');
     localStorage.removeItem('adminType');
     localStorage.removeItem('departmentName');
+    localStorage.removeItem('department');
     localStorage.removeItem('userId');
     localStorage.removeItem('nurseId');
     localStorage.removeItem('name');
@@ -606,6 +616,29 @@ toggleUserActive(user: any): void {
     }
   });
 }
+// Department scope (incident view) applies to admins and the Nursing Superintendent.
+canSetDepartment(user: any): boolean {
+  return user?.role === 'admin' || user?.subAdminType === 'Nursing Superintendent';
+}
+onUserDepartmentChange(user: any, value: string): void {
+  const previous = user.department ?? null;
+  const next = value ? value : null;
+  if (next === previous) return;
+  user.department = next;          // optimistic
+  user._savingDept = true;
+  this.authService.setUserDepartment(user.id, next).subscribe({
+    next: (res) => {
+      user.department = res?.department ?? next;
+      user._savingDept = false;
+      this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Department updated successfully' });
+    },
+    error: (err) => {
+      user.department = previous;  // revert
+      user._savingDept = false;
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: err?.error?.error || 'Failed to update department' });
+    }
+  });
+}
 loadDepartments(): void {
   this.doctorService.getDepartments().subscribe((departments) => {
     this.departments = departments;
@@ -643,6 +676,7 @@ onAccountTypeChange(type: string) {
   this.password = '';
   this.employeeId = '';
   this.selectedDepartment = '';
+  this.newUserDepartment = '';
   this.selectedDoctor = [];
   this.name = '';
 }

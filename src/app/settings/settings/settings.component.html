@@ -225,8 +225,18 @@
             <option value="Senior Manager">Senior Manager</option>
             <option value="Management">Management</option>
             <option value="IP Billing Manager">IP Billing Manager</option>
+            <!-- Quality / NABH — see backend src/api/_shared/quality-roles.ts -->
+            <option value="Quality Manager">Quality Manager</option>
           </select>
           <label for="adminType"> Admin Type*</label>
+        </div>
+        <!-- Department this admin manages — scopes their (read-only) incident view. Optional. -->
+        <div class="floating-label">
+          <select id="newUserDepartmentAdmin" [(ngModel)]="newUserDepartment" class="styled-select">
+            <option value="">— none —</option>
+            <option *ngFor="let department of departments" [value]="department.name">{{ department.name }}</option>
+          </select>
+          <label for="newUserDepartmentAdmin">Department</label>
         </div>
         <div class="floating-label">
           <input type="text" id="name" name="name" placeholder=" " [(ngModel)]="name" required />
@@ -273,10 +283,23 @@
             <option value="Billing Coordinator">Billing Coordinator</option>
             <option value="Discharge Coordinator">Discharge Coordinator</option>
             <option value="Dietician">Dietician</option>
+            <!-- Kitchen / canteen — plates trays on /dietetics/canteen -->
+            <option value="Canteen Staff">Canteen Staff</option>
             <!-- Ophthalmology refraction work-up (verified by the doctor) -->
             <option value="Optometrist">Optometrist</option>
+            <!-- Quality / NABH — see backend src/api/_shared/quality-roles.ts -->
+            <option value="Infection Control Nurse">Infection Control Nurse</option>
+            <option value="Patient Relations">Patient Relations</option>
           </select>
           <label for="subAdminType">Sub Admin Type*</label>
+        </div>
+        <!-- Nursing Superintendent: optional department scope for incidents. -->
+        <div class="floating-label" *ngIf="subAdminType === 'Nursing Superintendent'">
+          <select id="newUserDepartmentSub" [(ngModel)]="newUserDepartment" class="styled-select">
+            <option value="">— none —</option>
+            <option *ngFor="let department of departments" [value]="department.name">{{ department.name }}</option>
+          </select>
+          <label for="newUserDepartmentSub">Department</label>
         </div>
         <div *ngIf="isSubAdmin && subAdminType === 'Therapist'">
           <div class="floating-label">
@@ -434,6 +457,7 @@
             <th>Staff Name</th>
             <th>Role</th>
             <th>Employee ID</th>
+            <th>Department</th>
             <th>Status</th>
             <th>Action</th>
           </tr>
@@ -444,6 +468,15 @@
             <td>{{ firstNames[i] }}</td>
             <td>{{ staff.role }}</td>
             <td>{{ staff.employeeId }}</td>
+            <td>
+              <select *ngIf="canSetDepartment(staff); else noDept" class="styled-select"
+                [ngModel]="staff.department || ''" (ngModelChange)="onUserDepartmentChange(staff, $event)"
+                [disabled]="staff._savingDept">
+                <option value="">— none —</option>
+                <option *ngFor="let department of departments" [value]="department.name">{{ department.name }}</option>
+              </select>
+              <ng-template #noDept>{{ staff.department || '—' }}</ng-template>
+            </td>
             <td>
               <span [ngClass]="staff.isActive !== false ? 'status-active' : 'status-inactive'">
                 {{ staff.isActive !== false ? 'Active' : 'Inactive' }}

@@ -100,7 +100,7 @@ export class DoctorDetailsComponent implements OnInit {
     if (this.doctorToDeactivate) {
       this.doctorService.deactivateDoctor(this.doctorToDeactivate.id).subscribe(
         () => {
-          this.messageService.add({ severity: 'success', summary: 'Success', detail: `Dr. ${this.doctorToDeactivate!.name} has been deactivated.` });
+          this.messageService.add({ severity: 'success', summary: 'Success', detail: `${this.doctorToDeactivate!.name.replace(/^(dr\.\s*|dr\s+)?/i, 'Dr. ')} has been deactivated.` });
           this.showDeactivateConfirmDialog = false;
           this.doctorToDeactivate = null;
           this.fetchDepartmentsAndDoctors();
@@ -339,6 +339,7 @@ export class DoctorDetailsComponent implements OnInit {
       this.doctorService.updateDoctor(rest).subscribe(
         () => {
           updatedDoctor.slotDuration = Number(updatedDoctor.slotDuration);
+          this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Doctor details updated successfully' });
           this.fetchDepartmentsAndDoctors(); // Refresh the list of doctors
           this.isEditMode = false;
           this.isButtonLoading = false; // Stop loading state
@@ -347,6 +348,7 @@ export class DoctorDetailsComponent implements OnInit {
         (error) => {
           this.isButtonLoading = false; // Stop loading state
           console.error('Error updating doctor:', error);
+          this.messageService.add({ severity: 'error', summary: 'Error', detail: error?.error?.error || 'Error in updating doctor details' });
         }
       );
     } else {
@@ -405,7 +407,7 @@ export class DoctorDetailsComponent implements OnInit {
       const endDate = new Date(this.unavailabilityForm.value.endDate);
 
       if (endDate < startDate) {
-        console.error('End date must be after start date');
+        this.messageService.add({ severity: 'warn', summary: 'Check the dates', detail: 'Ending Date must be on or after the Starting Date.' });
         return;
       }
       // 🏥 Check if the doctor has any booked slots within the selected date range
@@ -429,6 +431,7 @@ export class DoctorDetailsComponent implements OnInit {
       if (this.selectedEditDoctor) {
         this.doctorService.addUnavailableDates(this.selectedEditDoctor.id, startDate.toISOString().split('T')[0], endDate.toISOString().split('T')[0], unavailableDates, this.userId).subscribe(
           () => {
+            this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Unavailable dates saved successfully' });
             this.fetchDoctors(); // Refresh the list of doctors
             this.closeUnavailableModal();
           },

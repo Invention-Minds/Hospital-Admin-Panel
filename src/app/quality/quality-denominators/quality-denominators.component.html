@@ -1,7 +1,7 @@
 <div class="page q-shell">
   <div class="q-head">
     <div>
-      <h2 class="q-title">Monthly denominators</h2>
+      <h2 class="q-title">Monthly denominators <span class="q-view-only" *ngIf="!canEdit">View only</span></h2>
       <p class="q-sub">"Total medication administrations / surgeries / transfusions / encounters" per month. Without these, the Phase&nbsp;5c indicators stay unpublished — auto-source skips them.</p>
     </div>
     <div class="q-range">
@@ -13,7 +13,7 @@
   <div class="q-banner den-banner-ok" *ngIf="successMessage">{{ successMessage }}</div>
 
   <!-- ── Upsert form ── -->
-  <div class="den-card">
+  <div class="den-card" *ngIf="canEdit">
     <h3 class="den-card-title">Record denominator</h3>
 
     <div class="den-row">
@@ -73,7 +73,7 @@
           <td>{{ r.value }}</td>
           <td>{{ r.capturedBy || '—' }}</td>
           <td>{{ r.updatedAt | date:'yyyy-MM-dd' }}</td>
-          <td><button class="den-delete" (click)="remove(r)">×</button></td>
+          <td><button class="den-delete" *ngIf="canEdit" (click)="remove(r)">×</button></td>
         </tr>
       </tbody>
     </table>

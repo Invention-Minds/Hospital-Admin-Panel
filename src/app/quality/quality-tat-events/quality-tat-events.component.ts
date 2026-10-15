@@ -9,6 +9,7 @@ import {
   QualityService, QualityIndicator, QualityTatEvent, TatEventCreateBody,
 } from '../../services/quality.service';
 import { AlertService } from '../../services/alert.service';
+import { isQualityEditor } from '../quality-access';
 
 /**
  * Phase 9.26 / Phase 5e — Generic TAT event capture.
@@ -35,6 +36,8 @@ export class QualityTatEventsComponent implements OnInit, OnDestroy {
   saving = false;
   errorMessage = '';
   successMessage = '';
+  /** Quality Manager / super_admin; senior management view read-only. */
+  readonly canEdit = isQualityEditor();
 
   // Mirror of the backend Phase 5e set; used to filter the dropdown.
   readonly TAT_BACKED: string[] = [

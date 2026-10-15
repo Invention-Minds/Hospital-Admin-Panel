@@ -8,21 +8,28 @@ import {
   DietPlan,
   AdmissionInteractionHit,
   MealOrder,
+  MealHold,
+  DietHistoryEvent,
+  TRAY_STATUS_LABEL,
+  localDateString,
+  dietFlags,
 } from '../../services/dietetics.service';
 
 /**
  * Diet tab — `/ipd/admission/:id/diet`.
  *
  * What the bedside team sees:
- *   1. Current diet plan + diet macros + restrictions/allergens.
- *   2. Drug-food interaction warnings (computed live from active prescriptions).
- *   3. Today's meal schedule for this admission.
- *   4. Recent plan history (audit trail).
+ *   1. Current diet (signed, or the interim census diet) — code + texture,
+ *      macros, allergens / avoid, fluid restriction, NPO, feed, remarks.
+ *   2. Active NPO / meal holds (e.g. relayed in the nursing census).
+ *   3. Drug-food interaction warnings (computed live from active prescriptions).
+ *   4. Today's meals with the hospital's statuses.
+ *   5. Date/time-wise diet change history + plan versions (audit trail).
  */
 @Component({
   selector: 'app-diet-admission-tab',
   templateUrl: './diet-admission-tab.component.html',
-  styleUrls: ['./diet-admission-tab.component.css'],
+  styleUrls: ['../dietetics-shared.css', './diet-admission-tab.component.css'],
 })
 export class DietAdmissionTabComponent implements OnInit, OnDestroy {
   @Input() admissionId!: string;
@@ -34,6 +41,11 @@ export class DietAdmissionTabComponent implements OnInit, OnDestroy {
 
   restrictions: string[] = [];
   allergens: string[] = [];
+  /** Veg / Jain / Halal / … badges from the current diet. */
+  flags: string[] = [];
+  holds: MealHold[] = [];
+  changes: DietHistoryEvent[] = [];
+  readonly statusLabel = TRAY_STATUS_LABEL;
 
   loading = false;
   errorMessage = '';
@@ -70,6 +82,7 @@ export class DietAdmissionTabComponent implements OnInit, OnDestroy {
         this.current = p;
         this.restrictions = this.parseJsonArray(p?.restrictionsSnapshot);
         this.allergens = this.parseJsonArray(p?.allergensSnapshot);
+        this.flags = dietFlags(p?.diet);
         this.loading = false;
       },
       error: (e) => { this.errorMessage = e?.error?.error || 'Failed to load current plan'; this.loading = false; },
@@ -85,10 +98,20 @@ export class DietAdmissionTabComponent implements OnInit, OnDestroy {
       error: () => { this.interactions = []; },
     });
 
-    const today = new Date().toISOString().slice(0, 10);
+    const today = localDateString();
     this.svc.getOrdersForAdmission(this.admissionId, today).pipe(takeUntil(this.destroy$)).subscribe({
       next: (rows) => { this.todayOrders = rows; },
       error: () => { this.todayOrders = []; },
+    });
+
+    this.svc.listHolds(this.admissionId).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (rows) => { this.holds = rows.filter((h) => !h.liftedAt); },
+      error: () => { this.holds = []; },
+    });
+
+    this.svc.getDietHistory(this.admissionId).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (rows) => { this.changes = rows.slice().reverse(); },
+      error: () => { this.changes = []; },
     });
   }
 

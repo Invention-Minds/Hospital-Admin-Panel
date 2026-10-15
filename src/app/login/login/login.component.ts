@@ -142,6 +142,18 @@ export class LoginComponent implements OnInit {
           else if(response.user.subAdminType === 'ER Nurse'){
             this.router.navigate(['/emergency'])
           }
+          else if(response.user.subAdminType === 'Canteen Staff'){
+            this.router.navigate(['/dietetics/canteen'])
+          }
+          else if(response.user.subAdminType === 'Dietician'){
+            this.router.navigate(['/dietetics/queue'])
+          }
+          else if(response.user.subAdminType === 'Infection Control Nurse'){
+            this.router.navigate(['/quality/infection-control'])
+          }
+          else if(response.user.subAdminType === 'Patient Relations'){
+            this.router.navigate(['/complaints'])
+          }
           else if(response.user.subAdminType === 'Nursing Superintendent'){
             // Hospital-wide oversight dashboard (dispatcher renders the
             // nursing-superintendent view for this subAdminType).
@@ -153,6 +165,9 @@ export class LoginComponent implements OnInit {
           }
           else if(response.user.adminType === 'IP Billing Manager'){
             this.router.navigate(['/estimation'])
+          }
+          else if(response.user.role === 'admin' && response.user.adminType === 'Quality Manager'){
+            this.router.navigate(['/quality'])
           }
             else if(response.user.role === 'admin'){
             this.router.navigate(['/analytics']);

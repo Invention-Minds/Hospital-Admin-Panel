@@ -6,30 +6,49 @@
     <h3>⚠ Drug-food interactions</h3>
     <ul>
       <li *ngFor="let hit of interactions">
-        <strong>{{ hit.drug.genericName || hit.drug.brandName }}</strong>
-        — <span class="dt-pill" [class.dt-pill-critical]="hit.interaction.severity === 'critical'">{{ hit.interaction.severity }}</span>
-        <div class="dt-guidance">{{ hit.interaction.foodGuidance }}</div>
+        <strong>{{ hit.drugName }}</strong>
+        — <span class="dt-pill" [class.dt-pill-critical]="hit.severity === 'critical'">{{ hit.severity }}</span>
+        <div class="dt-guidance">{{ hit.foodGuidance }}</div>
       </li>
     </ul>
+  </section>
+
+  <!-- Active NPO / meal holds -->
+  <section class="dt-card dt-warn-card" *ngIf="holds.length > 0">
+    <h3>NPO / meal hold</h3>
+    <div class="dt-row" *ngFor="let h of holds">
+      <strong>{{ h.reason }}</strong> from {{ h.fromAt | date:'dd-MM HH:mm' }}{{ h.untilAt ? ' until ' + (h.untilAt | date:'dd-MM HH:mm') : ' (till lifted)' }}
+      <span class="dt-muted">· {{ h.source === 'CENSUS' ? 'nursing census' : h.source.toLowerCase() }} · {{ h.createdBy }}</span>
+    </div>
   </section>
 
   <!-- Current plan -->
   <section class="dt-card">
     <h3>Current diet plan</h3>
-    <div *ngIf="!current" class="dt-empty">No active diet plan. Ask the dietician to assign one.</div>
+    <div *ngIf="!current" class="dt-empty">No diet yet. The dietitian assesses new admissions; the nursing census can set an interim diet.</div>
     <div *ngIf="current" class="dt-plan">
       <div class="dt-plan-head">
-        <span class="dt-plan-code">{{ current.diet?.code }}</span>
-        <span class="dt-plan-name">{{ current.diet?.name }}</span>
-        <span class="dt-pill">ACTIVE</span>
+        <span class="dt-plan-code">{{ current.diet?.code }}<span *ngIf="current.texture">-{{ current.texture.code }}</span></span>
+        <span class="dt-plan-name">{{ current.diet?.name }}<span *ngIf="current.texture"> · {{ current.texture.name }}</span></span>
+        <span class="dt-pill">{{ current.status === 'INTERIM' ? 'INTERIM (census)' : 'ACTIVE' }}</span>
       </div>
+      <div class="dt-row" *ngIf="current.foodAvoid"><strong>Food allergy / avoid:</strong> {{ current.foodAvoid }}</div>
+      <div class="dt-row" *ngIf="current.fluidRestrictionMl"><strong>Fluid restriction:</strong> {{ current.fluidRestrictionMl }} ml/day</div>
+      <div class="dt-row" *ngIf="current.feedVolumeMl || current.feedNotes">
+        <strong>Feed:</strong> {{ current.feedVolumeMl ? current.feedVolumeMl + ' ml' : '' }}{{ current.feedIntervalHours ? ' Q' + current.feedIntervalHours + 'H' : '' }} {{ current.feedNotes }}
+      </div>
+      <div class="dt-row" *ngIf="current.disposablePlate"><strong>Disposable plate</strong></div>
+      <div class="dt-row" *ngIf="current.remarks"><strong>Remarks:</strong> {{ current.remarks }}</div>
+      <div class="dt-row" *ngIf="current.needsCheck"><strong>Needs check:</strong> {{ current.checkNote || '—' }}</div>
       <div class="dt-macros" *ngIf="current.diet">
         <span *ngIf="current.diet.caloriesKcal">{{ current.diet.caloriesKcal }} kcal</span>
         <span *ngIf="current.diet.proteinG">protein {{ current.diet.proteinG }}g</span>
         <span *ngIf="current.diet.carbsG">carbs {{ current.diet.carbsG }}g</span>
         <span *ngIf="current.diet.fatG">fat {{ current.diet.fatG }}g</span>
         <span *ngIf="current.diet.sodiumMg">sodium {{ current.diet.sodiumMg }}mg</span>
+        <span *ngIf="current.diet.potassiumMg">potassium {{ current.diet.potassiumMg }}mg</span>
         <span *ngIf="current.diet.fluidMl">fluid {{ current.diet.fluidMl }}ml</span>
+        <span *ngFor="let f of flags">{{ f }}</span>
       </div>
       <div class="dt-row" *ngIf="allergens.length">
         <strong>Allergens:</strong> {{ allergens.join(', ') }}
@@ -40,11 +59,16 @@
       <div class="dt-row" *ngIf="current.notesForKitchen">
         <strong>Kitchen note:</strong> {{ current.notesForKitchen }}
       </div>
-      <div class="dt-row" *ngIf="current.npoUntil">
-        <strong>NPO until:</strong> {{ current.npoUntil | date:'medium' }}
+      <div class="dt-row" *ngIf="current.npoFrom || current.npoUntil">
+        <strong>NPO:</strong>
+        {{ current.npoFrom ? 'from ' + (current.npoFrom | date:'medium') : '' }}
+        {{ current.npoUntil ? 'until ' + (current.npoUntil | date:'medium') : 'till further orders' }}
       </div>
-      <div class="dt-row dt-sig">
+      <div class="dt-row dt-sig" *ngIf="current.signedAt">
         Signed {{ current.signedAt | date:'medium' }} by {{ current.signedBy }}
+      </div>
+      <div class="dt-row dt-sig" *ngIf="!current.signedAt">
+        Interim from the nursing census {{ current.createdAt | date:'medium' }} — awaiting dietitian assessment.
       </div>
     </div>
   </section>
@@ -52,14 +76,17 @@
   <!-- Today's orders -->
   <section class="dt-card">
     <h3>Today's meals</h3>
-    <table class="dt-table" *ngIf="todayOrders.length > 0">
+    <table class="diet-grid" *ngIf="todayOrders.length > 0">
       <thead><tr><th>Slot</th><th>Meal</th><th>Scheduled</th><th>Status</th><th>Intake</th></tr></thead>
       <tbody>
         <tr *ngFor="let o of todayOrders">
           <td>{{ o.mealTimeSlot?.name }}</td>
-          <td>{{ o.meal?.name ?? '—' }}</td>
+          <td>{{ o.meal?.name }}<span *ngIf="o.kitchenNotes"> {{ o.kitchenNotes }}</span><span *ngIf="!o.meal && !o.kitchenNotes">—</span></td>
           <td>{{ o.scheduledFor | date:'shortTime' }}</td>
-          <td><span class="dt-pill" [ngClass]="statusColor(o.status)">{{ o.status }}</span></td>
+          <td>
+            <span class="dt-pill" [ngClass]="statusColor(o.status)">{{ statusLabel[o.status] || o.status }}</span>
+            <div class="dt-muted" *ngIf="o.skipReason">{{ o.skipReason }}</div>
+          </td>
           <td>
             <span *ngIf="o.intake">{{ o.intake.percentConsumed }}%</span>
             <span *ngIf="!o.intake" class="dt-muted">—</span>
@@ -73,7 +100,7 @@
   <!-- History -->
   <section class="dt-card">
     <h3>Plan history</h3>
-    <table class="dt-table" *ngIf="history.length > 1">
+    <table class="diet-grid" *ngIf="history.length > 1">
       <thead><tr><th>Diet</th><th>Status</th><th>Signed</th><th>By</th><th>Reason</th></tr></thead>
       <tbody>
         <tr *ngFor="let p of history">
@@ -86,5 +113,21 @@
       </tbody>
     </table>
     <div *ngIf="history.length <= 1" class="dt-empty">No prior plans.</div>
+  </section>
+
+  <!-- Date/time-wise diet changes (plans, sheet cells, holds, census) -->
+  <section class="dt-card">
+    <h3>Diet change history</h3>
+    <table class="diet-grid" *ngIf="changes.length > 0">
+      <thead><tr><th>Date &amp; time</th><th>Change</th><th>By</th></tr></thead>
+      <tbody>
+        <tr *ngFor="let c of changes">
+          <td>{{ c.at | date:'dd-MM-yyyy HH:mm' }}</td>
+          <td>{{ c.what }}</td>
+          <td>{{ c.by ?? '—' }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <div *ngIf="changes.length === 0" class="dt-empty">No changes recorded.</div>
   </section>
 </div>

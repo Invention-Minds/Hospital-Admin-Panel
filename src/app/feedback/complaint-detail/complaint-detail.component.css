@@ -22,6 +22,8 @@
   border: 1px solid #d1d5db; border-radius: 6px; padding: 8px 12px; font-size: 14px;
   color: #271e4a; background: #fff; font-family: Kanit, sans-serif; box-sizing: border-box; width: 100%;
 }
+.cpd-hint { font-size: 12px; color: #92400e; margin: -4px 0 8px; }
+.cpd-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .cpd-actions { display: flex; justify-content: flex-end; margin-top: 8px; }
 .cpd-btn { height: 38px; padding: 0 16px; border-radius: 6px; border: 1px solid #d1d5db; background: #fff; color: #271e4a; cursor: pointer; font-family: Kanit, sans-serif; font-size: 13px; }
 .cpd-btn-primary { background: #169458; color: #fff; border-color: #169458; }

@@ -1,35 +1,72 @@
 <div class="cw-shell">
   <div class="cw-head">
-    <h2 class="cw-title">Canteen workspace</h2>
-    <div class="cw-toolbar">
-      <label>Date <input type="date" [(ngModel)]="date" (change)="refresh()" /></label>
-      <label>Meal time
+    <div>
+      <h2 class="cw-title">Canteen / dietary workspace</h2>
+      <div class="cw-links">
+        <a routerLink="/dietetics/sheet">Diet Information Sheet</a>
+        <a routerLink="/dietetics/census">Nursing census inbox</a>
+        <a routerLink="/dietetics/labels">Print labels</a>
+      </div>
+    </div>
+    <div class="cw-toolbar" *ngIf="tab === 'trays' || tab === 'extra'">
+      <label>Date <input type="date" [(ngModel)]="date" (change)="refresh(); tab === 'extra' && loadExtras()" /></label>
+      <label *ngIf="tab === 'trays'">Meal time
         <select [(ngModel)]="slotId" (change)="refresh()">
           <option value="">All</option>
           <option *ngFor="let s of slots" [value]="s.id">{{ s.name }} ({{ s.startTime }})</option>
         </select>
       </label>
       <button type="button" class="cw-btn" (click)="refresh()">Refresh</button>
-      <button type="button" class="cw-btn" (click)="regenerate()">Regenerate</button>
-      <button type="button" class="cw-btn cw-btn-primary" (click)="selectAllOrdered()">Select all ordered</button>
-      <button type="button" class="cw-btn cw-btn-primary" [disabled]="selected.size === 0" (click)="bulkPlate()">
-        Plate selected ({{ selected.size }})
-      </button>
+      <ng-container *ngIf="tab === 'trays'">
+        <button type="button" class="cw-btn" (click)="regenerate()">Regenerate</button>
+        <button type="button" class="cw-btn cw-btn-primary" (click)="selectAllOrdered()">Select all ordered</button>
+        <button type="button" class="cw-btn cw-btn-primary" [disabled]="selected.size === 0" (click)="bulkPlate()">
+          Mark prepared ({{ selected.size }})
+        </button>
+      </ng-container>
     </div>
   </div>
 
   <div class="cw-banner cw-banner-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
   <div class="cw-banner cw-banner-good" *ngIf="successMessage">{{ successMessage }}</div>
 
-  <table class="cw-table">
+  <!-- ─── Dietary alerts (admission / discharge / transfer / bed re-occupied) ─── -->
+  <div class="cw-alerts" *ngIf="alerts.length">
+    <div class="cw-alerts-head">
+      <b>{{ alerts.length }} dietary alert(s)</b>
+      <button type="button" class="cw-btn cw-btn-sm" *ngIf="canAckAlerts" (click)="acknowledgeAlerts(alertIds)">Acknowledge all</button>
+    </div>
+    <div class="cw-alert" *ngFor="let a of alerts" [class.cw-alert-danger]="a.type === 'BED_REOCCUPIED'">
+      <span class="cw-pill" [class.cw-warn]="a.type !== 'BED_REOCCUPIED'">{{ a.type.replace('_', ' ') }}</span>
+      {{ a.message }} <span class="cw-time">{{ a.createdAt | date:'dd-MM HH:mm' }}</span>
+      <button type="button" class="cw-btn cw-btn-sm" *ngIf="canAckAlerts" (click)="acknowledgeAlerts([a.id])">OK</button>
+    </div>
+  </div>
+
+  <div class="cw-tabs">
+    <button type="button" [class.active]="tab === 'trays'" (click)="setTab('trays')">Trays</button>
+    <button type="button" [class.active]="tab === 'extra'" (click)="setTab('extra')">Extra food</button>
+    <button type="button" *ngIf="canBill" [class.active]="tab === 'billing'" (click)="setTab('billing')">Billing</button>
+  </div>
+
+  <!-- ─── Trays ─── -->
+  <div class="dx-summary" *ngIf="tab === 'trays' && orders.length">
+    <span [class.is-act]="trayCounts.ordered"><b>{{ trayCounts.ordered }}</b> to prepare</span>
+    <span><b>{{ trayCounts.prepared }}</b> prepared, to serve</span>
+    <span><b>{{ trayCounts.served }}</b> served</span>
+    <span><b>{{ trayCounts.notServed }}</b> not served</span>
+    <span [class.is-bad]="trayCounts.alerts" *ngIf="trayCounts.alerts"><b>{{ trayCounts.alerts }}</b> with a bed / admission alert</span>
+  </div>
+  <table class="diet-grid" *ngIf="tab === 'trays'">
     <thead>
       <tr>
         <th></th>
-        <th>Slot</th>
+        <th>Meal</th>
         <th>Ward / Bed</th>
         <th>Patient</th>
         <th>Diet</th>
-        <th>Meal</th>
+        <th>Food allergy / avoid</th>
+        <th>Serve</th>
         <th>Status</th>
         <th>Tray temps</th>
         <th>Intake</th>
@@ -37,17 +74,38 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let o of orders" [class.cw-row-skipped]="o.status === 'SKIPPED'">
+      <tr *ngFor="let o of orders" [class.cw-row-skipped]="o.status === 'SKIPPED'" [class.cw-row-alert]="o.alerts?.length">
         <td>
           <input type="checkbox" *ngIf="o.status === 'ORDERED'"
                  [checked]="selected.has(o.id)" (change)="toggleSelect(o.id)" />
         </td>
         <td>{{ o.mealTimeSlot?.name }} <span class="cw-time">{{ o.scheduledFor | date:'shortTime' }}</span></td>
         <td>{{ o.wardName ?? '—' }} <span class="cw-bed">{{ o.bedNumber }}</span></td>
-        <td>{{ o.patientName ?? '—' }}<br><span class="cw-pid">{{ o.admissionNo }}</span></td>
-        <td>{{ o.dietPlan?.diet?.code ?? '—' }}</td>
-        <td>{{ o.meal?.name ?? '—' }}</td>
-        <td><span class="cw-pill" [ngClass]="statusClass(o.status)">{{ o.status }}</span></td>
+        <td>
+          {{ o.patientName ?? '—' }}<br><span class="cw-pid">PRN {{ o.prn }} · {{ o.admissionNo }}</span>
+          <div class="cw-row-warn" *ngFor="let a of o.alerts">⚠ {{ a }}</div>
+        </td>
+        <td>
+          <b>{{ o.displayCode ?? '—' }}</b>
+          <span class="cw-pill cw-warn" *ngIf="o.interim" title="Interim diet from the nursing census — not yet assessed">Interim</span>
+          <div class="cw-flags">
+            <span class="cw-flag" *ngFor="let f of flagsFor(o)">{{ f }}</span>
+            <span class="cw-flag cw-flag-dark" *ngIf="o.disposablePlate">Disposable</span>
+            <span class="cw-flag cw-flag-dark" *ngIf="o.fluidRestrictionMl">F/R {{ o.fluidRestrictionMl }} ml</span>
+          </div>
+        </td>
+        <td class="cw-avoid">{{ o.avoid || '—' }}</td>
+        <td>
+          {{ o.meal?.name }}
+          <div class="cw-note" *ngIf="o.kitchenNotes">{{ o.kitchenNotes }}</div>
+          <span *ngIf="!o.meal && !o.kitchenNotes" class="cw-muted">—</span>
+        </td>
+        <td>
+          <span class="cw-pill" [ngClass]="statusClass(o.status)">{{ statusLabel[o.status] || o.status }}</span>
+          <div class="cw-time" *ngIf="o.status === 'SKIPPED' && o.skipReason">{{ o.skipReason }}</div>
+          <div class="cw-time" *ngIf="o.deliveredAt">{{ o.servedByName || o.deliveredBy }} · {{ o.deliveredAt | date:'HH:mm' }}</div>
+          <div class="cw-time cw-bad" *ngIf="o.delayReason">Late: {{ o.delayReason }}</div>
+        </td>
         <td>
           <span *ngIf="o.delivery?.trayHotTempC != null" [class.cw-bad]="trayTempBad(o.delivery?.trayHotTempC, 'hot')">H {{ o.delivery?.trayHotTempC }}°C</span>
           <span *ngIf="o.delivery?.trayColdTempC != null" [class.cw-bad]="trayTempBad(o.delivery?.trayColdTempC, 'cold')">C {{ o.delivery?.trayColdTempC }}°C</span>
@@ -58,30 +116,130 @@
           <span *ngIf="!o.intake" class="cw-muted">—</span>
         </td>
         <td class="cw-actions">
-          <button type="button" class="cw-btn cw-btn-sm" *ngIf="o.status === 'PLATED' || o.status === 'ORDERED'" (click)="openDeliver(o)">Deliver</button>
+          <button type="button" class="cw-btn cw-btn-sm" *ngIf="o.status === 'PLATED'" (click)="openDeliver(o)">Serve</button>
           <button type="button" class="cw-btn cw-btn-sm" *ngIf="o.status === 'DELIVERED'" (click)="openIntake(o)">Intake</button>
-          <button type="button" class="cw-btn cw-btn-sm" *ngIf="o.status !== 'CONSUMED' && o.status !== 'SKIPPED'" (click)="openSkip(o)">Skip</button>
+          <button type="button" class="cw-btn cw-btn-sm" *ngIf="o.status !== 'CONSUMED' && o.status !== 'SKIPPED' && o.status !== 'DELIVERED'" (click)="openSkip(o)">Not served</button>
         </td>
       </tr>
-      <tr *ngIf="orders.length === 0"><td colspan="10" class="cw-empty">No meal orders for this date / slot.</td></tr>
+      <tr *ngIf="orders.length === 0"><td colspan="11" class="cw-empty">No meal orders for this date / meal. Issue the diet sheet or regenerate.</td></tr>
     </tbody>
   </table>
 
-  <!-- ─── Deliver modal ─── -->
+  <!-- ─── Extra food ─── -->
+  <ng-container *ngIf="tab === 'extra'">
+    <div class="cw-card">
+      <h3>New extra food request</h3>
+      <div class="cw-form-grid">
+        <label>Patient
+          <select [(ngModel)]="extraForm.admissionId">
+            <option value="">— select —</option>
+            <option *ngFor="let p of patients" [value]="p.admissionId">{{ p.bedNumber }} · {{ p.patientName || p.admissionNo }} ({{ p.diet?.code || 'no diet' }})</option>
+          </select>
+        </label>
+        <label>For
+          <select [(ngModel)]="extraForm.forWhom"><option value="PATIENT">Patient</option><option value="ATTENDANT">Attendant</option></select>
+        </label>
+        <label>Item <input type="text" [(ngModel)]="extraForm.item" placeholder="e.g. Diet meal, Tea, Soup" /></label>
+        <label>Quantity <input type="text" [(ngModel)]="extraForm.quantity" placeholder="1" /></label>
+        <label>Meal
+          <select [(ngModel)]="extraForm.mealTimeSlotId">
+            <option value="">— any time —</option>
+            <option *ngFor="let s of slots" [value]="s.id">{{ s.name }}</option>
+          </select>
+        </label>
+        <label>Notes <input type="text" [(ngModel)]="extraForm.notes" /></label>
+      </div>
+      <button type="button" class="cw-btn cw-btn-primary" (click)="createExtra()">Order</button>
+    </div>
+
+    <table class="diet-grid">
+      <thead><tr><th>Time</th><th>Bed</th><th>Patient</th><th>For</th><th>Item</th><th>Meal</th><th>Status</th><th>Billed</th><th>Actions</th></tr></thead>
+      <tbody>
+        <tr *ngFor="let x of extras" [class.cw-row-skipped]="x.status === 'CANCELLED'">
+          <td>{{ x.requestedFor | date:'HH:mm' }}</td>
+          <td class="cw-bed">{{ x.bedNumber }}</td>
+          <td>{{ x.patientName || x.admissionNo }}</td>
+          <td>{{ x.forWhom === 'ATTENDANT' ? 'Attendant' : 'Patient' }}</td>
+          <td>{{ x.item }}{{ x.quantity ? ' × ' + x.quantity : '' }}<div class="cw-time" *ngIf="x.notes">{{ x.notes }}</div></td>
+          <td>{{ x.mealTimeSlot?.name || '—' }}</td>
+          <td>
+            <span class="cw-pill" [class.cw-ok]="x.status === 'SERVED'" [class.cw-info]="x.status === 'PREPARED'" [class.cw-warn]="x.status === 'CANCELLED'">{{ x.status }}</span>
+            <div class="cw-time" *ngIf="x.servedAt">{{ x.servedByName }} · {{ x.servedAt | date:'HH:mm' }}</div>
+            <div class="cw-time" *ngIf="x.cancelReason">{{ x.cancelReason }}</div>
+          </td>
+          <td>{{ x.billed ? 'Yes' : '' }}</td>
+          <td class="cw-actions">
+            <button type="button" class="cw-btn cw-btn-sm" *ngIf="x.status === 'ORDERED'" (click)="prepareExtra(x)">Prepared</button>
+            <button type="button" class="cw-btn cw-btn-sm" *ngIf="x.status === 'PREPARED'" (click)="extraAction = { order: x, action: 'serve', value: username }">Served</button>
+            <button type="button" class="cw-btn cw-btn-sm" *ngIf="x.status === 'ORDERED' || x.status === 'PREPARED'" (click)="extraAction = { order: x, action: 'cancel', value: '' }">Cancel</button>
+          </td>
+        </tr>
+        <tr *ngIf="extras.length === 0"><td colspan="9" class="cw-empty">No extra food for this date.</td></tr>
+      </tbody>
+    </table>
+  </ng-container>
+
+  <!-- ─── Billing (flag only — billing itself happens in the HIS) ─── -->
+  <ng-container *ngIf="tab === 'billing'">
+    <div class="cw-toolbar cw-billbar">
+      <label>From <input type="date" [(ngModel)]="billFrom" /></label>
+      <label>To <input type="date" [(ngModel)]="billTo" /></label>
+      <label>Show
+        <select [(ngModel)]="billFilter">
+          <option value="false">Not billed</option>
+          <option value="true">Billed</option>
+          <option value="">All</option>
+        </select>
+      </label>
+      <button type="button" class="cw-btn" (click)="loadBilling()">Load</button>
+      <button type="button" class="cw-btn" (click)="selectAllBill()">Select all</button>
+      <button type="button" class="cw-btn cw-btn-primary" [disabled]="billSelected.size === 0" (click)="markBilled(true)">Mark billed ({{ billSelected.size }})</button>
+      <button type="button" class="cw-btn" [disabled]="billSelected.size === 0" (click)="markBilled(false)">Mark not billed</button>
+    </div>
+    <p class="cw-sub">Served trays and served extra food. DocMinds does not bill — tick what has been billed in the HIS.</p>
+    <table class="diet-grid">
+      <thead><tr><th></th><th>Date</th><th>Meal</th><th>Bed</th><th>Patient</th><th>PRN</th><th>Diet</th><th>Item</th><th>Served</th><th>Billed</th></tr></thead>
+      <tbody>
+        <tr *ngFor="let r of billRows">
+          <td><input type="checkbox" [checked]="billSelected.has(r.id)" (change)="toggleBill(r.id)" /></td>
+          <td>{{ r.date | date:'dd-MM' }}</td>
+          <td>{{ r.slot || '—' }}</td>
+          <td class="cw-bed">{{ r.bedNumber }}</td>
+          <td>{{ r.patientName || r.admissionNo }}</td>
+          <td>{{ r.prn }}</td>
+          <td>{{ r.dietCode || (r.kind === 'EXTRA' ? 'Extra' : '—') }}</td>
+          <td>{{ r.item }}</td>
+          <td>{{ r.servedBy }} · {{ r.servedAt | date:'HH:mm' }}</td>
+          <td>
+            <span class="cw-pill cw-ok" *ngIf="r.billed">{{ r.billedBy }} · {{ r.billedAt | date:'dd-MM HH:mm' }}</span>
+            <span class="cw-muted" *ngIf="!r.billed">—</span>
+          </td>
+        </tr>
+        <tr *ngIf="billRows.length === 0"><td colspan="10" class="cw-empty">Nothing to show for this range.</td></tr>
+      </tbody>
+    </table>
+  </ng-container>
+
+  <!-- ─── Serve modal ─── -->
   <div class="cw-modal-bg" *ngIf="modal === 'deliver' && active" (click)="closeModal()">
     <div class="cw-modal" (click)="$event.stopPropagation()">
-      <h3>Deliver tray — {{ active.patientName }} ({{ active.admissionNo }})</h3>
-      <p class="cw-sub">{{ active.meal?.name }} · {{ active.mealTimeSlot?.name }}</p>
+      <h3>Serve tray — {{ active.patientName }} ({{ active.bedNumber }})</h3>
+      <p class="cw-sub">{{ active.displayCode }} · {{ active.meal?.name }} {{ active.kitchenNotes }} · {{ active.mealTimeSlot?.name }}</p>
+      <div class="cw-row-warn" *ngFor="let a of active.alerts">⚠ {{ a }}</div>
+      <label>Served by (name) <input type="text" [(ngModel)]="deliverForm.servedByName" [placeholder]="username || 'Name of the person serving'" /></label>
       <div class="cw-form-row">
         <label>Hot tray °C <input type="number" [(ngModel)]="deliverForm.trayHotTempC" step="0.5" /></label>
         <label>Cold tray °C <input type="number" [(ngModel)]="deliverForm.trayColdTempC" step="0.5" /></label>
       </div>
-      <label class="cw-check"><input type="checkbox" [(ngModel)]="deliverForm.twoIdVerified" /> Verified patient with two identifiers (name + admissionNo)</label>
+      <label class="cw-check"><input type="checkbox" [(ngModel)]="deliverForm.twoIdVerified" /> Verified patient with two identifiers (name + PRN / admission no.)</label>
+      <label *ngIf="isLate(active)" class="cw-late">Delay reason (served after {{ active.mealTimeSlot?.endTime }}) *
+        <input type="text" [(ngModel)]="deliverForm.delayReason" placeholder="e.g. Patient in procedure, kitchen delay" />
+      </label>
       <label>Notes <textarea rows="2" [(ngModel)]="deliverForm.notes"></textarea></label>
-      <h4>Nurse signature</h4>
+      <h4>Signature</h4>
       <app-e-sign
-        [signerType]="'nurse'"
-        [signerName]="'Nurse'"
+        [signerType]="'staff'"
+        [signerName]="deliverForm.servedByName || username || 'Dietary staff'"
         [contextType]="'meal-delivery'"
         [contextId]="active.id"
         (signed)="onDeliverSigned($event)"
@@ -113,16 +271,30 @@
     </div>
   </div>
 
-  <!-- ─── Skip modal ─── -->
+  <!-- ─── Not served modal ─── -->
   <div class="cw-modal-bg" *ngIf="modal === 'skip' && active" (click)="closeModal()">
     <div class="cw-modal" (click)="$event.stopPropagation()">
-      <h3>Skip meal — {{ active.patientName }}</h3>
+      <h3>Not served — {{ active.patientName }}</h3>
       <label>Reason
-        <textarea rows="3" [(ngModel)]="skipForm.reason" placeholder="Refused / NPO order / Transferred"></textarea>
+        <textarea rows="3" [(ngModel)]="skipForm.reason" placeholder="Refused / NPO / In procedure / Discharged"></textarea>
       </label>
       <div class="cw-modal-actions">
         <button type="button" class="cw-btn cw-btn-primary" (click)="saveSkip()">Save</button>
         <button type="button" class="cw-btn" (click)="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Extra food serve / cancel ─── -->
+  <div class="cw-modal-bg" *ngIf="extraAction" (click)="extraAction = null">
+    <div class="cw-modal" (click)="$event.stopPropagation()">
+      <h3>{{ extraAction.action === 'serve' ? 'Served' : 'Cancel' }} — {{ extraAction.order.item }}</h3>
+      <label>{{ extraAction.action === 'serve' ? 'Served by (name)' : 'Reason' }}
+        <input type="text" [(ngModel)]="extraAction.value" />
+      </label>
+      <div class="cw-modal-actions">
+        <button type="button" class="cw-btn cw-btn-primary" (click)="confirmExtraAction()">Save</button>
+        <button type="button" class="cw-btn" (click)="extraAction = null">Close</button>
       </div>
     </div>
   </div>

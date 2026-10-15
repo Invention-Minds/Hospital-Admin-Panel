@@ -1,7 +1,7 @@
 <div class="page q-shell">
   <div class="q-head">
     <div>
-      <h2 class="q-title">Lab / Radiology events</h2>
+      <h2 class="q-title">Lab / Radiology events <span class="q-view-only" *ngIf="!canEdit">View only</span></h2>
       <p class="q-sub">Amended reports, rejected samples, repeat imaging. Powers PSQ-002 (lab amendments), PSQ-003 (radiology amendments), LAB-001 (sample rejection), RAD-003 (repeat imaging).</p>
     </div>
     <div class="q-range">
@@ -12,7 +12,7 @@
   <div class="q-banner q-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
   <div class="q-banner lr-banner-ok" *ngIf="successMessage">{{ successMessage }}</div>
 
-  <div class="lr-card">
+  <div class="lr-card" *ngIf="canEdit">
     <h3 class="lr-card-title">Record event</h3>
     <div class="lr-row">
       <label>Event
@@ -47,7 +47,7 @@
           <td>{{ r.prn || '—' }}</td>
           <td>{{ r.reason || '—' }}</td>
           <td>{{ r.reporter || '—' }}</td>
-          <td><button class="lr-delete" (click)="remove(r)">×</button></td>
+          <td><button class="lr-delete" *ngIf="canEdit" (click)="remove(r)">×</button></td>
         </tr>
       </tbody>
     </table>

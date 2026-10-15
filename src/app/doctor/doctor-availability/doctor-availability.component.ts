@@ -3,7 +3,7 @@ import { DoctorServiceService } from '../../services/doctor-details/doctor-servi
 import { Doctor } from '../../models/doctor.model';
 import { DoctorWithSlots } from '../../models/doctos_with_slots.model';
 import { ChangeDetectorRef } from '@angular/core';
-import { forkJoin } from 'rxjs';
+import { forkJoin, Subscription } from 'rxjs';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { MessageService } from 'primeng/api';
 import { AlertService } from '../../services/alert.service';
@@ -57,6 +57,8 @@ export class DoctorAvailabilityComponent {
   userId: string = ''; // User ID
   arrivedDoctorIds: number[] = []; // Doctors marked "came" today (drives TV display)
   arrivedToggleBusy: { [doctorId: number]: boolean } = {};
+  private doctorsSub?: Subscription; // In-flight paged request (cancelled when a newer one starts)
+  private searchDebounce?: ReturnType<typeof setTimeout>;
 
 
 
@@ -92,9 +94,20 @@ export class DoctorAvailabilityComponent {
   fetchDoctors(): void {
     const formattedDate = this.formatDate(this.selectedDate);
     this.isLoading = true;
-    this.doctorService.getAllDoctors(formattedDate).subscribe({
-      next: (doctors: Doctor[]) => {
-        this.unavailableDoctorList = doctors.map(d => ({
+    this.doctorsSub?.unsubscribe();
+    // Only the current page of doctors is loaded; search and pagination happen on the server
+    this.doctorsSub = this.doctorService.getDoctorsPaged(
+      formattedDate,
+      this.currentPage,
+      this.itemsPerPage,
+      this.departmentSearchQuery.trim(),
+      this.doctorSearchQuery.trim()
+    ).subscribe({
+      next: (res) => {
+        const doctors: Doctor[] = res.doctors;
+        this.totalPages = res.totalPages;
+        this.currentPage = res.page;
+        this.unavailableDoctorList = res.allDoctors.map(d => ({
           ...d,
           selected: false  // Add this if using checkboxes
         }));
@@ -377,43 +390,48 @@ export class DoctorAvailabilityComponent {
   doctorSearchQuery: string = '';
 
 
+  // Filtering, sorting and paging are now done by the backend (get-doctor-details-paged),
+  // so this.doctors already holds only the current page in sorted order.
   applySearchFilter(): void {
-    let filteredDoctors = [];
-
-    if (this.departmentSearchQuery.trim() === '' && this.doctorSearchQuery.trim() === '') {
-      // If both search fields are empty, show all doctors
-      filteredDoctors = this.doctors.sort((a, b) =>
-        this.stripPrefix(a.name).localeCompare(this.stripPrefix(b.name))
-      );
-    } else {
-      filteredDoctors = this.doctors.filter(doctor => {
-        const matchesDepartment = this.departmentSearchQuery.trim() === '' || doctor.departmentName?.toLowerCase().includes(this.departmentSearchQuery.toLowerCase());
-        const matchesDoctor = this.doctorSearchQuery.trim() === '' || doctor.name.toLowerCase().includes(this.doctorSearchQuery.toLowerCase());
-        return matchesDepartment && matchesDoctor;
-      });
-    }
-
-    this.totalPages = Math.ceil(filteredDoctors.length / this.itemsPerPage);
-    this.filteredDoctors = filteredDoctors.slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage);
+    this.filteredDoctors = this.doctors;
   }
+  // applySearchFilter(): void {
+  //   let filteredDoctors = [];
+
+  //   if (this.departmentSearchQuery.trim() === '' && this.doctorSearchQuery.trim() === '') {
+  //     // If both search fields are empty, show all doctors
+  //     filteredDoctors = this.doctors.sort((a, b) =>
+  //       this.stripPrefix(a.name).localeCompare(this.stripPrefix(b.name))
+  //     );
+  //   } else {
+  //     filteredDoctors = this.doctors.filter(doctor => {
+  //       const matchesDepartment = this.departmentSearchQuery.trim() === '' || doctor.departmentName?.toLowerCase().includes(this.departmentSearchQuery.toLowerCase());
+  //       const matchesDoctor = this.doctorSearchQuery.trim() === '' || doctor.name.toLowerCase().includes(this.doctorSearchQuery.toLowerCase());
+  //       return matchesDepartment && matchesDoctor;
+  //     });
+  //   }
+
+  //   this.totalPages = Math.ceil(filteredDoctors.length / this.itemsPerPage);
+  //   this.filteredDoctors = filteredDoctors.slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage);
+  // }
   nextPage(): void {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
-      this.applySearchFilter();
+      this.fetchDoctors();
     }
   }
 
   prevPage(): void {
     if (this.currentPage > 1) {
       this.currentPage--;
-      this.applySearchFilter();
+      this.fetchDoctors();
     }
   }
 
   goToPage(pageNumber: number): void {
     if (pageNumber >= 1 && pageNumber <= this.totalPages) {
       this.currentPage = pageNumber;
-      this.applySearchFilter();
+      this.fetchDoctors();
     }
   }
   onPageInputChange(): void {
@@ -422,7 +440,7 @@ export class DoctorAvailabilityComponent {
     } else if (this.currentPage > this.totalPages) {
       this.currentPage = this.totalPages;
     }
-    this.applySearchFilter();
+    this.fetchDoctors();
   }
 
 
@@ -431,7 +449,12 @@ export class DoctorAvailabilityComponent {
     return name.replace(/^(Dr\.|Ms\.|Mr\.|Mrs\.)\s*/i, '').trim();
   }
   onSearchChange(): void {
-    this.applySearchFilter(); // Apply filter when either search value changes
+    // Apply filter when either search value changes (debounced, server-side, back to page 1)
+    clearTimeout(this.searchDebounce);
+    this.searchDebounce = setTimeout(() => {
+      this.currentPage = 1;
+      this.fetchDoctors();
+    }, 400);
   }
   onSlotClick(doctor: Doctor, slot: any): void {
     console.log('Slot clicked:', slot);
@@ -754,6 +777,7 @@ export class DoctorAvailabilityComponent {
         .subscribe(
           response => {
             // console.log('Unavailable slots added successfully:', response);
+            this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Unavailable slots updated successfully' });
             // Close the dialog after saving
             this.fetchDoctors();
             this.closeSlotDialog();
@@ -891,11 +915,13 @@ export class DoctorAvailabilityComponent {
   }
 
 
-  closeSlotDialog(): void {
+  // Keep the board on the date the user was working on (it used to jump back to today).
+  // The dialog's calendar shares selectedDate with the board, so refresh when closing without saving.
+  closeSlotDialog(refresh = false): void {
     this.isSlotDialogOpen = false;
     this.selectedDoctor = null;
-    this.selectedDate = this.todayforUnavialable;
     this.generatedSlots = [];
+    if (refresh) this.fetchDoctors();
   }
   addExtraSlotsBefore(doctor: any, timeRange: string): void {
     // Ensure object exists
@@ -1082,8 +1108,8 @@ export class DoctorAvailabilityComponent {
             bookedSlots,
             currentTimeInMinutes,
             isUnavailableDay,
-            beforeMinutes,
-            afterMinutes
+            extraHoursBefore?.[timeRange] || 0, // hours — generateUnavailableSlots converts to minutes itself
+            extraHoursAfter?.[timeRange] || 0
           )
         );
         continue;

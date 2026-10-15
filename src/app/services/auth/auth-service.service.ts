@@ -66,6 +66,8 @@ export class AuthServiceService {
           localStorage.setItem('id', user.id);
           localStorage.setItem('therapistId', user.therapistId);
           localStorage.setItem('departmentName', user.departmentName || '');
+          // Department a (non-doctor) user manages — scopes their incident view.
+          localStorage.setItem('department', user.department || '');
           // NS — nurse sidebar capability flags. OPD-station nurse → appointments;
           // IPD/ward-scoped nurse → clinical menus. A pure OPD nurse has only the
           // first, so they see just Appointments + Incidents.
@@ -124,9 +126,11 @@ initializeUserFromStorage(): void {
     // console.log(this.user);
   }
 
-  register(username: string, password: string, isReceptionist: boolean, employeeId: string, role:string, adminType: string, subAdminType: string, createdBy: string): Observable<any> {
+  register(username: string, password: string, isReceptionist: boolean, employeeId: string, role:string, adminType: string, subAdminType: string, createdBy: string, department?: string | null): Observable<any> {
     // const role = this.extractRoleFromUsername(username);  // Extract role
-    return this.http.post(`${this.apiUrl}/register`, { username, password, isReceptionist, employeeId, role, adminType, subAdminType, createdBy }).pipe(
+    const body: any = { username, password, isReceptionist, employeeId, role, adminType, subAdminType, createdBy };
+    if (department) body.department = department;
+    return this.http.post(`${this.apiUrl}/register`, body).pipe(
       tap(response => {
         this.role = role;  // Save the role
       })
@@ -154,6 +158,10 @@ initializeUserFromStorage(): void {
   }
   toggleUserActive(userId: number): Observable<any> {
     return this.http.patch(`${this.apiUrl}/toggle-active/${userId}`, {});
+  }
+  /** Set/clear the department a user manages (must be an existing Department.name). */
+  setUserDepartment(userId: number, department: string | null): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/user-department/${userId}`, { department });
   }
   getUserDetails(userId: number): Observable<any> {
     const params = new HttpParams().set('userId', userId); // Pass userId as a query param

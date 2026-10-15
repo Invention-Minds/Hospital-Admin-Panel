@@ -1,0 +1,233 @@
+<div class="dx-shell">
+  <div class="dx-head">
+    <div>
+      <h2 class="dx-title">Diet census</h2>
+      <p class="dx-sub">The ward's morning patient list for Dietary. Nursing marks NPO, feeds and changes · Dietary receives and acknowledges.</p>
+    </div>
+  </div>
+
+  <div class="dx-banner dx-banner-bad" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+  <div class="dx-banner dx-banner-good" *ngIf="successMessage" role="status">{{ successMessage }}</div>
+
+  <div class="dx-tabs" *ngIf="isNurse && isDietary">
+    <button type="button" [class.active]="tab==='send'" (click)="tab='send'">Send census</button>
+    <button type="button" [class.active]="tab==='inbox'" (click)="tab='inbox'; loadInbox()">Dietary inbox</button>
+  </div>
+
+  <!-- ═════════════ Send (nurse) ═════════════ -->
+  <ng-container *ngIf="tab==='send'">
+    <div class="dx-toolbar dc-bar">
+      <label>Ward
+        <select [(ngModel)]="wardId" (change)="loadPrefill()">
+          <option value="">Select your ward</option>
+          <option *ngFor="let w of wards" [value]="w.id">{{ w.wardName }}</option>
+        </select>
+      </label>
+      <button type="button" class="dx-btn" (click)="loadPrefill()" [disabled]="!wardId">Reload list</button>
+      <label class="dx-check dc-only" *ngIf="lines.length">
+        <input type="checkbox" [(ngModel)]="onlyMarked" /> Show only patients I marked
+      </label>
+    </div>
+
+    <p class="dx-empty" *ngIf="!wardId && !loading">Pick your ward to load today's patient list.</p>
+    <p class="dx-empty" *ngIf="loading">Loading the ward list…</p>
+
+    <ng-container *ngIf="prefill && !loading">
+      <div class="dx-summary">
+        <span><b>{{ lines.length }}</b> patients in {{ prefill.wardName }}</span>
+        <span [class.is-act]="markedCount"><b>{{ markedCount }}</b> marked by you</span>
+        <span><b>{{ npoCount }}</b> NPO</span>
+        <span><b>{{ newCount }}</b> new admissions</span>
+        <span *ngIf="prefill.lastCensus as lc">Last sent {{ lc.submittedAt | date:'dd MMM, HH:mm' }} by {{ lc.submittedBy }} · {{ statusLabel(lc.status) }}</span>
+      </div>
+
+      <div class="dx-scroll">
+        <table class="diet-grid dc-grid">
+          <thead>
+            <tr>
+              <th>Bed</th><th>Patient</th><th>Consultant · diagnosis</th><th>Current diet</th>
+              <th>Diet on ward</th><th>NPO</th><th>RT feed</th><th>D/S plate</th><th>Remarks</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let l of visibleLines" [class.is-act]="isMarked(l)" [class.is-new]="l.isNew && !isMarked(l)">
+              <td class="is-strong dx-tight">{{ l.bedNumber || '—' }}</td>
+              <td class="dc-patient">
+                <span class="dx-strong">{{ l.patientName || l.admissionNo }}</span>
+                <span class="dx-sub-line">PRN {{ l.prn }}{{ l.ageSex ? ' · ' + l.ageSex : '' }}</span>
+                <span class="dx-pill dx-pill-new" *ngIf="l.isNew">New admission</span>
+              </td>
+              <td class="dc-dx">
+                {{ l.consultant }}
+                <span class="dx-sub-line">{{ l.diagnosis | slice:0:60 }}</span>
+              </td>
+              <td class="dx-tight">
+                <ng-container *ngIf="l.currentDiet as d">
+                  <span class="dx-strong">{{ d.code }}</span>
+                  <span class="dx-pill dx-pill-warn" *ngIf="d.status==='INTERIM'">Interim</span>
+                </ng-container>
+                <span class="dx-muted" *ngIf="!l.currentDiet">None yet</span>
+              </td>
+              <td class="dc-diet">
+                <input type="text" class="dx-input" [(ngModel)]="l.dietText" placeholder="As on ward, e.g. DM low salt" aria-label="Diet on ward" />
+                <select class="dx-input" *ngIf="!l.currentDiet" [(ngModel)]="l.dietMasterId" (ngModelChange)="onDietPick(l)"
+                        aria-label="Diet code for the interim tray">
+                  <option [ngValue]="null">Diet code (interim tray)</option>
+                  <option *ngFor="let d of diets" [ngValue]="d.id">{{ d.code }} · {{ d.name }}</option>
+                </select>
+              </td>
+              <td class="dc-npo">
+                <label class="dx-check"><input type="checkbox" [(ngModel)]="l.npo" /> NPO</label>
+                <input *ngIf="l.npo" type="datetime-local" class="dx-input" [(ngModel)]="l.npoFromLocal" aria-label="NPO from (blank = now)" title="NPO from — leave blank for now" />
+              </td>
+              <td class="dc-feed"><input type="text" class="dx-input" [(ngModel)]="l.feedText" placeholder="200 ml Q2H" aria-label="RT feed" /></td>
+              <td class="dx-tight"><label class="dx-check"><input type="checkbox" [(ngModel)]="l.disposablePlate" aria-label="Disposable plate" /> Yes</label></td>
+              <td class="dc-remarks"><input type="text" class="dx-input" [(ngModel)]="l.remarks" aria-label="Remarks" /></td>
+            </tr>
+            <tr *ngIf="visibleLines.length===0">
+              <td colspan="9" class="dx-empty">{{ onlyMarked ? 'You have not marked any patient yet.' : 'No admitted patients in this ward.' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="dx-card dc-send" *ngIf="lines.length">
+        <div class="dx-row dc-send-row">
+          <label class="dx-field">Note to Dietary
+            <textarea rows="2" [(ngModel)]="notes" placeholder="e.g. 1206 discharge expected after lunch"></textarea>
+          </label>
+          <div class="dc-send-side">
+            <p class="dx-sub">
+              All {{ lines.length }} patients are sent so Dietary has the full ward list;
+              the {{ markedCount }} you marked are highlighted for them.
+            </p>
+            <button type="button" class="dx-btn dx-btn-primary" *ngIf="!signing" (click)="signing = true">Sign and send to Dietary</button>
+          </div>
+        </div>
+        <app-e-sign *ngIf="signing" [signerType]="'staff'" [signerRole]="'nurse'" [signerName]="username || 'Nurse'"
+                    [contextType]="'diet-census'" [contextId]="wardId" (signed)="onSigned($event)" (cancelled)="signing = false">
+        </app-e-sign>
+      </div>
+
+      <div class="dx-card" *ngIf="myHistory.length">
+        <h3>Sent from this ward</h3>
+        <table class="diet-grid">
+          <thead><tr><th>Sent</th><th>By</th><th class="dx-right">Patients</th><th class="dx-right">Marked</th><th>Status</th><th>Acknowledged</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let c of myHistory">
+              <td class="dx-tight">{{ c.submittedAt | date:'dd MMM, HH:mm' }}</td>
+              <td>{{ c.submittedBy }}</td>
+              <td class="dx-right">{{ c.lineCount }}</td>
+              <td class="dx-right">{{ c.actionCount }}</td>
+              <td><span class="dx-pill" [ngClass]="statusClass(c.status)">{{ statusLabel(c.status) }}</span></td>
+              <td>{{ c.acknowledgedBy ? c.acknowledgedBy + ' · ' : '' }}{{ c.acknowledgedAt | date:'HH:mm' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </ng-container>
+  </ng-container>
+
+  <!-- ═════════════ Inbox (dietary) ═════════════ -->
+  <ng-container *ngIf="tab==='inbox'">
+    <div class="dx-toolbar dc-bar">
+      <label>Date <input type="date" [(ngModel)]="inboxDate" (change)="loadInbox()" /></label>
+      <button type="button" class="dx-btn" (click)="loadInbox()">Refresh</button>
+    </div>
+
+    <table class="diet-grid">
+      <thead>
+        <tr>
+          <th>Ward</th><th>Sent</th><th class="dx-right">Patients</th><th class="dx-right">Needs action</th>
+          <th class="dx-right">New</th><th class="dx-right">NPO</th><th>Status</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let c of inbox" class="is-click" [class.is-selected]="detail?.id === c.id" [class.is-muted]="c.status === 'REPLACED'" (click)="openCensus(c)">
+          <td class="is-strong">{{ c.wardName }}</td>
+          <td class="dx-tight">{{ c.submittedAt | date:'HH:mm' }} <span class="dx-muted">· {{ c.submittedBy }}</span></td>
+          <td class="dx-right">{{ c.lineCount }}</td>
+          <td class="dx-right"><b [class.dc-act-num]="c.actionCount">{{ c.actionCount }}</b></td>
+          <td class="dx-right">{{ c.newCount }}</td>
+          <td class="dx-right">{{ c.npoCount }}</td>
+          <td><span class="dx-pill" [ngClass]="statusClass(c.status)">{{ statusLabel(c.status) }}</span></td>
+          <td class="dx-right"><button type="button" class="dx-btn dx-btn-sm" (click)="$event.stopPropagation(); openCensus(c)">Open</button></td>
+        </tr>
+        <tr *ngIf="inbox.length===0"><td colspan="8" class="dx-empty">No census received for this date yet.</td></tr>
+      </tbody>
+    </table>
+
+    <section class="dx-card dc-detail" *ngIf="detail">
+      <div class="dx-card-head">
+        <h3>{{ detail.wardName }}</h3>
+        <span class="dx-pill" [ngClass]="statusClass(detail.status)">{{ statusLabel(detail.status) }}</span>
+      </div>
+      <ol class="dx-steps">
+        <li class="is-done"><span class="dx-dot"></span>Sent {{ detail.submittedAt | date:'HH:mm' }} by {{ detail.submittedBy }}</li>
+        <li [class.is-done]="detail.receivedAt" [class.is-todo]="!detail.receivedAt"><span class="dx-dot"></span>
+          {{ detail.receivedAt ? 'Received ' + (detail.receivedAt | date:'HH:mm') + ' by ' + detail.receivedBy : 'Not received' }}</li>
+        <li [class.is-done]="detail.acknowledgedAt" [class.is-todo]="!detail.acknowledgedAt"><span class="dx-dot"></span>
+          {{ detail.acknowledgedAt ? 'Acknowledged ' + (detail.acknowledgedAt | date:'HH:mm') + ' by ' + detail.acknowledgedBy : 'Not acknowledged' }}</li>
+      </ol>
+      <p class="dc-note" *ngIf="detail.notes"><span class="dx-muted">Nurse's note:</span> {{ detail.notes }}</p>
+
+      <div class="dx-scroll">
+        <table class="diet-grid">
+          <thead>
+            <tr><th>Bed</th><th>Patient</th><th>Nurse reports</th><th>NPO</th><th>Feed</th><th>Plate</th><th>Current diet</th><th>What to do</th></tr>
+          </thead>
+          <tbody>
+            <tr class="dx-group"><td colspan="8">Needs action · {{ actionLines.length }}</td></tr>
+            <tr *ngFor="let l of actionLines" class="is-act">
+              <ng-container *ngTemplateOutlet="censusLine; context: { $implicit: l }"></ng-container>
+            </tr>
+            <tr *ngIf="actionLines.length===0"><td colspan="8" class="dx-empty">Nothing to act on — no changes reported.</td></tr>
+
+            <tr class="dx-group">
+              <td colspan="8">
+                No change · {{ unchangedLines.length }}
+                <button type="button" class="dx-btn-link dx-btn dc-toggle" *ngIf="unchangedLines.length" (click)="showUnchanged = !showUnchanged">
+                  {{ showUnchanged ? 'Hide' : 'Show' }}
+                </button>
+              </td>
+            </tr>
+            <ng-container *ngIf="showUnchanged">
+              <tr *ngFor="let l of unchangedLines" class="is-muted">
+                <ng-container *ngTemplateOutlet="censusLine; context: { $implicit: l }"></ng-container>
+              </tr>
+            </ng-container>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="dx-banner dx-banner-warn" *ngIf="detail.status === 'REPLACED'">
+        The ward re-sent this census — open the newer one to acknowledge.
+      </div>
+      <div class="dx-actionbar" *ngIf="detail.status === 'SUBMITTED' || detail.status === 'RECEIVED'">
+        <label class="dx-check"><input type="checkbox" [(ngModel)]="applyNpo" /> Apply NPO holds reported by the ward</label>
+        <label class="dx-check"><input type="checkbox" [(ngModel)]="createInterim" /> Interim diet for new patients until the dietitian assesses</label>
+        <button type="button" class="dx-btn dx-btn-primary" (click)="acknowledge()" [disabled]="acknowledging">
+          {{ acknowledging ? 'Acknowledging…' : 'Acknowledge census' }}
+        </button>
+      </div>
+    </section>
+  </ng-container>
+</div>
+
+<!-- One census line (used by both groups). -->
+<ng-template #censusLine let-l>
+  <td class="is-strong dx-tight">{{ l.bedNumber }}</td>
+  <td>
+    <span class="dx-strong">{{ l.patientName }}</span>
+    <span class="dx-sub-line">PRN {{ l.prn }}</span>
+  </td>
+  <td>{{ l.dietText || '—' }}<span class="dx-muted" *ngIf="l.dietMaster"> ({{ l.dietMaster.code }})</span></td>
+  <td class="dx-tight"><span *ngIf="l.npo" class="dc-npo">NPO{{ l.npoFrom ? ' from ' + (l.npoFrom | date:'HH:mm, dd MMM') : '' }}</span></td>
+  <td>{{ l.feedText }}</td>
+  <td>{{ l.disposablePlate ? 'Disposable' : '' }}</td>
+  <td class="dx-tight">{{ l.currentDiet?.code || '—' }}</td>
+  <td class="dc-todo">
+    <span class="dx-note dx-note-act" *ngFor="let a of l.actions">{{ a }}</span>
+    <span class="dx-note dx-note-info" *ngFor="let i of l.info">{{ i }}</span>
+  </td>
+</ng-template>

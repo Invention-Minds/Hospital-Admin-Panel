@@ -43,7 +43,7 @@
             <div class="col">
               <div class="custom-form-field">
                 <input type="email" id="email" [(ngModel)]="doctor!.email" name="email" placeholder=""
-                  #email="ngModel" />
+                  pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" #email="ngModel" />
                 <label for="email" class="input-label">Email</label>
                 <div *ngIf="email.invalid && (email.dirty || email.touched)" class="error-message">
                   <!-- <small *ngIf="email.errors && email.errors['required']">Email is required</small> -->
@@ -277,7 +277,7 @@
                       *ngFor="let time of individualAvailability[day].availableFromArray; let i = index; trackBy: trackByFn"
                       class="availability-field-container">
                       <input type="text" id="availableTime{{day}}{{i}}"
-                        [(ngModel)]="individualAvailability[day].availableFromArray[i]" placeholder="09:00-10:00"
+                        [(ngModel)]="individualAvailability[day].availableFromArray[i]" placeholder="09:00-17:00"
                         name="availableTime{{day}}{{i}}" pattern="^\d{2}:\d{2}-\d{2}:\d{2}$" required
                         (ngModelChange)="updateAvailableFromString(day.toString())" />
                       <label class="input-label" for="availableTime{{day}}{{i}}">{{ day.toString() | titlecase }}
@@ -307,7 +307,7 @@
                       class="availability-field-container">
                       <input type="text" id="availableTime{{day}}{{i}}"
                         [(ngModel)]="individualAvailability[day].availableFromArray[i]" name="availableTime{{day}}{{i}}"
-                        placeholder="09:00-10:00" pattern="^\d{2}:\d{2}-\d{2}:\d{2}$" required
+                        placeholder="09:00-17:00" pattern="^\d{2}:\d{2}-\d{2}:\d{2}$" required
                         (ngModelChange)="updateAvailableFromString(day.toString())" />
                       <label class="input-label" for="availableTime{{day}}{{i}}">{{ day.toString() | titlecase }}
                         Available Times*</label>
@@ -330,8 +330,16 @@
               <div class="col">
                 <div class="custom-form-field">
                   <input type="number" id="slotTiming" [(ngModel)]="generalSlotDuration"
-                    (ngModelChange)="generateSlots()" name="slotTiming" min="1" placeholder="20" required />
+                    (ngModelChange)="generateSlots()" name="slotTiming" min="1" placeholder="20" required
+                    #slotTimingPerDay="ngModel" />
                   <label for="slotTiming" class="input-label">Slot Timing*</label>
+                  <div *ngIf="slotTimingPerDay.invalid && (slotTimingPerDay.dirty || slotTimingPerDay.touched)"
+                    class="error-message">
+                    <small *ngIf="slotTimingPerDay.errors && slotTimingPerDay.errors['required']">Slot timing is
+                      required</small>
+                    <small *ngIf="slotTimingPerDay.errors && slotTimingPerDay.errors['min']">Slot timing must be a
+                      positive number</small>
+                  </div>
                 </div>
               </div>
             </div>

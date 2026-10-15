@@ -1,43 +1,472 @@
-.cc-shell {
-  background: #0f172a;
-  color: #e5e7eb;
-  min-height: 100vh;
-  padding: 24px;
-  font-family: 'Inter', system-ui, sans-serif;
-}
-.cc-header {
-  display: flex; align-items: center; justify-content: space-between;
-  border-bottom: 2px solid #1e293b;
-  padding-bottom: 12px; margin-bottom: 18px;
-}
-.cc-title { font-size: 28px; font-weight: 700; }
-.cc-slot { font-size: 22px; color: #38bdf8; }
-.cc-time { color: #64748b; font-size: 16px; }
-.cc-clock { font-size: 26px; font-weight: 600; color: #fbbf24; }
+/* Canteen TV — "The pass", light.
+   A clean kitchen-tile wall, a brushed-steel ticket rail per ward, white
+   order slips hanging from it. Saffron = still cooking, teal = on the pass
+   (prepared, stamped), green = sent. Poppins throughout, like the rest of
+   DocMinds; heavy weights for bed numbers so they read across the kitchen. */
+:host {
+  --wall: #f7f5f0;
+  --tile-line: rgba(176, 168, 150, 0.16);
+  --surface: #ffffff;
+  --navy: #0e2970;
+  --navy-2: #1b3a8a;
+  --ink: #16213e;
+  --ink-soft: #5a6480;
+  --line: #e6e1d6;
 
-.cc-err { background: #7f1d1d; padding: 10px 14px; border-radius: 6px; }
+  --steel-hi: #f1f3f6;
+  --steel: #b9c0c9;
+  --steel-lo: #7c8591;
 
-.cc-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  --saffron: #f5a524;
+  --saffron-ink: #3a2500;
+  --saffron-tint: #fff4dc;
+  --teal: #0f9d84;
+  --teal-ink: #0b6e5d;
+  --teal-tint: #e3f6f1;
+  --green: #2e8b3e;
+  --green-tint: #e8f4e9;
+  --tomato: #e0482b;
+
+  display: block;
+}
+
+.pass {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  color: var(--ink);
+  font-family: Poppins, sans-serif;
+  font-variant-numeric: tabular-nums;
+  /* kitchen wall tiles */
+  background:
+    linear-gradient(var(--tile-line) 1px, transparent 1px) 0 0 / 64px 64px,
+    linear-gradient(90deg, var(--tile-line) 1px, transparent 1px) 0 0 / 64px 64px,
+    var(--wall);
+  cursor: none; /* unattended TV */
+}
+.pass ::selection { background: var(--saffron); color: var(--saffron-ink); }
+.sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+.ic { width: 1em; height: 1em; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+
+/* ── Top ─────────────────────────────────────────────────── */
+.top {
+  flex: 0 0 76px;
+  display: flex;
+  align-items: center;
   gap: 18px;
+  padding: 0 28px 0 18px;
+  background: var(--surface);
+  border-bottom: 4px solid var(--saffron);
+  box-shadow: 0 2px 10px rgba(22, 33, 62, 0.06);
+}
+.top-logo { height: 48px; flex-shrink: 0; }
+.top-name { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.top-name h1 {
+  margin: 0;
+  color: var(--navy);
+  font-size: 26px;
+  font-weight: 600;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.top-name span { font-size: 15px; font-weight: 500; color: var(--ink-soft); }
+.top-clock { display: flex; flex-direction: column; align-items: flex-end; line-height: 1; color: var(--navy); }
+.top-time { font-size: 34px; font-weight: 700; }
+.top-time small { font-size: 18px; font-weight: 600; color: var(--ink-soft); margin-left: 2px; }
+.top-date { margin-top: 5px; font-size: 14px; font-weight: 500; color: var(--ink-soft); }
+
+/* ── Floor ───────────────────────────────────────────────── */
+.floor {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 26px 10px;
 }
 
-.cc-ward {
-  background: #1e293b;
+/* Service line — sits on the wall, no card */
+.service {
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: auto minmax(260px, 1fr) auto;
+  align-items: center;
+  gap: 18px 44px;
+  margin-bottom: 24px;
+}
+.meal { display: flex; flex-direction: column; min-width: 0; }
+.meal-name { margin: 0; color: var(--navy); font-size: 50px; font-weight: 700; line-height: 1; letter-spacing: -0.01em; }
+.meal-window { margin-top: 6px; font-size: 20px; font-weight: 500; color: var(--ink-soft); }
+
+.clock { min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+.clock-head { display: flex; align-items: center; gap: 10px; }
+.clock-head .ic { font-size: 26px; color: var(--teal); }
+.clock-text { font-size: 26px; font-weight: 700; color: var(--ink); }
+.clock-phase {
+  margin-left: auto;
+  padding: 4px 14px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--teal);
+  white-space: nowrap;
+}
+.clock.ph-next .clock-phase { background: var(--navy-2); }
+.clock.ph-next .ic { color: var(--navy-2); }
+.clock.ph-tomorrow .clock-phase { background: var(--ink-soft); }
+.clock.ph-tomorrow .ic { color: var(--ink-soft); }
+.track { position: relative; height: 12px; border-radius: 6px; background: #e4e0d6; }
+.track-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 6px;
+  background: linear-gradient(90deg, rgba(15, 157, 132, 0.35), var(--teal));
+}
+.track-now {
+  position: absolute;
+  top: 50%;
+  width: 22px;
+  height: 22px;
+  margin-left: -11px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 4px solid var(--teal);
+  transform: translateY(-50%);
+  box-shadow: 0 2px 6px rgba(22, 33, 62, 0.25);
+}
+.clock.urgent .clock-text, .clock.urgent .ic { color: var(--tomato); }
+.clock.urgent .clock-phase { background: var(--tomato); }
+.clock.urgent .track-fill { background: linear-gradient(90deg, rgba(224, 72, 43, 0.35), var(--tomato)); }
+.clock.urgent .track-now { border-color: var(--tomato); animation: now-pulse 1.6s ease-out infinite; }
+@keyframes now-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(224, 72, 43, 0.5); }
+  100% { box-shadow: 0 0 0 16px rgba(224, 72, 43, 0); }
+}
+
+.tally { display: flex; gap: 28px; }
+.t { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+.t b { font-size: 40px; font-weight: 700; line-height: 1; }
+.t > span:last-child { font-size: 17px; font-weight: 500; color: var(--ink-soft); }
+.t-icon { position: relative; display: grid; place-items: center; width: 48px; height: 48px; border-radius: 12px; font-size: 28px; }
+.t.pending .t-icon { background: var(--saffron-tint); color: #c47c00; }
+.t.prepared .t-icon { background: var(--teal-tint); color: var(--teal); }
+.t.served .t-icon { background: var(--green-tint); color: var(--green); }
+.t.pending b { color: #c47c00; }
+.t.prepared b { color: var(--teal); }
+.t.served b { color: var(--green); }
+
+/* Steam over the pot while anything is still cooking */
+.steam {
+  position: absolute;
+  top: 1px;
+  width: 4px;
+  height: 14px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, rgba(196, 124, 0, 0), rgba(196, 124, 0, 0.55));
+  filter: blur(1px);
+  opacity: 0;
+  animation: steam 2.6s ease-out infinite;
+}
+.steam:nth-of-type(1) { left: 16px; animation-delay: 0s; }
+.steam:nth-of-type(2) { left: 22px; animation-delay: 0.85s; }
+.steam:nth-of-type(3) { left: 28px; animation-delay: 1.7s; }
+@keyframes steam {
+  0% { opacity: 0; transform: translateY(6px) scaleY(0.6); }
+  30% { opacity: 0.9; }
+  100% { opacity: 0; transform: translateY(-16px) translateX(3px) scaleY(1.2); }
+}
+
+.offline {
+  flex-shrink: 0;
+  margin: -8px 0 16px;
+  padding: 10px 16px;
   border-radius: 10px;
-  padding: 14px 16px;
+  background: #fde9e4;
+  color: #9a2a14;
+  font-size: 17px;
+  font-weight: 600;
 }
-.cc-ward h2 { font-size: 20px; margin: 0 0 10px; color: #fbbf24; }
-.cc-ward table { width: 100%; border-collapse: collapse; font-size: 16px; }
-.cc-ward th, .cc-ward td { padding: 7px 6px; text-align: left; border-bottom: 1px solid #334155; }
-.cc-ward th { color: #94a3b8; font-weight: 500; font-size: 13px; }
 
-.cc-pill { padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; background: #475569; }
-.cc-ordered { background: #475569; color: #f1f5f9; }
-.cc-plated { background: #1e40af; color: #dbeafe; }
-.cc-delivered { background: #166534; color: #dcfce7; }
+/* ── The pass ────────────────────────────────────────────── */
+.stage { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.board { flex: 1; min-height: 0; display: grid; gap: 18px; align-items: start; }
+.lane { min-width: 0; display: flex; flex-direction: column; }
 
-.cc-empty {
-  text-align: center; padding: 80px 20px; color: #64748b; font-size: 22px;
+/* Ward plate */
+.plate {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 14px 12px;
+  border-radius: 12px 12px 0 0;
+  background: var(--navy);
+  color: #fff;
+}
+.plate-title { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.plate-title h3 {
+  margin: 0;
+  min-width: 0;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.plate-part { flex-shrink: 0; font-size: 14px; font-weight: 500; color: #c3cdf0; }
+.plate-meta { display: flex; justify-content: space-between; gap: 10px; min-width: 0; overflow: hidden; font-size: 15px; font-weight: 500; color: #c3cdf0; }
+.plate-state { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: #ffc65c; white-space: nowrap; }
+.plate-count { white-space: nowrap; }
+.lane.is-ready .plate { background: var(--teal); }
+.lane.is-ready .plate-state, .lane.is-ready .plate-meta { color: #fff; }
+.lane.is-served .plate { background: var(--green); }
+.lane.is-served .plate-state, .lane.is-served .plate-meta { color: #fff; }
+
+/* Brushed-steel rail the slips hang from */
+.rail {
+  position: relative;
+  height: 14px;
+  margin: 0 -4px 16px;
+  border-radius: 7px;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.18) 0 2px, transparent 2px 5px),
+    linear-gradient(180deg, var(--steel-hi) 0%, var(--steel) 50%, var(--steel-lo) 100%);
+  box-shadow: 0 3px 5px rgba(22, 33, 62, 0.18);
+}
+.lane.is-ready .rail { box-shadow: 0 3px 5px rgba(22, 33, 62, 0.18), 0 0 14px rgba(15, 157, 132, 0.45); }
+/* Full-width runner so translateX(100%) = one rail length */
+.rail-cart {
+  position: absolute;
+  top: -24px;
+  left: 0;
+  width: 100%;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--teal);
+  pointer-events: none;
+  animation: cart-roll 5.5s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+}
+@keyframes cart-roll {
+  0% { transform: translateX(0); opacity: 0; }
+  12% { opacity: 1; }
+  78% { opacity: 1; }
+  100% { transform: translateX(calc(100% - 24px)); opacity: 0; }
+}
+
+/* Order slips */
+.slips { list-style: none; margin: 0; padding: 0 2px; display: flex; flex-direction: column; gap: 14px; }
+.slip {
+  position: relative;
+  transform-origin: 50% -14px;
+  transform: rotate(var(--tilt, 0deg));
+  animation: hang 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation-delay: calc(var(--i, 0) * 60ms);
+}
+@keyframes hang {
+  0% { opacity: 0; transform: translateY(-16px) rotate(-4deg); }
+  100% { opacity: 1; transform: rotate(var(--tilt, 0deg)); }
+}
+/* Shadow lives on the slip: the paper's torn-edge mask would clip it. */
+.slip:not(.served) { filter: drop-shadow(0 5px 8px rgba(22, 33, 62, 0.16)); }
+
+/* Clip holding the slip on the rail */
+.slip:not(.served)::before {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  top: -9px;
+  left: 50%;
+  width: 34px;
+  height: 12px;
+  margin-left: -17px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, var(--steel-hi), var(--steel-lo));
+  box-shadow: 0 2px 3px rgba(22, 33, 62, 0.25);
+}
+
+.paper {
+  position: relative;
+  padding: 14px 15px;
+  color: var(--ink);
+  background: var(--surface);
+  border-radius: 3px 3px 6px 6px;
+  /* perforated bottom edge, like a tear-off order slip */
+  -webkit-mask: radial-gradient(circle 5px at 50% 100%, transparent 96%, #000 100%) 0 0 / 14px 100% repeat-x,
+                linear-gradient(#000, #000) 0 0 / 100% calc(100% - 4px) no-repeat;
+          mask: radial-gradient(circle 5px at 50% 100%, transparent 96%, #000 100%) 0 0 / 14px 100% repeat-x,
+                linear-gradient(#000, #000) 0 0 / 100% calc(100% - 4px) no-repeat;
+}
+.slip.pending .paper { box-shadow: inset 0 5px 0 var(--saffron); }
+.slip.prepared .paper { background: linear-gradient(180deg, var(--teal-tint), var(--surface) 60%); }
+
+.slip-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 40px; }
+.bed { font-size: 32px; font-weight: 700; line-height: 1; letter-spacing: -0.01em; color: var(--navy); white-space: nowrap; }
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  padding: 5px 10px;
+  border-radius: 6px;
+  background: var(--saffron);
+  color: var(--saffron-ink);
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.tag .ic { font-size: 17px; }
+.stamp {
+  flex-shrink: 0;
+  padding: 2px 10px;
+  border: 3px double var(--teal-ink);
+  border-radius: 6px;
+  color: var(--teal-ink);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transform: rotate(-7deg);
+  opacity: 0.9;
+}
+
+.adm { margin-top: 4px; font-size: 14px; font-weight: 500; letter-spacing: 0.02em; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.diet {
+  margin-top: 9px;
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.flag {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 0 7px;
+  border: 1.5px solid #3f8a3a;
+  border-radius: 5px;
+  color: #2f6f2b;
+  font-size: 12px;
+  font-weight: 600;
+  vertical-align: 3px;
+}
+.dish {
+  margin-top: 3px;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--ink);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Sent: off the rail, one quiet line */
+.slip.served { transform: none; }
+.sent {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--green-tint);
+  color: var(--ink-soft);
+}
+.sent .ic { font-size: 20px; color: var(--green); }
+.sent-bed { font-size: 17px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+.sent-line { flex: 1; min-width: 0; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sent-lbl { font-size: 14px; font-weight: 600; color: var(--green); }
+
+/* The one authored moment: a slip that just changed gets stamped */
+.slip.fresh.prepared .stamp { animation: stamp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.slip.fresh.prepared .paper { animation: thud 0.4s ease-out 0.15s both; }
+.slip.fresh.served .sent { animation: sent-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) both; }
+@keyframes stamp {
+  0% { opacity: 0; transform: scale(2.4) rotate(-18deg); }
+  100% { opacity: 0.9; transform: scale(1) rotate(-7deg); }
+}
+@keyframes thud {
+  0%, 100% { transform: translateY(0); }
+  40% { transform: translateY(3px); }
+}
+@keyframes sent-in {
+  0% { opacity: 0; transform: translateY(-10px); background: #c8e6cb; }
+  100% { opacity: 1; transform: none; }
+}
+
+/* ── Summary: one card per ward ──────────────────────────── */
+.cards { flex: 1; min-height: 0; display: grid; gap: 16px; align-content: start; }
+.card {
+  min-width: 0;
+  height: 132px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--surface);
+  border-top: 6px solid var(--saffron);
+  box-shadow: 0 4px 10px rgba(22, 33, 62, 0.08);
+}
+.card.is-ready { border-top-color: var(--teal); }
+.card.is-served { border-top-color: var(--green); background: var(--green-tint); }
+.card-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; min-width: 0; }
+.card-head h3 { margin: 0; min-width: 0; color: var(--navy); font-size: 22px; font-weight: 700; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card-count { flex-shrink: 0; font-size: 17px; font-weight: 600; color: var(--ink-soft); }
+.card-bar { display: flex; height: 12px; border-radius: 6px; overflow: hidden; background: #e4e0d6; }
+.card-bar .seg { height: 100%; transition: width 0.6s ease; }
+.card-bar .seg.served { background: var(--green); }
+.card-bar .seg.prepared { background: var(--teal); }
+.card-bar .seg.pending { background: var(--saffron); }
+.card-meta { display: flex; gap: 18px; align-items: center; font-size: 16px; font-weight: 500; color: var(--ink-soft); white-space: nowrap; overflow: hidden; }
+.card-num b { font-size: 24px; font-weight: 700; margin-right: 3px; }
+.card-num.pending b { color: #c47c00; }
+.card-num.prepared b { color: var(--teal); }
+.card-state { display: inline-flex; align-items: center; gap: 7px; font-size: 18px; font-weight: 600; }
+.card.is-ready .card-state { color: var(--teal-ink); }
+.card.is-served .card-state { color: var(--green); }
+
+/* Pager */
+.pager { flex-shrink: 0; display: flex; justify-content: center; align-items: center; gap: 8px; padding-top: 12px; }
+.pager-text { margin-right: 6px; font-size: 15px; font-weight: 600; color: var(--ink-soft); }
+.pip { width: 10px; height: 10px; border-radius: 5px; background: #d9d3c5; transition: background 0.3s ease; }
+.pip.on { background: var(--saffron); }
+
+/* Empty */
+.empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; }
+.empty-ic { width: 84px; height: 84px; fill: none; stroke: var(--steel-lo); stroke-width: 1.4; stroke-linecap: round; }
+.empty h3 { margin: 0; color: var(--navy); font-size: 32px; font-weight: 600; }
+.empty p { margin: 0; max-width: 46ch; font-size: 19px; line-height: 1.5; color: var(--ink-soft); }
+
+/* ── Foot ────────────────────────────────────────────────── */
+.foot {
+  flex: 0 0 48px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 0 26px;
+  background: var(--navy);
+  color: #fff;
+}
+.foot p { flex: 1; min-width: 0; margin: 0; font-size: 17px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.foot-copy { font-size: 13px; color: #c3cdf0; white-space: nowrap; }
+
+@media (prefers-reduced-motion: reduce) {
+  .slip, .steam, .rail-cart, .clock.urgent .track-now,
+  .slip.fresh.prepared .stamp, .slip.fresh.prepared .paper, .slip.fresh.served .sent { animation: none; }
+  .steam, .rail-cart { display: none; }
+}
+
+/* Laptop preview */
+@media (max-width: 1300px) {
+  .service { grid-template-columns: auto minmax(220px, 1fr); }
+  .tally { grid-column: 1 / -1; }
+  .meal-name { font-size: 42px; }
 }

@@ -1,7 +1,7 @@
 <div class="page q-shell">
   <div class="q-head">
     <div>
-      <h2 class="q-title">Pharmacy — stock + expired</h2>
+      <h2 class="q-title">Pharmacy — stock + expired <span class="q-view-only" *ngIf="!canEdit">View only</span></h2>
       <p class="q-sub">Critical drug watch-list + stock-out / expired event log. Powers OPS-003 + OPS-004.</p>
     </div>
     <div class="q-range">
@@ -19,7 +19,7 @@
 
   <!-- ── Critical drugs tab ── -->
   <ng-container *ngIf="tab === 'drugs'">
-    <div class="ph-card">
+    <div class="ph-card" *ngIf="canEdit">
       <h3 class="ph-card-title">Add drug</h3>
       <div class="ph-row">
         <label>Code <input type="text" [(ngModel)]="drugDraft.code" placeholder="DRUG-001" /></label>
@@ -35,7 +35,7 @@
     <div class="ph-card">
       <h3 class="ph-card-title">Critical drugs ({{ drugs.length }})</h3>
       <div class="q-loading" *ngIf="loading">Loading…</div>
-      <div class="q-empty" *ngIf="!loading && drugs.length === 0">No drugs yet. Add the first one above.</div>
+      <div class="q-empty" *ngIf="!loading && drugs.length === 0">No drugs yet.<ng-container *ngIf="canEdit"> Add the first one above.</ng-container></div>
       <table class="ph-table" *ngIf="drugs.length > 0">
         <thead><tr><th>Code</th><th>Name</th><th>Category</th><th>Critical</th><th></th></tr></thead>
         <tbody>
@@ -44,11 +44,11 @@
             <td>{{ d.name }}</td>
             <td>{{ d.category || '—' }}</td>
             <td>
-              <button class="ph-pill-btn" [class.q-bad]="d.isCritical" (click)="toggleCritical(d)">
+              <button class="ph-pill-btn" [class.q-bad]="d.isCritical" [disabled]="!canEdit" (click)="toggleCritical(d)">
                 {{ d.isCritical ? '★ critical' : 'normal' }}
               </button>
             </td>
-            <td><button class="ph-delete" (click)="removeDrug(d)">×</button></td>
+            <td><button class="ph-delete" *ngIf="canEdit" (click)="removeDrug(d)">×</button></td>
           </tr>
         </tbody>
       </table>
@@ -57,7 +57,7 @@
 
   <!-- ── Stock events tab ── -->
   <ng-container *ngIf="tab === 'events'">
-    <div class="ph-card">
+    <div class="ph-card" *ngIf="canEdit">
       <h3 class="ph-card-title">Record stock event</h3>
       <div class="ph-row">
         <label>Drug
@@ -100,7 +100,7 @@
             <td>{{ ev.batchCode || '—' }}</td>
             <td>{{ ev.quantity ?? '—' }}</td>
             <td>{{ ev.reporter || '—' }}</td>
-            <td><button class="ph-delete" (click)="removeEvent(ev)">×</button></td>
+            <td><button class="ph-delete" *ngIf="canEdit" (click)="removeEvent(ev)">×</button></td>
           </tr>
         </tbody>
       </table>

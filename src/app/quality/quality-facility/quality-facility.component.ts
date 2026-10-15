@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Subject } from 'rxjs';
+import { Subject, forkJoin } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import {
@@ -13,6 +13,8 @@ import {
   FacilityAmbulanceCall, AmbulanceCallCreateBody,
   FacilityMaintenanceComplaint, MaintenanceCreateBody, MaintenanceStatus, MaintenanceType,
 } from '../../services/quality.service';
+import { AlertService } from '../../services/alert.service';
+import { isQualityEditor } from '../quality-access';
 
 type Tab = 'equipment' | 'utility' | 'ambulance' | 'maintenance';
 
@@ -35,10 +37,14 @@ export class QualityFacilityComponent implements OnInit, OnDestroy {
 
   loading = false; saving = false;
   errorMessage = ''; successMessage = '';
+  /** Quality Manager / super_admin; senior management view read-only. */
+  readonly canEdit = isQualityEditor();
 
   // Equipment state.
   equipment: FacilityEquipment[] = [];
   equipmentEvents: FacilityEquipmentEvent[] = [];
+  openBreakdowns: FacilityEquipmentEvent[] = [];
+  showRetired = false;
   equipDraft: EquipmentCreateBody = {
     code: '', name: '', type: '', isCritical: false, location: '', department: '',
   };
@@ -70,7 +76,12 @@ export class QualityFacilityComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  constructor(private svc: QualityService, private router: Router) {}
+  constructor(private svc: QualityService, private router: Router, private alertSvc: AlertService) {}
+
+  /** Equipment that can take new events (retired rows are hidden from the picker). */
+  get activeEquipment(): FacilityEquipment[] {
+    return this.equipment.filter((e) => e.status !== 'retired');
+  }
 
   ngOnInit(): void { this.load(); }
   ngOnDestroy(): void { this.destroy$.next(); this.destroy$.complete(); }
@@ -83,13 +94,23 @@ export class QualityFacilityComponent implements OnInit, OnDestroy {
     const { start, end } = this.monthBounds();
 
     if (this.tab === 'equipment') {
-      this.svc.listEquipment().pipe(takeUntil(this.destroy$)).subscribe({
+      this.svc.listEquipment({ includeRetired: this.showRetired }).pipe(takeUntil(this.destroy$)).subscribe({
         next: (r) => {
           this.equipment = r.data;
-          if (!this.eventDraft.equipmentId && r.data.length > 0) this.eventDraft.equipmentId = r.data[0].id;
-          // Load this month's events too so the table below shows them.
-          this.svc.listEquipmentEvents({ from: start, to: end }).pipe(takeUntil(this.destroy$)).subscribe({
-            next: (re) => { this.equipmentEvents = re.data; this.loading = false; },
+          const active = this.activeEquipment;
+          if (!active.some((e) => e.id === this.eventDraft.equipmentId)) {
+            this.eventDraft.equipmentId = active.length > 0 ? active[0].id : '';
+          }
+          // This month's events + every still-open breakdown (any month).
+          forkJoin({
+            month: this.svc.listEquipmentEvents({ from: start, to: end }),
+            breakdowns: this.svc.listEquipmentEvents({ eventType: 'breakdown' }),
+          }).pipe(takeUntil(this.destroy$)).subscribe({
+            next: ({ month, breakdowns }) => {
+              this.equipmentEvents = month.data;
+              this.openBreakdowns = breakdowns.data.filter((ev) => !ev.resolvedAt);
+              this.loading = false;
+            },
             error: (e) => { this.errorMessage = e?.error?.message || 'Failed to load events'; this.loading = false; },
           });
         },
@@ -166,6 +187,52 @@ export class QualityFacilityComponent implements OnInit, OnDestroy {
     });
   }
 
+  async resolveBreakdown(ev: FacilityEquipmentEvent): Promise<void> {
+    const note = await this.alertSvc.prompt(
+      `Mark breakdown on ${ev.equipment?.code ?? 'equipment'} as resolved now? Optional resolution note:`,
+    );
+    if (note === null) return;
+    this.errorMessage = ''; this.successMessage = '';
+    this.svc.resolveEquipmentEvent(ev.id, { notes: note.trim() || undefined }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        this.successMessage = 'Breakdown resolved';
+        setTimeout(() => (this.successMessage = ''), 2500);
+        this.load();
+      },
+      error: (e) => (this.errorMessage = e?.error?.message || 'Failed to resolve'),
+    });
+  }
+
+  async removeEquipment(eq: FacilityEquipment): Promise<void> {
+    const ok = await this.alertSvc.confirm(
+      `Remove ${eq.code}? Equipment with PM / calibration / breakdown history is retired (kept for FMS indicators) rather than deleted.`,
+      { severity: 'danger', confirmLabel: 'Remove' },
+    );
+    if (!ok) return;
+    this.errorMessage = ''; this.successMessage = '';
+    this.svc.deleteEquipment(eq.id).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (r) => {
+        this.successMessage = r.retired ? `${eq.code} retired (history kept)` : `${eq.code} deleted`;
+        setTimeout(() => (this.successMessage = ''), 2500);
+        this.load();
+      },
+      error: (e) => (this.errorMessage = e?.error?.message || 'Failed to remove'),
+    });
+  }
+
+  reactivateEquipment(eq: FacilityEquipment): void {
+    this.svc.updateEquipment(eq.id, { status: 'operational' }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => this.load(),
+      error: (e) => (this.errorMessage = e?.error?.message || 'Failed to update'),
+    });
+  }
+
+  /** PM / calibration done on or before the due calendar day (local). */
+  pmOnTime(ev: FacilityEquipmentEvent): boolean {
+    if (!ev.dueAt) return true;
+    return this.localDayKey(new Date(ev.occurredAt)) <= this.localDayKey(new Date(ev.dueAt));
+  }
+
   // ── Utility handlers ─────────────────────────────────────────────────
   submitUtility(): void {
     this.saving = true; this.errorMessage = ''; this.successMessage = '';
@@ -199,7 +266,9 @@ export class QualityFacilityComponent implements OnInit, OnDestroy {
     }).pipe(takeUntil(this.destroy$)).subscribe({
       next: (r) => {
         this.saving = false; this.ambulanceTarget = r.target;
-        this.successMessage = r.data.withinTarget ? 'Recorded — within target ✓' : 'Recorded — outside target';
+        this.successMessage = r.data.responseTimeMinutes === null
+          ? 'Recorded — arrival time not captured'
+          : r.data.withinTarget ? 'Recorded — within target ✓' : 'Recorded — outside target';
         setTimeout(() => (this.successMessage = ''), 2500);
         this.ambDraft = { calledAt: this.todayIso(), dispatchedAt: null, arrivedAt: null, notes: '' };
         this.load();
@@ -242,6 +311,9 @@ export class QualityFacilityComponent implements OnInit, OnDestroy {
   }
 
   // ── Helpers ──────────────────────────────────────────────────────────
+  private localDayKey(d: Date): string {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
   private todayIso(): string {
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}T${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;

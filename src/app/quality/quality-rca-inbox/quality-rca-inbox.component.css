@@ -47,3 +47,6 @@
 .qi-pill.q-warn { background: #fef3c7; color: #92400e; }
 .qi-pill.q-bad { background: #fee2e2; color: #b91c1c; }
 .qi-pill.q-critical { background: #b91c1c; color: #fff; }
+
+/* Read-only mode note (non-editors) */
+.q-view-only { display: inline-block; margin-left: 10px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; vertical-align: middle; background: #f3f4f6; color: #4b5563; }

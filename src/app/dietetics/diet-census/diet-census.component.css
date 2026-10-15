@@ -1,0 +1,25 @@
+.dc-bar { margin-bottom: 14px; }
+.dc-only { margin-left: 4px; padding-bottom: 8px; }
+
+.dc-grid td { vertical-align: middle; }
+.dc-patient { min-width: 170px; }
+.dc-patient .dx-pill { margin-top: 4px; }
+.dc-dx { min-width: 170px; max-width: 240px; }
+.dc-diet { min-width: 190px; }
+.dc-diet .dx-input + .dx-input { margin-top: 4px; }
+.dc-npo { min-width: 150px; color: var(--dx-bad-ink); font-weight: 600; white-space: nowrap; }
+.dc-npo .dx-check { color: var(--dx-ink); font-weight: 400; }
+.dc-npo .dx-input { margin-top: 4px; }
+.dc-feed { min-width: 120px; }
+.dc-remarks { min-width: 160px; }
+
+.dc-send { margin-top: 14px; }
+.dc-send-row { grid-template-columns: minmax(260px, 2fr) minmax(220px, 1fr); align-items: end; }
+.dc-send-side { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+.dc-send-side .dx-sub { margin: 0; }
+
+.dc-detail { margin-top: 16px; }
+.dc-note { font-size: 13px; margin: 0 0 12px; }
+.dc-act-num { color: var(--dx-act-ink); }
+.dc-todo { min-width: 240px; }
+.dc-toggle { margin-left: 10px; font-size: 12px; font-weight: 500; }

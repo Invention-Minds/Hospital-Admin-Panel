@@ -1,7 +1,7 @@
 <div class="page q-shell">
   <div class="q-head">
     <div>
-      <h2 class="q-title">NABH/QCI Quality Indicators</h2>
+      <h2 class="q-title">NABH/QCI Quality Indicators <span class="q-view-only" *ngIf="!canEdit">View only</span></h2>
       <p class="q-sub">108 indicators across 10 chapters. Capture monthly numerator/denominator; status engine auto-evaluates Green / Amber / Red / Critical.</p>
     </div>
     <div class="q-range">
@@ -56,7 +56,7 @@
     <section class="qi-section" *ngFor="let g of grouped">
       <h3 class="qi-section-title">{{ g.chapter }} <span class="qi-section-count">{{ g.rows.length }}</span></h3>
       <div class="qi-grid">
-        <div class="qi-card" *ngFor="let ind of g.rows" (click)="openCapture(ind)">
+        <div class="qi-card" *ngFor="let ind of g.rows" (click)="openCapture(ind)" [style.cursor]="canEdit ? null : 'default'">
           <div class="qi-card-head">
             <span class="qi-code">{{ ind.qiCode }}</span>
             <span class="qi-type">{{ ind.indicatorType }}</span>
@@ -71,7 +71,7 @@
           </div>
           <div class="qi-card-foot">
             <span class="qi-owner" title="Escalation owner">{{ ind.escalationOwner }}</span>
-            <span class="qi-action">Capture →</span>
+            <span class="qi-action" *ngIf="canEdit">Capture →</span>
           </div>
         </div>
       </div>
@@ -79,7 +79,8 @@
   </ng-container>
 
   <!-- ── Capture dialog ── -->
-  <div class="qi-modal-backdrop" *ngIf="capture" (click)="closeCapture()"></div>
+  <div class="qi-modal-backdrop" *ngIf="canEdit && capture" (click)="closeCapture()"></div>
+  <ng-container *ngIf="canEdit">
   <div class="qi-modal" *ngIf="capture as ind">
     <div class="qi-modal-head">
       <div>
@@ -141,4 +142,5 @@
       <button class="qi-save" (click)="submitCapture()" [disabled]="saving">{{ saving ? 'Saving…' : 'Capture' }}</button>
     </div>
   </div>
+  </ng-container>
 </div>

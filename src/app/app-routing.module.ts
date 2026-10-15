@@ -80,7 +80,13 @@ import { DieteticsSetupComponent } from './dietetics/dietetics-setup/dietetics-s
 import { DieticianQueueComponent } from './dietetics/dietician-queue/dietician-queue.component';
 import { CanteenWorkspaceComponent } from './dietetics/canteen-workspace/canteen-workspace.component';
 import { CanteenChannelComponent } from './dietetics/canteen-channel/canteen-channel.component';
+import { HmisImportComponent } from './hmis-import/hmis-import.component';
 import { DietAdmissionTabComponent } from './dietetics/diet-admission-tab/diet-admission-tab.component';
+import { DietSheetComponent } from './dietetics/diet-sheet/diet-sheet.component';
+import { DietCensusComponent } from './dietetics/diet-census/diet-census.component';
+import { DietLabelsComponent } from './dietetics/diet-labels/diet-labels.component';
+import { DietRoundsComponent } from './dietetics/diet-rounds/diet-rounds.component';
+import { NutritionAssessmentComponent } from './dietetics/nutrition-assessment/nutrition-assessment.component';
 import { MastersComponent } from './masters/masters.component';
 import { NursingStationAdminComponent } from './nursing-station/nursing-station-admin/nursing-station-admin.component';
 import { IpdReportsComponent } from './ipd/ipd-reports/ipd-reports.component';
@@ -160,32 +166,33 @@ const routes: Routes = [
   // Phase P — Pharmacy + nurse handshake.
   { path: 'pharmacy/queue', loadComponent: () => import('./ipd/pharmacy-queue/pharmacy-queue.component').then(m => m.PharmacyQueueComponent), canActivate: [authGuard] },
   { path: 'nurse/medication-inbox', loadComponent: () => import('./ipd/nurse-medication-inbox/nurse-medication-inbox.component').then(m => m.NurseMedicationInboxComponent), canActivate: [authGuard] },
-  { path: 'feedback', loadComponent: () => import('./feedback/feedback-inbox/feedback-inbox.component').then(m => m.FeedbackInboxComponent), canActivate:[authGuard] },
+  { path: 'feedback', loadComponent: () => import('./feedback/feedback-inbox/feedback-inbox.component').then(m => m.FeedbackInboxComponent), canActivate:[authGuard, roleGuard], data: { adminTypes: ['Quality Manager', 'Manager', 'Senior Manager', 'Management'], subAdminTypes: ['Patient Relations', 'Front Desk'] } },
+  // Complaints are open to all staff (raise + own/assigned); the API scopes reads.
   { path: 'complaints', loadComponent: () => import('./feedback/complaint-inbox/complaint-inbox.component').then(m => m.ComplaintInboxComponent), canActivate:[authGuard] },
   { path: 'complaints/:id', loadComponent: () => import('./feedback/complaint-detail/complaint-detail.component').then(m => m.ComplaintDetailComponent), canActivate:[authGuard] },
   { path: 'whatsapp-queries', loadComponent: () => import('./whatsapp-queries/whatsapp-queries.component').then(m => m.WhatsappQueriesComponent), canActivate:[authGuard] },
   { path: 'doorstep-requests', loadComponent: () => import('./doorstep-requests/doorstep-requests.component').then(m => m.DoorstepRequestsComponent), canActivate:[authGuard] },
   // Phase 9.26 — Quality / NABH dashboard
-  { path: 'quality', loadComponent: () => import('./quality/quality-dashboard/quality-dashboard.component').then(m => m.QualityDashboardComponent), canActivate:[authGuard] },
+  { path: 'quality', loadComponent: () => import('./quality/quality-dashboard/quality-dashboard.component').then(m => m.QualityDashboardComponent), canActivate:[authGuard, roleGuard], data: { adminTypes: ['Quality Manager', 'Manager', 'Senior Manager', 'Management'] } },
   // Phase 9.26 / Phase 1 — NABH 108-indicator master + capture
-  { path: 'quality/indicators', loadComponent: () => import('./quality/quality-indicators/quality-indicators.component').then(m => m.QualityIndicatorsComponent), canActivate:[authGuard] },
+  { path: 'quality/indicators', loadComponent: () => import('./quality/quality-indicators/quality-indicators.component').then(m => m.QualityIndicatorsComponent), canActivate:[authGuard, roleGuard], data: { adminTypes: ['Quality Manager', 'Manager', 'Senior Manager', 'Management'] } },
   // Phase 9.26 / Phase 3 — RCA inbox + detail editor
-  { path: 'quality/rcas', loadComponent: () => import('./quality/quality-rca-inbox/quality-rca-inbox.component').then(m => m.QualityRcaInboxComponent), canActivate:[authGuard] },
-  { path: 'quality/rcas/:id', loadComponent: () => import('./quality/quality-rca-detail/quality-rca-detail.component').then(m => m.QualityRcaDetailComponent), canActivate:[authGuard] },
+  { path: 'quality/rcas', loadComponent: () => import('./quality/quality-rca-inbox/quality-rca-inbox.component').then(m => m.QualityRcaInboxComponent), canActivate:[authGuard, roleGuard], data: { adminTypes: ['Quality Manager', 'Manager', 'Senior Manager', 'Management'] } },
+  { path: 'quality/rcas/:id', loadComponent: () => import('./quality/quality-rca-detail/quality-rca-detail.component').then(m => m.QualityRcaDetailComponent), canActivate:[authGuard, roleGuard], data: { adminTypes: ['Quality Manager', 'Manager', 'Senior Manager', 'Management'] } },
   // Phase 9.26 / Phase 5a — Audit observation capture
-  { path: 'quality/audit', loadComponent: () => import('./quality/quality-audit/quality-audit.component').then(m => m.QualityAuditComponent), canActivate:[authGuard] },
+  { path: 'quality/audit', loadComponent: () => import('./quality/quality-audit/quality-audit.component').then(m => m.QualityAuditComponent), canActivate:[authGuard, roleGuard], data: { adminTypes: ['Quality Manager', 'Manager', 'Senior Manager', 'Management'] } },
   // Phase 9.26 / Phase 5c — Monthly denominator capture
-  { path: 'quality/denominators', loadComponent: () => import('./quality/quality-denominators/quality-denominators.component').then(m => m.QualityDenominatorsComponent), canActivate:[authGuard] },
+  { path: 'quality/denominators', loadComponent: () => import('./quality/quality-denominators/quality-denominators.component').then(m => m.QualityDenominatorsComponent), canActivate:[authGuard, roleGuard], data: { adminTypes: ['Quality Manager', 'Manager', 'Senior Manager', 'Management'] } },
   // Phase 9.26 / Phase 5b — Infection control capture
-  { path: 'quality/infection-control', loadComponent: () => import('./quality/quality-infection-control/quality-infection-control.component').then(m => m.QualityInfectionControlComponent), canActivate:[authGuard] },
+  { path: 'quality/infection-control', loadComponent: () => import('./quality/quality-infection-control/quality-infection-control.component').then(m => m.QualityInfectionControlComponent), canActivate:[authGuard, roleGuard], data: { adminTypes: ['Quality Manager', 'Manager', 'Senior Manager', 'Management'], subAdminTypes: ['Infection Control Nurse'] } },
   // Phase 9.26 / Phase 5f — Facility / equipment registers
-  { path: 'quality/facility', loadComponent: () => import('./quality/quality-facility/quality-facility.component').then(m => m.QualityFacilityComponent), canActivate:[authGuard] },
+  { path: 'quality/facility', loadComponent: () => import('./quality/quality-facility/quality-facility.component').then(m => m.QualityFacilityComponent), canActivate:[authGuard, roleGuard], data: { adminTypes: ['Quality Manager', 'Manager', 'Senior Manager', 'Management'] } },
   // Phase 9.26 / Phase 5e — Generic TAT event capture
-  { path: 'quality/tat-events', loadComponent: () => import('./quality/quality-tat-events/quality-tat-events.component').then(m => m.QualityTatEventsComponent), canActivate:[authGuard] },
+  { path: 'quality/tat-events', loadComponent: () => import('./quality/quality-tat-events/quality-tat-events.component').then(m => m.QualityTatEventsComponent), canActivate:[authGuard, roleGuard], data: { adminTypes: ['Quality Manager', 'Manager', 'Senior Manager', 'Management'] } },
   // Phase 9.26 / Phase 5g — Pharmacy stock + expired drugs
-  { path: 'quality/pharmacy', loadComponent: () => import('./quality/quality-pharmacy/quality-pharmacy.component').then(m => m.QualityPharmacyComponent), canActivate:[authGuard] },
+  { path: 'quality/pharmacy', loadComponent: () => import('./quality/quality-pharmacy/quality-pharmacy.component').then(m => m.QualityPharmacyComponent), canActivate:[authGuard, roleGuard], data: { adminTypes: ['Quality Manager', 'Manager', 'Senior Manager', 'Management'] } },
   // Phase 9.26 / Phase 5i — Lab/Radiology event log
-  { path: 'quality/lab-rad-events', loadComponent: () => import('./quality/quality-lab-rad/quality-lab-rad.component').then(m => m.QualityLabRadComponent), canActivate:[authGuard] },
+  { path: 'quality/lab-rad-events', loadComponent: () => import('./quality/quality-lab-rad/quality-lab-rad.component').then(m => m.QualityLabRadComponent), canActivate:[authGuard, roleGuard], data: { adminTypes: ['Quality Manager', 'Manager', 'Senior Manager', 'Management'] } },
   // Phase 6 / Batch A — Notification target-role aliases
   { path: 'settings/role-aliases', loadComponent: () => import('./settings/role-aliases/role-aliases.component').then(m => m.RoleAliasesComponent), canActivate:[authGuard] },
   // Phase 9.20 — hospital emergency codes board (Code Blue / Red / …)
@@ -332,8 +339,14 @@ const routes: Routes = [
   { path: 'dietetics/setup', component: DieteticsSetupComponent, canActivate:[authGuard] },
   { path: 'dietetics/queue', component: DieticianQueueComponent, canActivate:[authGuard] },
   { path: 'dietetics/canteen', component: CanteenWorkspaceComponent, canActivate:[authGuard] },
+  { path: 'dietetics/sheet', component: DietSheetComponent, canActivate:[authGuard] },
+  { path: 'dietetics/census', component: DietCensusComponent, canActivate:[authGuard] },
+  { path: 'dietetics/labels', component: DietLabelsComponent, canActivate:[authGuard] },
+  { path: 'dietetics/rounds', component: DietRoundsComponent, canActivate:[authGuard] },
+  { path: 'dietetics/nutrition/:admissionId', component: NutritionAssessmentComponent, canActivate:[authGuard] },
   { path: 'ipd/admission/:admissionId/diet', component: DietAdmissionTabComponent, canActivate:[authGuard] },
   { path: 'canteen-channel/:channelId', component: CanteenChannelComponent },
+  { path: 'ipd/hmis-import', component: HmisImportComponent, canActivate:[authGuard] },
 
   // Unified Masters admin (super_admin only).
   { path: 'masters', component: MastersComponent, canActivate:[authGuard] },

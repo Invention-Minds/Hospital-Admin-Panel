@@ -72,6 +72,29 @@ export class DoctorServiceService {
     return this.http.get<Doctor[]>(url);
   }
 
+  // Paged + filtered doctor details for the Doctor Availability board
+  getDoctorsPaged(date: string, page: number, limit: number, department: string, search: string): Observable<{
+    doctors: Doctor[];
+    total: number;
+    page: number;
+    totalPages: number;
+    allDoctors: { id: number; name: string }[];
+  }> {
+    const params = new HttpParams()
+      .set('date', date)
+      .set('page', page)
+      .set('limit', limit)
+      .set('department', department)
+      .set('search', search);
+    return this.http.get<{
+      doctors: Doctor[];
+      total: number;
+      page: number;
+      totalPages: number;
+      allDoctors: { id: number; name: string }[];
+    }>(`${this.apiUrl}/doctors/get-doctor-details-paged`, { params });
+  }
+
   getFutureBookedSlotDuration(doctorId: string, date: string): Observable<any> {
     const params = new HttpParams().set('doctorId', doctorId)
       .set('date', date);

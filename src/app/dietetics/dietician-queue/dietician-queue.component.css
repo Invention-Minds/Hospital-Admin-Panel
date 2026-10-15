@@ -1,53 +1,77 @@
-.dq-shell { padding: 24px; max-width: 1400px; margin: 24px auto 24px 96px; }
-.dq-title { font-size: 22px; font-weight: 600; margin-bottom: 12px; }
-.dq-banner { padding: 10px 14px; border-radius: 6px; margin-bottom: 12px; font-size: 14px; }
-.dq-banner-bad { background: #fee2e2; color: #b91c1c; }
-.dq-banner-good { background: #dcfce7; color: #166534; }
+/* Dietician queue — worklist table + side-panel editor
+   (variables come from ../dietetics-shared.css). */
 
-.dq-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 18px; }
-@media (max-width: 1100px) { .dq-grid { grid-template-columns: 1fr; } }
+.dq-tabs { margin-bottom: 0; }
+.dq-tabn { display: inline-block; min-width: 20px; text-align: center; font-variant-numeric: tabular-nums; font-size: 12px; font-weight: 600; color: var(--dx-muted); background: #eef0f4; border-radius: 999px; padding: 2px 7px; margin-left: 6px; }
+.dq-tabn.is-hot { background: var(--dx-bad-bg); color: var(--dx-bad-ink); }
 
-.dq-buckets section { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px 14px; margin-bottom: 14px; }
-.dq-bucket-title { font-size: 14px; font-weight: 600; margin: 0 0 4px; display: flex; align-items: center; gap: 8px; }
-.dq-bucket-title.dq-warn { color: #b45309; }
-.dq-count { background: #f3f4f6; color: #374151; border-radius: 12px; padding: 1px 8px; font-size: 12px; font-weight: 500; }
-.dq-bucket-sub { color: #6b7280; font-size: 12px; margin: 0 0 8px; }
-.dq-buckets ul { list-style: none; padding: 0; margin: 0; }
-.dq-buckets li {
-  padding: 8px 10px; border-radius: 6px; cursor: pointer; border: 1px solid transparent;
-  margin-bottom: 4px;
+.dq-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; padding: 18px 0; }
+.dq-search input {
+  font: inherit; font-size: 13px; color: var(--dx-ink); width: 320px; max-width: 70vw;
+  border: 1px solid var(--dx-line-strong); border-radius: 7px; padding: 7px 12px; min-height: 34px; background: #fff;
 }
-.dq-buckets li:hover { background: #f9fafb; }
-.dq-buckets li.active { background: #eff6ff; border-color: #93c5fd; }
-.dq-empty { color: #9ca3af; font-style: italic; cursor: default; }
-.dq-row-main { font-weight: 600; font-size: 13px; color: #111827; }
-.dq-row-sub { color: #6b7280; font-size: 12px; }
-.dq-row-date { color: #9ca3af; font-size: 11px; margin-top: 2px; }
-
-.dq-editor { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; }
-.dq-editor-header h3 { margin: 0 0 4px; font-size: 16px; display: flex; align-items: center; gap: 10px; }
-.dq-pill { background: #e0e7ff; color: #3730a3; font-size: 11px; padding: 2px 8px; border-radius: 10px; }
-.dq-meta { color: #6b7280; font-size: 12px; margin-bottom: 12px; }
-
-.dq-form { display: flex; flex-direction: column; gap: 10px; }
-.dq-field { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #4b5563; }
-.dq-field input, .dq-field select, .dq-field textarea {
-  border: 1px solid #d1d5db; border-radius: 6px; padding: 6px 8px; font-size: 13px;
+.dq-ward select {
+  font: inherit; font-size: 13px; color: var(--dx-ink);
+  border: 1px solid var(--dx-line-strong); border-radius: 7px; padding: 7px 10px; min-height: 34px; background: #fff;
 }
-.dq-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.dq-fs { border: 1px solid #e5e7eb; border-radius: 6px; padding: 8px 10px; }
-.dq-fs legend { font-size: 12px; color: #374151; padding: 0 6px; }
-.dq-check-inline { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; margin-right: 12px; }
+.dq-bar-note { font-size: 13px; color: var(--dx-bad-ink); }
+.dq-bar-note b { font-variant-numeric: tabular-nums; }
+.dq-spacer { flex: 1; }
+.dq-visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-.dq-actions { display: flex; gap: 8px; margin-top: 6px; }
-.dq-btn { background: #fff; border: 1px solid #d1d5db; padding: 7px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; }
-.dq-btn:hover:not([disabled]) { background: #f3f4f6; }
-.dq-btn-primary { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
-.dq-btn-primary:hover:not([disabled]) { background: #1e40af; }
-.dq-btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+.dq-scroll { max-height: calc(100vh - 320px); }
+.dq-grid td { vertical-align: middle; }
+.dq-bed { font-weight: 600; white-space: nowrap; width: 100px; color: var(--dx-navy-ink); }
+.dq-patient { min-width: 220px; white-space: nowrap; }
+.dq-age { color: var(--dx-muted); font-size: 12.5px; margin-left: 10px; }
+/* One line of diagnosis; full text on hover. */
+.dq-dx { max-width: 420px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--dx-ink); }
+.dq-interim { margin-left: 6px; }
+.dq-open { color: var(--dx-navy); font-size: 12.5px; font-weight: 500; opacity: 0; transition: opacity 120ms ease-out; }
+.dq-grid tr:hover .dq-open, .dq-grid tr.is-selected .dq-open { opacity: 1; }
 
-.dq-sign { margin-top: 18px; padding-top: 14px; border-top: 1px solid #f3f4f6; }
-.dq-sign h4 { margin: 0 0 4px; font-size: 14px; }
-.dq-sub { color: #6b7280; font-size: 12px; margin: 0 0 10px; }
+/* ── Side panel ── */
+.dq-drawer-bg { position: fixed; inset: 0; background: rgba(15, 23, 51, 0.18); z-index: 90; }
+.dq-drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 91;
+  width: min(680px, 100vw); background: #fff; border-left: 1px solid var(--dx-line);
+  box-shadow: -18px 0 48px rgba(15, 23, 51, 0.16);
+  display: flex; flex-direction: column;
+  animation: dq-slide 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes dq-slide { from { transform: translateX(24px); opacity: 0.6; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .dq-drawer { animation: none; } }
 
-.dq-editor-empty { background: #f9fafb; color: #6b7280; border: 1px dashed #e5e7eb; border-radius: 8px; padding: 40px; text-align: center; }
+.dq-drawer-head { display: flex; align-items: flex-start; gap: 12px; padding: 18px 22px 10px; border-bottom: 1px solid var(--dx-line); }
+.dq-drawer-title { flex: 1; min-width: 0; }
+.dq-drawer-title h3 { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin: 0; font-size: 17px; font-weight: 600; color: var(--dx-navy-ink); }
+.dq-drawer-title .dx-sub { margin-top: 3px; }
+.dq-close { flex: none; width: 34px; height: 34px; border-radius: 8px; border: 1px solid transparent; background: none; color: var(--dx-muted); cursor: pointer; display: grid; place-items: center; }
+.dq-close:hover { background: var(--dx-hover); color: var(--dx-ink); }
+
+.dq-drawer-links { display: flex; gap: 18px; padding: 10px 22px; font-size: 13px; border-bottom: 1px solid var(--dx-line); }
+.dq-drawer-links a { color: var(--dx-navy); text-underline-offset: 3px; }
+
+.dq-drawer-body { flex: 1; overflow: auto; padding: 6px 26px 24px; }
+.dq-drawer-body .dx-row { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.dq-drawer-foot { display: flex; align-items: center; gap: 10px; padding: 12px 22px; border-top: 1px solid var(--dx-line); background: #fff; }
+
+.dq-section { border-top: 1px solid var(--dx-line); padding: 20px 0 10px; display: flex; flex-direction: column; gap: 14px; }
+.dq-section:first-of-type { border-top: none; }
+.dq-section h4 { margin: 0; font-size: 13px; font-weight: 600; color: var(--dx-navy-ink); }
+.dq-hint { margin: 0; font-size: 12px; color: var(--dx-muted); }
+.dq-hint-inline { font-weight: 400; color: var(--dx-faint); }
+.dq-check-cell { align-self: end; padding-bottom: 8px; }
+
+.dq-chips { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.dq-chips-label { font-size: 12px; font-weight: 500; color: var(--dx-muted); margin-right: 4px; min-width: 76px; }
+.dq-chip {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; cursor: pointer;
+  border: 1px solid var(--dx-line-strong); border-radius: 999px; padding: 4px 10px; background: #fff;
+}
+.dq-chip:hover { border-color: #b6c1d6; }
+.dq-chip.is-on { background: var(--dx-info-bg); border-color: var(--dx-info-line); color: var(--dx-info-ink); font-weight: 500; }
+.dq-chip input { width: 14px; height: 14px; }
+
+.dq-sign { border-top: 1px solid var(--dx-line); margin-top: 12px; padding-top: 14px; }
+.dq-sign h4 { margin: 0 0 2px; font-size: 14px; font-weight: 600; color: var(--dx-navy-ink); }

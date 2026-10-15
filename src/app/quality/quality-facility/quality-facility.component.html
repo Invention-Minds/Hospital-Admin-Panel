@@ -1,7 +1,7 @@
 <div class="page q-shell">
   <div class="q-head">
     <div>
-      <h2 class="q-title">Facility / equipment</h2>
+      <h2 class="q-title">Facility / equipment <span class="q-view-only" *ngIf="!canEdit">View only</span></h2>
       <p class="q-sub">Equipment master, PM / calibration / breakdown log, utility failures, ambulance dispatch, maintenance tickets. Powers FMS-001/002/003/004/008/009.</p>
     </div>
     <div class="q-range">
@@ -21,7 +21,7 @@
 
   <!-- ── EQUIPMENT TAB ── -->
   <ng-container *ngIf="tab === 'equipment'">
-    <div class="fc-card">
+    <div class="fc-card" *ngIf="canEdit">
       <h3 class="fc-card-title">Add equipment</h3>
       <div class="fc-row">
         <label>Code <input type="text" [(ngModel)]="equipDraft.code" placeholder="EQ-…" /></label>
@@ -39,12 +39,12 @@
       </div>
     </div>
 
-    <div class="fc-card">
+    <div class="fc-card" *ngIf="canEdit">
       <h3 class="fc-card-title">Log PM / calibration / breakdown</h3>
       <div class="fc-row">
         <label>Equipment
           <select [(ngModel)]="eventDraft.equipmentId">
-            <option *ngFor="let e of equipment" [value]="e.id">{{ e.code }} · {{ e.name }}{{ e.isCritical ? ' ★' : '' }}</option>
+            <option *ngFor="let e of activeEquipment" [value]="e.id">{{ e.code }} · {{ e.name }}{{ e.isCritical ? ' ★' : '' }}</option>
           </select>
         </label>
         <label>Event type
@@ -69,10 +69,14 @@
 
     <div class="fc-card">
       <h3 class="fc-card-title">Equipment master ({{ equipment.length }})</h3>
+      <label class="fc-check">
+        <input type="checkbox" [(ngModel)]="showRetired" (change)="load()" />
+        Show retired
+      </label>
       <div class="q-loading" *ngIf="loading">Loading…</div>
-      <div class="q-empty" *ngIf="!loading && equipment.length === 0">No equipment yet. Add the first one above.</div>
+      <div class="q-empty" *ngIf="!loading && equipment.length === 0">No equipment yet.<ng-container *ngIf="canEdit"> Add the first one above.</ng-container></div>
       <table class="fc-table" *ngIf="equipment.length > 0">
-        <thead><tr><th>Code</th><th>Name</th><th>Type</th><th>Location</th><th>Critical</th><th>Status</th></tr></thead>
+        <thead><tr><th>Code</th><th>Name</th><th>Type</th><th>Location</th><th>Critical</th><th>Status</th><th *ngIf="canEdit">Actions</th></tr></thead>
         <tbody>
           <tr *ngFor="let e of equipment">
             <td class="fc-code">{{ e.code }}</td>
@@ -80,11 +84,32 @@
             <td>{{ e.type || '—' }}</td>
             <td>{{ e.location || '—' }}</td>
             <td>
-              <button class="fc-pill-btn" [class.q-bad]="e.isCritical" (click)="toggleCritical(e)">
+              <button class="fc-pill-btn" [class.q-bad]="e.isCritical" [disabled]="!canEdit" (click)="toggleCritical(e)">
                 {{ e.isCritical ? '★ critical' : 'normal' }}
               </button>
             </td>
             <td><span class="qi-pill" [class.q-bad]="e.status === 'breakdown'">{{ e.status }}</span></td>
+            <td class="fc-actions" *ngIf="canEdit">
+              <button class="fc-tiny" *ngIf="e.status !== 'retired'" (click)="removeEquipment(e)">Remove</button>
+              <button class="fc-tiny" *ngIf="e.status === 'retired'" (click)="reactivateEquipment(e)">Re-activate</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="fc-card" *ngIf="openBreakdowns.length > 0">
+      <h3 class="fc-card-title">Open breakdowns ({{ openBreakdowns.length }})</h3>
+      <table class="fc-table">
+        <thead><tr><th>Reported</th><th>Equipment</th><th>Notes</th><th *ngIf="canEdit">Actions</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let ev of openBreakdowns">
+            <td>{{ ev.occurredAt | date:'yyyy-MM-dd HH:mm' }}</td>
+            <td class="fc-code">{{ ev.equipment?.code }}{{ ev.equipment?.isCritical ? ' ★' : '' }}</td>
+            <td>{{ ev.notes || '—' }}</td>
+            <td class="fc-actions" *ngIf="canEdit">
+              <button class="fc-tiny" (click)="resolveBreakdown(ev)">Resolve</button>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -103,10 +128,15 @@
             <td>{{ ev.dueAt ? (ev.dueAt | date:'yyyy-MM-dd') : '—' }}</td>
             <td>
               <span class="qi-pill" *ngIf="ev.eventType !== 'breakdown' && ev.dueAt"
-                    [class.q-good]="ev.occurredAt <= ev.dueAt"
-                    [class.q-bad]="ev.occurredAt > ev.dueAt">
-                {{ ev.occurredAt <= ev.dueAt ? 'on time' : 'late' }}
+                    [class.q-good]="pmOnTime(ev)"
+                    [class.q-bad]="!pmOnTime(ev)">
+                {{ pmOnTime(ev) ? 'on time' : 'late' }}
               </span>
+              <ng-container *ngIf="ev.eventType === 'breakdown'">
+                <span class="qi-pill q-good" *ngIf="ev.resolvedAt">resolved {{ ev.resolvedAt | date:'MM-dd HH:mm' }}</span>
+                <button class="fc-tiny" *ngIf="canEdit && !ev.resolvedAt" (click)="resolveBreakdown(ev)">Resolve</button>
+                <span *ngIf="!canEdit && !ev.resolvedAt">open</span>
+              </ng-container>
             </td>
             <td>{{ ev.notes || '—' }}</td>
           </tr>
@@ -117,7 +147,7 @@
 
   <!-- ── UTILITY TAB ── -->
   <ng-container *ngIf="tab === 'utility'">
-    <div class="fc-card">
+    <div class="fc-card" *ngIf="canEdit">
       <h3 class="fc-card-title">Record utility failure</h3>
       <div class="fc-row">
         <label>Type
@@ -157,7 +187,7 @@
 
   <!-- ── AMBULANCE TAB ── -->
   <ng-container *ngIf="tab === 'ambulance'">
-    <div class="fc-card">
+    <div class="fc-card" *ngIf="canEdit">
       <h3 class="fc-card-title">Log ambulance call</h3>
       <p class="fc-sub-hint">Within-target threshold: <strong>{{ ambulanceTarget }} min</strong> (called → arrived).</p>
       <div class="fc-row">
@@ -184,9 +214,10 @@
             <td>{{ c.arrivedAt ? (c.arrivedAt | date:'HH:mm') : '—' }}</td>
             <td>{{ c.responseTimeMinutes ?? '—' }}</td>
             <td>
-              <span class="qi-pill" [class.q-good]="c.withinTarget" [class.q-bad]="!c.withinTarget">
+              <span class="qi-pill" *ngIf="c.responseTimeMinutes !== null" [class.q-good]="c.withinTarget" [class.q-bad]="!c.withinTarget">
                 {{ c.withinTarget ? 'within' : 'over' }}
               </span>
+              <span *ngIf="c.responseTimeMinutes === null">pending</span>
             </td>
             <td>{{ c.notes || '—' }}</td>
           </tr>
@@ -197,7 +228,7 @@
 
   <!-- ── MAINTENANCE TAB ── -->
   <ng-container *ngIf="tab === 'maintenance'">
-    <div class="fc-card">
+    <div class="fc-card" *ngIf="canEdit">
       <h3 class="fc-card-title">Raise maintenance ticket</h3>
       <div class="fc-row">
         <label>Type
@@ -220,7 +251,7 @@
       <h3 class="fc-card-title">This month — tickets ({{ maintenance.length }})</h3>
       <div class="q-empty" *ngIf="!loading && maintenance.length === 0">No tickets this month.</div>
       <table class="fc-table" *ngIf="maintenance.length > 0">
-        <thead><tr><th>Raised</th><th>Type</th><th>Location</th><th>SLA due</th><th>Status</th><th>Closed</th><th>Actions</th></tr></thead>
+        <thead><tr><th>Raised</th><th>Type</th><th>Location</th><th>SLA due</th><th>Status</th><th>Closed</th><th *ngIf="canEdit">Actions</th></tr></thead>
         <tbody>
           <tr *ngFor="let m of maintenance">
             <td>{{ m.raisedAt | date:'yyyy-MM-dd HH:mm' }}</td>
@@ -231,7 +262,7 @@
             </td>
             <td>{{ m.status.replace('_', ' ') }}</td>
             <td>{{ m.closedAt ? (m.closedAt | date:'yyyy-MM-dd HH:mm') : '—' }}</td>
-            <td class="fc-actions">
+            <td class="fc-actions" *ngIf="canEdit">
               <button class="fc-tiny" *ngIf="m.status !== 'in_progress'" (click)="changeMaintenanceStatus(m, 'in_progress')">In progress</button>
               <button class="fc-tiny" *ngIf="m.status !== 'closed'" (click)="changeMaintenanceStatus(m, 'closed')">Close</button>
               <button class="fc-tiny" *ngIf="m.status === 'closed'" (click)="changeMaintenanceStatus(m, 'open')">Re-open</button>

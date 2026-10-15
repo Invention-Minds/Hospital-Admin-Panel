@@ -31,15 +31,19 @@ export const roleGuard: CanActivateFn = (route) => {
 
   const role = localStorage.getItem('role') || '';
   const subAdminType = localStorage.getItem('subAdminType') || '';
+  const adminType = localStorage.getItem('adminType') || '';
 
   const allowedRoles: string[] = route.data?.['roles'] ?? [];
   const allowedSubTypes: string[] = route.data?.['subAdminTypes'] ?? [];
+  // adminTypes only match users whose role is 'admin' (mirrors backend requireRole).
+  const allowedAdminTypes: string[] = route.data?.['adminTypes'] ?? [];
   const allowSuperAdmin = route.data?.['allowSuperAdmin'] !== false;
 
   const passes =
     (allowSuperAdmin && role === 'super_admin') ||
     allowedRoles.includes(role) ||
-    allowedSubTypes.includes(subAdminType);
+    (!!subAdminType && allowedSubTypes.includes(subAdminType)) ||
+    (role === 'admin' && !!adminType && allowedAdminTypes.includes(adminType));
 
   if (!passes) {
     router.navigate(['/dashboard']);

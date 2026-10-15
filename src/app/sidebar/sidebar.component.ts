@@ -3,6 +3,7 @@ import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { SettingsComponent } from "../settings/settings/settings.component";
 import { AppointmentConfirmService } from '../services/appointment-confirm.service';
+import { isQualityViewer, isInfectionControlEditor, canOpenFeedback } from '../quality/quality-access';
 
 @Component({
   selector: 'app-sidebar',
@@ -70,6 +71,11 @@ export class SidebarComponent implements OnInit {
     // Dietetics
     { prefix: '/dietetics/queue', group: 'dietetics' },
     { prefix: '/dietetics/canteen', group: 'dietetics' },
+    { prefix: '/dietetics/sheet', group: 'dietetics' },
+    { prefix: '/dietetics/census', group: 'dietetics' },
+    { prefix: '/dietetics/labels', group: 'dietetics' },
+    { prefix: '/dietetics/rounds', group: 'dietetics' },
+    { prefix: '/dietetics/nutrition', group: 'dietetics' },
     // Discharge & Finance
     { prefix: '/estimation', group: 'discharge' },
     { prefix: '/lama-dama', group: 'discharge' },
@@ -229,6 +235,19 @@ export class SidebarComponent implements OnInit {
   get isNursingSuper(): boolean {
     return this.role === 'sub_admin' && this.subAdminType === 'Nursing Superintendent';
   }
+  // Quality module access — mirrors backend src/api/_shared/quality-roles.ts.
+  // Viewers: super_admin + admin of type Quality Manager / Manager / Senior Manager / Management.
+  get isQualityViewer(): boolean {
+    return isQualityViewer();
+  }
+  // Infection Control Nurse gets a standalone link to the one screen they can use.
+  get showInfectionControlLink(): boolean {
+    return isInfectionControlEditor() && !isQualityViewer();
+  }
+  // Feedback: NPS viewers + survey collectors (Front Desk / Patient Relations).
+  get showFeedbackLink(): boolean {
+    return canOpenFeedback();
+  }
   // A nurse is ward/clinical-focused, so the broad OPD + Investigations sections
   // stay hidden for them (they get their IPD/clinical menus + block vitals link).
   isNotNursing():boolean{
@@ -311,7 +330,8 @@ get showOtSection(): boolean {
 
 get showDieteticsSection(): boolean {
   return this.role === 'super_admin' || this.role === 'doctor'
-    || ['Dietician', 'Canteen Staff'].includes(this.subAdminType) || this.isIpdNurse;
+    || ['Dietician', 'Canteen Staff', 'Billing Coordinator', 'Nursing Superintendent'].includes(this.subAdminType)
+    || this.isIpdNurse;
 }
 
 get showDischargeSection(): boolean {

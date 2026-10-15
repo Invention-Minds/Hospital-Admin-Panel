@@ -1,7 +1,7 @@
 <div class="page q-shell">
   <div class="q-head">
     <div>
-      <h2 class="q-title">RCA · {{ rca?.record?.qiCode }}</h2>
+      <h2 class="q-title">RCA · {{ rca?.record?.qiCode }} <span class="q-view-only" *ngIf="!canEdit">View only</span></h2>
       <p class="q-sub" *ngIf="rca?.record?.indicator as ind">{{ ind.name }} — {{ ind.chapter }} / {{ ind.department }}</p>
     </div>
     <div class="q-range">
@@ -41,6 +41,8 @@
     <!-- ── Editor ── -->
     <div class="rca-card">
       <h3 class="rca-card-title">Root cause analysis</h3>
+      <!-- Non-editors (senior management) see the RCA read-only. -->
+      <fieldset [disabled]="!canEdit" style="border: 0; padding: 0; margin: 0; min-width: 0;">
 
       <label class="rca-fullrow">Immediate actions
         <textarea rows="2" [(ngModel)]="draft.immediateActions" placeholder="What was done right away to contain the harm?"></textarea>
@@ -84,7 +86,9 @@
         <label>Effectiveness reviewed at <input type="date" [(ngModel)]="draft.effectivenessReviewAt" /></label>
       </div>
 
-      <div class="rca-foot">
+      </fieldset>
+
+      <div class="rca-foot" *ngIf="canEdit">
         <button class="rca-save" (click)="save()" [disabled]="saving">{{ saving ? 'Saving…' : 'Save RCA' }}</button>
       </div>
     </div>

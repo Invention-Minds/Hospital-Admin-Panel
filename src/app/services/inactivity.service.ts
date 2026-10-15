@@ -33,7 +33,8 @@ export class InactivityService {
     this.resetLogoutTimer();
   }
   private isChannelRoute(): boolean {
-    return this.router.url.startsWith('/channel/');
+    // Unattended TV screens (doctor channel, canteen kitchen TV) never time out.
+    return this.router.url.startsWith('/channel/') || this.router.url.startsWith('/canteen-channel/');
   }
   private isDoctorRoute(): boolean {
     return this.router.url.startsWith('/doctor-appointments');

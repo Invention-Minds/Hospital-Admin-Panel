@@ -1,0 +1,225 @@
+<div class="dx-shell">
+  <div class="dx-head dx-noprint">
+    <div>
+      <h2 class="dx-title">Diet Information Sheet</h2>
+      <p class="dx-sub">Patient-wise diet for the service window. Click a meal cell to change it — the kitchen is updated immediately.</p>
+    </div>
+    <div class="dx-toolbar">
+      <label>Service date <input type="date" [(ngModel)]="date" (change)="viewingSheet = null; load()" /></label>
+      <label>Ward
+        <select [(ngModel)]="wardFilter">
+          <option value="">All wards</option>
+          <option *ngFor="let w of wards" [value]="w">{{ w }}</option>
+        </select>
+      </label>
+      <label>Search <input type="text" [(ngModel)]="search" placeholder="Name / PRN / bed / diet" /></label>
+      <button type="button" class="dx-btn" (click)="load(); loadSheets()">Refresh</button>
+      <button type="button" class="dx-btn" (click)="print()">Print</button>
+      <button type="button" class="dx-btn dx-btn-primary" *ngIf="isDietitian && !viewingSheet" (click)="startIssue()">Issue sheet</button>
+    </div>
+  </div>
+
+  <div class="dx-banner dx-banner-bad dx-noprint" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="dx-banner dx-banner-good dx-noprint" *ngIf="successMessage">{{ successMessage }}</div>
+
+  <div class="dx-tabs dx-noprint">
+    <button type="button" [class.active]="tab==='live'" (click)="tab='live'; viewingSheet = null">Live sheet</button>
+    <button type="button" [class.active]="tab==='issued'" (click)="tab='issued'; viewingSheet = null">Issued sheets <span class="dx-count">{{ openSheets }}</span></button>
+  </div>
+
+  <!-- ─── Live / snapshot sheet ─── -->
+  <ng-container *ngIf="tab==='live' || (tab==='issued' && viewingSheet)">
+    <div class="ds-viewbar dx-noprint" *ngIf="viewingSheet as v">
+      <button type="button" class="dx-btn dx-btn-sm" (click)="viewingSheet = null">← Back to issued sheets</button>
+      <span class="ds-viewbar-text">
+        Issued copy (read-only) · {{ v.issuedAt | date:'dd MMM, HH:mm' }} by {{ v.issuedBy }} ·
+        <b *ngIf="v.status === 'ACKNOWLEDGED'">received by F&amp;B {{ v.supervisorAckBy }} {{ v.supervisorAckAt | date:'HH:mm' }}</b>
+        <b *ngIf="v.status === 'ISSUED'">waiting for F&amp;B to acknowledge</b>
+        <b *ngIf="v.status === 'REPLACED'">replaced by a newer issue</b>
+      </span>
+      <button type="button" class="dx-btn dx-btn-sm dx-btn-primary" *ngIf="isFnb && v.status === 'ISSUED'" (click)="acknowledging = v">Acknowledge</button>
+    </div>
+
+    <div class="ds-sheet-head">
+      <div class="ds-sheet-title">
+        DIET INFORMATION LIST {{ (viewingSheet?.serviceDate ?? preview?.serviceDate) | date:'dd-MM-yyyy' }}
+        ({{ totalsLine }}) &nbsp; {{ windowLabel }}
+      </div>
+      <div class="ds-sheet-notes" *ngIf="(viewingSheet?.notes ?? preview?.standingNotes) as notes">NOTE: {{ notes }}</div>
+      <div class="dx-summary ds-sheet-meta dx-noprint" *ngIf="!viewingSheet && preview">
+        <span><b>{{ preview.totals.total }}</b> patients</span>
+        <span [class.is-act]="changedCount"><b>{{ changedCount }}</b> changed since last sheet</span>
+        <span [class.is-bad]="preview.totals.noPlan"><b>{{ preview.totals.noPlan }}</b> without a diet</span>
+        <span><b>{{ preview.totals.npo }}</b> NPO</span>
+        <span><b>{{ preview.totals.noTray }}</b> no tray</span>
+        <span *ngIf="preview.lastSheet">Last issued {{ preview.lastSheet.issuedAt | date:'dd MMM, HH:mm' }} by {{ preview.lastSheet.issuedBy }}{{ preview.lastSheet.status === 'ACKNOWLEDGED' ? ' · acknowledged' : ' · awaiting F&B' }}</span>
+        <span *ngIf="!preview.lastSheet">No sheet issued yet — changes are tracked from the first issue</span>
+      </div>
+    </div>
+
+    <div class="dx-banner dx-banner-warn" *ngIf="!viewingSheet && preview?.departed?.length">
+      Left since last sheet (discharged / no longer admitted) — remove from service:
+      <span *ngFor="let d of preview?.departed; let last = last">
+        {{ d.bedNumber || '—' }} {{ d.patientName || d.admissionNo }}<span *ngIf="!last">, </span>
+      </span>
+    </div>
+
+    <div class="dx-empty" *ngIf="loading">Loading…</div>
+
+    <ng-container *ngIf="!loading">
+      <div class="dx-scroll">
+        <ng-container *ngTemplateOutlet="sheetTable; context: { rows: mainRows }"></ng-container>
+      </div>
+
+      <ng-container *ngIf="newRows.length">
+        <h3 class="ds-new-title">NEW ADMISSIONS (since last sheet) — {{ windowLabel }}</h3>
+        <div class="dx-scroll">
+          <ng-container *ngTemplateOutlet="sheetTable; context: { rows: newRows }"></ng-container>
+        </div>
+      </ng-container>
+    </ng-container>
+
+    <div class="ds-signoff">
+      <div>FOOD AND BEVERAGE MANAGER / SUPERVISOR SIGN &amp; DATE:
+        <b *ngIf="viewingSheet?.supervisorAckBy">{{ viewingSheet?.supervisorAckBy }} · {{ viewingSheet?.supervisorAckAt | date:'dd-MM-yyyy HH:mm' }}</b>
+      </div>
+      <div>DIETICIAN SIGN &amp; DATE:
+        <b *ngIf="viewingSheet?.issuedBy">{{ viewingSheet?.issuedBy }} · {{ viewingSheet?.issuedAt | date:'dd-MM-yyyy HH:mm' }}</b>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ─── Issued sheets ─── -->
+  <div *ngIf="tab==='issued' && !viewingSheet" class="dx-noprint">
+    <p class="dx-sub ds-issued-help">
+      Every issued sheet is a signed snapshot sent to the kitchen. The F&amp;B manager / supervisor acknowledges it to confirm
+      the kitchen has the diet for that window — the same as signing the paper sheet. Re-issuing replaces the earlier copy.
+    </p>
+    <table class="diet-grid">
+      <thead>
+        <tr><th>Window</th><th class="dx-right">Patients</th><th>Issued by dietitian</th><th>Kitchen (F&amp;B)</th><th></th></tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let s of sheets" [class.is-muted]="s.status==='REPLACED'">
+          <td class="is-strong">{{ s.windowLabel }}</td>
+          <td class="dx-right">{{ s.totalPatients }}<span class="dx-muted" *ngIf="s.noTrayPatients"> ({{ s.noTrayPatients }} no tray)</span></td>
+          <td class="dx-tight">{{ s.issuedAt | date:'dd MMM, HH:mm' }}<span class="dx-sub-line">{{ s.issuedBy }}</span></td>
+          <td>
+            <span class="dx-pill dx-pill-ok" *ngIf="s.status==='ACKNOWLEDGED'">Received · {{ s.supervisorAckBy }} {{ s.supervisorAckAt | date:'HH:mm' }}</span>
+            <span class="dx-pill dx-pill-warn" *ngIf="s.status==='ISSUED'">Waiting for F&amp;B</span>
+            <span class="dx-pill" *ngIf="s.status==='REPLACED'">Replaced</span>
+          </td>
+          <td class="dx-actions dx-right">
+            <button type="button" class="dx-btn dx-btn-sm" (click)="viewSheet(s)">View</button>
+            <button type="button" class="dx-btn dx-btn-sm dx-btn-primary"
+                    *ngIf="isFnb && s.status==='ISSUED'" (click)="acknowledging = s">Acknowledge</button>
+          </td>
+        </tr>
+        <tr *ngIf="sheets.length===0"><td colspan="5" class="dx-empty">No sheets issued yet.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- One table template for the main sheet and the new-admissions section. -->
+<ng-template #sheetTable let-rows="rows">
+  <table class="diet-grid ds-sheet">
+    <thead>
+      <tr>
+        <th>SL</th><th>Bed</th><th>PRN</th><th>Patient name</th><th>Age</th><th>Provisional diagnosis</th>
+        <th>Diet</th><th>Food allergy / avoid</th>
+        <th *ngFor="let w of window">{{ w.name }}<br><span class="ds-slot-date">{{ w.date | date:'dd/MM' }}{{ w.orderCutoff ? ' · cut-off ' + w.orderCutoff : '' }}</span></th>
+        <th>Remark</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let r of rows; let i = index" [class.ds-changed]="r.changes.length" [title]="r.changes.join(' · ')">
+        <td>{{ i + 1 }}</td>
+        <td class="ds-bed">{{ r.bedNumber || '—' }}<div class="ds-ward">{{ r.wardName }}</div></td>
+        <td>{{ r.prn }}</td>
+        <td>
+          <b>{{ r.patientName || r.admissionNo }}</b>
+          <div class="ds-changes dx-noprint" *ngIf="r.changes.length">{{ r.changes.join(' · ') }}</div>
+        </td>
+        <td>{{ r.age }}</td>
+        <td>{{ r.diagnosis | slice:0:60 }}</td>
+        <td>
+          <b *ngIf="r.dietCode">{{ r.dietCode }}</b>
+          <span class="dx-pill dx-pill-bad" *ngIf="r.planStatus==='NONE'">No diet</span>
+          <span class="dx-pill dx-pill-warn" *ngIf="r.planStatus==='INTERIM'" title="Interim diet from the nursing census">Interim</span>
+          <div class="ds-npo" *ngIf="r.npo">{{ r.npo }}</div>
+          <span class="dx-pill dx-pill-warn" *ngIf="r.needsCheck" [title]="r.checkNote || ''">CHECK</span>
+          <span class="dx-pill" *ngIf="r.riskLevel" [class.dx-pill-bad]="r.riskLevel==='HIGH' || r.riskLevel==='SEVERE'">Risk: {{ r.riskLevel }}</span>
+        </td>
+        <td>{{ r.avoid || 'NIL' }}</td>
+        <td *ngFor="let w of window" class="ds-cell" [class.ds-editable]="isDietitian && !viewingSheet"
+            (click)="openCell(r, w)" [title]="cellTitle(r, w)">
+          <span *ngIf="r.cells[w.slotId]?.text as t" [class.ds-no]="t === 'NO'">{{ t }}</span>
+          <span *ngIf="!r.cells[w.slotId]?.text && r.cells[w.slotId]?.defaultMeal" class="ds-default">{{ r.cells[w.slotId]?.defaultMeal }}</span>
+        </td>
+        <td>{{ r.remark }}</td>
+      </tr>
+      <tr *ngIf="rows.length===0"><td [attr.colspan]="9 + window.length" class="dx-empty">No patients.</td></tr>
+    </tbody>
+  </table>
+</ng-template>
+
+<!-- ─── Cell editor ─── -->
+<div class="dx-modal-bg" *ngIf="editing" (click)="editing = null">
+  <div class="dx-modal" (click)="$event.stopPropagation()">
+    <h3>{{ editing.row.bedNumber }} · {{ editing.row.patientName }} — {{ editing.slot.name }}</h3>
+    <p class="dx-sub">
+      Diet {{ editing.row.dietCode || '—' }}.
+      <span *ngIf="editing.row.cells[editing.slot.slotId]?.defaultMeal as m">Menu default: {{ m }}.</span>
+      Leave everything empty to go back to the menu default.
+    </p>
+    <label class="dx-check"><input type="checkbox" [(ngModel)]="editing.skip" /> NO — nothing for this meal</label>
+    <ng-container *ngIf="!editing.skip">
+      <label class="dx-field">Instruction / quantity
+        <textarea rows="3" [(ngModel)]="editing.instruction"
+                  placeholder="e.g. Dhaliya khichdi 3/4 cup + 3 cup palya + 1 big bowl salad · 100 ml only · 200 ml Q2H"></textarea>
+      </label>
+      <div class="dx-row">
+        <label class="dx-field">Supplement
+          <select [(ngModel)]="editing.supplementId" (ngModelChange)="onSupplementPick()">
+            <option value="">— none —</option>
+            <option *ngFor="let s of supplements" [value]="s.id">{{ s.name }}</option>
+          </select>
+        </label>
+        <label class="dx-field">Dose <input type="text" [(ngModel)]="editing.supplementDose" placeholder="2.5 scoops in 150 ml warm water" /></label>
+      </div>
+    </ng-container>
+    <div class="dx-actions">
+      <button type="button" class="dx-btn" (click)="editing = null">Cancel</button>
+      <button type="button" class="dx-btn" (click)="saveCell(true)" [disabled]="savingCell">Reset to menu</button>
+      <button type="button" class="dx-btn dx-btn-primary" (click)="saveCell()" [disabled]="savingCell">{{ savingCell ? 'Saving…' : 'Save' }}</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Issue (dietitian signs) ─── -->
+<div class="dx-modal-bg" *ngIf="issuing" (click)="issuing = false">
+  <div class="dx-modal" (click)="$event.stopPropagation()">
+    <h3>Issue Diet Information Sheet</h3>
+    <p class="dx-sub">{{ windowLabel }} · {{ totalsLine }}. Issuing snapshots the sheet, pushes every tray in the window to the kitchen and asks F&amp;B to acknowledge.</p>
+    <label class="dx-field">Note for the kitchen
+      <textarea rows="3" [(ngModel)]="issueNotes"></textarea>
+    </label>
+    <app-e-sign [signerType]="'staff'" [signerRole]="'dietician'" [signerName]="username || 'Dietician'"
+                [contextType]="'diet-sheet'" [contextId]="date" (signed)="onIssueSigned($event)"
+                (cancelled)="issuing = false">
+    </app-e-sign>
+  </div>
+</div>
+
+<!-- ─── Acknowledge (F&B manager / supervisor) ─── -->
+<div class="dx-modal-bg" *ngIf="acknowledging" (click)="acknowledging = null">
+  <div class="dx-modal" (click)="$event.stopPropagation()">
+    <h3>Acknowledge sheet</h3>
+    <p class="dx-sub">{{ acknowledging.windowLabel }} — confirm the kitchen has received this diet sheet.</p>
+    <app-e-sign [signerType]="'staff'" [signerRole]="'fnb-supervisor'" [signerName]="username || 'F&B Supervisor'"
+                [contextType]="'diet-sheet-ack'" [contextId]="acknowledging.id" (signed)="onAckSigned($event)"
+                (cancelled)="acknowledging = null">
+    </app-e-sign>
+  </div>
+</div>

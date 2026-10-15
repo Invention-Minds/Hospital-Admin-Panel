@@ -1,11 +1,11 @@
 <div class="page q-shell">
   <div class="q-head">
     <div>
-      <h2 class="q-title">Infection control capture</h2>
+      <h2 class="q-title">Infection control capture <span class="q-view-only" *ngIf="!canEdit">View only</span></h2>
       <p class="q-sub">Surveillance events, device-day counts, and sterilization cycles. Powers ICO-001..005, ICO-008, HR-006.</p>
     </div>
     <div class="q-range">
-      <button class="qi-back" (click)="goBack()">← Indicators</button>
+      <button class="qi-back" *ngIf="canViewQuality" (click)="goBack()">← Indicators</button>
     </div>
   </div>
 
@@ -20,7 +20,7 @@
 
   <!-- ── Surveillance tab ── -->
   <ng-container *ngIf="tab === 'surveillance'">
-    <div class="ic-card">
+    <div class="ic-card" *ngIf="canEdit">
       <h3 class="ic-card-title">Record surveillance event</h3>
       <div class="ic-row">
         <label>Type
@@ -59,7 +59,7 @@
             <td>{{ r.organism || '—' }}</td>
             <td>{{ r.deviceRelated ? 'yes' : 'no' }}</td>
             <td>{{ r.reporter || '—' }}</td>
-            <td><button class="ic-delete" (click)="removeSurveillance(r)">×</button></td>
+            <td><button class="ic-delete" *ngIf="canEdit" (click)="removeSurveillance(r)">×</button></td>
           </tr>
         </tbody>
       </table>
@@ -68,7 +68,7 @@
 
   <!-- ── Device-day tab ── -->
   <ng-container *ngIf="tab === 'device-days'">
-    <div class="ic-card">
+    <div class="ic-card" *ngIf="canEdit">
       <h3 class="ic-card-title">Record device-day count</h3>
       <div class="ic-row">
         <label>Date <input type="date" [(ngModel)]="ddDraft.date" /></label>
@@ -99,7 +99,7 @@
             <td>{{ r.deviceType.replace('_', ' ') }}</td>
             <td>{{ r.count }}</td>
             <td>{{ r.capturedBy || '—' }}</td>
-            <td><button class="ic-delete" (click)="removeDeviceDay(r)">×</button></td>
+            <td><button class="ic-delete" *ngIf="canEdit" (click)="removeDeviceDay(r)">×</button></td>
           </tr>
         </tbody>
       </table>
@@ -108,7 +108,7 @@
 
   <!-- ── Sterilization tab ── -->
   <ng-container *ngIf="tab === 'sterilization'">
-    <div class="ic-card">
+    <div class="ic-card" *ngIf="canEdit">
       <h3 class="ic-card-title">Log sterilization cycle</h3>
       <div class="ic-row">
         <label>Batch code <input type="text" [(ngModel)]="sterilDraft.batchCode" placeholder="BATCH-…" /></label>
@@ -146,7 +146,7 @@
             </td>
             <td>{{ r.failureReason || '—' }}</td>
             <td>{{ r.capturedBy || '—' }}</td>
-            <td><button class="ic-delete" (click)="removeSterilization(r)">×</button></td>
+            <td><button class="ic-delete" *ngIf="canEdit" (click)="removeSterilization(r)">×</button></td>
           </tr>
         </tbody>
       </table>

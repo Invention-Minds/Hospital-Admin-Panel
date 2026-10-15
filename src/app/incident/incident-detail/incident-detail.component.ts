@@ -5,7 +5,12 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
-import { CapaPayload, Incident, IncidentService, IncidentStatus, IncidentSeverity } from '../../services/incident.service';
+import {
+  CapaPayload, Incident, IncidentService, IncidentStatus, IncidentSeverity,
+  INCIDENT_TRANSITIONS,
+} from '../../services/incident.service';
+import { isIncidentManager } from '../../quality/quality-access';
+import { SchedulingService, SchedulingStaff } from '../../services/scheduling.service';
 
 /**
  * Phase 9.24 / Phase 1 — Incident detail + status transitions.
@@ -25,8 +30,18 @@ export class IncidentDetailComponent implements OnInit, OnDestroy {
   errorMessage = '';
   successMessage = '';
 
+  // Triage / assign / CAPA editing is manager-only (super_admin or admin
+  // 'Quality Manager'); reporters, assignees and department viewers get a
+  // read-only view. Evidence upload stays open to anyone who can read it.
+  readonly isManager = isIncidentManager();
+  staff: SchedulingStaff[] = [];
+
   // Status-edit draft.
-  draft = { status: 'open' as IncidentStatus, severityFinal: '', assignedTo: '', closureNotes: '' };
+  draft = {
+    status: 'open' as IncidentStatus, severityFinal: '',
+    assignedTo: '', assignedToId: null as number | null, closureNotes: '',
+  };
+  saving = false;
 
   // Phase 3 — CAPA editor draft (root cause + actions).
   capaDraft: CapaPayload = {
@@ -48,12 +63,21 @@ export class IncidentDetailComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  constructor(private route: ActivatedRoute, private router: Router, private svc: IncidentService) {}
+  constructor(
+    private route: ActivatedRoute, private router: Router,
+    private svc: IncidentService, private scheduling: SchedulingService,
+  ) {}
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id') ?? '';
     if (!id) { this.errorMessage = 'Missing incident id'; return; }
     this.load(id);
+    if (this.isManager) {
+      this.scheduling.listStaff().pipe(takeUntil(this.destroy$)).subscribe({
+        next: (rows) => { this.staff = rows ?? []; },
+        error: () => { /* picker is best-effort; free-text name still works */ },
+      });
+    }
   }
   ngOnDestroy(): void { this.destroy$.next(); this.destroy$.complete(); }
 
@@ -65,6 +89,7 @@ export class IncidentDetailComponent implements OnInit, OnDestroy {
         this.draft.status = r.data.status;
         this.draft.severityFinal = r.data.severityFinal ?? '';
         this.draft.assignedTo = r.data.assignedTo ?? '';
+        this.draft.assignedToId = r.data.assignedToId ?? null;
         this.draft.closureNotes = r.data.closureNotes ?? '';
         // Hydrate the CAPA draft from the saved row (if any).
         const c = r.data.capa;
@@ -88,21 +113,40 @@ export class IncidentDetailComponent implements OnInit, OnDestroy {
     });
   }
 
+  /** Current status plus the moves the backend allows from it. */
+  statusOptions(): IncidentStatus[] {
+    const cur = this.incident?.status;
+    if (!cur) return this.STATUSES;
+    return [cur, ...(INCIDENT_TRANSITIONS[cur] ?? [])];
+  }
+
+  /** Picker → keep the id and the display name in sync. */
+  onAssigneeSelected(id: number | null): void {
+    this.draft.assignedToId = id;
+    const u = this.staff.find((s) => s.id === id);
+    if (u) this.draft.assignedTo = u.username;
+  }
+
   saveStatus(): void {
-    if (!this.incident) return;
+    if (!this.incident || this.saving) return;
     this.errorMessage = '';
-    this.svc.updateStatus(this.incident.id, {
+    this.saving = true;
+    const id = this.incident.id;
+    this.svc.updateStatus(id, {
       status: this.draft.status,
       severityFinal: this.draft.severityFinal || null,
       assignedTo: this.draft.assignedTo || null,
+      assignedToId: this.draft.assignedToId,
       closureNotes: this.draft.closureNotes || null,
     }).pipe(takeUntil(this.destroy$)).subscribe({
       next: (r) => {
-        this.incident = r.data;
-        this.successMessage = `Status updated → ${r.data.status}`;
+        this.saving = false;
+        this.successMessage = `Status updated → ${this.statusLabel(r.data.status)}`;
         setTimeout(() => (this.successMessage = ''), 3000);
+        // The PUT returns the bare row — refetch so CAPA + linked records stay.
+        this.load(id);
       },
-      error: (e) => { this.errorMessage = e?.error?.message || 'Failed to update status'; },
+      error: (e) => { this.saving = false; this.errorMessage = e?.error?.message || 'Failed to update status'; },
     });
   }
 

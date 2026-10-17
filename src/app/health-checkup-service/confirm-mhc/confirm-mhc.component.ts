@@ -9,6 +9,7 @@ import * as FileSaver from 'file-saver';
 import { start } from 'node:repl';
 import * as moment from 'moment-timezone';
 import { app } from '../../../../server';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 interface Appointment {
   id?: number;
@@ -47,7 +48,7 @@ interface Appointment {
 export class ConfirmMhcComponent {
   confirmedAppointments: Appointment[] = [];
 
-  constructor(private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private messageService: MessageService, private cdRef: ChangeDetectorRef, private alertSvc: AlertService) { }
+  constructor(private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private messageService: MessageService, private cdRef: ChangeDetectorRef, private alertSvc: AlertService, private downloadOtp: DownloadOtpService) { }
   appointments: any[] = [
     // { id: '0001', patientName: 'Search Sundar', phoneNumber: '+91 7708590100', doctorName: 'Dr. Nitish', department: 'Psychologist', date: '11/02/24', time: '9.00 to 9.15', status: 'Booked', smsSent: true },
   ];
@@ -412,7 +413,8 @@ export class ConfirmMhcComponent {
     this.selectedDateRange = [];
     this.filterAppointmentsByDate(new Date());
   }
-  downloadData(): void {
+  async downloadData(): Promise<void> {
+    if (!(await this.downloadOtp.verify('Confirmed health checkups (CSV)'))) return;
     if (this.filteredServices.length === 0) {
       console.warn('No data to download');
       return;
@@ -566,6 +568,7 @@ export class ConfirmMhcComponent {
   }
 
   async downloadLastWeekData(): Promise<void> {
+    if (!(await this.downloadOtp.verify('Last week health checkups (Excel)'))) return;
     // Excel export library is loaded only when the user exports.
     const XLSX = await import('xlsx');
     this.loadLastWeekAppointments();
@@ -619,6 +622,7 @@ export class ConfirmMhcComponent {
   }
   // Method to download the filtered data as Excel
   async downloadFilteredData(): Promise<void> {
+    if (!(await this.downloadOtp.verify('Confirmed health checkups (Excel)'))) return;
     // Excel export library is loaded only when the user exports.
     const XLSX = await import('xlsx');
     if (this.filteredServices && this.filteredServices.length > 0) {
@@ -687,7 +691,8 @@ export class ConfirmMhcComponent {
       console.warn('No data available to download');
     }
   }
-  printAppointmentDetails(): void {
+  async printAppointmentDetails(): Promise<void> {
+    if (!(await this.downloadOtp.verify('Confirmed health checkups (Print)'))) return;
     console.log(this.filteredServices)
     const selectedFields = this.filteredServices.map((appointment: Appointment) => {
       // console.log('Appointment:', appointment.created_at);

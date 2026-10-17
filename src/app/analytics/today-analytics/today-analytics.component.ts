@@ -6,6 +6,7 @@ import { EstimationService } from '../../services/estimation/estimation.service'
 import { HealthCheckupServiceService } from '../../services/health-checkup/health-checkup-service.service';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import type * as XLSXTypes from 'xlsx';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 @Component({
   selector: 'app-today-analytics',
@@ -15,7 +16,7 @@ import type * as XLSXTypes from 'xlsx';
 export class TodayAnalyticsComponent {
   private charts = new EChartsTracker();
 
-  constructor(private doctor: DoctorServiceService, private estimations: EstimationService, private healthCheckUp: HealthCheckupServiceService, private appointment: AppointmentConfirmService) { }
+  constructor(private doctor: DoctorServiceService, private estimations: EstimationService, private healthCheckUp: HealthCheckupServiceService, private appointment: AppointmentConfirmService, private downloadOtp: DownloadOtpService) { }
   date: any = '';
   doctors: any[] = [];
   todayTotalOpdCount: number = 0;
@@ -111,6 +112,7 @@ export class TodayAnalyticsComponent {
   closeCheckinReport(): void { this.showCheckinReport = false; }
 
   async downloadCheckinExcel(): Promise<void> {
+    if (!(await this.downloadOtp.verify('Today check-in list (Excel)'))) return;
     // Excel export library is loaded only when the user exports.
     const XLSX = await import('xlsx');
     if (!this.checkinList || this.checkinList.length === 0) { return; }
@@ -365,6 +367,7 @@ export class TodayAnalyticsComponent {
   async downloadConsultPatientsExcel(): Promise<void> {
     const doc = this.selectedConsultDoctor;
     if (!doc?.patients?.length) return;
+    if (!(await this.downloadOtp.verify('Doctor consultation patients (Excel)'))) return;
 
     // Excel export library is loaded only when the user exports.
     const { Workbook } = await import('exceljs');
@@ -391,6 +394,7 @@ export class TodayAnalyticsComponent {
   // Download the consultation summary plus the underlying appointment details.
   async downloadConsultExcel(): Promise<void> {
     if (!this.consultSummary.length) return;
+    if (!(await this.downloadOtp.verify('Consultation summary (Excel)'))) return;
 
     // Excel export library is loaded only when the user exports.
     const { Workbook } = await import('exceljs');
@@ -1189,6 +1193,7 @@ export class TodayAnalyticsComponent {
   }
 
   async checkInReportDownload(): Promise<void> {
+    if (!(await this.downloadOtp.verify('Today check-in report (Excel)'))) return;
     // Excel export library is loaded only when the user exports.
     const XLSX = await import('xlsx');
     const columns = [

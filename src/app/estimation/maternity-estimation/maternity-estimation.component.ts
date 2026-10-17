@@ -3,6 +3,7 @@ import { EstimationService } from '../../services/estimation/estimation.service'
 import { MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
 import { environment } from '../../../environment/environment';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 @Component({
   selector: 'app-maternity-estimation',
@@ -12,7 +13,7 @@ import { environment } from '../../../environment/environment';
 export class MaternityEstimationComponent {
 
 
-  constructor(private estimationService: EstimationService, private messageService: MessageService,private router: Router) { }
+  constructor(private estimationService: EstimationService, private messageService: MessageService,private router: Router, private downloadOtp: DownloadOtpService) { }
   pendingEstimations: any[] = [];
   filteredEstimations: any[] = [];
   currentPage = 1;
@@ -78,7 +79,8 @@ this.fetchPendingEstimations();
     });
     
   }
-  print(estimation: any): void {
+  async print(estimation: any): Promise<void> {
+    if (!(await this.downloadOtp.verify('Maternity estimation (PDF)'))) return;
     if (estimation.pdfLink) {
       const href = estimation.pdfLink.startsWith('http')
         ? estimation.pdfLink

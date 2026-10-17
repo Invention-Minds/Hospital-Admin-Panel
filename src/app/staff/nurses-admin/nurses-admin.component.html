@@ -139,6 +139,12 @@
         <input class="ns-input" type="text" [(ngModel)]="draft.fullName" />
       </div>
 
+      <div class="ns-form-row">
+        <label class="ns-field-label">Email {{ editing === 'new' ? '*' : '' }}</label>
+        <input class="ns-input" type="email" [(ngModel)]="draft.email" autocomplete="off" placeholder="name@hospital.com" />
+        <small class="ns-hint">Download verification codes go here. The nurse confirms it at next sign-in.</small>
+      </div>
+
       <div class="ns-form-grid">
         <div class="ns-form-row">
           <label class="ns-field-label">Employee ID</label>

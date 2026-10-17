@@ -8,6 +8,7 @@ import {
   MealTimeSlot,
   localDateString,
 } from '../../services/dietetics.service';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 /**
  * Diet labels — `/dietetics/labels`. Replaces the hand-written stickers:
@@ -33,7 +34,7 @@ export class DietLabelsComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  constructor(private svc: DieteticsService) {}
+  constructor(private svc: DieteticsService, private downloadOtp: DownloadOtpService) {}
 
   ngOnInit(): void {
     this.svc.listMealTimeSlots().pipe(takeUntil(this.destroy$)).subscribe({
@@ -79,7 +80,8 @@ export class DietLabelsComponent implements OnInit, OnDestroy {
     };
   }
 
-  print(): void {
+  async print(): Promise<void> {
+    if (!(await this.downloadOtp.verify('Diet labels print'))) return;
     if (typeof window !== 'undefined') window.print();
   }
 }

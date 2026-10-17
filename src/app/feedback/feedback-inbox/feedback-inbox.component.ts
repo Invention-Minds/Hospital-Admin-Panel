@@ -7,6 +7,7 @@ import { QRCodeModule } from 'angularx-qrcode';
 
 import { FeedbackService, FeedbackSurvey, SurveyStats, SurveyTemplate } from '../../services/feedback.service';
 import { isComplaintHandler, isFeedbackCollector, isFeedbackViewer } from '../../quality/quality-access';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 /**
  * Phase 9.25 / Phase 4 — Feedback inbox (staff view).
@@ -50,7 +51,7 @@ export class FeedbackInboxComponent implements OnInit, OnDestroy {
   readonly TEMPLATES: SurveyTemplate[] = ['opd-post-visit', 'ipd-discharge', 'er-discharge', 'day-care', 'general'];
 
   private destroy$ = new Subject<void>();
-  constructor(private svc: FeedbackService) {}
+  constructor(private svc: FeedbackService, private downloadOtp: DownloadOtpService) {}
 
   ngOnInit(): void { this.load(); this.loadStats(); }
   ngOnDestroy(): void { this.destroy$.next(); this.destroy$.complete(); }
@@ -127,7 +128,10 @@ export class FeedbackInboxComponent implements OnInit, OnDestroy {
 
   openQr(row: FeedbackSurvey): void { if (row.token) this.qrSurvey = row; }
   closeQr(): void { this.qrSurvey = null; }
-  printQr(): void { window.print(); }
+  async printQr(): Promise<void> {
+    if (!(await this.downloadOtp.verify('Feedback QR print'))) return;
+    window.print();
+  }
 
   walkUpUrl(): string { return `${location.origin}/feedback/new`; }
   openWalkUpPoster(): void { this.walkUpPosterOpen = true; }

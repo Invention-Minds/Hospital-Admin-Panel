@@ -4,6 +4,7 @@ import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { AuthServiceService } from './services/auth/auth-service.service'; // Your AuthService to handle logout logic
+import { currentDownloadGrant, takeDownloadTicket } from './shared/download-otp/download-grant.store';
 
 
 @Injectable()
@@ -25,6 +26,14 @@ export class AuthInterceptor implements HttpInterceptor {
           Authorization: `Bearer ${token}`
         }
       });
+    }
+    // File downloads carry the email-OTP grant and the one-time ticket from
+    // captcha + reason (see DownloadOtpService).
+    if (req.responseType === 'blob') {
+      const grant = currentDownloadGrant();
+      const ticket = takeDownloadTicket();
+      if (grant) authReq = authReq.clone({ setHeaders: { 'X-Download-Grant': grant } });
+      if (ticket) authReq = authReq.clone({ setHeaders: { 'X-Download-Ticket': ticket } });
     }
     // Handle the request and catch any errors
     return next.handle(authReq).pipe(

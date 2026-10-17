@@ -6,6 +6,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { OtIssuedDrugsService, IssuedDrugsResponse } from '../../services/ot-issued-drugs.service';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 /**
  * Phase 9.5d — View Issued Drugs (read-only).
@@ -33,6 +34,7 @@ export class OtIssuedDrugsComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private svc: OtIssuedDrugsService,
+    private downloadOtp: DownloadOtpService,
   ) {}
 
   ngOnInit(): void {
@@ -50,6 +52,9 @@ export class OtIssuedDrugsComponent implements OnInit, OnDestroy {
     });
   }
 
-  print(): void { window.print(); }
+  async print(): Promise<void> {
+    if (!(await this.downloadOtp.verify('OT issued drugs print'))) return;
+    window.print();
+  }
   close(): void { this.router.navigate(['/surgery-ot', this.scheduleId]); }
 }

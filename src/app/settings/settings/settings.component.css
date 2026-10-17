@@ -862,3 +862,39 @@ line-height: normal;
 .btn-activate:hover {
   background-color: #1e8449;
 }
+
+/* Download Logs tab */
+.dl-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.dl-filters input {
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid #d5deec;
+  border-radius: 8px;
+  font-family: inherit;
+}
+.dl-filters input[type="text"] { flex: 1 1 260px; }
+.dl-filters .create-button { margin: 0; }
+.dl-reason { max-width: 280px; white-space: pre-wrap; word-break: break-word; }
+.dl-pager {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 10px;
+  font-size: 13px;
+}
+.dl-pager button {
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid #d5deec;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+.dl-pager button:disabled { opacity: 0.5; cursor: not-allowed; }

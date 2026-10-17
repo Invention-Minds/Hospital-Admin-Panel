@@ -3,6 +3,7 @@ import { AppointmentConfirmService } from '../../services/appointment-confirm.se
 import { HealthCheckupServiceService } from '../../services/health-checkup/health-checkup-service.service';
 import { MessageService } from 'primeng/api';
 import * as FileSaver from 'file-saver';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 @Component({
   selector: 'app-doctor-report',
@@ -21,7 +22,7 @@ export class DoctorReportComponent implements OnInit {
   today = new Date();
   isLoading: boolean = false;
 
-  constructor(private serviceApi: HealthCheckupServiceService, private messageService: MessageService ) {}
+  constructor(private serviceApi: HealthCheckupServiceService, private messageService: MessageService, private downloadOtp: DownloadOtpService ) {}
 
   ngOnInit(): void {
     this.loadServices();
@@ -263,6 +264,7 @@ generateCombinedReport(): void {
     // Download logic for combinedReport
   }
   async download() {
+    if (!(await this.downloadOtp.verify('Services report (Excel)'))) return;
     // Excel library is loaded only when the user downloads a report.
     const { Workbook } = await import('exceljs');
     if (this.selectedDateRange && this.selectedDateRange.length === 2) {
@@ -404,6 +406,7 @@ this.loadServices();
     });
   }
   async downloadAppointments(userId: number | string, role: string): Promise<void> {
+    if (!(await this.downloadOtp.verify('Services report by user (Excel)'))) return;
     // Excel library is loaded only when the user downloads a report.
     const { Workbook } = await import('exceljs');
     let filteredData: any[];
@@ -509,7 +512,8 @@ this.loadServices();
   
   
   
-  printAppointments(userId: number | string, role: string): void {
+  async printAppointments(userId: number | string, role: string): Promise<void> {
+    if (!(await this.downloadOtp.verify('Services report by user (Print)'))) return;
     let filteredData: any[];
   
     // Filter data based on role

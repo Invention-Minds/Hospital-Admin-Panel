@@ -1,7 +1,8 @@
 
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild, inject } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import SignaturePad from 'signature_pad';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 @Component({
   selector: 'app-signature',
@@ -13,6 +14,7 @@ export class SignatureComponent {
   @ViewChild('employeePad', { static: true }) employeePadElement!: ElementRef;
   private patientPad!: SignaturePad;
   private employeePad!: SignaturePad;
+  private downloadOtp = inject(DownloadOtpService);
 
   formData = {
     patientName: '',
@@ -62,6 +64,7 @@ export class SignatureComponent {
   //   pdf.save('completed-estimation.pdf');
   // }
   async generatePDF() {
+    if (!(await this.downloadOtp.verify('Signed estimation (PDF)'))) return;
     // PDF library is loaded only when a PDF is generated.
     const { PDFDocument, rgb } = await import('pdf-lib');
     // Load the template PDF

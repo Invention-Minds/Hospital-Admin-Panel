@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { HealthCheckupServiceService } from '../../../services/health-checkup/health-checkup-service.service';
 import * as FileSaver from 'file-saver';
 import { MessageService } from 'primeng/api';
+import { DownloadOtpService } from '../../../shared/download-otp/download-otp.service';
 
 export interface Service {
   pnrNumber: string;
@@ -36,7 +37,7 @@ export interface Service {
 })
 export class HealthCheckupCompleteComponent {
 
-  constructor(private healthCheckupService: HealthCheckupServiceService, private messageService: MessageService){}
+  constructor(private healthCheckupService: HealthCheckupServiceService, private messageService: MessageService, private downloadOtp: DownloadOtpService){}
   completedAppointments: Service[] = [];
   filteredAppointments: Service[] = [];
   currentPage = 1;
@@ -172,7 +173,8 @@ refresh() {
   this.selectedDateRange = [];
   this.filteredAppointments = [...this.completedAppointments];
 }
-downloadData(): void {
+async downloadData(): Promise<void> {
+  if (!(await this.downloadOtp.verify('Completed health checkups (CSV)'))) return;
   if (this.filteredAppointments.length === 0) {
     console.warn('No data to download');
     return;

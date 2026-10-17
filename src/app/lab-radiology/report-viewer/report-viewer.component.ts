@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 import { InvestigationResult, InvestigationResultService } from '../../services/investigation-result.service';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 /**
  * Phase 9.11 — Reusable PDF result viewer modal.
@@ -43,6 +44,7 @@ export class ReportViewerComponent implements OnChanges {
   constructor(
     private sanitizer: DomSanitizer,
     private svc: InvestigationResultService,
+    private downloadOtp: DownloadOtpService,
   ) {}
 
   ngOnChanges(_changes: SimpleChanges): void {
@@ -83,8 +85,9 @@ export class ReportViewerComponent implements OnChanges {
     });
   }
 
-  download(): void {
+  async download(): Promise<void> {
     if (this.result?.reportUrl) {
+      if (!(await this.downloadOtp.verify('Investigation report'))) return;
       // GCS URLs serve with Content-Disposition: inline, so a real
       // download requires opening in a new tab; the user can save from there.
       window.open(this.result.reportUrl, '_blank', 'noopener,noreferrer');

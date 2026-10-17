@@ -3,6 +3,7 @@ import { RadiologyService } from '../../services/radiology/radiology.service';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import * as FileSaver from 'file-saver';
 import { MessageService } from 'primeng/api';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 
 
@@ -15,7 +16,7 @@ import { MessageService } from 'primeng/api';
 
 export class PatientDetailsComponent {
 
-  constructor(private messageService: MessageService, private patientService: AppointmentConfirmService) { }
+  constructor(private messageService: MessageService, private patientService: AppointmentConfirmService, private downloadOtp: DownloadOtpService) { }
   patients: any[] = [];
   filteredAppointments: any[] = [];
   currentPage = 1;
@@ -160,7 +161,8 @@ export class PatientDetailsComponent {
     this.selectedDateRange = [];
     this.filteredAppointments = [...this.patients];
   }
-  downloadData(): void {
+  async downloadData(): Promise<void> {
+    if (!(await this.downloadOtp.verify('Patient list (CSV)'))) return;
     if (this.filteredAppointments.length === 0) {
       console.warn('No data to download');
       return;

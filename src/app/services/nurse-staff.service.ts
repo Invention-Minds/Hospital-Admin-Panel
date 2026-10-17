@@ -30,6 +30,7 @@ export interface NurseRow {
   id: number;
   username: string;
   employeeId: string | null;
+  email?: string | null;
   fullName: string | null;
   designation: NurseDesignation | null;
   qualification: string | null;
@@ -54,6 +55,7 @@ export interface NurseCreateBody {
   username: string;
   password: string;
   employeeId?: string | null;
+  email: string;
   fullName: string;
   designation: NurseDesignation;
   qualification?: string | null;

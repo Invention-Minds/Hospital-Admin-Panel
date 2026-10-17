@@ -14,6 +14,7 @@ import { NotificationRecipientService } from '../../../services/notification-rec
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { PrescriptionService } from '../../../services/prescription/prescription.service';
 import { loadPdfMake } from '../../../shared/pdf/pdfmake-loader';
+import { DownloadOtpService } from '../../../shared/download-otp/download-otp.service';
 import { getJmrhPdfBranding, JmrhPdfBranding } from '../../../shared/pdf/jmrh-letterhead';
 import { keepHeadingsWithContent, OPD_ASSESSMENT_PDF_STYLES } from '../../../shared/pdf/opd-assessment-pdf';
 import { buildSavedVisitSummaryContent, resolveVisitRecords } from '../../../shared/pdf/opd-visit-summary-pdf';
@@ -138,6 +139,7 @@ export class TodayConsultationsComponent {
     private healthCheckupService: HealthCheckupServiceService,  // Inject NoSleep service
     private noteTemplateService: NoteTemplateService,
     private alertSvc: AlertService,
+    private downloadOtp: DownloadOtpService,
     private recipientsSvc: NotificationRecipientService,
   ) {
     this.form = this.fb.group({
@@ -2134,7 +2136,8 @@ export class TodayConsultationsComponent {
     });
   }
 
-  print() {
+  async print() {
+    if (!(await this.downloadOtp.verify('Prescription print'))) return;
     console.log(this.selectPrescriptionPrint)
     if (!this.selectedAppointment || !this.selectPrescriptionPrint) {
       console.error('Print data is not ready');
@@ -2602,6 +2605,7 @@ export class TodayConsultationsComponent {
 
 
   async printVisitSummary(data: any) {
+    if (!(await this.downloadOtp.verify('Visit summary PDF'))) return;
     // PDF library is loaded only when a PDF is generated.
     const pdfMake = await loadPdfMake();
     console.log(data)

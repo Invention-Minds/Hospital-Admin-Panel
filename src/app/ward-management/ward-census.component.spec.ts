@@ -16,6 +16,7 @@ import { Observable, of, throwError } from 'rxjs';
 
 import { WardCensusComponent } from './ward-census.component';
 import { WardManagementService } from '../services/ward-management.service';
+import { DownloadOtpService } from '../shared/download-otp/download-otp.service';
 
 class WardServiceStub {
   getBedCensusSpy = jasmine.createSpy('getBedCensus').and.returnValue(of({ data: [] }));
@@ -52,7 +53,10 @@ describe('WardCensusComponent (Phase 1e)', () => {
     await TestBed.configureTestingModule({
       imports: [FormsModule, CalendarModule],
       declarations: [WardCensusComponent],
-      providers: [{ provide: WardManagementService, useValue: svc }],
+      providers: [
+        { provide: WardManagementService, useValue: svc },
+        { provide: DownloadOtpService, useValue: { verify: () => Promise.resolve(true) } },
+      ],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
 

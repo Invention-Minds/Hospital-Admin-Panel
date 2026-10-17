@@ -129,7 +129,7 @@
     <h3 class="incd-section">Evidence</h3>
 
     <div class="incd-ev-list" *ngIf="evidenceList().length > 0">
-      <a class="incd-ev-link" *ngFor="let ev of evidenceList()" [href]="ev.url" target="_blank" rel="noopener">
+      <a class="incd-ev-link" *ngFor="let ev of evidenceList()" href="#" (click)="$event.preventDefault(); openFile(ev.url)">
         📎 {{ ev.label }}
         <span class="incd-ev-meta" *ngIf="ev.uploadedBy">· {{ ev.uploadedBy }}</span>
       </a>

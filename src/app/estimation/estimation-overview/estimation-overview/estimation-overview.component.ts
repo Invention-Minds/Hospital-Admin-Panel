@@ -9,6 +9,7 @@ import { DateTime } from 'luxon';
 import type * as XLSXTypes from 'xlsx';
 import * as FileSaver from 'file-saver';
 import { MessageService } from 'primeng/api';
+import { DownloadOtpService } from '../../../shared/download-otp/download-otp.service';
 import { EstimationAnalyticsComponent } from "../../../estimation-analytics/estimation-analytics.component";
 
 @Component({
@@ -79,7 +80,7 @@ export class EstimationOverviewComponent {
 
 
   @ViewChild('estimationApproved') EstimationApprovedComponent?: EstimationApprovedComponent;
-  constructor(private estimationService: EstimationService, private doctorService: DoctorServiceService, private messageService: MessageService) { }
+  constructor(private estimationService: EstimationService, private doctorService: DoctorServiceService, private messageService: MessageService, private downloadOtp: DownloadOtpService) { }
 
   ngOnInit() {
     const date = new Date();
@@ -718,7 +719,7 @@ export class EstimationOverviewComponent {
     this.totalEstimationsOverall = overAllSummary
 
 }
-downloadEstimationSummary() {
+async downloadEstimationSummary() {
   if (this.selectedDateRange && this.selectedDateRange.length) {
     const startDate = new Date(this.selectedDateRange[0]);
     const endDate = new Date(
@@ -741,6 +742,7 @@ downloadEstimationSummary() {
   }
 
   // Proceed to export
+  if (!(await this.downloadOtp.verify('Estimation overview (Excel)'))) return;
   this.exportToExcel(this.totalEstimationsOverall, 'Estimation-Summary');
 }
 

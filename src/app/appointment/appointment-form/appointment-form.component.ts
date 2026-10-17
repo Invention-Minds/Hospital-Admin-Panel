@@ -1589,6 +1589,19 @@ isLoading: boolean = false;
     this.cdr.detectChanges();
   }
 
+  /**
+   * An existing appointment reopened and saved without a single field being
+   * touched. There is nothing to save and nobody to tell, so the save is
+   * refused rather than run — running it messaged the patient and the doctor
+   * for a change that never happened.
+   *
+   * `pristine` is the right test here: Angular marks a control dirty only on
+   * user input, so this form's own patchValue/setValue calls never trip it.
+   */
+  private get isUnchangedExistingAppointment(): boolean {
+    return !!this.appointment?.id && this.appointmentForm.pristine;
+  }
+
   async confirm() {
     // Repeat clicks land here while the first submit is still running.
     if (this.isSubmitting) return;
@@ -1596,6 +1609,15 @@ isLoading: boolean = false;
     this.getInvalidControls(this.appointmentForm);
     if (!this.appointmentForm.valid) {
       this.messageService.add({ severity: 'warn', summary: 'Warn', detail: 'Some fields are not filled' });
+      return;
+    }
+
+    if (this.isUnchangedExistingAppointment) {
+      this.messageService.add({
+        severity: 'info',
+        summary: 'Nothing changed',
+        detail: 'No changes were made to this appointment. Nothing has been saved and no message has been sent.',
+      });
       return;
     }
 
@@ -1783,10 +1805,13 @@ isLoading: boolean = false;
         this.appointment.smsSent = true;
         this.appointment.messageSent = true;
         const formattedNewDate = this.formatDate(newDate)
-        if (
+        // Captured here because this.appointment is reassigned to the new form
+        // values further down — after that point the original slot is gone and
+        // there is nothing left to compare against.
+        const slotMoved =
           this.appointment.date !== formattedNewDate ||
-          this.appointment.time !== newTime
-        ) {
+          this.appointment.time !== newTime;
+        if (slotMoved) {
           this.appointment.status = 'rescheduled';
           // console.log("role", this.appointment)
         } else {
@@ -1847,7 +1872,11 @@ isLoading: boolean = false;
 
         console.log(newStatus, currentStatus)
         // console.log('appointment', this.appointment);
-        if (newStatus === 'Confirm' && (currentStatus === 'Cancelled' || currentStatus === 'confirmed')) {
+        // `slotMoved` is the gate. Without it this branch called every re-save
+        // of an already-confirmed appointment a reschedule and messaged the
+        // patient and the doctor to say so — on appointments the history shows
+        // were never rescheduled.
+        if (slotMoved && newStatus === 'Confirm' && (currentStatus === 'Cancelled' || currentStatus === 'confirmed')) {
           // This is a reschedule
           console.log('when it is coming')
           this.appointment.status = 'rescheduled';

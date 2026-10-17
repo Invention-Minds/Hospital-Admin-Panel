@@ -12,6 +12,7 @@ import {
   NabhAuditService,
 } from '../services/nabh-audit.service';
 import { environment } from '../../environment/environment.prod';
+import { DownloadOtpService } from '../shared/download-otp/download-otp.service';
 
 /**
  * Phase 10 (extended) — NABH Audit page.
@@ -62,7 +63,7 @@ export class NabhAuditComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  constructor(private nabhAuditService: NabhAuditService) {}
+  constructor(private nabhAuditService: NabhAuditService, private downloadOtp: DownloadOtpService) {}
 
   ngOnInit(): void {
     const today = new Date();
@@ -176,6 +177,11 @@ export class NabhAuditComponent implements OnInit, OnDestroy {
     if (!rel) return '';
     const apiRoot = environment.apiUrl.replace(/\/api(\/.*)?$/, '');
     return apiRoot + rel;
+  }
+
+  async openFile(url: string) {
+    if (!(await this.downloadOtp.verify('NABH audit bundle'))) return;
+    window.open(url, '_blank', 'noopener');
   }
 
   formatBytes(bytes: number): string {

@@ -58,7 +58,7 @@
           <div class="wq-bubble">
             <div *ngIf="m.mediaUrl" class="wq-media">
               <img *ngIf="isImage(m)" [src]="mediaSrc(m)" alt="attachment" (click)="$any($event.target).requestFullscreen?.()" />
-              <a *ngIf="!isImage(m)" [href]="mediaSrc(m)" target="_blank" rel="noopener" class="wq-file">
+              <a *ngIf="!isImage(m)" href="#" (click)="$event.preventDefault(); openFile(mediaSrc(m))" class="wq-file">
                 📄 {{ m.fileName || 'attachment' }}
               </a>
             </div>

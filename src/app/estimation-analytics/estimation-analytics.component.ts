@@ -3,6 +3,7 @@ import { EstimationService } from '../services/estimation/estimation.service';
 import { DoctorServiceService } from '../services/doctor-details/doctor-service.service';
 
 import { saveAs } from 'file-saver';
+import { DownloadOtpService } from '../shared/download-otp/download-otp.service';
 
 @Component({
   selector: 'app-estimation-analytics',
@@ -169,7 +170,7 @@ export class EstimationAnalyticsComponent {
 
 
 
-  constructor(private estimationService: EstimationService, private doctorService: DoctorServiceService) { }
+  constructor(private estimationService: EstimationService, private doctorService: DoctorServiceService, private downloadOtp: DownloadOtpService) { }
 
 
   ngOnInit() {
@@ -1335,6 +1336,7 @@ export class EstimationAnalyticsComponent {
   }
 
   async exportPopupTable() {
+    if (!(await this.downloadOtp.verify('Estimation analytics details (Excel)'))) return;
     // Excel export library is loaded only when the user exports.
     const XLSX = await import('xlsx');
     if (!this.popupTableData || this.popupTableData.length === 0) {

@@ -13,6 +13,7 @@ import {
 import * as FileSaver from 'file-saver';
 import { stat } from 'node:fs';
 import moment from 'moment-timezone';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 interface Appointment {
   id?: number;
   patientName: string;
@@ -77,7 +78,7 @@ export class AppointmentCancelComponent {
   historyAppointmentId: number | null = null;
 
 
-  constructor(private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private alertSvc: AlertService, private historyService: AppointmentHistoryService) {
+  constructor(private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private alertSvc: AlertService, private historyService: AppointmentHistoryService, private downloadOtp: DownloadOtpService) {
     this.userId = localStorage.getItem('userid')
   }
 
@@ -193,7 +194,8 @@ export class AppointmentCancelComponent {
     this.searchValue = '';
     this.fetchCancelledAppointments();   // Default = last 7 days
   }
-  downloadData(): void {
+  async downloadData(): Promise<void> {
+    if (!(await this.downloadOtp.verify('Cancelled appointments (CSV)'))) return;
     if (this.filteredServices.length === 0) {
       console.warn('No data to download');
       return;
@@ -406,6 +408,7 @@ export class AppointmentCancelComponent {
     this.currentPage = 1;
   }
   async downloadFilteredData(): Promise<void> {
+    if (!(await this.downloadOtp.verify('Cancelled appointments (Excel)'))) return;
     // Excel export library is loaded only when the user exports.
     const XLSX = await import('xlsx');
     // filteredServices is only populated by a search or Clear, so on a fresh
@@ -505,7 +508,8 @@ export class AppointmentCancelComponent {
       console.warn('No data available to download');
     }
   }
-  printAppointmentDetails(): void {
+  async printAppointmentDetails(): Promise<void> {
+    if (!(await this.downloadOtp.verify('Cancelled appointments (Print)'))) return;
     // Sorted copy: the filter still decides WHICH rows print, this only decides
     // their order — chronological by slot, which is how a queue list reads.
     const sourceList = [...((this.filteredServices && this.filteredServices.length)

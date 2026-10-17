@@ -11,6 +11,7 @@ import {
   TimeBookedVsActualRow,
   TimeReportMeta,
 } from '../../services/ot-reports.service';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 /**
  * Phase 9.3a — OT reports page.
@@ -46,7 +47,7 @@ export class OtReportsComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  constructor(private svc: OtReportsService) {}
+  constructor(private svc: OtReportsService, private downloadOtp: DownloadOtpService) {}
 
   ngOnInit(): void {
     const today = new Date();
@@ -93,7 +94,8 @@ export class OtReportsComponent implements OnInit, OnDestroy {
     return 'rpt-delta-ok';
   }
 
-  exportCsv(): void {
+  async exportCsv(): Promise<void> {
+    if (!(await this.downloadOtp.verify('OT report CSV'))) return;
     let rows: Array<Record<string, unknown>> = [];
     let filename = 'ot-report.csv';
 

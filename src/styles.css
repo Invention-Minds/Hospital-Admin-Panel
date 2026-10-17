@@ -32,6 +32,23 @@ body { margin: 0; font-family: Kanit; background-color: #F0F3FF; }
     cursor: pointer;
 }
 
+/* Screen protection (ScreenProtectionService) — no text selection outside
+   form fields, blur when the window loses focus, user watermark on top. */
+body.dm-protected { -webkit-user-select: none; user-select: none; }
+body.dm-protected input,
+body.dm-protected textarea,
+body.dm-protected [contenteditable="true"] { -webkit-user-select: text; user-select: text; }
+body.dm-privacy-blur > *:not(.dm-watermark) { filter: blur(18px); }
+.dm-watermark {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483000;
+    pointer-events: none;
+    background-repeat: repeat;
+    opacity: 0.07;
+}
+@media print { .dm-watermark { opacity: 0.15; } }
+
 .downloadButtonLanding{
     font-size: 16px;
     color: #0096f0;

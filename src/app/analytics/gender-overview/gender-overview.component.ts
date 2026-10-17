@@ -4,6 +4,7 @@ import { EChartsTracker } from '../../shared/charts/echarts-tracker';
 import { getYesterdayDate, getIndividualDates, getLastSevenDays, getLastThirtyDaysFromSelected, reorderDateFormat, captureScreenshot } from '../functions'
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { MessageService } from 'primeng/api';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 
 @Component({
@@ -15,7 +16,7 @@ export class GenderOverviewComponent implements OnChanges {
   private charts = new EChartsTracker();
 
 
-  constructor(private appointment: AppointmentConfirmService, private docDetails: DoctorServiceService, private messageService: MessageService) { }
+  constructor(private appointment: AppointmentConfirmService, private docDetails: DoctorServiceService, private messageService: MessageService, private downloadOtp: DownloadOtpService) { }
 
   option: any
   isLoading: boolean = false
@@ -47,7 +48,10 @@ export class GenderOverviewComponent implements OnChanges {
   allDoctors:any[] = []
 
   // screenshot
-  screenShot : Function = captureScreenshot
+  screenShot : Function = async (divId: string, name: String) => {
+    if (!(await this.downloadOtp.verify(`${name} chart (PNG)`))) return;
+    return captureScreenshot(divId, name);
+  }
 
   ngOnInit() {
     this.selectedDate = getLastSevenDays()

@@ -8,6 +8,7 @@ import { OtSchedule, OtSafetyChecklist, OtIntraOpNote, OtWorkflowService } from 
 import {
   OtEquipmentUsage, OtScheduleExtrasService, OtScheduleStaff, OtScheduleSurgery,
 } from '../../services/ot-schedule-extras.service';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 type PrintForm = 'safety-checklist' | 'operative-note' | 'track-sheet';
 
@@ -48,6 +49,7 @@ export class OtPrintPreviewComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private otSvc: OtWorkflowService,
     private extrasSvc: OtScheduleExtrasService,
+    private downloadOtp: DownloadOtpService,
   ) {}
 
   ngOnInit(): void {
@@ -95,7 +97,10 @@ export class OtPrintPreviewComponent implements OnInit, OnDestroy {
     try { return JSON.parse(raw); } catch { return []; }
   }
 
-  print(): void { window.print(); }
+  async print(): Promise<void> {
+    if (!(await this.downloadOtp.verify('OT form print'))) return;
+    window.print();
+  }
 
   setForm(f: PrintForm): void { this.form = f; }
 }

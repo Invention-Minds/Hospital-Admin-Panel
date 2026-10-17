@@ -3,6 +3,7 @@ import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 
 import { DischargeSummaryService, DischargeContext } from '../../services/discharge-summary.service';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 /**
  * Phase 9.17 — Full Discharge Summary (UHJ paper layout, printable).
@@ -31,6 +32,7 @@ export class IpdDischargeSummaryComponent implements OnInit {
     private route: ActivatedRoute,
     private svc: DischargeSummaryService,
     private location: Location,
+    private downloadOtp: DownloadOtpService,
   ) {}
 
   ngOnInit(): void {
@@ -47,7 +49,10 @@ export class IpdDischargeSummaryComponent implements OnInit {
     });
   }
 
-  print(): void { if (typeof window !== 'undefined') window.print(); }
+  async print(): Promise<void> {
+    if (!(await this.downloadOtp.verify('Discharge summary print'))) return;
+    if (typeof window !== 'undefined') window.print();
+  }
   goBack(): void { this.location.back(); }
 
   // ─── Derived views over the loose records ──────────────────────────────

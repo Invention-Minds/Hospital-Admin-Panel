@@ -7,6 +7,7 @@ import { formatDate } from '@angular/common';
 import { error } from 'console';
 import { getIndividualDates, getYesterdayDate, getLastThirtyDaysFromSelected, reorderDateFormat, getLastSevenDays, getTodayDate, captureScreenshot } from '../functions'
 import { MessageService } from 'primeng/api';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 @Component({
   selector: 'app-estimation-bar',
@@ -17,7 +18,7 @@ export class EstimationBarComponent implements OnChanges {
   private charts = new EChartsTracker();
 
 
-  constructor(private estimation: EstimationService, private datePipe: DatePipe, private docDetails: DoctorServiceService, private messageService : MessageService) { }
+  constructor(private estimation: EstimationService, private datePipe: DatePipe, private docDetails: DoctorServiceService, private messageService : MessageService, private downloadOtp: DownloadOtpService) { }
 
   option: any;
   estimationData: any = {
@@ -69,7 +70,10 @@ export class EstimationBarComponent implements OnChanges {
   allDoctors: any[] = []
 
   // screenshot
-  screenShot : Function = captureScreenshot
+  screenShot : Function = async (divId: string, name: String) => {
+    if (!(await this.downloadOtp.verify(`${name} chart (PNG)`))) return;
+    return captureScreenshot(divId, name);
+  }
 
   ngOnInit() {
     const yesterdayDate = getYesterdayDate()

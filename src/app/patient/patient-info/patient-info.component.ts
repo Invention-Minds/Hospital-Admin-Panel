@@ -16,6 +16,7 @@ import {
 import { getJmrhPdfBranding } from '../../shared/pdf/jmrh-letterhead';
 
 import { loadPdfMake } from '../../shared/pdf/pdfmake-loader';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 
 
@@ -66,7 +67,7 @@ export class PatientInfoComponent implements OnInit {
   }
 
 
-  constructor(private route: ActivatedRoute, private patientService: AppointmentConfirmService, private secondService: AppointmentConfirmService, private cdr: ChangeDetectorRef) { }
+  constructor(private route: ActivatedRoute, private patientService: AppointmentConfirmService, private secondService: AppointmentConfirmService, private cdr: ChangeDetectorRef, private downloadOtp: DownloadOtpService) { }
   @ViewChild('printSection') printSection!: ElementRef;
   ngOnInit(): void {
     console.log(this.patient)
@@ -289,7 +290,8 @@ export class PatientInfoComponent implements OnInit {
   toggleVisit(index: number) {
     this.expandedVisitIndex = this.expandedVisitIndex === index ? null : index;
   }
-  printPrescription() {
+  async printPrescription() {
+    if (!(await this.downloadOtp.verify('Prescription print'))) return;
     const contents = this.printSection.nativeElement.innerHTML;
     const popupWin = window.open('', '_blank', 'width=900,height=700');
     if (popupWin) {
@@ -327,7 +329,8 @@ export class PatientInfoComponent implements OnInit {
       popupWin.document.close();
     }
   }
-  printFullVisit(date: string) {
+  async printFullVisit(date: string) {
+    if (!(await this.downloadOtp.verify('OPD visit summary print'))) return;
     this.selectedVisit = this.doctorNotes.find(d => d.date === date) || {};
     this.selectedVitals = this.bloodGroupAppointments.find((appt: any) => appt.date === date);
     this.selectedService = this.serviceAppointments.filter((appt: any) => appt.appointmentDate === date);
@@ -397,6 +400,7 @@ export class PatientInfoComponent implements OnInit {
   }
   /** @param apptId disambiguates same-date visits — see toggleView. */
   async printVisitSummary(date: any, apptId?: number | null) {
+    if (!(await this.downloadOtp.verify('OPD visit summary PDF'))) return;
     // PDF library is loaded only when a PDF is generated.
     const pdfMake = await loadPdfMake();
     this.selectedVisit = this.doctorNotes.find(d => d.date === date) || {};

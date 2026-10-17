@@ -3,6 +3,7 @@ import type * as XLSXTypes from 'xlsx';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { getLastThirtyDaysFromSelected, getYesterdayDate } from '../functions';
 import { HealthCheckupServiceService } from '../../services/health-checkup/health-checkup-service.service';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 @Component({
   selector: 'app-report-filter',
@@ -10,7 +11,7 @@ import { HealthCheckupServiceService } from '../../services/health-checkup/healt
   styleUrls: ['./report-filter.component.css']
 })
 export class ReportFilterComponent implements OnInit, OnChanges {
-  constructor(private doctor: DoctorServiceService, private healthCheckup: HealthCheckupServiceService) {}
+  constructor(private doctor: DoctorServiceService, private healthCheckup: HealthCheckupServiceService, private downloadOtp: DownloadOtpService) {}
 
   months: string[] = ['Jan', 'Feb', 'Mar', 'April', 'May', 'June', 'July', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   type: boolean = true;
@@ -230,6 +231,7 @@ export class ReportFilterComponent implements OnInit, OnChanges {
 
   // Download data as Excel file
   async downloadExcel(data:any): Promise<void> {
+    if (!(await this.downloadOtp.verify(`${this.reportName} report (Excel)`))) return;
     // Excel export library is loaded only when the user exports.
     const XLSX = await import('xlsx');
     const header = this.columns.map(col => col.header);

@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs/operators';
+import { ScreenProtectionService } from './shared/screen-protection/screen-protection.service';
 import { Location } from '@angular/common';
 import { InactivityService } from './services/inactivity.service';
 import { AppointmentConfirmService } from './services/appointment-confirm.service';
@@ -34,8 +36,14 @@ export class AppComponent {
     private location: Location,
     public alertSvc: AlertService,
     private recipientsSvc: NotificationRecipientService,
+    private screenProtection: ScreenProtectionService,
   ) {
     this.alertSvc.state$.subscribe((s) => (this.alertState = s));
+    this.screenProtection.start();
+    // Login/logout change the signed-in user, so re-check on every navigation.
+    this.router.events
+      .pipe(filter((e) => e instanceof NavigationEnd))
+      .subscribe(() => this.screenProtection.refreshWatermark());
   }
 
   onAlertConfirm(): void { this.alertSvc.respondConfirm(true); }

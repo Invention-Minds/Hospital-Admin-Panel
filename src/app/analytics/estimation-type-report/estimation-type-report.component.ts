@@ -4,6 +4,7 @@ import { saveAs } from "file-saver";
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { getLastThirtyDaysFromSelected, getYesterdayDate } from '../functions';
 import { HealthCheckupServiceService } from '../../services/health-checkup/health-checkup-service.service';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 @Component({
   selector: 'app-estimation-type-report',
@@ -31,7 +32,7 @@ export class EstimationTypeReportComponent {
     total: this.tableData.reduce((sum, item) => sum + item.total, 0)
   };
 
-  constructor(private doctor: DoctorServiceService, private healthCheckup: HealthCheckupServiceService) {}
+  constructor(private doctor: DoctorServiceService, private healthCheckup: HealthCheckupServiceService, private downloadOtp: DownloadOtpService) {}
   
     type: boolean = true;
   
@@ -237,7 +238,8 @@ export class EstimationTypeReportComponent {
     }
   
     // Download data as Excel file
-    downloadExcel = (data: any[]) => {
+    downloadExcel = async (data: any[]) => {
+      if (!(await this.downloadOtp.verify('Estimation type report (Excel)'))) return;
       // Define the headers
       const headers = [
         "S.No",

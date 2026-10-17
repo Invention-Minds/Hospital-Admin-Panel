@@ -2,6 +2,7 @@ import { Component, Output, EventEmitter } from '@angular/core';
 import { HealthCheckupServiceService } from '../../../services/health-checkup/health-checkup-service.service';
 import * as FileSaver from 'file-saver';
 import { MessageService } from 'primeng/api';
+import { DownloadOtpService } from '../../../shared/download-otp/download-otp.service';
 
 export interface Service {
   id?: number;
@@ -38,7 +39,7 @@ export interface Service {
 })
 export class HealthCheckupCancelComponent {
 
-  constructor(private healthCheckupService: HealthCheckupServiceService, private messageService: MessageService){}
+  constructor(private healthCheckupService: HealthCheckupServiceService, private messageService: MessageService, private downloadOtp: DownloadOtpService){}
   cancelledAppointments: Service[] = [];
   filteredAppointments: Service[] = [];
   currentPage = 1;
@@ -179,7 +180,8 @@ refresh() {
   this.selectedDateRange = [];
   this.filteredAppointments = [...this.cancelledAppointments];
 }
-downloadData(): void {
+async downloadData(): Promise<void> {
+  if (!(await this.downloadOtp.verify('Cancelled health checkups (CSV)'))) return;
   if (this.filteredAppointments.length === 0) {
     console.warn('No data to download');
     return;

@@ -9,6 +9,7 @@ import {
   OtDischargeSummaryService,
   OtDischargeSummaryResponse,
 } from '../../services/ot-discharge-summary.service';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 type DsTab = 'admission' | 'op1' | 'op2' | 'op3' | 'course' | 'advice' | 'other';
 
@@ -44,6 +45,7 @@ export class OtDischargeSummaryComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private svc: OtDischargeSummaryService,
+    private downloadOtp: DownloadOtpService,
   ) {}
 
   ngOnInit(): void {
@@ -68,7 +70,10 @@ export class OtDischargeSummaryComponent implements OnInit, OnDestroy {
 
   setTab(tab: DsTab): void { this.activeTab = tab; }
 
-  print(): void { window.print(); }
+  async print(): Promise<void> {
+    if (!(await this.downloadOtp.verify('OT discharge summary print'))) return;
+    window.print();
+  }
 
   /** Try to parse the IpdDischarge.medications JSON string. */
   parseMedications(raw: string | null): Array<Record<string, unknown>> {

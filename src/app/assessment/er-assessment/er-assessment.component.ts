@@ -7,6 +7,7 @@ import { NgForm } from '@angular/forms';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { HandWrittenComponent } from '../hand-written/hand-written.component';
 import { resolveFileUrl } from '../../shared/file-url.util';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 @Component({
   selector: 'app-er-assessment',
@@ -68,7 +69,7 @@ ngAfterViewInit() {
   departments: any[] = [];
 
 
-  constructor(private erService: ErService, private messageService: MessageService, private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService) { }
+  constructor(private erService: ErService, private messageService: MessageService, private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private downloadOtp: DownloadOtpService) { }
 
   ngOnInit(): void {
     if (this.appointmentId) {
@@ -212,6 +213,7 @@ ngAfterViewInit() {
     }
   }
   async printAssessment() {
+    if (!(await this.downloadOtp.verify('ER assessment PDF'))) return;
     // PDF library is loaded only when a PDF is generated.
     const pdfMake = await loadPdfMake();
     const d = this.formData;

@@ -6,6 +6,7 @@ import * as FileSaver from 'file-saver';
 import { MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
 import { app } from '../../../../../server';
+import { DownloadOtpService } from '../../../shared/download-otp/download-otp.service';
 
 @Component({
   selector: 'app-doctor-appointments',
@@ -14,7 +15,7 @@ import { app } from '../../../../../server';
 })
 export class DoctorAppointmentsComponent {
 
-  constructor(private healthCheckupService: HealthCheckupServiceService, private messageService: MessageService, private router: Router, private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService) {
+  constructor(private healthCheckupService: HealthCheckupServiceService, private messageService: MessageService, private router: Router, private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private downloadOtp: DownloadOtpService) {
 
   }
   confirmedAppointments: any[] = [];
@@ -160,7 +161,8 @@ export class DoctorAppointmentsComponent {
     //   }
     // });
   }
-  printAppointments(summary: any): void {
+  async printAppointments(summary: any): Promise<void> {
+    if (!(await this.downloadOtp.verify('Doctor appointment summary (Print)'))) return;
     let printContent = `
       <h2>Appointment Summary</h2>
       <p><strong>Doctor Name:</strong> ${summary.doctorName}</p>
@@ -369,7 +371,8 @@ export class DoctorAppointmentsComponent {
     this.selectedDateRange = [];
     this.filteredSummary = this.doctorCloseOpdSummary
   }
-  downloadData(): void {
+  async downloadData(): Promise<void> {
+    if (!(await this.downloadOtp.verify('Doctor appointments (CSV)'))) return;
     if (this.filteredServices.length === 0) {
       console.warn('No data to download');
       return;

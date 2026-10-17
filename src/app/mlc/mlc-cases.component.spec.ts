@@ -18,6 +18,7 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 
 import { MlcCasesComponent } from './mlc-cases.component';
 import { MlcCase, MlcService } from '../services/mlc.service';
+import { DownloadOtpService } from '../shared/download-otp/download-otp.service';
 import { ConfirmDialogComponent } from '../shared/ui/confirm-dialog/confirm-dialog.component';
 import { EmptyStateComponent } from '../shared/ui/empty-state/empty-state.component';
 
@@ -46,6 +47,7 @@ describe('MlcCasesComponent — Sprint 3d enhancements', () => {
       declarations: [MlcCasesComponent, ConfirmDialogComponent, EmptyStateComponent],
       providers: [
         { provide: MlcService, useValue: mlcService },
+        { provide: DownloadOtpService, useValue: { verify: () => Promise.resolve(true) } },
         MessageService,
       ],
       schemas: [NO_ERRORS_SCHEMA],

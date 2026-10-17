@@ -7,6 +7,7 @@ import { Console, error } from 'console';
 import { doctors } from '../../Analytics-Folder/data';
 import { MessageService } from 'primeng/api';
 import { title } from 'process';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 
 @Component({
@@ -17,7 +18,7 @@ import { title } from 'process';
 export class OpdRequestComponent {
   private charts = new EChartsTracker();
 
-  constructor(private appointment: AppointmentConfirmService, private docDetails: DoctorServiceService, private messageService : MessageService) { }
+  constructor(private appointment: AppointmentConfirmService, private docDetails: DoctorServiceService, private messageService : MessageService, private downloadOtp: DownloadOtpService) { }
 
   appVia: any = {
     walkIn: 0,
@@ -65,7 +66,10 @@ export class OpdRequestComponent {
     this.selectedViewDate = getLastThirtyDaysFromSelected();
   }
 
-  screenShot : Function = captureScreenshot
+  screenShot : Function = async (divId: string, name: String) => {
+    if (!(await this.downloadOtp.verify(`${name} chart (PNG)`))) return;
+    return captureScreenshot(divId, name);
+  }
 
   appointmentData(): void {
     this.isLoading = true; // Set loading to true before making the API call
@@ -308,7 +312,8 @@ export class OpdRequestComponent {
     // });
   }
 
-  downloadChart() {
+  async downloadChart() {
+    if (!(await this.downloadOtp.verify('OPD Request Via chart (PNG)'))) return;
     download("pie-chart", this.chartInstance)
   }
 

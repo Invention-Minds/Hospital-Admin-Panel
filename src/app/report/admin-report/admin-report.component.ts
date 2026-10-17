@@ -8,6 +8,7 @@ import * as FileSaver from 'file-saver';
 import { app } from '../../../../server';
 import { MessageService } from 'primeng/api';
 import e from 'express';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 interface AppointmentSummary {
   username: string;
@@ -83,7 +84,8 @@ export class AdminReportComponent {
     private appointmentService: AppointmentConfirmService,
     private authService: AuthServiceService,
     private messageService: MessageService,
-    private doctorService: DoctorServiceService
+    private doctorService: DoctorServiceService,
+    private downloadOtp: DownloadOtpService
   ) { }
 
   appointments: Appointment[] = [];
@@ -934,6 +936,7 @@ export class AdminReportComponent {
 
 
   async download() {
+    if (!(await this.downloadOtp.verify('Overall appointments report (Excel)'))) return;
     // Excel library is loaded only when the user downloads a report.
     const { Workbook } = await import('exceljs');
     if (this.selectedDateRange && this.selectedDateRange.length === 2) {
@@ -1037,6 +1040,7 @@ export class AdminReportComponent {
 
 
   async downloadAppointments(userId: number | string, role: string): Promise<void> {
+    if (!(await this.downloadOtp.verify('Appointments report by user (Excel)'))) return;
     // Excel library is loaded only when the user downloads a report.
     const { Workbook } = await import('exceljs');
     const userAppointments = this.filterAppointmentsByUser(userId, role);
@@ -1113,7 +1117,8 @@ export class AdminReportComponent {
   }
 
   // Function to print the filtered appointments
-  printAppointments(userId: number | string, role: string): void {
+  async printAppointments(userId: number | string, role: string): Promise<void> {
+    if (!(await this.downloadOtp.verify('Appointments report by user (Print)'))) return;
     const userAppointments = this.filterAppointmentsByUser(userId, role);
     // console.log('Printing appointments for user ID:', userId);
 

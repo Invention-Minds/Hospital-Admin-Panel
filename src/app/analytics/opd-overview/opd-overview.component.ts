@@ -7,6 +7,7 @@ import { getLastSevenDays, getIndividualDates, getLastThirtyDaysFromSelected, re
 import { error } from 'console';
 import { EChartsTracker } from '../../shared/charts/echarts-tracker';
 import { MessageService } from 'primeng/api';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 
 @Component({
@@ -17,7 +18,7 @@ import { MessageService } from 'primeng/api';
 export class OpdOverviewComponent {
   private charts = new EChartsTracker();
 
-  constructor(private appointment: AppointmentConfirmService, private docDetails :  DoctorServiceService, private messageService : MessageService) { }
+  constructor(private appointment: AppointmentConfirmService, private docDetails :  DoctorServiceService, private messageService : MessageService, private downloadOtp: DownloadOtpService) { }
 
   dates: any
   appointmentCount: any = {
@@ -62,7 +63,10 @@ export class OpdOverviewComponent {
   isLoading: boolean = true
 
   // screen shot
-  screenShot : Function = captureScreenshot
+  screenShot : Function = async (divId: string, name: String) => {
+    if (!(await this.downloadOtp.verify(`${name} chart (PNG)`))) return;
+    return captureScreenshot(divId, name);
+  }
 
   ngOnInit(): void {
     this.appointmentData()

@@ -9,6 +9,7 @@ import {
   WhatsappQueryMessage,
   WhatsappQueryService,
 } from '../services/whatsapp-query.service';
+import { DownloadOtpService } from '../shared/download-otp/download-otp.service';
 
 /**
  * WhatsApp patient-query inbox (doctor side).
@@ -39,7 +40,7 @@ export class WhatsappQueriesComponent implements OnInit, OnDestroy {
   closing = false;
 
   private destroy$ = new Subject<void>();
-  constructor(private svc: WhatsappQueryService) {}
+  constructor(private svc: WhatsappQueryService, private downloadOtp: DownloadOtpService) {}
 
   ngOnInit(): void { this.load(); }
   ngOnDestroy(): void { this.destroy$.next(); this.destroy$.complete(); }
@@ -92,4 +93,9 @@ export class WhatsappQueriesComponent implements OnInit, OnDestroy {
 
   mediaSrc(m: WhatsappQueryMessage): string { return this.svc.mediaSrc(m.mediaUrl); }
   isImage(m: WhatsappQueryMessage): boolean { return m.mediaType === 'image'; }
+
+  async openFile(url: string) {
+    if (!(await this.downloadOtp.verify('WhatsApp attachment'))) return;
+    window.open(url, '_blank', 'noopener');
+  }
 }

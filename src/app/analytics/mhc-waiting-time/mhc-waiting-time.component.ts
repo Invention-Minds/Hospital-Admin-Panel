@@ -6,6 +6,7 @@ import { EChartsTracker } from '../../shared/charts/echarts-tracker';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { MessageService } from 'primeng/api';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 import { Router } from '@angular/router';
 import { captureScreenshot, getLast7Days, getLastThirtyDaysFromSelected } from '../functions'
 
@@ -17,7 +18,7 @@ import { captureScreenshot, getLast7Days, getLastThirtyDaysFromSelected } from '
 export class MhcWaitingTimeComponent implements OnChanges {
   private charts = new EChartsTracker();
 
-  constructor(private healthCheckupService: HealthCheckupServiceService, private messageService: MessageService, private router: Router, private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private radiologyService: RadiologyService) { }
+  constructor(private healthCheckupService: HealthCheckupServiceService, private messageService: MessageService, private router: Router, private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private radiologyService: RadiologyService, private downloadOtp: DownloadOtpService) { }
 
   rawData: any
   isLoading: any
@@ -54,7 +55,10 @@ export class MhcWaitingTimeComponent implements OnChanges {
   @Output() reportName = new EventEmitter<string>();
 
   // screenshot
-  screenShot : Function = captureScreenshot
+  screenShot : Function = async (divId: string, name: String) => {
+    if (!(await this.downloadOtp.verify(`${name} chart (PNG)`))) return;
+    return captureScreenshot(divId, name);
+  }
 
   ngOnInit() {
     // this.loadChartData()

@@ -8,6 +8,7 @@ import { TherapyAppointment } from '../../services/therapy/therapy.service';
 import { EventService } from '../../services/event.service';
 import { Subscription, interval } from 'rxjs';
 import { environment } from '../../../environment/environment.prod';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 @Component({
   selector: 'app-therapist-appts',
@@ -16,7 +17,7 @@ import { environment } from '../../../environment/environment.prod';
 })
 export class TherapistApptsComponent {
   constructor(private therapyService: TherapyService, private messageService: MessageService,
-     private router: Router, private appointmentService: AppointmentConfirmService, private eventService: EventService) {
+     private router: Router, private appointmentService: AppointmentConfirmService, private eventService: EventService, private downloadOtp: DownloadOtpService) {
 
   }
   confirmedAppointments: any[] = [];
@@ -178,7 +179,8 @@ export class TherapistApptsComponent {
     this.selectedDateRange = [];
     this.filteredServices = [...this.confirmedAppointments];
   }
-  downloadData(): void {
+  async downloadData(): Promise<void> {
+    if (!(await this.downloadOtp.verify('Therapist appointments (CSV)'))) return;
     if (this.filteredServices.length === 0) {
       console.warn('No data to download');
       return;

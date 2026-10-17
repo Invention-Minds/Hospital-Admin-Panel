@@ -3,6 +3,7 @@ import * as FileSaver from 'file-saver';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { utcToIst, getYesterdayDate } from '../functions';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 @Component({
   selector: 'app-doctor-login-activity',
@@ -13,7 +14,8 @@ export class DoctorLoginActivityComponent implements OnChanges {
 
   constructor(
     private doctorsService: DoctorServiceService,
-    private appointmentService: AppointmentConfirmService
+    private appointmentService: AppointmentConfirmService,
+    private downloadOtp: DownloadOtpService
   ) { }
   isModalOpen = false;
   @Input() selectedDate: any[] = []; // Default to today
@@ -237,6 +239,7 @@ loadAllAppointments(){
   // Download the detailed view as an Excel file
   async downloadExcel(): Promise<void> {
     if (!this.doctorDelaysForReport?.length) return;
+    if (!(await this.downloadOtp.verify('Doctor login activity (Excel)'))) return;
 
     // Excel export library is loaded only when the user exports.
     const { Workbook } = await import('exceljs');

@@ -3,6 +3,15 @@ import { AuthServiceService } from '../../services/auth/auth-service.service'; /
 import { Router } from '@angular/router'; // Import Router for navigation
 import { MessageService } from 'primeng/api';
 
+interface LoginChallenge {
+  token: string;
+  step: 'mfa_setup' | 'mfa' | 'email' | 'password';
+  mfaSetup?: { qrDataUrl: string; manualKey: string };
+  pendingEmail?: string;
+  passwordMaxAgeDays: number;
+  passwordNeverSet?: boolean;
+}
+
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
@@ -90,7 +99,96 @@ export class LoginComponent implements OnInit {
   onSubmit() {
     this.isLoading = true;
     this.authService.login(this.username, this.password).subscribe(
-      (response) => {
+      (response) => this.handleAuthResponse(response),
+      (error) => {
+        console.error('Login failed:', error);
+        this.isLoading = false;
+        const detail = error.status === 403
+          ? (error.error?.error || 'Your account is inactive. Please contact the administrator.')
+          : 'Invalid username and password';
+        this.messageService.add({ severity: 'error', summary: 'Error', detail });
+      }
+    );
+  }
+
+  // ── Security steps (authenticator / email / expired password) ────────
+  challenge: LoginChallenge | null = null;
+  mfaCode = '';
+  email = '';
+  emailOtp = '';
+  emailSentTo = '';
+  newPassword = '';
+  confirmPassword = '';
+
+  private handleAuthResponse(response: any) {
+    this.isLoading = false;
+    if (response?.challenge) {
+      this.challenge = response.challenge;
+      this.mfaCode = '';
+      this.emailOtp = '';
+      this.emailSentTo = '';
+      this.newPassword = '';
+      this.confirmPassword = '';
+      this.email = response.challenge.pendingEmail || '';
+      return;
+    }
+    this.challenge = null;
+    this.onLoginSuccess(response);
+  }
+
+  private stepError(error: any) {
+    this.isLoading = false;
+    // Expired/invalid challenge → back to the password form.
+    if (error.status === 401 && /session/i.test(error.error?.error || '')) this.cancelChallenge();
+    this.messageService.add({ severity: 'error', summary: 'Error', detail: error.error?.error || 'Something went wrong. Please try again.' });
+  }
+
+  submitMfa() {
+    if (!this.challenge) return;
+    this.isLoading = true;
+    this.authService.challengeMfa(this.challenge.token, this.mfaCode.trim())
+      .subscribe({ next: (r) => this.handleAuthResponse(r), error: (e) => this.stepError(e) });
+  }
+
+  sendEmailOtp() {
+    if (!this.challenge) return;
+    this.isLoading = true;
+    this.emailOtp = ''; // a new code replaces the old one — clear what was typed
+    this.authService.challengeEmailSend(this.challenge.token, this.email.trim()).subscribe({
+      next: (r) => {
+        this.isLoading = false;
+        this.emailSentTo = r.sentTo;
+        this.messageService.add({ severity: 'success', summary: 'OTP sent', detail: `Code sent to ${r.sentTo}` });
+      },
+      error: (e) => this.stepError(e),
+    });
+  }
+
+  verifyEmailOtp() {
+    if (!this.challenge) return;
+    this.isLoading = true;
+    this.authService.challengeEmailVerify(this.challenge.token, this.emailOtp.trim())
+      .subscribe({ next: (r) => this.handleAuthResponse(r), error: (e) => this.stepError(e) });
+  }
+
+  get passwordMismatch(): boolean {
+    return !!this.confirmPassword && this.newPassword !== this.confirmPassword;
+  }
+
+  submitNewPassword() {
+    if (!this.challenge || this.passwordMismatch) return;
+    this.isLoading = true;
+    this.authService.challengePassword(this.challenge.token, this.newPassword)
+      .subscribe({ next: (r) => this.handleAuthResponse(r), error: (e) => this.stepError(e) });
+  }
+
+  cancelChallenge() {
+    this.challenge = null;
+    this.password = '';
+    this.isLoading = false;
+  }
+
+  private onLoginSuccess(response: any) {
         console.log('Login successful:', response);
         // response = response;
         // Navigate to the desired route upon successful login
@@ -189,16 +287,6 @@ export class LoginComponent implements OnInit {
         }
        
         this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Welcome!' });
-      },
-      (error) => {
-        console.error('Login failed:', error);
-        this.isLoading = false;
-        const detail = error.status === 403
-          ? (error.error?.error || 'Your account is inactive. Please contact the administrator.')
-          : 'Invalid username and password';
-        this.messageService.add({ severity: 'error', summary: 'Error', detail });
-      }
-    );
   }
   togglePasswordVisibility() {
     this.isPasswordVisible = !this.isPasswordVisible;

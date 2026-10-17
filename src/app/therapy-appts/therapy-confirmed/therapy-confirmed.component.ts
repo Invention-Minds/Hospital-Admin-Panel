@@ -5,6 +5,7 @@ import * as FileSaver from 'file-saver';
 import { MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
 import { TherapyAppointment } from '../../services/therapy/therapy.service';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 
 
@@ -14,7 +15,7 @@ import { TherapyAppointment } from '../../services/therapy/therapy.service';
   styleUrl: './therapy-confirmed.component.css'
 })
 export class TherapyConfirmedComponent {
-  constructor(private therapyService: TherapyService, private messageService: MessageService, private router: Router, private appointmentService: AppointmentConfirmService) {
+  constructor(private therapyService: TherapyService, private messageService: MessageService, private router: Router, private appointmentService: AppointmentConfirmService, private downloadOtp: DownloadOtpService) {
 
   }
   confirmedAppointments: any[] = [];
@@ -164,7 +165,8 @@ export class TherapyConfirmedComponent {
     this.selectedDateRange = [];
     this.filteredServices = [...this.confirmedAppointments];
   }
-  downloadData(): void {
+  async downloadData(): Promise<void> {
+    if (!(await this.downloadOtp.verify('Confirmed therapy appointments (CSV)'))) return;
     if (this.filteredServices.length === 0) {
       console.warn('No data to download');
       return;
@@ -174,7 +176,8 @@ export class TherapyConfirmedComponent {
     FileSaver.saveAs(blob, 'confirmed_appointments.csv');
   }
 
-  printTherapyDetails(): void {
+  async printTherapyDetails(): Promise<void> {
+    if (!(await this.downloadOtp.verify('Confirmed therapy appointments (Print)'))) return;
     const sourceList = this.filteredServices && this.filteredServices.length
       ? this.filteredServices
       : this.confirmedAppointments;

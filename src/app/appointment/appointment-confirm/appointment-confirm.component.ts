@@ -16,6 +16,7 @@ import * as FileSaver from 'file-saver';
 import { start } from 'node:repl';
 import * as moment from 'moment-timezone';
 import { app } from '../../../../server';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 interface Appointment {
   id?: number;
@@ -136,7 +137,7 @@ export class AppointmentConfirmComponent {
 
 
 
-  constructor(private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private messageService: MessageService, private cdRef: ChangeDetectorRef, private alertSvc: AlertService, private historyService: AppointmentHistoryService) { }
+  constructor(private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private messageService: MessageService, private cdRef: ChangeDetectorRef, private alertSvc: AlertService, private historyService: AppointmentHistoryService, private downloadOtp: DownloadOtpService) { }
 
   openHistory(appointment: Appointment): void {
     this.historyAppointmentId = appointment.id ?? null;
@@ -460,7 +461,8 @@ export class AppointmentConfirmComponent {
     this.searchValue = '';
     this.loadConfirmedAppointments(this.today);  // Back to today + future
   }
-  downloadData(): void {
+  async downloadData(): Promise<void> {
+    if (!(await this.downloadOtp.verify('Confirmed appointments (CSV)'))) return;
     if (this.filteredServices.length === 0) {
       console.warn('No data to download');
       return;
@@ -588,6 +590,7 @@ export class AppointmentConfirmComponent {
   }
 
   async downloadLastWeekData(): Promise<void> {
+    if (!(await this.downloadOtp.verify('Last week appointments (Excel)'))) return;
     // Excel export library is loaded only when the user exports.
     const XLSX = await import('xlsx');
     this.loadLastWeekAppointments();
@@ -640,6 +643,7 @@ export class AppointmentConfirmComponent {
   }
   // Method to download the filtered data as Excel
   async downloadFilteredData(): Promise<void> {
+    if (!(await this.downloadOtp.verify('Confirmed appointments (Excel)'))) return;
     // Excel export library is loaded only when the user exports.
     const XLSX = await import('xlsx');
     // filteredServices is only populated by a search or Clear, so on a fresh
@@ -729,7 +733,8 @@ export class AppointmentConfirmComponent {
       console.warn('No data available to download');
     }
   }
-  printAppointmentDetails(): void {
+  async printAppointmentDetails(): Promise<void> {
+    if (!(await this.downloadOtp.verify('Confirmed appointments (Print)'))) return;
     // Use whichever list has data — filteredServices populates on search, otherwise use filteredAppointments
     // Sorted copy: the filter still decides WHICH rows print, this only decides
     // their order — chronological by slot, which is how a queue list reads.

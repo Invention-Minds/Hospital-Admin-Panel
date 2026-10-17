@@ -9,6 +9,7 @@ import {
   SCREENING_FORM_LABEL,
   localDateString,
 } from '../../services/dietetics.service';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 /**
  * Dietitian rounds list — `/dietetics/rounds`. Replaces the IP list the
@@ -35,7 +36,7 @@ export class DietRoundsComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  constructor(private svc: DieteticsService) {}
+  constructor(private svc: DieteticsService, private downloadOtp: DownloadOtpService) {}
 
   ngOnInit(): void {
     this.svc.listCensusWards().pipe(takeUntil(this.destroy$)).subscribe({
@@ -77,6 +78,7 @@ export class DietRoundsComponent implements OnInit, OnDestroy {
   }
 
   async exportExcel(): Promise<void> {
+    if (!(await this.downloadOtp.verify('Diet rounds IP list Excel'))) return;
     const { Workbook } = await import('exceljs');
     const wb = new Workbook();
     const ws = wb.addWorksheet('Current IP list');

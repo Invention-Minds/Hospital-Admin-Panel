@@ -8,6 +8,7 @@ import * as FileSaver from 'file-saver';
 import { MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
 import { MhcFormComponent } from "../mhc-form/mhc-form.component";
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 @Component({
   selector: 'app-mhc-today-consul',
@@ -19,7 +20,7 @@ export class MhcTodayConsulComponent {
 
 
 
-  constructor(private healthCheckupService: HealthCheckupServiceService, private messageService: MessageService, private router: Router, private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private radiologyService: RadiologyService) {
+  constructor(private healthCheckupService: HealthCheckupServiceService, private messageService: MessageService, private router: Router, private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private radiologyService: RadiologyService, private downloadOtp: DownloadOtpService) {
 
   }
   confirmedAppointments: any[] = [];
@@ -252,7 +253,8 @@ export class MhcTodayConsulComponent {
     this.selectedDateRange = [];
     this.filteredServices = [...this.confirmedAppointments];
   }
-  downloadData(): void {
+  async downloadData(): Promise<void> {
+    if (!(await this.downloadOtp.verify('Today\'s MHC consultations (CSV)'))) return;
     if (this.filteredServices.length === 0) {
       console.warn('No data to download');
       return;

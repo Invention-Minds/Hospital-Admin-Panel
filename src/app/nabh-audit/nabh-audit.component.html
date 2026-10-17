@@ -194,9 +194,8 @@
             </td>
             <td>
               <a *ngIf="row.status === 'READY' && row.downloadUrl"
-                 [href]="resolveDownloadUrl(row.downloadUrl)"
-                 target="_blank"
-                 rel="noopener"
+                 href="#"
+                 (click)="$event.preventDefault(); openFile(resolveDownloadUrl(row.downloadUrl))"
                  class="na-link">
                 <i class="pi pi-download"></i> Download
               </a>

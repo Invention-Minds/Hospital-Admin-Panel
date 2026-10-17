@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { WardManagementService } from '../../services/ward-management.service';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 import { MessageService } from 'primeng/api';
 import { Subject, interval } from 'rxjs';
 import { takeUntil, switchMap } from 'rxjs/operators';
@@ -25,7 +26,8 @@ export class BedCensusComponent implements OnInit, OnDestroy {
 
   constructor(
     private wardService: WardManagementService,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private downloadOtp: DownloadOtpService
   ) { }
 
   ngOnInit(): void {
@@ -111,7 +113,8 @@ export class BedCensusComponent implements OnInit, OnDestroy {
     });
   }
 
-  downloadReport(): void {
+  async downloadReport(): Promise<void> {
+    if (!(await this.downloadOtp.verify('Bed census report'))) return;
     this.wardService.downloadBedCensusReport()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -123,11 +126,13 @@ export class BedCensusComponent implements OnInit, OnDestroy {
           link.click();
           window.URL.revokeObjectURL(url);
         },
-        error: () => {
+        error: (err) => {
           this.messageService.add({
             severity: 'error',
             summary: 'Error',
-            detail: 'Failed to download report'
+            detail: err?.status === 428
+              ? 'Download verification required. Please verify the email OTP and try again.'
+              : 'Failed to download report'
           });
         }
       });

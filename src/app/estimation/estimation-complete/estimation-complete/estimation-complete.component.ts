@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import type * as XLSXTypes from 'xlsx';
 import * as FileSaver from 'file-saver';
 import { environment } from '../../../../environment/environment';
+import { DownloadOtpService } from '../../../shared/download-otp/download-otp.service';
 
 @Component({
   selector: 'app-estimation-complete',
@@ -14,7 +15,7 @@ import { environment } from '../../../../environment/environment';
 export class EstimationCompleteComponent {
 
 
-  constructor(private estimationService: EstimationService, private messageService: MessageService, private router: Router) { }
+  constructor(private estimationService: EstimationService, private messageService: MessageService, private router: Router, private downloadOtp: DownloadOtpService) { }
   pendingEstimations: any[] = [];
   filteredEstimations: any[] = [];
   currentPage = 1;
@@ -83,7 +84,8 @@ export class EstimationCompleteComponent {
     });
 
   }
-  print(estimation: any): void {
+  async print(estimation: any): Promise<void> {
+    if (!(await this.downloadOtp.verify('Completed estimation (PDF)'))) return;
     if (estimation.pdfLink) {
       const href = estimation.pdfLink.startsWith('http')
         ? estimation.pdfLink
@@ -210,7 +212,8 @@ export class EstimationCompleteComponent {
     this.selectedDateRange = []
     this.fetchPendingEstimations()
   }
-  downloadData(data: any): void {
+  async downloadData(data: any): Promise<void> {
+    if (!(await this.downloadOtp.verify('Completed estimations (Excel)'))) return;
     this.exportToExcel(data, 'Estimation-Completed-Summary');
   }
 

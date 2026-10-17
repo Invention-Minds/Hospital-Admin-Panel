@@ -6,6 +6,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { OtArchivesService, OtArchivesResponse } from '../../services/ot-archives.service';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 type ArchivesSection =
   | 'dashboard'
@@ -48,6 +49,7 @@ export class OtArchivesComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private svc: OtArchivesService,
+    private downloadOtp: DownloadOtpService,
   ) {}
 
   ngOnInit(): void {
@@ -75,4 +77,9 @@ export class OtArchivesComponent implements OnInit, OnDestroy {
 
   setSection(s: ArchivesSection): void { this.section = s; }
   close(): void { this.router.navigate(['/surgery-ot']); }
+
+  async openFile(url: string) {
+    if (!(await this.downloadOtp.verify('Report PDF'))) return;
+    window.open(url, '_blank', 'noopener');
+  }
 }

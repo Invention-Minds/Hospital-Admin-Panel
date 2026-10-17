@@ -5,6 +5,7 @@ import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 
 import { PrescriptionService } from '../../../services/prescription/prescription.service';
+import { DownloadOtpService } from '../../download-otp/download-otp.service';
 
 /** Viewport coordinates for a position:fixed suggestion list. */
 interface SuggestPos {
@@ -82,7 +83,7 @@ export class PrescriptionCaptureComponent implements OnInit, OnChanges {
   ];
   readonly durationOptions = ['Daily', '3 days', '5 days', '7 days', '10 days'];
 
-  constructor(private fb: FormBuilder, private prescriptionService: PrescriptionService, private messageService: MessageService) {
+  constructor(private fb: FormBuilder, private prescriptionService: PrescriptionService, private messageService: MessageService, private downloadOtp: DownloadOtpService) {
     this.form = this.fb.group({
       prescribedBy: [''],
       prn: [''],
@@ -842,8 +843,9 @@ export class PrescriptionCaptureComponent implements OnInit, OnChanges {
     });
   }
 
-  print(): void {
+  async print(): Promise<void> {
     if (typeof window === 'undefined') return;
+    if (!(await this.downloadOtp.verify('Prescription print'))) return;
     const rx = this.selectPrescriptionPrint?.[0] ?? this.form.value;
     const tablets = (rx?.tablets ?? []) as any[];
     // Every stage of a taper prints its own drug name — a blank cell reads as

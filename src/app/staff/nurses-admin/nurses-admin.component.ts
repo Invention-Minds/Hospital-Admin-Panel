@@ -111,6 +111,7 @@ export class NursesAdminComponent implements OnInit, OnDestroy {
       username: row.username,
       password: '', // not used on edit
       employeeId: row.employeeId ?? '',
+      email: row.email ?? '',
       fullName: row.fullName ?? '',
       designation: (row.designation ?? 'Staff Nurse') as NurseDesignation,
       qualification: row.qualification ?? '',
@@ -136,6 +137,8 @@ export class NursesAdminComponent implements OnInit, OnDestroy {
 
     if (!this.draft.fullName.trim()) { this.errorMessage = 'Full name is required'; return; }
     if (!this.draft.designation) { this.errorMessage = 'Designation is required'; return; }
+    const email = this.draft.email.trim();
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { this.errorMessage = 'Enter a valid email address'; return; }
 
     if (this.editing === 'new') {
       if (!this.draft.username.trim()) { this.errorMessage = 'Username is required'; return; }
@@ -143,10 +146,12 @@ export class NursesAdminComponent implements OnInit, OnDestroy {
         this.errorMessage = 'Password must be at least 6 characters';
         return;
       }
+      if (!email) { this.errorMessage = 'Email is required'; return; }
       const body: NurseCreateBody = {
         username: this.draft.username.trim(),
         password: this.draft.password,
         employeeId: this.draft.employeeId.trim() || null,
+        email,
         fullName: this.draft.fullName.trim(),
         designation: this.draft.designation,
         qualification: this.draft.qualification.trim() || null,
@@ -173,6 +178,8 @@ export class NursesAdminComponent implements OnInit, OnDestroy {
       const id = this.editing.id;
       const body: NurseUpdateBody = {
         employeeId: this.draft.employeeId.trim() || null,
+        // Older accounts may have no email yet; only send one when entered.
+        ...(email && { email }),
         fullName: this.draft.fullName.trim(),
         designation: this.draft.designation,
         qualification: this.draft.qualification.trim() || null,
@@ -253,6 +260,7 @@ export class NursesAdminComponent implements OnInit, OnDestroy {
       username: '',
       password: '',
       employeeId: '',
+      email: '',
       fullName: '',
       designation: 'Staff Nurse' as NurseDesignation,
       qualification: '',

@@ -86,8 +86,7 @@ export class AnalyticsComponent implements OnChanges{
           dataZoom: {
             yAxisIndex: 'none'
           },
-          restore: {},
-          saveAsImage: {}
+          restore: {}
         }
       },
       dataZoom: [

@@ -9,6 +9,7 @@ import { HttpHeaders } from '@angular/common/http';
 import { MessageService } from 'primeng/api';
 import moment from 'moment-timezone';
 import { forkJoin } from 'rxjs';
+import { DownloadOtpService, DownloadLogRow } from '../../shared/download-otp/download-otp.service';
 
 // export enum UserRole {
 //   admin = 'admin',
@@ -60,6 +61,10 @@ export class SettingsComponent implements OnInit {
   employeeId: string = '';
   selectedDepartment: string = '';
   newUserDepartment: string = ''; // optional department scope for new admin / Nursing Superintendent
+  newUserEmail: string = ''; // required; receives download OTPs (verified by the user at first sign-in)
+  get isNewUserEmailValid(): boolean {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.newUserEmail.trim());
+  }
   selectedDoctor: any;
   filteredDoctors: any[] = [];
   departments: any[] = [];
@@ -83,13 +88,13 @@ therapists: any[] = [];
   constructor(private authService: AuthServiceService, private router: Router,
      private messageService: MessageService, private appointmentService: AppointmentConfirmService,
       private doctorService: DoctorServiceService, private estimationService: EstimationService,
-    private therapyService: TherapyService) {}
+    private therapyService: TherapyService, private downloadOtp: DownloadOtpService) {}
  // Define the role-based access
  rolePermissions: Record<UserRole, string[]> = {
   sub_admin: ['profile', 'reset','est_locked'],
   doctor: ['profile', 'reset'],
-  admin: ['profile', 'reset', 'login','delete'],
-  super_admin: ['profile', 'reset', 'login','delete','login_details','user_status'],
+  admin: ['profile', 'reset', 'login','delete','download_logs'],
+  super_admin: ['profile', 'reset', 'login','delete','login_details','user_status','download_logs'],
 };
 
   ngOnInit(): void {
@@ -144,6 +149,35 @@ therapists: any[] = [];
 
   switchTab(tabName: string) {
     this.selectedTab = tabName;
+    if (tabName === 'download_logs') this.loadDownloadLogs(1);
+  }
+
+  // ── Download logs (who downloaded what, when, why) ──────────────────
+  downloadLogs: DownloadLogRow[] = [];
+  downloadLogTotal = 0;
+  downloadLogPage = 1;
+  readonly downloadLogPageSize = 25;
+  downloadLogFilters = { search: '', from: '', to: '' };
+  downloadLogsLoading = false;
+
+  get downloadLogPages(): number {
+    return Math.max(1, Math.ceil(this.downloadLogTotal / this.downloadLogPageSize));
+  }
+
+  loadDownloadLogs(page: number): void {
+    this.downloadLogsLoading = true;
+    this.downloadOtp.getLogs({ page, pageSize: this.downloadLogPageSize, ...this.downloadLogFilters }).subscribe({
+      next: (res) => {
+        this.downloadLogs = res.data;
+        this.downloadLogTotal = res.total;
+        this.downloadLogPage = res.page;
+        this.downloadLogsLoading = false;
+      },
+      error: () => {
+        this.downloadLogsLoading = false;
+        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to load download logs' });
+      },
+    });
   }
 
   openDeleteDialog(): void {
@@ -295,7 +329,7 @@ createAccount() {
     ? (this.newUserDepartment || null) : null;
   // NOTE: subAdminType/adminType argument order is intentionally swapped vs the
   // service signature — the backend swaps them back. Do not "fix" one side only.
-  this.authService.register(this.username, this.password,this.isReceptionist, this.employeeId, this.role!, this.subAdminType,this.adminType, this.createdBy, department).subscribe(response => {
+  this.authService.register(this.username, this.password,this.isReceptionist, this.employeeId, this.role!, this.subAdminType,this.adminType, this.createdBy, department, this.newUserEmail.trim()).subscribe(response => {
     if (this.isSubAdmin && this.subAdminType === 'Therapist') {
       this.selectedTherapist.userId = response.id;
       this.therapyService.updateTherapist(this.selectedTherapist.id, this.selectedTherapist).subscribe(
@@ -313,6 +347,7 @@ createAccount() {
     this.employeeId='';
     this.selectedDepartment ='';
     this.newUserDepartment = '';
+    this.newUserEmail = '';
     // this.selectedDoctor = [];
     this.subAdminType='';
     this.name='';
@@ -330,9 +365,9 @@ createAccount() {
       );
     }
   }, error => {
-    if (error.status === 400) {
+    if (error.status === 400 || error.status === 409) {
       const msg: string = error?.error?.error || '';
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: msg.includes('department') ? msg : 'This username has already been used.' });
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: /department|email/i.test(msg) ? msg : 'This username has already been used.' });
       this.buttonClicked = false;
     }
     else{

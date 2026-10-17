@@ -10,6 +10,7 @@ import * as FileSaver from 'file-saver';
 import { MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
 import { app } from '../../../../server';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 @Component({
   selector: 'app-referred',
@@ -19,7 +20,7 @@ import { app } from '../../../../server';
 
 export class ReferredComponent {
 
-  constructor(private healthCheckupService: HealthCheckupServiceService, private messageService: MessageService, private router: Router, private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService) {
+  constructor(private healthCheckupService: HealthCheckupServiceService, private messageService: MessageService, private router: Router, private appointmentService: AppointmentConfirmService, private doctorService: DoctorServiceService, private downloadOtp: DownloadOtpService) {
 
   }
   confirmedAppointments: any[] = [];
@@ -160,7 +161,8 @@ export class ReferredComponent {
     this.selectedDateRange = [];
     this.filteredServices = [...this.confirmedAppointments];
   }
-  downloadData(): void {
+  async downloadData(): Promise<void> {
+    if (!(await this.downloadOtp.verify('Referred appointments (CSV)'))) return;
     if (this.filteredServices.length === 0) {
       console.warn('No data to download');
       return;

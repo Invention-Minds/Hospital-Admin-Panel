@@ -3,6 +3,7 @@ import { OpthPresService } from '../../services/ophthamology-prescription/opth-p
 import { loadPdfMake } from '../../shared/pdf/pdfmake-loader';
 import { MessageService } from 'primeng/api';
 import { getJmrhPdfBranding } from '../../shared/pdf/jmrh-letterhead';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 type DiagramType = 'eye' | 'cornea' | 'fundus' | 'vf' | 'eom' | 'gonio';
 interface DiagramColorGroup {
   color: string;
@@ -269,7 +270,7 @@ export class OphthamologyTemplateComponent {
 
 
 
-  constructor(private api: OpthPresService, private messageService: MessageService) { }
+  constructor(private api: OpthPresService, private messageService: MessageService, private downloadOtp: DownloadOtpService) { }
 
   ngOnInit() {
     this.visibleTabs = this.isOptometrist
@@ -1113,6 +1114,7 @@ export class OphthamologyTemplateComponent {
    * render the eye record identically.
    */
   async printPrescriptionPDF(data: any) {
+    if (!(await this.downloadOtp.verify('Ophthalmology prescription PDF'))) return;
     // PDF library is loaded only when a PDF is generated.
     const pdfMake = await loadPdfMake();
     const brand = await getJmrhPdfBranding();

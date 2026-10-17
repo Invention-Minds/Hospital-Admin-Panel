@@ -5,6 +5,7 @@ import { MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
 import type * as XLSXTypes from 'xlsx';
 import * as FileSaver from 'file-saver';
+import { DownloadOtpService } from '../../../shared/download-otp/download-otp.service';
 
 @Component({
   selector: 'app-estimation-submit',
@@ -14,7 +15,7 @@ import * as FileSaver from 'file-saver';
 export class EstimationSubmitComponent {
 
 
-  constructor(private estimationService: EstimationService, private messageService: MessageService,private router: Router,private healthCheckupService: HealthCheckupServiceService) { }
+  constructor(private estimationService: EstimationService, private messageService: MessageService,private router: Router,private healthCheckupService: HealthCheckupServiceService, private downloadOtp: DownloadOtpService) { }
   pendingEstimations: any[] = [];
   filteredEstimations: any[] = [];
   currentPage = 1;
@@ -193,7 +194,8 @@ this.fetchPendingEstimations();
     this.selectedDateRange = []
     this.fetchPendingEstimations()
   }
-  downloadData(data:any): void {
+  async downloadData(data:any): Promise<void> {
+    if (!(await this.downloadOtp.verify('Submitted estimations (Excel)'))) return;
     this.exportToExcel(data, 'Estimation-Pending-Summary');
   }
 

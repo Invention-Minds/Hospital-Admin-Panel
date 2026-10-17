@@ -6,6 +6,7 @@ import { error } from 'console';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { Header } from 'primeng/api';
 import { MessageService } from 'primeng/api';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 import { saveAs } from 'file-saver';
 @Component({
   selector: 'app-average-waiting-time',
@@ -16,7 +17,7 @@ export class AverageWaitingTimeComponent implements OnInit, OnChanges {
   private charts = new EChartsTracker();
 
 
-  constructor(private appointment: AppointmentConfirmService, private docDetails: DoctorServiceService, private messageService: MessageService) { }
+  constructor(private appointment: AppointmentConfirmService, private docDetails: DoctorServiceService, private messageService: MessageService, private downloadOtp: DownloadOtpService) { }
 
   option: any;
   @Input() department: any
@@ -54,7 +55,10 @@ export class AverageWaitingTimeComponent implements OnInit, OnChanges {
   allDoctors:any[]=[]
 
   // screenshot
-  screenShot : Function = captureScreenshot
+  screenShot : Function = async (divId: string, name: String) => {
+    if (!(await this.downloadOtp.verify(`${name} chart (PNG)`))) return;
+    return captureScreenshot(divId, name);
+  }
 
   ngOnInit(): void {
     const yersterDay = getYesterdayDate()
@@ -443,6 +447,7 @@ export class AverageWaitingTimeComponent implements OnInit, OnChanges {
   }
 
   async downloadReport(event: any): Promise<void> {
+    if (!(await this.downloadOtp.verify('Patient waiting time report (Excel)'))) return;
     // Excel export library is loaded only when the user exports.
     const XLSX = await import('xlsx');
     console.log(event);

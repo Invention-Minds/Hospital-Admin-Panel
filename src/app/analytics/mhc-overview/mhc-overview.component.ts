@@ -4,6 +4,7 @@ import { HealthCheckupServiceService } from '../../services/health-checkup/healt
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { getYesterdayDate, getIndividualDates, getLastThirtyDaysFromSelected, getLastSevenDays, captureScreenshot } from '../functions'
 import { MessageService } from 'primeng/api';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 import { app } from '../../../../server';
 
 
@@ -16,7 +17,7 @@ export class MhcOverviewComponent implements OnChanges {
   private charts = new EChartsTracker();
 
 
-  constructor(private healthCheckup: HealthCheckupServiceService, private docDetails: DoctorServiceService, private messageService : MessageService) { }
+  constructor(private healthCheckup: HealthCheckupServiceService, private docDetails: DoctorServiceService, private messageService : MessageService, private downloadOtp: DownloadOtpService) { }
 
   option: any;
   overViewData: any;
@@ -48,7 +49,10 @@ export class MhcOverviewComponent implements OnChanges {
   packagesName : any
 
   // screenShot
-  screenShot : Function = captureScreenshot
+  screenShot : Function = async (divId: string, name: String) => {
+    if (!(await this.downloadOtp.verify(`${name} chart (PNG)`))) return;
+    return captureScreenshot(divId, name);
+  }
 
   ngOnInit() {
     this.selectedDate = getLastSevenDays()

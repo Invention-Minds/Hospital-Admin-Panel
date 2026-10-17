@@ -11,6 +11,7 @@ import {
 } from '../../services/incident.service';
 import { isIncidentManager } from '../../quality/quality-access';
 import { SchedulingService, SchedulingStaff } from '../../services/scheduling.service';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 /**
  * Phase 9.24 / Phase 1 — Incident detail + status transitions.
@@ -66,6 +67,7 @@ export class IncidentDetailComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute, private router: Router,
     private svc: IncidentService, private scheduling: SchedulingService,
+    private downloadOtp: DownloadOtpService,
   ) {}
 
   ngOnInit(): void {
@@ -212,6 +214,11 @@ export class IncidentDetailComponent implements OnInit, OnDestroy {
     if (!raw) return [];
     try { const v = JSON.parse(raw); return Array.isArray(v) ? v : []; }
     catch { return []; }
+  }
+
+  async openFile(url: string) {
+    if (!(await this.downloadOtp.verify('Incident evidence file'))) return;
+    window.open(url, '_blank', 'noopener');
   }
 
   onFileSelected(event: Event): void {

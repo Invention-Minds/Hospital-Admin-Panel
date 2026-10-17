@@ -425,6 +425,130 @@
 
     <div class="lgn-card">
 
+      @if (challenge) {
+        <!-- Security steps after the password is accepted. One at a time:
+             authenticator (admins) → verified email → expired password. -->
+        @switch (challenge.step) {
+          @case ('mfa_setup') {
+            <div class="lgn-greet">
+              <h1>Set up Google Authenticator</h1>
+              <p class="lgn-greet__line">Admin accounts need a code from your phone at every sign-in.</p>
+            </div>
+            <ol class="lgn-steps">
+              <li>Install <b>Google Authenticator</b> on your phone.</li>
+              <li>Tap <b>+</b> → <b>Scan a QR code</b> and scan this:</li>
+            </ol>
+            <img class="lgn-qr" [src]="challenge.mfaSetup?.qrDataUrl" alt="Authenticator setup QR code"/>
+            <p class="lgn-manual">Can't scan? Enter this key: <code>{{ challenge.mfaSetup?.manualKey }}</code></p>
+            <form (ngSubmit)="submitMfa()" #mfaForm="ngForm" class="lgn-form">
+              <div class="lgn-field">
+                <label for="lgn-mfa">6-digit code from the app</label>
+                <div class="lgn-input">
+                  <i class="pi pi-shield" aria-hidden="true"></i>
+                  <input id="lgn-mfa" name="mfaCode" [(ngModel)]="mfaCode" inputmode="numeric" minlength="6" maxlength="6"
+                         autocomplete="one-time-code" placeholder="123456" required />
+                </div>
+              </div>
+              <button type="submit" class="lgn-submit" [disabled]="!mfaForm.valid || isLoading">
+                <i [class]="isLoading ? 'pi pi-spin pi-spinner' : 'pi pi-check'" aria-hidden="true"></i>
+                <span>Verify and continue</span>
+              </button>
+            </form>
+          }
+          @case ('mfa') {
+            <div class="lgn-greet">
+              <h1>Two-step verification</h1>
+              <p class="lgn-greet__line">Open Google Authenticator and enter the DocMinds code.</p>
+            </div>
+            <form (ngSubmit)="submitMfa()" #mfaForm="ngForm" class="lgn-form">
+              <div class="lgn-field">
+                <label for="lgn-mfa">Authenticator code</label>
+                <div class="lgn-input">
+                  <i class="pi pi-shield" aria-hidden="true"></i>
+                  <input id="lgn-mfa" name="mfaCode" [(ngModel)]="mfaCode" inputmode="numeric" minlength="6" maxlength="6"
+                         autocomplete="one-time-code" placeholder="123456" required />
+                </div>
+              </div>
+              <button type="submit" class="lgn-submit" [disabled]="!mfaForm.valid || isLoading">
+                <i [class]="isLoading ? 'pi pi-spin pi-spinner' : 'pi pi-check'" aria-hidden="true"></i>
+                <span>Verify</span>
+              </button>
+            </form>
+          }
+          @case ('email') {
+            <div class="lgn-greet">
+              <h1>Add your email</h1>
+              <p class="lgn-greet__line">Download verification codes are sent here. We'll send a code to confirm it.</p>
+            </div>
+            <form (ngSubmit)="emailSentTo ? verifyEmailOtp() : sendEmailOtp()" #emailForm="ngForm" class="lgn-form">
+              <div class="lgn-field">
+                <label for="lgn-email">Email address</label>
+                <div class="lgn-input">
+                  <i class="pi pi-envelope" aria-hidden="true"></i>
+                  <input id="lgn-email" type="email" name="email" [(ngModel)]="email" [readonly]="!!emailSentTo"
+                         autocomplete="email" placeholder="name@hospital.com" email required />
+                </div>
+              </div>
+              @if (emailSentTo) {
+                <div class="lgn-field">
+                  <label for="lgn-eotp">Code sent to {{ emailSentTo }}</label>
+                  <div class="lgn-input">
+                    <i class="pi pi-key" aria-hidden="true"></i>
+                    <input id="lgn-eotp" name="emailOtp" [(ngModel)]="emailOtp" inputmode="numeric" minlength="6" maxlength="6"
+                           autocomplete="one-time-code" placeholder="123456" required />
+                  </div>
+                </div>
+                <button type="button" class="lgn-link" (click)="emailSentTo = ''; emailOtp = ''">Change email</button>
+                <button type="button" class="lgn-link" [disabled]="isLoading" (click)="sendEmailOtp()">Resend code</button>
+              }
+              <button type="submit" class="lgn-submit" [disabled]="!emailForm.valid || isLoading">
+                <i [class]="isLoading ? 'pi pi-spin pi-spinner' : (emailSentTo ? 'pi pi-check' : 'pi pi-send')" aria-hidden="true"></i>
+                <span>{{ emailSentTo ? 'Verify email' : 'Send code' }}</span>
+              </button>
+            </form>
+          }
+          @case ('password') {
+            <div class="lgn-greet">
+              <h1>{{ challenge.passwordNeverSet ? 'Choose a new password' : 'Your password has expired' }}</h1>
+              <p class="lgn-greet__line">
+                Passwords must be changed every {{ challenge.passwordMaxAgeDays }} days.
+                Use at least 8 characters with a letter and a number.
+              </p>
+            </div>
+            <form (ngSubmit)="submitNewPassword()" #pwForm="ngForm" class="lgn-form">
+              <div class="lgn-field">
+                <label for="lgn-newpw">New password</label>
+                <div class="lgn-input">
+                  <i class="pi pi-lock" aria-hidden="true"></i>
+                  <input id="lgn-newpw" [type]="isPasswordVisible ? 'text' : 'password'" name="newPassword" [(ngModel)]="newPassword"
+                         autocomplete="new-password" minlength="8" required />
+                  <button type="button" class="lgn-eye" [attr.aria-label]="isPasswordVisible ? 'Hide password' : 'Show password'"
+                          (click)="togglePasswordVisibility()">
+                    <i [class]="isPasswordVisible ? 'pi pi-eye-slash' : 'pi pi-eye'"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="lgn-field">
+                <label for="lgn-confpw">Confirm new password</label>
+                <div class="lgn-input">
+                  <i class="pi pi-lock" aria-hidden="true"></i>
+                  <input id="lgn-confpw" [type]="isPasswordVisible ? 'text' : 'password'" name="confirmPassword" [(ngModel)]="confirmPassword"
+                         autocomplete="new-password" required />
+                </div>
+              </div>
+              @if (passwordMismatch) {
+                <p class="lgn-error">Passwords do not match.</p>
+              }
+              <button type="submit" class="lgn-submit" [disabled]="!pwForm.valid || passwordMismatch || isLoading">
+                <i [class]="isLoading ? 'pi pi-spin pi-spinner' : 'pi pi-check'" aria-hidden="true"></i>
+                <span>Update password</span>
+              </button>
+            </form>
+          }
+        }
+        <p class="lgn-help"><button type="button" class="lgn-link" (click)="cancelChallenge()">← Back to sign in</button></p>
+      } @else {
+
       <div class="lgn-greet">
         <h1>{{ greeting }}</h1>
         <p class="lgn-greet__line">Welcome to seamless healthcare management.</p>
@@ -492,6 +616,7 @@
       </form>
 
       <p class="lgn-help">Trouble signing in? Contact your hospital administrator.</p>
+      }
     </div>
 
     <p class="lgn-legal">© {{ currentYear }} DocMinds · Seamless healthcare management</p>

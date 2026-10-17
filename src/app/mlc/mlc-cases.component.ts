@@ -4,6 +4,7 @@ import { Observable, Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { MessageService } from 'primeng/api';
 import { MlcService, MlcCase } from '../services/mlc.service';
+import { DownloadOtpService } from '../shared/download-otp/download-otp.service';
 
 @Component({
   selector: 'app-mlc-cases',
@@ -54,7 +55,8 @@ export class MlcCasesComponent implements OnInit, OnDestroy {
   constructor(
     private mlcService: MlcService,
     private router: Router,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private downloadOtp: DownloadOtpService
   ) { }
 
   ngOnInit(): void {
@@ -120,8 +122,9 @@ export class MlcCasesComponent implements OnInit, OnDestroy {
     this.filteredCases = list;
   }
 
-  downloadReport(id?: string): void {
+  async downloadReport(id?: string): Promise<void> {
     if (!id) return;
+    if (!(await this.downloadOtp.verify('MLC report PDF'))) return;
     this.mlcService.generateMlcReport(id)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -133,7 +136,12 @@ export class MlcCasesComponent implements OnInit, OnDestroy {
           a.click();
           URL.revokeObjectURL(url);
         },
-        error: (err) => console.error('Download failed', err)
+        error: (err) => {
+          console.error('Download failed', err);
+          if (err?.status === 428) {
+            this.messageService.add({ severity: 'error', summary: 'Download verification required', detail: 'Please verify the email OTP and try again.', life: 5000 });
+          }
+        }
       });
   }
 

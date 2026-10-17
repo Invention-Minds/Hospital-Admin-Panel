@@ -2,6 +2,7 @@ import { Component,Input, OnChanges, SimpleChanges } from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { EChartsTracker } from '../../shared/charts/echarts-tracker';
 import { download, countByDate, filteredAppointments } from '../data';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 @Component({
   selector: 'app-opd-request',
@@ -11,7 +12,7 @@ import { download, countByDate, filteredAppointments } from '../data';
 export class OpdRequestComponent implements OnChanges{
   private charts = new EChartsTracker();
 
-  constructor(private appointment : AppointmentConfirmService){}
+  constructor(private appointment : AppointmentConfirmService, private downloadOtp: DownloadOtpService){}
 
   appVia : any
   walkIn : any
@@ -98,7 +99,8 @@ export class OpdRequestComponent implements OnChanges{
     this.chartInstance.setOption(chartOptions);
   }
 
-  downloadChart() {
+  async downloadChart() {
+    if (!(await this.downloadOtp.verify('OPD Request Via chart (PNG)'))) return;
     download("pie-chart",this.chartInstance)
   }
 

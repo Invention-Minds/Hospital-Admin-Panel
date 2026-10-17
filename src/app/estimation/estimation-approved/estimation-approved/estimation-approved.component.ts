@@ -7,6 +7,7 @@ import { Router } from '@angular/router';
 import type * as XLSXTypes from 'xlsx';
 import * as FileSaver from 'file-saver';
 import { environment } from '../../../../environment/environment';
+import { DownloadOtpService } from '../../../shared/download-otp/download-otp.service';
 
 
 @Component({
@@ -18,7 +19,7 @@ import { environment } from '../../../../environment/environment';
 export class EstimationApprovedComponent {
 
 
-  constructor(private estimationService: EstimationService, private messageService: MessageService, private router: Router, private cdr: ChangeDetectorRef, private alertSvc: AlertService) { }
+  constructor(private estimationService: EstimationService, private messageService: MessageService, private router: Router, private cdr: ChangeDetectorRef, private alertSvc: AlertService, private downloadOtp: DownloadOtpService) { }
   pendingEstimations: any[] = [];
   filteredEstimations: any[] = [];
   currentPage = 1;
@@ -256,7 +257,8 @@ export class EstimationApprovedComponent {
     );
 
   }
-  print(estimation: any): void {
+  async print(estimation: any): Promise<void> {
+    if (!(await this.downloadOtp.verify('Approved estimation (PDF)'))) return;
     if (estimation.pdfLink) {
       const href = estimation.pdfLink.startsWith('http')
         ? estimation.pdfLink
@@ -389,7 +391,8 @@ export class EstimationApprovedComponent {
     this.selectedDateRange = []
     this.fetchPendingEstimations()
   }
-  downloadData(data:any): void {
+  async downloadData(data:any): Promise<void> {
+    if (!(await this.downloadOtp.verify('Approved estimations (Excel)'))) return;
     this.exportToExcel(data, 'Estimation-Approved-Summary');
   }
 

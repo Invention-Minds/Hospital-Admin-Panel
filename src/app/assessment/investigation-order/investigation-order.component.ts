@@ -11,6 +11,7 @@ import {
 } from '../../services/appointment-confirm.service';
 import { InvestigationSeederService } from './investigation-seeder.service';
 import { LAB_TEST_SEED } from './investigation-catalog.seed';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 interface CatalogTest {
   id: number;
@@ -113,6 +114,7 @@ export class InvestigationOrderComponent implements OnInit, OnChanges {
   constructor(
     private api: AppointmentConfirmService,
     private seeder: InvestigationSeederService,
+    private downloadOtp: DownloadOtpService,
   ) {}
 
   ngOnInit(): void {
@@ -424,9 +426,10 @@ export class InvestigationOrderComponent implements OnInit, OnChanges {
   }
 
   /** Standalone PDF resembling the paper LAB / RADIOLOGY REQUEST FORM. */
-  printRequestForm(): void {
+  async printRequestForm(): Promise<void> {
     const inv = this.getPrintableInvestigations();
     if (!inv.labByDept.length && !inv.radiologyNames.length) return;
+    if (!(await this.downloadOtp.verify('Investigation request form PDF'))) return;
     // Branded JMRH letterhead background (shared helper), then build.
     getJmrhPdfBranding().then((brand) => this.openRequestPdf(inv, brand));
   }

@@ -4,6 +4,7 @@ import { HandWrittenComponent } from '../hand-written/hand-written.component';
 import { OpdAssessmentsService } from '../../services/opd-assessment/opd-assessments.service';
 import { MessageService } from 'primeng/api';
 import { loadPdfMake } from '../../shared/pdf/pdfmake-loader';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { InvestigationOrderComponent } from '../investigation-order/investigation-order.component';
 import { getJmrhPdfBranding } from '../../shared/pdf/jmrh-letterhead';
@@ -173,6 +174,7 @@ export class OpdAssessmentComponent {
     private appointmentService: AppointmentConfirmService,
     private voiceOPDService: VoiceOpdService,
     private noteTemplateService: NoteTemplateService,
+    private downloadOtp: DownloadOtpService,
   ) { }
 
   /** Admit button enables only after the assessment has been persisted (has an id). */
@@ -817,6 +819,7 @@ loadAssessment(appointmentId: number) {
       });
   }
   async printAssessment() {
+    if (!(await this.downloadOtp.verify('OPD assessment PDF'))) return;
     // PDF library is loaded only when a PDF is generated.
     const pdfMake = await loadPdfMake();
     const d = this.formData;

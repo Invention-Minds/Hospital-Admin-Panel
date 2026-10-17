@@ -4,6 +4,7 @@ import { getYesterdayDate, lastSelectedSevenDays, getIndividualDates, getLastThi
 import { EChartsTracker } from '../../shared/charts/echarts-tracker';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
 import { MessageService } from 'primeng/api';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 
 @Component({
@@ -15,7 +16,7 @@ export class OpdTypeComponent {
   private charts = new EChartsTracker();
 
 
-  constructor(private appointment: AppointmentConfirmService, private docDetails: DoctorServiceService, private messageService : MessageService) { }
+  constructor(private appointment: AppointmentConfirmService, private docDetails: DoctorServiceService, private messageService : MessageService, private downloadOtp: DownloadOtpService) { }
 
   @Input() selectedDate: any[] = []
   @Input() doctorId: any
@@ -48,7 +49,10 @@ export class OpdTypeComponent {
 
   // screenshot
 
-  screenShot : Function = captureScreenshot
+  screenShot : Function = async (divId: string, name: String) => {
+    if (!(await this.downloadOtp.verify(`${name} chart (PNG)`))) return;
+    return captureScreenshot(divId, name);
+  }
 
   ngOnInit() {
     const yesterdayDate = getYesterdayDate()

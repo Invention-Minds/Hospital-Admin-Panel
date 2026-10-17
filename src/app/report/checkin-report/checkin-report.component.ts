@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import * as FileSaver from 'file-saver';
 import { MessageService } from 'primeng/api';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 
 
@@ -38,7 +39,7 @@ export class CheckinReportComponent {
   currentPage = 1;
   itemsPerPage = 10;
 
-  constructor(private appointmentService: AppointmentConfirmService, private messageService: MessageService) { }
+  constructor(private appointmentService: AppointmentConfirmService, private messageService: MessageService, private downloadOtp: DownloadOtpService) { }
 
   ngOnInit(): void {
     this.loadCheckedInAppointments();
@@ -153,6 +154,7 @@ export class CheckinReportComponent {
   }
 
   async download(): Promise<void> {
+    if (!(await this.downloadOtp.verify('Check-in report (Excel)'))) return;
     // Excel library is loaded only when the user downloads a report.
     const { Workbook } = await import('exceljs');
     if (!this.appointments || this.appointments.length === 0) {

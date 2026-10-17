@@ -4,6 +4,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { MessageService } from 'primeng/api';
 import { LamaDamaService, LamaRecord, DamaRecord } from '../services/lama-dama.service';
+import { DownloadOtpService } from '../shared/download-otp/download-otp.service';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -32,7 +33,8 @@ export class LamaDamaComponent implements OnInit, OnDestroy {
   constructor(
     private lamaDamaService: LamaDamaService,
     private router: Router,
-    private messageService: MessageService
+    private messageService: MessageService,
+    private downloadOtp: DownloadOtpService
   ) { }
 
   ngOnInit(): void {
@@ -98,8 +100,9 @@ export class LamaDamaComponent implements OnInit, OnDestroy {
     this.activeTab = tab;
   }
 
-  downloadReport(type: 'lama' | 'dama', id?: string): void {
+  async downloadReport(type: 'lama' | 'dama', id?: string): Promise<void> {
     if (!id) return;
+    if (!(await this.downloadOtp.verify(`${type.toUpperCase()} report PDF`))) return;
     const obs = type === 'lama'
       ? this.lamaDamaService.generateLamaReport(id)
       : this.lamaDamaService.generateDamaReport(id);
@@ -113,7 +116,12 @@ export class LamaDamaComponent implements OnInit, OnDestroy {
         a.click();
         URL.revokeObjectURL(url);
       },
-      error: (err) => console.error('Download failed', err)
+      error: (err) => {
+        console.error('Download failed', err);
+        if (err?.status === 428) {
+          this.messageService.add({ severity: 'error', summary: 'Download verification required', detail: 'Please verify the email OTP and try again.', life: 5000 });
+        }
+      }
     });
   }
 

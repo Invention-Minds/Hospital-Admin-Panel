@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { HealthCheckupServiceService } from '../../../services/health-checkup/health-checkup-service.service';
 import type * as XLSXTypes from 'xlsx';
 import * as FileSaver from 'file-saver';
+import { DownloadOtpService } from '../../../shared/download-otp/download-otp.service';
 
 
 
@@ -17,7 +18,7 @@ import * as FileSaver from 'file-saver';
 export class EstimationRequestComponent {
 
 
-    constructor(private estimationService: EstimationService, private messageService: MessageService,private router: Router, private healthCheckupService: HealthCheckupServiceService) { }
+    constructor(private estimationService: EstimationService, private messageService: MessageService,private router: Router, private healthCheckupService: HealthCheckupServiceService, private downloadOtp: DownloadOtpService) { }
     pendingEstimations: any[] = [];
     filteredEstimations: any[] = [];
     currentPage = 1;
@@ -196,7 +197,8 @@ export class EstimationRequestComponent {
       this.selectedDateRange = []
       this.fetchPendingEstimations()
     }
-    downloadData(data:any): void {
+    async downloadData(data:any): Promise<void> {
+      if (!(await this.downloadOtp.verify('Estimation requests (Excel)'))) return;
       this.exportToExcel(data, 'Estimation-Pending-Summary');
     }
   

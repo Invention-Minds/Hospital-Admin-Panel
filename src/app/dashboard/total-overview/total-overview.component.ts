@@ -2,6 +2,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 import * as moment from 'moment-timezone';
 
@@ -45,7 +46,8 @@ export class TotalOverviewComponent implements OnInit {
 
   constructor(
     private appointmentService: AppointmentConfirmService,
-    private doctorService: DoctorServiceService
+    private doctorService: DoctorServiceService,
+    private downloadOtp: DownloadOtpService
   ) { }
 
   ngOnInit(): void {
@@ -100,6 +102,7 @@ export class TotalOverviewComponent implements OnInit {
 
 
   async downloadFilteredData(): Promise<void> {
+    if (!(await this.downloadOtp.verify('Check-in appointments (Excel)'))) return;
     // Excel export library is loaded only when the user exports.
     const XLSX = await import('xlsx');
     // console.log('Downloading completed appointments data...');
@@ -180,6 +183,7 @@ export class TotalOverviewComponent implements OnInit {
   }
 
   async downlaodTodayAppts(): Promise<void> {
+    if (!(await this.downloadOtp.verify('Today appointments (Excel)'))) return;
     // Excel export library is loaded only when the user exports.
     const XLSX = await import('xlsx');
     // console.log('Downloading completed appointments data...');

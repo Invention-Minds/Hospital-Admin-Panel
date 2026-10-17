@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subject, interval } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { WardManagementService, BedCensus } from '../services/ward-management.service';
+import { DownloadOtpService } from '../shared/download-otp/download-otp.service';
 
 type Mode = 'live' | 'snapshot';
 
@@ -36,7 +37,7 @@ export class WardCensusComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  constructor(private wardService: WardManagementService) { }
+  constructor(private wardService: WardManagementService, private downloadOtp: DownloadOtpService) { }
 
   ngOnInit(): void {
     this.loadCensus();
@@ -165,7 +166,8 @@ export class WardCensusComponent implements OnInit, OnDestroy {
       });
   }
 
-  downloadReport(): void {
+  async downloadReport(): Promise<void> {
+    if (!(await this.downloadOtp.verify('Bed census CSV'))) return;
     this.wardService.downloadBedCensusReport()
       .pipe(takeUntil(this.destroy$))
       .subscribe({

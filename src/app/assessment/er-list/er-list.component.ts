@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { ErService } from '../../services/er/er.service';
 import { loadPdfMake } from '../../shared/pdf/pdfmake-loader';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 @Component({
   selector: 'app-er-list',
@@ -18,7 +19,7 @@ export class ErListComponent {
   selectedAssessment: any = null;
 
 
-  constructor(private erService: ErService) { }
+  constructor(private erService: ErService, private downloadOtp: DownloadOtpService) { }
 
   ngOnInit(): void {
     this.loadData();
@@ -231,6 +232,7 @@ export class ErListComponent {
 // }
 
 async printAssessment(data: any) {
+  if (!(await this.downloadOtp.verify('ER assessment PDF'))) return;
   // PDF library is loaded only when a PDF is generated.
   const pdfMake = await loadPdfMake();
   const d = { ...data };

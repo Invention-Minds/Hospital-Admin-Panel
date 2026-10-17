@@ -12,6 +12,7 @@ import {
   localDateString,
 } from '../../services/dietetics.service';
 import { SignatureCreateResponse } from '../../services/signature.service';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 /**
  * Diet Information Sheet — `/dietetics/sheet`.
@@ -61,7 +62,7 @@ export class DietSheetComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  constructor(private svc: DieteticsService) {}
+  constructor(private svc: DieteticsService, private downloadOtp: DownloadOtpService) {}
 
   get isDietitian(): boolean {
     return this.role === 'super_admin' || ['Dietician', 'Diet'].includes(this.subAdminType);
@@ -225,7 +226,8 @@ export class DietSheetComponent implements OnInit, OnDestroy {
     });
   }
 
-  print(): void {
+  async print(): Promise<void> {
+    if (!(await this.downloadOtp.verify('Diet sheet print'))) return;
     if (typeof window !== 'undefined') window.print();
   }
 

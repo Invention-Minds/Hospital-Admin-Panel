@@ -4,6 +4,7 @@ import { AppointmentConfirmService } from '../../services/appointment-confirm.se
 import * as FileSaver from 'file-saver';
 import { MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 export interface Service {
   id?: number;
@@ -37,7 +38,7 @@ export interface Service {
 
 export class ServiceConfirmComponent {
 
-  constructor(private healthCheckupService: RadiologyService, private messageService: MessageService, private router: Router, private appointmentService: AppointmentConfirmService) {
+  constructor(private healthCheckupService: RadiologyService, private messageService: MessageService, private router: Router, private appointmentService: AppointmentConfirmService, private downloadOtp: DownloadOtpService) {
   
   }
   confirmedAppointments: Service[] = [];
@@ -217,7 +218,8 @@ refresh() {
   this.selectedDateRange = [];
   this.filteredServices = [...this.confirmedAppointments];
 }
-downloadData(): void {
+async downloadData(): Promise<void> {
+  if (!(await this.downloadOtp.verify('Confirmed radiology services (CSV)'))) return;
   if (this.filteredServices.length === 0) {
     console.warn('No data to download');
     return;

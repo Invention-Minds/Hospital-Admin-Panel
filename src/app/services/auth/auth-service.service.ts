@@ -47,10 +47,30 @@ export class AuthServiceService {
       loginPayload.employeeId = employeeId;
     }
     return this.http.post(`${this.apiUrl}/login`, loginPayload).pipe(
-      tap((response: any) => {
-        console.log(response)
-        const user = response.user;  // Use 'user' from the response
-        // console.log('User in the login:', user);
+      tap((response: any) => this.storeSession(response))
+    );
+  }
+
+  // Post-password security steps. Each response is either the next
+  // `challenge` or the full session (stored exactly like a normal login).
+  challengeMfa(challengeToken: string, code: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/challenge/mfa`, { challengeToken, code })
+      .pipe(tap((response: any) => this.storeSession(response)));
+  }
+  challengeEmailSend(challengeToken: string, email: string): Observable<{ sentTo: string; expiresAt: string }> {
+    return this.http.post<{ sentTo: string; expiresAt: string }>(`${this.apiUrl}/challenge/email/send`, { challengeToken, email });
+  }
+  challengeEmailVerify(challengeToken: string, otp: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/challenge/email/verify`, { challengeToken, otp })
+      .pipe(tap((response: any) => this.storeSession(response)));
+  }
+  challengePassword(challengeToken: string, newPassword: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/challenge/password`, { challengeToken, newPassword })
+      .pipe(tap((response: any) => this.storeSession(response)));
+  }
+
+  private storeSession(response: any): void {
+        const user = response?.challenge ? null : response?.user;  // Use 'user' from the response
         if (user) {
           this.user = { username: user.username, role: user.role, id: user.userId}; // Save the user in the service
           localStorage.setItem('loggedinTime', response.generatedTime);
@@ -74,8 +94,6 @@ export class AuthServiceService {
           localStorage.setItem('isOpdNurse', user.isOpdNurse ? 'true' : 'false');
           localStorage.setItem('isIpdNurse', user.isIpdNurse ? 'true' : 'false');
         }
-      })
-    );
   }
   getDepartmentName(): string {
     return localStorage.getItem('departmentName') || '';
@@ -126,9 +144,9 @@ initializeUserFromStorage(): void {
     // console.log(this.user);
   }
 
-  register(username: string, password: string, isReceptionist: boolean, employeeId: string, role:string, adminType: string, subAdminType: string, createdBy: string, department?: string | null): Observable<any> {
+  register(username: string, password: string, isReceptionist: boolean, employeeId: string, role:string, adminType: string, subAdminType: string, createdBy: string, department: string | null | undefined, email: string): Observable<any> {
     // const role = this.extractRoleFromUsername(username);  // Extract role
-    const body: any = { username, password, isReceptionist, employeeId, role, adminType, subAdminType, createdBy };
+    const body: any = { username, password, isReceptionist, employeeId, role, adminType, subAdminType, createdBy, email };
     if (department) body.department = department;
     return this.http.post(`${this.apiUrl}/register`, body).pipe(
       tap(response => {

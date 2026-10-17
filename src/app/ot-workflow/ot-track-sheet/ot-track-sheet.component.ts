@@ -10,6 +10,7 @@ import {
   OtEquipmentUsage, OtScheduleExtrasService, OtScheduleStaff, OtScheduleSurgery,
 } from '../../services/ot-schedule-extras.service';
 import { getJmrhPdfBranding } from '../../shared/pdf/jmrh-letterhead';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 
 
 /**
@@ -46,6 +47,7 @@ export class OtTrackSheetComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private otSvc: OtWorkflowService,
     private extrasSvc: OtScheduleExtrasService,
+    private downloadOtp: DownloadOtpService,
   ) {}
 
   ngOnInit(): void {
@@ -147,6 +149,7 @@ export class OtTrackSheetComponent implements OnInit, OnDestroy {
   }
 
   async print(): Promise<void> {
+    if (!(await this.downloadOtp.verify('OT track sheet PDF'))) return;
     // PDF library is loaded only when a PDF is generated.
     const pdfMake = await loadPdfMake();
     const s = this.schedule;

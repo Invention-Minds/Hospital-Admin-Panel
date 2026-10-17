@@ -7,6 +7,7 @@ import { map } from 'rxjs/operators';
 import { utcToIstDate, getYesterdayDate, getIndividualDates, getLastThirtyDaysFromSelected, getLast7Days, formatDate, reorderDateFormat, captureScreenshot } from '../functions'
 import { error } from 'console';
 import { MessageService } from 'primeng/api';
+import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
 import { constants } from 'buffer';
 
 @Component({
@@ -18,7 +19,7 @@ export class OpdEstimationPieComponent implements OnChanges {
   private charts = new EChartsTracker();
 
 
-  constructor(private appointment: AppointmentConfirmService, private estimation: EstimationService, private doctor: DoctorServiceService, private messageService: MessageService) { }
+  constructor(private appointment: AppointmentConfirmService, private estimation: EstimationService, private doctor: DoctorServiceService, private messageService: MessageService, private downloadOtp: DownloadOtpService) { }
 
   rawData: any
   prnNumber: any
@@ -50,7 +51,10 @@ export class OpdEstimationPieComponent implements OnChanges {
   @Output() reportInitializeDate = new EventEmitter<any>
 
   // screenshot
-  screenShot : Function = captureScreenshot
+  screenShot : Function = async (divId: string, name: String) => {
+    if (!(await this.downloadOtp.verify(`${name} chart (PNG)`))) return;
+    return captureScreenshot(divId, name);
+  }
 
   ngOnInit() {
     this.selectedDate = getLast7Days()

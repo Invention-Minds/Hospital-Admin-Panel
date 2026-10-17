@@ -17,6 +17,7 @@ import { MessageService } from 'primeng/api';
 
 import { LamaDamaComponent } from './lama-dama.component';
 import { LamaDamaService, LamaRecord, DamaRecord } from '../services/lama-dama.service';
+import { DownloadOtpService } from '../shared/download-otp/download-otp.service';
 import { EmptyStateComponent } from '../shared/ui/empty-state/empty-state.component';
 import { HmisSyncIndicatorComponent } from '../shared/ui/hmis-sync-indicator/hmis-sync-indicator.component';
 
@@ -50,6 +51,7 @@ describe('LamaDamaComponent — Sprint 3e enhancements', () => {
       declarations: [LamaDamaComponent, EmptyStateComponent, HmisSyncIndicatorComponent],
       providers: [
         { provide: LamaDamaService, useValue: svc },
+        { provide: DownloadOtpService, useValue: { verify: () => Promise.resolve(true) } },
         MessageService,
       ],
       schemas: [NO_ERRORS_SCHEMA],

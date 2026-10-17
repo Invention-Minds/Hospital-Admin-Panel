@@ -7,6 +7,7 @@ import {
   HmisConflict,
 } from '../services/hmis-sync.service';
 import { AlertService } from '../services/alert.service';
+import { DownloadOtpService } from '../shared/download-otp/download-otp.service';
 
 @Component({
   selector: 'app-sync-status',
@@ -45,7 +46,7 @@ export class SyncStatusComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  constructor(private hmisSyncService: HmisSyncService, private alertSvc: AlertService) { }
+  constructor(private hmisSyncService: HmisSyncService, private alertSvc: AlertService, private downloadOtp: DownloadOtpService) { }
 
   ngOnInit(): void {
     this.loadStatus();
@@ -126,7 +127,8 @@ export class SyncStatusComponent implements OnInit, OnDestroy {
       });
   }
 
-  downloadAuditReport(): void {
+  async downloadAuditReport(): Promise<void> {
+    if (!(await this.downloadOtp.verify('HMIS audit log CSV'))) return;
     this.hmisSyncService.downloadAuditReport()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -138,7 +140,10 @@ export class SyncStatusComponent implements OnInit, OnDestroy {
           a.click();
           URL.revokeObjectURL(url);
         },
-        error: (err) => console.error('Download failed', err)
+        error: (err) => {
+          console.error('Download failed', err);
+          if (err?.status === 428) this.alertSvc.show('Download verification required. Please verify the email OTP and try again.');
+        }
       });
   }
 

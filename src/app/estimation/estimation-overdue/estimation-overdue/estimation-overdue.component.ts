@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import type * as XLSXTypes from 'xlsx';
 import * as FileSaver from 'file-saver';
 import { environment } from '../../../../environment/environment';
+import { DownloadOtpService } from '../../../shared/download-otp/download-otp.service';
 
 @Component({
   selector: 'app-estimation-overdue',
@@ -14,7 +15,7 @@ import { environment } from '../../../../environment/environment';
 export class EstimationOverdueComponent {
 
 
-  constructor(private estimationService: EstimationService, private messageService: MessageService,private router: Router) { }
+  constructor(private estimationService: EstimationService, private messageService: MessageService,private router: Router, private downloadOtp: DownloadOtpService) { }
   pendingEstimations: any[] = [];
   filteredEstimations: any[] = [];
   currentPage = 1;
@@ -209,7 +210,8 @@ this.fetchPendingEstimations();
     this.selectedDateRange = []
     this.fetchPendingEstimations()
   }
-  downloadData(data:any): void {
+  async downloadData(data:any): Promise<void> {
+    if (!(await this.downloadOtp.verify('Overdue estimations (Excel)'))) return;
     this.exportToExcel(data, 'Estimation-OverDued-Summary');
   }
 
@@ -521,7 +523,8 @@ this.fetchPendingEstimations();
   openForm(estimation: any) {
     this.activeComponent = 'form';
   }
-  print(estimation: any): void {
+  async print(estimation: any): Promise<void> {
+    if (!(await this.downloadOtp.verify('Overdue estimation (PDF)'))) return;
     if (estimation.pdfLink) {
       const href = estimation.pdfLink.startsWith('http')
         ? estimation.pdfLink

@@ -26,6 +26,10 @@
       (click)="switchTab('user_status')" *ngIf="canAccessTab('user_status')">
       User Status
     </div>
+    <div class="settings-tab" [ngClass]="{'active-tab': selectedTab === 'download_logs'}"
+      (click)="switchTab('download_logs')" *ngIf="canAccessTab('download_logs')">
+      Download Logs
+    </div>
     <div class="settings-tab" [ngClass]="{'active-tab': selectedTab === 'est_locked'}" (click)="switchTab('est_locked')"
       *ngIf="loggedInAdminType === 'IT Manager' || role === 'super_admin' || loggedInAdminType === 'IT Support'">
       Locked Ids
@@ -384,8 +388,19 @@
       </div>
     </div>
 
+    <!-- Email — receives download OTPs; the user verifies it at first sign-in. -->
+    <div *ngIf="isAdmin || isSubAdmin || isDoctor">
+      <div class="input">
+        <div class="floating-label">
+          <input type="email" id="newUserEmail" name="newUserEmail" placeholder=" " [(ngModel)]="newUserEmail" required />
+          <label for="newUserEmail">Email*</label>
+          <div *ngIf="newUserEmail && !isNewUserEmailValid" class="error-message">Enter a valid email address</div>
+        </div>
+      </div>
+    </div>
+
     <!-- Save Button -->
-    <button class="create-button" (click)="createAccount()" [disabled]="!isFormValid">Create Account</button>
+    <button class="create-button" (click)="createAccount()" [disabled]="!isFormValid || !isNewUserEmailValid">Create Account</button>
     <p-toast></p-toast>
   </div>
 
@@ -447,6 +462,49 @@
       </table>
     </div>
 
+  </div>
+  <div class="settings-content" *ngIf="selectedTab === 'download_logs'">
+    <div class="dl-filters">
+      <input type="text" placeholder="Search user, employee ID, file or reason" [(ngModel)]="downloadLogFilters.search"
+        (keyup.enter)="loadDownloadLogs(1)" />
+      <input type="date" [(ngModel)]="downloadLogFilters.from" aria-label="From date" />
+      <input type="date" [(ngModel)]="downloadLogFilters.to" aria-label="To date" />
+      <button class="create-button" (click)="loadDownloadLogs(1)" [disabled]="downloadLogsLoading">Search</button>
+    </div>
+    <div class="table-container">
+      <table class="styled-table">
+        <thead>
+          <tr>
+            <th>When</th>
+            <th>User</th>
+            <th>Role</th>
+            <th>What</th>
+            <th>Why</th>
+            <th>Page / file</th>
+            <th>IP</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let log of downloadLogs">
+            <td>{{ log.createdAt | date:'dd MMM yyyy, HH:mm' }}</td>
+            <td>{{ log.username }}<br /><small>{{ log.employeeId }}</small></td>
+            <td>{{ log.role }}</td>
+            <td>{{ log.label }}</td>
+            <td class="dl-reason">{{ log.reason }}</td>
+            <td><small>{{ log.serverRoute || log.page }}</small></td>
+            <td><small>{{ log.ip }}</small></td>
+          </tr>
+          <tr *ngIf="!downloadLogsLoading && downloadLogs.length === 0">
+            <td colspan="7">No downloads recorded for this filter.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="dl-pager">
+      <button (click)="loadDownloadLogs(downloadLogPage - 1)" [disabled]="downloadLogPage <= 1 || downloadLogsLoading">‹ Prev</button>
+      <span>Page {{ downloadLogPage }} of {{ downloadLogPages }} · {{ downloadLogTotal }} downloads</span>
+      <button (click)="loadDownloadLogs(downloadLogPage + 1)" [disabled]="downloadLogPage >= downloadLogPages || downloadLogsLoading">Next ›</button>
+    </div>
   </div>
   <div class="settings-content" *ngIf="selectedTab === 'user_status'">
     <div class="table-container">

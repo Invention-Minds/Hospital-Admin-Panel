@@ -120,7 +120,7 @@
               <td>{{ r.referenceRange || '—' }}</td>
               <td>{{ (r.reportedAt || r.createdAt) | date:'dd/MM/yyyy HH:mm' }}</td>
               <td>{{ r.status }}</td>
-              <td><a *ngIf="r.reportUrl" [href]="r.reportUrl" target="_blank">PDF</a></td>
+              <td><a *ngIf="r.reportUrl" href="#" (click)="$event.preventDefault(); openFile(r.reportUrl)">PDF</a></td>
             </tr>
           </tbody>
         </table>
@@ -137,7 +137,7 @@
               <td>{{ r.result || '—' }}</td>
               <td>{{ (r.reportedAt || r.createdAt) | date:'dd/MM/yyyy HH:mm' }}</td>
               <td>{{ r.status }}</td>
-              <td><a *ngIf="r.reportUrl" [href]="r.reportUrl" target="_blank">PDF</a></td>
+              <td><a *ngIf="r.reportUrl" href="#" (click)="$event.preventDefault(); openFile(r.reportUrl)">PDF</a></td>
             </tr>
           </tbody>
         </table>

@@ -5,6 +5,7 @@ import { takeUntil } from 'rxjs/operators';
 import { IpdService, IpdAdmission } from '../services/ipd.service';
 import { DoctorServiceService } from '../services/doctor-details/doctor-service.service';
 import { NursingStationService, NursingStationRow, StationWardRef } from '../services/nursing-station.service';
+import { DownloadOtpService } from '../shared/download-otp/download-otp.service';
 
 @Component({
   selector: 'app-ipd-overview',
@@ -52,7 +53,8 @@ export class IpdOverviewComponent implements OnInit, OnDestroy {
     private ipdService: IpdService,
     private router: Router,
     private doctorService: DoctorServiceService,
-    private stationSvc: NursingStationService
+    private stationSvc: NursingStationService,
+    private downloadOtp: DownloadOtpService
   ) { }
 
   ngOnInit(): void {
@@ -246,8 +248,9 @@ export class IpdOverviewComponent implements OnInit, OnDestroy {
   }
 
   /** Export the filtered discharge list as CSV (a discharge register). */
-  exportDischarges(): void {
+  async exportDischarges(): Promise<void> {
     if (typeof document === 'undefined') return;
+    if (!(await this.downloadOtp.verify('Discharge register CSV'))) return;
     const rows = this.filteredDischarges;
     const header = ['Admission No', 'PRN', 'Discharge Date', 'Type', 'Condition', 'Consultant', 'Ward', 'Summary Status'];
     const esc = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`;

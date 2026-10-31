@@ -174,6 +174,10 @@ initializeUserFromStorage(): void {
   getAllUsers(): Observable<any> {
     return this.http.get(`${this.apiUrl}/get-all-users`);
   }
+  /** super_admin only — clears the user's Google Authenticator so they re-scan at next sign-in. */
+  resetUserMfa(userId: number): Observable<{ id: number; mfaEnabled: boolean }> {
+    return this.http.post<{ id: number; mfaEnabled: boolean }>(`${this.apiUrl}/reset-mfa/${userId}`, {});
+  }
   toggleUserActive(userId: number): Observable<any> {
     return this.http.patch(`${this.apiUrl}/toggle-active/${userId}`, {});
   }

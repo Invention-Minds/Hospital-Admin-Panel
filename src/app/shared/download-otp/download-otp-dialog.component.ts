@@ -118,7 +118,8 @@ export class DownloadOtpDialogComponent implements OnInit {
   error = '';
 
   constructor(
-    public ref: MatDialogRef<DownloadOtpDialogComponent, boolean>,
+    // Closes with the Download ID, or false when cancelled.
+    public ref: MatDialogRef<DownloadOtpDialogComponent, string | false>,
     @Inject(MAT_DIALOG_DATA) public data: { label: string },
     @Inject(forwardRef(() => DownloadOtpService)) private svc: DownloadOtpService,
   ) {}
@@ -180,13 +181,13 @@ export class DownloadOtpDialogComponent implements OnInit {
     this.busy = true;
     this.error = '';
     try {
-      await this.svc.authorize({
+      const downloadRef = await this.svc.authorize({
         captchaId: this.captcha!.captchaId,
         captchaAnswer: [...this.selected],
         reason: this.reason.trim(),
         label: this.data.label,
       });
-      this.ref.close(true);
+      this.ref.close(downloadRef);
     } catch (e: any) {
       this.busy = false;
       this.error = e?.error?.error || 'Could not verify. Please try again.';

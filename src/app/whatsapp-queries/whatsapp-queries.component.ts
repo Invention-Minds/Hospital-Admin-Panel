@@ -10,6 +10,7 @@ import {
   WhatsappQueryService,
 } from '../services/whatsapp-query.service';
 import { DownloadOtpService } from '../shared/download-otp/download-otp.service';
+import { openStampedFile } from '../shared/download-otp/download-stamp';
 
 /**
  * WhatsApp patient-query inbox (doctor side).
@@ -96,6 +97,6 @@ export class WhatsappQueriesComponent implements OnInit, OnDestroy {
 
   async openFile(url: string) {
     if (!(await this.downloadOtp.verify('WhatsApp attachment'))) return;
-    window.open(url, '_blank', 'noopener');
+    await openStampedFile(url);
   }
 }

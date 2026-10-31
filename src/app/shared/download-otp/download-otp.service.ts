@@ -5,6 +5,7 @@ import { Observable, firstValueFrom } from 'rxjs';
 import { environment } from '../../../environment/environment.prod';
 import { DownloadOtpDialogComponent } from './download-otp-dialog.component';
 import { DownloadGrant, currentDownloadGrant, setDownloadTicket, storeDownloadGrant } from './download-grant.store';
+import { setDownloadRef } from './download-stamp';
 
 /**
  * Gate for every download / export / print:
@@ -20,16 +21,20 @@ import { DownloadGrant, currentDownloadGrant, setDownloadTicket, storeDownloadGr
 @Injectable({ providedIn: 'root' })
 export class DownloadOtpService {
   private apiUrl = `${environment.apiUrl}/download-otp`;
-  private pending: Promise<boolean> | null = null;
+  private pending: Promise<string | null> | null = null;
 
   constructor(private http: HttpClient, private dialog: MatDialog) {}
 
-  /** Resolves true once the user has passed OTP (if needed), captcha and reason. */
-  verify(label = 'this download'): Promise<boolean> {
+  /**
+   * Resolves with the Download ID once the user has passed OTP (if needed),
+   * captcha and reason, or null if they cancelled. The ID is also stamped on
+   * the file automatically (download-stamp.ts).
+   */
+  verify(label = 'this download'): Promise<string | null> {
     // Several exports fired by one click share one prompt.
     if (!this.pending) {
       const ref = this.dialog.open(DownloadOtpDialogComponent, { data: { label }, width: '420px', disableClose: true });
-      this.pending = firstValueFrom(ref.afterClosed()).then((ok) => !!ok).finally(() => (this.pending = null));
+      this.pending = firstValueFrom(ref.afterClosed()).then((r) => r || null).finally(() => (this.pending = null));
     }
     return this.pending;
   }
@@ -54,15 +59,20 @@ export class DownloadOtpService {
     return this.http.get<PictureCaptcha>(`${this.apiUrl}/captcha`);
   }
 
-  /** Logs the download (what/why) and arms the one-time ticket for a server file route. */
-  async authorize(body: { captchaId: string; captchaAnswer: number[]; reason: string; label: string }): Promise<void> {
+  /**
+   * Logs the download (what/why), arms the one-time ticket for a server file
+   * route and the Download ID stamped on the file. Returns the Download ID.
+   */
+  async authorize(body: { captchaId: string; captchaAnswer: number[]; reason: string; label: string }): Promise<string> {
     const page = typeof window !== 'undefined' ? window.location.pathname : null;
-    const res = await firstValueFrom(this.http.post<{ logId: string; ticket: string }>(
+    const res = await firstValueFrom(this.http.post<{ logId: string; downloadRef: string | null; ticket: string }>(
       `${this.apiUrl}/authorize`,
       { ...body, page },
       { headers: { 'X-Download-Grant': this.currentGrant() || '' } },
     ));
     setDownloadTicket(res.ticket);
+    setDownloadRef(res.downloadRef);
+    return res.downloadRef || res.logId;
   }
 
   getLogs(params: { page: number; pageSize: number; search?: string; from?: string; to?: string }): Observable<DownloadLogPage> {
@@ -81,6 +91,7 @@ export interface DownloadLogRow {
   id: string;
   username: string;
   employeeId: string | null;
+  downloadRef: string | null;
   role: string;
   label: string;
   page: string | null;

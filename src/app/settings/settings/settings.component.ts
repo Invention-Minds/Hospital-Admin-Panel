@@ -10,6 +10,7 @@ import { MessageService } from 'primeng/api';
 import moment from 'moment-timezone';
 import { forkJoin } from 'rxjs';
 import { DownloadOtpService, DownloadLogRow } from '../../shared/download-otp/download-otp.service';
+import { AlertService } from '../../services/alert.service';
 
 // export enum UserRole {
 //   admin = 'admin',
@@ -88,7 +89,8 @@ therapists: any[] = [];
   constructor(private authService: AuthServiceService, private router: Router,
      private messageService: MessageService, private appointmentService: AppointmentConfirmService,
       private doctorService: DoctorServiceService, private estimationService: EstimationService,
-    private therapyService: TherapyService, private downloadOtp: DownloadOtpService) {}
+    private therapyService: TherapyService, private downloadOtp: DownloadOtpService,
+    private alertSvc: AlertService) {}
  // Define the role-based access
  rolePermissions: Record<UserRole, string[]> = {
   sub_admin: ['profile', 'reset','est_locked'],
@@ -649,6 +651,37 @@ toggleUserActive(user: any): void {
     error: () => {
       this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update user status' });
     }
+  });
+}
+// Google Authenticator applies to admin / super_admin accounts only.
+usesAuthenticator(user: any): boolean {
+  return user?.role === 'admin' || user?.role === 'super_admin';
+}
+authenticatorStatus(user: any): string {
+  if (user.totpEnabledAt) return 'Set up';
+  return user.totpSecret ? 'Setup pending' : 'Not set up';
+}
+async resetAuthenticator(user: any): Promise<void> {
+  const name = this.extractFirstName(user.username) || user.username;
+  const ok = await this.alertSvc.confirm(
+    `Reset Google Authenticator for ${name} (${user.employeeId || 'no employee ID'})? ` +
+    'Their current authenticator codes stop working, and they will scan a new QR code at their next sign-in. ' +
+    'Only do this after confirming the request came from them.',
+    { title: 'Reset authenticator', confirmLabel: 'Reset', severity: 'danger' },
+  );
+  if (!ok) return;
+  user._resettingMfa = true;
+  this.authService.resetUserMfa(user.id).subscribe({
+    next: () => {
+      user._resettingMfa = false;
+      user.totpSecret = null;
+      user.totpEnabledAt = null;
+      this.messageService.add({ severity: 'success', summary: 'Authenticator reset', detail: `${name} will set it up again at next sign-in` });
+    },
+    error: (e) => {
+      user._resettingMfa = false;
+      this.messageService.add({ severity: 'error', summary: 'Error', detail: e?.error?.error || 'Failed to reset authenticator' });
+    },
   });
 }
 // Department scope (incident view) applies to admins and the Nursing Superintendent.

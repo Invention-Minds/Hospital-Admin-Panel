@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { ScreenProtectionService } from './shared/screen-protection/screen-protection.service';
+import { installDownloadStamp } from './shared/download-otp/download-stamp';
 import { Location } from '@angular/common';
 import { InactivityService } from './services/inactivity.service';
 import { AppointmentConfirmService } from './services/appointment-confirm.service';
@@ -40,6 +41,7 @@ export class AppComponent {
   ) {
     this.alertSvc.state$.subscribe((s) => (this.alertState = s));
     this.screenProtection.start();
+    installDownloadStamp(); // Download ID footer on every export (no-op during SSR)
     // Login/logout change the signed-in user, so re-check on every navigation.
     this.router.events
       .pipe(filter((e) => e instanceof NavigationEnd))

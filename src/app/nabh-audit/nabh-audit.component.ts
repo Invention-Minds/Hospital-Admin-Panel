@@ -13,6 +13,7 @@ import {
 } from '../services/nabh-audit.service';
 import { environment } from '../../environment/environment.prod';
 import { DownloadOtpService } from '../shared/download-otp/download-otp.service';
+import { openStampedFile } from '../shared/download-otp/download-stamp';
 
 /**
  * Phase 10 (extended) — NABH Audit page.
@@ -181,7 +182,7 @@ export class NabhAuditComponent implements OnInit, OnDestroy {
 
   async openFile(url: string) {
     if (!(await this.downloadOtp.verify('NABH audit bundle'))) return;
-    window.open(url, '_blank', 'noopener');
+    await openStampedFile(url);
   }
 
   formatBytes(bytes: number): string {

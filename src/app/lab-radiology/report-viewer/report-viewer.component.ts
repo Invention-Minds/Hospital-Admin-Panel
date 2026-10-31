@@ -4,6 +4,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 import { InvestigationResult, InvestigationResultService } from '../../services/investigation-result.service';
 import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
+import { openStampedFile } from '../../shared/download-otp/download-stamp';
 
 /**
  * Phase 9.11 — Reusable PDF result viewer modal.
@@ -90,7 +91,7 @@ export class ReportViewerComponent implements OnChanges {
       if (!(await this.downloadOtp.verify('Investigation report'))) return;
       // GCS URLs serve with Content-Disposition: inline, so a real
       // download requires opening in a new tab; the user can save from there.
-      window.open(this.result.reportUrl, '_blank', 'noopener,noreferrer');
+      await openStampedFile(this.result.reportUrl);
     }
   }
 }

@@ -4,6 +4,7 @@ import { MessageService } from 'primeng/api';
 import { Router } from '@angular/router';
 import { environment } from '../../../environment/environment';
 import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
+import { openStampedFile } from '../../shared/download-otp/download-stamp';
 
 @Component({
   selector: 'app-followup-estimation',
@@ -83,12 +84,7 @@ this.fetchPendingEstimations();
       const href = estimation.pdfLink.startsWith('http')
         ? estimation.pdfLink
         : `${environment.filesUrl}${estimation.pdfLink}`;
-      const pdfWindow = window.open(href, '_blank');
-      if (pdfWindow) {
-        pdfWindow.onload = () => {
-          pdfWindow.print();
-        };
-      }
+      await openStampedFile(href, { print: true });
     } else {
       console.error("No PDF link available for this estimation.");
     }

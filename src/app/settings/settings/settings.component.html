@@ -465,7 +465,7 @@
   </div>
   <div class="settings-content" *ngIf="selectedTab === 'download_logs'">
     <div class="dl-filters">
-      <input type="text" placeholder="Search user, employee ID, file or reason" [(ngModel)]="downloadLogFilters.search"
+      <input type="text" placeholder="Search Download ID, user, employee ID, file or reason" [(ngModel)]="downloadLogFilters.search"
         (keyup.enter)="loadDownloadLogs(1)" />
       <input type="date" [(ngModel)]="downloadLogFilters.from" aria-label="From date" />
       <input type="date" [(ngModel)]="downloadLogFilters.to" aria-label="To date" />
@@ -476,6 +476,7 @@
         <thead>
           <tr>
             <th>When</th>
+            <th>Download ID</th>
             <th>User</th>
             <th>Role</th>
             <th>What</th>
@@ -487,6 +488,7 @@
         <tbody>
           <tr *ngFor="let log of downloadLogs">
             <td>{{ log.createdAt | date:'dd MMM yyyy, HH:mm' }}</td>
+            <td><small>{{ log.downloadRef || '—' }}</small></td>
             <td>{{ log.username }}<br /><small>{{ log.employeeId }}</small></td>
             <td>{{ log.role }}</td>
             <td>{{ log.label }}</td>
@@ -495,7 +497,7 @@
             <td><small>{{ log.ip }}</small></td>
           </tr>
           <tr *ngIf="!downloadLogsLoading && downloadLogs.length === 0">
-            <td colspan="7">No downloads recorded for this filter.</td>
+            <td colspan="8">No downloads recorded for this filter.</td>
           </tr>
         </tbody>
       </table>
@@ -517,6 +519,7 @@
             <th>Employee ID</th>
             <th>Department</th>
             <th>Status</th>
+            <th>Authenticator</th>
             <th>Action</th>
           </tr>
         </thead>
@@ -539,6 +542,16 @@
               <span [ngClass]="staff.isActive !== false ? 'status-active' : 'status-inactive'">
                 {{ staff.isActive !== false ? 'Active' : 'Inactive' }}
               </span>
+            </td>
+            <td>
+              <ng-container *ngIf="usesAuthenticator(staff); else noMfa">
+                <span class="mfa-status">{{ authenticatorStatus(staff) }}</span>
+                <button *ngIf="staff.totpSecret || staff.totpEnabledAt" class="toggle-btn btn-reset-mfa"
+                  (click)="resetAuthenticator(staff)" [disabled]="staff._resettingMfa">
+                  {{ staff._resettingMfa ? 'Resetting…' : 'Reset' }}
+                </button>
+              </ng-container>
+              <ng-template #noMfa><span class="mfa-status">—</span></ng-template>
             </td>
             <td>
               <button

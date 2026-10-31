@@ -7,6 +7,7 @@ import type * as XLSXTypes from 'xlsx';
 import * as FileSaver from 'file-saver';
 import { environment } from '../../../environment/environment';
 import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
+import { openStampedFile } from '../../shared/download-otp/download-stamp';
 
 @Component({
   selector: 'app-estimation-cancel',
@@ -88,12 +89,7 @@ this.fetchPendingEstimations();
       const href = estimation.pdfLink.startsWith('http')
         ? estimation.pdfLink
         : `${environment.filesUrl}${estimation.pdfLink}`;
-      const pdfWindow = window.open(href, '_blank');
-      if (pdfWindow) {
-        pdfWindow.onload = () => {
-          pdfWindow.print();
-        };
-      }
+      await openStampedFile(href, { print: true });
     } else {
       console.error("No PDF link available for this estimation.");
     }

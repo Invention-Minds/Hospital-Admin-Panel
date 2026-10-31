@@ -863,6 +863,12 @@ line-height: normal;
   background-color: #1e8449;
 }
 
+/* User Status → Authenticator column */
+.mfa-status { display: block; font-size: 12px; color: #475569; margin-bottom: 4px; }
+.btn-reset-mfa { background-color: #f59e0b; color: white; }
+.btn-reset-mfa:hover:not(:disabled) { background-color: #d97706; }
+.btn-reset-mfa:disabled { opacity: 0.6; cursor: not-allowed; }
+
 /* Download Logs tab */
 .dl-filters {
   display: flex;

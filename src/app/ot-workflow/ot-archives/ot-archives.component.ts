@@ -7,6 +7,7 @@ import { takeUntil } from 'rxjs/operators';
 
 import { OtArchivesService, OtArchivesResponse } from '../../services/ot-archives.service';
 import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
+import { openStampedFile } from '../../shared/download-otp/download-stamp';
 
 type ArchivesSection =
   | 'dashboard'
@@ -80,6 +81,6 @@ export class OtArchivesComponent implements OnInit, OnDestroy {
 
   async openFile(url: string) {
     if (!(await this.downloadOtp.verify('Report PDF'))) return;
-    window.open(url, '_blank', 'noopener');
+    await openStampedFile(url);
   }
 }

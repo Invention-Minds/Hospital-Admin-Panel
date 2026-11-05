@@ -10,7 +10,8 @@ import { AlertService } from '../../../services/alert.service';
 
 
 type InclusionsType = {
-  wardICUStay: boolean;
+  wardStay: boolean;
+  icuStay: boolean;
   primaryConsultant: boolean;
   crossConsultation: boolean;
   implants: boolean;
@@ -425,7 +426,8 @@ export class EstimationFormComponent {
     multipleSurgeryDoctor: '',
     consultants: [] as string[],
     includedItems: {
-      wardICUStay: false,
+      wardStay: false,
+      icuStay: false,
       primaryConsultant: false,
       crossConsultation: false,
       implants: false,
@@ -1823,7 +1825,7 @@ export class EstimationFormComponent {
     let baseEstimationCost = 0; // Start from 0 and rebuild the total cost
 
     const categoryCheckboxMapping: { [key: string]: string } = {
-      "implants": "implants",
+      "implants": "instrumentsAndImplants",
       "procedures": "bedsideProcedure",
       "instrumentals": "instrumentEquipment",
     };

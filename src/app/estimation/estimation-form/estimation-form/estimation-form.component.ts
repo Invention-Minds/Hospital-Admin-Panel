@@ -10,7 +10,8 @@ import { AlertService } from '../../../services/alert.service';
 
 
 type InclusionsType = {
-  wardICUStay: boolean;
+  wardStay: boolean;
+  icuStay: boolean;
   primaryConsultant: boolean;
   crossConsultation: boolean;
   implants: boolean;
@@ -425,7 +426,8 @@ export class EstimationFormComponent {
     multipleSurgeryDoctor: '',
     consultants: [] as string[],
     includedItems: {
-      wardICUStay: false,
+      wardStay: false,
+      icuStay: false,
       primaryConsultant: false,
       crossConsultation: false,
       implants: false,

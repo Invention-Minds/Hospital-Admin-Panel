@@ -1825,7 +1825,7 @@ export class EstimationFormComponent {
     let baseEstimationCost = 0; // Start from 0 and rebuild the total cost
 
     const categoryCheckboxMapping: { [key: string]: string } = {
-      "implants": "instrumentsAndImplants",
+      "implants": "implants",
       "procedures": "bedsideProcedure",
       "instrumentals": "instrumentEquipment",
     };

@@ -8,7 +8,13 @@ export const QUALITY_MANAGER = 'Quality Manager';
 export const INFECTION_CONTROL_NURSE = 'Infection Control Nurse';
 export const NURSING_SUPERINTENDENT = 'Nursing Superintendent';
 export const SENIOR_MANAGEMENT = ['Manager', 'Senior Manager', 'Management'];
+// Escalation-matrix executives — read every incident / complaint, receive escalations.
+export const QUALITY_EXECUTIVES = ['Medical Superintendent', 'Medical Director', 'CEO'];
 export const QUALITY_VIEWER_ADMIN_TYPES = [QUALITY_MANAGER, ...SENIOR_MANAGEMENT];
+
+export function isQualityExecutive(): boolean {
+  return isAdminOfType(QUALITY_EXECUTIVES);
+}
 
 function read(key: string): string {
   if (typeof window === 'undefined' || typeof localStorage === 'undefined') return '';

@@ -3,7 +3,7 @@ import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { SettingsComponent } from "../settings/settings/settings.component";
 import { AppointmentConfirmService } from '../services/appointment-confirm.service';
-import { isQualityViewer, isInfectionControlEditor, canOpenFeedback } from '../quality/quality-access';
+import { isQualityViewer, isQualityEditor, isInfectionControlEditor, canOpenFeedback, isFeedbackViewer } from '../quality/quality-access';
 
 @Component({
   selector: 'app-sidebar',
@@ -240,6 +240,10 @@ export class SidebarComponent implements OnInit {
   get isQualityViewer(): boolean {
     return isQualityViewer();
   }
+  // Units & Escalation settings — Quality Manager / super_admin.
+  get isQualityEditor(): boolean {
+    return isQualityEditor();
+  }
   // Infection Control Nurse gets a standalone link to the one screen they can use.
   get showInfectionControlLink(): boolean {
     return isInfectionControlEditor() && !isQualityViewer();
@@ -247,6 +251,9 @@ export class SidebarComponent implements OnInit {
   // Feedback: NPS viewers + survey collectors (Front Desk / Patient Relations).
   get showFeedbackLink(): boolean {
     return canOpenFeedback();
+  }
+  get showFeedbackAnalyticsLink(): boolean {
+    return isFeedbackViewer();
   }
   // A nurse is ward/clinical-focused, so the broad OPD + Investigations sections
   // stay hidden for them (they get their IPD/clinical menus + block vitals link).

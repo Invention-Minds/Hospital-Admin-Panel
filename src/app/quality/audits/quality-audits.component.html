@@ -1,0 +1,165 @@
+<div class="page qa-shell">
+  <div class="qa-head">
+    <div>
+      <h1 class="qa-title">Quality audits</h1>
+      <p class="qa-sub">Checklist audits per unit — every "No" is a finding with corrective actions; the next audit shows whether it was fixed.</p>
+    </div>
+    <div class="qa-tabs">
+      <button class="qa-tab" *ngIf="isViewer" [class.qa-tab-on]="tab === 'dashboard'" (click)="setTab('dashboard')">Dashboard</button>
+      <button class="qa-tab" [class.qa-tab-on]="tab === 'audits'" (click)="setTab('audits')">Audits</button>
+      <button class="qa-tab" [class.qa-tab-on]="tab === 'checklists'" (click)="setTab('checklists')">Checklists</button>
+    </div>
+  </div>
+
+  <div class="qa-banner qa-banner-bad" *ngIf="errorMessage" (click)="errorMessage = ''">{{ errorMessage }}</div>
+  <div class="qa-banner qa-banner-good" *ngIf="successMessage">{{ successMessage }}</div>
+
+  <!-- ── Dashboard ── -->
+  <ng-container *ngIf="tab === 'dashboard' && isViewer">
+    <div class="qa-filters">
+      <label>From <input type="date" [(ngModel)]="from" (change)="loadSummary()" /></label>
+      <label>To <input type="date" [(ngModel)]="to" (change)="loadSummary()" /></label>
+      <label>Unit
+        <select [(ngModel)]="summaryUnit" (change)="loadSummary()">
+          <option value="">All units</option>
+          <option *ngFor="let u of units" [ngValue]="u.id">{{ u.name }}</option>
+        </select>
+      </label>
+    </div>
+    <ng-container *ngIf="summary as s">
+      <div class="qa-tiles">
+        <div class="qa-tile"><span class="qa-tile-label">Audits completed</span><span class="qa-tile-val">{{ s.summary.audits }}</span></div>
+        <div class="qa-tile"><span class="qa-tile-label">Compliance</span><span class="qa-tile-val" [ngClass]="pctClass(s.summary.compliancePct)">{{ s.summary.compliancePct === null ? '—' : s.summary.compliancePct + '%' }}</span>
+          <span class="qa-tile-meta">{{ s.summary.compliant }} of {{ s.summary.applicable }} checks</span></div>
+        <div class="qa-tile" [class.qa-tile-bad]="s.summary.nc"><span class="qa-tile-label">Non-compliances</span><span class="qa-tile-val">{{ s.summary.nc }}</span>
+          <span class="qa-tile-meta">{{ s.summary.ncPct ?? 0 }}% · {{ s.summary.criticalNc }} critical</span></div>
+        <div class="qa-tile" [class.qa-tile-bad]="s.summary.overdueAudits"><span class="qa-tile-label">Open audits</span><span class="qa-tile-val">{{ s.summary.openAudits }}</span>
+          <span class="qa-tile-meta">{{ s.summary.overdueAudits }} overdue</span></div>
+        <div class="qa-tile" [class.qa-tile-bad]="s.summary.overdueActions"><span class="qa-tile-label">Open finding actions</span><span class="qa-tile-val">{{ s.summary.openActions }}</span>
+          <span class="qa-tile-meta">{{ s.summary.overdueActions }} overdue</span></div>
+      </div>
+      <div class="qa-grid">
+        <section class="qa-card">
+          <h2 class="qa-h">By checklist <span class="qa-h-note">lowest compliance first</span></h2>
+          <div class="qa-empty" *ngIf="!s.byChecklist.length">No audits completed in this period.</div>
+          <table class="qa-table" *ngIf="s.byChecklist.length">
+            <thead><tr><th>Checklist</th><th>Audits</th><th>Compliance</th><th>NC</th><th>Critical</th></tr></thead>
+            <tbody><tr *ngFor="let r of s.byChecklist">
+              <td>{{ r.label }}</td><td>{{ r.audits }}</td>
+              <td [ngClass]="pctClass(r.compliancePct)">{{ r.compliancePct ?? '—' }}<ng-container *ngIf="r.compliancePct !== null">%</ng-container></td>
+              <td>{{ r.nc }}</td><td [class.qa-bad]="r.criticalNc">{{ r.criticalNc }}</td>
+            </tr></tbody>
+          </table>
+        </section>
+        <section class="qa-card">
+          <h2 class="qa-h">By unit</h2>
+          <div class="qa-empty" *ngIf="!s.byUnit.length">No audits completed in this period.</div>
+          <table class="qa-table" *ngIf="s.byUnit.length">
+            <thead><tr><th>Unit</th><th>Audits</th><th>Compliance</th><th>NC</th><th>Critical</th></tr></thead>
+            <tbody><tr *ngFor="let r of s.byUnit">
+              <td>{{ r.label }}</td><td>{{ r.audits }}</td>
+              <td [ngClass]="pctClass(r.compliancePct)">{{ r.compliancePct ?? '—' }}<ng-container *ngIf="r.compliancePct !== null">%</ng-container></td>
+              <td>{{ r.nc }}</td><td [class.qa-bad]="r.criticalNc">{{ r.criticalNc }}</td>
+            </tr></tbody>
+          </table>
+        </section>
+      </div>
+    </ng-container>
+  </ng-container>
+
+  <!-- ── Audits ── -->
+  <ng-container *ngIf="tab === 'audits'">
+    <div class="qa-filters">
+      <label>Show
+        <select [(ngModel)]="statusFilter" (change)="loadRuns()">
+          <option value="open">Open (scheduled / in progress)</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+        </select>
+      </label>
+      <label class="qa-check"><input type="checkbox" [(ngModel)]="mineOnly" (change)="loadRuns()" /> Assigned to me</label>
+      <span class="qa-spacer"></span>
+      <button class="qa-btn qa-btn-primary" (click)="openSchedule()">＋ Schedule audit</button>
+    </div>
+
+    <section class="qa-card qa-schedule" *ngIf="scheduleOpen">
+      <h2 class="qa-h">Schedule an audit</h2>
+      <p class="qa-sub">The Quality Manager can schedule any unit; a unit HOD can schedule their own units.</p>
+      <div class="qa-form">
+        <label>Checklist *
+          <select [(ngModel)]="draft.checklistId">
+            <option [ngValue]="null">— choose —</option>
+            <option *ngFor="let c of activeChecklists" [ngValue]="c.id">{{ c.name }}</option>
+          </select>
+        </label>
+        <label>Unit
+          <select [(ngModel)]="draft.unitId">
+            <option [ngValue]="null">— no unit —</option>
+            <option *ngFor="let u of units" [ngValue]="u.id">{{ u.name }}</option>
+          </select>
+        </label>
+        <label>Location / area
+          <input type="text" [(ngModel)]="draft.location" maxlength="160" placeholder="e.g. ICU, Ward 3B" />
+        </label>
+        <label>Due date
+          <input type="date" [(ngModel)]="draft.dueDate" />
+        </label>
+        <label>Auditor
+          <select [(ngModel)]="draft.auditorId">
+            <option [ngValue]="null">— unassigned (HOD / Quality conduct it) —</option>
+            <option *ngFor="let u of staff" [ngValue]="u.id">{{ u.username }}{{ u.subAdminType ? ' · ' + u.subAdminType : '' }}</option>
+          </select>
+        </label>
+        <label class="qa-wide">Notes
+          <input type="text" [(ngModel)]="draft.notes" maxlength="500" placeholder="Optional" />
+        </label>
+      </div>
+      <div class="qa-actions">
+        <button class="qa-btn" (click)="scheduleOpen = false">Cancel</button>
+        <button class="qa-btn qa-btn-primary" (click)="schedule()" [disabled]="scheduling">{{ scheduling ? 'Scheduling…' : 'Schedule' }}</button>
+      </div>
+    </section>
+
+    <div class="qa-empty" *ngIf="!loading && !runs.length">No audits here.</div>
+    <table class="qa-table qa-runs" *ngIf="runs.length">
+      <thead><tr><th>Audit</th><th>Checklist</th><th>Unit / area</th><th>Due</th><th>Auditor</th><th>Status</th><th>Compliance</th><th>Findings</th></tr></thead>
+      <tbody>
+        <tr *ngFor="let r of runs" (click)="open(r)" class="qa-row">
+          <td class="qa-code">{{ r.code }}</td>
+          <td>{{ r.checklist.name }}</td>
+          <td>{{ r.unitName || '—' }}<span class="qa-muted" *ngIf="r.location"> · {{ r.location }}</span></td>
+          <td [class.qa-bad]="r.overdue">{{ r.dueDate ? (r.dueDate | date:'dd/MM/yy') : '—' }}<span *ngIf="r.overdue"> · overdue</span></td>
+          <td>{{ r.auditor || '—' }}</td>
+          <td><span class="qa-pill qa-st-{{ r.status }}">{{ STATUS_LABELS[r.status] }}</span></td>
+          <td [ngClass]="pctClass(r.compliancePct)">{{ r.compliancePct === null ? '—' : r.compliancePct + '%' }}</td>
+          <td>
+            <ng-container *ngIf="r.status === 'completed'">{{ r.ncCount }} NC<span class="qa-bad" *ngIf="r.criticalNcCount"> · {{ r.criticalNcCount }} critical</span><span class="qa-muted" *ngIf="r.openActions"> · {{ r.openActions }} open action(s)</span></ng-container>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </ng-container>
+
+  <!-- ── Checklists ── -->
+  <ng-container *ngIf="tab === 'checklists'">
+    <div class="qa-filters" *ngIf="isEditor">
+      <button class="qa-btn" (click)="importStarter()" [disabled]="importing">{{ importing ? 'Importing…' : 'Import NABH starter library' }}</button>
+      <a class="qa-btn qa-btn-primary" routerLink="/quality/audits/checklists/new">＋ New checklist</a>
+      <span class="qa-muted">The starter library is a draft — review each checklist before scheduling audits with it.</span>
+    </div>
+    <div class="qa-empty" *ngIf="!checklists.length">No checklists yet.<ng-container *ngIf="isEditor"> Import the starter library or create one.</ng-container></div>
+    <section class="qa-card" *ngFor="let g of ['clinical', 'quality', 'facility']" [hidden]="!checklistsIn(g).length">
+      <h2 class="qa-h">{{ GROUP_LABELS[g] }}</h2>
+      <div class="qa-cl" *ngFor="let c of checklistsIn(g)" [class.qa-cl-off]="!c.isActive">
+        <div class="qa-cl-main">
+          <span class="qa-cl-name">{{ c.name }}</span>
+          <span class="qa-muted">{{ c.itemCount }} questions<ng-container *ngIf="c.frequency"> · {{ c.frequency }}</ng-container><ng-container *ngIf="c.runCount"> · {{ c.runCount }} audit(s)</ng-container><ng-container *ngIf="!c.isActive"> · inactive</ng-container></span>
+        </div>
+        <div class="qa-cl-btns">
+          <a class="qa-btn qa-btn-sm" [routerLink]="['/quality/audits/checklists', c.id]">{{ isEditor ? 'Edit' : 'View' }}</a>
+          <button class="qa-btn qa-btn-sm" *ngIf="c.isActive" (click)="openSchedule(c.id)">Schedule</button>
+        </div>
+      </div>
+    </section>
+  </ng-container>
+</div>

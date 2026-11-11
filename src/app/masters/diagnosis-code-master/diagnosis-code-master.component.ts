@@ -5,9 +5,11 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import {
+  DIAGNOSIS_SPECIALTIES,
   DiagnosisCodeMaster,
   DiagnosisCodeMasterCategory,
   DiagnosisCodeMasterService,
+  DiagnosisSpecialty,
 } from '../../services/diagnosis-code-master.service';
 import { AlertService } from '../../services/alert.service';
 
@@ -33,8 +35,11 @@ export class DiagnosisCodeMasterComponent implements OnInit, OnDestroy {
   errorMessage = '';
   successMessage = '';
   search = '';
+  /** List filter: '' = all, 'general' = untagged, or a specialty. */
+  specialtyFilter: DiagnosisSpecialty | 'general' | '' = '';
+  readonly specialties = DIAGNOSIS_SPECIALTIES;
 
-  draft = { code: '', description: '' };
+  draft: { code: string; description: string; specialty: DiagnosisSpecialty | null } = { code: '', description: '', specialty: null };
   selected: DiagnosisCodeMaster | null = null;
 
   private destroy$ = new Subject<void>();
@@ -47,7 +52,7 @@ export class DiagnosisCodeMasterComponent implements OnInit, OnDestroy {
   load(): void {
     this.loading = true;
     this.errorMessage = '';
-    this.svc.list({ category: this.activeTab, search: this.search, limit: 200 })
+    this.svc.list({ category: this.activeTab, specialty: this.specialtyFilter || undefined, search: this.search, limit: 200 })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (r) => { this.rows = r.data; this.loading = false; },
@@ -64,12 +69,16 @@ export class DiagnosisCodeMasterComponent implements OnInit, OnDestroy {
 
   edit(row: DiagnosisCodeMaster): void {
     this.selected = row;
-    this.draft = { code: row.code, description: row.description };
+    this.draft = { code: row.code, description: row.description, specialty: row.specialty ?? null };
   }
 
   cancelEdit(): void {
     this.selected = null;
-    this.draft = { code: '', description: '' };
+    this.draft = { code: '', description: '', specialty: null };
+  }
+
+  specialtyLabel(value: DiagnosisSpecialty | null): string {
+    return this.specialties.find((s) => s.value === value)?.label ?? 'General';
   }
 
   save(): void {
@@ -83,6 +92,7 @@ export class DiagnosisCodeMasterComponent implements OnInit, OnDestroy {
       category: this.activeTab,
       code: this.draft.code.trim(),
       description: this.draft.description.trim(),
+      specialty: this.draft.specialty,
     };
     const op = this.selected
       ? this.svc.update(this.selected.id, body)

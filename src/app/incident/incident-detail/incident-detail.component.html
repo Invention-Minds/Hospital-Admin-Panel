@@ -13,7 +13,7 @@
     <div class="incd-card">
       <div class="incd-head-row">
         <h2 class="incd-title">{{ inc.title }}</h2>
-        <span class="incd-pill incd-sev-{{ inc.severity }}">{{ statusLabel(inc.severity) }}</span>
+        <span class="incd-pill incd-sev-{{ effectiveSeverity(inc) }}">{{ statusLabel(effectiveSeverity(inc)) }}</span>
         <span class="incd-pill incd-status-{{ inc.status }}">{{ statusLabel(inc.status) }}</span>
         <span class="incd-pill incd-encounter-{{ encounterType(inc) | lowercase }}" *ngIf="encounterType(inc)">
           {{ encounterType(inc) }}
@@ -21,12 +21,29 @@
       </div>
 
       <div class="incd-meta">
-        <div><span>Reported</span> {{ inc.reportedAt | date:'dd/MM/yy h:mm a' }}<span *ngIf="inc.reportedBy"> by {{ inc.reportedBy }}</span></div>
+        <div><span>Reported</span> {{ inc.reportedAt | date:'dd/MM/yy h:mm a' }}<span *ngIf="inc.reportedBy"> by {{ inc.reportedBy }}</span><span *ngIf="inc.anonymous"> · anonymously</span></div>
         <div *ngIf="inc.occurredAt"><span>Occurred</span> {{ inc.occurredAt | date:'dd/MM/yy h:mm a' }}</div>
-        <div><span>Source</span> {{ inc.source === 'auto-rule' ? 'Auto-rule (' + (inc.ruleKey || '?') + ')' : 'Manual' }}</div>
+        <div><span>Source</span> {{ inc.source === 'auto-rule' ? 'Auto-rule (' + (inc.ruleKey || '?') + ')' : inc.source === 'anonymous' ? 'Anonymous QR report' : 'Manual' }}</div>
         <div *ngIf="inc.nabhClause"><span>NABH</span> {{ inc.nabhClause }}</div>
-        <div><span>Category</span> {{ inc.category }}</div>
+        <div><span>Category</span> {{ inc.category }}<ng-container *ngIf="inc.subCategory"> · {{ subLabel(inc.subCategory) }}</ng-container></div>
+        <div><span>Harm (reported)</span> {{ inc.harmLevel ? HARM_LABELS[inc.harmLevel] : 'Not assessed' }}<ng-container *ngIf="!inc.harmLevel"> · severity {{ statusLabel(inc.severity) }}</ng-container></div>
+        <div *ngIf="inc.harmLevelFinal || inc.severityFinal"><span>Harm (confirmed)</span>
+          {{ inc.harmLevelFinal ? HARM_LABELS[inc.harmLevelFinal] : 'not recorded' }} · severity {{ statusLabel(effectiveSeverity(inc)) }}</div>
+        <div><span>Unit</span> {{ inc.unit?.name || 'Not assigned — Quality triages' }}</div>
+        <div *ngIf="inc.unit"><span>HOD</span> {{ inc.unit.hodName || 'not set' }}<ng-container *ngIf="inc.unit.deputyName"> · deputy {{ inc.unit.deputyName }}</ng-container></div>
+        <div *ngIf="inc.escalationLevel"><span>Escalation</span> Level {{ inc.escalationLevel }}<ng-container *ngIf="inc.lastEscalatedAt"> · {{ inc.lastEscalatedAt | date:'dd/MM/yy h:mm a' }}</ng-container></div>
       </div>
+
+      <ng-container *ngIf="inc.escalations?.length">
+        <h3 class="incd-section">Escalation timeline</h3>
+        <ul class="incd-timeline">
+          <li *ngFor="let e of inc.escalations">
+            <strong>L{{ e.level }}</strong> · {{ e.at | date:'dd/MM/yy h:mm a' }}
+            <span *ngIf="e.label"> — {{ e.label }}</span>
+            <span class="incd-tl-meta"> ({{ e.recipients }} notified)</span>
+          </li>
+        </ul>
+      </ng-container>
 
       <h3 class="incd-section">Description</h3>
       <p class="incd-desc">{{ inc.description }}</p>
@@ -43,9 +60,17 @@
       </div>
     </div>
 
-    <!-- Right: status workflow (managers edit; everyone else sees it read-only) -->
-    <div class="incd-card" *ngIf="isManager">
+    <!-- Right: status workflow (manager or unit HOD edit; everyone else sees it read-only) -->
+    <div class="incd-card" *ngIf="canEditStatus || (isManager && isLocked)">
       <h3 class="incd-section">Status &amp; assignment</h3>
+      <p class="incd-hint" *ngIf="actingAsHod">You're the HOD for this unit — triage, investigate and record the CAPA. The Quality Manager closes it.</p>
+
+      <label class="incd-field" *ngIf="canChangeUnit">Unit responsible
+        <select [(ngModel)]="draft.unitId">
+          <option [ngValue]="null">— not assigned —</option>
+          <option *ngFor="let u of units" [ngValue]="u.id">{{ u.name }}</option>
+        </select>
+      </label>
 
       <label class="incd-field">Status
         <select [(ngModel)]="draft.status">
@@ -53,12 +78,22 @@
         </select>
       </label>
 
-      <label class="incd-field">Severity (revised)
-        <select [(ngModel)]="draft.severityFinal">
-          <option value="">— unchanged —</option>
-          <option *ngFor="let s of SEVERITIES" [value]="s">{{ statusLabel(s) }}</option>
+      <label class="incd-field" *ngIf="subtypes.length">Type
+        <select [(ngModel)]="draft.subCategory">
+          <option [ngValue]="null">— not set —</option>
+          <option *ngFor="let s of subtypes" [ngValue]="s.key">{{ s.label }}</option>
         </select>
       </label>
+
+      <label class="incd-field">Confirmed harm (after investigation)
+        <select [(ngModel)]="draft.harmLevelFinal">
+          <option [ngValue]="null">— not yet confirmed —</option>
+          <option *ngFor="let h of HARM_LEVELS" [ngValue]="h">{{ HARM_LABELS[h] }}</option>
+        </select>
+      </label>
+      <p class="incd-hint" *ngIf="harmSeverity(draft.harmLevelFinal) as s">
+        Final severity will be <strong>{{ statusLabel(s) }}</strong> — the escalation ladder follows it.
+      </p>
 
       <label class="incd-field">Assign to staff
         <select [ngModel]="draft.assignedToId" (ngModelChange)="onAssigneeSelected($event)">
@@ -73,28 +108,54 @@
         <input type="text" [(ngModel)]="draft.assignedTo" [readonly]="draft.assignedToId !== null" placeholder="Investigator name" />
       </label>
 
+      <!-- Staff also involved besides the lead investigator -->
+      <div class="incd-field">
+        <span>Also involved</span>
+        <div class="incd-people">
+          <span class="incd-person" *ngFor="let p of inc.participants">
+            {{ p.name }}
+            <button type="button" *ngIf="!isLocked" (click)="removeParticipant(p.userId)" [disabled]="participantBusy" aria-label="Remove">✕</button>
+          </span>
+          <span class="incd-muted" *ngIf="!inc.participants?.length">Nobody yet</span>
+        </div>
+        <div class="incd-people-add" *ngIf="!isLocked">
+          <select [(ngModel)]="newParticipant">
+            <option [ngValue]="null">— add staff —</option>
+            <option *ngFor="let u of availableStaff" [ngValue]="u.id">{{ u.username }}{{ u.subAdminType ? ' · ' + u.subAdminType : '' }}</option>
+          </select>
+          <button type="button" class="incd-btn incd-btn-sm" (click)="addParticipant()" [disabled]="!newParticipant || participantBusy">Add</button>
+        </div>
+      </div>
+
       <label class="incd-field" *ngIf="draft.status === 'closed' || draft.status === 'cancelled'">
-        Closure notes
-        <textarea rows="3" [(ngModel)]="draft.closureNotes"></textarea>
+        {{ draft.status === 'cancelled' && inc.status !== 'cancelled' ? 'Reason for cancelling *' : 'Closure notes' }}
+        <textarea rows="3" [(ngModel)]="draft.closureNotes"
+                  [placeholder]="draft.status === 'cancelled' ? 'e.g. duplicate of INC-…, not an incident, test entry' : ''"></textarea>
       </label>
       <p class="incd-hint" *ngIf="draft.status === 'closed' && inc.status !== 'closed'">
-        Closing needs a saved CAPA (root cause + corrective actions) and closure notes.
+        Closing needs a root cause, at least one corrective action, no open actions
+        <ng-container *ngIf="openActionCount"> ({{ openActionCount }} still open)</ng-container>, and closure notes.
+        Effectiveness checks are then scheduled automatically.
+      </p>
+      <p class="incd-hint" *ngIf="isLocked && draft.status === inc.status">
+        This incident is {{ statusLabel(inc.status) }} — choose a reopen status to edit it.
       </p>
 
       <div class="incd-actions">
-        <button class="incd-btn incd-btn-primary" (click)="saveStatus()" [disabled]="saving">
+        <button class="incd-btn incd-btn-primary" (click)="saveStatus()" [disabled]="saving || (isLocked && draft.status === inc.status)">
           {{ saving ? 'Saving…' : 'Save' }}
         </button>
       </div>
 
     </div>
 
-    <div class="incd-card" *ngIf="!isManager">
+    <div class="incd-card" *ngIf="!(canEditStatus || (isManager && isLocked))">
       <h3 class="incd-section">Status &amp; assignment</h3>
       <div class="incd-meta">
         <div><span>Status</span> {{ statusLabel(inc.status) }}</div>
-        <div *ngIf="inc.severityFinal"><span>Severity (revised)</span> {{ statusLabel(inc.severityFinal) }}</div>
+        <div *ngIf="inc.severityFinal"><span>Severity (final)</span> {{ statusLabel(inc.severityFinal) }}</div>
         <div><span>Assigned to</span> {{ inc.assignedTo || '—' }}</div>
+        <div *ngIf="inc.participants?.length"><span>Also involved</span> {{ participantNames }}</div>
         <div *ngIf="inc.closedAt"><span>Closed</span> {{ inc.closedAt | date:'dd/MM/yy h:mm a' }}<span *ngIf="inc.closedBy"> by {{ inc.closedBy }}</span></div>
         <div *ngIf="inc.closureNotes"><span>Closure notes</span> {{ inc.closureNotes }}</div>
       </div>
@@ -136,7 +197,7 @@
     </div>
     <div class="incd-ev-empty" *ngIf="evidenceList().length === 0">No files attached yet.</div>
 
-    <div class="incd-ev-uploader">
+    <div class="incd-ev-uploader" *ngIf="canAttachEvidence">
       <input type="file" #fileInput (change)="onFileSelected($event)"
              accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt,.csv" />
       <input type="text" [(ngModel)]="evidenceLabel" placeholder="Label (optional)" class="incd-ev-label" />
@@ -147,10 +208,10 @@
     </div>
   </div>
 
-  <!-- Phase 3 — CAPA chain: root cause + corrective + preventive actions. -->
-  <div *ngIf="incident && (isManager || incident.capa)" class="incd-card incd-capa">
-    <h3 class="incd-section">CAPA — Root cause &amp; actions</h3>
-    <fieldset class="incd-capa-fields" [disabled]="!isManager">
+  <!-- CAPA: root cause (5-Whys) → tracked actions → effectiveness checks. -->
+  <div *ngIf="incident && (canEditCapa || incident.capa || incident.capaActions?.length)" class="incd-card incd-capa">
+    <h3 class="incd-section">CAPA — Root cause</h3>
+    <fieldset class="incd-capa-fields" [disabled]="!canEditCapa || isLocked">
 
     <label class="incd-field">Immediate actions taken
       <textarea rows="2" [(ngModel)]="capaDraft.immediateActions" placeholder="What was done right away to contain the harm?"></textarea>
@@ -176,42 +237,119 @@
     <label class="incd-field">Root cause (summary)
       <textarea rows="2" [(ngModel)]="capaDraft.rootCause"></textarea>
     </label>
-
-    <label class="incd-field">Corrective actions
-      <textarea rows="3" [(ngModel)]="capaDraft.correctiveActions" placeholder="What's being done to resolve THIS event?"></textarea>
-    </label>
-
-    <label class="incd-field">Preventive actions
-      <textarea rows="3" [(ngModel)]="capaDraft.preventiveActions" placeholder="What's changing so it doesn't happen again?"></textarea>
-    </label>
-
-    <div class="incd-capa-row">
-      <label class="incd-field">Owner
-        <input type="text" [(ngModel)]="capaDraft.owner" placeholder="Investigator / department head" />
-      </label>
-      <label class="incd-field">Due date
-        <input type="date" [(ngModel)]="capaDraft.dueDate" />
-      </label>
-      <label class="incd-field">Completed on
-        <input type="date" [(ngModel)]="capaDraft.completedAt" />
-      </label>
-    </div>
-
-    <div class="incd-capa-row">
-      <label class="incd-field">Effectiveness review
-        <textarea rows="2" [(ngModel)]="capaDraft.effectivenessReview" placeholder="After how long, what evidence shows the fix worked?"></textarea>
-      </label>
-      <label class="incd-field">Reviewed on
-        <input type="date" [(ngModel)]="capaDraft.effectivenessReviewAt" />
-      </label>
-    </div>
     </fieldset>
 
-    <div class="incd-actions" *ngIf="isManager">
+    <div class="incd-actions" *ngIf="canEditCapa && !isLocked">
       <span class="incd-capa-saved" *ngIf="capaSavedAt">Saved at {{ capaSavedAt | date:'h:mm a' }}</span>
       <button class="incd-btn incd-btn-primary" (click)="saveCapa()" [disabled]="capaSaving">
-        {{ capaSaving ? 'Saving…' : 'Save CAPA' }}
+        {{ capaSaving ? 'Saving…' : 'Save root cause' }}
       </button>
+    </div>
+
+    <!-- Earlier free-text CAPA (before actions were tracked) — read-only. -->
+    <div class="incd-legacy" *ngIf="legacyCapaNotes.length">
+      <h4 class="incd-subhead">Earlier notes</h4>
+      <div *ngFor="let n of legacyCapaNotes" class="incd-legacy-row"><span>{{ n.label }}</span> {{ n.text }}</div>
+    </div>
+
+    <!-- Tracked actions -->
+    <ng-container *ngFor="let kind of ['corrective', 'preventive']">
+      <h3 class="incd-section">{{ kind === 'corrective' ? 'Corrective actions' : 'Preventive actions' }}
+        <span class="incd-section-note">{{ kind === 'corrective' ? 'fix this event' : 'stop it happening again' }}</span>
+      </h3>
+      <div class="incd-ev-empty" *ngIf="actionsOf($any(kind)).length === 0">None yet.</div>
+      <div class="incd-act" *ngFor="let a of actionsOf($any(kind))" [class.incd-act-closed]="a.status !== 'open'">
+        <ng-container *ngIf="editingAction?.id !== a.id; else editTpl">
+          <div class="incd-act-main">
+            <span class="incd-act-status incd-act-{{ a.status }}" [class.incd-act-overdue]="isOverdue(a)">{{ a.status === 'open' ? (isOverdue(a) ? 'overdue' : 'open') : a.status }}</span>
+            <span class="incd-act-desc">{{ a.description }}</span>
+          </div>
+          <div class="incd-act-meta">
+            <span>Owner: {{ a.owner || 'unassigned' }}</span>
+            <span *ngIf="a.dueDate" [class.incd-overdue]="isOverdue(a)">Due {{ a.dueDate | date:'dd/MM/yy' }}</span>
+            <span *ngIf="a.completedAt">{{ a.status === 'done' ? 'Done' : 'Dropped' }} {{ a.completedAt | date:'dd/MM/yy' }}<ng-container *ngIf="a.completedBy"> by {{ a.completedBy }}</ng-container></span>
+          </div>
+          <div class="incd-act-note" *ngIf="a.completionNote">{{ a.completionNote }}</div>
+
+          <div class="incd-act-close" *ngIf="closingAction?.id === a.id && closingAction as c">
+            <textarea rows="2" [(ngModel)]="c.note"
+                      [placeholder]="c.status === 'done' ? 'What was done? (evidence, date, who)' : 'Why is this action dropped?'"></textarea>
+            <button class="incd-btn incd-btn-primary" (click)="confirmClose()" [disabled]="actionBusy">
+              {{ c.status === 'done' ? 'Mark done' : 'Drop action' }}
+            </button>
+            <button class="incd-btn" (click)="closingAction = null">Cancel</button>
+          </div>
+
+          <div class="incd-act-btns" *ngIf="!isLocked && closingAction?.id !== a.id">
+            <ng-container *ngIf="a.status === 'open'">
+              <button class="incd-btn incd-btn-sm" *ngIf="a.canComplete" (click)="startClose(a, 'done')">Mark done</button>
+              <button class="incd-btn incd-btn-sm" *ngIf="canEditCapa" (click)="startEdit(a)">Edit</button>
+              <button class="incd-btn incd-btn-sm" *ngIf="canEditCapa" (click)="startClose(a, 'dropped')">Drop</button>
+            </ng-container>
+            <button class="incd-btn incd-btn-sm" *ngIf="a.status !== 'open' && (canEditCapa || (a.canComplete && a.status === 'done'))"
+                    (click)="reopenAction(a)" [disabled]="actionBusy">Reopen</button>
+          </div>
+        </ng-container>
+
+        <ng-template #editTpl>
+          <div class="incd-act-form" *ngIf="editingAction as e">
+            <textarea rows="2" [(ngModel)]="e.description"></textarea>
+            <select [(ngModel)]="e.ownerId">
+              <option [ngValue]="null">— no owner —</option>
+              <option *ngFor="let u of staff" [ngValue]="u.id">{{ u.username }}</option>
+              <option *ngIf="e.ownerId && !staffName(e.ownerId)" [ngValue]="e.ownerId">{{ a.owner }}</option>
+            </select>
+            <input type="date" [(ngModel)]="e.dueDate" />
+            <button class="incd-btn incd-btn-primary" (click)="saveEdit()" [disabled]="actionBusy">Save</button>
+            <button class="incd-btn" (click)="editingAction = null">Cancel</button>
+          </div>
+        </ng-template>
+      </div>
+    </ng-container>
+
+    <div class="incd-act-add" *ngIf="canEditCapa && !isLocked">
+      <h4 class="incd-subhead">Add an action</h4>
+      <div class="incd-act-form">
+        <select [(ngModel)]="newAction.kind">
+          <option value="corrective">Corrective</option>
+          <option value="preventive">Preventive</option>
+        </select>
+        <textarea rows="2" [(ngModel)]="newAction.description" placeholder="What has to be done?"></textarea>
+        <select [(ngModel)]="newAction.ownerId">
+          <option [ngValue]="null">— owner —</option>
+          <option *ngFor="let u of staff" [ngValue]="u.id">{{ u.username }}{{ u.subAdminType ? ' · ' + u.subAdminType : '' }}</option>
+        </select>
+        <input type="date" [(ngModel)]="newAction.dueDate" title="Due date" />
+        <button class="incd-btn incd-btn-primary" (click)="addAction()" [disabled]="actionBusy">Add</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Effectiveness checks — scheduled at closure (30/60/90 days, or 30 for minor / near miss). -->
+  <div *ngIf="incident?.effectivenessReviews?.length" class="incd-card incd-capa">
+    <h3 class="incd-section">Effectiveness checks
+      <span class="incd-section-note">did the CAPA actually work?</span>
+    </h3>
+    <div class="incd-rv" *ngFor="let r of incident!.effectivenessReviews">
+      <div class="incd-rv-head">
+        <strong>{{ r.dayOffset }}-day check</strong>
+        <span [class.incd-overdue]="reviewOverdue(r)">due {{ r.dueAt | date:'dd/MM/yy' }}</span>
+        <span *ngIf="r.status === 'done' && r.outcome" class="incd-rv-out incd-rv-{{ r.outcome }}">{{ OUTCOME_LABELS[r.outcome] }}</span>
+        <span *ngIf="r.status === 'pending' && !reviewOpen(r)" class="incd-rv-wait">opens 7 days before due</span>
+      </div>
+      <div class="incd-act-note" *ngIf="r.status === 'done'">
+        <ng-container *ngIf="r.notes">{{ r.notes }} · </ng-container>{{ r.reviewedBy }} {{ r.reviewedAt | date:'dd/MM/yy' }}
+      </div>
+      <div class="incd-act-form" *ngIf="canReview && reviewOpen(r) && incident!.status === 'closed' && reviewDraft[r.id] as d">
+        <select [(ngModel)]="d.outcome">
+          <option value="">— outcome —</option>
+          <option value="effective">Effective — no recurrence</option>
+          <option value="partial">Partly effective</option>
+          <option value="not_effective">Not effective — reopen</option>
+        </select>
+        <textarea rows="2" [(ngModel)]="d.notes" placeholder="Evidence checked (audit, recurrence count, observation)…"></textarea>
+        <button class="incd-btn incd-btn-primary" (click)="recordReview(r)" [disabled]="reviewBusy">Record</button>
+      </div>
     </div>
   </div>
 </div>

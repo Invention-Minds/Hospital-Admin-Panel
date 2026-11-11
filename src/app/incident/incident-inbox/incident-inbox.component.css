@@ -52,3 +52,6 @@
 .inc-status-capa_in_progress { background: #fce7f3; color: #9d174d; }
 .inc-status-closed { background: #dcfce7; color: #166534; }
 .inc-status-cancelled { background: #e5e7eb; color: #6b7280; }
+
+.inc-head-btns { display: flex; gap: 8px; align-items: center; }
+.inc-head-btns a.inc-btn { display: inline-flex; align-items: center; text-decoration: none; }

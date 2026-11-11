@@ -9,6 +9,12 @@ import { MessageService } from 'primeng/api';
 import { NotificationRecipientService } from '../../services/notification-recipient.service';
 import { isQualityEditor } from '../../quality/quality-access';
 
+/** Bells addressed to one user whose entityType is 'Incident:<uuid>' — click opens the incident. */
+const IncidentBellTypes = new Set([
+  'incident_raised', 'incident_assigned', 'incident_closed', 'incident_escalated', 'incident_reopened', 'incident_participant',
+  'capa_action_assigned', 'capa_action_done', 'capa_action_due', 'effectiveness_review_due',
+]);
+
 interface Notification {
   id: number;
   type: string;
@@ -176,8 +182,10 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
     //  - incident_raised: targetRole='admin' (admins triage).
     //  - incident_assigned: userId = the investigator.
     //  - incident_closed: userId = the original reporter.
+    //  - incident_escalated: userId = escalation-matrix recipient.
+    //  - capa_* / effectiveness_review_due / incident_reopened: CAPA follow-up.
     const isIncidentForMe =
-      (notification.type === 'incident_raised' || notification.type === 'incident_assigned' || notification.type === 'incident_closed') &&
+      IncidentBellTypes.has(notification.type) &&
       (
         (notification['userId'] != null && String(notification['userId']) === myUserId) ||
         (notification['targetRole'] != null && this.role === String(notification['targetRole']).replace(/_/g, ''))
@@ -196,10 +204,15 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
     // target an escalation-owner alias, so show them to Quality editors.
     const isQualityAlert = notification.type?.startsWith('qi_') && isQualityEditor();
 
+    // Quality audits (assigned / due / critical finding / action) — per user.
+    const isAuditForMe = notification.type?.startsWith('audit_') &&
+      notification['userId'] != null && String(notification['userId']) === myUserId;
+
     return (
       isEmergencyCode ||
       isReferralForMe ||
       isIncidentForMe ||
+      isAuditForMe ||
       isGrievanceForMe ||
       isQualityAlert ||
       (this.role === 'subadmin' &&
@@ -285,12 +298,18 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
           } else if (clickedType === 'emergency_code') {
             // Phase 9.20 — open the emergency codes board.
             this.router.navigate(['/emergency/codes']);
-          } else if (clickedType === 'incident_raised' || clickedType === 'incident_assigned' || clickedType === 'incident_closed') {
+          } else if (IncidentBellTypes.has(clickedType)) {
             // Phase 9.24 / Phase 3 — entityType is 'Incident:<uuid>'; jump to the detail.
             const ent = notificationToDelete['entityType'] as string | undefined;
             const incidentId = ent && ent.startsWith('Incident:') ? ent.slice('Incident:'.length) : null;
             if (incidentId) this.router.navigate(['/incidents', incidentId]);
             else this.router.navigate(['/incidents']);
+          } else if (clickedType?.startsWith('audit_')) {
+            // entityType is 'AuditRun:<uuid>' — open that audit.
+            const ent = notificationToDelete['entityType'] as string | undefined;
+            const runId = ent && ent.startsWith('AuditRun:') ? ent.slice('AuditRun:'.length) : null;
+            if (runId) this.router.navigate(['/quality/audits/runs', runId]);
+            else this.router.navigate(['/quality/audits']);
           } else if (clickedType?.startsWith('complaint_')) {
             const ent = notificationToDelete['entityType'] as string | undefined;
             const complaintId = ent && ent.startsWith('Complaint:') ? ent.slice('Complaint:'.length) : null;

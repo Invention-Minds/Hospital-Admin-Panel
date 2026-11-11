@@ -7,7 +7,10 @@
       <p class="inc-sub" *ngIf="!isManager && isDeptViewer && !isSuperintendent">Incidents you reported or are assigned, plus your department's incidents (view only).</p>
       <p class="inc-sub" *ngIf="!isManager && !isDeptViewer">Incidents you reported or are assigned to you.</p>
     </div>
-    <button class="inc-btn inc-btn-primary" (click)="showRaise = true">+ Raise incident</button>
+    <div class="inc-head-btns">
+      <a class="inc-btn" *ngIf="isManager" routerLink="/incidents/report-poster" title="Print QR posters for anonymous reporting">▦ QR posters</a>
+      <button class="inc-btn inc-btn-primary" (click)="showRaise = true">+ Raise incident</button>
+    </div>
   </div>
 
   <!-- KPI tiles -->

@@ -405,6 +405,12 @@ input:focus {
     transition: 0.2s;
 }
 
+.diag-hint {
+    margin: 6px 0 0;
+    font-size: 13px;
+    color: #64748b;
+}
+
 .diag-item:hover {
     background: #eef3ff;
     color: #062A78;

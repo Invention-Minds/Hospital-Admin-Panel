@@ -14,8 +14,10 @@
 .dcm-bad { background: #fee2e2; color: #b91c1c; }
 .dcm-good { background: #dcfce7; color: #166534; }
 
-.dcm-toolbar { margin-bottom: 12px; }
+.dcm-toolbar { margin-bottom: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
 .dcm-search { border: 1px solid #d1d5db; border-radius: 6px; padding: 6px 10px; font-size: 13px; width: 380px; max-width: 100%; }
+.dcm-filter { border: 1px solid #d1d5db; border-radius: 6px; padding: 6px 10px; font-size: 13px; background: #fff; }
+.dcm-tag { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 11px; background: #e0f2fe; color: #075985; white-space: nowrap; }
 
 .dcm-loading { padding: 40px; text-align: center; color: #6b7280; font-style: italic; }
 .dcm-muted { color: #9ca3af; font-style: italic; }
@@ -32,7 +34,7 @@
 .dcm-editor { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px 18px; height: fit-content; }
 .dcm-editor h3 { font-size: 14px; font-weight: 600; margin: 0 0 12px; }
 .dcm-editor label { display: flex; flex-direction: column; font-size: 12px; color: #4b5563; gap: 3px; margin-bottom: 10px; }
-.dcm-editor input, .dcm-editor textarea {
+.dcm-editor input, .dcm-editor textarea, .dcm-editor select {
   border: 1px solid #d1d5db; border-radius: 6px; padding: 6px 8px; font-size: 13px;
 }
 .dcm-editor input.dcm-code { font-family: monospace; max-width: 160px; }

@@ -25,6 +25,16 @@
 .fk-scale-axis { display: flex; justify-content: space-between; font-size: 11px; color: #6b7280; margin-top: 6px; }
 .fk-score-tag { font-size: 13px; color: #271e4a; margin: 14px 0 10px; }
 
+.fk-q-sub { font-size: 14px; margin: 18px 0 8px; }
+.fk-rate-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 0; border-bottom: 1px solid #f3f4f6; }
+.fk-rate-label { font-size: 14px; color: #271e4a; }
+.fk-rate-btns { display: flex; gap: 4px; }
+.fk-rate {
+  width: 40px; height: 40px; border: none; background: transparent; cursor: pointer;
+  font-size: 24px; line-height: 1; color: #d1d5db; padding: 0;
+}
+.fk-rate-on { color: #f59e0b; }
+
 .fk-field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #4b5563; margin: 14px 0; }
 .fk-field textarea { border: 1px solid #d1d5db; border-radius: 8px; padding: 10px 12px; font-size: 14px; font-family: Kanit, sans-serif; resize: vertical; }
 
@@ -34,3 +44,32 @@
 }
 .fk-submit:hover:not([disabled]) { background: #117849; }
 .fk-submit[disabled] { opacity: 0.6; cursor: not-allowed; }
+
+/* Kanit has no Indic glyphs — fall back to the device's Kannada / Malayalam / Devanagari fonts. */
+.fk-shell, .fk-shell button, .fk-shell textarea {
+  font-family: Kanit, 'Noto Sans Kannada', 'Noto Sans Malayalam', 'Noto Sans Devanagari', 'Nirmala UI', sans-serif;
+}
+
+.fk-review { margin-top: 18px; padding: 16px; border: 1px solid #e5e7eb; border-radius: 12px; background: #f9fafb; text-align: center; }
+.fk-review p { font-size: 14px; color: #374151; margin: 0 0 12px; }
+.fk-review-btn { height: 46px; padding: 0 22px; border-radius: 23px; border: 1px solid #1a73e8; background: #fff; color: #1a73e8; font-size: 15px; font-weight: 600; cursor: pointer; }
+.fk-review-btn:hover { background: #e8f0fe; }
+
+.fk-langs { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; margin: -12px -8px 16px 0; }
+.fk-lang {
+  height: 32px; padding: 0 12px; border-radius: 16px; border: 1px solid #d1d5db; background: #fff;
+  color: #374151; font-size: 13px; cursor: pointer;
+}
+.fk-lang-on { background: #1e40af; border-color: #1e40af; color: #fff; }
+
+.fk-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.fk-chip {
+  min-height: 40px; padding: 6px 14px; border-radius: 20px; border: 1px solid #d1d5db; background: #f9fafb;
+  color: #271e4a; font-size: 14px; cursor: pointer;
+}
+.fk-chip-on { background: #dbeafe; border-color: #1e40af; color: #1e3a8a; font-weight: 500; }
+
+@media (max-width: 480px) {
+  .fk-card { padding: 24px 16px; }
+  .fk-langs { justify-content: flex-start; margin: -6px 0 14px; }
+}

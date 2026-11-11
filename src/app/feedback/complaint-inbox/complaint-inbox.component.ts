@@ -9,6 +9,7 @@ import {
   Complaint, ComplaintChannel, ComplaintDuplicate, ComplaintService, ComplaintSeverity, ComplaintStats, ComplaintStatus,
 } from '../../services/complaint.service';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
+import { ComplaintCategory, QualityUnitService } from '../../services/quality-unit.service';
 import { isComplaintHandler, isComplaintDepartmentViewer, isNursingSuperintendent } from '../../quality/quality-access';
 
 /**
@@ -36,12 +37,13 @@ export class ComplaintInboxComponent implements OnInit, OnDestroy {
   readonly isDeptViewer = isComplaintDepartmentViewer();
   readonly isSuperintendent = isNursingSuperintendent();
 
-  filters = { status: '', severity: '', source: '', department: '', from: '', to: '' };
+  filters = { status: '', severity: '', source: '', department: '', category: '', from: '', to: '' };
   readonly pageSize = 50;
   skip = 0;
   total = 0;
 
   departments: string[] = [];
+  categories: ComplaintCategory[] = [];
 
   draftCreate = this.blankDraft();
   // Encounter ids arrive via deep-link query params only.
@@ -66,8 +68,13 @@ export class ComplaintInboxComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   constructor(
     private svc: ComplaintService, private router: Router, private route: ActivatedRoute,
-    private doctorService: DoctorServiceService,
+    private doctorService: DoctorServiceService, private units: QualityUnitService,
   ) {}
+
+  categoryLabel(key: string | null | undefined): string {
+    if (!key) return '—';
+    return this.categories.find((c) => c.key === key)?.label ?? key;
+  }
 
   ngOnInit(): void {
     this.applyRaiseDeepLink();
@@ -77,11 +84,15 @@ export class ComplaintInboxComponent implements OnInit, OnDestroy {
       next: (rows) => { this.departments = (rows ?? []).map((d) => d.name).filter(Boolean).sort(); },
       error: () => { /* department pickers are best-effort */ },
     });
+    this.units.complaintCategories().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (r) => { this.categories = r.data ?? []; },
+      error: () => { /* type picker is best-effort */ },
+    });
   }
   ngOnDestroy(): void { this.destroy$.next(); this.destroy$.complete(); }
 
-  private blankDraft(): { patientName: string; patientPrn: string; channel: ComplaintChannel; severity: ComplaintSeverity; department: string; description: string } {
-    return { patientName: '', patientPrn: '', channel: 'phone', severity: 'medium', department: '', description: '' };
+  private blankDraft(): { patientName: string; patientPrn: string; channel: ComplaintChannel; severity: ComplaintSeverity; category: string; department: string; description: string } {
+    return { patientName: '', patientPrn: '', channel: 'phone', severity: 'medium', category: '', department: '', description: '' };
   }
 
   private applyRaiseDeepLink(): void {
@@ -140,6 +151,7 @@ export class ComplaintInboxComponent implements OnInit, OnDestroy {
       patientPrn: this.draftCreate.patientPrn.trim() || null,
       channel: this.draftCreate.channel,
       severity: this.draftCreate.severity,
+      category: this.draftCreate.category || null,
       department: this.draftCreate.department || null,
       description: this.draftCreate.description.trim(),
       appointmentId: this.encounter.appointmentId,

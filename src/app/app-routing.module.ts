@@ -126,6 +126,8 @@ const routes: Routes = [
   {path: 'analytics', component: AnalyticsRootComponent, canActivate:[authGuard]},
   // Module Utilization — management analytics (admins only; super_admin always passes roleGuard)
   {path: 'module-utilization', component: ModuleUtilizationComponent, canActivate:[authGuard, roleGuard], data: { roles: ['admin'] }},
+  // User-activity log — super_admin only (no roles listed = super_admin only).
+  { path: 'activity-log', loadComponent: () => import('./activity-log/activity-log.component').then(m => m.ActivityLogComponent), canActivate:[authGuard, roleGuard], data: {} },
   {path: 'blood-appointments', component: SamraskhaApptOverviewComponent, canActivate:[authGuard]},
   {path:'help-center', component: HelpCenterComponent, canActivate:[authGuard]},
   {path: 'lab', component: LabOverviewComponent, canActivate:[authGuard]},
@@ -153,6 +155,9 @@ const routes: Routes = [
   { path: 'patient/timeline', redirectTo: 'patient/timeline/0', pathMatch: 'full' },
   // Phase 9.24 — incident reporting (Phase 1: manual raise + inbox + detail)
   { path: 'incidents', loadComponent: () => import('./incident/incident-inbox/incident-inbox.component').then(m => m.IncidentInboxComponent), canActivate:[authGuard] },
+  // Phase 3 — anonymous incident report (PUBLIC, opened from the QR poster) + poster printing (incident managers).
+  { path: 'report-incident', loadComponent: () => import('./incident/incident-public-report/incident-public-report.component').then(m => m.IncidentPublicReportComponent) },
+  { path: 'incidents/report-poster', loadComponent: () => import('./incident/incident-report-poster/incident-report-poster.component').then(m => m.IncidentReportPosterComponent), canActivate:[authGuard, roleGuard], data: { adminTypes: ['Quality Manager'] } },
   { path: 'incidents/:id', loadComponent: () => import('./incident/incident-detail/incident-detail.component').then(m => m.IncidentDetailComponent), canActivate:[authGuard] },
   // Phase 9.25 — patient feedback + complaints. Kiosk route is PUBLIC (no
   // authGuard) — the token in the URL is the authentication.
@@ -166,12 +171,21 @@ const routes: Routes = [
   // Phase P — Pharmacy + nurse handshake.
   { path: 'pharmacy/queue', loadComponent: () => import('./ipd/pharmacy-queue/pharmacy-queue.component').then(m => m.PharmacyQueueComponent), canActivate: [authGuard] },
   { path: 'nurse/medication-inbox', loadComponent: () => import('./ipd/nurse-medication-inbox/nurse-medication-inbox.component').then(m => m.NurseMedicationInboxComponent), canActivate: [authGuard] },
+  // Feedback analytics — feedback viewers (mirrors backend FEEDBACK_VIEWER).
+  { path: 'feedback/analytics', loadComponent: () => import('./feedback/feedback-analytics/feedback-analytics.component').then(m => m.FeedbackAnalyticsComponent), canActivate:[authGuard, roleGuard], data: { adminTypes: ['Quality Manager', 'Manager', 'Senior Manager', 'Management'], subAdminTypes: ['Patient Relations'] } },
   { path: 'feedback', loadComponent: () => import('./feedback/feedback-inbox/feedback-inbox.component').then(m => m.FeedbackInboxComponent), canActivate:[authGuard, roleGuard], data: { adminTypes: ['Quality Manager', 'Manager', 'Senior Manager', 'Management'], subAdminTypes: ['Patient Relations', 'Front Desk'] } },
   // Complaints are open to all staff (raise + own/assigned); the API scopes reads.
   { path: 'complaints', loadComponent: () => import('./feedback/complaint-inbox/complaint-inbox.component').then(m => m.ComplaintInboxComponent), canActivate:[authGuard] },
   { path: 'complaints/:id', loadComponent: () => import('./feedback/complaint-detail/complaint-detail.component').then(m => m.ComplaintDetailComponent), canActivate:[authGuard] },
   { path: 'whatsapp-queries', loadComponent: () => import('./whatsapp-queries/whatsapp-queries.component').then(m => m.WhatsappQueriesComponent), canActivate:[authGuard] },
   { path: 'doorstep-requests', loadComponent: () => import('./doorstep-requests/doorstep-requests.component').then(m => m.DoorstepRequestsComponent), canActivate:[authGuard] },
+  // Quality → hospital units, HODs + escalation matrix (Quality Manager; super_admin passes roleGuard)
+  { path: 'quality/units', loadComponent: () => import('./quality/quality-units/quality-units.component').then(m => m.QualityUnitsComponent), canActivate:[authGuard, roleGuard], data: { adminTypes: ['Quality Manager'] } },
+  // Quality audits — any signed-in user; the API scopes what each person sees
+  // (auditor / unit HOD / Quality). Checklist editing is Quality Manager only (API-enforced).
+  { path: 'quality/audits', loadComponent: () => import('./quality/audits/quality-audits.component').then(m => m.QualityAuditsComponent), canActivate:[authGuard] },
+  { path: 'quality/audits/runs/:id', loadComponent: () => import('./quality/audits/audit-run.component').then(m => m.AuditRunComponent), canActivate:[authGuard] },
+  { path: 'quality/audits/checklists/:id', loadComponent: () => import('./quality/audits/audit-checklist-editor.component').then(m => m.AuditChecklistEditorComponent), canActivate:[authGuard] },
   // Phase 9.26 — Quality / NABH dashboard
   { path: 'quality', loadComponent: () => import('./quality/quality-dashboard/quality-dashboard.component').then(m => m.QualityDashboardComponent), canActivate:[authGuard, roleGuard], data: { adminTypes: ['Quality Manager', 'Manager', 'Senior Manager', 'Management'] } },
   // Phase 9.26 / Phase 1 — NABH 108-indicator master + capture

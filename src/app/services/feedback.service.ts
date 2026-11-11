@@ -24,6 +24,47 @@ export interface FeedbackSurvey {
   expiresAt: string | null;
   respondedAt: string | null;
   createdAt: string;
+  // Visit context + answer language (analytics).
+  department?: string | null;
+  doctorName?: string | null;
+  wardName?: string | null;
+  unitId?: number | null;
+  language?: string | null;
+  /** Public by-token read only: the patient's preferred language on record. */
+  preferredLanguage?: string | null;
+}
+
+export interface FeedbackThresholds {
+  satisfiedMinRating: number; complaintMaxNps: number; incidentMaxNps: number;
+  /** Google review page offered to every respondent after submitting (config endpoints only). */
+  googleReviewUrl?: string | null;
+}
+
+export interface FeedbackBucket {
+  key: string;
+  label?: string;
+  responses: number;
+  promoters: number;
+  passives: number;
+  detractors: number;
+  nps: number;
+  rated: number;
+  satisfied: number;
+  satisfiedPct: number | null;
+  avgRating: number | null;
+}
+
+export interface FeedbackAnalytics {
+  window: { from: string; to: string };
+  thresholds: FeedbackThresholds;
+  summary: FeedbackBucket & { surveysCreated: number; responseRate: number | null; truncated: boolean; reviewClicks?: number };
+  trend: FeedbackBucket[];
+  byQuestion: Array<{ key: string; count: number; avg: number; satisfiedPct: number }>;
+  choiceReasons: Array<{ key: string; count: number }>;
+  breakdowns: Record<'department' | 'doctor' | 'ward' | 'unit' | 'channel' | 'language' | 'collector' | 'template', FeedbackBucket[]>;
+  complaintsByUnit: Array<{ key: string; label: string; total: number; resolved: number; resolutionRate: number; avgResolutionHours: number | null }>;
+  complaintsByType?: Array<{ key: string; label: string; total: number; resolved: number; avgResolutionHours: number | null; onTimePct: number | null; overdueOpen: number }>;
+  lowScores: Array<{ id: string; respondedAt: string; npsScore: number; template: string; department: string | null; wardName: string | null; comment: string }>;
 }
 
 export interface SurveyStats {
@@ -60,13 +101,32 @@ export class FeedbackService {
   create(body: Partial<FeedbackSurvey> & { template: SurveyTemplate; expiresInDays?: number }): Observable<{ data: FeedbackSurvey }> {
     return this.http.post<{ data: FeedbackSurvey }>(`${this.base}/surveys`, body);
   }
+  /** Breakdowns over responses in [from, to] (YYYY-MM-DD; default last 30 days). */
+  analytics(filters: { from?: string; to?: string; template?: string; unitId?: number | string }): Observable<FeedbackAnalytics> {
+    let params = new HttpParams();
+    for (const [k, v] of Object.entries(filters)) if (v !== undefined && v !== null && v !== '') params = params.set(k, String(v));
+    return this.http.get<FeedbackAnalytics>(`${this.base}/analytics`, { params });
+  }
+  getConfig(): Observable<{ data: FeedbackThresholds }> {
+    return this.http.get<{ data: FeedbackThresholds }>(`${this.base}/config`);
+  }
+  updateConfig(body: Partial<FeedbackThresholds>): Observable<{ data: FeedbackThresholds }> {
+    return this.http.put<{ data: FeedbackThresholds }>(`${this.base}/config`, body);
+  }
 
   // ── Public (kiosk) — no auth interceptor wrapping needed; backend is open. ──
   getByToken(token: string): Observable<{ data: FeedbackSurvey }> {
     return this.http.get<{ data: FeedbackSurvey }>(`${this.base}/surveys/by-token/${token}`);
   }
-  submitByToken(token: string, body: { npsScore: number; comments?: string; satisfactionScores?: Record<string, number>; channel?: string }): Observable<{ data: { id: string; status: string } }> {
-    return this.http.post<{ data: { id: string; status: string } }>(`${this.base}/surveys/by-token/${token}/respond`, body);
+  submitByToken(token: string, body: {
+    npsScore: number; comments?: string; satisfactionScores?: Record<string, number>; channel?: string;
+    language?: string; choiceReasons?: string[];
+  }): Observable<{ data: { id: string; status: string; reviewUrl?: string | null } }> {
+    return this.http.post<{ data: { id: string; status: string; reviewUrl?: string | null } }>(`${this.base}/surveys/by-token/${token}/respond`, body);
+  }
+  /** Counts the "Share on Google" tap (public, fire-and-forget). */
+  reviewClick(token: string): Observable<unknown> {
+    return this.http.post(`${this.base}/surveys/by-token/${token}/review-click`, {});
   }
   // Walk-up kiosk: PRN → SMS OTP to the phone on record → verify → the server
   // mints a survey and returns its token. challengeId is absent when no OTP

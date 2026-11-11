@@ -98,6 +98,18 @@
       </div>
     </a>
 
+    <!-- User activity — logins, actions, downloads per user (super_admin only) -->
+    <a [routerLink]="role === 'super_admin' ? '/activity-log' : null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="role === 'super_admin'">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89l.07.14L9 12H6a7 7 0 1 1 2.05 4.95l-1.42 1.42A9 9 0 1 0 13 3m-1 5v5l4.28 2.54l.72-1.21l-3.5-2.08V8z"/>
+        </svg>
+        <span>User Activity</span>
+      </div>
+    </a>
+
     <!-- Notification Recipients — WhatsApp/SMS numbers per group (super_admin only) -->
     <a [routerLink]="role === 'super_admin' ? '/settings/notification-recipients' : null"
        routerLinkActive="active" class="icon-wrapper"
@@ -416,6 +428,18 @@
       </div>
     </a>
 
+    <!-- Feedback analytics (feedback viewers) -->
+    <a [routerLink]="showFeedbackAnalyticsLink ? '/feedback/analytics': null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="showFeedbackAnalyticsLink">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M3 3h2v16h16v2H3zm4 10h2v4H7zm4-4h2v8h-2zm4-3h2v11h-2zm4 3h2v8h-2z"/>
+        </svg>
+        <span>Feedback analytics</span>
+      </div>
+    </a>
+
     <!-- Phase 9.25 — Complaints workflow (any staff can raise; API scopes reads) -->
     <a [routerLink]="(['super_admin', 'admin', 'doctor', 'sub_admin'].includes(role)) ? '/complaints': null"
        routerLinkActive="active" class="icon-wrapper"
@@ -437,6 +461,31 @@
           <path fill="currentColor" d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>
         </svg>
         <span>Quality</span>
+      </div>
+    </a>
+
+    <!-- Quality → hospital units, HODs + escalation matrix (Quality Manager / super_admin) -->
+    <a [routerLink]="isQualityEditor ? '/quality/units': null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="isQualityEditor">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M12 2a3 3 0 1 1 0 6a3 3 0 0 1 0-6M5 14a3 3 0 1 1 0 6a3 3 0 0 1 0-6m14 0a3 3 0 1 1 0 6a3 3 0 0 1 0-6M11 9h2v3h5v2h-2v-1H8v1H6v-2h5z"/>
+        </svg>
+        <span>Units &amp; Escalation</span>
+      </div>
+    </a>
+
+    <!-- Quality audits (checklists, scheduled audits, findings) — Quality viewers / editors;
+         auditors and unit HODs reach their audits from the bell -->
+    <a [routerLink]="isQualityViewer ? '/quality/audits': null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="isQualityViewer">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M19 3h-4.18A3 3 0 0 0 12 1a3 3 0 0 0-2.82 2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2m-7 0a1 1 0 1 1 0 2a1 1 0 0 1 0-2m-2 14l-4-4l1.41-1.41L10 14.17l6.59-6.59L18 9z"/>
+        </svg>
+        <span>Audits</span>
       </div>
     </a>
 

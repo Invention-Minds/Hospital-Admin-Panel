@@ -14,6 +14,11 @@ export interface SafetyKpis {
   bySource: Record<string, number>;
   byNabh: Record<string, number>;
   window: QualityWindow;
+  // Incident CAPA follow-through (live counts; effectiveRate over checks recorded in the window).
+  capa?: {
+    openActions: number; overdueActions: number; reviewsDue: number; reviewsDone: number;
+    effectiveRate: number | null; reviewOutcomes: Record<string, number>;
+  };
 }
 export interface ClinicalKpis {
   admissions: number; discharges: number; expired: number; lama: number; dama: number;

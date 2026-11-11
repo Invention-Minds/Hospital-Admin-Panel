@@ -231,6 +231,10 @@
             <option value="IP Billing Manager">IP Billing Manager</option>
             <!-- Quality / NABH — see backend src/api/_shared/quality-roles.ts -->
             <option value="Quality Manager">Quality Manager</option>
+            <!-- Escalation-matrix executives: read every incident / complaint, receive escalations. -->
+            <option value="Medical Superintendent">Medical Superintendent</option>
+            <option value="Medical Director">Medical Director</option>
+            <option value="CEO">CEO</option>
           </select>
           <label for="adminType"> Admin Type*</label>
         </div>
@@ -546,7 +550,7 @@
             <td>
               <ng-container *ngIf="usesAuthenticator(staff); else noMfa">
                 <span class="mfa-status">{{ authenticatorStatus(staff) }}</span>
-                <button *ngIf="staff.totpSecret || staff.totpEnabledAt" class="toggle-btn btn-reset-mfa"
+                <button *ngIf="staff.mfaSecretSet || staff.totpEnabledAt" class="toggle-btn btn-reset-mfa"
                   (click)="resetAuthenticator(staff)" [disabled]="staff._resettingMfa">
                   {{ staff._resettingMfa ? 'Resetting…' : 'Reset' }}
                 </button>

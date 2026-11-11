@@ -1,0 +1,72 @@
+<div class="pr-shell">
+  <div class="pr-card">
+    <ng-container *ngIf="!doneCode; else done">
+      <h1 class="pr-title">Report a safety incident</h1>
+      <p class="pr-sub">
+        Anonymous — we don't ask for or store your name. Reports help us fix problems, not blame people.
+        <ng-container *ngIf="unitName"><br />Area: <strong>{{ unitName }}</strong></ng-container>
+      </p>
+
+      <div class="pr-q">What kind of incident was it? *</div>
+      <div class="pr-cats">
+        <button type="button" class="pr-cat" *ngFor="let c of taxonomy" [class.pr-on]="category === c.category" (click)="pickCategory(c.category)">{{ c.label }}</button>
+      </div>
+
+      <label class="pr-field" *ngIf="subtypes.length">More specifically
+        <select [(ngModel)]="subCategory">
+          <option [ngValue]="null">— choose the closest (optional) —</option>
+          <option *ngFor="let s of subtypes" [ngValue]="s.key">{{ s.label }}</option>
+        </select>
+      </label>
+
+      <div class="pr-q">Did it reach a patient?</div>
+      <div class="pr-seg">
+        <button type="button" [class.pr-on]="reached === 'yes'" (click)="reached = 'yes'">Yes</button>
+        <button type="button" [class.pr-on]="reached === 'no'" (click)="reached = 'no'; harm = null">No — caught in time</button>
+        <button type="button" [class.pr-on]="reached === 'unsure'" (click)="reached = 'unsure'; harm = null">Not sure / no patient</button>
+      </div>
+      <div class="pr-harm" *ngIf="reached === 'yes'">
+        <label class="pr-harm-opt" *ngFor="let h of HARM_OPTIONS" [class.pr-on]="harm === h.value">
+          <input type="radio" name="harm" [value]="h.value" [(ngModel)]="harm" />
+          <span>{{ h.label }}<small>{{ h.hint }}</small></span>
+        </label>
+      </div>
+
+      <label class="pr-field">What happened? *
+        <textarea rows="5" [(ngModel)]="description" maxlength="4000"
+                  placeholder="Describe what you saw. Please don't include patient names or numbers."></textarea>
+        <small class="pr-count">{{ description.trim().length }} / at least {{ MIN }} characters</small>
+      </label>
+
+      <div class="pr-row">
+        <label class="pr-field" *ngIf="!unitName">Area / unit
+          <select [(ngModel)]="unitId">
+            <option [ngValue]="null">— not sure —</option>
+            <option *ngFor="let u of units" [ngValue]="u.id">{{ u.name }}</option>
+          </select>
+        </label>
+        <label class="pr-field">Exact place (optional)
+          <input type="text" [(ngModel)]="location" maxlength="160" placeholder="e.g. Ward 3B, bed 12 corridor" />
+        </label>
+        <label class="pr-field">When? (optional)
+          <input type="datetime-local" [(ngModel)]="occurredAt" />
+        </label>
+      </div>
+
+      <!-- Bot trap: hidden from people, filled by bots. -->
+      <div class="pr-trap" aria-hidden="true">
+        <label>Website <input type="text" [(ngModel)]="website" tabindex="-1" autocomplete="off" /></label>
+      </div>
+
+      <p class="pr-error" *ngIf="errorMessage">{{ errorMessage }}</p>
+      <button class="pr-submit" (click)="submit()" [disabled]="sending">{{ sending ? 'Sending…' : 'Send report' }}</button>
+    </ng-container>
+
+    <ng-template #done>
+      <h1 class="pr-title">✓ Thank you</h1>
+      <p class="pr-sub">Your report has reached the Quality team. Reference: <strong>{{ doneCode }}</strong></p>
+      <p class="pr-sub">If something is still unsafe right now, tell the nurse in charge immediately.</p>
+      <button class="pr-submit pr-secondary" (click)="another()">Report another incident</button>
+    </ng-template>
+  </div>
+</div>

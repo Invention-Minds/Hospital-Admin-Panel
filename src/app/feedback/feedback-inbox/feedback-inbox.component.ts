@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { QRCodeModule } from 'angularx-qrcode';
@@ -20,7 +21,7 @@ import { DownloadOtpService } from '../../shared/download-otp/download-otp.servi
 @Component({
   selector: 'app-feedback-inbox',
   standalone: true,
-  imports: [CommonModule, FormsModule, QRCodeModule],
+  imports: [CommonModule, FormsModule, QRCodeModule, RouterLink],
   templateUrl: './feedback-inbox.component.html',
   styleUrls: ['./feedback-inbox.component.css'],
 })

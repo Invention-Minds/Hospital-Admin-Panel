@@ -1,0 +1,184 @@
+<div class="page fa-shell">
+  <div class="fa-head">
+    <div>
+      <h1 class="fa-title">Feedback analytics</h1>
+      <p class="fa-sub">Patient satisfaction and NPS by department, unit, doctor, ward and question.
+        <a routerLink="/feedback">Back to the feedback inbox</a></p>
+    </div>
+    <div class="fa-filters">
+      <label>From <input type="date" [(ngModel)]="from" (change)="load()" /></label>
+      <label>To <input type="date" [(ngModel)]="to" (change)="load()" /></label>
+      <label>Survey
+        <select [(ngModel)]="template" (change)="load()">
+          <option *ngFor="let t of TEMPLATES" [value]="t.value">{{ t.label }}</option>
+        </select>
+      </label>
+      <label>Unit
+        <select [(ngModel)]="unitId" (change)="load()">
+          <option value="">All units</option>
+          <option *ngFor="let u of units" [ngValue]="u.id">{{ u.name }}</option>
+        </select>
+      </label>
+      <button class="fa-btn" (click)="exportCsv()" [disabled]="!data">Export CSV</button>
+    </div>
+  </div>
+
+  <div class="fa-banner fa-banner-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+  <div class="fa-loading" *ngIf="loading && !data">Loading…</div>
+
+  <ng-container *ngIf="data as d">
+    <div class="fa-banner" *ngIf="d.summary.truncated">Showing the most recent 20,000 responses — narrow the dates for exact figures.</div>
+
+    <div class="fa-tiles">
+      <div class="fa-tile">
+        <span class="fa-tile-label">NPS</span>
+        <span class="fa-tile-val" [ngClass]="npsClass(d.summary.nps)">{{ d.summary.responses ? d.summary.nps : '—' }}</span>
+        <span class="fa-tile-meta">{{ d.summary.promoters }} promoters · {{ d.summary.passives }} passive · {{ d.summary.detractors }} detractors</span>
+      </div>
+      <div class="fa-tile">
+        <span class="fa-tile-label">Responses</span>
+        <span class="fa-tile-val">{{ d.summary.responses }}</span>
+        <span class="fa-tile-meta" *ngIf="d.summary.responseRate !== null">{{ d.summary.responseRate }}% of {{ d.summary.surveysCreated }} surveys sent</span>
+        <span class="fa-tile-meta" *ngIf="d.summary.reviewClicks">{{ d.summary.reviewClicks }} opened the Google review page</span>
+      </div>
+      <div class="fa-tile">
+        <span class="fa-tile-label">Satisfied</span>
+        <span class="fa-tile-val" [ngClass]="pctClass(d.summary.satisfiedPct)">{{ d.summary.satisfiedPct === null ? '—' : d.summary.satisfiedPct + '%' }}</span>
+        <span class="fa-tile-meta">average rating {{ d.thresholds.satisfiedMinRating }}+ of 5 · {{ d.summary.rated }} rated</span>
+      </div>
+      <div class="fa-tile">
+        <span class="fa-tile-label">Average rating</span>
+        <span class="fa-tile-val">{{ d.summary.avgRating ?? '—' }}</span>
+        <span class="fa-tile-meta">out of 5</span>
+      </div>
+    </div>
+
+    <div class="fa-grid">
+      <section class="fa-card fa-span2">
+        <h2 class="fa-h">NPS trend</h2>
+        <div class="fa-empty" *ngIf="!d.trend.length">No responses in this period.</div>
+        <div #trendChart class="fa-chart" [hidden]="!d.trend.length"></div>
+      </section>
+
+      <section class="fa-card">
+        <h2 class="fa-h">By question <span class="fa-h-note">lowest first</span></h2>
+        <div class="fa-empty" *ngIf="!d.byQuestion.length">No question ratings yet.</div>
+        <div class="fa-q" *ngFor="let q of d.byQuestion">
+          <span class="fa-q-label">{{ questionLabel(q.key) }}</span>
+          <span class="fa-bar"><span class="fa-bar-fill" [style.width.%]="q.avg / 5 * 100"></span></span>
+          <span class="fa-q-val">{{ q.avg }}</span>
+          <span class="fa-q-meta" [ngClass]="pctClass(q.satisfiedPct)">{{ q.satisfiedPct }}%</span>
+        </div>
+      </section>
+
+      <section class="fa-card">
+        <h2 class="fa-h">Why patients chose us</h2>
+        <div class="fa-empty" *ngIf="!d.summary.responses">No responses yet.</div>
+        <div class="fa-q" *ngFor="let r of d.choiceReasons">
+          <span class="fa-q-label">{{ reasonLabel(r.key) }}</span>
+          <span class="fa-bar"><span class="fa-bar-fill fa-bar-alt" [style.width.%]="r.count / maxReason * 100"></span></span>
+          <span class="fa-q-val">{{ r.count }}</span>
+        </div>
+      </section>
+
+      <section class="fa-card fa-span2">
+        <div class="fa-tabs">
+          <button *ngFor="let x of DIMS" class="fa-tab" [class.fa-tab-on]="dim === x.key" (click)="dim = x.key">{{ x.label }}</button>
+        </div>
+        <div class="fa-empty" *ngIf="!rows.length">No responses in this period.</div>
+        <table class="fa-table" *ngIf="rows.length">
+          <thead>
+            <tr><th>{{ dimLabel }}</th><th>Responses</th><th>NPS</th><th>Promoters</th><th>Passive</th><th>Detractors</th><th>Satisfied</th><th>Avg rating</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let b of rows">
+              <td>{{ rowLabel(b) }}</td>
+              <td>{{ b.responses }}</td>
+              <td [ngClass]="npsClass(b.nps)">{{ b.nps }}</td>
+              <td>{{ b.promoters }}</td>
+              <td>{{ b.passives }}</td>
+              <td>{{ b.detractors }}</td>
+              <td [ngClass]="pctClass(b.satisfiedPct)">{{ b.satisfiedPct === null ? '—' : b.satisfiedPct + '%' }}</td>
+              <td>{{ b.avgRating ?? '—' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="fa-card">
+        <h2 class="fa-h">Complaints by unit <span class="fa-h-note">raised in this period</span></h2>
+        <div class="fa-empty" *ngIf="!d.complaintsByUnit.length">No complaints in this period.</div>
+        <table class="fa-table" *ngIf="d.complaintsByUnit.length">
+          <thead><tr><th>Unit</th><th>Raised</th><th>Resolved</th><th>Avg time</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let c of d.complaintsByUnit">
+              <td>{{ c.label }}</td>
+              <td>{{ c.total }}</td>
+              <td [ngClass]="pctClass(c.resolutionRate)">{{ c.resolutionRate }}%</td>
+              <td>{{ c.avgResolutionHours === null ? '—' : (c.avgResolutionHours < 48 ? c.avgResolutionHours + ' h' : (c.avgResolutionHours / 24 | number:'1.0-1') + ' d') }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="fa-card" *ngIf="d.complaintsByType?.length">
+        <h2 class="fa-h">Complaints by type <span class="fa-h-note">raised in this period · on time = resolved by its deadline</span></h2>
+        <table class="fa-table">
+          <thead><tr><th>Type</th><th>Raised</th><th>Resolved</th><th>On time</th><th>Overdue, open</th><th>Avg time</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let c of d.complaintsByType">
+              <td>{{ c.label }}</td>
+              <td>{{ c.total }}</td>
+              <td>{{ c.resolved }}</td>
+              <td [ngClass]="c.onTimePct === null ? '' : pctClass(c.onTimePct)">{{ c.onTimePct === null ? '—' : c.onTimePct + '%' }}</td>
+              <td>{{ c.overdueOpen || '—' }}</td>
+              <td>{{ c.avgResolutionHours === null ? '—' : (c.avgResolutionHours < 48 ? c.avgResolutionHours + ' h' : (c.avgResolutionHours / 24 | number:'1.0-1') + ' d') }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="fa-card">
+        <h2 class="fa-h">Recent low-score comments <span class="fa-h-note">NPS {{ d.thresholds.complaintMaxNps }} or below</span></h2>
+        <div class="fa-empty" *ngIf="!d.lowScores.length">None in this period.</div>
+        <div class="fa-comment" *ngFor="let c of d.lowScores">
+          <div class="fa-comment-meta">
+            <span class="fa-nps-pill">{{ c.npsScore }}</span>
+            {{ c.respondedAt | date:'dd/MM/yy' }} · {{ templateLabel(c.template) }}<ng-container *ngIf="c.department"> · {{ c.department }}</ng-container><ng-container *ngIf="c.wardName"> · {{ c.wardName }}</ng-container>
+          </div>
+          <div class="fa-comment-text">{{ c.comment }}</div>
+        </div>
+      </section>
+
+      <section class="fa-card fa-span2" *ngIf="config">
+        <h2 class="fa-h">Thresholds</h2>
+        <p class="fa-sub" *ngIf="!canEditConfig">
+          Satisfied = average rating {{ config.satisfiedMinRating }}+ of 5 · complaint raised at NPS {{ config.complaintMaxNps }} or below ·
+          incident also raised at NPS {{ config.incidentMaxNps }} or below. The Quality Manager can change these.
+        </p>
+        <div class="fa-config" *ngIf="canEditConfig && configDraft as c">
+          <label>Satisfied when average rating is at least
+            <select [(ngModel)]="c.satisfiedMinRating">
+              <option *ngFor="let n of [2,3,4,5]" [ngValue]="n">{{ n }} of 5</option>
+            </select>
+          </label>
+          <label>Raise a complaint at NPS
+            <select [(ngModel)]="c.complaintMaxNps">
+              <option *ngFor="let n of [0,1,2,3,4,5,6,7,8,9]" [ngValue]="n">{{ n }} or below</option>
+            </select>
+          </label>
+          <label>Also raise an incident at NPS
+            <select [(ngModel)]="c.incidentMaxNps">
+              <option *ngFor="let n of [0,1,2,3,4,5,6,7,8,9]" [ngValue]="n" [disabled]="n > c.complaintMaxNps">{{ n }} or below</option>
+            </select>
+          </label>
+          <label class="fa-review-url">Google review link (shown to every patient after they submit)
+            <input type="url" [(ngModel)]="c.googleReviewUrl" maxlength="500" placeholder="https://g.page/r/…/review — leave empty to hide" />
+          </label>
+          <button class="fa-btn fa-btn-primary" (click)="saveConfig()" [disabled]="configSaving">{{ configSaving ? 'Saving…' : 'Save settings' }}</button>
+          <span class="fa-config-msg" *ngIf="configMessage">{{ configMessage }}</span>
+        </div>
+      </section>
+    </div>
+  </ng-container>
+</div>

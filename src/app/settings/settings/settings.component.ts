@@ -379,7 +379,6 @@ createAccount() {
     }
     
   });
-  console.log(this.username, this.password, this.isReceptionist, this.employeeId, this.subAdminType, this.adminType);
 }
 validateInputs(): void {
   const usernameRegex = /^[a-zA-Z]+_(admin|subadmin|superadmin|doctor)@rashtrotthana$/;
@@ -659,7 +658,7 @@ usesAuthenticator(user: any): boolean {
 }
 authenticatorStatus(user: any): string {
   if (user.totpEnabledAt) return 'Set up';
-  return user.totpSecret ? 'Setup pending' : 'Not set up';
+  return user.mfaSecretSet ? 'Setup pending' : 'Not set up';
 }
 async resetAuthenticator(user: any): Promise<void> {
   const name = this.extractFirstName(user.username) || user.username;
@@ -674,7 +673,7 @@ async resetAuthenticator(user: any): Promise<void> {
   this.authService.resetUserMfa(user.id).subscribe({
     next: () => {
       user._resettingMfa = false;
-      user.totpSecret = null;
+      user.mfaSecretSet = false;
       user.totpEnabledAt = null;
       this.messageService.add({ severity: 'success', summary: 'Authenticator reset', detail: `${name} will set it up again at next sign-in` });
     },

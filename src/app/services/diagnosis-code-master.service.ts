@@ -7,12 +7,19 @@ import { environment } from '../../environment/environment.prod';
 
 export type DiagnosisCodeMasterCategory = 'icd' | 'cpt';
 
+/** null = general. A tagged code shows in that specialty's own diagnosis search. */
+export type DiagnosisSpecialty = 'ophthalmology';
+export const DIAGNOSIS_SPECIALTIES: { value: DiagnosisSpecialty; label: string }[] = [
+  { value: 'ophthalmology', label: 'Ophthalmology' },
+];
+
 export interface DiagnosisCodeMaster {
   id: number;
   category: DiagnosisCodeMasterCategory;
   code: string;
   description: string;
   isActive: boolean;
+  specialty: DiagnosisSpecialty | null;
   createdAt: string;
   createdBy: string | null;
 }
@@ -23,9 +30,11 @@ export class DiagnosisCodeMasterService {
 
   constructor(private http: HttpClient) {}
 
-  list(filters?: { category?: DiagnosisCodeMasterCategory; search?: string; limit?: number }): Observable<{ data: DiagnosisCodeMaster[] }> {
+  /** specialty: a specialty → only its codes; 'general' → untagged codes; omitted → all. */
+  list(filters?: { category?: DiagnosisCodeMasterCategory; specialty?: DiagnosisSpecialty | 'general'; search?: string; limit?: number }): Observable<{ data: DiagnosisCodeMaster[] }> {
     let params = new HttpParams();
     if (filters?.category) params = params.set('category', filters.category);
+    if (filters?.specialty) params = params.set('specialty', filters.specialty);
     if (filters?.search) params = params.set('search', filters.search);
     if (filters?.limit !== undefined) params = params.set('limit', String(filters.limit));
     return this.http.get<{ data: DiagnosisCodeMaster[] }>(this.base, { params });

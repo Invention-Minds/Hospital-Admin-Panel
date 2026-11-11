@@ -20,6 +20,8 @@
     <button type="button" [class.active]="tab==='packages'" (click)="setTab('packages')">MHC Packages</button>
     <button type="button" [class.active]="tab==='shifts'" (click)="setTab('shifts')">Shifts</button>
     <button type="button" [class.active]="tab==='therapies'" (click)="setTab('therapies')">Therapies</button>
+    <!-- Separate page (ICD-10 / CPT, with specialty tags) -->
+    <a routerLink="/masters/diagnosis-codes">Diagnosis codes</a>
   </div>
 
   <!-- ─── Departments ─── -->

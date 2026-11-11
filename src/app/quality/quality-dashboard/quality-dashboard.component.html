@@ -31,6 +31,14 @@
       <div class="q-card" [ngClass]="s.sentinel ? 'q-bad' : ''"><span class="q-card-label">Sentinel events</span><span class="q-card-val">{{ s.sentinel }}</span></div>
       <div class="q-card"><span class="q-card-label">Near-miss rate</span><span class="q-card-val">{{ s.nearMissRate }}%</span></div>
     </div>
+    <div class="q-cards" *ngIf="s.capa as c">
+      <div class="q-card"><span class="q-card-label">Open CAPA actions</span><span class="q-card-val">{{ c.openActions }}</span></div>
+      <div class="q-card" [ngClass]="c.overdueActions ? 'q-bad' : ''"><span class="q-card-label">Overdue CAPA actions</span><span class="q-card-val">{{ c.overdueActions }}</span></div>
+      <div class="q-card" [ngClass]="c.reviewsDue ? 'q-bad' : ''"><span class="q-card-label">Effectiveness checks due</span><span class="q-card-val">{{ c.reviewsDue }}</span></div>
+      <div class="q-card"><span class="q-card-label">CAPA effective</span>
+        <span class="q-card-val">{{ c.effectiveRate === null ? '—' : c.effectiveRate + '%' }}</span>
+        <span class="q-card-label" *ngIf="c.reviewsDone">of {{ c.reviewsDone }} check(s)</span></div>
+    </div>
     <div class="q-grid">
       <div class="q-block">
         <h3 class="q-block-title">By severity</h3>

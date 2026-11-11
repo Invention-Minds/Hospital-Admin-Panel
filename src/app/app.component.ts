@@ -154,6 +154,8 @@ export class AppComponent {
    *  the browser's HTTP/1.1 connection pool and the survey GET hangs. */
   isFeedbackKioskRoute(): boolean {
     const url = (this.router.url || '').split('?')[0];
-    return url.startsWith('/feedback/k/') || url === '/feedback/new';
+    // Public pages (no login, no app shell): feedback survey / walk-up and the
+    // anonymous incident report opened from the QR poster.
+    return url.startsWith('/feedback/k/') || url === '/feedback/new' || url === '/report-incident';
   }
 }

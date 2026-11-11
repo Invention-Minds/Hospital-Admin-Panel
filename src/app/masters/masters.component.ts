@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { Subject } from 'rxjs';
 import { finalize, takeUntil } from 'rxjs/operators';
@@ -45,7 +46,7 @@ interface NewBedRow { bedNumber: string; bedType: string; }
 @Component({
   selector: 'app-masters',
   standalone: true,
-  imports: [CommonModule, FormsModule, MultiSelectModule],
+  imports: [CommonModule, FormsModule, MultiSelectModule, RouterLink],
   templateUrl: './masters.component.html',
   styleUrls: ['./masters.component.css'],
 })

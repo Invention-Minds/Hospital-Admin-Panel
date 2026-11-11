@@ -1,0 +1,291 @@
+<div class="page qu-shell">
+  <div class="qu-head">
+    <div>
+      <h1 class="qu-title">Units &amp; Escalation</h1>
+      <p class="qu-sub">Hospital units with their HOD, how incidents and complaints find their unit, and who is alerted when a case stays open.</p>
+    </div>
+    <div class="qu-tabs">
+      <button class="qu-tab" [class.qu-tab-on]="tab === 'units'" (click)="tab = 'units'">Units &amp; HODs</button>
+      <button class="qu-tab" [class.qu-tab-on]="tab === 'matrix'" (click)="tab = 'matrix'">Escalation matrix</button>
+      <button class="qu-tab" [class.qu-tab-on]="tab === 'sla'" (click)="openSlaTab()">Complaint deadlines</button>
+    </div>
+  </div>
+
+  <div class="qu-banner qu-bad" *ngIf="errorMessage" (click)="errorMessage = ''">{{ errorMessage }}</div>
+  <div class="qu-banner qu-good" *ngIf="successMessage">{{ successMessage }}</div>
+  <div class="qu-loading" *ngIf="loading">Loading…</div>
+
+  <!-- ═══════════ Units & HODs ═══════════ -->
+  <ng-container *ngIf="!loading && tab === 'units'">
+    <div class="qu-card">
+      <div class="qu-card-head">
+        <h2 class="qu-h2">Units</h2>
+        <button class="qu-btn" (click)="importSpecialties()" [disabled]="saving"
+                title="Creates a clinical unit for each doctor specialty that doesn't have one yet">
+          Import doctor specialties as clinical units
+        </button>
+      </div>
+      <p class="qu-hint">
+        Units are separate from doctor specialties. One person can be HOD or deputy of several units.
+        The HOD (and deputy) can investigate their unit's incidents and handle its complaints; closing an incident stays with the Quality Manager.
+      </p>
+
+      <table class="qu-table" *ngIf="units.length > 0">
+        <thead>
+          <tr><th>Unit</th><th>Type</th><th>HOD</th><th>Deputy</th><th>Routes from</th><th>Active</th><th></th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let u of units" [class.qu-inactive]="!u.isActive">
+            <td class="qu-name">{{ u.name }}</td>
+            <td>
+              <select [ngModel]="u.type" (ngModelChange)="saveUnit(u, { type: $event })">
+                <option *ngFor="let t of UNIT_TYPES" [value]="t">{{ t }}</option>
+              </select>
+            </td>
+            <td>
+              <select [ngModel]="u.hodUserId" (ngModelChange)="saveUnit(u, { hodUserId: $event })" [class.qu-missing]="!u.hodUserId">
+                <option [ngValue]="null">— not set —</option>
+                <option *ngFor="let p of people" [ngValue]="p.id">{{ personLabel(p) }}</option>
+              </select>
+            </td>
+            <td>
+              <select [ngModel]="u.deputyUserId" (ngModelChange)="saveUnit(u, { deputyUserId: $event })">
+                <option [ngValue]="null">— none —</option>
+                <option *ngFor="let p of people" [ngValue]="p.id">{{ personLabel(p) }}</option>
+              </select>
+            </td>
+            <td class="qu-routes">
+              <span *ngIf="u.departments.length === 0 && u.wardIds.length === 0" class="qu-muted">Name match only</span>
+              <span *ngIf="u.departments.length > 0">{{ u.departments.length }} department value{{ u.departments.length === 1 ? '' : 's' }}</span>
+              <span *ngIf="u.wardIds.length > 0">{{ u.wardIds.length }} ward{{ u.wardIds.length === 1 ? '' : 's' }}</span>
+            </td>
+            <td><input type="checkbox" [ngModel]="u.isActive" (ngModelChange)="saveUnit(u, { isActive: $event })" /></td>
+            <td><button class="qu-btn qu-btn-sm" (click)="openMapping(u)">Edit routing</button></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="qu-empty" *ngIf="units.length === 0">No units yet — import the doctor specialties and add the non-clinical units below.</div>
+    </div>
+
+    <div class="qu-card">
+      <h2 class="qu-h2">Add a unit</h2>
+      <div class="qu-chips" *ngIf="suggestions.length > 0">
+        <span class="qu-muted">Suggestions:</span>
+        <button class="qu-chip" *ngFor="let s of suggestions" (click)="useSuggestion(s)">{{ s.name }}</button>
+      </div>
+      <div class="qu-row">
+        <label class="qu-field">Name
+          <input type="text" [(ngModel)]="newUnit.name" placeholder="e.g. Pharmacy" maxlength="80" />
+        </label>
+        <label class="qu-field">Type
+          <select [(ngModel)]="newUnit.type"><option *ngFor="let t of UNIT_TYPES" [value]="t">{{ t }}</option></select>
+        </label>
+        <label class="qu-field">HOD
+          <select [(ngModel)]="newUnit.hodUserId">
+            <option [ngValue]="null">— not set —</option>
+            <option *ngFor="let p of people" [ngValue]="p.id">{{ personLabel(p) }}</option>
+          </select>
+        </label>
+        <label class="qu-field">Deputy
+          <select [(ngModel)]="newUnit.deputyUserId">
+            <option [ngValue]="null">— none —</option>
+            <option *ngFor="let p of people" [ngValue]="p.id">{{ personLabel(p) }}</option>
+          </select>
+        </label>
+        <button class="qu-btn qu-btn-primary" (click)="addUnit()" [disabled]="saving || !newUnit.name.trim()">Add unit</button>
+      </div>
+    </div>
+
+    <!-- Routing editor -->
+    <div class="qu-card qu-map" *ngIf="editing as u">
+      <div class="qu-card-head">
+        <h2 class="qu-h2">Routing for {{ u.name }}</h2>
+        <button class="qu-btn qu-btn-sm" (click)="closeMapping()">Close</button>
+      </div>
+      <p class="qu-hint">
+        A case goes to this unit when it was raised on one of these IPD wards, or its department is one of the values below.
+        Picking a value that belongs to another unit moves it here.
+      </p>
+
+      <div class="qu-map-grid">
+        <div>
+          <h3 class="qu-h3">Doctor specialties</h3>
+          <label class="qu-check" *ngFor="let s of sources?.specialties">
+            <input type="checkbox" [checked]="mapDepartments.has(s)" (change)="toggle(mapDepartments, s)" />
+            {{ s }} <em *ngIf="mappedElsewhere('department', s) as other" class="qu-other">→ {{ other }}</em>
+          </label>
+        </div>
+        <div>
+          <h3 class="qu-h3">Other department text on old cases</h3>
+          <div class="qu-muted" *ngIf="!sources?.legacyDepartments?.length">None</div>
+          <label class="qu-check" *ngFor="let l of sources?.legacyDepartments">
+            <input type="checkbox" [checked]="mapDepartments.has(l.name)" (change)="toggle(mapDepartments, l.name)" />
+            {{ l.name }} <span class="qu-muted">({{ l.cases }} cases)</span>
+            <em *ngIf="mappedElsewhere('department', l.name) as other" class="qu-other">→ {{ other }}</em>
+          </label>
+        </div>
+        <div>
+          <h3 class="qu-h3">IPD wards</h3>
+          <div class="qu-muted" *ngIf="!sources?.wards?.length">No wards</div>
+          <label class="qu-check" *ngFor="let w of sources?.wards">
+            <input type="checkbox" [checked]="mapWards.has(w.id)" (change)="toggle(mapWards, w.id)" />
+            {{ w.wardName }} <span class="qu-muted">({{ w.department }})</span>
+            <em *ngIf="mappedElsewhere('ward', w.id) as other" class="qu-other">→ {{ other }}</em>
+          </label>
+        </div>
+      </div>
+      <div class="qu-actions">
+        <button class="qu-btn qu-btn-primary" (click)="saveMapping()" [disabled]="saving">Save routing</button>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ═══════════ Escalation matrix ═══════════ -->
+  <ng-container *ngIf="!loading && tab === 'matrix'">
+    <div class="qu-card">
+      <div class="qu-card-head">
+        <h2 class="qu-h2">Escalation matrix</h2>
+        <div class="qu-tabs">
+          <button class="qu-tab" [class.qu-tab-on]="matrixModule === 'incident'" (click)="matrixModule = 'incident'">Incidents</button>
+          <button class="qu-tab" [class.qu-tab-on]="matrixModule === 'complaint'" (click)="matrixModule = 'complaint'">Complaints</button>
+        </div>
+      </div>
+      <p class="qu-hint">
+        Each level fires once if the case is still open that many hours after it was raised (or reopened).
+        Alerts go to the in-app bell; tick WhatsApp / SMS to also message phones (uses the phone number on each staff record —
+        works once your provider has approved the templates and IT has switched the channel on).
+        "Unit HOD" falls back to the Quality Manager when the case has no unit or the unit has no HOD.
+        Cases raised before the matrix went live are not escalated.
+      </p>
+    </div>
+
+    <div class="qu-card" *ngFor="let sev of severities[matrixModule]">
+      <div class="qu-card-head">
+        <h3 class="qu-h3 qu-sev">{{ sevLabel(sev) }}
+          <span class="qu-badge" [class.qu-badge-custom]="source(sev) === 'custom'">{{ source(sev) === 'custom' ? 'customised' : 'default' }}</span>
+          <span class="qu-badge qu-badge-dirty" *ngIf="isDirty(sev)">unsaved</span>
+        </h3>
+        <div class="qu-actions-inline">
+          <button class="qu-btn qu-btn-sm" (click)="addLevel(sev)" [disabled]="ladder(sev).length >= 6">+ Level</button>
+          <button class="qu-btn qu-btn-sm" (click)="resetLadder(sev)" [disabled]="saving || source(sev) === 'default'">Reset to default</button>
+          <button class="qu-btn qu-btn-sm qu-btn-primary" (click)="saveLadder(sev)" [disabled]="saving || !isDirty(sev)">Save</button>
+        </div>
+      </div>
+
+      <div class="qu-muted" *ngIf="ladder(sev).length === 0">No escalation for this severity.</div>
+      <div class="qu-level" *ngFor="let row of ladder(sev); let i = index">
+        <div class="qu-level-no">L{{ i + 1 }}</div>
+        <label class="qu-field qu-hours">After (hours)
+          <input type="number" min="0.25" step="0.25" [(ngModel)]="row.hours" (ngModelChange)="markDirty(sev)" />
+        </label>
+        <div class="qu-targets">
+          <label class="qu-check qu-inline" *ngFor="let t of TARGET_OPTIONS">
+            <input type="checkbox" [checked]="row.targets.includes(t.token)" (change)="toggleTarget(sev, row, t.token)" /> {{ t.label }}
+          </label>
+          <span class="qu-muted" *ngFor="let x of row.extra">{{ x }}</span>
+        </div>
+        <label class="qu-field qu-label">Note
+          <input type="text" [(ngModel)]="row.label" (ngModelChange)="markDirty(sev)" maxlength="120" placeholder="Shown in the alert" />
+        </label>
+        <div class="qu-phone" title="Also message the recipients' phones (needs the approved template and the server setting turned on)">
+          <label class="qu-check qu-inline"><input type="checkbox" [(ngModel)]="row.whatsapp" (ngModelChange)="markDirty(sev)" /> WhatsApp</label>
+          <label class="qu-check qu-inline"><input type="checkbox" [(ngModel)]="row.sms" (ngModelChange)="markDirty(sev)" /> SMS</label>
+        </div>
+        <button class="qu-btn qu-btn-sm qu-btn-danger" (click)="removeLevel(sev, i)" title="Remove level">✕</button>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ═══════════ Complaint deadlines ═══════════ -->
+  <ng-container *ngIf="!loading && tab === 'sla'">
+    <div class="qu-card">
+      <h2 class="qu-h2">Complaint deadlines</h2>
+      <p class="qu-hint">
+        How long a complaint has to be resolved, by unit, complaint type and severity. The most specific rule wins:
+        unit + type + severity, then unit + type, unit, type, and severity alone.
+        With no matching rule the built-in deadline applies — high {{ slaDefaults['high'] }}h, medium {{ slaDefaults['medium'] }}h, low {{ slaDefaults['low'] }}h.
+        Rules apply to complaints raised from now on; existing complaints keep their deadline unless their unit or type is changed.
+      </p>
+      <div class="qu-loading" *ngIf="!slaLoaded">Loading…</div>
+
+      <table class="qu-table" *ngIf="slaLoaded && slaRules.length > 0">
+        <thead><tr><th>Unit</th><th>Type</th><th>Severity</th><th>Resolve within (hours)</th><th>Note</th><th></th></tr></thead>
+        <tbody>
+          <tr *ngFor="let r of slaRules">
+            <td>{{ r.unitName || 'Any unit' }}</td>
+            <td>{{ categoryLabel(r.category) }}</td>
+            <td>{{ r.severity || 'Any' }}</td>
+            <td>
+              <input class="qu-num" type="number" min="1" [max]="slaMaxHours" step="1" [(ngModel)]="ruleHours[r.id]"
+                     (blur)="saveRuleHours(r)" (keyup.enter)="saveRuleHours(r)" />
+              <span class="qu-muted"> {{ hoursText(r.hours) }}</span>
+            </td>
+            <td class="qu-muted">{{ r.note || '' }}</td>
+            <td><button class="qu-btn qu-btn-sm qu-btn-danger" (click)="deleteRule(r)" title="Delete rule">✕</button></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="qu-empty" *ngIf="slaLoaded && slaRules.length === 0">No rules yet — every complaint uses the built-in deadline for its severity.</div>
+    </div>
+
+    <div class="qu-card" *ngIf="slaLoaded">
+      <h2 class="qu-h2">Add a rule</h2>
+      <div class="qu-row">
+        <label class="qu-field">Unit
+          <select [(ngModel)]="newRule.unitId">
+            <option [ngValue]="null">Any unit</option>
+            <option *ngFor="let u of units" [ngValue]="u.id">{{ u.name }}</option>
+          </select>
+        </label>
+        <label class="qu-field">Complaint type
+          <select [(ngModel)]="newRule.category">
+            <option [ngValue]="null">Any type</option>
+            <option *ngFor="let c of categories" [ngValue]="c.key">{{ c.label }}</option>
+          </select>
+        </label>
+        <label class="qu-field">Severity
+          <select [(ngModel)]="newRule.severity">
+            <option [ngValue]="null">Any</option>
+            <option *ngFor="let s of COMPLAINT_SEVERITIES" [ngValue]="s">{{ s }}</option>
+          </select>
+        </label>
+        <label class="qu-field">Resolve within (hours)
+          <input class="qu-num" type="number" min="1" [max]="slaMaxHours" step="1" [(ngModel)]="newRule.hours" />
+        </label>
+        <label class="qu-field">Note
+          <input type="text" maxlength="300" [(ngModel)]="newRule.note" placeholder="Optional" />
+        </label>
+        <button class="qu-btn qu-btn-primary" (click)="addRule()" [disabled]="saving">Add rule</button>
+      </div>
+    </div>
+
+    <div class="qu-card" *ngIf="slaLoaded">
+      <h2 class="qu-h2">Which rule applies?</h2>
+      <p class="qu-hint">Pick a unit, type and severity to see the deadline a new complaint would get.</p>
+      <div class="qu-row">
+        <label class="qu-field">Unit
+          <select [(ngModel)]="tester.unitId">
+            <option [ngValue]="null">No unit</option>
+            <option *ngFor="let u of units" [ngValue]="u.id">{{ u.name }}</option>
+          </select>
+        </label>
+        <label class="qu-field">Complaint type
+          <select [(ngModel)]="tester.category">
+            <option [ngValue]="null">Not set</option>
+            <option *ngFor="let c of categories" [ngValue]="c.key">{{ c.label }}</option>
+          </select>
+        </label>
+        <label class="qu-field">Severity
+          <select [(ngModel)]="tester.severity">
+            <option *ngFor="let s of COMPLAINT_SEVERITIES" [ngValue]="s">{{ s }}</option>
+          </select>
+        </label>
+        <button class="qu-btn" (click)="runTest()">Check</button>
+      </div>
+      <p class="qu-test" *ngIf="testResult">
+        Resolve within <strong>{{ hoursText(testResult.hours) }}</strong>
+        — {{ testResult.ruleId ? 'rule: ' + testResult.label : 'built-in ' + testResult.label.toLowerCase() }}
+      </p>
+    </div>
+  </ng-container>
+</div>

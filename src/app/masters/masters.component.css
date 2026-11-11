@@ -7,9 +7,9 @@
 .ms-banner-good { background: #dcfce7; color: #166534; }
 
 .ms-tabs { display: flex; gap: 4px; border-bottom: 1px solid #e5e7eb; margin-bottom: 18px; flex-wrap: wrap; }
-.ms-tabs button {
+.ms-tabs button, .ms-tabs a {
   padding: 8px 14px; background: transparent; border: 0; cursor: pointer;
-  font-size: 14px; color: #4b5563; border-bottom: 2px solid transparent;
+  font-size: 14px; color: #4b5563; border-bottom: 2px solid transparent; text-decoration: none;
 }
 .ms-tabs button.active { color: #1d4ed8; border-bottom-color: #1d4ed8; font-weight: 600; }
 

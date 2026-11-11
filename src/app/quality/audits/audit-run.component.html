@@ -1,0 +1,126 @@
+<div class="page ar-shell">
+  <div class="ar-top">
+    <a class="ar-btn" routerLink="/quality/audits">← Audits</a>
+    <span class="ar-code" *ngIf="run">{{ run.code }}</span>
+  </div>
+
+  <div class="ar-banner ar-banner-bad" *ngIf="errorMessage" (click)="errorMessage = ''">{{ errorMessage }}</div>
+  <div class="ar-banner ar-banner-good" *ngIf="successMessage">{{ successMessage }}</div>
+  <div class="ar-empty" *ngIf="loading && !run">Loading…</div>
+
+  <ng-container *ngIf="run as r">
+    <header class="ar-card ar-head">
+      <div>
+        <h1 class="ar-title">{{ r.checklist.name }}</h1>
+        <div class="ar-meta">
+          <span>{{ r.unit?.name || 'No unit' }}<ng-container *ngIf="r.location"> · {{ r.location }}</ng-container></span>
+          <span *ngIf="r.dueDate">Due {{ r.dueDate | date:'dd/MM/yy' }}</span>
+          <span>Auditor: {{ r.auditor || 'unassigned' }}</span>
+          <span class="ar-pill ar-st-{{ r.status }}">{{ r.status.replace('_', ' ') }}</span>
+        </div>
+        <p class="ar-desc" *ngIf="r.checklist.description">{{ r.checklist.description }}</p>
+      </div>
+      <div class="ar-score" *ngIf="completed">
+        <span class="ar-score-val" [ngClass]="pctClass(r.compliancePct)">{{ r.compliancePct ?? '—' }}<small *ngIf="r.compliancePct !== null">%</small></span>
+        <span class="ar-score-meta">{{ r.compliantCount }} / {{ r.applicableCount }} compliant · {{ r.ncCount }} NC<ng-container *ngIf="r.criticalNcCount"> · {{ r.criticalNcCount }} critical</ng-container></span>
+        <span class="ar-score-meta" *ngIf="r.previousRun">Previous: {{ r.previousRun.compliancePct ?? '—' }}% ({{ r.previousRun.code }})</span>
+        <span class="ar-score-meta" *ngIf="r.nextRun">Next: {{ r.nextRun.compliancePct ?? '—' }}% ({{ r.nextRun.code }})</span>
+      </div>
+      <div class="ar-score" *ngIf="!completed && conducting">
+        <span class="ar-score-val">{{ answeredCount }}<small>/{{ totalCount }}</small></span>
+        <span class="ar-score-meta">answered · running score {{ liveScore ?? '—' }}<ng-container *ngIf="liveScore !== null">%</ng-container></span>
+      </div>
+    </header>
+
+    <p class="ar-hint" *ngIf="r.status !== 'completed' && r.status !== 'cancelled' && !conducting">
+      This audit is assigned to {{ r.auditor || 'the unit HOD / Quality team' }} — you can view it but not answer it.
+    </p>
+
+    <!-- ── Conduct ── -->
+    <ng-container *ngIf="!completed && r.status !== 'cancelled'">
+      <section class="ar-card" *ngFor="let s of sections">
+        <h2 class="ar-h" *ngIf="s.name">{{ s.name }}</h2>
+        <div class="ar-q" *ngFor="let it of s.items; trackBy: trackItem" [class.ar-q-no]="answers[it.id].result === 'no'">
+          <div class="ar-q-text">
+            <span class="ar-crit" *ngIf="it.critical" title="Critical — a No alerts the HOD and Quality">Critical</span>
+            {{ it.text }}
+            <span class="ar-prev" *ngIf="it.previousResult === 'no'">NC last audit</span>
+          </div>
+          <div class="ar-seg" role="group">
+            <button type="button" *ngFor="let v of RESULTS" class="ar-seg-btn ar-seg-{{ v }}"
+                    [class.ar-on]="answers[it.id].result === v" [disabled]="!conducting"
+                    [attr.aria-pressed]="answers[it.id].result === v"
+                    (click)="setAnswer(it.id, $any(v))">{{ RESULT_LABELS[v] }}</button>
+          </div>
+          <input *ngIf="answers[it.id].result === 'no' || answers[it.id].remark" class="ar-remark" type="text" maxlength="2000"
+                 [(ngModel)]="answers[it.id].remark" (ngModelChange)="dirty = true" [disabled]="!conducting"
+                 [placeholder]="answers[it.id].result === 'no' ? 'What was found? (required for No)' : 'Remark (optional)'" />
+        </div>
+      </section>
+      <section class="ar-card" *ngIf="conducting">
+        <label class="ar-field">Overall notes
+          <textarea rows="2" [(ngModel)]="notes" (ngModelChange)="dirty = true" placeholder="Optional"></textarea>
+        </label>
+        <div class="ar-actions">
+          <span class="ar-muted" *ngIf="dirty">Unsaved changes</span>
+          <button class="ar-btn" (click)="save()" [disabled]="saving">{{ saving ? 'Saving…' : 'Save' }}</button>
+          <button class="ar-btn ar-btn-primary" (click)="submit()" [disabled]="saving">Submit audit</button>
+        </div>
+      </section>
+    </ng-container>
+
+    <!-- ── Results ── -->
+    <ng-container *ngIf="completed">
+      <section class="ar-card">
+        <h2 class="ar-h">Findings <span class="ar-h-note">every "No" answer</span></h2>
+        <div class="ar-empty" *ngIf="!findings.length">No non-compliances — nothing to follow up.</div>
+        <div class="ar-finding" *ngFor="let it of findings">
+          <div class="ar-f-head">
+            <span class="ar-crit" *ngIf="it.critical">Critical</span>
+            <span class="ar-f-text">{{ it.text }}</span>
+            <span class="ar-effect {{ effectLabel(it)?.cls }}" *ngIf="effectLabel(it) as e">{{ e.text }}</span>
+          </div>
+          <div class="ar-f-remark" *ngIf="remarkFor(it.id)">{{ remarkFor(it.id) }}</div>
+
+          <div class="ar-act" *ngFor="let a of actionsFor(it.id)" [class.ar-act-closed]="a.status !== 'open'">
+            <div class="ar-act-main">
+              <span class="ar-act-st ar-act-{{ a.status }}" [class.ar-act-overdue]="isOverdue(a)">{{ a.status === 'open' ? (isOverdue(a) ? 'overdue' : 'open') : a.status }}</span>
+              <span>{{ a.description }}</span>
+            </div>
+            <div class="ar-muted">Owner: {{ a.owner || 'unassigned' }}<ng-container *ngIf="a.dueDate"> · due {{ a.dueDate | date:'dd/MM/yy' }}</ng-container><ng-container *ngIf="a.completedAt"> · {{ a.status }} {{ a.completedAt | date:'dd/MM/yy' }} by {{ a.completedBy }}</ng-container></div>
+            <div class="ar-f-remark" *ngIf="a.completionNote">{{ a.completionNote }}</div>
+            <div class="ar-act-close" *ngIf="closing?.id === a.id && closing as c">
+              <input type="text" [(ngModel)]="c.note" [placeholder]="c.status === 'done' ? 'What was done?' : 'Why is it dropped?'" />
+              <button class="ar-btn ar-btn-primary ar-btn-sm" (click)="confirmClose()" [disabled]="busy">{{ c.status === 'done' ? 'Mark done' : 'Drop' }}</button>
+              <button class="ar-btn ar-btn-sm" (click)="closing = null">Cancel</button>
+            </div>
+            <div class="ar-act-btns" *ngIf="closing?.id !== a.id">
+              <button class="ar-btn ar-btn-sm" *ngIf="a.status === 'open' && a.canComplete" (click)="startClose(a, 'done')">Mark done</button>
+              <button class="ar-btn ar-btn-sm" *ngIf="a.status === 'open' && r.permissions.canManageActions" (click)="startClose(a, 'dropped')">Drop</button>
+              <button class="ar-btn ar-btn-sm" *ngIf="a.status !== 'open' && (r.permissions.canManageActions || (a.canComplete && a.status === 'done'))" (click)="reopen(a)" [disabled]="busy">Reopen</button>
+            </div>
+          </div>
+
+          <div class="ar-add" *ngIf="r.permissions.canManageActions && newAction[it.id] as d">
+            <input type="text" [(ngModel)]="d.description" placeholder="Corrective action…" />
+            <select [(ngModel)]="d.ownerId">
+              <option [ngValue]="null">— owner —</option>
+              <option *ngFor="let u of staff" [ngValue]="u.id">{{ u.username }}</option>
+            </select>
+            <input type="date" [(ngModel)]="d.dueDate" title="Due date" />
+            <button class="ar-btn ar-btn-primary ar-btn-sm" (click)="addAction(it.id)" [disabled]="busy">Add</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="ar-card">
+        <h2 class="ar-h">All answers</h2>
+        <div class="ar-ans" *ngFor="let it of r.items">
+          <span class="ar-ans-res ar-res-{{ answers[it.id].result }}">{{ RESULT_LABELS[answers[it.id].result || ''] || '—' }}</span>
+          <span>{{ it.text }}<span class="ar-muted" *ngIf="answers[it.id].remark"> — {{ answers[it.id].remark }}</span></span>
+        </div>
+        <p class="ar-muted" *ngIf="r.notes">Notes: {{ r.notes }}</p>
+      </section>
+    </ng-container>
+  </ng-container>
+</div>

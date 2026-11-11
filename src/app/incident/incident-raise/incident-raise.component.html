@@ -7,16 +7,39 @@
 
     <div class="ir-grid">
       <label class="ir-field">Category *
-        <select [(ngModel)]="draft.category">
+        <select [(ngModel)]="draft.category" (ngModelChange)="onCategoryChange()">
           <option *ngFor="let c of CATEGORIES" [value]="c">{{ c }}</option>
         </select>
       </label>
-      <label class="ir-field">Severity *
-        <select [(ngModel)]="draft.severity">
-          <option *ngFor="let s of SEVERITIES" [value]="s">{{ s.replace('_',' ') }}</option>
+      <label class="ir-field" *ngIf="subtypes.length">Type
+        <select [(ngModel)]="subCategory">
+          <option [ngValue]="null">— choose the closest —</option>
+          <option *ngFor="let s of subtypes" [ngValue]="s.key">{{ s.label }}</option>
         </select>
       </label>
     </div>
+
+    <fieldset class="ir-harm">
+      <legend>Did it reach the patient? *</legend>
+      <div class="ir-seg">
+        <button type="button" [class.on]="reached === true" (click)="reached = true">Yes</button>
+        <button type="button" [class.on]="reached === false" (click)="reached = false; harm = null">No — caught in time</button>
+      </div>
+
+      <ng-container *ngIf="reached === true">
+        <legend class="ir-harm-q">What harm was caused? *</legend>
+        <label class="ir-harm-opt" *ngFor="let h of HARM_OPTIONS" [class.on]="harm === h.value">
+          <input type="radio" name="harm" [value]="h.value" [(ngModel)]="harm" />
+          <span class="ir-harm-label">{{ h.label }}</span>
+          <span class="ir-harm-hint">{{ h.hint }}</span>
+        </label>
+      </ng-container>
+
+      <div class="ir-sev" *ngIf="derivedSeverity as s">
+        Severity: <span class="ir-sev-chip sev-{{ s }}">{{ s.replace('_', ' ') }}</span>
+        <span class="ir-sev-note">set from your answer — Quality can revise it after investigation</span>
+      </div>
+    </fieldset>
 
     <label class="ir-field">Title *
       <input type="text" [(ngModel)]="draft.title" placeholder="One-line summary, e.g. 'Wrong-site marking missed in OT-2'" />
@@ -31,10 +54,10 @@
       <label class="ir-field">When did it occur?
         <input type="datetime-local" [(ngModel)]="draft.occurredAt" />
       </label>
-      <label class="ir-field">NABH clause (optional)
+      <label class="ir-field" *ngIf="isManager">NABH clause (optional)
         <input type="text" [(ngModel)]="draft.nabhClause" placeholder="e.g. PSQ.4" />
       </label>
-      <label class="ir-field">QI indicator (optional)
+      <label class="ir-field" *ngIf="isManager">QI indicator (optional)
         <select [(ngModel)]="draft.qiCode">
           <option [ngValue]="null">— none —</option>
           <option *ngFor="let c of QI_CODES" [value]="c">{{ c }}</option>
@@ -52,7 +75,16 @@
     </div>
 
     <div class="ir-grid">
-      <label class="ir-field">Department
+      <label class="ir-field">Unit responsible
+        <select [(ngModel)]="unitId">
+          <option [ngValue]="null">— work it out from ward / department —</option>
+          <option *ngFor="let u of units" [ngValue]="u.id">{{ u.name }}</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="ir-grid">
+      <label class="ir-field">Department (specialty)
         <select [(ngModel)]="ctx.department">
           <option value="">— none —</option>
           <option *ngFor="let d of departments" [value]="d">{{ d }}</option>
@@ -62,6 +94,24 @@
         <input type="text" [(ngModel)]="ctx.ward" placeholder="e.g. Ward 3B" />
       </label>
     </div>
+
+    <div class="ir-files" *ngIf="!anonymous">
+      <label class="ir-file-btn">📎 Attach photos / documents
+        <input type="file" multiple (change)="onFiles($event)"
+               accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt,.csv" />
+      </label>
+      <span class="ir-file-note">Up to 5 files, 10 MB each</span>
+      <div class="ir-file-chips" *ngIf="files.length">
+        <span class="ir-file-chip" *ngFor="let f of files">{{ f.name }} <button type="button" (click)="removeFile(f)" aria-label="Remove">✕</button></span>
+      </div>
+      <div class="ir-file-err" *ngIf="fileError">{{ fileError }}</div>
+    </div>
+
+    <label class="ir-anon">
+      <input type="checkbox" [(ngModel)]="anonymous" />
+      <span><strong>Report anonymously</strong> — your name is not stored, so nobody (not even Quality) can see who reported.
+        You won't be able to follow it up or attach files later.</span>
+    </label>
 
     <div class="ir-context" *ngIf="admissionId || emergencyId || appointmentId">
       <span class="ir-ctx-label">Linked context</span>
@@ -75,7 +125,7 @@
     <div class="ir-actions">
       <button class="ir-btn" (click)="cancel()" [disabled]="saving">Cancel</button>
       <button class="ir-btn ir-btn-primary" (click)="save()" [disabled]="saving">
-        {{ saving ? 'Raising…' : 'Raise incident' }}
+        {{ saving ? (files.length && !anonymous ? 'Raising + attaching…' : 'Raising…') : 'Raise incident' }}
       </button>
     </div>
   </div>

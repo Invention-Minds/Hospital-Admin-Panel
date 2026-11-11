@@ -44,3 +44,15 @@
 }
 .fks-link:disabled { color: #9ca3af; cursor: not-allowed; text-decoration: none; }
 .fks-error { background: #fee2e2; color: #b91c1c; padding: 10px 14px; border-radius: 8px; font-size: 13px; margin: 12px 0; }
+
+/* Language switch + Indic font fallback (Kanit has no Kannada / Malayalam / Devanagari glyphs). */
+.fks-shell, .fks-shell button, .fks-shell input {
+  font-family: Kanit, 'Noto Sans Kannada', 'Noto Sans Malayalam', 'Noto Sans Devanagari', 'Nirmala UI', sans-serif;
+}
+.fks-langs { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; margin-bottom: 12px; }
+.fks-lang {
+  height: 32px; padding: 0 12px; border-radius: 16px; border: 1px solid #d1d5db; background: #fff;
+  color: #374151; font-size: 13px; cursor: pointer;
+}
+.fks-lang-on { background: #1e40af; border-color: #1e40af; color: #fff; }
+@media (max-width: 480px) { .fks-langs { justify-content: flex-start; } }

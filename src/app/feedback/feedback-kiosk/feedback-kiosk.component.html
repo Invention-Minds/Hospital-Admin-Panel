@@ -1,24 +1,32 @@
-<div class="fk-shell">
+<div class="fk-shell" [attr.lang]="lang">
   <div class="fk-card">
-    <div class="fk-loading" *ngIf="loading">Loading your survey…</div>
+    <div class="fk-langs" role="group" [attr.aria-label]="t.language">
+      <button type="button" class="fk-lang" *ngFor="let l of LANGS"
+              [class.fk-lang-on]="lang === l.code" [attr.aria-pressed]="lang === l.code"
+              [attr.lang]="l.code" (click)="setLang(l.code)">{{ l.label }}</button>
+    </div>
+
+    <div class="fk-loading" *ngIf="loading">{{ t.loading }}</div>
 
     <ng-container *ngIf="!loading && loadError && !done">
-      <h2 class="fk-title">We're sorry</h2>
+      <h2 class="fk-title">{{ t.sorry }}</h2>
       <p class="fk-error">{{ loadError }}</p>
     </ng-container>
 
     <ng-container *ngIf="!loading && done">
-      <h2 class="fk-title">🙏 Thank you</h2>
-      <p class="fk-sub">Your feedback helps us care for you better.</p>
+      <h2 class="fk-title">🙏 {{ t.thanks }}</h2>
+      <p class="fk-sub">{{ t.thanksSub }}</p>
+      <div class="fk-review" *ngIf="reviewUrl">
+        <p>{{ t.reviewAsk }}</p>
+        <button type="button" class="fk-review-btn" (click)="openReview()">★ {{ t.reviewBtn }}</button>
+      </div>
     </ng-container>
 
     <ng-container *ngIf="!loading && survey && !done && !loadError">
-      <h2 class="fk-title">How was your visit?</h2>
-      <p class="fk-sub" *ngIf="survey.patientName">For {{ survey.patientName }}</p>
+      <h2 class="fk-title">{{ t.title }}</h2>
+      <p class="fk-sub" *ngIf="survey.patientName">{{ t.forName }} {{ survey.patientName }}</p>
 
-      <div class="fk-q">
-        How likely are you to recommend us to a friend or family member?
-      </div>
+      <div class="fk-q">{{ t.npsQ }}</div>
 
       <div class="fk-scale">
         <button class="fk-num" *ngFor="let n of NPS_BUTTONS"
@@ -29,20 +37,38 @@
                 (click)="pickScore(n)">{{ n }}</button>
       </div>
       <div class="fk-scale-axis">
-        <span>Not at all likely</span>
-        <span>Extremely likely</span>
+        <span>{{ t.notLikely }}</span>
+        <span>{{ t.veryLikely }}</span>
       </div>
 
       <p class="fk-score-tag" *ngIf="npsScore != null">
-        You picked <strong>{{ npsScore }}</strong> — {{ scoreLabel(npsScore) }}
+        {{ t.youPicked }} <strong>{{ npsScore }}</strong> — {{ scoreLabel(npsScore) }}
       </p>
 
-      <label class="fk-field">Anything we should know? (optional)
-        <textarea rows="4" [(ngModel)]="comments" [maxlength]="MAX_COMMENT" placeholder="Tell us in your own words…"></textarea>
+      <div class="fk-q fk-q-sub">{{ t.rateQ }}</div>
+      <div class="fk-rate-row" *ngFor="let c of categories">
+        <span class="fk-rate-label">{{ c.label }}</span>
+        <span class="fk-rate-btns">
+          <button type="button" class="fk-rate" *ngFor="let n of RATING_BUTTONS"
+                  [class.fk-rate-on]="(ratings[c.key] ?? 0) >= n"
+                  [attr.aria-label]="c.label + ' ' + n + ' ' + t.outOf"
+                  (click)="rate(c.key, n)">★</button>
+        </span>
+      </div>
+
+      <div class="fk-q fk-q-sub">{{ t.reasonsQ }}</div>
+      <div class="fk-chips">
+        <button type="button" class="fk-chip" *ngFor="let k of REASON_KEYS"
+                [class.fk-chip-on]="reasons.has(k)" [attr.aria-pressed]="reasons.has(k)"
+                (click)="toggleReason(k)">{{ reasonLabel(k) }}</button>
+      </div>
+
+      <label class="fk-field">{{ t.commentsLabel }}
+        <textarea rows="4" [(ngModel)]="comments" [maxlength]="MAX_COMMENT" [placeholder]="t.commentsPh"></textarea>
       </label>
 
       <button class="fk-submit" (click)="submit()" [disabled]="saving">
-        {{ saving ? 'Submitting…' : 'Submit' }}
+        {{ saving ? t.submitting : t.submit }}
       </button>
       <p class="fk-error" *ngIf="errorMessage">{{ errorMessage }}</p>
     </ng-container>

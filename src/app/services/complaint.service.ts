@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environment/environment.prod';
+import type { CaseUnit, EscalationEvent } from './incident.service';
 
 // Phase 9.25 / Phase 4 — Patient complaint workflow API.
 
@@ -28,6 +29,7 @@ export interface Complaint {
   feedbackSurveyId: string | null;
   description: string;
   severity: ComplaintSeverity;
+  category?: string | null;
   department?: string | null;
   raisedById?: number | null;
   assignedTo: string | null;
@@ -46,6 +48,16 @@ export interface Complaint {
   // Resolved by GET /complaints/:id.
   relatedIncidents?: Array<{ id: string; code: string; category: string; severity: string; status: string }>;
   raisedByName?: string | null;
+  // Quality escalation matrix.
+  unitId?: number | null;
+  escalationLevel?: number;
+  escalationStartAt?: string | null;
+  lastEscalatedAt?: string | null;
+  unit?: CaseUnit | null;
+  permissions?: { canUpdateStatus: boolean; canAssign: boolean; canChangeUnit: boolean };
+  escalations?: EscalationEvent[];
+  // GET /complaints/:id — the deadline rule that applies today.
+  slaRule?: { hours: number; ruleId: number | null; label: string };
 }
 
 export interface ComplaintStats {
@@ -56,13 +68,16 @@ export interface ComplaintStats {
 
 export interface ComplaintListFilters {
   status?: string; severity?: string; source?: string; patientPrn?: string; department?: string;
-  from?: string; to?: string; mine?: boolean; take?: number; skip?: number;
+  from?: string; to?: string; mine?: boolean; take?: number; skip?: number; unitId?: number | string;
+  category?: string; // a type key, or 'none' for complaints without a type
 }
 
 export interface ComplaintCreateBody {
   patientPrn?: string | null; patientName?: string | null;
   channel: ComplaintChannel; description: string; severity: ComplaintSeverity;
+  category?: string | null;
   department?: string | null;
+  unitId?: number | null;
   appointmentId?: number | null; admissionId?: string | null; emergencyId?: number | null;
   proceedDespiteDuplicate?: boolean;
 }
@@ -97,7 +112,8 @@ export class ComplaintService {
   }
   updateStatus(id: string, body: {
     status: ComplaintStatus; assignedTo?: string | null; assignedToId?: number | null;
-    resolutionNotes?: string | null; department?: string | null;
+    resolutionNotes?: string | null; department?: string | null; unitId?: number | null;
+    category?: string | null;
   }): Observable<{ data: Complaint }> {
     return this.http.put<{ data: Complaint }>(`${this.base}/${id}/status`, body);
   }

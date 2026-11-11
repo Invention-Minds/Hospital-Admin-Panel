@@ -1,0 +1,109 @@
+<div class="page al-shell">
+  <div class="al-head">
+    <div>
+      <h1 class="al-title">User activity</h1>
+      <p class="al-sub">Logins, actions and downloads per staff member. Logins are recorded from the date this screen went live; an earlier "last login" comes from the user record.</p>
+    </div>
+    <div class="al-filters">
+      <label>From <input type="date" [(ngModel)]="from" (change)="loadUsers()" /></label>
+      <label>To <input type="date" [(ngModel)]="to" (change)="loadUsers()" /></label>
+      <button class="al-btn" (click)="exportCsv()" [disabled]="!visible.length">Export CSV</button>
+    </div>
+  </div>
+
+  <div class="al-banner" *ngIf="errorMessage" (click)="errorMessage = ''">{{ errorMessage }}</div>
+
+  <div class="al-tiles">
+    <div class="al-tile"><span>Active users</span><strong>{{ activeCount }}</strong><small>of {{ users.length }} accounts</small></div>
+    <div class="al-tile"><span>Logins</span><strong>{{ totals.logins }}</strong></div>
+    <div class="al-tile"><span>Actions</span><strong>{{ totals.actions }}</strong></div>
+    <div class="al-tile"><span>Downloads</span><strong>{{ totals.downloads }}</strong></div>
+    <button class="al-tile al-tile-btn" [class.al-tile-bad]="failedLogins" (click)="showFailed()"><span>Failed logins</span><strong>{{ failedLogins }}</strong><small>click to see them</small></button>
+  </div>
+
+  <div class="al-grid">
+    <section class="al-card al-users">
+      <div class="al-users-tools">
+        <input type="search" [(ngModel)]="search" (ngModelChange)="applyFilter()" placeholder="Search name, employee ID, role…" />
+        <label class="al-check"><input type="checkbox" [(ngModel)]="hideIdle" (ngModelChange)="applyFilter()" /> Hide users with no activity</label>
+      </div>
+      <div class="al-empty" *ngIf="loading">Loading…</div>
+      <table class="al-table" *ngIf="!loading">
+        <thead>
+          <tr>
+            <th (click)="sortBy('name')" class="al-sort">User</th>
+            <th (click)="sortBy('lastLoginAt')" class="al-sort">Last login</th>
+            <th (click)="sortBy('actions')" class="al-sort al-num">Actions</th>
+            <th (click)="sortBy('lastActionAt')" class="al-sort">Last action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="al-row" [class.al-sel]="selected?.id === u.id" *ngFor="let u of visible" (click)="open(u)">
+            <td>
+              <div class="al-name">{{ u.name }}<span class="al-off" *ngIf="!u.isActive">inactive</span></div>
+              <div class="al-muted">{{ u.title || u.role }}<ng-container *ngIf="u.employeeId"> · {{ u.employeeId }}</ng-container></div>
+            </td>
+            <td>{{ u.lastLoginAt ? (u.lastLoginAt | date:'dd/MM/yy h:mm a') : '—' }}<div class="al-muted" *ngIf="u.logins">{{ u.logins }} in period</div></td>
+            <td class="al-num">{{ u.actions }}<div class="al-muted" *ngIf="u.downloads">{{ u.downloads }} dl</div></td>
+            <td>{{ u.lastActionAt ? (u.lastActionAt | date:'dd/MM/yy h:mm a') : '—' }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="al-empty" *ngIf="!loading && !visible.length">No users match.</div>
+    </section>
+
+    <section class="al-card al-timeline">
+      <div class="al-tl-head">
+        <h2 class="al-h">{{ selected ? selected.name : (action === 'LOGIN_FAILED' ? 'Failed logins' : 'All activity') }}</h2>
+        <button class="al-btn al-btn-sm" *ngIf="selected || module || action" (click)="module = ''; action = ''; open(null)">Show everyone</button>
+      </div>
+      <div class="al-filters al-tl-filters">
+        <label>Module
+          <select [(ngModel)]="module" (change)="setFilter()">
+            <option value="">All</option>
+            <option *ngFor="let m of modules" [value]="m">{{ m }}</option>
+          </select>
+        </label>
+        <label>Action
+          <select [(ngModel)]="action" (change)="setFilter()">
+            <option value="">All</option>
+            <option *ngFor="let a of actions" [value]="a">{{ a }}</option>
+          </select>
+        </label>
+        <span class="al-muted">{{ total }} event(s)</span>
+      </div>
+
+      <div class="al-dl" *ngIf="selected && downloads.length">
+        <h3 class="al-h3">Downloads</h3>
+        <div class="al-dl-row" *ngFor="let d of downloads">
+          <span class="al-time">{{ d.createdAt | date:'dd/MM/yy h:mm a' }}</span>
+          <span>{{ d.label }}</span>
+          <span class="al-muted">— {{ d.reason }}<ng-container *ngIf="d.downloadRef"> · {{ d.downloadRef }}</ng-container></span>
+        </div>
+      </div>
+
+      <div class="al-empty" *ngIf="timelineLoading">Loading…</div>
+      <div class="al-empty" *ngIf="!timelineLoading && !rows.length">Nothing in this period.</div>
+      <div class="al-ev" *ngFor="let r of rows" (click)="expanded = expanded === r.id ? null : r.id">
+        <div class="al-ev-main">
+          <span class="al-time">{{ r.createdAt | date:'dd/MM/yy h:mm:ss a' }}</span>
+          <span class="al-act {{ actionClass(r.action) }}">{{ r.action }}</span>
+          <span class="al-mod">{{ r.module }}</span>
+          <span class="al-ent" *ngIf="r.entityType">{{ r.entityType }}<span class="al-muted" *ngIf="r.entityId"> {{ r.entityId.length > 14 ? r.entityId.slice(0, 8) + '…' : r.entityId }}</span></span>
+          <span class="al-who" *ngIf="!selected">{{ r.actorName || 'system / unknown' }}</span>
+        </div>
+        <div class="al-ev-meta">
+          <span *ngIf="r.ipAddress">IP {{ r.ipAddress }}</span>
+          <span *ngIf="device(r.userAgent) as dv">{{ dv }}</span>
+          <span *ngIf="r.notes">{{ r.notes }}</span>
+        </div>
+        <pre class="al-payload" *ngIf="expanded === r.id && r.payload">{{ r.payload }}</pre>
+      </div>
+      <div class="al-pager" *ngIf="pages > 1">
+        <button class="al-btn al-btn-sm" (click)="go(page - 1)" [disabled]="page === 1">‹ Newer</button>
+        <span>Page {{ page }} of {{ pages }}</span>
+        <button class="al-btn al-btn-sm" (click)="go(page + 1)" [disabled]="page === pages">Older ›</button>
+      </div>
+    </section>
+  </div>
+</div>

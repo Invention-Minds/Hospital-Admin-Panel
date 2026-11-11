@@ -4,6 +4,7 @@ import { loadPdfMake } from '../../shared/pdf/pdfmake-loader';
 import { MessageService } from 'primeng/api';
 import { getJmrhPdfBranding } from '../../shared/pdf/jmrh-letterhead';
 import { DownloadOtpService } from '../../shared/download-otp/download-otp.service';
+import { DiagnosisCodeMasterService } from '../../services/diagnosis-code-master.service';
 type DiagramType = 'eye' | 'cornea' | 'fundus' | 'vf' | 'eom' | 'gonio';
 interface DiagramColorGroup {
   color: string;
@@ -270,7 +271,12 @@ export class OphthamologyTemplateComponent {
 
 
 
-  constructor(private api: OpthPresService, private messageService: MessageService, private downloadOtp: DownloadOtpService) { }
+  constructor(
+    private api: OpthPresService,
+    private messageService: MessageService,
+    private downloadOtp: DownloadOtpService,
+    private diagnosisMaster: DiagnosisCodeMasterService,
+  ) { }
 
   ngOnInit() {
     this.visibleTabs = this.isOptometrist
@@ -1707,22 +1713,36 @@ export class OphthamologyTemplateComponent {
 
 
   diagnosisSearch = "";
-  diagFiltered: any[] = [];
+  diagFiltered: { code: string; label: string }[] = [];
+  diagLoading = false;
+  private diagSearchTimer: ReturnType<typeof setTimeout> | null = null;
+  private diagSearchSeq = 0;
 
-  ICD10 = [
-    { code: "H52.1", label: "Myopia" },
-    { code: "H52.2", label: "Astigmatism" },
-    { code: "H25.1", label: "Nuclear Cataract" },
-    { code: "H40.1", label: "Primary Open-Angle Glaucoma" },
-    { code: "H35.0", label: "Diabetic Retinopathy" }
-  ];
-
-
+  /**
+   * Searches the Diagnosis Codes master: ICD-10 codes tagged "Ophthalmology"
+   * (Masters → Diagnosis codes). Saved as { code, label } like before, so old
+   * prescriptions and the printed PDF read the same.
+   */
   searchDiagnosis() {
-    const t = this.diagnosisSearch.toLowerCase();
-    this.diagFiltered = this.ICD10.filter(d =>
-      d.label.toLowerCase().includes(t) || d.code.includes(t)
-    );
+    if (this.diagSearchTimer) clearTimeout(this.diagSearchTimer);
+    const term = this.diagnosisSearch.trim();
+    this.diagSearchTimer = setTimeout(() => {
+      const seq = ++this.diagSearchSeq; // ignore answers to older keystrokes
+      this.diagLoading = true;
+      this.diagnosisMaster.list({ category: 'icd', specialty: 'ophthalmology', search: term, limit: 30 }).subscribe({
+        next: (r) => {
+          if (seq !== this.diagSearchSeq) return;
+          this.diagLoading = false;
+          this.diagFiltered = r.data.map((d) => ({ code: d.code, label: d.description }));
+        },
+        error: () => {
+          if (seq !== this.diagSearchSeq) return;
+          this.diagLoading = false;
+          this.diagFiltered = [];
+          this.messageService.add({ severity: 'error', summary: 'Diagnosis', detail: 'Could not load diagnosis codes' });
+        },
+      });
+    }, 250);
   }
 
   addDiagnosis(d: any) {

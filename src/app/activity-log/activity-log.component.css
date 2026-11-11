@@ -1,0 +1,69 @@
+.al-shell { padding: 24px 28px 40px; font-family: Kanit, sans-serif; color: #271e4a; }
+.al-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 14px; margin-bottom: 14px; }
+.al-title { font-size: 24px; font-weight: 600; color: #0e2970; margin: 0 0 4px; }
+.al-sub { font-size: 13px; color: #6b7280; margin: 0; max-width: 680px; }
+.al-filters { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+.al-filters label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #4b5563; }
+.al-filters input, .al-filters select, .al-users-tools input { height: 36px; border: 1px solid #d1d5db; border-radius: 6px; padding: 0 10px; font-family: Kanit, sans-serif; font-size: 13px; background: #fff; color: #271e4a; }
+.al-btn { height: 36px; padding: 0 14px; border-radius: 6px; border: 1px solid #d1d5db; background: #fff; color: #271e4a; cursor: pointer; font-family: Kanit, sans-serif; font-size: 13px; }
+.al-btn:hover:not([disabled]) { background: #f3f4f6; }
+.al-btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+.al-btn-sm { height: 30px; padding: 0 10px; font-size: 12px; }
+.al-banner { background: #fee2e2; color: #b91c1c; padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; font-size: 13px; cursor: pointer; }
+.al-empty { color: #6b7280; font-style: italic; font-size: 13px; padding: 10px 0; }
+.al-muted { color: #6b7280; font-size: 12px; }
+
+.al-tiles { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px; }
+.al-tile { background: #fff; border-radius: 10px; padding: 12px 16px; display: flex; flex-direction: column; gap: 2px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); border: 0; text-align: left; font-family: Kanit, sans-serif; color: #271e4a; }
+.al-tile span { font-size: 11px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.4px; }
+.al-tile strong { font-size: 26px; line-height: 1.2; }
+.al-tile small { font-size: 12px; color: #6b7280; }
+.al-tile-btn { cursor: pointer; }
+.al-tile-btn:hover { background: #f9fafb; }
+.al-tile-bad { box-shadow: inset 3px 0 0 #b91c1c; background: #fff5f5; }
+
+.al-grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 14px; align-items: start; }
+.al-card { background: #fff; border-radius: 10px; padding: 14px 16px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); min-width: 0; }
+.al-users { max-height: calc(100vh - 220px); overflow: auto; }
+.al-users-tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 8px; }
+.al-users-tools input { flex: 1 1 200px; }
+.al-check { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: #4b5563; }
+.al-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.al-table th { text-align: left; font-weight: 500; color: #6b7280; font-size: 12px; padding: 6px 8px; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; background: #fff; }
+.al-sort { cursor: pointer; user-select: none; }
+.al-sort:hover { color: #1e40af; }
+.al-table td { padding: 7px 8px; border-bottom: 1px solid #f3f4f6; vertical-align: top; }
+.al-num { text-align: right; }
+.al-row { cursor: pointer; }
+.al-row:hover { background: #f9fafb; }
+.al-sel { background: #eef2ff !important; }
+.al-name { font-weight: 500; }
+.al-off { font-size: 10px; text-transform: uppercase; color: #6b7280; background: #f3f4f6; border-radius: 4px; padding: 1px 6px; margin-left: 6px; }
+
+.al-tl-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.al-h { font-size: 15px; font-weight: 600; color: #0e2970; margin: 0; }
+.al-h3 { font-size: 12px; font-weight: 600; color: #4b5563; text-transform: uppercase; letter-spacing: 0.4px; margin: 0 0 6px; }
+.al-tl-filters { margin: 10px 0; }
+.al-dl { background: #f9fafb; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; }
+.al-dl-row { display: flex; flex-wrap: wrap; gap: 8px; font-size: 13px; padding: 2px 0; }
+.al-ev { border-bottom: 1px solid #f3f4f6; padding: 8px 0; cursor: pointer; }
+.al-ev:hover { background: #fafafa; }
+.al-ev-main { display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; font-size: 13px; }
+.al-time { font-family: ui-monospace, monospace; font-size: 12px; color: #4b5563; }
+.al-act { font-size: 11px; font-weight: 700; padding: 1px 8px; border-radius: 10px; background: #e0e7ff; color: #1e3a8a; }
+.al-login { background: #dcfce7; color: #166534; }
+.al-fail { background: #fee2e2; color: #b91c1c; }
+.al-del { background: #fef3c7; color: #92400e; }
+.al-exp { background: #f3e8ff; color: #6b21a8; }
+.al-mod { font-size: 12px; color: #374151; }
+.al-ent { font-size: 12px; color: #374151; }
+.al-who { font-size: 12px; font-weight: 500; margin-left: auto; }
+.al-ev-meta { display: flex; flex-wrap: wrap; gap: 12px; font-size: 11px; color: #9ca3af; margin-top: 2px; }
+.al-payload { background: #f9fafb; border-radius: 6px; padding: 8px 10px; font-size: 11px; white-space: pre-wrap; word-break: break-all; margin: 6px 0 0; color: #374151; }
+.al-pager { display: flex; justify-content: center; align-items: center; gap: 12px; padding-top: 10px; font-size: 12px; }
+
+@media (max-width: 1100px) {
+  .al-grid { grid-template-columns: 1fr; }
+  .al-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .al-users { max-height: none; }
+}

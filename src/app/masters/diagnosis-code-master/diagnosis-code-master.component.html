@@ -1,6 +1,6 @@
 <div class="dcm-shell">
   <h2 class="dcm-title">Diagnosis Codes Master (ICD-10 + CPT)</h2>
-  <p class="dcm-sub">Curated catalog for the autocomplete on Discharge Summary.</p>
+  <p class="dcm-sub">Curated catalog for the autocomplete on Discharge Summary and OT. Codes tagged with a specialty also appear in that specialty's own diagnosis search (e.g. Ophthalmology → eye prescription).</p>
 
   <div class="dcm-tabs">
     <button [class.dcm-tab-active]="activeTab === 'icd'" (click)="setTab('icd')">ICD-10</button>
@@ -12,6 +12,11 @@
 
   <div class="dcm-toolbar">
     <input type="text" [(ngModel)]="search" (input)="load()" placeholder="Search code or description…" class="dcm-search" />
+    <select [(ngModel)]="specialtyFilter" (ngModelChange)="load()" class="dcm-filter" aria-label="Filter by specialty">
+      <option value="">All specialties</option>
+      <option value="general">General only</option>
+      <option *ngFor="let s of specialties" [value]="s.value">{{ s.label }}</option>
+    </select>
   </div>
 
   <div class="dcm-loading" *ngIf="loading">Loading…</div>
@@ -19,12 +24,13 @@
   <div class="dcm-layout" *ngIf="!loading">
     <div class="dcm-list">
       <table>
-        <thead><tr><th>Code</th><th>Description</th><th></th></tr></thead>
+        <thead><tr><th>Code</th><th>Description</th><th>Specialty</th><th></th></tr></thead>
         <tbody>
-          <tr *ngIf="!rows.length"><td colspan="3" class="dcm-muted">No entries.</td></tr>
+          <tr *ngIf="!rows.length"><td colspan="4" class="dcm-muted">No entries.</td></tr>
           <tr *ngFor="let r of rows" [class.dcm-row-active]="selected?.id === r.id" (click)="edit(r)">
             <td><strong>{{ r.code }}</strong></td>
             <td>{{ r.description }}</td>
+            <td><span [class.dcm-tag]="r.specialty" [class.dcm-muted]="!r.specialty">{{ specialtyLabel(r.specialty) }}</span></td>
             <td>
               <button class="dcm-btn dcm-btn-sm dcm-btn-danger" (click)="$event.stopPropagation(); remove(r)">×</button>
             </td>
@@ -42,6 +48,13 @@
       <label>
         <span>Description *</span>
         <textarea rows="3" [(ngModel)]="draft.description"></textarea>
+      </label>
+      <label>
+        <span>Specialty</span>
+        <select [(ngModel)]="draft.specialty">
+          <option [ngValue]="null">General (all departments)</option>
+          <option *ngFor="let s of specialties" [ngValue]="s.value">{{ s.label }}</option>
+        </select>
       </label>
       <div class="dcm-editor-actions">
         <button class="dcm-btn" (click)="cancelEdit()" [disabled]="saving">Cancel</button>

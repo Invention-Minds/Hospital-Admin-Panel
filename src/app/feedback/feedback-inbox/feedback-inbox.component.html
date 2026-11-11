@@ -5,6 +5,7 @@
       <p class="fb-sub">Surveys auto-created after each encounter — low scores raise complaints automatically.</p>
     </div>
     <div class="fb-head-actions">
+      <a class="fb-btn" *ngIf="canStats" routerLink="/feedback/analytics">📊 Analytics</a>
       <button class="fb-btn" *ngIf="canCreate" (click)="createOpen = !createOpen">＋ New survey QR</button>
       <button class="fb-btn" (click)="openWalkUpPoster()" title="Print a QR poster patients can scan in the waiting area">
         🖼 Kiosk poster

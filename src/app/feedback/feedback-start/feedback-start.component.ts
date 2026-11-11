@@ -4,6 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { FeedbackService } from '../../services/feedback.service';
+import {
+  FEEDBACK_LANGS, FEEDBACK_STRINGS, FeedbackLang, FeedbackStrings, browserFeedbackLang,
+} from '../feedback-i18n';
 
 /**
  * Walk-up kiosk start page.
@@ -35,13 +38,13 @@ export class FeedbackStartComponent implements OnDestroy {
   private resendTimer: ReturnType<typeof setInterval> | null = null;
 
   readonly RESEND_SECONDS = 60;
-  readonly VISIT_TYPES: Array<{ value: string; label: string }> = [
-    { value: 'opd', label: 'OPD consultation' },
-    { value: 'ipd', label: 'Inpatient stay' },
-    { value: 'er', label: 'Emergency visit' },
-    { value: 'day-care', label: 'Day-care procedure' },
-    { value: 'general', label: 'Something else' },
-  ];
+  readonly VISIT_TYPES = ['opd', 'ipd', 'er', 'day-care', 'general'] as const;
+
+  readonly LANGS = FEEDBACK_LANGS;
+  lang: FeedbackLang = browserFeedbackLang();
+  get t(): FeedbackStrings { return FEEDBACK_STRINGS[this.lang]; }
+  visitLabel(v: string): string { return (this.t.visit as Record<string, string>)[v] ?? v; }
+  get resendLabel(): string { return this.t.resendIn.replace('{s}', String(this.resendIn)); }
 
   constructor(private svc: FeedbackService, private router: Router) {}
 
@@ -49,21 +52,21 @@ export class FeedbackStartComponent implements OnDestroy {
 
   requestOtp(): void {
     const prn = this.patientPrn.trim();
-    if (!/^\d{1,10}$/.test(prn)) { this.errorMessage = 'Please enter your PRN (numbers only).'; return; }
+    if (!/^\d{1,10}$/.test(prn)) { this.errorMessage = this.t.prnInvalid; return; }
     this.submitting = true; this.errorMessage = ''; this.infoMessage = '';
     this.svc.requestWalkUpOtp(prn).subscribe({
       next: (r) => {
         this.submitting = false;
         if (!r.data.challengeId) {
           // Unknown PRN or no phone on file — the server doesn't say which.
-          this.errorMessage = `${r.data.message} If you don't receive it, please check your PRN or ask a staff member.`;
+          this.errorMessage = `${r.data.message} ${this.t.prnHelp}`;
           return;
         }
         this.challengeId = r.data.challengeId;
         this.phoneLast4 = r.data.phoneLast4 || '';
         this.otp = '';
         this.step = 'otp';
-        this.infoMessage = this.phoneLast4 ? `OTP sent to ••••${this.phoneLast4}` : 'OTP sent to the phone on record';
+        this.infoMessage = this.phoneLast4 ? `${this.t.otpSentTo} ••••${this.phoneLast4}` : this.t.otpSentRecord;
         this.startTimer();
       },
       error: (e) => {
@@ -75,10 +78,10 @@ export class FeedbackStartComponent implements OnDestroy {
 
   verify(): void {
     const otp = this.otp.trim();
-    if (!/^\d{6}$/.test(otp)) { this.errorMessage = 'Please enter the 6-digit OTP.'; return; }
+    if (!/^\d{6}$/.test(otp)) { this.errorMessage = this.t.otpInvalid; return; }
     this.submitting = true; this.errorMessage = '';
     this.svc.verifyWalkUpOtp({ challengeId: this.challengeId, otp, visitType: this.visitType }).subscribe({
-      next: (r) => { this.stopTimer(); this.router.navigateByUrl(`/feedback/k/${r.data.token}`); },
+      next: (r) => { this.stopTimer(); this.router.navigateByUrl(`/feedback/k/${r.data.token}?lang=${this.lang}`); },
       error: (e) => {
         this.submitting = false;
         this.errorMessage = this.errText(e, 'Could not verify the OTP — please try again.');

@@ -1,36 +1,42 @@
-<div class="fks-shell">
+<div class="fks-shell" [attr.lang]="lang">
   <div class="fks-card">
-    <h1 class="fks-title">Share your feedback</h1>
+    <div class="fks-langs" role="group" [attr.aria-label]="t.language">
+      <button type="button" class="fks-lang" *ngFor="let l of LANGS"
+              [class.fks-lang-on]="lang === l.code" [attr.aria-pressed]="lang === l.code"
+              [attr.lang]="l.code" (click)="lang = l.code">{{ l.label }}</button>
+    </div>
+
+    <h1 class="fks-title">{{ t.startTitle }}</h1>
 
     <ng-container *ngIf="step === 'prn'">
-      <p class="fks-sub">It takes less than a minute. We'll send a one-time code to the phone number registered with your PRN.</p>
+      <p class="fks-sub">{{ t.startSub }}</p>
 
-      <label class="fks-field">Your PRN
+      <label class="fks-field">{{ t.prnLabel }}
         <input type="text" inputmode="numeric" maxlength="10" [(ngModel)]="patientPrn"
-               placeholder="e.g. 102345" autocomplete="off" (keyup.enter)="requestOtp()" />
+               [placeholder]="t.prnPh" autocomplete="off" (keyup.enter)="requestOtp()" />
       </label>
 
-      <div class="fks-field-label">What was your visit for?</div>
+      <div class="fks-field-label">{{ t.visitQ }}</div>
       <div class="fks-visit-grid">
         <label class="fks-visit-opt" *ngFor="let v of VISIT_TYPES">
-          <input type="radio" name="visitType" [value]="v.value" [(ngModel)]="visitType" />
-          <span>{{ v.label }}</span>
+          <input type="radio" name="visitType" [value]="v" [(ngModel)]="visitType" />
+          <span>{{ visitLabel(v) }}</span>
         </label>
       </div>
 
       <p class="fks-error" *ngIf="errorMessage">{{ errorMessage }}</p>
 
       <button class="fks-submit" (click)="requestOtp()" [disabled]="submitting">
-        {{ submitting ? 'Sending OTP…' : 'Send OTP' }}
+        {{ submitting ? t.sendingOtp : t.sendOtp }}
       </button>
-      <p class="fks-foot">Don't know your PRN? It's printed on your registration slip — or ask a staff member.</p>
+      <p class="fks-foot">{{ t.prnHelp }}</p>
     </ng-container>
 
     <ng-container *ngIf="step === 'otp'">
-      <p class="fks-sub">Enter the 6-digit code we sent by SMS. It is valid for 2 minutes.</p>
+      <p class="fks-sub">{{ t.otpSub }}</p>
       <p class="fks-info" *ngIf="infoMessage">{{ infoMessage }}</p>
 
-      <label class="fks-field">One-time code
+      <label class="fks-field">{{ t.otpLabel }}
         <input class="fks-otp" type="text" inputmode="numeric" maxlength="6" [(ngModel)]="otp"
                placeholder="••••••" autocomplete="one-time-code" (keyup.enter)="verify()" />
       </label>
@@ -38,14 +44,14 @@
       <p class="fks-error" *ngIf="errorMessage">{{ errorMessage }}</p>
 
       <button class="fks-submit" (click)="verify()" [disabled]="submitting">
-        {{ submitting ? 'Verifying…' : 'Verify & continue' }}
+        {{ submitting ? t.verifying : t.verify }}
       </button>
 
       <div class="fks-otp-actions">
         <button class="fks-link" (click)="resend()" [disabled]="resendIn > 0 || submitting">
-          {{ resendIn > 0 ? 'Resend OTP in ' + resendIn + 's' : 'Resend OTP' }}
+          {{ resendIn > 0 ? resendLabel : t.resend }}
         </button>
-        <button class="fks-link" (click)="changePrn()" [disabled]="submitting">Change PRN</button>
+        <button class="fks-link" (click)="changePrn()" [disabled]="submitting">{{ t.changePrn }}</button>
       </div>
     </ng-container>
   </div>

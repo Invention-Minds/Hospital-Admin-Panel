@@ -1,0 +1,61 @@
+<div class="page ce-shell">
+  <div class="ce-top">
+    <a class="ce-btn" routerLink="/quality/audits">← Audits</a>
+    <button class="ce-btn ce-btn-primary" *ngIf="canEdit" (click)="save()" [disabled]="saving || loading">{{ saving ? 'Saving…' : 'Save checklist' }}</button>
+  </div>
+
+  <div class="ce-banner ce-banner-bad" *ngIf="errorMessage" (click)="errorMessage = ''">{{ errorMessage }}</div>
+  <div class="ce-banner ce-banner-good" *ngIf="successMessage">{{ successMessage }}</div>
+
+  <fieldset class="ce-card ce-meta" [disabled]="!canEdit">
+    <label class="ce-wide">Checklist name
+      <input type="text" [(ngModel)]="name" maxlength="160" placeholder="e.g. Hand hygiene" />
+    </label>
+    <label>Group
+      <select [(ngModel)]="group"><option *ngFor="let g of GROUPS" [value]="g.value">{{ g.label }}</option></select>
+    </label>
+    <label>Suggested frequency
+      <select [(ngModel)]="frequency">
+        <option [ngValue]="null">—</option>
+        <option value="weekly">Weekly</option>
+        <option value="monthly">Monthly</option>
+        <option value="quarterly">Quarterly</option>
+      </select>
+    </label>
+    <label class="ce-check"><input type="checkbox" [(ngModel)]="isActive" /> Active (can be scheduled)</label>
+    <label class="ce-full">Description / instructions for the auditor
+      <textarea rows="2" [(ngModel)]="description" placeholder="Optional"></textarea>
+    </label>
+  </fieldset>
+
+  <section class="ce-card">
+    <div class="ce-h-row">
+      <h2 class="ce-h">Questions <span class="ce-muted">{{ activeItems.length }} active</span></h2>
+      <span class="ce-muted" *ngIf="canEdit">Critical = a "No" alerts the unit HOD and Quality. Indicator = each answer also counts toward that NABH indicator.</span>
+    </div>
+    <div class="ce-item" *ngFor="let it of items; let i = index" [class.ce-item-off]="!it.isActive">
+      <span class="ce-num">{{ i + 1 }}</span>
+      <fieldset class="ce-item-body" [disabled]="!canEdit || !it.isActive">
+        <textarea rows="2" [(ngModel)]="it.text" maxlength="1000" placeholder="Question — phrase it so 'Yes' means compliant"></textarea>
+        <div class="ce-item-opts">
+          <input type="text" [(ngModel)]="it.section" maxlength="120" placeholder="Section (optional)" />
+          <label class="ce-check"><input type="checkbox" [(ngModel)]="it.critical" /> Critical</label>
+          <select [(ngModel)]="it.qiCode" *ngIf="canEdit || it.qiCode">
+            <option [ngValue]="null">— no indicator —</option>
+            <option *ngFor="let c of qiCodes" [value]="c">{{ c }}</option>
+            <option *ngIf="it.qiCode && !qiCodes.includes(it.qiCode)" [value]="it.qiCode">{{ it.qiCode }}</option>
+          </select>
+        </div>
+      </fieldset>
+      <div class="ce-item-btns" *ngIf="canEdit">
+        <ng-container *ngIf="it.isActive">
+          <button class="ce-btn ce-btn-sm" (click)="move(it, -1)" [disabled]="i === 0" title="Move up">↑</button>
+          <button class="ce-btn ce-btn-sm" (click)="move(it, 1)" [disabled]="i === items.length - 1" title="Move down">↓</button>
+          <button class="ce-btn ce-btn-sm" (click)="remove(it)" [title]="it.id ? 'Retire (kept for past audits)' : 'Remove'">✕</button>
+        </ng-container>
+        <button class="ce-btn ce-btn-sm" *ngIf="!it.isActive" (click)="restore(it)">Restore</button>
+      </div>
+    </div>
+    <button class="ce-btn" *ngIf="canEdit" (click)="addItem()">＋ Add question</button>
+  </section>
+</div>

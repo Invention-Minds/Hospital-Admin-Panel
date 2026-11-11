@@ -19,15 +19,32 @@
         <div><span>Raised</span> {{ c.raisedAt | date:'dd/MM/yy h:mm a' }}<ng-container *ngIf="c.raisedByName"> by {{ c.raisedByName }}</ng-container></div>
         <div><span>Channel</span> {{ c.channel }}</div>
         <div><span>Source</span> {{ c.source === 'survey' ? 'Auto from low-NPS survey' : 'Manual' }}</div>
+        <div><span>Type</span> {{ categoryLabel(c.category) }}</div>
         <div><span>Department</span> {{ c.department || '—' }}</div>
         <div *ngIf="c.assignedTo"><span>Assigned to</span> {{ c.assignedTo }}</div>
-        <div *ngIf="c.slaDueAt"><span>SLA due</span> {{ c.slaDueAt | date:'dd/MM/yy h:mm a' }}</div>
+        <div *ngIf="c.slaDueAt"><span>Due by</span> {{ c.slaDueAt | date:'dd/MM/yy h:mm a' }}
+          <small class="cpd-rule" *ngIf="c.slaRule" title="The deadline rule that matches this complaint's unit, type and severity">
+            rule: {{ c.slaRule.label }} → {{ c.slaRule.hours }}h</small></div>
         <div *ngIf="c.escalatedAt"><span>Escalated</span> {{ c.escalatedAt | date:'dd/MM/yy h:mm a' }}</div>
+        <div><span>Unit</span> {{ c.unit?.name || 'Not assigned' }}</div>
+        <div *ngIf="c.unit"><span>HOD</span> {{ c.unit.hodName || 'not set' }}<ng-container *ngIf="c.unit.deputyName"> · deputy {{ c.unit.deputyName }}</ng-container></div>
+        <div *ngIf="c.escalationLevel"><span>Escalation</span> Level {{ c.escalationLevel }}</div>
         <div *ngIf="c.resolvedAt"><span>Resolved</span> {{ c.resolvedAt | date:'dd/MM/yy h:mm a' }} by {{ c.resolvedBy }}</div>
       </div>
 
       <h3 class="cpd-section">Description</h3>
       <p class="cpd-desc">{{ c.description }}</p>
+
+      <ng-container *ngIf="c.escalations?.length">
+        <h3 class="cpd-section">Escalation timeline</h3>
+        <ul class="cpd-timeline">
+          <li *ngFor="let e of c.escalations">
+            <strong>L{{ e.level }}</strong> · {{ e.at | date:'dd/MM/yy h:mm a' }}
+            <span *ngIf="e.label"> — {{ e.label }}</span>
+            <span class="cpd-tl-meta"> ({{ e.recipients }} notified)</span>
+          </li>
+        </ul>
+      </ng-container>
 
       <h3 class="cpd-section" *ngIf="c.patientName || c.patientPrn">Patient</h3>
       <div *ngIf="c.patientName || c.patientPrn" class="cpd-context">
@@ -35,7 +52,7 @@
         <div *ngIf="c.patientPrn"><span>PRN</span> {{ c.patientPrn }}</div>
       </div>
 
-      <ng-container *ngIf="c.resolutionNotes && (!isHandler || c.status === 'resolved')">
+      <ng-container *ngIf="c.resolutionNotes && (!canAct || c.status === 'resolved')">
         <h3 class="cpd-section">Resolution</h3>
         <p class="cpd-desc">{{ c.resolutionNotes }}</p>
       </ng-container>
@@ -52,19 +69,37 @@
       </div>
     </div>
 
-    <div class="cpd-card" *ngIf="isHandler">
+    <div class="cpd-card" *ngIf="canAct">
       <h3 class="cpd-section">Status &amp; resolution</h3>
       <label class="cpd-field">Status
         <select [(ngModel)]="draft.status">
           <option *ngFor="let s of statusOptions()" [value]="s">{{ s === 'acknowledged' && c.status === 'resolved' ? 'acknowledged (reopen)' : s }}</option>
         </select>
       </label>
+      <label class="cpd-field" *ngIf="canAssign">Type
+        <select [(ngModel)]="draft.category">
+          <option [ngValue]="null">— not specified —</option>
+          <option *ngFor="let t of categories" [ngValue]="t.key">{{ t.label }}</option>
+        </select>
+      </label>
+      <p class="cpd-hint" *ngIf="canAssign && (draft.category !== (c.category ?? null) || draft.unitId !== (c.unitId ?? null)) && c.status !== 'resolved'">
+        Changing the unit or type re-works the deadline from when the complaint was raised.
+      </p>
+      <label class="cpd-field" *ngIf="canChangeUnit">Unit responsible
+        <select [(ngModel)]="draft.unitId">
+          <option [ngValue]="null">— not assigned —</option>
+          <option *ngFor="let u of units" [ngValue]="u.id">{{ u.name }}</option>
+        </select>
+      </label>
+      <ng-container *ngIf="canChangeUnit">
       <label class="cpd-field">Department
         <select [(ngModel)]="draft.department">
           <option value="">— not specified —</option>
           <option *ngFor="let d of departmentOptions()" [value]="d">{{ d }}</option>
         </select>
       </label>
+      </ng-container>
+      <ng-container *ngIf="canAssign">
       <label class="cpd-field">Assign to staff
         <select [ngModel]="draft.assignedToId" (ngModelChange)="onAssigneeSelected($event)">
           <option [ngValue]="null">— not in list / unassigned —</option>
@@ -76,6 +111,7 @@
       <label class="cpd-field">Assignee name
         <input type="text" [(ngModel)]="draft.assignedTo" [readonly]="draft.assignedToId !== null" placeholder="Investigator / desk owner" />
       </label>
+      </ng-container>
       <label class="cpd-field" *ngIf="draft.status === 'resolved'">
         Resolution notes{{ needsNotes() ? ' *' : '' }}
         <textarea rows="4" [(ngModel)]="draft.resolutionNotes"></textarea>

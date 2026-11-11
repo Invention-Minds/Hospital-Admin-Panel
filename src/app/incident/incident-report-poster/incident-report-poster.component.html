@@ -1,0 +1,23 @@
+<div class="page rp-shell">
+  <div class="rp-controls">
+    <a class="rp-btn" routerLink="/incidents">← Incidents</a>
+    <h1 class="rp-h">Incident reporting QR posters</h1>
+    <p class="rp-sub">Staff, patients and visitors scan the QR to report a safety incident anonymously — no login, no name stored.
+      A unit poster pre-selects that unit, so its HOD is alerted.</p>
+    <label class="rp-check"><input type="checkbox" [(ngModel)]="general" /> General poster (any area)</label>
+    <div class="rp-units">
+      <label class="rp-check" *ngFor="let u of units"><input type="checkbox" [checked]="selected.has(u.id)" (change)="toggle(u.id)" /> {{ u.name }}</label>
+    </div>
+    <button class="rp-btn rp-btn-primary" (click)="print()" [disabled]="!posterList.length">Print {{ posterList.length }} poster(s)</button>
+  </div>
+
+  <div class="rp-poster" *ngFor="let p of posterList">
+    <div class="rp-badge">PATIENT SAFETY</div>
+    <h2 class="rp-title">Saw something unsafe?</h2>
+    <p class="rp-lead">Report it anonymously in under a minute.</p>
+    <qrcode [qrdata]="p.url" [width]="300" [errorCorrectionLevel]="'M'"></qrcode>
+    <p class="rp-area" *ngIf="p.title">{{ p.title }}</p>
+    <p class="rp-small">Scan with your phone camera · Your name is not recorded · Reports help us fix problems, not blame people</p>
+    <p class="rp-url">{{ p.url }}</p>
+  </div>
+</div>

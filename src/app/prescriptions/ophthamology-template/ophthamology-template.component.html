@@ -1101,13 +1101,16 @@
     <div *ngIf="tab==='diagnosis'" class="tab-box">
         <h4>Diagnosis (ICD-10)</h4>
 
-        <input [(ngModel)]="diagnosisSearch" placeholder="Search diagnosis…" (input)="searchDiagnosis()">
+        <input [(ngModel)]="diagnosisSearch" placeholder="Search diagnosis…" (input)="searchDiagnosis()" (focus)="searchDiagnosis()">
 
         <div class="diag-results" *ngIf="diagFiltered.length">
             <div class="diag-item" *ngFor="let d of diagFiltered" (click)="addDiagnosis(d)">
                 {{d.code}} – {{d.label}}
             </div>
         </div>
+        <p class="diag-hint" *ngIf="diagnosisSearch && !diagLoading && !diagFiltered.length">
+            No ophthalmology diagnosis matches "{{ diagnosisSearch }}". Add it in Masters → Diagnosis codes with Specialty "Ophthalmology".
+        </p>
 
         <h4>Selected Diagnoses</h4>
         <div *ngFor="let d of pres.diagnosisList" class="diag-selected">

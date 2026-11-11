@@ -43,6 +43,13 @@
         <option *ngFor="let d of departments" [value]="d">{{ d }}</option>
       </select>
     </label>
+    <label>Type
+      <select [(ngModel)]="filters.category" (change)="search()">
+        <option value="">All</option>
+        <option *ngFor="let t of categories" [value]="t.key">{{ t.label }}</option>
+        <option value="none">Not set</option>
+      </select>
+    </label>
     <label>From
       <input type="date" [(ngModel)]="filters.from" (change)="search()" />
     </label>
@@ -77,7 +84,7 @@
   <table class="cp-table" *ngIf="!loading && rows.length">
     <thead><tr>
       <th class="cp-th-check" *ngIf="isHandler"><input type="checkbox" [checked]="allSelected()" (change)="toggleAll()" /></th>
-      <th>Code</th><th>When</th><th>Severity</th><th>Patient</th><th>Department</th><th>Source</th><th>Status</th><th>SLA</th>
+      <th>Code</th><th>When</th><th>Severity</th><th>Type</th><th>Patient</th><th>Department</th><th>Source</th><th>Status</th><th>SLA</th>
     </tr></thead>
     <tbody>
       <tr *ngFor="let c of rows" (click)="openDetail(c)" class="cp-row" [class.cp-row-breach]="slaState(c) === 'breach'" [class.cp-row-selected]="isSelected(c.id)">
@@ -87,6 +94,7 @@
         <td>{{ c.code }}</td>
         <td>{{ c.raisedAt | date:'dd/MM/yy h:mm a' }}</td>
         <td><span class="cp-pill cp-sev-{{ c.severity }}">{{ c.severity }}</span></td>
+        <td>{{ categoryLabel(c.category) }}</td>
         <td><span *ngIf="c.patientName">{{ c.patientName }}</span><span *ngIf="c.patientPrn"> · {{ c.patientPrn }}</span></td>
         <td>{{ c.department || '—' }}</td>
         <td>{{ c.source === 'survey' ? 'Survey (auto)' : 'Manual' }}</td>
@@ -132,6 +140,12 @@
         </select>
       </label>
     </div>
+    <label class="cp-field">Type
+      <select [(ngModel)]="draftCreate.category">
+        <option value="">— not specified —</option>
+        <option *ngFor="let t of categories" [value]="t.key">{{ t.label }}</option>
+      </select>
+    </label>
     <label class="cp-field">Department
       <select [(ngModel)]="draftCreate.department">
         <option value="">{{ hasEncounter() ? '— from the encounter —' : '— not specified —' }}</option>

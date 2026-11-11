@@ -1,0 +1,26 @@
+.pr-shell { min-height: 100vh; background: linear-gradient(135deg, #e0e7ff 0%, #f0fdf4 100%); display: flex; align-items: flex-start; justify-content: center; padding: 24px 16px; font-family: Kanit, sans-serif; box-sizing: border-box; }
+.pr-card { background: #fff; border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.1); padding: 28px 26px; width: 100%; max-width: 620px; box-sizing: border-box; }
+.pr-title { font-size: 24px; font-weight: 600; color: #0e2970; margin: 0 0 6px; }
+.pr-sub { font-size: 14px; color: #4b5563; margin: 0 0 16px; line-height: 1.5; }
+.pr-q { font-size: 14px; font-weight: 500; color: #271e4a; margin: 14px 0 8px; }
+.pr-cats { display: flex; flex-wrap: wrap; gap: 8px; }
+.pr-cat, .pr-seg button { min-height: 40px; padding: 6px 14px; border-radius: 20px; border: 1px solid #d1d5db; background: #f9fafb; color: #271e4a; font-family: Kanit, sans-serif; font-size: 14px; cursor: pointer; }
+.pr-on { background: #1e40af !important; border-color: #1e40af !important; color: #fff !important; }
+.pr-seg { display: flex; flex-wrap: wrap; gap: 8px; }
+.pr-harm { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; }
+.pr-harm-opt { display: grid; grid-template-columns: 18px 1fr; gap: 8px; padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: 14px; color: #271e4a; }
+.pr-harm-opt.pr-on { background: #eff6ff !important; color: #271e4a !important; border: 0 !important; }
+.pr-harm-opt small { display: block; font-size: 12px; color: #6b7280; }
+.pr-field { display: flex; flex-direction: column; gap: 5px; font-size: 13px; color: #4b5563; margin: 14px 0 0; flex: 1 1 180px; }
+.pr-field input, .pr-field select, .pr-field textarea { border: 1px solid #d1d5db; border-radius: 8px; padding: 9px 12px; font-size: 15px; font-family: Kanit, sans-serif; color: #271e4a; background: #fff; box-sizing: border-box; width: 100%; }
+.pr-field textarea { resize: vertical; }
+.pr-count { font-size: 11px; color: #9ca3af; text-align: right; }
+.pr-row { display: flex; flex-wrap: wrap; gap: 0 12px; }
+.pr-trap { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+.pr-error { color: #b91c1c; font-size: 14px; margin: 12px 0 0; }
+.pr-submit { width: 100%; height: 50px; margin-top: 18px; border: 0; border-radius: 10px; background: #169458; color: #fff; font-family: Kanit, sans-serif; font-size: 17px; font-weight: 600; cursor: pointer; }
+.pr-submit:hover:not([disabled]) { background: #117849; }
+.pr-submit[disabled] { opacity: 0.6; cursor: not-allowed; }
+.pr-secondary { background: #fff; color: #1e40af; border: 1px solid #1e40af; }
+.pr-secondary:hover:not([disabled]) { background: #eff6ff; }
+@media (max-width: 480px) { .pr-card { padding: 22px 16px; } }

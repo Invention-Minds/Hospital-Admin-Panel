@@ -411,8 +411,14 @@
         <label>
           <input type="checkbox" name="inclusions"
             [disabled]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'  "
-            [(ngModel)]="formData.includedItems['wardICUStay']" />
-          Ward and ICU Stay
+            [(ngModel)]="formData.includedItems['wardStay']" />
+          Ward Stay
+        </label>
+        <label>
+          <input type="checkbox" name="inclusions"
+            [disabled]="formData.statusOfEstimation === 'accepted' || formData.statusOfEstimation === 'confirmed' || formData.statusOfEstimation === 'approved'  "
+            [(ngModel)]="formData.includedItems['icuStay']" />
+          ICU Stay
         </label>
         <label>
           <input type="checkbox" name="primaryConsultant"

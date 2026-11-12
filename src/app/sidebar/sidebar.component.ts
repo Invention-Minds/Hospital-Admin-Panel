@@ -327,7 +327,8 @@ get showEmergencySection(): boolean {
 
 get showIpdSection(): boolean {
   return this.role === 'doctor' || this.role === 'super_admin'
-    || this.isIpdNurse || this.isNursingSuper;
+    || this.isIpdNurse || this.isNursingSuper
+    || this.isEstimator(); // HMIS import only
 }
 
 get showOtSection(): boolean {

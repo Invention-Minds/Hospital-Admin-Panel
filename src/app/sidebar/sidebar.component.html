@@ -539,9 +539,9 @@
     </a>
 
     <!-- HMIS export upload — keeps admissions current until HMIS is integrated -->
-    <a [routerLink]="(role === 'super_admin' || isNursingSuper) ? '/ipd/hmis-import': null"
+    <a [routerLink]="(role === 'super_admin' || isNursingSuper || isEstimator()) ? '/ipd/hmis-import': null"
        routerLinkActive="active" class="icon-wrapper"
-       *ngIf="(role === 'super_admin' || isNursingSuper)">
+       *ngIf="(role === 'super_admin' || isNursingSuper || isEstimator())">
       <div class="icon-content">
         <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
           <path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zm-1 2.5L17.5 9H13zM12 11l4 4h-3v4h-2v-4H8z"/>

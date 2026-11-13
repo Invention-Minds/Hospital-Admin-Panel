@@ -17,6 +17,11 @@
     </div>
   </div>
 
+  <!-- ── Monthly submission deadline ── -->
+  <app-qi-submission-banner [showMissingToggle]="true" [missingOnly]="missingOnly"
+                            (missingOnlyChange)="onMissingOnly($event)"
+                            (statusLoaded)="onSubmissionStatus($event)"></app-qi-submission-banner>
+
   <!-- ── Stats tile ── -->
   <div class="q-cards" *ngIf="stats as s">
     <div class="q-card"><span class="q-card-label">Total</span><span class="q-card-val">{{ s.total }}</span><span class="q-card-meta">{{ s.active }} active</span></div>
@@ -49,7 +54,7 @@
 
   <div class="q-banner q-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
   <div class="q-loading" *ngIf="loading">Loading indicators…</div>
-  <div class="q-empty" *ngIf="!loading && rows.length === 0">No indicators match your filters.</div>
+  <div class="q-empty" *ngIf="!loading && rows.length === 0">{{ missingOnly ? 'No missing indicators match your filters.' : 'No indicators match your filters.' }}</div>
 
   <!-- ── Indicators grouped by chapter ── -->
   <ng-container *ngIf="!loading">
@@ -62,6 +67,7 @@
             <span class="qi-type">{{ ind.indicatorType }}</span>
             <span class="qi-pill q-bad q-critical" *ngIf="ind.isCritical">CRITICAL</span>
             <span class="qi-pill" *ngIf="!ind.isActive">disabled</span>
+            <span class="qi-pill q-warn" *ngIf="isMissing(ind)" title="No record yet for {{ submission?.period }}">missing {{ submission?.period }}</span>
           </div>
           <div class="qi-name">{{ ind.name }}</div>
           <div class="qi-meta">

@@ -1,0 +1,7 @@
+.dq-scale { margin: 12px 0 8px; font-size: 13px; }
+.dq-rate td input[type="radio"] { width: 18px; height: 18px; accent-color: var(--dx-navy); cursor: pointer; }
+.dq-rate th .dx-sub-line { font-weight: 500; text-transform: none; letter-spacing: 0; }
+.dq-score { display: flex; flex-wrap: wrap; gap: 8px 24px; align-items: center; margin: 12px 0 16px; font-size: 14px; color: var(--dx-ink); }
+.dq-score b { font-size: 18px; color: var(--dx-navy); }
+.dq-req { margin-left: 6px; font-size: 12px; font-weight: 600; color: #a3321c; }
+.dq-yn { align-items: center; gap: 16px; margin: 14px 0 10px; }

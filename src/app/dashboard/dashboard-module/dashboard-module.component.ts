@@ -208,8 +208,21 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
     const isAuditForMe = notification.type?.startsWith('audit_') &&
       notification['userId'] != null && String(notification['userId']) === myUserId;
 
+    // Dietary: new admission / census / diet change → Dietician; at night the
+    // same goes to doctors (any doctor acknowledges). The discharge "stop trays"
+    // note goes to the dietary team (Dietician + Canteen Staff).
+    const isDietician = this.subAdminType === 'Dietician' || this.subAdminType === 'Diet';
+    const dietTarget = String(notification['targetRole'] ?? '');
+    const isDietForMe =
+      (notification.type?.startsWith('diet_') &&
+        ((dietTarget === 'Dietician' && isDietician) || (dietTarget === 'doctor' && this.role === 'doctor'))) ||
+      // targetRole may be the 'discharge_diet' alias or what the hospital mapped it to.
+      (notification.type === 'discharge_clearance_cleared' && /diet/i.test(dietTarget) &&
+        (isDietician || this.subAdminType === 'Canteen Staff'));
+
     return (
       isEmergencyCode ||
+      isDietForMe ||
       isReferralForMe ||
       isIncidentForMe ||
       isAuditForMe ||
@@ -254,6 +267,9 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
       case 'appointment_request': return 'New Appointment Request';
       case 'service_request': return 'New Service Request';
       case 'estimation_request': return 'New Estimation Request';
+      case 'diet_new_admission': return 'New admission — diet needed';
+      case 'diet_census': return 'Diet census received';
+      case 'diet_change': return 'Diet change to review';
       default: return 'Notification';
     }
   }
@@ -317,6 +333,9 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
             else this.router.navigate(['/complaints']);
           } else if (clickedType === 'qi_rca_opened' || clickedType === 'qi_trend_breach') {
             this.router.navigate(['/quality/rcas']);
+          } else if (clickedType === 'qi_submission_due') {
+            // Monthly QI deadline reminder — open the indicators narrowed to the missing ones.
+            this.router.navigate(['/quality/indicators'], { queryParams: { missing: '1' } });
           } else if (clickedType?.startsWith('qi_')) {
             this.router.navigate(['/quality/indicators']);
           } else if (clickedType === 'feedback_reminder') {

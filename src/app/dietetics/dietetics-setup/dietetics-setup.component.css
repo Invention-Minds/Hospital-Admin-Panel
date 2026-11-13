@@ -70,3 +70,11 @@
 .ds-channel-tip { margin: 10px 2px 0; }
 
 code { font-size: 12px; background: #f3f5fa; border-radius: 5px; padding: 2px 6px; color: var(--dx-navy-ink); }
+
+/* Weekly menu: extra dish options per cell */
+.ds-opts { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+.ds-opt { display: inline-flex; align-items: center; gap: 4px; padding: 2px 4px 2px 8px; border-radius: 10px; background: #eef2fb; color: #0e2970; font-size: 12px; }
+.ds-opt-x { border: 0; background: transparent; color: #5a6275; cursor: pointer; font-size: 14px; line-height: 1; padding: 0 2px; }
+.ds-opt-x:hover { color: #a3321c; }
+.ds-opt-add { font-size: 12px; padding: 2px 4px; max-width: 120px; }
+

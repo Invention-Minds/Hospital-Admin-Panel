@@ -1,0 +1,9 @@
+.to-choices { min-width: 260px; }
+.to-choice {
+  display: flex; align-items: center; gap: 8px; padding: 6px 10px; margin: 0 0 6px;
+  border: 1px solid var(--dx-line); border-radius: 8px; cursor: pointer; font-size: 14px;
+}
+.to-choice:hover { border-color: var(--dx-navy); }
+.to-choice.is-on { border-color: var(--dx-navy); background: #f0f3ff; font-weight: 600; }
+.to-choice input { accent-color: var(--dx-navy); }
+.to-avoid { color: #a3321c; font-weight: 600; }

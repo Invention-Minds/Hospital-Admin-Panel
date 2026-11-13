@@ -1,0 +1,96 @@
+<div class="dx-shell df-screen">
+  <div class="dx-head">
+    <div>
+      <h2 class="dx-title">RT feeds</h2>
+      <p class="dx-sub">Feed doses from the doctor's feed order on each diet plan (first feed + every N hours inside the feed window). Kitchen prepares and labels each dose; the ward nurse records it given.</p>
+    </div>
+    <div class="dx-toolbar">
+      <label>Date <input type="date" [(ngModel)]="date" (change)="load()" /></label>
+      <label>Ward
+        <select [(ngModel)]="wardId" (change)="load()">
+          <option value="">All wards</option>
+          <option *ngFor="let w of wards" [value]="w.id">{{ w.wardName }}</option>
+        </select>
+      </label>
+      <button type="button" class="dx-btn" (click)="load()">Refresh</button>
+    </div>
+  </div>
+
+  <div class="dx-banner dx-banner-bad" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+  <div class="dx-banner dx-banner-good" *ngIf="successMessage" role="status">{{ successMessage }}</div>
+
+  <div class="dx-summary">
+    <span class="is-act"><b>{{ count('ORDERED') }}</b> to prepare</span>
+    <span><b>{{ count('PREPARED') }}</b> prepared</span>
+    <span><b>{{ count('GIVEN') }}</b> given</span>
+    <span><b>{{ count('SKIPPED') }}</b> not given</span>
+  </div>
+
+  <div class="dx-actionbar" *ngIf="doses.length">
+    <ng-container *ngIf="isKitchen">
+      <label>Labels for the next
+        <select [(ngModel)]="labelHours">
+          <option [ngValue]="1">1 hour</option>
+          <option [ngValue]="2">2 hours</option>
+          <option [ngValue]="4">4 hours</option>
+          <option [ngValue]="0">whole day</option>
+        </select>
+      </label>
+      <button type="button" class="dx-btn" (click)="selectDueSoon()">Select due ({{ dueSoon.length }})</button>
+      <button type="button" class="dx-btn" (click)="prepareSelected()" [disabled]="!selected.size">Mark prepared ({{ selected.size }})</button>
+      <button type="button" class="dx-btn dx-btn-primary" (click)="printLabels()">Print {{ selected.size || dueSoon.length }} labels</button>
+    </ng-container>
+    <span class="dx-spacer"></span>
+    <label *ngIf="isNurse">Given by <input type="text" class="dx-input df-given" [(ngModel)]="givenByName" aria-label="Given by" /></label>
+  </div>
+
+  <p class="dx-empty" *ngIf="loading">Loading…</p>
+  <p class="dx-empty" *ngIf="!loading && !doses.length">
+    No feeds for this day. Feeds appear when a diet plan has a feed order — interval, first feed time and (optionally) the feeding window.
+  </p>
+
+  <div class="dx-scroll" *ngIf="doses.length">
+    <table class="diet-grid">
+      <thead>
+        <tr><th *ngIf="isKitchen"></th><th>Time</th><th>Bed</th><th>Patient</th><th>Feed</th><th>Avoid</th><th>Status</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let d of doses; trackBy: trackDose" [class.is-act]="isLate(d)" [class.is-muted]="d.status === 'GIVEN' || d.status === 'SKIPPED'">
+          <td *ngIf="isKitchen" class="dx-tight"><input type="checkbox" [checked]="selected.has(d.id)" (change)="toggle(d)" [disabled]="d.status !== 'ORDERED'" aria-label="Select feed" /></td>
+          <td class="is-strong dx-tight">{{ d.scheduledFor | date:'HH:mm' }}<span class="dx-sub-line df-late" *ngIf="isLate(d)">Overdue</span></td>
+          <td class="dx-tight">{{ d.bedNumber || '—' }}<span class="dx-sub-line">{{ d.wardName }}</span></td>
+          <td>{{ d.patientName || d.admissionNo }}<span class="dx-sub-line">PRN {{ d.prn }}</span></td>
+          <td>
+            <span class="dx-strong">{{ d.volumeMl ? d.volumeMl + ' ml' : 'Feed' }}</span>
+            <span class="dx-muted" *ngIf="d.intervalHours"> · every {{ d.intervalHours }} h</span>
+            <span class="dx-sub-line">{{ d.dietCode }}{{ d.feedNotes ? ' · ' + d.feedNotes : '' }}</span>
+          </td>
+          <td class="df-avoid">{{ d.foodAvoid || '' }}</td>
+          <td>
+            <span class="dx-pill" [ngClass]="{ 'dx-pill-warn': d.status === 'ORDERED', 'dx-pill-info': d.status === 'PREPARED', 'dx-pill-ok': d.status === 'GIVEN', 'dx-pill-bad': d.status === 'SKIPPED' }">
+              {{ d.status === 'ORDERED' ? 'To prepare' : d.status === 'PREPARED' ? 'Prepared' : d.status === 'GIVEN' ? 'Given' : 'Not given' }}
+            </span>
+            <span class="dx-sub-line" *ngIf="d.givenAt">{{ d.givenByName }} · {{ d.givenAt | date:'HH:mm' }}</span>
+            <span class="dx-sub-line" *ngIf="d.skipReason">{{ d.skipReason }}</span>
+          </td>
+          <td class="dx-tight">
+            <button type="button" class="dx-btn dx-btn-sm" *ngIf="isKitchen && d.status === 'ORDERED'" (click)="prepare(d)">Prepared</button>
+            <button type="button" class="dx-btn dx-btn-sm dx-btn-primary" *ngIf="isNurse && d.status === 'PREPARED'" (click)="give(d)">Given</button>
+            <button type="button" class="dx-btn dx-btn-sm" *ngIf="(isNurse || isKitchen) && (d.status === 'ORDERED' || d.status === 'PREPARED')" (click)="skip(d)">Not given</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Print: one sticker per feed dose -->
+<div class="df-labels" *ngIf="printing.length">
+  <div class="df-label" *ngFor="let d of printing">
+    <div class="df-l-top"><b>{{ d.bedNumber || '—' }}</b><span>{{ d.scheduledFor | date:'HH:mm, dd MMM' }}</span></div>
+    <div class="df-l-name">{{ d.patientName || d.admissionNo }} · PRN {{ d.prn }}</div>
+    <div class="df-l-feed">RT FEED {{ d.volumeMl ? d.volumeMl + ' ml' : '' }}{{ d.intervalHours ? ' · Q' + d.intervalHours + 'H' : '' }}</div>
+    <div class="df-l-sub">{{ d.dietCode }}{{ d.feedNotes ? ' · ' + d.feedNotes : '' }}</div>
+    <div class="df-l-avoid" *ngIf="d.foodAvoid">AVOID: {{ d.foodAvoid }}</div>
+  </div>
+</div>

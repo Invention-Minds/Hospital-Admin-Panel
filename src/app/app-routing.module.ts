@@ -87,6 +87,10 @@ import { DietCensusComponent } from './dietetics/diet-census/diet-census.compone
 import { DietLabelsComponent } from './dietetics/diet-labels/diet-labels.component';
 import { DietRoundsComponent } from './dietetics/diet-rounds/diet-rounds.component';
 import { NutritionAssessmentComponent } from './dietetics/nutrition-assessment/nutrition-assessment.component';
+import { DietNightAckComponent } from './dietetics/diet-night-ack/diet-night-ack.component';
+import { DietFeedsComponent } from './dietetics/diet-feeds/diet-feeds.component';
+import { DietQualityComponent } from './dietetics/diet-quality/diet-quality.component';
+import { DietTakeOrderComponent } from './dietetics/diet-take-order/diet-take-order.component';
 import { MastersComponent } from './masters/masters.component';
 import { NursingStationAdminComponent } from './nursing-station/nursing-station-admin/nursing-station-admin.component';
 import { IpdReportsComponent } from './ipd/ipd-reports/ipd-reports.component';
@@ -358,6 +362,10 @@ const routes: Routes = [
   { path: 'dietetics/labels', component: DietLabelsComponent, canActivate:[authGuard] },
   { path: 'dietetics/rounds', component: DietRoundsComponent, canActivate:[authGuard] },
   { path: 'dietetics/nutrition/:admissionId', component: NutritionAssessmentComponent, canActivate:[authGuard] },
+  { path: 'dietetics/night-ack', component: DietNightAckComponent, canActivate:[authGuard] },
+  { path: 'dietetics/feeds', component: DietFeedsComponent, canActivate:[authGuard] },
+  { path: 'dietetics/quality', component: DietQualityComponent, canActivate:[authGuard] },
+  { path: 'dietetics/take-order', component: DietTakeOrderComponent, canActivate:[authGuard] },
   { path: 'ipd/admission/:admissionId/diet', component: DietAdmissionTabComponent, canActivate:[authGuard] },
   { path: 'canteen-channel/:channelId', component: CanteenChannelComponent },
   { path: 'ipd/hmis-import', component: HmisImportComponent, canActivate:[authGuard] },

@@ -46,7 +46,7 @@
           <thead>
             <tr>
               <th>Bed</th><th>Patient</th><th>Consultant · diagnosis</th><th>Current diet</th>
-              <th>Diet on ward</th><th>NPO</th><th>RT feed</th><th>D/S plate</th><th>Remarks</th>
+              <th>Diet on ward</th><th>Food allergy · preference</th><th>NPO</th><th>RT feed</th><th>D/S plate</th><th>Remarks</th>
             </tr>
           </thead>
           <tbody>
@@ -76,6 +76,18 @@
                   <option *ngFor="let d of diets" [ngValue]="d.id">{{ d.code }} · {{ d.name }}</option>
                 </select>
               </td>
+              <td class="dc-allergy">
+                <input type="text" class="dx-input" [(ngModel)]="l.foodAllergy" placeholder="Food allergy — none if blank" aria-label="Food allergy" />
+                <select class="dx-input" [(ngModel)]="l.foodPreference" aria-label="Food preference">
+                  <option value="">Preference —</option>
+                  <option value="Veg">Veg</option>
+                  <option value="Non-veg">Non-veg</option>
+                  <option value="Eggetarian">Eggetarian</option>
+                  <option value="Jain">Jain</option>
+                  <option value="Satvik">Satvik (no onion / garlic)</option>
+                  <option *ngIf="l.foodPreference && !['Veg','Non-veg','Eggetarian','Jain','Satvik'].includes(l.foodPreference)" [value]="l.foodPreference">{{ l.foodPreference }}</option>
+                </select>
+              </td>
               <td class="dc-npo">
                 <label class="dx-check"><input type="checkbox" [(ngModel)]="l.npo" /> NPO</label>
                 <input *ngIf="l.npo" type="datetime-local" class="dx-input" [(ngModel)]="l.npoFromLocal" aria-label="NPO from (blank = now)" title="NPO from — leave blank for now" />
@@ -85,7 +97,7 @@
               <td class="dc-remarks"><input type="text" class="dx-input" [(ngModel)]="l.remarks" aria-label="Remarks" /></td>
             </tr>
             <tr *ngIf="visibleLines.length===0">
-              <td colspan="9" class="dx-empty">{{ onlyMarked ? 'You have not marked any patient yet.' : 'No admitted patients in this ward.' }}</td>
+              <td colspan="10" class="dx-empty">{{ onlyMarked ? 'You have not marked any patient yet.' : 'No admitted patients in this ward.' }}</td>
             </tr>
           </tbody>
         </table>
@@ -219,7 +231,10 @@
   <td class="is-strong dx-tight">{{ l.bedNumber }}</td>
   <td>
     <span class="dx-strong">{{ l.patientName }}</span>
-    <span class="dx-sub-line">PRN {{ l.prn }}</span>
+    <span class="dx-sub-line">PRN {{ l.prn }}{{ l.ageSex ? ' · ' + l.ageSex : '' }}</span>
+    <span class="dx-sub-line" *ngIf="l.consultant || l.diagnosis">{{ l.consultant }}{{ l.diagnosis ? ' · ' + (l.diagnosis | slice:0:60) : '' }}</span>
+    <span class="dx-sub-line dc-allergy-line" *ngIf="l.foodAllergy">Allergy: {{ l.foodAllergy }}</span>
+    <span class="dx-sub-line" *ngIf="l.foodPreference">Prefers {{ l.foodPreference }}</span>
   </td>
   <td>{{ l.dietText || '—' }}<span class="dx-muted" *ngIf="l.dietMaster"> ({{ l.dietMaster.code }})</span></td>
   <td class="dx-tight"><span *ngIf="l.npo" class="dc-npo">NPO{{ l.npoFrom ? ' from ' + (l.npoFrom | date:'HH:mm, dd MMM') : '' }}</span></td>

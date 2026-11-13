@@ -1,14 +1,15 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import {
-  QualityService, QualityIndicator, IndicatorStats, CaptureBody,
+  QualityService, QualityIndicator, IndicatorStats, CaptureBody, QiSubmissionStatus,
 } from '../../services/quality.service';
 import { isQualityEditor } from '../quality-access';
+import { QiSubmissionBannerComponent } from '../qi-submission-banner/qi-submission-banner.component';
 
 /**
  * Phase 9.26 / Phase 1 — NABH/QCI 108-indicator master.
@@ -21,12 +22,19 @@ import { isQualityEditor } from '../quality-access';
 @Component({
   selector: 'app-quality-indicators',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, QiSubmissionBannerComponent],
   templateUrl: './quality-indicators.component.html',
   styleUrls: ['./quality-indicators.component.css'],
 })
 export class QualityIndicatorsComponent implements OnInit, OnDestroy {
+  @ViewChild(QiSubmissionBannerComponent) banner?: QiSubmissionBannerComponent;
+  /** Rows shown (allRows, narrowed to the missing ones when missingOnly). */
   rows: QualityIndicator[] = [];
+  private allRows: QualityIndicator[] = [];
+  /** Monthly submission deadline — codes still missing for `submission.period`. */
+  submission: QiSubmissionStatus | null = null;
+  missingCodes = new Set<string>();
+  missingOnly = false;
   stats: IndicatorStats | null = null;
   loading = false;
   errorMessage = '';
@@ -49,9 +57,13 @@ export class QualityIndicatorsComponent implements OnInit, OnDestroy {
 
   private destroy$ = new Subject<void>();
 
-  constructor(private svc: QualityService, private router: Router) {}
+  constructor(private svc: QualityService, private router: Router, private route: ActivatedRoute) {}
 
-  ngOnInit(): void { this.load(); this.loadStats(); }
+  ngOnInit(): void {
+    // The deadline bell links here with ?missing=1.
+    this.missingOnly = this.route.snapshot.queryParamMap.get('missing') === '1';
+    this.load(); this.loadStats();
+  }
   ngOnDestroy(): void { this.destroy$.next(); this.destroy$.complete(); }
 
   // ── Loaders ──────────────────────────────────────────────────────────
@@ -67,7 +79,7 @@ export class QualityIndicatorsComponent implements OnInit, OnDestroy {
       })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (r) => { this.rows = r.data; this.loading = false; },
+        next: (r) => { this.allRows = r.data; this.applyMissingFilter(); this.loading = false; },
         error: (e) => { this.errorMessage = e?.error?.message || 'Failed to load indicators'; this.loading = false; },
       });
   }
@@ -77,6 +89,24 @@ export class QualityIndicatorsComponent implements OnInit, OnDestroy {
       next: (s) => (this.stats = s),
       error: () => (this.stats = null),
     });
+  }
+
+  // ── Submission deadline ──────────────────────────────────────────────
+  onSubmissionStatus(s: QiSubmissionStatus): void {
+    this.submission = s;
+    this.missingCodes = new Set(s.missing.map((m) => m.qiCode));
+    if (this.missingCodes.size === 0) this.missingOnly = false;
+    this.applyMissingFilter();
+  }
+  onMissingOnly(on: boolean): void { this.missingOnly = on; this.applyMissingFilter(); }
+  private applyMissingFilter(): void {
+    this.rows = this.missingOnly && this.submission
+      ? this.allRows.filter((r) => this.missingCodes.has(r.qiCode))
+      : this.allRows;
+  }
+  /** Card still needs data for the month being collected. */
+  isMissing(ind: QualityIndicator): boolean {
+    return !!this.submission && this.submission.state !== 'not_started' && this.missingCodes.has(ind.qiCode);
   }
 
   // ── Filters ──────────────────────────────────────────────────────────
@@ -116,7 +146,8 @@ export class QualityIndicatorsComponent implements OnInit, OnDestroy {
     this.benchmarkOverrideEnabled = false;
     this.captureError = '';
     this.draftCapture = {
-      period: this.currentMonth(),
+      // Missing for the month being collected → default to that month.
+      period: this.isMissing(ind) ? this.submission!.period : this.currentMonth(),
       numerator: 0,
       denominator: 0,
       remarks: '',
@@ -153,7 +184,7 @@ export class QualityIndicatorsComponent implements OnInit, OnDestroy {
     this.svc.captureIndicatorRecord(this.capture.qiCode, payload)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: () => { this.saving = false; this.closeCapture(); this.load(); this.loadStats(); },
+        next: () => { this.saving = false; this.closeCapture(); this.load(); this.loadStats(); this.banner?.reload(); },
         error: (e) => { this.captureError = e?.error?.message || 'Failed to save'; this.saving = false; },
       });
   }

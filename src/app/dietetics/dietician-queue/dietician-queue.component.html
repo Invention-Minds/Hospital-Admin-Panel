@@ -68,7 +68,11 @@
                   [title]="'Admitted ' + (item.row.admissionDate | date:'dd MMM yyyy, HH:mm')">
               {{ overdue(item.row.admissionDate) ? 'Overdue · ' : '' }}{{ waiting(item.row.admissionDate) }}
             </span>
-            <span class="dx-pill dx-pill-warn dq-interim" *ngIf="item.row.interimDiet" title="Interim diet from the nursing census">Interim {{ item.row.interimDiet.code }}</span>
+            <span class="dx-pill dx-pill-warn dq-interim" *ngIf="item.row.interimDiet" title="Interim diet — review and sign">Interim {{ item.row.interimDiet.code }}</span>
+            <span class="dx-pill dx-pill-info dq-interim" *ngIf="item.row.interimDiet?.doctorAckAt"
+                  [title]="item.row.interimDiet?.doctorAckNote || 'Acknowledged by a doctor at night'">
+              Night ack · {{ item.row.interimDiet?.doctorAckBy }} {{ item.row.interimDiet?.doctorAckAt | date:'HH:mm' }}
+            </span>
           </td>
           <td class="dx-tight" *ngIf="tab === 'reassess'">{{ item.row.admissionDate | date:'dd MMM' }}</td>
           <td *ngIf="tab === 'check'">{{ item.row.checkNote || 'Check diet' }}</td>
@@ -192,9 +196,15 @@
         </label>
         <label class="dx-check dq-check-cell"><input type="checkbox" [(ngModel)]="form.disposablePlate" /> Disposable plate</label>
       </div>
-      <div class="dx-row" *ngIf="selectedDiet?.kind === 'FEED' || form.feedVolumeMl || form.feedNotes">
+      <p class="dx-muted dq-feed-hint" *ngIf="selectedDiet?.kind === 'FEED' || form.feedVolumeMl || form.feedIntervalHours">
+        RT feed order as given by the doctor — enter it once; feed doses and 2-hourly (or hourly) labels are generated from it.
+      </p>
+      <div class="dx-row" *ngIf="selectedDiet?.kind === 'FEED' || form.feedVolumeMl || form.feedNotes || form.feedIntervalHours">
         <label class="dx-field">Feed volume (ml) <input type="number" min="0" [(ngModel)]="form.feedVolumeMl" /></label>
-        <label class="dx-field">Every (hours) <input type="number" min="0" step="0.5" [(ngModel)]="form.feedIntervalHours" /></label>
+        <label class="dx-field">Every (hours) <input type="number" min="0.5" max="24" step="0.5" [(ngModel)]="form.feedIntervalHours" placeholder="2" /></label>
+        <label class="dx-field">First feed at <input type="time" [(ngModel)]="form.feedStartTime" /></label>
+        <label class="dx-field">Feeding window from <input type="time" [(ngModel)]="form.feedWindowFrom" /></label>
+        <label class="dx-field">until <input type="time" [(ngModel)]="form.feedWindowUntil" title="Leave both blank for round the clock" /></label>
         <label class="dx-field">Formula / notes <input type="text" [(ngModel)]="form.feedNotes" placeholder="e.g. Celnutra 2.0" /></label>
       </div>
       <label class="dx-field">Remarks <span class="dq-hint-inline">printed in the sheet's Remark column</span>

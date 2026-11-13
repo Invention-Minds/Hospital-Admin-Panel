@@ -10,6 +10,7 @@ import {
   DietMasterPayload,
   MealMaster,
   MenuPlanCell,
+  MenuOptionRow,
   CanteenChannel,
   DietTexture,
   SupplementMaster,
@@ -82,6 +83,7 @@ export class DieteticsSetupComponent implements OnInit, OnDestroy {
   // Menu tab.
   menuDietId = '';
   menuRows: MenuPlanCell[] = [];
+  menuOptions: MenuOptionRow[] = [];
   readonly dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   loading = false;
@@ -200,15 +202,41 @@ export class DieteticsSetupComponent implements OnInit, OnDestroy {
   }
 
   loadMenu(): void {
-    if (!this.menuDietId) { this.menuRows = []; return; }
+    if (!this.menuDietId) { this.menuRows = []; this.menuOptions = []; return; }
     this.svc.getMenuForDiet(this.menuDietId).pipe(takeUntil(this.destroy$)).subscribe({
       next: (r) => { this.menuRows = r; },
       error: (e) => { this.errorMessage = e?.error?.error || 'Failed to load menu'; },
+    });
+    this.svc.listMenuOptions(this.menuDietId).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (r) => { this.menuOptions = r; },
+      error: () => { /* options optional */ },
     });
   }
 
   cellAt(dayOfWeek: number, slotId: string): MenuPlanCell | undefined {
     return this.menuRows.find((c) => c.dayOfWeek === dayOfWeek && c.mealTimeSlotId === slotId);
+  }
+
+  /** Extra dishes a patient on this diet may choose for this meal (beside the default). */
+  optionsAt(dayOfWeek: number, slotId: string): MenuOptionRow[] {
+    return this.menuOptions.filter((o) => o.dayOfWeek === dayOfWeek && o.mealTimeSlotId === slotId);
+  }
+
+  addOption(dayOfWeek: number, slotId: string, mealId: string): void {
+    if (!mealId || !this.menuDietId) return;
+    this.svc.addMenuOption({ dietMasterId: this.menuDietId, mealTimeSlotId: slotId, dayOfWeek, mealMasterId: mealId })
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => this.loadMenu(),
+        error: (e) => { this.errorMessage = e?.error?.error || 'Could not add the option'; },
+      });
+  }
+
+  removeOption(o: MenuOptionRow): void {
+    this.svc.removeMenuOption(o.id).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => { this.menuOptions = this.menuOptions.filter((x) => x.id !== o.id); },
+      error: (e) => { this.errorMessage = e?.error?.error || 'Could not remove the option'; },
+    });
   }
 
   // ─── Save handlers ──────────────────────────────────────────────────

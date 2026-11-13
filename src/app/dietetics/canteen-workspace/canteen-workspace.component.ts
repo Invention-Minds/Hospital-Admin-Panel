@@ -85,6 +85,24 @@ export class CanteenWorkspaceComponent implements OnInit, OnDestroy {
   get canAckAlerts(): boolean {
     return this.role === 'super_admin' || ['Canteen Staff', 'Dietician', 'Diet'].includes(this.subAdminType);
   }
+  /** Ward nurses confirm the tray reached the patient. */
+  get isWardNurse(): boolean {
+    return this.role === 'super_admin'
+      || ['Nurse', 'Nursing', 'IPD Nurse', 'ICU Nurse', 'ER Nurse', 'Ward Coordinator', 'nurse', 'Nursing Superintendent'].includes(this.subAdminType);
+  }
+
+  /** Nurse: tray received on the ward (after the kitchen's Serve). */
+  receive(o: MealOrder): void {
+    this.errorMessage = '';
+    this.svc.receiveTray(o.id, this.username).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (r) => {
+        o.receivedAt = r.receivedAt;
+        o.receivedByName = r.receivedByName;
+        this.successMessage = `Tray for bed ${(o as MealOrder & { bedNumber?: string }).bedNumber ?? ''} received on the ward.`;
+      },
+      error: (e) => { this.errorMessage = e?.error?.error || 'Could not record receipt'; },
+    });
+  }
 
   ngOnInit(): void {
     if (this.subAdminType === 'Billing Coordinator') this.tab = 'billing';

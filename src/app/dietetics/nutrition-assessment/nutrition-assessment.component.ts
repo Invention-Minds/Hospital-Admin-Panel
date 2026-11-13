@@ -176,8 +176,9 @@ export class NutritionAssessmentComponent implements OnInit, OnDestroy {
   get preview(): { score: number | null; level: string; note: string } {
     if (this.formType === 'NRS2002') {
       const i = this.nrs.initial;
-      if (!(i.bmiBelow205 || i.weightLoss3m || i.reducedIntake || i.severelyIll)) {
-        return { score: 0, level: 'NIL', note: 'All NO — re-screen weekly' };
+      const finalDone = this.nrs.nutritionScore !== null && this.nrs.severityScore !== null;
+      if (!(i.bmiBelow205 || i.weightLoss3m || i.reducedIntake || i.severelyIll) && !finalDone) {
+        return { score: 0, level: 'NIL', note: 'All NO — re-screen weekly (final screening optional)' };
       }
       if (this.nrs.nutritionScore === null || this.nrs.severityScore === null) {
         return { score: null, level: '—', note: 'A YES answer — complete the final screening' };

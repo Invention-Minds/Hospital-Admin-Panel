@@ -756,6 +756,18 @@
       </div>
     </a>
 
+    <!-- Night diet acknowledgement — any doctor while the dietitian is off duty -->
+    <a [routerLink]="(role === 'doctor' || subAdminType === 'Dietician' || role === 'super_admin') ? '/dietetics/night-ack' : null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="(role === 'doctor' || subAdminType === 'Dietician' || role === 'super_admin')">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M12.34 2.02C6.59 1.82 2 6.42 2 12c0 5.52 4.48 10 10 10c3.71 0 6.93-2.02 8.66-5.02c-7.51-.25-12.09-8.43-8.32-14.96"/>
+        </svg>
+        <span>Night diet ack</span>
+      </div>
+    </a>
+
     <!-- Dietitian rounds (current IP list + nutrition screening) -->
     <a [routerLink]="(subAdminType === 'Dietician' || role === 'super_admin') ? '/dietetics/rounds' : null"
        routerLinkActive="active" class="icon-wrapper"
@@ -813,6 +825,42 @@
           <path fill="currentColor" d="M8.1 13.34l2.83-2.83L3.91 3.5a4 4 0 0 0 0 5.66zm6.78-1.81c1.53.71 3.68.21 5.27-1.38c1.91-1.91 2.28-4.65.81-6.12s-4.21-1.1-6.12.81c-1.59 1.59-2.09 3.74-1.38 5.27L3.7 19.87l1.41 1.42L12 14.41l6.88 6.88l1.41-1.41L13.41 13l1.47-1.47"/>
         </svg>
         <span>Canteen</span>
+      </div>
+    </a>
+
+    <!-- Take order — canteen staff record each patient's dish choice -->
+    <a [routerLink]="(subAdminType === 'Canteen Staff' || role === 'super_admin') ? '/dietetics/take-order' : null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="(subAdminType === 'Canteen Staff' || role === 'super_admin')">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M19 3h-4.18C14.4 1.84 13.3 1 12 1s-2.4.84-2.82 2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2m-7 0a1 1 0 1 1 0 2a1 1 0 0 1 0-2m-2 14l-4-4l1.41-1.41L10 14.17l6.59-6.59L18 9z"/>
+        </svg>
+        <span>Take order</span>
+      </div>
+    </a>
+
+    <!-- RT feeds — kitchen prepares + labels, nurse records given -->
+    <a [routerLink]="(subAdminType === 'Canteen Staff' || subAdminType === 'Dietician' || isIpdNurse || isNursingSuper || role === 'super_admin') ? '/dietetics/feeds' : null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="(subAdminType === 'Canteen Staff' || subAdminType === 'Dietician' || isIpdNurse || isNursingSuper || role === 'super_admin')">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M15 2H9v2h1v2.07A6 6 0 0 0 5 12v8a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-8a6 6 0 0 0-5-5.93V4h1zm2 10v2H7v-2a4 4 0 0 1 8 0z"/>
+        </svg>
+        <span>RT feeds</span>
+      </div>
+    </a>
+
+    <!-- Food quality checks + patient dietary feedback -->
+    <a [routerLink]="(subAdminType === 'Canteen Staff' || subAdminType === 'Dietician' || isIpdNurse || role === 'super_admin') ? '/dietetics/quality' : null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="(subAdminType === 'Canteen Staff' || subAdminType === 'Dietician' || isIpdNurse || role === 'super_admin')">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2L9.19 8.63L2 9.24l5.46 4.73L5.82 21z"/>
+        </svg>
+        <span>Quality &amp; feedback</span>
       </div>
     </a>
 

@@ -112,6 +112,22 @@ export interface IndicatorStats {
   latestPeriodStatus: Record<string, number>;
 }
 
+export type QiSubmissionState = 'not_started' | 'open' | 'due_soon' | 'due_today' | 'overdue' | 'complete';
+
+export interface QiSubmissionStatus {
+  period: string;          // 'YYYY-MM' whose data is due
+  dueDay: number;
+  dueDate: string;         // ISO, end of the due day (IST)
+  daysLeft: number;        // negative = overdue
+  state: QiSubmissionState;
+  expected: number;
+  entered: number;
+  enteredLate: number;
+  missing: Array<{ qiCode: string; name: string; chapter: string; escalationOwner: string; autoSourced: boolean }>;
+}
+
+export interface QiSubmissionConfig { submissionDueDay: number; min: number; max: number }
+
 export interface CaptureBody {
   period: string;
   numerator: number;
@@ -565,6 +581,20 @@ export class QualityService {
 
   updateIndicator(qiCode: string, body: IndicatorUpdateBody): Observable<{ data: QualityIndicator }> {
     return this.http.put<{ data: QualityIndicator }>(`${this.indBase}/${qiCode}`, body);
+  }
+
+  /** Monthly submission deadline status; no period = last month (the one being collected). */
+  getSubmissionStatus(period?: string): Observable<{ data: QiSubmissionStatus }> {
+    const params = period ? new HttpParams().set('period', period) : undefined;
+    return this.http.get<{ data: QiSubmissionStatus }>(`${this.indBase}/submission-status`, { params });
+  }
+
+  getSubmissionConfig(): Observable<{ data: QiSubmissionConfig }> {
+    return this.http.get<{ data: QiSubmissionConfig }>(`${this.indBase}/submission-config`);
+  }
+
+  updateSubmissionConfig(submissionDueDay: number): Observable<{ data: QiSubmissionConfig }> {
+    return this.http.put<{ data: QiSubmissionConfig }>(`${this.indBase}/submission-config`, { submissionDueDay });
   }
 
   // ── RCA (Phase 3) ─────────────────────────────────────────────────────

@@ -1,0 +1,20 @@
+.df-given { width: 160px; margin-left: 6px; }
+.df-late { color: #a3321c; font-weight: 600; }
+.df-avoid { color: #a3321c; font-weight: 600; font-size: 13px; }
+
+/* Feed labels (print only) */
+.df-labels { display: none; }
+@media print {
+  .df-screen { display: none !important; }
+  .df-labels { display: grid; grid-template-columns: repeat(3, 63mm); gap: 2mm; }
+  .df-label {
+    height: 38mm; padding: 2.5mm 3mm; border: 1px solid #000; border-radius: 2mm;
+    font-family: Arial, sans-serif; font-size: 9pt; line-height: 1.25; overflow: hidden; break-inside: avoid;
+  }
+  .df-l-top { display: flex; justify-content: space-between; font-size: 10pt; }
+  .df-l-top b { font-size: 14pt; }
+  .df-l-name { margin-top: 1mm; }
+  .df-l-feed { margin-top: 1.5mm; font-size: 11pt; font-weight: 700; }
+  .df-l-avoid { margin-top: 1mm; font-weight: 700; }
+  @page { size: A4; margin: 8mm; }
+}

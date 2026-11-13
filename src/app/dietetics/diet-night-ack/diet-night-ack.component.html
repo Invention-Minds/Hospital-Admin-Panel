@@ -1,0 +1,62 @@
+<div class="dx-shell">
+  <div class="dx-head">
+    <div>
+      <h2 class="dx-title">Night diet acknowledgement</h2>
+      <p class="dx-sub">New admissions and diet changes while the dietitian is off duty. Acknowledge so the kitchen can serve; the dietitian reviews and signs the diet next morning.</p>
+    </div>
+    <div class="dx-toolbar"><button type="button" class="dx-btn" (click)="load()">Refresh</button></div>
+  </div>
+
+  <div class="dx-banner" *ngIf="data" [ngClass]="data.night ? 'dx-banner-warn' : 'dx-banner-good'">
+    <ng-container *ngIf="data.night; else dayTime">
+      Dietitian off duty ({{ data.nightFrom }}–{{ data.nightUntil }}). Any doctor can acknowledge the patients below.
+    </ng-container>
+    <ng-template #dayTime>Dietitian on duty ({{ data.nightUntil }}–{{ data.nightFrom }}). These are normally handled in the Dietician queue.</ng-template>
+  </div>
+  <div class="dx-banner dx-banner-bad" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+  <div class="dx-banner dx-banner-good" *ngIf="successMessage" role="status">{{ successMessage }}</div>
+  <div class="dx-empty" *ngIf="loading && !data">Loading…</div>
+
+  <div class="dx-empty" *ngIf="data && data.rows.length === 0">Nothing to acknowledge — every admitted patient has a reviewed diet.</div>
+
+  <div class="dx-scroll" *ngIf="data && data.rows.length">
+    <table class="diet-grid">
+      <thead>
+        <tr><th>Bed</th><th>Patient</th><th>Consultant · diagnosis</th><th>Allergy · preference</th><th>Why</th><th>Current diet</th><th *ngIf="canAck">Acknowledge</th></tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of data.rows; trackBy: trackRow" class="is-act">
+          <td class="is-strong dx-tight">{{ r.bedNumber || '—' }}<span class="dx-sub-line">{{ r.wardName }}</span></td>
+          <td>
+            <span class="dx-strong">{{ r.patientName || r.admissionNo }}</span>
+            <span class="dx-sub-line">PRN {{ r.prn }}{{ r.ageSex ? ' · ' + r.ageSex : '' }}</span>
+          </td>
+          <td>{{ r.consultant }}<span class="dx-sub-line">{{ r.diagnosis | slice:0:70 }}</span></td>
+          <td>
+            <span class="na-allergy" *ngIf="r.foodAllergy">{{ r.foodAllergy }}</span>
+            <span class="dx-muted" *ngIf="!r.foodAllergy">No allergy recorded</span>
+            <span class="dx-sub-line" *ngIf="r.foodPreference">Prefers {{ r.foodPreference }}</span>
+          </td>
+          <td><span class="dx-note dx-note-act">{{ r.reason }}</span></td>
+          <td class="dx-tight">
+            <ng-container *ngIf="r.currentDiet as d">
+              <span class="dx-strong">{{ d.code }}</span>
+              <span class="dx-pill dx-pill-warn" *ngIf="d.status === 'INTERIM'">Interim</span>
+            </ng-container>
+            <span class="dx-muted" *ngIf="!r.currentDiet">None</span>
+          </td>
+          <td *ngIf="canAck" class="na-ack">
+            <select class="dx-input" [(ngModel)]="draft(r).dietMasterId" [attr.aria-label]="'Diet for ' + (r.patientName || r.admissionNo)">
+              <option [ngValue]="null">{{ r.currentDiet ? 'Keep ' + r.currentDiet.code : 'Pick a diet (required)' }}</option>
+              <option *ngFor="let d of diets" [ngValue]="d.id">{{ d.code }} · {{ d.name }}</option>
+            </select>
+            <input type="text" class="dx-input" [(ngModel)]="draft(r).note" placeholder="Note for the dietitian (optional)" aria-label="Note" />
+            <button type="button" class="dx-btn dx-btn-primary dx-btn-sm" (click)="acknowledge(r)" [disabled]="draft(r).saving">
+              {{ draft(r).saving ? 'Saving…' : 'Acknowledge' }}
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

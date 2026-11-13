@@ -9,6 +9,8 @@
     </div>
   </div>
 
+  <app-qi-submission-banner></app-qi-submission-banner>
+
   <div class="q-banner q-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
   <div class="q-banner den-banner-ok" *ngIf="successMessage">{{ successMessage }}</div>
 

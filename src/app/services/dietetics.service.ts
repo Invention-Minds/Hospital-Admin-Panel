@@ -184,6 +184,9 @@ export interface DieteticsSettings {
   labelShowQr: boolean;
   defaultScreeningForm: string;
   maternalDepartments: string[];
+  /** Dietitian off duty between these times ("19:00" → "07:00"). */
+  nightFrom: string;
+  nightUntil: string;
 }
 
 export interface MealMaster {
@@ -248,10 +251,16 @@ export interface DietPlan {
   feedVolumeMl?: number | null;
   feedIntervalHours?: number | null;
   feedNotes?: string | null;
+  feedStartTime?: string | null;
+  feedWindowFrom?: string | null;
+  feedWindowUntil?: string | null;
+  doctorAckAt?: string | null;
+  doctorAckBy?: string | null;
+  doctorAckNote?: string | null;
   needsCheck?: boolean;
   checkNote?: string | null;
   remarks?: string | null;
-  /** DIETITIAN | CENSUS (interim plan from the nursing census). */
+  /** DIETITIAN | CENSUS (interim from the nursing census) | DOCTOR (night acknowledgement). */
   source?: string;
   signedAt?: string | null;
   signedBy?: string | null;
@@ -286,6 +295,10 @@ export interface UpsertDietPlanPayload {
   feedVolumeMl?: number | null;
   feedIntervalHours?: number | null;
   feedNotes?: string | null;
+  /** Doctor's feed order: first feed + daily window, "HH:mm". */
+  feedStartTime?: string | null;
+  feedWindowFrom?: string | null;
+  feedWindowUntil?: string | null;
   needsCheck?: boolean;
   checkNote?: string | null;
   remarks?: string | null;
@@ -305,7 +318,11 @@ export interface DieticianQueueRow {
   age?: string | null;
   sex?: string | null;
   /** Pending rows on an INTERIM census diet. */
-  interimDiet?: { code: string; name: string } | null;
+  interimDiet?: {
+    code: string; name: string; source?: string;
+    /** Set when a doctor acknowledged it at night (dietitian off duty). */
+    doctorAckBy?: string | null; doctorAckAt?: string | null; doctorAckNote?: string | null;
+  } | null;
   checkNote?: string | null;
 }
 
@@ -347,6 +364,11 @@ export interface MealOrder {
   billed?: boolean;
   billedAt?: string | null;
   billedBy?: string | null;
+  /** Ward nurse confirmed the tray reached the patient. */
+  receivedAt?: string | null;
+  receivedByName?: string | null;
+  /** Patient's own dish choice taken by canteen staff. */
+  choiceTakenAt?: string | null;
   delivery?: MealDelivery | null;
   intake?: MealIntake | null;
   // Hydrated by the backend /kitchen endpoint:
@@ -590,6 +612,9 @@ export interface CensusLineDraft {
   npoFrom: string | null;
   feedText: string;
   disposablePlate: boolean;
+  /** Nurse-entered; prefilled from the plan's avoid list / doctor's initial assessment. */
+  foodAllergy: string;
+  foodPreference: string;
   remarks: string;
   isNew?: boolean;
 }
@@ -642,6 +667,8 @@ export interface CensusDetail extends Omit<CensusSummary, 'lineCount' | 'newCoun
     npoFrom: string | null;
     feedText: string | null;
     disposablePlate: boolean;
+    foodAllergy: string | null;
+    foodPreference: string | null;
     remarks: string | null;
     changeFlag: 'NEW' | 'CHANGED' | 'UNCHANGED';
     currentDiet: { code: string; name: string; status: string; remark: string | null } | null;
@@ -1100,4 +1127,220 @@ export class DieteticsService {
     const params: Record<string, string> = wardId ? { ward: wardId } : {};
     return this.http.get<CanteenTvSnapshot>(`${this.base}/canteen-channels/${channelId}/snapshot`, { params });
   }
+
+  // ─── Night diet acknowledgement (any doctor) ────────────────────────
+  getNightAck(): Observable<NightAckList> {
+    return this.http.get<NightAckList>(`${this.base}/night-ack`);
+  }
+  acknowledgeNight(admissionId: string, body: { dietMasterId?: string | null; note?: string | null }): Observable<{ ok: boolean; planId: string }> {
+    return this.http.post<{ ok: boolean; planId: string }>(`${this.base}/night-ack/${admissionId}`, body);
+  }
+
+  // ─── Ward receipt ───────────────────────────────────────────────────
+  receiveTray(orderId: string, receivedByName?: string): Observable<MealOrder> {
+    return this.http.post<MealOrder>(`${this.base}/meal-orders/${orderId}/receive`, { receivedByName });
+  }
+
+  // ─── Food quality + patient feedback ────────────────────────────────
+  listQualityChecks(from?: string, to?: string): Observable<FoodQualityCheck[]> {
+    const params: Record<string, string> = {};
+    if (from) params['from'] = from;
+    if (to) params['to'] = to;
+    return this.http.get<FoodQualityCheck[]>(`${this.base}/quality-checks`, { params });
+  }
+  createQualityCheck(body: {
+    checkDate?: string; mealTimeSlotId?: string | null; dietMasterId?: string | null; item?: string | null;
+    ratings: Record<string, number>; observations?: string | null; correctiveAction?: string | null;
+  }): Observable<FoodQualityCheck> {
+    return this.http.post<FoodQualityCheck>(`${this.base}/quality-checks`, body);
+  }
+  listFeedback(from?: string, to?: string): Observable<DietFeedbackList> {
+    const params: Record<string, string> = {};
+    if (from) params['from'] = from;
+    if (to) params['to'] = to;
+    return this.http.get<DietFeedbackList>(`${this.base}/feedback`, { params });
+  }
+  createFeedback(body: {
+    admissionId: string; ratings: Record<string, number>; correctDiet: boolean | null; comments?: string | null;
+    respondent: 'PATIENT' | 'ATTENDANT'; respondentName?: string | null; signatureId?: string | null; staffName?: string | null;
+  }): Observable<DietFeedbackRow> {
+    return this.http.post<DietFeedbackRow>(`${this.base}/feedback`, body);
+  }
+
+  // ─── Menu options + take order ──────────────────────────────────────
+  listMenuOptions(dietMasterId: string): Observable<MenuOptionRow[]> {
+    return this.http.get<MenuOptionRow[]>(`${this.base}/menu-options`, { params: { dietMasterId } });
+  }
+  addMenuOption(body: { dietMasterId: string; mealTimeSlotId: string; dayOfWeek: number; mealMasterId: string }): Observable<MenuOptionRow> {
+    return this.http.post<MenuOptionRow>(`${this.base}/menu-options`, body);
+  }
+  removeMenuOption(id: string): Observable<{ ok: boolean }> {
+    return this.http.delete<{ ok: boolean }>(`${this.base}/menu-options/${id}`);
+  }
+  getTakeOrder(filters: { date: string; mealTimeSlotId: string; wardId?: string }): Observable<TakeOrderRow[]> {
+    const params: Record<string, string> = { date: filters.date, mealTimeSlotId: filters.mealTimeSlotId };
+    if (filters.wardId) params['wardId'] = filters.wardId;
+    return this.http.get<TakeOrderRow[]>(`${this.base}/take-order`, { params });
+  }
+  setTrayChoice(orderId: string, mealMasterId: string): Observable<MealOrder> {
+    return this.http.post<MealOrder>(`${this.base}/meal-orders/${orderId}/choice`, { mealMasterId });
+  }
+
+  // ─── RT feed doses ──────────────────────────────────────────────────
+  listFeeds(date: string, wardId?: string): Observable<FeedDoseRow[]> {
+    const params: Record<string, string> = { date };
+    if (wardId) params['wardId'] = wardId;
+    return this.http.get<FeedDoseRow[]>(`${this.base}/feeds`, { params });
+  }
+  updateFeed(id: string, action: 'prepare' | 'give' | 'skip', body: { givenByName?: string; reason?: string } = {}): Observable<FeedDoseRow> {
+    return this.http.post<FeedDoseRow>(`${this.base}/feeds/${id}/${action}`, body);
+  }
+}
+
+// ─── Night acknowledgement / quality / feedback / take order / feeds ──
+
+export interface NightAckRow {
+  admissionId: string;
+  admissionNo: string;
+  prn: string;
+  patientName: string | null;
+  ageSex: string | null;
+  wardName: string | null;
+  bedNumber: string | null;
+  consultant: string;
+  diagnosis: string;
+  foodAllergy: string | null;
+  foodPreference: string | null;
+  currentDiet: { code: string; name: string; status: string } | null;
+  doctorAck: { at: string; by: string | null; note: string | null } | null;
+  reason: string;
+  admittedAt: string;
+}
+export interface NightAckList {
+  /** True while the dietitian is off duty (night window). */
+  night: boolean;
+  nightFrom: string;
+  nightUntil: string;
+  rows: NightAckRow[];
+}
+
+/** Food quality parameters, in the hospital's order. */
+export const QUALITY_PARAMETERS: Array<{ key: string; label: string }> = [
+  { key: 'appearance', label: 'Appearance' },
+  { key: 'taste', label: 'Taste' },
+  { key: 'aroma', label: 'Aroma' },
+  { key: 'texture', label: 'Texture / consistency' },
+  { key: 'portion', label: 'Portion size' },
+  { key: 'temperature', label: 'Serving temperature' },
+  { key: 'freshness', label: 'Freshness' },
+  { key: 'hygiene', label: 'Hygiene / presentation' },
+  { key: 'recipe', label: 'Recipe consistency' },
+  { key: 'therapeutic', label: 'Therapeutic diet compliance' },
+];
+export const QUALITY_SCALE = ['Unacceptable', 'Poor', 'Satisfactory', 'Very good', 'Excellent'];
+/** Same bands as the server (total out of 50). */
+export function qualityGrade(total: number): string {
+  if (total >= 45) return 'Excellent';
+  if (total >= 38) return 'Very good';
+  if (total >= 30) return 'Satisfactory';
+  if (total >= 20) return 'Poor';
+  return 'Unacceptable';
+}
+export interface FoodQualityCheck {
+  id: string;
+  checkDate: string;
+  mealTimeSlotId: string | null;
+  dietMasterId: string | null;
+  item: string | null;
+  ratings: Record<string, number>;
+  totalScore: number;
+  ratedCount: number;
+  grade: string;
+  observations: string | null;
+  correctiveAction: string | null;
+  checkedBy: string | null;
+  createdAt: string;
+  mealName?: string | null;
+  dietName?: string | null;
+}
+
+/** Patient Dietary Service Feedback Form parameters. */
+export const FEEDBACK_PARAMETERS: Array<{ key: string; label: string }> = [
+  { key: 'taste', label: 'Food taste' },
+  { key: 'temperature', label: 'Food temperature' },
+  { key: 'timeliness', label: 'Timeliness of delivery' },
+  { key: 'courtesy', label: 'Courtesy of dietary staff' },
+  { key: 'qualityHygiene', label: 'Food quality & hygiene' },
+  { key: 'overall', label: 'Overall satisfaction' },
+];
+export const FEEDBACK_SCALE = ['Poor', 'Fair', 'Good', 'Very good', 'Excellent'];
+export interface DietFeedbackRow {
+  id: string;
+  admissionId: string;
+  feedbackDate: string;
+  ratings: Record<string, number>;
+  averageScore: number;
+  correctDiet: boolean | null;
+  comments: string | null;
+  respondent: 'PATIENT' | 'ATTENDANT';
+  respondentName: string | null;
+  staffName: string | null;
+  patientName?: string | null;
+  prn?: string | null;
+  admissionNo?: string | null;
+  wardName?: string | null;
+  bedNumber?: string | null;
+}
+export interface DietFeedbackList {
+  rows: DietFeedbackRow[];
+  count: number;
+  averages: Record<string, number | null>;
+  correctDietPct: number | null;
+}
+
+export interface MenuOptionRow {
+  id: string;
+  dietMasterId: string;
+  mealTimeSlotId: string;
+  dayOfWeek: number;
+  mealMasterId: string;
+  meal: { id: string; name: string; isVeg: boolean; caloriesKcal: number | null };
+}
+export interface TakeOrderRow {
+  id: string;
+  admissionId: string;
+  bedNumber: string | null;
+  wardName: string | null;
+  patientName: string | null;
+  prn: string;
+  dietCode: string;
+  foodAvoid: string | null;
+  kitchenNotes: string | null;
+  currentMeal: { id: string; name: string } | null;
+  choiceTakenAt: string | null;
+  choiceTakenBy: string | null;
+  choices: Array<{ id: string; name: string; isVeg: boolean; caloriesKcal: number | null; isDefault: boolean }>;
+}
+
+export interface FeedDoseRow {
+  id: string;
+  admissionId: string;
+  scheduledFor: string;
+  volumeMl: number | null;
+  status: 'ORDERED' | 'PREPARED' | 'GIVEN' | 'SKIPPED';
+  preparedAt: string | null;
+  preparedBy: string | null;
+  givenAt: string | null;
+  givenByName: string | null;
+  skipReason: string | null;
+  intervalHours: number | null;
+  feedNotes: string | null;
+  dietCode: string;
+  dietName: string;
+  foodAvoid: string | null;
+  patientName: string | null;
+  prn: string | null;
+  admissionNo: string | null;
+  wardName: string | null;
+  bedNumber: string | null;
 }

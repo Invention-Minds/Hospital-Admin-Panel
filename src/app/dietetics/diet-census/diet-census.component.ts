@@ -18,7 +18,10 @@ import { SignatureCreateResponse } from '../../services/signature.service';
 /** A census line being edited, plus what it looked like when pre-filled. */
 type CensusRow = CensusLineDraft & {
   npoFromLocal: string;
-  orig: { dietText: string; dietMasterId: string | null; npo: boolean; npoFromLocal: string; feedText: string; disposablePlate: boolean };
+  orig: {
+    dietText: string; dietMasterId: string | null; npo: boolean; npoFromLocal: string; feedText: string; disposablePlate: boolean;
+    foodAllergy: string; foodPreference: string;
+  };
 };
 
 /**
@@ -114,11 +117,13 @@ export class DietCensusComponent implements OnInit, OnDestroy {
         this.prefill = p;
         this.lines = p.lines.map((l) => {
           const npoFromLocal = toDateTimeLocal(l.npoFrom);
+          const foodAllergy = l.foodAllergy ?? '';
+          const foodPreference = l.foodPreference ?? '';
           return {
-            ...l, npoFromLocal,
+            ...l, npoFromLocal, foodAllergy, foodPreference,
             orig: {
               dietText: l.dietText, dietMasterId: l.dietMasterId, npo: l.npo, npoFromLocal,
-              feedText: l.feedText, disposablePlate: l.disposablePlate,
+              feedText: l.feedText, disposablePlate: l.disposablePlate, foodAllergy, foodPreference,
             },
           };
         });
@@ -138,7 +143,8 @@ export class DietCensusComponent implements OnInit, OnDestroy {
     const o = l.orig;
     return l.dietText !== o.dietText || l.dietMasterId !== o.dietMasterId || l.npo !== o.npo
       || (l.npo && l.npoFromLocal !== o.npoFromLocal) || l.feedText !== o.feedText
-      || l.disposablePlate !== o.disposablePlate || !!l.remarks.trim();
+      || l.disposablePlate !== o.disposablePlate || !!l.remarks.trim()
+      || l.foodAllergy.trim() !== o.foodAllergy.trim() || l.foodPreference.trim() !== o.foodPreference.trim();
   }
   get markedCount(): number { return this.lines.filter((l) => this.isMarked(l)).length; }
   get newCount(): number { return this.lines.filter((l) => l.isNew).length; }
@@ -171,6 +177,8 @@ export class DietCensusComponent implements OnInit, OnDestroy {
         npoFrom: l.npo ? fromDateTimeLocal(l.npoFromLocal) : null,
         feedText: l.feedText,
         disposablePlate: l.disposablePlate,
+        foodAllergy: l.foodAllergy,
+        foodPreference: l.foodPreference,
         remarks: l.remarks,
       })),
     }).pipe(takeUntil(this.destroy$)).subscribe({

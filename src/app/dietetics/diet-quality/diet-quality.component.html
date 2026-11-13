@@ -1,0 +1,174 @@
+<div class="dx-shell">
+  <div class="dx-head">
+    <div>
+      <h2 class="dx-title">Quality &amp; feedback</h2>
+      <p class="dx-sub">Food quality checks by the dietary team, and the Patient Dietary Service Feedback Form filled at the bedside.</p>
+    </div>
+    <div class="dx-toolbar">
+      <label>From <input type="date" [(ngModel)]="from" (change)="reload()" /></label>
+      <label>To <input type="date" [(ngModel)]="to" (change)="reload()" /></label>
+    </div>
+  </div>
+
+  <div class="dx-tabs">
+    <button type="button" [class.active]="tab === 'quality'" (click)="setTab('quality')">Food quality check</button>
+    <button type="button" [class.active]="tab === 'feedback'" (click)="setTab('feedback')">Patient feedback</button>
+  </div>
+
+  <div class="dx-banner dx-banner-bad" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+  <div class="dx-banner dx-banner-good" *ngIf="successMessage" role="status">{{ successMessage }}</div>
+
+  <!-- ═════════ Food quality check ═════════ -->
+  <ng-container *ngIf="tab === 'quality'">
+    <section class="dx-card">
+      <div class="dx-card-head"><h3>New quality check</h3></div>
+      <div class="dx-row">
+        <label class="dx-field">Date <input type="date" [(ngModel)]="q.checkDate" /></label>
+        <label class="dx-field">Meal
+          <select [(ngModel)]="q.mealTimeSlotId">
+            <option value="">—</option>
+            <option *ngFor="let s of slots" [value]="s.id">{{ s.name }}</option>
+          </select>
+        </label>
+        <label class="dx-field">Diet sampled
+          <select [(ngModel)]="q.dietMasterId">
+            <option value="">—</option>
+            <option *ngFor="let d of diets" [value]="d.id">{{ d.code }} · {{ d.name }}</option>
+          </select>
+        </label>
+        <label class="dx-field">Item <input type="text" [(ngModel)]="q.item" placeholder="e.g. Dal khichdi" /></label>
+      </div>
+
+      <p class="dx-muted dq-scale">Rate each parameter: 1 = Unacceptable · 2 = Poor · 3 = Satisfactory · 4 = Very good · 5 = Excellent</p>
+      <table class="diet-grid dq-rate">
+        <thead><tr><th>Parameter</th><th class="dx-right" *ngFor="let s of qScale; let i = index">{{ i + 1 }}<span class="dx-sub-line">{{ s }}</span></th></tr></thead>
+        <tbody>
+          <tr *ngFor="let p of qParams">
+            <td class="is-strong">{{ p.label }}</td>
+            <td class="dx-right" *ngFor="let s of qScale; let i = index">
+              <input type="radio" [name]="'q-' + p.key" [value]="i + 1" [(ngModel)]="q.ratings[p.key]" [attr.aria-label]="p.label + ' ' + (i + 1)" />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="dq-score">
+        <span>Total score <b>{{ qTotal }}/50</b></span>
+        <span>{{ qRated }}/{{ qParams.length }} parameters rated</span>
+        <span *ngIf="qRated">Grade <span class="dx-pill" [ngClass]="gradeClass(qGrade)">{{ qGrade }}</span></span>
+      </div>
+
+      <div class="dx-row">
+        <label class="dx-field">Observations <textarea rows="2" [(ngModel)]="q.observations"></textarea></label>
+        <label class="dx-field">Corrective action <span class="dq-req" *ngIf="qNeedsAction">required</span>
+          <textarea rows="2" [(ngModel)]="q.correctiveAction"></textarea>
+        </label>
+      </div>
+      <div class="dx-actions">
+        <button type="button" class="dx-btn dx-btn-primary" (click)="saveQuality()" [disabled]="saving">{{ saving ? 'Saving…' : 'Save quality check' }}</button>
+      </div>
+    </section>
+
+    <section class="dx-card">
+      <div class="dx-card-head">
+        <h3>Quality checks</h3>
+        <span class="dx-muted" *ngIf="checksAverage !== null">{{ checks.length }} checks · average {{ checksAverage }}/50</span>
+      </div>
+      <div class="dx-empty" *ngIf="!checks.length">No quality checks in this period.</div>
+      <div class="dx-scroll" *ngIf="checks.length">
+        <table class="diet-grid">
+          <thead><tr><th>Date</th><th>Meal · diet · item</th><th class="dx-right">Score</th><th>Grade</th><th>Observations / action</th><th>Checked by</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let c of checks" [class.is-act]="c.grade === 'Poor' || c.grade === 'Unacceptable'">
+              <td class="dx-tight">{{ c.checkDate | date:'dd MMM' }}</td>
+              <td>{{ c.mealName || '—' }}<span class="dx-sub-line">{{ c.dietName }}{{ c.item ? ' · ' + c.item : '' }}</span></td>
+              <td class="dx-right is-strong">{{ c.totalScore }}/50</td>
+              <td><span class="dx-pill" [ngClass]="gradeClass(c.grade)">{{ c.grade }}</span></td>
+              <td>{{ c.observations }}<span class="dx-sub-line" *ngIf="c.correctiveAction">Action: {{ c.correctiveAction }}</span></td>
+              <td class="dx-tight">{{ c.checkedBy }}<span class="dx-sub-line">{{ c.createdAt | date:'HH:mm' }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </ng-container>
+
+  <!-- ═════════ Patient feedback ═════════ -->
+  <ng-container *ngIf="tab === 'feedback'">
+    <section class="dx-card">
+      <div class="dx-card-head"><h3>Patient Dietary Service Feedback Form</h3></div>
+      <div class="dx-row">
+        <label class="dx-field">Patient
+          <select [(ngModel)]="f.admissionId">
+            <option value="">Select the patient</option>
+            <option *ngFor="let p of patients" [value]="p.admissionId">{{ patientLabel(p) }}</option>
+          </select>
+        </label>
+        <label class="dx-field">Filled by
+          <select [(ngModel)]="f.respondent">
+            <option value="PATIENT">Patient</option>
+            <option value="ATTENDANT">Attendant</option>
+          </select>
+        </label>
+        <label class="dx-field">Name (if attendant) <input type="text" [(ngModel)]="f.respondentName" /></label>
+        <label class="dx-field">Dietary staff <input type="text" [(ngModel)]="f.staffName" /></label>
+      </div>
+
+      <table class="diet-grid dq-rate">
+        <thead><tr><th>Parameter</th><th class="dx-right" *ngFor="let s of fScale; let i = index">{{ s }}<span class="dx-sub-line">({{ i + 1 }})</span></th></tr></thead>
+        <tbody>
+          <tr *ngFor="let p of fParams">
+            <td class="is-strong">{{ p.label }}</td>
+            <td class="dx-right" *ngFor="let s of fScale; let i = index">
+              <input type="radio" [name]="'f-' + p.key" [value]="i + 1" [(ngModel)]="f.ratings[p.key]" [attr.aria-label]="p.label + ' ' + s" />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="dx-row dq-yn">
+        <span class="is-strong">Were you served the correct prescribed diet?</span>
+        <label class="dx-check"><input type="radio" name="f-correct" [value]="true" [(ngModel)]="f.correctDiet" /> Yes</label>
+        <label class="dx-check"><input type="radio" name="f-correct" [value]="false" [(ngModel)]="f.correctDiet" /> No</label>
+      </div>
+      <label class="dx-field">Any suggestions or comments? <textarea rows="2" [(ngModel)]="f.comments"></textarea></label>
+
+      <div class="dx-actions" *ngIf="!signing">
+        <button type="button" class="dx-btn" (click)="onFeedbackSigned(null)" [disabled]="saving || !f.admissionId || fRated < fParams.length">Save without signature</button>
+        <button type="button" class="dx-btn dx-btn-primary" (click)="startFeedbackSign()" [disabled]="saving">Patient / attendant signs</button>
+      </div>
+      <app-e-sign *ngIf="signing"
+                  [signerType]="f.respondent === 'ATTENDANT' ? 'attender' : 'patient'"
+                  [signerName]="f.respondentName || selectedPatientName"
+                  [contextType]="'diet-feedback'" [contextId]="f.admissionId"
+                  (signed)="onFeedbackSigned($event)" (cancelled)="signing = false">
+      </app-e-sign>
+    </section>
+
+    <section class="dx-card" *ngIf="feedback">
+      <div class="dx-card-head">
+        <h3>Feedback received</h3>
+        <span class="dx-muted">{{ feedback.count }} forms<ng-container *ngIf="feedback.correctDietPct !== null"> · correct diet {{ feedback.correctDietPct }}%</ng-container></span>
+      </div>
+      <div class="dx-summary" *ngIf="feedback.count">
+        <span *ngFor="let p of fParams"><b>{{ feedback.averages[p.key] ?? '—' }}</b> {{ p.label }}</span>
+      </div>
+      <div class="dx-empty" *ngIf="!feedback.count">No feedback in this period.</div>
+      <div class="dx-scroll" *ngIf="feedback.count">
+        <table class="diet-grid">
+          <thead><tr><th>Date</th><th>Patient</th><th class="dx-right">Average</th><th>Correct diet</th><th>Comments</th><th>By</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let r of feedback.rows" [class.is-act]="r.averageScore < 3 || r.correctDiet === false">
+              <td class="dx-tight">{{ r.feedbackDate | date:'dd MMM, HH:mm' }}</td>
+              <td>{{ r.patientName || r.admissionNo }}<span class="dx-sub-line">{{ r.bedNumber }} · {{ r.wardName }}</span></td>
+              <td class="dx-right is-strong">{{ r.averageScore }}/5</td>
+              <td>{{ r.correctDiet === null ? '—' : r.correctDiet ? 'Yes' : 'No' }}</td>
+              <td>{{ r.comments }}</td>
+              <td class="dx-tight">{{ r.respondent === 'ATTENDANT' ? 'Attendant' : 'Patient' }}<span class="dx-sub-line">{{ r.staffName }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </ng-container>
+</div>

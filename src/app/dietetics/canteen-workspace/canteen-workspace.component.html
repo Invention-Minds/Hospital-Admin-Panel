@@ -105,6 +105,8 @@
           <div class="cw-time" *ngIf="o.status === 'SKIPPED' && o.skipReason">{{ o.skipReason }}</div>
           <div class="cw-time" *ngIf="o.deliveredAt">{{ o.servedByName || o.deliveredBy }} · {{ o.deliveredAt | date:'HH:mm' }}</div>
           <div class="cw-time cw-bad" *ngIf="o.delayReason">Late: {{ o.delayReason }}</div>
+          <div class="cw-time" *ngIf="o.receivedAt">Received on ward · {{ o.receivedByName }} {{ o.receivedAt | date:'HH:mm' }}</div>
+          <div class="cw-time" *ngIf="o.choiceTakenAt">Patient's choice</div>
         </td>
         <td>
           <span *ngIf="o.delivery?.trayHotTempC != null" [class.cw-bad]="trayTempBad(o.delivery?.trayHotTempC, 'hot')">H {{ o.delivery?.trayHotTempC }}°C</span>
@@ -117,6 +119,7 @@
         </td>
         <td class="cw-actions">
           <button type="button" class="cw-btn cw-btn-sm" *ngIf="o.status === 'PLATED'" (click)="openDeliver(o)">Serve</button>
+          <button type="button" class="cw-btn cw-btn-sm cw-btn-primary" *ngIf="isWardNurse && (o.status === 'DELIVERED' || o.status === 'CONSUMED') && !o.receivedAt" (click)="receive(o)">Received</button>
           <button type="button" class="cw-btn cw-btn-sm" *ngIf="o.status === 'DELIVERED'" (click)="openIntake(o)">Intake</button>
           <button type="button" class="cw-btn cw-btn-sm" *ngIf="o.status !== 'CONSUMED' && o.status !== 'SKIPPED' && o.status !== 'DELIVERED'" (click)="openSkip(o)">Not served</button>
         </td>

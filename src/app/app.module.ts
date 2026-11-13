@@ -272,6 +272,10 @@ import { DietCensusComponent } from './dietetics/diet-census/diet-census.compone
 import { DietLabelsComponent } from './dietetics/diet-labels/diet-labels.component';
 import { DietRoundsComponent } from './dietetics/diet-rounds/diet-rounds.component';
 import { NutritionAssessmentComponent } from './dietetics/nutrition-assessment/nutrition-assessment.component';
+import { DietNightAckComponent } from './dietetics/diet-night-ack/diet-night-ack.component';
+import { DietFeedsComponent } from './dietetics/diet-feeds/diet-feeds.component';
+import { DietQualityComponent } from './dietetics/diet-quality/diet-quality.component';
+import { DietTakeOrderComponent } from './dietetics/diet-take-order/diet-take-order.component';
 import { QRCodeModule } from 'angularx-qrcode';
 import { MastersComponent } from './masters/masters.component';
 import { DutyAckModalComponent } from './scheduling/duty-ack-modal/duty-ack-modal.component';
@@ -503,6 +507,10 @@ import { NursingSuperDashboardComponent } from './dashboards/nursing-super-dashb
     DietLabelsComponent,
     DietRoundsComponent,
     NutritionAssessmentComponent,
+    DietNightAckComponent,
+    DietFeedsComponent,
+    DietQualityComponent,
+    DietTakeOrderComponent,
     // Duty-ack modal — mounted globally in app.component, declared here so
     // AppComponent's template can resolve <app-duty-ack-modal>. It uses
     // <app-e-sign> internally, which works because ESignComponent (standalone)

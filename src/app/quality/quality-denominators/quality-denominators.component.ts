@@ -11,6 +11,7 @@ import {
 } from '../../services/quality.service';
 import { AlertService } from '../../services/alert.service';
 import { isQualityEditor } from '../quality-access';
+import { QiSubmissionBannerComponent } from '../qi-submission-banner/qi-submission-banner.component';
 
 /**
  * Phase 9.26 / Phase 5c — Monthly denominator capture.
@@ -24,7 +25,7 @@ import { isQualityEditor } from '../quality-access';
 @Component({
   selector: 'app-quality-denominators',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, QiSubmissionBannerComponent],
   templateUrl: './quality-denominators.component.html',
   styleUrls: ['./quality-denominators.component.css'],
 })

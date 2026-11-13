@@ -1,0 +1,30 @@
+<div class="qsb" *ngIf="status as s" [ngClass]="'qsb-' + tone">
+  <div class="qsb-main">
+    <span class="qsb-month">{{ monthLabel }} QI data</span>
+    <span class="qsb-count"><b>{{ s.entered }}</b> of {{ s.expected }} entered</span>
+    <span class="qsb-when">{{ whenText }}</span>
+    <span class="qsb-late" *ngIf="s.enteredLate > 0">{{ s.enteredLate }} entered late</span>
+  </div>
+  <div class="qsb-actions">
+    <button type="button" class="qsb-btn" *ngIf="showMissingToggle && s.missing.length > 0"
+            [class.qsb-btn-on]="missingOnly" (click)="toggleMissing()">
+      {{ missingOnly ? 'Show all' : 'Show ' + s.missing.length + ' missing' }}
+    </button>
+    <ng-container *ngIf="canEdit">
+      <button type="button" class="qsb-link" *ngIf="!editingDueDay" (click)="startEditDueDay()"
+              title="Day of the next month by which each month's data must be entered">
+        Due day: {{ s.dueDay }} · change
+      </button>
+      <span class="qsb-edit" *ngIf="editingDueDay">
+        <label>Due on day
+          <input type="number" [(ngModel)]="dueDayDraft" [min]="dueDayMin" [max]="dueDayMax" />
+          of the next month
+        </label>
+        <button type="button" class="qsb-btn" (click)="saveDueDay()" [disabled]="savingDueDay">{{ savingDueDay ? 'Saving…' : 'Save' }}</button>
+        <button type="button" class="qsb-link" (click)="editingDueDay = false" [disabled]="savingDueDay">Cancel</button>
+        <span class="qsb-err" *ngIf="dueDayError">{{ dueDayError }}</span>
+      </span>
+    </ng-container>
+  </div>
+</div>
+<div class="qsb qsb-bad" *ngIf="!status && loadError">{{ loadError }}</div>

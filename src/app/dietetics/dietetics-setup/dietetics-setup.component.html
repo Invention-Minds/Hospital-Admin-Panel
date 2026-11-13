@@ -253,6 +253,13 @@
       </label>
       <p class="ds-hint">Patients under 18 get STAMP; pregnant patients (from the doctor's initial assessment) or these departments get the Maternal form; everyone else NRS-2002. The dietitian can always switch.</p>
 
+      <h3>Night cover (dietitian off duty)</h3>
+      <div class="ds-row">
+        <label>Night from <input type="time" [(ngModel)]="settings.nightFrom" /></label>
+        <label>until <input type="time" [(ngModel)]="settings.nightUntil" /></label>
+      </div>
+      <p class="ds-hint">In this window new admissions and diet changes are also sent to doctors, and any doctor can acknowledge them in <b>Night diet ack</b>. The dietitian reviews and signs next morning.</p>
+
       <div class="ds-actions">
         <button type="button" class="ds-btn ds-btn-primary" (click)="saveSettings()">Save settings</button>
       </div>
@@ -322,6 +329,7 @@
         <option *ngFor="let d of diets" [value]="d.id">{{ d.code }} · {{ d.name }}</option>
       </select>
     </label>
+    <p class="ds-hint" *ngIf="menuDietId">The first dish in each cell is the default tray. Add "+ option" dishes the patient may choose instead — canteen staff record the choice in <b>Take order</b>.</p>
     <table class="diet-grid ds-menu" *ngIf="menuDietId">
       <thead>
         <tr>
@@ -334,10 +342,21 @@
           <th>{{ label }}</th>
           <td *ngFor="let s of slots">
             <select [ngModel]="cellAt(dow, s.id)?.mealMasterId || ''"
-                    (ngModelChange)="setMenuCell(dow, s.id, $event)">
+                    (ngModelChange)="setMenuCell(dow, s.id, $event)" aria-label="Default dish">
               <option value="">—</option>
               <option *ngFor="let m of meals" [value]="m.id">{{ m.name }}</option>
             </select>
+            <!-- Extra dishes the patient may choose (Take order) -->
+            <div class="ds-opts" *ngIf="cellAt(dow, s.id)">
+              <span class="ds-opt" *ngFor="let o of optionsAt(dow, s.id)">
+                {{ o.meal.name }}
+                <button type="button" class="ds-opt-x" (click)="removeOption(o)" [attr.aria-label]="'Remove option ' + o.meal.name">×</button>
+              </span>
+              <select class="ds-opt-add" [ngModel]="''" (ngModelChange)="addOption(dow, s.id, $event)" aria-label="Add a dish option">
+                <option value="">+ option</option>
+                <option *ngFor="let m of meals" [value]="m.id">{{ m.name }}</option>
+              </select>
+            </div>
           </td>
         </tr>
       </tbody>

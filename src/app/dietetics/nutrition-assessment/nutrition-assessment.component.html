@@ -53,13 +53,23 @@
         </div>
         <h4>Table 1 — initial screening</h4>
         <table class="diet-grid na-yn">
-          <tr><td>Is BMI &lt; 20.5?</td><td><label class="dx-check"><input type="checkbox" [(ngModel)]="nrs.initial.bmiBelow205" /> Yes</label></td></tr>
-          <tr><td>Has the patient lost weight within the last 3 months?</td><td><label class="dx-check"><input type="checkbox" [(ngModel)]="nrs.initial.weightLoss3m" /> Yes</label></td></tr>
-          <tr><td>Has the patient had a reduced dietary intake in the last week?</td><td><label class="dx-check"><input type="checkbox" [(ngModel)]="nrs.initial.reducedIntake" /> Yes</label></td></tr>
-          <tr><td>Is the patient severely ill (e.g. in intensive therapy)?</td><td><label class="dx-check"><input type="checkbox" [(ngModel)]="nrs.initial.severelyIll" /> Yes</label></td></tr>
+          <tr><td>Is BMI &lt; 20.5?</td><td>
+            <label class="dx-check"><input type="radio" name="nrsBmi" [value]="true" [(ngModel)]="nrs.initial.bmiBelow205" /> Yes</label>
+            <label class="dx-check"><input type="radio" name="nrsBmi" [value]="false" [(ngModel)]="nrs.initial.bmiBelow205" /> No</label></td></tr>
+          <tr><td>Has the patient lost weight within the last 3 months?</td><td>
+            <label class="dx-check"><input type="radio" name="nrsWt" [value]="true" [(ngModel)]="nrs.initial.weightLoss3m" /> Yes</label>
+            <label class="dx-check"><input type="radio" name="nrsWt" [value]="false" [(ngModel)]="nrs.initial.weightLoss3m" /> No</label></td></tr>
+          <tr><td>Has the patient had a reduced dietary intake in the last week?</td><td>
+            <label class="dx-check"><input type="radio" name="nrsIntake" [value]="true" [(ngModel)]="nrs.initial.reducedIntake" /> Yes</label>
+            <label class="dx-check"><input type="radio" name="nrsIntake" [value]="false" [(ngModel)]="nrs.initial.reducedIntake" /> No</label></td></tr>
+          <tr><td>Is the patient severely ill (e.g. in intensive therapy)?</td><td>
+            <label class="dx-check"><input type="radio" name="nrsIll" [value]="true" [(ngModel)]="nrs.initial.severelyIll" /> Yes</label>
+            <label class="dx-check"><input type="radio" name="nrsIll" [value]="false" [(ngModel)]="nrs.initial.severelyIll" /> No</label></td></tr>
         </table>
-        <ng-container *ngIf="nrs.initial.bmiBelow205 || nrs.initial.weightLoss3m || nrs.initial.reducedIntake || nrs.initial.severelyIll">
-          <h4>Table 2 — final screening</h4>
+        <ng-container>
+          <h4>Table 2 — final screening
+            <span class="dx-muted" *ngIf="!(nrs.initial.bmiBelow205 || nrs.initial.weightLoss3m || nrs.initial.reducedIntake || nrs.initial.severelyIll)">(optional — all initial answers are No)</span>
+          </h4>
           <div class="dx-row">
             <label class="dx-field">Impaired nutritional status
               <select [(ngModel)]="nrs.nutritionScore">

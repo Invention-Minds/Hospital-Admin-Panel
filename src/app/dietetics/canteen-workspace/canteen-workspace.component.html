@@ -30,6 +30,13 @@
   <div class="cw-banner cw-banner-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
   <div class="cw-banner cw-banner-good" *ngIf="successMessage">{{ successMessage }}</div>
 
+  <!-- RT feed patients get feed doses (every N hours), not meal trays -->
+  <div class="cw-feeds" *ngIf="feedSummary?.patients">
+    <b>RT feeds today:</b> {{ feedSummary!.patients }} patient(s) · {{ feedSummary!.toPrepare }} feed(s) to prepare
+    <span *ngIf="feedSummary!.dueNext2h"> · <b>{{ feedSummary!.dueNext2h }} due in the next 2 hours</b></span>
+    <a routerLink="/dietetics/feeds">Open RT feeds →</a>
+  </div>
+
   <!-- ─── Dietary alerts (admission / discharge / transfer / bed re-occupied) ─── -->
   <div class="cw-alerts" *ngIf="alerts.length">
     <div class="cw-alerts-head">

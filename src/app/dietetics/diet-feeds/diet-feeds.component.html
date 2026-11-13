@@ -64,6 +64,7 @@
             <span class="dx-strong">{{ d.volumeMl ? d.volumeMl + ' ml' : 'Feed' }}</span>
             <span class="dx-muted" *ngIf="d.intervalHours"> · every {{ d.intervalHours }} h</span>
             <span class="dx-sub-line">{{ d.dietCode }}{{ d.feedNotes ? ' · ' + d.feedNotes : '' }}</span>
+            <span class="dx-pill dx-pill-warn" *ngIf="d.defaultSchedule" title="No feed order on the diet plan — set it in the Dietician queue">Default schedule — confirm</span>
           </td>
           <td class="df-avoid">{{ d.foodAvoid || '' }}</td>
           <td>

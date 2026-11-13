@@ -271,6 +271,26 @@ export class DieticianQueueComponent implements OnInit, OnDestroy {
     this.appliedDietRestrictions = decodeJsonList(
       this.diets.find((d) => d.id === plan.dietMasterId)?.restrictions,
     );
+    this.applyFeedDefaults();
+  }
+
+  /**
+   * RT feed diet: prefill the feed order so doses + labels are generated —
+   * volume / interval read from the ward's text ("200ml Q2h"), else every
+   * 2 h from 06:00. The dietitian corrects it to the doctor's order.
+   */
+  private applyFeedDefaults(): void {
+    if (this.selectedDiet?.kind !== 'FEED') return;
+    const t = (this.form.feedNotes || '').toLowerCase();
+    if (!this.form.feedVolumeMl) {
+      const v = t.match(/(\d{2,4})\s*(ml|cc)\b/);
+      if (v) this.form.feedVolumeMl = Number(v[1]);
+    }
+    if (!this.form.feedIntervalHours) {
+      const q = t.match(/q\s*(\d+(?:\.\d+)?)\s*(h|hr|hrs|hour|hourly)?\b/) ?? t.match(/every\s*(\d+(?:\.\d+)?)\s*(h|hr|hrs|hour|hours)\b/);
+      this.form.feedIntervalHours = q ? Number(q[1]) : /\bhourly\b/.test(t) ? 1 : 2;
+    }
+    if (!this.form.feedStartTime) this.form.feedStartTime = '06:00';
   }
 
   private parseTemplatedValues(s: string | null | undefined): Record<string, unknown> {
@@ -306,6 +326,7 @@ export class DieticianQueueComponent implements OnInit, OnDestroy {
     const kept = this.form.restrictionsSnapshot.filter((r) => !this.appliedDietRestrictions.includes(r));
     this.form.restrictionsSnapshot = Array.from(new Set([...kept, ...fromDiet]));
     this.appliedDietRestrictions = fromDiet;
+    this.applyFeedDefaults();
   }
 
   toggleRestriction(name: string): void {

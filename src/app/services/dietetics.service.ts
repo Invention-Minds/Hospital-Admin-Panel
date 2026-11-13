@@ -1324,6 +1324,8 @@ export interface TakeOrderRow {
 
 export interface FeedDoseRow {
   id: string;
+  /** Schedule taken from the ward's text / Q2H-from-06:00 default — dietitian to confirm. */
+  defaultSchedule?: boolean;
   admissionId: string;
   scheduledFor: string;
   volumeMl: number | null;

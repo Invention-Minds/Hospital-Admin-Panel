@@ -92,3 +92,8 @@
 .cw-late input { border-color: #f5b46b !important; }
 .cw-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .cw-modal-actions { display: flex; gap: 10px; margin-top: 12px; justify-content: flex-end; }
+
+/* RT feeds summary */
+.cw-feeds { margin: 0 0 12px; padding: 10px 14px; border: 1px solid #c9d6f5; border-radius: 8px; background: #f0f3ff; font-size: 14px; }
+.cw-feeds a { margin-left: 12px; font-weight: 600; }
+

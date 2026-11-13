@@ -140,7 +140,21 @@ export class CanteenWorkspaceComponent implements OnInit, OnDestroy {
       next: (a) => { this.alerts = a; },
       error: () => { /* swallow */ },
     });
+    // RT-feed patients get feed doses, not trays — show them here too.
+    this.svc.listFeeds(this.date).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (f) => {
+        this.feedSummary = {
+          patients: new Set(f.map((d) => d.admissionId)).size,
+          toPrepare: f.filter((d) => d.status === 'ORDERED').length,
+          dueNext2h: f.filter((d) => d.status === 'ORDERED' && new Date(d.scheduledFor).getTime() <= Date.now() + 2 * 3600 * 1000).length,
+        };
+      },
+      error: () => { this.feedSummary = null; },
+    });
   }
+
+  /** RT feeds for the day (kitchen prepares them on the RT feeds screen). */
+  feedSummary: { patients: number; toPrepare: number; dueNext2h: number } | null = null;
 
   // ─── Alerts ─────────────────────────────────────────────────────────
   acknowledgeAlerts(ids: string[]): void {

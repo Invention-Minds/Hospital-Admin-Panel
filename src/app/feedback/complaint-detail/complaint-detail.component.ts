@@ -39,6 +39,7 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
   draft = {
     status: 'open' as ComplaintStatus, assignedTo: '', assignedToId: null as number | null,
     resolutionNotes: '', department: '', unitId: null as number | null, category: null as string | null,
+    escalationReason: '',
   };
   categories: ComplaintCategory[] = [];
 
@@ -104,6 +105,7 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
       department: c.department ?? '',
       unitId: c.unitId ?? null,
       category: c.category ?? null,
+      escalationReason: '',
     };
     this.loadPickers();
   }
@@ -134,6 +136,11 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
     return cur && !this.departments.includes(cur) ? [cur, ...this.departments] : this.departments;
   }
 
+  /** Escalating by hand needs a reason — it goes to the next level's alert and the timeline. */
+  needsReason(): boolean {
+    return this.draft.status === 'escalated' && this.complaint?.status !== 'escalated';
+  }
+
   needsNotes(): boolean {
     return this.draft.status === 'resolved' && this.complaint?.status !== 'resolved';
   }
@@ -142,6 +149,10 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
     if (!this.complaint || this.saving || !this.canAct) return;
     if (this.needsNotes() && !this.draft.resolutionNotes.trim()) {
       this.errorMessage = 'Resolution notes are required to resolve a complaint.';
+      return;
+    }
+    if (this.needsReason() && this.draft.escalationReason.trim().length < 5) {
+      this.errorMessage = 'Give a reason for escalating (at least 5 characters).';
       return;
     }
     this.errorMessage = '';
@@ -161,6 +172,7 @@ export class ComplaintDetailComponent implements OnInit, OnDestroy {
       ...(this.canAssign && this.draft.category !== (this.complaint.category ?? null) && { category: this.draft.category }),
       // Reopen clears the resolution server-side — don't resend the old notes.
       ...(!reopening && { resolutionNotes: this.draft.resolutionNotes.trim() || null }),
+      ...(this.needsReason() && { escalationReason: this.draft.escalationReason.trim() }),
     }).pipe(takeUntil(this.destroy$)).subscribe({
       next: () => {
         this.saving = false;

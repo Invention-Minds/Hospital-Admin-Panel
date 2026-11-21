@@ -66,6 +66,7 @@
     <label>QI code
       <input type="text" [(ngModel)]="filters.qiCode" (keyup.enter)="load()" (change)="load()" placeholder="e.g. PSQ-017" />
     </label>
+    <button class="inc-btn inc-btn-on" *ngIf="filters.unitId" (click)="filters.unitId = ''; unitLabel = ''; load()" title="Remove the unit filter">Unit: {{ unitLabel }} ✕</button>
     <button class="inc-btn" [class.inc-btn-on]="mineOnly" (click)="toggleMine()">{{ mineOnly ? '✓ Mine only' : 'Mine only' }}</button>
     <button class="inc-btn" (click)="clearFilters()">Clear</button>
     <button class="inc-btn" (click)="load()">↻ Refresh</button>

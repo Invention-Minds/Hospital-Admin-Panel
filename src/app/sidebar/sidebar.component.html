@@ -234,6 +234,19 @@
       </div>
     </a>
 
+    <!-- Doctor Updates — who added / edited / deactivated a doctor or changed
+         their schedule, and when. For the booking desks and admins. -->
+    <a [routerLink]="canSeeDoctorUpdates() ? '/doctor-updates' : null" routerLinkActive="active" class="icon-wrapper"
+       *ngIf="canSeeDoctorUpdates()">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M10 4a4 4 0 1 1 0 8a4 4 0 0 1 0-8m0 10c1.2 0 2.33.13 3.36.36A7 7 0 0 0 12.07 21H2v-2c0-2.76 3.58-5 8-5m8 0a5 5 0 1 1 0 10a5 5 0 0 1 0-10m-.75 2v3.31l2.35 1.4l.6-1.01l-1.7-1V16z"/>
+        </svg>
+        <span>Doctor Updates</span>
+      </div>
+    </a>
+
+
     <!-- MHC (Master Health Checkup) -->
     <a routerLink="/health-checkup" routerLinkActive="active" class="icon-wrapper"
        *ngIf="(isMHC() || (['super_admin', 'admin', 'sub_admin'].includes(role) && isNotEstimator() && isNotIpBillingManager() && isNotRadiology() && !isMukund() && isNotLab() && isNotNursing() && isNotOT() && isNotTherapist())) && isNotTVController() && isNotDischargeCoordinator() && isNotErNurse()">
@@ -861,6 +874,18 @@
           <path fill="currentColor" d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2L9.19 8.63L2 9.24l5.46 4.73L5.82 21z"/>
         </svg>
         <span>Quality &amp; feedback</span>
+      </div>
+    </a>
+
+    <!-- Dietary reports: patients / trays served -->
+    <a [routerLink]="(subAdminType === 'Canteen Staff' || subAdminType === 'Dietician' || isNursingSuper || role === 'super_admin' || (role === 'admin' && (adminType === 'Manager' || adminType === 'Senior Manager' || adminType === 'Management' || adminType === 'Quality Manager'))) ? '/dietetics/reports' : null"
+       routerLinkActive="active" class="icon-wrapper"
+       *ngIf="(subAdminType === 'Canteen Staff' || subAdminType === 'Dietician' || isNursingSuper || role === 'super_admin' || (role === 'admin' && (adminType === 'Manager' || adminType === 'Senior Manager' || adminType === 'Management' || adminType === 'Quality Manager')))">
+      <div class="icon-content">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon" width="2em" height="2em" viewBox="0 0 24 24">
+          <path fill="currentColor" d="M3 3h2v16h16v2H3zm4 10h3v5H7zm5-6h3v11h-3zm5 3h3v8h-3z"/>
+        </svg>
+        <span>Diet reports</span>
       </div>
     </a>
 

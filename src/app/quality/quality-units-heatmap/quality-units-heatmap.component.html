@@ -1,0 +1,54 @@
+<div class="qh">
+  <div class="qh-bar">
+    <p class="qh-intro">
+      Each unit compared with the whole hospital. <span class="qh-key qh-bad">Red</span> = 25% or more worse,
+      <span class="qh-key qh-good">green</span> = 25% or more better, <span class="qh-key qh-warn">amber</span> = well above the average unit,
+      <span class="qh-key qh-few">grey</span> = too few cases to judge. Click a number to see the cases.
+    </p>
+    <div class="qh-controls">
+      <select [(ngModel)]="month" (ngModelChange)="load(false)" aria-label="Month">
+        <option *ngFor="let m of months" [value]="m.key">{{ m.label }}</option>
+      </select>
+      <button type="button" class="qh-btn" (click)="load(true)" [disabled]="loading">{{ loading ? 'Loading…' : 'Refresh' }}</button>
+    </div>
+  </div>
+
+  <div class="qh-error" *ngIf="errorMessage" (click)="errorMessage = ''">{{ errorMessage }}</div>
+  <div class="qh-loading" *ngIf="loading && !data">Loading units…</div>
+
+  <ng-container *ngIf="data as d">
+    <div class="qh-empty" *ngIf="!d.rows.length">
+      No hospital units set up yet. Add units and map them to wards and departments under <b>Quality → Units &amp; Escalation</b>.
+    </div>
+    <div class="qh-wrap" *ngIf="d.rows.length">
+      <table class="qh-table">
+        <thead>
+          <tr>
+            <th rowspan="2" class="qh-unit">Unit</th>
+            <th [attr.colspan]="monthCols.length" class="qh-scope">This month</th>
+            <th [attr.colspan]="nowCols.length" class="qh-scope qh-scope-now">Right now</th>
+          </tr>
+          <tr>
+            <th *ngFor="let c of monthCols" [title]="c.help">{{ c.label }}</th>
+            <th *ngFor="let c of nowCols" [title]="c.help" class="qh-now">{{ c.label }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="qh-hosp">
+            <td class="qh-unit"><b>{{ d.hospital.unit }}</b></td>
+            <td *ngFor="let c of monthCols" [title]="title(d.hospital.cells[c.key], c)">{{ show(d.hospital.cells[c.key], c) }}</td>
+            <td *ngFor="let c of nowCols" class="qh-now" [title]="title(d.hospital.cells[c.key], c)">{{ show(d.hospital.cells[c.key], c) }}</td>
+          </tr>
+          <tr *ngFor="let r of d.rows; trackBy: trackRow">
+            <td class="qh-unit">{{ r.unit }}<small *ngIf="r.unitId !== null && !r.hasWards" title="Map this unit to wards to get rates per patient-day"> · no wards</small></td>
+            <td *ngFor="let c of monthCols" [ngClass]="'qh-' + (r.cells[c.key]?.tone || 'none')" [class.qh-click]="r.unitId !== null && r.cells[c.key]?.value !== null"
+                [title]="title(r.cells[c.key], c)" (click)="openCell(r, c)">{{ show(r.cells[c.key], c) }}</td>
+            <td *ngFor="let c of nowCols" class="qh-now" [ngClass]="'qh-' + (r.cells[c.key]?.tone || 'none')" [class.qh-click]="r.unitId !== null"
+                [title]="title(r.cells[c.key], c)" (click)="openCell(r, c)">{{ show(r.cells[c.key], c) }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="qh-note">{{ d.patientDaysNote }} Cases raised before units existed are matched by ward, then department. The incident and complaint lists filter on the unit stored on each case, so older cases may not appear there.</p>
+  </ng-container>
+</div>

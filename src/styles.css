@@ -49,6 +49,20 @@ body.dm-privacy-blur > *:not(.dm-watermark) { filter: blur(18px); }
 }
 @media print { .dm-watermark { opacity: 0.15; } }
 
+/* Printing any page prints only the page: the app shell (sidebar, global
+   Back button, hospital header with WhatsApp / bell / profile, toasts and
+   pop-ups) is left out so labels, sheets and posters start at the top. */
+@media print {
+  app-sidebar,
+  .app-back-btn,
+  app-dashboard-module > .header-container,
+  app-dashboard-module > .mobile-header,
+  app-critical-values-alert,
+  app-duty-ack-modal,
+  p-toast { display: none !important; }
+  .content, .content.has-back-button { margin: 0 !important; padding: 0 !important; }
+}
+
 .downloadButtonLanding{
     font-size: 16px;
     color: #0096f0;

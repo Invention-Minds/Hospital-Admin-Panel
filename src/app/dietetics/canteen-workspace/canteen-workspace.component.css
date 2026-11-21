@@ -97,3 +97,20 @@
 .cw-feeds { margin: 0 0 12px; padding: 10px 14px; border: 1px solid #c9d6f5; border-radius: 8px; background: #f0f3ff; font-size: 14px; }
 .cw-feeds a { margin-left: 12px; font-weight: 600; }
 
+.cw-gaps { margin: 6px 0 0; padding-left: 18px; font-size: 13px; }
+
+/* Dishes on a tray row */
+.cw-dishes { font-size: 12.5px; color: #4b5563; margin-top: 2px; }
+.cw-dish-swap { font-weight: 600; color: #0e2970; }
+.cw-dish-no { text-decoration: line-through; color: #9ca3af; }
+
+/* Prep count: one card per meal time */
+.cw-prep-intro { font-size: 13px; margin: 0 0 12px; max-width: 90ch; }
+.cw-prep-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; align-items: start; }
+.cw-prep { background: #fff; border: 1px solid #e3e8f0; border-radius: 10px; padding: 12px 14px; }
+.cw-prep-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.cw-prep-head h3 { margin: 0; font-size: 15px; font-weight: 600; color: #0e2970; }
+.cw-prep-meta { font-size: 12.5px; color: #5b6475; margin: 4px 0 8px; }
+.cw-prep-table { width: 100%; }
+.cw-num { text-align: right; width: 64px; font-variant-numeric: tabular-nums; }
+

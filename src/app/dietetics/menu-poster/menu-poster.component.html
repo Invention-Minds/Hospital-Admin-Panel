@@ -1,0 +1,36 @@
+<div class="mp-shell">
+  <div class="mp-controls">
+    <h2 class="mp-h">Menu QR posters</h2>
+    <p class="mp-sub">Print and put up in patient rooms, wards and the canteen. Patients and families scan the QR with their phone camera
+      to see the weekly menu, with no login and no patient details. The page always shows the current menu from <b>Setup → Weekly menu</b>,
+      so you don't need to reprint when the menu changes.</p>
+
+    <label class="mp-check"><input type="checkbox" [(ngModel)]="general" /> General poster (patient picks their diet on the phone)</label>
+    <p class="mp-group" *ngIf="diets.length">Posters with one diet already selected:</p>
+    <div class="mp-diets">
+      <label class="mp-check" *ngFor="let d of diets"><input type="checkbox" [checked]="selected.has(d.id)" (change)="toggle(d.id)" /> {{ d.name }}</label>
+    </div>
+    <p class="mp-empty" *ngIf="!diets.length">No diet has a weekly menu yet. Fill it in Setup → Weekly menu first.</p>
+
+    <label class="mp-field">Location line (optional)
+      <input type="text" [(ngModel)]="caption" maxlength="60" placeholder="e.g. Ward 3 · Second floor" />
+    </label>
+
+    <div class="mp-actions">
+      <button type="button" class="mp-btn mp-btn-primary" (click)="print()" [disabled]="!posters.length">Print {{ posters.length }} poster{{ posters.length === 1 ? '' : 's' }}</button>
+      <a class="mp-btn" [href]="menuUrl" target="_blank" rel="noopener">Open the menu page ↗</a>
+      <a class="mp-btn" routerLink="/dietetics/setup">Back to setup</a>
+    </div>
+  </div>
+
+  <div class="mp-poster" *ngFor="let p of posters">
+    <div class="mp-badge">FOOD &amp; NUTRITION</div>
+    <h3 class="mp-title">What's on the menu?</h3>
+    <p class="mp-lead">Scan to see today's meals and the week ahead.</p>
+    <qrcode [qrdata]="p.url" [width]="300" [margin]="2" [errorCorrectionLevel]="'M'"></qrcode>
+    <p class="mp-area" *ngIf="p.caption">{{ p.caption }}</p>
+    <p class="mp-small">Open your phone camera and point it at the code · No app or login needed<br />
+      Want a different dish or have a food allergy? Tell your nurse or the canteen staff.</p>
+    <p class="mp-url">{{ p.url }}</p>
+  </div>
+</div>

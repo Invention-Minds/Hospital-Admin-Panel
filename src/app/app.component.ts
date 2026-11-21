@@ -156,6 +156,6 @@ export class AppComponent {
     const url = (this.router.url || '').split('?')[0];
     // Public pages (no login, no app shell): feedback survey / walk-up and the
     // anonymous incident report opened from the QR poster.
-    return url.startsWith('/feedback/k/') || url === '/feedback/new' || url === '/report-incident';
+    return url.startsWith('/feedback/k/') || url === '/feedback/new' || url === '/report-incident' || url === '/menu';
   }
 }

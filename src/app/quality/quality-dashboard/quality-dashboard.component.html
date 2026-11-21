@@ -6,12 +6,17 @@
     </div>
     <div class="q-range">
       <button class="q-link" (click)="openIndicators()">NABH 108 indicators →</button>
-      <label>From <input type="date" [(ngModel)]="from" (change)="loadCurrent()" /></label>
-      <label>To <input type="date" [(ngModel)]="to" (change)="loadCurrent()" /></label>
+      <ng-container *ngIf="tab !== 'today' && tab !== 'units' && tab !== 'trends'">
+        <label>From <input type="date" [(ngModel)]="from" (change)="loadCurrent()" /></label>
+        <label>To <input type="date" [(ngModel)]="to" (change)="loadCurrent()" /></label>
+      </ng-container>
     </div>
   </div>
 
   <div class="q-tabs">
+    <button class="q-tab" *ngIf="canEdit" [class.q-tab-on]="tab === 'today'" (click)="switchTab('today')">Today</button>
+    <button class="q-tab" [class.q-tab-on]="tab === 'units'" (click)="switchTab('units')">Units</button>
+    <button class="q-tab" [class.q-tab-on]="tab === 'trends'" (click)="switchTab('trends')">Trends</button>
     <button class="q-tab" [class.q-tab-on]="tab === 'safety'" (click)="switchTab('safety')">Patient safety</button>
     <button class="q-tab" [class.q-tab-on]="tab === 'clinical'" (click)="switchTab('clinical')">Clinical</button>
     <button class="q-tab" [class.q-tab-on]="tab === 'timeliness'" (click)="switchTab('timeliness')">Process timeliness</button>
@@ -22,6 +27,11 @@
 
   <div class="q-banner q-bad" *ngIf="errorMessage" (click)="errorMessage=''">{{ errorMessage }}</div>
   <div class="q-loading" *ngIf="loading">Loading…</div>
+
+  <!-- ── Today (Quality Manager) ── -->
+  <app-quality-today *ngIf="tab === 'today'"></app-quality-today>
+  <app-quality-units-heatmap *ngIf="tab === 'units'"></app-quality-units-heatmap>
+  <app-quality-trends *ngIf="tab === 'trends'"></app-quality-trends>
 
   <!-- ── Safety ── -->
   <ng-container *ngIf="!loading && tab === 'safety' && safety as s">

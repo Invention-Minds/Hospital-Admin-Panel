@@ -1,0 +1,90 @@
+<div class="page du-shell">
+  <div class="du-head">
+    <div>
+      <h2 class="du-title">Doctor Updates</h2>
+      <p class="du-sub">Every change to a doctor's details or schedule — who did it and when.</p>
+    </div>
+  </div>
+
+  <div class="du-filters">
+    <div class="du-presets">
+      <button type="button" class="du-btn" [class.du-btn-on]="preset === 'today'" (click)="applyPreset('today')">Today</button>
+      <button type="button" class="du-btn" [class.du-btn-on]="preset === '7d'" (click)="applyPreset('7d')">7 days</button>
+      <button type="button" class="du-btn" [class.du-btn-on]="preset === '30d'" (click)="applyPreset('30d')">30 days</button>
+    </div>
+    <label>From
+      <input type="date" [(ngModel)]="filters.from" (change)="preset = 'custom'; search()" />
+    </label>
+    <label>To
+      <input type="date" [(ngModel)]="filters.to" (change)="preset = 'custom'; search()" />
+    </label>
+    <label>Doctor
+      <select [(ngModel)]="filters.doctorId" (change)="search()">
+        <option [ngValue]="null">All doctors</option>
+        <option *ngFor="let d of doctors" [ngValue]="d.id">{{ d.name }}</option>
+      </select>
+    </label>
+    <label>Change
+      <select [(ngModel)]="filters.action" (change)="search()">
+        <option value="">All changes</option>
+        <option *ngFor="let a of actions" [value]="a.value">{{ a.label }}</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="du-banner du-banner-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
+
+  <div class="du-loading" *ngIf="loading">Loading…</div>
+
+  <div class="du-empty" *ngIf="!loading && !errorMessage && rows.length === 0">
+    No doctor changes in this period.
+  </div>
+
+  <div class="du-table-wrap" *ngIf="!loading && rows.length > 0">
+    <table class="du-table">
+      <thead>
+        <tr>
+          <th>When</th>
+          <th>Doctor</th>
+          <th>Change</th>
+          <th>Details</th>
+          <th>Booked patients</th>
+          <th>Done by</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let r of rows" [class.du-row-alert]="r.affectedBookings > 0">
+          <td class="du-when">
+            <div>{{ r.at | date: 'd MMM y' }}</div>
+            <div class="du-muted">{{ r.at | date: 'h:mm a' }}</div>
+          </td>
+          <td class="du-doctor">{{ r.doctorName }}</td>
+          <td><span class="du-pill" [ngClass]="tone(r.action)">{{ actionLabel(r.action) }}</span></td>
+          <td class="du-details">
+            <div class="du-summary">{{ r.summary }}</div>
+            <ul class="du-changes" *ngIf="r.changes.length">
+              <li *ngFor="let c of r.changes">
+                <span class="du-field">{{ c.field }}:</span>
+                <span class="du-from">{{ c.from ?? '—' }}</span>
+                <span class="du-arrow">→</span>
+                <span class="du-to">{{ c.to ?? '—' }}</span>
+              </li>
+            </ul>
+            <div class="du-muted" *ngFor="let line of detailLines(r)">{{ line }}</div>
+          </td>
+          <td>
+            <span *ngIf="r.affectedBookings > 0" class="du-pill du-bad">{{ r.affectedBookings }} to reschedule</span>
+            <span *ngIf="r.affectedBookings === 0" class="du-muted">—</span>
+          </td>
+          <td class="du-by">{{ r.doneBy }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="du-pager" *ngIf="!loading && total > limit">
+    <button type="button" class="du-btn" [disabled]="page <= 1" (click)="goTo(page - 1)">Previous</button>
+    <span>Page {{ page }} of {{ pageCount }} · {{ total }} changes</span>
+    <button type="button" class="du-btn" [disabled]="page >= pageCount" (click)="goTo(page + 1)">Next</button>
+  </div>
+</div>

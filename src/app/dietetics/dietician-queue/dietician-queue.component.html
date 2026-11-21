@@ -62,7 +62,7 @@
             <span class="dx-strong">{{ item.row.patientName || item.row.admissionNo }}</span>
             <span class="dq-age" *ngIf="item.row.age">{{ item.row.age }}{{ item.row.sex ? ' · ' + (item.row.sex | slice:0:1) : '' }}</span>
           </td>
-          <td class="dq-dx" [title]="item.row.diagnosis">{{ item.row.diagnosis }}</td>
+          <td class="dq-dx" [title]="item.row.diagnosis || 'No diagnosis on the admission, the doctor\'s assessment or the census'">{{ item.row.diagnosis || '' }}<span class="dx-muted" *ngIf="!item.row.diagnosis">Not recorded</span></td>
           <td class="dx-tight" *ngIf="tab === 'pending'">
             <span class="dx-pill" [class.dx-pill-bad]="overdue(item.row.admissionDate)" [class.dx-pill-info]="!overdue(item.row.admissionDate)"
                   [title]="'Admitted ' + (item.row.admissionDate | date:'dd MMM yyyy, HH:mm')">

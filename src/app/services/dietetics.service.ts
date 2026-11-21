@@ -187,6 +187,78 @@ export interface DieteticsSettings {
   /** Dietitian off duty between these times ("19:00" → "07:00"). */
   nightFrom: string;
   nightUntil: string;
+  /** Kitchen cooks the per-dish count plus this margin (%). */
+  prepBufferPct: number;
+}
+
+/** One item on a plate (Rice, Chapati, Dal…). Meals are built from dishes. */
+export interface Dish {
+  id: string;
+  name: string;
+  /** Dishes in the same group can replace each other on a tray. */
+  swapGroup: string | null;
+  portion: string | null;
+  isVeg: boolean;
+  caloriesKcal: number | null;
+  isActive: boolean;
+  /** Diets the dish suits; empty = any diet. */
+  dietIds: string[];
+  mealCount?: number;
+}
+
+export interface TrayDish {
+  id: string;
+  dish: { id: string; name: string; portion: string | null; isVeg: boolean };
+  defaultDishId: string;
+  defaultDishName: string | null;
+  swapGroup: string | null;
+  swapped: boolean;
+  omitted: boolean;
+  changedLate: boolean;
+  /** The meal's own dish first, then others of its group that suit the diet. */
+  swapTo: Array<{ id: string; name: string; portion: string | null; isVeg: boolean }>;
+}
+
+export interface PrepCountSlot {
+  mealTimeSlotId: string;
+  name: string;
+  startTime: string;
+  orderCutoff: string | null;
+  cutoffPassed: boolean;
+  trays: number;
+  dishes: Array<{ dishId: string; name: string; portion: string | null; group: string | null; count: number; withBuffer: number }>;
+  /** Trays whose meal has no dish list — counted as whole plates. */
+  plates: Array<{ name: string; count: number; withBuffer: number }>;
+  instructionOnly: number;
+  swapped: number;
+  omitted: number;
+  lateChanges: number;
+}
+export interface PrepCount { bufferPct: number; slots: PrepCountSlot[] }
+
+/** Served report — patients / trays served over a date range. */
+export interface ServedReport {
+  from: string;
+  to: string;
+  slots: Array<{ id: string; name: string; startTime: string }>;
+  totals: {
+    patientsServed: number; traysServed: number;
+    /** Staff marked "not served". */
+    notServed: number;
+    /** System skipped: NPO, sheet NO, empty menu, plan ended… */
+    noTray: number;
+    /** Never marked served (still ordered / prepared). */
+    pending: number;
+    servedLate: number; receivedOnWard: number;
+    intakeRecorded: number; avgIntakePct: number | null; lowIntake: number;
+    extraFoodServed: number; attendantMeals: number;
+  };
+  byDay: Array<{ date: string; patients: number; trays: number; notServed: number; perSlot: Record<string, number> }>;
+  bySlot: Array<{ id: string; name: string; patients: number; trays: number }>;
+  byDiet: Array<{ code: string; name: string; patients: number; trays: number }>;
+  byWard: Array<{ name: string; patients: number; trays: number }>;
+  notServedReasons: Array<{ reason: string; count: number }>;
+  noTrayReasons: Array<{ reason: string; count: number }>;
 }
 
 export interface MealMaster {
@@ -199,6 +271,8 @@ export interface MealMaster {
   isActive: boolean;
   compatibleDietIds?: string[];
   allergenIds?: string[];
+  /** Dishes on this meal's plate, in serving order. */
+  dishIds?: string[];
 }
 
 export interface MenuPlanCell {
@@ -369,6 +443,8 @@ export interface MealOrder {
   receivedByName?: string | null;
   /** Patient's own dish choice taken by canteen staff. */
   choiceTakenAt?: string | null;
+  /** Dishes on the tray (meals built from dishes). */
+  items?: Array<{ id: string; dishId: string; defaultDishId: string; omitted: boolean; dish: { id: string; name: string; portion: string | null } }>;
   delivery?: MealDelivery | null;
   intake?: MealIntake | null;
   // Hydrated by the backend /kitchen endpoint:
@@ -812,6 +888,14 @@ export function parseCanteenViewSpec(raw: string | null | undefined): CanteenVie
   }
 }
 
+export interface PublicDish { name: string; description: string | null; isVeg: boolean; caloriesKcal: number | null; items: string[] }
+export interface PublicMenuCell { day: number; slotId: string; dish: PublicDish; notes: string | null; options: PublicDish[] }
+export interface PublicMenu {
+  today: number;
+  slots: Array<{ id: string; name: string; startTime: string; endTime: string }>;
+  diets: Array<{ id: string; name: string; code: string; description: string | null; isVeg: boolean; cells: PublicMenuCell[] }>;
+}
+
 export interface CanteenTvSnapshot {
   channel: CanteenChannel;
   /** Absent on older backends → all wards, tickets. */
@@ -1128,6 +1212,11 @@ export class DieteticsService {
     return this.http.get<CanteenTvSnapshot>(`${this.base}/canteen-channels/${channelId}/snapshot`, { params });
   }
 
+  /** Public weekly menu (QR poster page) — no login needed. */
+  getPublicMenu(): Observable<PublicMenu> {
+    return this.http.get<PublicMenu>(`${this.base}/public/menu`);
+  }
+
   // ─── Night diet acknowledgement (any doctor) ────────────────────────
   getNightAck(): Observable<NightAckList> {
     return this.http.get<NightAckList>(`${this.base}/night-ack`);
@@ -1184,6 +1273,32 @@ export class DieteticsService {
   }
   setTrayChoice(orderId: string, mealMasterId: string): Observable<MealOrder> {
     return this.http.post<MealOrder>(`${this.base}/meal-orders/${orderId}/choice`, { mealMasterId });
+  }
+
+  // ─── Dishes, meal dish lists, swaps, prep count ─────────────────────
+  listDishes(active = false): Observable<Dish[]> {
+    return this.http.get<Dish[]>(`${this.base}/dishes`, { params: active ? { active: 'true' } : {} });
+  }
+  upsertDish(payload: Partial<Dish>): Observable<Dish> {
+    return payload.id
+      ? this.http.put<Dish>(`${this.base}/dishes/${payload.id}`, payload)
+      : this.http.post<Dish>(`${this.base}/dishes`, payload);
+  }
+  setMealDishes(mealId: string, dishIds: string[]): Observable<{ mealMasterId: string; dishIds: string[] }> {
+    return this.http.put<{ mealMasterId: string; dishIds: string[] }>(`${this.base}/meals/${mealId}/dishes`, { dishIds });
+  }
+  updateTrayDish(orderId: string, itemId: string, action: 'swap' | 'omit' | 'restore', dishId?: string): Observable<{ late: boolean }> {
+    return this.http.post<{ late: boolean }>(`${this.base}/meal-orders/${orderId}/items/${itemId}`, { action, dishId });
+  }
+  getServedReport(from: string, to: string, wardId?: string): Observable<ServedReport> {
+    const params: Record<string, string> = { from, to };
+    if (wardId) params['wardId'] = wardId;
+    return this.http.get<ServedReport>(`${this.base}/reports/served`, { params });
+  }
+  getPrepCount(date: string, mealTimeSlotId?: string): Observable<PrepCount> {
+    const params: Record<string, string> = { date };
+    if (mealTimeSlotId) params['mealTimeSlotId'] = mealTimeSlotId;
+    return this.http.get<PrepCount>(`${this.base}/prep-count`, { params });
   }
 
   // ─── RT feed doses ──────────────────────────────────────────────────
@@ -1320,6 +1435,10 @@ export interface TakeOrderRow {
   choiceTakenAt: string | null;
   choiceTakenBy: string | null;
   choices: Array<{ id: string; name: string; isVeg: boolean; caloriesKcal: number | null; isDefault: boolean }>;
+  /** Meal's order cut-off has passed — changes are flagged late. */
+  cutoffPassed: boolean;
+  /** Dishes on this tray (empty when the meal has no dish list). */
+  items: TrayDish[];
 }
 
 export interface FeedDoseRow {

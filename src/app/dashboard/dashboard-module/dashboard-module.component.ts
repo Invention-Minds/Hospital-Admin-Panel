@@ -220,8 +220,14 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
       (notification.type === 'discharge_clearance_cleared' && /diet/i.test(dietTarget) &&
         (isDietician || this.subAdminType === 'Canteen Staff'));
 
+    // Doctor changes (added / edited / deactivated / leave / slots) — one row
+    // per Tele Caller and Front Desk user, addressed by userId.
+    const isDoctorUpdateForMe = notification.type?.startsWith('doctor_') &&
+      notification['userId'] != null && String(notification['userId']) === myUserId;
+
     return (
       isEmergencyCode ||
+      isDoctorUpdateForMe ||
       isDietForMe ||
       isReferralForMe ||
       isIncidentForMe ||
@@ -270,7 +276,10 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
       case 'diet_new_admission': return 'New admission — diet needed';
       case 'diet_census': return 'Diet census received';
       case 'diet_change': return 'Diet change to review';
-      default: return 'Notification';
+      case 'doctor_deactivate': return 'Doctor deactivated';
+      case 'doctor_delete': return 'Doctor removed';
+      case 'doctor_leave_added': return 'Doctor unavailable';
+      default: return type?.startsWith('doctor_') ? 'Doctor update' : 'Notification';
     }
   }
   
@@ -342,6 +351,8 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
             this.router.navigate(['/feedback']);
           } else if (clickedType === 'estimation_request') {
             this.router.navigate(['/estimation']);
+          } else if (clickedType?.startsWith('doctor_')) {
+            this.router.navigate(['/doctor-updates']);
           } else {
             this.router.navigate(['/appointments']);
           }

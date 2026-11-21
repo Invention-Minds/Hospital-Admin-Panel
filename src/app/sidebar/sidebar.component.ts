@@ -40,6 +40,7 @@ export class SidebarComponent implements OnInit {
     { prefix: '/doorstep-requests', group: 'opd' },
     { prefix: '/patient', group: 'opd' },              // + /patient/timeline
     { prefix: '/doctor', group: 'opd' },
+    { prefix: '/doctor-updates', group: 'opd' },
     { prefix: '/health-checkup', group: 'opd' },
     { prefix: '/optometry', group: 'opd' },
     // Investigations
@@ -286,6 +287,12 @@ isErNurse(): boolean {
 }
 isNotErNurse(): boolean {
   return !this.isErNurse();
+}
+
+/** Doctor Updates menu: booking desks (Tele Caller, Front Desk) and admins. */
+canSeeDoctorUpdates(): boolean {
+  return this.role === 'super_admin' || this.role === 'admin' ||
+    this.subAdminType === 'Tele Caller' || this.subAdminType === 'Front Desk';
 }
 
 // ───────────────────────────────────────────────────────────────────────

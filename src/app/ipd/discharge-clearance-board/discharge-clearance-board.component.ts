@@ -29,6 +29,8 @@ export class DischargeClearanceBoardComponent implements OnInit, OnChanges {
 
   rows: DischargeClearance[] = [];
   gate: DischargeGate | null = null;
+  /** Departments this user may act on; null = server didn't say (show all, server still checks). */
+  canAct: string[] | null = null;
   loading = false;
 
   // Per-row inline editors.
@@ -54,7 +56,7 @@ export class DischargeClearanceBoardComponent implements OnInit, OnChanges {
   load(): void {
     this.loading = true;
     this.svc.list(this.admissionId).subscribe({
-      next: (r) => { this.rows = r.data.rows; this.gate = r.data.gate; this.loading = false; },
+      next: (r) => { this.rows = r.data.rows; this.gate = r.data.gate; this.canAct = r.data.canAct ?? null; this.loading = false; },
       error: (e) => { this.toast('error', e?.error?.error || 'Failed to load clearances'); this.loading = false; },
     });
   }
@@ -110,6 +112,10 @@ export class DischargeClearanceBoardComponent implements OnInit, OnChanges {
       },
       error: (e) => { this.toast('error', e?.error?.error || 'Failed to abandon'); },
     });
+  }
+
+  mayAct(dept: DischargeDepartment): boolean {
+    return !this.canAct || this.canAct.includes(dept);
   }
 
   rowFor(dept: DischargeDepartment): DischargeClearance | null {

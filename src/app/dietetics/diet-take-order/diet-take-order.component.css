@@ -1,4 +1,4 @@
-.to-choices { min-width: 260px; }
+.to-choices { min-width: 220px; }
 .to-choice {
   display: flex; align-items: center; gap: 8px; padding: 6px 10px; margin: 0 0 6px;
   border: 1px solid var(--dx-line); border-radius: 8px; cursor: pointer; font-size: 14px;
@@ -7,3 +7,14 @@
 .to-choice.is-on { border-color: var(--dx-navy); background: #f0f3ff; font-weight: 600; }
 .to-choice input { accent-color: var(--dx-navy); }
 .to-avoid { color: #a3321c; font-weight: 600; }
+
+/* Dishes on the tray: one line per dish, swap select + No */
+.to-dishes { min-width: 300px; }
+.to-dish-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.to-dish { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font-size: 13.5px; }
+.to-dish-name { min-width: 120px; }
+.to-swap { font: inherit; font-size: 13px; min-height: 30px; padding: 2px 6px; border: 1px solid var(--dx-line-strong); border-radius: 6px; background: #fff; min-width: 140px; }
+.to-dish.is-swapped .to-swap, .to-dish.is-swapped .to-dish-name { font-weight: 600; color: var(--dx-navy-ink); border-color: var(--dx-navy); }
+.to-dish.is-omitted .to-dish-name { text-decoration: line-through; color: var(--dx-faint); }
+.to-was { font-size: 12px; }
+.to-no { margin-left: auto; }

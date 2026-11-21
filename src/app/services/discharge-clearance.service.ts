@@ -35,6 +35,8 @@ export interface DischargeGate {
 export interface ClearanceListResponse {
   gate: DischargeGate;
   rows: DischargeClearance[];
+  /** Departments the logged-in user may clear / reject (server rule). Absent on older servers. */
+  canAct?: string[];
 }
 
 export interface QueueRow {

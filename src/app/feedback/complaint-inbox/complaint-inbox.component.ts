@@ -78,6 +78,14 @@ export class ComplaintInboxComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.applyRaiseDeepLink();
+    // ?status= / ?severity= / ?unitId= deep links (Quality "Today" and "Units" pages).
+    const qp = this.route.snapshot.queryParamMap;
+    for (const k of ['status', 'severity'] as const) {
+      const v = qp.get(k);
+      if (v) this.filters[k] = v;
+    }
+    const unitId = qp.get('unitId');
+    if (unitId && /^\d+$/.test(unitId)) { this.unitFilter = unitId; this.unitLabel = qp.get('unit') || `#${unitId}`; }
     this.load();
     this.loadStats();
     this.doctorService.getDepartments().pipe(takeUntil(this.destroy$)).subscribe({
@@ -109,6 +117,11 @@ export class ComplaintInboxComponent implements OnInit, OnDestroy {
     return !!(this.encounter.appointmentId || this.encounter.admissionId || this.encounter.emergencyId);
   }
 
+  /** Unit filter from a deep link (shown as a removable chip). */
+  unitFilter = '';
+  unitLabel = '';
+  clearUnit(): void { this.unitFilter = ''; this.unitLabel = ''; this.search(); }
+
   /** Filter change → back to the first page. */
   search(): void { this.skip = 0; this.load(); }
 
@@ -117,6 +130,7 @@ export class ComplaintInboxComponent implements OnInit, OnDestroy {
     this.selected.clear();
     this.svc.list({
       ...this.filters,
+      ...(this.unitFilter && { unitId: this.unitFilter }),
       // Date inputs are local 'YYYY-MM-DD' — cover the whole of the 'to' day.
       from: this.filters.from ? new Date(`${this.filters.from}T00:00:00`).toISOString() : '',
       to: this.filters.to ? new Date(`${this.filters.to}T23:59:59.999`).toISOString() : '',
@@ -215,10 +229,15 @@ export class ComplaintInboxComponent implements OnInit, OnDestroy {
       this.errorMessage = 'Resolution notes are required to resolve complaints.';
       return;
     }
+    if (this.bulkStatus === 'escalated' && this.bulkNotes.trim().length < 5) {
+      this.errorMessage = 'Give a reason for escalating (at least 5 characters).';
+      return;
+    }
     const ids = Array.from(this.selected);
     this.bulkSaving = true;
     this.bulkBanner = '';
-    this.svc.bulkUpdateStatus(ids, this.bulkStatus, this.bulkStatus === 'resolved' ? this.bulkNotes.trim() : null)
+    this.svc.bulkUpdateStatus(ids, this.bulkStatus, this.bulkStatus === 'resolved' ? this.bulkNotes.trim() : null,
+      this.bulkStatus === 'escalated' ? this.bulkNotes.trim() : null)
       .pipe(takeUntil(this.destroy$)).subscribe({
         next: (r) => {
           this.bulkSaving = false;

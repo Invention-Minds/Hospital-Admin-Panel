@@ -1,0 +1,70 @@
+<div class="qtr">
+  <div class="qtr-bar">
+    <p class="qtr-intro" *ngIf="data">
+      Last 12 complete months ({{ monthLabel(data.months[0]) }} – {{ monthLabel(data.months[data.months.length - 1]) }}) plus this month so far (hollow dot).
+      Dashed line = usual level (median). <b class="qtr-red">Red</b> months are a real change for the worse, <b class="qtr-green">green</b> for the better — not month-to-month noise.
+    </p>
+    <div class="qtr-controls">
+      <button type="button" class="qtr-chip" [class.qtr-chip-on]="view === 'flagged'" (click)="setView('flagged')">Needs attention {{ concerns.length }}</button>
+      <button type="button" class="qtr-chip" [class.qtr-chip-on]="view === 'all'" (click)="setView('all')">All measures</button>
+      <button type="button" class="qtr-btn" (click)="load(true)" [disabled]="loading">{{ loading ? 'Loading…' : 'Refresh' }}</button>
+    </div>
+  </div>
+
+  <div class="qtr-error" *ngIf="errorMessage" (click)="errorMessage = ''">{{ errorMessage }}</div>
+  <div class="qtr-loading" *ngIf="loading && !data">Working out 12 months of trends…</div>
+
+  <ng-container *ngIf="data">
+    <ng-container *ngIf="view === 'flagged'">
+      <div class="qtr-allclear" *ngIf="!concerns.length">No measure shows a real change for the worse.</div>
+      <div class="qtr-grid">
+        <ng-container *ngFor="let m of concerns; trackBy: trackKey">
+          <ng-container *ngTemplateOutlet="card; context: { $implicit: m }"></ng-container>
+        </ng-container>
+      </div>
+      <ng-container *ngIf="improvements.length">
+        <h3 class="qtr-h">Improving</h3>
+        <div class="qtr-grid">
+          <ng-container *ngFor="let m of improvements; trackBy: trackKey">
+            <ng-container *ngTemplateOutlet="card; context: { $implicit: m }"></ng-container>
+          </ng-container>
+        </div>
+      </ng-container>
+    </ng-container>
+
+    <ng-container *ngIf="view === 'all'">
+      <section *ngFor="let g of groups">
+        <h3 class="qtr-h">{{ g.name }}</h3>
+        <div class="qtr-grid">
+          <ng-container *ngFor="let m of g.measures; trackBy: trackKey">
+            <ng-container *ngTemplateOutlet="card; context: { $implicit: m }"></ng-container>
+          </ng-container>
+        </div>
+      </section>
+    </ng-container>
+
+    <p class="qtr-note" *ngIf="notEnough.length">
+      Not enough months of data yet to judge a change (needs 8): {{ notEnough.join(' · ') }}.
+    </p>
+  </ng-container>
+
+  <ng-template #card let-m>
+    <div class="qtr-card" [class.qtr-card-concern]="concerns.includes(m)" [class.qtr-card-good]="improvements.includes(m)">
+      <div class="qtr-card-head">
+        <span class="qtr-label" [title]="m.help">{{ m.label }}</span>
+        <button type="button" class="qtr-link" *ngIf="m.link" (click)="open(m.link)">Open →</button>
+      </div>
+      <div class="qtr-figs">
+        <span class="qtr-val">{{ fmt(latest(m), m.unit) }}</span>
+        <span class="qtr-sub">last month · usual {{ fmt(m.median, m.unit) }}</span>
+        <span class="qtr-sub" *ngIf="m.current.value !== null">· this month so far {{ fmt(m.current.value, m.unit) }}</span>
+      </div>
+      <div class="qtr-signals" *ngIf="m.signals.length">
+        <span class="qtr-sig" *ngFor="let s of m.signals" [ngClass]="'qtr-sig-' + s.polarity">{{ s.text }}</span>
+      </div>
+      <div class="qtr-nodata" *ngIf="!m.enoughData">Not enough data yet to judge</div>
+      <app-run-chart [points]="m.points" [current]="m.current" [median]="m.median" [signals]="m.signals" [unit]="m.unit" [label]="m.label"></app-run-chart>
+      <p class="qtr-help" *ngIf="m.help">{{ m.help }}</p>
+    </div>
+  </ng-template>
+</div>

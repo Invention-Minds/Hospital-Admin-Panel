@@ -56,7 +56,8 @@
           <div *ngIf="row.blockingReason"><em>{{ row.blockingReason }}</em></div>
         </div>
 
-        <ng-container *ngIf="row.status !== 'cleared'">
+        <div class="dcb-meta" *ngIf="row.status !== 'cleared' && !mayAct(dept)">Waiting for {{ dept }} staff to clear.</div>
+        <ng-container *ngIf="row.status !== 'cleared' && mayAct(dept)">
           <textarea rows="2" placeholder="Notes (optional)" [(ngModel)]="clearDraft[dept]"></textarea>
           <div class="dcb-row-actions">
             <button class="dcb-btn dcb-btn-primary" (click)="clear(dept)">✓ Clear</button>

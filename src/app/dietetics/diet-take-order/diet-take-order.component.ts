@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
-import { DieteticsService, MealTimeSlot, TakeOrderRow, localDateString } from '../../services/dietetics.service';
+import { DieteticsService, MealTimeSlot, TakeOrderRow, TrayDish, localDateString } from '../../services/dietetics.service';
 
 /**
  * Take order — `/dietetics/take-order`.
@@ -63,8 +63,45 @@ export class DietTakeOrderComponent implements OnInit, OnDestroy {
       });
   }
 
-  get withOptions(): number { return this.rows.filter((r) => r.choices.length > 1).length; }
+  /** Patient has something to choose: another plate, or a dish to swap. */
+  hasChoice(r: TakeOrderRow): boolean { return r.choices.length > 1 || r.items.some((i) => i.swapTo.length > 1); }
+  get withOptions(): number { return this.rows.filter((r) => this.hasChoice(r)).length; }
   get taken(): number { return this.rows.filter((r) => r.choiceTakenAt).length; }
+  get changedDishes(): number { return this.rows.reduce((n, r) => n + r.items.filter((i) => i.swapped || i.omitted).length, 0); }
+  /** Meal cut-off already passed — the kitchen count may be fixed. */
+  get cutoffPassed(): boolean { return this.rows.length > 0 && this.rows.every((r) => r.cutoffPassed); }
+
+  /** Swap one dish on the tray (choosing the meal's own dish puts it back). */
+  swapDish(r: TakeOrderRow, item: TrayDish, dishId: string): void {
+    if (!dishId || dishId === item.dish.id) return;
+    const back = dishId === item.defaultDishId;
+    this.saveDish(r, item, back ? 'restore' : 'swap', back ? undefined : dishId);
+  }
+  /** Patient doesn't want this dish / wants it back. */
+  toggleOmit(r: TakeOrderRow, item: TrayDish): void {
+    this.saveDish(r, item, item.omitted ? 'restore' : 'omit');
+  }
+  private saveDish(r: TakeOrderRow, item: TrayDish, action: 'swap' | 'omit' | 'restore', dishId?: string): void {
+    this.savingId = r.id;
+    this.errorMessage = '';
+    this.svc.updateTrayDish(r.id, item.id, action, dishId).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (res) => {
+        this.savingId = null;
+        const to = action === 'restore' ? item.defaultDishId : dishId ?? item.dish.id;
+        const next = item.swapTo.find((d) => d.id === to);
+        if (action !== 'omit' && next) item.dish = next;
+        item.omitted = action === 'omit';
+        item.swapped = item.dish.id !== item.defaultDishId;
+        item.changedLate = res.late;
+        r.choiceTakenAt = new Date().toISOString();
+        const what = action === 'omit' ? `no ${item.dish.name}` : action === 'restore' ? `${item.dish.name} (as planned)` : item.dish.name;
+        this.successMessage = `Bed ${r.bedNumber || '—'}: ${what}.${res.late ? ' After the cut-off — tell the kitchen.' : ''}`;
+      },
+      error: (e) => { this.savingId = null; this.errorMessage = e?.error?.error || 'Could not change the dish'; },
+    });
+  }
+
+  trackItem(_: number, i: TrayDish): string { return i.id; }
 
   choose(r: TakeOrderRow, mealId: string): void {
     if (r.currentMeal?.id === mealId && r.choiceTakenAt) return;
@@ -77,6 +114,8 @@ export class DietTakeOrderComponent implements OnInit, OnDestroy {
         r.currentMeal = meal ? { id: meal.id, name: meal.name } : r.currentMeal;
         r.choiceTakenAt = o.choiceTakenAt ?? new Date().toISOString();
         this.successMessage = `Bed ${r.bedNumber || '—'}: ${meal?.name ?? 'dish'} recorded.`;
+        // A different plate brings its own dish list.
+        this.load();
       },
       error: (e) => { this.savingId = null; this.errorMessage = e?.error?.error || 'Could not save the choice'; },
     });

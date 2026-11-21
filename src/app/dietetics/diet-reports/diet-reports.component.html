@@ -1,0 +1,124 @@
+<div class="dx-shell">
+  <div class="dx-head">
+    <div>
+      <h2 class="dx-title">Diet reports</h2>
+      <p class="dx-sub">Patients and trays served. A tray counts as served once canteen staff press <b>Serve</b> (or intake is recorded).</p>
+    </div>
+    <div class="dx-toolbar dx-noprint">
+      <label>Period
+        <select [ngModel]="preset" (ngModelChange)="applyPreset($event)">
+          <option value="today">Today</option>
+          <option value="yesterday">Yesterday</option>
+          <option value="7d">Last 7 days</option>
+          <option value="month">This month</option>
+          <option value="lastMonth">Last month</option>
+          <option value="custom">Custom</option>
+        </select>
+      </label>
+      <label>From <input type="date" [(ngModel)]="from" (change)="preset = 'custom'; load()" /></label>
+      <label>To <input type="date" [(ngModel)]="to" (change)="preset = 'custom'; load()" /></label>
+      <label>Ward
+        <select [(ngModel)]="wardId" (change)="load()">
+          <option value="">All wards</option>
+          <option *ngFor="let w of wards" [value]="w.id">{{ w.wardName }}</option>
+        </select>
+      </label>
+      <button type="button" class="dx-btn" (click)="downloadCsv()" [disabled]="!report">Excel (CSV)</button>
+      <button type="button" class="dx-btn" (click)="print()" [disabled]="!report">Print</button>
+    </div>
+  </div>
+
+  <div class="dx-banner dx-banner-bad" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+  <p class="dx-empty" *ngIf="loading">Loading…</p>
+
+  <ng-container *ngIf="report && !loading">
+    <p class="dr-period">{{ report.from | date:'d MMM yyyy' }}{{ report.from !== report.to ? ' – ' + (report.to | date:'d MMM yyyy') : '' }} · {{ wardName }}</p>
+
+    <div class="dr-tiles">
+      <div class="dr-tile dr-tile-main"><span class="dr-num">{{ report.totals.patientsServed }}</span><span class="dr-lbl">patients served</span></div>
+      <div class="dr-tile dr-tile-main"><span class="dr-num">{{ report.totals.traysServed }}</span><span class="dr-lbl">trays served<span *ngIf="servedPct !== null"> · {{ servedPct }}% of planned</span></span></div>
+      <div class="dr-tile" [class.is-bad]="report.totals.notServed"><span class="dr-num">{{ report.totals.notServed }}</span><span class="dr-lbl">marked not served</span></div>
+      <div class="dr-tile" [class.is-warn]="report.totals.pending"><span class="dr-num">{{ report.totals.pending }}</span><span class="dr-lbl">never marked served</span></div>
+      <div class="dr-tile"><span class="dr-num">{{ report.totals.avgIntakePct ?? '—' }}<small *ngIf="report.totals.avgIntakePct !== null">%</small></span><span class="dr-lbl">average intake · {{ report.totals.intakeRecorded }} recorded</span></div>
+      <div class="dr-tile"><span class="dr-num">{{ report.totals.extraFoodServed }}</span><span class="dr-lbl">extra food served<span *ngIf="report.totals.attendantMeals"> · {{ report.totals.attendantMeals }} attendant</span></span></div>
+    </div>
+
+    <div class="dx-banner dx-banner-warn" *ngIf="report.totals.pending" role="status">
+      {{ report.totals.pending }} tray(s) were never marked served (still "Ordered" or "Prepared"). If they were given to patients,
+      ask canteen staff to press <b>Serve</b> on every tray. Otherwise this report counts fewer patients than were fed.
+    </div>
+
+    <p class="dr-notes">
+      <span *ngIf="report.totals.servedLate">{{ report.totals.servedLate }} served after the meal time ·</span>
+      {{ report.totals.receivedOnWard }} confirmed received on the ward ·
+      {{ report.totals.lowIntake }} ate less than half ·
+      {{ report.totals.noTray }} with no tray needed (NPO, sheet "NO", empty menu, plan ended)
+    </p>
+
+    <section class="dx-card">
+      <div class="dx-card-head"><h3>By day and meal</h3><span class="dx-muted">Trays served</span></div>
+      <div class="dx-scroll">
+        <table class="diet-grid dr-table">
+          <thead>
+            <tr>
+              <th>Date</th><th class="dr-n">Patients</th><th class="dr-n">Trays</th>
+              <th class="dr-n" *ngFor="let s of report.slots">{{ s.name }}</th>
+              <th class="dr-n">Not served</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let d of report.byDay" [class.is-muted]="!d.trays && !d.notServed">
+              <td class="dx-tight">{{ d.date | date:'EEE d MMM' }}</td>
+              <td class="dr-n is-strong">{{ d.patients }}</td>
+              <td class="dr-n">{{ d.trays }}</td>
+              <td class="dr-n" *ngFor="let s of report.slots">{{ d.perSlot[s.id] || '' }}</td>
+              <td class="dr-n" [class.dr-bad]="d.notServed">{{ d.notServed || '' }}</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <th>Total</th>
+              <th class="dr-n">{{ report.totals.patientsServed }}</th>
+              <th class="dr-n">{{ report.totals.traysServed }}</th>
+              <th class="dr-n" *ngFor="let s of report.slots">{{ slotTotal(s.id) }}</th>
+              <th class="dr-n">{{ report.totals.notServed }}</th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <p class="dx-muted dr-foot">Patients = different patients served at least one tray that day. The total counts each patient once for the whole period.</p>
+    </section>
+
+    <div class="dr-grid">
+      <section class="dx-card">
+        <h3>By diet</h3>
+        <p class="dx-empty" *ngIf="!report.byDiet.length">No trays served.</p>
+        <div class="dr-bar-row" *ngFor="let d of report.byDiet">
+          <span class="dr-bar-label" [title]="d.name"><b>{{ d.code }}</b> {{ d.name }}</span>
+          <span class="dr-bar"><span [style.width.%]="(d.trays / maxTrays(report.byDiet)) * 100"></span></span>
+          <span class="dr-bar-val">{{ d.trays }} <small>· {{ d.patients }} pt</small></span>
+        </div>
+      </section>
+      <section class="dx-card">
+        <h3>By ward</h3>
+        <p class="dx-empty" *ngIf="!report.byWard.length">No trays served.</p>
+        <div class="dr-bar-row" *ngFor="let w of report.byWard">
+          <span class="dr-bar-label" [title]="w.name">{{ w.name }}</span>
+          <span class="dr-bar"><span [style.width.%]="(w.trays / maxTrays(report.byWard)) * 100"></span></span>
+          <span class="dr-bar-val">{{ w.trays }} <small>· {{ w.patients }} pt</small></span>
+        </div>
+      </section>
+      <section class="dx-card">
+        <h3>Why trays were not served</h3>
+        <p class="dx-empty" *ngIf="!report.notServedReasons.length">None. Every planned tray was served or is still open.</p>
+        <table class="diet-grid" *ngIf="report.notServedReasons.length">
+          <tbody><tr *ngFor="let r of report.notServedReasons"><td>{{ r.reason }}</td><td class="dr-n">{{ r.count }}</td></tr></tbody>
+        </table>
+        <h4 *ngIf="report.noTrayReasons.length">No tray needed</h4>
+        <table class="diet-grid" *ngIf="report.noTrayReasons.length">
+          <tbody><tr *ngFor="let r of report.noTrayReasons"><td>{{ r.reason }}</td><td class="dr-n">{{ r.count }}</td></tr></tbody>
+        </table>
+      </section>
+    </div>
+  </ng-container>
+</div>

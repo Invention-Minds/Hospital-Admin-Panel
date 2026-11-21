@@ -16,6 +16,7 @@
     <button type="button" [class.active]="tab==='diets'" (click)="setTab('diets')">Diets</button>
     <button type="button" [class.active]="tab==='textures'" (click)="setTab('textures')">Textures</button>
     <button type="button" [class.active]="tab==='supplements'" (click)="setTab('supplements')">Supplements</button>
+    <button type="button" [class.active]="tab==='dishes'" (click)="setTab('dishes')">Dishes</button>
     <button type="button" [class.active]="tab==='meals'" (click)="setTab('meals')">Meals</button>
     <button type="button" [class.active]="tab==='menu'" (click)="setTab('menu')">Weekly menu</button>
     <button type="button" [class.active]="tab==='settings'" (click)="setTab('settings')">Sheet &amp; labels</button>
@@ -260,8 +261,69 @@
       </div>
       <p class="ds-hint">In this window new admissions and diet changes are also sent to doctors, and any doctor can acknowledge them in <b>Night diet ack</b>. The dietitian reviews and signs next morning.</p>
 
+      <h3>Kitchen prep count</h3>
+      <label>Extra margin (%) <input type="number" min="0" max="50" [(ngModel)]="settings.prepBufferPct" /></label>
+      <p class="ds-hint">The Canteen prep count shows each dish to cook plus this margin, for new admissions and late changes. 34 dishes at 5% → cook 36.</p>
+
       <div class="ds-actions">
         <button type="button" class="ds-btn ds-btn-primary" (click)="saveSettings()">Save settings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Dishes ─── -->
+  <div *ngIf="tab==='dishes'" class="ds-panel">
+    <p class="ds-hint">
+      Single dishes (Rice, Chapati, Dal, Curd…). Build meals from them in <b>Meals</b>.
+      Dishes in the same <b>swap group</b> can replace each other on a patient's tray in <b>Take order</b>
+      (e.g. group "Staple": Rice, Chapati, Phulka). Limit a dish to certain diets so a swap never goes off-diet.
+    </p>
+    <div class="ds-grid-2">
+      <div>
+        <table class="diet-grid">
+          <thead><tr><th>Dish</th><th>Portion</th><th>kCal</th><th>Suits</th><th>Meals</th><th></th></tr></thead>
+          <tbody>
+            <ng-container *ngFor="let g of dishGroups">
+              <tr class="ds-group-row"><td colspan="6">{{ g.group }} <span class="ds-hint">· {{ g.dishes.length }}</span></td></tr>
+              <tr *ngFor="let d of g.dishes" [class.ds-inactive]="!d.isActive">
+                <td><span class="ds-veg" [class.is-nonveg]="!d.isVeg" [attr.aria-label]="d.isVeg ? 'Veg' : 'Non-veg'"></span>{{ d.name }}<span class="ds-hint" *ngIf="!d.isActive"> (inactive)</span></td>
+                <td>{{ d.portion || '—' }}</td>
+                <td>{{ d.caloriesKcal ?? '—' }}</td>
+                <td>{{ dietCodes(d.dietIds) }}</td>
+                <td>{{ d.mealCount || 0 }}</td>
+                <td><button type="button" class="ds-btn ds-btn-sm" (click)="editDish(d)">Edit</button></td>
+              </tr>
+            </ng-container>
+            <tr *ngIf="dishes.length===0"><td colspan="6" class="ds-empty">No dishes yet. Add Rice, Chapati, Dal… on the right.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="ds-form">
+        <h3>{{ dishForm.id ? 'Edit dish' : 'New dish' }}</h3>
+        <label>Name <input type="text" [(ngModel)]="dishForm.name" placeholder="Chapati" /></label>
+        <label>Swap group <span class="ds-hint">— dishes in one group can replace each other</span>
+          <input type="text" [(ngModel)]="dishForm.swapGroup" list="ds-swap-groups" placeholder="Staple / Curry / Side / Dessert" />
+          <datalist id="ds-swap-groups"><option *ngFor="let g of swapGroups" [value]="g"></option></datalist>
+        </label>
+        <div class="ds-row">
+          <label>Portion <input type="text" [(ngModel)]="dishForm.portion" placeholder="2 nos / 150 g / 1 cup" /></label>
+          <label>kCal <input type="number" min="0" [(ngModel)]="dishForm.caloriesKcal" /></label>
+        </div>
+        <div class="ds-checks">
+          <label><input type="checkbox" [(ngModel)]="dishForm.isVeg" /> Vegetarian</label>
+          <label><input type="checkbox" [(ngModel)]="dishForm.isActive" /> Active</label>
+        </div>
+        <fieldset class="ds-fs">
+          <legend>Suits diets <span class="ds-hint">— none ticked = any diet</span></legend>
+          <label *ngFor="let d of diets" class="ds-check-inline">
+            <input type="checkbox" [checked]="dishForm.dietIds.includes(d.id)" (change)="toggleDishDiet(d.id)" />
+            {{ d.code }} · {{ d.name }}
+          </label>
+        </fieldset>
+        <div class="ds-actions">
+          <button type="button" class="ds-btn ds-btn-primary" (click)="saveDish()">Save</button>
+          <button type="button" class="ds-btn" (click)="dishForm = blankDish()">Cancel</button>
+        </div>
       </div>
     </div>
   </div>
@@ -271,11 +333,11 @@
     <div class="ds-grid-2">
       <div>
         <table class="diet-grid">
-          <thead><tr><th>Name</th><th>Category</th><th>kCal</th><th>Veg</th><th></th></tr></thead>
+          <thead><tr><th>Name</th><th>Dishes on the plate</th><th>kCal</th><th>Veg</th><th></th></tr></thead>
           <tbody>
             <tr *ngFor="let m of meals">
-              <td>{{ m.name }}</td>
-              <td>{{ m.category ?? '—' }}</td>
+              <td>{{ m.name }}<span class="ds-hint" *ngIf="m.category"> · {{ m.category }}</span></td>
+              <td>{{ mealDishNames(m) || '—' }}</td>
               <td>{{ m.caloriesKcal ?? '—' }}</td>
               <td>{{ m.isVeg ? '✓' : '' }}</td>
               <td><button type="button" class="ds-btn ds-btn-sm" (click)="editMeal(m)">Edit</button></td>
@@ -287,6 +349,25 @@
       <div class="ds-form">
         <h3>{{ mealForm.id ? 'Edit meal' : 'New meal' }}</h3>
         <label>Name <input type="text" [(ngModel)]="mealForm.name" /></label>
+        <fieldset class="ds-fs">
+          <legend>Dishes on the plate <span class="ds-hint">— in serving order; the kitchen counts each dish</span></legend>
+          <ol class="ds-dish-list" *ngIf="mealForm.dishIds.length">
+            <li *ngFor="let id of mealForm.dishIds; let i = index; let last = last">
+              <span class="ds-dish-name">{{ dishById(id)?.name || 'Unknown dish' }}
+                <span class="ds-hint" *ngIf="dishById(id)?.swapGroup"> · {{ dishById(id)?.swapGroup }}</span>
+              </span>
+              <button type="button" class="ds-btn ds-btn-sm" (click)="moveMealDish(i, -1)" [disabled]="i === 0" aria-label="Move up">↑</button>
+              <button type="button" class="ds-btn ds-btn-sm" (click)="moveMealDish(i, 1)" [disabled]="last" aria-label="Move down">↓</button>
+              <button type="button" class="ds-btn ds-btn-sm" (click)="removeMealDish(id)" aria-label="Remove dish">✕</button>
+            </li>
+          </ol>
+          <select #addDish (change)="addMealDish(addDish.value); addDish.value = ''" aria-label="Add a dish">
+            <option value="">+ Add a dish…</option>
+            <option *ngFor="let d of addableDishes" [value]="d.id">{{ d.name }}{{ d.swapGroup ? ' (' + d.swapGroup + ')' : '' }}</option>
+          </select>
+          <p class="ds-hint" *ngIf="!mealForm.dishIds.length">No dishes: the tray is counted as one whole plate and can't have single dishes swapped.</p>
+          <p class="ds-hint" *ngIf="mealDishKcal">Dishes add up to {{ mealDishKcal }} kcal.</p>
+        </fieldset>
         <label>Category <input type="text" [(ngModel)]="mealForm.category" placeholder="Main / Side / Beverage" /></label>
         <label>kCal <input type="number" [(ngModel)]="mealForm.caloriesKcal" /></label>
         <label>Description <textarea [(ngModel)]="mealForm.description" rows="2"></textarea></label>
@@ -329,6 +410,7 @@
         <option *ngFor="let d of diets" [value]="d.id">{{ d.code }} · {{ d.name }}</option>
       </select>
     </label>
+    <p class="ds-hint">Patients and families can see this menu on their phone by scanning a QR poster. <a routerLink="/dietetics/menu-poster">Print menu QR posters →</a></p>
     <p class="ds-hint" *ngIf="menuDietId">The first dish in each cell is the default tray. Add "+ option" dishes the patient may choose instead — canteen staff record the choice in <b>Take order</b>.</p>
     <table class="diet-grid ds-menu" *ngIf="menuDietId">
       <thead>

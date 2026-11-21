@@ -114,6 +114,7 @@ const routes: Routes = [
   { path: 'appointment-request', component: AppointmentRequestComponent,canActivate:[authGuard] },
   { path: 'new-appointment', component: AppointmentFormComponent,canActivate:[authGuard] },
   {path:'doctor',component:DoctorOverviewComponent,canActivate:[authGuard]},
+  { path: 'doctor-updates', loadComponent: () => import('./doctor/doctor-updates/doctor-updates.component').then(m => m.DoctorUpdatesComponent), canActivate:[authGuard, roleGuard], data: { roles: ['admin'], subAdminTypes: ['Tele Caller', 'Front Desk'] } },
   {path:'doctor-profile',component: DoctorFormComponent,canActivate:[authGuard]},
   {path:'login', component:LoginComponent},
   {path:'settings', component: SettingsComponent,canActivate:[authGuard]},
@@ -366,6 +367,10 @@ const routes: Routes = [
   { path: 'dietetics/feeds', component: DietFeedsComponent, canActivate:[authGuard] },
   { path: 'dietetics/quality', component: DietQualityComponent, canActivate:[authGuard] },
   { path: 'dietetics/take-order', component: DietTakeOrderComponent, canActivate:[authGuard] },
+  { path: 'dietetics/reports', loadComponent: () => import('./dietetics/diet-reports/diet-reports.component').then(m => m.DietReportsComponent), canActivate:[authGuard] },
+  { path: 'dietetics/menu-poster', loadComponent: () => import('./dietetics/menu-poster/menu-poster.component').then(m => m.MenuPosterComponent), canActivate:[authGuard] },
+  // PUBLIC weekly menu — opened from the menu QR poster (no login, no patient data).
+  { path: 'menu', loadComponent: () => import('./dietetics/public-menu/public-menu.component').then(m => m.PublicMenuComponent) },
   { path: 'ipd/admission/:admissionId/diet', component: DietAdmissionTabComponent, canActivate:[authGuard] },
   { path: 'canteen-channel/:channelId', component: CanteenChannelComponent },
   { path: 'ipd/hmis-import', component: HmisImportComponent, canActivate:[authGuard] },

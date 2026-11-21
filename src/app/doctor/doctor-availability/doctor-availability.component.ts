@@ -57,6 +57,8 @@ export class DoctorAvailabilityComponent {
   userId: string = ''; // User ID
   arrivedDoctorIds: number[] = []; // Doctors marked "came" today (drives TV display)
   arrivedToggleBusy: { [doctorId: number]: boolean } = {};
+  /** Arrival time + who marked it, per doctor, for today. */
+  arrivalInfo: { [doctorId: number]: { arrivedAt: string; markedByLabel: string | null } } = {};
   private doctorsSub?: Subscription; // In-flight paged request (cancelled when a newer one starts)
   private searchDebounce?: ReturnType<typeof setTimeout>;
 
@@ -608,6 +610,10 @@ export class DoctorAvailabilityComponent {
     this.doctorService.getTodayAttendance().subscribe({
       next: (res) => {
         this.arrivedDoctorIds = res.doctorIds || [];
+        this.arrivalInfo = {};
+        for (const a of res.arrivals || []) {
+          this.arrivalInfo[a.doctorId] = { arrivedAt: a.arrivedAt, markedByLabel: a.markedByLabel };
+        }
       },
       error: (error) => console.error('Error fetching today attendance:', error),
     });
@@ -636,6 +642,8 @@ export class DoctorAvailabilityComponent {
       next: (res) => {
         this.arrivedDoctorIds = res.doctorIds || [];
         this.arrivedToggleBusy[doctor.id] = false;
+        // Mark/unmark responses carry only ids; reload for the time + marked-by line.
+        this.fetchTodayAttendance();
         this.messageService.add({
           severity: 'success',
           summary: currentlyArrived ? 'Marked not arrived' : 'Marked arrived',

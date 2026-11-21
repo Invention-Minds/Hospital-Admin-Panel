@@ -8,8 +8,8 @@
         <a routerLink="/dietetics/labels">Print labels</a>
       </div>
     </div>
-    <div class="cw-toolbar" *ngIf="tab === 'trays' || tab === 'extra'">
-      <label>Date <input type="date" [(ngModel)]="date" (change)="refresh(); tab === 'extra' && loadExtras()" /></label>
+    <div class="cw-toolbar" *ngIf="tab === 'trays' || tab === 'extra' || tab === 'prep'">
+      <label>Date <input type="date" [(ngModel)]="date" (change)="refresh(); tab === 'extra' && loadExtras(); tab === 'prep' && loadPrep()" /></label>
       <label *ngIf="tab === 'trays'">Meal time
         <select [(ngModel)]="slotId" (change)="refresh()">
           <option value="">All</option>
@@ -29,6 +29,15 @@
 
   <div class="cw-banner cw-banner-bad" *ngIf="errorMessage">{{ errorMessage }}</div>
   <div class="cw-banner cw-banner-good" *ngIf="successMessage">{{ successMessage }}</div>
+
+  <!-- Patients with no tray because the weekly menu has an empty cell -->
+  <div class="cw-banner cw-banner-bad" *ngIf="tab === 'trays' && menuGaps.length" role="alert">
+    <b>{{ menuGaps.length }} empty weekly-menu cell(s): these patients get no tray.</b>
+    Fill them in <a routerLink="/dietetics/setup">Setup → Weekly menu</a>, then press <b>Regenerate</b>.
+    <ul class="cw-gaps">
+      <li *ngFor="let g of menuGaps">{{ g.text }} · {{ g.trays }} patient(s)</li>
+    </ul>
+  </div>
 
   <!-- RT feed patients get feed doses (every N hours), not meal trays -->
   <div class="cw-feeds" *ngIf="feedSummary?.patients">
@@ -52,6 +61,7 @@
 
   <div class="cw-tabs">
     <button type="button" [class.active]="tab === 'trays'" (click)="setTab('trays')">Trays</button>
+    <button type="button" [class.active]="tab === 'prep'" (click)="setTab('prep')">Prep count</button>
     <button type="button" [class.active]="tab === 'extra'" (click)="setTab('extra')">Extra food</button>
     <button type="button" *ngIf="canBill" [class.active]="tab === 'billing'" (click)="setTab('billing')">Billing</button>
   </div>
@@ -104,6 +114,12 @@
         <td class="cw-avoid">{{ o.avoid || '—' }}</td>
         <td>
           {{ o.meal?.name }}
+          <div class="cw-dishes" *ngIf="o.items?.length">
+            <ng-container *ngFor="let i of o.items; let last = last">
+              <span [class.cw-dish-swap]="i.dishId !== i.defaultDishId && !i.omitted" [class.cw-dish-no]="i.omitted"
+                    [title]="i.omitted ? 'Patient does not want this' : i.dishId !== i.defaultDishId ? 'Swapped by the patient' : ''">{{ i.omitted ? 'No ' : '' }}{{ i.dish.name }}</span>{{ last ? '' : ', ' }}
+            </ng-container>
+          </div>
           <div class="cw-note" *ngIf="o.kitchenNotes">{{ o.kitchenNotes }}</div>
           <span *ngIf="!o.meal && !o.kitchenNotes" class="cw-muted">—</span>
         </td>
@@ -134,6 +150,47 @@
       <tr *ngIf="orders.length === 0"><td colspan="11" class="cw-empty">No meal orders for this date / meal. Issue the diet sheet or regenerate.</td></tr>
     </tbody>
   </table>
+
+  <!-- ─── Kitchen prep count: dishes to cook per meal ─── -->
+  <ng-container *ngIf="tab === 'prep'">
+    <p class="cw-muted cw-prep-intro">
+      What to cook for {{ date | date:'d MMM' }}: every tray not marked "not served", after the patients' swaps and "no" dishes.
+      <b>Cook</b> includes the {{ prep?.bufferPct ?? 0 }}% margin set in Setup → Sheet &amp; labels.
+      Counts change until each meal's cut-off.
+    </p>
+    <p class="cw-empty" *ngIf="prepLoading">Loading…</p>
+    <p class="cw-empty" *ngIf="!prepLoading && prep && !prep.slots.length">No trays for this date yet. Press Regenerate on the Trays tab.</p>
+    <div class="cw-prep-grid" *ngIf="prep?.slots?.length">
+      <section class="cw-prep" *ngFor="let s of prep!.slots">
+        <header class="cw-prep-head">
+          <h3>{{ s.name }} <span class="cw-time">{{ s.startTime }}</span></h3>
+          <span class="cw-pill" [class.cw-warn]="!s.cutoffPassed">{{ s.cutoffPassed ? 'Cut-off passed' : (s.orderCutoff ? 'Open till ' + s.orderCutoff : 'Open') }}</span>
+        </header>
+        <p class="cw-prep-meta">
+          {{ s.trays }} trays
+          <span *ngIf="s.swapped"> · {{ s.swapped }} swapped</span>
+          <span *ngIf="s.omitted"> · {{ s.omitted }} not wanted</span>
+          <span class="cw-bad" *ngIf="s.lateChanges"> · {{ s.lateChanges }} changed after cut-off</span>
+        </p>
+        <table class="diet-grid cw-prep-table" *ngIf="s.dishes.length || s.plates.length">
+          <thead><tr><th>Dish</th><th class="cw-num">Trays</th><th class="cw-num">Cook</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let d of s.dishes">
+              <td>{{ d.name }}<span class="cw-time" *ngIf="d.portion"> · {{ d.portion }}</span><span class="cw-time" *ngIf="d.group"> · {{ d.group }}</span></td>
+              <td class="cw-num">{{ d.count }}</td>
+              <td class="cw-num"><b>{{ d.withBuffer }}</b></td>
+            </tr>
+            <tr *ngFor="let p of s.plates">
+              <td>{{ p.name }} <span class="cw-time">· whole plate</span></td>
+              <td class="cw-num">{{ p.count }}</td>
+              <td class="cw-num"><b>{{ p.withBuffer }}</b></td>
+            </tr>
+          </tbody>
+        </table>
+        <p class="cw-prep-meta" *ngIf="s.instructionOnly">{{ s.instructionOnly }} tray(s) from diet-sheet instructions only (see Trays).</p>
+      </section>
+    </div>
+  </ng-container>
 
   <!-- ─── Extra food ─── -->
   <ng-container *ngIf="tab === 'extra'">

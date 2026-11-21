@@ -9,8 +9,11 @@ import {
   QualityService, SafetyKpis, ClinicalKpis, TimelinessKpis, ExperienceKpis, OtKpis, NabhScorecard,
 } from '../../services/quality.service';
 import { isQualityEditor } from '../quality-access';
+import { QualityTodayComponent } from '../quality-today/quality-today.component';
+import { QualityTrendsComponent } from '../quality-trends/quality-trends.component';
+import { QualityUnitsHeatmapComponent } from '../quality-units-heatmap/quality-units-heatmap.component';
 
-type Tab = 'safety' | 'clinical' | 'timeliness' | 'experience' | 'ot' | 'nabh';
+type Tab = 'today' | 'units' | 'trends' | 'safety' | 'clinical' | 'timeliness' | 'experience' | 'ot' | 'nabh';
 
 /**
  * Phase 9.26 / Phase 5 — Quality / NABH dashboard.
@@ -20,12 +23,13 @@ type Tab = 'safety' | 'clinical' | 'timeliness' | 'experience' | 'ot' | 'nabh';
 @Component({
   selector: 'app-quality-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, QualityTodayComponent, QualityUnitsHeatmapComponent, QualityTrendsComponent],
   templateUrl: './quality-dashboard.component.html',
   styleUrls: ['./quality-dashboard.component.css'],
 })
 export class QualityDashboardComponent implements OnInit, OnDestroy {
-  tab: Tab = 'safety';
+  /** Quality Manager opens on "Today"; senior management keeps the KPI tabs. */
+  tab: Tab = isQualityEditor() ? 'today' : 'safety';
   from = '';
   to = '';
   loading = false;
@@ -71,7 +75,9 @@ export class QualityDashboardComponent implements OnInit, OnDestroy {
       });
     };
     switch (this.tab) {
-      case 'safety':     return handle(() => this.svc.safety(this.from, this.to), (v) => (this.safety = v));
+      case 'today': case 'units': case 'trends':
+        this.loading = false; return; // these child components load themselves
+      case 'safety':    return handle(() => this.svc.safety(this.from, this.to), (v) => (this.safety = v));
       case 'clinical':   return handle(() => this.svc.clinical(this.from, this.to), (v) => (this.clinical = v));
       case 'timeliness': return handle(() => this.svc.timeliness(this.from, this.to), (v) => (this.timeliness = v));
       case 'experience': return handle(() => this.svc.experience(this.from, this.to), (v) => (this.experience = v));

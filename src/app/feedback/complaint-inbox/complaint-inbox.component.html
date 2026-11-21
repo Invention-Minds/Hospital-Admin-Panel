@@ -56,6 +56,7 @@
     <label>To
       <input type="date" [(ngModel)]="filters.to" (change)="search()" />
     </label>
+    <button class="cp-btn" *ngIf="unitFilter" (click)="clearUnit()" title="Remove the unit filter">Unit: {{ unitLabel }} ✕</button>
     <button class="cp-btn" (click)="load(); loadStats()">↻ Refresh</button>
   </div>
 
@@ -71,10 +72,10 @@
         <option *ngFor="let s of STATUSES" [value]="s">{{ s }}</option>
       </select>
     </label>
-    <input *ngIf="bulkStatus === 'resolved'" class="cp-bulk-notes" type="text" [(ngModel)]="bulkNotes"
-           placeholder="Resolution notes (required)" />
+    <input *ngIf="bulkStatus === 'resolved' || bulkStatus === 'escalated'" class="cp-bulk-notes" type="text" [(ngModel)]="bulkNotes"
+           [placeholder]="bulkStatus === 'escalated' ? 'Reason for escalating (required)' : 'Resolution notes (required)'" />
     <button class="cp-bulk-apply" (click)="applyBulk()"
-            [disabled]="bulkSaving || (bulkStatus === 'resolved' && !bulkNotes.trim())">
+            [disabled]="bulkSaving || ((bulkStatus === 'resolved' || bulkStatus === 'escalated') && !bulkNotes.trim())">
       {{ bulkSaving ? 'Applying…' : 'Apply' }}
     </button>
     <button class="cp-bulk-clear" (click)="selected.clear()" [disabled]="bulkSaving">Clear</button>

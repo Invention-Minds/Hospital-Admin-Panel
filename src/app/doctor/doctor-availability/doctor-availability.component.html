@@ -68,6 +68,9 @@
             <span class="status-dot"></span>
             {{ isArrived(doctor) ? 'Arrived' : 'Mark Arrived' }}
           </button>
+          <div class="arrived-by" *ngIf="isArrived(doctor) && isTodaySelected() && arrivalInfo[doctor.id] as info">
+            {{ info.arrivedAt | date: 'h:mm a' }}<ng-container *ngIf="info.markedByLabel"> · by {{ info.markedByLabel }}</ng-container>
+          </div>
         </div>
         <!-- <div class="extra-slots-buttons" *ngIf="((role === 'admin' || role === 'super_admin') && doctor.doctorType !== 'Visiting Consultant')">
             <button type="button" class="button-after" (click)="addExtraSlotsBefore(doctor)"><img src="/before.svg"></button>

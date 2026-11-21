@@ -4,6 +4,7 @@ import { takeUntil } from 'rxjs/operators';
 
 import {
   DieteticsService,
+  PrepCount,
   MealOrder,
   MealTimeSlot,
   DietaryAlert,
@@ -37,7 +38,10 @@ import { AlertService } from '../../services/alert.service';
   styleUrls: ['../dietetics-shared.css', './canteen-workspace.component.css'],
 })
 export class CanteenWorkspaceComponent implements OnInit, OnDestroy {
-  tab: 'trays' | 'extra' | 'billing' = 'trays';
+  tab: 'trays' | 'prep' | 'extra' | 'billing' = 'trays';
+  /** Kitchen prep count — dishes to cook per meal. */
+  prep: PrepCount | null = null;
+  prepLoading = false;
   date = localDateString();
   slots: MealTimeSlot[] = [];
   slotId = '';
@@ -125,11 +129,21 @@ export class CanteenWorkspaceComponent implements OnInit, OnDestroy {
     this.successMessage = '';
     if (t === 'extra') this.loadExtras();
     if (t === 'billing') this.loadBilling();
+    if (t === 'prep') this.loadPrep();
+  }
+
+  loadPrep(): void {
+    this.prepLoading = true;
+    this.svc.getPrepCount(this.date).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (p) => { this.prep = p; this.prepLoading = false; },
+      error: (e) => { this.prepLoading = false; this.errorMessage = e?.error?.error || 'Failed to load the prep count'; },
+    });
   }
 
   refresh(): void {
     this.loading = true;
     this.errorMessage = '';
+    if (this.tab === 'prep') this.loadPrep();
     this.svc.getKitchenList({ date: this.date, mealTimeSlotId: this.slotId || undefined })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -151,6 +165,21 @@ export class CanteenWorkspaceComponent implements OnInit, OnDestroy {
       },
       error: () => { this.feedSummary = null; },
     });
+  }
+
+  /**
+   * Patients left without a tray because the weekly menu has an empty cell
+   * for their diet × day × meal — grouped so Setup can be fixed in one go.
+   */
+  get menuGaps(): Array<{ text: string; trays: number }> {
+    const map = new Map<string, number>();
+    for (const o of this.orders) {
+      const r = o.status === 'SKIPPED' ? o.skipReason ?? '' : '';
+      if (!r.startsWith('No dish in the weekly menu') && r !== 'Slot not on the current diet menu') continue;
+      const text = r.split(' — ')[0];
+      map.set(text, (map.get(text) ?? 0) + 1);
+    }
+    return Array.from(map.entries()).map(([text, trays]) => ({ text, trays }));
   }
 
   /** RT feeds for the day (kitchen prepares them on the RT feeds screen). */

@@ -1,0 +1,66 @@
+<main class="pm">
+  <header class="pm-head">
+    <p class="pm-eyebrow">Patient food service</p>
+    <h1 class="pm-title">{{ day === today ? "Today's menu" : dayName + "'s menu" }}</h1>
+    <p class="pm-lead">What the kitchen serves for each diet. Your diet is set by your doctor and dietitian.</p>
+  </header>
+
+  <p class="pm-state" *ngIf="loading">Loading the menu…</p>
+  <p class="pm-state pm-error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</p>
+  <p class="pm-state" *ngIf="menu && !menu.diets.length">The weekly menu has not been published yet.</p>
+
+  <ng-container *ngIf="menu && menu.diets.length">
+    <nav class="pm-days" aria-label="Day">
+      <button type="button" *ngFor="let d of days" class="pm-day" [class.is-on]="d.day === day" (click)="day = d.day" [attr.aria-pressed]="d.day === day">
+        <span>{{ d.label }}</span><small *ngIf="d.sub">{{ d.sub }}</small>
+      </button>
+    </nav>
+
+    <section class="pm-diet" *ngIf="menu.diets.length > 1">
+      <p class="pm-label">Diet</p>
+      <div class="pm-diets" role="group" aria-label="Diet">
+        <button type="button" *ngFor="let d of menu.diets; trackBy: trackId" class="pm-chip" [class.is-on]="d.id === dietId" (click)="setDiet(d.id)" [attr.aria-pressed]="d.id === dietId">
+          {{ d.name }}
+        </button>
+      </div>
+      <p class="pm-diet-note" *ngIf="diet?.description">{{ diet?.description }}</p>
+    </section>
+
+    <ol class="pm-meals">
+      <li *ngFor="let m of meals; trackBy: trackId" class="pm-meal" [class.is-past]="m.state === 'past'" [class.is-now]="m.state === 'now' || m.state === 'next'">
+        <div class="pm-when">
+          <span class="pm-slot">{{ m.name }}</span>
+          <span class="pm-time">{{ m.time }}</span>
+          <span class="pm-badge" *ngIf="m.state === 'now'">Serving now</span>
+          <span class="pm-badge" *ngIf="m.state === 'next'">Next</span>
+        </div>
+
+        <div class="pm-food" *ngIf="m.cell as c; else noDish">
+          <p class="pm-dish">
+            <span class="pm-veg" [class.is-nonveg]="!c.dish.isVeg" [attr.aria-label]="c.dish.isVeg ? 'Vegetarian' : 'Non-vegetarian'" [title]="c.dish.isVeg ? 'Vegetarian' : 'Non-vegetarian'"></span>
+            {{ c.dish.name }}
+            <span class="pm-kcal" *ngIf="c.dish.caloriesKcal">{{ c.dish.caloriesKcal }} kcal</span>
+          </p>
+          <p class="pm-desc" *ngIf="c.dish.items?.length">{{ c.dish.items.join(' · ') }}</p>
+          <p class="pm-desc" *ngIf="c.dish.description">{{ c.dish.description }}</p>
+          <p class="pm-desc" *ngIf="c.notes">{{ c.notes }}</p>
+
+          <div class="pm-options" *ngIf="c.options.length">
+            <p class="pm-or">Or you can ask for</p>
+            <p class="pm-dish pm-dish-alt" *ngFor="let o of c.options">
+              <span class="pm-veg" [class.is-nonveg]="!o.isVeg" [attr.aria-label]="o.isVeg ? 'Vegetarian' : 'Non-vegetarian'" [title]="o.isVeg ? 'Vegetarian' : 'Non-vegetarian'"></span>
+              {{ o.name }}
+              <span class="pm-kcal" *ngIf="o.caloriesKcal">{{ o.caloriesKcal }} kcal</span>
+            </p>
+          </div>
+        </div>
+        <ng-template #noDish><p class="pm-none">Nothing on the menu for this meal</p></ng-template>
+      </li>
+    </ol>
+
+    <footer class="pm-foot">
+      <p>Want a different dish from the options, or have a food allergy? Tell your nurse or the canteen staff when they take your order.</p>
+      <p>Patients on a special diet (RT feed, fasting, home food) are served as their doctor ordered, not from this menu.</p>
+    </footer>
+  </ng-container>
+</main>

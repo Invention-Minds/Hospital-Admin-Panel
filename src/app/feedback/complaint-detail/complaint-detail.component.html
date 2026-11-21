@@ -116,12 +116,17 @@
         Resolution notes{{ needsNotes() ? ' *' : '' }}
         <textarea rows="4" [(ngModel)]="draft.resolutionNotes"></textarea>
       </label>
+      <label class="cpd-field" *ngIf="needsReason()">
+        Reason for escalating *
+        <textarea rows="3" [(ngModel)]="draft.escalationReason" maxlength="500"
+                  placeholder="What needs the next level's attention? (sent to them and kept on the timeline)"></textarea>
+      </label>
       <p class="cpd-hint" *ngIf="c.status === 'resolved' && draft.status !== 'resolved'">
         Reopening clears the resolution (notes, resolved by / at).
       </p>
       <div class="cpd-actions">
         <button class="cpd-btn cpd-btn-primary" (click)="save()"
-                [disabled]="saving || (needsNotes() && !draft.resolutionNotes.trim())">
+                [disabled]="saving || (needsNotes() && !draft.resolutionNotes.trim()) || (needsReason() && draft.escalationReason.trim().length < 5)">
           {{ saving ? 'Saving…' : 'Save' }}
         </button>
       </div>

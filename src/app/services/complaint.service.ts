@@ -113,12 +113,12 @@ export class ComplaintService {
   updateStatus(id: string, body: {
     status: ComplaintStatus; assignedTo?: string | null; assignedToId?: number | null;
     resolutionNotes?: string | null; department?: string | null; unitId?: number | null;
-    category?: string | null;
+    category?: string | null; escalationReason?: string | null;
   }): Observable<{ data: Complaint }> {
     return this.http.put<{ data: Complaint }>(`${this.base}/${id}/status`, body);
   }
   // Phase 6h — bulk status change from the grievance inbox.
-  bulkUpdateStatus(ids: string[], status: ComplaintStatus, resolutionNotes?: string | null): Observable<{ data: BulkStatusResult }> {
-    return this.http.put<{ data: BulkStatusResult }>(`${this.base}/bulk-status`, { ids, status, resolutionNotes });
+  bulkUpdateStatus(ids: string[], status: ComplaintStatus, resolutionNotes?: string | null, escalationReason?: string | null): Observable<{ data: BulkStatusResult }> {
+    return this.http.put<{ data: BulkStatusResult }>(`${this.base}/bulk-status`, { ids, status, resolutionNotes, escalationReason });
   }
 }

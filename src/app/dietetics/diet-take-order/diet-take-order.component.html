@@ -2,7 +2,7 @@
   <div class="dx-head">
     <div>
       <h2 class="dx-title">Take order</h2>
-      <p class="dx-sub">Record each patient's dish for the meal from the options allowed for their diet. Only trays the kitchen hasn't started can change.</p>
+      <p class="dx-sub">Only record changes: a patient who asks for nothing gets the planned plate. Swap a dish for another of its group that suits the diet, or mark it <b>No</b>. Only trays the kitchen hasn't started can change.</p>
     </div>
     <div class="dx-toolbar">
       <label>Date <input type="date" [(ngModel)]="date" (change)="load()" /></label>
@@ -24,10 +24,15 @@
   <div class="dx-banner dx-banner-bad" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
   <div class="dx-banner dx-banner-good" *ngIf="successMessage" role="status">{{ successMessage }}</div>
 
+  <div class="dx-banner dx-banner-warn" *ngIf="cutoffPassed" role="status">
+    The order cut-off for this meal has passed. Changes are still saved but flagged late — tell the kitchen.
+  </div>
+
   <div class="dx-summary" *ngIf="rows.length">
     <span><b>{{ rows.length }}</b> trays not started</span>
-    <span class="is-act"><b>{{ withOptions }}</b> with a choice of dish</span>
+    <span class="is-act"><b>{{ withOptions }}</b> with a choice</span>
     <span><b>{{ taken }}</b> orders taken</span>
+    <span><b>{{ changedDishes }}</b> dishes changed</span>
   </div>
 
   <p class="dx-empty" *ngIf="loading">Loading…</p>
@@ -37,9 +42,9 @@
 
   <div class="dx-scroll" *ngIf="rows.length">
     <table class="diet-grid">
-      <thead><tr><th>Bed</th><th>Patient</th><th>Diet</th><th>Dish</th><th>Taken</th></tr></thead>
+      <thead><tr><th>Bed</th><th>Patient</th><th>Diet</th><th>Meal</th><th>Dishes on the tray</th><th>Taken</th></tr></thead>
       <tbody>
-        <tr *ngFor="let r of rows; trackBy: trackRow" [class.is-muted]="r.choices.length <= 1">
+        <tr *ngFor="let r of rows; trackBy: trackRow" [class.is-muted]="!hasChoice(r)">
           <td class="is-strong dx-tight">{{ r.bedNumber || '—' }}<span class="dx-sub-line">{{ r.wardName }}</span></td>
           <td>{{ r.patientName }}<span class="dx-sub-line">PRN {{ r.prn }}</span></td>
           <td class="dx-tight">
@@ -57,7 +62,25 @@
                 <span class="dx-muted" *ngIf="!c.isVeg"> · non-veg</span>
               </label>
             </ng-container>
-            <ng-template #single>{{ r.currentMeal?.name || 'Per diet sheet' }}<span class="dx-muted"> · no other option</span></ng-template>
+            <ng-template #single>{{ r.currentMeal?.name || 'Per diet sheet' }}</ng-template>
+          </td>
+          <td class="to-dishes">
+            <ul class="to-dish-list" *ngIf="r.items.length; else noItems">
+              <li *ngFor="let i of r.items; trackBy: trackItem" class="to-dish" [class.is-omitted]="i.omitted" [class.is-swapped]="i.swapped && !i.omitted">
+                <ng-container *ngIf="i.swapTo.length > 1 && !i.omitted; else fixedDish">
+                  <select class="to-swap" [ngModel]="i.dish.id" (ngModelChange)="swapDish(r, i, $event)" [disabled]="savingId === r.id"
+                          [attr.aria-label]="'Dish instead of ' + i.defaultDishName">
+                    <option *ngFor="let d of i.swapTo" [value]="d.id">{{ d.name }}{{ d.id === i.defaultDishId ? ' (planned)' : '' }}</option>
+                  </select>
+                </ng-container>
+                <ng-template #fixedDish><span class="to-dish-name">{{ i.dish.name }}</span></ng-template>
+                <span class="dx-muted to-was" *ngIf="i.swapped && !i.omitted">instead of {{ i.defaultDishName }}</span>
+                <span class="dx-pill dx-pill-warn" *ngIf="i.changedLate">Late</span>
+                <button type="button" class="dx-btn dx-btn-sm to-no" (click)="toggleOmit(r, i)" [disabled]="savingId === r.id"
+                        [attr.aria-pressed]="i.omitted">{{ i.omitted ? 'Undo no' : 'No' }}</button>
+              </li>
+            </ul>
+            <ng-template #noItems><span class="dx-muted">Whole plate (no dish list)</span></ng-template>
           </td>
           <td class="dx-tight">
             <span class="dx-pill dx-pill-ok" *ngIf="r.choiceTakenAt">Taken {{ r.choiceTakenAt | date:'HH:mm' }}</span>

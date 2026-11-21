@@ -123,10 +123,56 @@ export interface QiSubmissionStatus {
   expected: number;
   entered: number;
   enteredLate: number;
-  missing: Array<{ qiCode: string; name: string; chapter: string; escalationOwner: string; autoSourced: boolean }>;
+  missing: Array<{ qiCode: string; name: string; chapter: string; escalationOwner: string }>;
 }
 
 export interface QiSubmissionConfig { submissionDueDay: number; min: number; max: number }
+
+// ── Quality insights: trends, unit heat-map, pattern alerts ───────────
+export type RunDirection = 'up_bad' | 'down_bad' | 'neutral';
+export interface RunSignal { kind: 'shift' | 'trend' | 'worst'; polarity: 'concern' | 'improvement' | 'neutral'; from: string; to: string; length: number; text: string }
+export interface TrendPoint { period: string; value: number | null; n: number }
+export interface TrendMeasure {
+  key: string; label: string; group: string; unit: string; direction: RunDirection; help: string;
+  points: TrendPoint[]; current: TrendPoint; median: number | null; signals: RunSignal[]; enoughData: boolean;
+  link?: TodayLink;
+}
+export interface QualityTrends { months: string[]; current: string; measures: TrendMeasure[]; generatedAt: string }
+export type HeatTone = 'bad' | 'warn' | 'good' | 'ok' | 'few' | 'none';
+export interface HeatCell { value: number | null; n?: number; tone: HeatTone; note?: string }
+export interface HeatColumn { key: string; label: string; unit: string; direction: RunDirection; scope: 'month' | 'now'; help: string }
+export interface HeatRow { unitId: number | null; unit: string; hasWards: boolean; cells: Record<string, HeatCell> }
+export interface UnitsHeatmap { month: string; columns: HeatColumn[]; rows: HeatRow[]; hospital: HeatRow; generatedAt: string; patientDaysNote: string }
+export interface QualityCluster {
+  kind: 'outbreak' | 'falls' | 'medication' | 'pressure' | 'complaints' | 'doctor_feedback' | 'repeat_patient';
+  severity: 'bad' | 'warn'; title: string; where: string; count: number; windowDays: number; firstAt: string; lastAt: string;
+  refs: Array<{ ref: string; link?: TodayLink }>; link?: TodayLink;
+}
+
+// ── Quality Manager "Today" page ──────────────────────────────────────
+export interface TodayLink { path: string; query?: Record<string, string> }
+export interface TodayBriefRow { ref: string; title: string; at: string | null; detail?: string | null; flag?: string | null; link?: TodayLink }
+export interface TodayBriefSection { key: string; label: string; count: number; rows: TodayBriefRow[]; link?: TodayLink; tone: 'bad' | 'warn' | 'info' }
+export interface TodayRadarRow { kind: string; ref: string; title: string; owner: string | null; dueAt: string; bucket: 'overdue' | 'today' | 'soon'; link?: TodayLink }
+export interface TodayAge { d0_7: number; d8_30: number; d30p: number }
+export interface TodayUnitRow {
+  unitId: number | null; unit: string; hod: string | null;
+  incidents: TodayAge; complaints: TodayAge; open: number; overdue: number;
+  untriaged24h: number; medianTriageHours: number | null; triagedLast90: number;
+}
+export interface TodayOwnerRow { name: string; open: number; overdue: number; oldestDays: number }
+export interface QualityToday {
+  generatedAt: string;
+  since: string;
+  safety: TodayBriefSection[];
+  radar: {
+    rows: TodayRadarRow[];
+    counts: { overdue: number; today: number; soon: number };
+    byKind: Record<string, number>;
+    qiSubmission: { period: string; dueDate: string; daysLeft: number; state: string; expected: number; entered: number; missing: number } | null;
+  };
+  accountability: { units: TodayUnitRow[]; owners: TodayOwnerRow[]; unassigned: { days: number; incidents: number; complaints: number } };
+}
 
 export interface CaptureBody {
   period: string;
@@ -552,6 +598,31 @@ export class QualityService {
   }
   nabhScorecard(from?: string, to?: string): Observable<NabhScorecard> {
     return this.http.get<NabhScorecard>(`${this.base}/nabh-scorecard`, { params: this.rangeParams(from, to) });
+  }
+
+  /** Quality Manager "Today" page. `hours` overrides the brief window (default 24 h; Monday → since Friday 09:00). */
+  today(hours?: number): Observable<{ data: QualityToday }> {
+    const params = hours ? new HttpParams().set('hours', String(hours)) : undefined;
+    return this.http.get<{ data: QualityToday }>(`${this.base}/today`, { params });
+  }
+
+  /** 12-month run charts with signals. Cached server-side 10 min; fresh=true recomputes. */
+  trends(fresh = false): Observable<{ data: QualityTrends }> {
+    const params = fresh ? new HttpParams().set('fresh', '1') : undefined;
+    return this.http.get<{ data: QualityTrends }>(`${this.base}/trends`, { params });
+  }
+
+  unitsHeatmap(month?: string, fresh = false): Observable<{ data: UnitsHeatmap }> {
+    let params = new HttpParams();
+    if (month) params = params.set('month', month);
+    if (fresh) params = params.set('fresh', '1');
+    return this.http.get<{ data: UnitsHeatmap }>(`${this.base}/units-heatmap`, { params });
+  }
+
+  /** Pattern alerts (Quality Manager only). */
+  clusters(fresh = false): Observable<{ data: { clusters: QualityCluster[]; generatedAt: string } }> {
+    const params = fresh ? new HttpParams().set('fresh', '1') : undefined;
+    return this.http.get<{ data: { clusters: QualityCluster[]; generatedAt: string } }>(`${this.base}/clusters`, { params });
   }
 
   // ── Indicators ────────────────────────────────────────────────────────

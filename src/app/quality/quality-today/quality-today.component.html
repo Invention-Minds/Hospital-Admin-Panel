@@ -1,0 +1,171 @@
+<div class="qt">
+  <div class="qt-bar">
+    <div class="qt-since" *ngIf="data">
+      Showing <b>{{ when(data.since) }}</b> → now · updated {{ ago(data.generatedAt) }}
+    </div>
+    <div class="qt-controls">
+      <select [(ngModel)]="hours" (ngModelChange)="load()" aria-label="Window">
+        <option *ngFor="let w of WINDOWS" [ngValue]="w.value">{{ w.label }}</option>
+      </select>
+      <button type="button" class="qt-btn" (click)="load()" [disabled]="loading">{{ loading ? 'Loading…' : 'Refresh' }}</button>
+    </div>
+  </div>
+
+  <div class="qt-error" *ngIf="errorMessage" (click)="errorMessage = ''">{{ errorMessage }}</div>
+  <div class="qt-loading" *ngIf="loading && !data">Loading today's picture…</div>
+
+  <ng-container *ngIf="data as d">
+    <!-- ── Headline tiles ── -->
+    <div class="qt-tiles">
+      <button type="button" class="qt-tile" *ngFor="let t of tiles" [ngClass]="'qt-' + t.tone"
+              [class.qt-tile-click]="!!t.target" (click)="onTile(t.target)">
+        <span class="qt-tile-val">{{ t.value }}</span>
+        <span class="qt-tile-label">{{ t.label }}</span>
+        <span class="qt-tile-hint" *ngIf="t.hint">{{ t.hint }}</span>
+      </button>
+    </div>
+
+    <!-- QI data deadline -->
+    <div class="qt-qi" *ngIf="d.radar.qiSubmission as qi" [class.qt-qi-bad]="qi.state === 'overdue'" [class.qt-qi-warn]="qi.state === 'due_soon' || qi.state === 'due_today'"
+         [class.qt-qi-good]="qi.state === 'complete'" (click)="open({ path: '/quality/indicators', query: qi.missing ? { missing: '1' } : {} })">
+      <b>QI data {{ qi.period }}:</b> {{ qi.entered }} of {{ qi.expected }} entered ·
+      <ng-container [ngSwitch]="qi.state">
+        <span *ngSwitchCase="'complete'">complete</span>
+        <span *ngSwitchCase="'overdue'">{{ -qi.daysLeft }} day(s) overdue</span>
+        <span *ngSwitchCase="'due_today'">due today</span>
+        <span *ngSwitchDefault>due in {{ qi.daysLeft }} day(s)</span>
+      </ng-container>
+      <span class="qt-go">Open →</span>
+    </div>
+
+    <!-- ── Patterns ── -->
+    <section class="qt-block" *ngIf="clustersLoaded && clusters.length">
+      <h3 class="qt-h">Patterns needing a look <span class="qt-h-sub">things that keep happening in one place</span></h3>
+      <div class="qt-clusters">
+        <div class="qt-cluster" *ngFor="let c of clusters" [ngClass]="'qt-cluster-' + c.severity">
+          <div class="qt-cluster-head">
+            <span class="qt-sec-count">{{ c.count }}</span>
+            <span class="qt-cluster-title">{{ c.title }}</span>
+            <button type="button" class="qt-link" *ngIf="c.link" (click)="open(c.link)">Open →</button>
+          </div>
+          <div class="qt-cluster-where"><b>{{ c.where }}</b> · within {{ c.windowDays }} days · latest {{ ago(c.lastAt) }}</div>
+          <div class="qt-cluster-refs" *ngIf="c.refs.length">
+            <button type="button" class="qt-ref-chip" *ngFor="let r of c.refs" (click)="open(r.link)" [disabled]="!r.link">{{ r.ref }}</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 1. Safety brief ── -->
+    <section class="qt-block">
+      <h3 class="qt-h">What happened <span class="qt-h-sub">since {{ when(d.since) }}</span></h3>
+      <div class="qt-allclear" *ngIf="activeSections.length === 0">Nothing to report — no deaths, codes, serious incidents, infections, breakdowns or angry patients in this window.</div>
+      <div class="qt-sections">
+        <div class="qt-sec" *ngFor="let s of activeSections; trackBy: trackKey" [id]="'qt-sec-' + s.key" [ngClass]="'qt-sec-' + s.tone">
+          <div class="qt-sec-head">
+            <span class="qt-sec-count">{{ s.count }}</span>
+            <span class="qt-sec-label">{{ s.label }}</span>
+            <button type="button" class="qt-link" *ngIf="s.link" (click)="open(s.link)">View all →</button>
+          </div>
+          <ul class="qt-rows">
+            <li *ngFor="let r of s.rows" (click)="open(r.link)" [class.qt-row-click]="!!r.link">
+              <span class="qt-ref">{{ r.ref }}</span>
+              <span class="qt-title">{{ r.title }}</span>
+              <span class="qt-flag" *ngIf="r.flag">{{ r.flag }}</span>
+              <span class="qt-detail" *ngIf="r.detail">{{ r.detail }}</span>
+              <span class="qt-at">{{ ago(r.at) }}</span>
+            </li>
+          </ul>
+          <div class="qt-more" *ngIf="s.count > s.rows.length">+ {{ s.count - s.rows.length }} more</div>
+        </div>
+      </div>
+      <div class="qt-quiet" *ngIf="quietSections.length && activeSections.length">
+        <b>All clear:</b> {{ quietSections.join(' · ') }}
+      </div>
+    </section>
+
+    <!-- ── 2. Deadline radar ── -->
+    <section class="qt-block" id="qt-radar">
+      <h3 class="qt-h">Deadlines <span class="qt-h-sub">overdue or due in the next 3 days</span></h3>
+      <div class="qt-chips">
+        <button type="button" class="qt-chip" [class.qt-chip-on]="radarFilter === 'all'" (click)="setRadarFilter('all')">All {{ d.radar.counts.overdue + d.radar.counts.today + d.radar.counts.soon }}</button>
+        <button type="button" class="qt-chip qt-chip-bad" [class.qt-chip-on]="radarFilter === 'overdue'" (click)="setRadarFilter('overdue')">Overdue {{ d.radar.counts.overdue }}</button>
+        <button type="button" class="qt-chip qt-chip-warn" [class.qt-chip-on]="radarFilter === 'today'" (click)="setRadarFilter('today')">Today {{ d.radar.counts.today }}</button>
+        <button type="button" class="qt-chip" [class.qt-chip-on]="radarFilter === 'soon'" (click)="setRadarFilter('soon')">Next 3 days {{ d.radar.counts.soon }}</button>
+      </div>
+      <div class="qt-empty" *ngIf="radarRows.length === 0">No deadlines in this view.</div>
+      <div class="qt-table-wrap" *ngIf="radarRows.length">
+        <table class="qt-table">
+          <thead><tr><th>Due</th><th>Type</th><th>Ref</th><th>Item</th><th>Owner</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let r of radarRows" (click)="open(r.link)" [ngClass]="'qt-b-' + r.bucket">
+              <td class="qt-due">{{ dueText(r) }}<small>{{ when(r.dueAt) }}</small></td>
+              <td>{{ r.kind }}</td>
+              <td class="qt-ref">{{ r.ref }}</td>
+              <td>{{ r.title }}</td>
+              <td>{{ r.owner || '—' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="qt-more" *ngIf="radarFilter === 'all' && (d.radar.counts.overdue + d.radar.counts.today + d.radar.counts.soon) > d.radar.rows.length">
+        Showing the {{ d.radar.rows.length }} most urgent.
+      </div>
+    </section>
+
+    <!-- ── 3. Accountability ── -->
+    <section class="qt-block">
+      <h3 class="qt-h">Who is holding open work</h3>
+      <div class="qt-unassigned" *ngIf="d.accountability.unassigned.incidents + d.accountability.unassigned.complaints > 0">
+        Raised in the last {{ d.accountability.unassigned.days }} days and not assigned to anyone: <b>{{ d.accountability.unassigned.incidents }}</b> open incident(s) ·
+        <b>{{ d.accountability.unassigned.complaints }}</b> open complaint(s)
+      </div>
+
+      <h4 class="qt-h4">By unit</h4>
+      <div class="qt-table-wrap">
+        <table class="qt-table qt-units">
+          <thead>
+            <tr>
+              <th rowspan="2">Unit</th><th rowspan="2">HOD</th>
+              <th colspan="3">Open incidents (days)</th><th colspan="3">Open complaints (days)</th>
+              <th rowspan="2">Overdue</th><th rowspan="2">Not triaged &gt; 24 h</th><th rowspan="2">Median triage</th>
+            </tr>
+            <tr><th>0–7</th><th>8–30</th><th>30+</th><th>0–7</th><th>8–30</th><th>30+</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let u of d.accountability.units" (click)="u.unitId && open({ path: '/incidents', query: { unitId: '' + u.unitId, unit: u.unit } })">
+              <td><b>{{ u.unit }}</b></td>
+              <td>{{ u.hod || 'No HOD' }}</td>
+              <td>{{ u.incidents.d0_7 || '' }}</td>
+              <td [class.qt-c-warn]="u.incidents.d8_30">{{ u.incidents.d8_30 || '' }}</td>
+              <td [class.qt-c-bad]="u.incidents.d30p">{{ u.incidents.d30p || '' }}</td>
+              <td>{{ u.complaints.d0_7 || '' }}</td>
+              <td [class.qt-c-warn]="u.complaints.d8_30">{{ u.complaints.d8_30 || '' }}</td>
+              <td [class.qt-c-bad]="u.complaints.d30p">{{ u.complaints.d30p || '' }}</td>
+              <td [class.qt-c-bad]="u.overdue">{{ u.overdue || '' }}</td>
+              <td [class.qt-c-warn]="u.untriaged24h">{{ u.untriaged24h || '' }}</td>
+              <td>{{ u.medianTriageHours === null ? '—' : u.medianTriageHours + ' h' }}<small *ngIf="u.triagedLast90"> ({{ u.triagedLast90 }})</small></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="qt-note">Overdue = complaints past their deadline + CAPA and audit actions past their due date. Median triage = hours from report to triage, last 90 days (number of incidents in brackets).</p>
+
+      <h4 class="qt-h4">People with the most open work</h4>
+      <div class="qt-empty" *ngIf="!d.accountability.owners.length">Nothing is assigned to anyone right now.</div>
+      <div class="qt-table-wrap" *ngIf="d.accountability.owners.length">
+        <table class="qt-table">
+          <thead><tr><th>Person</th><th>Open</th><th>Overdue</th><th>Oldest open</th></tr></thead>
+          <tbody>
+            <tr *ngFor="let o of d.accountability.owners">
+              <td>{{ o.name }}</td>
+              <td>{{ o.open }}</td>
+              <td [class.qt-c-bad]="o.overdue">{{ o.overdue || '—' }}</td>
+              <td [class.qt-c-warn]="o.oldestDays > 30">{{ o.oldestDays }} days</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </ng-container>
+</div>

@@ -1,0 +1,45 @@
+/* Sidebar clearance + Back-button spacing come from the global `.page` wrapper (styles/forms.css). */
+.du-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.du-title { font-size: 22px; font-weight: 600; margin: 0 0 4px; color: #271e4a; }
+.du-sub { color: #6b7280; font-size: 13px; margin: 0; }
+
+.du-filters { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin-bottom: 14px; padding: 10px 14px; background: #fff; border: 1px solid #e5e7eb; border-radius: 10px; }
+.du-filters label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #4b5563; }
+.du-filters select, .du-filters input { height: 34px; padding: 4px 10px; border: 1px solid #d1d5db; border-radius: 6px; box-sizing: border-box; }
+.du-filters select { min-width: 170px; }
+.du-presets { display: flex; gap: 6px; }
+
+.du-btn { height: 34px; padding: 0 12px; border-radius: 6px; border: 1px solid #d1d5db; background: #fff; color: #271e4a; cursor: pointer; font-family: Kanit, sans-serif; font-size: 13px; }
+.du-btn:disabled { opacity: 0.5; cursor: default; }
+.du-btn-on { background: #0e2970; border-color: #0e2970; color: #fff; }
+
+.du-banner { padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; font-size: 14px; }
+.du-banner-bad { background: #fee2e2; color: #b91c1c; }
+.du-loading { padding: 30px; text-align: center; color: #6b7280; font-style: italic; }
+.du-empty { padding: 44px; text-align: center; color: #6b7280; background: #f9fafb; border: 1px dashed #e5e7eb; border-radius: 10px; }
+
+.du-table-wrap { overflow-x: auto; border-radius: 10px; }
+.du-table { width: 100%; border-collapse: collapse; background: #fff; }
+.du-table th { background: #0e2970; color: #fff; padding: 10px; text-align: left; font-weight: 500; font-size: 12px; white-space: nowrap; }
+.du-table td { padding: 10px; border-bottom: 1px solid #f3f4f6; font-size: 13px; vertical-align: top; }
+.du-row-alert td { background: #fff7f7; }
+.du-when { white-space: nowrap; }
+.du-doctor { font-weight: 500; color: #271e4a; }
+.du-details { max-width: 420px; }
+.du-summary { margin-bottom: 4px; }
+.du-changes { margin: 0; padding-left: 16px; }
+.du-changes li { margin: 2px 0; }
+.du-field { color: #4b5563; margin-right: 4px; }
+.du-from { color: #9ca3af; text-decoration: line-through; }
+.du-arrow { margin: 0 4px; color: #6b7280; }
+.du-to { color: #111827; font-weight: 500; }
+.du-by { white-space: nowrap; }
+.du-muted { color: #9ca3af; font-size: 12px; }
+
+.du-pill { display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+.du-bad { background: #fee2e2; color: #b91c1c; }
+.du-warn { background: #fef3c7; color: #92400e; }
+.du-good { background: #dcfce7; color: #166534; }
+.du-info { background: #dbeafe; color: #1e40af; }
+
+.du-pager { display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin-top: 12px; font-size: 13px; color: #4b5563; }

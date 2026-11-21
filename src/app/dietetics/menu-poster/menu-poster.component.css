@@ -1,0 +1,29 @@
+.mp-shell { padding: 20px 28px 40px; font-family: Kanit, sans-serif; color: #14213d; }
+.mp-controls { background: #fff; border: 1px solid #e3e8f0; border-radius: 10px; padding: 16px 18px; margin-bottom: 18px; }
+.mp-h { font-size: 20px; font-weight: 600; color: #0e2970; margin: 0 0 4px; }
+.mp-sub { font-size: 13px; line-height: 1.5; color: #5b6475; margin: 0 0 14px; max-width: 760px; }
+.mp-group { font-size: 13px; color: #5b6475; margin: 12px 0 4px; }
+.mp-diets { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-bottom: 12px; }
+.mp-check { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; }
+.mp-empty { font-size: 13px; color: #b45309; margin: 8px 0 12px; }
+.mp-field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: #5b6475; max-width: 360px; margin-bottom: 14px; }
+.mp-field input { height: 36px; padding: 0 10px; border: 1px solid #d1d5db; border-radius: 6px; font: inherit; font-size: 14px; color: #14213d; }
+.mp-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.mp-btn { display: inline-flex; align-items: center; height: 38px; padding: 0 16px; border-radius: 6px; border: 1px solid #d1d5db; background: #fff; color: #14213d; cursor: pointer; font-family: Kanit, sans-serif; font-size: 13px; text-decoration: none; }
+.mp-btn[disabled] { opacity: 0.5; cursor: not-allowed; }
+.mp-btn-primary { background: #1e40af; border-color: #1e40af; color: #fff; }
+
+.mp-poster { background: #fff; border: 2px solid #1e40af; border-radius: 18px; max-width: 520px; margin: 0 auto 24px; padding: 32px 28px; text-align: center; }
+.mp-badge { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: 2px; color: #fff; background: #15803d; border-radius: 4px; padding: 4px 10px; }
+.mp-title { font-size: 34px; font-weight: 700; color: #0e2970; margin: 14px 0 4px; }
+.mp-lead { font-size: 18px; color: #374151; margin: 0 0 16px; }
+.mp-poster qrcode { display: inline-block; }
+.mp-area { font-size: 22px; font-weight: 600; color: #1e40af; margin: 8px 0 0; }
+.mp-small { font-size: 13px; line-height: 1.5; color: #4b5563; margin: 14px 0 6px; }
+.mp-url { font-size: 11px; color: #9ca3af; word-break: break-all; margin: 0; }
+
+@media print {
+  .mp-controls { display: none; }
+  .mp-shell { padding: 0; }
+  .mp-poster { page-break-after: always; break-after: page; border-width: 3px; margin-top: 40px; }
+}

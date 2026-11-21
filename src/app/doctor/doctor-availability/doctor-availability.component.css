@@ -1031,6 +1031,12 @@ line-height: normal;
 .arrived-control {
   margin-top: 10px;
 }
+/* "9:42 AM · by Meena (Front Desk)" under the Arrived toggle */
+.arrived-by {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #4b5563;
+}
 .arrived-toggle {
   display: inline-flex;
   align-items: center;

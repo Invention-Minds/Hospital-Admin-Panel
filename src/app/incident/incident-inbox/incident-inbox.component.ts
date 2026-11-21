@@ -35,7 +35,9 @@ export class IncidentInboxComponent implements OnInit, OnDestroy {
   readonly isDeptViewer = isIncidentDepartmentViewer();
   readonly isSuperintendent = isNursingSuperintendent();
 
-  filters = { status: '', severity: '', category: '', source: '', nabhClause: '', qiCode: '' };
+  filters = { status: '', severity: '', category: '', source: '', nabhClause: '', qiCode: '', unitId: '' };
+  /** Unit name for the "Unit" chip when the list was opened from the Quality "Today" page. */
+  unitLabel = '';
   // Phase 6g — "Mine only" toggle. Sent as a separate query param so the
   // user can stack it on top of the other filters.
   mineOnly = false;
@@ -56,6 +58,13 @@ export class IncidentInboxComponent implements OnInit, OnDestroy {
     const qiCode = params.get('qiCode');
     if (nabhClause) this.filters.nabhClause = nabhClause;
     if (qiCode) this.filters.qiCode = qiCode;
+    // …and ?status / ?severity / ?category / ?source / ?unitId from the Quality "Today" page.
+    for (const k of ['status', 'severity', 'category', 'source'] as const) {
+      const v = params.get(k);
+      if (v) this.filters[k] = v;
+    }
+    const unitId = params.get('unitId');
+    if (unitId && /^\d+$/.test(unitId)) { this.filters.unitId = unitId; this.unitLabel = params.get('unit') || `#${unitId}`; }
     this.load();
     this.loadStats();
   }
@@ -78,7 +87,8 @@ export class IncidentInboxComponent implements OnInit, OnDestroy {
   }
 
   clearFilters(): void {
-    this.filters = { status: '', severity: '', category: '', source: '', nabhClause: '', qiCode: '' };
+    this.filters = { status: '', severity: '', category: '', source: '', nabhClause: '', qiCode: '', unitId: '' };
+    this.unitLabel = '';
     this.mineOnly = false;
     // Strip the deep-link query params so a reload doesn't bring them back.
     this.router.navigate([], { relativeTo: this.route, queryParams: {} });

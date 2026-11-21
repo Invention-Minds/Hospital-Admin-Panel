@@ -5,6 +5,36 @@ import { Doctor } from '../../models/doctor.model';
 import { Department } from '../../models/department.model';
 import { environment } from '../../../environment/environment.prod';
 
+export interface DoctorChangeLogEntry {
+  id: string;
+  at: string;
+  action: string;
+  doctorId: number;
+  doctorName: string;
+  summary: string;
+  changes: { field: string; from: string | null; to: string | null }[];
+  details: Record<string, any>;
+  affectedBookings: number;
+  doneBy: string;
+}
+
+/** One doctor's arrival today: when, and who marked it ("Name (Job title)"). */
+export interface DoctorArrival {
+  doctorId: number;
+  arrivedAt: string;
+  markedBy: string | null;
+  markedByLabel: string | null;
+}
+
+export interface DoctorChangeLogPage {
+  data: DoctorChangeLogEntry[];
+  total: number;
+  page: number;
+  limit: number;
+  from: string;
+  to: string;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -38,6 +68,18 @@ export class DoctorServiceService {
 
   activateDoctor(id: number): Observable<any> {
     return this.http.patch<any>(`${this.apiUrl}/doctors/${id}/activate`, {});
+  }
+
+  /** Doctor Updates page — who changed which doctor, and when. */
+  getDoctorChangeLog(filters: { from: string; to: string; doctorId?: number | null; action?: string | null; page: number; limit: number }): Observable<DoctorChangeLogPage> {
+    let params = new HttpParams()
+      .set('from', filters.from)
+      .set('to', filters.to)
+      .set('page', String(filters.page))
+      .set('limit', String(filters.limit));
+    if (filters.doctorId) params = params.set('doctorId', String(filters.doctorId));
+    if (filters.action) params = params.set('action', filters.action);
+    return this.http.get<DoctorChangeLogPage>(`${this.apiUrl}/doctors/change-log`, { params });
   }
   // Get all doctors
   // getDoctors(): Observable<Doctor[]> {
@@ -213,8 +255,8 @@ export class DoctorServiceService {
   }
 
   // Daily doctor-arrival ("came today") — backed by a JSON file on the server, no DB.
-  getTodayAttendance(): Observable<{ date: string; doctorIds: number[] }> {
-    return this.http.get<{ date: string; doctorIds: number[] }>(`${this.apiUrl}/attendance/today`);
+  getTodayAttendance(): Observable<{ date: string; doctorIds: number[]; arrivals?: DoctorArrival[] }> {
+    return this.http.get<{ date: string; doctorIds: number[]; arrivals?: DoctorArrival[] }>(`${this.apiUrl}/attendance/today`);
   }
   markArrived(doctorId: number): Observable<{ date: string; doctorIds: number[] }> {
     return this.http.post<{ date: string; doctorIds: number[] }>(`${this.apiUrl}/attendance/mark`, { doctorId });

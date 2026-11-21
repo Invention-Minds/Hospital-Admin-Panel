@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { switchMap, takeUntil } from 'rxjs/operators';
 
 import {
   DieteticsService,
@@ -9,6 +9,7 @@ import {
   DietMaster,
   DietMasterPayload,
   MealMaster,
+  Dish,
   MenuPlanCell,
   MenuOptionRow,
   CanteenChannel,
@@ -46,7 +47,7 @@ import { MastersService, MasterWard } from '../../services/masters.service';
   styleUrls: ['../dietetics-shared.css', './dietetics-setup.component.css'],
 })
 export class DieteticsSetupComponent implements OnInit, OnDestroy {
-  tab: 'slots' | 'allergens' | 'diets' | 'textures' | 'supplements' | 'meals' | 'menu' | 'settings' | 'channels' = 'slots';
+  tab: 'slots' | 'allergens' | 'diets' | 'textures' | 'supplements' | 'dishes' | 'meals' | 'menu' | 'settings' | 'channels' = 'slots';
 
   // Shared lists.
   slots: MealTimeSlot[] = [];
@@ -68,8 +69,10 @@ export class DieteticsSetupComponent implements OnInit, OnDestroy {
   slotForm: Partial<MealTimeSlot> = this.blankSlot();
   allergenForm: Partial<AllergenMaster> = this.blankAllergen();
   dietForm: Partial<DietMaster> = this.blankDiet();
-  mealForm: Partial<MealMaster> & { compatibleDietIds: string[]; allergenIds: string[] }
+  mealForm: Partial<MealMaster> & { compatibleDietIds: string[]; allergenIds: string[]; dishIds: string[] }
     = this.blankMeal();
+  dishes: Dish[] = [];
+  dishForm: Partial<Dish> & { dietIds: string[] } = this.blankDish();
   channelForm: Partial<CanteenChannel> = this.blankChannel();
   // Channel view, kept apart from the form and serialised into viewSpec on save.
   wards: MasterWard[] = [];
@@ -132,6 +135,7 @@ export class DieteticsSetupComponent implements OnInit, OnDestroy {
       next: (r) => { this.meals = r; this.loading = false; },
       error: () => { this.loading = false; },
     });
+    this.loadDishes();
     this.svc.listCanteenChannels().pipe(takeUntil(this.destroy$)).subscribe({
       next: (r) => { this.channels = r; },
       error: () => { /* swallow */ },
@@ -298,7 +302,11 @@ export class DieteticsSetupComponent implements OnInit, OnDestroy {
 
   saveMeal(): void {
     if (!this.mealForm.name) { this.errorMessage = 'Meal name is required.'; return; }
-    this.svc.upsertMeal(this.mealForm).pipe(takeUntil(this.destroy$)).subscribe({
+    const { dishIds, ...meal } = this.mealForm;
+    this.svc.upsertMeal(meal).pipe(
+      switchMap((saved) => this.svc.setMealDishes(saved.id, dishIds)),
+      takeUntil(this.destroy$),
+    ).subscribe({
       next: () => { this.successMessage = 'Meal saved.'; this.mealForm = this.blankMeal(); this.refreshAll(); },
       error: (e) => { this.errorMessage = e?.error?.error || 'Save failed'; },
     });
@@ -308,7 +316,76 @@ export class DieteticsSetupComponent implements OnInit, OnDestroy {
       ...m,
       compatibleDietIds: m.compatibleDietIds ?? [],
       allergenIds: m.allergenIds ?? [],
+      dishIds: [...(m.dishIds ?? [])],
     };
+  }
+
+  // ─── Dishes + the dishes on a meal's plate ──────────────────────────
+  dishById(id: string): Dish | undefined { return this.dishes.find((d) => d.id === id); }
+  /** Dish names on a meal, for the meals table. */
+  mealDishNames(m: MealMaster): string {
+    return (m.dishIds ?? []).map((id) => this.dishById(id)?.name).filter(Boolean).join(', ');
+  }
+  /** Active dishes not yet on the meal being edited. */
+  get addableDishes(): Dish[] {
+    const on = new Set(this.mealForm.dishIds);
+    return this.dishes.filter((d) => d.isActive && !on.has(d.id));
+  }
+  get mealDishKcal(): number {
+    return this.mealForm.dishIds.reduce((n, id) => n + (this.dishById(id)?.caloriesKcal ?? 0), 0);
+  }
+  addMealDish(id: string): void {
+    if (id && !this.mealForm.dishIds.includes(id)) this.mealForm.dishIds = [...this.mealForm.dishIds, id];
+  }
+  removeMealDish(id: string): void { this.mealForm.dishIds = this.mealForm.dishIds.filter((x) => x !== id); }
+  moveMealDish(i: number, step: -1 | 1): void {
+    const list = [...this.mealForm.dishIds];
+    const j = i + step;
+    if (j < 0 || j >= list.length) return;
+    [list[i], list[j]] = [list[j], list[i]];
+    this.mealForm.dishIds = list;
+  }
+
+  /** Existing swap groups, for the dish form's suggestions. */
+  get swapGroups(): string[] {
+    return Array.from(new Set(this.dishes.map((d) => d.swapGroup).filter((g): g is string => !!g))).sort();
+  }
+  /** Dishes grouped by swap group for the table ("No swaps" last). */
+  get dishGroups(): Array<{ group: string; dishes: Dish[] }> {
+    const map = new Map<string, Dish[]>();
+    for (const d of this.dishes) {
+      const g = d.swapGroup || '';
+      map.set(g, [...(map.get(g) ?? []), d]);
+    }
+    return Array.from(map.entries())
+      .sort(([a], [b]) => (a ? 0 : 1) - (b ? 0 : 1) || a.localeCompare(b))
+      .map(([group, dishes]) => ({ group: group || 'No swaps', dishes }));
+  }
+  dietCodes(ids: string[]): string {
+    if (!ids.length) return 'Any diet';
+    return ids.map((id) => this.diets.find((d) => d.id === id)?.code).filter(Boolean).join(', ');
+  }
+  saveDish(): void {
+    if (!this.dishForm.name?.trim()) { this.errorMessage = 'Dish name is required.'; return; }
+    this.svc.upsertDish(this.dishForm).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => { this.successMessage = 'Dish saved.'; this.dishForm = this.blankDish(); this.loadDishes(); },
+      error: (e) => { this.errorMessage = e?.error?.error || 'Save failed'; },
+    });
+  }
+  editDish(d: Dish): void { this.dishForm = { ...d, dietIds: [...d.dietIds] }; }
+  toggleDishDiet(id: string): void {
+    const set = new Set(this.dishForm.dietIds);
+    if (set.has(id)) set.delete(id); else set.add(id);
+    this.dishForm.dietIds = Array.from(set);
+  }
+  loadDishes(): void {
+    this.svc.listDishes().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (r) => { this.dishes = r; },
+      error: () => { /* swallow */ },
+    });
+  }
+  blankDish(): Partial<Dish> & { dietIds: string[] } {
+    return { name: '', swapGroup: null, portion: null, isVeg: true, caloriesKcal: null, isActive: true, dietIds: [] };
   }
   toggleMealDiet(id: string): void {
     const set = new Set(this.mealForm.compatibleDietIds);
@@ -417,8 +494,8 @@ export class DieteticsSetupComponent implements OnInit, OnDestroy {
       isGeneral: false, kind: 'ORAL', isActive: true,
     };
   }
-  blankMeal(): Partial<MealMaster> & { compatibleDietIds: string[]; allergenIds: string[] } {
-    return { name: '', description: null, category: null, caloriesKcal: null, isVeg: true, isActive: true, compatibleDietIds: [], allergenIds: [] };
+  blankMeal(): Partial<MealMaster> & { compatibleDietIds: string[]; allergenIds: string[]; dishIds: string[] } {
+    return { name: '', description: null, category: null, caloriesKcal: null, isVeg: true, isActive: true, compatibleDietIds: [], allergenIds: [], dishIds: [] };
   }
   blankChannel(): Partial<CanteenChannel> {
     return { name: '', isActive: true, viewSpec: null };

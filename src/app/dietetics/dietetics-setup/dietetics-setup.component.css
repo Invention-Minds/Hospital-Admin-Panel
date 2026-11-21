@@ -78,3 +78,17 @@ code { font-size: 12px; background: #f3f5fa; border-radius: 5px; padding: 2px 6p
 .ds-opt-x:hover { color: #a3321c; }
 .ds-opt-add { font-size: 12px; padding: 2px 4px; max-width: 120px; }
 
+/* Dishes: grouped by swap group; meal editor's ordered dish list */
+.ds-group-row td { background: #f3f5fa; font-size: 12px; font-weight: 600; color: var(--dx-navy-ink); text-transform: uppercase; letter-spacing: 0.04em; }
+.ds-inactive td { color: var(--dx-faint); }
+.ds-veg { display: inline-block; position: relative; width: 11px; height: 11px; margin-right: 7px; vertical-align: -1px; border: 1.5px solid #15803d; border-radius: 2px; }
+.ds-veg::after { content: ''; position: absolute; inset: 2px; border-radius: 50%; background: #15803d; }
+.ds-veg.is-nonveg { border-color: #b91c1c; }
+.ds-veg.is-nonveg::after { background: #b91c1c; }
+.ds-fs .ds-dish-list { width: 100%; margin: 0; padding: 0; list-style: none; counter-reset: dish; display: flex; flex-direction: column; gap: 4px; }
+.ds-dish-list li { display: flex; align-items: center; gap: 6px; counter-increment: dish; font-size: 13px; color: var(--dx-ink); }
+.ds-dish-list li::before { content: counter(dish); min-width: 18px; color: var(--dx-faint); font-size: 12px; }
+.ds-dish-name { flex: 1; }
+.ds-fs > select { width: 100%; }
+.ds-fs > .ds-hint { width: 100%; margin: 0; }
+

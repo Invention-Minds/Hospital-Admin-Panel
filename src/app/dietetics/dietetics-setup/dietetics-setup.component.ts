@@ -10,6 +10,7 @@ import {
   DietMasterPayload,
   MealMaster,
   Dish,
+  SplitMealsResult,
   MenuPlanCell,
   MenuOptionRow,
   CanteenChannel,
@@ -318,6 +319,34 @@ export class DieteticsSetupComponent implements OnInit, OnDestroy {
       allergenIds: m.allergenIds ?? [],
       dishIds: [...(m.dishIds ?? [])],
     };
+  }
+
+  // ─── Create dishes from meal names ("Rice + dal" → Rice, Dal) ───────
+  splitPreview: SplitMealsResult | null = null;
+  splitBusy = false;
+  previewSplit(): void {
+    this.splitBusy = true;
+    this.errorMessage = '';
+    this.svc.splitMealsIntoDishes(true).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (r) => {
+        this.splitBusy = false;
+        if (!r.meals) { this.successMessage = 'Every meal already has its dishes.'; this.splitPreview = null; return; }
+        this.splitPreview = r;
+      },
+      error: (e) => { this.splitBusy = false; this.errorMessage = e?.error?.error || 'Preview failed'; },
+    });
+  }
+  confirmSplit(): void {
+    this.splitBusy = true;
+    this.svc.splitMealsIntoDishes(false).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (r) => {
+        this.splitBusy = false;
+        this.splitPreview = null;
+        this.successMessage = `${r.meals} meal(s) now have dishes · ${r.newDishes} new dish(es) created. Set swap groups and portions in the Dishes tab.`;
+        this.refreshAll();
+      },
+      error: (e) => { this.splitBusy = false; this.errorMessage = e?.error?.error || 'Could not create the dishes'; },
+    });
   }
 
   // ─── Dishes + the dishes on a meal's plate ──────────────────────────

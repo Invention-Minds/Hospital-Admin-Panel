@@ -206,6 +206,16 @@ export interface Dish {
   mealCount?: number;
 }
 
+export interface SplitMealsResult {
+  dryRun: boolean;
+  meals: number;
+  newDishes: number;
+  reusedDishes: number;
+  /** Meals that already had dishes — left alone. */
+  skippedMeals: number;
+  plan: Array<{ mealId: string; meal: string; dishes: Array<{ name: string; isNew: boolean }> }>;
+}
+
 export interface TrayDish {
   id: string;
   dish: { id: string; name: string; portion: string | null; isVeg: boolean };
@@ -1283,6 +1293,10 @@ export class DieteticsService {
     return payload.id
       ? this.http.put<Dish>(`${this.base}/dishes/${payload.id}`, payload)
       : this.http.post<Dish>(`${this.base}/dishes`, payload);
+  }
+  /** Split existing meal names at "+" into dishes. dryRun = preview only. */
+  splitMealsIntoDishes(dryRun: boolean): Observable<SplitMealsResult> {
+    return this.http.post<SplitMealsResult>(`${this.base}/meals/split-dishes`, { dryRun });
   }
   setMealDishes(mealId: string, dishIds: string[]): Observable<{ mealMasterId: string; dishIds: string[] }> {
     return this.http.put<{ mealMasterId: string; dishIds: string[] }>(`${this.base}/meals/${mealId}/dishes`, { dishIds });

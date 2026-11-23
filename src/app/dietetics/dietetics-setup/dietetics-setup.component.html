@@ -330,6 +330,34 @@
 
   <!-- ─── Meals ─── -->
   <div *ngIf="tab==='meals'" class="ds-panel">
+    <div class="ds-split">
+      <div>
+        <b>Meals without dishes?</b>
+        <span class="ds-hint">Names like "Steamed rice + dal + sabzi" can be split into dishes in one go. Meal names, the weekly menu and served trays don't change.</span>
+      </div>
+      <button type="button" class="ds-btn" (click)="previewSplit()" [disabled]="splitBusy">{{ splitBusy && !splitPreview ? 'Checking…' : 'Create dishes from meal names' }}</button>
+    </div>
+
+    <div class="ds-split-preview" *ngIf="splitPreview">
+      <h3>Preview: nothing is saved yet</h3>
+      <p class="ds-hint">
+        {{ splitPreview.meals }} meal(s) get dishes · <b>{{ splitPreview.newDishes }} new dish(es)</b> · {{ splitPreview.reusedDishes }} existing dish(es) reused
+        <span *ngIf="splitPreview.skippedMeals"> · {{ splitPreview.skippedMeals }} meal(s) already have dishes and are left alone</span>.
+        New dishes are allowed only for the diets their meal is already used in. Swap groups and portions are left empty for you to fill.
+      </p>
+      <ul class="ds-split-list">
+        <li *ngFor="let p of splitPreview.plan">
+          <span class="ds-split-meal">{{ p.meal }}</span>
+          <span class="ds-split-arrow">→</span>
+          <span class="ds-opt" *ngFor="let d of p.dishes" [class.ds-opt-new]="d.isNew">{{ d.name }}{{ d.isNew ? '' : ' (existing)' }}</span>
+        </li>
+      </ul>
+      <div class="ds-actions">
+        <button type="button" class="ds-btn ds-btn-primary" (click)="confirmSplit()" [disabled]="splitBusy">{{ splitBusy ? 'Creating…' : 'Create ' + splitPreview.newDishes + ' dishes and link them' }}</button>
+        <button type="button" class="ds-btn" (click)="splitPreview = null" [disabled]="splitBusy">Cancel</button>
+      </div>
+    </div>
+
     <div class="ds-grid-2">
       <div>
         <table class="diet-grid">

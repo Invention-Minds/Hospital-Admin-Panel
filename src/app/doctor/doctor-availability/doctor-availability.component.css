@@ -1085,3 +1085,18 @@ line-height: normal;
   opacity: 0.55;
   cursor: not-allowed;
 }
+
+/* Shown when the doctor list fails or times out (instead of a blank grid). */
+.load-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 24px auto;
+  padding: 12px 16px;
+  max-width: 520px;
+  border: 1px solid #f5c2c7;
+  border-radius: 8px;
+  background: #fff5f5;
+  color: #842029;
+}

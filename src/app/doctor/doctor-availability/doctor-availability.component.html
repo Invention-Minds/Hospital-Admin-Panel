@@ -276,3 +276,7 @@
 
 </div>
 <div class="loader" *ngIf="isLoading"></div>
+<div class="load-error" *ngIf="!isLoading && loadError">
+  <span>{{ loadError }}</span>
+  <button class="next-button" (click)="fetchDoctors()">Retry</button>
+</div>

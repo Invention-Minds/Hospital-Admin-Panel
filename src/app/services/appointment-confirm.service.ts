@@ -305,7 +305,25 @@ export class AppointmentConfirmService {
   getAppointmentsByRole(): Observable<Appointment[]> {
     return this.http.get<Appointment[]>(`${this.apiUrl}/by-role`);
   }
-  // Method to fetch all appointments
+  /**
+   * Appointments filtered on the server. Prefer this over getAllAppointments(),
+   * which downloads every appointment ever booked (hundreds of MB).
+   *   fromDate/toDate: YYYY-MM-DD (IST) — appointment date OR created date in range
+   *   lean: only the waiting-time columns, no relations
+   */
+  getAppointmentsFiltered(filters: {
+    fromDate?: string; toDate?: string; isCloseOPD?: boolean; doctorId?: number; lean?: boolean;
+  }): Observable<Appointment[]> {
+    let params = new HttpParams();
+    if (filters.fromDate) params = params.set('fromDate', filters.fromDate);
+    if (filters.toDate) params = params.set('toDate', filters.toDate);
+    if (filters.isCloseOPD !== undefined) params = params.set('isCloseOPD', String(filters.isCloseOPD));
+    if (filters.doctorId !== undefined) params = params.set('doctorId', String(filters.doctorId));
+    if (filters.lean) params = params.set('fields', 'lean');
+    return this.http.get<Appointment[]>(`${this.apiUrl}`, { params });
+  }
+
+  // Method to fetch all appointments — downloads EVERY appointment; avoid.
   getAllAppointments(): Observable<Appointment[]> {
     return this.http.get<Appointment[]>(`${this.apiUrl}`);
   }

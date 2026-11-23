@@ -57,7 +57,8 @@ export class DoctorAppointmentsComponent {
   fetchConfirmedAppointments(): void {
     this.isLoading = true
     const today = new Date();
-    this.appointmentService.getAllAppointments().subscribe({
+    // Only close-OPD requests are shown here — ask the server for just those.
+    this.appointmentService.getAppointmentsFiltered({ isCloseOPD: true }).subscribe({
       next: (services: any[]) => {
 
         // Process the services when the API call is successful

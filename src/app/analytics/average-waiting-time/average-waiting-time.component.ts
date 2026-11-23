@@ -41,6 +41,9 @@ export class AverageWaitingTimeComponent implements OnInit, OnChanges {
 
   // viewmore
   rawData: any
+  /** Date window (YYYY-MM-DD) that rawData was fetched for. */
+  rawFrom?: string
+  rawTo?: string
   viewMoreDepartment: any
   selectedViewMoreDepartment: any
   departmentValue: any = 'all'
@@ -136,13 +139,52 @@ export class AverageWaitingTimeComponent implements OnInit, OnChanges {
     this.loadWaitingTime(this.date)
   }
 
+  /** Earliest and latest YYYY-MM-DD in a list of dates (strings sort by date). */
+  private dateBounds(dates: string[]): { fromDate: string; toDate: string } | null {
+    const sorted = (dates || []).filter(Boolean).slice().sort();
+    return sorted.length ? { fromDate: sorted[0], toDate: sorted[sorted.length - 1] } : null;
+  }
+
+  /**
+   * Make sure rawData covers `dates`, fetching only that window from the server
+   * (lean columns) when it does not. Replaces downloading every appointment.
+   */
+  private withRawData(dates: string[], then: () => void): void {
+    const want = this.dateBounds(dates);
+    if (!want || (this.rawData && this.rawFrom && this.rawTo && this.rawFrom <= want.fromDate && this.rawTo >= want.toDate)) {
+      then();
+      return;
+    }
+    this.appointment.getAppointmentsFiltered({ ...want, lean: true }).subscribe({
+      next: (data) => {
+        this.rawData = data;
+        this.rawFrom = want.fromDate;
+        this.rawTo = want.toDate;
+        then();
+      },
+      error: (error) => console.log(error),
+    });
+  }
+
   loadWaitingTime(date: any[]): void {
+    // No days selected → nothing can match (same result as before), so don't
+    // fetch: an unfiltered call would download every appointment.
+    if (!date || date.length === 0) {
+      this.waitingData.doctorNames = [];
+      this.waitingData.more_than_twenty_min = [];
+      this.isLoading = false;
+      return;
+    }
     this.isLoading = true;
-    this.appointment.getAllAppointments().subscribe({
+    // Fetch the tile's days plus the "View more" window, so both use one download.
+    const window = this.dateBounds([...date, ...(this.selectedViewDate || [])]);
+    this.appointment.getAppointmentsFiltered({ ...(window ?? {}), lean: true }).subscribe({
 
       next: (data) => {
         console.log(this.department)
         this.rawData = data
+        this.rawFrom = window?.fromDate
+        this.rawTo = window?.toDate
         const filteredData = data.filter(
           (entry: any) => date.includes(entry.date) && entry.department === this.department
         );
@@ -207,7 +249,8 @@ export class AverageWaitingTimeComponent implements OnInit, OnChanges {
 
   report(): void {
     this.isLoading = true;
-    this.appointment.getAllAppointments().subscribe((data) => {
+    // All-time report: still every appointment, but only the columns it groups on.
+    this.appointment.getAppointmentsFiltered({ lean: true }).subscribe((data) => {
       const groupedData = new Map<string, any>();  // Use a Map to group by date and doctorId
 
       data.forEach((entry: any) => {
@@ -499,7 +542,12 @@ export class AverageWaitingTimeComponent implements OnInit, OnChanges {
 
 
   viewMoreData(): void {
-    const filteredData = this.rawData.filter(
+    // The "View more" range can be wider than what the tile loaded.
+    this.withRawData(this.selectedViewDate, () => this.computeViewMore());
+  }
+
+  private computeViewMore(): void {
+    const filteredData = (this.rawData || []).filter(
       (entry: any) => this.selectedViewDate.includes(entry.date) && entry.department === this.selectedViewMoreDepartment
     );
     const groupedData = new Map();  // Use a Map to group data by doctorId

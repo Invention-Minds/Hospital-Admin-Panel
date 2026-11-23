@@ -518,9 +518,25 @@ export class AdminReportComponent {
 
 
   // Function to download the filtered appointments as an Excel file
+  /** Local (IST) calendar date as YYYY-MM-DD — matches the server's IST-day filter. */
+  private toYmd(d: Date): string {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
+  /** The days this report shows: the picked range, or today when none is picked. */
+  private reportDateWindow(): { fromDate: string; toDate: string } {
+    const start: Date | null | undefined = this.selectedDateRange?.[0];
+    const end: Date | null | undefined = this.selectedDateRange?.[1] || start;
+    if (start && end) return { fromDate: this.toYmd(start), toDate: this.toYmd(end) };
+    const today = this.toYmd(new Date());
+    return { fromDate: today, toDate: today };
+  }
+
   loadAllAppointments(): void {
     this.isLoading = true;
-    this.appointmentService.getAllAppointments().subscribe({
+    // Fetch only the selected days (was: every appointment ever booked, then
+    // filtered here). The filtering below still runs and narrows the same way.
+    this.appointmentService.getAppointmentsFiltered(this.reportDateWindow()).subscribe({
       next: (appointments) => {
         this.appointments = appointments;
         let filteredAppointments = this.appointments;

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, throwError } from 'rxjs';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { map } from 'rxjs/operators';
 import { AuthServiceService } from './auth/auth-service.service';
@@ -96,15 +96,15 @@ export class AppointmentConfirmService {
 
   // Fetch appointments from backend
   fetchAppointments(): void {
-    this.http.get<Appointment[]>(`${this.apiUrl}`).subscribe((appointments) => {
-      const confirmed = appointments.filter(a => a.status.toLowerCase() === 'confirmed');
-      const canceled = appointments.filter(a => a.status.toLowerCase() === 'cancelled');
-      const completed = appointments.filter(a => a.status.toLowerCase() === 'completed');
+    // this.http.get<Appointment[]>(`${this.apiUrl}`).subscribe((appointments) => {
+    //   const confirmed = appointments.filter(a => a.status.toLowerCase() === 'confirmed');
+    //   const canceled = appointments.filter(a => a.status.toLowerCase() === 'cancelled');
+    //   const completed = appointments.filter(a => a.status.toLowerCase() === 'completed');
 
-      this.confirmedAppointmentsSource.next(confirmed);
-      this.canceledAppointmentsSource.next(canceled);
-      this.completedAppointmentsSource.next(completed);
-    });
+    //   this.confirmedAppointmentsSource.next(confirmed);
+    //   this.canceledAppointmentsSource.next(canceled);
+    //   this.completedAppointmentsSource.next(completed);
+    // });
   }
   // Method to add a confirmed appointment
   addConfirmedAppointment(appointment: Appointment): void {
@@ -215,6 +215,49 @@ export class AppointmentConfirmService {
     this.http.put<Appointment>(`${this.apiUrl}/${appointment!.id}`, updateData).subscribe(() => {
       this.fetchAppointments(); // Fetch appointments to update the list
     });
+  }
+
+  /**
+   * Same save as addConfirmedAppointment / addCancelledAppointment (same status,
+   * sent-flags, userId and PUT), but returns the request so the screen can act
+   * only after the server has saved it — e.g. update or remove a table row.
+   * The void versions above are unchanged for every other caller.
+   */
+  /**
+   * Fired by the appointment form after a reschedule has been SAVED, carrying
+   * the updated appointment. Lives in the service because the form is often
+   * closed before the save returns, so a component @Output would be lost.
+   */
+  private appointmentRescheduledSubject = new Subject<Appointment>();
+  appointmentRescheduled$ = this.appointmentRescheduledSubject.asObservable();
+  notifyRescheduled(appointment: Appointment): void {
+    this.appointmentRescheduledSubject.next(appointment);
+  }
+
+  confirmAppointmentObs(appointment: Appointment): Observable<Appointment> {
+    return this.saveStatusObs(appointment, 'confirmed');
+  }
+
+  cancelAppointmentObs(appointment: Appointment): Observable<Appointment> {
+    return this.saveStatusObs(appointment, 'cancelled');
+  }
+
+  private saveStatusObs(appointment: Appointment, status: 'confirmed' | 'cancelled'): Observable<Appointment> {
+    if (appointment.id === null || appointment.id === undefined) {
+      return throwError(() => new Error(`Cannot set appointment ${status}: Appointment ID is missing.`));
+    }
+    appointment.status = status;
+    appointment.emailSent = !(appointment.email == null || appointment.email == '');
+    appointment.smsSent = true;
+    appointment.messageSent = true;
+    const userId = this.authService.getUserId();
+    const updateData = {
+      ...appointment,
+      userId: userId ? userId : appointment.userId // Include userId if available
+    };
+    return this.http.put<Appointment>(`${this.apiUrl}/${appointment.id}`, updateData).pipe(
+      tap(() => this.fetchAppointments())
+    );
   }
 
   updateAppointment(appointment: Appointment): void {

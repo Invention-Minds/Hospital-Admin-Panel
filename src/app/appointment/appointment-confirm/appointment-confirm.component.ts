@@ -12,6 +12,7 @@ import {
   slotText,
 } from '../../services/appointment-history.service';
 import { ChangeDetectorRef } from '@angular/core';
+import { Subscription } from 'rxjs';
 import * as FileSaver from 'file-saver';
 import { start } from 'node:repl';
 import * as moment from 'moment-timezone';
@@ -285,7 +286,10 @@ export class AppointmentConfirmComponent {
 
     // Default load: today + future only (avoids loading 80k+ historical records)
     this.loadConfirmedAppointments(this.today);
+    // Show a reschedule in the table once the server has saved it.
+    this.rescheduledSub = this.appointmentService.appointmentRescheduled$.subscribe(a => this.onRescheduled(a));
   }
+  private rescheduledSub?: Subscription;
 
   /**
    * Fetch confirmed appointments from backend, optionally filtered by date range.
@@ -1098,6 +1102,36 @@ export class AppointmentConfirmComponent {
 
 
 
+  /**
+   * Drop an appointment from this table once the server has saved the cancel.
+   * Nothing else reloads the confirmed list after a cancel, so the row used to
+   * linger until the page or tab was reopened.
+   */
+  private removeFromConfirmedTable(id: number | null | undefined): void {
+    if (id == null) return;
+    this.confirmedAppointments = this.confirmedAppointments.filter(a => a.id !== id);
+    this.appointments = this.appointments.filter(a => a.id !== id);
+    this.filteredAppointments = this.filteredAppointments.filter(a => a.id !== id);
+  }
+
+  /** The cancel did not save — the row stays, so tell staff to try again. */
+  private showCancelFailed(error: unknown): void {
+    console.error('Error cancelling appointment:', error);
+    this.messageService.add({ severity: 'error', summary: 'Not cancelled', detail: 'The appointment could not be cancelled. Please try again.' });
+  }
+
+  /**
+   * Called (via the service) only after the server saved a reschedule; show the
+   * new doctor / date / time in this row (the form edits its own copy, not the row).
+   */
+  onRescheduled(updated: Appointment): void {
+    if (updated?.id == null) return;
+    const merge = (list: any[]) => list.map(a => (a.id === updated.id ? { ...a, ...updated } : a));
+    this.confirmedAppointments = merge(this.confirmedAppointments);
+    this.appointments = merge(this.appointments);
+    this.filteredAppointments = merge(this.filteredAppointments);
+  }
+
   cancelAppointment(appointment: Appointment) {
     const cancelled: Appointment = {
       ...appointment,
@@ -1107,7 +1141,10 @@ export class AppointmentConfirmComponent {
       messageSent: true,
       requestVia: appointment.requestVia
     };
-    this.appointmentService.addCancelledAppointment(cancelled);
+    this.appointmentService.cancelAppointmentObs(cancelled).subscribe({
+      next: () => this.removeFromConfirmedTable(appointment.id),
+      error: (error) => this.showCancelFailed(error),
+    });
     // Scoped: only this appointment's hold on the slot is released.
     this.doctorService.getCancelledSlots(appointment.doctorId, appointment.date, appointment.time, appointment.id).subscribe({
       next: (response) => {
@@ -1191,7 +1228,10 @@ export class AppointmentConfirmComponent {
 
     } else if (status === 'Cancel') {
       confirmedAppointment.status = 'Cancelled'; // Update the status
-      this.appointmentService.addCancelledAppointment(confirmedAppointment);
+      this.appointmentService.cancelAppointmentObs(confirmedAppointment).subscribe({
+        next: () => this.removeFromConfirmedTable(appointment.id),
+        error: (error) => this.showCancelFailed(error),
+      });
       this.messageService.add({ severity: 'success', summary: 'Success', detail: 'Appointment cancelled successfully!' });
       this.doctorService.getDoctorDetails(appointment.doctorId).subscribe({
         next: (response) => {
@@ -1266,6 +1306,7 @@ export class AppointmentConfirmComponent {
 
   }
   ngOnDestroy(): void {
+    this.rescheduledSub?.unsubscribe();
     if (this.activeAppointmentId !== null) {
       this.closeAppointmentForm();
     }

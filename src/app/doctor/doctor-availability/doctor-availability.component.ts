@@ -4,7 +4,6 @@ import { Doctor } from '../../models/doctor.model';
 import { DoctorWithSlots } from '../../models/doctos_with_slots.model';
 import { ChangeDetectorRef } from '@angular/core';
 import { forkJoin, Subscription } from 'rxjs';
-import { timeout } from 'rxjs/operators';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { MessageService } from 'primeng/api';
 import { AlertService } from '../../services/alert.service';
@@ -50,10 +49,8 @@ export class DoctorAvailabilityComponent {
   itemsPerPage: number = 10;
   totalPages: number = 1;
   isLoading: boolean = false;
-  /** Shown with a Retry button when the doctor list fails or times out. */
+  /** Shown with a Retry button when the doctor list request fails. */
   loadError: string | null = null;
-  /** Give up after this long instead of spinning until the proxy timeout (600 s). */
-  private static readonly LOAD_TIMEOUT_MS = 30000;
   role: string = '';
   doctorsList: any[] = [];
   unavailableDoctorList: any[] = [];
@@ -110,7 +107,7 @@ export class DoctorAvailabilityComponent {
       this.itemsPerPage,
       this.departmentSearchQuery.trim(),
       this.doctorSearchQuery.trim()
-    ).pipe(timeout(DoctorAvailabilityComponent.LOAD_TIMEOUT_MS)).subscribe({
+    ).subscribe({
       next: (res) => {
         const doctors: Doctor[] = res.doctors;
         this.totalPages = res.totalPages;
@@ -335,9 +332,7 @@ export class DoctorAvailabilityComponent {
         this.isLoading = false;
         console.error('Error fetching doctors:', error);
         // Tell staff instead of leaving a blank grid; the Retry button reloads.
-        this.loadError = error?.name === 'TimeoutError'
-          ? 'The server is taking too long to respond.'
-          : 'Could not load doctor availability.';
+        this.loadError = 'Could not load doctor availability.';
         this.messageService.add({ severity: 'error', summary: 'Doctor availability', detail: `${this.loadError} Press Retry.` });
       },
       complete: () => {

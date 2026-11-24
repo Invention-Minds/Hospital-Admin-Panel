@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { AppointmentConfirmService } from '../../services/appointment-confirm.service';
 import { app } from '../../../../server';
 import { DoctorServiceService } from '../../services/doctor-details/doctor-service.service';
@@ -116,6 +117,16 @@ export class AppointmentCancelComponent {
     const day = today.getDate().toString().padStart(2, '0');
     this.today = `${year}-${month}-${day}`;
     this.fetchCancelledAppointments();
+    // A rescheduled appointment is confirmed again — drop it from this list
+    // once the server has saved it (nothing else reloads the list).
+    this.rescheduledSub = this.appointmentService.appointmentRescheduled$.subscribe(a => this.onRescheduled(a));
+  }
+  private rescheduledSub?: Subscription;
+
+  onRescheduled(updated: Appointment): void {
+    if (updated?.id == null) return;
+    this.cancelledAppointments = this.cancelledAppointments.filter(a => a.id !== updated.id);
+    this.filteredAppointments = this.filteredAppointments.filter(a => a.id !== updated.id);
   }
 
   fetchCancelledAppointments(fromDate?: string, toDate?: string) {
@@ -643,6 +654,7 @@ export class AppointmentCancelComponent {
 
   // Cleanup: unlock appointment if component is destroyed
   ngOnDestroy(): void {
+    this.rescheduledSub?.unsubscribe();
     if (this.activeAppointmentId !== null) {
       this.closeAppointmentForm();
     }
@@ -688,6 +700,7 @@ export class AppointmentCancelComponent {
 
     if (status === 'rescheduled') {
       appointment.isrescheduled = true;
+      // Row removal happens in onRescheduled(), once the server has saved it.
     }
 
 

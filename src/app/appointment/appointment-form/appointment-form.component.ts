@@ -2016,8 +2016,18 @@ isLoading: boolean = false;
               },
             });
           }
-          // this.syncFormToModel(); 
-          this.appointmentService.addConfirmedAppointment(this.appointment);
+          // this.syncFormToModel();
+          // Same save as addConfirmedAppointment, but the tables update only
+          // after the server has saved it (same object, so it carries the
+          // synced date/time by the time the save returns).
+          const rescheduledAppointment = this.appointment;
+          this.appointmentService.confirmAppointmentObs(rescheduledAppointment).subscribe({
+            next: () => this.appointmentService.notifyRescheduled({ ...rescheduledAppointment }),
+            error: (error) => {
+              console.error('Error saving reschedule:', error);
+              this.messageService.add({ severity: 'error', summary: 'Not rescheduled', detail: 'The reschedule could not be saved. Please try again.' });
+            },
+          });
           this.messageService.add({ severity: 'success', summary: 'Success', detail: 'The appointment is rescheduled.' });
           this.appointmentService.removeCancelledAppointment(this.appointment.id!);
         } else {
@@ -2205,7 +2215,18 @@ isLoading: boolean = false;
                   // const cancelledSlots = response;
                   // console.log(cancelledSlots);
                   if (this.appointment) {
-                    this.appointmentService.addConfirmedAppointment(this.appointment);
+                    // Same save as addConfirmedAppointment; the Confirmed /
+                    // Cancelled tables update only once the server has saved it.
+                    // (Rescheduling from the Cancelled table lands here: stored
+                    // status is 'cancelled', so the branch above never matches.)
+                    const savedAppointment = this.appointment;
+                    this.appointmentService.confirmAppointmentObs(savedAppointment).subscribe({
+                      next: () => this.appointmentService.notifyRescheduled({ ...savedAppointment }),
+                      error: (error) => {
+                        console.error('Error saving reschedule:', error);
+                        this.messageService.add({ severity: 'error', summary: 'Not rescheduled', detail: 'The reschedule could not be saved. Please try again.' });
+                      },
+                    });
                     this.showForm = false;
                     this.isLoading = false;
                       this.formSuccess.emit('confirmed');

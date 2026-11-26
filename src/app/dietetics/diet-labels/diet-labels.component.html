@@ -41,10 +41,12 @@
       <div class="dl-foot">
         <span *ngIf="l.disposable" class="dl-tag">DISPOSABLE</span>
         <span *ngIf="l.fluidRestrictionMl" class="dl-tag">F/R {{ l.fluidRestrictionMl }} ml</span>
+      </div>
+      <div class="dl-foot">
         <span *ngFor="let f of l.flags" class="dl-tag">{{ f }}</span>
       </div>
       <div class="dl-qr" *ngIf="sheet!.layout.showQr">
-        <qrcode [qrdata]="l.qr" [width]="64" [margin]="0" [errorCorrectionLevel]="'M'"></qrcode>
+        <qrcode [qrdata]="l.qr" [width]="40" [margin]="0" [errorCorrectionLevel]="'M'"></qrcode>
       </div>
     </div>
   </div>

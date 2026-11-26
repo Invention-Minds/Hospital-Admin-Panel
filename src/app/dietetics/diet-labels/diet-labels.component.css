@@ -4,7 +4,7 @@
   padding: 2mm 2.5mm; overflow: hidden; background: #fff; font-size: 9.5pt; line-height: 1.2;
 }
 .dl-extra { border-style: dotted; }
-.dl-top { display: flex; justify-content: space-between; align-items: baseline; gap: 2mm; padding-right: 15mm; }
+.dl-top { display: flex; justify-content: space-between; align-items: baseline; gap: 4mm; padding-right: 15mm; }
 .dl-bed { font-weight: 800; font-size: 12pt; }
 .dl-code { font-weight: 800; font-size: 11pt; }
 .dl-name { font-weight: 700; padding-right: 15mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -17,6 +17,103 @@
 .dl-qr :where(qrcode, qrcode > div, qrcode canvas, qrcode img) { display: block; width: 14mm !important; height: 14mm !important; }
 
 @media print {
-  @page { size: A4; margin: 6mm; }
-  .dl-label { border-color: transparent; break-inside: avoid; }
+  .dx-shell {
+    width: 50mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .dx-noprint {
+    display: none !important;
+  }
+
+  .dl-grid {
+    display: block !important;
+    width: 50mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    grid-template-columns: none !important;
+    grid-auto-rows: auto !important;
+  }
+
+  .dl-grid > .dl-label {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+
+    position: relative !important;
+    box-sizing: border-box !important;
+
+    width: 50mm !important;
+    height: 30mm !important;
+    min-height: 30mm !important;
+    max-height: 30mm !important;
+
+    margin: 0 !important;
+    padding: 1.5mm 4mm 3mm !important;
+
+    border: none !important;
+    border-radius: 0 !important;
+    overflow: hidden !important;
+
+    font-size: 6pt !important;
+    line-height: 1.05 !important;
+
+    break-after: page !important;
+    page-break-after: always !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .dl-grid > .dl-label:last-child {
+    break-after: auto !important;
+    page-break-after: auto !important;
+  }
+
+  .dl-top {
+    padding-right: 13mm !important;
+  }
+
+  .dl-bed { font-size: 8pt !important; }
+  .dl-code { font-size: 7pt !important; }
+
+  .dl-name {
+    padding-right: 13mm !important;
+    font-size: 6pt !important;
+  }
+
+  .dl-prn { font-size:5.5pt !important; }
+
+  .dl-avoid,
+  .dl-item { font-size: 4.5pt !important; }
+
+  .dl-foot {
+    gap: 0.5mm !important;
+    margin-top: 0.5mm !important;
+  }
+
+  .dl-tag {
+    font-size: 4.5pt !important;
+  }
+
+  .dl-qr {
+    position: absolute !important;
+    top: 55% !important;
+    right: 8mm !important;
+    transform: translateY(-50%) !important;
+    width: 9mm !important;
+    height: 9mm !important;
+  }
+
+  .dl-qr qrcode,
+  .dl-qr qrcode canvas,
+  .dl-qr qrcode img,
+  .dl-qr canvas,
+  .dl-qr img {
+    display: block !important;
+    width: 9mm !important;
+    height: 9mm !important;
+    max-width: 9mm !important;
+    max-height: 9mm !important;
+  }
 }

@@ -120,3 +120,19 @@ body.dm-privacy-blur > *:not(.dm-watermark) { filter: blur(18px); }
     flex-wrap: wrap;
   }
 }
+
+@media print {
+  @page {
+    size: 50mm 30mm;
+    margin: 0;
+  }
+
+  html,
+  body {
+    width: 50mm !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+}

@@ -1231,8 +1231,9 @@ export class DieteticsService {
   getNightAck(): Observable<NightAckList> {
     return this.http.get<NightAckList>(`${this.base}/night-ack`);
   }
-  acknowledgeNight(admissionId: string, body: { dietMasterId?: string | null; note?: string | null }): Observable<{ ok: boolean; planId: string }> {
-    return this.http.post<{ ok: boolean; planId: string }>(`${this.base}/night-ack/${admissionId}`, body);
+  /** trays = kitchen trays for today's remaining meals + tomorrow; menuGaps = "GEN · Monday Lunch"… with no dish. */
+  acknowledgeNight(admissionId: string, body: { dietMasterId?: string | null; note?: string | null }): Observable<NightAckResult> {
+    return this.http.post<NightAckResult>(`${this.base}/night-ack/${admissionId}`, body);
   }
 
   // ─── Ward receipt ───────────────────────────────────────────────────
@@ -1344,6 +1345,14 @@ export interface NightAckRow {
   doctorAck: { at: string; by: string | null; note: string | null } | null;
   reason: string;
   admittedAt: string;
+}
+export interface NightAckResult {
+  ok: boolean;
+  planId: string;
+  trays?: number;
+  menuGaps?: string[];
+  dietKind?: string | null;
+  dietCode?: string | null;
 }
 export interface NightAckList {
   /** True while the dietitian is off duty (night window). */

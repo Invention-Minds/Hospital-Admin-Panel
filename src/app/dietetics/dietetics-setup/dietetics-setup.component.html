@@ -114,7 +114,7 @@
       <div class="ds-form">
         <h3>{{ dietForm.id ? 'Edit diet' : 'New diet' }}</h3>
         <label>Name <input type="text" [(ngModel)]="dietForm.name" placeholder="Diabetic 1800kcal" /></label>
-        <label>Code <input type="text" [(ngModel)]="dietForm.code" placeholder="SRDD" /></label>
+        <label>Code <input type="text" [ngModel]="dietForm.code" (ngModelChange)="dietForm.code = ($event || '').toUpperCase()" placeholder="SRDD" autocapitalize="characters" /></label>
         <label>Kind
           <select [(ngModel)]="dietForm.kind">
             <option *ngFor="let k of dietKinds" [ngValue]="k.value">{{ k.label }}</option>
@@ -172,7 +172,7 @@
       </div>
       <div class="ds-form">
         <h3>{{ textureForm.id ? 'Edit texture' : 'New texture' }}</h3>
-        <label>Code <input type="text" [(ngModel)]="textureForm.code" placeholder="SD" /></label>
+        <label>Code <input type="text" [ngModel]="textureForm.code" (ngModelChange)="textureForm.code = ($event || '').toUpperCase()" placeholder="SD" autocapitalize="characters" /></label>
         <label>Name <input type="text" [(ngModel)]="textureForm.name" placeholder="Soft diet" /></label>
         <label>Description <textarea [(ngModel)]="textureForm.description" rows="2"></textarea></label>
         <label>Sequence <input type="number" [(ngModel)]="textureForm.sequence" /></label>
@@ -241,7 +241,8 @@
         <label>Label height (mm) <input type="number" min="15" [(ngModel)]="settings.labelHeightMm" /></label>
         <label>Labels per row <input type="number" min="1" max="6" [(ngModel)]="settings.labelColumns" /></label>
       </div>
-      <label class="ds-check"><input type="checkbox" [(ngModel)]="settings.labelShowQr" /> Print QR code (scan at bedside)</label>
+      <p class="ds-hint">Label-printer roll: enter the sticker size (e.g. 50 × 30) and <b>1 label per row</b>, so each sticker prints as its own page. A4 sticker sheet: 2 or more per row. Text size is set automatically to fit each sticker.</p>
+      <label class="ds-check"><input type="checkbox" [(ngModel)]="settings.labelShowQr" /> Print QR code (scan at bedside). Turning it off leaves more room for the dishes.</label>
 
       <h3>Nutrition screening</h3>
       <label>Default form for adults

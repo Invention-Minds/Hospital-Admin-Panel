@@ -121,18 +121,6 @@ body.dm-privacy-blur > *:not(.dm-watermark) { filter: blur(18px); }
   }
 }
 
-@media print {
-  @page {
-    size: 50mm 30mm;
-    margin: 0;
-  }
-
-  html,
-  body {
-    width: 50mm !important;
-    height: auto !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
-}
+/* Sticker page size (e.g. 50 × 30 mm roll) is NOT set here — a global @page
+   would shrink every print in the app (OPD, discharge summary, reports).
+   The Diet labels page sets it from Setup → Sheet & labels while it is open. */

@@ -138,6 +138,9 @@ async function stampImage(blob: Blob, ref: string): Promise<Blob | null> {
 export function stampPrintDocument(doc: Document, ref: string): HTMLElement | null {
   try {
     if (doc.getElementById(FOOTER_ID)) return null;
+    // Small tray stickers (diet labels) print the Download ID inside each
+    // sticker instead, so they skip this page footer. Set just for that print.
+    if (doc.body?.dataset?.['printStamp'] === 'off') return null;
     const host = doc.body || doc.documentElement;
     if (!host) return null;
     const el = doc.createElement('div');

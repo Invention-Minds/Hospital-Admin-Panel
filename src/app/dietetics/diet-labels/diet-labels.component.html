@@ -2,7 +2,10 @@
   <div class="dx-head dx-noprint">
     <div>
       <h2 class="dx-title">Diet labels</h2>
-      <p class="dx-sub">One label per tray for the selected meal. Skipped / NPO trays are not printed. Size is set in Setup → Sheet &amp; labels.</p>
+      <p class="dx-sub">
+        One sticker per tray for the selected meal. Skipped / NPO trays are not printed.
+        Sticker size and labels per row are set in Setup → Sheet &amp; labels. For the label-printer roll use 1 per row.
+      </p>
     </div>
     <div class="dx-toolbar">
       <label>Date <input type="date" [(ngModel)]="date" (change)="load()" /></label>
@@ -27,27 +30,36 @@
   <div class="dx-empty dx-noprint" *ngIf="!loading && sheet && sheet.labels.length === 0">
     No trays for {{ sheet.slot?.name }} on {{ sheet.date | date:'dd-MM-yyyy' }}. Issue the diet sheet or regenerate orders first.
   </div>
+  <p class="dl-hint dx-noprint" *ngIf="sheet?.labels?.length">
+    Sticker {{ sheet!.layout.widthMm }} × {{ sheet!.layout.heightMm }} mm ·
+    {{ isRoll ? 'label-printer roll, one sticker per page' : sheet!.layout.columns + ' per row on A4' }}.
+    The preview below is the real size. Each sticker's text is made as large as it can be without spilling.
+    <span class="dl-hint-warn" *ngIf="tightCount"> {{ tightCount }} sticker(s) have a long dish list and are at the smallest text size, so check that they are readable.</span>
+  </p>
 
-  <div class="dl-grid" *ngIf="sheet?.labels?.length" [ngStyle]="gridStyle">
-    <div class="dl-label" *ngFor="let l of sheet!.labels" [class.dl-extra]="l.kind === 'EXTRA'">
-      <div class="dl-top">
-        <span class="dl-bed">{{ l.bedNumber || '—' }}</span>
-        <span class="dl-code">{{ l.dietCode }}</span>
+  <div class="dl-grid" [class.dl-roll]="isRoll" *ngIf="sheet?.labels?.length" [ngStyle]="gridStyle">
+    <div class="dl-label" *ngFor="let l of sheet!.labels" [class.dl-extra]="l.kind === 'EXTRA'" [ngStyle]="labelStyle">
+      <div class="dl-head">
+        <div class="dl-id">
+          <div class="dl-top">
+            <span class="dl-bed">{{ l.bedNumber || '—' }}</span>
+            <span class="dl-code">{{ l.dietCode }}</span>
+          </div>
+          <div class="dl-name">{{ l.patientName || l.admissionNo }}</div>
+          <div class="dl-prn">PRN {{ l.prn }} · {{ sheet!.slot?.name }} {{ sheet!.date | date:'dd/MM' }}</div>
+        </div>
+        <div class="dl-qr" *ngIf="sheet!.layout.showQr" [ngStyle]="qrStyle">
+          <qrcode [qrdata]="l.qr" [width]="96" [margin]="0" [errorCorrectionLevel]="'M'"></qrcode>
+        </div>
       </div>
-      <div class="dl-name">{{ l.patientName || l.admissionNo }}</div>
-      <div class="dl-prn">PRN {{ l.prn }} · {{ sheet!.slot?.name }} {{ sheet!.date | date:'dd/MM' }}</div>
       <div class="dl-avoid" *ngIf="l.avoid">⚠ {{ l.avoid }}</div>
-      <div class="dl-item" *ngIf="l.item">{{ l.item }}</div>
-      <div class="dl-foot">
-        <span *ngIf="l.disposable" class="dl-tag">DISPOSABLE</span>
-        <span *ngIf="l.fluidRestrictionMl" class="dl-tag">F/R {{ l.fluidRestrictionMl }} ml</span>
+      <div class="dl-item" *ngIf="l.item">{{ dishText(l.item) }}</div>
+      <div class="dl-foot" *ngIf="l.disposable || l.fluidRestrictionMl || l.flags.length">
+        <span *ngIf="l.disposable">Disposable</span>
+        <span *ngIf="l.fluidRestrictionMl">F/R {{ l.fluidRestrictionMl }} ml</span>
+        <span *ngFor="let f of l.flags">{{ f }}</span>
       </div>
-      <div class="dl-foot">
-        <span *ngFor="let f of l.flags" class="dl-tag">{{ f }}</span>
-      </div>
-      <div class="dl-qr" *ngIf="sheet!.layout.showQr">
-        <qrcode [qrdata]="l.qr" [width]="40" [margin]="0" [errorCorrectionLevel]="'M'"></qrcode>
-      </div>
+      <div class="dl-ref" *ngIf="downloadRef">Download ID: {{ downloadRef }}</div>
     </div>
   </div>
 </div>

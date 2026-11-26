@@ -147,8 +147,9 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
           });
         }
   
-        // Fetch Notifications Based on Role
-        this.fetchNotifications();
+        // Refresh the bell once per burst (not once per notification): one
+        // event used to make every open browser re-download the whole list.
+        this.scheduleNotificationRefresh();
       });
   
       // Initial Fetch for Notifications
@@ -288,9 +289,24 @@ export class DashboardModuleComponent implements OnInit, OnDestroy {
     this.appointmentService.openSettingsModal()
   }
   ngOnDestroy(): void {
+    if (this.notificationRefreshTimer) {
+      clearTimeout(this.notificationRefreshTimer);
+    }
     if (this.eventSource) {
       this.eventSource.close();
     }
+  }
+
+  /** Coalesces live notifications arriving together into one bell refresh. */
+  private notificationRefreshTimer: ReturnType<typeof setTimeout> | null = null;
+  private scheduleNotificationRefresh(): void {
+    if (this.notificationRefreshTimer) {
+      clearTimeout(this.notificationRefreshTimer);
+    }
+    this.notificationRefreshTimer = setTimeout(() => {
+      this.notificationRefreshTimer = null;
+      this.fetchNotifications();
+    }, 2000);
   }
   // handleNotificationClick(index: number): void {
   //   // Remove the clicked notification from the list

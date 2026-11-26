@@ -76,8 +76,22 @@ export class DietNightAckComponent implements OnInit, OnDestroy {
     this.svc.acknowledgeNight(r.admissionId, { dietMasterId: d.dietMasterId, note: d.note.trim() || null })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: () => {
-          this.successMessage = `Acknowledged ${r.patientName || r.admissionNo} (bed ${r.bedNumber || '—'}). The kitchen has been updated.`;
+        next: (res) => {
+          const who = `${r.patientName || r.admissionNo} (bed ${r.bedNumber || '—'})`;
+          const gaps = res.menuGaps ?? [];
+          if (res.dietKind === 'FEED') {
+            this.successMessage = `Acknowledged ${who}. RT-feed diet: the kitchen prepares feed doses on the RT feeds screen, not meal trays.`;
+          } else if (res.dietKind === 'NO_TRAY') {
+            this.successMessage = `Acknowledged ${who}. ${res.dietCode} is a no-tray diet (home food / NPO), so the kitchen sends nothing.`;
+          } else if (gaps.length) {
+            // Shown as an error so it isn't missed: the patient may get no food.
+            this.errorMessage = `Acknowledged ${who}, but ${res.dietCode} has no dish in the weekly menu for ${gaps.join(', ')}. `
+              + `The kitchen gets NO tray for ${gaps.length === 1 ? 'that meal' : 'those meals'}. `
+              + `Pick a diet that has a menu, or ask the dietetics admin to fill Setup → Weekly menu.`;
+            this.successMessage = res.trays ? `${res.trays} other tray(s) were sent to the kitchen.` : '';
+          } else {
+            this.successMessage = `Acknowledged ${who}. ${res.trays ?? 0} tray(s) sent to the kitchen for the rest of today and tomorrow.`;
+          }
           this.drafts.delete(r.admissionId);
           this.load();
         },

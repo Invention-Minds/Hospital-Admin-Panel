@@ -56,6 +56,17 @@ export class DoctorAvailabilityComponent {
   unavailableDoctorList: any[] = [];
   subAdminType: string = ''; // Sub-admin type
   employeeId: string = ''; // Employee ID
+
+  /**
+   * Who sees the Before / After (extend OPD hours) buttons: admin, super_admin
+   * and these employees. The backend enforces the same list on
+   * /extraslot-count/add (EXTRA_SLOT_EDITORS in backend extraslots/extra-slot-editors.ts).
+   */
+  private static readonly EXTRA_SLOT_EDITORS = ['JMRH370', 'JMRH124', 'JMRH356', 'JMRH575', 'JMRH519'];
+  get canExtendSlots(): boolean {
+    return this.role === 'admin' || this.role === 'super_admin'
+      || DoctorAvailabilityComponent.EXTRA_SLOT_EDITORS.includes(this.employeeId);
+  }
   userId: string = ''; // User ID
   arrivedDoctorIds: number[] = []; // Doctors marked "came" today (drives TV display)
   arrivedToggleBusy: { [doctorId: number]: boolean } = {};

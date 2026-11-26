@@ -1,119 +1,51 @@
+/* Diet stickers. Sizes inside a label are in em, relative to the font size
+   the component sets on each label (as large as that sticker allows), so the
+   whole label scales together and never spills off the sticker.
+   Sticker size, per-row count and page size come from Setup → Sheet & labels;
+   the @page rule is added by the component while this page is open. */
+.dl-hint { font-size: 12.5px; color: var(--dx-muted); margin: -8px 0 12px; max-width: 110ch; }
+.dl-hint-warn { color: var(--dx-act-ink); font-weight: 600; }
+
 .dl-grid { display: grid; gap: 2mm; }
+.dl-roll { gap: 3mm; }
 .dl-label {
-  position: relative; box-sizing: border-box; border: 1px dashed #9ca3af; border-radius: 3mm;
-  padding: 2mm 2.5mm; overflow: hidden; background: #fff; font-size: 9.5pt; line-height: 1.2;
+  position: relative; box-sizing: border-box; overflow: hidden;
+  display: flex; flex-direction: column; gap: 0.12em;
+  border: 1px dashed #9ca3af; border-radius: 2mm; background: #fff;
+  color: #000; font-family: Arial, Helvetica, sans-serif; line-height: 1.12;
 }
 .dl-extra { border-style: dotted; }
-.dl-top { display: flex; justify-content: space-between; align-items: baseline; gap: 4mm; padding-right: 15mm; }
-.dl-bed { font-weight: 800; font-size: 12pt; }
-.dl-code { font-weight: 800; font-size: 11pt; }
-.dl-name { font-weight: 700; padding-right: 15mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.dl-prn { font-size: 8pt; color: #374151; }
-.dl-avoid { font-size: 8.5pt; font-weight: 700; color: #b91c1c; }
-.dl-item { font-size: 8.5pt; margin-top: 0.5mm; }
-.dl-foot { display: flex; flex-wrap: wrap; gap: 1mm; margin-top: 0.5mm; }
-.dl-tag { font-size: 7pt; border: 1px solid #374151; border-radius: 2mm; padding: 0 1.2mm; }
-.dl-qr { position: absolute; top: 1.5mm; right: 1.5mm; width: 14mm; height: 14mm; }
-.dl-qr :where(qrcode, qrcode > div, qrcode canvas, qrcode img) { display: block; width: 14mm !important; height: 14mm !important; }
+/* No line may be squeezed to fit — the text size shrinks instead. */
+.dl-label > * { flex-shrink: 0; }
+
+/* Identity on the left, QR on the right; dishes use the full width below. */
+.dl-head { display: flex; gap: 1.2mm; align-items: flex-start; }
+.dl-id { flex: 1; min-width: 0; }
+/* Bed and diet code are never cut off: the code drops to its own line when
+   both don't fit side by side (the text then shrinks if it must). */
+.dl-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 0 1.5mm; }
+.dl-bed { font-weight: 800; font-size: 1.3em; white-space: nowrap; }
+.dl-code { font-weight: 800; font-size: 1.1em; white-space: nowrap; text-transform: uppercase; }
+/* Long lunch: QR dropped so the dishes get the full width. */
+.dl-noqr .dl-qr { display: none; }
+.dl-name { font-weight: 700; font-size: 1.05em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dl-prn { font-size: 0.78em; }
+.dl-qr { flex: none; }
+.dl-qr :where(qrcode, qrcode > div, qrcode canvas, qrcode img) { display: block; width: 100% !important; height: 100% !important; }
+
+.dl-avoid { font-size: 0.9em; font-weight: 800; }
+/* The dishes — what the kitchen reads — wrap over as many lines as needed. */
+.dl-item { font-size: 1em; font-weight: 600; overflow-wrap: anywhere; }
+.dl-foot { display: flex; flex-wrap: wrap; gap: 0 0.5em; font-size: 0.72em; font-weight: 700; text-transform: uppercase; }
+.dl-foot span + span::before { content: '· '; }
+/* Download ID of this print: last line, small, pinned to the bottom. */
+.dl-ref { margin-top: auto; font-size: 0.6em; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 @media print {
-  .dx-shell {
-    width: 50mm !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
-  .dx-noprint {
-    display: none !important;
-  }
-
-  .dl-grid {
-    display: block !important;
-    width: 50mm !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    grid-template-columns: none !important;
-    grid-auto-rows: auto !important;
-  }
-
-  .dl-grid > .dl-label {
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: flex-start !important;
-
-    position: relative !important;
-    box-sizing: border-box !important;
-
-    width: 50mm !important;
-    height: 30mm !important;
-    min-height: 30mm !important;
-    max-height: 30mm !important;
-
-    margin: 0 !important;
-    padding: 1.5mm 4mm 3mm !important;
-
-    border: none !important;
-    border-radius: 0 !important;
-    overflow: hidden !important;
-
-    font-size: 6pt !important;
-    line-height: 1.05 !important;
-
-    break-after: page !important;
-    page-break-after: always !important;
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
-  }
-
-  .dl-grid > .dl-label:last-child {
-    break-after: auto !important;
-    page-break-after: auto !important;
-  }
-
-  .dl-top {
-    padding-right: 13mm !important;
-  }
-
-  .dl-bed { font-size: 8pt !important; }
-  .dl-code { font-size: 7pt !important; }
-
-  .dl-name {
-    padding-right: 13mm !important;
-    font-size: 6pt !important;
-  }
-
-  .dl-prn { font-size:5.5pt !important; }
-
-  .dl-avoid,
-  .dl-item { font-size: 4.5pt !important; }
-
-  .dl-foot {
-    gap: 0.5mm !important;
-    margin-top: 0.5mm !important;
-  }
-
-  .dl-tag {
-    font-size: 4.5pt !important;
-  }
-
-  .dl-qr {
-    position: absolute !important;
-    top: 55% !important;
-    right: 8mm !important;
-    transform: translateY(-50%) !important;
-    width: 9mm !important;
-    height: 9mm !important;
-  }
-
-  .dl-qr qrcode,
-  .dl-qr qrcode canvas,
-  .dl-qr qrcode img,
-  .dl-qr canvas,
-  .dl-qr img {
-    display: block !important;
-    width: 9mm !important;
-    height: 9mm !important;
-    max-width: 9mm !important;
-    max-height: 9mm !important;
-  }
+  .dl-grid { gap: 0; }
+  .dl-label { border-color: transparent !important; border-radius: 0; break-inside: avoid; page-break-inside: avoid; }
+  /* Label-printer roll: one sticker per page. */
+  .dl-roll { display: block !important; }
+  .dl-roll .dl-label { break-after: page; page-break-after: always; }
+  .dl-roll .dl-label:last-child { break-after: auto; page-break-after: auto; }
 }

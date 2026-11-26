@@ -1,4 +1,7 @@
-.mp-shell { padding: 20px 28px 40px; font-family: Kanit, sans-serif; color: #14213d; }
+/* Same page frame as the other Dietetics pages: clears the sidebar (left)
+   and the hospital header (top). */
+.mp-shell { padding: 12px 36px 48px; max-width: 1560px; margin: 64px auto 0 96px; font-family: Kanit, sans-serif; color: #14213d; }
+@media (max-width: 900px) { .mp-shell { margin: 64px 0 0; padding: 8px 14px 32px; } }
 .mp-controls { background: #fff; border: 1px solid #e3e8f0; border-radius: 10px; padding: 16px 18px; margin-bottom: 18px; }
 .mp-h { font-size: 20px; font-weight: 600; color: #0e2970; margin: 0 0 4px; }
 .mp-sub { font-size: 13px; line-height: 1.5; color: #5b6475; margin: 0 0 14px; max-width: 760px; }
@@ -24,6 +27,6 @@
 
 @media print {
   .mp-controls { display: none; }
-  .mp-shell { padding: 0; }
+  .mp-shell { padding: 0; margin: 0; max-width: none; }
   .mp-poster { page-break-after: always; break-after: page; border-width: 3px; margin-top: 40px; }
 }

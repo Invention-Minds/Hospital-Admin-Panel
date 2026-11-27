@@ -30,8 +30,15 @@
 .dl-noqr .dl-qr { display: none; }
 .dl-name { font-weight: 700; font-size: 1.05em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dl-prn { font-size: 0.78em; }
-.dl-qr { flex: none; }
-.dl-qr :where(qrcode, qrcode > div, qrcode canvas, qrcode img) { display: block; width: 100% !important; height: 100% !important; }
+/* The QR library draws its own canvas/img inside <qrcode>, outside this
+   component's styles — ::ng-deep reaches it so the QR stays exactly inside
+   its box. overflow:hidden means it can never cover the dishes or make the
+   label look over-full while the text is being sized. */
+.dl-qr { flex: none; overflow: hidden; }
+.dl-qr ::ng-deep qrcode,
+.dl-qr ::ng-deep qrcode > div,
+.dl-qr ::ng-deep canvas,
+.dl-qr ::ng-deep img { display: block; width: 100% !important; height: 100% !important; max-width: 100% !important; max-height: 100% !important; }
 
 .dl-avoid { font-size: 0.9em; font-weight: 800; }
 /* The dishes — what the kitchen reads — wrap over as many lines as needed. */

@@ -77,6 +77,7 @@
           <td class="dx-tight">
             <button type="button" class="dx-btn dx-btn-sm" *ngIf="isKitchen && d.status === 'ORDERED'" (click)="prepare(d)">Prepared</button>
             <button type="button" class="dx-btn dx-btn-sm dx-btn-primary" *ngIf="isNurse && d.status === 'PREPARED'" (click)="give(d)">Given</button>
+            <span class="dx-muted df-wait" *ngIf="!isNurse && d.status === 'PREPARED'">Sent. The ward nurse marks it Given.</span>
             <button type="button" class="dx-btn dx-btn-sm" *ngIf="(isNurse || isKitchen) && (d.status === 'ORDERED' || d.status === 'PREPARED')" (click)="skip(d)">Not given</button>
           </td>
         </tr>

@@ -89,8 +89,10 @@ export class DietLabelsComponent implements OnInit, OnDestroy {
           this.sheet = s;
           this.loading = false;
           this.setPageStyle();
-          // After Angular has drawn the stickers.
+          // After Angular has drawn the stickers, and again once the QR
+          // images have rendered (they draw asynchronously).
           setTimeout(() => this.fitLabels());
+          setTimeout(() => this.fitLabels(), 400);
         },
         error: (e) => { this.errorMessage = e?.error?.error || 'Failed to build labels'; this.loading = false; },
       });

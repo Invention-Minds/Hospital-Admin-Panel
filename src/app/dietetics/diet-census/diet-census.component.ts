@@ -20,7 +20,7 @@ type CensusRow = CensusLineDraft & {
   npoFromLocal: string;
   orig: {
     dietText: string; dietMasterId: string | null; npo: boolean; npoFromLocal: string; feedText: string; disposablePlate: boolean;
-    foodAllergy: string; foodPreference: string;
+    foodAllergy: string; foodPreference: string; npoFeed: 'continue' | 'stop' | null;
   };
 };
 
@@ -119,11 +119,12 @@ export class DietCensusComponent implements OnInit, OnDestroy {
           const npoFromLocal = toDateTimeLocal(l.npoFrom);
           const foodAllergy = l.foodAllergy ?? '';
           const foodPreference = l.foodPreference ?? '';
+          const npoFeed = l.npoFeed ?? null;
           return {
-            ...l, npoFromLocal, foodAllergy, foodPreference,
+            ...l, npoFromLocal, foodAllergy, foodPreference, npoFeed,
             orig: {
               dietText: l.dietText, dietMasterId: l.dietMasterId, npo: l.npo, npoFromLocal,
-              feedText: l.feedText, disposablePlate: l.disposablePlate, foodAllergy, foodPreference,
+              feedText: l.feedText, disposablePlate: l.disposablePlate, foodAllergy, foodPreference, npoFeed,
             },
           };
         });
@@ -143,6 +144,7 @@ export class DietCensusComponent implements OnInit, OnDestroy {
     const o = l.orig;
     return l.dietText !== o.dietText || l.dietMasterId !== o.dietMasterId || l.npo !== o.npo
       || (l.npo && l.npoFromLocal !== o.npoFromLocal) || l.feedText !== o.feedText
+      || (this.needsFeedChoice(l) && (l.npoFeed ?? null) !== o.npoFeed)
       || l.disposablePlate !== o.disposablePlate || !!l.remarks.trim()
       || l.foodAllergy.trim() !== o.foodAllergy.trim() || l.foodPreference.trim() !== o.foodPreference.trim();
   }
@@ -162,6 +164,27 @@ export class DietCensusComponent implements OnInit, OnDestroy {
     if (d && (!line.dietText || line.isNew)) line.dietText = d.code;
   }
 
+  /** NPO and an RT feed on the same patient — the nurse must say whether the feed continues. */
+  needsFeedChoice(l: CensusLineDraft): boolean {
+    return !!l.npo && !!l.feedText?.trim();
+  }
+  /** Patients (beds) still waiting for that choice — sending is blocked until none are left. */
+  get missingFeedChoice(): string[] {
+    return this.lines
+      .filter((l) => this.needsFeedChoice(l) && l.npoFeed !== 'continue' && l.npoFeed !== 'stop')
+      .map((l) => l.bedNumber || l.patientName || l.admissionNo || 'patient');
+  }
+
+  startSigning(): void {
+    const missing = this.missingFeedChoice;
+    if (missing.length) {
+      this.errorMessage = `NPO with RT feed (${missing.join(', ')}): choose whether the RT feed continues or stops.`;
+      return;
+    }
+    this.errorMessage = '';
+    this.signing = true;
+  }
+
   onSigned(sig: SignatureCreateResponse): void {
     if (!this.prefill) return;
     this.svc.submitCensus({
@@ -176,6 +199,7 @@ export class DietCensusComponent implements OnInit, OnDestroy {
         npo: l.npo,
         npoFrom: l.npo ? fromDateTimeLocal(l.npoFromLocal) : null,
         feedText: l.feedText,
+        npoFeed: this.needsFeedChoice(l) ? l.npoFeed ?? null : null,
         disposablePlate: l.disposablePlate,
         foodAllergy: l.foodAllergy,
         foodPreference: l.foodPreference,
@@ -224,7 +248,8 @@ export class DietCensusComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (r) => {
           this.acknowledging = false;
-          this.successMessage = `Census acknowledged — ${r.holdsCreated} NPO hold(s) applied, ${r.interimCreated} interim diet(s) created. Kitchen updated.`;
+          const lifted = r.holdsLifted ? `, ${r.holdsLifted} NPO lifted` : '';
+          this.successMessage = `Census acknowledged — ${r.holdsCreated} NPO hold(s) applied${lifted}, ${r.interimCreated} interim diet(s) created. Kitchen updated.`;
           this.detail = null;
           this.loadInbox();
         },

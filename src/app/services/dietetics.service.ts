@@ -697,6 +697,8 @@ export interface CensusLineDraft {
   npo: boolean;
   npoFrom: string | null;
   feedText: string;
+  /** NPO + RT feed: 'continue' = nil by mouth, feed goes on; 'stop' = fasting, feed stops too. */
+  npoFeed?: 'continue' | 'stop' | null;
   disposablePlate: boolean;
   /** Nurse-entered; prefilled from the plan's avoid list / doctor's initial assessment. */
   foodAllergy: string;
@@ -1106,8 +1108,8 @@ export class DieteticsService {
   receiveCensus(id: string): Observable<CensusSummary> {
     return this.http.post<CensusSummary>(`${this.base}/census/${id}/receive`, {});
   }
-  acknowledgeCensus(id: string, body: { applyNpo: boolean; createInterim: boolean }): Observable<CensusSummary & { holdsCreated: number; interimCreated: number }> {
-    return this.http.post<CensusSummary & { holdsCreated: number; interimCreated: number }>(`${this.base}/census/${id}/acknowledge`, body);
+  acknowledgeCensus(id: string, body: { applyNpo: boolean; createInterim: boolean }): Observable<CensusSummary & { holdsCreated: number; holdsLifted?: number; interimCreated: number }> {
+    return this.http.post<CensusSummary & { holdsCreated: number; holdsLifted?: number; interimCreated: number }>(`${this.base}/census/${id}/acknowledge`, body);
   }
 
   // ─── Clinical nutrition ─────────────────────────────────────────────

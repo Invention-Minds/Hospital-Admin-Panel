@@ -30,5 +30,6 @@
 .dt-macros span { background: #f3f5fa; padding: 3px 9px; border-radius: 999px; }
 .dt-row { font-size: 13px; line-height: 1.5; margin: 3px 0; color: var(--dx-ink); }
 .dt-row strong { font-weight: 600; color: var(--dx-navy-ink); }
+.dt-row .dt-lift { margin-left: 8px; vertical-align: middle; }
 .dt-sig { color: var(--dx-muted); font-size: 12px; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--dx-line); }
 .dt-guidance { color: var(--dx-act-ink); font-size: 12.5px; margin-top: 2px; }

@@ -91,6 +91,12 @@
               <td class="dc-npo">
                 <label class="dx-check"><input type="checkbox" [(ngModel)]="l.npo" /> NPO</label>
                 <input *ngIf="l.npo" type="datetime-local" class="dx-input" [(ngModel)]="l.npoFromLocal" aria-label="NPO from (blank = now)" title="NPO from — leave blank for now" />
+                <select *ngIf="needsFeedChoice(l)" class="dx-input dc-npofeed" [class.dc-need]="!l.npoFeed" [(ngModel)]="l.npoFeed"
+                        aria-label="RT feed during NPO" title="Patient is NPO and on RT feed — does the feed continue?">
+                  <option [ngValue]="null">RT feed during NPO?</option>
+                  <option ngValue="continue">Nil by mouth — RT feed continues</option>
+                  <option ngValue="stop">Fasting — stop RT feed too</option>
+                </select>
               </td>
               <td class="dc-feed"><input type="text" class="dx-input" [(ngModel)]="l.feedText" placeholder="200 ml Q2H" aria-label="RT feed" /></td>
               <td class="dx-tight"><label class="dx-check"><input type="checkbox" [(ngModel)]="l.disposablePlate" aria-label="Disposable plate" /> Yes</label></td>
@@ -113,7 +119,10 @@
               All {{ lines.length }} patients are sent so Dietary has the full ward list;
               the {{ markedCount }} you marked are highlighted for them.
             </p>
-            <button type="button" class="dx-btn dx-btn-primary" *ngIf="!signing" (click)="signing = true">Sign and send to Dietary</button>
+            <p class="dx-sub dc-need-note" *ngIf="missingFeedChoice.length">
+              NPO with RT feed ({{ missingFeedChoice.join(', ') }}): choose whether the RT feed continues before sending.
+            </p>
+            <button type="button" class="dx-btn dx-btn-primary" *ngIf="!signing" (click)="startSigning()">Sign and send to Dietary</button>
           </div>
         </div>
         <app-e-sign *ngIf="signing" [signerType]="'staff'" [signerRole]="'nurse'" [signerName]="username || 'Nurse'"

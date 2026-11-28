@@ -49,8 +49,29 @@ export class DietAdmissionTabComponent implements OnInit, OnDestroy {
 
   loading = false;
   errorMessage = '';
+  /** Hold being lifted (button disabled meanwhile). */
+  liftingId: string | null = null;
+
+  private readonly role = typeof localStorage !== 'undefined' ? (localStorage.getItem('role') ?? '') : '';
+  private readonly subAdminType = typeof localStorage !== 'undefined' ? (localStorage.getItem('subAdminType') ?? '') : '';
 
   private destroy$ = new Subject<void>();
+
+  /** Dietary (dietitian / kitchen) may lift an NPO — same roles the server allows. */
+  get canLiftHold(): boolean {
+    return this.role === 'super_admin' || ['Dietician', 'Diet', 'Canteen Staff'].includes(this.subAdminType);
+  }
+
+  liftHold(h: MealHold): void {
+    if (this.liftingId) return;
+    if (typeof window !== 'undefined' && !window.confirm(`Lift "${h.reason}"? The patient's meals (and RT feeds, if stopped) start again from the next meal.`)) return;
+    this.liftingId = h.id;
+    this.errorMessage = '';
+    this.svc.liftHold(h.id).pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => { this.liftingId = null; this.refresh(); },
+      error: (e) => { this.liftingId = null; this.errorMessage = e?.error?.error || 'Failed to lift NPO'; },
+    });
+  }
 
   constructor(private svc: DieteticsService, private route: ActivatedRoute) {}
 

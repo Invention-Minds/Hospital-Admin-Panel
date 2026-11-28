@@ -19,6 +19,9 @@
     <div class="dt-row" *ngFor="let h of holds">
       <strong>{{ h.reason }}</strong> from {{ h.fromAt | date:'dd-MM HH:mm' }}{{ h.untilAt ? ' until ' + (h.untilAt | date:'dd-MM HH:mm') : ' (till lifted)' }}
       <span class="dt-muted">· {{ h.source === 'CENSUS' ? 'nursing census' : h.source.toLowerCase() }} · {{ h.createdBy }}</span>
+      <button type="button" class="dx-btn dx-btn-sm dt-lift" *ngIf="canLiftHold" [disabled]="liftingId === h.id" (click)="liftHold(h)">
+        {{ liftingId === h.id ? 'Lifting…' : 'Lift NPO' }}
+      </button>
     </div>
   </section>
 

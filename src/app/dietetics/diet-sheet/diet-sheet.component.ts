@@ -151,6 +151,7 @@ export class DietSheetComponent implements OnInit, OnDestroy {
   openCell(row: SheetRow, slot: SheetWindowSlot): void {
     if (!this.isDietitian || this.viewingSheet) return;
     const c = row.cells[slot.slotId];
+    if (c?.notForPatient) return; // meal limited to other departments
     this.editing = {
       row, slot,
       instruction: c?.instruction ?? '',
@@ -233,6 +234,7 @@ export class DietSheetComponent implements OnInit, OnDestroy {
 
   cellTitle(row: SheetRow, slot: SheetWindowSlot): string {
     const c = row.cells[slot.slotId];
+    if (c?.notForPatient) return `${slot.name} is only for ${(slot.departments ?? []).join(', ')}`;
     if (c?.text) return c.text;
     return c?.defaultMeal ? `Menu: ${c.defaultMeal}` : '';
   }

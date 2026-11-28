@@ -128,7 +128,7 @@
       <tr>
         <th>SL</th><th>Bed</th><th>PRN</th><th>Patient name</th><th>Age</th><th>Provisional diagnosis</th>
         <th>Diet</th><th>Food allergy / avoid</th>
-        <th *ngFor="let w of window">{{ w.name }}<br><span class="ds-slot-date">{{ w.date | date:'dd/MM' }}{{ w.orderCutoff ? ' · cut-off ' + w.orderCutoff : '' }}</span></th>
+        <th *ngFor="let w of window">{{ w.name }}<br><span class="ds-slot-date">{{ w.date | date:'dd/MM' }}{{ w.orderCutoff ? ' · cut-off ' + w.orderCutoff : '' }}</span><span class="ds-slot-date" *ngIf="w.departments?.length"><br>{{ w.departments!.join(', ') }} only</span></th>
         <th>Remark</th>
       </tr>
     </thead>
@@ -152,8 +152,9 @@
           <span class="dx-pill" *ngIf="r.riskLevel" [class.dx-pill-bad]="r.riskLevel==='HIGH' || r.riskLevel==='SEVERE'">Risk: {{ r.riskLevel }}</span>
         </td>
         <td>{{ r.avoid || 'NIL' }}</td>
-        <td *ngFor="let w of window" class="ds-cell" [class.ds-editable]="isDietitian && !viewingSheet"
+        <td *ngFor="let w of window" class="ds-cell" [class.ds-editable]="isDietitian && !viewingSheet && !r.cells[w.slotId]?.notForPatient"
             (click)="openCell(r, w)" [title]="cellTitle(r, w)">
+          <span *ngIf="r.cells[w.slotId]?.notForPatient" class="ds-default">—</span>
           <span *ngIf="r.cells[w.slotId]?.text as t" [class.ds-no]="t === 'NO'">{{ t }}</span>
           <span *ngIf="!r.cells[w.slotId]?.text && r.cells[w.slotId]?.defaultMeal" class="ds-default">{{ r.cells[w.slotId]?.defaultMeal }}</span>
         </td>

@@ -5,6 +5,7 @@ import { switchMap, takeUntil } from 'rxjs/operators';
 import {
   DieteticsService,
   MealTimeSlot,
+  AdmissionDepartment,
   AllergenMaster,
   DietMaster,
   DietMasterPayload,
@@ -68,6 +69,8 @@ export class DieteticsSetupComponent implements OnInit, OnDestroy {
 
   // Editor buffers.
   slotForm: Partial<MealTimeSlot> = this.blankSlot();
+  /** Department names as admissions store them (for limiting a meal time). */
+  admissionDepartments: AdmissionDepartment[] = [];
   allergenForm: Partial<AllergenMaster> = this.blankAllergen();
   dietForm: Partial<DietMaster> = this.blankDiet();
   mealForm: Partial<MealMaster> & { compatibleDietIds: string[]; allergenIds: string[]; dishIds: string[] }
@@ -123,6 +126,10 @@ export class DieteticsSetupComponent implements OnInit, OnDestroy {
         if (!this.slotForm.id) this.slotForm.sequence = this.nextSlotSequence();
       },
       error: (e) => { this.errorMessage = e?.error?.error || 'Failed to load slots'; },
+    });
+    this.svc.listAdmissionDepartments().pipe(takeUntil(this.destroy$)).subscribe({
+      next: (r) => { this.admissionDepartments = r; },
+      error: () => { this.admissionDepartments = []; },
     });
     this.svc.listAllergens().pipe(takeUntil(this.destroy$)).subscribe({
       next: (r) => { this.allergens = r; },
@@ -258,8 +265,21 @@ export class DieteticsSetupComponent implements OnInit, OnDestroy {
   nextSlotSequence(): number {
     return this.slots.reduce((max, s) => Math.max(max, s.sequence ?? 0), 0) + 1;
   }
+  /** Departments to tick: those admissions use, plus any already on the slot. */
+  get slotDepartmentChoices(): string[] {
+    const names = new Set(this.admissionDepartments.map((d) => d.name));
+    for (const d of this.slotForm.departments ?? []) names.add(d);
+    return Array.from(names).sort((a, b) => a.localeCompare(b));
+  }
+  slotHasDepartment(name: string): boolean {
+    return (this.slotForm.departments ?? []).includes(name);
+  }
+  toggleSlotDepartment(name: string): void {
+    const cur = this.slotForm.departments ?? [];
+    this.slotForm.departments = cur.includes(name) ? cur.filter((d) => d !== name) : [...cur, name];
+  }
   editSlot(s: MealTimeSlot): void {
-    this.slotForm = { ...s };
+    this.slotForm = { ...s, departments: [...(s.departments ?? [])] };
     this.errorMessage = '';
     this.successMessage = '';
   }
@@ -508,7 +528,7 @@ export class DieteticsSetupComponent implements OnInit, OnDestroy {
 
   // ─── Blank-form factories ───────────────────────────────────────────
   blankSlot(): Partial<MealTimeSlot> {
-    return { name: '', code: '', startTime: '', endTime: '', orderCutoff: null, sequence: this.nextSlotSequence(), isActive: true };
+    return { name: '', code: '', startTime: '', endTime: '', orderCutoff: null, departments: [], sequence: this.nextSlotSequence(), isActive: true };
   }
   blankAllergen(): Partial<AllergenMaster> {
     return { name: '', isActive: true };

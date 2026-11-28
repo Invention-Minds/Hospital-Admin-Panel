@@ -29,7 +29,7 @@
       <div>
         <table class="diet-grid">
           <thead>
-            <tr><th>Name</th><th>Code</th><th>Start</th><th>End</th><th>Cut-off</th><th>Seq</th><th></th></tr>
+            <tr><th>Name</th><th>Code</th><th>Start</th><th>End</th><th>Cut-off</th><th>For</th><th>Seq</th><th></th></tr>
           </thead>
           <tbody>
             <tr *ngFor="let s of slots">
@@ -38,10 +38,11 @@
               <td>{{ s.startTime }}</td>
               <td>{{ s.endTime }}</td>
               <td>{{ s.orderCutoff || '—' }}</td>
+              <td>{{ s.departments?.length ? s.departments!.join(', ') + ' only' : 'All patients' }}</td>
               <td>{{ s.sequence }}</td>
               <td><button type="button" class="ds-btn ds-btn-sm" (click)="editSlot(s)">Edit</button></td>
             </tr>
-            <tr *ngIf="slots.length===0"><td colspan="7" class="ds-empty">No slots yet — add Early morning / Breakfast / Mid-morning / Lunch / Evening / Dinner / Bed time.</td></tr>
+            <tr *ngIf="slots.length===0"><td colspan="8" class="ds-empty">No slots yet — add Early morning / Breakfast / Mid-morning / Lunch / Evening / Dinner / Bed time.</td></tr>
           </tbody>
         </table>
       </div>
@@ -54,6 +55,13 @@
         <label>Change cut-off (HH:mm) <span class="ds-hint">— last time a diet change reaches the kitchen for this meal</span>
           <input type="text" [(ngModel)]="slotForm.orderCutoff" placeholder="05:00" />
         </label>
+        <div class="ds-slot-depts">
+          <span>Only for departments <span class="ds-hint">— tick none for every patient; tick OBG for an OBG-only meal</span></span>
+          <label class="ds-check" *ngFor="let d of slotDepartmentChoices">
+            <input type="checkbox" [checked]="slotHasDepartment(d)" (change)="toggleSlotDepartment(d)" /> {{ d }}
+          </label>
+          <span class="ds-hint" *ngIf="slotDepartmentChoices.length === 0">No admission departments found yet.</span>
+        </div>
         <label>Sequence <input type="number" [(ngModel)]="slotForm.sequence" /></label>
         <label class="ds-check"><input type="checkbox" [(ngModel)]="slotForm.isActive" /> Active</label>
         <div class="ds-actions">

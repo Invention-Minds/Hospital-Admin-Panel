@@ -107,10 +107,17 @@ export interface MealTimeSlot {
   endTime: string;
   /** HH:mm — last time a change can still reach the kitchen for this meal. */
   orderCutoff?: string | null;
+  /** Only patients admitted under these departments get this meal; empty = all. */
+  departments?: string[];
   sequence: number;
   isActive: boolean;
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface AdmissionDepartment {
+  name: string;
+  admissions: number;
 }
 
 export interface AllergenMaster {
@@ -594,6 +601,8 @@ export interface SheetWindowSlot {
   startTime: string;
   endTime: string;
   orderCutoff: string | null;
+  /** Departments this meal is limited to; empty / missing = every patient. */
+  departments?: string[];
 }
 
 export interface SheetCell {
@@ -603,6 +612,8 @@ export interface SheetCell {
   supplementId: string | null;
   supplementDose: string | null;
   defaultMeal: string | null;
+  /** The meal is limited to other departments — not for this patient. */
+  notForPatient?: boolean;
 }
 
 export interface SheetRow {
@@ -944,6 +955,10 @@ export class DieteticsService {
     return payload.id
       ? this.http.put<MealTimeSlot>(`${this.base}/meal-time-slots/${payload.id}`, payload)
       : this.http.post<MealTimeSlot>(`${this.base}/meal-time-slots`, payload);
+  }
+  /** Department names as admissions store them — for limiting a meal time. */
+  listAdmissionDepartments(): Observable<AdmissionDepartment[]> {
+    return this.http.get<AdmissionDepartment[]>(`${this.base}/admission-departments`);
   }
 
   listAllergens(): Observable<AllergenMaster[]> {
